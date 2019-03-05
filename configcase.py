@@ -6,12 +6,12 @@ from utils import universe
 
 class ConfigCase:
 
-    def __init__(self, theory, structure):
+    def __init__(self, theory):
         self.relevantVals = {}
         self.symbols = []
         self.solver = Solver()
         theory(self)
-        self.assumptions = structure(self)
+        self.assumptions = []
 
     def relevantValsOf(self, var):
         stored_rels = self.relevantVals.get(var)
@@ -47,6 +47,24 @@ class ConfigCase:
     def as_symbol(self, symbStr):
         return [sym for sym in self.symbols if str(sym) == symbStr][0]
 
+    def loadStructure(self, assumptions):
+        self.assumptions = assumptions
+
+    def loadStructureFromJson(self, jsonstr):
+        self.loadStructure(self.structureFromJson(jsonstr))
+
+    def structureFromJson(self, jsonstr):
+        obj = json.loads(jsonstr)
+        return self.structureFromObject(obj)
+
+    # Structure: symbol -> value -> {ct,cf} -> true/false
+    def structureFromObject(self, object):
+        return [Comparison(sign == "ct", self.as_symbol(sym), json.loads(val)).asAST()
+                for sym in object
+                for val in object[sym]
+                for sign in {"ct", "cf"}
+                if object[sym][val][sign]]
+
 
 class Comparison:
     def __init__(self, sign, symbol, value):
@@ -56,6 +74,12 @@ class Comparison:
 
     def __repr__(self) -> str:
         return str((self.sign, self.symbol, self.value))
+
+    def asAST(self):
+        if self.sign:
+            return self.symbol == self.value
+        else:
+            return self.symbol != self.value
 
 
 def extractInfoFromConsequence(s):

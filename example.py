@@ -1,5 +1,5 @@
-from configcase import ConfigCase
 from z3 import *
+from configcase import ConfigCase
 
 
 def theory(self):
@@ -28,19 +28,14 @@ def theory(self):
     # solver.add(p == (a == 1))
 
 
-def structure(self):
-    return [
-        # self.as_symbol("a") == 2,
-        # self.as_symbol("f") == 1,
-        # self.as_symbol("g") == 0,
-        self.as_symbol("p") == True
-    ]
+case = ConfigCase(theory)
 
-
-case = ConfigCase(theory, structure)
+jsonstr = "{\"f\" : { \"1\"     : {\"ct\" : true, \"cf\" : false}}," \
+          " \"g\" : { \"0\"     : {\"ct\" : true, \"cf\" : false}}," \
+          " \"p\" : { \"true\"  : {\"ct\" : false, \"cf\" : true}}}"
+case.loadStructureFromJson(jsonstr)
 
 print("Model: ", case.model())
 print("JSON: ", case.json_model())
-print(case.consequences())
 
-c = case.consequences()
+cons = case.consequences()
