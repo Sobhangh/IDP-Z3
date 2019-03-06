@@ -28,14 +28,16 @@ def theory(self):
     # solver.add(p == (a == 1))
 
 
-case = ConfigCase(theory)
+if __name__ == '__main__':
+    case = ConfigCase(theory)
 
-jsonstr = "{\"f\" : { \"1\"     : {\"ct\" : true, \"cf\" : false}}," \
-          " \"g\" : { \"0\"     : {\"ct\" : true, \"cf\" : false}}," \
-          " \"p\" : { \"true\"  : {\"ct\" : false, \"cf\" : true}}}"
-case.loadStructureFromJson(jsonstr)
+    jsonstr = "{\"f\" : { \"[1]\"     : {\"ct\" : true, \"cf\" : false}}," \
+              " \"g\" : { \"[0]\"     : {\"ct\" : true, \"cf\" : false}}," \
+              " \"p\" : { \"[true]\"  : {\"ct\" : false, \"cf\" : true}}}"
+    case.loadStructureFromJson(jsonstr)
 
-print("Model: ", case.model())
-print("JSON: ", case.json_model())
+    print("Model: ", case.model())
+    print("JSON: ", case.json_model())
 
-cons = case.consequences()
+    cons = case.consequences()
+    print(cons)

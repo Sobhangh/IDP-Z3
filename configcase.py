@@ -37,6 +37,12 @@ class ConfigCase:
     def list_of_propositions(self):
         return [sym == val for sym in self.symbols for val in self.relevantValsOf(sym)]
 
+    def initialisationlist(self):
+        out = {}
+        for sym in self.symbols:
+            out[str(sym)] = [[str(x)] for x in self.relevantValsOf(sym)]  # SINGLETON ALERT
+        return out
+
     def list_of_assumptions(self):
         return self.assumptions
 
@@ -45,7 +51,7 @@ class ConfigCase:
         return [extractInfoFromConsequence(s) for s in consqs]
 
     def as_symbol(self, symbStr):
-        return [sym for sym in self.symbols if str(sym) == symbStr][0]
+        return [sym for sym in self.symbols if str(sym) == symbStr][0]  # SINGLETON ALERT
 
     def loadStructure(self, assumptions):
         self.assumptions = assumptions
@@ -59,7 +65,7 @@ class ConfigCase:
 
     # Structure: symbol -> value -> {ct,cf} -> true/false
     def structureFromObject(self, object):
-        return [Comparison(sign == "ct", self.as_symbol(sym), json.loads(val)).asAST()
+        return [Comparison(sign == "ct", self.as_symbol(sym), json.loads(val)[0]).asAST()
                 for sym in object
                 for val in object[sym]
                 for sign in {"ct", "cf"}
