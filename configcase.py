@@ -1,3 +1,5 @@
+import ast
+
 from z3 import *
 import json
 
@@ -48,7 +50,21 @@ class ConfigCase:
 
     def consequences(self):
         satresult, consqs = self.solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
+        print(consqs)
         return [extractInfoFromConsequence(s) for s in consqs]
+
+    def outputstructure(self):
+        out = Structure()
+        for s in self.symbols:
+            for v in self.relevantValsOf(s):
+                out.initialise(s, v)
+        return out
+
+    def propagation(self):
+        out = self.outputstructure()
+        for ass, csq in self.consequences():
+            out.addComparison(csq)
+        return out.m
 
     def as_symbol(self, symbStr):
         return [sym for sym in self.symbols if str(sym) == symbStr][0]  # SINGLETON ALERT
@@ -59,9 +75,10 @@ class ConfigCase:
     def loadStructureFromJson(self, jsonstr):
         self.loadStructure(self.structureFromJson(jsonstr))
 
-    def structureFromJson(self, jsonstr):
-        obj = json.loads(jsonstr)
-        return self.structureFromObject(obj)
+    def structureFromJson(self, json_data):
+        json_data = ast.literal_eval(json_data)
+        # obj = json.loads(json_data)
+        return self.structureFromObject(json_data)
 
     # Structure: symbol -> value -> {ct,cf} -> true/false
     def structureFromObject(self, object):
@@ -82,10 +99,21 @@ class Comparison:
         return str((self.sign, self.symbol, self.value))
 
     def asAST(self):
+        val = self.value
+        if val == "True":
+            val = True
         if self.sign:
-            return self.symbol == self.value
+            return self.symbol == val
         else:
-            return self.symbol != self.value
+            return self.symbol != val
+
+    def symbName(self):
+        return str(self.symbol)
+
+    def valName(self):  # SINGLETON ALERT
+        if type(self.value) in [str, int, float]:
+            return json.dumps([str(self.value)])
+        return json.dumps([obj_to_string(self.value)])
 
 
 def extractInfoFromConsequence(s):
@@ -109,5 +137,32 @@ def extractInfoFromComparison(c):
         c = c.children()[0]
     if not is_eq(c):
         sign = not sign
-    symbol, value = c.children()
+    arr = c.children()
+    value, symbol = sorted(arr, key=lambda x: str(x))
     return Comparison(sign, symbol, value)
+
+
+class Structure:
+    def __init__(self):
+        self.m = {}
+
+    def getJSON(self):
+        return json.dumps(self.m)
+
+    def initialise(self, symbol, value):
+        comp = Comparison(True, symbol, value)
+        if comp.symbName() not in self.m:
+            self.m[comp.symbName()] = {}
+        if comp.valName() not in self.m[comp.symbName()]:
+            self.m[comp.symbName()][comp.valName()] = {"ct": False, "cf": False}
+
+    def addComparison(self, comp: Comparison):
+        signstr = "cf"
+        if comp.sign:
+            signstr = "ct"
+
+        # print(comp.symbName())
+        # print(comp.valName())
+        # print(self.m)
+        # print(self.m[comp.symbName()])
+        self.m[comp.symbName()][comp.valName()][signstr] = True

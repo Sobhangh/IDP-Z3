@@ -14,8 +14,6 @@ parser = reqparse.RequestParser()
 parser.add_argument('method', type=str, help='Method to execute')
 parser.add_argument('active', type=str, help='Three-valued structure')
 
-case = ConfigCase(theory)
-
 
 class HelloWorld(Resource):
     def get(self):
@@ -24,12 +22,19 @@ class HelloWorld(Resource):
 
 class eval(Resource):
     def post(self):
+        case = ConfigCase(theory)
+
         args = parser.parse_args()
         method = args['method']
         active = args['active']
         print(method, active)
         if method == "init":
             return case.initialisationlist()
+        if method == "propagate":
+            case.loadStructureFromJson(active)
+            print(case.propagation())
+            return case.propagation()
+
         return {'hello': 'world'}
 
 

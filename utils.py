@@ -1,3 +1,5 @@
+import itertools
+
 from z3 import *
 
 
