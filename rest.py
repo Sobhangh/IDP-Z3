@@ -35,6 +35,12 @@ class eval(Resource):
             out = case.propagation()
             print(out)
             return out
+        if method == "modelexpand":
+            case.loadStructureFromJson(active)
+            print(case.json_model())
+            return case.json_model()
+        if method == "relevance":
+            return {}
 
         return {'hello': 'world'}
 

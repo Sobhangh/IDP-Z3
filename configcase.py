@@ -33,11 +33,12 @@ class ConfigCase:
         return self.model_to_json(self.model())
 
     def model_to_json(self, m):
-        output = {}
+        output = self.outputstructure()
         for symb in self.symbols:
             val = m[symb]
-            output[obj_to_string(symb)] = obj_to_string(val)
-        return json.dumps(output)
+            print(symb, val)
+            output.addComparison(Comparison(True, symb, val))
+        return output.m
 
     def list_of_propositions(self):
         return [sym == val for sym in self.symbols for val in self.relevantValsOf(sym)]
@@ -53,7 +54,7 @@ class ConfigCase:
 
     def consequences(self):
         satresult, consqs = self.solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
-        print(consqs)
+        # print(consqs)
         return [extractInfoFromConsequence(s) for s in consqs]
 
     def outputstructure(self):
@@ -194,18 +195,11 @@ class Structure:
 
     def initialise(self, symbol, value):
         comp = Comparison(True, symbol, value)
-        if comp.symbName() not in self.m:
-            self.m[comp.symbName()] = {}
-        if comp.valName() not in self.m[comp.symbName()]:
-            self.m[comp.symbName()][comp.valName()] = {"ct": False, "cf": False}
+        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": False, "cf": False})
 
     def addComparison(self, comp: Comparison):
         signstr = "cf"
         if comp.sign:
             signstr = "ct"
 
-        # print(comp.symbName())
-        # print(comp.valName())
-        # print(self.m)
-        # print(self.m[comp.symbName()])
-        self.m[comp.symbName()][comp.valName()][signstr] = True
+        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {})[signstr] = True
