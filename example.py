@@ -1,13 +1,13 @@
 from configcase import ConfigCase
 
 
-def theory(self: ConfigCase):
-    solver = self.solver
-    a, b, c, f, g = self.IntsInRange("a b c f g", 0, 10)
+def theory(case: ConfigCase):
+    solver = case.solver
+    a, b, c, f, g = case.IntsInRange("a b c f g", 0, 10)
 
-    d = self.Reals("d", [1.0, 2.5, 8.0])
-    e = self.Reals("e", [1.0, 3.5, 9.0], True)
-    p, q = self.Bools("p q")
+    d = case.Reals("d", [1.0, 2.5, 8.0])
+    e = case.Reals("e", [1.0, 3.5, 9.0], True)
+    p, q = case.Bools("p q")
 
     solver.add(a > b + 2)
     solver.add(a + 2 * c == 10)

@@ -1,3 +1,4 @@
+import threading
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
@@ -20,29 +21,35 @@ class HelloWorld(Resource):
         return {'hello': 'world'}
 
 
+z3lock = threading.Lock()
+
+
 class eval(Resource):
     def post(self):
-        case = ConfigCase(theory)
+        z3lock.acquire()
+        global _main_ctx
+        _main_ctx = None
 
+        case = ConfigCase(theory)
         args = parser.parse_args()
         method = args['method']
         active = args['active']
         print(method, active)
+        out = {'hello': 'world'}
         if method == "init":
-            return case.initialisationlist()
+            out = case.initialisationlist()
         if method == "propagate":
             case.loadStructureFromJson(active)
             out = case.propagation()
-            print(out)
-            return out
         if method == "modelexpand":
             case.loadStructureFromJson(active)
-            print(case.json_model())
-            return case.json_model()
+            out = case.json_model()
         if method == "relevance":
-            return {}
-
-        return {'hello': 'world'}
+            out = {}
+            
+        z3lock.release()
+        print(out)
+        return out
 
 
 class meta(Resource):

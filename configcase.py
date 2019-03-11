@@ -33,10 +33,9 @@ class ConfigCase:
         return self.model_to_json(self.model())
 
     def model_to_json(self, m):
-        output = self.outputstructure()
+        output = self.outputstructure(True)
         for symb in self.symbols:
             val = m[symb]
-            print(symb, val)
             output.addComparison(Comparison(True, symb, val))
         return output.m
 
@@ -46,7 +45,7 @@ class ConfigCase:
     def initialisationlist(self):
         out = {}
         for sym in self.symbols:
-            out[str(sym)] = [[str(x)] for x in self.relevantValsOf(sym)]  # SINGLETON ALERT
+            out[obj_to_string(sym)] = [[obj_to_string(x)] for x in self.relevantValsOf(sym)]  # SINGLETON ALERT
         return out
 
     def list_of_assumptions(self):
@@ -54,14 +53,13 @@ class ConfigCase:
 
     def consequences(self):
         satresult, consqs = self.solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
-        # print(consqs)
         return [extractInfoFromConsequence(s) for s in consqs]
 
-    def outputstructure(self):
+    def outputstructure(self, allEmpty=False):
         out = Structure()
         for s in self.symbols:
             for v in self.relevantValsOf(s):
-                out.initialise(s, v)
+                out.initialise(s, v, allEmpty)
         return out
 
     def propagation(self):
@@ -94,17 +92,17 @@ class ConfigCase:
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
         ints = Ints(txt)
-        values = list(map(_py2expr, range(underbound, upperbound+1)))
+        values = list(map(_py2expr, range(underbound, upperbound + 1)))
         for i in ints:
             self.relevantVals[i] = values
-            self.solver.add(underbound <= i)
-            self.solver.add(i <= upperbound)
+            self.solver.add(_py2expr(underbound) <= i)
+            self.solver.add(i <= _py2expr(upperbound))
             self.symbols.append(i)
         return ints
 
     def Reals(self, txt: str, rang: List[float], restrictive=False):
         reals = Reals(txt)
-        values = list(map(_py2expr, rang))
+        values: List[ArithRef] = list(map(_py2expr, rang))
         for i in reals:
             self.symbols.append(i)
             self.relevantVals[i] = values
@@ -193,9 +191,9 @@ class Structure:
     def getJSON(self):
         return json.dumps(self.m)
 
-    def initialise(self, symbol, value):
+    def initialise(self, symbol, value, allEmpty):
         comp = Comparison(True, symbol, value)
-        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": False, "cf": False})
+        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": False, "cf": allEmpty})
 
     def addComparison(self, comp: Comparison):
         signstr = "cf"
