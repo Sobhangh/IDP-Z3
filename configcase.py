@@ -55,11 +55,11 @@ class ConfigCase:
         satresult, consqs = self.solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
         return [extractInfoFromConsequence(s) for s in consqs]
 
-    def outputstructure(self, allEmpty=False):
+    def outputstructure(self, allFalse=False, allTrue=False):
         out = Structure()
         for s in self.symbols:
             for v in self.relevantValsOf(s):
-                out.initialise(s, v, allEmpty)
+                out.initialise(s, v, allFalse, allTrue)
         return out
 
     def propagation(self):
@@ -130,6 +130,14 @@ class ConfigCase:
         out = {"title": "Z3 Interactive Configuration", "timeout": 3, "symbols": symbols, "values": []}
         return out
 
+    def explain(self, symbol, value):
+        out = self.outputstructure()
+        for ass, csq in self.consequences():
+            if (csq.symbName() == symbol) & (csq.valName() == value):
+                for a in ass:
+                    out.addComparison(a)
+        return out.m
+
 
 class Comparison:
     def __init__(self, sign, symbol, value):
@@ -173,7 +181,7 @@ def extractInfoFromConsequence(s):
     return assumptions, comp
 
 
-def extractInfoFromComparison(c):
+def extractInfoFromComparison(c) -> Comparison:
     sign = not is_not(c)
     if not sign:
         c = c.children()[0]
@@ -191,9 +199,9 @@ class Structure:
     def getJSON(self):
         return json.dumps(self.m)
 
-    def initialise(self, symbol, value, allEmpty):
+    def initialise(self, symbol, value, allFalse, allTrue):
         comp = Comparison(True, symbol, value)
-        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": False, "cf": allEmpty})
+        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": allTrue, "cf": allFalse})
 
     def addComparison(self, comp: Comparison):
         signstr = "cf"

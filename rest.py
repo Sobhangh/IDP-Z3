@@ -14,6 +14,8 @@ api = Api(app)
 parser = reqparse.RequestParser()
 parser.add_argument('method', type=str, help='Method to execute')
 parser.add_argument('active', type=str, help='Three-valued structure')
+parser.add_argument('symbol', type=str, help='Symbol to explain')
+parser.add_argument('value', type=str, help='Value to explain')
 
 
 class HelloWorld(Resource):
@@ -35,7 +37,7 @@ class eval(Resource):
         method = args['method']
         active = args['active']
         print(method, active)
-        out = {'hello': 'world'}
+        out = {}
         if method == "init":
             out = case.initialisationlist()
         if method == "propagate":
@@ -45,8 +47,11 @@ class eval(Resource):
             case.loadStructureFromJson(active)
             out = case.json_model()
         if method == "relevance":
-            out = {}
-            
+            out = case.outputstructure(True, True).m
+        if method == "explain":
+            case.loadStructureFromJson(active)
+            out = case.explain(args['symbol'], args['value'])
+
         z3lock.release()
         print(out)
         return out
