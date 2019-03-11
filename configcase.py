@@ -1,9 +1,12 @@
 import ast
+from typing import List
 
 from z3 import *
 import json
 
-from utils import universe
+from z3.z3 import _py2expr
+
+from utils import universe, in_list
 
 
 class ConfigCase:
@@ -88,6 +91,46 @@ class ConfigCase:
                 for sign in {"ct", "cf"}
                 if object[sym][val][sign]]
 
+    def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
+        ints = Ints(txt)
+        values = list(map(_py2expr, range(underbound, upperbound+1)))
+        for i in ints:
+            self.relevantVals[i] = values
+            self.solver.add(underbound <= i)
+            self.solver.add(i <= upperbound)
+            self.symbols.append(i)
+        return ints
+
+    def Reals(self, txt: str, rang: List[float], restrictive=False):
+        reals = Reals(txt)
+        values = list(map(_py2expr, rang))
+        for i in reals:
+            self.symbols.append(i)
+            self.relevantVals[i] = values
+            if restrictive:
+                self.solver.add(in_list(i, values))
+        return reals
+
+    def Bools(self, str):
+        bools = Bools(str)
+        for i in bools:
+            self.symbols.append(i)
+        return bools
+
+    def metaJSON(self):
+        symbols = []
+        for i in self.symbols:
+            symbol_type = "function"
+            if type(i) == BoolRef:
+                symbol_type = "proposition"
+            symbols.append({
+                "idpname": str(i),
+                "type": symbol_type,
+                "priority": "core"
+            })
+        out = {"title": "Z3 Interactive Configuration", "timeout": 3, "symbols": symbols, "values": []}
+        return out
+
 
 class Comparison:
     def __init__(self, sign, symbol, value):
@@ -108,7 +151,7 @@ class Comparison:
             return self.symbol != val
 
     def symbName(self):
-        return str(self.symbol)
+        return obj_to_string(self.symbol)
 
     def valName(self):  # SINGLETON ALERT
         if type(self.value) in [str, int, float]:

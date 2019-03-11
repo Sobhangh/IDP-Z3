@@ -32,14 +32,21 @@ class eval(Resource):
             return case.initialisationlist()
         if method == "propagate":
             case.loadStructureFromJson(active)
-            print(case.propagation())
-            return case.propagation()
+            out = case.propagation()
+            print(out)
+            return out
 
         return {'hello': 'world'}
 
 
+class meta(Resource):
+    def get(self):
+        return ConfigCase(theory).metaJSON()
+
+
 api.add_resource(HelloWorld, '/test')
 api.add_resource(eval, '/eval')
+api.add_resource(meta, '/meta')
 
 if __name__ == '__main__':
     app.run(debug=True)

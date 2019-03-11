@@ -1,6 +1,7 @@
 import itertools
 
 from z3 import *
+from z3.z3 import _py2expr
 
 
 def universe(vsort):
@@ -37,3 +38,10 @@ def universe(vsort):
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
+
+
+def in_list(q, ls):
+    outp = False
+    for i in ls:
+        outp = Or(q == i, outp)
+    return outp
