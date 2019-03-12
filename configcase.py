@@ -15,8 +15,9 @@ class ConfigCase:
         self.relevantVals = {}
         self.symbols = []
         self.solver = Solver()
-        theory(self)
         self.assumptions = []
+        self.valueMap = {"True": True}
+        theory(self)
 
     def relevantValsOf(self, var):
         stored_rels = self.relevantVals.get(var)
@@ -53,13 +54,13 @@ class ConfigCase:
 
     def consequences(self):
         satresult, consqs = self.solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
-        return [extractInfoFromConsequence(s) for s in consqs]
+        return [self.extractInfoFromConsequence(s) for s in consqs]
 
     def outputstructure(self, allFalse=False, allTrue=False):
         out = Structure()
-        for s in self.symbols:
-            for v in self.relevantValsOf(s):
-                out.initialise(s, v, allFalse, allTrue)
+        for symbol in self.symbols:
+            for value in self.relevantValsOf(symbol):
+                out.initialise(Comparison(True, symbol, value, self), allFalse, allTrue)
         return out
 
     def propagation(self):
@@ -84,7 +85,7 @@ class ConfigCase:
 
     # Structure: symbol -> value -> {ct,cf} -> true/false
     def structureFromObject(self, object):
-        return [Comparison(sign == "ct", self.as_symbol(sym), json.loads(val)[0]).asAST()
+        return [Comparison(sign == "ct", self.as_symbol(sym), json.loads(val)[0], self).asAST()
                 for sym in object
                 for val in object[sym]
                 for sign in {"ct", "cf"}
@@ -95,8 +96,8 @@ class ConfigCase:
         values = list(map(_py2expr, range(underbound, upperbound + 1)))
         for i in ints:
             self.relevantVals[i] = values
-            self.solver.add(_py2expr(underbound) <= i)
-            self.solver.add(i <= _py2expr(upperbound))
+            self.solver.add(underbound <= i)
+            self.solver.add(i <= upperbound)
             self.symbols.append(i)
         return ints
 
@@ -115,6 +116,18 @@ class ConfigCase:
         for i in bools:
             self.symbols.append(i)
         return bools
+
+    def Consts(self, param, sort):
+        out = Consts(param, sort)
+        for i in out:
+            self.symbols.append(i)
+        return out
+
+    def EnumSort(self, name, objects):
+        out = EnumSort(name, objects)
+        for i in out[1]:
+            self.valueMap[obj_to_string(i)] = i
+        return out
 
     def metaJSON(self):
         symbols = []
@@ -138,20 +151,48 @@ class ConfigCase:
                     out.addComparison(a)
         return out.m
 
+    def extractInfoFromConsequence(self, s):
+        assumption_expr = s.children()[0]
+        assumptions = []
+        if is_true(assumption_expr):
+            pass
+        elif is_and(assumption_expr):
+            assumptions = [self.extractInfoFromComparison(c) for c in assumption_expr.children()]
+        else:
+            assumptions = [self.extractInfoFromComparison(assumption_expr)]
+
+        consequence = s.children()[1]
+        comp = self.extractInfoFromComparison(consequence)
+        return assumptions, comp
+
+    def extractInfoFromComparison(self, c):
+        sign = not is_not(c)
+        if not sign:
+            c = c.children()[0]
+        if not is_eq(c):
+            sign = not sign
+        value, symbol = c.children()
+        if obj_to_string(symbol) in self.valueMap:
+            temp = symbol
+            symbol = value
+            value = temp
+        return Comparison(sign, symbol, value, self)
+
 
 class Comparison:
-    def __init__(self, sign, symbol, value):
+    def __init__(self, sign, symbol, value, case: ConfigCase):
         self.sign = sign
         self.symbol = symbol
         self.value = value
+        self.case = case
 
     def __repr__(self) -> str:
         return str((self.sign, self.symbol, self.value))
 
     def asAST(self):
         val = self.value
-        if val == "True":
-            val = True
+        if val in self.case.valueMap:
+            val = self.case.valueMap[val]
         if self.sign:
             return self.symbol == val
         else:
@@ -166,32 +207,6 @@ class Comparison:
         return json.dumps([obj_to_string(self.value)])
 
 
-def extractInfoFromConsequence(s):
-    assumptionE = s.children()[0]
-    assumptions = []
-    if is_true(assumptionE):
-        pass
-    elif is_and(assumptionE):
-        assumptions = [extractInfoFromComparison(c) for c in assumptionE.children()]
-    else:
-        assumptions = [extractInfoFromComparison(assumptionE)]
-
-    consequence = s.children()[1]
-    comp = extractInfoFromComparison(consequence)
-    return assumptions, comp
-
-
-def extractInfoFromComparison(c) -> Comparison:
-    sign = not is_not(c)
-    if not sign:
-        c = c.children()[0]
-    if not is_eq(c):
-        sign = not sign
-    arr = c.children()
-    value, symbol = sorted(arr, key=lambda x: str(x))
-    return Comparison(sign, symbol, value)
-
-
 class Structure:
     def __init__(self):
         self.m = {}
@@ -199,8 +214,7 @@ class Structure:
     def getJSON(self):
         return json.dumps(self.m)
 
-    def initialise(self, symbol, value, allFalse, allTrue):
-        comp = Comparison(True, symbol, value)
+    def initialise(self, comp, allFalse, allTrue):
         self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": allTrue, "cf": allFalse})
 
     def addComparison(self, comp: Comparison):
