@@ -6,7 +6,7 @@ import json
 
 from z3.z3 import _py2expr
 
-from utils import universe, in_list
+from utils import universe, in_list, is_number
 
 
 class ConfigCase:
@@ -20,9 +20,8 @@ class ConfigCase:
         theory(self)
 
     def relevantValsOf(self, var):
-        stored_rels = self.relevantVals.get(var)
-        if stored_rels:
-            return stored_rels
+        if var in self.relevantVals:
+            return self.relevantVals[var]
         else:
             return universe(var.sort())
 
@@ -37,7 +36,7 @@ class ConfigCase:
         output = self.outputstructure(True)
         for symb in self.symbols:
             val = m[symb]
-            output.addComparison(Comparison(True, symb, val))
+            output.addComparison(Comparison(True, symb, self.z3_value(val)))
         return output.m
 
     def list_of_propositions(self):
@@ -56,11 +55,11 @@ class ConfigCase:
         satresult, consqs = self.solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
         return [self.extractInfoFromConsequence(s) for s in consqs]
 
-    def outputstructure(self, allFalse=False, allTrue=False):
+    def outputstructure(self, all_false=False, all_true=False):
         out = Structure()
         for symbol in self.symbols:
             for value in self.relevantValsOf(symbol):
-                out.initialise(Comparison(True, symbol, value, self), allFalse, allTrue)
+                out.initialise(Comparison(True, symbol, self.z3_value(value)), all_false, all_true)
         return out
 
     def propagation(self):
@@ -69,8 +68,8 @@ class ConfigCase:
             out.addComparison(csq)
         return out.m
 
-    def as_symbol(self, symbStr):
-        return [sym for sym in self.symbols if str(sym) == symbStr][0]  # SINGLETON ALERT
+    def as_symbol(self, symb_str):
+        return [sym for sym in self.symbols if str(sym) == symb_str][0]  # SINGLETON ALERT
 
     def loadStructure(self, assumptions):
         self.assumptions = assumptions
@@ -80,16 +79,15 @@ class ConfigCase:
 
     def structureFromJson(self, json_data):
         json_data = ast.literal_eval(json_data)
-        # obj = json.loads(json_data)
         return self.structureFromObject(json_data)
 
     # Structure: symbol -> value -> {ct,cf} -> true/false
-    def structureFromObject(self, object):
-        return [Comparison(sign == "ct", self.as_symbol(sym), json.loads(val)[0], self).asAST()
-                for sym in object
-                for val in object[sym]
+    def structureFromObject(self, obj):
+        return [Comparison(sign == "ct", self.as_symbol(sym), self.z3_value(json.loads(val)[0])).asAST()
+                for sym in obj
+                for val in obj[sym]
                 for sign in {"ct", "cf"}
-                if object[sym][val][sign]]
+                if obj[sym][val][sign]]
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
         ints = Ints(txt)
@@ -111,14 +109,14 @@ class ConfigCase:
                 self.solver.add(in_list(i, values))
         return reals
 
-    def Bools(self, str):
-        bools = Bools(str)
+    def Bools(self, txt: str):
+        bools = Bools(txt)
         for i in bools:
             self.symbols.append(i)
         return bools
 
-    def Consts(self, param, sort):
-        out = Consts(param, sort)
+    def Consts(self, txt: str, sort):
+        out = Consts(txt, sort)
         for i in out:
             self.symbols.append(i)
         return out
@@ -146,6 +144,7 @@ class ConfigCase:
     def explain(self, symbol, value):
         out = self.outputstructure()
         for ass, csq in self.consequences():
+            print(ass, csq)
             if (csq.symbName() == symbol) & (csq.valName() == value):
                 for a in ass:
                     out.addComparison(a)
@@ -172,27 +171,30 @@ class ConfigCase:
         if not is_eq(c):
             sign = not sign
         value, symbol = c.children()
-        if obj_to_string(symbol) in self.valueMap:
+        if (obj_to_string(symbol) in self.valueMap) | is_number(obj_to_string(symbol)):
             temp = symbol
             symbol = value
             value = temp
-        return Comparison(sign, symbol, value, self)
+        return Comparison(sign, symbol, self.z3_value(value))
+
+    def z3_value(self, value):
+        if value in self.valueMap:
+            return self.valueMap[value]
+        else:
+            return value
 
 
 class Comparison:
-    def __init__(self, sign, symbol, value, case: ConfigCase):
+    def __init__(self, sign, symbol, value):
         self.sign = sign
         self.symbol = symbol
         self.value = value
-        self.case = case
 
     def __repr__(self) -> str:
         return str((self.sign, self.symbol, self.value))
 
     def asAST(self):
         val = self.value
-        if val in self.case.valueMap:
-            val = self.case.valueMap[val]
         if self.sign:
             return self.symbol == val
         else:
@@ -214,12 +216,11 @@ class Structure:
     def getJSON(self):
         return json.dumps(self.m)
 
-    def initialise(self, comp, allFalse, allTrue):
-        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": allTrue, "cf": allFalse})
+    def initialise(self, comp, all_false, all_true):
+        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": all_true, "cf": all_false})
 
     def addComparison(self, comp: Comparison):
         signstr = "cf"
         if comp.sign:
             signstr = "ct"
-
         self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {})[signstr] = True

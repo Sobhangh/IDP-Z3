@@ -1,7 +1,6 @@
 import itertools
 
 from z3 import *
-from z3.z3 import _py2expr
 
 
 def universe(vsort):
@@ -45,3 +44,11 @@ def in_list(q, ls):
     for i in ls:
         outp = Or(q == i, outp)
     return outp
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

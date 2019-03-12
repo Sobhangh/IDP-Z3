@@ -1,6 +1,7 @@
 from z3 import Function, ForAll, And, Implies, Int, IntSort, EnumSort
 
 from configcase import ConfigCase
+from utils import universe
 
 
 def theory(case: ConfigCase):
@@ -31,10 +32,11 @@ def theo2(case: ConfigCase):
     f = Function('f', IntSort(), IntSort())
     solver.add(ForAll(a, Implies(And(0 < a, a < 10), f(a) == a)))
     solver.add(f(110) == 4)
+    print(print(f(4).sort()))
 
 
 if __name__ == '__main__':
-    cc = ConfigCase(theory)
-    print(cc.model())
-    print(cc.list_of_propositions())
-    print(cc.consequences())
+    cc = ConfigCase(theo2)
+    # print(cc.model())
+    # print(cc.list_of_propositions())
+    # print(cc.consequences())
