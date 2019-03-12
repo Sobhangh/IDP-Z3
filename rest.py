@@ -3,7 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
-from configcase import ConfigCase
+from configcase import ConfigCase, Optimize
 from example import theory
 
 app = Flask(__name__)
@@ -14,8 +14,9 @@ api = Api(app)
 parser = reqparse.RequestParser()
 parser.add_argument('method', type=str, help='Method to execute')
 parser.add_argument('active', type=str, help='Three-valued structure')
-parser.add_argument('symbol', type=str, help='Symbol to explain')
+parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
 parser.add_argument('value', type=str, help='Value to explain')
+parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
 
 
 class HelloWorld(Resource):
@@ -36,7 +37,7 @@ class eval(Resource):
         args = parser.parse_args()
         method = args['method']
         active = args['active']
-        print(method, active)
+        print(args)
         out = {}
         if method == "init":
             out = case.initialisationlist()
@@ -51,7 +52,10 @@ class eval(Resource):
         if method == "explain":
             case.loadStructureFromJson(active)
             out = case.explain(args['symbol'], args['value'])
-
+        if method == "minimize":
+            case = ConfigCase(theory, Optimize())
+            case.loadStructureFromJson(active)
+            out = case.minimize(args['symbol'], args['minimize'])
         z3lock.release()
         print(out)
         return out

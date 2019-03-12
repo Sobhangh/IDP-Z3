@@ -1,4 +1,4 @@
-from z3 import Function, ForAll, And, Implies, Int, IntSort, EnumSort
+from z3 import Function, ForAll, And, Implies, Int, IntSort, EnumSort, Optimize
 
 from configcase import ConfigCase
 from utils import universe
@@ -36,7 +36,8 @@ def theo2(case: ConfigCase):
 
 
 if __name__ == '__main__':
-    cc = ConfigCase(theo2)
+    cc = ConfigCase(theory, Optimize())
+    print(cc.minimize("e", True))
     # print(cc.model())
     # print(cc.list_of_propositions())
     # print(cc.consequences())

@@ -11,10 +11,10 @@ from utils import universe, in_list, is_number
 
 class ConfigCase:
 
-    def __init__(self, theory):
+    def __init__(self, theory, solver=Solver()):
         self.relevantVals = {}
         self.symbols = []
-        self.solver = Solver()
+        self.solver = solver
         self.assumptions = []
         self.valueMap = {"True": True}
         theory(self)
@@ -136,7 +136,8 @@ class ConfigCase:
             symbols.append({
                 "idpname": str(i),
                 "type": symbol_type,
-                "priority": "core"
+                "priority": "core",
+                "showOptimize": type(i) == ArithRef
             })
         out = {"title": "Z3 Interactive Configuration", "timeout": 3, "symbols": symbols, "values": []}
         return out
@@ -182,6 +183,18 @@ class ConfigCase:
             return self.valueMap[value]
         else:
             return value
+
+    def minimize(self, symbol, minimize):
+        s = self.as_symbol(symbol)
+        if minimize:
+            self.solver.minimize(s)
+        else:
+            self.solver.maximize(s)
+            
+        for assumption in self.list_of_assumptions():
+            self.solver.add(assumption)
+        self.solver.check()
+        return self.model_to_json(self.solver.model())
 
 
 class Comparison:
