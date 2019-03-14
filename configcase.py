@@ -1,7 +1,7 @@
 import ast
 import json
 from typing import List
-from utils import universe, in_list, is_number
+from utils import universe, in_list, is_number, splitLast
 from z3 import *
 from z3.z3 import _py2expr
 
@@ -43,7 +43,7 @@ class ConfigCase:
         output = self.outputstructure(True)
         for symb in self.symbols:
             val = m[symb]
-            output.addComparison(Comparison(True, symb, self.z3_value(val)))
+            output.addComparison(Comparison(True, symb, [], self.z3_value(val)))  # SINGLETON ALERT
         return output.m
 
     def list_of_propositions(self):
@@ -67,7 +67,8 @@ class ConfigCase:
         out = Structure()
         for symbol in self.symbols:
             for value in self.relevantValsOf(symbol):
-                out.initialise(Comparison(True, symbol, self.z3_value(value)), all_false, all_true)
+                out.initialise(Comparison(True, symbol, [], self.z3_value(value)), all_false, all_true)
+                # SINGLETON ALERT
         return out
 
     def propagation(self):
@@ -89,9 +90,17 @@ class ConfigCase:
         json_data = ast.literal_eval(json_data)
         return self.structureFromObject(json_data)
 
+    def args(self, val):
+        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
+        return a
+
+    def outVal(self, val):
+        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
+        return l
+
     # Structure: symbol -> value -> {ct,cf} -> true/false
     def structureFromObject(self, obj):
-        return [Comparison(sign == "ct", self.as_symbol(sym), self.z3_value(json.loads(val)[0])).asAST()
+        return [Comparison(sign == "ct", self.as_symbol(sym), self.args(val), self.outVal(val)).asAST()
                 for sym in obj
                 for val in obj[sym]
                 for sign in {"ct", "cf"}
@@ -153,7 +162,7 @@ class ConfigCase:
     def explain(self, symbol, value):
         out = self.outputstructure()
         for ass, csq in self.consequences():
-            if (csq.symbName() == symbol) & (csq.valName() == value):
+            if (csq.symbName() == symbol) & (csq.graphedValue() == value):
                 for a in ass:
                     out.addComparison(a)
         return out.m
@@ -167,7 +176,6 @@ class ConfigCase:
             assumptions = [self.extractInfoFromComparison(c) for c in assumption_expr.children()]
         else:
             assumptions = [self.extractInfoFromComparison(assumption_expr)]
-
         consequence = s.children()[1]
         comp = self.extractInfoFromComparison(consequence)
         return assumptions, comp
@@ -179,17 +187,25 @@ class ConfigCase:
         if not is_eq(c):
             sign = not sign
         value, symbol = c.children()
-        if (obj_to_string(symbol) in self.valueMap) | is_number(obj_to_string(symbol)):
+        if (obj_to_string(symbol) in self.valueMap) | is_number(obj_to_string(symbol)) | \
+                self.is_symbol(value):
             temp = symbol
             symbol = value
             value = temp
-        return Comparison(sign, symbol, self.z3_value(value))
+        return Comparison(sign, symbol, [], self.z3_value(value))  # SINGLETON ALERT
 
     def z3_value(self, value):
         if value in self.valueMap:
             return self.valueMap[value]
         else:
             return value
+
+    def is_symbol(self, symb):
+        if type(symb) == str:
+            return len([c for c in self.symbols if obj_to_string(c) == symb]) > 0
+        if is_expr(symb):
+            return len([c for c in self.symbols if obj_to_string(c) == obj_to_string(symb)]) > 0
+        return False
 
     def minimize(self, symbol, minimize):
         solver = Optimize()
@@ -208,28 +224,39 @@ class ConfigCase:
 
 
 class Comparison:
-    def __init__(self, sign, symbol, value):
+    def __init__(self, sign: bool, symbol, args: List, value):
         self.sign = sign
         self.symbol = symbol
+        self.args = args
         self.value = value
 
     def __repr__(self) -> str:
-        return str((self.sign, self.symbol, self.value))
+        return str((self.sign, self.symbol, self.args, self.value))
+
+    def astSymb(self):
+        if len(self.args) == 0:
+            return self.symbol
+        return self.symbol(self.args)
 
     def asAST(self):
         val = self.value
         if self.sign:
-            return self.symbol == val
+            return self.astSymb() == val
         else:
-            return self.symbol != val
+            return self.astSymb() != val
 
     def symbName(self):
         return obj_to_string(self.symbol)
 
-    def valName(self):  # SINGLETON ALERT
+    def graphedValue(self):
+        strVal = self.value
         if type(self.value) in [str, int, float]:
-            return json.dumps([str(self.value)])
-        return json.dumps([obj_to_string(self.value)])
+            strVal = str(self.value)
+        else:
+            strVal = obj_to_string(strVal)
+        lst = [obj_to_string(x) for x in self.args]
+        lst.append(strVal)
+        return json.dumps(lst)
 
 
 class Structure:
@@ -240,10 +267,10 @@ class Structure:
         return json.dumps(self.m)
 
     def initialise(self, comp, all_false, all_true):
-        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {"ct": all_true, "cf": all_false})
+        self.m.setdefault(comp.symbName(), {}).setdefault(comp.graphedValue(), {"ct": all_true, "cf": all_false})
 
     def addComparison(self, comp: Comparison):
         signstr = "cf"
         if comp.sign:
             signstr = "ct"
-        self.m.setdefault(comp.symbName(), {}).setdefault(comp.valName(), {})[signstr] = True
+        self.m.setdefault(comp.symbName(), {}).setdefault(comp.graphedValue(), {})[signstr] = True

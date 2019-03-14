@@ -52,3 +52,7 @@ def is_number(s):
         return True
     except ValueError:
         return False
+
+
+def splitLast(l):
+    return [l[i] for i in range(0, len(l) - 1)], l[len(l) - 1]
