@@ -16,95 +16,9 @@ class ConfigCase:
         self.constraints = []
         theory(self)
 
-    def add(self, constraint):
-        self.constraints.append(constraint)
-
-    def relevantValsOf(self, var):
-        if var in self.relevantVals:
-            return self.relevantVals[var]
-        else:
-            return universe(var.sort())
-
-    def mk_solver(self):
-        s = Solver()
-        for c in self.constraints:
-            s.add(c)
-        return s
-
-    def model(self):
-        solver = self.mk_solver()
-        solver.check(self.list_of_assumptions())
-        return solver.model()
-
-    def json_model(self):
-        return self.model_to_json(self.model())
-
-    def model_to_json(self, m):
-        output = self.outputstructure(True)
-        for symb in self.symbols:
-            val = m[symb]
-            output.addComparison(Comparison(True, symb, [], self.z3_value(val)))  # SINGLETON ALERT
-        return output.m
-
-    def list_of_propositions(self):
-        return [sym == val for sym in self.symbols for val in self.relevantValsOf(sym)]
-
-    def initialisationlist(self):
-        out = {}
-        for sym in self.symbols:
-            out[obj_to_string(sym)] = [[obj_to_string(x)] for x in self.relevantValsOf(sym)]  # SINGLETON ALERT
-        return out
-
-    def list_of_assumptions(self):
-        return self.assumptions
-
-    def consequences(self):
-        solver = self.mk_solver()
-        satresult, consqs = solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
-        return [self.extractInfoFromConsequence(s) for s in consqs]
-
-    def outputstructure(self, all_false=False, all_true=False):
-        out = Structure()
-        for symbol in self.symbols:
-            for value in self.relevantValsOf(symbol):
-                out.initialise(Comparison(True, symbol, [], self.z3_value(value)), all_false, all_true)
-                # SINGLETON ALERT
-        return out
-
-    def propagation(self):
-        out = self.outputstructure()
-        for ass, csq in self.consequences():
-            out.addComparison(csq)
-        return out.m
-
-    def as_symbol(self, symb_str):
-        return [sym for sym in self.symbols if str(sym) == symb_str][0]
-
-    def loadStructure(self, assumptions):
-        self.assumptions = assumptions
-
-    def loadStructureFromJson(self, jsonstr):
-        self.loadStructure(self.structureFromJson(jsonstr))
-
-    def structureFromJson(self, json_data):
-        json_data = ast.literal_eval(json_data)
-        return self.structureFromObject(json_data)
-
-    def args(self, val):
-        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
-        return a
-
-    def outVal(self, val):
-        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
-        return l
-
-    # Structure: symbol -> value -> {ct,cf} -> true/false
-    def structureFromObject(self, obj):
-        return [Comparison(sign == "ct", self.as_symbol(sym), self.args(val), self.outVal(val)).asAST()
-                for sym in obj
-                for val in obj[sym]
-                for sign in {"ct", "cf"}
-                if obj[sym][val][sign]]
+    #################
+    # BUILDER FUNCTIONS
+    #################
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
         ints = Ints(txt)
@@ -144,6 +58,91 @@ class ConfigCase:
             self.valueMap[obj_to_string(i)] = i
         return out
 
+    #################
+    # UTILITIES
+    #################
+
+    def add(self, constraint):
+        self.constraints.append(constraint)
+
+    def relevantValsOf(self, var):
+        if var in self.relevantVals:
+            return self.relevantVals[var]
+        else:
+            return universe(var.sort())
+
+    def mk_solver(self):
+        s = Solver()
+        for c in self.constraints:
+            s.add(c)
+        return s
+
+    def model(self):
+        solver = self.mk_solver()
+        solver.check(self.list_of_assumptions())
+        return solver.model()
+
+    def model_to_json(self, m):
+        output = self.outputstructure(True)
+        for symb in self.symbols:
+            val = m[symb]
+            output.addComparison(Comparison(True, symb, [], self.z3_value(val)))  # SINGLETON ALERT
+        return output.m
+
+    def list_of_propositions(self):
+        return [sym == val for sym in self.symbols for val in self.relevantValsOf(sym)]
+
+    def initialisationlist(self):
+        out = {}
+        for sym in self.symbols:
+            out[obj_to_string(sym)] = [[obj_to_string(x)] for x in self.relevantValsOf(sym)]  # SINGLETON ALERT
+        return out
+
+    def list_of_assumptions(self):
+        return self.assumptions
+
+    def consequences(self):
+        solver = self.mk_solver()
+        satresult, consqs = solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
+        return [self.extractInfoFromConsequence(s) for s in consqs]
+
+    def outputstructure(self, all_false=False, all_true=False):
+        out = Structure()
+        for symbol in self.symbols:
+            for value in self.relevantValsOf(symbol):
+                out.initialise(Comparison(True, symbol, [], self.z3_value(value)), all_false, all_true)
+                # SINGLETON ALERT
+        return out
+
+    def as_symbol(self, symb_str):
+        return [sym for sym in self.symbols if str(sym) == symb_str][0]
+
+    def loadStructure(self, assumptions):
+        self.assumptions = assumptions
+
+    def loadStructureFromJson(self, jsonstr):
+        self.loadStructure(self.structureFromJson(jsonstr))
+
+    def structureFromJson(self, json_data):
+        json_data = ast.literal_eval(json_data)
+        return self.structureFromObject(json_data)
+
+    def args(self, val):
+        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
+        return a
+
+    def outVal(self, val):
+        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
+        return l
+
+    # Structure: symbol -> value -> {ct,cf} -> true/false
+    def structureFromObject(self, obj):
+        return [Comparison(sign == "ct", self.as_symbol(sym), self.args(val), self.outVal(val)).asAST()
+                for sym in obj
+                for val in obj[sym]
+                for sign in {"ct", "cf"}
+                if obj[sym][val][sign]]
+
     def metaJSON(self):
         symbols = []
         for i in self.symbols:
@@ -158,14 +157,6 @@ class ConfigCase:
             })
         out = {"title": "Z3 Interactive Configuration", "timeout": 3, "symbols": symbols, "values": []}
         return out
-
-    def explain(self, symbol, value):
-        out = self.outputstructure()
-        for ass, csq in self.consequences():
-            if (csq.symbName() == symbol) & (csq.graphedValue() == value):
-                for a in ass:
-                    out.addComparison(a)
-        return out.m
 
     def extractInfoFromConsequence(self, s):
         assumption_expr = s.children()[0]
@@ -211,6 +202,18 @@ class ConfigCase:
             return len([c for c in self.symbols if obj_to_string(c) == obj_to_string(symb)]) > 0
         return False
 
+    #################
+    # INFERENCES
+    #################
+
+    def explain(self, symbol, value):
+        out = self.outputstructure()
+        for ass, csq in self.consequences():
+            if (csq.symbName() == symbol) & (csq.graphedValue() == value):
+                for a in ass:
+                    out.addComparison(a)
+        return out.m
+
     def minimize(self, symbol, minimize):
         solver = Optimize()
         for c in self.constraints:
@@ -225,6 +228,15 @@ class ConfigCase:
             solver.add(assumption)
         solver.check()
         return self.model_to_json(solver.model())
+
+    def json_model(self):
+        return self.model_to_json(self.model())
+
+    def propagation(self):
+        out = self.outputstructure()
+        for ass, csq in self.consequences():
+            out.addComparison(csq)
+        return out.m
 
 
 class Comparison:
