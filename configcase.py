@@ -1,7 +1,7 @@
 import ast
 import json
 from typing import List
-from utils import universe, in_list, is_number, splitLast
+from utils import universe, in_list, is_number, splitLast, singleton, applyTo, appended
 from z3 import *
 from z3.z3 import _py2expr
 
@@ -22,7 +22,7 @@ class ConfigCase:
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
         ints = Ints(txt)
-        values = list(map(_py2expr, range(underbound, upperbound + 1)))
+        values = list(map(singleton, map(_py2expr, range(underbound, upperbound + 1))))
         for i in ints:
             self.relevantVals[i] = values
             self.constraints.append(underbound <= i)
@@ -35,7 +35,7 @@ class ConfigCase:
         values: List[ArithRef] = list(map(_py2expr, rang))
         for i in reals:
             self.symbols.append(i)
-            self.relevantVals[i] = values
+            self.relevantVals[i] = list(map(singleton, values))
             if restrictive:
                 self.constraints.append(in_list(i, values))
         return reals
@@ -69,7 +69,7 @@ class ConfigCase:
         if var in self.relevantVals:
             return self.relevantVals[var]
         else:
-            return universe(var.sort())
+            return list(map(singleton, universe(var.sort())))
 
     def mk_solver(self):
         s = Solver()
@@ -90,12 +90,13 @@ class ConfigCase:
         return output.m
 
     def list_of_propositions(self):
-        return [sym == val for sym in self.symbols for val in self.relevantValsOf(sym)]
+        return [applyTo(sym, arg) == val for sym in self.symbols for arg, val in self.relevantValsOf(sym)]
 
     def initialisationlist(self):
         out = {}
         for sym in self.symbols:
-            out[obj_to_string(sym)] = [[obj_to_string(x)] for x in self.relevantValsOf(sym)]  # SINGLETON ALERT
+            out[obj_to_string(sym)] = [list(map(obj_to_string, appended(arg, val)))
+                                       for arg, val in self.relevantValsOf(sym)]
         return out
 
     def list_of_assumptions(self):
@@ -109,9 +110,9 @@ class ConfigCase:
     def outputstructure(self, all_false=False, all_true=False):
         out = Structure()
         for symbol in self.symbols:
-            for value in self.relevantValsOf(symbol):
-                out.initialise(Comparison(True, symbol, [], self.z3_value(value)), all_false, all_true)
-                # SINGLETON ALERT
+            for args, value in self.relevantValsOf(symbol):
+                out.initialise(Comparison(True, symbol, list(map(self.z3_value, args)), self.z3_value(value)),
+                               all_false, all_true)
         return out
 
     def as_symbol(self, symb_str):

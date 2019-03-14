@@ -54,5 +54,25 @@ def is_number(s):
         return False
 
 
+def singleton(x):
+    return [], x
+
+
 def splitLast(l):
     return [l[i] for i in range(0, len(l) - 1)], l[len(l) - 1]
+
+
+def applyTo(sym, arg):
+    if len(arg) == 0:
+        return sym
+    return sym(arg)
+
+
+def appended(arg, val):
+    out = [x for x in arg]
+    out.append(val)
+    print('cal')
+    print(arg)
+    print(val)
+    print(out)
+    return out
