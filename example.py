@@ -1,4 +1,4 @@
-from z3 import Function, ForAll, And, Implies, Int, IntSort
+from z3 import Function, ForAll, And, Implies, Int, IntSort, Solver, ExprRef
 
 from configcase import ConfigCase
 
@@ -33,8 +33,15 @@ def theo2(case: ConfigCase):
 
 
 if __name__ == '__main__':
-    cc = ConfigCase(theory)
-    print(cc.minimize("e", True))
-    # print(cc.model())
-    # print(cc.list_of_propositions())
-    # print(cc.consequences())
+    solver = Solver()
+    a = Int("a")
+    f = Function('f', IntSort(), IntSort())
+    solver.add(ForAll(a, Implies(And(0 < a, a < 10), f(a) == a)))
+    solver.add(f(110) == 4)
+    # print(a.num_args())
+    # print(f.num_args())
+    print(isinstance(f, ExprRef))
+    print(isinstance(f(110), ExprRef))
+    print(f(110).children())
+    print(f(110).decl())
+    print(solver.consequences([], [f(5) == 5]))

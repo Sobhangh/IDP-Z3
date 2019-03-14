@@ -78,7 +78,7 @@ class ConfigCase:
         return out.m
 
     def as_symbol(self, symb_str):
-        return [sym for sym in self.symbols if str(sym) == symb_str][0]  # SINGLETON ALERT
+        return [sym for sym in self.symbols if str(sym) == symb_str][0]
 
     def loadStructure(self, assumptions):
         self.assumptions = assumptions
@@ -192,7 +192,11 @@ class ConfigCase:
             temp = symbol
             symbol = value
             value = temp
-        return Comparison(sign, symbol, [], self.z3_value(value))  # SINGLETON ALERT
+        args = []
+        if isinstance(symbol, ExprRef):
+            args = symbol.children()
+            symbol = symbol.decl()
+        return Comparison(sign, symbol, args, self.z3_value(value))
 
     def z3_value(self, value):
         if value in self.valueMap:
