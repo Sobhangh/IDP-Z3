@@ -53,7 +53,7 @@ class eval(Resource):
             case.loadStructureFromJson(active)
             out = case.explain(args['symbol'], args['value'])
         if method == "minimize":
-            case = ConfigCase(theory, Optimize())
+            case = ConfigCase(theory)
             case.loadStructureFromJson(active)
             out = case.minimize(args['symbol'], args['minimize'])
         z3lock.release()

@@ -1,12 +1,9 @@
-from z3 import Function, ForAll, And, Implies, Int, IntSort, EnumSort, Optimize
+from z3 import Function, ForAll, And, Implies, Int, IntSort
 
 from configcase import ConfigCase
-from utils import universe
 
 
 def theory(case: ConfigCase):
-    solver = case.solver
-
     a, b, c, f, g = case.IntsInRange("a b c f g", 0, 10)
 
     Color, (red, green, blue) = case.EnumSort('Color', ['red', 'green', 'blue'])
@@ -16,12 +13,12 @@ def theory(case: ConfigCase):
     e = case.Reals("e", [1.0, 3.5, 9.0], True)
     p, q = case.Bools("p q")
 
-    solver.add(a > b + 2)
-    solver.add(a + 2 * c == 10)
-    solver.add(b + c <= 1000)
-    solver.add(d >= e)
-    solver.add(p != q)
-    solver.add(a + b + g == f)
+    case.add(a > b + 2)
+    case.add(a + 2 * c == 10)
+    case.add(b + c <= 1000)
+    case.add(d >= e)
+    case.add(p != q)
+    case.add(a + b + g == f)
     # solver.add(clr != green)
     # solver.add(p == (a == 1))
 
@@ -36,7 +33,7 @@ def theo2(case: ConfigCase):
 
 
 if __name__ == '__main__':
-    cc = ConfigCase(theory, Optimize())
+    cc = ConfigCase(theory)
     print(cc.minimize("e", True))
     # print(cc.model())
     # print(cc.list_of_propositions())

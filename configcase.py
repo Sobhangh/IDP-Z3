@@ -1,23 +1,23 @@
 import ast
-from typing import List
-
-from z3 import *
 import json
-
-from z3.z3 import _py2expr
-
+from typing import List
 from utils import universe, in_list, is_number
+from z3 import *
+from z3.z3 import _py2expr
 
 
 class ConfigCase:
 
-    def __init__(self, theory, solver=Solver()):
+    def __init__(self, theory):
         self.relevantVals = {}
         self.symbols = []
-        self.solver = solver
         self.assumptions = []
         self.valueMap = {"True": True}
+        self.constraints = []
         theory(self)
+
+    def add(self, constraint):
+        self.constraints.append(constraint)
 
     def relevantValsOf(self, var):
         if var in self.relevantVals:
@@ -25,9 +25,16 @@ class ConfigCase:
         else:
             return universe(var.sort())
 
+    def mk_solver(self):
+        s = Solver()
+        for c in self.constraints:
+            s.add(c)
+        return s
+
     def model(self):
-        self.solver.check(self.list_of_assumptions())
-        return self.solver.model()
+        solver = self.mk_solver()
+        solver.check(self.list_of_assumptions())
+        return solver.model()
 
     def json_model(self):
         return self.model_to_json(self.model())
@@ -52,7 +59,8 @@ class ConfigCase:
         return self.assumptions
 
     def consequences(self):
-        satresult, consqs = self.solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
+        solver = self.mk_solver()
+        satresult, consqs = solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
         return [self.extractInfoFromConsequence(s) for s in consqs]
 
     def outputstructure(self, all_false=False, all_true=False):
@@ -94,8 +102,8 @@ class ConfigCase:
         values = list(map(_py2expr, range(underbound, upperbound + 1)))
         for i in ints:
             self.relevantVals[i] = values
-            self.solver.add(underbound <= i)
-            self.solver.add(i <= upperbound)
+            self.constraints.append(underbound <= i)
+            self.constraints.append(i <= upperbound)
             self.symbols.append(i)
         return ints
 
@@ -106,7 +114,7 @@ class ConfigCase:
             self.symbols.append(i)
             self.relevantVals[i] = values
             if restrictive:
-                self.solver.add(in_list(i, values))
+                self.constraints.append(in_list(i, values))
         return reals
 
     def Bools(self, txt: str):
@@ -145,7 +153,6 @@ class ConfigCase:
     def explain(self, symbol, value):
         out = self.outputstructure()
         for ass, csq in self.consequences():
-            print(ass, csq)
             if (csq.symbName() == symbol) & (csq.valName() == value):
                 for a in ass:
                     out.addComparison(a)
@@ -185,16 +192,19 @@ class ConfigCase:
             return value
 
     def minimize(self, symbol, minimize):
+        solver = Optimize()
+        for c in self.constraints:
+            solver.add(c)
         s = self.as_symbol(symbol)
         if minimize:
-            self.solver.minimize(s)
+            solver.minimize(s)
         else:
-            self.solver.maximize(s)
-            
+            solver.maximize(s)
+
         for assumption in self.list_of_assumptions():
-            self.solver.add(assumption)
-        self.solver.check()
-        return self.model_to_json(self.solver.model())
+            solver.add(assumption)
+        solver.check()
+        return self.model_to_json(solver.model())
 
 
 class Comparison:
