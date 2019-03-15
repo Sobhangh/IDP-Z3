@@ -64,7 +64,7 @@ class ConfigCase:
         rel_vars = list(map(lambda x: list(map(_py2expr, x)), rel_vars))
         args, vals = splitLast(rel_vars)
         args = list(itertools.product(*args))
-        values = itertools.product(args, vals)
+        values = list(itertools.product(args, vals))
         self.symbols.append(out)
         self.relevantVals[out] = values
         if restrictive:
@@ -72,6 +72,13 @@ class ConfigCase:
                 exp = in_list(out(*arg), vals)
                 self.add(exp)
         return out
+
+    def Predicate(self, name, types, rel_vars, restrictive=True):
+        p = self.Function(name, types + [BoolSort()], rel_vars + [[True]], False)
+        if restrictive:
+            argL = [Const('a' + str(ind), s) for s, ind in zip(types, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
+            self.add(ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
+        return p
 
     #################
     # UTILITIES
@@ -109,7 +116,11 @@ class ConfigCase:
         return output.m
 
     def list_of_propositions(self):
-        return [applyTo(sym, arg) == val for sym in self.symbols for arg, val in self.relevantValsOf(sym)]
+        out = []
+        for sym in self.symbols:
+            for arg, val in self.relevantValsOf(sym):
+                out.append(applyTo(sym, arg) == val)
+        return out
 
     def list_of_assumptions(self):
         return self.assumptions

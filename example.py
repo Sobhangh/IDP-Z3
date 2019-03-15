@@ -15,6 +15,10 @@ def theory(case: ConfigCase):
 
     k = case.Function("k", [IntSort(), IntSort()], [[1, 2, 3], [4, 5, 6]], True)
 
+    pred = case.Predicate("pred", [IntSort()], [[1, 2, 3, 4, 5, 6, 7, 8, 9]], True)
+
+    case.add(pred(a))
+
     case.add(a > b + 2)
     case.add(a + 2 * c == 10)
     case.add(b + c <= 1000)
