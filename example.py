@@ -13,6 +13,8 @@ def theory(case: ConfigCase):
     e = case.Reals("e", [1.0, 3.5, 9.0], True)
     p, q = case.Bools("p q")
 
+    k = case.Function("k", [IntSort(), IntSort()], [[1, 2, 3], [4, 5, 6]], True)
+
     case.add(a > b + 2)
     case.add(a + 2 * c == 10)
     case.add(b + c <= 1000)

@@ -1,4 +1,5 @@
 import ast
+import itertools
 import json
 from typing import List
 from utils import universe, in_list, is_number, splitLast, singleton, applyTo, appended
@@ -58,6 +59,20 @@ class ConfigCase:
             self.valueMap[obj_to_string(i)] = i
         return out
 
+    def Function(self, name, types, rel_vars, restrictive=True):
+        out = Function(name, *types)
+        rel_vars = list(map(lambda x: list(map(_py2expr, x)), rel_vars))
+        args, vals = splitLast(rel_vars)
+        args = list(itertools.product(*args))
+        values = itertools.product(args, vals)
+        self.symbols.append(out)
+        self.relevantVals[out] = values
+        if restrictive:
+            for arg in list(args):
+                exp = in_list(out(*arg), vals)
+                self.add(exp)
+        return out
+
     #################
     # UTILITIES
     #################
@@ -85,19 +100,16 @@ class ConfigCase:
     def model_to_json(self, m):
         output = self.outputstructure(True)
         for symb in self.symbols:
-            val = m[symb]
-            output.addComparison(Comparison(True, symb, [], self.z3_value(val)))  # SINGLETON ALERT
+            for args, val in self.relevantValsOf(symb):
+                if len(args) == 0:
+                    val = m.eval(symb)
+                else:
+                    val = m.eval(symb(args))
+                output.addComparison(Comparison(True, symb, args, val))
         return output.m
 
     def list_of_propositions(self):
         return [applyTo(sym, arg) == val for sym in self.symbols for arg, val in self.relevantValsOf(sym)]
-
-    def initialisationlist(self):
-        out = {}
-        for sym in self.symbols:
-            out[obj_to_string(sym)] = [list(map(obj_to_string, appended(arg, val)))
-                                       for arg, val in self.relevantValsOf(sym)]
-        return out
 
     def list_of_assumptions(self):
         return self.assumptions
@@ -238,6 +250,15 @@ class ConfigCase:
         for ass, csq in self.consequences():
             out.addComparison(csq)
         return out.m
+
+    def initialisationlist(self):
+        out = {}
+        for sym in self.symbols:
+            ls = []
+            for arg, val in self.relevantValsOf(sym):
+                ls.append(json.dumps(list(map(obj_to_string, appended(arg, val)))))
+            out[obj_to_string(sym)] = ls
+        return out
 
 
 class Comparison:

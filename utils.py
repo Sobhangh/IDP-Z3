@@ -71,8 +71,4 @@ def applyTo(sym, arg):
 def appended(arg, val):
     out = [x for x in arg]
     out.append(val)
-    print('cal')
-    print(arg)
-    print(val)
-    print(out)
     return out
