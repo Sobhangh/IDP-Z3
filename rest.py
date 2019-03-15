@@ -15,6 +15,7 @@ api = Api(app)
 
 parser = reqparse.RequestParser()
 parser.add_argument('method', type=str, help='Method to execute')
+parser.add_argument('code', type=str, help='Code')
 parser.add_argument('active', type=str, help='Three-valued structure')
 parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
 parser.add_argument('value', type=str, help='Value to explain')
