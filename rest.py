@@ -1,11 +1,9 @@
 import threading
+
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
-from configcase import ConfigCase, Optimize
-from example import theoString
-from z3 import *
 from configcase import *
 
 app = Flask(__name__)
@@ -36,10 +34,11 @@ class eval(Resource):
         global _main_ctx
         _main_ctx = None
 
-        exec(theoString)
+        args = parser.parse_args()
+        exec(args['code'])
+
         global theory
         case = ConfigCase(theory)
-        args = parser.parse_args()
         method = args['method']
         active = args['active']
         print(args)
@@ -67,8 +66,9 @@ class eval(Resource):
 
 
 class meta(Resource):
-    def get(self):
-        exec(theoString)
+    def post(self):
+        args = parser.parse_args()
+        exec(args['code'])
         global theory
         return ConfigCase(theory).metaJSON()
 
