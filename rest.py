@@ -36,9 +36,11 @@ class eval(Resource):
         _main_ctx = None
 
         args = parser.parse_args()
+        
+        global theory
+        theory = None
         exec(args['code'])
 
-        global theory
         case = ConfigCase(theory)
         method = args['method']
         active = args['active']
@@ -53,12 +55,12 @@ class eval(Resource):
             case.loadStructureFromJson(active)
             out = case.json_model()
         if method == "relevance":
-            out = case.outputstructure(True, True).m
+            case.loadStructureFromJson(active)
+            out = case.relevance()
         if method == "explain":
             case.loadStructureFromJson(active)
             out = case.explain(args['symbol'], args['value'])
         if method == "minimize":
-            case = ConfigCase(theory)
             case.loadStructureFromJson(active)
             out = case.minimize(args['symbol'], args['minimize'])
         z3lock.release()

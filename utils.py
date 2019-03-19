@@ -72,3 +72,14 @@ def appended(arg, val):
     out = [x for x in arg]
     out.append(val)
     return out
+
+
+def flattenexpr(e):
+    out = []
+    for i in e.children():
+        out += flattenexpr(i)
+    if is_app(e):
+        out.append(e.decl())
+    else:
+        out.append(e)
+    return out

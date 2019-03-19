@@ -2,9 +2,9 @@ import ast
 import itertools
 import json
 from typing import List
-from utils import universe, in_list, is_number, splitLast, singleton, applyTo, appended
+from utils import universe, in_list, is_number, splitLast, singleton, applyTo, appended, flattenexpr
 from z3 import *
-from z3.z3 import _py2expr
+from z3.z3 import _py2expr, _to_expr_ref
 
 
 class ConfigCase:
@@ -108,10 +108,7 @@ class ConfigCase:
         output = self.outputstructure(True)
         for symb in self.symbols:
             for args, val in self.relevantValsOf(symb):
-                if len(args) == 0:
-                    val = m.eval(symb)
-                else:
-                    val = m.eval(symb(args))
+                val = m.eval(applyTo(symb, args))
                 output.addComparison(Comparison(True, symb, args, val))
         return output.m
 
@@ -230,6 +227,24 @@ class ConfigCase:
     # INFERENCES
     #################
 
+    def relevance(self):
+        g = Goal()
+        g.add(self.constraints)
+        g.add(self.assumptions)
+        simplified = Tactic('ctx-solver-simplify')(g)[0]
+        print(simplified)
+        total = []
+        for i in simplified:
+            total += flattenexpr(i)
+
+        out = self.outputstructure()
+        for i in self.symbols:
+            for j in total:
+                if obj_to_string(i) == obj_to_string(j):
+                    out.fillSymbol(i)
+                    break
+        return out.m
+
     def explain(self, symbol, value):
         out = self.outputstructure()
         for ass, csq in self.consequences():
@@ -323,3 +338,9 @@ class Structure:
         if comp.sign:
             signstr = "ct"
         self.m.setdefault(comp.symbName(), {}).setdefault(comp.graphedValue(), {})[signstr] = True
+
+    def fillSymbol(self, s):
+        map = self.m[obj_to_string(s)]
+        for i in self.m[obj_to_string(s)]:
+            map[i]['ct'] = True
+            map[i]['cf'] = True

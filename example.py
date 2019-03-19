@@ -1,6 +1,8 @@
-from z3 import Function, ForAll, And, Implies, Int, IntSort, Solver, ExprRef
+from z3 import Function, ForAll, And, Implies, Int, IntSort, Solver, ExprRef, simplify, help_simplify, Ints, Goal, Or, \
+    Then, Tactic
 
 from configcase import ConfigCase
+from utils import flattenexpr
 
 
 def theoryTestCase(case: ConfigCase):
@@ -70,16 +72,16 @@ def theo2(case: ConfigCase):
     print(print(f(4).sort()))
 
 
+
 if __name__ == '__main__':
-    solver = Solver()
-    a = Int("a")
-    f = Function('f', IntSort(), IntSort())
-    solver.add(ForAll(a, Implies(And(0 < a, a < 10), f(a) == a)))
-    solver.add(f(110) == 4)
-    # print(a.num_args())
-    # print(f.num_args())
-    print(isinstance(f, ExprRef))
-    print(isinstance(f(110), ExprRef))
-    print(f(110).children())
-    print(f(110).decl())
-    print(solver.consequences([], [f(5) == 5]))
+    a, b, c, d = Ints('a b c d')
+    g = Goal()
+    g.add(Or(a == 0, a == 1), Or(b == 0, b == 1), a > b, Or(c == 1, d > c), d == 3)
+    t = Tactic('ctx-solver-simplify')
+    r = t(g)
+    for i in r:
+        for j in i:
+            print("Flatten:")
+            print(j)
+            print(flattenexpr(j))
+    print(r)
