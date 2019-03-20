@@ -74,12 +74,20 @@ def appended(arg, val):
     return out
 
 
-def flattenexpr(e):
+def objInList(obj, list):
+    for i in list:
+        if obj_to_string(obj) == obj_to_string(i):
+            return True
+    return False
+
+
+def flattenexpr(e, symblist):
     out = []
     for i in e.children():
-        out += flattenexpr(i)
+        out += flattenexpr(i, symblist)
     if is_app(e):
-        out.append(e.decl())
-    else:
+        if objInList(e.decl(), symblist):
+            out.append(e)
+    elif objInList(e, symblist):
         out.append(e)
     return out

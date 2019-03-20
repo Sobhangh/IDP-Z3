@@ -15,6 +15,7 @@ class ConfigCase:
         self.assumptions = []
         self.valueMap = {"True": True}
         self.constraints = []
+        self.typeConstraints = []
         theory(self)
 
     #################
@@ -26,8 +27,8 @@ class ConfigCase:
         values = list(map(singleton, map(_py2expr, range(underbound, upperbound + 1))))
         for i in ints:
             self.relevantVals[i] = values
-            self.constraints.append(underbound <= i)
-            self.constraints.append(i <= upperbound)
+            self.typeConstraints.append(underbound <= i)
+            self.typeConstraints.append(i <= upperbound)
             self.symbols.append(i)
         return ints
 
@@ -38,7 +39,7 @@ class ConfigCase:
             self.symbols.append(i)
             self.relevantVals[i] = list(map(singleton, values))
             if restrictive:
-                self.constraints.append(in_list(i, values))
+                self.typeConstraints.append(in_list(i, values))
         return reals
 
     def Bools(self, txt: str):
@@ -70,14 +71,15 @@ class ConfigCase:
         if restrictive:
             for arg in list(args):
                 exp = in_list(out(*arg), vals)
-                self.add(exp)
+                self.typeConstraints.append(exp)
         return out
 
     def Predicate(self, name, types, rel_vars, restrictive=True):
         p = self.Function(name, types + [BoolSort()], rel_vars + [[True]], False)
         if restrictive:
             argL = [Const('a' + str(ind), s) for s, ind in zip(types, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
-            self.add(ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
+            self.typeConstraints.append(
+                ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
         return p
 
     #################
@@ -95,8 +97,8 @@ class ConfigCase:
 
     def mk_solver(self):
         s = Solver()
-        for c in self.constraints:
-            s.add(c)
+        s.add(self.constraints)
+        s.add(self.typeConstraints)
         return s
 
     def model(self):
@@ -232,17 +234,16 @@ class ConfigCase:
         g.add(self.constraints)
         g.add(self.assumptions)
         simplified = Tactic('ctx-solver-simplify')(g)[0]
-        print(simplified)
         total = []
         for i in simplified:
-            total += flattenexpr(i)
+            total += flattenexpr(i, self.symbols)
+        print(simplified)
+        total = list(set(total))
 
+        print(total)
         out = self.outputstructure()
-        for i in self.symbols:
-            for j in total:
-                if obj_to_string(i) == obj_to_string(j):
-                    out.fillSymbol(i)
-                    break
+        for i in total:
+            out.fillApp(i)
         return out.m
 
     def explain(self, symbol, value):
@@ -255,8 +256,8 @@ class ConfigCase:
 
     def minimize(self, symbol, minimize):
         solver = Optimize()
-        for c in self.constraints:
-            solver.add(c)
+        solver.add(self.constraints)
+        solver.add(self.typeConstraints)
         s = self.as_symbol(symbol)
         if minimize:
             solver.minimize(s)
@@ -344,3 +345,19 @@ class Structure:
         for i in self.m[obj_to_string(s)]:
             map[i]['ct'] = True
             map[i]['cf'] = True
+
+    def fillApp(self, s):
+        if not is_app(s):
+            self.fillSymbol(s)
+            return
+        func = obj_to_string(s.decl())
+        args = [obj_to_string(x) for x in s.children()]
+        found = False
+        for fargs in self.m[func]:
+            argp, l = splitLast(json.loads(fargs))
+            if argp == args:
+                self.m[func][fargs]['ct'] = True
+                self.m[func][fargs]['cf'] = True
+                found = True
+        if not found:
+            self.fillSymbol(s.decl())
