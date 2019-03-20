@@ -237,13 +237,43 @@ class ConfigCase:
         total = []
         for i in simplified:
             total += flattenexpr(i, self.symbols)
-        print(simplified)
         total = list(set(total))
 
-        print(total)
         out = self.outputstructure()
         for i in total:
             out.fillApp(i)
+        return out.m
+
+    def brokenRelevance(self):
+        out = self.outputstructure()
+        for s in self.symbols:
+            argshandled = {}
+            for arg, val in self.relevantValsOf(s):
+                comp = Comparison(True, s, arg, val)
+                if argshandled[comp.args]:
+                    continue
+                argshandled[comp.args] = True
+
+                # REMOVE IN TODO
+                if len(arg) > 0:
+                    continue
+
+                ap = applyTo(s, arg)
+                theoExpr = And(self.constraints)
+
+                theo1 = And(theoExpr)
+
+                c = Const('temporaryConstant', s.sort())
+                solver = Solver()
+                solver.add(self.assumptions)
+                solver.add(c != val)
+                solver.add(ap == val)
+                theo2 = substitute(theo1, (ap, c))
+                solver.add(theo1 != theo2)
+                a = solver.check()
+                if not (a == unsat):
+                    out.addComparison(comp)
+
         return out.m
 
     def explain(self, symbol, value):
