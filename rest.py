@@ -36,7 +36,7 @@ class eval(Resource):
         _main_ctx = None
 
         args = parser.parse_args()
-        
+
         global theory
         theory = None
         exec(args['code'])
@@ -62,7 +62,7 @@ class eval(Resource):
             out = case.explain(args['symbol'], args['value'])
         if method == "minimize":
             case.loadStructureFromJson(active)
-            out = case.minimize(args['symbol'], args['minimize'])
+            out = case.optimize(args['symbol'], args['minimize'])
         z3lock.release()
         print(out)
         return out

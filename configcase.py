@@ -104,7 +104,8 @@ class ConfigCase:
 
     def model(self):
         solver = self.mk_solver()
-        solver.check(self.list_of_assumptions())
+        solver.add(self.list_of_assumptions())
+        solver.check()
         return solver.model()
 
     def model_to_json(self, m):
@@ -124,11 +125,6 @@ class ConfigCase:
 
     def list_of_assumptions(self):
         return self.assumptions
-
-    def consequences(self):
-        solver = self.mk_solver()
-        satresult, consqs = solver.consequences(self.list_of_assumptions(), self.list_of_propositions())
-        return [self.extractInfoFromConsequence(s) for s in consqs]
 
     def outputstructure(self, all_false=False, all_true=False):
         out = Structure()
@@ -220,10 +216,11 @@ class ConfigCase:
             return value
 
     def is_symbol(self, symb):
-        if type(symb) == str:
-            return len([c for c in self.symbols if obj_to_string(c) == symb]) > 0
         if is_expr(symb):
-            return len([c for c in self.symbols if obj_to_string(c) == obj_to_string(symb)]) > 0
+            symb = obj_to_string(symb)
+        for c in self.symbols:
+            if obj_to_string(c) == symb:
+                return True
         return False
 
     #################
@@ -263,7 +260,7 @@ class ConfigCase:
                 solver.add(
                     ForAll(constants,
                            Or(And(pairwiseEquals(arg_fill, constants)),
-                              applyTo(s, constants) == applyTo(c, constants))))
+                              s(constants) == c(constants))))
                 var_list = [Var(i, s.domain(i)) for i in range(0, s.arity())]
                 theo2 = rewrite(theo1, s, applyTo(c, var_list))
                 type_transform = rewrite(And(self.typeConstraints + self.assumptions), s, applyTo(c, var_list))
@@ -294,14 +291,20 @@ class ConfigCase:
         return out.m
 
     def explain(self, symbol, value):
+        solver = self.mk_solver()
+        arg, l = splitLast(json.loads(value))
+        arg = list(map(self.z3_value, arg))
+        to_explain = [applyTo(self.as_symbol(symbol), arg) == self.z3_value(l)]
+        satresult, consqs = solver.consequences(self.assumptions, to_explain)
+
         out = self.outputstructure()
-        for ass, csq in self.consequences():
-            if (csq.symbName() == symbol) & (csq.graphedValue() == value):
-                for a in ass:
-                    out.addComparison(a)
+        for cons in consqs:
+            ass, csq = self.extractInfoFromConsequence(cons)
+            for a in ass:
+                out.addComparison(a)
         return out.m
 
-    def minimize(self, symbol, minimize):
+    def optimize(self, symbol, minimize):
         solver = Optimize()
         solver.add(self.constraints)
         solver.add(self.typeConstraints)
@@ -320,8 +323,12 @@ class ConfigCase:
         return self.model_to_json(self.model())
 
     def propagation(self):
+        solver = self.mk_solver()
+        solver.add(self.assumptions)
+        satresult, consqs = solver.consequences([], self.list_of_propositions())
         out = self.outputstructure()
-        for ass, csq in self.consequences():
+        for consequence in consqs:
+            ass, csq = self.extractInfoFromConsequence(consequence)
             out.addComparison(csq)
         return out.m
 
@@ -330,7 +337,7 @@ class ConfigCase:
         for sym in self.symbols:
             ls = []
             for arg, val in self.relevantValsOf(sym):
-                ls.append(json.dumps(list(map(obj_to_string, appended(arg, val)))))
+                ls.append(json.dumps(list(map(obj_to_string, list(arg) + [val]))))
             out[obj_to_string(sym)] = ls
         return out
 

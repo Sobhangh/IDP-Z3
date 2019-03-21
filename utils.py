@@ -94,10 +94,10 @@ def flatten(l):
 
 
 def in_list(q, ls):
-    outp = False
+    outp = []
     for i in ls:
-        outp = Or(q == i, outp)
-    return outp
+        outp.append(q == i)
+    return Or(outp)
 
 
 def is_number(s):
@@ -120,12 +120,6 @@ def applyTo(sym, arg):
     if len(arg) == 0:
         return sym
     return sym(arg)
-
-
-def appended(arg, val):
-    out = [x for x in arg]
-    out.append(val)
-    return out
 
 
 def objInList(obj, list):
