@@ -2,7 +2,8 @@ import ast
 import itertools
 import json
 from typing import List
-from utils import universe, in_list, is_number, splitLast, singleton, applyTo, appended, flattenexpr
+from utils import universe, in_list, is_number, splitLast, singleton, applyTo, appended, flattenexpr, pairwiseEquals, \
+    rewrite
 from z3 import *
 from z3.z3 import _py2expr, _to_expr_ref
 
@@ -229,7 +230,7 @@ class ConfigCase:
     # INFERENCES
     #################
 
-    def relevance(self):
+    def brelevance(self):
         g = Goal()
         g.add(self.constraints)
         g.add(self.assumptions)
@@ -244,35 +245,46 @@ class ConfigCase:
             out.fillApp(i)
         return out.m
 
-    def brokenRelevance(self):
+    def relevance(self):
         out = self.outputstructure()
         for s in self.symbols:
+
             argshandled = {}
             for arg, val in self.relevantValsOf(s):
                 comp = Comparison(True, s, arg, val)
-                if argshandled[comp.args]:
+                strargs = json.dumps([obj_to_string(x) for x in comp.args])
+                if strargs in argshandled:
                     continue
-                argshandled[comp.args] = True
+                argshandled[strargs] = True
 
-                # REMOVE IN TODO
-                if len(arg) > 0:
-                    continue
-
-                ap = applyTo(s, arg)
-                theoExpr = And(self.constraints)
-
-                theo1 = And(theoExpr)
-
-                c = Const('temporaryConstant', s.sort())
                 solver = Solver()
-                solver.add(self.assumptions)
-                solver.add(c != val)
-                solver.add(ap == val)
-                theo2 = substitute(theo1, (ap, c))
+
+                theo1 = And(self.constraints)
+                solver.add(self.typeConstraints + self.assumptions)
+
+                if len(arg) > 0:
+                    typeList = [s.domain(i) for i in range(0, s.arity())] + [s.range()]
+                    c = Function("temporaryFunction", typeList)
+
+                    constants = [Const('ci', s.domain(i)) for i in range(0, s.arity())]
+                    solver.add(
+                        ForAll(constants,
+                               Or(And(pairwiseEquals(arg, constants)), applyTo(s, constants) == applyTo(c, constants))))
+                    varList = [Var(i, s.domain(i)) for i in range(0, s.arity())]
+                    theo2 = rewrite(theo1, s, applyTo(c, varList))
+                    typeTransform = rewrite(And(self.typeConstraints + self.assumptions), s, applyTo(c, varList))
+                else:
+                    c = Const('temporaryConstant', s.sort())
+                    solver.add(c != s)
+                    theo2 = substitute(theo1, (s, c))
+                    typeTransform = substitute(And(self.typeConstraints + self.assumptions), (s, c))
+
+                solver.add(self.typeConstraints)
+                solver.add(typeTransform)
                 solver.add(theo1 != theo2)
                 a = solver.check()
                 if not (a == unsat):
-                    out.addComparison(comp)
+                    out.fillApp(applyTo(s, arg))
 
         return out.m
 
