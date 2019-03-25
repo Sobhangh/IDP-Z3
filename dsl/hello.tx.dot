@@ -1,0 +1,88 @@
+
+    digraph xtext {
+    fontname = "Bitstream Vera Sans"
+    fontsize = 8
+    node[
+        shape=record,
+        style=filled,
+        fillcolor=aliceblue
+    ]
+    nodesep = 0.3
+    edge[dir=black,arrowtail=empty]
+
+
+28419032 -> 26351592[arrowtail=diamond, dir=both, headlabel="statement 0..*"]
+28419032[ label="{Theory|}"]
+
+28402424[ label="{Comment|\\/\\/.*$}"]
+
+26351592[ label="{*ExpressionStatement|Conjunction .}"]
+26351592 -> 26349592 [dir=back]
+
+26356536[ label="{*Expression|}"]
+26356536 -> 26349592 [dir=back]
+
+26349592 -> 28610648[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
+26349592[ label="{Conjunction|}"]
+
+28610648 -> 28653384[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
+28610648[ label="{Disjunction|}"]
+
+28653384 -> 28658328[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
+28653384[ label="{Implication|}"]
+
+28658328 -> 28663272[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
+28658328[ label="{RImplication|}"]
+
+28663272 -> 28668216[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
+28663272[ label="{Equivalence|}"]
+
+28668216[ label="{Comparison|+fs:list[OBJECT]\l+operator:ComparisonOp\l}"]
+
+28674280[ label="{SumMinus|+fs:list[OBJECT]\l+operator:SumMinusOp\l}"]
+
+28679224[ label="{MultDiv|+fs:list[OBJECT]\l+more:MultDivOp\l}"]
+
+28684168 -> 28689112[arrowtail=diamond, dir=both, headlabel="f "]
+28684168[ label="{Unary|+neg:UnaryOperator\l}"]
+
+28689112 -> 28694056[arrowtail=diamond, dir=both, headlabel="args "]
+28689112 -> 26356536[arrowtail=diamond, dir=both, headlabel="f "]
+28689112[ label="{Base|+name:ID\l+numb:NUMBER\l}"]
+
+28694056 -> 26356536[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
+28694056[ label="{Arguments|}"]
+
+28699000[ label="{UnaryOperator|-\|~}"]
+
+28703944[ label="{SumMinusOp|+\|-}"]
+
+28666216[ label="{MultDivOp|*\|/}"]
+
+28651384[ label="{ComparisonOp|=\|\<\|\>\|=\<\|\>=}"]
+
+28399480[ label="{ID|}"]
+
+28404424[ label="{STRING|}"]
+
+28409960[ label="{BOOL|}"]
+
+28415496[ label="{INT|}"]
+
+28421032[ label="{FLOAT|}"]
+
+28426568[ label="{NUMBER|}"]
+28426568 -> 28421032 [dir=back]
+28426568 -> 28415496 [dir=back]
+
+28432104[ label="{BASETYPE|}"]
+28432104 -> 28426568 [dir=back]
+28432104 -> 28409960 [dir=back]
+28432104 -> 28399480 [dir=back]
+28432104 -> 28404424 [dir=back]
+
+28438232[ label="{*OBJECT|}"]
+28438232 -> 28432104 [dir=back]
+
+
+}

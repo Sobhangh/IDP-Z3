@@ -1,0 +1,38 @@
+Theory:
+    statement*=ExpressionStatement
+;
+
+Comment:
+  /\/\/.*$/
+;
+
+ExpressionStatement:
+    Expression '.'
+;
+
+Expression: Conjunction;
+
+Conjunction: fs*=Disjunction['&'];
+Disjunction: fs*=Implication['|'];
+Implication: fs*=RImplication['=>'];
+RImplication: fs*=Equivalence['<='];
+Equivalence: fs*=Comparison['<=>'];
+
+Comparison: fs=SumMinus (operator=ComparisonOp fs=Comparison)?;
+SumMinus: fs=MultDiv (operator=SumMinusOp fs=SumMinus)?;
+MultDiv: fs=Unary (more=MultDivOp fs=MultDiv)?;
+
+Unary: neg=UnaryOperator? f=Base;
+
+Base:  s=Symbol args=Arguments?
+      |numb=NUMBER
+      | '(' f=Expression ')';
+
+Arguments: '(' fs*=Expression[','] ')';
+
+UnaryOperator: '-' | '~';
+SumMinusOp: '+' | '-';
+MultDivOp: '*' | '/';
+ComparisonOp: '=' | '<' | '>' | '=<' | '>=';
+
+Symbol: name=ID;
