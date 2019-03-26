@@ -8,7 +8,7 @@ Vocabulary:
 ;
 
 Theory:
-'theory' '{' (statement=Expression '.')* '}'
+'theory' '{' (constraint=Expression '.')* '}'
 ;
 
 Comment:
@@ -17,19 +17,27 @@ Comment:
 
 Expression: Quantification;
 
-Quantification: q=Quantor var=ID '[' sort=ID ']:' f=Conjunction
-             | f = Conjunction;
-Conjunction: fs*=Disjunction['&'];
-Disjunction: fs*=Implication['|'];
-Implication: fs*=RImplication['=>'];
-RImplication: fs*=Equivalence['<='];
-Equivalence: fs*=Comparison['<=>'];
+Quantification: AQuantification | Conjunction;
+Conjunction: AConjunction | Disjunction;
+Disjunction: ADisjunction | Implication;
+Implication: AImplication | RImplication;
+RImplication: ARImplication | Equivalence;
+Equivalence: AEquivalence | Comparison;
+Comparison: AComparison | SumMinus;
+SumMinus: ASumMinus | MultDiv;
+MultDiv: AMultDiv | Unary;
+Unary: AUnary | Base;
 
-Comparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)*;
-SumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)*;
-MultDiv: fs=Unary (operator=MultDivOp fs=Unary)*;
-
-Unary: neg=UnaryOperator? f=Base;
+AQuantification: q=Quantor var=ID '[' sort=ID ']:' f=Conjunction;
+AConjunction: fs=Disjunction (operator='&' fs=Disjunction)+;
+ADisjunction: fs=Implication (operator='|' fs=Implication)+;
+AImplication: fs=RImplication (operator='=>' fs=RImplication)+;
+ARImplication: fs=Equivalence (operator='<=' fs=Equivalence)+;
+AEquivalence: fs=Comparison (operator='<=>' fs=Comparison)+;
+AComparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)+;
+ASumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)+;
+AMultDiv: fs=Unary (operator=MultDivOp fs=Unary)+;
+AUnary: neg=UnaryOperator f=Base;
 
 Base:  s=[Symbol] args=Arguments
       |var=ID

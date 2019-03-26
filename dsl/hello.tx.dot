@@ -11,102 +11,142 @@
     edge[dir=black,arrowtail=empty]
 
 
-17029656 -> 17013048[arrowtail=diamond, dir=both, headlabel="voc "]
-17029656 -> 17232856[arrowtail=diamond, dir=both, headlabel="theo "]
-17029656[ label="{File|}"]
+27704200 -> 27688184[arrowtail=diamond, dir=both, headlabel="voc "]
+27704200 -> 27920712[arrowtail=diamond, dir=both, headlabel="theo "]
+27704200[ label="{File|}"]
 
-17013048 -> 17339048[arrowtail=diamond, dir=both, headlabel="declaration 0..*"]
-17013048[ label="{Vocabulary|}"]
+27688184 -> 28062424[arrowtail=diamond, dir=both, headlabel="declaration 0..*"]
+27688184[ label="{Vocabulary|}"]
 
-17232856 -> 14966504[arrowtail=diamond, dir=both, headlabel="statement 0..*"]
-17232856[ label="{Theory|}"]
+27920712 -> 25639736[arrowtail=diamond, dir=both, headlabel="statement 0..*"]
+27920712[ label="{Theory|}"]
 
-14961560[ label="{Comment|\\/\\/.*$}"]
+25634792[ label="{Comment|\\/\\/.*$}"]
 
-14966504[ label="{*Expression|}"]
-14966504 -> 17278984 [dir=back]
+25639736[ label="{*Expression|}"]
+25639736 -> 27963624 [dir=back]
 
-17278984 -> 14959560[arrowtail=diamond, dir=both, headlabel="f "]
-17278984[ label="{Quantification|+q:Quantor\l+var:ID\l+sort:ID\l}"]
+27963624[ label="{*Quantification|}"]
+27963624 -> 28018328 [dir=back]
+27963624 -> 27968568 [dir=back]
 
-14959560 -> 17035192[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-14959560[ label="{Conjunction|}"]
+27968568[ label="{*Conjunction|}"]
+27968568 -> 27966568 [dir=back]
+27968568 -> 27973512 [dir=back]
 
-17035192 -> 17282040[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17035192[ label="{Disjunction|}"]
+27973512[ label="{*Disjunction|}"]
+27973512 -> 25632792 [dir=back]
+27973512 -> 27978456 [dir=back]
 
-17282040 -> 17286984[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17282040[ label="{Implication|}"]
+27978456[ label="{*Implication|}"]
+27978456 -> 27709736 [dir=back]
+27978456 -> 27983992 [dir=back]
 
-17286984 -> 17293640[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17286984[ label="{RImplication|}"]
+27983992[ label="{*RImplication|}"]
+27983992 -> 27988648 [dir=back]
+27983992 -> 27990648 [dir=back]
 
-17293640 -> 17299176[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17293640[ label="{Equivalence|}"]
+27990648[ label="{*Equivalence|}"]
+27990648 -> 28005256 [dir=back]
+27990648 -> 27996184 [dir=back]
 
-17299176 -> 17304712[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17299176[ label="{Comparison|operator:list[ComparisonOp]\l}"]
+27996184[ label="{*Comparison|}"]
+27996184 -> 27971512 [dir=back]
+27996184 -> 28001720 [dir=back]
 
-17304712 -> 17310248[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17304712[ label="{SumMinus|operator:list[SumMinusOp]\l}"]
+28001720[ label="{*SumMinus|}"]
+28001720 -> 28028520 [dir=back]
+28001720 -> 28007256 [dir=back]
 
-17310248 -> 17315784[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17310248[ label="{MultDiv|operator:list[MultDivOp]\l}"]
+28007256[ label="{*MultDiv|}"]
+28007256 -> 28033464 [dir=back]
+28007256 -> 28012792 [dir=back]
 
-17315784 -> 17321320[arrowtail=diamond, dir=both, headlabel="f "]
-17315784[ label="{Unary|+neg:UnaryOperator\l}"]
+28012792[ label="{*Unary|}"]
+28012792 -> 28039000 [dir=back]
+28012792 -> 28044536 [dir=back]
 
-17321320 -> 17355064[headlabel="s "]
-17321320 -> 17326856[arrowtail=diamond, dir=both, headlabel="args "]
-17321320 -> 14966504[arrowtail=diamond, dir=both, headlabel="f "]
-17321320[ label="{Base|+var:ID\l+numb:NUMBER\l+str:STRING\l}"]
+28018328 -> 27968568[arrowtail=diamond, dir=both, headlabel="f "]
+28018328[ label="{AQuantification|+q:Quantor\l+var:ID\l+sort:ID\l}"]
 
-17326856 -> 14966504[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
-17326856[ label="{Arguments|}"]
+27966568 -> 27973512[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+27966568[ label="{AConjunction|+operator:list[STRING]\l}"]
 
-17332392[ label="{UnaryOperator|-\|~}"]
+25632792 -> 27978456[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+25632792[ label="{ADisjunction|+operator:list[STRING]\l}"]
 
-17291640[ label="{SumMinusOp|+\|-}"]
+27709736 -> 27983992[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+27709736[ label="{AImplication|+operator:list[STRING]\l}"]
 
-17018584[ label="{MultDivOp|*\|/}"]
+27988648 -> 27990648[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+27988648[ label="{ARImplication|+operator:list[STRING]\l}"]
 
-17314840[ label="{ComparisonOp|=\|\<\|\>\|=\<\|\>=}"]
+28005256 -> 27996184[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+28005256[ label="{AEquivalence|+operator:list[STRING]\l}"]
 
-17331448[ label="{Quantor|!\|\?}"]
+27971512 -> 28001720[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+27971512[ label="{AComparison|+operator:list[ComparisonOp]\l}"]
 
-17339048[ label="{*Declaration|}"]
-17339048 -> 17343992 [dir=back]
-17339048 -> 17349528 [dir=back]
+28028520 -> 28007256[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+28028520[ label="{ASumMinus|+operator:list[SumMinusOp]\l}"]
 
-17343992[ label="{TypeDeclaration|+name:ID\lsorts:list[ID]\l}"]
+28033464 -> 28012792[arrowtail=diamond, dir=both, headlabel="fs 1..*"]
+28033464[ label="{AMultDiv|+operator:list[MultDivOp]\l}"]
 
-17349528 -> 17355064[arrowtail=diamond, dir=both, headlabel="name "]
-17349528[ label="{SymbolDeclaration|args:list[ID]\l+out:ID\l}"]
+28039000 -> 28044536[arrowtail=diamond, dir=both, headlabel="f "]
+28039000[ label="{AUnary|+neg:UnaryOperator\l}"]
 
-17355064[ label="{Symbol|+name:ID\l}"]
+28044536 -> 28079032[headlabel="s "]
+28044536 -> 28050072[arrowtail=diamond, dir=both, headlabel="args "]
+28044536 -> 25639736[arrowtail=diamond, dir=both, headlabel="f "]
+28044536[ label="{Base|+var:ID\l+numb:NUMBER\l+str:STRING\l}"]
 
-17006696[ label="{ID|}"]
+28050072 -> 25639736[arrowtail=diamond, dir=both, headlabel="fs 0..*"]
+28050072[ label="{Arguments|}"]
 
-17015048[ label="{STRING|}"]
+27999720[ label="{UnaryOperator|-\|~}"]
 
-17020584[ label="{BOOL|}"]
+25637736[ label="{SumMinusOp|+\|-}"]
 
-17026120[ label="{INT|}"]
+28037000[ label="{MultDivOp|*\|/}"]
 
-17031656[ label="{FLOAT|}"]
+28049128[ label="{ComparisonOp|=\|\<\|\>\|=\<\|\>=}"]
 
-17037192[ label="{NUMBER|}"]
-17037192 -> 17031656 [dir=back]
-17037192 -> 17026120 [dir=back]
+28056888[ label="{Quantor|!\|\?}"]
 
-17042728[ label="{BASETYPE|}"]
-17042728 -> 17037192 [dir=back]
-17042728 -> 17020584 [dir=back]
-17042728 -> 17006696 [dir=back]
-17042728 -> 17015048 [dir=back]
+28062424[ label="{*Declaration|}"]
+28062424 -> 28067960 [dir=back]
+28062424 -> 28073496 [dir=back]
 
-17048856[ label="{*OBJECT|}"]
-17048856 -> 17042728 [dir=back]
+28067960[ label="{TypeDeclaration|+name:ID\lsorts:list[ID]\l}"]
+
+28073496 -> 28079032[arrowtail=diamond, dir=both, headlabel="name "]
+28073496[ label="{SymbolDeclaration|args:list[ID]\l+out:ID\l}"]
+
+28079032[ label="{Symbol|+name:ID\l}"]
+
+27680872[ label="{ID|}"]
+
+27690184[ label="{STRING|}"]
+
+27695128[ label="{BOOL|}"]
+
+27700664[ label="{INT|}"]
+
+27706200[ label="{FLOAT|}"]
+
+27711736[ label="{NUMBER|}"]
+27711736 -> 27706200 [dir=back]
+27711736 -> 27700664 [dir=back]
+
+27717272[ label="{BASETYPE|}"]
+27717272 -> 27711736 [dir=back]
+27717272 -> 27695128 [dir=back]
+27717272 -> 27680872 [dir=back]
+27717272 -> 27690184 [dir=back]
+
+27723400[ label="{*OBJECT|}"]
+27723400 -> 27717272 [dir=back]
 
 
 }

@@ -10,7 +10,7 @@ from utils import *
 
 class ConfigCase:
 
-    def __init__(self, theory):
+    def __init__(self, theory=(lambda x: 0)):
         self.relevantVals = {}
         self.symbols = []
         self.assumptions = []
