@@ -1,31 +1,40 @@
+File:
+    voc=Vocabulary
+    theo=Theory
+;
+
+Vocabulary:
+'vocabulary' '{' (declaration=Declaration '.')* '}'
+;
+
 Theory:
-    statement*=ExpressionStatement
+'theory' '{' (statement=Expression '.')* '}'
 ;
 
 Comment:
   /\/\/.*$/
 ;
 
-ExpressionStatement:
-    Expression '.'
-;
+Expression: Quantification;
 
-Expression: Conjunction;
-
+Quantification: q=Quantor var=ID '[' sort=ID ']:' f=Conjunction
+             | f = Conjunction;
 Conjunction: fs*=Disjunction['&'];
 Disjunction: fs*=Implication['|'];
 Implication: fs*=RImplication['=>'];
 RImplication: fs*=Equivalence['<='];
 Equivalence: fs*=Comparison['<=>'];
 
-Comparison: fs=SumMinus (operator=ComparisonOp fs=Comparison)?;
-SumMinus: fs=MultDiv (operator=SumMinusOp fs=SumMinus)?;
-MultDiv: fs=Unary (more=MultDivOp fs=MultDiv)?;
+Comparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)*;
+SumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)*;
+MultDiv: fs=Unary (operator=MultDivOp fs=Unary)*;
 
 Unary: neg=UnaryOperator? f=Base;
 
-Base:  s=Symbol args=Arguments?
+Base:  s=[Symbol] args=Arguments
+      |var=ID
       |numb=NUMBER
+      |str=STRING
       | '(' f=Expression ')';
 
 Arguments: '(' fs*=Expression[','] ')';
@@ -34,5 +43,14 @@ UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
 ComparisonOp: '=' | '<' | '>' | '=<' | '>=';
+Quantor: '!' | '?';
+
+Declaration: TypeDeclaration | SymbolDeclaration;
+
+TypeDeclaration: 'type' name=ID 'constructed' 'from' '{' sorts*=ID[','] '}';
+
+SymbolDeclaration:
+    name=Symbol ('(' args*=ID[','] ')')? (':' out=ID)?;
 
 Symbol: name=ID;
+

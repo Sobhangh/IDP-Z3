@@ -1,4 +1,9 @@
-f(x,y) > g(h(x,4.0)).
+vocabulary {
+    p.
+    q.
+    r.
+}
 
-f - g. //efjef
-ge.
+theory {
+    p <=> (q | r).
+}
