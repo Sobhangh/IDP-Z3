@@ -1,6 +1,6 @@
 vocabulary {
     p.
-    q.
+    q : Bool.
     r.
 }
 

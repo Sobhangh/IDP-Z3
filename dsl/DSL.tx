@@ -1,14 +1,14 @@
 File:
-    voc=Vocabulary
-    theo=Theory
+    vocabulary=Vocabulary
+    theory=Theory
 ;
 
 Vocabulary:
-'vocabulary' '{' (declaration=Declaration '.')* '}'
+'vocabulary' '{' (declarations=Declaration '.')* '}'
 ;
 
 Theory:
-'theory' '{' (constraint=Expression '.')* '}'
+'theory' '{' (constraints=Expression '.')* '}'
 ;
 
 Comment:
@@ -58,7 +58,8 @@ Declaration: TypeDeclaration | SymbolDeclaration;
 TypeDeclaration: 'type' name=ID 'constructed' 'from' '{' sorts*=ID[','] '}';
 
 SymbolDeclaration:
-    name=Symbol ('(' args*=ID[','] ')')? (':' out=ID)?;
+    name=Symbol ('(' args*=Sort[','] ')')? (':' out=Sort)?;
 
+Sort: name=ID;
 Symbol: name=ID;
 
