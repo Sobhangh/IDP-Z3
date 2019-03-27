@@ -7,5 +7,5 @@ vocabulary {
 theory {
     p <=> (q | r).
 
-    r.
+    ~r.
 }

@@ -37,7 +37,7 @@ AEquivalence: fs=Comparison (operator='<=>' fs=Comparison)+;
 AComparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)+;
 ASumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)+;
 AMultDiv: fs=Unary (operator=MultDivOp fs=Unary)+;
-AUnary: neg=UnaryOperator f=Base;
+AUnary: operator=UnaryOperator f=Base;
 
 Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
 

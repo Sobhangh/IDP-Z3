@@ -1,5 +1,5 @@
 from textx import metamodel_from_file
-from z3 import IntSort, BoolSort, RealSort, Or
+from z3 import IntSort, BoolSort, RealSort, Or, Not, And
 
 from configcase import ConfigCase
 
@@ -31,28 +31,65 @@ class Theory(object):
             case.add(c)
 
 
-class AEquivalence(object):
+class BinaryOperator(object):
     def __init__(self, **kwargs):
         self.fs = kwargs.pop('fs')
         self.operator = kwargs.pop('operator')
+        self.mapping = {'&': lambda x, y: And(x, y),
+                        '|': lambda x, y: Or(x, y),
+                        '=>': lambda x, y: Or(Not(x), y),
+                        '<=': lambda x, y: Or(x, Not(y)),
+                        '<=>': lambda x, y: x == y,
+                        '+': lambda x, y: x + y,
+                        '-': lambda x, y: x - y,
+                        '*': lambda x, y: x * y,
+                        '/': lambda x, y: x / y,
+                        }
 
     def translate(self, case: ConfigCase, env: Environment):
-        # TODO: N-Ary
-        a = self.fs[0].translate(case, env)
-        b = self.fs[1].translate(case, env)
-        return a == b
+        out = self.fs[0].translate(case, env)
+        for i in range(1, len(self.fs)):
+            function = self.mapping[self.operator[i - 1]]
+            out = function(out, self.fs[i].translate(case, env))
+        return out
 
 
-class ADisjunction(object):
+class AConjunction(BinaryOperator): pass
+
+
+class ADisjunction(BinaryOperator): pass
+
+
+class AImplication(BinaryOperator): pass
+
+
+class ARImplication(BinaryOperator): pass
+
+
+class AEquivalence(BinaryOperator): pass
+
+
+class AComparison(BinaryOperator): pass
+
+
+class ASumMinus(BinaryOperator): pass
+
+
+class AMultDiv(BinaryOperator): pass
+
+
+class AUnary(object):
     def __init__(self, **kwargs):
-        self.fs = kwargs.pop('fs')
+        self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
+        self.mapping = {'-': lambda x: 0 - x,
+                        '~': lambda x: Not(x)
+                        }
 
     def translate(self, case: ConfigCase, env: Environment):
-        # TODO: N-Ary
-        a = self.fs[0].translate(case, env)
-        b = self.fs[1].translate(case, env)
-        return Or(a, b)
+        out = self.f.translate(case, env)
+        function = self.mapping[self.operator]
+        return function(out)
 
 
 class Brackets(object):
@@ -104,6 +141,8 @@ class Sort(object):
 
 
 meta = metamodel_from_file('DSL.tx', memoization=True,
-                           classes=[File, Theory, Vocabulary, SymbolDeclaration, Sort, AEquivalence, ADisjunction,
+                           classes=[File, Theory, Vocabulary, SymbolDeclaration, Sort,
+                                    AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence, AComparison,
+                                    ASumMinus, AMultDiv, AUnary,
                                     Variable,
                                     Brackets])
