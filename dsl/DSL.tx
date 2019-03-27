@@ -52,12 +52,12 @@ Arguments: '(' fs*=Expression[','] ')';
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
-ComparisonOp: '=' | '<' | '>' | '=<' | '>=';
+ComparisonOp: '=' | '<' | '>' | '=<' | '>=' | '~=';
 Quantor: '!' | '?';
 
 Declaration: TypeDeclaration | SymbolDeclaration;
 
-TypeDeclaration: 'type' name=ID 'constructed' 'from' '{' sorts*=ID[','] '}';
+TypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
 
 SymbolDeclaration:
     name=Symbol ('(' args*=Sort[','] ')')? (':' out=Sort)?;

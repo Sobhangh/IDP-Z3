@@ -1,5 +1,5 @@
 from textx import metamodel_from_file
-from z3 import IntSort, BoolSort, RealSort, Or, Not, And
+from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string
 
 from configcase import ConfigCase
 
@@ -43,7 +43,12 @@ class BinaryOperator(object):
                         '+': lambda x, y: x + y,
                         '-': lambda x, y: x - y,
                         '*': lambda x, y: x * y,
-                        '/': lambda x, y: x / y,
+                        '=': lambda x, y: x == y,
+                        '<': lambda x, y: x < y,
+                        '>': lambda x, y: x > y,
+                        '=<': lambda x, y: x <= y,
+                        '>=': lambda x, y: x >= y,
+                        '~=': lambda x, y: x != y
                         }
 
     def translate(self, case: ConfigCase, env: Environment):
@@ -108,13 +113,37 @@ class Variable(object):
         return env.var_scope[self.var]
 
 
+class NumberConstant(object):
+    def __init__(self, **kwargs):
+        self.numb = kwargs.pop('numb')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        return self.numb
+
+
 class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
 
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.declarations:
-            i.translate(case, env)
+            if type(i) == TypeDeclaration:
+                i.translate(case, env)
+        for i in self.declarations:
+            if type(i) == SymbolDeclaration:
+                i.translate(case, env)
+
+
+class TypeDeclaration(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.constructors = kwargs.pop('constructors')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        type, cstrs = case.EnumSort(self.name, self.constructors)
+        env.type_scope[self.name] = type
+        for i in cstrs:
+            env.var_scope[obj_to_string(i)] = i
 
 
 class SymbolDeclaration(object):
@@ -143,6 +172,6 @@ class Sort(object):
 meta = metamodel_from_file('DSL.tx', memoization=True,
                            classes=[File, Theory, Vocabulary, SymbolDeclaration, Sort,
                                     AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence, AComparison,
-                                    ASumMinus, AMultDiv, AUnary,
+                                    ASumMinus, AMultDiv, AUnary, NumberConstant, TypeDeclaration,
                                     Variable,
                                     Brackets])
