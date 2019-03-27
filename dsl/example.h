@@ -1,32 +1,24 @@
 vocabulary {
-    p.
-    q : Bool.
-    r.
-    a : Int.
-    b : Int.
-    c : Int.
+    p;
+    q : Bool;
+    r;
+    a : Int;
+    b : Int;
+    c : Int;
 
-    type Color constructed from {red, green, blue}.
+    type Color constructed from {red, green, blue};
 
-    col : Color.
-    col2 : Color.
-    col3 : Color.
+    col : Color;
+    col2 : Color;
+    col3 : Color;
+
+    f(Int,Int) : Int;
 }
 
 theory {
-    p <=> (q | r).
 
-    ~r.
+f(a,b) ~= f(b,a);
 
-     a  + b * c = 13 .
-     a > 0 .
-     a < 6 .
-     b > 1 .
-     c > 1 .
+f(a,c) = f(c,a);
 
-     col ~= red.
-
-     col ~= col2.
-     col2 ~= col3.
-     col3 ~= col.
 }

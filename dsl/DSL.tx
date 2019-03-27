@@ -4,11 +4,11 @@ File:
 ;
 
 Vocabulary:
-'vocabulary' '{' (declarations=Declaration '.')* '}'
+'vocabulary' '{' (declarations=Declaration ';')* '}'
 ;
 
 Theory:
-'theory' '{' (constraints=Expression '.')* '}'
+'theory' '{' (constraints=Expression ';')* '}'
 ;
 
 Comment:
@@ -41,8 +41,8 @@ AUnary: operator=UnaryOperator f=Base;
 
 Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
 
-AppliedSymbol: s=[Symbol] args=Arguments;
-Variable: var=ID;
+AppliedSymbol: s=Symbol args=Arguments;
+Variable: name=ID;
 NumberConstant: numb=NUMBER;
 StringConstant: str=STRING;
 Brackets: '(' f=Expression ')';

@@ -97,6 +97,17 @@ class AUnary(object):
         return function(out)
 
 
+class AppliedSymbol(object):
+    def __init__(self, **kwargs):
+        self.s = kwargs.pop('s')
+        self.args = kwargs.pop('args')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        s = self.s.translate(case, env)
+        arg = [x.translate(case, env) for x in self.args.fs]
+        return s(arg)
+
+
 class Brackets(object):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
@@ -107,10 +118,13 @@ class Brackets(object):
 
 class Variable(object):
     def __init__(self, **kwargs):
-        self.var = kwargs.pop('var')
+        self.name = kwargs.pop('name')
 
     def translate(self, case: ConfigCase, env: Environment):
-        return env.var_scope[self.var]
+        return env.var_scope[self.name]
+
+
+class Symbol(Variable): pass
 
 
 class NumberConstant(object):
@@ -158,7 +172,10 @@ class SymbolDeclaration(object):
         if len(self.args) == 0:
             env.var_scope[self.name.name] = case.Const(self.name.name, self.out.asZ3(env))
         else:
-            raise Exception("Not Implemented Yet")
+            types = [x.asZ3(env) for x in self.args] + [self.out.asZ3(env)]
+            # TODO This should change
+            rel_vars = [[]] * len(types)
+            env.var_scope[self.name.name] = case.Function(self.name.name, types, rel_vars)
 
 
 class Sort(object):
@@ -172,6 +189,6 @@ class Sort(object):
 meta = metamodel_from_file('DSL.tx', memoization=True,
                            classes=[File, Theory, Vocabulary, SymbolDeclaration, Sort,
                                     AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence, AComparison,
-                                    ASumMinus, AMultDiv, AUnary, NumberConstant, TypeDeclaration,
-                                    Variable,
+                                    ASumMinus, AMultDiv, AUnary, NumberConstant, TypeDeclaration, AppliedSymbol,
+                                    Variable, Symbol,
                                     Brackets])
