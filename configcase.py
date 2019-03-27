@@ -55,6 +55,11 @@ class ConfigCase:
             self.symbols.append(i)
         return out
 
+    def Const(self, txt: str, sort):
+        out = Const(txt, sort)
+        self.symbols.append(out)
+        return out
+
     def EnumSort(self, name, objects):
         out = EnumSort(name, objects)
         for i in out[1]:

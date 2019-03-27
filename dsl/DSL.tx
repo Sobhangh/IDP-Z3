@@ -39,11 +39,13 @@ ASumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)+;
 AMultDiv: fs=Unary (operator=MultDivOp fs=Unary)+;
 AUnary: neg=UnaryOperator f=Base;
 
-Base:  s=[Symbol] args=Arguments
-      |var=ID
-      |numb=NUMBER
-      |str=STRING
-      | '(' f=Expression ')';
+Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
+
+AppliedSymbol: s=[Symbol] args=Arguments;
+Variable: var=ID;
+NumberConstant: numb=NUMBER;
+StringConstant: str=STRING;
+Brackets: '(' f=Expression ')';
 
 Arguments: '(' fs*=Expression[','] ')';
 

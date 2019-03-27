@@ -6,3 +6,6 @@ model: File = meta.model_from_file('example.h')
 c = ConfigCase()
 
 model.translate(c)
+
+
+print(c.model())
