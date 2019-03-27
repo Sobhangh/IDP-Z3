@@ -113,7 +113,7 @@ def singleton(x):
 
 
 def splitLast(l):
-    return l[1:], l[len(l) - 1]
+    return l[:-1], l[-1]
 
 
 def applyTo(sym, arg):
