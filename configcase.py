@@ -179,7 +179,7 @@ class ConfigCase:
                 "priority": "core",
                 "showOptimize": type(i) == ArithRef
             })
-        out = {"title": "Z3 Interactive Configuration", "timeout": 3, "symbols": symbols, "values": []}
+        out = {"title": "Z3 Interactive Configuration", "symbols": symbols, "values": []}
         return out
 
     def extractInfoFromConsequence(self, s):

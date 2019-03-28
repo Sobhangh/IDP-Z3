@@ -3,6 +3,7 @@ vocabulary {
     type nums = {0..5,15,20..25}
     type reals = {3.14, 5.28, 10, 15.28}
     pred(nums)
+    pred2(nums)
     col : color
     col2 : color
     a : nums
@@ -13,15 +14,21 @@ vocabulary {
     f : nums
     g : nums
     p
-    q
+    q : Bool
 }
 
 theory {
     pred(a).
     a > b + 2.
-    a + 2 * c = 10.
+    a + 2 * c > 10.
     d > e.
     p <=> ~ q.
     a + b + g = f.
     col ~= col2.
+
+    ? x[nums] y[nums]: pred(x) & pred(y) & pred2(x+y).
+
+    ? x[Int]: a = x.
+    ? x[Real]: d = x.
+
 }
