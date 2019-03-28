@@ -4,11 +4,11 @@ File:
 ;
 
 Vocabulary:
-'vocabulary' '{' (declarations=Declaration ';')* '}'
+'vocabulary' '{' (declarations=Declaration)* '}'
 ;
 
 Theory:
-'theory' '{' (constraints=Expression ';')* '}'
+'theory' '{' (constraints=Expression '.')* '}'
 ;
 
 Comment:
@@ -28,7 +28,7 @@ SumMinus: ASumMinus | MultDiv;
 MultDiv: AMultDiv | Unary;
 Unary: AUnary | Base;
 
-AQuantification: q=Quantor var=ID '[' sort=ID ']:' f=Conjunction;
+AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
 AConjunction: fs=Disjunction (operator='&' fs=Disjunction)+;
 ADisjunction: fs=Implication (operator='|' fs=Implication)+;
 AImplication: fs=RImplication (operator='=>' fs=RImplication)+;
@@ -43,7 +43,7 @@ Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
 
 AppliedSymbol: s=Symbol args=Arguments;
 Variable: name=ID;
-NumberConstant: numb=NUMBER;
+NumberConstant: number=IDPFLOAT | number=INT;
 StringConstant: str=STRING;
 Brackets: '(' f=Expression ')';
 
@@ -52,12 +52,15 @@ Arguments: '(' fs*=Expression[','] ')';
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
-ComparisonOp: '=' | '<' | '>' | '=<' | '>=' | '~=';
+ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' | '>' ;
 Quantor: '!' | '?';
 
-Declaration: TypeDeclaration | SymbolDeclaration;
+Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
-TypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
+ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
+RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[','] '}';
+
+RangeElement: fromI=NumberConstant ('..' to=NumberConstant)?;
 
 SymbolDeclaration:
     name=Symbol ('(' args*=Sort[','] ')')? (':' out=Sort)?;
@@ -65,3 +68,4 @@ SymbolDeclaration:
 Sort: name=ID;
 Symbol: name=ID;
 
+IDPFLOAT: /[+-]?(\d+(\.\d+)?|\.\d+)/;

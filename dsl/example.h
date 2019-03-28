@@ -1,24 +1,9 @@
 vocabulary {
-    p;
-    q : Bool;
-    r;
-    a : Int;
-    b : Int;
-    c : Int;
-
-    type Color constructed from {red, green, blue};
-
-    col : Color;
-    col2 : Color;
-    col3 : Color;
-
-    f(Int,Int) : Int;
+    type Domain = {0..10}
+    a : Domain
+    b : Domain
 }
 
 theory {
-
-f(a,b) ~= f(b,a);
-
-f(a,c) = f(c,a);
-
+    a+b = 10.
 }

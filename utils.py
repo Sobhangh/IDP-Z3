@@ -31,6 +31,7 @@ def universe(vsort):
                     r = r + [c(*args) for args in itertools.product(*domain_universe)]
             return r
         else:
+            print(vsort)
             raise AssertionError('dont know how to deal with this sort')
 
     return rec(vsort)

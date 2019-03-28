@@ -1,6 +1,5 @@
 import ast
 import json
-import time
 from typing import List
 
 from z3.z3 import _py2expr
@@ -203,11 +202,16 @@ class ConfigCase:
         if not is_eq(c):
             sign = not sign
         value, symbol = c.children()
+        if is_to_real(value) | is_to_int(value):
+            value = value.children()[0]
+        if is_to_real(symbol) | is_to_int(symbol):
+            symbol = symbol.children()[0]
         if (obj_to_string(symbol) in self.valueMap) | is_number(obj_to_string(symbol)) | \
                 self.is_symbol(value):
             temp = symbol
             symbol = value
             value = temp
+
         args = []
         if isinstance(symbol, ExprRef):
             args = symbol.children()
@@ -330,7 +334,8 @@ class ConfigCase:
     def propagation(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
-        satresult, consqs = solver.consequences([], self.list_of_propositions())
+        proplist = self.list_of_propositions()
+        satresult, consqs = solver.consequences([], proplist)
         out = self.outputstructure()
         for consequence in consqs:
             ass, csq = self.extractInfoFromConsequence(consequence)

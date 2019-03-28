@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
 from configcase import *
+from dsl.DSLClasses import idpparser
 
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 app = Flask(__name__)
@@ -37,11 +38,9 @@ class eval(Resource):
 
         args = parser.parse_args()
 
-        global theory
-        theory = None
-        exec(args['code'])
+        idpModel = idpparser.model_from_str(args['code'])
 
-        case = ConfigCase(theory)
+        case = ConfigCase(idpModel.translate)
         method = args['method']
         active = args['active']
         print(args)
@@ -71,9 +70,9 @@ class eval(Resource):
 class meta(Resource):
     def post(self):
         args = parser.parse_args()
-        exec(args['code'])
-        global theory
-        return ConfigCase(theory).metaJSON()
+        idpModel = idpparser.model_from_str(args['code'])
+        print(ConfigCase(idpModel.translate).mk_solver())
+        return ConfigCase(idpModel.translate).metaJSON()
 
 
 @app.route('/', methods=['GET'])
