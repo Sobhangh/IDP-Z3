@@ -26,8 +26,11 @@ Equivalence: AEquivalence | Comparison;
 Comparison: AComparison | SumMinus;
 SumMinus: ASumMinus | MultDiv;
 MultDiv: AMultDiv | Unary;
-Unary: AUnary | Base;
+Unary: AUnary | Aggregate;
+Aggregate: AAggregate | Base;
 
+
+AAggregate: aggtype=AggType set=SetExp;
 AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
 AConjunction: fs=Disjunction (operator='&' fs=Disjunction)+;
 ADisjunction: fs=Implication (operator='|' fs=Implication)+;
@@ -48,12 +51,14 @@ StringConstant: str=STRING;
 Brackets: '(' f=Expression ')';
 
 Arguments: '(' fs*=Expression[','] ')';
+SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
 
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
 ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' | '>' ;
 Quantor: '!' | '?';
+AggType: '#' | 'card' | 'sum';
 
 Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 

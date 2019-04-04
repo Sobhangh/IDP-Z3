@@ -26,6 +26,8 @@ theory {
     a + b + g = f.
     col ~= col2.
 
+    c = sum{x[nums] : pred(x) : x}.
+
     ? x[nums] y[nums]: pred(x) & pred(y) & pred2(x+y).
 
     ? x[Int]: a = x.

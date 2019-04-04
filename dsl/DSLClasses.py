@@ -1,7 +1,8 @@
 import os
 
 from textx import metamodel_from_file
-from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception
+from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
+    Sum, If
 from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
@@ -110,38 +111,7 @@ class AQuantification(object):
         self.f = kwargs.pop('f')
 
     def translate(self, case: ConfigCase, env: Environment):
-        bup = {}
-        z3vars = []
-
-        for var, sort in zip(self.vars, self.sorts):
-            z3var = Const(var, sort.asZ3(env))
-            if var in env.var_scope:
-                bup[var] = env.var_scope[var]
-            else:
-                bup[var] = None
-            env.var_scope[var] = z3var
-            z3vars.append(z3var)
-
-        form = self.f.translate(case, env)
-
-        for var in self.vars:
-            env.var_scope[var] = bup[var]
-
-        forms = [form]
-        finalvars = []
-
-        for i in range(0, len(self.vars)):
-            if self.sorts[i].name in env.range_scope:
-                forms2 = []
-                for f in forms:
-                    for v in self.sorts[i].getRange(env):
-                        try:
-                            forms2.append(substitute(f, (z3vars[i], _py2expr(float(v)))))
-                        except Z3Exception:
-                            forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
-                forms = forms2
-            else:
-                finalvars.append(z3vars[i])
+        finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
 
         if self.q == '!':
             if len(finalvars) > 0:
@@ -153,6 +123,73 @@ class AQuantification(object):
                 return Exists(finalvars, Or(forms))
             else:
                 return Or(forms)
+
+
+def expand_formula(vars, sorts, f, case, env):
+    bup = {}
+    z3vars = []
+    for var, sort in zip(vars, sorts):
+        z3var = Const(var, sort.asZ3(env))
+        if var in env.var_scope:
+            bup[var] = env.var_scope[var]
+        else:
+            bup[var] = None
+        env.var_scope[var] = z3var
+        z3vars.append(z3var)
+    form = f.translate(case, env)
+    for var in vars:
+        env.var_scope[var] = bup[var]
+    forms = [form]
+    finalvars = []
+    for i in range(0, len(vars)):
+        if sorts[i].name in env.range_scope:
+            forms2 = []
+            for f in forms:
+                for v in sorts[i].getRange(env):
+                    try:
+                        forms2.append(substitute(f, (z3vars[i], _py2expr(float(v)))))
+                    except Z3Exception:
+                        forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
+            forms = forms2
+        else:
+            finalvars.append(z3vars[i])
+    return finalvars, forms
+
+
+class AAggregate(object):
+    def __init__(self, **kwargs):
+        self.aggtype = kwargs.pop('aggtype')
+        self.set = kwargs.pop('set')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        return Sum(self.set.translate(case, env))
+
+
+class IfExpr(object):
+    def __init__(self, **kwargs):
+        self.if_f = kwargs.pop('if_f')
+        self.then_f = kwargs.pop('then_f')
+        self.else_f = kwargs.pop('else_f')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        return If(self.if_f.translate(case, env), self.then_f.translate(case, env), self.else_f.translate(case, env))
+
+
+class SetExp(object):
+    def __init__(self, **kwargs):
+        self.vars = kwargs.pop('vars')
+        self.sorts = kwargs.pop('sorts')
+        self.f = kwargs.pop('f')
+        self.out = kwargs.pop('out')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        form = IfExpr(if_f=self.f, then_f=NumberConstant(number='1'), else_f=NumberConstant(number='0'))
+        if self.out is not None:
+            form = AMultDiv(operator='*', fs=[form, self.out])
+        fvars, forms = expand_formula(self.vars, self.sorts, form, case, env)
+        if len(fvars) > 0:
+            raise Exception('Can only quantify over finite domains')
+        return forms
 
 
 class AppliedSymbol(object):
@@ -232,7 +269,7 @@ class RangeDeclaration(object):
             if x.to is None:
                 els.append(x.fromI.translate(case, env))
             else:
-                for i in range(x.fromI.translate(case, env), x.to.translate(case, env)):
+                for i in range(x.fromI.translate(case, env), x.to.translate(case, env) + 1):
                     els.append(i)
         if all(map(lambda x: type(x) == int, els)):
             env.type_scope[self.name] = IntSort()
@@ -291,7 +328,7 @@ dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[File, Theory, Vocabulary, SymbolDeclaration, Sort,
                                          AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
-                                         AComparison,
+                                         AComparison, AAggregate, SetExp,
                                          ASumMinus, AMultDiv, AUnary, NumberConstant, ConstructedTypeDeclaration,
                                          RangeDeclaration, AppliedSymbol,
                                          Variable, Symbol, AQuantification,
