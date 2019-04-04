@@ -3,6 +3,7 @@ import threading
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
+from textx import TextXError
 
 from configcase import *
 from dsl.DSLClasses import idpparser
@@ -70,9 +71,11 @@ class eval(Resource):
 class meta(Resource):
     def post(self):
         args = parser.parse_args()
-        idpModel = idpparser.model_from_str(args['code'])
-        print(ConfigCase(idpModel.translate).mk_solver())
-        return ConfigCase(idpModel.translate).metaJSON()
+        try:
+            idpModel = idpparser.model_from_str(args['code'])
+            return ConfigCase(idpModel.translate).metaJSON()
+        except Exception as exc:
+            return str(exc)
 
 
 @app.route('/', methods=['GET'])

@@ -271,7 +271,10 @@ class Sort(object):
         self.name = kwargs.pop('name')
 
     def asZ3(self, env: Environment):
-        return env.type_scope[self.name]
+        if self.name in env.type_scope:
+            return env.type_scope[self.name]
+        else:
+            raise Exception("Unknown sort: " + self.name)
 
     def getRange(self, env: Environment):
         if self.name in env.range_scope:
