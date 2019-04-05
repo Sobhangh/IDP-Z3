@@ -23,24 +23,24 @@ class ConfigCase:
     #################
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
-        ints = Ints(txt)
+        intVars = Ints(txt)
         values = list(map(singleton, map(_py2expr, range(underbound, upperbound + 1))))
-        for i in ints:
-            self.relevantVals[i] = values
-            self.typeConstraints.append(underbound <= i)
-            self.typeConstraints.append(i <= upperbound)
-            self.symbols.append(i)
-        return ints
+        for intVar in intVars:
+            self.relevantVals[intVar] = values
+            self.typeConstraints.append(underbound <= intVar)
+            self.typeConstraints.append(intVar <= upperbound)
+            self.symbols.append(intVar)
+        return intVars
 
     def Reals(self, txt: str, rang: List[float], restrictive=False):
-        reals = Reals(txt)
+        realVars = Reals(txt)
         values: List[ArithRef] = list(map(_py2expr, rang))
-        for i in reals:
-            self.symbols.append(i)
-            self.relevantVals[i] = list(map(singleton, values))
+        for realVar in realVars:
+            self.symbols.append(realVar)
+            self.relevantVals[realVar] = list(map(singleton, values))
             if restrictive:
-                self.typeConstraints.append(in_list(i, values))
-        return reals
+                self.typeConstraints.append(in_list(realVar, values))
+        return realVars
 
     def Bools(self, txt: str):
         bools = Bools(txt)
@@ -108,7 +108,7 @@ class ConfigCase:
 
     def model(self):
         solver = self.mk_solver()
-        solver.add(self.list_of_assumptions())
+        solver.add(self.assumptions())
         solver.check()
         return solver.model()
 
@@ -126,9 +126,6 @@ class ConfigCase:
             for arg, val in self.relevantValsOf(sym):
                 out.append(applyTo(sym, arg) == val)
         return out
-
-    def list_of_assumptions(self):
-        return self.assumptions
 
     def outputstructure(self, all_false=False, all_true=False):
         out = Structure()
@@ -323,7 +320,7 @@ class ConfigCase:
         else:
             solver.maximize(s)
 
-        for assumption in self.list_of_assumptions():
+        for assumption in self.assumptions():
             solver.add(assumption)
         solver.check()
         return self.model_to_json(solver.model())

@@ -41,7 +41,12 @@ class eval(Resource):
 
         idpModel = idpparser.model_from_str(args['code'])
 
-        case = ConfigCase(idpModel.translate)
+        try:
+            case = ConfigCase(idpModel.translate)
+        except:
+            z3lock.release()
+            return {"result": "syntax error"}
+
         method = args['method']
         active = args['active']
         print(args)
