@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Autoconfig3</title>
+  <base href="/">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link href="favicon.ico" rel="icon" type="image/x-icon">
+</head>
+<body>
+Hello Pierre
+<form action="/eval" method="POST">
+  method:<br>
+  <input type="text" name="method" value="init"><br>
+
+  code:<br>
+  <textarea name="code" rows=20 cols=60 >
+    vocabulary {
+      type color constructed from {red,green,blue}
+      type nums = {0..5,15,20..25}
+      type reals = {3.14, 5.28, 10, 15.28}
+      pred(nums)
+      col : color
+      col2 : color
+      a : nums
+      b : nums
+      c : nums
+      d : reals
+      e : reals
+      f : nums
+      g : nums
+      p
+      q
+  }
+
+  theory {
+      pred(a).
+      a > b + 2.
+      a + 2 * c = 10.
+      d > e.
+      p => ~ q.
+      a + b + g = f.
+      col ~= col2.
+  }
+
+  </textarea><br>
+
+  active:<br>
+  <input type="text" name="active" value=""><br>
+
+  symbol:<br>
+  <input type="text" name="symbol" value=""><br>
+
+  value:<br>
+  <input type="text" name="value" value=""><br>
+
+  minimize:<br>
+  <input type="text" name="minimize" value=""><br>
+
+  <input type="submit" value="Submit">
+</form>
+</body>
+</html>

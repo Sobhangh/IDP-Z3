@@ -5,7 +5,7 @@ AutoconfigZ3 is a dynamic configuration tool based on logic theory that uses the
 Installation
 ~~~~
 sudo apt install python3-pip
-pip3 install z3-solver flask flask-cors flask_restful
+pip3 install z3-solver flask flask-cors flask_restful textX
 ~~~~
 
 To launch the Autoconfig Z3 web server, run
