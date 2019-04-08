@@ -160,6 +160,10 @@ class AAggregate(object):
     def __init__(self, **kwargs):
         self.aggtype = kwargs.pop('aggtype')
         self.set = kwargs.pop('set')
+        if self.aggtype == "sum" and self.set.out is None:
+            raise Exception("Must have output variable for sum")
+        if self.aggtype != "sum" and self.set.out is not None:
+            raise Exception("Can't have output variable for #")
 
     def translate(self, case: ConfigCase, env: Environment):
         return Sum(self.set.translate(case, env))

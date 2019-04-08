@@ -23,4 +23,8 @@ The website (including the default logic theory) is served from the static direc
 * execute `npm run -script build`
 * copy the content of the new dist directory into the static folder of autoconfigZ3
 
-Alternatively, `npm start` the Z3 branch of autoconfig3, and open your browser at http://localhost:4201
+Alternatively,
+
+* `npm start` the **Z3** branch of autoconfig3,
+* verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
+* open your browser at http://localhost:4201
