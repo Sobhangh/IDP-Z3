@@ -310,12 +310,20 @@ class Sort(object):
     def asZ3(self, env: Environment):
         if self.name in env.type_scope:
             return env.type_scope[self.name]
+        elif self.name == "int":
+            return IntSort()
+        elif self.name == "real":
+            return RealSort()
         else:
             raise Exception("Unknown sort: " + self.name)
 
     def getRange(self, env: Environment):
         if self.name in env.range_scope:
             return env.range_scope[self.name]
+        elif self.name == "int":
+            return []
+        elif self.name == "real":
+            return []
         else:
             return universe(self.asZ3(env))
 

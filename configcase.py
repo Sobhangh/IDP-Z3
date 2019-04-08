@@ -115,16 +115,21 @@ class ConfigCase:
     def model_to_json(self, m):
         output = self.outputstructure(True)
         for symb in self.symbols:
-            for args, val in self.relevantValsOf(symb):
-                val = m.eval(applyTo(symb, args))
-                output.addComparison(Comparison(True, symb, args, val))
+            if self.relevantValsOf(symb) == []: # unenumerated real, int
+                val = m.eval(symb)
+                output.addComparison(Comparison(True, symb, [], val))
+            else:
+                for args, val in self.relevantValsOf(symb):
+                    val = m.eval(applyTo(symb, args))
+                    output.addComparison(Comparison(True, symb, args, val))
         return output.m
 
     def list_of_propositions(self):
         out = []
-        for sym in self.symbols:
-            for arg, val in self.relevantValsOf(sym):
-                out.append(applyTo(sym, arg) == val)
+        for symb in self.symbols:
+            #TODO if self.relevantValsOf(symb) == []:
+            for args, val in self.relevantValsOf(symb):
+                out.append(applyTo(symb, args) == val)
         return out
 
     def outputstructure(self, all_false=False, all_true=False):
