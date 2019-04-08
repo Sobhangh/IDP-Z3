@@ -23,41 +23,41 @@ class ConfigCase:
     #################
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
-        intVars = Ints(txt)
+        intConsts = Ints(txt) # an unknown constant function of type int
         values = list(map(singleton, map(_py2expr, range(underbound, upperbound + 1))))
-        for intVar in intVars:
-            self.relevantVals[intVar] = values
-            self.typeConstraints.append(underbound <= intVar)
-            self.typeConstraints.append(intVar <= upperbound)
-            self.symbols.append(intVar)
-        return intVars
+        for intConst in intConsts:
+            self.relevantVals[intConst] = values
+            self.typeConstraints.append(underbound <= intConst)
+            self.typeConstraints.append(intConst <= upperbound)
+            self.symbols.append(intConst)
+        return intConsts
 
     def Reals(self, txt: str, rang: List[float], restrictive=False):
-        realVars = Reals(txt)
+        realConsts = Reals(txt)
         values: List[ArithRef] = list(map(_py2expr, rang))
-        for realVar in realVars:
-            self.symbols.append(realVar)
-            self.relevantVals[realVar] = list(map(singleton, values))
+        for realConst in realConsts:
+            self.symbols.append(realConst)
+            self.relevantVals[realConst] = list(map(singleton, values))
             if restrictive:
-                self.typeConstraints.append(in_list(realVar, values))
-        return realVars
+                self.typeConstraints.append(in_list(realConst, values))
+        return realConsts
 
     def Bools(self, txt: str):
-        bools = Bools(txt)
-        for i in bools:
-            self.symbols.append(i)
-        return bools
+        boolConsts = Bools(txt)
+        for boolConst in boolConsts:
+            self.symbols.append(boolConst)
+        return boolConsts
 
     def Consts(self, txt: str, sort):
-        out = Consts(txt, sort)
-        for i in out:
-            self.symbols.append(i)
+        consts = Consts(txt, sort)
+        for const in consts:
+            self.symbols.append(const)
         return out
 
     def Const(self, txt: str, sort):
-        out = Const(txt, sort)
-        self.symbols.append(out)
-        return out
+        const = Const(txt, sort)
+        self.symbols.append(const)
+        return const
 
     def EnumSort(self, name, objects):
         out = EnumSort(name, objects)
