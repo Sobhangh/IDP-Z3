@@ -23,30 +23,30 @@ class ConfigCase:
     #################
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
-        intConsts = Ints(txt) # an unknown constant function of type int
+        int_consts = Ints(txt) # an unknown constant function of type int
         values = list(map(singleton, map(_py2expr, range(underbound, upperbound + 1))))
-        for intConst in intConsts:
-            self.relevantVals[intConst] = values
-            self.typeConstraints.append(underbound <= intConst)
-            self.typeConstraints.append(intConst <= upperbound)
-            self.symbols.append(intConst)
-        return intConsts
+        for int_const in int_consts:
+            self.relevantVals[int_const] = values
+            self.typeConstraints.append(underbound <= int_const)
+            self.typeConstraints.append(int_const <= upperbound)
+            self.symbols.append(int_const)
+        return int_consts
 
     def Reals(self, txt: str, rang: List[float], restrictive=False):
-        realConsts = Reals(txt)
+        real_consts = Reals(txt)
         values: List[ArithRef] = list(map(_py2expr, rang))
-        for realConst in realConsts:
-            self.symbols.append(realConst)
-            self.relevantVals[realConst] = list(map(singleton, values))
+        for real_const in real_consts:
+            self.symbols.append(real_const)
+            self.relevantVals[real_const] = list(map(singleton, values))
             if restrictive:
-                self.typeConstraints.append(in_list(realConst, values))
-        return realConsts
+                self.typeConstraints.append(in_list(real_const, values))
+        return real_consts
 
     def Bools(self, txt: str):
-        boolConsts = Bools(txt)
-        for boolConst in boolConsts:
-            self.symbols.append(boolConst)
-        return boolConsts
+        bool_consts = Bools(txt)
+        for bool_const in bool_consts:
+            self.symbols.append(bool_const)
+        return bool_consts
 
     def Consts(self, txt: str, sort):
         consts = Consts(txt, sort)
@@ -108,7 +108,7 @@ class ConfigCase:
 
     def model(self):
         solver = self.mk_solver()
-        solver.add(self.assumptions())
+        solver.add(self.assumptions)
         solver.check()
         return solver.model()
 
@@ -233,21 +233,6 @@ class ConfigCase:
     # INFERENCES
     #################
 
-    # def brelevance(self):
-    #     g = Goal()
-    #     g.add(self.constraints)
-    #     g.add(self.assumptions)
-    #     simplified = Tactic('ctx-solver-simplify')(g)[0]
-    #     total = []
-    #     for i in simplified:
-    #         total += flattenexpr(i, self.symbols)
-    #     total = list(set(total))
-
-    #     out = self.outputstructure()
-    #     for i in total:
-    #         out.fillApp(i)
-    #     return out.m
-
     def relevance(self):
         out = self.outputstructure()
 
@@ -320,7 +305,7 @@ class ConfigCase:
         else:
             solver.maximize(s)
 
-        for assumption in self.assumptions():
+        for assumption in self.assumptions:
             solver.add(assumption)
         solver.check()
         return self.model_to_json(solver.model())
