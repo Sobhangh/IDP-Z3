@@ -363,7 +363,18 @@ class ConfigCase:
         return atoms
 
     def parametric(self):
-        out = {"result" : list(self.atoms().keys())}
+        solver = self.mk_solver()
+        solver.add(self.assumptions)
+        out = []
+        while solver.check() == sat:
+            out += [ [(k, obj_to_string(solver.model().eval(v)))
+                            for k,v in self.atoms().items()]
+                   ]
+            # add constraint to eliminate this model
+            model = And( [(v if solver.model().eval(v) == True else Not(v))
+                            for v in self.atoms().values()]
+                          )
+            solver.add(Not(model))
         return out
 
 
