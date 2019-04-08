@@ -348,9 +348,24 @@ class ConfigCase:
             out[obj_to_string(sym)] = ls
         return out
 
+    def atoms(self): # get the ordered set of atoms in the constraints
+        def getAtoms(expr):
+            out = {}  # Ordered dict: string -> Z3 object
+            for child in expr.children():
+                out.update(getAtoms(child))
+            if expr.sort().__class__.__name__ == "BoolSortRef" and len(out) == 0:
+                out = {str(expr): expr}
+            return out
+
+        atoms = {}
+        for constraint in self.constraints:
+            atoms.update(getAtoms(constraint))
+        return atoms
+
     def parametric(self):
-        out = {"result" : str(self.constraints)}
+        out = {"result" : list(self.atoms().keys())}
         return out
+
 
 class Comparison:
     def __init__(self, sign: bool, symbol, args: List, value):

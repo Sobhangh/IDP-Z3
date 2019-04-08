@@ -1,7 +1,5 @@
 parametric expansion:
-    - count atoms in theory
-    - print atoms in theory (add __str__ in DSLClasses.py !)
-    - then, attach their truth values
+    - get truth values of atoms
     - generate generalized theories
     - simplify it
 
