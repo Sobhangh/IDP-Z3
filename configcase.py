@@ -233,20 +233,20 @@ class ConfigCase:
     # INFERENCES
     #################
 
-    def brelevance(self):
-        g = Goal()
-        g.add(self.constraints)
-        g.add(self.assumptions)
-        simplified = Tactic('ctx-solver-simplify')(g)[0]
-        total = []
-        for i in simplified:
-            total += flattenexpr(i, self.symbols)
-        total = list(set(total))
+    # def brelevance(self):
+    #     g = Goal()
+    #     g.add(self.constraints)
+    #     g.add(self.assumptions)
+    #     simplified = Tactic('ctx-solver-simplify')(g)[0]
+    #     total = []
+    #     for i in simplified:
+    #         total += flattenexpr(i, self.symbols)
+    #     total = list(set(total))
 
-        out = self.outputstructure()
-        for i in total:
-            out.fillApp(i)
-        return out.m
+    #     out = self.outputstructure()
+    #     for i in total:
+    #         out.fillApp(i)
+    #     return out.m
 
     def relevance(self):
         out = self.outputstructure()
@@ -348,6 +348,9 @@ class ConfigCase:
             out[obj_to_string(sym)] = ls
         return out
 
+    def parametric(self):
+        out = {"result" : str(self.constraints)}
+        return out
 
 class Comparison:
     def __init__(self, sign: bool, symbol, args: List, value):

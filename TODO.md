@@ -1,5 +1,4 @@
 parametric expansion:
-    - create new method
     - count atoms in theory
     - print atoms in theory (add __str__ in DSLClasses.py !)
     - then, attach their truth values

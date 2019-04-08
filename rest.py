@@ -61,6 +61,9 @@ class eval(Resource):
             if method == "minimize":
                 case.loadStructureFromJson(active)
                 out = case.optimize(args['symbol'], args['minimize'])
+            if method == "parametric":
+                case.loadStructureFromJson(active)
+                out = case.parametric()
             print(out)
             return out
 
