@@ -34,39 +34,41 @@ z3lock = threading.Lock()
 class eval(Resource):
     def post(self):
         with z3lock:
-            args = parser.parse_args()
+            try:
+                args = parser.parse_args()
 
-            idpModel = idpparser.model_from_str(args['code'])
+                idpModel = idpparser.model_from_str(args['code'])
 
-            case = ConfigCase(idpModel.translate)
+                case = ConfigCase(idpModel.translate)
 
-            method = args['method']
-            active = args['active']
-            print(args)
-            out = {}
-            if method == "init":
-                out = case.initialisationlist()
-            if method == "propagate":
-                case.loadStructureFromJson(active)
-                out = case.propagation()
-            if method == "modelexpand":
-                case.loadStructureFromJson(active)
-                out = case.json_model()
-            if method == "relevance":
-                case.loadStructureFromJson(active)
-                out = case.relevance()
-            if method == "explain":
-                case.loadStructureFromJson(active)
-                out = case.explain(args['symbol'], args['value'])
-            if method == "minimize":
-                case.loadStructureFromJson(active)
-                out = case.optimize(args['symbol'], args['minimize'])
-            if method == "parametric":
-                case.loadStructureFromJson(active)
-                out = case.parametric()
-            print(out)
-            return out
-
+                method = args['method']
+                active = args['active']
+                print(args)
+                out = {}
+                if method == "init":
+                    out = case.initialisationlist()
+                if method == "propagate":
+                    case.loadStructureFromJson(active)
+                    out = case.propagation()
+                if method == "modelexpand":
+                    case.loadStructureFromJson(active)
+                    out = case.json_model()
+                if method == "relevance":
+                    case.loadStructureFromJson(active)
+                    out = case.relevance()
+                if method == "explain":
+                    case.loadStructureFromJson(active)
+                    out = case.explain(args['symbol'], args['value'])
+                if method == "minimize":
+                    case.loadStructureFromJson(active)
+                    out = case.optimize(args['symbol'], args['minimize'])
+                if method == "parametric":
+                    case.loadStructureFromJson(active)
+                    out = case.parametric()
+                print(out)
+                return out
+            except Exception as exc:
+                return str(exc)
 
 class meta(Resource):
     def post(self):
