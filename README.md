@@ -1,4 +1,4 @@
-AutoconfigZ3 is a dynamic configuration tool based on logic theory that uses the Z3 SMT solver.  It is hosted at https://autoconfigparam.herokuapp.com/.
+AutoconfigZ3 is a dynamic configuration tool based on logic theory that uses the Z3 SMT solver.  It is hosted at https://autoconfigparam.herokuapp.com/
 
 # Get started
 
@@ -28,3 +28,5 @@ Alternatively,
 * `npm start` the **Z3** branch of autoconfig3,
 * verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
 * open your browser at http://localhost:4201
+
+To push on heroku, checkout the proper branch, then `git push heroku master`.
