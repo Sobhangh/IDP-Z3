@@ -1,4 +1,4 @@
-AutoconfigZ3 is a dynamic configuration tool based on logic theory that uses the Z3 SMT solver.
+AutoconfigZ3 is a dynamic configuration tool based on logic theory that uses the Z3 SMT solver.  It is hosted at https://autoconfigparam.herokuapp.com/.
 
 # Get started
 
