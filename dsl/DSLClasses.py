@@ -2,11 +2,11 @@ import os
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
-    Sum, If
+    Sum, If, FuncDeclRef
 from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
-from utils import is_number, universe
+from utils import is_number, universe, applyTo
 
 
 class Environment:
@@ -30,11 +30,82 @@ class File(object):
 class Theory(object):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
+        self.definitions = kwargs.pop('definitions')
 
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.constraints:
             c = i.translate(case, env)
             case.add(c)
+        for d in self.definitions:
+            d.translate(case, env)
+
+
+class Definition(object):
+    def __init__(self, **kwargs):
+        self.rules = kwargs.pop('rules')
+
+    def rulePartition(self):
+        out = {}
+        for i in self.rules:
+            out.setdefault(i.symbol.name, []).append(i)
+        return out
+
+    def translate(self, case: ConfigCase, env: Environment):
+        partition = self.rulePartition()
+        for symbol in partition.keys():
+            rules = partition[symbol]
+            symbol = Symbol(name=symbol)
+            vars = self.makeGlobalVars(symbol, case, env)
+            exprs = []
+            for i in rules:
+                exprs.append(i.translate(vars, case, env))
+
+            if len(vars) > 0:
+                case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars) == Or(exprs)))
+            else:
+                case.add(symbol.translate(case, env) == Or(exprs))
+
+    def makeGlobalVars(self, symb, case, env):
+        z3_symb = symb.translate(case, env)
+        if type(z3_symb) == FuncDeclRef:
+            return [Const('ci', z3_symb.domain(i)) for i in range(0, z3_symb.arity())]
+            # + [Const('cout', z3_symb.range())]
+        else:
+            return []
+
+
+class Rule(object):
+    def __init__(self, **kwargs):
+        self.vars = kwargs.pop('vars')
+        self.sorts = kwargs.pop('sorts')
+        self.symbol = kwargs.pop('symbol')
+        self.args = kwargs.pop('args')
+        self.body = kwargs.pop('body')
+
+    def translate(self, vars, case: ConfigCase, env: Environment):
+        args = self.args.fs
+
+        def function():
+            out = []
+            for var, expr in zip(vars, args):
+                out.append(var == expr.translate(case, env))
+            if self.body is not None:
+                out.append(self.body.translate(case, env))
+            return out
+
+        lvars = []
+        if lvars is not None:
+            lvars = self.vars
+        sorts = []
+        if sorts is not None:
+            sorts = self.sorts
+
+        outp, vars = with_local_vars(case, env, function, sorts, lvars)
+
+        if len(vars) == 0:
+            return And(outp)
+        else:
+            return Exists(vars, And(outp))
 
 
 class BinaryOperator(object):
@@ -126,19 +197,7 @@ class AQuantification(object):
 
 
 def expand_formula(vars, sorts, f, case, env):
-    bup = {}
-    z3vars = []
-    for var, sort in zip(vars, sorts):
-        z3var = Const(var, sort.asZ3(env))
-        if var in env.var_scope:
-            bup[var] = env.var_scope[var]
-        else:
-            bup[var] = None
-        env.var_scope[var] = z3var
-        z3vars.append(z3var)
-    form = f.translate(case, env)
-    for var in vars:
-        env.var_scope[var] = bup[var]
+    form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
     forms = [form]
     finalvars = []
     for i in range(0, len(vars)):
@@ -154,6 +213,25 @@ def expand_formula(vars, sorts, f, case, env):
         else:
             finalvars.append(z3vars[i])
     return finalvars, forms
+
+
+def with_local_vars(case, env, f, sorts, vars):
+    bup = {}
+    z3vars = []
+    assert len(sorts) == len(vars)
+    for var, sort in zip(vars, sorts):
+        z3var = Const(var, sort.asZ3(env))
+        if var in env.var_scope:
+            bup[var] = env.var_scope[var]
+        else:
+            bup[var] = None
+        env.var_scope[var] = z3var
+        z3vars.append(z3var)
+
+    out = f()
+    for var in vars:
+        env.var_scope[var] = bup[var]
+    return out, z3vars
 
 
 class AAggregate(object):
@@ -342,6 +420,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
                                          AComparison, AAggregate, SetExp,
                                          ASumMinus, AMultDiv, AUnary, NumberConstant, ConstructedTypeDeclaration,
-                                         RangeDeclaration, AppliedSymbol,
+                                         RangeDeclaration, AppliedSymbol, Definition, Rule,
                                          Variable, Symbol, AQuantification,
                                          Brackets])

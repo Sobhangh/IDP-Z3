@@ -8,7 +8,7 @@ Vocabulary:
 ;
 
 Theory:
-'theory' '{' (constraints=Expression '.')* '}'
+'theory' '{' ((constraints=Expression '.')*  definitions=Definition*)* '}'
 ;
 
 Comment:
@@ -52,6 +52,9 @@ Brackets: '(' f=Expression ')';
 
 Arguments: '(' fs*=Expression[','] ')';
 SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
+
+Definition: '{' rules*=Rule '}';
+Rule: ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('<-' body=Expression)? '.' ;
 
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
