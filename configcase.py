@@ -352,19 +352,49 @@ class ConfigCase:
             atoms.update(getAtoms(constraint))
         return atoms
 
+    def first_symbol(self, expr):
+        if (obj_to_string(expr) in self.valueMap) or is_number(obj_to_string(expr)):
+            return None # a literal value
+        name = expr.decl().name()
+        if name in ['=<', '>=', '~=', '=', '<', '>', '+', '-', '*', '/']:
+            for child in expr.children():
+                if self.first_symbol(child) is not None:
+                    return self.first_symbol(child)
+        else:
+            return name
+
     def parametric(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
-        out = []
+        solutions, count = {}, 0
         while solver.check() == sat:
-            out += [ [(k, obj_to_string(solver.model().eval(v)))
-                            for k,v in self.atoms().items()]
-                   ]
+            # group atoms by first symbol
+            solution = {}
+            for atom_string, atomZ3 in self.atoms().items():
+                groupBy = self.first_symbol(atomZ3)
+                solution.setdefault(groupBy, [])
+                if solver.model().eval(atomZ3) in [True, False]: # otherwise: don't care
+                    solution[groupBy] += [("" if solver.model().eval(atomZ3) == True else "Not ") + atom_string]
+
+            # add to solutions
+            for k, v in solution.items(): # create key
+                solutions[k] = solutions.setdefault(k, [])
+            for k,v in solutions.items(): # add solution
+                solutions[k] = v + [solution[k]]
+            count +=1
+
             # add constraint to eliminate this model
-            model = And( [(v if solver.model().eval(v) == True else Not(v))
-                            for v in self.atoms().values()]
-                          )
+            model = And( [(atomZ3 if solver.model().eval(atomZ3) == True else Not(atomZ3))
+                            for atomZ3 in self.atoms().values()
+                            if solver.model().eval(atomZ3) in [True, False]
+                         ]
+                       )
             solver.add(Not(model))
+
+        # build table of solutions
+        out = [[ [k] for k in solutions.keys()]]
+        for i in range(count):
+            out += [[v[i] for v in solutions.values()]]
         return out
 
 

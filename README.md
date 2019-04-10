@@ -29,4 +29,4 @@ Alternatively,
 * verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
 * open your browser at http://localhost:4201
 
-To push on heroku, checkout the proper branch, then `git push heroku master`.
+To push on heroku, checkout the proper branch, then `git push heroku autoconfigparam:master`.
