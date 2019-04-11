@@ -230,6 +230,9 @@ class NumberConstant(object):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
 
+    def __str__(self):
+        return str(self.number)
+
     def translate(self, case: ConfigCase, env: Environment):
         try:
             return int(self.number)
@@ -240,6 +243,11 @@ class NumberConstant(object):
 class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
+
+    def __str__(self):
+        return ( "vocabulary {\n"
+               + "\n".join(str(i) for i in self.declarations)
+               + "\n}\n" )
 
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.declarations:
@@ -255,6 +263,12 @@ class ConstructedTypeDeclaration(object):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
 
+    def __str__(self):
+        return ( "type " + self.name
+               + " constructed from {"
+               + ",".join(map(str, self.constructors))
+               + "}")
+
     def translate(self, case: ConfigCase, env: Environment):
         type, cstrs = case.EnumSort(self.name, self.constructors)
         env.type_scope[self.name] = type
@@ -266,6 +280,12 @@ class RangeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.elements = kwargs.pop('elements')
+
+    def __str__(self):
+        return ( "type " + self.name
+               + " = {"
+               + ",".join([str(x.fromI) + ("" if x.to is None else ".."+ str(x.to)) for x in self.elements])
+               + "}")
 
     def translate(self, case: ConfigCase, env: Environment):
         els = []
@@ -290,6 +310,12 @@ class SymbolDeclaration(object):
         if self.out is None:
             self.out = Sort(name='Bool')
 
+    def __str__(self):
+        return ( self.name.name
+               + ("({})".format(",".join(map(str, self.args))) if 0<len(self.args) else "")
+               + ("" if self.out.name == 'Bool' else " : " + self.out.name)
+        )
+
     def translate(self, case: ConfigCase, env: Environment):
         if len(self.args) == 0:
             const = case.Const(self.name.name, self.out.asZ3(env))
@@ -310,6 +336,9 @@ class SymbolDeclaration(object):
 class Sort(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+
+    def __str__(self):
+        return self.name
 
     def asZ3(self, env: Environment):
         if self.name in env.type_scope:

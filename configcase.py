@@ -385,13 +385,15 @@ class ConfigCase:
                     atoms += [ ("? " + atom_string, True, groupBy) ]
 
             # check if atoms are relevant
-            for current, (atom_string, atomZ3, groupBy) in enumerate(atoms):
-                solver.push()
-                alternative = And([ Not(a[1]) if j==current else a[1] for j, a in enumerate(atoms) ])
-                solver.add(alternative)
-                if solver.check() == sat: # atom can be true or false !
-                    atoms[current] = ("? " + atom_string, True, groupBy)
-                solver.pop()
+            # atoms1 = atoms
+            # for current, (atom_string, atomZ3, groupBy) in enumerate(atoms):
+            #     solver.push()
+            #     alternative = And([ Not(a[1]) if j==current else a[1] for j, a in enumerate(atoms1) ])
+            #     solver.add(alternative)
+            #     if solver.check() == sat: # atom can be true or false !
+            #         print( "Dropping: ", atom_string)
+            #         atoms[current] = ("? " + atom_string, True, groupBy)
+            #     solver.pop()
 
             # add constraint to eliminate this model
             model = And( [atomZ3 for (_, atomZ3, _) in atoms] )

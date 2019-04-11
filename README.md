@@ -20,6 +20,7 @@ The website (including the default logic theory) is served from the static direc
 
 * checkout the Z3 branch of autoconfig3
 * modify package.json so that the `build` script uses `--base-href \"/\""`
+* modify IDP_ENDPOINT, META_URL to `/eval`, `/meta` (possibly prefixed with `http://127.0.0.1:5000`) in assets/services/AppSettings.ts,
 * execute `npm run -script build`
 * copy the content of the new dist directory into the static folder of autoconfigZ3
 

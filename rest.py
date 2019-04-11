@@ -63,6 +63,14 @@ class eval(Resource):
                     case.loadStructureFromJson(active)
                     out = case.optimize(args['symbol'], args['minimize'])
                 if method == "parametric":
+                    if args['symbol'] != "": # theory to explain ?
+                        newTheory = ( str(idpModel.vocabulary)
+                                    + "theory {\n"
+                                    + args['symbol']
+                                    + "\n}"
+                        )
+                        idpModel = idpparser.model_from_str(newTheory)
+                        case = ConfigCase(idpModel.translate)
                     case.loadStructureFromJson(active)
                     out = case.parametric()
                 print(out)
