@@ -1,10 +1,10 @@
 {
-  "dirty": false,
-  "raw": "cc39b09",
-  "hash": "cc39b09",
+  "dirty": true,
+  "raw": "bdbc1a0-dirty",
+  "hash": "bdbc1a0",
   "distance": null,
   "tag": null,
   "semver": null,
-  "suffix": "cc39b09",
+  "suffix": "bdbc1a0-dirty",
   "semverString": null
 }

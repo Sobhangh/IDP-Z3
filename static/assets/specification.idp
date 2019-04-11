@@ -1,36 +1,10 @@
-vocabulary {
-    type color constructed from {red,green,blue}
-    type nums = {0..5,15,20..25}
-    type reals = {3.14, 5.28, 10, 15.28}
-    pred(nums)
-    pred2(nums)
-    col : color
-    col2 : color
-    a : nums
-    b : nums
-    c : nums
-    d : reals
-    e : reals
-    f : nums
-    g : nums
-    p
-    q : Bool
-}
 
-theory {
-    pred(a).
-    a > b + 2.
-    a + 2 * c > 10.
-    d > e.
-    p <=> ~ q.
-    a + b + g = f.
-    col ~= col2.
+  vocabulary {
+      x : real
+      p
+  }
 
-    c = sum{x[nums] : pred(x) : x}.
-
-    ? x[nums] y[nums]: pred(x) & pred(y) & pred2(x+y).
-
-    ? x[Int]: a = x.
-    ? x[Real]: d = x.
-
-}
+  theory {
+       p => x<0.
+      ~p => 0<x.
+  }
