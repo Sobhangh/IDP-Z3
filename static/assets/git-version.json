@@ -1,10 +1,10 @@
 {
-  "dirty": true,
-  "raw": "bdbc1a0-dirty",
-  "hash": "bdbc1a0",
+  "dirty": false,
+  "raw": "ceac771",
+  "hash": "ceac771",
   "distance": null,
   "tag": null,
   "semver": null,
-  "suffix": "bdbc1a0-dirty",
+  "suffix": "ceac771",
   "semverString": null
 }
