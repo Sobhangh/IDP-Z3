@@ -356,7 +356,7 @@ class ConfigCase:
         if (obj_to_string(expr) in self.valueMap) or is_number(obj_to_string(expr)):
             return None # a literal value
         name = expr.decl().name()
-        if name in ['=<', '>=', '~=', '=', '<', '>', '+', '-', '*', '/']:
+        if name in ['<=', '>=', 'distinct', '=', '<', '>', '+', '-', '*', '/']:
             for child in expr.children():
                 if self.first_symbol(child) is not None:
                     return self.first_symbol(child)
@@ -366,35 +366,52 @@ class ConfigCase:
     def parametric(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
-        solutions, count = {}, 0
-        while solver.check() == sat:
-            # group atoms by first symbol
-            solution = {}
-            for atom_string, atomZ3 in self.atoms().items():
-                groupBy = self.first_symbol(atomZ3)
-                solution.setdefault(groupBy, [])
-                if solver.model().eval(atomZ3) in [True, False]: # otherwise: don't care
-                    solution[groupBy] += [("" if solver.model().eval(atomZ3) == True else "Not ") + atom_string]
+        models, count = {}, 0
+        # create keys for models using first symbol of atoms
+        for atomZ3 in self.atoms().values():
+            models[self.first_symbol(atomZ3)] = []
 
-            # add to solutions
-            for k, v in solution.items(): # create key
-                solutions[k] = solutions.setdefault(k, [])
-            for k,v in solutions.items(): # add solution
-                solutions[k] = v + [solution[k]]
-            count +=1
+        while solver.check() == sat: # for each parametric model
+            atoms = [] # [(atom_string, atomZ3, groupBy)]
+            for atom_string, atomZ3 in self.atoms().items():
+                truth = solver.model().eval(atomZ3)
+                groupBy = self.first_symbol(atomZ3)
+                atom_string = atom_string.replace("==", "=").replace("!=", "~=").replace("<=", "=<")
+                if truth == True:
+                    atoms += [ (atom_string, atomZ3, groupBy) ]
+                elif truth == False:
+                    atoms += [ ("Not " + atom_string, Not(atomZ3), groupBy ) ]
+                else: # undefined
+                    atoms += [ ("? " + atom_string, True, groupBy) ]
+
+            # check if atoms are relevant
+            for current, (atom_string, atomZ3, groupBy) in enumerate(atoms):
+                solver.push()
+                alternative = And([ Not(a[1]) if j==current else a[1] for j, a in enumerate(atoms) ])
+                solver.add(alternative)
+                if solver.check() == sat: # atom can be true or false !
+                    atoms[current] = ("? " + atom_string, True, groupBy)
+                solver.pop()
 
             # add constraint to eliminate this model
-            model = And( [(atomZ3 if solver.model().eval(atomZ3) == True else Not(atomZ3))
-                            for atomZ3 in self.atoms().values()
-                            if solver.model().eval(atomZ3) in [True, False]
-                         ]
-                       )
+            model = And( [atomZ3 for (_, atomZ3, _) in atoms] )
             solver.add(Not(model))
 
-        # build table of solutions
-        out = [[ [k] for k in solutions.keys()]]
+            # group atoms by first symbol
+            model = {}
+            for atom_string, atomZ3, groupBy in atoms:
+                model.setdefault(groupBy, [])
+                model[groupBy] += [ (atom_string, atomZ3) ]
+
+            # add to models
+            for k,v in models.items(): # add model
+                models[k] = v + [ [tuple[0] for tuple in model[k]] ]
+            count +=1
+
+        # build table of models
+        out = [[ [k] for k in models.keys()]]
         for i in range(count):
-            out += [[v[i] for v in solutions.values()]]
+            out += [[v[i] for v in models.values()]]
         return out
 
 

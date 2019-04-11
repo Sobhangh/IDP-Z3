@@ -1,5 +1,6 @@
 parametric expansion:
-    - simplify parametric theories
+    - simplify intervals
+    - inject found value into atom and simplify
 
 Nice To Have
     - IntsInRange: add restrictive
