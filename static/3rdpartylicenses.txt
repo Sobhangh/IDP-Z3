@@ -322,10 +322,10 @@ MIT
 @angular/common
 MIT
 
-@angular/forms
+@angular/platform-browser
 MIT
 
-@angular/platform-browser
+@angular/forms
 MIT
 
 ngx-monaco-editor
