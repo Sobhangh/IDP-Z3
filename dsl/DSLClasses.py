@@ -57,21 +57,27 @@ class Definition(object):
             symbol = Symbol(name=symbol)
             vars = self.makeGlobalVars(symbol, case, env)
             exprs = []
+
+            outputVar = False
             for i in rules:
                 exprs.append(i.translate(vars, case, env))
-
-            if len(vars) > 0:
-                case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars) == Or(exprs)))
+                if i.out is not None:
+                    outputVar = True
+            if outputVar:
+                case.add(ForAll(vars, (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)))
             else:
-                case.add(symbol.translate(case, env) == Or(exprs))
+                if len(vars) > 1:
+                    case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)))
+                else:
+                    case.add(symbol.translate(case, env) == Or(exprs))
 
     def makeGlobalVars(self, symb, case, env):
         z3_symb = symb.translate(case, env)
         if type(z3_symb) == FuncDeclRef:
-            return [Const('ci', z3_symb.domain(i)) for i in range(0, z3_symb.arity())]
-            # + [Const('cout', z3_symb.range())]
+            return [Const('ci', z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
+                Const('cout', z3_symb.range())]
         else:
-            return []
+            return [Const('c', z3_symb.sort())]
 
 
 class Rule(object):
@@ -80,15 +86,20 @@ class Rule(object):
         self.sorts = kwargs.pop('sorts')
         self.symbol = kwargs.pop('symbol')
         self.args = kwargs.pop('args')
+        self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
 
     def translate(self, vars, case: ConfigCase, env: Environment):
-        args = self.args.fs
+        args = []
+        if self.args is not None:
+            args = self.args.fs
 
         def function():
             out = []
             for var, expr in zip(vars, args):
                 out.append(var == expr.translate(case, env))
+            if self.out is not None:
+                out.append(vars[-1] == self.out.translate(case, env))
             if self.body is not None:
                 out.append(self.body.translate(case, env))
             return out

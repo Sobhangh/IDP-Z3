@@ -54,12 +54,12 @@ Arguments: '(' fs*=Expression[','] ')';
 SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
 
 Definition: '{' rules*=Rule '}';
-Rule: ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('<-' body=Expression)? '.' ;
+Rule: ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Expression)? ('<-' body=Expression)? '.' ;
 
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
-ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' | '>' ;
+ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' !'-' | '>' ;
 Quantor: '!' | '?';
 AggType: '#' | 'card' | 'sum';
 

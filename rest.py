@@ -1,4 +1,5 @@
 import threading
+import traceback
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -77,7 +78,8 @@ class meta(Resource):
             idpModel = idpparser.model_from_str(args['code'])
             return ConfigCase(idpModel.translate).metaJSON()
         except Exception as exc:
-            return str(exc)
+            traceback.print_exc()
+            return repr(exc)
 
 
 @app.route('/', methods=['GET'])
