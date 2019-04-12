@@ -343,8 +343,9 @@ class ConfigCase:
             out = {}  # Ordered dict: string -> Z3 object
             for child in expr.children():
                 out.update(getAtoms(child))
-            if expr.sort().__class__.__name__ == "BoolSortRef" and len(out) == 0:
-                out = {str(expr): expr}
+            if expr.sort().name() == 'Bool' and len(out) == 0:
+                if not any([is_var(child) for child in expr.children()]):
+                    out = {str(expr): expr}
             return out
 
         atoms = {}
@@ -383,6 +384,7 @@ class ConfigCase:
                     atoms += [ ("Not " + atom_string, Not(atomZ3), groupBy ) ]
                 else: # undefined
                     atoms += [ ("? " + atom_string, True, groupBy) ]
+                # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
             # check if atoms are relevant
             # atoms1 = atoms
