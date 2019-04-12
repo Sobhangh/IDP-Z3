@@ -53,7 +53,7 @@ class eval(Resource):
                     out = case.propagation()
                 if method == "modelexpand":
                     case.loadStructureFromJson(active)
-                    out = case.json_model()
+                    out = case.model_to_json(case.model())
                 if method == "relevance":
                     case.loadStructureFromJson(active)
                     out = case.relevance()

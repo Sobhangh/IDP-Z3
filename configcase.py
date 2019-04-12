@@ -94,12 +94,6 @@ class ConfigCase:
     def add(self, constraint):
         self.constraints.append(constraint)
 
-    def relevantValsOf(self, var):
-        if var in self.relevantVals:
-            return self.relevantVals[var]
-        else:
-            return list(map(singleton, universe(var.sort())))
-
     def mk_solver(self):
         s = Solver()
         s.add(self.constraints)
@@ -115,11 +109,11 @@ class ConfigCase:
     def model_to_json(self, m):
         output = self.outputstructure(True)
         for symb in self.symbols:
-            if self.relevantValsOf(symb) == []: # unenumerated real, int
+            if self.relevantVals[symb] == []: # unenumerated real, int
                 val = m.eval(symb)
                 output.addComparison(Comparison(True, symb, [], val))
             else:
-                for args, val in self.relevantValsOf(symb):
+                for args, val in self.relevantVals[symb]:
                     val = m.eval(applyTo(symb, args))
                     output.addComparison(Comparison(True, symb, args, val))
         return output.m
@@ -127,47 +121,53 @@ class ConfigCase:
     def list_of_propositions(self):
         out = []
         for symb in self.symbols:
-            #TODO if self.relevantValsOf(symb) == []:
-            for args, val in self.relevantValsOf(symb):
+            #TODO if self.relevantVals[symb] == []:
+            for args, val in self.relevantVals[symb]:
                 out.append(applyTo(symb, args) == val)
         return out
+
+    def atoms(self): # get the ordered set of atoms in the constraints
+        def getAtoms(expr):
+            out = {}  # Ordered dict: string -> Z3 object
+            for child in expr.children():
+                out.update(getAtoms(child))
+            if expr.sort().name() == 'Bool' and len(out) == 0:
+                if not any([is_var(child) for child in expr.children()]):
+                    out = {str(expr): expr}
+            return out
+
+        atoms = {}
+        for constraint in self.constraints:
+            atoms.update(getAtoms(constraint))
+        return atoms
 
     def outputstructure(self, all_false=False, all_true=False):
         out = Structure()
         for symbol in self.symbols:
-            for args, value in self.relevantValsOf(symbol):
+            for args, value in self.relevantVals[symbol]:
                 out.initialise(Comparison(True, symbol, list(map(self.z3_value, args)), self.z3_value(value)),
                                all_false, all_true)
         return out
 
     def as_symbol(self, symb_str):
-        return [sym for sym in self.symbols if str(sym) == symb_str][0]
+        return list(filter(lambda s: str(s)==symb_str, self.symbols)) [0]
 
-    def loadStructure(self, assumptions):
-        self.assumptions = assumptions
-
+    # Structure: symbol -> value -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
-        self.loadStructure(self.structureFromJson(jsonstr))
-
-    def structureFromJson(self, json_data):
-        json_data = ast.literal_eval(json_data)
-        return self.structureFromObject(json_data)
+        json_data = ast.literal_eval(jsonstr)
+        self.assumptions = [Comparison(sign == "ct", self.as_symbol(sym), self.args(val), self.outVal(val)).asAST()
+                for sym in json_data
+                for val in json_data[sym]
+                for sign in {"ct", "cf"}
+                if json_data[sym][val][sign]]
 
     def args(self, val):
-        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
+        a, _ = splitLast(list(map(self.z3_value, json.loads(val))))
         return a
 
     def outVal(self, val):
-        a, l = splitLast(list(map(self.z3_value, json.loads(val))))
+        _, l = splitLast(list(map(self.z3_value, json.loads(val))))
         return l
-
-    # Structure: symbol -> value -> {ct,cf} -> true/false
-    def structureFromObject(self, obj):
-        return [Comparison(sign == "ct", self.as_symbol(sym), self.args(val), self.outVal(val)).asAST()
-                for sym in obj
-                for val in obj[sym]
-                for sign in {"ct", "cf"}
-                if obj[sym][val][sign]]
 
     def metaJSON(self):
         symbols = []
@@ -229,10 +229,7 @@ class ConfigCase:
     def is_symbol(self, symb):
         if is_expr(symb):
             symb = obj_to_string(symb)
-        for c in self.symbols:
-            if obj_to_string(c) == symb:
-                return True
-        return False
+        return any(obj_to_string(c) == symb for c in self.symbols)
 
     #################
     # INFERENCES
@@ -270,7 +267,7 @@ class ConfigCase:
             solver.add(theo1 != theo2)
 
             argshandled = {}
-            for arg, val in self.relevantValsOf(s):
+            for arg, val in self.relevantVals[s]:
                 strargs = json.dumps([obj_to_string(x) for x in arg])
                 if strargs in argshandled:
                     continue
@@ -291,11 +288,11 @@ class ConfigCase:
         arg, l = splitLast(json.loads(value))
         arg = list(map(self.z3_value, arg))
         to_explain = [applyTo(self.as_symbol(symbol), arg) == self.z3_value(l)]
-        satresult, consqs = solver.consequences(self.assumptions, to_explain)
+        _, consqs = solver.consequences(self.assumptions, to_explain)
 
         out = self.outputstructure()
         for cons in consqs:
-            ass, csq = self.extractInfoFromConsequence(cons)
+            ass, _ = self.extractInfoFromConsequence(cons)
             for a in ass:
                 out.addComparison(a)
         return out.m
@@ -315,17 +312,14 @@ class ConfigCase:
         solver.check()
         return self.model_to_json(solver.model())
 
-    def json_model(self):
-        return self.model_to_json(self.model())
-
     def propagation(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
         proplist = self.list_of_propositions()
-        satresult, consqs = solver.consequences([], proplist)
+        _, consqs = solver.consequences([], proplist)
         out = self.outputstructure()
         for consequence in consqs:
-            ass, csq = self.extractInfoFromConsequence(consequence)
+            _, csq = self.extractInfoFromConsequence(consequence)
             out.addComparison(csq)
         return out.m
 
@@ -333,25 +327,10 @@ class ConfigCase:
         out = {}
         for sym in self.symbols:
             ls = []
-            for arg, val in self.relevantValsOf(sym):
+            for arg, val in self.relevantVals[sym]:
                 ls.append(json.dumps(list(map(obj_to_string, list(arg) + [val]))))
             out[obj_to_string(sym)] = ls
         return out
-
-    def atoms(self): # get the ordered set of atoms in the constraints
-        def getAtoms(expr):
-            out = {}  # Ordered dict: string -> Z3 object
-            for child in expr.children():
-                out.update(getAtoms(child))
-            if expr.sort().name() == 'Bool' and len(out) == 0:
-                if not any([is_var(child) for child in expr.children()]):
-                    out = {str(expr): expr}
-            return out
-
-        atoms = {}
-        for constraint in self.constraints:
-            atoms.update(getAtoms(constraint))
-        return atoms
 
     def first_symbol(self, expr):
         if (obj_to_string(expr) in self.valueMap) or is_number(obj_to_string(expr)):
@@ -445,11 +424,10 @@ class Comparison:
         return obj_to_string(self.symbol)
 
     def graphedValue(self):
-        strVal = self.value
         if type(self.value) in [str, int, float]:
             strVal = str(self.value)
         else:
-            strVal = obj_to_string(strVal)
+            strVal = obj_to_string(self.value)
         lst = [obj_to_string(x) for x in self.args]
         lst.append(strVal)
         return json.dumps(lst)
