@@ -47,7 +47,7 @@ class eval(Resource):
                 print(args)
                 out = {}
                 if method == "init":
-                    out = case.initialisationlist()
+                    out = case.atomsGrouped()
                 if method == "propagate":
                     case.loadStructureFromJson(active)
                     out = case.propagation()
@@ -56,7 +56,7 @@ class eval(Resource):
                     out = case.model_to_json(case.model())
                 if method == "relevance":
                     case.loadStructureFromJson(active)
-                    out = case.relevance()
+                    out = case.propagation() #TODO
                 if method == "explain":
                     case.loadStructureFromJson(active)
                     out = case.explain(args['symbol'], args['value'])

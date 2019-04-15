@@ -107,24 +107,13 @@ class ConfigCase:
         return solver.model()
 
     def model_to_json(self, m):
-        output = self.outputstructure(True)
-        for symb in self.symbols:
-            if self.relevantVals[symb] == []: # unenumerated real, int
-                val = m.eval(symb)
-                output.addComparison(Comparison(True, symb, [], val))
+        out = Structure()
+        for atomZ3 in self.atoms().values():
+            if m.eval(atomZ3, model_completion=True): # 'if' needed to avoid BoolRef not JSONable
+                out.initialise(self, atomZ3, False, True)
             else:
-                for args, val in self.relevantVals[symb]:
-                    val = m.eval(applyTo(symb, args))
-                    output.addComparison(Comparison(True, symb, args, val))
-        return output.m
-
-    def list_of_propositions(self):
-        out = []
-        for symb in self.symbols:
-            #TODO if self.relevantVals[symb] == []:
-            for args, val in self.relevantVals[symb]:
-                out.append(applyTo(symb, args) == val)
-        return out
+                out.initialise(self, atomZ3, True, False)
+        return out.m
 
     def atoms(self): # get the ordered set of atoms in the constraints
         def getAtoms(expr):
@@ -133,7 +122,7 @@ class ConfigCase:
                 out.update(getAtoms(child))
             if expr.sort().name() == 'Bool' and len(out) == 0:
                 if not any([is_var(child) for child in expr.children()]):
-                    out = {str(expr): expr}
+                    out = {atom_as_string(expr): expr}
             return out
 
         atoms = {}
@@ -143,23 +132,25 @@ class ConfigCase:
 
     def outputstructure(self, all_false=False, all_true=False):
         out = Structure()
-        for symbol in self.symbols:
-            for args, value in self.relevantVals[symbol]:
-                out.initialise(Comparison(True, symbol, list(map(self.z3_value, args)), self.z3_value(value)),
-                               all_false, all_true)
+        for atomZ3 in self.atoms().values():
+            out.initialise(self, atomZ3, all_false, all_true)
         return out
 
     def as_symbol(self, symb_str):
         return list(filter(lambda s: str(s)==symb_str, self.symbols)) [0]
 
-    # Structure: symbol -> value -> {ct,cf} -> true/false
+    # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
+        atoms = self.atoms()
         json_data = ast.literal_eval(jsonstr)
-        self.assumptions = [Comparison(sign == "ct", self.as_symbol(sym), self.args(val), self.outVal(val)).asAST()
-                for sym in json_data
-                for val in json_data[sym]
-                for sign in {"ct", "cf"}
-                if json_data[sym][val][sign]]
+        self.assumptions = []
+        for sym in json_data:
+            for atom in json_data[sym]:
+                atomZ3 = atoms[atom[2:-2]]
+                if json_data[sym][atom]["ct"]:
+                    self.assumptions.append(atomZ3)
+                if json_data[sym][atom]["cf"]:
+                    self.assumptions.append(Not(atomZ3))
 
     def args(self, val):
         a, _ = splitLast(list(map(self.z3_value, json.loads(val))))
@@ -183,42 +174,6 @@ class ConfigCase:
             })
         out = {"title": "Z3 Interactive Configuration", "symbols": symbols, "values": []}
         return out
-
-    def extractInfoFromConsequence(self, s):
-        assumption_expr = s.children()[0]
-        assumptions = []
-        if is_true(assumption_expr):
-            pass
-        elif is_and(assumption_expr):
-            assumptions = [self.extractInfoFromComparison(c) for c in assumption_expr.children()]
-        else:
-            assumptions = [self.extractInfoFromComparison(assumption_expr)]
-        consequence = s.children()[1]
-        comp = self.extractInfoFromComparison(consequence)
-        return assumptions, comp
-
-    def extractInfoFromComparison(self, c):
-        sign = not is_not(c)
-        if not sign:
-            c = c.children()[0]
-        if not is_eq(c):
-            sign = not sign
-        value, symbol = c.children()
-        if is_to_real(value) | is_to_int(value):
-            value = value.children()[0]
-        if is_to_real(symbol) | is_to_int(symbol):
-            symbol = symbol.children()[0]
-        if (obj_to_string(symbol) in self.valueMap) | is_number(obj_to_string(symbol)) | \
-                self.is_symbol(value):
-            temp = symbol
-            symbol = value
-            value = temp
-
-        args = []
-        if isinstance(symbol, ExprRef):
-            args = symbol.children()
-            symbol = symbol.decl()
-        return Comparison(sign, symbol, args, self.z3_value(value))
 
     def z3_value(self, value):
         if value in self.valueMap:
@@ -285,16 +240,19 @@ class ConfigCase:
 
     def explain(self, symbol, value):
         solver = self.mk_solver()
-        arg, l = splitLast(json.loads(value))
-        arg = list(map(self.z3_value, arg))
-        to_explain = [applyTo(self.as_symbol(symbol), arg) == self.z3_value(l)]
-        _, consqs = solver.consequences(self.assumptions, to_explain)
+        to_explain = self.atoms()[value[2:-2]] # value is an atom string
+        _, consqs = solver.consequences(self.assumptions, [to_explain])
 
-        out = self.outputstructure()
+        out = Structure()
         for cons in consqs:
-            ass, _ = self.extractInfoFromConsequence(cons)
-            for a in ass:
-                out.addComparison(a)
+            assumption_expr = cons.children()[0]
+            if is_true(assumption_expr):
+                pass
+            elif is_and(assumption_expr):
+                for c in assumption_expr.children():
+                    out.addAtom(self, c)
+            else:
+                out.addAtom(self, assumption_expr)
         return out.m
 
     def optimize(self, symbol, minimize):
@@ -315,12 +273,11 @@ class ConfigCase:
     def propagation(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
-        proplist = self.list_of_propositions()
+        proplist = list(self.atoms().values())
         _, consqs = solver.consequences([], proplist)
         out = self.outputstructure()
-        for consequence in consqs:
-            _, csq = self.extractInfoFromConsequence(consequence)
-            out.addComparison(csq)
+        for s in consqs:
+            out.addAtom(self, s.children()[1]) # take the consequence
         return out.m
 
     def initialisationlist(self):
@@ -330,6 +287,13 @@ class ConfigCase:
             for arg, val in self.relevantVals[sym]:
                 ls.append(json.dumps(list(map(obj_to_string, list(arg) + [val]))))
             out[obj_to_string(sym)] = ls
+        return out
+
+    def atomsGrouped(self):
+        out = {} # {symbol_string : [atom_string]}
+        for atom_string, atomZ3 in self.atoms().items():
+            groupBy = self.first_symbol(atomZ3)
+            out.setdefault(groupBy, []).append(json.dumps([atom_string]))
         return out
 
     def first_symbol(self, expr):
@@ -356,7 +320,6 @@ class ConfigCase:
             for atom_string, atomZ3 in self.atoms().items():
                 truth = solver.model().eval(atomZ3)
                 groupBy = self.first_symbol(atomZ3)
-                atom_string = atom_string.replace("==", "=").replace("!=", "~=").replace("<=", "=<")
                 if truth == True:
                     atoms += [ (atom_string, atomZ3, groupBy) ]
                 elif truth == False:
@@ -377,18 +340,17 @@ class ConfigCase:
             #     solver.pop()
 
             # add constraint to eliminate this model
-            model = And( [atomZ3 for (_, atomZ3, _) in atoms] )
-            solver.add(Not(model))
+            modelZ3 = And( [atomZ3 for (_, atomZ3, _) in atoms] )
+            solver.add(Not(modelZ3))
 
             # group atoms by first symbol
             model = {}
-            for atom_string, atomZ3, groupBy in atoms:
-                model.setdefault(groupBy, [])
-                model[groupBy] += [ (atom_string, atomZ3) ]
+            for atom_string, _, groupBy in atoms:
+                model.setdefault(groupBy, []).append([ atom_string ])
 
             # add to models
             for k,v in models.items(): # add model
-                models[k] = v + [ [tuple[0] for tuple in model[k]] ]
+                models[k] = v + [ [atom_string for atom_string in model[k]] ]
             count +=1
 
         # build table of models
@@ -435,38 +397,26 @@ class Comparison:
 
 class Structure:
     def __init__(self):
-        self.m = {}
+        self.m = {} # {symbol_string: {atom : {ct: Bool}}}
 
     def getJSON(self):
         return json.dumps(self.m)
 
-    def initialise(self, comp, all_false, all_true):
-        self.m.setdefault(comp.symbName(), {}).setdefault(comp.graphedValue(), {"ct": all_true, "cf": all_false})
+    def initialise(self, case, atomZ3, all_false, all_true):
+        s = self.m.setdefault(case.first_symbol(atomZ3), {})
+        key = json.dumps([atom_as_string(atomZ3)])
+        s.setdefault(key, {"ct": all_true, "cf": all_false})
 
-    def addComparison(self, comp: Comparison):
-        signstr = "cf"
-        if comp.sign:
-            signstr = "ct"
-        self.m.setdefault(comp.symbName(), {}).setdefault(comp.graphedValue(), {})[signstr] = True
+    def addAtom(self, case, atomZ3):
+        sgn = "ct"
+        if is_not(atomZ3):
+            atomZ3, sgn = atomZ3.arg(0), "cf"
+        s = self.m.setdefault(case.first_symbol(atomZ3), {})
+        s.setdefault(json.dumps([atom_as_string(atomZ3)]), {})[sgn] = True
 
-    def fillSymbol(self, s):
-        map = self.m[obj_to_string(s)]
-        for i in self.m[obj_to_string(s)]:
-            map[i]['ct'] = True
-            map[i]['cf'] = True
 
-    def fillApp(self, s):
-        if not is_app(s):
-            self.fillSymbol(s)
-            return
-        func = obj_to_string(s.decl())
-        args = [obj_to_string(x) for x in s.children()]
-        found = False
-        for fargs in self.m[func]:
-            argp, l = splitLast(json.loads(fargs))
-            if argp == args:
-                self.m[func][fargs]['ct'] = True
-                self.m[func][fargs]['cf'] = True
-                found = True
-        if not found:
-            self.fillSymbol(s.decl())
+def atom_as_string(expr):
+    return str(expr).replace("==", "=").replace("!=", "~=").replace("<=", "=<")
+
+def string_as_atom(string):
+    return str(string).replace("=", "==").replace("~=", "!=").replace("=<", "<=")
