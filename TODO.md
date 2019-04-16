@@ -1,6 +1,7 @@
-precedence: p => a & b.
 
 parametric expansion:
+    - equalities: on top of list, add "= ?" if missing (args !)
+    - convert fractions, precedence: p => a & b.
     - relevance, minimize for atoms
     - inject found value into atom and simplify
     - implication semantics for definitions

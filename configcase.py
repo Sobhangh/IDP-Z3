@@ -359,42 +359,6 @@ class ConfigCase:
             out += [[v[i] for v in models.values()]]
         return out
 
-
-class Comparison:
-    def __init__(self, sign: bool, symbol, args: List, value):
-        self.sign = sign
-        self.symbol = symbol
-        self.args = args
-        self.value = value
-
-    def __repr__(self) -> str:
-        return str((self.sign, self.symbol, self.args, self.value))
-
-    def astSymb(self):
-        if len(self.args) == 0:
-            return self.symbol
-        return self.symbol(self.args)
-
-    def asAST(self):
-        val = self.value
-        if self.sign:
-            return self.astSymb() == val
-        else:
-            return self.astSymb() != val
-
-    def symbName(self):
-        return obj_to_string(self.symbol)
-
-    def graphedValue(self):
-        if type(self.value) in [str, int, float]:
-            strVal = str(self.value)
-        else:
-            strVal = obj_to_string(self.value)
-        lst = [obj_to_string(x) for x in self.args]
-        lst.append(strVal)
-        return json.dumps(lst)
-
-
 class Structure:
     def __init__(self):
         self.m = {} # {symbol_string: {atom : {ct: Bool}}}
