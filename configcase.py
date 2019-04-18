@@ -52,7 +52,7 @@ class ConfigCase:
         consts = Consts(txt, sort)
         for const in consts:
             self.symbols.append(const)
-        return out
+        return consts
 
     def Const(self, txt: str, sort):
         const = Const(txt, sort)
@@ -292,65 +292,73 @@ class ConfigCase:
     def atomsGrouped(self):
         out = {} # {symbol_string : [atom_string]}
         for atom_string, atomZ3 in self.atoms().items():
-            groupBy = self.first_symbol(atomZ3)
-            out.setdefault(groupBy, []).append(json.dumps([atom_string]))
+            for groupBy in self.symbols_of(atomZ3):
+                out.setdefault(groupBy, []).append(json.dumps([atom_string]))
         return out
 
-    def first_symbol(self, expr):
-        if (obj_to_string(expr) in self.valueMap) or is_number(obj_to_string(expr)):
-            return None # a literal value
+    def symbols_of(self, expr):
+        if (obj_to_string(expr) in self.valueMap) or is_number(obj_to_string(expr)) \
+        or is_true(expr) or is_false(expr):
+            return [] # a literal value
         name = expr.decl().name()
-        if name in ['<=', '>=', 'distinct', '=', '<', '>', '+', '-', '*', '/']:
+        if name in ['not', '<=', '>=', 'distinct', '=', '<', '>', '+', '-', '*', '/']:
+            out = []
             for child in expr.children():
-                if self.first_symbol(child) is not None:
-                    return self.first_symbol(child)
+                out.extend(self.symbols_of(child))
+            return out
         else:
-            return name
+            return [name]
+
+    def first_symbol(self, expr):
+        symbs = self.symbols_of(expr)
+        return symbs[0] if symbs != [] else None
+
 
     def parametric(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
         models, count = {}, 0
+
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms().values():
-            models[self.first_symbol(atomZ3)] = []
+            for symb in self.symbols_of(atomZ3):
+                models[symb] = []
 
         while solver.check() == sat: # for each parametric model
-            atoms = [] # [(atom_string, atomZ3, groupBy)]
+            atoms = [] # [(atom_string, atomZ3)]
             for atom_string, atomZ3 in self.atoms().items():
                 truth = solver.model().eval(atomZ3)
-                groupBy = self.first_symbol(atomZ3)
                 if truth == True:
-                    atoms += [ (atom_string, atomZ3, groupBy) ]
+                    atoms += [ (atom_string, atomZ3) ]
                 elif truth == False:
-                    atoms += [ ("Not " + atom_string, Not(atomZ3), groupBy ) ]
+                    atoms += [ ("Not " + atom_string, Not(atomZ3) ) ]
                 else: # undefined
-                    atoms += [ ("? " + atom_string, True, groupBy) ]
+                    atoms += [ ("? " + atom_string, BoolVal(True)) ]
                 # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
             # check if atoms are relevant
             # atoms1 = atoms
-            # for current, (atom_string, atomZ3, groupBy) in enumerate(atoms):
+            # for current, (atom_string, atomZ3) in enumerate(atoms):
             #     solver.push()
             #     alternative = And([ Not(a[1]) if j==current else a[1] for j, a in enumerate(atoms1) ])
             #     solver.add(alternative)
             #     if solver.check() == sat: # atom can be true or false !
             #         print( "Dropping: ", atom_string)
-            #         atoms[current] = ("? " + atom_string, True, groupBy)
+            #         atoms[current] = ("? " + atom_string, True)
             #     solver.pop()
 
             # add constraint to eliminate this model
-            modelZ3 = And( [atomZ3 for (_, atomZ3, _) in atoms] )
+            modelZ3 = And( [atomZ3 for (_, atomZ3) in atoms] )
             solver.add(Not(modelZ3))
 
-            # group atoms by first symbol
+            # group atoms by symbols
             model = {}
-            for atom_string, _, groupBy in atoms:
-                model.setdefault(groupBy, []).append([ atom_string ])
-
+            for atom_string, atomZ3 in atoms:
+                for symb in self.symbols_of(atomZ3):
+                    model.setdefault(symb, []).append([ atom_string ])
             # add to models
             for k,v in models.items(): # add model
-                models[k] = v + [ [atom_string for atom_string in model[k]] ]
+                models[k] = v + [ model[k] if k in model else [] ]
             count +=1
 
         # build table of models
@@ -367,16 +375,18 @@ class Structure:
         return json.dumps(self.m)
 
     def initialise(self, case, atomZ3, all_false, all_true):
-        s = self.m.setdefault(case.first_symbol(atomZ3), {})
-        key = json.dumps([atom_as_string(atomZ3)])
-        s.setdefault(key, {"ct": all_true, "cf": all_false})
+        for symb in case.symbols_of(atomZ3):
+            s = self.m.setdefault(symb, {})
+            key = json.dumps([atom_as_string(atomZ3)])
+            s.setdefault(key, {"ct": all_true, "cf": all_false})
 
     def addAtom(self, case, atomZ3):
         sgn = "ct"
         if is_not(atomZ3):
             atomZ3, sgn = atomZ3.arg(0), "cf"
-        s = self.m.setdefault(case.first_symbol(atomZ3), {})
-        s.setdefault(json.dumps([atom_as_string(atomZ3)]), {})[sgn] = True
+        for symb in case.symbols_of(atomZ3):
+            s = self.m.setdefault(symb, {})
+            s.setdefault(json.dumps([atom_as_string(atomZ3)]), {})[sgn] = True
 
 
 def atom_as_string(expr):
