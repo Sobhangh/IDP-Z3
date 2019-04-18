@@ -17,12 +17,12 @@ Comment:
 
 Expression: Quantification;
 
-Quantification: AQuantification | Conjunction;
-Conjunction: AConjunction | Disjunction;
-Disjunction: ADisjunction | Implication;
-Implication: AImplication | RImplication;
+Quantification: AQuantification | RImplication;
 RImplication: ARImplication | Equivalence;
-Equivalence: AEquivalence | Comparison;
+Equivalence: AEquivalence | Implication;
+Implication: AImplication | Disjunction;
+Disjunction: ADisjunction | Conjunction;
+Conjunction: AConjunction | Comparison;
 Comparison: AComparison | SumMinus;
 SumMinus: ASumMinus | MultDiv;
 MultDiv: AMultDiv | Unary;
@@ -32,11 +32,11 @@ Aggregate: AAggregate | Base;
 
 AAggregate: aggtype=AggType set=SetExp;
 AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
-AConjunction: fs=Disjunction (operator='&' fs=Disjunction)+;
-ADisjunction: fs=Implication (operator='|' fs=Implication)+;
-AImplication: fs=RImplication (operator='=>' fs=RImplication)+;
 ARImplication: fs=Equivalence (operator='<=' fs=Equivalence)+;
-AEquivalence: fs=Comparison (operator='<=>' fs=Comparison)+;
+AEquivalence: fs=Implication (operator='<=>' fs=Implication)+;
+AImplication: fs=Disjunction (operator='=>' fs=Disjunction)+;
+ADisjunction: fs=Conjunction (operator='|' fs=Conjunction)+;
+AConjunction: fs=Comparison (operator='&' fs=Comparison)+;
 AComparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)+;
 ASumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)+;
 AMultDiv: fs=Unary (operator=MultDivOp fs=Unary)+;

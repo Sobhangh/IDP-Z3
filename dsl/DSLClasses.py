@@ -309,6 +309,10 @@ class Variable(object):
         self.name = kwargs.pop('name')
 
     def translate(self, case: ConfigCase, env: Environment):
+        if self.name == "true":
+            return bool(True)
+        if self.name == "false":
+            return bool(False)
         return env.var_scope[self.name]
 
 
