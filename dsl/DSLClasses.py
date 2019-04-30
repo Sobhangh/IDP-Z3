@@ -38,7 +38,6 @@ class Theory(object):
             case.add(c)
         for d in self.definitions:
             d.translate(case, env)
-        print(case.constraints)
 
 
 class Definition(object):
@@ -93,17 +92,9 @@ class Rule(object):
         if self.args is not None:
             self.graphArgs = self.args.fs
         if self.out is not None:
-            self.graphArgs.add(self.out)
+            self.graphArgs.append(self.out)
 
     def translate(self, vars, case: ConfigCase, env: Environment):
-        def function():
-            out = []
-            for var, expr in zip(vars, self.graphArgs):
-                out.append(var == expr.translate(case, env))
-            if self.body is not None:
-                out.append(self.body.translate(case, env))
-            return out
-
         lvars = []
         if lvars is not None:
             lvars = self.vars
@@ -111,12 +102,22 @@ class Rule(object):
         if sorts is not None:
             sorts = self.sorts
 
-        outp, vars = with_local_vars(case, env, function, sorts, lvars)
+        def function():
+            out = []
+            for var, expr in zip(vars, self.graphArgs):
+                out.append(var == expr.translate(case, env))
+            if self.body is not None:
+                out.append(self.body.translate(case, env))
+            return And(out)
 
-        if len(vars) == 0:
-            return And(outp)
+        outp, z3vars = with_local_vars(case, env, function, sorts, lvars)
+
+        finalVars, finalFormula = expand_z3formula(env, outp, sorts, lvars, z3vars)
+
+        if len(finalVars) == 0:
+            return Or(finalFormula)
         else:
-            return Exists(vars, And(outp))
+            return Exists(finalVars, Or(finalFormula))
 
 
 class BinaryOperator(object):
@@ -209,6 +210,11 @@ class AQuantification(object):
 
 def expand_formula(vars, sorts, f, case, env):
     form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
+    finalvars, forms = expand_z3formula(env, form, sorts, vars, z3vars)
+    return finalvars, forms
+
+
+def expand_z3formula(env, form, sorts, vars, z3vars):
     forms = [form]
     finalvars = []
     for i in range(0, len(vars)):
