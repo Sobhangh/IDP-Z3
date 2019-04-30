@@ -38,6 +38,7 @@ class Theory(object):
             case.add(c)
         for d in self.definitions:
             d.translate(case, env)
+        print(case.constraints)
 
 
 class Definition(object):
@@ -74,7 +75,7 @@ class Definition(object):
     def makeGlobalVars(self, symb, case, env):
         z3_symb = symb.translate(case, env)
         if type(z3_symb) == FuncDeclRef:
-            return [Const('ci', z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
+            return [Const('ci' + str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
                 Const('cout', z3_symb.range())]
         else:
             return [Const('c', z3_symb.sort())]
@@ -88,18 +89,17 @@ class Rule(object):
         self.args = kwargs.pop('args')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
+        self.graphArgs = []
+        if self.args is not None:
+            self.graphArgs = self.args.fs
+        if self.out is not None:
+            self.graphArgs.add(self.out)
 
     def translate(self, vars, case: ConfigCase, env: Environment):
-        args = []
-        if self.args is not None:
-            args = self.args.fs
-
         def function():
             out = []
-            for var, expr in zip(vars, args):
+            for var, expr in zip(vars, self.graphArgs):
                 out.append(var == expr.translate(case, env))
-            if self.out is not None:
-                out.append(vars[-1] == self.out.translate(case, env))
             if self.body is not None:
                 out.append(self.body.translate(case, env))
             return out
