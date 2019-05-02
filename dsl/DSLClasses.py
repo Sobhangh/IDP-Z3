@@ -2,11 +2,11 @@ import os
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
-    Sum, If, FuncDeclRef
+    Sum, If, FuncDeclRef, Function, Var
 from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
-from utils import is_number, universe, applyTo
+from utils import is_number, universe, applyTo, rewrite
 
 
 class Environment:
@@ -14,6 +14,7 @@ class Environment:
         self.var_scope = {'True': True, 'False': False}
         self.type_scope = {'Int': IntSort(), 'Bool': BoolSort(), 'Real': RealSort()}
         self.range_scope = {}
+        self.level_scope = {}
 
 
 class File(object):
@@ -53,8 +54,13 @@ class Definition(object):
     def translate(self, case: ConfigCase, env: Environment):
         partition = self.rulePartition()
         for symbol in partition.keys():
+
             rules = partition[symbol]
             symbol = Symbol(name=symbol)
+
+            z3symbol = symbol.translate(case,env)
+            lvlSymb = self.makeLevelSymbol(z3symbol, env)
+
             vars = self.makeGlobalVars(symbol, case, env)
             exprs = []
 
@@ -64,12 +70,27 @@ class Definition(object):
                 if i.out is not None:
                     outputVar = True
             if outputVar:
-                case.add(ForAll(vars, (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)))
+                case.add(ForAll(vars, (applyTo(z3symbol, vars[:-1]) == vars[-1]) == Or(exprs)))
             else:
                 if len(vars) > 1:
-                    case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)))
+                    case.add(ForAll(vars, applyTo(z3symbol, vars[:-1]) == Or(exprs)))
+                    lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, z3symbol.arity())]
+                    comparison = lvlSymb(lvlVars) < lvlSymb(vars[:-1])
+                    newExpr = rewrite(Or(exprs), z3symbol, comparison)
+                    case.add(ForAll(vars, applyTo(z3symbol, vars[:-1]) == newExpr))
+                    print(case.constraints)
                 else:
                     case.add(symbol.translate(case, env) == Or(exprs))
+
+        # constants = [Const('ci', s.domain(i)) for i in range(0, s.arity())]
+        # arg_fill = [Const('ci2', s.domain(i)) for i in range(0, s.arity())]
+        # var_list = [Var(i, s.domain(i)) for i in range(0, s.arity())]
+        # theo2 = rewrite(theo1, s, applyTo(c, var_list))
+        # type_transform = rewrite(And(self.typeConstraints + self.assumptions), s, applyTo(c, var_list))
+
+    def makeLevelSymbol(self, symbol, env):
+        type_list = [symbol.domain(i) for i in range(0, symbol.arity())] + [IntSort()]
+        return Function("lvl", type_list)
 
     def makeGlobalVars(self, symb, case, env):
         z3_symb = symb.translate(case, env)
