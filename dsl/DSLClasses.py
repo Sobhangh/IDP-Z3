@@ -14,6 +14,7 @@ class Environment:
         self.var_scope = {'True': True, 'False': False}
         self.type_scope = {'Int': IntSort(), 'Bool': BoolSort(), 'Real': RealSort()}
         self.range_scope = {}
+        self.symbol_type = {}
         self.level_scope = {}
 
 
@@ -58,7 +59,7 @@ class Definition(object):
             rules = partition[symbol]
             symbol = Symbol(name=symbol)
 
-            z3symbol = symbol.translate(case,env)
+            z3symbol = symbol.translate(case, env)
             lvlSymb = self.makeLevelSymbol(z3symbol, env)
 
             vars = self.makeGlobalVars(symbol, case, env)
@@ -72,21 +73,22 @@ class Definition(object):
             if outputVar:
                 case.add(ForAll(vars, (applyTo(z3symbol, vars[:-1]) == vars[-1]) == Or(exprs)))
             else:
-                if len(vars) > 1:
-                    case.add(ForAll(vars, applyTo(z3symbol, vars[:-1]) == Or(exprs)))
+                vars = vars[:-1]
+                if len(vars) > 0:
+                    # predicate
+                    types = env.symbol_type[symbol.name]
+                    case.add(conjunctive(
+                        *expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == Or(exprs), case, env)))
+
                     lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, z3symbol.arity())]
-                    comparison = lvlSymb(lvlVars) < lvlSymb(vars[:-1])
+
+                    comparison = And(lvlSymb(lvlVars) < lvlSymb(vars), z3symbol(lvlVars))
                     newExpr = rewrite(Or(exprs), z3symbol, comparison)
-                    case.add(ForAll(vars, applyTo(z3symbol, vars[:-1]) == newExpr))
-                    print(case.constraints)
+
+                    case.add(
+                        conjunctive(*expand_z3formula(vars, types, applyTo(z3symbol, vars) == newExpr, case, env)))
                 else:
                     case.add(symbol.translate(case, env) == Or(exprs))
-
-        # constants = [Const('ci', s.domain(i)) for i in range(0, s.arity())]
-        # arg_fill = [Const('ci2', s.domain(i)) for i in range(0, s.arity())]
-        # var_list = [Var(i, s.domain(i)) for i in range(0, s.arity())]
-        # theo2 = rewrite(theo1, s, applyTo(c, var_list))
-        # type_transform = rewrite(And(self.typeConstraints + self.assumptions), s, applyTo(c, var_list))
 
     def makeLevelSymbol(self, symbol, env):
         type_list = [symbol.domain(i) for i in range(0, symbol.arity())] + [IntSort()]
@@ -133,12 +135,7 @@ class Rule(object):
 
         outp, z3vars = with_local_vars(case, env, function, sorts, lvars)
 
-        finalVars, finalFormula = expand_z3formula(env, outp, sorts, lvars, z3vars)
-
-        if len(finalVars) == 0:
-            return Or(finalFormula)
-        else:
-            return Exists(finalVars, Or(finalFormula))
+        return disjunctive(*expand_z3formula(z3vars, sorts, outp, case, env))
 
 
 class BinaryOperator(object):
@@ -215,30 +212,35 @@ class AQuantification(object):
         self.f = kwargs.pop('f')
 
     def translate(self, case: ConfigCase, env: Environment):
-        finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
-
         if self.q == '!':
-            if len(finalvars) > 0:
-                return ForAll(finalvars, And(forms))
-            else:
-                return And(forms)
+            return conjunctive(*expand_formula(self.vars, self.sorts, self.f, case, env))
         else:
-            if len(finalvars) > 0:
-                return Exists(finalvars, Or(forms))
-            else:
-                return Or(forms)
+            return disjunctive(*expand_formula(self.vars, self.sorts, self.f, case, env))
+
+
+def conjunctive(finalvars, forms):
+    if len(finalvars) > 0:
+        return ForAll(finalvars, And(forms))
+    else:
+        return And(forms)
+
+
+def disjunctive(finalvars, forms):
+    if len(finalvars) > 0:
+        return Exists(finalvars, And(forms))
+    else:
+        return Or(forms)
 
 
 def expand_formula(vars, sorts, f, case, env):
     form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
-    finalvars, forms = expand_z3formula(env, form, sorts, vars, z3vars)
-    return finalvars, forms
+    return expand_z3formula(z3vars, sorts, form, case, env)
 
 
-def expand_z3formula(env, form, sorts, vars, z3vars):
+def expand_z3formula(z3vars, sorts, form, case, env):
     forms = [form]
     finalvars = []
-    for i in range(0, len(vars)):
+    for i in range(0, len(z3vars)):
         if sorts[i].name in env.range_scope:
             forms2 = []
             for f in forms:
@@ -407,6 +409,7 @@ class SymbolDeclaration(object):
             self.out = Sort(name='Bool')
 
     def translate(self, case: ConfigCase, env: Environment):
+        env.symbol_type[self.name.name] = [x for x in self.args] + [self.out]
         if len(self.args) == 0:
             const = case.Const(self.name.name, self.out.asZ3(env))
             env.var_scope[self.name.name] = const
