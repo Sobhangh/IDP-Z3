@@ -2,7 +2,7 @@ import os
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
-    Sum, If, FuncDeclRef, Function, Var
+    Sum, If, FuncDeclRef, Function, Var, Int
 from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
@@ -60,7 +60,6 @@ class Definition(object):
             symbol = Symbol(name=symbol)
 
             z3symbol = symbol.translate(case, env)
-            lvlSymb = self.makeLevelSymbol(z3symbol, env)
 
             vars = self.makeGlobalVars(symbol, case, env)
             exprs = []
@@ -73,24 +72,24 @@ class Definition(object):
             if outputVar:
                 case.add(ForAll(vars, (applyTo(z3symbol, vars[:-1]) == vars[-1]) == Or(exprs)))
             else:
+                lvlSymb = self.makeLevelSymbol(z3symbol)
                 vars = vars[:-1]
-                if len(vars) > 0:
-                    # predicate
-                    types = env.symbol_type[symbol.name]
-                    case.add(conjunctive(
-                        *expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == Or(exprs), case, env)))
+                # boolean output
+                types = env.symbol_type[symbol.name]
+                case.add(conjunctive(
+                    *expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == Or(exprs), case, env)))
 
-                    lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, z3symbol.arity())]
+                lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, len(vars))]
 
-                    comparison = And(lvlSymb(lvlVars) < lvlSymb(vars), z3symbol(lvlVars))
-                    newExpr = rewrite(Or(exprs), z3symbol, comparison)
+                comparison = And(applyTo(lvlSymb, lvlVars) < applyTo(lvlSymb, vars), applyTo(z3symbol, lvlVars))
+                newExpr = rewrite(Or(exprs), z3symbol, comparison)
 
-                    case.add(
-                        conjunctive(*expand_z3formula(vars, types, applyTo(z3symbol, vars) == newExpr, case, env)))
-                else:
-                    case.add(symbol.translate(case, env) == Or(exprs))
+                case.add(
+                    conjunctive(*expand_z3formula(vars, types, applyTo(z3symbol, vars) == newExpr, case, env)))
 
-    def makeLevelSymbol(self, symbol, env):
+    def makeLevelSymbol(self, symbol):
+        if not hasattr(symbol, 'arity'):
+            return Int("lvl")
         type_list = [symbol.domain(i) for i in range(0, symbol.arity())] + [IntSort()]
         return Function("lvl", type_list)
 
