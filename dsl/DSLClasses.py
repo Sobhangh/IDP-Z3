@@ -62,6 +62,7 @@ class Definition(object):
             z3symbol = symbol.translate(case, env)
 
             vars = self.makeGlobalVars(symbol, case, env)
+            types = env.symbol_type[symbol.name]
             exprs = []
 
             outputVar = False
@@ -70,22 +71,25 @@ class Definition(object):
                 if i.out is not None:
                     outputVar = True
             if outputVar:
-                case.add(ForAll(vars, (applyTo(z3symbol, vars[:-1]) == vars[-1]) == Or(exprs)))
+                case.add(conjunctive(
+                    *expand_z3formula(vars, types, (applyTo(z3symbol, vars[:-1]) == vars[-1]) == Or(exprs), case, env)))
             else:
                 lvlSymb = self.makeLevelSymbol(z3symbol)
                 vars = vars[:-1]
                 # boolean output
-                types = env.symbol_type[symbol.name]
                 case.add(conjunctive(
                     *expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == Or(exprs), case, env)))
 
                 lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, len(vars))]
 
                 comparison = And(applyTo(lvlSymb, lvlVars) < applyTo(lvlSymb, vars), applyTo(z3symbol, lvlVars))
-                newExpr = rewrite(Or(exprs), z3symbol, comparison)
+                if len(vars) == 0:
+                    newExpr = substitute(Or(exprs), (z3symbol, comparison))
+                else:
+                    newExpr = rewrite(Or(exprs), z3symbol, comparison)
 
                 case.add(
-                    conjunctive(*expand_z3formula(vars, types, applyTo(z3symbol, vars) == newExpr, case, env)))
+                    conjunctive(*expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == newExpr, case, env)))
 
     def makeLevelSymbol(self, symbol):
         if not hasattr(symbol, 'arity'):
@@ -214,7 +218,8 @@ class AQuantification(object):
         if self.q == '!':
             return conjunctive(*expand_formula(self.vars, self.sorts, self.f, case, env))
         else:
-            return disjunctive(*expand_formula(self.vars, self.sorts, self.f, case, env))
+            out = disjunctive(*expand_formula(self.vars, self.sorts, self.f, case, env))
+            return out
 
 
 def conjunctive(finalvars, forms):
@@ -247,7 +252,11 @@ def expand_z3formula(z3vars, sorts, form, case, env):
                     try:
                         forms2.append(substitute(f, (z3vars[i], _py2expr(float(v)))))
                     except Z3Exception:
-                        forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
+                        try:
+                            forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
+                        except Z3Exception:
+                            forms2.append(substitute(f, (z3vars[i], _py2expr(bool(v)))))
+
             forms = forms2
         else:
             finalvars.append(z3vars[i])
@@ -432,20 +441,12 @@ class Sort(object):
     def asZ3(self, env: Environment):
         if self.name in env.type_scope:
             return env.type_scope[self.name]
-        elif self.name == "int":
-            return IntSort()
-        elif self.name == "real":
-            return RealSort()
         else:
             raise Exception("Unknown sort: " + self.name)
 
     def getRange(self, env: Environment):
         if self.name in env.range_scope:
             return env.range_scope[self.name]
-        elif self.name == "int":
-            return []
-        elif self.name == "real":
-            return []
         else:
             return universe(self.asZ3(env))
 

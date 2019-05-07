@@ -13,7 +13,7 @@ class ConfigCase:
         self.relevantVals = {}
         self.symbols = []
         self.assumptions = []
-        self.valueMap = {"True": True}
+        self.valueMap = {"True": True, "False": False}
         self.constraints = []
         self.typeConstraints = []
         theory(self)
@@ -23,7 +23,7 @@ class ConfigCase:
     #################
 
     def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
-        int_consts = Ints(txt) # an unknown constant function of type int
+        int_consts = Ints(txt)  # an unknown constant function of type int
         values = list(map(singleton, map(_py2expr, range(underbound, upperbound + 1))))
         for int_const in int_consts:
             self.relevantVals[int_const] = values
@@ -115,7 +115,7 @@ class ConfigCase:
     def model_to_json(self, m):
         output = self.outputstructure(True)
         for symb in self.symbols:
-            if self.relevantValsOf(symb) == []: # unenumerated real, int
+            if not self.relevantValsOf(symb):  # unenumerated real, int
                 val = m.eval(symb)
                 output.addComparison(Comparison(True, symb, [], val))
             else:
@@ -127,7 +127,7 @@ class ConfigCase:
     def list_of_propositions(self):
         out = []
         for symb in self.symbols:
-            #TODO if self.relevantValsOf(symb) == []:
+            # TODO if self.relevantValsOf(symb) == []:
             for args, val in self.relevantValsOf(symb):
                 out.append(applyTo(symb, args) == val)
         return out
@@ -338,7 +338,7 @@ class ConfigCase:
             out[obj_to_string(sym)] = ls
         return out
 
-    def atoms(self): # get the ordered set of atoms in the constraints
+    def atoms(self):  # get the ordered set of atoms in the constraints
         def getAtoms(expr):
             out = {}  # Ordered dict: string -> Z3 object
             for child in expr.children():
@@ -357,13 +357,13 @@ class ConfigCase:
         solver.add(self.assumptions)
         out = []
         while solver.check() == sat:
-            out += [ [(k, obj_to_string(solver.model().eval(v)))
-                            for k,v in self.atoms().items()]
-                   ]
+            out += [[(k, obj_to_string(solver.model().eval(v)))
+                     for k, v in self.atoms().items()]
+                    ]
             # add constraint to eliminate this model
-            model = And( [(v if solver.model().eval(v) == True else Not(v))
-                            for v in self.atoms().values()]
-                          )
+            model = And([(v if solver.model().eval(v) == True else Not(v))
+                         for v in self.atoms().values()]
+                        )
             solver.add(Not(model))
         return out
 
