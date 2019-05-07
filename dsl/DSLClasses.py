@@ -81,17 +81,19 @@ class Definition(object):
                     *expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == Or(exprs), case, env)))
 
                 if self.wellFounded:
-                    lvlSymb = self.makeLevelSymbol(z3symbol)
-                    lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, len(vars))]
+                    lvlMapped = self.lvl_mapped(case, env, exprs, types, vars, z3symbol)
+                    case.typeConstraints.append(lvlMapped)
 
-                    comparison = And(applyTo(lvlSymb, lvlVars) < applyTo(lvlSymb, vars), applyTo(z3symbol, lvlVars))
-                    if len(vars) == 0:
-                        newExpr = substitute(Or(exprs), (z3symbol, comparison))
-                    else:
-                        newExpr = rewrite(Or(exprs), z3symbol, comparison)
-
-                    case.add(
-                        conjunctive(*expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == newExpr, case, env)))
+    def lvl_mapped(self, case, env, exprs, types, vars, z3symbol):
+        lvlSymb = self.makeLevelSymbol(z3symbol)
+        lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, len(vars))]
+        comparison = And(applyTo(lvlSymb, lvlVars) < applyTo(lvlSymb, vars), applyTo(z3symbol, lvlVars))
+        if len(vars) == 0:
+            newExpr = substitute(Or(exprs), (z3symbol, comparison))
+        else:
+            newExpr = rewrite(Or(exprs), z3symbol, comparison)
+        lvlMapped = conjunctive(*expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == newExpr, case, env))
+        return lvlMapped
 
     def makeLevelSymbol(self, symbol):
         if not hasattr(symbol, 'arity'):
