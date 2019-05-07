@@ -53,7 +53,7 @@ Brackets: '(' f=Expression ')';
 Arguments: '(' fs*=Expression[','] ')';
 SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
 
-Definition: '{' rules*=Rule '}';
+Definition: wellFounded='wf'? '{' rules*=Rule '}';
 Rule: ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Expression)? ('<-' body=Expression)? '.' ;
 
 UnaryOperator: '-' | '~';

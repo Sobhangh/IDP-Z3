@@ -45,6 +45,7 @@ class Theory(object):
 class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
+        self.wellFounded = kwargs.pop('wellFounded')
 
     def rulePartition(self):
         out = {}
@@ -74,22 +75,23 @@ class Definition(object):
                 case.add(conjunctive(
                     *expand_z3formula(vars, types, (applyTo(z3symbol, vars[:-1]) == vars[-1]) == Or(exprs), case, env)))
             else:
-                lvlSymb = self.makeLevelSymbol(z3symbol)
                 vars = vars[:-1]
                 # boolean output
                 case.add(conjunctive(
                     *expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == Or(exprs), case, env)))
 
-                lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, len(vars))]
+                if self.wellFounded:
+                    lvlSymb = self.makeLevelSymbol(z3symbol)
+                    lvlVars = [Var(i, lvlSymb.domain(i)) for i in range(0, len(vars))]
 
-                comparison = And(applyTo(lvlSymb, lvlVars) < applyTo(lvlSymb, vars), applyTo(z3symbol, lvlVars))
-                if len(vars) == 0:
-                    newExpr = substitute(Or(exprs), (z3symbol, comparison))
-                else:
-                    newExpr = rewrite(Or(exprs), z3symbol, comparison)
+                    comparison = And(applyTo(lvlSymb, lvlVars) < applyTo(lvlSymb, vars), applyTo(z3symbol, lvlVars))
+                    if len(vars) == 0:
+                        newExpr = substitute(Or(exprs), (z3symbol, comparison))
+                    else:
+                        newExpr = rewrite(Or(exprs), z3symbol, comparison)
 
-                case.add(
-                    conjunctive(*expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == newExpr, case, env)))
+                    case.add(
+                        conjunctive(*expand_z3formula(vars, types[:-1], applyTo(z3symbol, vars) == newExpr, case, env)))
 
     def makeLevelSymbol(self, symbol):
         if not hasattr(symbol, 'arity'):
