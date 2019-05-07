@@ -251,8 +251,8 @@ class ConfigCase:
                 type_list = [s.domain(i) for i in range(0, s.arity())] + [s.range()]
                 c = Function("temporaryFunction", type_list)
 
-                constants = [Const('ci', s.domain(i)) for i in range(0, s.arity())]
-                arg_fill = [Const('ci2', s.domain(i)) for i in range(0, s.arity())]
+                constants = [Const('vx'+str(i), s.domain(i)) for i in range(0, s.arity())]
+                arg_fill = [Const('vy'+str(i), s.domain(i)) for i in range(0, s.arity())]
                 solver.add(
                     ForAll(constants,
                            Or(And(pairwiseEquals(arg_fill, constants)),
