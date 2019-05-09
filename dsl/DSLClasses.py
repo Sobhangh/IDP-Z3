@@ -2,17 +2,17 @@ import os
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
-    Sum, If, FuncDeclRef, Function, Var, Int
+    Sum, If, FuncDeclRef, Function, Var, Int, StringSort, StringVal
 from z3.z3 import _py2expr
 
-from configcase import ConfigCase, singleton, in_list
+from configcase import ConfigCase, singleton, in_list, value2z3
 from utils import is_number, universe, applyTo, rewrite
 
 
 class Environment:
     def __init__(self):
         self.var_scope = {'True': True, 'False': False}
-        self.type_scope = {'Int': IntSort(), 'Bool': BoolSort(), 'Real': RealSort()}
+        self.type_scope = {'Int': IntSort(), 'Bool': BoolSort(), 'Real': RealSort(), 'String': StringSort()}
         self.range_scope = {}
         self.symbol_type = {}
         self.level_scope = {}
@@ -356,6 +356,14 @@ class Variable(object):
 class Symbol(Variable): pass
 
 
+class StringConstant(object):
+    def __init__(self, **kwargs):
+        self.str = kwargs.pop('str')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        return StringVal(self.str)
+
+
 class NumberConstant(object):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
@@ -407,8 +415,10 @@ class RangeDeclaration(object):
                     els.append(i)
         if all(map(lambda x: type(x) == int, els)):
             env.type_scope[self.name] = IntSort()
-        else:
+        elif all(map(lambda x: type(x) in [int, float], els)):
             env.type_scope[self.name] = RealSort()
+        else:
+            env.type_scope[self.name] = StringSort()
         env.range_scope[self.name] = els
 
 
@@ -455,7 +465,7 @@ class Sort(object):
             return universe(self.asZ3(env))
 
     def getZ3Range(self, env: Environment):
-        return list(map(singleton, map(_py2expr, self.getRange(env))))
+        return list(map(singleton, map(value2z3, self.getRange(env))))
 
 
 dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
@@ -463,7 +473,7 @@ dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[File, Theory, Vocabulary, SymbolDeclaration, Sort,
                                          AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
-                                         AComparison, AAggregate, SetExp,
+                                         AComparison, AAggregate, SetExp, StringConstant,
                                          ASumMinus, AMultDiv, AUnary, NumberConstant, ConstructedTypeDeclaration,
                                          RangeDeclaration, AppliedSymbol, Definition, Rule,
                                          Variable, Symbol, AQuantification,

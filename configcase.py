@@ -251,8 +251,8 @@ class ConfigCase:
                 type_list = [s.domain(i) for i in range(0, s.arity())] + [s.range()]
                 c = Function("temporaryFunction", type_list)
 
-                constants = [Const('vx'+str(i), s.domain(i)) for i in range(0, s.arity())]
-                arg_fill = [Const('vy'+str(i), s.domain(i)) for i in range(0, s.arity())]
+                constants = [Const('vx' + str(i), s.domain(i)) for i in range(0, s.arity())]
+                arg_fill = [Const('vy' + str(i), s.domain(i)) for i in range(0, s.arity())]
                 solver.add(
                     ForAll(constants,
                            Or(And(pairwiseEquals(arg_fill, constants)),
@@ -327,6 +327,8 @@ class ConfigCase:
         for consequence in consqs:
             ass, csq = self.extractInfoFromConsequence(consequence)
             out.addComparison(csq)
+        # print(proplist)
+        # print(solver)
         return out.m
 
     def initialisationlist(self):
@@ -334,7 +336,7 @@ class ConfigCase:
         for sym in self.symbols:
             ls = []
             for arg, val in self.relevantValsOf(sym):
-                ls.append(json.dumps(list(map(obj_to_string, list(arg) + [val]))))
+                ls.append(json.dumps(list(map(value2python, list(arg) + [val]))))
             out[obj_to_string(sym)] = ls
         return out
 
@@ -373,7 +375,7 @@ class Comparison:
         self.sign = sign
         self.symbol = symbol
         self.args = args
-        self.value = value
+        self.value = value2z3(value)
 
     def __repr__(self) -> str:
         return str((self.sign, self.symbol, self.args, self.value))
@@ -384,24 +386,67 @@ class Comparison:
         return self.symbol(self.args)
 
     def asAST(self):
-        val = self.value
         if self.sign:
-            return self.astSymb() == val
+            return self.astSymb() == self.value
         else:
-            return self.astSymb() != val
+            return self.astSymb() != self.value
 
     def symbName(self):
         return obj_to_string(self.symbol)
 
     def graphedValue(self):
-        strVal = self.value
-        if type(self.value) in [str, int, float]:
-            strVal = str(self.value)
-        else:
-            strVal = obj_to_string(strVal)
-        lst = [obj_to_string(x) for x in self.args]
+        strVal = value2python(self.value)
+        lst = [value2python(x) for x in self.args]
         lst.append(strVal)
         return json.dumps(lst)
+
+
+def value2python(val):
+    if isinstance(val, SeqRef):
+        return repr(val)[:-1][1:]
+    elif isinstance(val, IntNumRef):
+        return repr(val)
+    elif isinstance(val, RatNumRef):
+        return repr(val)
+    elif isinstance(val, DatatypeRef):
+        return repr(val)
+    elif isinstance(val, BoolRef):
+        return repr(val)
+    elif type(val) in [str, int, float, bool]:
+        return val
+    raise Exception("Can't handle this")
+
+
+def value2z3(val):
+    if isinstance(val, bool):
+        return BoolVal(val)
+    if isinstance(val, str):
+        try:
+            return IntVal(val)
+        except Z3Exception:
+            pass
+        try:
+            return RealVal(val)
+        except Z3Exception:
+            pass
+        return StringVal(val)
+    elif isinstance(val, int):
+        return IntVal(val)
+    elif isinstance(val, float):
+        return RealVal(val)
+    elif isinstance(val, SeqRef):
+        return val
+    elif isinstance(val, IntNumRef):
+        return val
+    elif isinstance(val, RatNumRef):
+        return val
+    elif isinstance(val, DatatypeRef):
+        return val
+    elif isinstance(val, BoolRef):
+        return val
+    print(val)
+    print(type(val))
+    raise Exception("Invalid Value")
 
 
 class Structure:

@@ -66,10 +66,10 @@ class eval(Resource):
                 if method == "parametric":
                     case.loadStructureFromJson(active)
                     out = case.parametric()
-                # print(case.constraints)
                 print(out)
                 return out
             except Exception as exc:
+                raise exc
                 return str(exc)
 
 class meta(Resource):

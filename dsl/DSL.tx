@@ -68,7 +68,9 @@ Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
 RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[','] '}';
 
-RangeElement: fromI=NumberConstant ('..' to=NumberConstant)?;
+RangeElement: fromI=Constant ('..' to=NumberConstant)?;
+
+Constant: NumberConstant|StringConstant;
 
 SymbolDeclaration:
     name=Symbol ('(' args*=Sort[','] ')')? (':' out=Sort)?;
