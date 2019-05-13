@@ -8,7 +8,7 @@ Vocabulary:
 ;
 
 Theory:
-'theory' '{' ((constraints=Expression '.')*  definitions=Definition*)* '}'
+'theory' '{' ((constraints=Expression '.') |  definitions=Definition)* '}'
 ;
 
 Comment:
