@@ -107,7 +107,7 @@ class ConfigCase:
         return solver.model()
 
     def model_to_json(self, m):
-        out = Structure()
+        out = Structure(self)
         for atomZ3 in self.atoms().values():
             if m.eval(atomZ3, model_completion=True): # 'if' needed to avoid BoolRef not JSONable
                 out.initialise(self, atomZ3, False, True)
@@ -131,12 +131,13 @@ class ConfigCase:
         return atoms
 
     def outputstructure(self, all_false=False, all_true=False):
-        out = Structure()
+        out = Structure(self)
         for atomZ3 in self.atoms().values():
             out.initialise(self, atomZ3, all_false, all_true)
         return out
 
     def as_symbol(self, symb_str):
+        #print(symb_str)
         return list(filter(lambda s: str(s)==symb_str, self.symbols)) [0]
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
@@ -172,7 +173,7 @@ class ConfigCase:
                 "priority": "core",
                 "showOptimize": type(i) == ArithRef
             })
-        out = {"title": "Z3 Interactive Configuration", "symbols": symbols, "values": []}
+        out = {"title": "Interactive Configurator", "symbols": symbols, "values": []}
         return out
 
     def z3_value(self, value):
@@ -243,14 +244,14 @@ class ConfigCase:
         to_explain = self.atoms()[value[2:-2]] # value is an atom string
         _, consqs = solver.consequences(self.assumptions, [to_explain])
 
-        out = Structure()
+        out = Structure(self)
         for cons in consqs:
             assumption_expr = cons.children()[0]
             if is_true(assumption_expr):
                 pass
             elif is_and(assumption_expr):
                 for c in assumption_expr.children():
-                    out.addAtom(self, c)
+                     out.addAtom(self, c)
             else:
                 out.addAtom(self, assumption_expr)
         return out.m
@@ -280,20 +281,16 @@ class ConfigCase:
             out.addAtom(self, s.children()[1]) # take the consequence
         return out.m
 
-    def initialisationlist(self):
-        out = {}
-        for sym in self.symbols:
-            ls = []
-            for arg, val in self.relevantVals[sym]:
-                ls.append(json.dumps(list(map(obj_to_string, list(arg) + [val]))))
-            out[obj_to_string(sym)] = ls
-        return out
-
     def atomsGrouped(self):
-        out = {} # {symbol_string : [atom_string]}
+        #solver = self.mk_solver()
+        #solver.add(self.assumptions)
+        out = {} # {symbol_string : [atom_string, "?"]}
         for atom_string, atomZ3 in self.atoms().items():
             for groupBy in self.symbols_of(atomZ3):
-                out.setdefault(groupBy, []).append(json.dumps([atom_string]))
+                d = out.setdefault(groupBy, [])
+                #if "[]" not in d and type(self.as_symbol(groupBy)) != BoolRef:
+                #    d.append("[]")
+                d.append(json.dumps([atom_string]))
         return out
 
     def symbols_of(self, expr):
@@ -308,6 +305,7 @@ class ConfigCase:
             return out
         else:
             return [name]
+            #return [obj_to_string(expr)]
 
     def first_symbol(self, expr):
         symbs = self.symbols_of(expr)
@@ -325,6 +323,9 @@ class ConfigCase:
                 models[symb] = []
 
         while solver.check() == sat: # for each parametric model
+            #for symb in self.symbols:
+            #    print (symb, solver.model().eval(symb))
+
             atoms = [] # [(atom_string, atomZ3)]
             for atom_string, atomZ3 in self.atoms().items():
                 truth = solver.model().eval(atomZ3)
@@ -339,9 +340,12 @@ class ConfigCase:
             # check if atoms are relevant
             # atoms1 = atoms
             # for current, (atom_string, atomZ3) in enumerate(atoms):
+            #     print("step 1")
             #     solver.push()
-            #     alternative = And([ Not(a[1]) if j==current else a[1] for j, a in enumerate(atoms1) ])
+            #     alternative = And([ Not(a) if j==current else a for j, (_,a) in enumerate(atoms1) ])
+            #     print("step 2")
             #     solver.add(alternative)
+            #     print("step 3")
             #     if solver.check() == sat: # atom can be true or false !
             #         print( "Dropping: ", atom_string)
             #         atoms[current] = ("? " + atom_string, True)
@@ -368,8 +372,15 @@ class ConfigCase:
         return out
 
 class Structure:
-    def __init__(self):
-        self.m = {} # {symbol_string: {atom : {ct: Bool}}}
+    def __init__(self, case):
+        self.m = {} # {symbol_string: {atom : {ct: Bool}, "[]": {args: value}? }
+        # print("Structure")
+        # for symb in case.symbols:
+        #     s = self.m.setdefault(str(symb), {})
+        #     for arg, val in case.relevantVals[symb]:
+        #         if type(symb) != BoolRef:
+        #             # symbol can have a numeric value
+        #             print(symb, arg, val)
 
     def getJSON(self):
         return json.dumps(self.m)
