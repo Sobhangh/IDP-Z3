@@ -109,6 +109,7 @@ class ConfigCase:
     def model_to_json(self, m):
         out = Structure(self)
         for atomZ3 in self.atoms().values():
+            # atom might not have an interpretation in model (if "don't care")
             if m.eval(atomZ3, model_completion=True): # 'if' needed to avoid BoolRef not JSONable
                 out.initialise(self, atomZ3, False, True)
             else:
@@ -121,7 +122,7 @@ class ConfigCase:
             for child in expr.children():
                 out.update(getAtoms(child))
             if expr.sort().name() == 'Bool' and len(out) == 0:
-                if not any([is_var(child) for child in expr.children()]):
+                if not any([is_var(child) for child in expr.children()]): # for quantified formulas ?
                     out = {atom_as_string(expr): expr}
             return out
 
@@ -286,29 +287,26 @@ class ConfigCase:
         #solver.add(self.assumptions)
         out = {} # {symbol_string : [atom_string, "?"]}
         for atom_string, atomZ3 in self.atoms().items():
-            for groupBy in self.symbols_of(atomZ3):
+            for groupBy in self.symbols_of(atomZ3).keys():
                 d = out.setdefault(groupBy, [])
                 #if "[]" not in d and type(self.as_symbol(groupBy)) != BoolRef:
                 #    d.append("[]")
-                d.append(json.dumps([atom_string]))
+                temp = json.dumps([atom_string])
+                if temp not in d: # test: x=y(x).
+                    d.append(temp)
         return out
 
-    def symbols_of(self, expr):
-        if (obj_to_string(expr) in self.valueMap) or is_number(obj_to_string(expr)) \
-        or is_true(expr) or is_false(expr):
-            return [] # a literal value
+    def symbols_of(self, expr): # returns a dict
+        out = {} # for unicity (ordered set)
         name = expr.decl().name()
-        if name in ['not', '<=', '>=', 'distinct', '=', '<', '>', '+', '-', '*', '/']:
-            out = []
-            for child in expr.children():
-                out.extend(self.symbols_of(child))
-            return out
-        else:
-            return [name]
-            #return [obj_to_string(expr)]
+        if self.is_symbol(name):
+            out[name] = name
+        for child in expr.children():
+            out.update(self.symbols_of(child))
+        return out
 
     def first_symbol(self, expr):
-        symbs = self.symbols_of(expr)
+        symbs = self.symbols_of(expr).keys()
         return symbs[0] if symbs != [] else None
 
 
@@ -319,7 +317,7 @@ class ConfigCase:
 
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms().values():
-            for symb in self.symbols_of(atomZ3):
+            for symb in self.symbols_of(atomZ3).keys():
                 models[symb] = []
 
         while solver.check() == sat: # for each parametric model
@@ -358,7 +356,7 @@ class ConfigCase:
             # group atoms by symbols
             model = {}
             for atom_string, atomZ3 in atoms:
-                for symb in self.symbols_of(atomZ3):
+                for symb in self.symbols_of(atomZ3).keys():
                     model.setdefault(symb, []).append([ atom_string ])
             # add to models
             for k,v in models.items(): # add model
@@ -395,7 +393,7 @@ class Structure:
         sgn = "ct"
         if is_not(atomZ3):
             atomZ3, sgn = atomZ3.arg(0), "cf"
-        for symb in case.symbols_of(atomZ3):
+        for symb in case.symbols_of(atomZ3).keys():
             s = self.m.setdefault(symb, {})
             s.setdefault(json.dumps([atom_as_string(atomZ3)]), {})[sgn] = True
 
