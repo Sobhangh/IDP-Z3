@@ -110,31 +110,55 @@ class ConfigCase:
         out = Structure(self)
         for atomZ3 in self.atoms().values():
             # atom might not have an interpretation in model (if "don't care")
-            if m.eval(atomZ3, model_completion=True): # 'if' needed to avoid BoolRef not JSONable
-                out.initialise(self, atomZ3, False, True)
+            value = m.eval(atomZ3, model_completion=True)
+            if atomZ3.sort().name() == 'Bool':
+                value = True if value else False
+                out.initialise(self, atomZ3, value, not value)
             else:
-                out.initialise(self, atomZ3, True, False)
+                out.initialise(self, atomZ3, None, None, value)
         return out.m
 
     def atoms(self): # get the ordered set of atoms in the constraints
+        def is_really_constant(expr):
+            return (obj_to_string(expr) in self.valueMap) \
+                or is_number(obj_to_string(expr)) \
+                or is_true(expr) or is_false(expr)
+
+        def has_ground_children(expr):
+            return all([is_ground(child) for child in expr.children()])
+
+        def is_ground(expr):
+            return is_really_constant(expr) or \
+                (0 < len(expr.children()) and has_ground_children(expr))
+
+        def getTerms(expr):
+            out = {}  # Ordered dict: string -> Z3 object
+            if not is_bool(expr) and not is_really_constant(expr) and has_ground_children(expr):
+                    out = {atom_as_string(expr): expr}
+            for child in expr.children():
+                    out.update(getTerms(child))
+            return out
+
         def getAtoms(expr):
             out = {}  # Ordered dict: string -> Z3 object
             for child in expr.children():
                 out.update(getAtoms(child))
-            if expr.sort().name() == 'Bool' and len(out) == 0:
+            if is_bool(expr) and len(out) == 0:
                 if not any([is_var(child) for child in expr.children()]): # for quantified formulas ?
                     out = {atom_as_string(expr): expr}
             return out
 
         atoms = {}
         for constraint in self.constraints:
+            atoms.update(getTerms(constraint))
+        for constraint in self.constraints:
             atoms.update(getAtoms(constraint))
         return atoms
 
-    def outputstructure(self, all_false=False, all_true=False):
+    def outputstructure(self):
         out = Structure(self)
         for atomZ3 in self.atoms().values():
-            out.initialise(self, atomZ3, all_false, all_true)
+            out.initialise(self, atomZ3, False, False, "")
         return out
 
     def as_symbol(self, symb_str):
@@ -148,11 +172,21 @@ class ConfigCase:
         self.assumptions = []
         for sym in json_data:
             for atom in json_data[sym]:
+                json_atom = json_data[sym][atom]
                 atomZ3 = atoms[atom[2:-2]]
-                if json_data[sym][atom]["ct"]:
-                    self.assumptions.append(atomZ3)
-                if json_data[sym][atom]["cf"]:
-                    self.assumptions.append(Not(atomZ3))
+                if json_atom["typ"] == "Bool":
+                    if "ct" in json_atom and json_atom["ct"]:
+                        self.assumptions.append(atomZ3)
+                    if "cf" in json_atom and json_atom["cf"]:
+                        self.assumptions.append(Not(atomZ3))
+                elif json_atom["value"]:
+                    if json_atom["typ"] == "Int":
+                        value = int(json_atom["value"])
+                    elif json_atom["typ"] == "Real":
+                        value = float(json_atom["value"])
+                    else:
+                        value = json_atom["value"]
+                    self.assumptions.append(atomZ3 == value)
 
     def args(self, val):
         a, _ = splitLast(list(map(self.z3_value, json.loads(val))))
@@ -383,11 +417,15 @@ class Structure:
     def getJSON(self):
         return json.dumps(self.m)
 
-    def initialise(self, case, atomZ3, all_false, all_true):
+    def initialise(self, case, atomZ3, ct_true, ct_false, value=""):
         for symb in case.symbols_of(atomZ3):
             s = self.m.setdefault(symb, {})
             key = json.dumps([atom_as_string(atomZ3)])
-            s.setdefault(key, {"ct": all_true, "cf": all_false})
+            typ = atomZ3.sort().name()
+            if typ == 'Bool':
+                s.setdefault(key, {"typ": typ, "ct": ct_true, "cf": ct_false})
+            else:
+                s.setdefault(key, {"typ": typ, "value": str(value)})
 
     def addAtom(self, case, atomZ3):
         sgn = "ct"
