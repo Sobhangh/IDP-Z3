@@ -315,6 +315,8 @@ class ConfigCase:
         for s in consqs:
             # consequences of a numeric is x = value !
             out.addAtom(self, s.children()[1], True, "") # take the consequence
+        if solver.check() == unsat:
+            raise Exception("Not satisifiable !")
         return out.m
 
     def atomsGrouped(self):

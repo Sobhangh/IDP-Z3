@@ -1,6 +1,5 @@
 
 entry of parameter:
-    - show inconsistent numeric entry
     - explain, addAtom
         - propagated ? -> explain
         - use user entry in explain
