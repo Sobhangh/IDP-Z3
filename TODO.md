@@ -1,15 +1,12 @@
 
 entry of parameter:
-    - reset choice should clear fields
-    - show if unique values - avoid inconsistent entries
-    - model expand + undo
+    - show inconsistent numeric entry
     - explain, addAtom
         - propagated ? -> explain
         - use user entry in explain
     - send on enter only
     - domain -> list box + ignore equality atoms with a constant
     - check syntax of int, real
-    - undo
     - garanteed order of appearance ?
 
 Other

@@ -106,16 +106,22 @@ class ConfigCase:
         solver.check()
         return solver.model()
 
-    def model_to_json(self, m):
+    def initial_structure(self):
         out = Structure(self)
+        for atomZ3 in self.atoms().values():
+            out.initialise(self, atomZ3, False, False, "")
+        return out
+
+    def model_to_json(self, m):
+        out = self.initial_structure()
         for atomZ3 in self.atoms().values():
             # atom might not have an interpretation in model (if "don't care")
             value = m.eval(atomZ3, model_completion=True)
             if atomZ3.sort().name() == 'Bool':
                 value = True if value else False
-                out.initialise(self, atomZ3, value, not value)
+                out.addAtom(self, atomZ3, value, "")
             else:
-                out.initialise(self, atomZ3, None, None, value)
+                out.addAtom(self, atomZ3, True, value)
         return out.m
 
     def atoms(self): # get the ordered set of atoms in the constraints
@@ -154,12 +160,6 @@ class ConfigCase:
         for constraint in self.constraints:
             atoms.update(getAtoms(constraint))
         return atoms
-
-    def outputstructure(self):
-        out = Structure(self)
-        for atomZ3 in self.atoms().values():
-            out.initialise(self, atomZ3, False, False, "")
-        return out
 
     def as_symbol(self, symb_str):
         #print(symb_str)
@@ -227,7 +227,7 @@ class ConfigCase:
     #################
 
     def relevance(self):
-        out = self.outputstructure()
+        out = self.initial_structure()
 
         solver = Solver()
         theo1 = And(self.constraints)
@@ -286,9 +286,9 @@ class ConfigCase:
                 pass
             elif is_and(assumption_expr):
                 for c in assumption_expr.children():
-                     out.addAtom(self, c)
+                     out.addAtom(self, c, True, "")
             else:
-                out.addAtom(self, assumption_expr)
+                out.addAtom(self, assumption_expr, True, "")
         return out.m
 
     def optimize(self, symbol, minimize):
@@ -309,11 +309,12 @@ class ConfigCase:
     def propagation(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
-        proplist = list(self.atoms().values())
+        proplist = list(self.atoms().values()) # numeric variables or atom !
         _, consqs = solver.consequences([], proplist)
-        out = self.outputstructure()
+        out = self.initial_structure()
         for s in consqs:
-            out.addAtom(self, s.children()[1]) # take the consequence
+            # consequences of a numeric is x = value !
+            out.addAtom(self, s.children()[1], True, "") # take the consequence
         return out.m
 
     def atomsGrouped(self):
@@ -418,22 +419,35 @@ class Structure:
         return json.dumps(self.m)
 
     def initialise(self, case, atomZ3, ct_true, ct_false, value=""):
+        key = json.dumps([atom_as_string(atomZ3)])
+        typ = atomZ3.sort().name()
         for symb in case.symbols_of(atomZ3):
             s = self.m.setdefault(symb, {})
-            key = json.dumps([atom_as_string(atomZ3)])
-            typ = atomZ3.sort().name()
             if typ == 'Bool':
                 s.setdefault(key, {"typ": typ, "ct": ct_true, "cf": ct_false})
             else:
                 s.setdefault(key, {"typ": typ, "value": str(value)})
 
-    def addAtom(self, case, atomZ3):
-        sgn = "ct"
+    def addAtom(self, case, atomZ3, truth, value):
+        if is_eq(atomZ3): # try to interpret it as an assignment
+            value = str(atomZ3.arg(1))
+            try:
+                if str(eval(value)) == value: # is this really a value ?
+                    self.addAtom(case, atomZ3.arg(0), True, atomZ3.arg(1))
+            except: pass
+        sgn = "ct" if truth else "cf"
         if is_not(atomZ3):
-            atomZ3, sgn = atomZ3.arg(0), "cf"
+            atomZ3, sgn = atomZ3.arg(0), "cf" if truth else "ct"
+        key = json.dumps([atom_as_string(atomZ3)])
+        typ = atomZ3.sort().name()
         for symb in case.symbols_of(atomZ3).keys():
             s = self.m.setdefault(symb, {})
-            s.setdefault(json.dumps([atom_as_string(atomZ3)]), {})[sgn] = True
+            if key in s:
+                if typ == 'Bool':
+                    s[key][sgn] = True
+                else:
+                    s[key]["typ"] = ""
+                    s[key]["value"] = str(value)
 
 
 def atom_as_string(expr):
