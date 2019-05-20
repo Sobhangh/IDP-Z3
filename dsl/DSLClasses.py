@@ -219,8 +219,11 @@ def expand_formula(vars, sorts, f, case, env):
                 for v in sorts[i].getRange(env):
                     try:
                         forms2.append(substitute(f, (z3vars[i], _py2expr(float(v)))))
-                    except Z3Exception:
-                        forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
+                    except:
+                        try:
+                            forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
+                        except:
+                            forms2.append(substitute(f, (z3vars[i], v)))
             forms = forms2
         else:
             finalvars.append(z3vars[i])
@@ -368,6 +371,7 @@ class ConstructedTypeDeclaration(object):
         env.type_scope[self.name] = type
         for i in cstrs:
             env.var_scope[obj_to_string(i)] = i
+        env.range_scope[self.name] = cstrs
 
 
 class RangeDeclaration(object):

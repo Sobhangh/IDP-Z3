@@ -95,6 +95,7 @@ def flatten(l):
 
 
 def in_list(q, ls):
+    if not ls: return True # e.g. for int, real
     outp = []
     for i in ls:
         outp.append(q == i)

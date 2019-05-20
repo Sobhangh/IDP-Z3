@@ -11,15 +11,19 @@ from DSLClasses import *
 model: File = idpparser.model_from_str("""
 vocabulary {
     type Domain = {1..2}
+    type color constructed from {red, blue, green}
     p
     q(Domain)
     x : Domain
-    y(Domain): Domain
+    y(Domain): int
+    c(color)
 }
 
 theory {
     p | q(1) & ~ q(2).
     x=1 | y(1)=1 | y(2)=1.
+    y(x)=x.
+    ?z[color]: c(z).
 }
 """)
 
@@ -30,3 +34,5 @@ model.translate(c)
 print(c.mk_solver())
 print(c.mk_solver().check())
 print(c.model())
+
+print(c.relevantVals)

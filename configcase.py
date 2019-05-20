@@ -22,38 +22,6 @@ class ConfigCase:
     # BUILDER FUNCTIONS
     #################
 
-    def IntsInRange(self, txt: str, underbound: Int, upperbound: Int):
-        int_consts = Ints(txt) # an unknown constant function of type int
-        values = list(map(singleton, map(_py2expr, range(underbound, upperbound + 1))))
-        for int_const in int_consts:
-            self.relevantVals[int_const] = values
-            self.typeConstraints.append(underbound <= int_const)
-            self.typeConstraints.append(int_const <= upperbound)
-            self.symbols.append(int_const)
-        return int_consts
-
-    def Reals(self, txt: str, rang: List[float], restrictive=False):
-        real_consts = Reals(txt)
-        values: List[ArithRef] = list(map(_py2expr, rang))
-        for real_const in real_consts:
-            self.symbols.append(real_const)
-            self.relevantVals[real_const] = list(map(singleton, values))
-            if restrictive:
-                self.typeConstraints.append(in_list(real_const, values))
-        return real_consts
-
-    def Bools(self, txt: str):
-        bool_consts = Bools(txt)
-        for bool_const in bool_consts:
-            self.symbols.append(bool_const)
-        return bool_consts
-
-    def Consts(self, txt: str, sort):
-        consts = Consts(txt, sort)
-        for const in consts:
-            self.symbols.append(const)
-        return consts
-
     def Const(self, txt: str, sort):
         const = Const(txt, sort)
         self.symbols.append(const)
@@ -137,8 +105,13 @@ class ConfigCase:
             return is_really_constant(expr) or \
                 (0 < len(expr.children()) and has_ground_children(expr))
 
+        def has_vars(expr):
+            return is_var(expr) or \
+                (0 < len(expr.children()) and any([has_vars(child) for child in expr.children()]))
+
         def getTerms(expr):
             out = {}  # Ordered dict: string -> Z3 object
+            if not is_app(expr): return out
             if not is_bool(expr) and not is_really_constant(expr) and has_ground_children(expr):
                     out = {atom_as_string(expr): expr}
             for child in expr.children():
@@ -149,13 +122,12 @@ class ConfigCase:
             out = {}  # Ordered dict: string -> Z3 object
             for child in expr.children():
                 out.update(getAtoms(child))
-            if is_bool(expr) and len(out) == 0:
-                if not any([is_var(child) for child in expr.children()]): # for quantified formulas ?
-                    out = {atom_as_string(expr): expr}
+            if is_bool(expr) and len(out) == 0 and not has_vars(expr): # for quantified formulas
+                out = {atom_as_string(expr): expr}
             return out
 
         atoms = {}
-        for constraint in self.constraints:
+        for constraint in self.constraints+self.typeConstraints:
             atoms.update(getTerms(constraint))
         for constraint in self.constraints:
             atoms.update(getAtoms(constraint))
@@ -363,14 +335,15 @@ class ConfigCase:
 
             atoms = [] # [(atom_string, atomZ3)]
             for atom_string, atomZ3 in self.atoms().items():
-                truth = solver.model().eval(atomZ3)
-                if truth == True:
-                    atoms += [ (atom_string, atomZ3) ]
-                elif truth == False:
-                    atoms += [ ("Not " + atom_string, Not(atomZ3) ) ]
-                else: # undefined
-                    atoms += [ ("? " + atom_string, BoolVal(True)) ]
-                # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
+                if is_bool(atomZ3):
+                    truth = solver.model().eval(atomZ3)
+                    if truth == True:
+                        atoms += [ (atom_string, atomZ3) ]
+                    elif truth == False:
+                        atoms += [ ("Not " + atom_string, Not(atomZ3) ) ]
+                    else: # undefined
+                        atoms += [ ("? " + atom_string, BoolVal(True)) ]
+                    # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
             # check if atoms are relevant
             # atoms1 = atoms
