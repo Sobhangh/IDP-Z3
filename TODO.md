@@ -1,5 +1,6 @@
 
 reduce differences with idp:
+    - partial vs total functions
     - support recursive constructors
     - support type hierarchy
     - type inference
