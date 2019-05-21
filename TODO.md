@@ -1,15 +1,16 @@
 
 for the paper:
-    - maximize
+    - relevance in abstraction
 
 functional NTH:
-    - convert fractions
     - send on enter only
+    - convert fractions
+    - update formulas
     - domain -> list box + ignore equality atoms with a constant
     - check syntax of int, real
     - garanteed order of appearance ?
 
-    - relevance
+    - relevance in UI
     - inject found value into atom and simplify
     - implication semantics for definitions
     - simplify intervals

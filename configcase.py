@@ -293,14 +293,14 @@ class ConfigCase:
         solver = Optimize()
         solver.add(self.constraints)
         solver.add(self.typeConstraints)
+        for assumption in self.assumptions:
+            solver.add(assumption)
         s = self.as_symbol(symbol)
         if minimize:
             solver.minimize(s)
         else:
             solver.maximize(s)
 
-        for assumption in self.assumptions:
-            solver.add(assumption)
         solver.check()
         return self.model_to_json(solver)
 
