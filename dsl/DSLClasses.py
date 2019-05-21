@@ -197,15 +197,17 @@ class AQuantification(object):
         finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
 
         if self.q == '!':
+            forms = And(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0:
-                return ForAll(finalvars, And(forms))
+                return ForAll(finalvars, forms)
             else:
-                return And(forms)
+                return forms
         else:
+            forms = Or(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0:
-                return Exists(finalvars, Or(forms))
+                return Exists(finalvars, forms)
             else:
-                return Or(forms)
+                return forms
 
 
 def expand_formula(vars, sorts, f, case, env):

@@ -68,11 +68,11 @@ class ConfigCase:
         s.add(self.typeConstraints)
         return s
 
-    def model(self):
+    def expand(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
         solver.check()
-        return solver.model()
+        return self.model_to_json(solver)
 
     def initial_structure(self):
         out = Structure(self)
@@ -80,16 +80,35 @@ class ConfigCase:
             out.initialise(self, atomZ3, False, False, "")
         return out
 
-    def model_to_json(self, m):
+
+    def quantified(self, s):
+        # creates predicates equivalent to the infinitely-quantified formulas
+        # returns ({atomZ3: predicate}, {predicate: atomZ3})
+        count, (reify, unreify) = 0, ({}, {})
+        for atomZ3 in self.atoms().values():
+            if is_quantifier(atomZ3):
+                count += 1
+                const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
+                s.add(const == atomZ3)
+                reify[atomZ3] = const
+                unreify[const]    = atomZ3
+            else:
+                reify[atomZ3] = atomZ3
+                unreify[atomZ3] = atomZ3
+        return (reify, unreify)
+
+    def model_to_json(self, s):
+        m = s.model()
         out = self.initial_structure()
+        (reify, unreify) = self.quantified(s)
         for atomZ3 in self.atoms().values():
             # atom might not have an interpretation in model (if "don't care")
-            value = m.eval(atomZ3, model_completion=True)
+            value = m.eval(reify[atomZ3], model_completion=True)
             if atomZ3.sort().name() == 'Bool':
                 value = True if value else False
-                out.addAtom(self, atomZ3, value, "")
+                out.addAtom(self, atomZ3, unreify, value, "")
             else:
-                out.addAtom(self, atomZ3, True, value)
+                out.addAtom(self, atomZ3, unreify, True, value)
         return out.m
 
     def atoms(self): # get the ordered set of atoms in the constraints
@@ -122,7 +141,8 @@ class ConfigCase:
             out = {}  # Ordered dict: string -> Z3 object
             for child in expr.children():
                 out.update(getAtoms(child))
-            if is_bool(expr) and len(out) == 0 and not has_vars(expr): # for quantified formulas
+            if is_bool(expr) and len(out) == 0 and \
+                ( not has_vars(expr) or is_quantifier(expr) ): # for quantified formulas
                 out = {atom_as_string(expr): expr}
             return out
 
@@ -251,6 +271,7 @@ class ConfigCase:
         to_explain = self.atoms()[value[2:-2]] # value is an atom string
         _, consqs = solver.consequences(self.assumptions, [to_explain])
 
+        (_, unreify) = self.quantified(solver)
         out = Structure(self)
         for cons in consqs:
             assumption_expr = cons.children()[0]
@@ -258,9 +279,9 @@ class ConfigCase:
                 pass
             elif is_and(assumption_expr):
                 for c in assumption_expr.children():
-                     out.addAtom(self, c, True, "")
+                     out.addAtom(self, c, unreify, True, "")
             else:
-                out.addAtom(self, assumption_expr, True, "")
+                out.addAtom(self, assumption_expr, unreify, True, "")
         return out.m
 
     def optimize(self, symbol, minimize):
@@ -276,19 +297,20 @@ class ConfigCase:
         for assumption in self.assumptions:
             solver.add(assumption)
         solver.check()
-        return self.model_to_json(solver.model())
+        return self.model_to_json(solver)
 
     def propagation(self):
         solver = self.mk_solver()
         solver.add(self.assumptions)
-        proplist = list(self.atoms().values()) # numeric variables or atom !
+        (_, unreify) = self.quantified(solver)
+        proplist = list(unreify.keys()) # numeric variables or atom !
         _, consqs = solver.consequences([], proplist)
         out = self.initial_structure()
         for s in consqs:
             # consequences of a numeric is x = value !
-            out.addAtom(self, s.children()[1], True, "") # take the consequence
+            out.addAtom(self, s.children()[1], unreify, True, "") # take the consequence
         if solver.check() == unsat:
-            raise Exception("Not satisifiable !")
+            raise Exception("Not satisfiable !")
         return out.m
 
     def atomsGrouped(self):
@@ -307,9 +329,11 @@ class ConfigCase:
 
     def symbols_of(self, expr): # returns a dict
         out = {} # for unicity (ordered set)
-        name = expr.decl().name()
-        if self.is_symbol(name):
-            out[name] = name
+        try:
+            name = expr.decl().name()
+            if self.is_symbol(name):
+                out[name] = name
+        except: pass
         for child in expr.children():
             out.update(self.symbols_of(child))
         return out
@@ -328,6 +352,7 @@ class ConfigCase:
         for atomZ3 in self.atoms().values():
             for symb in self.symbols_of(atomZ3).keys():
                 models[symb] = []
+        (reify, _) = self.quantified(solver)
 
         while solver.check() == sat: # for each parametric model
             #for symb in self.symbols:
@@ -336,7 +361,7 @@ class ConfigCase:
             atoms = [] # [(atom_string, atomZ3)]
             for atom_string, atomZ3 in self.atoms().items():
                 if is_bool(atomZ3):
-                    truth = solver.model().eval(atomZ3)
+                    truth = solver.model().eval(reify[atomZ3])
                     if truth == True:
                         atoms += [ (atom_string, atomZ3) ]
                     elif truth == False:
@@ -403,16 +428,17 @@ class Structure:
             else:
                 s.setdefault(key, {"typ": typ, "value": str(value)})
 
-    def addAtom(self, case, atomZ3, truth, value):
+    def addAtom(self, case, atomZ3, unreify, truth, value):
         if is_eq(atomZ3): # try to interpret it as an assignment
             value = str(atomZ3.arg(1))
             try:
                 if str(eval(value)) == value: # is this really a value ?
-                    self.addAtom(case, atomZ3.arg(0), True, atomZ3.arg(1))
+                    self.addAtom(case, atomZ3.arg(0), unreify, True, atomZ3.arg(1))
             except: pass
         sgn = "ct" if truth else "cf"
         if is_not(atomZ3):
             atomZ3, sgn = atomZ3.arg(0), "cf" if truth else "ct"
+        atomZ3 = unreify[atomZ3] if atomZ3 in unreify else atomZ3
         key = json.dumps([atom_as_string(atomZ3)])
         typ = atomZ3.sort().name()
         for symb in case.symbols_of(atomZ3).keys():

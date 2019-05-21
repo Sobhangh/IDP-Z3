@@ -1,10 +1,20 @@
+vocabulary {
+    Radial
+    InnerDiameter : real
+    OuterDiameter : real
+    Length : real
+    Depth : real
+    type spring constructed from {b,c,d,e,f}
+    cSID : spring
+}
 
-  vocabulary {
-      x : real
-      p
-  }
+theory {
+    Radial => Depth = (OuterDiameter-InnerDiameter) / 2.0 .
+    ~Radial => Depth = Length.
 
-  theory {
-       p => x<0.
-      ~p => 0<x.
-  }
+    2.104 =< Depth & Depth =< 2.476 <=> cSID=b.
+    2.768 =< Depth & Depth =< 3.391 <=> cSID=c.
+    4.294 =< Depth & Depth =< 5.206 <=> cSID=d.
+    5.474 =< Depth & Depth =< 6.686 <=> cSID=e.
+     8.312 =< Depth & Depth =< 10.748 <=> cSID=f.
+}

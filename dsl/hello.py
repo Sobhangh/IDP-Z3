@@ -31,8 +31,9 @@ c = ConfigCase()
 
 model.translate(c)
 
-print(c.mk_solver())
-print(c.mk_solver().check())
-print(c.model())
+solver = c.mk_solver()
+print(solver)
+print(solver.check())
+print(solver.model())
 
 print(c.relevantVals)
