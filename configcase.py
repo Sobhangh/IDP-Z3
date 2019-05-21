@@ -111,46 +111,48 @@ class ConfigCase:
                 out.addAtom(self, atomZ3, unreify, True, value)
         return out.m
 
-    def atoms(self): # get the ordered set of atoms in the constraints
-        def is_really_constant(expr):
-            return (obj_to_string(expr) in self.valueMap) \
-                or is_number(obj_to_string(expr)) \
-                or is_true(expr) or is_false(expr)
+    def is_really_constant(self, expr):
+        return (obj_to_string(expr) in self.valueMap) \
+            or is_number(obj_to_string(expr)) \
+            or is_true(expr) or is_false(expr)
 
-        def has_ground_children(expr):
-            return all([is_ground(child) for child in expr.children()])
+    def has_ground_children(self, expr):
+        return all([self.is_ground(child) for child in expr.children()])
 
-        def is_ground(expr):
-            return is_really_constant(expr) or \
-                (0 < len(expr.children()) and has_ground_children(expr))
+    def is_ground(self, expr):
+        return self.is_really_constant(expr) or \
+            (0 < len(expr.children()) and self.has_ground_children(expr))
 
-        def has_vars(expr):
-            return is_var(expr) or \
-                (0 < len(expr.children()) and any([has_vars(child) for child in expr.children()]))
+    def has_vars(self, expr):
+        return is_var(expr) or \
+               ( 0 < len(expr.children()) \
+                 and any([self.has_vars(child) for child in expr.children()]))
 
-        def getTerms(expr):
-            out = {}  # Ordered dict: string -> Z3 object
-            if not is_app(expr): return out
-            if not is_bool(expr) and not is_really_constant(expr) and has_ground_children(expr):
-                    out = {atom_as_string(expr): expr}
-            for child in expr.children():
-                    out.update(getTerms(child))
-            return out
-
-        def getAtoms(expr):
-            out = {}  # Ordered dict: string -> Z3 object
-            for child in expr.children():
-                out.update(getAtoms(child))
-            if is_bool(expr) and len(out) == 0 and \
-                ( not has_vars(expr) or is_quantifier(expr) ): # for quantified formulas
+    def getTerms(self, expr):
+        out = {}  # Ordered dict: string -> Z3 object
+        if not is_app(expr): return out
+        if not is_bool(expr) and not self.is_really_constant(expr) \
+           and self.has_ground_children(expr):
                 out = {atom_as_string(expr): expr}
-            return out
+        for child in expr.children():
+                out.update(self.getTerms(child))
+        return out
 
+    def getAtoms(self, expr):
+        out = {}  # Ordered dict: string -> Z3 object
+        for child in expr.children():
+            out.update(self.getAtoms(child))
+        if is_bool(expr) and len(out) == 0 and \
+            ( not self.has_vars(expr) or is_quantifier(expr) ): # for quantified formulas
+            out = {atom_as_string(expr): expr}
+        return out
+
+    def atoms(self): # get the ordered set of atoms in the constraints
         atoms = {}
         for constraint in self.constraints+self.typeConstraints:
-            atoms.update(getTerms(constraint))
+            atoms.update(self.getTerms(constraint))
         for constraint in self.constraints:
-            atoms.update(getAtoms(constraint))
+            atoms.update(self.getAtoms(constraint))
         return atoms
 
     def as_symbol(self, symb_str):
@@ -272,14 +274,17 @@ class ConfigCase:
         _, consqs = solver.consequences(self.assumptions, [to_explain])
 
         (_, unreify) = self.quantified(solver)
-        out = Structure(self)
+        out = self.initial_structure()
+        for ass in self.assumptions:
+            for atomZ3 in self.getAtoms(ass).values():
+                out.initialise(self, atomZ3, False, False, "")
         for cons in consqs:
             assumption_expr = cons.children()[0]
             if is_true(assumption_expr):
                 pass
             elif is_and(assumption_expr):
                 for c in assumption_expr.children():
-                     out.addAtom(self, c, unreify, True, "")
+                    out.addAtom(self, c, unreify, True, "")
             else:
                 out.addAtom(self, assumption_expr, unreify, True, "")
         return out.m
@@ -433,11 +438,11 @@ class Structure:
             value = str(atomZ3.arg(1))
             try:
                 if str(eval(value)) == value: # is this really a value ?
-                    self.addAtom(case, atomZ3.arg(0), unreify, True, atomZ3.arg(1))
+                    self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1))
             except: pass
         sgn = "ct" if truth else "cf"
         if is_not(atomZ3):
-            atomZ3, sgn = atomZ3.arg(0), "cf" if truth else "ct"
+            atomZ3, sgn, truth = atomZ3.arg(0), "cf" if truth else "ct", truth
         atomZ3 = unreify[atomZ3] if atomZ3 in unreify else atomZ3
         key = json.dumps([atom_as_string(atomZ3)])
         typ = atomZ3.sort().name()

@@ -44,7 +44,7 @@ class eval(Resource):
 
                 method = args['method']
                 active = args['active']
-                print(args)
+                #print(args)
                 out = {}
                 if method == "init":
                     out = case.atomsGrouped()
@@ -74,7 +74,7 @@ class eval(Resource):
                         case = ConfigCase(idpModel.translate)
                     case.loadStructureFromJson(active)
                     out = case.parametric()
-                print(out)
+                #print(out)
                 return out
             except Exception as exc:
                 return str(exc)

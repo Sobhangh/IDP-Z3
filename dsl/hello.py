@@ -24,6 +24,7 @@ theory {
     x=1 | y(1)=1 | y(2)=1.
     y(x)=x.
     ?z[color]: c(z).
+    p => (?t[int]: y(t)=2).
 }
 """)
 

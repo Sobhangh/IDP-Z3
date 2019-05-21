@@ -1,25 +1,22 @@
 
 for the paper:
-    - infinitely quantified expression: eval by Z3 ? propagation ?  model ?
-    - disequality atoms
     - maximize
-    - explain, addAtom
-        - propagated ? -> explain
-        - use user entry in explain
 
-NTH:
+functional NTH:
+    - convert fractions
     - send on enter only
     - domain -> list box + ignore equality atoms with a constant
     - check syntax of int, real
     - garanteed order of appearance ?
 
-    - convert fractions
     - relevance
     - inject found value into atom and simplify
     - implication semantics for definitions
     - simplify intervals
     - keep quantified expressions in full
 
-Nice To Have
+other NTH (refactor)
+    - distinguish between x=1 entry and x=1 atom in output structure
+    - simplify Or, And with only one element
     - why multiple unnecessary calls to idp ?
     - p(real) should be possible
