@@ -435,9 +435,8 @@ class Structure:
 
     def addAtom(self, case, atomZ3, unreify, truth, value):
         if is_eq(atomZ3): # try to interpret it as an assignment
-            value = str(atomZ3.arg(1))
             try:
-                if str(eval(value)) == value: # is this really a value ?
+                if is_int(atomZ3.arg(1)) or is_real(atomZ3.arg(1)): # is this really a value ?
                     self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1))
             except: pass
         sgn = "ct" if truth else "cf"
@@ -453,7 +452,7 @@ class Structure:
                     s[key][sgn] = True
                 else:
                     s[key]["typ"] = ""
-                    s[key]["value"] = str(value)
+                    s[key]["value"] = str(eval(str(value))) # compute fraction
 
 
 def atom_as_string(expr):

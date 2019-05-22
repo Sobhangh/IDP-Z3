@@ -81,13 +81,17 @@ class eval(Resource):
 
 class meta(Resource):
     def post(self):
-        args = parser.parse_args()
-        try:
-            idpModel = idpparser.model_from_str(args['code'])
-            return ConfigCase(idpModel.translate).metaJSON()
-        except Exception as exc:
-            traceback.print_exc()
-            return repr(exc)
+        with z3lock:
+            try:
+                args = parser.parse_args()
+                try:
+                    idpModel = idpparser.model_from_str(args['code'])
+                    return ConfigCase(idpModel.translate).metaJSON()
+                except Exception as exc:
+                    traceback.print_exc()
+                    return repr(exc)
+            except Exception as exc:
+                return str(exc)
 
 
 @app.route('/', methods=['GET'])
