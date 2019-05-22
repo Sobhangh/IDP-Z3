@@ -435,10 +435,9 @@ class Structure:
 
     def addAtom(self, case, atomZ3, unreify, truth, value):
         if is_eq(atomZ3): # try to interpret it as an assignment
-            try:
-                if is_int(atomZ3.arg(1)) or is_real(atomZ3.arg(1)): # is this really a value ?
-                    self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1))
-            except: pass
+            if atomZ3.arg(1).__class__.__name__ in \
+                ["IntNumRef", "RatNumRef", "AlgebraicNumRef"]: # is this really a value ?
+                self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1))
         sgn = "ct" if truth else "cf"
         if is_not(atomZ3):
             atomZ3, sgn, truth = atomZ3.arg(0), "cf" if truth else "ct", truth
