@@ -131,7 +131,7 @@ class ConfigCase:
     def getTerms(self, expr):
         out = {}  # Ordered dict: string -> Z3 object
         if not is_app(expr): return out
-        if not is_bool(expr) and not self.is_really_constant(expr) \
+        if expr.sort().name() in ["Real", "Int"] and not self.is_really_constant(expr) \
            and self.has_ground_children(expr):
                 out = {atom_as_string(expr): expr}
         for child in expr.children():
@@ -293,8 +293,7 @@ class ConfigCase:
         solver = Optimize()
         solver.add(self.constraints)
         solver.add(self.typeConstraints)
-        for assumption in self.assumptions:
-            solver.add(assumption)
+        solver.add(self.assumptions)
         s = self.as_symbol(symbol)
         if minimize:
             solver.minimize(s)
@@ -430,7 +429,7 @@ class Structure:
             s = self.m.setdefault(symb, {})
             if typ == 'Bool':
                 s.setdefault(key, {"typ": typ, "ct": ct_true, "cf": ct_false})
-            else:
+            elif typ in ["Real", "Int"]:
                 s.setdefault(key, {"typ": typ, "value": str(value)})
 
     def addAtom(self, case, atomZ3, unreify, truth, value):
@@ -449,7 +448,7 @@ class Structure:
             if key in s:
                 if typ == 'Bool':
                     s[key][sgn] = True
-                else:
+                elif typ in ["Real", "Int"] :
                     s[key]["typ"] = ""
                     s[key]["value"] = str(eval(str(value))) # compute fraction
 
