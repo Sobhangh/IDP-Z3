@@ -91,6 +91,26 @@ class ConfigCase:
     # UTILITIES
     #################
 
+    def interpretSymbol(self, symbol, args, default):
+        z3_symb = self.as_symbol(symbol)
+        vars = self.as_symbol(z3_symb)
+
+        out = default
+
+        for tup in args:
+            comps = []
+            for var, arg in zip(vars, tup):
+                comps.append(var == self.z3_value(arg))
+            out = If(And(comps), self.z3_value(tup[-1]), out)
+
+        self.typeConstraints.append(out)
+
+    def argVars(self, z3_symb):
+        if type(z3_symb) == FuncDeclRef:
+            return [Const('ci' + str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())]
+        else:
+            return []
+
     def add(self, constraint):
         self.constraints.append(constraint)
 
