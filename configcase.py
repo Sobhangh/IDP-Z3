@@ -347,9 +347,17 @@ class ConfigCase:
         return symbs[0] if symbs != [] else None
 
 
-    def parametric(self):
+    def abstract(self):
+        out = {}
         solver = self.mk_solver()
+
+        # extract fixed atoms in constraints
+        # TODO e.g. for quantifiers
+
         solver.add(self.assumptions)
+
+        # extract assumptions and their consequences
+
         models, count = {}, 0
 
         # create keys for models using first symbol of atoms
@@ -358,14 +366,13 @@ class ConfigCase:
                 models[symb] = [] # models[symb][row] = [relevant atoms]
         (reify, _) = self.quantified(solver)
 
-        active_symbol = {}
         while solver.check() == sat: # for each parametric model
             #for symb in self.symbols:
             #    print (symb, solver.model().eval(symb))
 
             atoms = [] # [(atom_string, atomZ3)]
             for atom_string, atomZ3 in self.atoms().items():
-                if is_bool(atomZ3):
+                if is_bool(atomZ3): #TODO and is not fixed
                     truth = solver.model().eval(reify[atomZ3])
                     if truth == True:
                         atoms += [ (atom_string, atomZ3) ]
@@ -378,20 +385,6 @@ class ConfigCase:
             # remove consequences
             # TODO
 
-            # check if atoms are relevant
-            # atoms1 = atoms
-            # for current, (atom_string, atomZ3) in enumerate(atoms):
-            #     print("step 1")
-            #     solver.push()
-            #     alternative = And([ Not(a) if j==current else a for j, (_,a) in enumerate(atoms1) ])
-            #     print("step 2")
-            #     solver.add(alternative)
-            #     print("step 3")
-            #     if solver.check() == sat: # atom can be true or false !
-            #         print( "Dropping: ", atom_string)
-            #         atoms[current] = ("? " + atom_string, True)
-            #     solver.pop()
-
             # add constraint to eliminate this model
             modelZ3 = And( [atomZ3 for (_, atomZ3) in atoms] )
             solver.add(Not(modelZ3))
@@ -400,18 +393,26 @@ class ConfigCase:
             model = {}
             for atom_string, atomZ3 in atoms:
                 for symb in self.symbols_of(atomZ3).keys():
-                    active_symbol[symb] = True
                     model.setdefault(symb, []).append([ atom_string ])
             # add to models
             for k,v in models.items(): # add model
                 models[k] = v + [ model[k] if k in model else [] ]
             count +=1
 
+        # join disjuncts
+        # TODO
+
+        # detect symbols with atoms
+        active_symbol = {}
+        for symb in models.keys():
+            for i in range(count):
+                if not models[symb][i] == []:
+                    active_symbol[symb] = True
+
         # build table of models
-        out = {}
-        out["variable"] = [[ [k] for k in models.keys() if k in active_symbol ]]
+        out["variable"] = [[ [symb] for symb in models.keys() if symb in active_symbol ]]
         for i in range(count):
-            out["variable"] += [[ models[k][i] for k in models.keys() if k in active_symbol ]]
+            out["variable"] += [[ models[symb][i] for symb in models.keys() if symb in active_symbol ]]
         return out
 
 class Structure:

@@ -63,7 +63,7 @@ class eval(Resource):
                 if method == "minimize":
                     case.loadStructureFromJson(active)
                     out = case.optimize(args['symbol'], args['minimize'])
-                if method == "parametric":
+                if method == "abstract":
                     if args['symbol'] != "": # theory to explain ?
                         newTheory = ( str(idpModel.vocabulary)
                                     + "theory {\n"
@@ -73,7 +73,7 @@ class eval(Resource):
                         idpModel = idpparser.model_from_str(newTheory)
                         case = ConfigCase(idpModel.translate)
                     case.loadStructureFromJson(active)
-                    out = case.parametric()
+                    out = case.abstract()
                 #print(out)
                 return out
             except Exception as exc:
