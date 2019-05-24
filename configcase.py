@@ -355,9 +355,10 @@ class ConfigCase:
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms().values():
             for symb in self.symbols_of(atomZ3).keys():
-                models[symb] = []
+                models[symb] = [] # models[symb][row] = [relevant atoms]
         (reify, _) = self.quantified(solver)
 
+        active_symbol = {}
         while solver.check() == sat: # for each parametric model
             #for symb in self.symbols:
             #    print (symb, solver.model().eval(symb))
@@ -373,6 +374,9 @@ class ConfigCase:
                     else: # undefined
                         atoms += [ ("? " + atom_string, BoolVal(True)) ]
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
+
+            # remove consequences
+            # TODO
 
             # check if atoms are relevant
             # atoms1 = atoms
@@ -396,6 +400,7 @@ class ConfigCase:
             model = {}
             for atom_string, atomZ3 in atoms:
                 for symb in self.symbols_of(atomZ3).keys():
+                    active_symbol[symb] = True
                     model.setdefault(symb, []).append([ atom_string ])
             # add to models
             for k,v in models.items(): # add model
@@ -403,9 +408,10 @@ class ConfigCase:
             count +=1
 
         # build table of models
-        out = [[ [k] for k in models.keys()]]
+        out = {}
+        out["variable"] = [[ [k] for k in models.keys() if k in active_symbol ]]
         for i in range(count):
-            out += [[v[i] for v in models.values()]]
+            out["variable"] += [[ models[k][i] for k in models.keys() if k in active_symbol ]]
         return out
 
 class Structure:
