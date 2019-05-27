@@ -120,31 +120,45 @@ class Rule(object):
 
 
 class BinaryOperator(object):
+    MAP = {  '&': lambda x, y: And(x, y),
+            '|': lambda x, y: Or(x, y),
+            '=>': lambda x, y: Or(Not(x), y),
+            '<=': lambda x, y: Or(x, Not(y)),
+            '<=>': lambda x, y: x == y,
+            '+': lambda x, y: x + y,
+            '-': lambda x, y: x - y,
+            '*': lambda x, y: x * y,
+            '/': lambda x, y: x / y,
+            '=': lambda x, y: x == y,
+            '<': lambda x, y: x < y,
+            '>': lambda x, y: x > y,
+            '=<': lambda x, y: x <= y,
+            '>=': lambda x, y: x >= y,
+            '~=': lambda x, y: x != y
+            }
+
     def __init__(self, **kwargs):
         self.fs = kwargs.pop('fs')
         self.operator = kwargs.pop('operator')
-        self.mapping = {'&': lambda x, y: And(x, y),
-                        '|': lambda x, y: Or(x, y),
-                        '=>': lambda x, y: Or(Not(x), y),
-                        '<=': lambda x, y: Or(x, Not(y)),
-                        '<=>': lambda x, y: x == y,
-                        '+': lambda x, y: x + y,
-                        '-': lambda x, y: x - y,
-                        '*': lambda x, y: x * y,
-                        '/': lambda x, y: x / y,
-                        '=': lambda x, y: x == y,
-                        '<': lambda x, y: x < y,
-                        '>': lambda x, y: x > y,
-                        '=<': lambda x, y: x <= y,
-                        '>=': lambda x, y: x >= y,
-                        '~=': lambda x, y: x != y
-                        }
 
     def translate(self, case: ConfigCase, env: Environment):
-        out = self.fs[0].translate(case, env)
-        for i in range(1, len(self.fs)):
-            function = self.mapping[self.operator[i - 1]]
-            out = function(out, self.fs[i].translate(case, env))
+        # chained comparisons -> And()
+        if self.operator[0] in ['=', '<', '>', '=<', '>=', '~=']:
+            out = []
+            string = str(self.fs[0].translate(case, env))
+            for i in range(1, len(self.fs)):
+                x = self.fs[i-1].translate(case, env)
+                function = BinaryOperator.MAP[self.operator[i - 1]]
+                y = self.fs[i].translate(case, env)
+                out = out + [function(x, y)]
+                string = string + self.operator[i-1] + str(y)
+            out = And(out)
+        else:
+            out = self.fs[0].translate(case, env)
+
+            for i in range(1, len(self.fs)):
+                function = BinaryOperator.MAP[self.operator[i - 1]]
+                out = function(out, self.fs[i].translate(case, env))
         return out
 
 
@@ -171,18 +185,17 @@ class ASumMinus(BinaryOperator): pass
 
 class AMultDiv(BinaryOperator): pass
 
-
 class AUnary(object):
+    MAP = {'-': lambda x: 0 - x,
+           '~': lambda x: Not(x)
+          }
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
-        self.mapping = {'-': lambda x: 0 - x,
-                        '~': lambda x: Not(x)
-                        }
 
     def translate(self, case: ConfigCase, env: Environment):
         out = self.f.translate(case, env)
-        function = self.mapping[self.operator]
+        function = AUnary.MAP[self.operator]
         return function(out)
 
 

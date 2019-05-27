@@ -12,9 +12,9 @@ theory {
     Radial => Depth = (OuterDiameter-InnerDiameter) / 2.0 .
     ~Radial => Depth = Length.
 
-    2.104 =< Depth & Depth =< 2.476 <=> cSID=b.
-    2.768 =< Depth & Depth =< 3.391 <=> cSID=c.
-    4.294 =< Depth & Depth =< 5.206 <=> cSID=d.
-    5.474 =< Depth & Depth =< 6.686 <=> cSID=e.
-     8.312 =< Depth & Depth =< 10.748 <=> cSID=f.
+    2.104 =< Depth =< 2.476 <=> cSID=b.
+    2.768 =< Depth =< 3.391 <=> cSID=c.
+    4.294 =< Depth =< 5.206 <=> cSID=d.
+    5.474 =< Depth =< 6.686 <=> cSID=e.
+     8.312 =< Depth =< 10.748 <=> cSID=f.
 }
