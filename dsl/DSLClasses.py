@@ -141,18 +141,25 @@ class BinaryOperator(object):
         self.fs = kwargs.pop('fs')
         self.operator = kwargs.pop('operator')
 
+    def __str__(self):
+        out = str(self.fs[0])
+        for i in range(1, len(self.fs)):
+            op = self.operator[i-1]
+            op = "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else op
+            out = out + " " + op + " " + str(self.fs[i])
+        return out
+
     def translate(self, case: ConfigCase, env: Environment):
         # chained comparisons -> And()
         if self.operator[0] in ['=', '<', '>', '=<', '>=', '~=']:
             out = []
-            string = str(self.fs[0].translate(case, env))
             for i in range(1, len(self.fs)):
                 x = self.fs[i-1].translate(case, env)
                 function = BinaryOperator.MAP[self.operator[i - 1]]
                 y = self.fs[i].translate(case, env)
                 out = out + [function(x, y)]
-                string = string + self.operator[i-1] + str(y)
-            out = And(out)
+            out = And(out) if 1 < len(out) else out[0]
+            case.Atom(str(self), out)
         else:
             out = self.fs[0].translate(case, env)
 
@@ -193,6 +200,9 @@ class AUnary(object):
         self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
 
+    def __str__(self):
+        return self.operator + str(self.f)
+
     def translate(self, case: ConfigCase, env: Environment):
         out = self.f.translate(case, env)
         function = AUnary.MAP[self.operator]
@@ -206,20 +216,32 @@ class AQuantification(object):
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
 
+    def __str__(self):
+        out  = self.q
+        out += "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
+        out += " : " + str(self.f)
+        return out
+
     def translate(self, case: ConfigCase, env: Environment):
         finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
 
         if self.q == '!':
             forms = And(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0:
-                return ForAll(finalvars, forms)
+            if len(finalvars) > 0: # not fully expanded !
+                out = ForAll(finalvars, forms)
+                case.Atom(str(self), out)
+                return out
             else:
+                case.Atom(str(self), forms)
                 return forms
         else:
             forms = Or(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0:
-                return Exists(finalvars, forms)
+            if len(finalvars) > 0: # not fully expanded !
+                out = Exists(finalvars, forms)
+                case.Atom(str(self), out)
+                return out
             else:
+                case.Atom(str(self), forms)
                 return forms
 
 
@@ -273,6 +295,9 @@ class AAggregate(object):
         if self.aggtype != "sum" and self.set.out is not None:
             raise Exception("Can't have output variable for #")
 
+    def __str__(self):
+        return self.aggtype + str(self.set)
+
     def translate(self, case: ConfigCase, env: Environment):
         return Sum(self.set.translate(case, env))
 
@@ -282,6 +307,9 @@ class IfExpr(object):
         self.if_f = kwargs.pop('if_f')
         self.then_f = kwargs.pop('then_f')
         self.else_f = kwargs.pop('else_f')
+
+    def __str__(self):
+        return "if " + str(self.if_f) + " then " + str(self.then_f) + " else " + str(self.else_f)
 
     def translate(self, case: ConfigCase, env: Environment):
         return If(self.if_f.translate(case, env), self.then_f.translate(case, env), self.else_f.translate(case, env))
@@ -293,6 +321,13 @@ class SetExp(object):
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
+
+    def __str__(self):
+        out = "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
+        out += ":" + str(self.f)
+        if self.out: out += str(self.out)
+        out += "}"
+        return out
 
     def translate(self, case: ConfigCase, env: Environment):
         form = IfExpr(if_f=self.f, then_f=NumberConstant(number='1'), else_f=NumberConstant(number='0'))
@@ -309,15 +344,22 @@ class AppliedSymbol(object):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
 
+    def __str__(self):
+        return str(self.s) + "(" + ",".join([str(x) for x in self.args.fs]) + ")"
+
     def translate(self, case: ConfigCase, env: Environment):
         s = self.s.translate(case, env)
         arg = [x.translate(case, env) for x in self.args.fs]
-        return s(arg)
+        out = s(arg)
+        case.Atom(str(self), out)
+        return out
 
 
 class Brackets(object):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
+
+    def __str__(self): return "(" + str(self.f) + ")"
 
     def translate(self, case: ConfigCase, env: Environment):
         return self.f.translate(case, env)
@@ -327,12 +369,16 @@ class Variable(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
 
+    def __str__(self): return self.name
+
     def translate(self, case: ConfigCase, env: Environment):
         if self.name == "true":
             return bool(True)
         if self.name == "false":
             return bool(False)
-        return env.var_scope[self.name]
+        out = env.var_scope[self.name]
+        case.Atom(self.name, out)
+        return out
 
 
 class Symbol(Variable): pass

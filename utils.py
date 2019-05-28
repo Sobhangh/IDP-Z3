@@ -105,9 +105,9 @@ def in_list(q, ls):
 
 def is_number(s):
     try:
-        float(s)
+        float(eval(s)) # accepts "2/3"
         return True
-    except ValueError:
+    except:
         return False
 
 

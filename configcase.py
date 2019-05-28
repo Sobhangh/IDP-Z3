@@ -16,7 +16,14 @@ class ConfigCase:
         self.valueMap = {"True": True}
         self.constraints = []
         self.typeConstraints = []
+        self.atoms = {}
         theory(self)
+
+        out = {}
+        for atomZ3 in self.atoms.values(): # add terms first
+            out.update(self.getTerms(atomZ3))
+        out.update(self.atoms) # then other atoms
+        self.atoms = out
 
     #################
     # BUILDER FUNCTIONS
@@ -55,6 +62,11 @@ class ConfigCase:
                 ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
         return p
 
+    def Atom(self, atom_string, atomZ3):
+        if is_bool(atomZ3) and (is_quantifier(atomZ3) or not self.has_local_var(atomZ3)):
+            atomZ3.atom_string = atom_string
+            self.atoms.update({atom_string: atomZ3})
+
     #################
     # UTILITIES
     #################
@@ -76,7 +88,7 @@ class ConfigCase:
 
     def initial_structure(self):
         out = Structure(self)
-        for atomZ3 in self.atoms().values():
+        for atomZ3 in self.atoms.values():
             out.initialise(self, atomZ3, False, False, "")
         return out
 
@@ -85,7 +97,7 @@ class ConfigCase:
         # creates predicates equivalent to the infinitely-quantified formulas
         # returns ({atomZ3: predicate}, {predicate: atomZ3})
         count, (reify, unreify) = 0, ({}, {})
-        for atomZ3 in self.atoms().values():
+        for atomZ3 in self.atoms.values():
             if is_quantifier(atomZ3):
                 count += 1
                 const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
@@ -101,7 +113,7 @@ class ConfigCase:
         m = s.model()
         out = self.initial_structure()
         (reify, unreify) = self.quantified(s)
-        for atomZ3 in self.atoms().values():
+        for atomZ3 in self.atoms.values():
             # atom might not have an interpretation in model (if "don't care")
             value = m.eval(reify[atomZ3], model_completion=True)
             if atomZ3.sort().name() == 'Bool':
@@ -123,10 +135,12 @@ class ConfigCase:
         return self.is_really_constant(expr) or \
             (0 < len(expr.children()) and self.has_ground_children(expr))
 
-    def has_vars(self, expr):
-        return is_var(expr) or \
-               ( 0 < len(expr.children()) \
-                 and any([self.has_vars(child) for child in expr.children()]))
+    def has_local_var(self, expr):
+        out = ( 0==len(expr.children()) and not self.is_symbol(expr) \
+                and not self.is_really_constant(expr)) \
+           or ( 0 < len(expr.children()) \
+                and any([self.has_local_var(child) for child in expr.children()]))
+        return out
 
     def getTerms(self, expr):
         out = {}  # Ordered dict: string -> Z3 object
@@ -143,17 +157,9 @@ class ConfigCase:
         for child in expr.children():
             out.update(self.getAtoms(child))
         if is_bool(expr) and len(out) == 0 and \
-            ( not self.has_vars(expr) or is_quantifier(expr) ): # for quantified formulas
+            ( not self.has_local_var(expr) or is_quantifier(expr) ): # for quantified formulas
             out = {atom_as_string(expr): expr}
         return out
-
-    def atoms(self): # get the ordered set of atoms in the constraints
-        atoms = {}
-        for constraint in self.constraints+self.typeConstraints:
-            atoms.update(self.getTerms(constraint))
-        for constraint in self.constraints:
-            atoms.update(self.getAtoms(constraint))
-        return atoms
 
     def as_symbol(self, symb_str):
         #print(symb_str)
@@ -161,13 +167,12 @@ class ConfigCase:
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
-        atoms = self.atoms()
         json_data = ast.literal_eval(jsonstr)
         self.assumptions = []
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
-                atomZ3 = atoms[atom[2:-2]]
+                atomZ3 = self.atoms[atom[2:-2]]
                 if json_atom["typ"] == "Bool":
                     if "ct" in json_atom and json_atom["ct"]:
                         self.assumptions.append(atomZ3)
@@ -233,8 +238,8 @@ class ConfigCase:
                 type_list = [s.domain(i) for i in range(0, s.arity())] + [s.range()]
                 c = Function("temporaryFunction", type_list)
 
-                constants = [Const('ci', s.domain(i)) for i in range(0, s.arity())]
-                arg_fill = [Const('ci2', s.domain(i)) for i in range(0, s.arity())]
+                constants = [Const('vx'+str(i), s.domain(i)) for i in range(0, s.arity())]
+                arg_fill = [Const('vy'+str(i), s.domain(i)) for i in range(0, s.arity())]
                 solver.add(
                     ForAll(constants,
                            Or(And(pairwiseEquals(arg_fill, constants)),
@@ -270,7 +275,7 @@ class ConfigCase:
 
     def explain(self, symbol, value):
         solver = self.mk_solver()
-        to_explain = self.atoms()[value[2:-2]] # value is an atom string
+        to_explain = self.atoms[value[2:-2]] # value is an atom string
         _, consqs = solver.consequences(self.assumptions, [to_explain])
 
         (_, unreify) = self.quantified(solver)
@@ -321,7 +326,7 @@ class ConfigCase:
         #solver = self.mk_solver()
         #solver.add(self.assumptions)
         out = {} # {symbol_string : [atom_string, "?"]}
-        for atom_string, atomZ3 in self.atoms().items():
+        for atom_string, atomZ3 in self.atoms.items():
             for groupBy in self.symbols_of(atomZ3).keys():
                 d = out.setdefault(groupBy, [])
                 #if "[]" not in d and type(self.as_symbol(groupBy)) != BoolRef:
@@ -361,7 +366,7 @@ class ConfigCase:
         models, count = {}, 0
 
         # create keys for models using first symbol of atoms
-        for atomZ3 in self.atoms().values():
+        for atomZ3 in self.atoms.values():
             for symb in self.symbols_of(atomZ3).keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
         (reify, _) = self.quantified(solver)
@@ -371,7 +376,7 @@ class ConfigCase:
             #    print (symb, solver.model().eval(symb))
 
             atoms = [] # [(atom_string, atomZ3)]
-            for atom_string, atomZ3 in self.atoms().items():
+            for atom_string, atomZ3 in self.atoms.items():
                 if is_bool(atomZ3): #TODO and is not fixed
                     truth = solver.model().eval(reify[atomZ3])
                     if truth == True:
@@ -461,6 +466,7 @@ class Structure:
 
 
 def atom_as_string(expr):
+    if hasattr(expr, 'atom_string'): return expr.atom_string
     return str(expr).replace("==", "=").replace("!=", "~=").replace("<=", "=<")
 
 def string_as_atom(string):
