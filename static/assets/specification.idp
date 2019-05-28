@@ -28,17 +28,19 @@ theory {
     (!x[Int]: 0<x=<Sides => Angle(x)<180) => Convex.
 
     // triangle
-    Name=triangle => Perimeter = Length(1) + Length(2) + Length(3).
-    Name=triangle => Surface = Base * Height.
+    Name=triangle <=> Perimeter = Length(1) + Length(2) + Length(3).
+    Name=triangle => Surface = (Base * Height)/2.
     Sides=3 => Angle(1) + Angle(2) + Angle(3) = 180.
     Subname=triangle_equilateral <=> Sides=3 & Length(1)=Length(2)=Length(3).
     Subname=triangle_rectangle <=> Sides=3 & (Angle(1)=90 | Angle(2)=90 | Angle(3)=90).
 
     // quadrilateral
-    Name=quadrilateral => Perimeter = Length(1) + Length(2) + Length(3) + Length(4).
-    Subname=square | Subname=rectangle <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90.
+    Name=quadrilateral <=> Perimeter = Length(1) + Length(2) + Length(3) + Length(4).
+    Subname=square | Subname=rectangle <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90
+        & Length(1)=Length(3) & Length(2)=Length(4).
     Subname=square <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90
        & Length(1)=Length(2)=Length(3)=Length(4).
+    Subname=square | Subname=rectangle => Surface = Length(1)*Length(2).
 
 
     // feasibility
