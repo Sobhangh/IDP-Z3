@@ -59,7 +59,7 @@ Rule: ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
-ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' !'-' | '>' ;
+ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' !'-' | '>' | '≤' | '≥' | '≠' ;
 Quantor: '!' | '?';
 AggType: '#' | 'card' | 'sum';
 

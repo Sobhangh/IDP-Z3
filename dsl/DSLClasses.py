@@ -134,7 +134,10 @@ class BinaryOperator(object):
             '>': lambda x, y: x > y,
             '=<': lambda x, y: x <= y,
             '>=': lambda x, y: x >= y,
-            '~=': lambda x, y: x != y
+            '~=': lambda x, y: x != y,
+            '≤': lambda x, y: x <= y,
+            '≥': lambda x, y: x >= y,
+            '≠': lambda x, y: x != y
             }
 
     def __init__(self, **kwargs):
@@ -151,7 +154,7 @@ class BinaryOperator(object):
 
     def translate(self, case: ConfigCase, env: Environment):
         # chained comparisons -> And()
-        if self.operator[0] in ['=', '<', '>', '=<', '>=', '~=']:
+        if self.operator[0] in ['=', '<', '>', '=<', '>=', '~=', "≤", "≥", "≠"]:
             out = []
             for i in range(1, len(self.fs)):
                 x = self.fs[i-1].translate(case, env)

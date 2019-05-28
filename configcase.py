@@ -146,7 +146,7 @@ class ConfigCase:
         out = {}  # Ordered dict: string -> Z3 object
         if not is_app(expr): return out
         if expr.sort().name() in ["Real", "Int"] and not self.is_really_constant(expr) \
-           and self.has_ground_children(expr):
+           and self.has_ground_children(expr) and expr.decl().name() not in ["+", "-", "*", "/"]:
                 out = {atom_as_string(expr): expr}
         for child in expr.children():
                 out.update(self.getTerms(child))
@@ -167,7 +167,7 @@ class ConfigCase:
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
-        json_data = ast.literal_eval(jsonstr)
+        json_data = ast.literal_eval(jsonstr.replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠"))
         self.assumptions = []
         for sym in json_data:
             for atom in json_data[sym]:

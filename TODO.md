@@ -1,17 +1,8 @@
 
 for the paper:
-    - CI on gitlab ?
-    - interval predicate
-        - or detect And of 2 comparisons ?
-            in atoms(), atom_as_string
-    - collapse possible
-    - disable relevance
     - simplify abstract models
         - extract fixed atoms
         - remove consequences in each disjunct
-    - better control pop-up window position, size
-    - theory of polygons
-    - send on enter only
 
 functional NTH:
     - separate info button

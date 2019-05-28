@@ -1,20 +1,56 @@
 vocabulary {
-    Radial
-    InnerDiameter : real
-    OuterDiameter : real
-    Length : real
-    Depth : real
-    type spring constructed from {b,c,d,e,f}
-    cSID : spring
+    type name constructed from {triangle, quadrilateral}
+    type subname constructed from
+        { triangle_equilateral
+        , triangle_rectangle
+        , rectangle
+        , square
+        , irregular}
+    Name : name
+    Subname : subname
+    Vertices: int
+    Sides: int
+    Length(int):real
+    Angle(int):real
+    Perimeter:real
+    Base : real
+    Height: real
+    Surface:real
+
+    Convex
 }
 
 theory {
-    Radial => Depth = (OuterDiameter-InnerDiameter) / 2.0 .
-    ~Radial => Depth = Length.
+    Name=triangle      <=> Vertices=3 & Sides=3.
+    Name=quadrilateral <=> Vertices=4 & Sides=4.
 
-    2.104 =< Depth =< 2.476 <=> cSID=b.
-    2.768 =< Depth =< 3.391 <=> cSID=c.
-    4.294 =< Depth =< 5.206 <=> cSID=d.
-    5.474 =< Depth =< 6.686 <=> cSID=e.
-     8.312 =< Depth =< 10.748 <=> cSID=f.
+    Sides=3 => Convex.
+    (!x[Int]: 0<x=<Sides => Angle(x)<180) => Convex.
+
+    // triangle
+    Name=triangle => Perimeter = Length(1) + Length(2) + Length(3).
+    Name=triangle => Surface = Base * Height.
+    Sides=3 => Angle(1) + Angle(2) + Angle(3) = 180.
+    Subname=triangle_equilateral <=> Sides=3 & Length(1)=Length(2)=Length(3).
+    Subname=triangle_rectangle <=> Sides=3 & (Angle(1)=90 | Angle(2)=90 | Angle(3)=90).
+
+    // quadrilateral
+    Name=quadrilateral => Perimeter = Length(1) + Length(2) + Length(3) + Length(4).
+    Subname=square | Subname=rectangle <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90.
+    Subname=square <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90
+       & Length(1)=Length(2)=Length(3)=Length(4).
+
+
+    // feasibility
+    Name=triangle => Length(1) =< Length(2) + Length(3).
+    Name=triangle => Length(2) =< Length(3) + Length(1).
+    Name=triangle => Length(3) =< Length(1) + Length(2).
+
+    // positive values
+    0 < Vertices.
+    0 < Sides.
+    !x[int]: 0 =< Length(x).
+    0 =< Base.
+    0 =< Height.
+    !x[int]: 0 =< Angle(x).
 }
