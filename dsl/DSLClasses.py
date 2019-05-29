@@ -271,21 +271,21 @@ def expand_formula(vars, sorts, f, case, env):
 
 
 def with_local_vars(case, env, f, sorts, vars):
-    bup = {}
+    backup = {}
     z3vars = []
     assert len(sorts) == len(vars)
     for var, sort in zip(vars, sorts):
         z3var = Const(var, sort.asZ3(env))
         if var in env.var_scope:
-            bup[var] = env.var_scope[var]
+            backup[var] = env.var_scope[var]
         else:
-            bup[var] = None
+            backup[var] = None
         env.var_scope[var] = z3var
         z3vars.append(z3var)
 
     out = f()
     for var in vars:
-        env.var_scope[var] = bup[var]
+        env.var_scope[var] = backup[var]
     return out, z3vars
 
 

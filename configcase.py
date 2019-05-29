@@ -309,28 +309,35 @@ class ConfigCase:
         return self.model_to_json(solver)
 
     def propagation(self):
+        out = self.initial_structure()
         solver = self.mk_solver()
         solver.add(self.assumptions)
-        (_, unreify) = self.quantified(solver)
-        proplist = list(unreify.keys()) # numeric variables or atom !
-        _, consqs = solver.consequences([], proplist)
-        out = self.initial_structure()
-        for s in consqs:
-            # consequences of a numeric is x = value !
-            out.addAtom(self, s.children()[1], unreify, True, "") # take the consequence
-        if solver.check() == unsat:
-            raise Exception("Not satisfiable !")
+        (_, unreify) = self.quantified(solver) #TODO needed ???
+
+        for atom in unreify.keys(): # numeric variables or atom !
+            result, consq = solver.consequences([], [atom])
+
+            if result==sat:
+                if consq:
+                    consq = consq[0].children()[1]
+                    if is_not(consq):
+                        out.addAtom(self, atom, unreify, False, "")
+                    elif not is_bool(atom):
+                        out.addAtom(self, consq, unreify, True, "")
+                    else:
+                        out.addAtom(self, atom, unreify, True, "")
+            else: # unknown -> restart solver
+                solver = self.mk_solver()
+                solver.add(self.assumptions)
+                (_, unreify) = self.quantified(solver) #TODO needed ???
+
         return out.m
 
     def atomsGrouped(self):
-        #solver = self.mk_solver()
-        #solver.add(self.assumptions)
         out = {} # {symbol_string : [atom_string, "?"]}
         for atom_string, atomZ3 in self.atoms.items():
             for groupBy in self.symbols_of(atomZ3).keys():
                 d = out.setdefault(groupBy, [])
-                #if "[]" not in d and type(self.as_symbol(groupBy)) != BoolRef:
-                #    d.append("[]")
                 temp = json.dumps([atom_string])
                 if temp not in d: # test: x=y(x).
                     d.append(temp)
