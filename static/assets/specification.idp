@@ -37,10 +37,9 @@ theory {
 
     // quadrilateral
     Name=quadrilateral <=> Perimeter = Length(1) + Length(2) + Length(3) + Length(4).
-    Subname=square | Subname=rectangle <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90
-        & Length(1)=Length(3) & Length(2)=Length(4).
-    Subname=square <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90
-       & Length(1)=Length(2)=Length(3)=Length(4).
+    Subname=square | Subname=rectangle <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90.
+    Subname=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
+    Subname=square => Length(1)=Length(2)=Length(3)=Length(4).
 
     // surface : not linear --> not supported by Z3!
     // 0 =< Base.

@@ -98,12 +98,12 @@ class ConfigCase:
         # returns ({atomZ3: predicate}, {predicate: atomZ3})
         count, (reify, unreify) = 0, ({}, {})
         for atomZ3 in self.atoms.values():
-            if is_quantifier(atomZ3):
+            if is_quantifier(atomZ3) or hasattr(atomZ3, 'atom_string'):
                 count += 1
                 const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
                 s.add(const == atomZ3)
                 reify[atomZ3] = const
-                unreify[const]    = atomZ3
+                unreify[const] = atomZ3
             else:
                 reify[atomZ3] = atomZ3
                 unreify[atomZ3] = atomZ3
@@ -279,21 +279,24 @@ class ConfigCase:
     def explain(self, symbol, value):
         value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
             .replace("\\u2200", "∀").replace("\\u2203", "∃")
-        solver = self.mk_solver()
         to_explain = self.atoms[value[2:-2]] # value is an atom string
-        _, consqs = solver.consequences(self.assumptions, [to_explain])
 
-        (_, unreify) = self.quantified(solver)
         out = self.initial_structure()
         for ass in self.assumptions:
             for atomZ3 in self.getAtoms(ass).values():
                 out.initialise(self, atomZ3, False, False, "")
+
+        solver = self.mk_solver()
+        (reify, unreify) = self.quantified(solver)
+        def r1(a): return reify[a] if a in reify else a
+        def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
+        _, consqs = solver.consequences([r2(a) for a in self.assumptions], [to_explain])
+
         for cons in consqs:
             assumption_expr = cons.children()[0]
             if is_true(assumption_expr):
                 pass
-            elif is_and(assumption_expr):
-                raise Exception("unexpected path in explain")
+            elif is_and(assumption_expr): # multiple atoms needed to justify to_explain
                 for c in assumption_expr.children():
                     out.addAtom(self, c, unreify, True, "")
             else:
