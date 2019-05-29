@@ -215,6 +215,7 @@ class AUnary(object):
 class AQuantification(object):
     def __init__(self, **kwargs):
         self.q = kwargs.pop('q')
+        self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
@@ -228,7 +229,7 @@ class AQuantification(object):
     def translate(self, case: ConfigCase, env: Environment):
         finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
 
-        if self.q == '!':
+        if self.q == '∀':
             forms = And(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !
                 out = ForAll(finalvars, forms)

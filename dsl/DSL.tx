@@ -60,7 +60,7 @@ UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
 ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' !'-' | '>' | '≤' | '≥' | '≠' ;
-Quantor: '!' | '?';
+Quantor: '∀' | '!' | '∃' | '?' ;
 AggType: '#' | 'card' | 'sum';
 
 Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;

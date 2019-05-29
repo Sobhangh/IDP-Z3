@@ -1,8 +1,11 @@
 
 for the paper:
+    - explain should show quantifiers, values
+    - remove quantified
     - simplify abstract models
         - extract fixed atoms
         - remove consequences in each disjunct
+    - surface formula as string
 
 functional NTH:
     - separate info button

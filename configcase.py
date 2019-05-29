@@ -167,7 +167,10 @@ class ConfigCase:
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
-        json_data = ast.literal_eval(jsonstr.replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠"))
+        json_data = ast.literal_eval(jsonstr \
+            .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
+            .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃"))
+
         self.assumptions = []
         for sym in json_data:
             for atom in json_data[sym]:
@@ -274,6 +277,8 @@ class ConfigCase:
         return out.m
 
     def explain(self, symbol, value):
+        value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
+            .replace("\\u2200", "∀").replace("\\u2203", "∃")
         solver = self.mk_solver()
         to_explain = self.atoms[value[2:-2]] # value is an atom string
         _, consqs = solver.consequences(self.assumptions, [to_explain])
@@ -288,6 +293,7 @@ class ConfigCase:
             if is_true(assumption_expr):
                 pass
             elif is_and(assumption_expr):
+                raise Exception("unexpected path in explain")
                 for c in assumption_expr.children():
                     out.addAtom(self, c, unreify, True, "")
             else:
@@ -360,10 +366,10 @@ class ConfigCase:
 
 
     def abstract(self):
-        out = {}
+        out = {} # universals, assumptions, consequences, variable
         solver = self.mk_solver()
 
-        # extract fixed atoms in constraints
+        # extract fixed atoms from constraints
         # TODO e.g. for quantifiers
 
         solver.add(self.assumptions)
