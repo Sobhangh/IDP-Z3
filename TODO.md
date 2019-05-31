@@ -1,9 +1,5 @@
 
 for the paper:
-    - simplify abstract models
-        - extract fixed atoms
-        - remove consequences in each disjunct
-    - surface formula as string
     - dead end in config --> undo !
 
 functional NTH:

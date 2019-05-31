@@ -331,7 +331,7 @@ class ConfigCase:
                     consq = consq[0].children()[1]
                     if is_not(consq):
                         out.addAtom(self, atom, unreify, False, "")
-                    elif not is_bool(atom):
+                    elif not is_bool(atom): # numeric value
                         out.addAtom(self, consq, unreify, True, "")
                     else:
                         out.addAtom(self, atom, unreify, True, "")
@@ -369,16 +369,48 @@ class ConfigCase:
 
     def abstract(self):
         out = {} # universals, assumptions, consequences, variable
-        solver = self.mk_solver()
+
+        def _consequences(done, with_assumptions=True):
+            out = {} # ordered set of atom_as_string
+            solver = self.mk_solver(with_assumptions)
+            (reify, _) = self.quantified(solver)
+
+            for atomZ3 in self.atoms.values():# numeric variables or atom !
+                if not atom_as_string(atomZ3) in done:
+                    result, consq = solver.consequences([], [reify[atomZ3]])
+
+                    if result==sat:
+                        if consq:
+                            consq = consq[0].children()[1]
+                            if is_not(consq):
+                                if not ("Not " + atom_as_string(atomZ3)) in done:
+                                    out["Not " + atom_as_string(atomZ3)] = True
+                            elif not is_bool(atomZ3):
+                                if not atom_as_string(consq) in done:
+                                    out[atom_as_string(consq)] = True
+                            else:
+                                out[atom_as_string(atomZ3)] = True
+                    else: # unknown -> restart solver
+                        solver = self.mk_solver(with_assumptions)
+                        (reify, _) = self.quantified(solver)
+            return out
 
         # extract fixed atoms from constraints
-        # TODO e.g. for quantifiers
+        universal = _consequences({}, with_assumptions=False)
+        out["universal"] = list(universal.keys())
 
-        solver.add(self.assumptions)
+        out["given"] = []
+        for assumption in self.assumptions:
+            universal[atom_as_string(assumption)] = True
+            out["given"] += [atom_as_string(assumption)]
 
         # extract assumptions and their consequences
+        fixed = _consequences(universal, with_assumptions=True)
+        out["fixed"] = list(fixed.keys())
 
+        solver = self.mk_solver(with_assumptions=True)
         models, count = {}, 0
+        done = out["universal"] + out["given"] + out["fixed"]
 
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms.values():
@@ -392,7 +424,7 @@ class ConfigCase:
 
             atoms = [] # [(atom_string, atomZ3)]
             for atom_string, atomZ3 in self.atoms.items():
-                if is_bool(atomZ3): #TODO and is not fixed
+                if is_bool(atomZ3) and not atom_string in done and not ("Not " + atom_string) in done:
                     truth = solver.model().eval(reify[atomZ3])
                     if truth == True:
                         atoms += [ (atom_string, atomZ3) ]
@@ -401,9 +433,6 @@ class ConfigCase:
                     else: # undefined
                         atoms += [ ("? " + atom_string, BoolVal(True)) ]
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
-
-            # remove consequences
-            # TODO
 
             # add constraint to eliminate this model
             modelZ3 = And( [atomZ3 for (_, atomZ3) in atoms] )
