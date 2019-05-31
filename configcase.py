@@ -74,17 +74,18 @@ class ConfigCase:
     def add(self, constraint):
         self.constraints.append(constraint)
 
-    def mk_solver(self):
+    def mk_solver(self, with_assumptions=False):
         s = Solver()
         s.add(self.constraints)
         s.add(self.typeConstraints)
+        if with_assumptions: s.add(self.assumptions)
         return s
 
     def expand(self):
-        solver = self.mk_solver()
-        solver.add(self.assumptions)
+        solver = self.mk_solver(with_assumptions=True)
+        (reify, unreify) = self.quantified(solver)
         solver.check()
-        return self.model_to_json(solver)
+        return self.model_to_json(solver, reify, unreify)
 
     def initial_structure(self):
         out = Structure(self)
@@ -109,10 +110,9 @@ class ConfigCase:
                 unreify[atomZ3] = atomZ3
         return (reify, unreify)
 
-    def model_to_json(self, s):
+    def model_to_json(self, s, reify, unreify):
         m = s.model()
         out = self.initial_structure()
-        (reify, unreify) = self.quantified(s)
         for atomZ3 in self.atoms.values():
             # atom might not have an interpretation in model (if "don't care")
             value = m.eval(reify[atomZ3], model_completion=True)
@@ -282,7 +282,7 @@ class ConfigCase:
         to_explain = self.atoms[value[2:-2]] # value is an atom string
 
         out = self.initial_structure()
-        for ass in self.assumptions:
+        for ass in self.assumptions: # add numeric assumptions
             for atomZ3 in self.getAtoms(ass).values():
                 out.initialise(self, atomZ3, False, False, "")
 
@@ -314,14 +314,14 @@ class ConfigCase:
         else:
             solver.maximize(s)
 
+        (reify, unreify) = self.quantified(solver)
         solver.check()
-        return self.model_to_json(solver)
+        return self.model_to_json(solver, reify, unreify)
 
     def propagation(self):
         out = self.initial_structure()
-        solver = self.mk_solver()
-        solver.add(self.assumptions)
-        (_, unreify) = self.quantified(solver) #TODO needed ???
+        solver = self.mk_solver(with_assumptions=True)
+        (_, unreify) = self.quantified(solver)
 
         for atom in unreify.keys(): # numeric variables or atom !
             result, consq = solver.consequences([], [atom])
@@ -336,9 +336,8 @@ class ConfigCase:
                     else:
                         out.addAtom(self, atom, unreify, True, "")
             else: # unknown -> restart solver
-                solver = self.mk_solver()
-                solver.add(self.assumptions)
-                (_, unreify) = self.quantified(solver) #TODO needed ???
+                solver = self.mk_solver(with_assumptions=True)
+                (_, unreify) = self.quantified(solver)
 
         return out.m
 
