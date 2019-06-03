@@ -74,7 +74,6 @@ class eval(Resource):
                         case = ConfigCase(idpModel.translate)
                     case.loadStructureFromJson(active)
                     out = case.abstract()
-                #print(out)
                 return out
             except Exception as exc:
                 return str(exc)

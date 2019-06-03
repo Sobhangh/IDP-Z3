@@ -175,20 +175,21 @@ class ConfigCase:
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
-                atomZ3 = self.atoms[atom[2:-2]]
-                if json_atom["typ"] == "Bool":
-                    if "ct" in json_atom and json_atom["ct"]:
-                        self.assumptions.append(atomZ3)
-                    if "cf" in json_atom and json_atom["cf"]:
-                        self.assumptions.append(Not(atomZ3))
-                elif json_atom["value"]:
-                    if json_atom["typ"] == "Int":
-                        value = int(json_atom["value"])
-                    elif json_atom["typ"] == "Real":
-                        value = float(json_atom["value"])
-                    else:
-                        value = json_atom["value"]
-                    self.assumptions.append(atomZ3 == value)
+                if atom[2:-2] in self.atoms:
+                    atomZ3 = self.atoms[atom[2:-2]]
+                    if json_atom["typ"] == "Bool":
+                        if "ct" in json_atom and json_atom["ct"]:
+                            self.assumptions.append(atomZ3)
+                        if "cf" in json_atom and json_atom["cf"]:
+                            self.assumptions.append(Not(atomZ3))
+                    elif json_atom["value"]:
+                        if json_atom["typ"] == "Int":
+                            value = int(json_atom["value"])
+                        elif json_atom["typ"] == "Real":
+                            value = float(json_atom["value"])
+                        else:
+                            value = json_atom["value"]
+                        self.assumptions.append(atomZ3 == value)
 
     def args(self, val):
         a, _ = splitLast(list(map(self.z3_value, json.loads(val))))
@@ -277,30 +278,31 @@ class ConfigCase:
         return out.m
 
     def explain(self, symbol, value):
-        value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
-            .replace("\\u2200", "∀").replace("\\u2203", "∃")
-        to_explain = self.atoms[value[2:-2]] # value is an atom string
-
         out = self.initial_structure()
         for ass in self.assumptions: # add numeric assumptions
             for atomZ3 in self.getAtoms(ass).values():
                 out.initialise(self, atomZ3, False, False, "")
 
-        solver = self.mk_solver()
-        (reify, unreify) = self.quantified(solver)
-        def r1(a): return reify[a] if a in reify else a
-        def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
-        _, consqs = solver.consequences([r2(a) for a in self.assumptions], [to_explain])
+        value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
+            .replace("\\u2200", "∀").replace("\\u2203", "∃")
+        if value[2:-2] in self.atoms:
+            to_explain = self.atoms[value[2:-2]] # value is an atom string
 
-        for cons in consqs:
-            assumption_expr = cons.children()[0]
-            if is_true(assumption_expr):
-                pass
-            elif is_and(assumption_expr): # multiple atoms needed to justify to_explain
-                for c in assumption_expr.children():
-                    out.addAtom(self, c, unreify, True, "")
-            else:
-                out.addAtom(self, assumption_expr, unreify, True, "")
+            solver = self.mk_solver()
+            (reify, unreify) = self.quantified(solver)
+            def r1(a): return reify[a] if a in reify else a
+            def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
+            _, consqs = solver.consequences([r2(a) for a in self.assumptions], [to_explain])
+
+            for cons in consqs:
+                assumption_expr = cons.children()[0]
+                if is_true(assumption_expr):
+                    pass
+                elif is_and(assumption_expr): # multiple atoms needed to justify to_explain
+                    for c in assumption_expr.children():
+                        out.addAtom(self, c, unreify, True, "")
+                else:
+                    out.addAtom(self, assumption_expr, unreify, True, "")
         return out.m
 
     def optimize(self, symbol, minimize):
@@ -370,10 +372,12 @@ class ConfigCase:
     def abstract(self):
         out = {} # universals, assumptions, consequences, variable
 
+        solver = self.mk_solver(with_assumptions=False)
+        (reify, _) = self.quantified(solver)
+
         def _consequences(done, with_assumptions=True):
+            nonlocal solver, reify
             out = {} # ordered set of atom_as_string
-            solver = self.mk_solver(with_assumptions)
-            (reify, _) = self.quantified(solver)
 
             for atomZ3 in self.atoms.values():# numeric variables or atom !
                 if not atom_as_string(atomZ3) in done:
@@ -405,10 +409,10 @@ class ConfigCase:
             out["given"] += [atom_as_string(assumption)]
 
         # extract assumptions and their consequences
+        solver.add(self.assumptions)
         fixed = _consequences(universal, with_assumptions=True)
         out["fixed"] = list(fixed.keys())
 
-        solver = self.mk_solver(with_assumptions=True)
         models, count = {}, 0
         done = out["universal"] + out["given"] + out["fixed"]
 
@@ -418,7 +422,7 @@ class ConfigCase:
                 models[symb] = [] # models[symb][row] = [relevant atoms]
         (reify, _) = self.quantified(solver)
 
-        while solver.check() == sat: # for each parametric model
+        while solver.check() == sat and count < 50: # for each parametric model
             #for symb in self.symbols:
             #    print (symb, solver.model().eval(symb))
 
@@ -459,6 +463,7 @@ class ConfigCase:
                     active_symbol[symb] = True
 
         # build table of models
+        out["models"] = "" if count < 50 else "More than 50 models..."
         out["variable"] = [[ [symb] for symb in models.keys() if symb in active_symbol ]]
         for i in range(count):
             out["variable"] += [[ models[symb][i] for symb in models.keys() if symb in active_symbol ]]

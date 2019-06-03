@@ -8,10 +8,14 @@ vocabulary {
         , irregular}
     Name : name
     Subname : subname
-    Vertices: int
-    Sides: int
-    Length(int):real
-    Angle(int):real
+
+    type sides = {3..4}
+    Vertices: sides
+    Sides: sides
+
+    type side = {1..4}
+    Length(side):real
+    Angle(side):real
     Perimeter:real
     Base : real
     Height: real
@@ -27,12 +31,13 @@ theory {
     Name=quadrilateral <=> Sides=4.
 
     Sides=3 => Convex.
-    (!x[Int]: 0<x=<Sides => Angle(x)<180) <=> Convex.
+    (!x[side]: 0<x=<Sides => Angle(x)<180) <=> Convex.
 
     // triangle
     Name=triangle <=> Perimeter = Length(1) + Length(2) + Length(3).
     Sides=3 => Angle(1) + Angle(2) + Angle(3) = 180.
     Subname=triangle_equilateral <=> Sides=3 & Length(1)=Length(2)=Length(3).
+    Subname=triangle_equilateral <=> Sides=3 & (Angle(1)=60 & Angle(2)=60 & Angle(3)=60).
     Subname=triangle_rectangle <=> Sides=3 & (Angle(1)=90 | Angle(2)=90 | Angle(3)=90).
 
     // quadrilateral
@@ -55,6 +60,6 @@ theory {
     // positive values
     0 < Vertices.
     0 < Sides.
-    !x[int]: 0 =< Length(x).
-    !x[int]: 0 =< Angle(x).
+    !x[side]: 0 =< Length(x).
+    !x[side]: 0 =< Angle(x).
 }

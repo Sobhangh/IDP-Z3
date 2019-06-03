@@ -1,5 +1,6 @@
 
 for the paper:
+    - reset propagated numeric values
     - dead end in config --> undo !
 
 functional NTH:
