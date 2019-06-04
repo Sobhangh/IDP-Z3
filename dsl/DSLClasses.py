@@ -329,7 +329,7 @@ class SetExp(object):
     def __str__(self):
         out = "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
         out += ":" + str(self.f)
-        if self.out: out += str(self.out)
+        if self.out: out += " : " + str(self.out)
         out += "}"
         return out
 

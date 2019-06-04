@@ -2,7 +2,7 @@ vocabulary {
     type name constructed from {triangle, quadrilateral}
     type subname constructed from
         { triangle_equilateral
-        , triangle_rectangle
+        , right_triangle
         , rectangle
         , square
         , irregular}
@@ -22,6 +22,7 @@ vocabulary {
     Surface:real
 
     Convex
+    Equilateral
 }
 
 theory {
@@ -30,21 +31,24 @@ theory {
     Name=triangle      <=> Sides=3.
     Name=quadrilateral <=> Sides=4.
 
+    // General rules
     Sides=3 => Convex.
-    (!x[side]: 0<x=<Sides => Angle(x)<180) <=> Convex.
+    (!n[side]: n=<Sides => Angle(n)<180) <=> Convex.
+    (!n[side]: n=<Sides => Length(n)=Length(1)) <=> Equilateral.
+
+
+    Perimeter = sum{n[side] : n=<Sides : Length(n)}.
+    sum{n[side] : n=<Sides : Angle(n)} = (Sides-2)*180.
 
     // triangle
-    Name=triangle <=> Perimeter = Length(1) + Length(2) + Length(3).
-    Sides=3 => Angle(1) + Angle(2) + Angle(3) = 180.
-    Subname=triangle_equilateral <=> Sides=3 & Length(1)=Length(2)=Length(3).
-    Subname=triangle_equilateral <=> Sides=3 & (Angle(1)=60 & Angle(2)=60 & Angle(3)=60).
-    Subname=triangle_rectangle <=> Sides=3 & (Angle(1)=90 | Angle(2)=90 | Angle(3)=90).
+    Subname=triangle_equilateral <=> Sides=3 & Equilateral.
+    Subname=triangle_equilateral <=> Sides=3 & (!n[side]: Angle(n)=60).
+    Subname=right_triangle <=> Sides=3 & (?n[side]:Angle(n)=90).
 
     // quadrilateral
-    Name=quadrilateral <=> Perimeter = Length(1) + Length(2) + Length(3) + Length(4).
-    Subname=square | Subname=rectangle <=> Sides=4 & Angle(1)=Angle(2)=Angle(3)=Angle(4)=90.
+    Subname=square | Subname=rectangle <=> Sides=4 & (!n[side]: Angle(n)=90).
     Subname=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
-    Subname=square => Length(1)=Length(2)=Length(3)=Length(4).
+    Subname=square => Sides=4 & Equilateral.
 
     // surface : not linear --> not supported by Z3!
     // 0 =< Base.
