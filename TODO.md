@@ -7,7 +7,7 @@ functional NTH:
     - separate info button
     - join 2 disjuncts that differ only by the sign of one atom
     - separate fixed from relevant ?
-    - convert fractions, inject known values in formulas
+    - inject known values in formulas
     - domain should still have atoms (e.g. quantified)
     - domain -> list box + ignore equality atoms with a constant
     - check syntax of int, real on client
