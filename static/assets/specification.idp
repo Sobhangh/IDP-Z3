@@ -42,19 +42,19 @@ theory {
 
     // triangle
     Subname=triangle_equilateral <=> Sides=3 & Equilateral.
-    Subname=triangle_equilateral <=> Sides=3 & (!n[side]: Angle(n)=60).
-    Subname=right_triangle <=> Sides=3 & (?n[side]:Angle(n)=90).
+    Subname=triangle_equilateral <=> Sides=3 & (!n[side]: n=<Sides => Angle(n)=60).
+    Subname=right_triangle <=> Sides=3 & (?n[side]: n=<Sides & Angle(n)=90).
 
     // quadrilateral
-    Subname=square | Subname=rectangle <=> Sides=4 & (!n[side]: Angle(n)=90).
+    Subname=square | Subname=rectangle <=> Sides=4 & (!n[side]: n=<Sides => Angle(n)=90).
     Subname=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
     Subname=square => Sides=4 & Equilateral.
 
-    // surface : not linear --> not supported by Z3!
-    // 0 =< Base.
-    // 0 =< Height.
-    // Name=triangle => Surface = (Base * Height)/2.
-    // Subname=square | Subname=rectangle => Surface = Length(1)*Length(2).
+    // surface
+    0 =< Base.
+    0 =< Height.
+    Name=triangle => Surface = (Base * Height)/2.
+    Subname=square | Subname=rectangle => Surface = Length(1)*Length(2).
 
     // feasibility
     Name=triangle => Length(1) =< Length(2) + Length(3).

@@ -10,31 +10,32 @@ from DSLClasses import *
 
 model: File = idpparser.model_from_str("""
 vocabulary {
-    type Domain = {1..2}
-    type color constructed from {red, blue, green}
-    p
-    q(Domain)
-    x : Domain
-    y(Domain): int
-    c(color)
+
+    Base : real
+    Height: real
+    Surface:real
+
+    Convex
+    Equilateral
 }
 
 theory {
-    p | q(1) & ~ q(2).
-    x=1 | y(1)=1 | y(2)=1.
-    y(x)=x.
-    ?z[color]: c(z).
-    p => (?t[int]: y(t)=2).
+    //Height=5.
+    Convex => Surface = Height.
+    ~Convex  => Surface = Height*Base.
+
+    Convex => Equilateral.
 }
 """)
+for i in range(1):
+    c = ConfigCase(model.translate)
+    c.assumptions = [c.atoms["Convex"]]
+    out = c.propagation()
+    print(out["Equilateral"]['[\"Equilateral\"]']["ct"]) # expected True
 
-c = ConfigCase()
+# solver = c.mk_solver()
+# print(solver)
+# print(solver.check())
+# print(solver.model())
 
-model.translate(c)
-
-solver = c.mk_solver()
-print(solver)
-print(solver.check())
-print(solver.model())
-
-print(c.relevantVals)
+# print(c.relevantVals)

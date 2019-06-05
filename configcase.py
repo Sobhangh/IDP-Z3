@@ -95,11 +95,11 @@ class ConfigCase:
 
 
     def quantified(self, s):
-        # creates predicates equivalent to the infinitely-quantified formulas
+        # creates predicates equivalent to the infinitely-quantified formulas or chained comparison
         # returns ({atomZ3: predicate}, {predicate: atomZ3})
         count, (reify, unreify) = 0, ({}, {})
         for atomZ3 in self.atoms.values():
-            if is_quantifier(atomZ3) or hasattr(atomZ3, 'atom_string'):
+            if is_quantifier(atomZ3) or hasattr(atomZ3, 'is_chained'):
                 count += 1
                 const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
                 s.add(const == atomZ3)

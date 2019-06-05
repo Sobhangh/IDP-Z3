@@ -1,6 +1,7 @@
 
 for the paper:
-    - aggregate
+    - non linear propagation
+    - add unicity of functions ?
     - reset propagated numeric values
     - dead end in config --> undo !
 

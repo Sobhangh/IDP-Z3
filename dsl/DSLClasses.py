@@ -161,7 +161,11 @@ class BinaryOperator(object):
                 function = BinaryOperator.MAP[self.operator[i - 1]]
                 y = self.fs[i].translate(case, env)
                 out = out + [function(x, y)]
-            out = And(out) if 1 < len(out) else out[0]
+            if 1 < len(out):
+                out = And(out)
+                out.is_chained = True
+            else:
+                out = out[0]
             case.Atom(str(self), out)
         else:
             out = self.fs[0].translate(case, env)
