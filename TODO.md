@@ -1,6 +1,7 @@
 
 for the paper:
-    - non linear propagation
+    - abstract: inject assumptions
+    - abstract: remove consequences per background theory
     - add unicity of functions ?
     - reset propagated numeric values
     - dead end in config --> undo !

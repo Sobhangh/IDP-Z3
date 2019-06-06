@@ -68,60 +68,23 @@ class ConfigCase:
             self.atoms.update({atom_string: atomZ3})
 
     #################
-    # UTILITIES
+    # EXPRESSIONS
     #################
 
-    def add(self, constraint):
-        self.constraints.append(constraint)
-
-    def mk_solver(self, with_assumptions=False):
-        s = Solver()
-        s.add(self.constraints)
-        s.add(self.typeConstraints)
-        if with_assumptions: s.add(self.assumptions)
-        return s
-
-    def expand(self):
-        solver = self.mk_solver(with_assumptions=True)
-        (reify, unreify) = self.quantified(solver)
-        solver.check()
-        return self.model_to_json(solver, reify, unreify)
-
-    def initial_structure(self):
-        out = Structure(self)
-        for atomZ3 in self.atoms.values():
-            out.initialise(self, atomZ3, False, False, "")
+    def symbols_of(self, expr): # returns a dict
+        out = {} # for unicity (ordered set)
+        try:
+            name = expr.decl().name()
+            if self.is_symbol(name):
+                out[name] = name
+        except: pass
+        for child in expr.children():
+            out.update(self.symbols_of(child))
         return out
 
-
-    def quantified(self, s):
-        # creates predicates equivalent to the infinitely-quantified formulas or chained comparison
-        # returns ({atomZ3: predicate}, {predicate: atomZ3})
-        count, (reify, unreify) = 0, ({}, {})
-        for atomZ3 in self.atoms.values():
-            if is_quantifier(atomZ3) or hasattr(atomZ3, 'is_chained'):
-                count += 1
-                const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
-                s.add(const == atomZ3)
-                reify[atomZ3] = const
-                unreify[const] = atomZ3
-            else:
-                reify[atomZ3] = atomZ3
-                unreify[atomZ3] = atomZ3
-        return (reify, unreify)
-
-    def model_to_json(self, s, reify, unreify):
-        m = s.model()
-        out = self.initial_structure()
-        for atomZ3 in self.atoms.values():
-            # atom might not have an interpretation in model (if "don't care")
-            value = m.eval(reify[atomZ3], model_completion=True)
-            if atomZ3.sort().name() == 'Bool':
-                value = True if value else False
-                out.addAtom(self, atomZ3, unreify, value, "")
-            else:
-                out.addAtom(self, atomZ3, unreify, True, value)
-        return out.m
+    def first_symbol(self, expr):
+        symbs = self.symbols_of(expr).keys()
+        return symbs[0] if symbs != [] else None
 
     def is_really_constant(self, expr):
         return (obj_to_string(expr) in self.valueMap) \
@@ -160,6 +123,56 @@ class ConfigCase:
             ( not self.has_local_var(expr) or is_quantifier(expr) ): # for quantified formulas
             out = {atom_as_string(expr): expr}
         return out
+
+    def quantified(self, solver):
+        # creates predicates equivalent to the infinitely-quantified formulas or chained comparison
+        # returns ({atomZ3: predicate}, {predicate: atomZ3})
+        count, (reify, unreify) = 0, ({}, {})
+        for atomZ3 in self.atoms.values():
+            if is_quantifier(atomZ3) or hasattr(atomZ3, 'is_chained'):
+                count += 1
+                const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
+                solver.add(const == atomZ3)
+                reify[atomZ3] = const
+                unreify[const] = atomZ3
+            else:
+                reify[atomZ3] = atomZ3
+                unreify[atomZ3] = atomZ3
+        return (reify, unreify)
+
+    #################
+    # UTILITIES
+    #################
+
+    def add(self, constraint):
+        self.constraints.append(constraint)
+
+    def mk_solver(self, with_assumptions=False):
+        s = Solver()
+        s.add(self.constraints)
+        s.add(self.typeConstraints)
+        if with_assumptions: s.add(self.assumptions)
+        return s
+
+    def initial_structure(self):
+        out = Structure(self)
+        for atomZ3 in self.atoms.values():
+            out.initialise(self, atomZ3, False, False, "")
+        return out
+
+
+    def model_to_json(self, s, reify, unreify):
+        m = s.model()
+        out = self.initial_structure()
+        for atomZ3 in self.atoms.values():
+            # atom might not have an interpretation in model (if "don't care")
+            value = m.eval(reify[atomZ3], model_completion=True)
+            if atomZ3.sort().name() == 'Bool':
+                value = True if value else False
+                out.addAtom(self, atomZ3, unreify, value, "")
+            else:
+                out.addAtom(self, atomZ3, unreify, True, value)
+        return out.m
 
     def as_symbol(self, symb_str):
         #print(symb_str)
@@ -229,7 +242,47 @@ class ConfigCase:
     # INFERENCES
     #################
 
-    def relevance(self):
+    def atomsGrouped(self):
+        out = {} # {symbol_string : [atom_string, []]}
+        for atom_string, atomZ3 in self.atoms.items():
+            for groupBy in self.symbols_of(atomZ3).keys():
+                d = out.setdefault(groupBy, [])
+                temp = json.dumps([atom_string])
+                if temp not in d: # test: x=y(x).
+                    d.append(temp)
+        return out
+
+
+    def propagation(self):
+        out = self.initial_structure()
+        solver = self.mk_solver(with_assumptions=True)
+        (_, unreify) = self.quantified(solver)
+
+        for atom in unreify.keys(): # numeric variables or atom !
+            result, consq = solver.consequences([], [atom])
+
+            if result==sat:
+                if consq:
+                    consq = consq[0].children()[1]
+                    if is_not(consq):
+                        out.addAtom(self, atom, unreify, False, "")
+                    elif not is_bool(atom): # numeric value
+                        out.addAtom(self, consq, unreify, True, "")
+                    else:
+                        out.addAtom(self, atom, unreify, True, "")
+            else: # unknown -> restart solver
+                solver = self.mk_solver(with_assumptions=True)
+                (_, unreify) = self.quantified(solver)
+
+        return out.m
+
+    def expand(self):
+        solver = self.mk_solver(with_assumptions=True)
+        (reify, unreify) = self.quantified(solver)
+        solver.check()
+        return self.model_to_json(solver, reify, unreify)
+
+    def relevance(self): # not used
         out = self.initial_structure()
 
         solver = Solver()
@@ -277,6 +330,21 @@ class ConfigCase:
             solver.pop()
         return out.m
 
+    def optimize(self, symbol, minimize):
+        solver = Optimize()
+        solver.add(self.constraints)
+        solver.add(self.typeConstraints)
+        solver.add(self.assumptions)
+        s = self.as_symbol(symbol)
+        if minimize:
+            solver.minimize(s)
+        else:
+            solver.maximize(s)
+
+        (reify, unreify) = self.quantified(solver)
+        solver.check()
+        return self.model_to_json(solver, reify, unreify)
+
     def explain(self, symbol, value):
         out = self.initial_structure()
         for ass in self.assumptions: # add numeric assumptions
@@ -304,70 +372,6 @@ class ConfigCase:
                 else:
                     out.addAtom(self, assumption_expr, unreify, True, "")
         return out.m
-
-    def optimize(self, symbol, minimize):
-        solver = Optimize()
-        solver.add(self.constraints)
-        solver.add(self.typeConstraints)
-        solver.add(self.assumptions)
-        s = self.as_symbol(symbol)
-        if minimize:
-            solver.minimize(s)
-        else:
-            solver.maximize(s)
-
-        (reify, unreify) = self.quantified(solver)
-        solver.check()
-        return self.model_to_json(solver, reify, unreify)
-
-    def propagation(self):
-        out = self.initial_structure()
-        solver = self.mk_solver(with_assumptions=True)
-        (_, unreify) = self.quantified(solver)
-
-        for atom in unreify.keys(): # numeric variables or atom !
-            result, consq = solver.consequences([], [atom])
-
-            if result==sat:
-                if consq:
-                    consq = consq[0].children()[1]
-                    if is_not(consq):
-                        out.addAtom(self, atom, unreify, False, "")
-                    elif not is_bool(atom): # numeric value
-                        out.addAtom(self, consq, unreify, True, "")
-                    else:
-                        out.addAtom(self, atom, unreify, True, "")
-            else: # unknown -> restart solver
-                solver = self.mk_solver(with_assumptions=True)
-                (_, unreify) = self.quantified(solver)
-
-        return out.m
-
-    def atomsGrouped(self):
-        out = {} # {symbol_string : [atom_string, "?"]}
-        for atom_string, atomZ3 in self.atoms.items():
-            for groupBy in self.symbols_of(atomZ3).keys():
-                d = out.setdefault(groupBy, [])
-                temp = json.dumps([atom_string])
-                if temp not in d: # test: x=y(x).
-                    d.append(temp)
-        return out
-
-    def symbols_of(self, expr): # returns a dict
-        out = {} # for unicity (ordered set)
-        try:
-            name = expr.decl().name()
-            if self.is_symbol(name):
-                out[name] = name
-        except: pass
-        for child in expr.children():
-            out.update(self.symbols_of(child))
-        return out
-
-    def first_symbol(self, expr):
-        symbs = self.symbols_of(expr).keys()
-        return symbs[0] if symbs != [] else None
-
 
     def abstract(self):
         out = {} # universals, assumptions, consequences, variable
@@ -415,6 +419,10 @@ class ConfigCase:
 
         models, count = {}, 0
         done = out["universal"] + out["given"] + out["fixed"]
+
+        # substitutions = [(given atom, truthvalue)] + [quantifier/chained, reified]
+        # relevants = unreify(getAtoms(simplify(substitute(self.constraints, substitutions))))
+        # --> irrelevants
 
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms.values():
