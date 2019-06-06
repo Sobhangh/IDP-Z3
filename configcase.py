@@ -62,9 +62,12 @@ class ConfigCase:
                 ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
         return p
 
-    def Atom(self, atom_string, atomZ3):
+    def Atom(self, atomZ3, atom_string=None):
         if is_bool(atomZ3) and (is_quantifier(atomZ3) or not self.has_local_var(atomZ3)):
-            atomZ3.atom_string = atom_string
+            if atom_string:
+                atomZ3.atom_string = atom_string
+            else:
+                atom_string = atom_as_string(atomZ3)
             self.atoms.update({atom_string: atomZ3})
 
     #################
@@ -89,6 +92,7 @@ class ConfigCase:
     def is_really_constant(self, expr):
         return (obj_to_string(expr) in self.valueMap) \
             or is_number(obj_to_string(expr)) \
+            or is_string_value(expr) \
             or is_true(expr) or is_false(expr)
 
     def has_ground_children(self, expr):
@@ -409,8 +413,14 @@ class ConfigCase:
 
         out["given"] = []
         for assumption in self.assumptions:
-            universal[atom_as_string(assumption)] = True
-            out["given"] += [atom_as_string(assumption)]
+            if is_not(assumption):
+                ass = atom_as_string(assumption.children()[0])
+                universal[ass] = False
+                out["given"] += ["Not " + ass]
+            else:
+                ass = atom_as_string(assumption)
+                universal[ass] = True
+                out["given"] += [ass]
 
         # extract assumptions and their consequences
         solver.add(self.assumptions)
@@ -420,9 +430,33 @@ class ConfigCase:
         models, count = {}, 0
         done = out["universal"] + out["given"] + out["fixed"]
 
-        # substitutions = [(given atom, truthvalue)] + [quantifier/chained, reified]
-        # relevants = unreify(getAtoms(simplify(substitute(self.constraints, substitutions))))
-        # --> irrelevants
+        # substitutions = [(given atom, truthvalue)] + [(quantifier/chained, reified)]
+        substitutions = []
+        for literal_string in done:
+            if literal_string.startswith("Not "):
+                if literal_string[4:] in self.atoms:
+                    substitutions += [(self.atoms[literal_string[4:]], BoolVal(False))]
+            else:
+                if literal_string in self.atoms:
+                    substitutions += [(self.atoms[literal_string], BoolVal(True))]
+        reified = Function("qsdfvqe13435", StringSort(), BoolSort())
+        for atom_string, atomZ3 in self.atoms.items():
+            if hasattr(atomZ3, 'atom_string'):
+                substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
+
+        # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
+        simplified = simplify(substitute(And(self.constraints), substitutions))
+        relevants = self.getAtoms(simplified) # includes reified !
+
+        # --> irrelevant
+        irrelevant = []
+        for atom_string, atomZ3 in self.atoms.items():
+            if is_bool(atomZ3) and not atom_string in done and not ("Not " + atom_string) in done:
+                string2 = atom_as_string(reified(StringVal(atom_string.encode('utf8'))))
+                if not atom_string in relevants and not string2 in relevants:
+                    irrelevant += [atom_string]
+        out["irrelevant"] = irrelevant
+        done += irrelevant
 
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms.values():

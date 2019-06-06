@@ -1,6 +1,5 @@
 
 for the paper:
-    - abstract: inject assumptions
     - abstract: remove consequences per background theory
     - add unicity of functions ?
     - reset propagated numeric values
