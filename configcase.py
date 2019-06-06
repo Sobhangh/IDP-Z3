@@ -430,22 +430,22 @@ class ConfigCase:
         models, count = {}, 0
         done = out["universal"] + out["given"] + out["fixed"]
 
-        # substitutions = [(given atom, truthvalue)] + [(quantifier/chained, reified)]
+        # substitutions = [(quantifier/chained, reified)] + [(given atom, truthvalue)]
         substitutions = []
-        for literal_string in done:
-            if literal_string.startswith("Not "):
-                if literal_string[4:] in self.atoms:
-                    substitutions += [(self.atoms[literal_string[4:]], BoolVal(False))]
-            else:
-                if literal_string in self.atoms:
-                    substitutions += [(self.atoms[literal_string], BoolVal(True))]
         reified = Function("qsdfvqe13435", StringSort(), BoolSort())
         for atom_string, atomZ3 in self.atoms.items():
             if hasattr(atomZ3, 'atom_string'):
                 substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
+        for literal_string in done:
+            if literal_string.startswith("Not "):
+                key, val = (literal_string[4:], BoolVal(False))
+            else:
+                key, val = (literal_string, BoolVal(True))
+            if key in self.atoms:
+                substitutions += [(self.atoms[key], val)]
 
         # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
-        simplified = simplify(substitute(And(self.constraints), substitutions))
+        simplified = simplify(substitute(And(self.constraints), substitutions)) # it starts by the last substitution ??
         relevants = self.getAtoms(simplified) # includes reified !
 
         # --> irrelevant
