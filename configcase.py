@@ -551,7 +551,7 @@ class Structure:
             if key in s:
                 if typ == 'Bool':
                     s[key][sgn] = True
-                elif typ in ["Real", "Int"] :
+                elif typ in ["Real", "Int"] and truth:
                     s[key]["typ"] = ""
                     s[key]["value"] = str(eval(str(value))) # compute fraction
 
