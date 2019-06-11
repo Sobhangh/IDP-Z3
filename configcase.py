@@ -265,7 +265,10 @@ class ConfigCase:
         for atom in unreify.keys(): # numeric variables or atom !
             result, consq = solver.consequences([], [atom])
 
-            if result==sat:
+            if result == unsat:
+                raise Exception("Not satisfiable !")
+
+            if result == sat:
                 if consq:
                     consq = consq[0].children()[1]
                     if is_not(consq):
@@ -390,6 +393,9 @@ class ConfigCase:
             for atomZ3 in self.atoms.values():# numeric variables or atom !
                 if not atom_as_string(atomZ3) in done:
                     result, consq = solver.consequences([], [reify[atomZ3]])
+
+                    if result==unsat:
+                        raise Exception("Not satisfiable !")
 
                     if result==sat:
                         if consq:
@@ -536,6 +542,7 @@ class Structure:
                 s.setdefault(key, {"typ": typ, "value": str(value)})
 
     def addAtom(self, case, atomZ3, unreify, truth, value):
+        print(atomZ3, truth, value)
         if is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in \
                 ["IntNumRef", "RatNumRef", "AlgebraicNumRef"]: # is this really a value ?
