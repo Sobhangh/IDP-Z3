@@ -1,5 +1,8 @@
 
 for the paper:
+    - Undo
+    - show unknown as unknowns
+    - interpret structures as facts
     - abstract variables: remove consequences per background theory
     - add unicity of functions ?
     - reset propagated numeric values

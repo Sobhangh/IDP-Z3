@@ -55,6 +55,7 @@ theory {
     0 =< Height.
     Name=triangle => Surface = (Base * Height)/2.
     Subname=square | Subname=rectangle => Surface = Length(1)*Length(2).
+    ?n[sides]: n=<Sides & Length(n)=Base.
 
     // feasibility
     Name=triangle => Length(1) =< Length(2) + Length(3).

@@ -542,7 +542,6 @@ class Structure:
                 s.setdefault(key, {"typ": typ, "value": str(value)})
 
     def addAtom(self, case, atomZ3, unreify, truth, value):
-        print(atomZ3, truth, value)
         if is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in \
                 ["IntNumRef", "RatNumRef", "AlgebraicNumRef"]: # is this really a value ?
