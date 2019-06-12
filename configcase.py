@@ -278,6 +278,8 @@ class ConfigCase:
                     else:
                         out.addAtom(self, atom, unreify, True, "")
             else: # unknown -> restart solver
+                out.addAtom(self, atom, unreify, True, "", unknown=True)
+
                 solver = self.mk_solver(with_assumptions=True)
                 (_, unreify) = self.quantified(solver)
 
@@ -541,11 +543,11 @@ class Structure:
             elif typ in ["Real", "Int"]:
                 s.setdefault(key, {"typ": typ, "value": str(value)})
 
-    def addAtom(self, case, atomZ3, unreify, truth, value):
+    def addAtom(self, case, atomZ3, unreify, truth, value, unknown=False):
         if is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in \
                 ["IntNumRef", "RatNumRef", "AlgebraicNumRef"]: # is this really a value ?
-                self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1))
+                self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1), unknown)
         sgn = "ct" if truth else "cf"
         if is_not(atomZ3):
             atomZ3, sgn, truth = atomZ3.arg(0), "cf" if truth else "ct", truth
@@ -555,7 +557,8 @@ class Structure:
         for symb in case.symbols_of(atomZ3).keys():
             s = self.m.setdefault(symb, {})
             if key in s:
-                if typ == 'Bool':
+                if unknown: s[key]["unknown"] = unknown
+                elif typ == 'Bool':
                     s[key][sgn] = True
                 elif typ in ["Real", "Int"] and truth:
                     s[key]["typ"] = ""
