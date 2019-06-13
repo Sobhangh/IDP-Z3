@@ -15,6 +15,7 @@ class ConfigCase:
         self.assumptions = []
         self.valueMap = {"True": True}
         self.constraints = []
+        self.interpretations = [] # from structure
         self.typeConstraints = []
         self.atoms = {}
         theory(self)
@@ -154,6 +155,7 @@ class ConfigCase:
     def mk_solver(self, with_assumptions=False):
         s = Solver()
         s.add(self.constraints)
+        s.add(self.interpretations)
         s.add(self.typeConstraints)
         if with_assumptions: s.add(self.assumptions)
         return s
@@ -296,7 +298,7 @@ class ConfigCase:
 
         solver = Solver()
         theo1 = And(self.constraints)
-        solver.add(self.typeConstraints + self.assumptions)
+        solver.add(self.interpretations + self.typeConstraints + self.assumptions)
 
         for s in self.symbols:
             solver.push()
@@ -342,6 +344,7 @@ class ConfigCase:
     def optimize(self, symbol, minimize):
         solver = Optimize()
         solver.add(self.constraints)
+        solver.add(self.interpretations)
         solver.add(self.typeConstraints)
         solver.add(self.assumptions)
         s = self.as_symbol(symbol)

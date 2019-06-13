@@ -20,11 +20,14 @@ class File(object):
     def __init__(self, **kwargs):
         self.theory = kwargs.pop('theory')
         self.vocabulary = kwargs.pop('vocabulary')
+        self.structure = kwargs.pop('structure')
 
     def translate(self, case: ConfigCase):
         env = Environment()
         self.vocabulary.translate(case, env)
         self.theory.translate(case, env)
+        if self.structure:
+            self.structure.translate(case, env)
 
 
 class Theory(object):
@@ -79,6 +82,37 @@ class Definition(object):
         else:
             return [Const('c', z3_symb.sort())]
 
+class Structure(object):
+    def __init__(self, **kwargs):
+        self.interpretations = kwargs.pop('interpretations')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        for i in self.interpretations:
+            i.translate(case, env)
+
+class Interpretation(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.tuples = kwargs.pop('tuples')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        s = self.name.translate(case, env)
+        for tuple in self.tuples:
+            arg = tuple.translate(case, env)
+            try: # predicate
+                out = s(arg)
+                case.interpretations.append(out)
+            except: # function
+                out = s(arg[:-1]) == arg[-1]
+                case.interpretations.append(out)
+
+class Tuple(object):
+    def __init__(self, **kwargs):
+        self.args = kwargs.pop('args')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        print(self.args)
+        return [arg.translate(case, env) for arg in self.args]
 
 class Rule(object):
     def __init__(self, **kwargs):
@@ -534,7 +568,7 @@ class Sort(object):
 dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True,
-                                classes=[File, Theory, Vocabulary, SymbolDeclaration, Sort,
+                                classes=[File, Theory, Vocabulary, Structure, Interpretation, Tuple, SymbolDeclaration, Sort,
                                          AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
                                          AComparison, AAggregate, SetExp,
                                          ASumMinus, AMultDiv, AUnary, NumberConstant, ConstructedTypeDeclaration,
