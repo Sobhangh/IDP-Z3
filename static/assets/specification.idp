@@ -51,10 +51,11 @@ theory {
     Subname=square => Sides=4 & Equilateral.
 
     // surface
-    0 =< Base.
-    0 =< Height.
     Name=triangle => Surface = (Base * Height)/2.
     Subname=square | Subname=rectangle => Surface = Length(1)*Length(2).
+    Subname=irregular => Surface = -1.
+    0 =< Base.
+    0 =< Height.
     ?n[sides]: n=<Sides & Length(n)=Base.
 
     // feasibility
