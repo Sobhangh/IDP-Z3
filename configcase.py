@@ -22,7 +22,7 @@ class ConfigCase:
 
         out = {}
         for atomZ3 in self.atoms.values(): # add terms first
-            out.update(self.getTerms(atomZ3))
+            out.update(self.getNumericTerms(atomZ3))
         out.update(self.atoms) # then other atoms
         self.atoms = out
 
@@ -110,14 +110,16 @@ class ConfigCase:
                 and any([self.has_local_var(child) for child in expr.children()]))
         return out
 
-    def getTerms(self, expr):
+    def getNumericTerms(self, expr): # to be shown as atoms
         out = {}  # Ordered dict: string -> Z3 object
         if not is_app(expr): return out
-        if expr.sort().name() in ["Real", "Int"] and not self.is_really_constant(expr) \
-           and self.has_ground_children(expr) and expr.decl().name() not in ["+", "-", "*", "/"]:
-                out = {atom_as_string(expr): expr}
+        name = expr.decl().name()
+        if self.is_symbol(name) and expr.sort().name() in ["Real", "Int"] \
+            and not self.is_really_constant(expr) \
+            and self.has_ground_children(expr) and expr.decl().name() not in ["+", "-", "*", "/"]:
+                out[atom_as_string(expr)] = expr
         for child in expr.children():
-                out.update(self.getTerms(child))
+            out.update(self.getNumericTerms(child))
         return out
 
     def getAtoms(self, expr):

@@ -1,5 +1,6 @@
 
 for the paper:
+    - domain -> list box + ignore equality atoms with a constant
     - Undo
     - abstract variables: remove consequences per background theory
     - add unicity of functions ?
@@ -7,13 +8,12 @@ for the paper:
     - dead end in config --> undo !
 
 functional NTH:
-    - structure: ct, cf, arrows for functions, parenthesis, no expressions (brackets)
+    - structure: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
     - compute relevance in propagate
     - separate info button
     - join 2 disjuncts that differ only by the sign of one atom
     - inject known values in formulas
     - predicate symbols should show atoms (e.g. quantified constraints)
-    - domain -> list box + ignore equality atoms with a constant
     - check syntax of int, real on client
     - garanteed order of appearance ?
 
