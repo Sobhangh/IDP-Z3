@@ -1,8 +1,9 @@
+import itertools as it
 import os
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
-    Sum, If, FuncDeclRef
+    Sum, If, FuncDeclRef, BoolVal
 from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
@@ -18,16 +19,16 @@ class Environment:
 
 class File(object):
     def __init__(self, **kwargs):
-        self.theory = kwargs.pop('theory')
         self.vocabulary = kwargs.pop('vocabulary')
+        self.theory = kwargs.pop('theory')
         self.structure = kwargs.pop('structure')
 
     def translate(self, case: ConfigCase):
         env = Environment()
         self.vocabulary.translate(case, env)
-        self.theory.translate(case, env)
         if self.structure:
             self.structure.translate(case, env)
+        self.theory.translate(case, env)
 
 
 class Theory(object):
@@ -94,24 +95,43 @@ class Interpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.tuples = kwargs.pop('tuples')
+        self.default = kwargs.pop('default')
 
     def translate(self, case: ConfigCase, env: Environment):
-        s = self.name.translate(case, env)
-        for tuple in self.tuples:
-            arg = tuple.translate(case, env)
-            try: # predicate
-                out = s(arg)
-                case.interpretations.append(out)
-            except: # function
-                out = s(arg[:-1]) == arg[-1]
-                case.interpretations.append(out)
+        symbol = env.var_scope[self.name.name]
+        function = -1 if symbol.__class__.__name__ == "ArithRef" or symbol.range() != BoolSort() else 0
+        arity = len(self.tuples[0].args) # there must be at least one tuple !
+        if function and 1 < arity and self.default == None:
+            raise Exception("Default value required for function {} in structure.".format(self.name.name))
+
+        # create a macro and attach it to the symbol
+        def interpretation(rank, args, tuples=None):
+            tuples = [tuple.translate(case, env) for tuple in self.tuples] if tuples == None else tuples
+            if rank == arity+function: # return a value
+                if not function:
+                    return BoolVal(True)
+                elif 1 < len(tuples):
+                    raise Exception("Duplicate values in structure for " + str(symbol))
+                else:
+                    return tuples[0][rank]
+            else: # constructs If-then-else recursively
+                out = self.default.translate(case, env) if function else BoolVal(False)
+
+                tuples.sort(key=lambda t: str(t[rank]))
+                groups = it.groupby(tuples, key=lambda t: t[rank])
+                for val, tuples2 in groups:
+                    out = If(args[rank]==val, interpretation(rank+1, args, list(tuples2)), out)
+                return out
+        symbol.interpretation = interpretation
 
 class Tuple(object):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
 
+    def __str__(self):
+        return ",".join([str(a) for a in self.args])
+
     def translate(self, case: ConfigCase, env: Environment):
-        print(self.args)
         return [arg.translate(case, env) for arg in self.args]
 
 class Rule(object):
@@ -394,6 +414,8 @@ class AppliedSymbol(object):
         arg = [x.translate(case, env) for x in self.args.fs]
         out = s(arg)
         case.Atom(out)
+        if hasattr(s, 'interpretation'):
+            out = s.interpretation(0, arg)
         return out
 
 
@@ -420,6 +442,9 @@ class Variable(object):
             return bool(False)
         out = env.var_scope[self.name]
         case.Atom(out)
+        if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
+            # exclude applied symbols
+            out = out.interpretation(0, [])
         return out
 
 
