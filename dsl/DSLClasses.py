@@ -414,10 +414,13 @@ class AppliedSymbol(object):
         s = self.s.translate(case, env)
         arg = [x.translate(case, env) for x in self.args.fs]
         out = s(arg)
-        case.Atom(out)
         if hasattr(s, 'interpretation'):
-            out = s.interpretation(0, arg)
-        return out
+            out.interpretation = s.interpretation(0, arg)
+            case.Atom(out)
+            return out.interpretation
+        else:
+            case.Atom(out)
+            return out
 
 
 class Brackets(object):
@@ -442,11 +445,14 @@ class Variable(object):
         if self.name == "false":
             return bool(False)
         out = env.var_scope[self.name]
-        case.Atom(out)
         if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
             # exclude applied symbols
-            out = out.interpretation(0, [])
-        return out
+            out.interpretation = out.interpretation(0, [])
+            case.Atom(out)
+            return out.interpretation
+        else:
+            case.Atom(out)
+            return out
 
 
 class Symbol(Variable): pass

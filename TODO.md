@@ -1,5 +1,6 @@
 
 for the paper:
+    - abstract for interpreted ? should not be irrelevant
     - domain -> list box + ignore equality atoms with a constant
     - Undo
     - abstract variables: remove consequences per background theory

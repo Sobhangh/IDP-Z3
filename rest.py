@@ -32,6 +32,18 @@ class HelloWorld(Resource):
 z3lock = threading.Lock()
 cases = {} #{code_string : ConfigCase}
 
+def caseOf(code):
+    global cases
+    if code in cases:
+        return cases[code]
+    else:
+        idpModel = idpparser.model_from_str(code)
+        case = ConfigCase(idpModel.translate)
+        if 20<len(cases):
+            del cases[0] # remove oldest entry, to prevent memory overflow
+        cases[code] = case
+        return case
+
 class eval(Resource):
     def post(self):
         global cases
@@ -39,14 +51,7 @@ class eval(Resource):
             try:
                 args = parser.parse_args()
 
-                if args['code'] in cases:
-                    case = cases[args['code']]
-                else:
-                    idpModel = idpparser.model_from_str(args['code'])
-                    case = ConfigCase(idpModel.translate)
-                    if 100<len(cases):
-                        cases = {} # reset after a while, to prevent memory overflow
-                    cases[args['code']] = case
+                case = caseOf(args['code'])
 
                 method = args['method']
                 active = args['active']
@@ -86,12 +91,13 @@ class eval(Resource):
 
 class meta(Resource):
     def post(self):
+        global cases
         with z3lock:
             try:
                 args = parser.parse_args()
                 try:
-                    idpModel = idpparser.model_from_str(args['code'])
-                    return ConfigCase(idpModel.translate).metaJSON()
+                    case = caseOf(args['code'])
+                    return case.metaJSON()
                 except Exception as exc:
                     traceback.print_exc()
                     return repr(exc)

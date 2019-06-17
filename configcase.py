@@ -142,6 +142,12 @@ class ConfigCase:
                 solver.add(const == atomZ3)
                 reify[atomZ3] = const
                 unreify[const] = atomZ3
+            elif hasattr(atomZ3, 'interpretation'):
+                count += 1
+                const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
+                solver.add(const == atomZ3.interpretation)
+                reify[atomZ3] = const
+                unreify[const] = atomZ3
             else:
                 reify[atomZ3] = atomZ3
                 unreify[atomZ3] = atomZ3
@@ -374,7 +380,7 @@ class ConfigCase:
             (reify, unreify) = self.quantified(solver)
             def r1(a): return reify[a] if a in reify else a
             def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
-            _, consqs = solver.consequences([r2(a) for a in self.assumptions], [to_explain])
+            _, consqs = solver.consequences([r2(a) for a in self.assumptions], [r2(to_explain)])
 
             for cons in consqs:
                 assumption_expr = cons.children()[0]
