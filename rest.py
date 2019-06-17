@@ -30,17 +30,23 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
-
+cases = {} #{code_string : ConfigCase}
 
 class eval(Resource):
     def post(self):
+        global cases
         with z3lock:
             try:
                 args = parser.parse_args()
 
-                idpModel = idpparser.model_from_str(args['code'])
-
-                case = ConfigCase(idpModel.translate)
+                if args['code'] in cases:
+                    case = cases[args['code']]
+                else:
+                    idpModel = idpparser.model_from_str(args['code'])
+                    case = ConfigCase(idpModel.translate)
+                    if 100<len(cases):
+                        cases = {} # reset after a while, to prevent memory overflow
+                    cases[args['code']] = case
 
                 method = args['method']
                 active = args['active']
