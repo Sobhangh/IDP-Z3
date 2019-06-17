@@ -1,7 +1,13 @@
-import itertools
+import itertools, time
 
 from z3 import *
 from z3.z3 import _to_expr_ref
+
+start = time.time()
+def log(action):
+    global start
+    print(action, time.time()-start)
+    start = time.time()
 
 
 def universe(vsort):

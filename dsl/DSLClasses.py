@@ -110,9 +110,10 @@ class Interpretation(object):
             if rank == arity+function: # return a value
                 if not function:
                     return BoolVal(True)
-                elif 1 < len(tuples):
-                    raise Exception("Duplicate values in structure for " + str(symbol))
                 else:
+                    if 1 < len(tuples):
+                        #raise Exception("Duplicate values in structure for " + str(symbol))
+                        print("Duplicate values in structure for " + str(symbol) + str(tuples[0]) )
                     return tuples[0][rank]
             else: # constructs If-then-else recursively
                 out = self.default.translate(case, env) if function else BoolVal(False)

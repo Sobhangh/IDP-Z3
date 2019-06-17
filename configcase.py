@@ -11,7 +11,7 @@ class ConfigCase:
 
     def __init__(self, theory=(lambda x: 0)):
         self.relevantVals = {}
-        self.symbols = []
+        self.symbols = {} # {string: Z3Expr}
         self.assumptions = []
         self.valueMap = {"True": True}
         self.constraints = []
@@ -32,7 +32,7 @@ class ConfigCase:
 
     def Const(self, txt: str, sort):
         const = Const(txt, sort)
-        self.symbols.append(const)
+        self.symbols[str(const)] = const
         return const
 
     def EnumSort(self, name, objects):
@@ -47,7 +47,7 @@ class ConfigCase:
         args, vals = splitLast(rel_vars)
         args = list(itertools.product(*args))
         values = list(itertools.product(args, vals))
-        self.symbols.append(out)
+        self.symbols[str(out)] = out
         self.relevantVals[out] = values
         if restrictive:
             for arg in list(args):
@@ -184,7 +184,12 @@ class ConfigCase:
 
     def as_symbol(self, symb_str):
         #print(symb_str)
-        return list(filter(lambda s: str(s)==symb_str, self.symbols)) [0]
+        return self.symbols[symb_str]
+
+    def is_symbol(self, symb):
+        if is_expr(symb):
+            symb = obj_to_string(symb)
+        return str(symb) in self.symbols
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
@@ -222,7 +227,7 @@ class ConfigCase:
 
     def metaJSON(self):
         symbols = []
-        for i in self.symbols:
+        for i in self.symbols.values():
             symbol_type = "function"
             if type(i) == BoolRef:
                 symbol_type = "proposition"
@@ -240,11 +245,6 @@ class ConfigCase:
             return self.valueMap[value]
         else:
             return value
-
-    def is_symbol(self, symb):
-        if is_expr(symb):
-            symb = obj_to_string(symb)
-        return any(obj_to_string(c) == symb for c in self.symbols)
 
     #################
     # INFERENCES
@@ -302,7 +302,7 @@ class ConfigCase:
         theo1 = And(self.constraints)
         solver.add(self.interpretations + self.typeConstraints + self.assumptions)
 
-        for s in self.symbols:
+        for s in self.symbols.values():
             solver.push()
             if type(s) == FuncDeclRef:
                 type_list = [s.domain(i) for i in range(0, s.arity())] + [s.range()]
@@ -478,7 +478,7 @@ class ConfigCase:
         (reify, _) = self.quantified(solver)
 
         while solver.check() == sat and count < 50: # for each parametric model
-            #for symb in self.symbols:
+            #for symb in self.symbols.values():
             #    print (symb, solver.model().eval(symb))
 
             atoms = [] # [(atom_string, atomZ3)]
@@ -528,7 +528,7 @@ class Structure:
     def __init__(self, case):
         self.m = {} # {symbol_string: {atom : {ct: Bool}, "[]": {args: value}? }
         # print("Structure")
-        # for symb in case.symbols:
+        # for symb in case.symbols.values():
         #     s = self.m.setdefault(str(symb), {})
         #     for arg, val in case.relevantVals[symb]:
         #         if type(symb) != BoolRef:
