@@ -99,6 +99,7 @@ class Interpretation(object):
 
     def translate(self, case: ConfigCase, env: Environment):
         symbol = env.var_scope[self.name.name]
+        case.interpreted[self.name.name] = True
         function = -1 if symbol.__class__.__name__ == "ArithRef" or symbol.range() != BoolSort() else 0
         arity = len(self.tuples[0].args) # there must be at least one tuple !
         if function and 1 < arity and self.default == None:
