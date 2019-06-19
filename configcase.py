@@ -11,6 +11,7 @@ class ConfigCase:
 
     def __init__(self, theory=(lambda x: 0)):
         self.relevantVals = {}
+        self.enums = {} # {string: string[]}
         self.symbols = {} # {string: Z3Expr}
         self.assumptions = []
         self.valueMap = {"True": True}
@@ -36,6 +37,7 @@ class ConfigCase:
         return const
 
     def EnumSort(self, name, objects):
+        self.enums[name] = objects
         out = EnumSort(name, objects)
         for i in out[1]:
             self.valueMap[obj_to_string(i)] = i
@@ -114,10 +116,14 @@ class ConfigCase:
         out = {}  # Ordered dict: string -> Z3 object
         if not is_app(expr): return out
         name = expr.decl().name()
-        if self.is_symbol(name) and expr.sort().name() in ["Real", "Int"] \
+        typ = expr.sort().name()
+        if self.is_symbol(name) \
+            and ( typ in ["Real", "Int"] or typ in self.enums ) \
             and not self.is_really_constant(expr) \
-            and self.has_ground_children(expr) and expr.decl().name() not in ["+", "-", "*", "/"]:
+            and self.has_ground_children(expr) \
+            and expr.decl().name() not in ["+", "-", "*", "/"]:
                 out[atom_as_string(expr)] = expr
+
         for child in expr.children():
             out.update(self.getNumericTerms(child))
         return out
@@ -219,7 +225,7 @@ class ConfigCase:
                         elif json_atom["typ"] == "Real":
                             value = float(json_atom["value"])
                         else:
-                            value = json_atom["value"]
+                            value = self.valueMap[json_atom["value"]]
                         self.assumptions.append(atomZ3 == value)
 
     def args(self, val):
@@ -551,11 +557,12 @@ class Structure:
                 s.setdefault(key, {"typ": typ, "ct": ct_true, "cf": ct_false})
             elif typ in ["Real", "Int"]:
                 s.setdefault(key, {"typ": typ, "value": str(value)})
+            elif typ in case.enums:
+                s.setdefault(key, {"typ": typ, "value": str(value), "values": case.enums[typ]})
 
     def addAtom(self, case, atomZ3, unreify, truth, value, unknown=False):
         if is_eq(atomZ3): # try to interpret it as an assignment
-            if atomZ3.arg(1).__class__.__name__ in \
-                ["IntNumRef", "RatNumRef", "AlgebraicNumRef"]: # is this really a value ?
+            if atomZ3.arg(1).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
                 self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1), unknown)
         sgn = "ct" if truth else "cf"
         if is_not(atomZ3):
@@ -570,9 +577,9 @@ class Structure:
                 elif typ == 'Bool':
                     s[key][sgn] = True
                 elif typ in ["Real", "Int"] and truth:
-                    s[key]["typ"] = ""
                     s[key]["value"] = str(eval(str(value))) # compute fraction
-
+                elif typ in case.enums and truth and value.decl().name() != "if":
+                    s[key]["value"] = str(value)
 
 def atom_as_string(expr):
     if hasattr(expr, 'atom_string'): return expr.atom_string

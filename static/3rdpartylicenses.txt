@@ -328,13 +328,7 @@ MIT
 @angular/platform-browser
 MIT
 
-ngx-monaco-editor
-MIT
-
-@angular/router
-MIT
-
-@angular/flex-layout
+@angular/cdk
 MIT
 The MIT License
 
@@ -359,7 +353,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
-@angular/cdk
+ngx-monaco-editor
+MIT
+
+@angular/router
+MIT
+
+@angular/cdk/scrolling
+
+@angular/flex-layout
 MIT
 The MIT License
 
