@@ -1,5 +1,6 @@
 
 for the paper:
+    - isolate non-linear constraints over real ? https://rise4fun.com/z3/tutorial
     - abstract for interpreted ? should not be irrelevant
     - domain -> list box + ignore equality atoms with a constant
     - Undo

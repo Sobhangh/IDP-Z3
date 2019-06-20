@@ -274,6 +274,23 @@ class ConfigCase:
 
     def propagation(self):
         out = self.initial_structure()
+
+        # resolve numeric consequences first
+        # solver = self.mk_solver(with_assumptions=True)
+        # (_, unreify) = self.quantified(solver)
+        # for atom in unreify.keys():
+        #     if not is_bool(atom): # numeric value
+        #         solver.push()
+        #         if solver.check() == sat:
+        #             val = solver.model().eval(atom)
+        #             if is_number(str(val)):
+        #                 solver.add(atom != val)
+        #                 result = solver.check()
+        #                 if result != sat:
+        #                     out.addAtom(self, atom, unreify, True, val)
+        #                     self.assumptions.append(atom == val)
+        #         solver.pop()
+
         solver = self.mk_solver(with_assumptions=True)
         (_, unreify) = self.quantified(solver)
 

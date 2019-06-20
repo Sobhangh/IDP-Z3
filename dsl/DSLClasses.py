@@ -185,6 +185,7 @@ class BinaryOperator(object):
             '-': lambda x, y: x - y,
             '*': lambda x, y: x * y,
             '/': lambda x, y: x / y,
+            '^': lambda x, y: x ** y,
             '=': lambda x, y: x == y,
             '<': lambda x, y: x < y,
             '>': lambda x, y: x > y,
@@ -254,6 +255,8 @@ class ASumMinus(BinaryOperator): pass
 
 
 class AMultDiv(BinaryOperator): pass
+
+class APower(BinaryOperator): pass
 
 class AUnary(object):
     MAP = {'-': lambda x: 0 - x,
@@ -604,7 +607,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[File, Theory, Vocabulary, Structure, Interpretation, Tuple, SymbolDeclaration, Sort,
                                          AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
                                          AComparison, AAggregate, SetExp,
-                                         ASumMinus, AMultDiv, AUnary, NumberConstant, ConstructedTypeDeclaration,
+                                         ASumMinus, AMultDiv, APower, AUnary, NumberConstant, ConstructedTypeDeclaration,
                                          RangeDeclaration, AppliedSymbol, Definition, Rule,
                                          Variable, Symbol, AQuantification,
                                          Brackets])

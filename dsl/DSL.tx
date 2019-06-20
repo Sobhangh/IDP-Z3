@@ -26,7 +26,8 @@ Disjunction: ADisjunction | Conjunction;
 Conjunction: AConjunction | Comparison;
 Comparison: AComparison | SumMinus;
 SumMinus: ASumMinus | MultDiv;
-MultDiv: AMultDiv | Unary;
+MultDiv: AMultDiv | Power;
+Power: APower | Unary;
 Unary: AUnary | Aggregate;
 Aggregate: AAggregate | Base;
 
@@ -40,7 +41,8 @@ ADisjunction: fs=Conjunction (operator='|' fs=Conjunction)+;
 AConjunction: fs=Comparison (operator='&' fs=Comparison)+;
 AComparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)+;
 ASumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)+;
-AMultDiv: fs=Unary (operator=MultDivOp fs=Unary)+;
+AMultDiv: fs=Power (operator=MultDivOp fs=Power)+;
+APower: fs=Unary (operator='^' fs=Unary);
 AUnary: operator=UnaryOperator f=Base;
 
 Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
