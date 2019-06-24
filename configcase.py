@@ -279,7 +279,7 @@ class ConfigCase:
         # solver = self.mk_solver(with_assumptions=True)
         # (_, unreify) = self.quantified(solver)
         # for atom in unreify.keys():
-        #     if not is_bool(atom): # numeric value
+        #     if not is_bool(atom): # and not str(atom) in self.enums: #numeric value
         #         solver.push()
         #         if solver.check() == sat:
         #             val = solver.model().eval(atom)
@@ -418,13 +418,13 @@ class ConfigCase:
         out = {} # universals, assumptions, consequences, variable
 
         solver = self.mk_solver(with_assumptions=False)
-        (reify, _) = self.quantified(solver)
+        (reify, unreify) = self.quantified(solver)
 
         def _consequences(done, with_assumptions=True):
-            nonlocal solver, reify
+            nonlocal solver, reify, unreify
             out = {} # ordered set of atom_as_string
 
-            for atomZ3 in self.atoms.values():# numeric variables or atom !
+            for atomZ3 in unreify.keys():# numeric variables or atom !
                 if not atom_as_string(atomZ3) in done:
                     result, consq = solver.consequences([], [reify[atomZ3]])
 
