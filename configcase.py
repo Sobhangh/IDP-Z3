@@ -573,7 +573,11 @@ class Structure:
             if typ == 'Bool':
                 s.setdefault(key, {"typ": typ, "ct": ct_true, "cf": ct_false})
             elif typ in ["Real", "Int"]:
-                s.setdefault(key, {"typ": typ, "value": str(value)})
+                if atomZ3 in case.relevantVals and case.relevantVals[atomZ3]:
+                    s.setdefault(key, {"typ": typ, "value": str(value),
+                                        "values": [str(eval(str(b))) for a,b in case.relevantVals[atomZ3]]})
+                else:
+                    s.setdefault(key, {"typ": typ, "value": str(value)})
             elif typ in case.enums:
                 s.setdefault(key, {"typ": typ, "value": str(value), "values": case.enums[typ]})
 
