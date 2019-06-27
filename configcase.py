@@ -573,9 +573,14 @@ class Structure:
             if typ == 'Bool':
                 s.setdefault(key, {"typ": typ, "ct": ct_true, "cf": ct_false})
             elif typ in ["Real", "Int"]:
-                if atomZ3 in case.relevantVals and case.relevantVals[atomZ3]:
-                    s.setdefault(key, {"typ": typ, "value": str(value),
-                                        "values": [str(eval(str(b))) for a,b in case.relevantVals[atomZ3]]})
+                symb = case.symbols[atomZ3.decl().name()]
+                if symb in case.relevantVals and case.relevantVals[symb]:
+                    values = [] #TODO refactor using enumeration type of symbol
+                    for _,b in case.relevantVals[symb]:
+                        v = str(eval(str(b)))
+                        if v in values: break
+                        values.append(v)
+                    s.setdefault(key, {"typ": typ, "value": str(value), "values": values})
                 else:
                     s.setdefault(key, {"typ": typ, "value": str(value)})
             elif typ in case.enums:

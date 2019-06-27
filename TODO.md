@@ -1,15 +1,13 @@
 
 for the paper:
     - isolate non-linear constraints over real ? https://rise4fun.com/z3/tutorial
-    - abstract for interpreted ? should not be irrelevant
-    - domain -> ignore equality atoms with a constant ?
-    - Undo
-    - abstract variables: remove consequences per background theory
-    - add unicity of functions ?
-    - reset propagated numeric values
-    - dead end in config --> undo !
+    - abstract : remove redundant consequences per background theory
+    - explain variable assignment too
 
 functional NTH:
+    - show (quantified) abstract atoms in English (e.g. all lenghts are positive)
+    - Undo button
+    - explain should include the list of rules used
     - structure: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
     - compute relevance in propagate
     - separate info button

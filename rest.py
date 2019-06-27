@@ -76,7 +76,7 @@ class eval(Resource):
                     out = case.optimize(args['symbol'], args['minimize'])
                 if method == "abstract":
                     if args['symbol'] != "": # theory to explain ?
-                        newTheory = ( str(idpModel.vocabulary)
+                        newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
                                     + "theory {\n"
                                     + args['symbol']
                                     + "\n}"
