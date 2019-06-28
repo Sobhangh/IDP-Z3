@@ -13,7 +13,7 @@ class ConfigCase:
         self.relevantVals = {}
         self.enums = {} # {string: string[]}
         self.symbols = {} # {string: Z3Expr}
-        self.assumptions = []
+        self.assumptions = {} # {Z3expr : True}
         self.valueMap = {"True": True}
         self.constraints = {} # {Z3expr: string}
         self.interpreted = {} # from structure: {string: True}
@@ -170,7 +170,7 @@ class ConfigCase:
         s = Solver()
         s.add(list(self.constraints.keys()))
         s.add(self.typeConstraints)
-        if with_assumptions: s.add(self.assumptions)
+        if with_assumptions: s.add(list(self.assumptions.keys()))
         return s
 
     def initial_structure(self):
@@ -187,9 +187,12 @@ class ConfigCase:
             # atom might not have an interpretation in model (if "don't care")
             value = m.eval(reify[atomZ3], model_completion=True)
             if atomZ3.sort().name() == 'Bool':
-                value = True if value else False
+                if not (is_true(value) or is_false(value)):
+                    #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
+                    print("*** ", atomZ3, " is not defined, and assumed false")
+                value = True if is_true(value) else False
                 out.addAtom(self, atomZ3, unreify, value, "")
-            else:
+            else: #TODO check that value is numeric ?
                 out.addAtom(self, atomZ3, unreify, True, value)
         return out.m
 
@@ -208,7 +211,7 @@ class ConfigCase:
             .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
             .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃"))
 
-        self.assumptions = []
+        self.assumptions = {}
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
@@ -216,9 +219,9 @@ class ConfigCase:
                     atomZ3 = self.atoms[atom[2:-2]]
                     if json_atom["typ"] == "Bool":
                         if "ct" in json_atom and json_atom["ct"]:
-                            self.assumptions.append(atomZ3)
+                            self.assumptions[atomZ3] = True
                         if "cf" in json_atom and json_atom["cf"]:
-                            self.assumptions.append(Not(atomZ3))
+                            self.assumptions[Not(atomZ3)] = True
                     elif json_atom["value"]:
                         if json_atom["typ"] == "Int":
                             value = int(json_atom["value"])
@@ -226,7 +229,7 @@ class ConfigCase:
                             value = float(json_atom["value"])
                         else:
                             value = self.valueMap[json_atom["value"]]
-                        self.assumptions.append(atomZ3 == value)
+                        self.assumptions[atomZ3 == value] = True
 
     def args(self, val):
         a, _ = splitLast(list(map(self.z3_value, json.loads(val))))
@@ -288,7 +291,7 @@ class ConfigCase:
         #                 result = solver.check()
         #                 if result != sat:
         #                     out.addAtom(self, atom, unreify, True, val)
-        #                     self.assumptions.append(atom == val)
+        #                     self.assumptions[atom == val] = True
         #         solver.pop()
 
         solver = self.mk_solver(with_assumptions=True)
@@ -328,7 +331,7 @@ class ConfigCase:
 
         solver = Solver()
         theo1 = And(list(self.constraints.keys()))
-        solver.add(self.typeConstraints + self.assumptions)
+        solver.add(self.typeConstraints + list(self.assumptions.keys))
 
         for s in self.symbols.values():
             solver.push()
@@ -344,12 +347,12 @@ class ConfigCase:
                               s(constants) == c(constants))))
                 var_list = [Var(i, s.domain(i)) for i in range(0, s.arity())]
                 theo2 = rewrite(theo1, s, applyTo(c, var_list))
-                type_transform = rewrite(And(self.typeConstraints + self.assumptions), s, applyTo(c, var_list))
+                type_transform = rewrite(And(self.typeConstraints + list(self.assumptions.keys())), s, applyTo(c, var_list))
             else:
                 c = Const('temporaryConstant', s.sort())
                 solver.add(c != s)
                 theo2 = substitute(theo1, (s, c))
-                type_transform = substitute(And(self.typeConstraints + self.assumptions), (s, c))
+                type_transform = substitute(And(self.typeConstraints + list(self.assumptions.keys())), (s, c))
                 arg_fill = []
             solver.add(type_transform)
             solver.add(theo1 != theo2)
@@ -375,7 +378,7 @@ class ConfigCase:
         solver = Optimize()
         solver.add(list(self.constraints.keys()))
         solver.add(self.typeConstraints)
-        solver.add(self.assumptions)
+        solver.add(list(self.assumptions.keys()))
         s = self.as_symbol(symbol)
         if minimize:
             solver.minimize(s)
@@ -388,7 +391,7 @@ class ConfigCase:
 
     def explain(self, symbol, value):
         out = self.initial_structure()
-        for ass in self.assumptions: # add numeric assumptions
+        for ass in self.assumptions.keys(): # add numeric assumptions
             for atomZ3 in self.getAtoms(ass).values():
                 out.initialise(self, atomZ3, False, False, "")
 
@@ -401,7 +404,7 @@ class ConfigCase:
             (reify, unreify) = self.quantified(solver)
             def r1(a): return reify[a] if a in reify else a
             def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
-            _, consqs = solver.consequences([r2(a) for a in self.assumptions], [r2(to_explain)])
+            _, consqs = solver.consequences([r2(a) for a in self.assumptions.keys()], [r2(to_explain)])
 
             for cons in consqs:
                 assumption_expr = cons.children()[0]
@@ -429,7 +432,7 @@ class ConfigCase:
                 p = Const("wsdraqsesdf"+str(i), BoolSort())
                 ps[p] = constraint
                 s.add(Implies(p, constraint))
-            s.add(self.assumptions)
+            s.add(list(self.assumptions.keys()))
             s.push()
             s.add(Not(r2(to_explain)))
             s.check(list(ps.keys()))
@@ -484,7 +487,7 @@ class ConfigCase:
         out["universal"] = list(universal.keys())
 
         out["given"] = []
-        for assumption in self.assumptions:
+        for assumption in self.assumptions.keys():
             if is_not(assumption):
                 ass = atom_as_string(assumption.children()[0])
                 universal[ass] = False
@@ -495,7 +498,7 @@ class ConfigCase:
                 out["given"] += [ass]
 
         # extract assumptions and their consequences
-        solver.add(self.assumptions)
+        solver.add(list(self.assumptions.keys()))
         fixed = _consequences(universal, with_assumptions=True)
         out["fixed"] = list(fixed.keys())
 
