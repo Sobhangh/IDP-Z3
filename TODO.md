@@ -2,7 +2,6 @@
 for the paper:
     - isolate non-linear constraints over real ? https://rise4fun.com/z3/tutorial
     - abstract : remove redundant consequences per background theory
-    - explain variable assignment too
 
 functional NTH:
     - show (quantified) abstract atoms in English (e.g. all lenghts are positive)
