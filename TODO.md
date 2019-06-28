@@ -1,12 +1,13 @@
 
 for the paper:
+    - translate numeric ranges to enum ?
     - isolate non-linear constraints over real ? https://rise4fun.com/z3/tutorial
     - abstract : remove redundant consequences per background theory
 
 functional NTH:
+    - explain should include the list of rules used
     - show (quantified) abstract atoms in English (e.g. all lenghts are positive)
     - Undo button
-    - explain should include the list of rules used
     - structure: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
     - compute relevance in propagate
     - separate info button
@@ -23,3 +24,4 @@ other NTH (refactor)
     - distinguish between x=1 entry and x=1 atom in output structure
     - simplify Or, And with only one element
     - p(real) should be possible
+    - client should send the literal to be explained, not the atom

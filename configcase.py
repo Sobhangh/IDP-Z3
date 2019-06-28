@@ -15,7 +15,7 @@ class ConfigCase:
         self.symbols = {} # {string: Z3Expr}
         self.assumptions = []
         self.valueMap = {"True": True}
-        self.constraints = []
+        self.constraints = {} # {Z3expr: string}
         self.interpreted = {} # from structure: {string: True}
         self.typeConstraints = []
         self.atoms = {}
@@ -163,12 +163,12 @@ class ConfigCase:
     # UTILITIES
     #################
 
-    def add(self, constraint):
-        self.constraints.append(constraint)
+    def add(self, constraint, source_code):
+        self.constraints[constraint] = source_code
 
     def mk_solver(self, with_assumptions=False):
         s = Solver()
-        s.add(self.constraints)
+        s.add(list(self.constraints.keys()))
         s.add(self.typeConstraints)
         if with_assumptions: s.add(self.assumptions)
         return s
@@ -327,7 +327,7 @@ class ConfigCase:
         out = self.initial_structure()
 
         solver = Solver()
-        theo1 = And(self.constraints)
+        theo1 = And(list(self.constraints.keys()))
         solver.add(self.typeConstraints + self.assumptions)
 
         for s in self.symbols.values():
@@ -373,7 +373,7 @@ class ConfigCase:
 
     def optimize(self, symbol, minimize):
         solver = Optimize()
-        solver.add(self.constraints)
+        solver.add(list(self.constraints.keys()))
         solver.add(self.typeConstraints)
         solver.add(self.assumptions)
         s = self.as_symbol(symbol)
@@ -412,6 +412,38 @@ class ConfigCase:
                         out.addAtom(self, c, unreify, True, "")
                 else:
                     out.addAtom(self, assumption_expr, unreify, True, "")
+
+            """ # rules used in justification
+            if not to_explain.sort()==BoolSort(): # calculate numeric value
+                # TODO should be given by client
+                s = self.mk_solver(with_assumptions=True)
+                s.check()
+                val = s.model().eval(to_explain)
+                to_explain = to_explain == val
+
+            # TODO show original source code
+            s = Solver()
+            (reify, unreify) = self.quantified(s)
+            ps = {}
+            for i, constraint in enumerate(list(self.constraints.keys()) + self.typeConstraints):
+                p = Const("wsdraqsesdf"+str(i), BoolSort())
+                ps[p] = constraint
+                s.add(Implies(p, constraint))
+            s.add(self.assumptions)
+            s.push()
+            s.add(Not(r2(to_explain)))
+            s.check(list(ps.keys()))
+            unsatcore = s.unsat_core()
+            if unsatcore:
+                print("unsat", [ ps[a] for a in unsatcore])
+            else: # try to explain not(to_explain)
+                #TODO refactor: client should send us the literal, not the atom
+                s.pop()
+                s.add(r2(to_explain))
+                s.check(list(ps.keys()))
+                print("unsat", [ ps[a] for a in s.unsat_core()])
+            """
+
         return out.m
 
     def abstract(self):
@@ -426,7 +458,7 @@ class ConfigCase:
 
             for atomZ3 in unreify.keys():# numeric variables or atom !
                 if not atom_as_string(atomZ3) in done:
-                    result, consq = solver.consequences([], [reify[atomZ3]])
+                    result, consq = solver.consequences([], [atomZ3])
 
                     if result==unsat:
                         raise Exception("Not satisfiable !")
@@ -435,13 +467,13 @@ class ConfigCase:
                         if consq:
                             consq = consq[0].children()[1]
                             if is_not(consq):
-                                if not ("Not " + atom_as_string(atomZ3)) in done:
-                                    out["Not " + atom_as_string(atomZ3)] = True
+                                if not ("Not " + atom_as_string(unreify[atomZ3])) in done:
+                                    out["Not " + atom_as_string(unreify[atomZ3])] = True
                             elif not is_bool(atomZ3):
                                 if not atom_as_string(consq) in done:
                                     out[atom_as_string(consq)] = True
                             else:
-                                out[atom_as_string(atomZ3)] = True
+                                out[atom_as_string(unreify[atomZ3])] = True
                     else: # unknown -> restart solver
                         solver = self.mk_solver(with_assumptions)
                         (reify, _) = self.quantified(solver)
@@ -485,7 +517,7 @@ class ConfigCase:
                 substitutions += [(self.atoms[key], val)]
 
         # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
-        simplified = simplify(substitute(And(self.constraints), substitutions)) # it starts by the last substitution ??
+        simplified = simplify(substitute(And(list(self.constraints.keys())), substitutions)) # it starts by the last substitution ??
         relevants = self.getAtoms(simplified) # includes reified !
 
         # --> irrelevant
@@ -502,7 +534,6 @@ class ConfigCase:
         for atomZ3 in self.atoms.values():
             for symb in self.symbols_of(atomZ3).keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
-        (reify, _) = self.quantified(solver)
 
         while solver.check() == sat and count < 50: # for each parametric model
             #for symb in self.symbols.values():

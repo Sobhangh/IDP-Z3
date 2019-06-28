@@ -39,7 +39,7 @@ class Theory(object):
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.constraints:
             c = i.translate(case, env)
-            case.add(c)
+            case.add(c, str(i))
         for d in self.definitions:
             d.translate(case, env)
 
