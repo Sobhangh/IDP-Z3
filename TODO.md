@@ -2,8 +2,7 @@
 for the paper:
     - translate numeric ranges to enum ?
     - isolate non-linear constraints over real ? https://rise4fun.com/z3/tutorial
-    - abstract : remove redundant consequences per background theory
-    - expansion of numeric values should not have explain
+    - Show 1 model: numeric values should not have "explain"
 
 functional NTH:
     - explain should include the list of rules used

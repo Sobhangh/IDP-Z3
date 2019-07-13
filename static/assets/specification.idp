@@ -9,6 +9,9 @@ vocabulary {
     Name : name
     Subname : subname
 
+    Convex
+    Equilateral
+
     type sides = {3..4}
     Vertices: sides
     Sides: sides
@@ -21,8 +24,6 @@ vocabulary {
     Height: real
     Surface:real
 
-    Convex
-    Equilateral
 }
 
 theory {
