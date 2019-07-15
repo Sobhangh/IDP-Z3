@@ -503,7 +503,7 @@ class ConfigCase:
         out["fixed"] = list(fixed.keys())
 
         models, count = {}, 0
-        done = out["universal"] + out["given"] + out["fixed"]
+        done = set(out["universal"] + out["given"] + out["fixed"])
 
         # substitutions = [(quantifier/chained, reified)] + [(given atom, truthvalue)]
         substitutions = []
@@ -531,7 +531,7 @@ class ConfigCase:
                 if not atom_string in relevants and not string2 in relevants:
                     irrelevant += [atom_string]
         out["irrelevant"] = irrelevant
-        done += irrelevant
+        done = done.union(set(irrelevant))
 
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms.values():

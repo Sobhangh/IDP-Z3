@@ -27,3 +27,16 @@ other NTH (refactor)
     - simplify Or, And with only one element
     - p(real) should be possible
     - client should send the literal to be explained, not the atom
+
+GUI enhancements:
+    - use pop-up to show constraints on symbols
+    - show offended rules when unsatisfiable
+
+Merge with Explain branch:
+    - use slider for numeric values
+    - show valid range of numeric values
+    - scroll bar for list of values
+    - categories to group symbols
+    - nested symbols
+    - option to disable some rules (full workflow)
+    - compare consequences of 2 different choices
