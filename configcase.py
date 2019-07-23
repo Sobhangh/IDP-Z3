@@ -251,7 +251,7 @@ class ConfigCase:
                 "priority": "core",
                 "showOptimize": type(i) == ArithRef
             })
-        out = {"title": "Interactive Configurator", "symbols": symbols, "values": []}
+        out = {"title": "Interactive Consultant", "symbols": symbols, "values": []}
         return out
 
     def z3_value(self, value):
@@ -561,6 +561,7 @@ class ConfigCase:
                     atoms2.append((prefix, atom, atomZ3))
                     continue
                 solver2 = Solver()
+                solver2.add(self.typeConstraints)
                 (reify, _) = self.reify([self.atoms[a] for (_, a, _) in atoms], solver2)
                 solver2.add(And([atomZ3 for (_, atom1, atomZ3) in atoms if atom1 != atom]))  # ignore theory !
 
