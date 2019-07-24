@@ -2,7 +2,7 @@ primeng
 MIT
 The MIT License (MIT)
 
-Copyright (c) 2016-2019 PrimeTek
+Copyright (c) 2016-2018 PrimeTek
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
 
 primeicons
 MIT
@@ -328,11 +327,17 @@ MIT
 @angular/platform-browser
 MIT
 
-@angular/cdk
+ngx-monaco-editor
+MIT
+
+@angular/router
+MIT
+
+@angular/flex-layout
 MIT
 The MIT License
 
-Copyright (c) 2019 Google LLC.
+Copyright (c) 2018 Google LLC.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -353,19 +358,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
-ngx-monaco-editor
-MIT
-
-@angular/router
-MIT
-
-@angular/cdk/scrolling
-
-@angular/flex-layout
+@angular/cdk
 MIT
 The MIT License
 
-Copyright (c) 2019 Google LLC.
+Copyright (c) 2018 Google LLC.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
