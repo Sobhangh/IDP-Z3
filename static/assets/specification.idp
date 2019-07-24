@@ -1,7 +1,7 @@
 vocabulary {
     type name constructed from {triangle, quadrilateral}
     type subname constructed from
-        { triangle_equilateral
+        { regular_triangle
         , right_triangle
         , rectangle
         , square
@@ -42,8 +42,8 @@ theory {
     sum{n[side] : n=<Sides : Angle(n)} = (Sides-2)*180.
 
     // triangle
-    Subname=triangle_equilateral <=> Sides=3 & Equilateral.
-    Subname=triangle_equilateral <=> Sides=3 & (!n[side]: n=<Sides => Angle(n)=60).
+    Subname=regular_triangle <=> Sides=3 & Equilateral.
+    Subname=regular_triangle <=> Sides=3 & (!n[side]: n=<Sides => Angle(n)=60).
     Subname=right_triangle <=> Sides=3 & (?n[side]: n=<Sides & Angle(n)=90).
 
     // quadrilateral
