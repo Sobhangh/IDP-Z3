@@ -227,7 +227,9 @@ class ConfigCase:
     def loadStructureFromJson(self, jsonstr):
         json_data = ast.literal_eval(jsonstr \
             .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
-            .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃"))
+            .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃")
+            .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
+            .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
 
         self.assumptions = {}
         for sym in json_data:
@@ -414,7 +416,9 @@ class ConfigCase:
                 out.initialise(self, atomZ3, False, False, "")
 
         value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
-            .replace("\\u2200", "∀").replace("\\u2203", "∃")
+            .replace("\\u2200", "∀").replace("\\u2203", "∃") \
+            .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
+            .replace("\\u2228", "∨").replace("\\u2227", "∧")
         if value[2:-2] in self.atoms:
             to_explain = self.atoms[value[2:-2]] # value is an atom string
 
@@ -598,6 +602,7 @@ class ConfigCase:
             for prefix, atom_string, atomZ3 in atoms:
                 for symb in self.symbols_of(atomZ3).keys():
                     model.setdefault(symb, []).append([ prefix + atom_string ])
+                    break
             # add to models
             for k,v in models.items(): # add model
                 models[k] = v + [ model[k] if k in model else [] ]

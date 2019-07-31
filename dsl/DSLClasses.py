@@ -176,11 +176,16 @@ class Rule(object):
 
 
 class BinaryOperator(object):
-    MAP = {  '&': lambda x, y: And(x, y),
+    MAP = { '&': lambda x, y: And(x, y),
             '|': lambda x, y: Or(x, y),
+            '∧': lambda x, y: And(x, y),
+            '∨': lambda x, y: Or(x, y),
             '=>': lambda x, y: Or(Not(x), y),
             '<=': lambda x, y: Or(x, Not(y)),
             '<=>': lambda x, y: x == y,
+            '⇒': lambda x, y: Or(Not(x), y),
+            '⇐': lambda x, y: Or(x, Not(y)),
+            '⇔': lambda x, y: x == y,
             '+': lambda x, y: x + y,
             '-': lambda x, y: x - y,
             '*': lambda x, y: x * y,
@@ -206,6 +211,8 @@ class BinaryOperator(object):
         for i in range(1, len(self.fs)):
             op = self.operator[i-1]
             op = "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else op
+            op = "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else op
+            op = "∨" if op == "|" else "∧" if op == "&" else op
             out = out + " " + op + " " + str(self.fs[i])
         return out
 

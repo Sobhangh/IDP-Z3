@@ -34,11 +34,11 @@ Aggregate: AAggregate | Base;
 
 AAggregate: aggtype=AggType set=SetExp;
 AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
-ARImplication: fs=Equivalence (operator='<=' fs=Equivalence)+;
-AEquivalence: fs=Implication (operator='<=>' fs=Implication)+;
-AImplication: fs=Disjunction (operator='=>' fs=Disjunction)+;
-ADisjunction: fs=Conjunction (operator='|' fs=Conjunction)+;
-AConjunction: fs=Comparison (operator='&' fs=Comparison)+;
+ARImplication: fs=Equivalence (operator=RImplicationOp fs=Equivalence)+;
+AEquivalence: fs=Implication (operator=EquivalenceOp fs=Implication)+;
+AImplication: fs=Disjunction (operator=ImplicationOp fs=Disjunction)+;
+ADisjunction: fs=Conjunction (operator=DisjunctionOp fs=Conjunction)+;
+AConjunction: fs=Comparison (operator=ConjunctionOp fs=Comparison)+;
 AComparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)+;
 ASumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)+;
 AMultDiv: fs=Power (operator=MultDivOp fs=Power)+;
@@ -59,10 +59,15 @@ SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression
 Definition: '{' rules*=Rule '}';
 Rule: ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Expression)? ('<-' body=Expression)? '.' ;
 
+RImplicationOp: '<=' | '⇐';
+EquivalenceOp: '<=>' | '⇔';
+ImplicationOp: '=>' | '⇒';
+DisjunctionOp: '|' | '∨';
+ConjunctionOp: '&' | '∧';
+ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' !'-' | '>' | '≤' | '≥' | '≠' ;
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';
-ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' !'-' | '>' | '≤' | '≥' | '≠' ;
 Quantor: '∀' | '!' | '∃' | '?' ;
 AggType: '#' | 'card' | 'sum';
 

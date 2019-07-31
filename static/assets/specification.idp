@@ -1,13 +1,13 @@
 vocabulary {
-    type name constructed from {triangle, quadrilateral}
-    type subname constructed from
+    type type constructed from {triangle, quadrilateral}
+    type subtype constructed from
         { regular_triangle
         , right_triangle
         , rectangle
         , square
         , irregular}
-    Name : name
-    Subname : subname
+    Type : type
+    Subtype : subtype
 
     Convex
     Equilateral
@@ -29,40 +29,40 @@ vocabulary {
 theory {
     Vertices=3 <=> Sides=3.
     Vertices=4 <=> Sides=4.
-    Name=triangle      <=> Sides=3.
-    Name=quadrilateral <=> Sides=4.
+    Type=triangle      <=> Sides=3.
+    Type=quadrilateral <=> Sides=4.
 
     // General rules
     Sides=3 => Convex.
-    (!n[side]: n=<Sides => Angle(n)<180) <=> Convex.
-    (!n[side]: n=<Sides => Length(n)=Length(1)) <=> Equilateral.
+    (∀n[side]: n=<Sides => Angle(n)<180) <=> Convex.
+    (∀n[side]: n=<Sides => Length(n)=Length(1)) <=> Equilateral.
 
 
     Perimeter = sum{n[side] : n=<Sides : Length(n)}.
     sum{n[side] : n=<Sides : Angle(n)} = (Sides-2)*180.
 
     // triangle
-    Subname=regular_triangle <=> Sides=3 & Equilateral.
-    Subname=regular_triangle <=> Sides=3 & (!n[side]: n=<Sides => Angle(n)=60).
-    Subname=right_triangle <=> Sides=3 & (?n[side]: n=<Sides & Angle(n)=90).
+    Subtype=regular_triangle <=> Sides=3 & Equilateral.
+    Subtype=regular_triangle <=> Sides=3 & (!n[side]: n=<Sides => Angle(n)=60).
+    Subtype=right_triangle <=> Sides=3 & (?n[side]: n=<Sides & Angle(n)=90).
 
     // quadrilateral
-    Subname=square | Subname=rectangle <=> Sides=4 & (!n[side]: n=<Sides => Angle(n)=90).
-    Subname=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
-    Subname=square => Sides=4 & Equilateral.
+    Subtype=square | Subtype=rectangle <=> Sides=4 & (!n[side]: n=<Sides => Angle(n)=90).
+    Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
+    Subtype=square => Sides=4 & Equilateral.
 
     // surface
-    //Name=triangle => Surface = (Base * Height)/2.
-    //Subname=square | Subname=rectangle => Surface = Length(1)*Length(2).
-    //Subname=irregular => Surface = -1.
+    //Type=triangle => Surface = (Base * Height)/2.
+    //Subtype=square | Subtype=rectangle => Surface = Length(1)*Length(2).
+    //Subtype=irregular => Surface = -1.
     //0 =< Base.
     //0 =< Height.
     //?n[side]: n=<Sides & Length(n)=Base.
 
     // feasibility
-    Name=triangle => Length(1) =< Length(2) + Length(3).
-    Name=triangle => Length(2) =< Length(3) + Length(1).
-    Name=triangle => Length(3) =< Length(1) + Length(2).
+    Type=triangle => Length(1) =< Length(2) + Length(3).
+    Type=triangle => Length(2) =< Length(3) + Length(1).
+    Type=triangle => Length(3) =< Length(1) + Length(2).
 
     // positive values
     0 < Vertices.
