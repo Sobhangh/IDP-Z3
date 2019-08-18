@@ -11,15 +11,15 @@ vocabulary {
 
     Convex
     Equilateral
+    Perimeter:real
 
     type sides = {3..4}
-    Vertices: sides
     Sides: sides
+    Vertices: sides
 
     type side = {1..4}
-    Length(side):real
     Angle(side):real
-    Perimeter:real
+    Length(side):real
     Base : real
     Height: real
     Surface:real
@@ -32,40 +32,59 @@ theory {
     Type=triangle      <=> Sides=3.
     Type=quadrilateral <=> Sides=4.
 
-    // General rules
+    // Convex, Equilateral
     Sides=3 => Convex.
-    [All angles are below 180°](∀n[side]: n=<Sides => Angle(n)<180) <=> Convex.
-    [All sides have the same length](∀n[side]: n=<Sides => Length(n)=Length(1)) <=> Equilateral.
+    Convex <=> [All angles are below 180°]
+               (∀n[side]: Angle(n)<180).
 
-    [The perimeter is the sum of the lengths of the sides](Perimeter = sum{n[side] : n=<Sides : Length(n)}).
-    [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral](sum{n[side] : n=<Sides : Angle(n)} = (Sides-2)*180).
+    Equilateral <=> [All sides have the same length]
+                    (∀n[side]: Length(n)=Length(1) | Length(n)=0).
 
     // triangle
     Subtype=regular_triangle <=> Sides=3 & Equilateral.
-    Subtype=regular_triangle <=> Sides=3 & [All angles are 60°](!n[side]: n=<Sides => Angle(n)=60).
-    Subtype=right_triangle <=> Sides=3 & [One angle is 90°](?n[side]: n=<Sides & Angle(n)=90).
+    Subtype=regular_triangle <=> Sides=3 & [All angles are 60°]
+                                           (!n[side]: Angle(n)=60 | Angle(n)=0).
+    Subtype=right_triangle <=> Sides=3 & [One angle is 90°]
+                                         (?n[side]: Angle(n)=90).
 
     // quadrilateral
-    Subtype=square | Subtype=rectangle <=> Sides=4 & [All sides are 90°](!n[side]: n=<Sides => Angle(n)=90).
+    Subtype=square | Subtype=rectangle <=> Sides=4 & [All sides are 90°]
+                                                     (!n[side]: Angle(n)=90| Angle(n)=0).
     Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
     Subtype=square => Sides=4 & Equilateral.
-
-    // surface
-    //Type=triangle => Surface = (Base * Height)/2.
-    //Subtype=square | Subtype=rectangle => Surface = Length(1)*Length(2).
-    //Subtype=irregular => Surface = -1.
-    //0 =< Base.
-    //0 =< Height.
-    //?n[side]: n=<Sides & Length(n)=Base.
 
     // feasibility
     Type=triangle => Length(1) =< Length(2) + Length(3).
     Type=triangle => Length(2) =< Length(3) + Length(1).
     Type=triangle => Length(3) =< Length(1) + Length(2).
 
-    // positive values
-    // 0 < Vertices.
-    // 0 < Sides.
-    [Lengths are positive numbers](!x[side]: 0 =< Length(x)).
-    [Angles are positive numbers] (!x[side]: 0 =< Angle(x)).
+    // General constraints
+
+    [The perimeter is the sum of the lengths of the sides]
+    (Perimeter = sum{n[side] : True : Length(n)}).
+
+    [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
+    (sum{n[side] : True : Angle(n)} = (Sides-2)*180).
+
+    [Lengths are positive numbers]
+    (!x[side]: 0 =< Length(x)).
+
+    [Angles cannot be 180°]
+    (!x[side]: Angle(x) ~= 180).
+
+    [A polygon with N vertices has N angles]
+    (!n[side]: Vertices<n <=> Angle(n)=0).
+
+    [A polygon with N sides has N lengths]
+    (!n[side]: Sides<n <=> Length(n)=0).
+
+
+
+    // TODO : surface
+    //Type=triangle => Surface = (Base * Height)/2.
+    //Subtype=square | Subtype=rectangle => Surface = Length(1)*Length(2).
+    //Subtype=irregular => Surface = -1.
+    //0 =< Base.
+    //0 =< Height.
+    //?n[side]: n=<Sides & Length(n)=Base.
 }
