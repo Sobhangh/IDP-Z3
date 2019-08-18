@@ -437,11 +437,15 @@ class AppliedSymbol(object):
 class Brackets(object):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
+        self.reading = kwargs.pop('reading')
 
     def __str__(self): return "(" + str(self.f) + ")"
 
     def translate(self, case: ConfigCase, env: Environment):
-        return self.f.translate(case, env)
+        expr= self.f.translate(case, env)
+        if self.reading: 
+            expr.reading = self.reading
+        return expr
 
 
 class Variable(object):

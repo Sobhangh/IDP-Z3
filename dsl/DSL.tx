@@ -19,30 +19,30 @@ Comment:
 Expression: Quantification;
 
 Quantification: AQuantification | RImplication;
-RImplication: ARImplication | Equivalence;
-Equivalence: AEquivalence | Implication;
-Implication: AImplication | Disjunction;
-Disjunction: ADisjunction | Conjunction;
-Conjunction: AConjunction | Comparison;
-Comparison: AComparison | SumMinus;
-SumMinus: ASumMinus | MultDiv;
-MultDiv: AMultDiv | Power;
-Power: APower | Unary;
-Unary: AUnary | Aggregate;
-Aggregate: AAggregate | Base;
+RImplication:   ARImplication   | Equivalence;
+Equivalence:    AEquivalence    | Implication;
+Implication:    AImplication    | Disjunction;
+Disjunction:    ADisjunction    | Conjunction;
+Conjunction:    AConjunction    | Comparison;
+Comparison:     AComparison     | SumMinus;
+SumMinus:       ASumMinus       | MultDiv;
+MultDiv:        AMultDiv        | Power;
+Power:          APower          | Unary;
+Unary:          AUnary          | Aggregate;
+Aggregate:      AAggregate      | Base;
 
 
 AAggregate: aggtype=AggType set=SetExp;
 AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
 ARImplication: fs=Equivalence (operator=RImplicationOp fs=Equivalence)+;
-AEquivalence: fs=Implication (operator=EquivalenceOp fs=Implication)+;
-AImplication: fs=Disjunction (operator=ImplicationOp fs=Disjunction)+;
-ADisjunction: fs=Conjunction (operator=DisjunctionOp fs=Conjunction)+;
-AConjunction: fs=Comparison (operator=ConjunctionOp fs=Comparison)+;
-AComparison: fs=SumMinus (operator=ComparisonOp fs=SumMinus)+;
-ASumMinus: fs=MultDiv (operator=SumMinusOp fs=MultDiv)+;
-AMultDiv: fs=Power (operator=MultDivOp fs=Power)+;
-APower: fs=Unary (operator='^' fs=Unary);
+AEquivalence:  fs=Implication (operator=EquivalenceOp  fs=Implication)+;
+AImplication:  fs=Disjunction (operator=ImplicationOp  fs=Disjunction)+;
+ADisjunction:  fs=Conjunction (operator=DisjunctionOp  fs=Conjunction)+;
+AConjunction:  fs=Comparison (operator=ConjunctionOp   fs=Comparison )+;
+AComparison:   fs=SumMinus (operator=ComparisonOp      fs=SumMinus   )+;
+ASumMinus:     fs=MultDiv (operator=SumMinusOp         fs=MultDiv    )+;
+AMultDiv:      fs=Power (operator=MultDivOp            fs=Power      )+;
+APower:        fs=Unary (operator='^'                  fs=Unary      );
 AUnary: operator=UnaryOperator f=Base;
 
 Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
@@ -51,7 +51,7 @@ AppliedSymbol: s=Symbol args=Arguments;
 Variable: name=ID;
 NumberConstant: number=IDPFLOAT | number=INT;
 StringConstant: str=STRING;
-Brackets: '(' f=Expression ')';
+Brackets: ('[' reading=/[^\]]*/ ']')? '(' f=Expression ')';
 
 Arguments: '(' fs*=Expression[','] ')';
 SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';

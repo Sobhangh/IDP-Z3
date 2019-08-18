@@ -34,20 +34,19 @@ theory {
 
     // General rules
     Sides=3 => Convex.
-    (∀n[side]: n=<Sides => Angle(n)<180) <=> Convex.
-    (∀n[side]: n=<Sides => Length(n)=Length(1)) <=> Equilateral.
+    [All angles are below 180°](∀n[side]: n=<Sides => Angle(n)<180) <=> Convex.
+    [All sides have the same length](∀n[side]: n=<Sides => Length(n)=Length(1)) <=> Equilateral.
 
-
-    Perimeter = sum{n[side] : n=<Sides : Length(n)}.
-    sum{n[side] : n=<Sides : Angle(n)} = (Sides-2)*180.
+    [The perimeter is the sum of the lengths of the sides](Perimeter = sum{n[side] : n=<Sides : Length(n)}).
+    [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral](sum{n[side] : n=<Sides : Angle(n)} = (Sides-2)*180).
 
     // triangle
     Subtype=regular_triangle <=> Sides=3 & Equilateral.
-    Subtype=regular_triangle <=> Sides=3 & (!n[side]: n=<Sides => Angle(n)=60).
-    Subtype=right_triangle <=> Sides=3 & (?n[side]: n=<Sides & Angle(n)=90).
+    Subtype=regular_triangle <=> Sides=3 & [All angles are 60°](!n[side]: n=<Sides => Angle(n)=60).
+    Subtype=right_triangle <=> Sides=3 & [One angle is 90°](?n[side]: n=<Sides & Angle(n)=90).
 
     // quadrilateral
-    Subtype=square | Subtype=rectangle <=> Sides=4 & (!n[side]: n=<Sides => Angle(n)=90).
+    Subtype=square | Subtype=rectangle <=> Sides=4 & [All sides are 90°](!n[side]: n=<Sides => Angle(n)=90).
     Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
     Subtype=square => Sides=4 & Equilateral.
 
@@ -65,8 +64,8 @@ theory {
     Type=triangle => Length(3) =< Length(1) + Length(2).
 
     // positive values
-    0 < Vertices.
-    0 < Sides.
-    !x[side]: 0 =< Length(x).
-    !x[side]: 0 =< Angle(x).
+    // 0 < Vertices.
+    // 0 < Sides.
+    [Lengths are positive numbers](!x[side]: 0 =< Length(x)).
+    [Angles are positive numbers] (!x[side]: 0 =< Angle(x)).
 }

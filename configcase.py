@@ -645,7 +645,7 @@ class Structure:
         for symb in case.symbols_of(atomZ3):
             s = self.m.setdefault(symb, {})
             if typ == 'Bool':
-                s.setdefault(key, {"typ": typ, "ct": ct_true, "cf": ct_false})
+                symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
             elif typ in ["Real", "Int"]:
                 symb = case.symbols[atomZ3.decl().name()]
                 if symb in case.relevantVals and case.relevantVals[symb]:
@@ -654,11 +654,17 @@ class Structure:
                         v = str(eval(str(b)))
                         if v in values: break
                         values.append(v)
-                    s.setdefault(key, {"typ": typ, "value": str(value), "values": values})
+                    symbol = {"typ": typ, "value": str(value), "values": values}
                 else:
-                    s.setdefault(key, {"typ": typ, "value": str(value)})
+                    symbol = {"typ": typ, "value": str(value)}
             elif typ in case.enums:
-                s.setdefault(key, {"typ": typ, "value": str(value), "values": case.enums[typ]})
+                symbol = {"typ": typ, "value": str(value), "values": case.enums[typ]}
+            else:
+                symbol = None
+            if symbol: 
+                if hasattr(atomZ3, 'reading'):
+                    symbol['reading'] = atomZ3.reading
+                s.setdefault(key, symbol)
 
     def addAtom(self, case, atomZ3, unreify, truth, value, unknown=False):
         if is_eq(atomZ3): # try to interpret it as an assignment
@@ -680,6 +686,8 @@ class Structure:
                     s[key]["value"] = str(eval(str(value))) # compute fraction
                 elif typ in case.enums and truth and value.decl().name() != "if":
                     s[key]["value"] = str(value)
+                if hasattr(atomZ3, 'reading'):
+                    s[key]['reading'] = atomZ3.reading
 
 def atom_as_string(expr):
     if hasattr(expr, 'atom_string'): return expr.atom_string
