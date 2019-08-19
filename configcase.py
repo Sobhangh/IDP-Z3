@@ -292,6 +292,7 @@ class ConfigCase:
                 temp = json.dumps([atom_string])
                 if temp not in d: # test: x=y(x).
                     d.append(temp)
+                break
         return out
 
 
@@ -559,6 +560,7 @@ class ConfigCase:
         for atomZ3 in self.atoms.values():
             for symb in self.symbols_of(atomZ3).keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
+                break
 
         while solver.check() == sat and count < 50: # for each parametric model
             #for symb in self.symbols.values():
@@ -665,6 +667,7 @@ class Structure:
                 if hasattr(atomZ3, 'reading'):
                     symbol['reading'] = atomZ3.reading
                 s.setdefault(key, symbol)
+                break
 
     def addAtom(self, case, atomZ3, unreify, truth, value, unknown=False):
         if is_eq(atomZ3): # try to interpret it as an assignment
@@ -688,6 +691,7 @@ class Structure:
                     s[key]["value"] = str(value)
                 if hasattr(atomZ3, 'reading'):
                     s[key]['reading'] = atomZ3.reading
+            
 
 def atom_as_string(expr):
     if hasattr(expr, 'atom_string'): return expr.atom_string
