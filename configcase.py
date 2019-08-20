@@ -24,6 +24,7 @@ from z3.z3 import _py2expr
 
 from utils import *
 
+from LiteralQ import *
 
 class ConfigCase:
 
@@ -36,11 +37,12 @@ class ConfigCase:
         self.constraints = {} # {Z3expr: string}
         self.interpreted = {} # from structure: {string: True}
         self.typeConstraints = []
-        self.atoms = {}
+        self.atoms = {} # {atom_string: Z3expr} atoms + numeric terms !
+        self.Z3atoms = {} # {Z3_code: Z3expr}
         theory(self)
 
         out = {}
-        for atomZ3 in self.atoms.values(): # add terms first
+        for atomZ3 in self.atoms.values(): # add numeric terms first
             out.update(self.getNumericTerms(atomZ3))
         out.update(self.atoms) # then other atoms
         self.atoms = out
@@ -84,12 +86,24 @@ class ConfigCase:
         return p
 
     def Atom(self, atomZ3, atom_string=None):
-        if is_bool(atomZ3) and (is_quantifier(atomZ3) or not self.has_local_var(atomZ3)):
-            if atom_string:
-                atomZ3.atom_string = atom_string
-            else:
-                atom_string = atom_as_string(atomZ3)
+        """
+            Z3_code:    ASCII, with ==, <=, !=
+            atom_string:original code, using UTF-8 characters for connectives
+            reading:    string from code annotation
+            proposition:qsdfvqe13435(Z3_code)
+        """
+        if is_bool(atomZ3) and (is_quantifier(atomZ3) or not self.has_local_var(atomZ3)): # AtomQ !
+            atom_string = atom_string if atom_string else atom_as_string(atomZ3)
+            atomZ3.atom_string = atom_string
             self.atoms.update({atom_string: atomZ3})
+
+            if hasattr(atomZ3, 'reading'): # then use it
+                self.atoms[atom_string].reading = atomZ3.reading
+            elif not hasattr(self.atoms[atom_string], 'reading'): # then use default value
+                self.atoms[atom_string].reading = atom_string
+
+            self.Z3atoms[str(atomZ3)] = self.atoms[atom_string]
+
 
     #################
     # EXPRESSIONS
@@ -473,18 +487,18 @@ class ConfigCase:
         return out.m
 
     def abstract(self):
-        out = {} # universals, assumptions, consequences, variable
+        out = {} # {category : [LiteralQ]}
 
         solver = self.mk_solver(with_assumptions=False)
         (reify, unreify) = self.reify(self.atoms.values(), solver)
 
         def _consequences(done, with_assumptions=True):
             nonlocal solver, reify, unreify
-            out = {} # ordered set of atom_as_string
+            out = {} # {LiteralQ: True}
 
-            for atomZ3 in unreify.keys():# numeric variables or atom !
-                if not atom_as_string(atomZ3) in done:
-                    result, consq = solver.consequences([], [atomZ3])
+            for reified, atomZ3 in unreify.items():# numeric variables or atom !
+                if not LiteralQ(True, atomZ3) in done and not LiteralQ(False, atomZ3) in done:
+                    result, consq = solver.consequences([], [reified])
 
                     if result==unsat:
                         raise Exception("Not satisfiable !")
@@ -493,13 +507,11 @@ class ConfigCase:
                         if consq:
                             consq = consq[0].children()[1]
                             if is_not(consq):
-                                if not ("Not " + atom_as_string(unreify[atomZ3])) in done:
-                                    out["Not " + atom_as_string(unreify[atomZ3])] = True
-                            elif not is_bool(atomZ3):
-                                if not atom_as_string(consq) in done:
-                                    out[atom_as_string(consq)] = True
+                                out[LiteralQ(False, atomZ3)] = True
+                            elif not is_bool(reified):
+                                out[LiteralQ(True, consq  )] = True
                             else:
-                                out[atom_as_string(unreify[atomZ3])] = True
+                                out[LiteralQ(True, atomZ3 )] = True
                     else: # unknown -> restart solver
                         solver = self.mk_solver(with_assumptions)
                         (_, unreify) = self.reify(self.atoms.values(), solver)
@@ -512,13 +524,11 @@ class ConfigCase:
         out["given"] = []
         for assumption in self.assumptions.keys():
             if is_not(assumption):
-                ass = atom_as_string(assumption.children()[0])
-                universal[ass] = False
-                out["given"] += ["Not " + ass]
+                ass = LiteralQ(False, assumption.children()[0])
             else:
-                ass = atom_as_string(assumption)
-                universal[ass] = True
-                out["given"] += [ass]
+                ass = LiteralQ(True, assumption)
+            universal[ass] = True
+            out["given"] += [ass]
 
         # extract assumptions and their consequences
         solver.add(list(self.assumptions.keys()))
@@ -528,19 +538,15 @@ class ConfigCase:
         models, count = {}, 0
         done = set(out["universal"] + out["given"] + out["fixed"])
 
-        # substitutions = [(quantifier/chained, reified)] + [(given atom, truthvalue)]
+        # substitutions = [(quantifier/chained, reified)] + [(consequences, truthvalue)]
         substitutions = []
         reified = Function("qsdfvqe13435", StringSort(), BoolSort())
         for atom_string, atomZ3 in self.atoms.items():
             if hasattr(atomZ3, 'atom_string'):
                 substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
-        for literal_string in done:
-            if literal_string.startswith("Not "):
-                key, val = (literal_string[4:], BoolVal(False))
-            else:
-                key, val = (literal_string, BoolVal(True))
-            if key in self.atoms:
-                substitutions += [(self.atoms[key], val)]
+        for literalQ in done:
+            if is_bool(literalQ.atomZ3):
+                substitutions += [(literalQ.atomZ3, BoolVal(literalQ.truth))]
 
         # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
         simplified = simplify(substitute(And(list(self.constraints.keys())), substitutions)) # it starts by the last substitution ??
@@ -549,10 +555,12 @@ class ConfigCase:
         # --> irrelevant
         irrelevant = []
         for atom_string, atomZ3 in self.atoms.items():
-            if is_bool(atomZ3) and not atom_string in done and not ("Not " + atom_string) in done:
+            if is_bool(atomZ3) \
+            and not LiteralQ(True , atomZ3) in done \
+            and not LiteralQ(False, atomZ3) in done:
                 string2 = atom_as_string(reified(StringVal(atom_string.encode('utf8'))))
-                if not atom_string in relevants and not string2 in relevants:
-                    irrelevant += [atom_string]
+                if not string2 in relevants:
+                    irrelevant += [LiteralQ(True, atomZ3)]
         out["irrelevant"] = irrelevant
         done = done.union(set(irrelevant))
 
@@ -561,55 +569,58 @@ class ConfigCase:
             for symb in self.symbols_of(atomZ3).keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
                 break
-
+        
         while solver.check() == sat and count < 50: # for each parametric model
             #for symb in self.symbols.values():
             #    print (symb, solver.model().eval(symb))
 
-            atoms = [] # [(atom_string, atomZ3)]
+            atoms = [] # [LiteralQ]
             for atom_string, atomZ3 in self.atoms.items():
-                if is_bool(atomZ3) and not atom_string in done and not ("Not " + atom_string) in done:
+                if is_bool(atomZ3) \
+                and not LiteralQ(True , atomZ3) in done \
+                and not LiteralQ(False, atomZ3) in done \
+                and not atom_string in relevants :
                     truth = solver.model().eval(reify[atomZ3])
                     if truth == True:
-                        atoms += [ ("", atom_string, atomZ3) ]
+                        atoms += [ LiteralQ(True,  atomZ3) ]
                     elif truth == False:
-                        atoms += [ ("Not ", atom_string, Not(atomZ3) ) ]
+                        atoms += [ LiteralQ(False, atomZ3) ]
                     else: # undefined
-                        atoms += [ ("? ", atom_string, BoolVal(True)) ]
+                        atoms += [ LiteralQ(None , BoolVal(True)) ]
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
             # remove atoms that are consequences of others
             atoms2 = []
-            for (prefix, atom, atomZ3) in atoms: # numeric variables or atom !
-                if prefix == "? ":
-                    atoms2.append((prefix, atom, atomZ3))
-                    continue
-                solver2 = Solver()
-                solver2.add(self.typeConstraints)
-                (reify, _) = self.reify([self.atoms[a] for (_, a, _) in atoms], solver2)
-                solver2.add(And([atomZ3 for (_, atom1, atomZ3) in atoms if atom1 != atom]))  # ignore theory !
+            solver2 = Solver()
+            solver2.add(self.typeConstraints)  # ignore theory !
+            (reify, _) = self.reify([l.atomZ3 for l in atoms], solver2)
+            for literalQ in atoms:
+                if literalQ.truth is not None:
+                    solver2.push()
+                    solver2.add(And([l.asZ3() for l in atoms if l != literalQ]))
 
-                a = reify[self.atoms[atom]] if not prefix else Not(reify[self.atoms[atom]])
-                result, consq = solver2.consequences([], [a])
-                if result==sat and not consq: # keep it if it's not a consequence
-                        atoms2.append((prefix, atom, atomZ3))
+                    a = reify[literalQ.atomZ3] if not literalQ.truth else Not(reify[literalQ.atomZ3])
+                    result, consq = solver2.consequences([], [a])
+                    if result==sat and not consq: # keep it if it's not a consequence
+                            atoms2.append(literalQ)
+                    solver2.pop()
             atoms = atoms2
 
             # add constraint to eliminate this model
-            modelZ3 = And( [atomZ3 for (_, _, atomZ3) in atoms] )
+            modelZ3 = And( [l.asZ3() for l in atoms] )
             solver.add(Not(modelZ3))
 
             # group atoms by symbols
             model = {}
-            for prefix, atom_string, atomZ3 in atoms:
-                for symb in self.symbols_of(atomZ3).keys():
-                    model.setdefault(symb, []).append([ prefix + atom_string ])
+            for l in atoms:
+                for symb in self.symbols_of(l.atomZ3).keys():
+                    model.setdefault(symb, []).append([ l ])
                     break
             # add to models
             for k,v in models.items(): # add model
                 models[k] = v + [ model[k] if k in model else [] ]
             count +=1
-
+            
         # join disjuncts
         # TODO
 
@@ -637,9 +648,6 @@ class Structure:
         #         if type(symb) != BoolRef:
         #             # symbol can have a numeric value
         #             print(symb, arg, val)
-
-    def getJSON(self):
-        return json.dumps(self.m)
 
     def initialise(self, case, atomZ3, ct_true, ct_false, value=""):
         key = json.dumps([atom_as_string(atomZ3)])
@@ -695,7 +703,4 @@ class Structure:
 
 def atom_as_string(expr):
     if hasattr(expr, 'atom_string'): return expr.atom_string
-    return str(expr).replace("==", "=").replace("!=", "~=").replace("<=", "=<")
-
-def string_as_atom(string):
-    return str(string).replace("=", "==").replace("~=", "!=").replace("=<", "<=")
+    return str(expr).replace("==", "=").replace("!=", "≠").replace("<=", "≤")

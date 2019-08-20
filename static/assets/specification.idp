@@ -50,7 +50,7 @@ theory {
                                            (?n[side]: Angle(n)=90).
 
     // quadrilateral
-    Subtype=square | Subtype=rectangle <=> Sides=4 & [All sides are 90°]
+    Subtype=square | Subtype=rectangle <=> Sides=4 & [All angles are 90°]
                                                      (!n[side]: Angle(n)=90| Angle(n)=0).
     Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
     Subtype=square    => Sides=4 & Equilateral.
