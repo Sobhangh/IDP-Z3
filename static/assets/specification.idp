@@ -4,27 +4,29 @@ vocabulary {
     Sides: sides
     Vertices: sides
 
-    Convex
-    Equilateral
-    Perimeter:real
+
+    type type constructed from {triangle, quadrilateral}
+    Type : type
 
     type side = {1..4}
     Length(side):real
     Angle(side):real
-    Base : real
-    Height: real
-    Surface:real
 
-    type type constructed from {triangle, quadrilateral}
     type subtype constructed from
         { regular_triangle
         , right_triangle
         , rectangle
         , square
         , irregular}
-    Type : type
     Subtype : subtype
 
+    Convex
+    Equilateral
+    Perimeter:real
+
+    Base : real
+    Height: real
+    Surface:real
 }
 
 theory {
