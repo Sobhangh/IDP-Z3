@@ -437,23 +437,7 @@ class ConfigCase:
         if value[2:-2] in self.atoms:
             to_explain = self.atoms[value[2:-2]] # value is an atom string
 
-            solver = self.mk_solver()
-            (reify, unreify) = self.reify(self.atoms.values(), solver)
-            def r1(a): return reify[a] if a in reify else a
-            def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
-            _, consqs = solver.consequences([r2(a) for a in self.assumptions.keys()], [r2(to_explain)])
-
-            for cons in consqs:
-                assumption_expr = cons.children()[0]
-                if is_true(assumption_expr):
-                    pass
-                elif is_and(assumption_expr): # multiple atoms needed to justify to_explain
-                    for c in assumption_expr.children():
-                        out.addAtom(self, c, unreify, True, "")
-                else:
-                    out.addAtom(self, assumption_expr, unreify, True, "")
-
-            """ # rules used in justification
+            # rules used in justification
             if not to_explain.sort()==BoolSort(): # calculate numeric value
                 # TODO should be given by client
                 s = self.mk_solver(with_assumptions=True)
@@ -464,25 +448,33 @@ class ConfigCase:
             # TODO show original source code
             s = Solver()
             (reify, unreify) = self.reify(self.atoms.values(), s)
-            ps = {}
-            for i, constraint in enumerate(list(self.constraints.keys()) + self.typeConstraints):
+            def r1(a): return reify[a] if a in reify else a
+            def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
+            ps = {} # {reified: constraint}
+            constraints = list(self.constraints.keys()) + self.typeConstraints + list(self.assumptions.keys())
+            for i, constraint in enumerate(constraints):
                 p = Const("wsdraqsesdf"+str(i), BoolSort())
                 ps[p] = constraint
                 s.add(Implies(p, constraint))
-            s.add(list(self.assumptions.keys()))
             s.push()
+
             s.add(Not(r2(to_explain)))
             s.check(list(ps.keys()))
             unsatcore = s.unsat_core()
-            if unsatcore:
-                print("unsat", [ ps[a] for a in unsatcore])
-            else: # try to explain not(to_explain)
+            if not unsatcore: # try to explain not(to_explain)
                 #TODO refactor: client should send us the literal, not the atom
                 s.pop()
                 s.add(r2(to_explain))
                 s.check(list(ps.keys()))
-                print("unsat", [ ps[a] for a in s.unsat_core()])
-            """
+                unsatcore = s.unsat_core()
+            
+            if unsatcore:
+                for a1 in self.assumptions.keys():
+                    for a2 in s.unsat_core():
+                        if str(a1) == str(ps[a2]):
+                            out.addAtom(self, a1, unreify, True, "")
+                #TODO display rules too
+                #print("unsatcore", ";".join([ str(ps[a]) for a in s.unsat_core()]))
 
         return out.m
 

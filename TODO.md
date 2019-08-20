@@ -8,7 +8,6 @@ functional NTH:
     - explain should include the list of rules used
     - improve metaJSON() to allow hiding of some variables, optimisation on some variables only
     - how to hide some of the atoms
-    - show (quantified) abstract atoms in English (e.g. all lenghts are positive)
     - Undo button
     - structure: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
     - compute relevance in propagate
