@@ -39,3 +39,7 @@ Merge with Explain branch:
     - nested symbols
     - option to disable some rules (full workflow)
     - compare consequences of 2 different choices
+
+Bart:
+    - add annotation in vocabulary
+    - confusing when list of atoms does not match list in drop box
