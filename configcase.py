@@ -572,32 +572,26 @@ class ConfigCase:
                 and not LiteralQ(True , atomZ3) in done \
                 and not LiteralQ(False, atomZ3) in done \
                 and not atom_string in relevants :
-                    if atomZ3 not in reify:
-                        print(atomZ3, "not known ****") #TODO test with ~=
-                    else:
-                        truth = solver.model().eval(reify[atomZ3])
-                        if truth == True:
-                            atoms += [ LiteralQ(True,  atomZ3) ]
-                        elif truth == False:
-                            atoms += [ LiteralQ(False, atomZ3) ]
-                        else: # undefined
-                            atoms += [ LiteralQ(None , BoolVal(True)) ]
-                        # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
+                    truth = solver.model().eval(reify[atomZ3])
+                    if truth == True:
+                        atoms += [ LiteralQ(True,  atomZ3) ]
+                    elif truth == False:
+                        atoms += [ LiteralQ(False, atomZ3) ]
+                    # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
             # remove atoms that are consequences of others
             solver2 = Solver()
             solver2.add(self.typeConstraints)  # ignore theory !
-            (reify, _) = self.reify([l.atomZ3 for l in atoms], solver2)
+            (reify2, _) = self.reify([l.atomZ3 for l in atoms], solver2)
             for i, literalQ in enumerate(atoms):
-                if literalQ.truth is not None:
-                    solver2.push()
-                    solver2.add(And([l.asZ3() for l in atoms if l != literalQ]))
+                solver2.push()
+                solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
 
-                    a = reify[literalQ.atomZ3] if not literalQ.truth else Not(reify[literalQ.atomZ3])
-                    result, consq = solver2.consequences([], [a])
-                    if result!=sat or consq: # remove it if it's a consequence
-                        atoms[i] = LiteralQ(True, BoolVal(True))
-                    solver2.pop()
+                a = reify2[literalQ.atomZ3] if not literalQ.truth else Not(reify2[literalQ.atomZ3])
+                result, consq = solver2.consequences([], [a])
+                if result!=sat or consq: # remove it if it's a consequence
+                    atoms[i] = LiteralQ(True, BoolVal(True))
+                solver2.pop()
 
             # add constraint to eliminate this model
             modelZ3 = And( [l.asZ3() for l in atoms] )
