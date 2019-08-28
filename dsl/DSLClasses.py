@@ -576,7 +576,9 @@ class SymbolDeclaration(object):
             env.var_scope[self.name.name] = const
             case.relevantVals[const] = self.out.getZ3Range(env)
             if len(self.out.getRange(env)) > 1:
-                case.typeConstraints.append(in_list(const, self.out.getRange(env)))
+                domain = in_list(const, self.out.getRange(env))
+                domain.reading = "Possible values for " + self.name.name
+                case.typeConstraints.append(domain)
         elif self.out.name == 'Bool':
             types = [x.asZ3(env) for x in self.args]
             rel_vars = [t.getRange(env) for t in self.args]

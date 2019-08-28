@@ -473,8 +473,15 @@ class ConfigCase:
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
                             out.addAtom(self, a1, unreify, True, "")
-                #TODO display rules too
-                #print("unsatcore", ";".join([ str(ps[a]) for a in s.unsat_core()]))
+                out.m["*rules*"] = []
+                for a1 in self.constraints.keys():
+                    for a2 in s.unsat_core():
+                        if str(a1) == str(ps[a2]):
+                            out.m["*rules*"].append(a1.reading if hasattr(a1, "reading") else self.constraints[a1])
+                for a1 in self.typeConstraints:
+                    for a2 in s.unsat_core():
+                        if str(a1) == str(ps[a2]):
+                            out.m["*rules*"].append(a1.reading if hasattr(a1, "reading") else a1)
 
         return out.m
 
@@ -686,7 +693,7 @@ class Structure:
                     s[key]["value"] = str(value)
                 if hasattr(atomZ3, 'reading'):
                     s[key]['reading'] = atomZ3.reading
-            
+
 
 def atom_as_string(expr):
     if hasattr(expr, 'atom_string'): return expr.atom_string

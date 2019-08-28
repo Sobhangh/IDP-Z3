@@ -30,37 +30,52 @@ vocabulary {
 }
 
 theory {
-    // Type, Sides, Vertices
-    Type=triangle      <=> Sides=3.
-    Type=quadrilateral <=> Sides=4.
-    Vertices=3 <=> Sides=3.
-    Vertices=4 <=> Sides=4.
+    [Definition of triangle]
+    (Type=triangle      <=> Sides=3).
 
-    // Convex, Equilateral
-    Sides=3 => Convex.
-    Convex <=> [All angles are below 180°]
-               (∀n[side]: Angle(n)<180).
+    [Definition of rectangle]
+    (Type=quadrilateral <=> Sides=4).
 
-    Equilateral <=> [All sides have the same length]
-                    (∀n[side]: Length(n)=Length(1) | Length(n)=0).
+    [There are as many vertices as there are sides]
+    ( (Vertices=3 <=> Sides=3) &
+      (Vertices=4 <=> Sides=4)).
 
-    // triangle
-    Subtype=regular_triangle <=> Sides=3 & Equilateral.
-    Subtype=regular_triangle <=> Sides=3 & [All angles are 60°]
-                                           (!n[side]: Angle(n)=60 | Angle(n)=0).
-    Subtype=right_triangle   <=> Sides=3 & [One angle is 90°]
-                                           (?n[side]: Angle(n)=90).
+    [All triangles are convex]
+    (Sides=3 => Convex).
 
-    // quadrilateral
-    Subtype=square | Subtype=rectangle <=> Sides=4 & [All angles are 90°]
-                                                     (!n[side]: Angle(n)=90| Angle(n)=0).
-    Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2).
-    Subtype=square    => Sides=4 & Equilateral.
+    [Definition of Convex]
+    (Convex <=> [All angles are below 180°]
+                (∀n[side]: Angle(n)<180)).
 
-    // feasibility
-    Type=triangle => Length(1) =< Length(2) + Length(3).
-    Type=triangle => Length(2) =< Length(3) + Length(1).
-    Type=triangle => Length(3) =< Length(1) + Length(2).
+    [Definition of Equilateral]
+    (Equilateral <=> [All sides have the same length]
+                     (∀n[side]: Length(n)=Length(1) | Length(n)=0)).
+
+    [A regular triangle is equilateral]
+    (Subtype=regular_triangle <=> Sides=3 & Equilateral).
+
+    [All angles of a regular triangle are 60°]
+    (Subtype=regular_triangle <=> Sides=3 & [All angles are 60°]
+                                            (!n[side]: Angle(n)=60 | Angle(n)=0)).
+
+    [In a right triangle, one angle is 90°]
+    (Subtype=right_triangle   <=> Sides=3 & [One angle is 90°]
+                                           (?n[side]: Angle(n)=90)).
+
+    [All angles are 90° in squares and rectangles]
+    (Subtype=square | Subtype=rectangle <=> Sides=4 & [All angles are 90°]
+                                                     (!n[side]: Angle(n)=90| Angle(n)=0)).
+
+    [In a rectangle, opposite side have the same length, and adjacent sides have different lengths]
+    (Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2)).
+
+    [A square is an equilateral quadrilateral]
+    (Subtype=square    => Sides=4 & Equilateral).
+
+    [In a triangle, no side is longer than the sum of the 2 other sides]
+    ( Type=triangle => ( Length(1) =< Length(2) + Length(3))
+                    &  ( Length(2) =< Length(3) + Length(1))
+                    &  ( Length(3) =< Length(1) + Length(2))).
 
     // General constraints
 
