@@ -51,14 +51,14 @@ theory {
     (Equilateral <=> [All sides have the same length]
                      (∀n[side]: Length(n)=Length(1) | Length(n)=0)).
 
-    [A regular triangle is equilateral]
+    [A regular triangle is an equilateral triangle]
     (Subtype=regular_triangle <=> Sides=3 & Equilateral).
 
-    [All angles of a regular triangle are 60°]
+    [A regular triangle is a triangle where all angles are 60°]
     (Subtype=regular_triangle <=> Sides=3 & [All angles are 60°]
                                             (!n[side]: Angle(n)=60 | Angle(n)=0)).
 
-    [In a right triangle, one angle is 90°]
+    [A right triangle is a triangle with a 90° angle]
     (Subtype=right_triangle   <=> Sides=3 & [One angle is 90°]
                                            (?n[side]: Angle(n)=90)).
 
