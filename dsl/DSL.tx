@@ -74,7 +74,7 @@ AggType: '#' | 'card' | 'sum';
 Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
 ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
-RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[','] '}';
+RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
 
 RangeElement: fromI=NumberConstant ('..' to=NumberConstant)?;
 
