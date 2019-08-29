@@ -25,6 +25,7 @@ class File(object):
 
     def translate(self, case: ConfigCase):
         env = Environment()
+        env.level = 0 # depth of quantifier
         self.vocabulary.translate(case, env)
         if self.structure:
             self.structure.translate(case, env)
@@ -303,27 +304,27 @@ class AQuantification(object):
         return out
 
     def translate(self, case: ConfigCase, env: Environment):
-        case.level += 1
+        env.level += 1
         finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
-        case.level -= 1
+        env.level -= 1
 
         if self.q == '∀':
             forms = And(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !
                 out = ForAll(finalvars, forms)
-                if case.level==0: case.Atom(out, str(self))
+                if env.level==0: case.Atom(out, str(self))
                 return out
             else:
-                if case.level==0: case.Atom(forms, str(self))
+                if env.level==0: case.Atom(forms, str(self))
                 return forms
         else:
             forms = Or(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !
                 out = Exists(finalvars, forms)
-                if case.level==0: case.Atom(out, str(self))
+                if env.level==0: case.Atom(out, str(self))
                 return out
             else:
-                if case.level==0: case.Atom(forms, str(self))
+                if env.level==0: case.Atom(forms, str(self))
                 return forms
 
 

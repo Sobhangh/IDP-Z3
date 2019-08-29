@@ -39,7 +39,6 @@ class ConfigCase:
         self.typeConstraints = []
         self.atoms = {} # {atom_string: Z3expr} atoms + numeric terms !
         self.Z3atoms = {} # {Z3_code: Z3expr}
-        self.level = 0
         theory(self)
 
         out = {}
