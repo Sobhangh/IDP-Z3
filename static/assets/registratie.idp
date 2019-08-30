@@ -7,7 +7,7 @@ type taxRate = {1; 2; 4; 7; 6; 10; 12}
 
 type realEstateType constructed from {Residential, ResidentialBuildingLand, OtherRealEstate}
 
-type destination constructed from {AsFamilyDwelling, Resale, CommunityPurpose, SocialHousing, SocialRenting, OtherHouse, NoHouse}
+type destination constructed from {AsFamilyDwelling, ForResale, CommunityPurpose, SocialHousing, SocialRenting, OtherHouse, NoHouse}
 type buyerType constructed from {NaturalPerson, LegalPerson, Mixed}
 
 type calculationBase = {190; 200; 210; 220; 225}
@@ -32,7 +32,7 @@ type seller constructed from {VlaamsWoningfonds, GelijksoortigeRechtspersoonEER,
 
 ////////////////////////
 
-Location : location
+Region : location
 Municipality : municipality
 TypeOfRealEstate : realEstateType
 Seller : seller
@@ -43,7 +43,7 @@ DomicileEstablished
 FirstOwnership
 Monument
 
-IsResale : resale
+Resale : resale
 TransactionType : transaction
 DurationOfAgreement : agreementDwellingForSocialRenting
 
@@ -92,39 +92,39 @@ theory {
 
      // Tax
 
-
+[Registration rate for heritage in Flemish Region is 1%.](
 Tax = 1 <=>
 RegistrationType = Heritage
-& Location = FlemishRegion.
+& Region = FlemishRegion).
 
 Tax = 2 <=> // correct amount is 1; 5
 RegistrationType = SocialDwelling
-& Location = FlemishRegion.
+& Region = FlemishRegion.
 
 Tax = 4 <=>
 RegistrationType = ProfessionalPurchase
-& Location = FlemishRegion.
+& Region = FlemishRegion.
 
 [The tax rate is 6% for social purpose sales in the Flemish Region.]
 (Tax = 6 <=>
 (RegistrationType = EnergyEfficientDwelling
 | RegistrationType = SocialPurpose
 | RegistrationType = ExchangeUnbuiltGround)
-& Location = FlemishRegion).
+& Region = FlemishRegion).
 
 Tax = 7 <=>
 (RegistrationType = FamilyDwelling
 | RegistrationType = DwellingForSocialRenting)
-& Location = FlemishRegion.
+& Region = FlemishRegion.
 
 Tax = 10 <=>
-Location = FlemishRegion
+Region = FlemishRegion
 & RegistrationType = Other.
 
 [The tax rate is 12% only in Brussels and Wallonia](
 Tax = 12 <=>
-Location = BrusselsRegion
-| Location = WalloonRegion).
+Region = BrusselsRegion
+| Region = WalloonRegion).
 
 //? x[int]: Tax = x.
 
@@ -165,18 +165,19 @@ TypeOfRealEstate = Residential
 & DurationOfAgreement = LessThan9years
 .
 
-RegistrationType = Heritage <=>          // @EXPLAIN: RegistrationType cannot be Heritage
+[An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
+(RegistrationType = Heritage <=>          // @EXPLAIN: RegistrationType cannot be Heritage
 TypeOfRealEstate = Residential
 & Monument
 & Use = AsFamilyDwelling
 & HeritageInvestment
 & HeritagePlan
-& AdditionalTerms.
+& AdditionalTerms).
 
 RegistrationType = ProfessionalPurchase <=> // @EXPLAIN: RegistrationType cannot be ProfessionalPurchase
 ProfessionalBuyer
 & TransactionType  ~= PublicSale
-& Use = Resale
+& Use = ForResale
 & CertificationDateSale = CertificationDate + 8
 .
 
@@ -217,7 +218,7 @@ ProfessionalDeclarationFiled
 & GuaranteeSatisfied
 & (AdditionalSecurityRequired & AdditionalSecuritySatisfied
 | ~ AdditionalSecurityRequired)
-& IsResale = ThreeOrMore
+& Resale = ThreeOrMore
 .
 
 }
