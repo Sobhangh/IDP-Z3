@@ -1,53 +1,56 @@
 vocabulary {
-type Location constructed from {FlemishRegion, WalloonRegion, BrusselsRegion}
+type location constructed from {FlemishRegion, WalloonRegion, BrusselsRegion}
 
-type RegistrationType constructed from {FamilyDwelling, SocialDwelling, SocialPurpose, ExchangeUnbuiltGround, ProfessionalPurchase, EnergyEfficientDwelling, Heritage, DwellingForSocialRenting, Other}
+type registrationType constructed from {FamilyDwelling, SocialDwelling, SocialPurpose, ExchangeUnbuiltGround, ProfessionalPurchase, EnergyEfficientDwelling, Heritage, DwellingForSocialRenting, Other}
 
-type TaxRate = {1; 2; 4; 7; 6; 10; 12}
+type taxRate = {1; 2; 4; 7; 6; 10; 12}
 
-type RealEstateType constructed from {Residential, ResidentialBuildingLand, OtherRealEstate}
+type realEstateType constructed from {Residential, ResidentialBuildingLand, OtherRealEstate}
 
-type Destination constructed from {AsFamilyDwelling, SocialHousing, Resale, SocialRenting, OtherHouse, NoHouse, CommunityPurpose}
-type BuyerType constructed from {NaturalPerson, LegalPerson, Mixed}
+type destination constructed from {AsFamilyDwelling, Resale, CommunityPurpose, SocialHousing, SocialRenting, OtherHouse, NoHouse}
+type buyerType constructed from {NaturalPerson, LegalPerson, Mixed}
 
-type CalculationBase = {190; 200; 210; 220; 225}
-type BaseLimit = {200; 220}
+type calculationBase = {190; 200; 210; 220; 225}
+type baseLimit = {200; 220}
 //type DiscountType = {56; 48; 0}
 
-type Date = {2015..2025}
+type date = {2015..2025}
 
-type AgreementDwellingForSocialRenting constructed from {LessThan9years, Morethan9Or9years}
+type agreementDwellingForSocialRenting constructed from {LessThan9years, Morethan9Or9years}
 
-type Transaction constructed from {PublicSale, OutHand, PublicSaleCommunity}
-
-
-
-type Municipality constructed from {otherMunicipal, Aalst, Antwerpen, Boom, Brugge, Dendermonde, Genk, Gent, Hasselt, Kortrijk, Leuven, Mechelen, Oostende, Roeselare, SintNiklaas, Turnhout, Vilvoorde, Affligem, Asse, Beersel, Bever, Dilbeek, Drogenbos, Galmaarden, Gooik, Grimbergen, Halle, Herne, Hoeilaart, Kampenhout, KapelleopdenBos, Kraainem, Lennik, Liedekerke, Linkebeek, Londerzeel, Machelen, Meise, Merchtem, Opwijk, Overijse, Pepingen, Roosdaal, SintGenesiusRode, SintPietersLeeuw, Steenokkerzeel, Ternat, Wemmel, WezembeekOppem, Zaventem, Zemst, Bertem, Huldenberg, Kortenberg, Tervuren}
-
-type Resale constructed from {LessThanThree, ThreeOrMore}
+type transaction constructed from {PublicSale, OutHand, PublicSaleCommunity}
 
 
-type Seller constructed from {VlaamsWoningfonds, GelijksoortigeRechtspersoonEER, MpyErkendDoorVlaamseMpyVoorSociaalWonen, VlaamseMpyVoorSociaalWonen, ErkendeSocialeHuisvestingsMpy}
+
+type municipality constructed from {otherMunicipal, Aalst, Antwerpen, Boom, Brugge, Dendermonde, Genk, Gent, Hasselt, Kortrijk, Leuven, Mechelen, Oostende, Roeselare, SintNiklaas, Turnhout, Vilvoorde, Affligem, Asse, Beersel, Bever, Dilbeek, Drogenbos, Galmaarden, Gooik, Grimbergen, Halle, Herne, Hoeilaart, Kampenhout, KapelleopdenBos, Kraainem, Lennik, Liedekerke, Linkebeek, Londerzeel, Machelen, Meise, Merchtem, Opwijk, Overijse, Pepingen, Roosdaal, SintGenesiusRode, SintPietersLeeuw, Steenokkerzeel, Ternat, Wemmel, WezembeekOppem, Zaventem, Zemst, Bertem, Huldenberg, Kortenberg, Tervuren}
+
+type resale constructed from {LessThanThree, ThreeOrMore}
+
+
+type seller constructed from {VlaamsWoningfonds, GelijksoortigeRechtspersoonEER, MpyErkendDoorVMSW, VlaamseMpyVoorSociaalWonen, ErkendeSocialeHuisvestingsMpy}
 
 
 ////////////////////////
 
-RegistrationTypePurchase : RegistrationType
-//IsDiscount: DiscountType
-Tax : TaxRate
+Location : location
+Municipality : municipality
+TypeOfRealEstate : realEstateType
+Seller : seller
+Buyer : buyerType
+Use : destination
 
-IsRealEstateType : RealEstateType
-LocationPurchase : Location
+DomicileEstablished
+FirstOwnership
+Monument
+
+IsResale : resale
+TransactionType : transaction
+DurationOfAgreement : agreementDwellingForSocialRenting
+
 CoreCity
-IsMunicipality : Municipality
-IsTypeBuyer : BuyerType
-IsDestination : Destination
-IsSeller : Seller
-
 
 //SocialSeller
 MortgageLoanAllowance
-DomicileEstablished
 CleanPurchase
 FirstOwnership
 CausalConnection
@@ -55,32 +58,34 @@ CausalConnection
 
 EnergyRenovationPlanned
 
-SocialRentingAgreement
-DurationOfAgreement : AgreementDwellingForSocialRenting
-Monument
+//SocialRentingAgreement
 HeritageInvestment
 HeritagePlan
-AdditionalConditions
+//AdditionalConditions
 
-ProfessionalBuyer
-IsTransaction : Transaction
 ProfessionalDeclarationFiled
 GuaranteeSatisfied
 AdditionalSecurityRequired
 AdditionalSecuritySatisfied
-IsResale : Resale
 
-TaxableBase : CalculationBase
-PermittedBase : BaseLimit
+//TaxableBase : calculationBase
+//PermittedBase : baseLimit
 
 AdditionalTerms
 
-CertificationDate : Date
-TermEnergyRenovation : Date
-StartDateDwellingForSocialRenting : Date
-CertificationDateSale : Date
-DomicileDate : Date
 
+StartDateDwellingForSocialRenting : date
+
+CertificationDate : date
+Tax : taxRate
+
+TermEnergyRenovation : date
+CertificationDateSale : date
+//DomicileDate : date
+
+RegistrationType : registrationType
+//IsDiscount: DiscountType
+ProfessionalBuyer
 }
 
 theory {
@@ -88,63 +93,64 @@ theory {
      // Tax
 
 
-Tax = 12 <=>
-LocationPurchase = BrusselsRegion
-| LocationPurchase = WalloonRegion.
-
-Tax = 10 <=>
-LocationPurchase = FlemishRegion
-& RegistrationTypePurchase = Other.
-
 Tax = 1 <=>
-RegistrationTypePurchase = Heritage
-& LocationPurchase = FlemishRegion.
+RegistrationType = Heritage
+& Location = FlemishRegion.
 
 Tax = 2 <=> // correct amount is 1; 5
-RegistrationTypePurchase = SocialDwelling
-& LocationPurchase = FlemishRegion.
+RegistrationType = SocialDwelling
+& Location = FlemishRegion.
 
 Tax = 4 <=>
-RegistrationTypePurchase = ProfessionalPurchase
-& LocationPurchase = FlemishRegion.
+RegistrationType = ProfessionalPurchase
+& Location = FlemishRegion.
 
-Tax = 6 <=>
-(RegistrationTypePurchase = EnergyEfficientDwelling
-| RegistrationTypePurchase = SocialPurpose
-| RegistrationTypePurchase = ExchangeUnbuiltGround)
-& LocationPurchase = FlemishRegion.
+[The tax rate is 6% for social purpose sales in the Flemish Region.]
+(Tax = 6 <=>
+(RegistrationType = EnergyEfficientDwelling
+| RegistrationType = SocialPurpose
+| RegistrationType = ExchangeUnbuiltGround)
+& Location = FlemishRegion).
 
 Tax = 7 <=>
-(RegistrationTypePurchase = FamilyDwelling
-| RegistrationTypePurchase = DwellingForSocialRenting)
-& LocationPurchase = FlemishRegion.
+(RegistrationType = FamilyDwelling
+| RegistrationType = DwellingForSocialRenting)
+& Location = FlemishRegion.
 
+Tax = 10 <=>
+Location = FlemishRegion
+& RegistrationType = Other.
 
-? x[int]: Tax = x.
+[The tax rate is 12% only in Brussels and Wallonia](
+Tax = 12 <=>
+Location = BrusselsRegion
+| Location = WalloonRegion).
+
+//? x[int]: Tax = x.
 
 // registration types currently only defined for Flanders.
 // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
 
 
-RegistrationTypePurchase = FamilyDwelling <=>
-IsRealEstateType = Residential
-& IsTypeBuyer = NaturalPerson
+RegistrationType = FamilyDwelling <=>
+TypeOfRealEstate = Residential
+& Buyer = NaturalPerson
 & DomicileEstablished
 & CleanPurchase
 & (FirstOwnership | CausalConnection)
 & (~ EnergyRenovationPlanned | TermEnergyRenovation ~= CertificationDate + 5)
 .
 
-RegistrationTypePurchase = SocialDwelling <=>         // @EXPLAIN: RegistrationType cannot be SocialDwelling
-IsTypeBuyer = NaturalPerson
-& IsRealEstateType = Residential
-& IsDestination = SocialHousing
-& (IsSeller = VlaamseMpyVoorSociaalWonen | IsSeller = ErkendeSocialeHuisvestingsMpy)
+RegistrationType = SocialDwelling <=>         // @EXPLAIN: RegistrationType cannot be SocialDwelling
+Buyer = NaturalPerson
+& TypeOfRealEstate = Residential
+& Use = SocialHousing
+& (Seller = VlaamseMpyVoorSociaalWonen | Seller = ErkendeSocialeHuisvestingsMpy)
 & MortgageLoanAllowance.
 
-RegistrationTypePurchase = EnergyEfficientDwelling <=>     // @EXPLAIN: RegistrationType cannot be EnergyEfficientDwelling
-IsRealEstateType = Residential
-& IsTypeBuyer = NaturalPerson
+RegistrationType = EnergyEfficientDwelling <=>     // @EXPLAIN: RegistrationType cannot be EnergyEfficientDwelling
+TypeOfRealEstate = Residential
+& Buyer = NaturalPerson
 & DomicileEstablished
 & CleanPurchase
 & (FirstOwnership | CausalConnection)
@@ -152,56 +158,57 @@ IsRealEstateType = Residential
 & TermEnergyRenovation = CertificationDate + 5
 .
 
-RegistrationTypePurchase = DwellingForSocialRenting <=>   // @EXPLAIN: RegistrationType cannot be DwellingForSocialRenting
-IsRealEstateType = Residential
-& IsDestination = SocialRenting
+RegistrationType = DwellingForSocialRenting <=>   // @EXPLAIN: RegistrationType cannot be DwellingForSocialRenting
+TypeOfRealEstate = Residential
+& Use = SocialRenting
 & StartDateDwellingForSocialRenting = CertificationDate + 3
 & DurationOfAgreement = LessThan9years
 .
 
-RegistrationTypePurchase = Heritage <=>          // @EXPLAIN: RegistrationType cannot be Heritage
-IsRealEstateType = Residential
+RegistrationType = Heritage <=>          // @EXPLAIN: RegistrationType cannot be Heritage
+TypeOfRealEstate = Residential
 & Monument
-& IsDestination = AsFamilyDwelling
+& Use = AsFamilyDwelling
 & HeritageInvestment
 & HeritagePlan
 & AdditionalTerms.
 
-RegistrationTypePurchase = ProfessionalPurchase <=> // @EXPLAIN: RegistrationType cannot be ProfessionalPurchase
+RegistrationType = ProfessionalPurchase <=> // @EXPLAIN: RegistrationType cannot be ProfessionalPurchase
 ProfessionalBuyer
-& IsTransaction  ~= PublicSale
-& IsDestination = Resale
+& TransactionType  ~= PublicSale
+& Use = Resale
 & CertificationDateSale = CertificationDate + 8
 .
 
-RegistrationTypePurchase = SocialPurpose <=>      // @EXPLAIN: RegistrationType cannot be SocialPurpose
-(IsSeller = MpyErkendDoorVlaamseMpyVoorSociaalWonen
-| IsSeller = VlaamsWoningfonds
-| IsSeller = GelijksoortigeRechtspersoonEER)
-& IsDestination = CommunityPurpose
+[A sale by the Vlaams Woning Fonds for community purpose is for social purpose.](
+RegistrationType = SocialPurpose <=>      // @EXPLAIN: RegistrationType cannot be SocialPurpose
+(Seller = MpyErkendDoorVMSW
+| Seller = VlaamsWoningfonds
+| Seller = GelijksoortigeRechtspersoonEER)
+& Use = CommunityPurpose)
 .
-RegistrationTypePurchase = ExchangeUnbuiltGround <=>    // @EXPLAIN: RegistrationType cannot be ExchangeUnbuiltGround
+RegistrationType = ExchangeUnbuiltGround <=>    // @EXPLAIN: RegistrationType cannot be ExchangeUnbuiltGround
 AdditionalTerms
 & ~Monument.
 
-    RegistrationTypePurchase = Other <=>     // @EXPLAIN: RegistrationType cannot be Other
-RegistrationTypePurchase ~= FamilyDwelling
-& RegistrationTypePurchase ~= SocialDwelling
-& RegistrationTypePurchase ~= EnergyEfficientDwelling
-& RegistrationTypePurchase ~= DwellingForSocialRenting
-& RegistrationTypePurchase ~= Heritage
-& RegistrationTypePurchase ~= ProfessionalPurchase
-& RegistrationTypePurchase ~= SocialPurpose
-& RegistrationTypePurchase ~= ExchangeUnbuiltGround
+    RegistrationType = Other <=>     // @EXPLAIN: RegistrationType cannot be Other
+RegistrationType ~= FamilyDwelling
+& RegistrationType ~= SocialDwelling
+& RegistrationType ~= EnergyEfficientDwelling
+& RegistrationType ~= DwellingForSocialRenting
+& RegistrationType ~= Heritage
+& RegistrationType ~= ProfessionalPurchase
+& RegistrationType ~= SocialPurpose
+& RegistrationType ~= ExchangeUnbuiltGround
 .
 
 
-? x[RegistrationType]: RegistrationTypePurchase = x.
+//? x[registrationType]: RegistrationType = x.
 
 
-IsMunicipality = otherMunicipal => ~ CoreCity.   // @EXPLAIN: otherMunicipal cannot be in CoreCity
+Municipality = otherMunicipal => ~ CoreCity.   // @EXPLAIN: otherMunicipal cannot be in CoreCity
 
-IsMunicipality ~= otherMunicipal => CoreCity.     // @EXPLAIN: non-otherMunicipal should be in CoreCity
+Municipality ~= otherMunicipal => CoreCity.     // @EXPLAIN: non-otherMunicipal should be in CoreCity
 
 
     

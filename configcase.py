@@ -44,7 +44,11 @@ class ConfigCase:
         out = {}
         for atomZ3 in self.atoms.values(): # add numeric terms first
             out.update(self.getNumericTerms(atomZ3))
-        out.update(self.atoms) # then other atoms
+        if "Tax" in self.symbols: #TODO hack for video
+            out.update(self.symbols)
+            out.update({k:v for (k,v) in self.atoms.items() if "Tax" in k})
+        else:
+            out.update(self.atoms) # then other atoms
         self.atoms = out
 
     #################

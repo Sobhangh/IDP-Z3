@@ -1,20 +1,25 @@
 
-for the paper:
+priority:
+    - optimal propagation -> surface and non-linear
+    - compact layout (More... --> pop-up)
+    - environmental variables
+
+
     - translate numeric ranges to enum ?
     - isolate non-linear constraints over real ? https://rise4fun.com/z3/tutorial
     - Show 1 model: numeric values should not have "explain"
 
 functional NTH:
-    - explain should include the list of rules used
     - improve metaJSON() to allow hiding of some variables, optimisation on some variables only
     - how to hide some of the atoms
     - Undo button
-    - structure: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
+    - structure syntax: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
     - compute relevance in propagate
     - separate info button
     - join 2 disjuncts that differ only by the sign of one atom
     - inject known values in formulas
     - predicate symbols should show atoms (e.g. quantified constraints)
+    - dates
     - check syntax of int, real on client
     - garanteed order of appearance ?
 
@@ -28,7 +33,6 @@ other NTH (refactor)
     - client should send the literal to be explained, not the atom
 
 GUI enhancements:
-    - use pop-up to show constraints on symbols
     - show offended rules when unsatisfiable
 
 Merge with Explain branch:

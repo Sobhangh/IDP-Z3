@@ -1,5 +1,6 @@
 import itertools as it
 import os
+import re
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
@@ -457,9 +458,13 @@ class Brackets(object):
         return expr
 
 
+def add_space(input):
+    words = re.findall('[A-Z][a-z]*', input)
+    return ' '.join(words) if ''.join(words) == input else input
+
 class Variable(object):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
+        self.name = add_space(kwargs.pop('name'))
 
     def __str__(self): return self.name
 
@@ -517,7 +522,7 @@ class Vocabulary(object):
 class ConstructedTypeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.constructors = kwargs.pop('constructors')
+        self.constructors = list(map(add_space, kwargs.pop('constructors')))
 
     def __str__(self):
         return ( "type " + self.name
