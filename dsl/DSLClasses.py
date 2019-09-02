@@ -546,7 +546,7 @@ class RangeDeclaration(object):
     def __str__(self):
         return ( "type " + self.name
                + " = {"
-               + ",".join([str(x.fromI) + ("" if x.to is None else ".."+ str(x.to)) for x in self.elements])
+               + ";".join([str(x.fromI) + ("" if x.to is None else ".."+ str(x.to)) for x in self.elements])
                + "}")
 
     def translate(self, case: ConfigCase, env: Environment):
