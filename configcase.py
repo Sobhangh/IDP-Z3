@@ -25,6 +25,7 @@ from z3.z3 import _py2expr
 from utils import *
 
 from LiteralQ import *
+from Theory import *
 
 class ConfigCase:
 
@@ -113,50 +114,15 @@ class ConfigCase:
     # EXPRESSIONS
     #################
 
-    def symbols_of(self, expr): # returns a dict
-        out = {} # for unicity (ordered set)
-        try:
-            name = expr.decl().name()
-            if self.is_symbol(name) and not name in self.interpreted:
-                out[name] = name
-        except: pass
-        for child in expr.children():
-            out.update(self.symbols_of(child))
-        return out
-
-    def first_symbol(self, expr):
-        symbs = self.symbols_of(expr).keys()
-        return symbs[0] if symbs != [] else None
-
-    def is_really_constant(self, expr):
-        return (obj_to_string(expr) in self.valueMap) \
-            or is_number(obj_to_string(expr)) \
-            or is_string_value(expr) \
-            or is_true(expr) or is_false(expr)
-
-    def has_ground_children(self, expr):
-        return all([self.is_ground(child) for child in expr.children()])
-
-    def is_ground(self, expr):
-        return self.is_really_constant(expr) or \
-            (0 < len(expr.children()) and self.has_ground_children(expr))
-
-    def has_local_var(self, expr):
-        out = ( 0==len(expr.children()) and not self.is_symbol(expr) \
-                and not self.is_really_constant(expr)) \
-           or ( 0 < len(expr.children()) \
-                and any([self.has_local_var(child) for child in expr.children()]))
-        return out
-
     def getNumericTerms(self, expr): # to be shown as atoms
         out = {}  # Ordered dict: string -> Z3 object
         if not is_app(expr): return out
         name = expr.decl().name()
         typ = expr.sort().name()
-        if self.is_symbol(name) \
+        if is_symbol(name, self.symbols) \
             and ( typ in ["Real", "Int"] or typ in self.enums ) \
-            and not self.is_really_constant(expr) \
-            and self.has_ground_children(expr) \
+            and not is_really_constant(expr, self.valueMap) \
+            and has_ground_children(expr, self.valueMap) \
             and expr.decl().name() not in ["+", "-", "*", "/"]:
                 out[atom_as_string(expr)] = expr
 
@@ -169,31 +135,10 @@ class ConfigCase:
         for child in expr.children():
             out.update(self.getAtoms(child))
         if is_bool(expr) and len(out) == 0 and \
-            ( not self.has_local_var(expr) or is_quantifier(expr) ): # for quantified formulas
+            ( not has_local_var(expr, self.valueMap, self.symbols) or is_quantifier(expr) ): # for quantified formulas
             out = {atom_as_string(expr): expr}
         return out
 
-    def reify(self, atoms, solver):
-        # creates predicates equivalent to the infinitely-quantified formulas or chained comparison
-        # returns ({atomZ3: predicate}, {predicate: atomZ3})
-        count, (reify, unreify) = 0, ({}, {})
-        for atomZ3 in atoms:
-            if is_quantifier(atomZ3) or hasattr(atomZ3, 'is_chained'):
-                count += 1
-                const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
-                solver.add(const == atomZ3)
-                reify[atomZ3] = const
-                unreify[const] = atomZ3
-            elif hasattr(atomZ3, 'interpretation'):
-                count += 1
-                const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
-                solver.add(const == atomZ3.interpretation)
-                reify[atomZ3] = const
-                unreify[const] = atomZ3
-            else:
-                reify[atomZ3] = atomZ3
-                unreify[atomZ3] = atomZ3
-        return (reify, unreify)
 
     #################
     # UTILITIES
@@ -208,9 +153,10 @@ class ConfigCase:
             + (list(self.assumptions.keys()) if with_assumptions else []))
             
     def mk_solver(self, theory):
-        s = Solver()
-        s.add(theory)
-        return s
+        solver = Solver()
+        solver.add(theory)
+        (reify, unreify) = reify(self.atoms.values(), solver)
+        return solver, reify, unreify
 
     def initial_structure(self):
         out = Structure(self)
@@ -238,11 +184,6 @@ class ConfigCase:
     def as_symbol(self, symb_str):
         #print(symb_str)
         return self.symbols[symb_str]
-
-    def is_symbol(self, symb):
-        if is_expr(symb):
-            symb = obj_to_string(symb)
-        return str(symb) in self.symbols
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
@@ -308,7 +249,7 @@ class ConfigCase:
     def atomsGrouped(self):
         out = {} # {symbol_string : [atom_string, []]}
         for atom_string, atomZ3 in self.atoms.items():
-            for groupBy in self.symbols_of(atomZ3).keys():
+            for groupBy in symbols_of(atomZ3, self.interpreted).keys():
                 d = out.setdefault(groupBy, [])
                 temp = json.dumps([atom_string])
                 if temp not in d: # test: x=y(x).
@@ -321,8 +262,7 @@ class ConfigCase:
         out = self.initial_structure()
 
         # resolve numeric consequences first
-        # solver = self.mk_solver(self.theory(with_assumptions=True))
-        # (_, unreify) = self.reify(self.atoms.values(), solver)
+        # solver, reify, unreify = self.mk_solver(self.theory(with_assumptions=True))
         # for atom in unreify.keys():
         #     if not is_bool(atom): # and not str(atom) in self.enums: #numeric value
         #         solver.push()
@@ -337,11 +277,10 @@ class ConfigCase:
         #         solver.pop()
 
         theory = self.theory(with_assumptions=True)
-        solver = self.mk_solver(theory)
-        (_, unreify) = self.reify(self.atoms.values(), solver)
+        solver, reify, unreify = self.mk_solver(theory)
 
-        for atom in unreify.keys(): # numeric variables or atom !
-            result, consq = solver.consequences([], [atom])
+        for reified in unreify.keys(): # numeric variables or atom !
+            result, consq = solver.consequences([], [reified])
 
             if result == unsat:
                 raise Exception("Not satisfiable !")
@@ -350,23 +289,20 @@ class ConfigCase:
                 if consq:
                     consq = consq[0].children()[1]
                     if is_not(consq):
-                        out.addAtom(self, atom, unreify, False, "")
-                    elif not is_bool(atom): # numeric value
+                        out.addAtom(self, reified, unreify, False, "")
+                    elif not is_bool(reified): # numeric value
                         out.addAtom(self, consq, unreify, True, "")
                     else:
-                        out.addAtom(self, atom, unreify, True, "")
+                        out.addAtom(self, reified, unreify, True, "")
             else: # unknown -> restart solver
-                out.addAtom(self, atom, unreify, True, "", unknown=True)
-
-                solver = self.mk_solver(theory)
-                (_, unreify) = self.reify(self.atoms.values(), solver)
+                out.addAtom(self, reified, unreify, True, "", unknown=True)
+                solver, reify, unreify = self.mk_solver(theory)
 
         return out.m
 
     def expand(self):
         theory = self.theory(with_assumptions=True)
-        solver = self.mk_solver(theory)
-        (reify, unreify) = self.reify(self.atoms.values(), solver)
+        solver, reify, unreify = self.mk_solver(theory)
         solver.check()
         return self.model_to_json(solver, reify, unreify)
 
@@ -429,7 +365,7 @@ class ConfigCase:
         else:
             solver.maximize(s)
 
-        (reify, unreify) = self.reify(self.atoms.values(), solver)
+        (reify, unreify) = reify(self.atoms.values(), solver)
         solver.check()
         return self.model_to_json(solver, reify, unreify)
 
@@ -450,14 +386,13 @@ class ConfigCase:
             if not to_explain.sort()==BoolSort(): # calculate numeric value
                 # TODO should be given by client
                 theory = self.theory(with_assumptions=True)
-                s = self.mk_solver(theory)
+                s, _, _ = self.mk_solver(theory)
                 s.check()
                 val = s.model().eval(to_explain)
                 to_explain = to_explain == val
 
-            # TODO show original source code
             s = Solver()
-            (reify, unreify) = self.reify(self.atoms.values(), s)
+            (reify, unreify) = reify(self.atoms.values(), s)
             def r1(a): return reify[a] if a in reify else a
             def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
             ps = {} # {reified: constraint}
@@ -499,15 +434,16 @@ class ConfigCase:
         out = {} # {category : [LiteralQ]}
 
         theory = self.theory(with_assumptions=False)
-        solver = self.mk_solver(theory)
-        (reify, unreify) = self.reify(self.atoms.values(), solver)
+        solver, reify, unreify = self.mk_solver(theory)
 
-        def _consequences(done, theory):
-            nonlocal solver, reify, unreify
+        def _consequences(theory, ignored, solver=None, reify=None, unreify=None):
+            if solver is None:
+                solver, reify, unreify = self.mk_solver(theory)
+
             out = {} # {LiteralQ: True}
 
             for reified, atomZ3 in unreify.items():# numeric variables or atom !
-                if not LiteralQ(True, atomZ3) in done and not LiteralQ(False, atomZ3) in done:
+                if not LiteralQ(True, atomZ3) in ignored and not LiteralQ(False, atomZ3) in ignored:
                     result, consq = solver.consequences([], [reified])
 
                     if result==unsat:
@@ -523,12 +459,11 @@ class ConfigCase:
                             else:
                                 out[LiteralQ(True, atomZ3 )] = True
                     else: # unknown -> restart solver
-                        solver = self.mk_solver(theory)
-                        (reify, unreify) = self.reify(self.atoms.values(), solver)
+                        solver, reify, unreify = self.mk_solver(theory)
             return out
 
         # extract fixed atoms from constraints
-        universal = _consequences({}, theory)
+        universal = _consequences(theory, {}, solver, reify, unreify)
         out["universal"] = list(universal.keys())
 
         out["given"] = []
@@ -543,7 +478,7 @@ class ConfigCase:
         # extract assumptions and their consequences
         solver.add(list(self.assumptions.keys()))
         theory2 = And([theory] + list(self.assumptions.keys()))
-        fixed = _consequences(universal, theory2)
+        fixed = _consequences(theory2, universal, solver, reify, unreify)
         out["fixed"] = list(fixed.keys())
 
         models, count = {}, 0
@@ -577,7 +512,7 @@ class ConfigCase:
 
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms.values():
-            for symb in self.symbols_of(atomZ3).keys():
+            for symb in symbols_of(atomZ3, self.interpreted).keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
                 break
         
@@ -601,7 +536,7 @@ class ConfigCase:
             # remove atoms that are consequences of others
             solver2 = Solver()
             solver2.add(self.typeConstraints)  # ignore theory !
-            (reify2, _) = self.reify([l.atomZ3 for l in atoms], solver2)
+            (reify2, _) = reify([l.atomZ3 for l in atoms], solver2)
             for i, literalQ in enumerate(atoms):
                 solver2.push()
                 solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
@@ -619,7 +554,7 @@ class ConfigCase:
             # group atoms by symbols
             model = {}
             for l in atoms:
-                for symb in self.symbols_of(l.atomZ3).keys():
+                for symb in symbols_of(l.atomZ3, self.interpreted).keys():
                     model.setdefault(symb, []).append([ l ])
                     break
             # add to models
@@ -655,7 +590,7 @@ class Structure:
     def initialise(self, case, atomZ3, ct_true, ct_false, value=""):
         key = json.dumps([atom_as_string(atomZ3)])
         typ = atomZ3.sort().name()
-        for symb in case.symbols_of(atomZ3):
+        for symb in symbols_of(atomZ3, case.interpreted):
             s = self.m.setdefault(symb, {})
             if typ == 'Bool':
                 symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
@@ -690,7 +625,7 @@ class Structure:
         atomZ3 = unreify[atomZ3] if atomZ3 in unreify else atomZ3
         key = json.dumps([atom_as_string(atomZ3)])
         typ = atomZ3.sort().name()
-        for symb in case.symbols_of(atomZ3).keys():
+        for symb in symbols_of(atomZ3, case.interpreted).keys():
             s = self.m.setdefault(symb, {})
             if key in s:
                 if unknown: s[key]["unknown"] = unknown
