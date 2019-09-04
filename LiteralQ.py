@@ -13,13 +13,15 @@ class LiteralQ(object):
         return self.truth == other.truth and str(self.atomZ3) == str(other.atomZ3)
 
     def __repr__(self):
-        return str(self.truth) + (self.atomZ3.reading if hasattr(self.atomZ3, 'reading') else str(self.atomZ3))
+        return str(self.truth) + ( self.atomZ3.reading if hasattr(self.atomZ3, 'reading')
+                                   else str(self.atomZ3)
+                                 )
 
 
     def __str__(self):
         return ("" if self.truth else "? " if self.truth is None else "Not ") \
-             + (self.atomZ3.reading if hasattr(self.atomZ3, 'reading') \
-                 else self.atomZ3.atom_string if hasattr(self.atomZ3, 'atom_string') \
+             + (self.atomZ3.reading if hasattr(self.atomZ3, 'reading')
+                 else self.atomZ3.atom_string if hasattr(self.atomZ3, 'atom_string')
                  else str(self.atomZ3))
 
     def to_json(self): return str(self)
