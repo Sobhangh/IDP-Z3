@@ -151,12 +151,6 @@ class ConfigCase:
         return And(list(self.constraints.keys()) 
             + self.typeConstraints
             + (list(self.assumptions.keys()) if with_assumptions else []))
-            
-    def mk_solver(self, theory, atoms):
-        solver = Solver()
-        solver.add(theory)
-        (reify, unreify) = reifier(atoms, solver)
-        return solver, reify, unreify
 
     def initial_structure(self):
         out = Structure(self)
@@ -180,10 +174,6 @@ class ConfigCase:
             else: #TODO check that value is numeric ?
                 out.addAtom(self, atomZ3, unreify, True, value)
         return out.m
-
-    def as_symbol(self, symb_str):
-        #print(symb_str)
-        return self.symbols[symb_str]
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
@@ -356,10 +346,8 @@ class ConfigCase:
 
     def optimize(self, symbol, minimize):
         solver = Optimize()
-        solver.add(list(self.constraints.keys()))
-        solver.add(self.typeConstraints)
-        solver.add(list(self.assumptions.keys()))
-        s = self.as_symbol(symbol)
+        solver.add(self.theory(with_assumptions=True))
+        s = self.symbols[symbol]
         if minimize:
             solver.minimize(s)
         else:

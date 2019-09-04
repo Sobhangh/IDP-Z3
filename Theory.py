@@ -71,7 +71,7 @@ def reifier(atoms, solver):
             reify[atomZ3] = const
             unreify[const] = atomZ3
         else:
-            reify[atomZ3] = atomZ3in
+            reify[atomZ3] = atomZ3
             unreify[atomZ3] = atomZ3
     return (reify, unreify)
 
