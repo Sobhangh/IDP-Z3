@@ -3,6 +3,8 @@ priority:
     - optimal propagation -> surface and non-linear
     - compact layout (More... --> pop-up)
     - environmental variables
+    - goal --> to the right of abstract models
+    - join 2 disjuncts that differ only by the sign of one atom
 
 
     - translate numeric ranges to enum ?
@@ -16,7 +18,6 @@ functional NTH:
     - structure syntax: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
     - compute relevance in propagate
     - separate info button
-    - join 2 disjuncts that differ only by the sign of one atom
     - inject known values in formulas
     - predicate symbols should show atoms (e.g. quantified constraints)
     - dates

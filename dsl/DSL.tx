@@ -57,14 +57,15 @@ Arguments: '(' fs*=Expression[','] ')';
 SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
 
 Definition: '{' rules*=Rule '}';
-Rule: ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Expression)? ('<-' body=Expression)? '.' ;
+Rule: ('[' reading=/[^\]]*/ ']')? 
+      ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Base)? ('<-' body=Expression)? '.' ;
 
 RImplicationOp: '<=' | '⇐';
 EquivalenceOp: '<=>' | '⇔';
 ImplicationOp: '=>' | '⇒';
 DisjunctionOp: '|' | '∨';
 ConjunctionOp: '&' | '∧';
-ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' !'-' | '>' | '≤' | '≥' | '≠' ;
+ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
 UnaryOperator: '-' | '~';
 SumMinusOp: '+' | '-';
 MultDivOp: '*' | '/';

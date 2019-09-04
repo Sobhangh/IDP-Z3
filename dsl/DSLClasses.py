@@ -70,12 +70,12 @@ class Definition(object):
                 if i.out is not None:
                     outputVar = True
             if outputVar:
-                case.add(ForAll(vars, (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)))
+                case.add(ForAll(vars, (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)), str(self))
             else:
                 if len(vars) > 1:
-                    case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)))
+                    case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)), str(self))
                 else:
-                    case.add(symbol.translate(case, env) == Or(exprs))
+                    case.add(symbol.translate(case, env) == Or(exprs), str(self))
 
     def makeGlobalVars(self, symb, case, env):
         z3_symb = symb.translate(case, env)
@@ -140,6 +140,7 @@ class Tuple(object):
 
 class Rule(object):
     def __init__(self, **kwargs):
+        self.reading = kwargs.pop('reading')
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.symbol = kwargs.pop('symbol')

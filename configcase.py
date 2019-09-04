@@ -202,11 +202,14 @@ class ConfigCase:
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
 
-    def mk_solver(self, with_assumptions=False):
+    def theory(self, with_assumptions=False):
+        return And(list(self.constraints.keys()) 
+            + self.typeConstraints
+            + (list(self.assumptions.keys()) if with_assumptions else []))
+            
+    def mk_solver(self, theory):
         s = Solver()
-        s.add(list(self.constraints.keys()))
-        s.add(self.typeConstraints)
-        if with_assumptions: s.add(list(self.assumptions.keys()))
+        s.add(theory)
         return s
 
     def initial_structure(self):
@@ -318,7 +321,7 @@ class ConfigCase:
         out = self.initial_structure()
 
         # resolve numeric consequences first
-        # solver = self.mk_solver(with_assumptions=True)
+        # solver = self.mk_solver(self.theory(with_assumptions=True))
         # (_, unreify) = self.reify(self.atoms.values(), solver)
         # for atom in unreify.keys():
         #     if not is_bool(atom): # and not str(atom) in self.enums: #numeric value
@@ -333,7 +336,8 @@ class ConfigCase:
         #                     self.assumptions[atom == val] = True
         #         solver.pop()
 
-        solver = self.mk_solver(with_assumptions=True)
+        theory = self.theory(with_assumptions=True)
+        solver = self.mk_solver(theory)
         (_, unreify) = self.reify(self.atoms.values(), solver)
 
         for atom in unreify.keys(): # numeric variables or atom !
@@ -354,13 +358,14 @@ class ConfigCase:
             else: # unknown -> restart solver
                 out.addAtom(self, atom, unreify, True, "", unknown=True)
 
-                solver = self.mk_solver(with_assumptions=True)
+                solver = self.mk_solver(theory)
                 (_, unreify) = self.reify(self.atoms.values(), solver)
 
         return out.m
 
     def expand(self):
-        solver = self.mk_solver(with_assumptions=True)
+        theory = self.theory(with_assumptions=True)
+        solver = self.mk_solver(theory)
         (reify, unreify) = self.reify(self.atoms.values(), solver)
         solver.check()
         return self.model_to_json(solver, reify, unreify)
@@ -444,7 +449,8 @@ class ConfigCase:
             # rules used in justification
             if not to_explain.sort()==BoolSort(): # calculate numeric value
                 # TODO should be given by client
-                s = self.mk_solver(with_assumptions=True)
+                theory = self.theory(with_assumptions=True)
+                s = self.mk_solver(theory)
                 s.check()
                 val = s.model().eval(to_explain)
                 to_explain = to_explain == val
@@ -492,10 +498,11 @@ class ConfigCase:
     def abstract(self):
         out = {} # {category : [LiteralQ]}
 
-        solver = self.mk_solver(with_assumptions=False)
+        theory = self.theory(with_assumptions=False)
+        solver = self.mk_solver(theory)
         (reify, unreify) = self.reify(self.atoms.values(), solver)
 
-        def _consequences(done, with_assumptions=True):
+        def _consequences(done, theory):
             nonlocal solver, reify, unreify
             out = {} # {LiteralQ: True}
 
@@ -516,12 +523,12 @@ class ConfigCase:
                             else:
                                 out[LiteralQ(True, atomZ3 )] = True
                     else: # unknown -> restart solver
-                        solver = self.mk_solver(with_assumptions)
-                        (_, unreify) = self.reify(self.atoms.values(), solver)
+                        solver = self.mk_solver(theory)
+                        (reify, unreify) = self.reify(self.atoms.values(), solver)
             return out
 
         # extract fixed atoms from constraints
-        universal = _consequences({}, with_assumptions=False)
+        universal = _consequences({}, theory)
         out["universal"] = list(universal.keys())
 
         out["given"] = []
@@ -535,7 +542,8 @@ class ConfigCase:
 
         # extract assumptions and their consequences
         solver.add(list(self.assumptions.keys()))
-        fixed = _consequences(universal, with_assumptions=True)
+        theory2 = And([theory] + list(self.assumptions.keys()))
+        fixed = _consequences(universal, theory2)
         out["fixed"] = list(fixed.keys())
 
         models, count = {}, 0
@@ -618,9 +626,6 @@ class ConfigCase:
             for k,v in models.items(): # add model
                 models[k] = v + [ model[k] if k in model else [] ]
             count +=1
-            
-        # join disjuncts
-        # TODO
 
         # detect symbols with atoms
         active_symbol = {}
