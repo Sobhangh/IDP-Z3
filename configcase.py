@@ -169,7 +169,7 @@ class ConfigCase:
                 if not (is_true(value) or is_false(value)):
                     #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                     print("*** ", atomZ3, " is not defined, and assumed false")
-                out.addAtom(self, atomZ3, True if is_true(value) else False, "")
+                out.addAtom(self, atomZ3, True if is_true(value) else False)
             else: #TODO check that value is numeric ?
                 out.addValue(self, atomZ3, value)
         return out.m
@@ -248,7 +248,11 @@ class ConfigCase:
 
 
     def propagation(self):
+        amf = consequences(self.theory(with_assumptions=True), self.atoms.values(), {})
+
         out = self.initial_structure()
+        for literalQ in amf:
+            out.addAtom(self, literalQ.atomZ3, literalQ.truth)
 
         # resolve numeric consequences first
         # solver, reify, unreify = mk_solver(self.theory(with_assumptions=True), self.atoms.values())
@@ -264,28 +268,6 @@ class ConfigCase:
         #                     out.addAtom(self, atom, unreify, True, val)
         #                     self.assumptions[atom == val] = True
         #         solver.pop()
-
-        theory = self.theory(with_assumptions=True)
-        solver, reify, unreify = mk_solver(theory, self.atoms.values())
-
-        for reified, atomZ3 in unreify.items(): # numeric variables or atom !
-            result, consq = solver.consequences([], [reified])
-
-            if result == unsat:
-                raise Exception("Not satisfiable !")
-
-            if result == sat:
-                if consq:
-                    consq = consq[0].children()[1]
-                    if is_not(consq):
-                        out.addAtom(self, atomZ3, False, "")
-                    elif not is_bool(reified): # numeric value
-                        out.addAtom(self, consq, True, "")
-                    else:
-                        out.addAtom(self, atomZ3, True, "")
-            else: # unknown -> restart solver
-                out.addAtom(self, atomZ3, None, "")
-                solver, reify, unreify = mk_solver(theory, self.atoms.values())
 
         return out.m
 
@@ -404,7 +386,7 @@ class ConfigCase:
                 for a1 in self.assumptions.keys():
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
-                            out.addAtom(self, a1, True, "")
+                            out.addAtom(self, a1, True)
                 out.m["*laws*"] = []
                 for a1 in self.constraints.keys():
                     for a2 in s.unsat_core():
@@ -425,7 +407,7 @@ class ConfigCase:
 
         # extract fixed atoms from constraints
         universal = consequences(theory, self.atoms.values(), {}, solver, reify, unreify)
-        out["universal"] = list(universal.keys())
+        out["universal"] = [k for k in universal.keys() if k.truth is not None]
 
         out["given"] = []
         for assumption in self.assumptions.keys():
@@ -440,7 +422,7 @@ class ConfigCase:
         solver.add(list(self.assumptions.keys()))
         theory2 = And([theory] + list(self.assumptions.keys()))
         fixed = consequences(theory2, self.atoms.values(), universal, solver, reify, unreify)
-        out["fixed"] = list(fixed.keys())
+        out["fixed"] = [k for k in fixed.keys() if k.truth is not None]
 
         models, count = {}, 0
         done = set(out["universal"] + out["given"] + out["fixed"])
@@ -576,7 +558,7 @@ class Structure:
                 s.setdefault(key, symbol)
                 break
 
-    def addAtom(self, case, atomZ3, truth, value):
+    def addAtom(self, case, atomZ3, truth):
         if atomZ3.sort().name() != 'Bool': return
         if truth and is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?

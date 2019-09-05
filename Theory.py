@@ -102,5 +102,6 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                     else:
                         out[LiteralQ(True, atomZ3 )] = True
             else: # unknown -> restart solver
+                out[LiteralQ(None, atomZ3 )] = True
                 solver, reify, unreify = mk_solver(theory, atoms)
     return out    
