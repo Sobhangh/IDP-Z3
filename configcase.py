@@ -171,7 +171,7 @@ class ConfigCase:
                     print("*** ", atomZ3, " is not defined, and assumed false")
                 out.addAtom(self, atomZ3, True if is_true(value) else False, "")
             else: #TODO check that value is numeric ?
-                out.addAtom(self, atomZ3, True, value)
+                out.addValue(self, atomZ3, value)
         return out.m
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
@@ -577,26 +577,34 @@ class Structure:
                 break
 
     def addAtom(self, case, atomZ3, truth, value):
-        if is_eq(atomZ3): # try to interpret it as an assignment
+        if atomZ3.sort().name() != 'Bool': return
+        if truth and is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
-                self.addAtom(case, atomZ3.arg(0), truth, atomZ3.arg(1))
-        sgn = "ct" if truth else "cf"
+                self.addValue(case, atomZ3.arg(0), atomZ3.arg(1))
         if is_not(atomZ3):
-            atomZ3, sgn, truth = atomZ3.arg(0), "cf" if truth else "ct", truth
+            atomZ3 = atomZ3.arg(0)
+            truth = None if truth is None else not truth
         key = json.dumps([atom_as_string(atomZ3)])
-        typ = atomZ3.sort().name()
         for symb in symbols_of(atomZ3, case.symbols, case.interpreted).keys():
             s = self.m.setdefault(symb, {})
             if key in s:
                 if truth is None: s[key]["unknown"] = True
-                elif typ == 'Bool':
-                    s[key][sgn] = True
-                elif typ in ["Real", "Int"] and truth:
-                    s[key]["value"] = str(eval(str(value))) # compute fraction
-                elif typ in case.enums and truth and value.decl().name() != "if":
-                    s[key]["value"] = str(value)
+                else:
+                    s[key]["ct" if truth else "cf"] = True
                 if hasattr(atomZ3, 'reading'):
                     s[key]['reading'] = atomZ3.reading
+
+    def addValue(self, case, symbol, value):
+        key = json.dumps([atom_as_string(symbol)])
+        typ = symbol.sort().name()
+        for symb in symbols_of(symbol, case.symbols, case.interpreted).keys():
+            s = self.m.setdefault(str(symb), {})
+            if key in s:
+                if typ in ["Real", "Int"]:
+                    s[key]["value"] = str(eval(str(value))) # compute fraction
+                elif typ in case.enums and value.decl().name() != "if":
+                    s[key]["value"] = str(value)
+
 
 
 def atom_as_string(expr):

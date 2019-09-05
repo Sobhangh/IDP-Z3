@@ -34,7 +34,7 @@ def has_local_var(expr, valueMap, symbols):
     return out
 
 
-def symbols_of(expr, symbols, ignored): # returns a dict
+def symbols_of(expr, symbols, ignored): # returns a dict {string: string}
     out = {} # for unicity (ordered set)
     try:
         name = expr.decl().name()
