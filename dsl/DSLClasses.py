@@ -477,7 +477,9 @@ class Variable(object):
         out = env.var_scope[self.name]
         if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
             # exclude applied symbols
-            out.interpretation = out.interpretation(0, [])
+            try:
+                out.interpretation = out.interpretation(0, []) # if not computed yet
+            except: pass
             case.Atom(out)
             return out.interpretation
         else:

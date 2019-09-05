@@ -80,6 +80,23 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
     """ returns a set of literalQs that are based on atoms and are consequences of the theory,
         ignoring the ignored literalQs
     """
+
+    # ??
+    # resolve numeric consequences first
+    # solver, reify, unreify = mk_solver(self.theory(with_assumptions=True), self.atoms.values())
+    # for atom in unreify.keys():
+    #     if not is_bool(atom): # and not str(atom) in self.enums: #numeric value
+    #         solver.push()
+    #         if solver.check() == sat:
+    #             val = solver.model().eval(atom)
+    #             if is_number(str(val)):
+    #                 solver.add(atom != val)
+    #                 result = solver.check()
+    #                 if result != sat:
+    #                     out.addAtom(self, atom, unreify, True, val)
+    #                     self.assumptions[atom == val] = True
+    #         solver.pop()
+
     if solver is None:
         solver, reify, unreify = mk_solver(theory, atoms)
 
