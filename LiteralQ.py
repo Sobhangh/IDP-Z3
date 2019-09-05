@@ -3,7 +3,7 @@ from z3 import *
 
 class LiteralQ(object):
     def __init__(self, truth, atomZ3):
-        self.truth = truth
+        self.truth = truth # None = unknown
         self.atomZ3 = atomZ3
 
     def __hash__(self):

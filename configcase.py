@@ -169,10 +169,9 @@ class ConfigCase:
                 if not (is_true(value) or is_false(value)):
                     #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                     print("*** ", atomZ3, " is not defined, and assumed false")
-                value = True if is_true(value) else False
-                out.addAtom(self, atomZ3, unreify, value, "")
+                out.addAtom(self, atomZ3, True if is_true(value) else False, "")
             else: #TODO check that value is numeric ?
-                out.addAtom(self, atomZ3, unreify, True, value)
+                out.addAtom(self, atomZ3, True, value)
         return out.m
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
@@ -269,7 +268,7 @@ class ConfigCase:
         theory = self.theory(with_assumptions=True)
         solver, reify, unreify = mk_solver(theory, self.atoms.values())
 
-        for reified in unreify.keys(): # numeric variables or atom !
+        for reified, atomZ3 in unreify.items(): # numeric variables or atom !
             result, consq = solver.consequences([], [reified])
 
             if result == unsat:
@@ -279,13 +278,13 @@ class ConfigCase:
                 if consq:
                     consq = consq[0].children()[1]
                     if is_not(consq):
-                        out.addAtom(self, reified, unreify, False, "")
+                        out.addAtom(self, atomZ3, False, "")
                     elif not is_bool(reified): # numeric value
-                        out.addAtom(self, consq, unreify, True, "")
+                        out.addAtom(self, consq, True, "")
                     else:
-                        out.addAtom(self, reified, unreify, True, "")
+                        out.addAtom(self, atomZ3, True, "")
             else: # unknown -> restart solver
-                out.addAtom(self, reified, unreify, True, "", unknown=True)
+                out.addAtom(self, atomZ3, None, "")
                 solver, reify, unreify = mk_solver(theory, self.atoms.values())
 
         return out.m
@@ -405,7 +404,7 @@ class ConfigCase:
                 for a1 in self.assumptions.keys():
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
-                            out.addAtom(self, a1, unreify, True, "")
+                            out.addAtom(self, a1, True, "")
                 out.m["*laws*"] = []
                 for a1 in self.constraints.keys():
                     for a2 in s.unsat_core():
@@ -577,20 +576,19 @@ class Structure:
                 s.setdefault(key, symbol)
                 break
 
-    def addAtom(self, case, atomZ3, unreify, truth, value, unknown=False):
+    def addAtom(self, case, atomZ3, truth, value):
         if is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
-                self.addAtom(case, atomZ3.arg(0), unreify, truth, atomZ3.arg(1), unknown)
+                self.addAtom(case, atomZ3.arg(0), truth, atomZ3.arg(1))
         sgn = "ct" if truth else "cf"
         if is_not(atomZ3):
             atomZ3, sgn, truth = atomZ3.arg(0), "cf" if truth else "ct", truth
-        atomZ3 = unreify[atomZ3] if atomZ3 in unreify else atomZ3
         key = json.dumps([atom_as_string(atomZ3)])
         typ = atomZ3.sort().name()
         for symb in symbols_of(atomZ3, case.symbols, case.interpreted).keys():
             s = self.m.setdefault(symb, {})
             if key in s:
-                if unknown: s[key]["unknown"] = unknown
+                if truth is None: s[key]["unknown"] = True
                 elif typ == 'Bool':
                     s[key][sgn] = True
                 elif typ in ["Real", "Int"] and truth:
