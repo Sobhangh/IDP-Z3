@@ -256,12 +256,12 @@ class ConfigCase:
     def propagation(self):
         out = self.initial_structure()
 
-        # useful for non linear assumptions)
-        amf = consequences(self.theory(with_assumptions=False), self.atoms.values(), {})
+        amf = consequences(self.theory(with_assumptions=True), self.atoms.values(), {})
         for literalQ in amf:
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
 
-        amf = consequences(self.theory(with_assumptions=True), self.atoms.values(), {})
+        # useful for non linear assumptions
+        amf = consequences(self.theory(with_assumptions=False), self.atoms.values(), amf)
         for literalQ in amf:
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
 
