@@ -121,4 +121,19 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
             else: # unknown -> restart solver
                 out[LiteralQ(None, atomZ3 )] = True
                 solver, reify, unreify = mk_solver(theory, atoms)
+                if atomZ3.sort().name() == 'Bool':  # is its value determined ?
+                    solver.push()
+                    solver.add(atomZ3)
+                    result1 = solver.check()
+                    solver.pop()
+
+                    solver.push()
+                    solver.add(Not(atomZ3))
+                    result2 = solver.check()
+                    solver.pop()
+
+                    if result1 == sat and result2 == unsat:
+                        out[LiteralQ(True, atomZ3)] = True
+                    elif result1 == unsat and result2 == sat:
+                        out[LiteralQ(False, atomZ3)] = True
     return out    

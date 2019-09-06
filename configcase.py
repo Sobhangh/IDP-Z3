@@ -253,7 +253,8 @@ class ConfigCase:
         out = self.initial_structure()
         for literalQ in amf:
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
-
+        for atomQ in self.assumptions.keys(): # needed to keep some numeric assignments
+            out.addAtom(self, atomQ, True)
         return out.m
 
     def expand(self):
@@ -267,7 +268,7 @@ class ConfigCase:
 
         solver = Solver()
         theo1 = And(list(self.constraints.keys()))
-        solver.add(self.typeConstraints + list(self.assumptions.keys))
+        solver.add(self.typeConstraints + list(self.assumptions.keys()))
 
         for s in self.symbols.values():
             solver.push()
