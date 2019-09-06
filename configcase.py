@@ -254,11 +254,17 @@ class ConfigCase:
 
 
     def propagation(self):
-        amf = consequences(self.theory(with_assumptions=True), self.atoms.values(), {})
-
         out = self.initial_structure()
+
+        # useful for non linear assumptions)
+        amf = consequences(self.theory(with_assumptions=False), self.atoms.values(), {})
         for literalQ in amf:
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
+
+        amf = consequences(self.theory(with_assumptions=True), self.atoms.values(), {})
+        for literalQ in amf:
+            out.addAtom(self, literalQ.atomZ3, literalQ.truth)
+
         for literalQ in self.assumptionLs.keys(): # needed to keep some numeric assignments
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
         return out.m
