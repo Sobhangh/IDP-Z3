@@ -1,10 +1,11 @@
 
 priority:
-    - optimal propagation -> surface and non-linear
     - compact layout (More... --> pop-up)
+    - relevance
     - environmental variables
     - goal --> to the right of abstract models
     - join 2 disjuncts that differ only by the sign of one atom
+    - optimal propagation -> surface and non-linear
 
 
     - translate numeric ranges to enum ?

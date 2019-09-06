@@ -6,6 +6,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 print(parentdir)
 import configcase
+from Theory import *
 from utils import log
 from DSLClasses import *
 
@@ -23,9 +24,11 @@ else:
         c = ConfigCase(model.translate)
         #print(c.interpretations)
         log("translate")
-        solver = c.mk_solver(with_assumptions=False)
+        print(simplify(c.theory()))
+        solver, _, _ = mk_solver(c.theory(), c.atoms.values())
         print(solver.check())
         log("solve")
+        print(list(str(l) for l in consequences(c.theory(), c.atoms.values(), {}).keys()))
 
 # solver = c.mk_solver()
 # print(solver)

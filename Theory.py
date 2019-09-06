@@ -132,10 +132,18 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                     solver.add(Not(atomZ3 == value))
                     result2 = solver.check()
 
-                    if result2 == unsat: # atomZ3 can have only one value
+                    if result2 == unknown:
+                        result = unknown
+                    elif result2 == unsat: # atomZ3 can have only one value
                         if atomZ3.sort().name() == 'Bool':
                             out[LiteralQ(True if is_true(value) else False, atomZ3)] = True
                         else:
                             out[LiteralQ(True, atomZ3 == value)] = True
                 solver.pop()
+                
+                if result == unknown:
+                    print("can't solve", atomZ3)
+                    #TODO reify the non linear equations, find their thruth value, then use a solver ?
+                    pass
+
     return out    

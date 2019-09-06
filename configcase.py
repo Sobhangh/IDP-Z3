@@ -29,7 +29,7 @@ from Theory import *
 
 class ConfigCase:
 
-    def __init__(self, theory=(lambda x: 0)):
+    def __init__(self, theory):
         self.relevantVals = {}
         self.enums = {} # {string: string[]}
         self.symbols = {} # {string: Z3Expr}
@@ -41,7 +41,7 @@ class ConfigCase:
         self.typeConstraints = []
         self.atoms = {} # {atom_string: Z3expr} atoms + numeric terms !
         self.Z3atoms = {} # {Z3_code: Z3expr}
-        theory(self)
+        theory.translate(self)
 
         out = {}
         for atomZ3 in self.atoms.values(): # add numeric terms first

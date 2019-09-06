@@ -57,7 +57,7 @@ def caseOf(code):
         return cases[code]
     else:
         idpModel = idpparser.model_from_str(code)
-        case = ConfigCase(idpModel.translate)
+        case = ConfigCase(idpModel)
         if 20<len(cases):
             del cases[0] # remove oldest entry, to prevent memory overflow
         cases[code] = case
@@ -101,7 +101,7 @@ class eval(Resource):
                                     + "\n}"
                         )
                         idpModel = idpparser.model_from_str(newTheory)
-                        case = ConfigCase(idpModel.translate)
+                        case = ConfigCase(idpModel)
                     case.loadStructureFromJson(active)
                     out = case.abstract()
                 return out
