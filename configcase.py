@@ -33,7 +33,8 @@ class ConfigCase:
         self.relevantVals = {}
         self.enums = {} # {string: string[]}
         self.symbols = {} # {string: Z3Expr}
-        self.assumptions = {} # {Z3expr : True}
+        self.assumptions = [] # [atomZ3]
+        self.assumptionLs = {} # {literalQ : True} (needed for propagate)
         self.valueMap = {"True": True}
         self.constraints = {} # {Z3expr: string}
         self.interpreted = {} # from structure: {string: True}
@@ -150,7 +151,7 @@ class ConfigCase:
     def theory(self, with_assumptions=False):
         return And(list(self.constraints.keys()) 
             + self.typeConstraints
-            + (list(self.assumptions.keys()) if with_assumptions else []))
+            + (self.assumptions if with_assumptions else []))
 
     def initial_structure(self):
         out = Structure(self)
@@ -182,7 +183,7 @@ class ConfigCase:
             .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
             .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
 
-        self.assumptions = {}
+        self.assumptions, self.assumptionLs = [], {}
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
@@ -190,9 +191,9 @@ class ConfigCase:
                     atomZ3 = self.atoms[atom[2:-2]]
                     if json_atom["typ"] == "Bool":
                         if "ct" in json_atom and json_atom["ct"]:
-                            self.assumptions[atomZ3] = True
+                            literalQ = LiteralQ(True, atomZ3)
                         if "cf" in json_atom and json_atom["cf"]:
-                            self.assumptions[Not(atomZ3)] = True
+                            literalQ = LiteralQ(False, atomZ3)
                     elif json_atom["value"]:
                         if json_atom["typ"] == "Int":
                             value = int(json_atom["value"])
@@ -200,7 +201,12 @@ class ConfigCase:
                             value = float(json_atom["value"])
                         else:
                             value = self.valueMap[json_atom["value"]]
-                        self.assumptions[atomZ3 == value] = True
+                        literalQ = LiteralQ(True, atomZ3 == value)
+                    else:
+                        literalQ = None #TODO error ?
+                    if literalQ is not None:
+                        self.assumptions.append(literalQ.asZ3())
+                        self.assumptionLs[literalQ] = True
 
     def args(self, val):
         a, _ = splitLast(list(map(self.z3_value, json.loads(val))))
@@ -253,8 +259,8 @@ class ConfigCase:
         out = self.initial_structure()
         for literalQ in amf:
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
-        for atomQ in self.assumptions.keys(): # needed to keep some numeric assignments
-            out.addAtom(self, atomQ, True)
+        for literalQ in self.assumptionLs.keys(): # needed to keep some numeric assignments
+            out.addAtom(self, literalQ.atomZ3, literalQ.truth)
         return out.m
 
     def expand(self):
@@ -268,7 +274,7 @@ class ConfigCase:
 
         solver = Solver()
         theo1 = And(list(self.constraints.keys()))
-        solver.add(self.typeConstraints + list(self.assumptions.keys()))
+        solver.add(self.typeConstraints + self.assumptions)
 
         for s in self.symbols.values():
             solver.push()
@@ -284,12 +290,12 @@ class ConfigCase:
                               s(constants) == c(constants))))
                 var_list = [Var(i, s.domain(i)) for i in range(0, s.arity())]
                 theo2 = rewrite(theo1, s, applyTo(c, var_list))
-                type_transform = rewrite(And(self.typeConstraints + list(self.assumptions.keys())), s, applyTo(c, var_list))
+                type_transform = rewrite(And(self.typeConstraints + self.assumptions), s, applyTo(c, var_list))
             else:
                 c = Const('temporaryConstant', s.sort())
                 solver.add(c != s)
                 theo2 = substitute(theo1, (s, c))
-                type_transform = substitute(And(self.typeConstraints + list(self.assumptions.keys())), (s, c))
+                type_transform = substitute(And(self.typeConstraints + self.assumptions), (s, c))
                 arg_fill = []
             solver.add(type_transform)
             solver.add(theo1 != theo2)
@@ -326,7 +332,7 @@ class ConfigCase:
 
     def explain(self, symbol, value):
         out = self.initial_structure()
-        for ass in self.assumptions.keys(): # add numeric assumptions
+        for ass in self.assumptions: # add numeric assumptions
             for atomZ3 in self.getAtoms(ass).values():
                 out.initialise(self, atomZ3, False, False, "")
 
@@ -351,7 +357,7 @@ class ConfigCase:
             def r1(a): return reify[a] if a in reify else a
             def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
             ps = {} # {reified: constraint}
-            constraints = list(self.constraints.keys()) + self.typeConstraints + list(self.assumptions.keys())
+            constraints = list(self.constraints.keys()) + self.typeConstraints + self.assumptions
             for i, constraint in enumerate(constraints):
                 p = Const("wsdraqsesdf"+str(i), BoolSort())
                 ps[p] = constraint
@@ -369,9 +375,9 @@ class ConfigCase:
                 unsatcore = s.unsat_core()
             
             if unsatcore:
-                for a1 in self.assumptions.keys():
+                for a1 in self.assumptions:
                     for a2 in s.unsat_core():
-                        if str(a1) == str(ps[a2]):
+                        if str(a1) == str(ps[a2]): #TODO we might miss some equality
                             out.addAtom(self, a1, True)
                 out.m["*laws*"] = []
                 for a1 in self.constraints.keys():
@@ -396,7 +402,7 @@ class ConfigCase:
         out["universal"] = [k for k in universal.keys() if k.truth is not None]
 
         out["given"] = []
-        for assumption in self.assumptions.keys():
+        for assumption in self.assumptions:
             if is_not(assumption):
                 ass = LiteralQ(False, assumption.children()[0])
             else:
@@ -405,8 +411,8 @@ class ConfigCase:
             out["given"] += [ass]
 
         # extract assumptions and their consequences
-        solver.add(list(self.assumptions.keys()))
-        theory2 = And([theory] + list(self.assumptions.keys()))
+        solver.add(self.assumptions)
+        theory2 = And([theory] + self.assumptions)
         fixed = consequences(theory2, self.atoms.values(), universal, solver, reify, unreify)
         out["fixed"] = [k for k in fixed.keys() if k.truth is not None]
 
@@ -549,6 +555,8 @@ class Structure:
         if truth and is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
                 self.addValue(case, atomZ3.arg(0), atomZ3.arg(1))
+            if atomZ3.arg(0).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
+                self.addValue(case, atomZ3.arg(1), atomZ3.arg(0))
         if is_not(atomZ3):
             atomZ3 = atomZ3.arg(0)
             truth = None if truth is None else not truth
@@ -569,7 +577,7 @@ class Structure:
             s = self.m.setdefault(str(symb), {})
             if key in s:
                 if typ in ["Real", "Int"]:
-                    s[key]["value"] = str(eval(str(value))) # compute fraction
+                    s[key]["value"] = str(eval(str(value).replace('?', ''))) # compute fraction
                 elif typ in case.enums and value.decl().name() != "if":
                     s[key]["value"] = str(value)
 
