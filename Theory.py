@@ -81,26 +81,14 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
         ignoring the ignored literalQs
     """
 
-    # ??
-    # resolve numeric consequences first
-    # solver, reify, unreify = mk_solver(self.theory(with_assumptions=True), self.atoms.values())
-    # for atom in unreify.keys():
-    #     if not is_bool(atom): # and not str(atom) in self.enums: #numeric value
-    #         solver.push()
-    #         if solver.check() == sat:
-    #             val = solver.model().eval(atom)
-    #             if is_number(str(val)):
-    #                 solver.add(atom != val)
-    #                 result = solver.check()
-    #                 if result != sat:
-    #                     out.addAtom(self, atom, unreify, True, val)
-    #                     self.assumptions[atom == val] = True
-    #         solver.pop()
-
     if solver is None:
         solver, reify, unreify = mk_solver(theory, atoms)
 
     out = {} # {LiteralQ: True}
+
+    # pre-compute possible values
+    solver2, reify2, unreify2 = mk_solver(theory, atoms)
+    result2 = solver2.check()
 
     for reified, atomZ3 in unreify.items():# numeric variables or atom !
         if not LiteralQ(True, atomZ3) in ignored and not LiteralQ(False, atomZ3) in ignored:
@@ -108,12 +96,11 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
 
             if result==unsat:
                 raise Exception("Not satisfiable !")
-
-            if result==sat:
+            elif result==sat:
                 if consq:
                     consq = consq[0].children()[1]
                     if is_not(consq):
-                        out[LiteralQ(False, atomZ3)] = True
+                        out[LiteralQ(False, atomZ3)] = True # must use atomZ3 here, not consq !
                     elif not is_bool(reified):
                         out[LiteralQ(True, consq  )] = True
                     else:
@@ -121,29 +108,26 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
             else: # unknown -> restart solver
                 solver, reify, unreify = mk_solver(theory, atoms)
 
-                # get its value
-                solver.push()
-                result = solver.check()
-                if result == sat:
-                    value = solver.model().eval(atomZ3)
+                # try full propagation
+                ok = False
+                if result2 == sat:
+                    value = solver2.model().eval(atomZ3)
 
-                    solver.pop()
                     solver.push()
                     solver.add(Not(atomZ3 == value))
-                    result2 = solver.check()
+                    result3 = solver.check()
+                    solver.pop()
 
-                    if result2 == unknown:
-                        result = unknown
-                    elif result2 == unsat: # atomZ3 can have only one value
+                    if result3 == unsat: # atomZ3 can have only one value
+                        ok = True
                         if atomZ3.sort().name() == 'Bool':
                             out[LiteralQ(True if is_true(value) else False, atomZ3)] = True
                         else:
                             out[LiteralQ(True, atomZ3 == value)] = True
-                solver.pop()
                 
-                if result == unknown:
-                    print("can't solve", atomZ3)
-                    #TODO reify the non linear equations, find their thruth value, then use a solver ?
-                    pass
-
+                    if not ok:
+                        print("can't propagate to", atomZ3, value)
+    if result2 != sat:
+        #TODO reify the non linear equations, find their thruth value, then use a solver ?
+        print("can't find a model")
     return out    
