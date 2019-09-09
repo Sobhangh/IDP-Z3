@@ -4,85 +4,81 @@ File:
     structure=Structure?
 ;
 
-Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
-
-Theory: 'theory' '{' ((constraints=Expression '.')*  definitions=Definition*)* '}';
-
-Structure: 'structure' '{' interpretations*=Interpretation '}';
-Interpretation: name=Symbol '=' '{' tuples+=Tuple[';'] '}' ('else' default=Base)?;
-Tuple : args*=Base[','];
-
 Comment:
   /\/\/.*$/
 ;
 
-Expression: Quantification;
+Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
+  Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
-Quantification: AQuantification | RImplication;
-RImplication:   ARImplication   | Equivalence;
-Equivalence:    AEquivalence    | Implication;
-Implication:    AImplication    | Disjunction;
-Disjunction:    ADisjunction    | Conjunction;
-Conjunction:    AConjunction    | Comparison;
-Comparison:     AComparison     | SumMinus;
-SumMinus:       ASumMinus       | MultDiv;
-MultDiv:        AMultDiv        | Power;
-Power:          APower          | Unary;
-Unary:          AUnary          | Aggregate;
-Aggregate:      AAggregate      | Base;
+    ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
+    RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
+      RangeElement: fromI=NumberConstant ('..' to=NumberConstant)?;
+
+    SymbolDeclaration: name=Symbol ('(' args*=Sort[','] ')')? (':' out=Sort)?;
+      Sort: name=ID;
+      Symbol: name=ID;
+
+Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
+
+  Definition: '{' rules*=Rule '}';
+  Rule: ('[' reading=/[^\]]*/ ']')? 
+        ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Base)? ('<-' body=Expression)? '.' ;
+
+  Expression: Quantification;
+
+    Quantification: AQuantification | RImplication;
+    RImplication:   ARImplication   | Equivalence;
+    Equivalence:    AEquivalence    | Implication;
+    Implication:    AImplication    | Disjunction;
+    Disjunction:    ADisjunction    | Conjunction;
+    Conjunction:    AConjunction    | Comparison;
+    Comparison:     AComparison     | SumMinus;
+    SumMinus:       ASumMinus       | MultDiv;
+    MultDiv:        AMultDiv        | Power;
+    Power:          APower          | Unary;
+    Unary:          AUnary          | Aggregate;
+    Aggregate:      AAggregate      | Base;
 
 
-AAggregate: aggtype=AggType set=SetExp;
-AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
-ARImplication: fs=Equivalence (operator=RImplicationOp fs=Equivalence)+;
-AEquivalence:  fs=Implication (operator=EquivalenceOp  fs=Implication)+;
-AImplication:  fs=Disjunction (operator=ImplicationOp  fs=Disjunction)+;
-ADisjunction:  fs=Conjunction (operator=DisjunctionOp  fs=Conjunction)+;
-AConjunction:  fs=Comparison (operator=ConjunctionOp   fs=Comparison )+;
-AComparison:   fs=SumMinus (operator=ComparisonOp      fs=SumMinus   )+;
-ASumMinus:     fs=MultDiv (operator=SumMinusOp         fs=MultDiv    )+;
-AMultDiv:      fs=Power (operator=MultDivOp            fs=Power      )+;
-APower:        fs=Unary (operator='^'                  fs=Unary      );
-AUnary: operator=UnaryOperator f=Base;
+    AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
+      Quantor: '∀' | '!' | '∃' | '?' ;
+    ARImplication: fs=Equivalence (operator=RImplicationOp fs=Equivalence)+;
+    AEquivalence:  fs=Implication (operator=EquivalenceOp  fs=Implication)+;
+    AImplication:  fs=Disjunction (operator=ImplicationOp  fs=Disjunction)+;
+    ADisjunction:  fs=Conjunction (operator=DisjunctionOp  fs=Conjunction)+;
+    AConjunction:  fs=Comparison  (operator=ConjunctionOp  fs=Comparison )+;
+    AComparison:   fs=SumMinus    (operator=ComparisonOp   fs=SumMinus   )+;
+    ASumMinus:     fs=MultDiv     (operator=SumMinusOp     fs=MultDiv    )+;
+    AMultDiv:      fs=Power       (operator=MultDivOp      fs=Power      )+;
+    APower:        fs=Unary       (operator='^'            fs=Unary      );
+    AUnary:                        operator=UnaryOperator  f=Base;
+    AAggregate: aggtype=AggType set=SetExp;
+      AggType: '#' | 'card' | 'sum';
+      SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
 
-Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
+    RImplicationOp: '<=' | '⇐';
+    EquivalenceOp: '<=>' | '⇔';
+    ImplicationOp:  '=>' | '⇒';
+    DisjunctionOp:   '|' | '∨';
+    ConjunctionOp:   '&' | '∧';
+    ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
+    SumMinusOp:      '+' | '-';
+    MultDivOp:       '*' | '/';
+    UnaryOperator:   '-' | '~';
+    
 
-AppliedSymbol: s=Symbol args=Arguments;
-Variable: name=ID;
-NumberConstant: number=IDPFLOAT | number=INT;
-StringConstant: str=STRING;
-Brackets: ('[' reading=/[^\]]*/ ']')? '(' f=Expression ')';
+    Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
 
-Arguments: '(' fs*=Expression[','] ')';
-SetExp: '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
+      AppliedSymbol: s=Symbol args=Arguments;
+        Arguments: '(' fs*=Expression[','] ')';
+      Variable: name=ID;
+      NumberConstant: number=IDPFLOAT | number=INT;
+        IDPFLOAT: /[+-]?(\d+(\.\d+)?|\.\d+)/;
+      StringConstant: str=STRING;
+      Brackets: ('[' reading=/[^\]]*/ ']')? '(' f=Expression ')';
 
-Definition: '{' rules*=Rule '}';
-Rule: ('[' reading=/[^\]]*/ ']')? 
-      ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Base)? ('<-' body=Expression)? '.' ;
 
-RImplicationOp: '<=' | '⇐';
-EquivalenceOp: '<=>' | '⇔';
-ImplicationOp: '=>' | '⇒';
-DisjunctionOp: '|' | '∨';
-ConjunctionOp: '&' | '∧';
-ComparisonOp: '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
-UnaryOperator: '-' | '~';
-SumMinusOp: '+' | '-';
-MultDivOp: '*' | '/';
-Quantor: '∀' | '!' | '∃' | '?' ;
-AggType: '#' | 'card' | 'sum';
-
-Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
-
-ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
-RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
-
-RangeElement: fromI=NumberConstant ('..' to=NumberConstant)?;
-
-SymbolDeclaration:
-    name=Symbol ('(' args*=Sort[','] ')')? (':' out=Sort)?;
-
-Sort: name=ID;
-Symbol: name=ID;
-
-IDPFLOAT: /[+-]?(\d+(\.\d+)?|\.\d+)/;
+Structure: 'structure' '{' interpretations*=Interpretation '}';
+  Interpretation: name=Symbol '=' '{' tuples+=Tuple[';'] '}' ('else' default=Base)?;
+  Tuple : args*=Base[','];

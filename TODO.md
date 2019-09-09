@@ -28,7 +28,6 @@ functional NTH:
     - implication semantics for definitions
 
 other NTH (refactor)
-    - organize DSL chronologically
     - distinguish between x=1 entry and x=1 atom in output structure
     - simplify Or, And with only one element
     - p(real) should be possible
