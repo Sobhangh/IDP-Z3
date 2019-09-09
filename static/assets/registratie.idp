@@ -1,0 +1,236 @@
+vocabulary {
+type location constructed from {FlemishRegion, WalloonRegion, BrusselsRegion}
+
+type registrationType constructed from {FamilyDwelling, SocialDwelling, SocialPurpose, ExchangeUnbuiltGround, ProfessionalPurchase, EnergyEfficientDwelling, Heritage, DwellingForSocialRenting, Other}
+
+type taxRate = {1; 2; 4; 7; 6; 10; 12}
+
+type realEstateType constructed from {Residential, ResidentialBuildingLand, OtherRealEstate}
+
+type destination constructed from {AsFamilyDwelling, ForResale, CommunityPurpose, SocialHousing, SocialRenting, OtherHouse, NoHouse}
+type buyerType constructed from {NaturalPerson, LegalPerson, Mixed}
+
+type calculationBase = {190; 200; 210; 220; 225}
+type baseLimit = {200; 220}
+//type DiscountType = {56; 48; 0}
+
+type date = {2015..2025}
+
+type agreementDwellingForSocialRenting constructed from {LessThan9years, Morethan9Or9years}
+
+type transaction constructed from {PublicSale, OutHand, PublicSaleCommunity}
+
+
+
+type municipality constructed from {otherMunicipal, Aalst, Antwerpen, Boom, Brugge, Dendermonde, Genk, Gent, Hasselt, Kortrijk, Leuven, Mechelen, Oostende, Roeselare, SintNiklaas, Turnhout, Vilvoorde, Affligem, Asse, Beersel, Bever, Dilbeek, Drogenbos, Galmaarden, Gooik, Grimbergen, Halle, Herne, Hoeilaart, Kampenhout, KapelleopdenBos, Kraainem, Lennik, Liedekerke, Linkebeek, Londerzeel, Machelen, Meise, Merchtem, Opwijk, Overijse, Pepingen, Roosdaal, SintGenesiusRode, SintPietersLeeuw, Steenokkerzeel, Ternat, Wemmel, WezembeekOppem, Zaventem, Zemst, Bertem, Huldenberg, Kortenberg, Tervuren}
+
+type resale constructed from {LessThanThree, ThreeOrMore}
+
+
+type seller constructed from {VlaamsWoningfonds, GelijksoortigeRechtspersoonEER, MpyErkendDoorVMSW, VlaamseMpyVoorSociaalWonen, ErkendeSocialeHuisvestingsMpy}
+
+
+////////////////////////
+
+Region : location
+Municipality : municipality
+TypeOfRealEstate : realEstateType
+Seller : seller
+Buyer : buyerType
+Use : destination
+
+DomicileEstablished
+FirstOwnership
+Monument
+
+Resale : resale
+TransactionType : transaction
+DurationOfAgreement : agreementDwellingForSocialRenting
+
+CoreCity
+
+//SocialSeller
+MortgageLoanAllowance
+CleanPurchase
+FirstOwnership
+CausalConnection
+
+
+EnergyRenovationPlanned
+
+//SocialRentingAgreement
+HeritageInvestment
+HeritagePlan
+//AdditionalConditions
+
+ProfessionalDeclarationFiled
+GuaranteeSatisfied
+AdditionalSecurityRequired
+AdditionalSecuritySatisfied
+
+//TaxableBase : calculationBase
+//PermittedBase : baseLimit
+
+AdditionalTerms
+
+
+StartDateDwellingForSocialRenting : date
+
+CertificationDate : date
+Tax : taxRate
+
+TermEnergyRenovation : date
+CertificationDateSale : date
+//DomicileDate : date
+
+RegistrationType : registrationType
+//IsDiscount: DiscountType
+ProfessionalBuyer
+}
+
+theory {
+
+     // Tax
+
+[Registration rate for heritage in Flemish Region is 1%.](
+Tax = 1 <=>
+    RegistrationType = Heritage
+    & Region = FlemishRegion
+).
+
+Tax = 2 <=> // correct amount is 1; 5
+    RegistrationType = SocialDwelling
+    & Region = FlemishRegion
+.
+
+Tax = 4 <=>
+    RegistrationType = ProfessionalPurchase
+    & Region = FlemishRegion
+.
+
+[The tax rate is 6% for social purpose sales in the Flemish Region.]
+(Tax = 6 <=>
+    (RegistrationType = EnergyEfficientDwelling
+    | RegistrationType = SocialPurpose
+    | RegistrationType = ExchangeUnbuiltGround)
+    & Region = FlemishRegion
+).
+
+Tax = 7 <=>
+    (RegistrationType = FamilyDwelling
+    | RegistrationType = DwellingForSocialRenting)
+    & Region = FlemishRegion
+.
+
+Tax = 10 <=>
+    Region = FlemishRegion
+    & RegistrationType = Other
+.
+
+[The tax rate is 12% only in Brussels and Wallonia](
+Tax = 12 <=>
+    Region = BrusselsRegion
+    | Region = WalloonRegion
+).
+
+//? x[int]: Tax = x.
+
+// registration types currently only defined for Flanders.
+// When a choice is made for walonia or brussels, types can still be entered with a view to expandability
+
+
+RegistrationType = FamilyDwelling <=>
+    TypeOfRealEstate = Residential
+    & Buyer = NaturalPerson
+    & DomicileEstablished
+    & CleanPurchase
+    & (FirstOwnership | CausalConnection)
+    & (~ EnergyRenovationPlanned | TermEnergyRenovation ~= CertificationDate + 5)
+.
+
+RegistrationType = SocialDwelling <=>     
+    Buyer = NaturalPerson
+    & TypeOfRealEstate = Residential
+    & Use = SocialHousing
+    & (Seller = VlaamseMpyVoorSociaalWonen | Seller = ErkendeSocialeHuisvestingsMpy)
+    & MortgageLoanAllowance
+.
+
+RegistrationType = EnergyEfficientDwelling <=>
+    TypeOfRealEstate = Residential
+    & Buyer = NaturalPerson
+    & DomicileEstablished
+    & CleanPurchase
+    & (FirstOwnership | CausalConnection)
+    & EnergyRenovationPlanned
+    & TermEnergyRenovation = CertificationDate + 5
+.
+
+RegistrationType = DwellingForSocialRenting <=>
+    TypeOfRealEstate = Residential
+    & Use = SocialRenting
+    & StartDateDwellingForSocialRenting = CertificationDate + 3
+    & DurationOfAgreement = LessThan9years
+.
+
+[An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
+(RegistrationType = Heritage <=>
+    TypeOfRealEstate = Residential
+    & Monument
+    & Use = AsFamilyDwelling
+    & HeritageInvestment
+    & HeritagePlan
+    & AdditionalTerms)
+.
+
+RegistrationType = ProfessionalPurchase <=> 
+    ProfessionalBuyer
+    & TransactionType  ~= PublicSale
+    & Use = ForResale
+    & CertificationDateSale = CertificationDate + 8
+.
+
+[A sale by the Vlaams Woning Fonds for community purpose is for social purpose.](
+RegistrationType = SocialPurpose <=>     
+    (Seller = MpyErkendDoorVMSW
+    | Seller = VlaamsWoningfonds
+    | Seller = GelijksoortigeRechtspersoonEER)
+    & Use = CommunityPurpose
+).
+
+RegistrationType = ExchangeUnbuiltGround <=> 
+    AdditionalTerms
+    & ~Monument.
+
+RegistrationType = Other <=>     // @EXPLAIN: RegistrationType cannot be Other
+    RegistrationType ~= FamilyDwelling
+    & RegistrationType ~= SocialDwelling
+    & RegistrationType ~= EnergyEfficientDwelling
+    & RegistrationType ~= DwellingForSocialRenting
+    & RegistrationType ~= Heritage
+    & RegistrationType ~= ProfessionalPurchase
+    & RegistrationType ~= SocialPurpose
+    & RegistrationType ~= ExchangeUnbuiltGround
+.
+
+
+//? x[registrationType]: RegistrationType = x.
+
+
+Municipality = otherMunicipal => ~ CoreCity.
+
+Municipality ~= otherMunicipal => CoreCity.
+
+
+    
+ProfessionalBuyer <=>
+    ProfessionalDeclarationFiled
+    & GuaranteeSatisfied
+    & (AdditionalSecurityRequired & AdditionalSecuritySatisfied
+    | ~ AdditionalSecurityRequired)
+    & Resale = ThreeOrMore
+.
+
+}
+
+

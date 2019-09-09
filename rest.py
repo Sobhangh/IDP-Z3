@@ -1,3 +1,22 @@
+"""
+    Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+
+    This file is part of Interactive_Consultant.
+
+    Interactive_Consultant is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Interactive_Consultant is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
 import threading
 import traceback
 
@@ -30,57 +49,79 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
+cases = {} #{code_string : ConfigCase}
 
+def caseOf(code):
+    global cases
+    if code in cases:
+        return cases[code]
+    else:
+        idpModel = idpparser.model_from_str(code)
+        case = ConfigCase(idpModel)
+        if 20<len(cases):
+            del cases[0] # remove oldest entry, to prevent memory overflow
+        cases[code] = case
+        return case
 
 class eval(Resource):
     def post(self):
+        global cases
         with z3lock:
             try:
                 args = parser.parse_args()
 
-                idpModel = idpparser.model_from_str(args['code'])
-
-                case = ConfigCase(idpModel.translate)
+                case = caseOf(args['code'])
 
                 method = args['method']
                 active = args['active']
-                print(args)
+                #print(args)
                 out = {}
                 if method == "init":
-                    out = case.initialisationlist()
+                    out = case.atomsGrouped()
                 if method == "propagate":
                     case.loadStructureFromJson(active)
                     out = case.propagation()
                 if method == "modelexpand":
                     case.loadStructureFromJson(active)
-                    out = case.json_model()
+                    out = case.expand()
                 if method == "relevance":
                     case.loadStructureFromJson(active)
-                    out = case.relevance()
+                    out = case.propagation() #TODO
                 if method == "explain":
                     case.loadStructureFromJson(active)
                     out = case.explain(args['symbol'], args['value'])
                 if method == "minimize":
                     case.loadStructureFromJson(active)
                     out = case.optimize(args['symbol'], args['minimize'])
-                if method == "parametric":
+                if method == "abstract":
+                    if args['symbol'] != "": # theory to explain ?
+                        newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
+                                    + "theory {\n"
+                                    + args['symbol']
+                                    + "\n}"
+                        )
+                        idpModel = idpparser.model_from_str(newTheory)
+                        case = ConfigCase(idpModel)
                     case.loadStructureFromJson(active)
-                    out = case.parametric()
-                print(out)
+                    out = case.abstract()
                 return out
             except Exception as exc:
-                raise exc
                 return str(exc)
 
 class meta(Resource):
     def post(self):
-        args = parser.parse_args()
-        try:
-            idpModel = idpparser.model_from_str(args['code'])
-            return ConfigCase(idpModel.translate).metaJSON()
-        except Exception as exc:
-            traceback.print_exc()
-            return repr(exc)
+        global cases
+        with z3lock:
+            try:
+                args = parser.parse_args()
+                try:
+                    case = caseOf(args['code'])
+                    return case.metaJSON()
+                except Exception as exc:
+                    traceback.print_exc()
+                    return repr(exc)
+            except Exception as exc:
+                return str(exc)
 
 
 @app.route('/', methods=['GET'])

@@ -1,0 +1,22 @@
+vocabulary {
+    c:int
+    p(int)
+    f1(int):int
+    f(int,int):int
+}
+
+theory {
+    c=0.
+    c=0.
+    p(2).
+    p(1).
+    f1(1)=2.
+    f(1,1)=1.
+}
+
+structure {
+    c = {0}
+    p = { 1; 2 }
+    f1 = {1,2; 3,4} else 0
+    f = {1,1, 1} else 0
+}
