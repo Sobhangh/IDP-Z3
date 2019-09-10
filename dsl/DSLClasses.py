@@ -33,475 +33,7 @@ class File(object):
         self.theory.translate(case, env)
 
 
-class Theory(object):
-    def __init__(self, **kwargs):
-        self.constraints = kwargs.pop('constraints')
-        self.definitions = kwargs.pop('definitions')
-
-    def translate(self, case: ConfigCase, env: Environment):
-        for i in self.constraints:
-            c = i.translate(case, env)
-            case.add(c, str(i))
-        for d in self.definitions:
-            d.translate(case, env)
-
-
-class Definition(object):
-    def __init__(self, **kwargs):
-        self.rules = kwargs.pop('rules')
-
-    def rulePartition(self):
-        out = {}
-        for i in self.rules:
-            out.setdefault(i.symbol.name, []).append(i)
-        return out
-
-    def translate(self, case: ConfigCase, env: Environment):
-        partition = self.rulePartition()
-        for symbol in partition.keys():
-            rules = partition[symbol]
-            symbol = Symbol(name=symbol)
-            vars = self.makeGlobalVars(symbol, case, env)
-            exprs = []
-
-            outputVar = False
-            for i in rules:
-                exprs.append(i.translate(vars, case, env))
-                if i.out is not None:
-                    outputVar = True
-            if outputVar:
-                case.add(ForAll(vars, (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)), str(self))
-            else:
-                if len(vars) > 1:
-                    case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)), str(self))
-                else:
-                    case.add(symbol.translate(case, env) == Or(exprs), str(self))
-
-    def makeGlobalVars(self, symb, case, env):
-        z3_symb = symb.translate(case, env)
-        if type(z3_symb) == FuncDeclRef:
-            return [Const('ci', z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
-                Const('cout', z3_symb.range())]
-        else:
-            return [Const('c', z3_symb.sort())]
-
-class Structure(object):
-    def __init__(self, **kwargs):
-        self.interpretations = kwargs.pop('interpretations')
-
-    def translate(self, case: ConfigCase, env: Environment):
-        for i in self.interpretations:
-            i.translate(case, env)
-
-class Interpretation(object):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.tuples = kwargs.pop('tuples')
-        self.default = kwargs.pop('default')
-
-    def translate(self, case: ConfigCase, env: Environment):
-        symbol = env.var_scope[self.name.name]
-        case.interpreted[self.name.name] = True
-        function = -1 if symbol.__class__.__name__ == "ArithRef" or symbol.range() != BoolSort() else 0
-        arity = len(self.tuples[0].args) # there must be at least one tuple !
-        if function and 1 < arity and self.default == None:
-            raise Exception("Default value required for function {} in structure.".format(self.name.name))
-
-        # create a macro and attach it to the symbol
-        def interpretation(rank, args, tuples=None):
-            tuples = [tuple.translate(case, env) for tuple in self.tuples] if tuples == None else tuples
-            if rank == arity+function: # return a value
-                if not function:
-                    return BoolVal(True)
-                else:
-                    if 1 < len(tuples):
-                        #raise Exception("Duplicate values in structure for " + str(symbol))
-                        print("Duplicate values in structure for " + str(symbol) + str(tuples[0]) )
-                    return tuples[0][rank]
-            else: # constructs If-then-else recursively
-                out = self.default.translate(case, env) if function else BoolVal(False)
-
-                tuples.sort(key=lambda t: str(t[rank]))
-                groups = it.groupby(tuples, key=lambda t: t[rank])
-                for val, tuples2 in groups:
-                    out = If(args[rank]==val, interpretation(rank+1, args, list(tuples2)), out)
-                return out
-        symbol.interpretation = interpretation
-
-class Tuple(object):
-    def __init__(self, **kwargs):
-        self.args = kwargs.pop('args')
-
-    def __str__(self):
-        return ",".join([str(a) for a in self.args])
-
-    def translate(self, case: ConfigCase, env: Environment):
-        return [arg.translate(case, env) for arg in self.args]
-
-class Rule(object):
-    def __init__(self, **kwargs):
-        self.reading = kwargs.pop('reading')
-        self.vars = kwargs.pop('vars')
-        self.sorts = kwargs.pop('sorts')
-        self.symbol = kwargs.pop('symbol')
-        self.args = kwargs.pop('args')
-        self.out = kwargs.pop('out')
-        self.body = kwargs.pop('body')
-
-    def translate(self, vars, case: ConfigCase, env: Environment):
-        args = []
-        if self.args is not None:
-            args = self.args.fs
-
-        def function():
-            out = []
-            for var, expr in zip(vars, args):
-                out.append(var == expr.translate(case, env))
-            if self.out is not None:
-                out.append(vars[-1] == self.out.translate(case, env))
-            if self.body is not None:
-                out.append(self.body.translate(case, env))
-            return out
-
-        lvars = []
-        if lvars is not None:
-            lvars = self.vars
-        sorts = []
-        if sorts is not None:
-            sorts = self.sorts
-
-        outp, vars = with_local_vars(case, env, function, sorts, lvars)
-
-        if len(vars) == 0:
-            return And(outp)
-        else:
-            return Exists(vars, And(outp))
-
-
-class BinaryOperator(object):
-    MAP = { '&': lambda x, y: And(x, y),
-            '|': lambda x, y: Or(x, y),
-            '∧': lambda x, y: And(x, y),
-            '∨': lambda x, y: Or(x, y),
-            '=>': lambda x, y: Or(Not(x), y),
-            '<=': lambda x, y: Or(x, Not(y)),
-            '<=>': lambda x, y: x == y,
-            '⇒': lambda x, y: Or(Not(x), y),
-            '⇐': lambda x, y: Or(x, Not(y)),
-            '⇔': lambda x, y: x == y,
-            '+': lambda x, y: x + y,
-            '-': lambda x, y: x - y,
-            '*': lambda x, y: x * y,
-            '/': lambda x, y: x / y,
-            '^': lambda x, y: x ** y,
-            '=': lambda x, y: x == y,
-            '<': lambda x, y: x < y,
-            '>': lambda x, y: x > y,
-            '=<': lambda x, y: x <= y,
-            '>=': lambda x, y: x >= y,
-            '~=': lambda x, y: Not(x == y),
-            '≤': lambda x, y: x <= y,
-            '≥': lambda x, y: x >= y,
-            '≠': lambda x, y: Not(x == y)
-            }
-
-    def __init__(self, **kwargs):
-        self.fs = kwargs.pop('fs')
-        self.operator = kwargs.pop('operator')
-
-    def __str__(self):
-        out = str(self.fs[0])
-        for i in range(1, len(self.fs)):
-            op = self.operator[i-1]
-            op = "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else op
-            op = "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else op
-            op = "∨" if op == "|" else "∧" if op == "&" else op
-            out = out + " " + op + " " + str(self.fs[i])
-        return out
-
-    def translate(self, case: ConfigCase, env: Environment):
-        # chained comparisons -> And()
-        if self.operator[0] in ['≠', '~='] and len(self.fs)==2:
-            x = self.fs[0].translate(case, env)
-            y = self.fs[1].translate(case, env)
-            atom = x==y
-            case.Atom(atom)
-            out = Not(atom)
-        elif self.operator[0] in ['=', '<', '>', '=<', '>=', '~=', "≤", "≥", "≠"]:
-            out = []
-            for i in range(1, len(self.fs)):
-                x = self.fs[i-1].translate(case, env)
-                function = BinaryOperator.MAP[self.operator[i - 1]]
-                y = self.fs[i].translate(case, env)
-                out = out + [function(x, y)]
-            if 1 < len(out):
-                out = And(out)
-                out.is_chained = True
-            else:
-                out = out[0]
-            case.Atom(out, str(self))
-        else:
-            out = self.fs[0].translate(case, env)
-
-            for i in range(1, len(self.fs)):
-                function = BinaryOperator.MAP[self.operator[i - 1]]
-                out = function(out, self.fs[i].translate(case, env))
-        return out
-
-
-class AConjunction(BinaryOperator): pass
-
-
-class ADisjunction(BinaryOperator): pass
-
-
-class AImplication(BinaryOperator): pass
-
-
-class ARImplication(BinaryOperator): pass
-
-
-class AEquivalence(BinaryOperator): pass
-
-
-class AComparison(BinaryOperator): pass
-
-
-class ASumMinus(BinaryOperator): pass
-
-
-class AMultDiv(BinaryOperator): pass
-
-class APower(BinaryOperator): pass
-
-class AUnary(object):
-    MAP = {'-': lambda x: 0 - x,
-           '~': lambda x: Not(x)
-          }
-    def __init__(self, **kwargs):
-        self.f = kwargs.pop('f')
-        self.operator = kwargs.pop('operator')
-
-    def __str__(self):
-        return self.operator + str(self.f)
-
-    def translate(self, case: ConfigCase, env: Environment):
-        out = self.f.translate(case, env)
-        function = AUnary.MAP[self.operator]
-        return function(out)
-
-
-class AQuantification(object):
-    def __init__(self, **kwargs):
-        self.q = kwargs.pop('q')
-        self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
-        self.vars = kwargs.pop('vars')
-        self.sorts = kwargs.pop('sorts')
-        self.f = kwargs.pop('f')
-
-    def __str__(self):
-        out  = self.q
-        out += "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
-        out += " : " + str(self.f)
-        return out
-
-    def translate(self, case: ConfigCase, env: Environment):
-        env.level += 1
-        finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
-        env.level -= 1
-
-        if self.q == '∀':
-            forms = And(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0: # not fully expanded !
-                out = ForAll(finalvars, forms)
-                if env.level==0: case.Atom(out, str(self))
-                return out
-            else:
-                if env.level==0: case.Atom(forms, str(self))
-                return forms
-        else:
-            forms = Or(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0: # not fully expanded !
-                out = Exists(finalvars, forms)
-                if env.level==0: case.Atom(out, str(self))
-                return out
-            else:
-                if env.level==0: case.Atom(forms, str(self))
-                return forms
-
-
-def expand_formula(vars, sorts, f, case, env):
-    form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
-    forms = [form]
-    finalvars = []
-    for i in range(0, len(vars)):
-        if sorts[i].name in env.range_scope:
-            forms2 = []
-            for f in forms:
-                for v in sorts[i].getRange(env):
-                    try:
-                        forms2.append(substitute(f, (z3vars[i], _py2expr(float(v)))))
-                    except:
-                        try:
-                            forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
-                        except:
-                            forms2.append(substitute(f, (z3vars[i], v)))
-            forms = forms2
-        else:
-            finalvars.append(z3vars[i])
-    return finalvars, forms
-
-
-def with_local_vars(case, env, f, sorts, vars):
-    backup = {}
-    z3vars = []
-    assert len(sorts) == len(vars)
-    for var, sort in zip(vars, sorts):
-        z3var = Const(var, sort.asZ3(env))
-        if var in env.var_scope:
-            backup[var] = env.var_scope[var]
-        else:
-            backup[var] = None
-        env.var_scope[var] = z3var
-        z3vars.append(z3var)
-
-    out = f()
-    for var in vars:
-        env.var_scope[var] = backup[var]
-    return out, z3vars
-
-
-class AAggregate(object):
-    def __init__(self, **kwargs):
-        self.aggtype = kwargs.pop('aggtype')
-        self.set = kwargs.pop('set')
-        if self.aggtype == "sum" and self.set.out is None:
-            raise Exception("Must have output variable for sum")
-        if self.aggtype != "sum" and self.set.out is not None:
-            raise Exception("Can't have output variable for #")
-
-    def __str__(self):
-        return self.aggtype + str(self.set)
-
-    def translate(self, case: ConfigCase, env: Environment):
-        return Sum(self.set.translate(case, env))
-
-
-class IfExpr(object):
-    def __init__(self, **kwargs):
-        self.if_f = kwargs.pop('if_f')
-        self.then_f = kwargs.pop('then_f')
-        self.else_f = kwargs.pop('else_f')
-
-    def __str__(self):
-        return "if " + str(self.if_f) + " then " + str(self.then_f) + " else " + str(self.else_f)
-
-    def translate(self, case: ConfigCase, env: Environment):
-        return If(self.if_f.translate(case, env), self.then_f.translate(case, env), self.else_f.translate(case, env))
-
-
-class SetExp(object):
-    def __init__(self, **kwargs):
-        self.vars = kwargs.pop('vars')
-        self.sorts = kwargs.pop('sorts')
-        self.f = kwargs.pop('f')
-        self.out = kwargs.pop('out')
-
-    def __str__(self):
-        out = "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
-        out += ":" + str(self.f)
-        if self.out: out += " : " + str(self.out)
-        out += "}"
-        return out
-
-    def translate(self, case: ConfigCase, env: Environment):
-        form = IfExpr(if_f=self.f, then_f=NumberConstant(number='1'), else_f=NumberConstant(number='0'))
-        if self.out is not None:
-            form = AMultDiv(operator='*', fs=[form, self.out])
-        fvars, forms = expand_formula(self.vars, self.sorts, form, case, env)
-        if len(fvars) > 0:
-            raise Exception('Can only quantify over finite domains')
-        return forms
-
-
-class AppliedSymbol(object):
-    def __init__(self, **kwargs):
-        self.s = kwargs.pop('s')
-        self.args = kwargs.pop('args')
-
-    def __str__(self):
-        return str(self.s) + "(" + ",".join([str(x) for x in self.args.fs]) + ")"
-
-    def translate(self, case: ConfigCase, env: Environment):
-        s = self.s.translate(case, env)
-        arg = [x.translate(case, env) for x in self.args.fs]
-        out = s(arg)
-        if hasattr(s, 'interpretation'):
-            out.interpretation = s.interpretation(0, arg)
-            case.Atom(out)
-            return out.interpretation
-        else:
-            case.Atom(out)
-            return out
-
-
-class Brackets(object):
-    def __init__(self, **kwargs):
-        self.f = kwargs.pop('f')
-        self.reading = kwargs.pop('reading')
-
-    def __str__(self): return "(" + str(self.f) + ")"
-
-    def translate(self, case: ConfigCase, env: Environment):
-        expr= self.f.translate(case, env)
-        if self.reading: 
-            expr.reading = self.reading
-        return expr
-
-
-def add_space(input):
-    words = re.findall('[A-Z][a-z]*', input)
-    return ' '.join(words) if ''.join(words) == input else input
-
-class Variable(object):
-    def __init__(self, **kwargs):
-        self.name = add_space(kwargs.pop('name'))
-
-    def __str__(self): return self.name
-
-    def translate(self, case: ConfigCase, env: Environment):
-        if self.name == "true":
-            return bool(True)
-        if self.name == "false":
-            return bool(False)
-        out = env.var_scope[self.name]
-        if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
-            # exclude applied symbols
-            try:
-                out.interpretation = out.interpretation(0, []) # if not computed yet
-            except: pass
-            case.Atom(out)
-            return out.interpretation
-        else:
-            case.Atom(out)
-            return out
-
-
-class Symbol(Variable): pass
-
-
-class NumberConstant(object):
-    def __init__(self, **kwargs):
-        self.number = kwargs.pop('number')
-
-    def __str__(self):
-        return str(self.number)
-
-    def translate(self, case: ConfigCase, env: Environment):
-        try:
-            return int(self.number)
-        except ValueError:
-            return float(self.number)
+################################ Vocabulary  ###############################
 
 
 class Vocabulary(object):
@@ -631,13 +163,468 @@ class Sort(object):
         return list(map(singleton, map(_py2expr, self.getRange(env))))
 
 
+################################ Theory ###############################
+
+
+class Theory(object):
+    def __init__(self, **kwargs):
+        self.constraints = kwargs.pop('constraints')
+        self.definitions = kwargs.pop('definitions')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        for i in self.constraints:
+            c = i.translate(case, env)
+            case.add(c, str(i))
+        for d in self.definitions:
+            d.translate(case, env)
+
+
+class Definition(object):
+    def __init__(self, **kwargs):
+        self.rules = kwargs.pop('rules')
+
+    def rulePartition(self):
+        out = {}
+        for i in self.rules:
+            out.setdefault(i.symbol.name, []).append(i)
+        return out
+
+    def translate(self, case: ConfigCase, env: Environment):
+        partition = self.rulePartition()
+        for symbol in partition.keys():
+            rules = partition[symbol]
+            symbol = Symbol(name=symbol)
+            vars = self.makeGlobalVars(symbol, case, env)
+            exprs = []
+
+            outputVar = False
+            for i in rules:
+                exprs.append(i.translate(vars, case, env))
+                if i.out is not None:
+                    outputVar = True
+            if outputVar:
+                case.add(ForAll(vars, (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)), str(self))
+            else:
+                if len(vars) > 1:
+                    case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)), str(self))
+                else:
+                    case.add(symbol.translate(case, env) == Or(exprs), str(self))
+
+    def makeGlobalVars(self, symb, case, env):
+        z3_symb = symb.translate(case, env)
+        if type(z3_symb) == FuncDeclRef:
+            return [Const('ci', z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
+                Const('cout', z3_symb.range())]
+        else:
+            return [Const('c', z3_symb.sort())]
+
+class Rule(object):
+    def __init__(self, **kwargs):
+        self.reading = kwargs.pop('reading')
+        self.vars = kwargs.pop('vars')
+        self.sorts = kwargs.pop('sorts')
+        self.symbol = kwargs.pop('symbol')
+        self.args = kwargs.pop('args')
+        self.out = kwargs.pop('out')
+        self.body = kwargs.pop('body')
+
+    def translate(self, vars, case: ConfigCase, env: Environment):
+        args = []
+        if self.args is not None:
+            args = self.args.fs
+
+        def function():
+            out = []
+            for var, expr in zip(vars, args):
+                out.append(var == expr.translate(case, env))
+            if self.out is not None:
+                out.append(vars[-1] == self.out.translate(case, env))
+            if self.body is not None:
+                out.append(self.body.translate(case, env))
+            return out
+
+        lvars = []
+        if lvars is not None:
+            lvars = self.vars
+        sorts = []
+        if sorts is not None:
+            sorts = self.sorts
+
+        outp, vars = with_local_vars(case, env, function, sorts, lvars)
+
+        if len(vars) == 0:
+            return And(outp)
+        else:
+            return Exists(vars, And(outp))
+
+
+class IfExpr(object):
+    def __init__(self, **kwargs):
+        self.if_f = kwargs.pop('if_f')
+        self.then_f = kwargs.pop('then_f')
+        self.else_f = kwargs.pop('else_f')
+
+    def __str__(self):
+        return "if " + str(self.if_f) + " then " + str(self.then_f) + " else " + str(self.else_f)
+
+    def translate(self, case: ConfigCase, env: Environment):
+        return If(self.if_f.translate(case, env), self.then_f.translate(case, env), self.else_f.translate(case, env))
+
+def expand_formula(vars, sorts, f, case, env):
+    form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
+    forms = [form]
+    finalvars = []
+    for i in range(0, len(vars)):
+        if sorts[i].name in env.range_scope:
+            forms2 = []
+            for f in forms:
+                for v in sorts[i].getRange(env):
+                    try:
+                        forms2.append(substitute(f, (z3vars[i], _py2expr(float(v)))))
+                    except:
+                        try:
+                            forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
+                        except:
+                            forms2.append(substitute(f, (z3vars[i], v)))
+            forms = forms2
+        else:
+            finalvars.append(z3vars[i])
+    return finalvars, forms
+
+
+def with_local_vars(case, env, f, sorts, vars):
+    backup = {}
+    z3vars = []
+    assert len(sorts) == len(vars)
+    for var, sort in zip(vars, sorts):
+        z3var = Const(var, sort.asZ3(env))
+        if var in env.var_scope:
+            backup[var] = env.var_scope[var]
+        else:
+            backup[var] = None
+        env.var_scope[var] = z3var
+        z3vars.append(z3var)
+
+    out = f()
+    for var in vars:
+        env.var_scope[var] = backup[var]
+    return out, z3vars
+
+class AQuantification(object):
+    def __init__(self, **kwargs):
+        self.q = kwargs.pop('q')
+        self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
+        self.vars = kwargs.pop('vars')
+        self.sorts = kwargs.pop('sorts')
+        self.f = kwargs.pop('f')
+
+    def __str__(self):
+        out  = self.q
+        out += "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
+        out += " : " + str(self.f)
+        return out
+
+    def translate(self, case: ConfigCase, env: Environment):
+        env.level += 1
+        finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
+        env.level -= 1
+
+        if self.q == '∀':
+            forms = And(forms) if 1<len(forms) else forms[0]
+            if len(finalvars) > 0: # not fully expanded !
+                out = ForAll(finalvars, forms)
+                if env.level==0: case.Atom(out, str(self))
+                return out
+            else:
+                if env.level==0: case.Atom(forms, str(self))
+                return forms
+        else:
+            forms = Or(forms) if 1<len(forms) else forms[0]
+            if len(finalvars) > 0: # not fully expanded !
+                out = Exists(finalvars, forms)
+                if env.level==0: case.Atom(out, str(self))
+                return out
+            else:
+                if env.level==0: case.Atom(forms, str(self))
+                return forms
+
+class BinaryOperator(object):
+    MAP = { '&': lambda x, y: And(x, y),
+            '|': lambda x, y: Or(x, y),
+            '∧': lambda x, y: And(x, y),
+            '∨': lambda x, y: Or(x, y),
+            '=>': lambda x, y: Or(Not(x), y),
+            '<=': lambda x, y: Or(x, Not(y)),
+            '<=>': lambda x, y: x == y,
+            '⇒': lambda x, y: Or(Not(x), y),
+            '⇐': lambda x, y: Or(x, Not(y)),
+            '⇔': lambda x, y: x == y,
+            '+': lambda x, y: x + y,
+            '-': lambda x, y: x - y,
+            '*': lambda x, y: x * y,
+            '/': lambda x, y: x / y,
+            '^': lambda x, y: x ** y,
+            '=': lambda x, y: x == y,
+            '<': lambda x, y: x < y,
+            '>': lambda x, y: x > y,
+            '=<': lambda x, y: x <= y,
+            '>=': lambda x, y: x >= y,
+            '~=': lambda x, y: Not(x == y),
+            '≤': lambda x, y: x <= y,
+            '≥': lambda x, y: x >= y,
+            '≠': lambda x, y: Not(x == y)
+            }
+
+    def __init__(self, **kwargs):
+        self.fs = kwargs.pop('fs')
+        self.operator = kwargs.pop('operator')
+
+    def __str__(self):
+        out = str(self.fs[0])
+        for i in range(1, len(self.fs)):
+            op = self.operator[i-1]
+            op = "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else op
+            op = "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else op
+            op = "∨" if op == "|" else "∧" if op == "&" else op
+            out = out + " " + op + " " + str(self.fs[i])
+        return out
+
+    def translate(self, case: ConfigCase, env: Environment):
+        # chained comparisons -> And()
+        if self.operator[0] in ['≠', '~='] and len(self.fs)==2:
+            x = self.fs[0].translate(case, env)
+            y = self.fs[1].translate(case, env)
+            atom = x==y
+            case.Atom(atom)
+            out = Not(atom)
+        elif self.operator[0] in ['=', '<', '>', '=<', '>=', '~=', "≤", "≥", "≠"]:
+            out = []
+            for i in range(1, len(self.fs)):
+                x = self.fs[i-1].translate(case, env)
+                function = BinaryOperator.MAP[self.operator[i - 1]]
+                y = self.fs[i].translate(case, env)
+                out = out + [function(x, y)]
+            if 1 < len(out):
+                out = And(out)
+                out.is_chained = True
+            else:
+                out = out[0]
+            case.Atom(out, str(self))
+        else:
+            out = self.fs[0].translate(case, env)
+
+            for i in range(1, len(self.fs)):
+                function = BinaryOperator.MAP[self.operator[i - 1]]
+                out = function(out, self.fs[i].translate(case, env))
+        return out
+
+class AImplication(BinaryOperator): pass
+class AEquivalence(BinaryOperator): pass
+class ARImplication(BinaryOperator): pass
+class ADisjunction(BinaryOperator): pass
+class AConjunction(BinaryOperator): pass
+class AComparison(BinaryOperator): pass
+class ASumMinus(BinaryOperator): pass
+class AMultDiv(BinaryOperator): pass
+class APower(BinaryOperator): pass
+
+class AUnary(object):
+    MAP = {'-': lambda x: 0 - x,
+           '~': lambda x: Not(x)
+          }
+    def __init__(self, **kwargs):
+        self.f = kwargs.pop('f')
+        self.operator = kwargs.pop('operator')
+
+    def __str__(self):
+        return self.operator + str(self.f)
+
+    def translate(self, case: ConfigCase, env: Environment):
+        out = self.f.translate(case, env)
+        function = AUnary.MAP[self.operator]
+        return function(out)
+
+
+class AAggregate(object):
+    def __init__(self, **kwargs):
+        self.aggtype = kwargs.pop('aggtype')
+        self.set = kwargs.pop('set')
+        if self.aggtype == "sum" and self.set.out is None:
+            raise Exception("Must have output variable for sum")
+        if self.aggtype != "sum" and self.set.out is not None:
+            raise Exception("Can't have output variable for #")
+
+    def __str__(self):
+        return self.aggtype + str(self.set)
+
+    def translate(self, case: ConfigCase, env: Environment):
+        return Sum(self.set.translate(case, env))
+
+
+class SetExp(object):
+    def __init__(self, **kwargs):
+        self.vars = kwargs.pop('vars')
+        self.sorts = kwargs.pop('sorts')
+        self.f = kwargs.pop('f')
+        self.out = kwargs.pop('out')
+
+    def __str__(self):
+        out = "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
+        out += ":" + str(self.f)
+        if self.out: out += " : " + str(self.out)
+        out += "}"
+        return out
+
+    def translate(self, case: ConfigCase, env: Environment):
+        form = IfExpr(if_f=self.f, then_f=NumberConstant(number='1'), else_f=NumberConstant(number='0'))
+        if self.out is not None:
+            form = AMultDiv(operator='*', fs=[form, self.out])
+        fvars, forms = expand_formula(self.vars, self.sorts, form, case, env)
+        if len(fvars) > 0:
+            raise Exception('Can only quantify over finite domains')
+        return forms
+
+
+class AppliedSymbol(object):
+    def __init__(self, **kwargs):
+        self.s = kwargs.pop('s')
+        self.args = kwargs.pop('args')
+
+    def __str__(self):
+        return str(self.s) + "(" + ",".join([str(x) for x in self.args.fs]) + ")"
+
+    def translate(self, case: ConfigCase, env: Environment):
+        s = self.s.translate(case, env)
+        arg = [x.translate(case, env) for x in self.args.fs]
+        out = s(arg)
+        if hasattr(s, 'interpretation'):
+            out.interpretation = s.interpretation(0, arg)
+            case.Atom(out)
+            return out.interpretation
+        else:
+            case.Atom(out)
+            return out
+
+def add_space(input):
+    words = re.findall('[A-Z][a-z]*', input)
+    return ' '.join(words) if ''.join(words) == input else input
+
+class Variable(object):
+    def __init__(self, **kwargs):
+        self.name = add_space(kwargs.pop('name'))
+
+    def __str__(self): return self.name
+
+    def translate(self, case: ConfigCase, env: Environment):
+        if self.name == "true":
+            return bool(True)
+        if self.name == "false":
+            return bool(False)
+        out = env.var_scope[self.name]
+        if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
+            # exclude applied symbols
+            try:
+                out.interpretation = out.interpretation(0, []) # if not computed yet
+            except: pass
+            case.Atom(out)
+            return out.interpretation
+        else:
+            case.Atom(out)
+            return out
+
+class Symbol(Variable): pass
+
+class NumberConstant(object):
+    def __init__(self, **kwargs):
+        self.number = kwargs.pop('number')
+
+    def __str__(self):
+        return str(self.number)
+
+    def translate(self, case: ConfigCase, env: Environment):
+        try:
+            return int(self.number)
+        except ValueError:
+            return float(self.number)
+
+class Brackets(object):
+    def __init__(self, **kwargs):
+        self.f = kwargs.pop('f')
+        self.reading = kwargs.pop('reading')
+
+    def __str__(self): return "(" + str(self.f) + ")"
+
+    def translate(self, case: ConfigCase, env: Environment):
+        expr= self.f.translate(case, env)
+        if self.reading: 
+            expr.reading = self.reading
+        return expr
+
+
+################################ Structure ###############################
+
+class Structure(object):
+    def __init__(self, **kwargs):
+        self.interpretations = kwargs.pop('interpretations')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        for i in self.interpretations:
+            i.translate(case, env)
+
+class Interpretation(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.tuples = kwargs.pop('tuples')
+        self.default = kwargs.pop('default')
+
+    def translate(self, case: ConfigCase, env: Environment):
+        symbol = env.var_scope[self.name.name]
+        case.interpreted[self.name.name] = True
+        function = -1 if symbol.__class__.__name__ == "ArithRef" or symbol.range() != BoolSort() else 0
+        arity = len(self.tuples[0].args) # there must be at least one tuple !
+        if function and 1 < arity and self.default == None:
+            raise Exception("Default value required for function {} in structure.".format(self.name.name))
+
+        # create a macro and attach it to the symbol
+        def interpretation(rank, args, tuples=None):
+            tuples = [tuple.translate(case, env) for tuple in self.tuples] if tuples == None else tuples
+            if rank == arity+function: # return a value
+                if not function:
+                    return BoolVal(True)
+                else:
+                    if 1 < len(tuples):
+                        #raise Exception("Duplicate values in structure for " + str(symbol))
+                        print("Duplicate values in structure for " + str(symbol) + str(tuples[0]) )
+                    return tuples[0][rank]
+            else: # constructs If-then-else recursively
+                out = self.default.translate(case, env) if function else BoolVal(False)
+
+                tuples.sort(key=lambda t: str(t[rank]))
+                groups = it.groupby(tuples, key=lambda t: t[rank])
+                for val, tuples2 in groups:
+                    out = If(args[rank]==val, interpretation(rank+1, args, list(tuples2)), out)
+                return out
+        symbol.interpretation = interpretation
+
+class Tuple(object):
+    def __init__(self, **kwargs):
+        self.args = kwargs.pop('args')
+
+    def __str__(self):
+        return ",".join([str(a) for a in self.args])
+
+    def translate(self, case: ConfigCase, env: Environment):
+        return [arg.translate(case, env) for arg in self.args]
+
+
 dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
 
-idpparser = metamodel_from_file(dslFile, memoization=True,
-                                classes=[File, Theory, Vocabulary, Structure, Interpretation, Tuple, SymbolDeclaration, Sort,
-                                         IfExpr, AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
-                                         AComparison, AAggregate, SetExp,
-                                         ASumMinus, AMultDiv, APower, AUnary, NumberConstant, ConstructedTypeDeclaration,
-                                         RangeDeclaration, AppliedSymbol, Definition, Rule,
-                                         Variable, Symbol, AQuantification,
-                                         Brackets])
+idpparser = metamodel_from_file(dslFile, memoization=True, classes=
+        [ File, 
+          Vocabulary, ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
+          Theory, Definition, Rule, IfExpr, AQuantification, 
+                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
+                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, SetExp,
+                    AppliedSymbol, Variable, NumberConstant, Brackets,
+          Interpretation, Structure, Tuple
+        ])
