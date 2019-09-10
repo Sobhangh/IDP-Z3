@@ -10,6 +10,12 @@ from z3.z3 import _py2expr
 from configcase import ConfigCase, singleton, in_list
 from utils import is_number, universe, applyTo
 
+class DSLException(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+
 
 class Environment:
     def __init__(self):
@@ -403,7 +409,10 @@ class BinaryOperator(object):
                 x = self.fs[i-1].translate(case, env)
                 function = BinaryOperator.MAP[self.operator[i - 1]]
                 y = self.fs[i].translate(case, env)
-                out = out + [function(x, y)]
+                try:
+                    out = out + [function(x, y)]
+                except Z3Exception as E:
+                    raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
             if 1 < len(out):
                 out = And(out)
                 out.is_chained = True
