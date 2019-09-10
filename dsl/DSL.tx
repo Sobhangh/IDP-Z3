@@ -25,7 +25,8 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
   Rule: ('[' reading=/[^\]]*/ ']')? 
         ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Base)? ('<-' body=Expression)? '.' ;
 
-  Expression: Quantification;
+  Expression: IfExpr | Quantification;
+    IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
 
     Quantification: AQuantification | RImplication;
     RImplication:   ARImplication   | Equivalence;

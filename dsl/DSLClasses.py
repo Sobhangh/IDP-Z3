@@ -635,7 +635,7 @@ dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[File, Theory, Vocabulary, Structure, Interpretation, Tuple, SymbolDeclaration, Sort,
-                                         AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
+                                         IfExpr, AConjunction, ADisjunction, AImplication, ARImplication, AEquivalence,
                                          AComparison, AAggregate, SetExp,
                                          ASumMinus, AMultDiv, APower, AUnary, NumberConstant, ConstructedTypeDeclaration,
                                          RangeDeclaration, AppliedSymbol, Definition, Rule,

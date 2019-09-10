@@ -32,7 +32,4 @@ Alternatively,
 * verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
 * open your browser at http://localhost:4201
 
-To update autoconfigparap.herokuapp.com:
- * merge master into autoconfigparam
- * checkout autoconfigparam
- * `git push heroku autoconfigparam:master`.
+To update autoconfigparam.herokuapp.com: `git push heroku master`.

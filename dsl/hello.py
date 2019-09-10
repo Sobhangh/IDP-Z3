@@ -21,7 +21,7 @@ if False:
     cProfile.run('ConfigCase(model.translate)')
 else:
     for i in range(1):
-        c = ConfigCase(model.translate)
+        c = ConfigCase(model)
         #print(c.interpretations)
         log("translate")
         print(simplify(c.theory()))

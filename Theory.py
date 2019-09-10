@@ -109,7 +109,6 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                 solver, reify, unreify = mk_solver(theory, atoms)
 
                 # try full propagation
-                ok = False
                 if result2 == sat:
                     value = solver2.model().eval(atomZ3)
 
@@ -118,15 +117,15 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                     result3 = solver.check()
                     solver.pop()
 
-                    if result3 == unsat: # atomZ3 can have only one value
-                        ok = True
+                    if result3 == sat:
+                        pass
+                    elif result3 == unsat: # atomZ3 can have only one value
                         if atomZ3.sort().name() == 'Bool':
                             out[LiteralQ(True if is_true(value) else False, atomZ3)] = True
                         else:
                             out[LiteralQ(True, atomZ3 == value)] = True
-                
-                    if not ok:
-                        print("can't propagate to", atomZ3, value)
+                    else:
+                        print("can't propagate with", exclude)
     if result2 != sat:
         #TODO reify the non linear equations, find their thruth value, then use a solver ?
         print("can't find a model")
