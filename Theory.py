@@ -125,7 +125,7 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                         else:
                             out[LiteralQ(True, atomZ3 == value)] = True
                     else:
-                        print("can't propagate with", exclude)
+                        print("can't propagate with", Not(atomZ3 == value))
     if result2 != sat:
         #TODO reify the non linear equations, find their thruth value, then use a solver ?
         print("can't find a model")
