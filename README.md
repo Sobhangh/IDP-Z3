@@ -20,9 +20,8 @@ and open your browser at http://127.0.0.1:5000
 
 The website (including the default logic theory) is served from the static directory.  Its code is available at https://gitlab.com/krr/autoconfig3.  To update it:
 
-* checkout the autoconfigparam branch of autoconfig3
-* modify package.json so that the `build` script uses `--base-href \"/\""`
-* modify IDP_ENDPOINT, META_URL to `/eval`, `/meta` (possibly prefixed with `http://127.0.0.1:5000`) in assets/services/AppSettings.ts,
+* checkout the master branch of autoconfig3
+* modify IDP_ENDPOINT, META_URL to `/eval`, `/meta` (remove `http://127.0.0.1:5000` prefix) in assets/services/AppSettings.ts,
 * execute `npm run -script build`
 * copy the content of the new dist directory into the static folder of this program
 

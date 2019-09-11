@@ -1,3 +1,23 @@
+Priority:
+    - settings: underscore for spaces in symbols, first underscore = hidden symbol (PC)
+    - values:fix bug when several arguments to predicate (PC)
+    - View Normal (with popup) / Expanded (PC)
+    - values:use slider for numeric values (when type is a range) (Bram)
+    - values:show valid range of numeric values ?? beware of inequalities and infinite (Bram)
+    - compare consequences of 2 different choices (Bram)
+
+    - non-linear
+    - settings: minimizable ? describe goal using new syntax ? (PC)
+    - error management (for idp code) (PC)
+    - show offended rules when unsatisfiable (re-use Explain API) (Bram)
+    - option to disable some rules (full workflow)(Bram)
+    - settings: group symbols into categories (e.g. using markdown annotations ?)
+    - settings: annotations in vocabulary (longinfo)
+    - values:how to say how the list box should be organised ?  Annotations ? based on size ?
+
+    - relevance
+    - settings: give name to a vocabulary
+
 
 priority:
     - compact layout (More... --> pop-up)
@@ -33,17 +53,7 @@ other NTH (refactor)
     - p(real) should be possible
     - client should send the literal to be explained, not the atom
 
-GUI enhancements:
-    - show offended rules when unsatisfiable
 
-Merge with Explain branch:
-    - use slider for numeric values
-    - show valid range of numeric values
-    - scroll bar for list of values
-    - categories to group symbols
-    - nested symbols
-    - option to disable some rules (full workflow)
-    - compare consequences of 2 different choices
 
 Bart:
     - add annotation in vocabulary
