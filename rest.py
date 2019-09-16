@@ -28,6 +28,17 @@ from textx import TextXError
 from configcase import *
 from dsl.DSLClasses import idpparser
 
+# library to generate call graph, for documentation purposes
+from pycallgraph2 import PyCallGraph
+from pycallgraph2.output import GraphvizOutput
+from pycallgraph2 import GlobbingFilter
+from pycallgraph2 import Config
+config = Config(max_depth=8)
+config.trace_filter = GlobbingFilter(
+    exclude=['arpeggio.*','ast.*','flask*', 'json.*', 'pycallgraph2.*', 'textx.*','werkzeug.*', 'z3.*']
+    )
+
+
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 app = Flask(__name__)
 CORS(app)
@@ -76,6 +87,7 @@ class eval(Resource):
                 active = args['active']
                 #print(args)
                 out = {}
+
                 if method == "init":
                     out = case.atomsGrouped()
                 if method == "propagate":
@@ -108,6 +120,16 @@ class eval(Resource):
             except Exception as exc:
                 return str(exc)
 
+class evalWithGraph(eval): # subcclass that generates call graphs
+    def post(self):
+        args = parser.parse_args()
+        method = args['method']
+
+        graphviz = GraphvizOutput()
+        graphviz.output_file = method + '.png'
+        with PyCallGraph(output=graphviz, config=config):
+            return super().post()
+
 class meta(Resource):
     def post(self):
         global cases
@@ -122,6 +144,13 @@ class meta(Resource):
                     return repr(exc)
             except Exception as exc:
                 return str(exc)
+
+class metaWithGraph(meta): # subclass that generates call graphs
+    def post(self):
+        graphviz = GraphvizOutput()
+        graphviz.output_file = 'meta.png'
+        with PyCallGraph(output=graphviz, config=config):
+            return super().post()
 
 
 @app.route('/', methods=['GET'])
@@ -138,7 +167,7 @@ def serve_file_in_dir(path):
 
 
 api.add_resource(HelloWorld, '/test')
-api.add_resource(eval, '/eval')
+api.add_resource(eval, '/eval') # use evalWithGraph instead of eval, to generate call graphs.
 api.add_resource(meta, '/meta')
 
 if __name__ == '__main__':

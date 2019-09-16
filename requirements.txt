@@ -2,5 +2,6 @@ z3-solver
 flask
 flask_restful
 flask_cors
+pycallgraph2
 gunicorn
 textx
