@@ -98,6 +98,7 @@ class RangeDeclaration(object):
             else:
                 for i in range(x.fromI.translate(case, env), x.to.translate(case, env) + 1):
                     els.append(i)
+        case.enums[self.name] = els
         if all(map(lambda x: type(x) == int, els)):
             env.type_scope[self.name] = IntSort()
         else:
@@ -123,7 +124,8 @@ class SymbolDeclaration(object):
         if len(self.args) == 0:
             const = case.Const(self.name.name, self.out.asZ3(env))
             env.var_scope[self.name.name] = const
-            case.relevantVals[const] = self.out.getZ3Range(env)
+            case.args[const] = []
+            case.symbol_types[self.name.name] = self.out.name
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(const, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name.name
@@ -164,9 +166,6 @@ class Sort(object):
             return []
         else:
             return universe(self.asZ3(env))
-
-    def getZ3Range(self, env: Environment):
-        return list(map(singleton, map(_py2expr, self.getRange(env))))
 
 
 ################################ Theory ###############################

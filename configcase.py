@@ -28,17 +28,22 @@ from utils import *
 class ConfigCase:
 
     def __init__(self, theory):
-        self.relevantVals = {}
-        self.enums = {} # {string: string[]}
-        self.symbols = {} # {string: Z3Expr}
-        self.assumptions = [] # [atomZ3]
-        self.assumptionLs = {} # {literalQ : True} (needed for propagate)
+        self.enums = {} # {string: [string] }
         self.valueMap = {"True": True}
-        self.constraints = {} # {Z3expr: string}
+
+        self.symbols = {} # {string: Z3Expr}
+        self.args = {} # {Z3Expr: [ (Z3expr) ]}
+        self.symbol_types = {} # {string: string}
         self.interpreted = {} # from structure: {string: True}
-        self.typeConstraints = []
+
         self.atoms = {} # {atom_string: Z3expr} atoms + numeric terms !
         self.Z3atoms = {} # {Z3_code: Z3expr}
+
+        self.assumptions = [] # [atomZ3]
+        self.assumptionLs = {} # {literalQ : True} (needed for propagate)
+        self.constraints = {} # {Z3expr: string}
+        self.typeConstraints = []
+        
         theory.translate(self)
 
         out = {}
@@ -73,9 +78,9 @@ class ConfigCase:
         rel_vars = list(map(lambda x: list(map(_py2expr, x)), rel_vars))
         args, vals = splitLast(rel_vars)
         args = list(itertools.product(*args))
-        values = list(itertools.product(args, vals))
         self.symbols[str(out)] = out
-        self.relevantVals[out] = values
+        self.args[out] = args
+        self.symbol_types[name] = str(types[-1])
         if restrictive:
             for arg in list(args):
                 exp = in_list(out(*arg), vals)
@@ -210,9 +215,9 @@ class ConfigCase:
         solver.check()
         return self.model_to_json(solver, reify, unreify)
 
-    def relevance(self): # not used
+    def relevance(self): 
         out = self.initial_structure()
-
+        """ # not used, not working
         solver = Solver()
         theo1 = And(list(self.constraints.keys()))
         solver.add(self.typeConstraints + self.assumptions)
@@ -256,6 +261,7 @@ class ConfigCase:
                     out.fillApp(applyTo(s, arg))
 
             solver.pop()
+        """
         return out.m
 
     def optimize(self, symbol, minimize):
@@ -495,14 +501,7 @@ class ConfigCase:
 
 class Structure:
     def __init__(self, case):
-        self.m = {} # {symbol_string: {atom : {ct: Bool}, "[]": {args: value}? }
-        # print("Structure")
-        # for symb in case.symbols.values():
-        #     s = self.m.setdefault(str(symb), {})
-        #     for arg, val in case.relevantVals[symb]:
-        #         if type(symb) != BoolRef:
-        #             # symbol can have a numeric value
-        #             print(symb, arg, val)
+        self.m = {}
 
     def initialise(self, case, atomZ3, ct_true, ct_false, value=""):
         key = atom_as_string(atomZ3)
@@ -511,19 +510,10 @@ class Structure:
             s = self.m.setdefault(symb, {})
             if typ == 'Bool':
                 symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
+            elif case.symbol_types[symb] in case.enums:
+                symbol = {"typ": typ, "value": str(value), "values": case.enums[case.symbol_types[symb]]}
             elif typ in ["Real", "Int"]:
-                symb = case.symbols[atomZ3.decl().name()]
-                if symb in case.relevantVals and case.relevantVals[symb]:
-                    values = [] #TODO refactor using enumeration type of symbol
-                    for _,b in case.relevantVals[symb]:
-                        v = str(eval(str(b)))
-                        if v in values: break
-                        values.append(v)
-                    symbol = {"typ": typ, "value": str(value), "values": values}
-                else:
-                    symbol = {"typ": typ, "value": str(value)}
-            elif typ in case.enums:
-                symbol = {"typ": typ, "value": str(value), "values": case.enums[typ]}
+                symbol = {"typ": typ, "value": str(value)} # default
             else:
                 symbol = None
             if symbol: 
