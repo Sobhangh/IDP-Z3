@@ -181,17 +181,6 @@ class ConfigCase:
         out = {"title": "Interactive Consultant", "symbols": symbols, "values": []}
         return out
 
-    def atomsGrouped(self):
-        "response to eval:init"
-        out = {} # {symbol_string : [atom_string, []]}
-        for atom_string, atomZ3 in self.atoms.items():
-            for groupBy in symbols_of(atomZ3, self.symbols, self.interpreted).keys():
-                d = out.setdefault(groupBy, [])
-                if atom_string not in d: # test: x=y(x).
-                    d.append(atom_string)
-                break
-        return out
-
 
     def propagation(self):
         out = self.initial_structure()

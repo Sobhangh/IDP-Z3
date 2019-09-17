@@ -36,11 +36,7 @@ GET request :
             }
         }
     - code : string
-    - method : "init" | "propagate" | ""modelexpand" | "explain" | "minimize" | "abstract"
-
-GET response for "init" :
-
-    - <symbol> : [ <atom> ] // <symbol> and <atom> are string
+    - method : "propagate" | ""modelexpand" | "explain" | "minimize" | "abstract"
 
 GET response for "propagate" :
 

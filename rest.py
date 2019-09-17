@@ -88,8 +88,6 @@ class eval(Resource):
                 #print(args)
                 out = {}
 
-                if method == "init":
-                    out = case.atomsGrouped()
                 if method == "propagate":
                     case.loadStructureFromJson(active)
                     out = case.propagation()
