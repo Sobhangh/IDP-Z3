@@ -270,6 +270,19 @@ class ConfigCase:
 
         (reify, unreify) = reifier(self.atoms.values(), solver)
         solver.check()
+
+        # deal with strict inequalities, e.g. min(0<x)
+        solver.push()
+        for i in range(0,10):
+            val = solver.model().eval(s)
+            if minimize:
+                solver.add(s < val)
+            else:
+                solver.add(val < s)
+            if solver.check()!=sat:
+                solver.pop() # get the last good one
+                break        
+
         return self.model_to_json(solver, reify, unreify)
 
     def explain(self, symbol, value):
