@@ -45,6 +45,38 @@ def symbols_of(expr, symbols, ignored): # returns a dict {string: string}
         out.update(symbols_of(child, symbols, ignored))
     return out
 
+
+def getAtoms(expr, valueMap, symbols):
+    out = {}  # Ordered dict: string -> Z3 object
+    for child in expr.children():
+        out.update(getAtoms(child, valueMap, symbols))
+    if is_bool(expr) and len(out) == 0 and \
+        ( not has_local_var(expr, valueMap, symbols) or is_quantifier(expr) ): # for quantified formulas
+        out = {atom_as_string(expr): expr}
+    return out
+
+def atom_as_string(expr):
+    if hasattr(expr, 'atom_string'): return expr.atom_string
+    return str(expr).replace("==", "=").replace("!=", "≠").replace("<=", "≤")
+
+def getNumericTerms(expr, enums, valueMap, symbols): # to be shown as atoms
+    out = {}  # Ordered dict: string -> Z3 object
+    if not is_app(expr): return out
+    name = expr.decl().name()
+    typ = expr.sort().name()
+    if is_symbol(name, symbols) \
+        and ( typ in ["Real", "Int"] or typ in enums ) \
+        and not is_really_constant(expr, valueMap) \
+        and has_ground_children(expr, valueMap) \
+        and expr.decl().name() not in ["+", "-", "*", "/"]:
+            out[atom_as_string(expr)] = expr
+
+    for child in expr.children():
+        out.update(getNumericTerms(child, enums, valueMap, symbols))
+    return out
+
+    
+
 ############ with solvers
 
 def mk_solver(theory, atoms):

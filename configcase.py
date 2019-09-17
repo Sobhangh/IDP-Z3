@@ -19,13 +19,11 @@
 import ast
 import json
 from typing import List
-
 from z3.z3 import _py2expr
-
-from utils import *
 
 from LiteralQ import *
 from Theory import *
+from utils import *
 
 class ConfigCase:
 
@@ -45,7 +43,7 @@ class ConfigCase:
 
         out = {}
         for atomZ3 in self.atoms.values(): # add numeric terms first
-            out.update(self.getNumericTerms(atomZ3))
+            out.update(getNumericTerms(atomZ3, self.enums, self.valueMap, self.symbols))
         if "Tax" in self.symbols: #TODO hack for video
             out.update(self.symbols)
             out.update({k:v for (k,v) in self.atoms.items() if "Tax" in k})
@@ -53,8 +51,9 @@ class ConfigCase:
             out.update(self.atoms) # then other atoms
         self.atoms = out
 
+
     #################
-    # BUILDER FUNCTIONS
+    # Helpers for translating idp code
     #################
 
     def Const(self, txt: str, sort):
@@ -110,70 +109,14 @@ class ConfigCase:
 
             self.Z3atoms[str(atomZ3)] = self.atoms[atom_string]
 
-
-    #################
-    # EXPRESSIONS
-    #################
-
-    def getNumericTerms(self, expr): # to be shown as atoms
-        out = {}  # Ordered dict: string -> Z3 object
-        if not is_app(expr): return out
-        name = expr.decl().name()
-        typ = expr.sort().name()
-        if is_symbol(name, self.symbols) \
-            and ( typ in ["Real", "Int"] or typ in self.enums ) \
-            and not is_really_constant(expr, self.valueMap) \
-            and has_ground_children(expr, self.valueMap) \
-            and expr.decl().name() not in ["+", "-", "*", "/"]:
-                out[atom_as_string(expr)] = expr
-
-        for child in expr.children():
-            out.update(self.getNumericTerms(child))
-        return out
-
-    def getAtoms(self, expr):
-        out = {}  # Ordered dict: string -> Z3 object
-        for child in expr.children():
-            out.update(self.getAtoms(child))
-        if is_bool(expr) and len(out) == 0 and \
-            ( not has_local_var(expr, self.valueMap, self.symbols) or is_quantifier(expr) ): # for quantified formulas
-            out = {atom_as_string(expr): expr}
-        return out
-
-
-    #################
-    # UTILITIES
-    #################
-
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
 
-    def theory(self, with_assumptions=False):
-        return And(list(self.constraints.keys()) 
-            + self.typeConstraints
-            + (self.assumptions if with_assumptions else []))
-
-    def initial_structure(self):
-        out = Structure(self)
-        for atomZ3 in self.atoms.values():
-            out.initialise(self, atomZ3, False, False, "")
-        return out
 
 
-    def model_to_json(self, s, reify, unreify):
-        m = s.model()
-        out = self.initial_structure()
-        for atomZ3 in self.atoms.values():
-            # atom might not have an interpretation in model (if "don't care")
-            value = m.eval(reify[atomZ3], model_completion=True)
-            if atomZ3.sort().name() == 'Bool':
-                if not (is_true(value) or is_false(value)):
-                    #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
-                    print("*** ", atomZ3, " is not defined, and assumed false")
-                out.addAtom(self, atomZ3, True if is_true(value) else False)
-            else: #TODO check that value is numeric ?
-                out.addValue(self, atomZ3, value)
-        return out.m
+    #################
+    # Helpers to load user's choices
+    #################
 
     # Structure: symbol -> atom -> {ct,cf} -> true/false
     def loadStructureFromJson(self, jsonstr):
@@ -208,15 +151,17 @@ class ConfigCase:
                         self.assumptions.append(literalQ.asZ3())
                         self.assumptionLs[literalQ] = True
 
-    def args(self, val):
-        a, _ = splitLast(list(map(self.z3_value, json.loads(val))))
-        return a
+    #################
+    # INFERENCES
+    #################
 
-    def outVal(self, val):
-        _, l = splitLast(list(map(self.z3_value, json.loads(val))))
-        return l
+    def theory(self, with_assumptions=False):
+        return And(list(self.constraints.keys()) 
+            + self.typeConstraints
+            + (self.assumptions if with_assumptions else []))
 
     def metaJSON(self):
+        "response to meta request"
         symbols = []
         for i in self.symbols.values():
             symbol_type = "function"
@@ -231,17 +176,8 @@ class ConfigCase:
         out = {"title": "Interactive Consultant", "symbols": symbols, "values": []}
         return out
 
-    def z3_value(self, value):
-        if value in self.valueMap:
-            return self.valueMap[value]
-        else:
-            return value
-
-    #################
-    # INFERENCES
-    #################
-
     def atomsGrouped(self):
+        "response to eval:init"
         out = {} # {symbol_string : [atom_string, []]}
         for atom_string, atomZ3 in self.atoms.items():
             for groupBy in symbols_of(atomZ3, self.symbols, self.interpreted).keys():
@@ -339,7 +275,7 @@ class ConfigCase:
     def explain(self, symbol, value):
         out = self.initial_structure()
         for ass in self.assumptions: # add numeric assumptions
-            for atomZ3 in self.getAtoms(ass).values():
+            for atomZ3 in getAtoms(ass,self.valueMap, self.symbols).values():
                 out.initialise(self, atomZ3, False, False, "")
 
         value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
@@ -437,7 +373,7 @@ class ConfigCase:
 
         # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
         simplified = simplify(substitute(And(list(self.constraints.keys())), substitutions)) # it starts by the last substitution ??
-        relevants = self.getAtoms(simplified) # includes reified !
+        relevants = getAtoms(simplified, self.valueMap, self.symbols) # includes reified !
 
         # --> irrelevant
         irrelevant = []
@@ -517,6 +453,34 @@ class ConfigCase:
             out["variable"] += [[ models[symb][i] for symb in models.keys() if symb in active_symbol ]]
         return out
 
+
+    #################
+    # Output structure
+    #################
+
+    def initial_structure(self):
+        out = Structure(self)
+        for atomZ3 in self.atoms.values():
+            out.initialise(self, atomZ3, False, False, "")
+        return out
+
+
+    def model_to_json(self, s, reify, unreify):
+        m = s.model()
+        out = self.initial_structure()
+        for atomZ3 in self.atoms.values():
+            # atom might not have an interpretation in model (if "don't care")
+            value = m.eval(reify[atomZ3], model_completion=True)
+            if atomZ3.sort().name() == 'Bool':
+                if not (is_true(value) or is_false(value)):
+                    #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
+                    print("*** ", atomZ3, " is not defined, and assumed false")
+                out.addAtom(self, atomZ3, True if is_true(value) else False)
+            else: #TODO check that value is numeric ?
+                out.addValue(self, atomZ3, value)
+        return out.m
+    
+
 class Structure:
     def __init__(self, case):
         self.m = {} # {symbol_string: {atom : {ct: Bool}, "[]": {args: value}? }
@@ -587,8 +551,3 @@ class Structure:
                 elif typ in case.enums and value.decl().name() != "if":
                     s[key]["value"] = str(value)
 
-
-
-def atom_as_string(expr):
-    if hasattr(expr, 'atom_string'): return expr.atom_string
-    return str(expr).replace("==", "=").replace("!=", "≠").replace("<=", "≤")
