@@ -130,8 +130,8 @@ class ConfigCase:
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
-                if atom[2:-2] in self.atoms:
-                    atomZ3 = self.atoms[atom[2:-2]]
+                if atom in self.atoms:
+                    atomZ3 = self.atoms[atom]
                     if json_atom["typ"] == "Bool":
                         if "ct" in json_atom and json_atom["ct"]:
                             literalQ = LiteralQ(True, atomZ3)
@@ -182,9 +182,8 @@ class ConfigCase:
         for atom_string, atomZ3 in self.atoms.items():
             for groupBy in symbols_of(atomZ3, self.symbols, self.interpreted).keys():
                 d = out.setdefault(groupBy, [])
-                temp = json.dumps([atom_string])
-                if temp not in d: # test: x=y(x).
-                    d.append(temp)
+                if atom_string not in d: # test: x=y(x).
+                    d.append(atom_string)
                 break
         return out
 
@@ -281,8 +280,8 @@ class ConfigCase:
                 solver.add(val < s)
             if solver.check()!=sat:
                 solver.pop() # get the last good one
-                break        
-
+                solver.check()
+                break    
         return self.model_to_json(solver, reify, unreify)
 
     def explain(self, symbol, value):
@@ -295,8 +294,8 @@ class ConfigCase:
             .replace("\\u2200", "∀").replace("\\u2203", "∃") \
             .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
             .replace("\\u2228", "∨").replace("\\u2227", "∧")
-        if value[2:-2] in self.atoms:
-            to_explain = self.atoms[value[2:-2]] # value is an atom string
+        if value in self.atoms:
+            to_explain = self.atoms[value] # value is an atom string
 
             # rules used in justification
             if not to_explain.sort()==BoolSort(): # calculate numeric value
@@ -506,7 +505,7 @@ class Structure:
         #             print(symb, arg, val)
 
     def initialise(self, case, atomZ3, ct_true, ct_false, value=""):
-        key = json.dumps([atom_as_string(atomZ3)])
+        key = atom_as_string(atomZ3)
         typ = atomZ3.sort().name()
         for symb in symbols_of(atomZ3, case.symbols, case.interpreted):
             s = self.m.setdefault(symb, {})
@@ -543,7 +542,7 @@ class Structure:
         if is_not(atomZ3):
             atomZ3 = atomZ3.arg(0)
             truth = None if truth is None else not truth
-        key = json.dumps([atom_as_string(atomZ3)])
+        key = atom_as_string(atomZ3)
         for symb in symbols_of(atomZ3, case.symbols, case.interpreted).keys():
             s = self.m.setdefault(symb, {})
             if key in s:
@@ -554,7 +553,7 @@ class Structure:
                     s[key]['reading'] = atomZ3.reading
 
     def addValue(self, case, symbol, value):
-        key = json.dumps([atom_as_string(symbol)])
+        key = atom_as_string(symbol)
         typ = symbol.sort().name()
         for symb in symbols_of(symbol, case.symbols, case.interpreted).keys():
             s = self.m.setdefault(str(symb), {})
