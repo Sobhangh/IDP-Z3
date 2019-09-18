@@ -81,9 +81,11 @@ class ConfigCase:
         self.symbols[str(out)] = out
         self.args[out] = args
         self.symbol_types[name] = str(types[-1])
-        if restrictive:
-            for arg in list(args):
-                exp = in_list(out(*arg), vals)
+        for arg in list(args):
+            expr = out(*arg)
+            self.atoms[str(expr)] = expr
+            if restrictive:
+                exp = in_list(expr, vals)
                 self.typeConstraints.append(exp)
         return out
 
