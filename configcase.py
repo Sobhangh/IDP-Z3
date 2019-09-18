@@ -500,7 +500,8 @@ class Structure:
             if typ == 'Bool':
                 symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
             elif case.symbol_types[symb] in case.enums:
-                symbol = {"typ": typ, "value": str(value), "values": case.enums[case.symbol_types[symb]]}
+                symbol = { "typ": typ, "value": str(value)
+                         , "values": [str(v) for v in case.enums[case.symbol_types[symb]]]}
             elif typ in ["Real", "Int"]:
                 symbol = {"typ": typ, "value": str(value)} # default
             else:
