@@ -233,5 +233,5 @@ ProfessionalBuyer <=>
 
 }
 
-
-view expanded // TODO
+goal Tax
+view normal

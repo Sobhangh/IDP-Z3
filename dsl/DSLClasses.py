@@ -29,6 +29,10 @@ class File(object):
         self.vocabulary = kwargs.pop('vocabulary')
         self.theory = kwargs.pop('theory')
         self.structure = kwargs.pop('structure')
+
+        self.goal = kwargs.pop('goal')
+        if self.goal is None:
+            self.goal = Goal(name="")
         self.view = kwargs.pop('view')
         if self.view is None:
             self.view = View(viewType='normal')
@@ -40,6 +44,7 @@ class File(object):
         if self.structure:
             self.structure.translate(case, env)
         self.theory.translate(case, env)
+        self.goal.translate(case)
         self.view.translate(case)
 
 
@@ -629,7 +634,16 @@ class Tuple(object):
         return [arg.translate(case, env) for arg in self.args]
 
 
-################################ View ###############################
+################################ Goal, View ###############################
+
+class Goal(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+
+    def translate(self, case: ConfigCase):
+        case.goal = case.symbols[self.name] if self.name else ""
+        return
+
 
 class View(object):
     def __init__(self, **kwargs):
@@ -651,5 +665,5 @@ idpparser = metamodel_from_file(dslFile, memoization=True, classes=
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, SetExp,
                     AppliedSymbol, Variable, NumberConstant, Brackets,
           Interpretation, Structure, Tuple,
-          View
+          Goal, View
         ])

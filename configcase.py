@@ -46,12 +46,6 @@ class ConfigCase:
         
         theory.translate(self)
 
-        if "Tax" in self.symbols: #TODO hack for video
-            out = {}
-            out.update(self.symbols)
-            out.update({k:v for (k,v) in self.atoms.items() if "Tax" in k})
-            self.atoms = out
-
 
     #################
     # Helpers for translating idp code
@@ -178,7 +172,7 @@ class ConfigCase:
                 "type": symbol_type,
                 "priority": "core",
                 "showOptimize": type(i) == ArithRef,
-                "view": self.view
+                "view": "expanded" if str(i) == str(self.goal) else self.view
             })
         out = {"title": "Interactive Consultant", "symbols": symbols}
         return out
