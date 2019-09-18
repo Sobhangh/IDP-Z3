@@ -124,7 +124,7 @@ class evalWithGraph(eval): # subcclass that generates call graphs
         method = args['method']
 
         graphviz = GraphvizOutput()
-        graphviz.output_file = 'callgraphs/'+ method + '.png'
+        graphviz.output_file = 'docs/'+ method + '.png'
         with PyCallGraph(output=graphviz, config=config):
             return super().post()
 
@@ -146,7 +146,7 @@ class meta(Resource):
 class metaWithGraph(meta): # subclass that generates call graphs
     def post(self):
         graphviz = GraphvizOutput()
-        graphviz.output_file = 'callgraphs/meta.png'
+        graphviz.output_file = 'docs/meta.png'
         with PyCallGraph(output=graphviz, config=config):
             return super().post()
 
