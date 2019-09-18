@@ -110,3 +110,5 @@ theory {
     //0 =< Height.
     //?n[side]: n=<Sides & Length(n)=Base.
 }
+
+view expanded

@@ -16,6 +16,7 @@ POST result:
         - type : string
         - priority : string
         - showOptimize : Bool
+        - view: "normal" | "expanded"
         } ]
 
 ### URL: /eval
@@ -47,6 +48,7 @@ GET response for "propagate" :
             - ct : Bool         // for Bool
             - cf : Bool         // for Bool
             - reading : string  // optional
+            - normal : Bool     // false if to be shown in expanded view only
             }
         } 
 

@@ -46,24 +46,22 @@ class ConfigCase:
         
         theory.translate(self)
 
-        out = {}
-        for atomZ3 in self.atoms.values(): # add numeric terms first
-            out.update(getNumericTerms(atomZ3, self.enums, self.valueMap, self.symbols))
         if "Tax" in self.symbols: #TODO hack for video
+            out = {}
             out.update(self.symbols)
             out.update({k:v for (k,v) in self.atoms.items() if "Tax" in k})
-        else:
-            out.update(self.atoms) # then other atoms
-        self.atoms = out
+            self.atoms = out
 
 
     #################
     # Helpers for translating idp code
     #################
 
-    def Const(self, txt: str, sort):
-        const = Const(txt, sort)
-        self.symbols[str(const)] = const
+    def Const(self, txt: str, sort, normal=False):
+        const = self.symbols.setdefault(txt, Const(txt, sort))
+        if normal: # this is a declared constant
+            const.normal = True
+            self.atoms[txt] = const
         return const
 
     def EnumSort(self, name, objects):
@@ -83,6 +81,7 @@ class ConfigCase:
         self.symbol_types[name] = str(types[-1])
         for arg in list(args):
             expr = out(*arg)
+            expr.normal = True
             self.atoms[str(expr)] = expr
             if restrictive:
                 exp = in_list(expr, vals)
@@ -178,7 +177,8 @@ class ConfigCase:
                 "idpname": str(i),
                 "type": symbol_type,
                 "priority": "core",
-                "showOptimize": type(i) == ArithRef
+                "showOptimize": type(i) == ArithRef,
+                "view": self.view
             })
         out = {"title": "Interactive Consultant", "symbols": symbols}
         return out
@@ -511,6 +511,7 @@ class Structure:
             if symbol: 
                 if hasattr(atomZ3, 'reading'):
                     symbol['reading'] = atomZ3.reading
+                symbol['normal'] = hasattr(atomZ3, 'normal')
                 s.setdefault(key, symbol)
                 break
 

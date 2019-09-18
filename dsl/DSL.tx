@@ -2,6 +2,7 @@ File:
     vocabulary=Vocabulary
     theory=Theory
     structure=Structure?
+    view=View?
 ;
 
 Comment:
@@ -83,3 +84,6 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
 Structure: 'structure' '{' interpretations*=Interpretation '}';
   Interpretation: name=Symbol '=' '{' tuples+=Tuple[';'] '}' ('else' default=Base)?;
   Tuple : args*=Base[','];
+
+View: 'view' viewType=ViewType;
+ViewType: 'normal' | 'expanded';

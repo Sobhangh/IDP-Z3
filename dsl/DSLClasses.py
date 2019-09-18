@@ -29,6 +29,9 @@ class File(object):
         self.vocabulary = kwargs.pop('vocabulary')
         self.theory = kwargs.pop('theory')
         self.structure = kwargs.pop('structure')
+        self.view = kwargs.pop('view')
+        if self.view is None:
+            self.view = View(viewType='normal')
 
     def translate(self, case: ConfigCase):
         env = Environment()
@@ -37,6 +40,7 @@ class File(object):
         if self.structure:
             self.structure.translate(case, env)
         self.theory.translate(case, env)
+        self.view.translate(case)
 
 
 ################################ Vocabulary  ###############################
@@ -122,7 +126,7 @@ class SymbolDeclaration(object):
 
     def translate(self, case: ConfigCase, env: Environment):
         if len(self.args) == 0:
-            const = case.Const(self.name.name, self.out.asZ3(env))
+            const = case.Const(self.name.name, self.out.asZ3(env), normal=True)
             env.var_scope[self.name.name] = const
             case.args[const] = []
             case.symbol_types[self.name.name] = self.out.name
@@ -625,6 +629,18 @@ class Tuple(object):
         return [arg.translate(case, env) for arg in self.args]
 
 
+################################ View ###############################
+
+class View(object):
+    def __init__(self, **kwargs):
+        self.viewType = kwargs.pop('viewType')
+
+    def translate(self, case: ConfigCase):
+        case.view = self.viewType
+        return
+
+################################ Main ###############################
+
 dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True, classes=
@@ -634,5 +650,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True, classes=
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, SetExp,
                     AppliedSymbol, Variable, NumberConstant, Brackets,
-          Interpretation, Structure, Tuple
+          Interpretation, Structure, Tuple,
+          View
         ])
