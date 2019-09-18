@@ -17,7 +17,6 @@ POST result:
         - priority : string
         - showOptimize : Bool
         } ]
-    - values : []  // not used
 
 ### URL: /eval
 

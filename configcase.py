@@ -180,7 +180,7 @@ class ConfigCase:
                 "priority": "core",
                 "showOptimize": type(i) == ArithRef
             })
-        out = {"title": "Interactive Consultant", "symbols": symbols, "values": []}
+        out = {"title": "Interactive Consultant", "symbols": symbols}
         return out
 
 
