@@ -18,6 +18,7 @@
 """
 import ast
 import json
+import re
 from typing import List
 from z3.z3 import _py2expr
 
@@ -171,7 +172,7 @@ class ConfigCase:
                 "idpname": str(i),
                 "type": symbol_type,
                 "priority": "core",
-                "showOptimize": type(i) == ArithRef,
+                "showOptimize": self.symbol_types[str(i)] in ['Int', 'Real'],
                 "view": "expanded" if str(i) == str(self.goal) else self.view
             })
         out = {"title": "Interactive Consultant", "symbols": symbols}
@@ -250,9 +251,28 @@ class ConfigCase:
         return out.m
 
     def optimize(self, symbol, minimize):
+        # symbol may be "angle(0)""
+        def parse_func_with_params(inp):
+            func_name = "([_a-zA-Z]+)"
+            try:
+                p = re.compile(func_name + "$")
+                return p.match(inp).groups()
+            except:
+                func_current_param = func_params_adder = "([_a-zA-Z0-9.]+)"
+                for count in range(10): # max 10 arguments
+                    try:
+                        p = re.compile(func_name + "\(" + func_current_param + "\)$")
+                        return p.match(inp).groups()
+                    except:
+                        func_current_param += ", " + func_params_adder
+        
+        args = parse_func_with_params(symbol)
+        s = self.symbols[args[0]]
+        if 1<len(args):
+            s = s(args[1:])
+
         solver = Optimize()
         solver.add(self.theory(with_assumptions=True))
-        s = self.symbols[symbol]
         if minimize:
             solver.minimize(s)
         else:

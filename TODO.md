@@ -1,5 +1,5 @@
 Priority:
-    - settings: underscore for spaces in symbols, first underscore = hidden symbol (PC)
+    - settings: first underscore = hidden symbol (PC)
     - View Normal (with popup) / Expanded (PC)
     - values:use slider for numeric values (when type is a range) (Bram)
     - values:show valid range of numeric values ?? beware of inequalities and infinite (Bram)

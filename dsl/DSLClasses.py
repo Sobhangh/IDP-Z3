@@ -72,7 +72,7 @@ class Vocabulary(object):
 class ConstructedTypeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.constructors = list(map(add_space, kwargs.pop('constructors')))
+        self.constructors = kwargs.pop('constructors')
 
     def __str__(self):
         return ( "type " + self.name
@@ -134,7 +134,7 @@ class SymbolDeclaration(object):
             const = case.Const(self.name.name, self.out.asZ3(env), normal=True)
             env.var_scope[self.name.name] = const
             case.args[const] = []
-            case.symbol_types[self.name.name] = self.out.name
+            case.symbol_types[self.name.name] = str(self.out.asZ3(env))
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(const, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name.name
@@ -522,13 +522,9 @@ class AppliedSymbol(object):
             case.Atom(out)
             return out
 
-def add_space(input):
-    words = re.findall('[A-Z][a-z]*', input)
-    return ' '.join(words) if ''.join(words) == input else input
-
 class Variable(object):
     def __init__(self, **kwargs):
-        self.name = add_space(kwargs.pop('name'))
+        self.name = kwargs.pop('name')
 
     def __str__(self): return self.name
 
