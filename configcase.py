@@ -437,6 +437,8 @@ class ConfigCase:
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
             # remove atoms that are consequences of others
+            # start with negations !
+            atoms.sort(key=lambda l: (l.truth, str(l.atomZ3)))
             solver2 = Solver()
             solver2.add(self.typeConstraints)  # ignore theory !
             solver2.add([l.asZ3() for l in done]) # excluding irrelevant

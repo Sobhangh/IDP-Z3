@@ -51,6 +51,10 @@ theory {
     (Equilateral <=> [All sides have the same length]
                      (∀n[side]: Length(n)=Length(1) | Length(n)=0)).
 
+    [A triangle is regular, right, or irregular]
+    ( Subtype=right_triangle | Subtype=regular_triangle | Subtype=irregular <=> Sides=3).
+
+
     [A regular triangle is an equilateral triangle]
     (Subtype=regular_triangle <=> Sides=3 & Equilateral).
 
