@@ -52,7 +52,7 @@ theory {
                      (∀n[side]: Length(n)=Length(1) | Length(n)=0)).
 
     [A triangle is regular, right, or irregular]
-    ( Subtype=right_triangle | Subtype=regular_triangle | Subtype=irregular <=> Sides=3).
+    ( Subtype=right_triangle | Subtype=regular_triangle | Subtype=irregular <= Sides=3).
 
 
     [A regular triangle is an equilateral triangle]
