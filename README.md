@@ -7,7 +7,7 @@ It is made available under the [GNU Affero General Public License](https://www.g
 Installation
 ~~~~
 sudo apt install python3-pip
-pip3 install z3-solver flask flask-cors flask_restful textX
+pip3 install -r requirements.txt
 ~~~~
 
 To launch the Interactive_Consultant web server, run
