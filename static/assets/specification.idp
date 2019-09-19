@@ -24,9 +24,9 @@ vocabulary {
     Equilateral
     Perimeter:real
 
-    Base : real
-    Height: real
-    Surface:real
+    // Base : real
+    // Height: real
+    // Surface:real
 }
 
 theory {

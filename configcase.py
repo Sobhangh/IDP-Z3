@@ -29,12 +29,12 @@ from utils import *
 class ConfigCase:
 
     def __init__(self, theory):
-        self.enums = {} # {string: [string] }
+        self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
         self.symbols = {} # {string: Z3Expr}
         self.args = {} # {Z3Expr: [ (Z3expr) ]}
-        self.symbol_types = {} # {string: string}
+        self.symbol_types = {} # {string: string} symbol -> idp_type
         self.interpreted = {} # from structure: {string: True}
 
         self.atoms = {} # {atom_string: Z3expr} atoms + numeric terms !
@@ -56,7 +56,8 @@ class ConfigCase:
         const = self.symbols.setdefault(txt, Const(txt, sort))
         if normal: # this is a declared constant
             const.normal = True
-            self.atoms[txt] = const
+            if not txt.startswith('_'):
+                self.atoms[txt] = const
         return const
 
     def EnumSort(self, name, objects):
@@ -71,13 +72,14 @@ class ConfigCase:
         rel_vars = list(map(lambda x: list(map(_py2expr, x)), rel_vars))
         args, vals = splitLast(rel_vars)
         args = list(itertools.product(*args))
-        self.symbols[str(out)] = out
+        if not str(out).startswith('_'):
+            self.symbols[str(out)] = out
         self.args[out] = args
-        self.symbol_types[name] = str(types[-1])
         for arg in list(args):
             expr = out(*arg)
             expr.normal = True
-            self.atoms[str(expr)] = expr
+            if not str(expr).startswith('_'):
+                self.atoms[str(expr)] = expr
             if restrictive:
                 exp = in_list(expr, vals)
                 self.typeConstraints.append(exp)
@@ -168,11 +170,12 @@ class ConfigCase:
             symbol_type = "function"
             if type(i) == BoolRef:
                 symbol_type = "proposition"
+            typ = self.symbol_types[str(i)]
             symbols.append({
                 "idpname": str(i),
                 "type": symbol_type,
                 "priority": "core",
-                "showOptimize": self.symbol_types[str(i)] in ['Int', 'Real'],
+                "showOptimize": True, # GUI is smart enough to show buttons appropriately
                 "view": "expanded" if str(i) == str(self.goal) else self.view
             })
         out = {"title": "Interactive Consultant", "symbols": symbols}
@@ -299,7 +302,7 @@ class ConfigCase:
         out = self.initial_structure()
         for ass in self.assumptions: # add numeric assumptions
             for atomZ3 in getAtoms(ass,self.valueMap, self.symbols).values():
-                out.initialise(self, atomZ3, False, False, "")
+                out.initialise(self, atomZ3, False, False, "")    
 
         value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
             .replace("\\u2200", "∀").replace("\\u2203", "∃") \
@@ -327,7 +330,7 @@ class ConfigCase:
                 p = Const("wsdraqsesdf"+str(i), BoolSort())
                 ps[p] = constraint
                 s.add(Implies(p, constraint))
-            s.push()
+            s.push()  
 
             s.add(Not(r2(to_explain)))
             s.check(list(ps.keys()))

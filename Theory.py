@@ -38,7 +38,7 @@ def symbols_of(expr, symbols, ignored): # returns a dict {string: string}
     out = {} # for unicity (ordered set)
     try:
         name = expr.decl().name()
-        if is_symbol(name, symbols) and not name in ignored:
+        if is_symbol(name, symbols) and not name in ignored and not name.startswith('_'):
             out[name] = name
     except: pass
     for child in expr.children():
@@ -50,7 +50,7 @@ def getAtoms(expr, valueMap, symbols):
     out = {}  # Ordered dict: string -> Z3 object
     for child in expr.children():
         out.update(getAtoms(child, valueMap, symbols))
-    if is_bool(expr) and len(out) == 0 and \
+    if is_bool(expr) and len(out) == 0 and not atom_as_string(expr).startswith('_') and \
         ( not has_local_var(expr, valueMap, symbols) or is_quantifier(expr) ): # for quantified formulas
         out = {atom_as_string(expr): expr}
     return out

@@ -130,11 +130,11 @@ class SymbolDeclaration(object):
         )
 
     def translate(self, case: ConfigCase, env: Environment):
+        case.symbol_types[self.name.name] = self.out.name
         if len(self.args) == 0:
             const = case.Const(self.name.name, self.out.asZ3(env), normal=True)
             env.var_scope[self.name.name] = const
             case.args[const] = []
-            case.symbol_types[self.name.name] = str(self.out.asZ3(env))
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(const, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name.name
