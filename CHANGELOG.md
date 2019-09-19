@@ -1,5 +1,6 @@
 Most recent first:
 
+* abstract models: use given and consequences to simplify them
 * GUI: hide symbols starting with '\_'.  Replace '\_' by spaces in symbol names, constructors
 * GUI: 2 optimize buttons are now next to entry fields (not in box header).  (Remove "do not optimize" button)
 * grammar: "goal <symbol>" forces the goal to be shown expanded

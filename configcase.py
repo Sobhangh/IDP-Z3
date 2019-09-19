@@ -411,7 +411,7 @@ class ConfigCase:
                 if not string2 in relevants:
                     irrelevant += [LiteralQ(True, atomZ3)]
         out["irrelevant"] = irrelevant
-        done = done.union(set(irrelevant))
+        done2 = done.union(set(irrelevant))
 
         # create keys for models using first symbol of atoms
         for atomZ3 in self.atoms.values():
@@ -426,8 +426,8 @@ class ConfigCase:
             atoms = [] # [LiteralQ]
             for atom_string, atomZ3 in self.atoms.items():
                 if is_bool(atomZ3) \
-                and not LiteralQ(True , atomZ3) in done \
-                and not LiteralQ(False, atomZ3) in done \
+                and not LiteralQ(True , atomZ3) in done2 \
+                and not LiteralQ(False, atomZ3) in done2 \
                 and not atom_string in relevants :
                     truth = solver.model().eval(reify[atomZ3])
                     if truth == True:
@@ -439,6 +439,7 @@ class ConfigCase:
             # remove atoms that are consequences of others
             solver2 = Solver()
             solver2.add(self.typeConstraints)  # ignore theory !
+            solver2.add([l.asZ3() for l in done]) # excluding irrelevant
             (reify2, _) = reifier([l.atomZ3 for l in atoms], solver2)
             for i, literalQ in enumerate(atoms):
                 solver2.push()
