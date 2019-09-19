@@ -74,7 +74,7 @@ Additional_Security_Satisfied
 Additional_Terms
 
 
-Start_Date_Dwelling_For_Social_Renting : date
+Start_Dt_Dwelling_For_Social_Rent : date
 
 Certification_Date : date
 Tax : tax_Rate
@@ -169,7 +169,7 @@ Registration_Type = Energy_Efficient_Dwelling <=>
 Registration_Type = Dwelling_For_Social_Renting <=>
     Type_Of_Real_Estate = Residential
     & Use = Social_Renting
-    & Start_Date_Dwelling_For_Social_Renting = Certification_Date + 3
+    & Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3
     & Duration_Of_Agreement = Less_Than_9_years
 .
 
