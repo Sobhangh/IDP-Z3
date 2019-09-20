@@ -423,6 +423,9 @@ class ConfigCase:
             #for symb in self.symbols.values():
             #    print (symb, solver.model().eval(symb))
 
+            # theory that forces irrelevant atoms to be irrelevant
+            theory2 = And(theory, And(self.typeConstraints))
+
             atoms = [] # [LiteralQ]
             for atom_string, atomZ3 in self.atoms.items():
                 if is_bool(atomZ3) \
@@ -434,28 +437,56 @@ class ConfigCase:
                         atoms += [ LiteralQ(True,  atomZ3) ]
                     elif truth == False:
                         atoms += [ LiteralQ(False, atomZ3) ]
+                    else: #unknown
+                        theory2 = And(theory2, 
+                                      substitute(theory2, [(atomZ3, BoolVal(True))]),  # don't simplify !
+                                      substitute(theory2, [(atomZ3, BoolVal(False))])) # it would break later substitutions
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
-            # remove atoms that are consequences of others
             # start with negations !
             atoms.sort(key=lambda l: (l.truth, str(l.atomZ3)))
+
+            # remove atoms that are irrelevant in AMF
             solver2 = Solver()
-            solver2.add(self.typeConstraints)  # ignore theory !
-            solver2.add([l.asZ3() for l in done]) # excluding irrelevant
+            solver2.add(theory2)
+            solver2.add([l.asZ3() for l in done]) # universal + given + fixed (ignore irrelevant)
             (reify2, _) = reifier([l.atomZ3 for l in atoms], solver2)
             for i, literalQ in enumerate(atoms):
-                solver2.push()
-                solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
+                if not is_true(literalQ.atomZ3):
+                    solver2.push()
+                    a = reify2[literalQ.atomZ3] if not literalQ.truth else Not(reify2[literalQ.atomZ3])
+                    solver2.add(a)
+                    solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
+                    result = solver2.check()
+                    solver2.pop()
+                    if result == sat:
+                        theory2 = And(theory2, 
+                                    substitute(theory2, [(literalQ.atomZ3, BoolVal(True))]),
+                                    substitute(theory2, [(literalQ.atomZ3, BoolVal(False))]))
+                        solver2.add(theory2)
+                        atoms[i] = LiteralQ(True, BoolVal(True))
 
-                a = reify2[literalQ.atomZ3] if not literalQ.truth else Not(reify2[literalQ.atomZ3])
-                result, consq = solver2.consequences([], [a])
-                if result!=sat or consq: # remove it if it's a consequence
-                    atoms[i] = LiteralQ(True, BoolVal(True))
-                solver2.pop()
+            # remove atoms that are consequences of others in the AMF
+            solver2 = Solver()
+            solver2.add(self.typeConstraints) # without theory !
+            (reify2, _) = reifier([l.atomZ3 for l in atoms], solver2)
+            for i, literalQ in enumerate(atoms):
+                if not is_true(literalQ.atomZ3):
+                    solver2.push()
+                    solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
+
+                    # evaluate not(literalQ)
+                    a = reify2[literalQ.atomZ3] if not literalQ.truth else Not(reify2[literalQ.atomZ3])
+                    result, consq = solver2.consequences([], [a])
+                    if result!=sat or consq: # remove it if it's a consequence
+                        atoms[i] = LiteralQ(True, BoolVal(True))
+                        # ??? theory2 = substitute(theory2, [(literalQ.atomZ3, BoolVal(literalQ.truth))])
+                    solver2.pop()
 
             # add constraint to eliminate this model
-            modelZ3 = And( [l.asZ3() for l in atoms] )
-            solver.add(Not(modelZ3))
+            modelZ3 = Not(And( [l.asZ3() for l in atoms] ))
+            theory = And(theory, modelZ3)
+            solver.add(modelZ3)
 
             # group atoms by symbols
             model = {}
