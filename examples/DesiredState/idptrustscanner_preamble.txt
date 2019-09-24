@@ -1,0 +1,12 @@
+include <table_utils>
+
+procedure main() {
+//    stdoptions.calculatedefinitions = false
+    stdoptions.xsb = false
+//    completion(T)
+    S = onemodel(T,S)
+    out = outputSymbols()
+
+    json = require "dkjson"
+    print(json.encode(encodeStruc(S,out)))
+}

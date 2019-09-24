@@ -1,0 +1,88 @@
+theory T : V {
+
+    {
+      ! id,p,sch,z,t : schrijverVan(DosEntry(id,p,sch,z,t)) = sch.
+      ! id,p,sch,z,t : idVan(DosEntry(id,p,sch,z,t)) = id.
+      ! id,p,sch,z,t : typeVan(DosEntry(id,p,sch,z,t)) = t.
+      ! id,p,sch,z,t : ziekteVan(DosEntry(id,p,sch,z,t)) = z.
+    }
+
+    {
+        ! id : weetBestaan(id) <- ? r : rechten(Recht(id,r) ) & r >= R1Bestaan.
+        ! id : weetBestaan(id) <- ? DE :
+           dossier( DE ) & id = idVan(DE) & aanvrager = schrijverVan(DE).
+        ! id : weetBestaan(id) <- globaalRecht >= R1Bestaan.
+    }
+
+    {
+        ! id : kanInhoudZien(id) <- ? r : rechten(Recht(id,r) ) & r >= R2Inhoud.
+        ! id : kanInhoudZien(id) <- ? DE : dossier( DE ) & idVan( DE ) = id & aanvrager = schrijverVan(DE).
+        ! id : kanInhoudZien(id) <- globaalRecht >= R2Inhoud.
+    }
+
+    {
+        ! id, prop : kanPropertyZien(id,prop) <-
+                ? DE : dossier( DE ) &
+                        idVan(DE) = id &
+                        schrijverVan(DE) = aanvrager &
+                        property( DocProp( typeVan(DE), prop ) ).
+           ! id, prop : kanPropertyZien(id,prop) <-
+            ? aanvT, BF, dtype, ziekte, pub, sch :
+                kanInhoudZien( id ) &
+                    aanvragerType( aanvT ) &
+                        BF = BFilter( aanvT, dtype ) &
+                        ( ~ defaultPropertyFilter( BF ) ) &
+                        ( ~ propertyFilter( SFilter( BF, prop ) ) ) &
+                        property( DocProp( dtype, prop ) ) &
+                        dossier( DosEntry( id, pub, sch, ziekte, dtype ) ).
+        ! id, prop : kanPropertyZien(id,prop) <-
+            ? aanvT, BF, dtype, ziekte, pub, sch :
+                        kanInhoudZien( id ) &
+                        aanvragerType( aanvT ) &
+                        BF = BFilter( aanvT, dtype ) &
+                        defaultPropertyFilter( BF ) &
+                        propertyFilter( SFilter( BF, prop ) ) &
+                        property( DocProp( dtype, prop ) ) &
+                        dossier( DosEntry( id, pub, sch, ziekte, dtype ) ).
+
+    }
+
+    {
+        ! z : ziektes( z ) <-
+                ? DE : dossier( DE ) & z = ziekteVan( DE ).
+    }
+
+    {
+        ! z, id : wilVolledigZiekteDossierZien( z, id ) <-
+           ? DE : dossier( DE ) &
+           ziekteVan( DE ) = z &
+           idVan(DE) = id &
+           ~ kanInhoudZien( id ).
+    }
+
+
+    {
+        ! z, id : wilVolledigZiekteDossierZienVoor( z, id ) <-
+           ? DE : ziekte(z) &
+           dossier( DE ) &
+           ziekteVan( DE ) = z &
+           idVan(DE) = id &
+           ~ kanInhoudZien( id ).
+    }
+
+    {
+        ! z, id : ziekteDossier( z, id ) <-
+           ? DE : dossier( DE ) &
+           ziekteVan( DE ) = z &
+           idVan( DE ) = id.
+    }
+
+    {
+        ! sch : behandelendeArts( sch ) <-
+           ? DE : dossier( DE ) &
+           schrijverVan(DE) = sch.
+    }
+
+
+
+}

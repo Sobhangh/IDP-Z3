@@ -39,7 +39,8 @@ config.trace_filter = GlobbingFilter(
     )
 
 
-static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
+static_file_dir   = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
+examples_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'examples')
 app = Flask(__name__)
 CORS(app)
 
@@ -162,6 +163,14 @@ def serve_file_in_dir(path):
         path = os.path.join(path, 'index.html')
 
     return send_from_directory(static_file_dir, path)
+
+
+@app.route('/examples/<path:path>', methods=['GET'])
+def serve_examples_file(path):
+    if not os.path.isfile(os.path.join(examples_file_dir, path)):
+        return "file not found: " + path
+
+    return send_from_directory(examples_file_dir, path)
 
 
 api.add_resource(HelloWorld, '/test')

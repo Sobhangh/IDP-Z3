@@ -1,5 +1,5 @@
 vocabulary {
-
+    
     type sides = {3..4}
     Sides: sides
     Vertices: sides

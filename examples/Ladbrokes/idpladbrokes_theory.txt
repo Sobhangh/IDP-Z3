@@ -1,0 +1,36 @@
+theory T : V {
+
+   {
+       // ladbrokes can access all stores
+       // HighBetters can enter all stores
+       canAccess( aperson, astore ) <-
+             accessRequestedFor = aperson &
+             accessRequestedTo = astore  &
+            ( aperson = "Ladbrokes" | aperson = "HighBetter" ).
+       // LowBetters can not enter VIP stores
+       canAccess( aperson, astore) <-
+             accessRequestedFor = aperson &
+             aperson = "LowBetter" &
+             accessRequestedTo = astore &
+             astore ~= "vipstore".
+   }
+
+   {
+      applicableLimits( aperson, agametype, alimit ) <-
+         account = alimit.
+      applicableLimits( aperson, agametype, alimit ) <-
+         personalGambleLimits( agametype, alimit ).
+      applicableLimits( aperson, agametype, alimit ) <-
+         mandatedGambleLimits( agametype, alimit ).
+      applicableLimits( aperson, agametype, alimit ) <-
+         accessRequestedTo = astoretype &
+         gambleLimitsPerStore( astoretype, agametype, alimit ).
+   }
+
+   {
+       gambleLimits( aperson, agame, alimit ) <-
+         accessRequestedFor = aperson &
+         alimit = min{ limits : applicableLimits( aperson, agame, limits ) : limits }.
+   }
+
+}

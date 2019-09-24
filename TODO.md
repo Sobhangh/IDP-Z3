@@ -12,6 +12,7 @@ Priority:
     - settings: group symbols into categories (e.g. using markdown annotations ? separate vocabulary ?)
     - settings: annotations in vocabulary (longinfo)
     - values:how to say how the list box should be organised ?  Annotations ? based on size ?
+    - functions for constructed types
 
     - relevance
     - settings: give name to a vocabulary

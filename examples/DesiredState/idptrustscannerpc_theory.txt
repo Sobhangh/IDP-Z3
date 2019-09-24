@@ -1,0 +1,170 @@
+theory T : V {
+{
+    !p,v[PCPropertyValue]: property(PV(p,v)) = p.
+    !p[PCProperty],v: value(PV(p,v)) = v.
+}
+
+{
+
+    ! proptup : isNecessaryProperty(  proptup ) <-
+        userDependency( proptup, 0 ).
+    ! proptup : isNecessaryProperty(  proptup ) <-
+        systemDependency( proptup ).
+    ! proptup : isNecessaryProperty( proptup ) <-
+        ? rootproptup : isNecessaryProperty( rootproptup ) &
+         propertyDependency( property(rootproptup), proptup ).
+    ! proptup : isNecessaryProperty( proptup ) <-
+        ? rootproptup : isNecessaryProperty( rootproptup ) &
+         propertyValueDependency( rootproptup, proptup ).
+}
+
+{
+
+     //Property is voldaan als de PC de property heeft en alle dependents fulfilled zijn
+     !pc,proptup: propertyIsStrictlyFullfilled( pc, proptup ) <-
+          pcProperty( pc, proptup ) &
+          dependentsAreFullfilled( pc, property(proptup)) &
+          valueDependentsAreFullfilled( pc, proptup ).
+
+     //Property is voldaan als de PC de property niet heeft maar het
+     // wel een value voor die property heeft die hoger is en waarvoor
+     // alle dependents fulfilled zijn
+     !pc,proptup: propertyIsOverlyFullfilled( pc, proptup ) <-
+          ~ pcProperty( pc, proptup ) &
+          ( ? proptup2 : pcProperty( pc, proptup2 ) &
+                     order(proptup) > 0 &
+                order(proptup) =< order(proptup2) &
+                     property(proptup) = property(proptup2) &
+                  dependentsAreFullfilled( pc, property(proptup2)) &
+                     valueDependentsAreFullfilled(pc,proptup2)).
+
+     !pc,proptup: propertyIsFullfilled( pc, proptup ) <-
+              propertyIsStrictlyFullfilled( pc, proptup ).
+     !pc,proptup: propertyIsFullfilled( pc, proptup ) <-
+              propertyIsOverlyFullfilled( pc, proptup ).
+
+     // Dependents zijn voldaan als de pc een waarde heeft voor die property
+     // en alle propertyDependencies voldaan zijn
+     !pc,pcp: dependentsAreFullfilled( pc, pcp ) <-
+          ( ? proptup : pcProperty( pc, proptup )  & property(proptup) = pcp) &
+          ( ! proptup : propertyDependency( pcp, proptup ) =>
+                       propertyIsFullfilled( pc, proptup)).
+
+     //ValueDependents zijn voldaanals alle propertyValueDependency voldaan zijn
+     !pc,proptup: valueDependentsAreFullfilled( pc, proptup ) <-
+         pcProperty( pc, proptup ) &
+         ( ! proptup2 : propertyValueDependency( proptup, proptup2 ) =>
+               propertyIsFullfilled( pc, proptup2)
+         ).
+}
+{
+     //useDependencyNTHThatapply zijn de user dependencies die voldaan zijn
+     !pc,proptup,nthv: userDependencyNTHThatApply( pc, proptup, nthv+1 ) <-
+         userDependency( proptup, nthv ) &
+         propertyIsFullfilled( pc, proptup ).
+}
+{
+     //PC kan geassigneerd worden als alle verplichte user Dependencies voldaan zijn
+     !pc: canSimpleAssignPC( pc ) <-
+         (
+             ! proptup : isNecessaryProperty( proptup ) =>
+                propertyIsFullfilled( pc, proptup )
+         ).
+}
+{
+     //PC kan niet geassigneerd worden door een bepaalde property
+     //als er een userdependency over die property niet voldaan is
+     !pc,proptup: cannotAssignPC( pc, proptup ) <-
+         isNecessaryProperty( proptup ) &
+         ~propertyIsFullfilled( pc, proptup).
+}
+
+{
+     //De preferentiewaarde voor een PC is de som van de voldane preferenties
+     !pc: pcNTHValue( pc ) = sum{ proptup, nthv :
+         userDependencyNTHThatApply( pc, proptup, nthv ) : nthv }.
+}
+{
+     //De gekozen waarde voor de preferentie is de maximale over alle pcs
+     nthValue = max{pc : true : pcNTHValue(pc)}.
+}
+{
+     //Een pc wordt gekozen als alle basisvoorwaarden voldaan zijn,
+     //en hij aan genoeg voorkeuren voldoet,
+     //en alle systemDependencies voldaan zijn
+     !pc: canAssignPC( pc ) <-
+         canSimpleAssignPC( pc ) &
+         pcNTHValue(pc) >= nthValue.
+}
+{
+     //PropertyForAssignedPC zijn de properties van de geassigneerde pc's
+     !pc,proptup: propertyForAssignedPC( pc, proptup) <-
+         canAssignPC( pc ) &
+         pcProperty( pc, proptup ).
+}
+{
+     !  proptup, depproptup : dependentProperty( proptup, depproptup ) <-
+          propertyDependency( property( proptup ), depproptup ).
+
+     !  proptup, depproptup : dependentProperty( proptup, depproptup ) <-
+          ? subprobtup[PropertyTuple] :
+            propertyDependency( property( proptup ), subproptup ) &
+                 propertyDependency( property( subproptup ), depprobtup ).
+}
+
+{
+     !pc,proptup: matchedPropertyForAssignedPC( pc, proptup ) <-
+         canAssignPC( pc ) &
+      userDependency( proptup, 0 ) &
+        pcProperty( pc, proptub ).
+     !pc,proptup: matchedPropertyForAssignedPC( pc, proptup ) <-
+         canAssignPC( pc ) &
+         userDependency( udproptup, 0 ) &
+      dependentProperty( udproptup, proptup ) &
+      pcProperty( pc, proptub ).
+     !pc,proptup: matchedPropertyForAssignedPC( pc, proptup ) <-
+         canAssignPC( pc ) &
+         systemDependency( proptup ) &
+        pcProperty( pc, proptub ).
+     !pc,proptup: matchedPropertyForAssignedPC( pc, proptup ) <-
+         canAssignPC( pc ) &
+         systemDependency( udproptup ) &
+      dependentProperty( udproptup, proptup ) &
+        pcProperty( pc, proptub ).
+     !pc,proptup: matchedPropertyForAssignedPC( pc, proptup ) <-
+         canAssignPC( pc ) &
+        userDependencyNTHThatApply( pc, proptup, nthv ) &
+        pcProperty( pc, proptub ).
+     !pc,proptup: matchedPropertyForAssignedPC( pc, proptup ) <-
+         canAssignPC( pc ) &
+        userDependencyNTHThatApply( pc, udproptup, nthv ) &
+        pcProperty( pc, udproptub ) &
+      dependentProperty( udproptup, proptup ) &
+        pcProperty( pc, proptub ).
+
+}
+
+{
+        ! proptup : pcStrictlyMatchingProperty( proptup ) <-
+         isNecessaryProperty( proptup ) &
+         propertyIsStrictlyFullfilled( checkPC, proptup ).
+
+}
+
+{
+        ! proptup : pcOverlyMatchingProperty( proptup ) <-
+         isNecessaryProperty( proptup ) &
+         propertyIsOverlyFullfilled( checkPC, proptup ).
+
+}
+
+{
+        ! proptup : pcNotMatchingProperty( proptup ) <-
+            ~ pcOverlyMatchingProperty( proptup ) &
+            ~ pcStrictlyMatchingProperty( proptup ) &
+         isNecessaryProperty( proptup ) &
+         ~ propertyIsFullfilled( checkPC, proptup ).
+
+}
+
+}

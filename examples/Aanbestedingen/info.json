@@ -1,0 +1,276 @@
+{
+"title": "Aanbestedingswijziging",
+"timeout": 5,
+"symbols": [
+{
+"idpname": "NieuweOpdracht",
+"type": "proposition",
+"priority": "core",
+"guiname": "Nieuwe opdracht vanaf 30 juni 2017",
+"shortinfo": "Datum bekendmaking of uitnodiging",
+"longinfo": "Overheidsopdrachten via vanaf 30 juni 2017 werden bekend gemaakt of waarvoor een uitnodiging tot het indienen van een aanvraag tot deelneming of offerte werd verstuurd."
+},
+{
+"idpname": "Kwalificatie",
+"type": "function",
+"priority": "core"
+},
+{
+"idpname": "Sector",
+"type": "function",
+"priority": "core"
+},
+{
+"idpname": "VanToepassing",
+"type": "predicate",
+"priority": "core",
+"guiname": "Toepasbaar",
+"showParameters": true
+},
+{
+"idpname": "WijzigingInContract",
+"type": "proposition",
+"guiname": "Wijzigingsclausule voorzien?",
+"shortinfo": "Is er een wijzigingsclausule voorzien in de opdrachtdocumenten voor de wijziging van de opdracht?",
+"longinfo": "Is in de opdrachtdocumenten een duidelijke, nauwkeurige en ondubbelzinnige wijzigingsclausule opgenomen die de voorgenomen Wijziging mogelijk maakt?"
+},
+{
+"idpname": "NoodzakelijkeAanvulling",
+"type": "proposition",
+"guiname": "Noodzakelijke aanvulling",
+"shortinfo": "De aanvullende opdracht is noodzakelijk geworden.",
+"longinfo": "Deze voorwaarde is vrij ruim te interpreteren. Het eenvoudige feit dat de aanvullende werken, leveringen of diensten noodzakelijk zijn geworden volstaat."
+},
+{
+"idpname": "GeenAlternatieveOpdrachtnemer",
+"type": "proposition",
+"guiname": "Verandering opdrachtnemer onmogelijk",
+"shortinfo": "Er zijn redenen om niet te veranderen van opdrachtnemer.",
+"longinfo": "Een verandering van opdrachtnemer is (1) niet mogelijk om economische of technische redenen of zou (2) tot een aanzienlijk ongemak of kostenstijging leiden voor de aanbestedende overheid."
+},
+{
+"idpname": "OnvoorzieneOmstandigheden",
+"type": "proposition",
+"guiname": "Niet te voorziene omstandigheden",
+"shortinfo": "De Wijziging volgt uit niet te voorziene omstandigheden.",
+"longinfo": "Het moet gaan om omstandigheden die onmogelijk door de aanbestedende overheid konden voorzien worden."
+},
+{
+"idpname": "AardWijzigtNiet",
+"type": "proposition",
+"guiname": "Algemene aard wijzigt niet",
+"shortinfo": "De algemene aard mag niet wijzigen",
+"longinfo": "De algemene aard mag niet wijzigen. Dit impliceert bvb. dat een opdracht voor leveringen in een opdracht voor werken, maar gaat ook over de inhoud van de overheidsopdracht."
+},
+{
+"idpname": "BeperktePrijsverhoging",
+"type": "proposition",
+"guiname": "Beperkte prijsverhoging per Wijziging",
+"shortinfo": "Beperking per Wijziging tot 50% van oorspronkelijke opdrachtbedrag.",
+"longinfo": "De prijsverhoging die met de Wijziging gepaard gaat, is per Wijziging beperkt tot maximum 50% van het oorspronkelijke opdrachtbedrag. Het artificieel opdelen van één Wijziging is echter verboden. Opeenvolgende Wijzigingen mogen immers niet worden gebruikt om de wetgeving overheidsopdrachten te omzeilen. De beperking tot 50% geldt niet voor de nutssectoren."
+},
+{
+"idpname": "VervangingInContract",
+"type": "proposition",
+"guiname": "Vervangingsclausule voorzien?",
+"shortinfo": "Is er een wijzigingsclausule voorzien in de opdrachtnemen voor de vervanging van de opdrachtnemer?",
+"longinfo": "Is in de opdrachtdocumenten een duidelijke, nauwkeurige en ondubbelzinnige wijzigingsclausule opgenomen die de voorgenomen vervanging van opdrachtnemer mogelijk maakt?"
+},
+{
+"idpname": "RechtsopvolgingOpdrachtnemer",
+"type": "proposition",
+"guiname": "Rechtsopvolging van de opdrachtnemer",
+"longinfo": "Het gaat om een rechtsopvolging onder algemene of gedeeltelijke titel in de positie van de oorspronkelijke opdrachtnemer."
+},
+{
+"idpname": "HerstructureringOpdrachtnemer",
+"type": "proposition",
+"guiname": "Oorzaak van rechtsopvolging is herstructurering",
+"shortinfo": "De oorzaak van de rechtsopvolging is een herstructurering.",
+"longinfo": "De rechtsopvolging is het gevolg van een herstructurering van de onderneming, onder meer door overname, fusie, acquisitie of insolventie."
+},
+{
+"idpname": "VoldoetAanOorspronkelijkeCriteria",
+"type": "proposition",
+"guiname": "Overnemer voldoet aan oorspronkelijke selectiecriteria",
+"longinfo": "De overnemer voldoet aan de aanvankelijk, in het bestek of de selectieleidraad, vastgestelde selectiecriteria."
+},
+{
+"idpname": "GeenWezenlijkeWijzigingen",
+"type": "proposition",
+"guiname": "Opdracht blijft wezenlijk ongewijzigd",
+"longinfo": "De overdracht mag niet worden aangegrepen om wezenlijke Wijzigingen in de opdracht door te voeren."
+},
+{
+"idpname": "GeenOmzeiling",
+"type": "proposition",
+"guiname": "Wetgeving wordt niet omzeild",
+"shortinfo": "Mogelijkheid tot Wijziging wordt niet misbruikt.",
+"longinfo": "De Wijziging mag niet gebruikt worden om de toepassing van de wetgeving inzake overheidsopdrachten te omzeilen."
+},
+{
+"idpname": "OudeRaming",
+"type": "numrange",
+"guiname": "Bedrag oorspronkelijke opdracht",
+"shortinfo": "Raming van de oorspronkelijke opdracht in duizendtallen"
+},
+{
+"idpname": "VerhogingKleinerDan",
+"type": "numrange",
+"showOptimize": "TRUE",
+"guiname": "De relatieve waarde van de Wijziging, in %"
+},
+{
+"idpname": "BereiktEuropeseDrempel",
+"type": "proposition",
+"guiname": "Europese drempel bereikt"
+},
+{
+"idpname": "BeperkteVerhoging",
+"type": "proposition",
+"guiname": "De prijsverhoging is beperkt",
+"shortinfo": "De verhoging is beperkt tot maximaal 15% (voor werken) en 10% (voor leveringen en diensten) van de waarde van de oorspronkelijke overheidsopdracht.",
+"longinfo": "Als opeenvolgende Wijzigingen plaatsvinden, dan wordt enkel de nettowaarde in aanmerking genomen. Dit impliceert dat de waarde van de meerwerken mag worden verminderd met de waarde van de minwerken en dat het overblijvende saldo onder de bovenvermelde drempels dient te blijven."
+},
+{
+"idpname": "GeenWijzigingInschrijvers",
+"type": "proposition",
+"guiname": "Geen risico op bijkomende inschrijvers of wijziging rangschikking",
+"longinfo": "Als de wijziging in de aanvankelijke opdracht al ware opgenomen, niet tot de toelating van andere opdrachtnemers of tot een andere rangschikking zou hebben geleid."
+},
+{
+"idpname": "GeenVerschuivingEvenwicht",
+"type": "proposition",
+"guiname": "Geen verschuiving economisch evenwicht",
+"longinfo": "De wijziging zou niet tot een verschuiving van het economisch evenwicht in het voordeel van de opdrachtnemer hebben geleid op een wijze die niet voorzien was in de oorspronkelijke opdracht."
+},
+{
+"idpname": "GeenAanzienlijkeVerruiming",
+"type": "proposition",
+"guiname": "Geen aanzienlijke verruiming van de opdracht",
+"longinfo": "Het toepassingsgebied van de opdracht niet aanzienlijk heeft verruimd. Merk op dat er voor de toepassing van deze hypothese geen beperking tot een bepaald percentage of bedrag werd voorzien. Met andere woorden, zelfs al gaat het om een Wijziging met een belangrijke financiële impact, zal deze nog steeds toelaatbaar zijn indien de bovenvermelde voorwaarden vervuld zijn en aldus kan worden aangetoond dat de Wijziging geen wezenlijk karakter heeft."
+},
+{
+"idpname": "VoorwerpOnveranderd",
+"type": "proposition",
+"guiname": "Het voorwerp van de opdracht blijft onveranderd"
+},
+{
+"idpname": "PassendeCompensatie",
+"type": "proposition",
+"guiname": "Opdrachtnemer wordt gecompenseerd",
+"shortinfo": "Zo nodig moet worden voorzien in een passende compensatie voor de opdrachtnemer."
+},
+{
+"idpname": "BeperkteTotalePrijsverhoging",
+"type": "proposition",
+"guiname": "Beperkte totale prijsverhoging",
+"shortinfo": "Beperkte prijsverhoging voor de som van alle wijzingen",
+"longinfo": "De wijziging blijft in waarde beperkt tot vijftien percent van het oorspronkelijke opdrachtbedrag. Bij opeenvolgende wijzigingen moet de nettowaarde van elke wijziging worden opgeteld. Met andere woorden, de vijftien percent geldt aldus niet voor elke wijziging apart."
+},
+{
+"idpname": "DriepartijenOvereenkomst",
+"type": "proposition",
+"guiname": "Driepartijenovereenkomst",
+"shortinfo": "Akkoord van alle partijen",
+"longinfo": "De vervanging impliceert een driepartijenovereenkomst waarbij zowel de oorspronkelijke en de nieuwe opdrachtnemer als de aanbestedende overheid instemmen met de vervanging."
+},
+{
+"idpname": "GeenWijzigingEssentieleVoorwaarde",
+"type": "proposition",
+"guiname": "Geen wijziging essentiële voorwaarden",
+"shortinfo": "De essentiële voorwaarden van de opdracht moeten behouden blijven."
+},
+{
+"idpname": "AanbestedendeOverheidIsFederaal",
+"type": "proposition",
+"guiname": "Federale aanbestedende overheid",
+"shortinfo": "De aanbestedending wordt uitgeschreven vanop het federaal niveau"
+},
+{
+"idpname": "IsSocialeDienst",
+"type": "proposition",
+"guiname": "Sociale dimensie",
+"shortinfo": "De opdracht heeft een sociale dimensie"
+},
+{
+"idpname": "PerWijziging",
+"type": "proposition",
+"guiname": "Relatieve meerprijs wordt gerekend per wijziging",
+"longinfo": "Indien aangevinkt, geldt de ingegeven relatieve meerprijs als maximum per individuele wijziging. Indien uitgevinkt, geldt de relatieve meerprijs als totale som over alle wijzigingen."
+}
+],
+"values": [
+{
+"idpname": "a38",
+"type": "value",
+"priority": "core",
+"guiname": "1. De contractuele wijzigingsclausule",
+"shortinfo": "Art. 38 KB Uitvoering",
+"longinfo": "Voorwaarden: het bestek bevat een duidelijke, nauwkeurige en ondubbelzinnige herzieningsclausule. ",
+"showParameters": true
+},
+{
+"idpname": "a38_1",
+"type": "value",
+"priority": "core",
+"guiname": "2. De aanvullende opdracht ",
+"shortinfo": "Art. 38/1 KB Uitvoering",
+"longinfo": "Voorwaarden: de aanvullende w/d/l zijn noodzakelijk geworden + een verandering van opdrachtnemer is (1) niet mogelijk om economische of technische redenen of zou (2)tot een aanzienlijk ongemak of kostenstijging leiden + de prijsverhoging is per Wijziging beperkt tot maximum 50 % van het oorspronkelijke bedrag + het is verboden om één wijziging artificieel op te delen.",
+"showParameters": true
+},
+{
+"idpname": "a38_2",
+"type": "value",
+"priority": "core",
+"guiname": "3. De onvoorzienbare omstandigheden",
+"shortinfo": "Art. 38/2 KB Uitvoering",
+"longinfo": "Voorwaarden: het gevolg van omstandigheden die een zorguldige aanbesteder niet kon voorzien + geen verandering van de algemene aard van de opdracht + per Wijziging beperkt tot 50 % van het oorspronkelijke opdrachtbedrag.",
+"showParameters": true
+},
+{
+"idpname": "a38_3",
+"type": "value",
+"priority": "core",
+"guiname": "4. De vervanging van de opdrachtnemer ",
+"shortinfo": "Art. 38/3 KB Uitvoering",
+"longinfo": "Voorwaarden: via een wijzigingsclausule of indien aan de volgende voorwaarden werd voldaan: rechtsopvolging onder algemene of bijzondere titel bij de oorspronkelijke opdrachtnemer + de rechtsopvolging is een gevolg van herstructurering + de overnemer voldoet aan de oorspronkelijke selectiectieria + overdracht mag geen wezenlijke wijzigingen tot gevolg hebben.",
+"showParameters": true
+},
+{
+"idpname": "a38_4",
+"type": "value",
+"priority": "core",
+"guiname": "5. De minimis-regel ",
+"shortinfo": "Art. 38/4 KB Uitvoering",
+"longinfo": "Voorwaarden: de wijziging is in absolute cijfers lager dan de Europese drempels en relatief lager dan 10 % (D/L) of 15 % (W) van de oorspronkelijke opdracht + bij opeenvolgende wijzigingen wordt de nettowaarde in aanmerking genomen + de wijziging mag niet leiden tot een wijziging van de algemene aard.",
+"showParameters": true
+},
+{
+"idpname": "a38_5_6",
+"type": "value",
+"priority": "core",
+"guiname": "6. De niet-wezenlijke wijziging die de Pressetexttoets doorstaat.",
+"shortinfo": "Art. 38/5 en 38/6 KB Uitvoering",
+"longinfo": "Voorwaarden: als de wijziging was opgenomen in de oorspronkelijke opdracht zou dat niet tot andere opdrachtnemers of tot eenandere rangschikking geleid hebben + geen verschuiving van het economisch evenwicht in het voordeel van de opdrachtnemer + het toepassingsgebied van de opdracht wordt niet aanzienlijk verruimd + er komt geen andere opdrachtnemer in de plaats (behoudens in de hypothese van de vervanging van de opdrachtnemer conform art. 38/3 KB Uitvoering).",
+"showParameters": true
+},
+{
+"idpname": "oud1_a38",
+"type": "value",
+"priority": "core",
+"guiname": "Oude vervanging van de opdrachtnemer conform het vroegere art. 38 KB Uitvoering",
+"shortinfo": "Art. 38 KB Uitvoering (oude wetgeving)",
+"showParameters": true
+},
+{
+"idpname": "oud2_a37",
+"type": "value",
+"priority": "core",
+"guiname": "Oude De minimis-regel conform het vroegere art. 37 KB Uitvoering",
+"shortinfo": "Art. 37 KB Uitvoering (oude wetgeving)",
+"showParameters": true
+}
+]
+}
+
