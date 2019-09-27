@@ -74,7 +74,7 @@ theory {
     (Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2)).
 
     [A square is an equilateral quadrilateral]
-    (Subtype=square    => Sides=4 & Equilateral).
+    (Subtype=square    <=> Sides=4 & Equilateral).
 
     [In a triangle, no side is longer than the sum of the 2 other sides]
     ( Type=triangle => ( Length(1) =< Length(2) + Length(3))
