@@ -47,6 +47,10 @@ class ConfigCase:
         
         theory.translate(self)
 
+        # remove atoms based only on interpreted symbols
+        self.atoms = {k:v for (k,v) in self.atoms.items() \
+            if symbols_of(v, self.symbols, self.interpreted) }
+
 
     #################
     # Helpers for translating idp code
