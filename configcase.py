@@ -537,7 +537,7 @@ class ConfigCase:
         for atomZ3 in self.atoms.values():
             # atom might not have an interpretation in model (if "don't care")
             value = m.eval(reify[atomZ3], model_completion=True)
-            if atomZ3.sort().name() == 'Bool':
+            if is_bool(atomZ3):
                 if not (is_true(value) or is_false(value)):
                     #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                     print("*** ", atomZ3, " is not defined, and assumed false")
@@ -573,7 +573,7 @@ class Structure:
                 break
 
     def addAtom(self, case, atomZ3, truth):
-        if atomZ3.sort().name() != 'Bool': return
+        if not is_bool(atomZ3): return
         if truth and is_eq(atomZ3): # try to interpret it as an assignment
             if atomZ3.arg(1).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
                 self.addValue(case, atomZ3.arg(0), atomZ3.arg(1))
