@@ -4,6 +4,7 @@ Priority:
     - values:show valid range of numeric values ?? beware of inequalities and infinite (Bram)
     - compare consequences of 2 different choices (Bram)
 
+    - speed: propagate only the atoms that are displayed
     - non-linear
     - settings: minimizable ? describe goal using new syntax ? (PC)
     - error management (for idp code) (PC)

@@ -129,10 +129,12 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
     for reified in todo:# numeric variables or atom !
         result, consq = solver.consequences([], [reified])
 
+        optimal = True
         if result==unsat:
             raise Exception("Not satisfiable !")
         elif result==sat:
             if consq:
+                optimal = False
                 consq = consq[0].children()[1]
                 t = True
                 if is_not(consq):
@@ -144,24 +146,23 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
         else: # unknown -> restart solver
             solver, _, unreify = mk_solver(theory, atoms)
 
-            # try full propagation
-            if result2 == sat:
-                value = solver2.model().eval(atomZ3)
+        if optimal and result2 == sat: # try optimal propagation
+            value = solver2.model().eval(reified)
 
-                solver.push()
-                solver.add(Not(atomZ3 == value))
-                result3 = solver.check()
-                solver.pop()
+            solver.push()
+            solver.add(Not(reified == value))
+            result3 = solver.check()
+            solver.pop()
 
-                if result3 == sat:
-                    pass
-                elif result3 == unsat: # atomZ3 can have only one value
-                    if is_bool(atomZ3):
-                        out[LiteralQ(True if is_true(value) else False, atomZ3)] = True
-                    else:
-                        out[LiteralQ(True, atomZ3 == value)] = True
+            if result3 == sat:
+                pass
+            elif result3 == unsat: # atomZ3 can have only one value
+                if is_bool(reified):
+                    out[LiteralQ(True if is_true(value) else False, unreify[reified])] = True
                 else:
-                    print("can't propagate with", Not(atomZ3 == value))
+                    out[LiteralQ(True, reified == value)] = True
+            else:
+                print("can't propagate with", Not(reified == value))
     if result2 != sat:
         #TODO reify the non linear equations, find their thruth value, then use a solver ?
         print("can't find a model")
