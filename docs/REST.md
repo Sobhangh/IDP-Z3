@@ -37,6 +37,7 @@ GET request :
         }
     - code : string
     - method : "propagate" | ""modelexpand" | "explain" | "minimize" | "abstract"
+    - expanded : [string]  // for propagate
 
 GET response for "propagate" :
 

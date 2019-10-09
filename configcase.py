@@ -186,16 +186,22 @@ class ConfigCase:
         return out
 
 
-    def propagation(self):
+    def propagation(self, expanded_symbols):
+        expanded_symbols = [] if expanded_symbols is None else expanded_symbols
+        
         out = self.initial_structure()
+        
+        todo = [ a for a in self.atoms.values() 
+                 if is_symbol(a.decl().name(), self.symbols) 
+                 or any([s in expanded_symbols for s in symbols_of(a, self.symbols, self.interpreted)]) ]
 
-        amf = consequences(self.theory(with_assumptions=True), self.atoms.values(), {})
+        amf = consequences(self.theory(with_assumptions=True), todo, {})
         for literalQ in amf:
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
 
         # useful for non linear assumptions
         """
-        amf = consequences(self.theory(with_assumptions=False), self.atoms.values(), amf)
+        amf = consequences(self.theory(with_assumptions=False), todo, amf)
         for literalQ in amf:
             out.addAtom(self, literalQ.atomZ3, literalQ.truth)
         """

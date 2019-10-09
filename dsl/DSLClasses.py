@@ -227,7 +227,7 @@ class Definition(object):
     def makeGlobalVars(self, symb, case, env):
         z3_symb = symb.translate(case, env)
         if type(z3_symb) == FuncDeclRef:
-            return [Const('ci', z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
+            return [Const('ci'+str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
                 Const('cout', z3_symb.range())]
         else:
             return [Const('c', z3_symb.sort())]
@@ -257,12 +257,9 @@ class Rule(object):
                 out.append(self.body.translate(case, env))
             return out
 
-        lvars = []
-        if lvars is not None:
-            lvars = self.vars
-        sorts = []
-        if sorts is not None:
-            sorts = self.sorts
+        #TODO if empty --> type inference
+        lvars = self.vars
+        sorts = self.sorts
 
         outp, vars = with_local_vars(case, env, function, sorts, lvars)
 

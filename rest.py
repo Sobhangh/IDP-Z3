@@ -50,6 +50,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('method', type=str, help='Method to execute')
 parser.add_argument('code', type=str, help='Code')
 parser.add_argument('active', type=str, help='Three-valued structure')
+parser.add_argument('expanded', type=str, action='append', help='list of expanded symbols')
 parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
 parser.add_argument('value', type=str, help='Value to explain')
 parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
@@ -91,13 +92,13 @@ class eval(Resource):
 
                 if method == "propagate":
                     case.loadStructureFromJson(active)
-                    out = case.propagation()
+                    out = case.propagation(args['expanded'])
                 if method == "modelexpand":
                     case.loadStructureFromJson(active)
                     out = case.expand()
                 if method == "relevance":
                     case.loadStructureFromJson(active)
-                    out = case.propagation() #TODO
+                    out = case.propagation(args['expanded']) #TODO
                 if method == "explain":
                     case.loadStructureFromJson(active)
                     out = case.explain(args['symbol'], args['value'])
