@@ -1,56 +1,42 @@
-Priority:
-    - View Normal (with popup) / Expanded (PC)
-    - values:use slider for numeric values (when type is a range) (Bram)
-    - values:show valid range of numeric values ?? beware of inequalities and infinite (Bram)
-    - compare consequences of 2 different choices (Bram)
-
-    - speed: propagate only the atoms that are displayed
-    - non-linear
-    - settings: minimizable ? describe goal using new syntax ? (PC)
-    - error management (for idp code) (PC)
-    - show offended rules when unsatisfiable (re-use Explain API) (Bram)
-    - option to disable some rules (full workflow)(Bram)
-    - settings: group symbols into categories (e.g. using markdown annotations ? separate vocabulary ?)
-    - settings: annotations in vocabulary (longinfo)
-    - values:how to say how the list box should be organised ?  Annotations ? based on size ?
-    - functions for constructed types
-
-    - relevance
-    - settings: give name to a vocabulary
+To do:
+    Support for constructor functions (p.6 of the IDP3 manual)
+    Support for abs(), remainder operator
+    Lexicographic, Pareto and conditional optimization
+    Support for dates
 
 
-priority:
-    - relevance (definitions)
-    - environmental variables
-    - goal --> to the right of abstract models
-    - join 2 disjuncts that differ only by the sign of one atom
+Research topics / may take a while:
+    Support for partial functions
+    Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
+    Relevance
+    Environmental vs Decision variables
+    Support for non-linear equations
 
-    - translate numeric ranges to enum ?
-    - isolate non-linear constraints over real ? https://rise4fun.com/z3/tutorial
-    - Show 1 model: numeric values should not have "explain"
 
-functional NTH:
-    - improve metaJSON() to allow optimisation on some variables only
-    - Undo button
-    - structure syntax: true, false, arrows for functions, optional parenthesis, no expressions (brackets)
-    - compute relevance in propagate
-    - separate info button
-    - inject known values in formulas
-    - predicate symbols should show atoms (e.g. quantified constraints)
-    - dates
-    - check syntax of int, real on client
-    - garanteed order of appearance ?
+Of dubious benefit / may never be done:
+    Type inference (p. 14 of the IDP3 manual)
+    Support for type hierarchy
+    Support for namespaces
+    Support for strings
+    Support for recursive definitions
+    Support for multiple vocabulary / theories
+    Support for natural (positive integers)
+    Handling of division by 0 may differ (to be tested)
+    Support order on domain elements (p. 8..9 )
+    Support for LTC vocabulary
+    Support for “quantified quantifiers”, and binary quantifications (p. 11 of the IDP3 manual)
+    Support for aggregates on list of terms or formulas (p. 13 of the IDP3 manual)
+    Support all syntactical forms of structures.
+    Support for factlist (p. 17 of the IDP3 manual)
+    Support of lua
+    Abstract models:
+        - show goal to the right of abstract models
+        - join 2 disjuncts that differ only by the sign of one atom
 
-    - implication semantics for definitions
 
-other NTH (refactor)
+other NTH (refactoring)
     - distinguish between x=1 entry and x=1 atom in output structure
     - simplify Or, And with only one element
     - p(real) should be possible
     - client should send the literal to be explained, not the atom
 
-
-
-Bart:
-    - add annotation in vocabulary
-    - confusing when list of atoms does not match list in drop box
