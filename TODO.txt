@@ -1,6 +1,5 @@
 To do:
     Support for constructor functions (p.6 of the IDP3 manual)
-    Support for abs(), remainder operator
     Lexicographic, Pareto and conditional optimization
     Support for dates
 

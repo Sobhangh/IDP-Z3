@@ -67,7 +67,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
     ConjunctionOp:   '&' | '∧';
     ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
     SumMinusOp:      '+' | '-';
-    MultDivOp:       '*' | '/';
+    MultDivOp:       '*' | '/' | '%';
     UnaryOperator:   '-' | '~';
     
 

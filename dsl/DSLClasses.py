@@ -374,6 +374,7 @@ class BinaryOperator(object):
             '-': lambda x, y: x - y,
             '*': lambda x, y: x * y,
             '/': lambda x, y: x / y,
+            '%': lambda x, y: x % y,
             '^': lambda x, y: x ** y,
             '=': lambda x, y: x == y,
             '<': lambda x, y: x < y,
@@ -508,6 +509,9 @@ class AppliedSymbol(object):
         return str(self.s) + "(" + ",".join([str(x) for x in self.args.fs]) + ")"
 
     def translate(self, case: ConfigCase, env: Environment):
+        if self.s.name == 'abs':
+            arg = self.args.fs[0].translate(case,env)
+            return If(arg >= 0, arg, -arg)
         s = self.s.translate(case, env)
         arg = [x.translate(case, env) for x in self.args.fs]
         out = s(arg)
