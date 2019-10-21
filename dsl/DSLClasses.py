@@ -344,19 +344,19 @@ class AQuantification(object):
             forms = And(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !
                 out = ForAll(finalvars, forms)
-                if env.level==0: case.Atom(out, str(self))
+                if env.level==0: case.mark_atom(self, out)
                 return out
             else:
-                if env.level==0: case.Atom(forms, str(self))
+                if env.level==0: case.mark_atom(self, forms)
                 return forms
         else:
             forms = Or(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !
                 out = Exists(finalvars, forms)
-                if env.level==0: case.Atom(out, str(self))
+                if env.level==0: case.mark_atom(self, out)
                 return out
             else:
-                if env.level==0: case.Atom(forms, str(self))
+                if env.level==0: case.mark_atom(self, forms)
                 return forms
 
 class BinaryOperator(object):
@@ -407,7 +407,7 @@ class BinaryOperator(object):
             x = self.fs[0].translate(case, env)
             y = self.fs[1].translate(case, env)
             atom = x==y
-            case.Atom(atom)
+            case.mark_atom(self, atom)
             out = Not(atom)
         elif self.operator[0] in ['=', '<', '>', '=<', '>=', '~=', "≤", "≥", "≠"]:
             out = []
@@ -424,7 +424,7 @@ class BinaryOperator(object):
                 out.is_chained = True
             else:
                 out = out[0]
-            case.Atom(out, str(self))
+            case.mark_atom(self, out)
         else:
             out = self.fs[0].translate(case, env)
 
@@ -517,10 +517,10 @@ class AppliedSymbol(object):
         out = s(arg)
         if hasattr(s, 'interpretation'):
             out.interpretation = s.interpretation(0, arg)
-            case.Atom(out)
+            case.mark_atom(self, out)
             return out.interpretation
         else:
-            case.Atom(out)
+            case.mark_atom(self, out)
             return out
 
 class Variable(object):
@@ -540,10 +540,10 @@ class Variable(object):
             try:
                 out.interpretation = out.interpretation(0, []) # if not computed yet
             except: pass
-            case.Atom(out)
+            case.mark_atom(self, out)
             return out.interpretation
         else:
-            case.Atom(out)
+            case.mark_atom(self, out)
             return out
 
 class Symbol(Variable): pass

@@ -97,23 +97,19 @@ class ConfigCase:
                 ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
         return p
 
-    def Atom(self, atomZ3, atom_string=None):
+    def mark_atom(self, dsl_object, atomZ3):
         """
             Z3_code:    ASCII, with ==, <=, !=
             atom_string:original code, using UTF-8 characters for connectives
             reading:    string from code annotation
             proposition:qsdfvqe13435(Z3_code)
         """
-        if is_bool(atomZ3) and (is_quantifier(atomZ3) or not has_local_var(atomZ3, self.valueMap, self.symbols)): # AtomQ !
-            atom_string = atom_string if atom_string else atom_as_string(atomZ3)
+        if is_bool(atomZ3) and \
+            (is_quantifier(atomZ3) or not has_local_var(atomZ3, self.valueMap, self.symbols)): # AtomQ !
+
+            atom_string = str(dsl_object)
             atomZ3.atom_string = atom_string
             self.atoms.update({atom_string: atomZ3})
-
-            if hasattr(atomZ3, 'reading'): # then use it
-                self.atoms[atom_string].reading = atomZ3.reading
-            elif not hasattr(self.atoms[atom_string], 'reading'): # then use default value
-                self.atoms[atom_string].reading = atom_string
-
             self.Z3atoms[str(atomZ3)] = self.atoms[atom_string]
 
     def add(self, constraint, source_code):
