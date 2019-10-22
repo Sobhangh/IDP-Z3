@@ -9,6 +9,7 @@ from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
 from utils import is_number, universe, applyTo
+from ASTNode import Expression
 
 class DSLException(Exception):
     def __init__(self, message):
@@ -245,7 +246,7 @@ class Rule(object):
     def translate(self, vars, case: ConfigCase, env: Environment):
         args = []
         if self.args is not None:
-            args = self.args.fs
+            args = self.args.sub_exprs
 
         def function():
             out = []
@@ -268,18 +269,26 @@ class Rule(object):
         else:
             return Exists(vars, And(outp))
 
+# Expressions
 
-class IfExpr(object):
+class IfExpr(Expression):
+    IF = 0
+    THEN = 1
+    ELSE = 2
+
     def __init__(self, **kwargs):
         self.if_f = kwargs.pop('if_f')
         self.then_f = kwargs.pop('then_f')
         self.else_f = kwargs.pop('else_f')
+        self.sub_exprs = [self.if_f, self.then_f, self.else_f]
 
     def __str__(self):
         return "if " + str(self.if_f) + " then " + str(self.then_f) + " else " + str(self.else_f)
 
     def translate(self, case: ConfigCase, env: Environment):
-        return If(self.if_f.translate(case, env), self.then_f.translate(case, env), self.else_f.translate(case, env))
+        return If(self.sub_exprs[IfExpr.IF  ].translate(case, env)
+                , self.sub_exprs[IfExpr.THEN].translate(case, env)
+                , self.sub_exprs[IfExpr.ELSE].translate(case, env))
 
 def expand_formula(vars, sorts, f, case, env):
     form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
@@ -321,13 +330,14 @@ def with_local_vars(case, env, f, sorts, vars):
         env.var_scope[var] = backup[var]
     return out, z3vars
 
-class AQuantification(object):
+class AQuantification(Expression):
     def __init__(self, **kwargs):
         self.q = kwargs.pop('q')
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
+        self.sub_exprs = [self.f]
 
     def __str__(self):
         out  = self.q
@@ -337,7 +347,7 @@ class AQuantification(object):
 
     def translate(self, case: ConfigCase, env: Environment):
         env.level += 1
-        finalvars, forms = expand_formula(self.vars, self.sorts, self.f, case, env)
+        finalvars, forms = expand_formula(self.vars, self.sorts, self.sub_exprs[0], case, env)
         env.level -= 1
 
         if self.q == '∀':
@@ -359,7 +369,7 @@ class AQuantification(object):
                 if env.level==0: case.mark_atom(self, forms)
                 return forms
 
-class BinaryOperator(object):
+class BinaryOperator(Expression):
     MAP = { '&': lambda x, y: And(x, y),
             '|': lambda x, y: Or(x, y),
             '∧': lambda x, y: And(x, y),
@@ -388,33 +398,33 @@ class BinaryOperator(object):
             }
 
     def __init__(self, **kwargs):
-        self.fs = kwargs.pop('fs')
+        self.sub_exprs = kwargs.pop('sub_exprs')
         self.operator = kwargs.pop('operator')
 
     def __str__(self):
-        out = str(self.fs[0])
-        for i in range(1, len(self.fs)):
+        out = str(self.sub_exprs[0])
+        for i in range(1, len(self.sub_exprs)):
             op = self.operator[i-1]
             op = "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else op
             op = "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else op
             op = "∨" if op == "|" else "∧" if op == "&" else op
-            out = out + " " + op + " " + str(self.fs[i])
+            out = out + " " + op + " " + str(self.sub_exprs[i])
         return out
 
     def translate(self, case: ConfigCase, env: Environment):
         # chained comparisons -> And()
-        if self.operator[0] in ['≠', '~='] and len(self.fs)==2:
-            x = self.fs[0].translate(case, env)
-            y = self.fs[1].translate(case, env)
+        if self.operator[0] in ['≠', '~='] and len(self.sub_exprs)==2:
+            x = self.sub_exprs[0].translate(case, env)
+            y = self.sub_exprs[1].translate(case, env)
             atom = x==y
             case.mark_atom(self, atom)
             out = Not(atom)
         elif self.operator[0] in ['=', '<', '>', '=<', '>=', '~=', "≤", "≥", "≠"]:
             out = []
-            for i in range(1, len(self.fs)):
-                x = self.fs[i-1].translate(case, env)
+            for i in range(1, len(self.sub_exprs)):
+                x = self.sub_exprs[i-1].translate(case, env)
                 function = BinaryOperator.MAP[self.operator[i - 1]]
-                y = self.fs[i].translate(case, env)
+                y = self.sub_exprs[i].translate(case, env)
                 try:
                     out = out + [function(x, y)]
                 except Z3Exception as E:
@@ -426,11 +436,11 @@ class BinaryOperator(object):
                 out = out[0]
             case.mark_atom(self, out)
         else:
-            out = self.fs[0].translate(case, env)
+            out = self.sub_exprs[0].translate(case, env)
 
-            for i in range(1, len(self.fs)):
+            for i in range(1, len(self.sub_exprs)):
                 function = BinaryOperator.MAP[self.operator[i - 1]]
-                out = function(out, self.fs[i].translate(case, env))
+                out = function(out, self.sub_exprs[i].translate(case, env))
         return out
 
 class AImplication(BinaryOperator): pass
@@ -450,70 +460,68 @@ class AUnary(object):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
+        self.sub_exprs = [self.f]
 
     def __str__(self):
         return self.operator + str(self.f)
 
     def translate(self, case: ConfigCase, env: Environment):
-        out = self.f.translate(case, env)
+        out = self.sub_exprs[0].translate(case, env)
         function = AUnary.MAP[self.operator]
         return function(out)
 
 
-class AAggregate(object):
+class AAggregate(Expression):
+    CONDITION = 0
+    OUT = 1
+
     def __init__(self, **kwargs):
         self.aggtype = kwargs.pop('aggtype')
-        self.set = kwargs.pop('set')
-        if self.aggtype == "sum" and self.set.out is None:
-            raise Exception("Must have output variable for sum")
-        if self.aggtype != "sum" and self.set.out is not None:
-            raise Exception("Can't have output variable for #")
-
-    def __str__(self):
-        return self.aggtype + str(self.set)
-
-    def translate(self, case: ConfigCase, env: Environment):
-        return Sum(self.set.translate(case, env))
-
-
-class SetExp(object):
-    def __init__(self, **kwargs):
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
+        self.sub_exprs = [self.f, self.out]
+
+        if self.aggtype == "sum" and self.out is None:
+            raise Exception("Must have output variable for sum")
+        if self.aggtype != "sum" and self.out is not None:
+            raise Exception("Can't have output variable for #")
 
     def __str__(self):
-        out = "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
+        out = self.aggtype + "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
         out += ":" + str(self.f)
         if self.out: out += " : " + str(self.out)
         out += "}"
         return out
 
     def translate(self, case: ConfigCase, env: Environment):
-        form = IfExpr(if_f=self.f, then_f=NumberConstant(number='1'), else_f=NumberConstant(number='0'))
-        if self.out is not None:
-            form = AMultDiv(operator='*', fs=[form, self.out])
+        form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
+                    , then_f=NumberConstant(number='1')
+                    , else_f=NumberConstant(number='0'))
+        if self.sub_exprs[AAggregate.OUT] is not None:
+            form = AMultDiv(operator='*', sub_exprs=[form, self.sub_exprs[AAggregate.OUT]])
         fvars, forms = expand_formula(self.vars, self.sorts, form, case, env)
         if len(fvars) > 0:
             raise Exception('Can only quantify over finite domains')
-        return forms
+        return Sum(forms)
 
 
-class AppliedSymbol(object):
+class AppliedSymbol(Expression):
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
+        self.sub_exprs = self.args.sub_exprs
 
     def __str__(self):
-        return str(self.s) + "(" + ",".join([str(x) for x in self.args.fs]) + ")"
+        return str(self.s) + "(" + ",".join([str(x) for x in self.args.sub_exprs]) + ")"
 
     def translate(self, case: ConfigCase, env: Environment):
         if self.s.name == 'abs':
-            arg = self.args.fs[0].translate(case,env)
+            arg = self.sub_exprs[0].translate(case,env)
             return If(arg >= 0, arg, -arg)
         s = self.s.translate(case, env)
-        arg = [x.translate(case, env) for x in self.args.fs]
+        arg = [x.translate(case, env) for x in self.sub_exprs]
         out = s(arg)
         if hasattr(s, 'interpretation'):
             out.interpretation = s.interpretation(0, arg)
@@ -523,7 +531,7 @@ class AppliedSymbol(object):
             case.mark_atom(self, out)
             return out
 
-class Variable(object):
+class Variable(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
 
@@ -548,7 +556,7 @@ class Variable(object):
 
 class Symbol(Variable): pass
 
-class NumberConstant(object):
+class NumberConstant(Expression):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
 
@@ -561,15 +569,16 @@ class NumberConstant(object):
         except ValueError:
             return float(self.number)
 
-class Brackets(object):
+class Brackets(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.reading = kwargs.pop('reading')
+        self.sub_exprs = [self.f]
 
     def __str__(self): return "(" + str(self.f) + ")"
 
     def translate(self, case: ConfigCase, env: Environment):
-        expr= self.f.translate(case, env)
+        expr= self.sub_exprs[0].translate(case, env)
         if self.reading: 
             expr.reading = self.reading
         return expr
@@ -659,7 +668,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True, classes=
           Vocabulary, ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
           Theory, Definition, Rule, IfExpr, AQuantification, 
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, SetExp,
+                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                     AppliedSymbol, Variable, NumberConstant, Brackets,
           Interpretation, Structure, Tuple,
           Goal, View
