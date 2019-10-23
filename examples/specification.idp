@@ -24,15 +24,15 @@ vocabulary {
     Equilateral
     Perimeter:real
 
-    Large
+    _Large
     // Base : real
     // Height: real
     // Surface:real
 }
 
 theory {
-    { Large <- 10 < Length(1).}
-    
+    { _Large <- 10 < Length(1).}
+
     [Definition of triangle]
     (Type=triangle      <=> Sides=3).
 

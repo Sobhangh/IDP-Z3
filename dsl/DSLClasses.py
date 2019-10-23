@@ -19,13 +19,15 @@ class DSLException(Exception):
 
 
 class Environment:
-    def __init__(self):
+    def __init__(self, idp):
+        self.idp = idp
         self.var_scope = {}
         self.type_scope = {'Int': IntSort(), 'Bool': BoolSort(), 'Real': RealSort()}
         self.range_scope = {}
+        self.level = 0 # depth of quantifier
 
 
-class File(object):
+class Idp(object):
     def __init__(self, **kwargs):
         self.vocabulary = kwargs.pop('vocabulary')
         self.theory = kwargs.pop('theory')
@@ -41,8 +43,7 @@ class File(object):
         self.theory.annotate(self.vocabulary)
 
     def translate(self, case: ConfigCase):
-        env = Environment()
-        env.level = 0 # depth of quantifier
+        env = Environment(self)
         self.vocabulary.translate(case, env)
         if self.structure:
             self.structure.translate(case, env)
@@ -82,9 +83,12 @@ class ConstructedTypeDeclaration(object):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
         self.symbol_decls = {self.name : self }
+        self.is_var = False
         for c in self.constructors:
-            self.symbol_decls[c] = self
-        # self.type = None
+            c.type = self
+            self.symbol_decls[c.name] = self
+        # .type = None
+        # .translated
 
     def __str__(self):
         return ( "type " + self.name
@@ -93,15 +97,27 @@ class ConstructedTypeDeclaration(object):
                + "}")
 
     def annotate(self, symbol_decls):
-        for c in self.constructors: symbol_decls[c].type = self
         self.type = None
 
     def translate(self, case: ConfigCase, env: Environment):
-        type, cstrs = case.EnumSort(self.name, self.constructors)
-        env.type_scope[self.name] = type
+        self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
+        for c, c3 in zip(self.constructors, cstrs):
+            c.translated = c3
+
+        env.type_scope[self.name] = self.translated
         for i in cstrs:
             env.var_scope[obj_to_string(i)] = i
         env.range_scope[self.name] = cstrs
+
+
+class Constructor(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.is_var = False
+        # .type
+        # .translated
+    
+    def __str__(self): return self.name
 
 
 class RangeDeclaration(object):
@@ -109,6 +125,7 @@ class RangeDeclaration(object):
         self.name = kwargs.pop('name')
         self.elements = kwargs.pop('elements')
         self.symbol_decls = {self.name : self }
+        self.is_var = False
         # self.type = None
 
     def annotate(self, symbol_decls): 
@@ -144,6 +161,7 @@ class SymbolDeclaration(object):
         if self.out is None:
             self.out = Sort(name='Bool')
         self.symbol_decls = {self.name : self }
+        self.is_var = True #TODO unless interpreted
         # self.type : a declaration object, or 'Bool', 'real', 'int', or None
 
     def __str__(self):
@@ -159,21 +177,21 @@ class SymbolDeclaration(object):
     def translate(self, case: ConfigCase, env: Environment):
         case.symbol_types[self.name] = self.out.name
         if len(self.args) == 0:
-            const = case.Const(self.name, self.out.asZ3(env), normal=True)
-            env.var_scope[self.name] = const
-            case.args[const] = []
+            self.translated = case.Const(self.name, self.out.asZ3(env))
+            case.args[self.translated] = []
             if len(self.out.getRange(env)) > 1:
-                domain = in_list(const, self.out.getRange(env))
+                domain = in_list(self.translated, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name
                 case.typeConstraints.append(domain)
         elif self.out.name == 'Bool':
             types = [x.asZ3(env) for x in self.args]
             rel_vars = [t.getRange(env) for t in self.args]
-            env.var_scope[self.name] = case.Predicate(self.name, types, rel_vars, True)
+            self.translated = case.Predicate(self.name, types, rel_vars, True)
         else:
             types = [x.asZ3(env) for x in self.args] + [self.out.asZ3(env)]
             rel_vars = [t.getRange(env) for t in self.args + [self.out]]
-            env.var_scope[self.name] = case.Function(self.name, types, rel_vars, True)
+            self.translated = case.Function(self.name, types, rel_vars, True)
+        env.var_scope[self.name] = self.translated
 
 
 class Sort(object):
@@ -470,7 +488,7 @@ class BinaryOperator(Expression):
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
         self.operator = kwargs.pop('operator')
-        self.operator = list(map(\ 
+        self.operator = list(map(
             lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
                 "∨" if op == "|" else "∧" if op == "&" else op
@@ -798,8 +816,8 @@ class View(object):
 dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True, classes=
-        [ File, 
-          Vocabulary, ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
+        [ Idp, 
+          Vocabulary, ConstructedTypeDeclaration, Constructor, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
           Theory, Definition, Rule, IfExpr, AQuantification, 
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,

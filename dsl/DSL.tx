@@ -1,4 +1,4 @@
-File:
+Idp:
     vocabulary=Vocabulary
     theory=Theory
     structure=Structure?
@@ -13,7 +13,8 @@ Comment:
 Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
   Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
-    ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=ID[','] '}';
+    ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
+      Constructor: name=ID;
     RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
       RangeElement: fromI=NumberConstant ('..' to=NumberConstant)?;
 

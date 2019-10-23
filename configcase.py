@@ -32,7 +32,7 @@ class ConfigCase:
         self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
-        self.symbols = {} # {string: Z3Expr}
+        self.symbols = {} # {string: Z3Expr}, including starting with '_'
         self.args = {} # {Z3Expr: [ (Z3expr) ]}
         self.symbol_types = {} # {string: string} symbol -> idp_type
         self.interpreted = {} # from structure: {string: True}
@@ -46,6 +46,11 @@ class ConfigCase:
         self.typeConstraints = []
         
         idp.translate(self)
+        
+        ##TODO remove dead code
+        #self.symbols = {str(k): v.translated for k, v in idp.vocabulary.symbol_decls.items() if v.is_var}
+        #print("missing", {k:v for k,v in self.symbols.items() if k not in self.symbols2})
+        #print("added", {k:v for k,v in self.symbols2.items() if k not in self.symbols})
 
         # remove atoms based only on interpreted symbols
         self.atoms = {k:v for (k,v) in self.atoms.items() \
@@ -56,12 +61,10 @@ class ConfigCase:
     # Helpers for translating idp code
     #################
 
-    def Const(self, txt: str, sort, normal=False):
+    def Const(self, txt: str, sort):
         const = self.symbols.setdefault(txt, Const(txt, sort))
-        if normal: # this is a declared constant
-            const.normal = True
-            if not txt.startswith('_'):
-                self.atoms[txt] = const
+        if not txt.startswith('_'):
+            self.atoms[txt] = const
         return const
 
     def EnumSort(self, name, objects):
@@ -81,7 +84,6 @@ class ConfigCase:
         self.args[out] = args
         for arg in list(args):
             expr = out(*arg)
-            expr.normal = True
             if not str(expr).startswith('_'):
                 self.atoms[str(expr)] = expr
             if restrictive:
