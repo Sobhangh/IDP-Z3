@@ -288,6 +288,7 @@ class Rule(object):
         self.args = kwargs.pop('args')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
+        # .translated
 
     def annotate(self, symbol_decls, free_vars):
         f_v = free_vars.copy() # shallow copy
@@ -320,9 +321,10 @@ class Rule(object):
         outp, vars = with_local_vars(case, env, function, sorts, lvars)
 
         if len(vars) == 0:
-            return And(outp)
+            self.translated = And(outp)
         else:
-            return Exists(vars, And(outp))
+            self.translated = Exists(vars, And(outp))
+        return self.translated
 
 # Expressions
 
@@ -347,9 +349,10 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[THEN].type
 
     def translate(self, case: ConfigCase, env: Environment):
-        return If(self.sub_exprs[IfExpr.IF  ].translate(case, env)
-                , self.sub_exprs[IfExpr.THEN].translate(case, env)
-                , self.sub_exprs[IfExpr.ELSE].translate(case, env))
+        self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate(case, env)
+                            , self.sub_exprs[IfExpr.THEN].translate(case, env)
+                            , self.sub_exprs[IfExpr.ELSE].translate(case, env))
+        return self.translated
 
 def expand_formula(vars, sorts, f, case, env):
     form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
@@ -427,28 +430,26 @@ class AQuantification(Expression):
             if len(finalvars) > 0: # not fully expanded !
                 out = ForAll(finalvars, forms)
                 if env.level==0: case.mark_atom(self, out)
-                return out
+                self.translated = out
             else:
                 if env.level==0: case.mark_atom(self, forms)
-                return forms
+                self.translated = forms
         else:
             forms = Or(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !
                 out = Exists(finalvars, forms)
                 if env.level==0: case.mark_atom(self, out)
-                return out
+                self.translated = out
             else:
                 if env.level==0: case.mark_atom(self, forms)
-                return forms
+                self.translated = forms
+        return self.translated
 
 class BinaryOperator(Expression):
     MAP = { '&': lambda x, y: And(x, y),
             '|': lambda x, y: Or(x, y),
             '∧': lambda x, y: And(x, y),
             '∨': lambda x, y: Or(x, y),
-            '=>': lambda x, y: Or(Not(x), y),
-            '<=': lambda x, y: Or(x, Not(y)),
-            '<=>': lambda x, y: x == y,
             '⇒': lambda x, y: Or(Not(x), y),
             '⇐': lambda x, y: Or(x, Not(y)),
             '⇔': lambda x, y: x == y,
@@ -461,9 +462,6 @@ class BinaryOperator(Expression):
             '=': lambda x, y: x == y,
             '<': lambda x, y: x < y,
             '>': lambda x, y: x > y,
-            '=<': lambda x, y: x <= y,
-            '>=': lambda x, y: x >= y,
-            '~=': lambda x, y: Not(x == y),
             '≤': lambda x, y: x <= y,
             '≥': lambda x, y: x >= y,
             '≠': lambda x, y: Not(x == y)
@@ -472,27 +470,28 @@ class BinaryOperator(Expression):
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
         self.operator = kwargs.pop('operator')
+        self.operator = list(map(\ 
+            lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
+                "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
+                "∨" if op == "|" else "∧" if op == "&" else op
+            , self.operator))
 
     def __str__(self):
         out = str(self.sub_exprs[0])
         for i in range(1, len(self.sub_exprs)):
-            op = self.operator[i-1]
-            op = "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else op
-            op = "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else op
-            op = "∨" if op == "|" else "∧" if op == "&" else op
-            out = out + " " + op + " " + str(self.sub_exprs[i])
+            out = out + " " + self.operator[i-1] + " " + str(self.sub_exprs[i])
         return out
 
     def annotate(self, symbol_decls, free_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, free_vars)
-        self.type = 'Bool' if self.operator[0] in '&|^∨⇒⇐⇔' or self.operator[0] in ['=>', '<=', '<=>'] \
-               else 'Bool' if self.operator[0] in '=<>≤≥≠'  or self.operator[0] in ['=<', '>=', '~='] \
+        self.type = 'Bool' if self.operator[0] in '&|^∨⇒⇐⇔' \
+               else 'Bool' if self.operator[0] in '=<>≤≥≠' \
                else 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
 
     def subtences(self):
         #TODO collect subtences of aggregates within comparisons
-        return {str(self): self} if self.operator[0] in '=<>≤≥≠'  or self.operator[0] in ['=<', '>=', '~='] \
+        return {str(self): self} if self.operator[0] in '=<>≤≥≠' \
             else super().subtences()
 
     def translate(self, case: ConfigCase, env: Environment):
@@ -503,7 +502,7 @@ class BinaryOperator(Expression):
             atom = x==y
             case.mark_atom(self, atom)
             out = Not(atom)
-        elif self.operator[0] in ['=', '<', '>', '=<', '>=', '~=', "≤", "≥", "≠"]:
+        elif self.operator[0] in '=<>≤≥≠':
             out = []
             for i in range(1, len(self.sub_exprs)):
                 x = self.sub_exprs[i-1].translate(case, env)
@@ -525,7 +524,8 @@ class BinaryOperator(Expression):
             for i in range(1, len(self.sub_exprs)):
                 function = BinaryOperator.MAP[self.operator[i - 1]]
                 out = function(out, self.sub_exprs[i].translate(case, env))
-        return out
+        self.translated = out
+        return self.translated
 
 class AImplication(BinaryOperator): pass
 class AEquivalence(BinaryOperator): pass
@@ -556,7 +556,8 @@ class AUnary(object):
     def translate(self, case: ConfigCase, env: Environment):
         out = self.sub_exprs[0].translate(case, env)
         function = AUnary.MAP[self.operator]
-        return function(out)
+        self.translated = function(out)
+        return self.translated
 
 
 class AAggregate(Expression):
@@ -599,7 +600,8 @@ class AAggregate(Expression):
         fvars, forms = expand_formula(self.vars, self.sorts, form, case, env)
         if len(fvars) > 0:
             raise Exception('Can only quantify over finite domains')
-        return Sum(forms)
+        self.translated = Sum(forms)
+        return self.translated
 
 
 class AppliedSymbol(Expression):
@@ -623,17 +625,19 @@ class AppliedSymbol(Expression):
     def translate(self, case: ConfigCase, env: Environment):
         if self.s.name == 'abs':
             arg = self.sub_exprs[0].translate(case,env)
-            return If(arg >= 0, arg, -arg)
-        s = self.s.translate(case, env)
-        arg = [x.translate(case, env) for x in self.sub_exprs]
-        out = s(arg)
-        if hasattr(s, 'interpretation'):
-            out.interpretation = s.interpretation(0, arg)
-            case.mark_atom(self, out)
-            return out.interpretation
+            self.translated = If(arg >= 0, arg, -arg)
         else:
-            case.mark_atom(self, out)
-            return out
+            s = self.s.translate(case, env)
+            arg = [x.translate(case, env) for x in self.sub_exprs]
+            out = s(arg)
+            if hasattr(s, 'interpretation'):
+                out.interpretation = s.interpretation(0, arg)
+                case.mark_atom(self, out)
+                self.translated = out.interpretation
+            else:
+                case.mark_atom(self, out)
+                self.translated = out
+        return self.translated
 
 class Variable(Expression):
     def __init__(self, **kwargs):
@@ -653,20 +657,22 @@ class Variable(Expression):
 
     def translate(self, case: ConfigCase, env: Environment):
         if self.name == "true":
-            return bool(True)
-        if self.name == "false":
-            return bool(False)
-        out = env.var_scope[self.name]
-        if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
-            # exclude applied symbols
-            try:
-                out.interpretation = out.interpretation(0, []) # if not computed yet
-            except: pass
-            case.mark_atom(self, out)
-            return out.interpretation
+            self.translated = bool(True)
+        elif self.name == "false":
+            self.translated = bool(False)
         else:
-            case.mark_atom(self, out)
-            return out
+            out = env.var_scope[self.name]
+            if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
+                # exclude applied symbols
+                try:
+                    out.interpretation = out.interpretation(0, []) # if not computed yet
+                except: pass
+                case.mark_atom(self, out)
+                self.translated = out.interpretation
+            else:
+                case.mark_atom(self, out)
+                self.translated = out
+        return self.translated
 
 class Symbol(Variable): pass
 
@@ -688,9 +694,10 @@ class NumberConstant(Expression):
 
     def translate(self, case: ConfigCase, env: Environment):
         try:
-            return int(self.number)
+            self.translated = int(self.number)
         except ValueError:
-            return float(self.number)
+            self.translated = float(self.number)
+        return self.translated
 
 class Brackets(Expression):
     def __init__(self, **kwargs):
@@ -705,10 +712,10 @@ class Brackets(Expression):
         self.type = self.sub_exprs[0].type
 
     def translate(self, case: ConfigCase, env: Environment):
-        expr= self.sub_exprs[0].translate(case, env)
+        self.translated = self.sub_exprs[0].translate(case, env)
         if self.reading: 
-            expr.reading = self.reading
-        return expr
+            self.translated.reading = self.reading
+        return self.translated
 
 
 ################################ Structure ###############################
