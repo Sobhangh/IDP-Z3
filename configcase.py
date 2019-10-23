@@ -28,7 +28,7 @@ from utils import *
 
 class ConfigCase:
 
-    def __init__(self, theory):
+    def __init__(self, idp):
         self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
@@ -45,7 +45,7 @@ class ConfigCase:
         self.constraints = {} # {Z3expr: string}
         self.typeConstraints = []
         
-        theory.translate(self)
+        idp.translate(self)
 
         # remove atoms based only on interpreted symbols
         self.atoms = {k:v for (k,v) in self.atoms.items() \

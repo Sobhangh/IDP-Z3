@@ -212,11 +212,17 @@ class Theory(object):
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         # self.symbol_decls : {string: decl}
+        # self.subtences, i.e., sub-sentences.  {string: Expression}
 
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
-        for c in self.constraints: c.annotate(self.symbol_decls, {})
-        for d in self.definitions: d.annotate(self.symbol_decls, {})
+        self.subtences = {} 
+        for e in self.constraints:
+            e.annotate(self.symbol_decls, {})
+            self.subtences.update(e.subtences())
+        for e in self.definitions: 
+            e.annotate(self.symbol_decls, {})
+            self.subtences.update(e.subtences())
 
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.constraints:
@@ -232,6 +238,11 @@ class Definition(object):
 
     def annotate(self, symbol_decls, free_vars):
         for r in self.rules: r.annotate(symbol_decls, free_vars)
+
+    def subtences(self):
+        out = {}
+        for r in self.rules: out.update(r.subtences())
+        return out
 
     def rulePartition(self):
         out = {}
@@ -283,6 +294,9 @@ class Rule(object):
         for v, s in zip(self.vars, self.sorts):
             f_v[v] = symbol_decls[s.name]
         self.body.annotate(symbol_decls, free_vars)
+
+    def subtences(self):
+        return self.body.subtences()
         
     def translate(self, vars, case: ConfigCase, env: Environment):
         args = []
@@ -399,6 +413,10 @@ class AQuantification(Expression):
         for e in self.sub_exprs: e.annotate(symbol_decls, f_v)
         self.type = 'Bool'
 
+    def subtences(self):
+        #TODO optionally add subtences of sub_exprs
+        return {str(self): self}
+
     def translate(self, case: ConfigCase, env: Environment):
         env.level += 1
         finalvars, forms = expand_formula(self.vars, self.sorts, self.sub_exprs[0], case, env)
@@ -471,6 +489,11 @@ class BinaryOperator(Expression):
                else 'Bool' if self.operator[0] in '=<>≤≥≠'  or self.operator[0] in ['=<', '>=', '~='] \
                else 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
+
+    def subtences(self):
+        #TODO collect subtences of aggregates within comparisons
+        return {str(self): self} if self.operator[0] in '=<>≤≥≠'  or self.operator[0] in ['=<', '>=', '~='] \
+            else super().subtences()
 
     def translate(self, case: ConfigCase, env: Environment):
         # chained comparisons -> And()
@@ -592,6 +615,11 @@ class AppliedSymbol(Expression):
         for e in self.sub_exprs: e.annotate(symbol_decls, free_vars)
         self.type = free_vars.get(self.s.name, symbol_decls[self.s.name].type)
 
+    def subtences(self):
+        out = super().subtences() # in case of predicate over boolean
+        if self.type == 'Bool': out[str(self)] = self
+        return out
+
     def translate(self, case: ConfigCase, env: Environment):
         if self.s.name == 'abs':
             arg = self.sub_exprs[0].translate(case,env)
@@ -617,6 +645,11 @@ class Variable(Expression):
         self.type = 'Bool' if self.name in ['true', 'false'] \
             else free_vars[self.name] if self.name in free_vars \
             else symbol_decls[self.name].type
+
+    def subtences(self):
+        return {} if self.name in ['true', 'false'] \
+            else {str(self): self} if self.type == 'Bool' \
+            else {}
 
     def translate(self, case: ConfigCase, env: Environment):
         if self.name == "true":
@@ -650,6 +683,8 @@ class NumberConstant(Expression):
             self.type = 'int'
         except ValueError:
             self.type = 'real'
+
+    def subtences(): return {}
 
     def translate(self, case: ConfigCase, env: Environment):
         try:
