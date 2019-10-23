@@ -84,10 +84,10 @@ theory {
     // General constraints
 
     [The perimeter is the sum of the lengths of the sides]
-    (Perimeter = sum{n[side] : True : Length(n)}).
+    (Perimeter = sum{n[side] : true : Length(n)}).
 
     [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
-    (sum{n[side] : True : Angle(n)} = (Sides-2)*180).
+    (sum{n[side] : true : Angle(n)} = (Sides-2)*180).
 
     [Lengths are positive numbers]
     (!x[side]: 0 =< Length(x)).
