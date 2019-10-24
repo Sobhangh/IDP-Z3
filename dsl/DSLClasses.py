@@ -178,7 +178,6 @@ class SymbolDeclaration(object):
         case.symbol_types[self.name] = self.out.name
         if len(self.args) == 0:
             self.translated = case.Const(self.name, self.out.asZ3(env))
-            case.args[self.translated] = []
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(self.translated, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name
@@ -309,13 +308,14 @@ class Rule(object):
         # .translated
 
     def annotate(self, symbol_decls, free_vars):
-        f_v = free_vars.copy() # shallow copy
-        for v, s in zip(self.vars, self.sorts):
-            f_v[v] = symbol_decls[s.name]
-        self.body.annotate(symbol_decls, free_vars)
+        if self.body:
+            f_v = free_vars.copy() # shallow copy
+            for v, s in zip(self.vars, self.sorts):
+                f_v[v] = symbol_decls[s.name]
+            self.body.annotate(symbol_decls, f_v)
 
     def subtences(self):
-        return self.body.subtences()
+        return self.body.subtences() if self.body else {}
         
     def translate(self, vars, case: ConfigCase, env: Environment):
         args = []
@@ -555,7 +555,7 @@ class ASumMinus(BinaryOperator): pass
 class AMultDiv(BinaryOperator): pass
 class APower(BinaryOperator): pass
 
-class AUnary(object):
+class AUnary(Expression):
     MAP = {'-': lambda x: 0 - x,
            '~': lambda x: Not(x)
           }
@@ -588,7 +588,7 @@ class AAggregate(Expression):
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
-        self.sub_exprs = [self.f, self.out]
+        self.sub_exprs = [self.f, self.out] if self.out else [self.f]
 
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
@@ -748,7 +748,7 @@ class Structure(object):
 
 class Interpretation(object):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
+        self.name = kwargs.pop('name').name
         self.tuples = kwargs.pop('tuples')
         self.default = kwargs.pop('default')
 

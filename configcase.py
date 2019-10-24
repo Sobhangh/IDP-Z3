@@ -33,12 +33,10 @@ class ConfigCase:
         self.valueMap = {"True": True}
 
         self.symbols = {} # {string: Z3Expr}, including starting with '_'
-        self.args = {} # {Z3Expr: [ (Z3expr) ]}
         self.symbol_types = {} # {string: string} symbol -> idp_type
         self.interpreted = {} # from structure: {string: True}
 
         self.atoms = {} # {atom_string: Z3expr} atoms + numeric terms !
-        self.Z3atoms = {} # {Z3_code: Z3expr}
 
         self.assumptions = [] # [atomZ3]
         self.assumptionLs = {} # {literalQ : True} (needed for propagate)
@@ -47,6 +45,12 @@ class ConfigCase:
         
         idp.translate(self)
         
+        """
+        self.atoms2 = {str(k): v.translated for k, v in idp.theory.subtences.items()}
+        print(self.symbols.keys())
+        print("missing", {k:v for k,v in self.atoms.items() if k not in self.atoms2})
+        print("added", {k:v for k,v in self.atoms2.items() if k not in self.atoms})
+        """
         ##TODO remove dead code
         #self.symbols = {str(k): v.translated for k, v in idp.vocabulary.symbol_decls.items() if v.is_var}
         #print("missing", {k:v for k,v in self.symbols.items() if k not in self.symbols2})
@@ -81,7 +85,6 @@ class ConfigCase:
         args = list(itertools.product(*args))
         if not str(out).startswith('_'):
             self.symbols[str(out)] = out
-        self.args[out] = args
         for arg in list(args):
             expr = out(*arg)
             if not str(expr).startswith('_'):
@@ -112,7 +115,6 @@ class ConfigCase:
             atom_string = str(dsl_object)
             atomZ3.atom_string = atom_string
             self.atoms.update({atom_string: atomZ3})
-            self.Z3atoms[str(atomZ3)] = self.atoms[atom_string]
 
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
