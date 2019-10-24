@@ -176,6 +176,7 @@ class SymbolDeclaration(object):
         self.is_var = True #TODO unless interpreted
         # .type : a declaration object, or 'Bool', 'real', 'int'
         # .domain: all possible arguments
+        # .instances: {string: Z3expr} translated applied symbols, not starting with '_'
 
     def __str__(self):
         return ( self.name
@@ -201,20 +202,31 @@ class SymbolDeclaration(object):
     def translate(self, case: ConfigCase, env: Environment):
         case.symbol_types[self.name] = self.out.name
         if len(self.sorts) == 0:
-            self.translated = case.Const(self.name, self.out.asZ3(env), normal=True)
+            self.translated = case.Const(self.name, self.out.translate(env), normal=True)
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(self.translated, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name
                 case.typeConstraints.append(domain)
         elif self.out.name == 'Bool':
-            types = [x.asZ3(env) for x in self.sorts]
+            types = [x.translate(env) for x in self.sorts]
             rel_vars = [t.getRange(env) for t in self.sorts]
             self.translated = case.Predicate(self.name, types, rel_vars, True)
         else:
-            types = [x.asZ3(env) for x in self.sorts] + [self.out.asZ3(env)]
+            types = [x.translate(env) for x in self.sorts] + [self.out.translate(env)]
             rel_vars = [t.getRange(env) for t in self.sorts + [self.out]]
             self.translated = case.Function(self.name, types, rel_vars, True)
         env.var_scope[self.name] = self.translated
+
+        self.instances = {}
+        if not self.name.startswith('_'):
+            if len(self.sorts) == 0:
+                self.translated.normal = True
+                self.instances[self.name] = self.translated
+            else:
+                for arg in list(self.domain):
+                    expr = self.translated(*[a.translate(case, env) for a in arg])
+                    expr.normal = True
+                    self.instances[str(expr)] = expr
 
 
 class Sort(object):
@@ -224,7 +236,7 @@ class Sort(object):
     def __str__(self):
         return self.name
 
-    def asZ3(self, env: Environment):
+    def translate(self, env: Environment):
         if self.name in env.type_scope:
             return env.type_scope[self.name]
         elif self.name == "int":
@@ -242,7 +254,7 @@ class Sort(object):
         elif self.name == "real":
             return []
         else:
-            return universe(self.asZ3(env))
+            return universe(self.translate(env))
 
 
 ################################ Theory ###############################
@@ -426,7 +438,7 @@ def with_local_vars(case, env, f, sorts, vars):
     z3vars = []
     assert len(sorts) == len(vars)
     for var, sort in zip(vars, sorts):
-        z3var = Const(var, sort.asZ3(env))
+        z3var = Const(var, sort.translate(env))
         if var in env.var_scope:
             backup[var] = env.var_scope[var]
         else:

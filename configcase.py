@@ -44,21 +44,20 @@ class ConfigCase:
         self.typeConstraints = []
         
         idp.translate(self)
-        
-        """
-        self.atoms2 = {str(k): v.translated for k, v in idp.theory.subtences.items()}
-        print(self.symbols.keys())
-        print("missing", {k:v for k,v in self.atoms.items() if k not in self.atoms2})
-        print("added", {k:v for k,v in self.atoms2.items() if k not in self.atoms})
-        """
+
+        for v in idp.vocabulary.symbol_decls.values():
+            if v.is_var:
+                self.atoms.update(v.instances)
+        self.atoms.update( {str(k): v.translated for k, v in idp.theory.subtences.items()})
+        # remove atoms based only on interpreted symbols
+        self.atoms = {k:v for (k,v) in self.atoms.items() \
+            if symbols_of(v, self.symbols, self.interpreted) }
+
         ##TODO remove dead code
         #self.symbols = {str(k): v.translated for k, v in idp.vocabulary.symbol_decls.items() if v.is_var}
         #print("missing", {k:v for k,v in self.symbols.items() if k not in self.symbols2})
         #print("added", {k:v for k,v in self.symbols2.items() if k not in self.symbols})
 
-        # remove atoms based only on interpreted symbols
-        self.atoms = {k:v for (k,v) in self.atoms.items() \
-            if symbols_of(v, self.symbols, self.interpreted) }
 
 
     #################
@@ -67,10 +66,6 @@ class ConfigCase:
 
     def Const(self, txt: str, sort, normal=False):
         const = self.symbols.setdefault(txt, Const(txt, sort))
-        if normal: # this is a declared constant
-            const.normal = True # sent to the client !
-            if not txt.startswith('_'):
-                self.atoms[txt] = const
         return const
 
     def EnumSort(self, name, objects):
@@ -89,9 +84,6 @@ class ConfigCase:
             self.symbols[str(out)] = out
         for arg in list(args):
             expr = out(*arg)
-            expr.normal = True
-            if not str(expr).startswith('_'):
-                self.atoms[str(expr)] = expr
             if restrictive:
                 exp = in_list(expr, vals)
                 self.typeConstraints.append(exp)
@@ -117,7 +109,6 @@ class ConfigCase:
 
             atom_string = str(dsl_object)
             atomZ3.atom_string = atom_string
-            self.atoms.update({atom_string: atomZ3})
 
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
