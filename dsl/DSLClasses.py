@@ -8,7 +8,7 @@ from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, 
 from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
-from utils import is_number, universe, applyTo
+from utils import is_number, universe, applyTo, log
 from ASTNode import Expression
 
 class DSLException(Exception):
@@ -29,6 +29,7 @@ class Environment:
 
 class Idp(object):
     def __init__(self, **kwargs):
+        log("parsing done")
         self.vocabulary = kwargs.pop('vocabulary')
         self.theory = kwargs.pop('theory')
         self.structure = kwargs.pop('structure')
@@ -41,13 +42,17 @@ class Idp(object):
             self.view = View(viewType='normal')
 
         self.theory.annotate(self.vocabulary)
+        log("annotated")
 
     def translate(self, case: ConfigCase):
         env = Environment(self)
         self.vocabulary.translate(case, env)
+        log("vocabulary translated")
         if self.structure:
             self.structure.translate(case, env)
+            log("structure translated")
         self.theory.translate(case, env)
+        log("theory translated")
         self.goal.translate(case)
         self.view.translate(case)
 
@@ -177,7 +182,7 @@ class SymbolDeclaration(object):
     def translate(self, case: ConfigCase, env: Environment):
         case.symbol_types[self.name] = self.out.name
         if len(self.args) == 0:
-            self.translated = case.Const(self.name, self.out.asZ3(env))
+            self.translated = case.Const(self.name, self.out.asZ3(env), normal=True)
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(self.translated, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name
@@ -243,6 +248,7 @@ class Theory(object):
 
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.constraints:
+            log("translating " + str(i)[:20])
             c = i.translate(case, env)
             case.add(c, str(i))
         for d in self.definitions:
@@ -270,6 +276,7 @@ class Definition(object):
     def translate(self, case: ConfigCase, env: Environment):
         partition = self.rulePartition()
         for symbol in partition.keys():
+            log("symbol " + symbol)
             rules = partition[symbol]
             symbol = Symbol(name=symbol)
             vars = self.makeGlobalVars(symbol, case, env)
@@ -318,6 +325,7 @@ class Rule(object):
         return self.body.subtences() if self.body else {}
         
     def translate(self, vars, case: ConfigCase, env: Environment):
+        log("translating rule " + str(self.body)[:20])
         args = []
         if self.args is not None:
             args = self.args.sub_exprs

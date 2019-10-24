@@ -37,7 +37,7 @@ JSONEncoder.default = _default # Replace it.
 start = time.time()
 def log(action):
     global start
-    print(action, time.time()-start)
+    print("*** ", action, time.time()-start)
     start = time.time()
 
 

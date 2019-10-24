@@ -65,10 +65,12 @@ class ConfigCase:
     # Helpers for translating idp code
     #################
 
-    def Const(self, txt: str, sort):
+    def Const(self, txt: str, sort, normal=False):
         const = self.symbols.setdefault(txt, Const(txt, sort))
-        if not txt.startswith('_'):
-            self.atoms[txt] = const
+        if normal: # this is a declared constant
+            const.normal = True
+            if not txt.startswith('_'):
+                self.atoms[txt] = const
         return const
 
     def EnumSort(self, name, objects):
@@ -87,6 +89,7 @@ class ConfigCase:
             self.symbols[str(out)] = out
         for arg in list(args):
             expr = out(*arg)
+            expr.normal = True
             if not str(expr).startswith('_'):
                 self.atoms[str(expr)] = expr
             if restrictive:

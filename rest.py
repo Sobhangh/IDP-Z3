@@ -79,6 +79,7 @@ def caseOf(code):
 class eval(Resource):
     def post(self):
         global cases
+        log("start /eval")
         with z3lock:
             try:
                 args = parser.parse_args()
@@ -116,6 +117,7 @@ class eval(Resource):
                         case = ConfigCase(idpModel)
                     case.loadStructureFromJson(active)
                     out = case.abstract()
+                log("end /eval " + method)
                 return out
             except Exception as exc:
                 return str(exc)
@@ -133,6 +135,7 @@ class evalWithGraph(eval): # subcclass that generates call graphs
 class meta(Resource):
     def post(self):
         global cases
+        log("start /meta")
         with z3lock:
             try:
                 args = parser.parse_args()
