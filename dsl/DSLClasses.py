@@ -8,7 +8,7 @@ from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, 
 from z3.z3 import _py2expr
 
 from configcase import ConfigCase, singleton, in_list
-from utils import is_number, universe, applyTo, log
+from utils import is_number, universe, applyTo, log, itertools
 from ASTNode import Expression
 
 class DSLException(Exception):
@@ -94,6 +94,7 @@ class ConstructedTypeDeclaration(object):
             self.symbol_decls[c.name] = self
         # .type = None
         # .translated
+        # .range # list of constructors
 
     def __str__(self):
         return ( "type " + self.name
@@ -103,6 +104,7 @@ class ConstructedTypeDeclaration(object):
 
     def annotate(self, symbol_decls):
         self.type = None
+        self.range = self.constructors #TODO constructor functions
 
     def translate(self, case: ConfigCase, env: Environment):
         self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
@@ -124,6 +126,9 @@ class Constructor(object):
     
     def __str__(self): return self.name
 
+    def translate(self, case, env):
+        return self.translated
+
 
 class RangeDeclaration(object):
     def __init__(self, **kwargs):
@@ -131,6 +136,14 @@ class RangeDeclaration(object):
         self.elements = kwargs.pop('elements')
         self.symbol_decls = {self.name : self }
         self.is_var = False
+
+        self.range = []
+        for x in self.elements:
+            if x.toI is None:
+                self.range.append(x.fromI)
+            else: #TODO test that it is an integer ?
+                for i in range(x.fromI.translated, x.toI.translated + 1):
+                    self.range.append(NumberConstant(number=str(i)))
         # self.type = None
 
     def annotate(self, symbol_decls): 
@@ -139,17 +152,11 @@ class RangeDeclaration(object):
     def __str__(self):
         return ( "type " + self.name
                + " = {"
-               + ";".join([str(x.fromI) + ("" if x.to is None else ".."+ str(x.to)) for x in self.elements])
+               + ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
                + "}")
 
     def translate(self, case: ConfigCase, env: Environment):
-        els = []
-        for x in self.elements:
-            if x.to is None:
-                els.append(x.fromI.translate(case, env))
-            else:
-                for i in range(x.fromI.translate(case, env), x.to.translate(case, env) + 1):
-                    els.append(i)
+        els = [e.translated for e in self.range]
         case.enums[self.name] = els
         if all(map(lambda x: type(x) == int, els)):
             env.type_scope[self.name] = IntSort()
@@ -161,39 +168,51 @@ class RangeDeclaration(object):
 class SymbolDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name # a string, not a Symbol
-        self.args = kwargs.pop('args')
+        self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
             self.out = Sort(name='Bool')
         self.symbol_decls = {self.name : self }
         self.is_var = True #TODO unless interpreted
-        # self.type : a declaration object, or 'Bool', 'real', 'int', or None
+        # .type : a declaration object, or 'Bool', 'real', 'int'
+        # .domain: all possible arguments
 
     def __str__(self):
         return ( self.name
-               + ("({})".format(",".join(map(str, self.args))) if 0<len(self.args) else "")
+               + ("({})".format(",".join(map(str, self.sorts))) if 0<len(self.sorts) else "")
                + ("" if self.out.name == 'Bool' else " : " + self.out.name)
         )
 
-    def annotate(self, symbol_decls): 
-        self.type = symbol_decls.get(self.out.name, 
-                    self.out.name if self.out.name in ['Bool', 'real', 'int'] else None)
+    def annotate(self, symbol_decls):
+        self.domain = list(itertools.product(*[symbol_decls[s.name].range for s in self.sorts]))
+        if self.out.name == 'Bool':
+            self.type = 'Bool'
+            self.range = [Symbol(name="true"), Symbol(name="false")] #TODO annotate them 
+        elif self.out.name in ['real', 'int']:
+            self.type = self.out.name
+            self.range = None
+        elif self.out.name in symbol_decls:
+            self.type = symbol_decls[self.out.name]
+            self.range = self.type.range
+        else:
+            assert False, "Unknown type: " + self.out.name
+        
 
     def translate(self, case: ConfigCase, env: Environment):
         case.symbol_types[self.name] = self.out.name
-        if len(self.args) == 0:
+        if len(self.sorts) == 0:
             self.translated = case.Const(self.name, self.out.asZ3(env), normal=True)
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(self.translated, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name
                 case.typeConstraints.append(domain)
         elif self.out.name == 'Bool':
-            types = [x.asZ3(env) for x in self.args]
-            rel_vars = [t.getRange(env) for t in self.args]
+            types = [x.asZ3(env) for x in self.sorts]
+            rel_vars = [t.getRange(env) for t in self.sorts]
             self.translated = case.Predicate(self.name, types, rel_vars, True)
         else:
-            types = [x.asZ3(env) for x in self.args] + [self.out.asZ3(env)]
-            rel_vars = [t.getRange(env) for t in self.args + [self.out]]
+            types = [x.asZ3(env) for x in self.sorts] + [self.out.asZ3(env)]
+            rel_vars = [t.getRange(env) for t in self.sorts + [self.out]]
             self.translated = case.Function(self.name, types, rel_vars, True)
         env.var_scope[self.name] = self.translated
 
@@ -259,8 +278,8 @@ class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
 
-    def annotate(self, symbol_decls, free_vars):
-        for r in self.rules: r.annotate(symbol_decls, free_vars)
+    def annotate(self, symbol_decls, q_vars):
+        for r in self.rules: r.annotate(symbol_decls, q_vars)
 
     def subtences(self):
         out = {}
@@ -314,12 +333,12 @@ class Rule(object):
         self.body = kwargs.pop('body')
         # .translated
 
-    def annotate(self, symbol_decls, free_vars):
+    def annotate(self, symbol_decls, q_vars):
         if self.body:
-            f_v = free_vars.copy() # shallow copy
+            q_v = q_vars.copy() # shallow copy
             for v, s in zip(self.vars, self.sorts):
-                f_v[v] = symbol_decls[s.name]
-            self.body.annotate(symbol_decls, f_v)
+                q_v[v] = symbol_decls[s.name]
+            self.body.annotate(symbol_decls, q_v)
 
     def subtences(self):
         return self.body.subtences() if self.body else {}
@@ -369,8 +388,8 @@ class IfExpr(Expression):
     def __str__(self):
         return "if " + str(self.if_f) + " then " + str(self.then_f) + " else " + str(self.else_f)
 
-    def annotate(self, symbol_decls, free_vars):
-        for e in self.sub_exprs: e.annotate(symbol_decls, free_vars)
+    def annotate(self, symbol_decls, q_vars):
+        for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
         #TODO verify consistency
         self.type = self.sub_exprs[THEN].type
 
@@ -435,11 +454,11 @@ class AQuantification(Expression):
         out += " : " + str(self.f)
         return out
 
-    def annotate(self, symbol_decls, free_vars):
-        f_v = free_vars.copy() # shallow copy
+    def annotate(self, symbol_decls, q_vars):
+        q_v = q_vars.copy() # shallow copy
         for v, s in zip(self.vars, self.sorts):
-            f_v[v] = symbol_decls[s.name]
-        for e in self.sub_exprs: e.annotate(symbol_decls, f_v)
+            q_v[v] = symbol_decls[s.name]
+        for e in self.sub_exprs: e.annotate(symbol_decls, q_v)
         self.type = 'Bool'
 
     def subtences(self):
@@ -508,8 +527,8 @@ class BinaryOperator(Expression):
             out = out + " " + self.operator[i-1] + " " + str(self.sub_exprs[i])
         return out
 
-    def annotate(self, symbol_decls, free_vars):
-        for e in self.sub_exprs: e.annotate(symbol_decls, free_vars)
+    def annotate(self, symbol_decls, q_vars):
+        for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
         self.type = 'Bool' if self.operator[0] in '&|^∨⇒⇐⇔' \
                else 'Bool' if self.operator[0] in '=<>≤≥≠' \
                else 'real' if any(e.type == 'real' for e in self.sub_exprs) \
@@ -575,8 +594,8 @@ class AUnary(Expression):
     def __str__(self):
         return self.operator + str(self.f)
 
-    def annotate(self, symbol_decls, free_vars):
-        for e in self.sub_exprs: e.annotate(symbol_decls, free_vars)
+    def annotate(self, symbol_decls, q_vars):
+        for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
         self.type = self.sub_exprs[0].type
 
     def translate(self, case: ConfigCase, env: Environment):
@@ -610,11 +629,11 @@ class AAggregate(Expression):
         out += "}"
         return out
 
-    def annotate(self, symbol_decls, free_vars):
-        f_v = free_vars.copy() # shallow copy
+    def annotate(self, symbol_decls, q_vars):
+        q_v = q_vars.copy() # shallow copy
         for v, s in zip(self.vars, self.sorts):
-            f_v[v] = symbol_decls[s.name]
-        for e in self.sub_exprs: e.annotate(symbol_decls, f_v)
+            q_v[v] = symbol_decls[s.name]
+        for e in self.sub_exprs: e.annotate(symbol_decls, q_v)
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
 
     def translate(self, case: ConfigCase, env: Environment):
@@ -639,9 +658,9 @@ class AppliedSymbol(Expression):
     def __str__(self):
         return str(self.s) + "(" + ",".join([str(x) for x in self.args.sub_exprs]) + ")"
 
-    def annotate(self, symbol_decls, free_vars):
-        for e in self.sub_exprs: e.annotate(symbol_decls, free_vars)
-        self.type = free_vars.get(self.s.name, symbol_decls[self.s.name].type)
+    def annotate(self, symbol_decls, q_vars):
+        for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
+        self.type = q_vars.get(self.s.name, symbol_decls[self.s.name].type)
 
     def subtences(self):
         out = super().subtences() # in case of predicate over boolean
@@ -668,12 +687,18 @@ class AppliedSymbol(Expression):
 class Variable(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+        if self.name == "true":
+            self.type = 'Bool'
+            self.translated = bool(True)
+        elif self.name == "false":
+            self.type = 'Bool'
+            self.translated = bool(False)
 
     def __str__(self): return self.name
 
-    def annotate(self, symbol_decls, free_vars):
+    def annotate(self, symbol_decls, q_vars):
         self.type = 'Bool' if self.name in ['true', 'false'] \
-            else free_vars[self.name] if self.name in free_vars \
+            else q_vars[self.name] if self.name in q_vars \
             else symbol_decls[self.name].type
 
     def subtences(self):
@@ -682,11 +707,7 @@ class Variable(Expression):
             else {}
 
     def translate(self, case: ConfigCase, env: Environment):
-        if self.name == "true":
-            self.translated = bool(True)
-        elif self.name == "false":
-            self.translated = bool(False)
-        else:
+        if not hasattr(self, 'translated'):
             out = env.var_scope[self.name]
             if hasattr(out, 'interpretation') and (not hasattr(out, 'arity') or out.arity() == 0):
                 # exclude applied symbols
@@ -705,24 +726,21 @@ class Symbol(Variable): pass
 class NumberConstant(Expression):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
+        try:
+            self.translated = int(self.number)
+            self.type = 'int'
+        except ValueError:
+            self.translated = float(self.number)
+            self.type = 'real'
 
     def __str__(self):
         return str(self.number)
 
-    def annotate(self, symbol_decls, free_vars):
-        try:
-            x = int(self.number)
-            self.type = 'int'
-        except ValueError:
-            self.type = 'real'
+    def annotate(self, symbol_decls, q_vars): pass
 
     def subtences(): return {}
 
     def translate(self, case: ConfigCase, env: Environment):
-        try:
-            self.translated = int(self.number)
-        except ValueError:
-            self.translated = float(self.number)
         return self.translated
 
 class Brackets(Expression):
@@ -733,8 +751,8 @@ class Brackets(Expression):
 
     def __str__(self): return "(" + str(self.f) + ")"
 
-    def annotate(self, symbol_decls, free_vars):
-        for e in self.sub_exprs: e.annotate(symbol_decls, free_vars)
+    def annotate(self, symbol_decls, q_vars):
+        for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
         self.type = self.sub_exprs[0].type
 
     def translate(self, case: ConfigCase, env: Environment):

@@ -68,7 +68,7 @@ class ConfigCase:
     def Const(self, txt: str, sort, normal=False):
         const = self.symbols.setdefault(txt, Const(txt, sort))
         if normal: # this is a declared constant
-            const.normal = True
+            const.normal = True # sent to the client !
             if not txt.startswith('_'):
                 self.atoms[txt] = const
         return const

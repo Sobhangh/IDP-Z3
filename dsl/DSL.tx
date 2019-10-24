@@ -16,9 +16,9 @@ Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
     ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
       Constructor: name=ID;
     RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
-      RangeElement: fromI=NumberConstant ('..' to=NumberConstant)?;
+      RangeElement: fromI=NumberConstant ('..' toI=NumberConstant)?;
 
-    SymbolDeclaration: name=Symbol ('(' args*=Sort[','] ')')? (':' out=Sort)?;
+    SymbolDeclaration: name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
       Sort: name=ID;
       Symbol: name=ID;
 
