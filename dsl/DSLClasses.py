@@ -1,6 +1,7 @@
 import itertools as it
 import os
 import re
+import sys
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
@@ -65,8 +66,6 @@ class Vocabulary(object):
         self.declarations = kwargs.pop('declarations')
 
         self.symbol_decls = {}
-        for s in self.declarations: self.symbol_decls.update(s.symbol_decls)
-
         for s in self.declarations: s.annotate(self.symbol_decls)
 
     def __str__(self):
@@ -87,11 +86,7 @@ class ConstructedTypeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
-        self.symbol_decls = {self.name : self }
         self.is_var = False
-        for c in self.constructors:
-            c.type = self
-            self.symbol_decls[c.name] = self
         # .type = None
         # .translated
         # .range # list of constructors
@@ -103,6 +98,10 @@ class ConstructedTypeDeclaration(object):
                + "}")
 
     def annotate(self, symbol_decls):
+        symbol_decls[self.name] = self
+        for c in self.constructors:
+            c.type = self
+            symbol_decls[c.name] = c
         self.type = None
         self.range = self.constructors #TODO constructor functions
 
@@ -121,10 +120,11 @@ class Constructor(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.is_var = False
+        self.str = sys.intern(self.name)
         # .type
         # .translated
     
-    def __str__(self): return self.name
+    def __str__(self): return self.str
 
     def translate(self, case, env):
         return self.translated
@@ -134,7 +134,6 @@ class RangeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.elements = kwargs.pop('elements')
-        self.symbol_decls = {self.name : self }
         self.is_var = False
 
         self.range = []
@@ -147,6 +146,7 @@ class RangeDeclaration(object):
         # self.type = None
 
     def annotate(self, symbol_decls): 
+        symbol_decls[self.name] = self
         self.type = None
 
     def __str__(self):
@@ -172,7 +172,6 @@ class SymbolDeclaration(object):
         self.out = kwargs.pop('out')
         if self.out is None:
             self.out = Sort(name='Bool')
-        self.symbol_decls = {self.name : self }
         self.is_var = True #TODO unless interpreted
         # .type : a declaration object, or 'Bool', 'real', 'int'
         # .domain: all possible arguments
@@ -185,6 +184,7 @@ class SymbolDeclaration(object):
         )
 
     def annotate(self, symbol_decls):
+        symbol_decls[self.name] = self
         self.domain = list(itertools.product(*[symbol_decls[s.name].range for s in self.sorts]))
         if self.out.name == 'Bool':
             self.type = 'Bool'
@@ -232,9 +232,9 @@ class SymbolDeclaration(object):
 class Sort(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+        self.str = sys.intern(self.name)
 
-    def __str__(self):
-        return self.name
+    def __str__(self): return self.str
 
     def translate(self, env: Environment):
         if self.name in env.type_scope:
@@ -394,11 +394,11 @@ class IfExpr(Expression):
         self.if_f = kwargs.pop('if_f')
         self.then_f = kwargs.pop('then_f')
         self.else_f = kwargs.pop('else_f')
+        self.str = sys.intern("if " + self.if_f.str + " then " + self.then_f.str + " else " + self.else_f.str)
+
         self.sub_exprs = [self.if_f, self.then_f, self.else_f]
         # self.type
 
-    def __str__(self):
-        return "if " + str(self.if_f) + " then " + str(self.then_f) + " else " + str(self.else_f)
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -458,13 +458,10 @@ class AQuantification(Expression):
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
+        self.str = sys.intern(self.q \
+            + "".join([v + "[" + s.str + "]" for v, s in zip(self.vars, self.sorts)]) \
+            + " : " + self.f.str)
         self.sub_exprs = [self.f]
-
-    def __str__(self):
-        out  = self.q
-        out += "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
-        out += " : " + str(self.f)
-        return out
 
     def annotate(self, symbol_decls, q_vars):
         q_v = q_vars.copy() # shallow copy
@@ -532,12 +529,11 @@ class BinaryOperator(Expression):
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
                 "∨" if op == "|" else "∧" if op == "&" else op
             , self.operator))
-
-    def __str__(self):
-        out = str(self.sub_exprs[0])
+        temp = self.sub_exprs[0].str
         for i in range(1, len(self.sub_exprs)):
-            out = out + " " + self.operator[i-1] + " " + str(self.sub_exprs[i])
-        return out
+            temp += " " + self.operator[i-1] + " " + self.sub_exprs[i].str
+        self.str = sys.intern(temp)
+
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -601,10 +597,8 @@ class AUnary(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
+        self.str = sys.intern(self.operator + self.f.str)
         self.sub_exprs = [self.f]
-
-    def __str__(self):
-        return self.operator + str(self.f)
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -627,19 +621,19 @@ class AAggregate(Expression):
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
+
+        out = self.aggtype + "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
+        out += ":" + str(self.f)
+        if self.out: out += " : " + str(self.out)
+        out += "}"
+        self.str = sys.intern(out)
+
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]
 
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
         if self.aggtype != "sum" and self.out is not None:
             raise Exception("Can't have output variable for #")
-
-    def __str__(self):
-        out = self.aggtype + "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
-        out += ":" + str(self.f)
-        if self.out: out += " : " + str(self.out)
-        out += "}"
-        return out
 
     def annotate(self, symbol_decls, q_vars):
         q_v = q_vars.copy() # shallow copy
@@ -665,10 +659,8 @@ class AppliedSymbol(Expression):
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
+        self.str = sys.intern(self.s.str + "(" + ",".join([x.str for x in self.args.sub_exprs]) + ")")
         self.sub_exprs = self.args.sub_exprs
-
-    def __str__(self):
-        return str(self.s) + "(" + ",".join([str(x) for x in self.args.sub_exprs]) + ")"
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -699,14 +691,13 @@ class AppliedSymbol(Expression):
 class Variable(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+        self.str = sys.intern(self.name)
         if self.name == "true":
             self.type = 'Bool'
             self.translated = bool(True)
         elif self.name == "false":
             self.type = 'Bool'
             self.translated = bool(False)
-
-    def __str__(self): return self.name
 
     def annotate(self, symbol_decls, q_vars):
         self.type = 'Bool' if self.name in ['true', 'false'] \
@@ -738,15 +729,13 @@ class Symbol(Variable): pass
 class NumberConstant(Expression):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
+        self.str = sys.intern(self.number)
         try:
             self.translated = int(self.number)
             self.type = 'int'
         except ValueError:
             self.translated = float(self.number)
             self.type = 'real'
-
-    def __str__(self):
-        return str(self.number)
 
     def annotate(self, symbol_decls, q_vars): pass
 
@@ -759,9 +748,8 @@ class Brackets(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.reading = kwargs.pop('reading')
+        self.str = sys.intern("(" + self.f.str + ")")
         self.sub_exprs = [self.f]
-
-    def __str__(self): return "(" + str(self.f) + ")"
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
