@@ -70,17 +70,18 @@ def mk_solver(theory, atoms):
 
 def reifier(atoms, solver):
     # creates a proposition variable for each boolean expression
-    # returns ({atomZ3: predicate}, {predicate: atomZ3})
+    # returns ({atom: predicateZ3}, {predicateZ3: atom})
     count, (reify, unreify) = 0, ({}, {})
-    for atomZ3 in atoms:
+    for atom in atoms:
+        atomZ3 = atom.translated
         if not is_bool(atomZ3):
-            reify[atomZ3] = atomZ3
-            unreify[atomZ3] = atomZ3
+            reify[atom] = atomZ3
+            unreify[atomZ3] = atom
         else:
             count += 1
             const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
-            reify[atomZ3] = const
-            unreify[const] = atomZ3
+            reify[atom] = const
+            unreify[const] = atom
             if hasattr(atomZ3, 'interpretation'):
                 solver.add(const == atomZ3.interpretation)
             else:
@@ -114,8 +115,12 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
             # try to unreify it
             if consq in unreify:
                 out[LiteralQ(t, unreify[consq])] = True
+            elif is_eq(consq):
+                symbol = consq.children()[0]
+                if symbol in unreify:
+                    out[ LiteralQ(t, Equality(unreify[symbol], consq.children()[1])) ] = True
             else:
-                out[LiteralQ(t, consq )] = True
+                print("???", str(consq))
         return out
     # else: # unknown satisfiability, e.g. due to non-linear equations
     # restart solver and continue 
@@ -141,8 +146,10 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                     t, consq = False, consq.arg(0)
                 if consq in unreify:
                     out[LiteralQ(t, unreify[consq])] = True
-                else:
-                    out[LiteralQ(t, consq )] = True
+                elif is_eq(consq):
+                    symbol = consq.children()[0]
+                    if symbol in unreify:
+                        out[ LiteralQ(t, Equality(unreify[symbol], consq.children()[1])) ] = True
         else: # unknown -> restart solver
             solver, _, unreify = mk_solver(theory, atoms)
 

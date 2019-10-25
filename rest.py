@@ -120,6 +120,7 @@ class eval(Resource):
                 log("end /eval " + method)
                 return out
             except Exception as exc:
+                traceback.print_exc()
                 return str(exc)
 
 class evalWithGraph(eval): # subcclass that generates call graphs
@@ -146,6 +147,7 @@ class meta(Resource):
                     traceback.print_exc()
                     return repr(exc)
             except Exception as exc:
+                traceback.print_exc()
                 return str(exc)
 
 class metaWithGraph(meta): # subclass that generates call graphs

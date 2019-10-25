@@ -103,7 +103,7 @@ class ConstructedTypeDeclaration(object):
             c.type = self
             symbol_decls[c.name] = c
         self.type = None
-        self.range = self.constructors #TODO constructor functions
+        self.range = [Symbol(name=c.name) for c in self.constructors] #TODO constructor functions
 
     def translate(self, case: ConfigCase, env: Environment):
         self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
@@ -202,7 +202,8 @@ class SymbolDeclaration(object):
     def translate(self, case: ConfigCase, env: Environment):
         case.symbol_types[self.name] = self.out.name
         if len(self.sorts) == 0:
-            self.translated = case.Const(self.name, self.out.translate(env), normal=True)
+            self.translated = case.Const(self.name, self.out.translate(env))
+            self.normal = True
             if len(self.out.getRange(env)) > 1:
                 domain = in_list(self.translated, self.out.getRange(env))
                 domain.reading = "Possible values for " + self.name
@@ -220,13 +221,16 @@ class SymbolDeclaration(object):
         self.instances = {}
         if not self.name.startswith('_'):
             if len(self.sorts) == 0:
-                self.translated.normal = True
-                self.instances[self.name] = self.translated
+                expr = Variable(name=self.name)
+                expr.translate(case, env)
+                expr.normal = True
+                self.instances[expr.str] = expr
             else:
                 for arg in list(self.domain):
-                    expr = self.translated(*[a.translate(case, env) for a in arg])
+                    expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
+                    expr.translate(case, env)
                     expr.normal = True
-                    self.instances[str(expr)] = expr
+                    self.instances[expr.str] = expr
 
 
 class Sort(object):
@@ -269,13 +273,15 @@ class Theory(object):
 
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
-        self.subtences = {} 
+        self.subtences = {}
         for e in self.constraints:
             e.annotate(self.symbol_decls, {})
             self.subtences.update(e.subtences())
+        self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         for e in self.definitions: 
             e.annotate(self.symbol_decls, {})
             self.subtences.update(e.subtences())
+        self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
 
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.constraints:
@@ -303,6 +309,11 @@ class Definition(object):
         for i in self.rules:
             out.setdefault(i.symbol.name, []).append(i)
         return out
+
+    def expand_quantifiers(self, theory):
+        self.rules = [r.expand_quantifiers(theory) for r in self.rules]
+        #TODO expand partition
+        return self
 
     def translate(self, case: ConfigCase, env: Environment):
         partition = self.rulePartition()
@@ -354,6 +365,11 @@ class Rule(object):
 
     def subtences(self):
         return self.body.subtences() if self.body else {}
+
+    def expand_quantifiers(self, theory):
+        if self.body:
+            self.body = self.body.expand_quantifiers(theory)
+        return self
         
     def translate(self, vars, case: ConfigCase, env: Environment):
         log("translating rule " + str(self.body)[:20])
@@ -394,11 +410,15 @@ class IfExpr(Expression):
         self.if_f = kwargs.pop('if_f')
         self.then_f = kwargs.pop('then_f')
         self.else_f = kwargs.pop('else_f')
-        self.str = sys.intern("if " + self.if_f.str + " then " + self.then_f.str + " else " + self.else_f.str)
 
         self.sub_exprs = [self.if_f, self.then_f, self.else_f]
+        self.str = repr(self)
         # self.type
 
+    def __repr__(self):
+        return sys.intern("if "    + self.sub_exprs[IfExpr.IF  ].str \
+                        + " then " + self.sub_exprs[IfExpr.THEN].str \
+                        + " else " + self.sub_exprs[IfExpr.ELSE].str)
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -458,10 +478,14 @@ class AQuantification(Expression):
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
-        self.str = sys.intern(self.q \
-            + "".join([v + "[" + s.str + "]" for v, s in zip(self.vars, self.sorts)]) \
-            + " : " + self.f.str)
         self.sub_exprs = [self.f]
+        self.str = repr(self)
+
+    def __repr__(self):
+        return sys.intern(self.q \
+            + "".join([v + "[" + s.str + "]" for v, s in zip(self.vars, self.sorts)]) \
+            + " : " + self.sub_exprs[0].str)
+
 
     def annotate(self, symbol_decls, q_vars):
         q_v = q_vars.copy() # shallow copy
@@ -472,37 +496,59 @@ class AQuantification(Expression):
 
     def subtences(self):
         #TODO optionally add subtences of sub_exprs
-        return {str(self): self}
+        return {self.str: self}
+
+    def expand_quantifiers(self, theory):
+        forms = [self.sub_exprs[0].expand_quantifiers(theory)]
+        final_vs = []
+        for var, sort in zip(self.vars, self.sorts):
+            if sort.name in theory.symbol_decls:
+                range_ = theory.symbol_decls[sort.name].range
+                forms = [f.substitute(Symbol(name=var), val) for val in range_ for f in forms]
+            else:
+                final_vs.append((var, sort))
+        if 1 < len(forms):
+            op = '∧' if self.q == '∀' else '∨'
+            self.sub_exprs = [BinaryOperator(sub_exprs=forms, operator=[op]*(len(forms)-1))]
+        else:
+            self.sub_exprs = forms
+        if final_vs:
+            vs = list(zip(*final_vs))
+            self.vars, self.sorts = vs[0], vs[1]
+        else:
+            self.vars, self.sorts = [], []
+        return self
 
     def translate(self, case: ConfigCase, env: Environment):
-        env.level += 1
-        finalvars, forms = expand_formula(self.vars, self.sorts, self.sub_exprs[0], case, env)
-        env.level -= 1
-
-        if self.q == '∀':
-            forms = And(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0: # not fully expanded !
-                out = ForAll(finalvars, forms)
-                if env.level==0: case.mark_atom(self, out)
-                self.translated = out
-            else:
-                if env.level==0: case.mark_atom(self, forms)
-                self.translated = forms
+        if not self.vars:
+            self.translated = self.sub_exprs[0].translate(case, env)
         else:
-            forms = Or(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0: # not fully expanded !
-                out = Exists(finalvars, forms)
-                if env.level==0: case.mark_atom(self, out)
-                self.translated = out
+            env.level += 1
+            finalvars, forms = expand_formula(self.vars, self.sorts, self.sub_exprs[0], case, env)
+            env.level -= 1
+
+            if self.q == '∀':
+                forms = And(forms) if 1<len(forms) else forms[0]
+                if len(finalvars) > 0: # not fully expanded !
+                    out = ForAll(finalvars, forms)
+                    if env.level==0: case.mark_atom(self, out)
+                    self.translated = out
+                else:
+                    if env.level==0: case.mark_atom(self, forms)
+                    self.translated = forms
             else:
-                if env.level==0: case.mark_atom(self, forms)
-                self.translated = forms
+                forms = Or(forms) if 1<len(forms) else forms[0]
+                if len(finalvars) > 0: # not fully expanded !
+                    out = Exists(finalvars, forms)
+                    if env.level==0: case.mark_atom(self, out)
+                    self.translated = out
+                else:
+                    if env.level==0: case.mark_atom(self, forms)
+                    self.translated = forms
         return self.translated
 
 class BinaryOperator(Expression):
-    MAP = { '&': lambda x, y: And(x, y),
-            '|': lambda x, y: Or(x, y),
-            '∧': lambda x, y: And(x, y),
+    MAP = { '∧': lambda x, y: And(x, y),
             '∨': lambda x, y: Or(x, y),
             '⇒': lambda x, y: Or(Not(x), y),
             '⇐': lambda x, y: Or(x, Not(y)),
@@ -529,11 +575,13 @@ class BinaryOperator(Expression):
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
                 "∨" if op == "|" else "∧" if op == "&" else op
             , self.operator))
+        self.str = repr(self)
+
+    def __repr__(self):
         temp = self.sub_exprs[0].str
         for i in range(1, len(self.sub_exprs)):
             temp += " " + self.operator[i-1] + " " + self.sub_exprs[i].str
-        self.str = sys.intern(temp)
-
+        return sys.intern(temp)
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -544,12 +592,12 @@ class BinaryOperator(Expression):
 
     def subtences(self):
         #TODO collect subtences of aggregates within comparisons
-        return {str(self): self} if self.operator[0] in '=<>≤≥≠' \
+        return {self.str: self} if self.operator[0] in '=<>≤≥≠' \
             else super().subtences()
 
     def translate(self, case: ConfigCase, env: Environment):
         # chained comparisons -> And()
-        if self.operator[0] in ['≠', '~='] and len(self.sub_exprs)==2:
+        if self.operator[0] =='≠' and len(self.sub_exprs)==2:
             x = self.sub_exprs[0].translate(case, env)
             y = self.sub_exprs[1].translate(case, env)
             atom = x==y
@@ -597,8 +645,11 @@ class AUnary(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
-        self.str = sys.intern(self.operator + self.f.str)
         self.sub_exprs = [self.f]
+        self.str = repr(self)
+
+    def __repr__(self):
+        return sys.intern(self.operator + self.sub_exprs[0].str)
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -622,18 +673,20 @@ class AAggregate(Expression):
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
-        out = self.aggtype + "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
-        out += ":" + str(self.f)
-        if self.out: out += " : " + str(self.out)
-        out += "}"
-        self.str = sys.intern(out)
-
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]
+        self.str = repr(self)
 
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
         if self.aggtype != "sum" and self.out is not None:
             raise Exception("Can't have output variable for #")
+
+    def __repr__(self):
+        out = self.aggtype + "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
+        out += ":" + self.sub_exprs[AAggregate.CONDITION].str
+        if self.out: out += " : " + self.sub_exprs[AAggregate.OUT].str
+        out += "}"
+        return sys.intern(out)
 
     def annotate(self, symbol_decls, q_vars):
         q_v = q_vars.copy() # shallow copy
@@ -646,7 +699,7 @@ class AAggregate(Expression):
         form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
                     , then_f=NumberConstant(number='1')
                     , else_f=NumberConstant(number='0'))
-        if self.sub_exprs[AAggregate.OUT] is not None:
+        if self.out is not None:
             form = AMultDiv(operator='*', sub_exprs=[form, self.sub_exprs[AAggregate.OUT]])
         fvars, forms = expand_formula(self.vars, self.sorts, form, case, env)
         if len(fvars) > 0:
@@ -659,8 +712,11 @@ class AppliedSymbol(Expression):
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
-        self.str = sys.intern(self.s.str + "(" + ",".join([x.str for x in self.args.sub_exprs]) + ")")
         self.sub_exprs = self.args.sub_exprs
+        self.str = repr(self)
+
+    def __repr__(self):
+        return sys.intern(self.s.str + "(" + ",".join([x.str for x in self.sub_exprs]) + ")")
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -668,7 +724,7 @@ class AppliedSymbol(Expression):
 
     def subtences(self):
         out = super().subtences() # in case of predicate over boolean
-        if self.type == 'Bool': out[str(self)] = self
+        if self.type == 'Bool': out[self.str] = self
         return out
 
     def translate(self, case: ConfigCase, env: Environment):
@@ -688,16 +744,24 @@ class AppliedSymbol(Expression):
                 self.translated = out
         return self.translated
 
+class Arguments(object):
+    def __init__(self, **kwargs):
+        self.sub_exprs = kwargs.pop('sub_exprs')
+
 class Variable(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.str = sys.intern(self.name)
+        self.str = repr(self)
+        self.sub_exprs = []
         if self.name == "true":
             self.type = 'Bool'
             self.translated = bool(True)
         elif self.name == "false":
             self.type = 'Bool'
             self.translated = bool(False)
+
+    def __repr__(self):
+        return sys.intern(self.name)
 
     def annotate(self, symbol_decls, q_vars):
         self.type = 'Bool' if self.name in ['true', 'false'] \
@@ -706,7 +770,7 @@ class Variable(Expression):
 
     def subtences(self):
         return {} if self.name in ['true', 'false'] \
-            else {str(self): self} if self.type == 'Bool' \
+            else {self.str: self} if self.type == 'Bool' \
             else {}
 
     def translate(self, case: ConfigCase, env: Environment):
@@ -729,13 +793,17 @@ class Symbol(Variable): pass
 class NumberConstant(Expression):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
-        self.str = sys.intern(self.number)
+        self.str = repr(self)
+        self.sub_exprs = []
         try:
             self.translated = int(self.number)
             self.type = 'int'
         except ValueError:
             self.translated = float(self.number)
             self.type = 'real'
+    
+    def __repr__(self):
+        return sys.intern(self.number)
 
     def annotate(self, symbol_decls, q_vars): pass
 
@@ -748,8 +816,11 @@ class Brackets(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.reading = kwargs.pop('reading')
-        self.str = sys.intern("(" + self.f.str + ")")
         self.sub_exprs = [self.f]
+        self.str = repr(self)
+
+    def __repr__(self):
+        return sys.intern("(" + self.sub_exprs[0].str + ")")
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
@@ -783,7 +854,7 @@ class Interpretation(object):
         case.interpreted[self.name] = True
         function = -1 if symbol.__class__.__name__ == "ArithRef" or symbol.range() != BoolSort() else 0
         arity = len(self.tuples[0].args) # there must be at least one tuple !
-        if function and 1 < arity and self.default == None:
+        if function and 1 < arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
 
         # create a macro and attach it to the symbol
@@ -847,7 +918,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True, classes=
           Theory, Definition, Rule, IfExpr, AQuantification, 
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,
-                    AppliedSymbol, Variable, NumberConstant, Brackets,
+                    AppliedSymbol, Variable, NumberConstant, Brackets, Arguments,
           Interpretation, Structure, Tuple,
           Goal, View
         ])

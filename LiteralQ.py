@@ -2,29 +2,43 @@
 from z3 import *
 
 class LiteralQ(object):
-    def __init__(self, truth, atomZ3):
-        self.truth = truth # None = unknown
-        self.atomZ3 = atomZ3
+    def __init__(self, truth, subtence):
+        self.truth = truth # Bool, "irrelevant", None = unknown, 
+        self.subtence = subtence
 
     def __hash__(self):
-        return hash((self.truth, str(self.atomZ3)))
+        return hash((self.truth, str(self.subtence)))
 
     def __eq__(self, other):
-        return self.truth == other.truth and str(self.atomZ3) == str(other.atomZ3)
+        return self.truth == other.truth and str(self.subtence) == str(other.subtence)
 
     def __repr__(self):
-        return str(self.truth) + ( self.atomZ3.reading if hasattr(self.atomZ3, 'reading')
-                                   else str(self.atomZ3)
+        return str(self.truth) + ( self.subtence.reading if hasattr(self.subtence, 'reading')
+                                   else str(self.subtence)
                                  )
 
 
     def __str__(self):
+        if self.truth == "irrelevant":
+            return ""
         return ("" if self.truth else "? " if self.truth is None else "Not ") \
-             + (self.atomZ3.reading if hasattr(self.atomZ3, 'reading')
-                 else self.atomZ3.atom_string if hasattr(self.atomZ3, 'atom_string')
-                 else str(self.atomZ3))
+             + (self.subtence.reading if hasattr(self.subtence, 'reading')
+                 else self.subtence.atom_string if hasattr(self.subtence, 'atom_string')
+                 else str(self.subtence))
 
     def to_json(self): return str(self)
 
     def asZ3(self):
-        return self.atomZ3 if self.truth else Not(self.atomZ3)
+        if self.truth == "irrelevant":
+            return BoolVal(True)
+        return self.subtence.translated if self.truth else Not(self.subtence.translated)
+
+class Equality(object):
+    def __init__(self, subtence, value):
+        self.subtence = subtence # an Expression
+        self.value = value # a Z3 value
+        self.str = subtence.str + " = " + str(value)
+        self.type = 'Bool'
+        self.translated = (subtence.translated == value) #TODO
+
+    def __str__(self): return self.str
