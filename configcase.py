@@ -108,7 +108,7 @@ class ConfigCase:
             (is_quantifier(atomZ3) or not has_local_var(atomZ3, self.valueMap, self.symbols)): # AtomQ !
 
             atom_string = str(dsl_object)
-            atomZ3.atom_string = atom_string
+            atomZ3.atom_string = atom_string # used in abstract()
 
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
@@ -569,8 +569,8 @@ class Structure:
             else:
                 symbol = None
             if symbol: 
-                if hasattr(atomZ3, 'reading'):
-                    symbol['reading'] = atomZ3.reading
+                if hasattr(atom, 'reading'):
+                    symbol['reading'] = atom.reading
                 symbol['normal'] = hasattr(atom, 'normal')
                 s.setdefault(key, symbol)
                 break
@@ -578,18 +578,17 @@ class Structure:
     def addAtom(self, case, atom, truth):
         if truth and type(atom) == Equality:
             self.addValue(case, atom.subtence, atom.value)
-        else:
-            atomZ3 = atom.translated
-            if not is_bool(atomZ3): return
-            key = atom.str
-            for symb in symbols_of(atomZ3, case.symbols, case.interpreted).keys():
-                s = self.m.setdefault(symb, {})
-                if key in s:
-                    if truth is None: s[key]["unknown"] = True
-                    else:
-                        s[key]["ct" if truth else "cf"] = True
-                    if hasattr(atomZ3, 'reading'):
-                        s[key]['reading'] = atomZ3.reading
+        atomZ3 = atom.translated
+        if not is_bool(atomZ3): return
+        key = atom.str
+        for symb in symbols_of(atomZ3, case.symbols, case.interpreted).keys():
+            s = self.m.setdefault(symb, {})
+            if key in s:
+                if truth is None: s[key]["unknown"] = True
+                else:
+                    s[key]["ct" if truth else "cf"] = True
+                if hasattr(atom, 'reading'):
+                    s[key]['reading'] = atom.reading
 
     def addValue(self, case, atom, value):
         symbol = atom.translated

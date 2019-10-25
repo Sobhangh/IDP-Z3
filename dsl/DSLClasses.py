@@ -126,9 +126,6 @@ class Constructor(object):
     
     def __str__(self): return self.str
 
-    def translate(self, case, env):
-        return self.translated
-
 
 class RangeDeclaration(object):
     def __init__(self, **kwargs):
@@ -145,15 +142,15 @@ class RangeDeclaration(object):
                     self.range.append(NumberConstant(number=str(i)))
         # self.type = None
 
-    def annotate(self, symbol_decls): 
-        symbol_decls[self.name] = self
-        self.type = None
-
     def __str__(self):
         return ( "type " + self.name
                + " = {"
                + ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
                + "}")
+
+    def annotate(self, symbol_decls): 
+        symbol_decls[self.name] = self
+        self.type = None
 
     def translate(self, case: ConfigCase, env: Environment):
         els = [e.translated for e in self.range]
@@ -304,19 +301,15 @@ class Definition(object):
         for r in self.rules: out.update(r.subtences())
         return out
 
-    def rulePartition(self):
-        out = {}
-        for i in self.rules:
-            out.setdefault(i.symbol.name, []).append(i)
-        return out
-
     def expand_quantifiers(self, theory):
         self.rules = [r.expand_quantifiers(theory) for r in self.rules]
         #TODO expand partition
         return self
 
     def translate(self, case: ConfigCase, env: Environment):
-        partition = self.rulePartition()
+        partition = {}
+        for i in self.rules:
+            partition.setdefault(i.symbol.name, []).append(i)
         for symbol in partition.keys():
             log("symbol " + symbol)
             rules = partition[symbol]
@@ -364,7 +357,7 @@ class Rule(object):
             self.body.annotate(symbol_decls, q_v)
 
     def subtences(self):
-        return self.body.subtences() if self.body else {}
+        return self.body.subtences() if not self.vars else {}
 
     def expand_quantifiers(self, theory):
         if self.body:
@@ -829,7 +822,8 @@ class Brackets(Expression):
     def translate(self, case: ConfigCase, env: Environment):
         self.translated = self.sub_exprs[0].translate(case, env)
         if self.reading: 
-            self.translated.reading = self.reading
+            self.sub_exprs[0].reading = self.reading
+            self.translated.reading   = self.reading #TODO for explain
         return self.translated
 
 

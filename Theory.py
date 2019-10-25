@@ -113,12 +113,14 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
             if is_not(consq):
                 t, consq = False, consq.arg(0)
             # try to unreify it
-            if consq in unreify:
-                out[LiteralQ(t, unreify[consq])] = True
-            elif is_eq(consq):
+            if is_eq(consq):
                 symbol = consq.children()[0]
                 if symbol in unreify:
                     out[ LiteralQ(t, Equality(unreify[symbol], consq.children()[1])) ] = True
+                else:
+                    print("???", str(consq))
+            elif consq in unreify:
+                out[LiteralQ(t, unreify[consq])] = True
             else:
                 print("???", str(consq))
         return out

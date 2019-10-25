@@ -10,7 +10,9 @@ class LiteralQ(object):
         return hash((self.truth, str(self.subtence)))
 
     def __eq__(self, other):
-        return self.truth == other.truth and str(self.subtence) == str(other.subtence)
+        return self.truth == other.truth \
+            and type(self.subtence) == type (other.subtence) \
+            and str(self.subtence) == str(other.subtence)
 
     def __repr__(self):
         return str(self.truth) + ( self.subtence.reading if hasattr(self.subtence, 'reading')
