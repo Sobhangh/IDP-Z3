@@ -230,6 +230,7 @@ class SymbolDeclaration(object):
                     expr.translate(case, env)
                     expr.normal = True
                     self.instances[expr.str] = expr
+        return self.translated
 
 
 class Sort(object):
@@ -294,9 +295,14 @@ class Theory(object):
 class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
+        # .partition : {Symbol: [Transformed Rule]}
 
     def annotate(self, symbol_decls, q_vars):
         for r in self.rules: r.annotate(symbol_decls, q_vars)
+
+        self.partition = {}
+        for i in self.rules:
+            self.partition.setdefault(symbol_decls[i.symbol.name], []).append(i)
 
     def subtences(self):
         out = {}
@@ -304,41 +310,36 @@ class Definition(object):
         return out
 
     def expand_quantifiers(self, theory):
-        self.rules = [r.expand_quantifiers(theory) for r in self.rules]
-        #TODO expand partition
+        for symbol, rules in self.partition.items():
+            self.partition[symbol] = sum((r.expand_quantifiers(theory) for r in rules), [])
         return self
 
     def translate(self, case: ConfigCase, env: Environment):
-        partition = {}
-        for i in self.rules:
-            partition.setdefault(i.symbol.name, []).append(i)
-        for symbol in partition.keys():
-            log("symbol " + symbol)
-            rules = partition[symbol]
-            symbol = Symbol(name=symbol)
-            vars = self.makeGlobalVars(symbol, case, env)
-            exprs = []
+        for symbol, rules in self.partition.items():
+            z3_symb = symbol.translate(case, env)
+            if type(z3_symb) == FuncDeclRef:
+                vars = [Const('ci'+str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
+                    Const('cout', z3_symb.range())]
+            else:
+                vars = [Const('c', z3_symb.sort())]
 
-            outputVar = False
+            exprs, outputVar = [], False
             for i in rules:
                 exprs.append(i.translate(vars, case, env))
                 if i.out is not None:
                     outputVar = True
+                    
             if outputVar:
-                case.add(ForAll(vars, (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)), str(self))
+                case.add(ForAll(vars, 
+                                (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)), 
+                         str(self))
             else:
                 if len(vars) > 1:
-                    case.add(ForAll(vars, applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)), str(self))
+                    case.add(ForAll(vars, 
+                                    applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)), 
+                             str(self))
                 else:
                     case.add(symbol.translate(case, env) == Or(exprs), str(self))
-
-    def makeGlobalVars(self, symb, case, env):
-        z3_symb = symb.translate(case, env)
-        if type(z3_symb) == FuncDeclRef:
-            return [Const('ci'+str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
-                Const('cout', z3_symb.range())]
-        else:
-            return [Const('c', z3_symb.sort())]
 
 class Rule(object):
     def __init__(self, **kwargs):
@@ -346,9 +347,13 @@ class Rule(object):
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.symbol = kwargs.pop('symbol')
-        self.args = kwargs.pop('args')
+        self.args = kwargs.pop('args') # later augmented with self.out, if any
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
+
+        self.args = [] if self.args is None else self.args.sub_exprs
+        if self.out is not None:
+            self.args.append(self.out)
         if self.body is None:
             self.body = Symbol(name='true')
         # .translated
@@ -363,21 +368,33 @@ class Rule(object):
         return self.body.subtences() if not self.vars else {}
 
     def expand_quantifiers(self, theory):
-        self.body = self.body.expand_quantifiers(theory)
-        return self
+        forms = [(self.args, self.body.expand_quantifiers(theory))]
+        final_vs = []
+        for var, sort in zip(self.vars, self.sorts):
+            if sort.name in theory.symbol_decls:
+                range_ = theory.symbol_decls[sort.name].range
+                forms = [([a.substitute(Symbol(name=var), val) for a in args], 
+                          f.substitute(Symbol(name=var), val)) 
+                          for val in range_ for (args, f) in forms]
+            else:
+                final_vs.append((var, sort))
+        if final_vs:
+            vs = list(zip(*final_vs))
+            vars, sorts = vs[0], vs[1]
+        else:
+            vars, sorts = [], []
+
+        return [Rule(reading=self.reading, vars=vars, sorts=sorts, symbol=self.symbol, 
+                     args=Arguments(sub_exprs=args[:-1] if self.out else args), 
+                     out=args[-1] if self.out else None, body=f) 
+                for (args, f) in forms]
         
     def translate(self, vars, case: ConfigCase, env: Environment):
         log("translating rule " + str(self.body)[:20])
-        args = []
-        if self.args is not None:
-            args = self.args.sub_exprs
-
         def function():
             out = []
-            for var, expr in zip(vars, args):
+            for var, expr in zip(vars, self.args):
                 out.append(var == expr.translate(case, env))
-            if self.out is not None:
-                out.append(vars[-1] == self.out.translate(case, env))
             out.append(self.body.translate(case, env))
             return out
 
