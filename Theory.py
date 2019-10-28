@@ -41,8 +41,10 @@ def symbols_of(expr, symbols, ignored): # returns a dict {string: string}
         if is_symbol(name, symbols) and not name in ignored and not name.startswith('_'):
             out[name] = name
     except: pass
-    for child in expr.children():
-        out.update(symbols_of(child, symbols, ignored))
+    try:
+        for child in expr.children():
+            out.update(symbols_of(child, symbols, ignored))
+    except: pass
     return out
 
 

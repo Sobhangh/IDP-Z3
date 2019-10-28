@@ -65,8 +65,10 @@ class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
 
-        self.symbol_decls = {}
-        for s in self.declarations: s.annotate(self.symbol_decls)
+        self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
+                             'real': RangeDeclaration(name='real', elements=[])}
+        for s in self.declarations: 
+            s.annotate(self.symbol_decls)
 
     def __str__(self):
         return ( "vocabulary {\n"
@@ -347,21 +349,21 @@ class Rule(object):
         self.args = kwargs.pop('args')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
+        if self.body is None:
+            self.body = Symbol(name='true')
         # .translated
 
     def annotate(self, symbol_decls, q_vars):
-        if self.body:
-            q_v = q_vars.copy() # shallow copy
-            for v, s in zip(self.vars, self.sorts):
-                q_v[v] = symbol_decls[s.name]
-            self.body.annotate(symbol_decls, q_v)
+        q_v = q_vars.copy() # shallow copy
+        for v, s in zip(self.vars, self.sorts):
+            q_v[v] = symbol_decls[s.name]
+        self.body.annotate(symbol_decls, q_v)
 
     def subtences(self):
         return self.body.subtences() if not self.vars else {}
 
     def expand_quantifiers(self, theory):
-        if self.body:
-            self.body = self.body.expand_quantifiers(theory)
+        self.body = self.body.expand_quantifiers(theory)
         return self
         
     def translate(self, vars, case: ConfigCase, env: Environment):
@@ -376,8 +378,7 @@ class Rule(object):
                 out.append(var == expr.translate(case, env))
             if self.out is not None:
                 out.append(vars[-1] == self.out.translate(case, env))
-            if self.body is not None:
-                out.append(self.body.translate(case, env))
+            out.append(self.body.translate(case, env))
             return out
 
         #TODO if empty --> type inference
@@ -416,7 +417,7 @@ class IfExpr(Expression):
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
         #TODO verify consistency
-        self.type = self.sub_exprs[THEN].type
+        self.type = self.sub_exprs[IfExpr.THEN].type
 
     def translate(self, case: ConfigCase, env: Environment):
         self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate(case, env)
@@ -681,7 +682,7 @@ class AAggregate(Expression):
         out += "}"
         return sys.intern(out)
 
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, symbol_decls, q_vars):   
         q_v = q_vars.copy() # shallow copy
         for v, s in zip(self.vars, self.sorts):
             q_v[v] = symbol_decls[s.name]
@@ -867,8 +868,14 @@ class Interpretation(object):
 
                 tuples.sort(key=lambda t: str(t[rank]))
                 groups = it.groupby(tuples, key=lambda t: t[rank])
-                for val, tuples2 in groups:
-                    out = If(args[rank]==val, interpretation(rank+1, args, list(tuples2)), out)
+
+                if type(args[rank]) == type(tuples[0][rank]): # immediately resolve
+                    for val, tuples2 in groups:
+                        if args[rank] == val:
+                            out = interpretation(rank+1, args, list(tuples2))
+                else:
+                    for val, tuples2 in groups:
+                        out = If(args[rank]==val, interpretation(rank+1, args, list(tuples2)), out)
                 return out
         symbol.interpretation = interpretation
 
