@@ -171,7 +171,7 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                 if is_bool(reified):
                     out[LiteralQ(True if is_true(value) else False, unreify[reified])] = True
                 else:
-                    out[LiteralQ(True, reified == value)] = True
+                    out[LiteralQ(True, Equality(unreify[reified], value))] = True
             else:
                 print("can't propagate with", Not(reified == value))
     if result2 != sat:

@@ -351,6 +351,7 @@ class Rule(object):
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
 
+        assert len(self.sorts) == len(self.vars)
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
             self.args.append(self.out)
@@ -389,25 +390,29 @@ class Rule(object):
                      out=args[-1] if self.out else None, body=f) 
                 for (args, f) in forms]
         
-    def translate(self, vars, case: ConfigCase, env: Environment):
+    def translate(self, new_vars, case: ConfigCase, env: Environment):
+        """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
+
         log("translating rule " + str(self.body)[:20])
-        def function():
-            out = []
-            for var, expr in zip(vars, self.args):
-                out.append(var == expr.translate(case, env))
-            out.append(self.body.translate(case, env))
-            return out
 
-        #TODO if empty --> type inference
-        lvars = self.vars
-        sorts = self.sorts
+        # translate self.vars into z3vars
+        backup, z3vars = env.var_scope.copy(), []
+        for var, sort in zip(self.vars, self.sorts):
+            z3var = Const(var, sort.translate(env))
+            env.var_scope[var] = v
+            z3vars.append(z3var)
 
-        outp, vars = with_local_vars(case, env, function, sorts, lvars)
+        out = [] # new_vars0=args0 & new_vars1=args1 .. & body(vars)
+        for new_var, arg in zip(new_vars, self.args):
+            out.append(new_var == arg.translate(case, env))
+        out.append(self.body.translate(case, env))
 
-        if len(vars) == 0:
-            self.translated = And(outp)
+        env.var_scope = backup
+
+        if len(z3vars) == 0:
+            self.translated = out[0]
         else:
-            self.translated = Exists(vars, And(outp))
+            self.translated = Exists(z3vars, And(out))
         return self.translated
 
 # Expressions
@@ -441,46 +446,6 @@ class IfExpr(Expression):
                             , self.sub_exprs[IfExpr.THEN].translate(case, env)
                             , self.sub_exprs[IfExpr.ELSE].translate(case, env))
         return self.translated
-
-def expand_formula(vars, sorts, f, case, env):
-    form, z3vars = with_local_vars(case, env, lambda: f.translate(case, env), sorts, vars)
-    forms = [form]
-    finalvars = []
-    for i in range(0, len(vars)):
-        if sorts[i].name in env.range_scope:
-            forms2 = []
-            for f in forms:
-                for v in sorts[i].getRange(env):
-                    try:
-                        forms2.append(substitute(f, (z3vars[i], _py2expr(float(v)))))
-                    except:
-                        try:
-                            forms2.append(substitute(f, (z3vars[i], _py2expr(int(v)))))
-                        except:
-                            forms2.append(substitute(f, (z3vars[i], v)))
-            forms = forms2
-        else:
-            finalvars.append(z3vars[i])
-    return finalvars, forms
-
-
-def with_local_vars(case, env, f, sorts, vars):
-    backup = {}
-    z3vars = []
-    assert len(sorts) == len(vars)
-    for var, sort in zip(vars, sorts):
-        z3var = Const(var, sort.translate(env))
-        if var in env.var_scope:
-            backup[var] = env.var_scope[var]
-        else:
-            backup[var] = None
-        env.var_scope[var] = z3var
-        z3vars.append(z3var)
-
-    out = f()
-    for var in vars:
-        env.var_scope[var] = backup[var]
-    return out, z3vars
 
 class AQuantification(Expression):
     def __init__(self, **kwargs):
@@ -534,28 +499,18 @@ class AQuantification(Expression):
         if not self.vars:
             self.translated = self.sub_exprs[0].translate(case, env)
         else:
-            env.level += 1
-            finalvars, forms = expand_formula(self.vars, self.sorts, self.sub_exprs[0], case, env)
-            env.level -= 1
+            finalvars, forms = self.vars, [f.translate(case, env) for f in self.sub_exprs]
 
             if self.q == '∀':
                 forms = And(forms) if 1<len(forms) else forms[0]
                 if len(finalvars) > 0: # not fully expanded !
-                    out = ForAll(finalvars, forms)
-                    if env.level==0: case.mark_atom(self, out)
-                    self.translated = out
-                else:
-                    if env.level==0: case.mark_atom(self, forms)
-                    self.translated = forms
+                    forms = ForAll(finalvars, forms)
             else:
                 forms = Or(forms) if 1<len(forms) else forms[0]
                 if len(finalvars) > 0: # not fully expanded !
-                    out = Exists(finalvars, forms)
-                    if env.level==0: case.mark_atom(self, out)
-                    self.translated = out
-                else:
-                    if env.level==0: case.mark_atom(self, forms)
-                    self.translated = forms
+                    forms = Exists(finalvars, forms)
+            case.mark_atom(self, forms)
+            self.translated = forms
         return self.translated
 
 class BinaryOperator(Expression):
