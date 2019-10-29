@@ -410,9 +410,10 @@ class Rule(object):
         env.var_scope = backup
 
         if len(z3vars) == 0:
-            self.translated = out[0]
+            self.translated = And(out)
         else:
             self.translated = Exists(z3vars, And(out))
+        print(self.translated)
         return self.translated
 
 # Expressions
