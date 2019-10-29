@@ -684,7 +684,7 @@ class AAggregate(Expression):
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
-        self.sub_exprs = [self.f, self.out] if self.out else [self.f]
+        self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
         self.str = repr(self)
 
         if self.aggtype == "sum" and self.out is None:
@@ -705,17 +705,23 @@ class AAggregate(Expression):
             q_v[v] = symbol_decls[s.name]
         for e in self.sub_exprs: e.annotate(symbol_decls, q_v)
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
+        
+    def expand_quantifiers(self, theory):
+        form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
+                    , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
+                    , else_f=NumberConstant(number='0'))
+        forms = [form.expand_quantifiers(theory)]
+        for var, sort in zip(self.vars, self.sorts):
+            if sort.name in theory.symbol_decls:
+                range_ = theory.symbol_decls[sort.name].range
+                forms = [f.substitute(Symbol(name=var), val) for val in range_ for f in forms]
+            else:
+                raise Exception('Can only quantify aggregates over finite domains')
+        self.sub_exprs = forms
+        return self
 
     def translate(self, case: ConfigCase, env: Environment):
-        form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
-                    , then_f=NumberConstant(number='1')
-                    , else_f=NumberConstant(number='0'))
-        if self.out is not None:
-            form = AMultDiv(operator='*', sub_exprs=[form, self.sub_exprs[AAggregate.OUT]])
-        fvars, forms = expand_formula(self.vars, self.sorts, form, case, env)
-        if len(fvars) > 0:
-            raise Exception('Can only quantify over finite domains')
-        self.translated = Sum(forms)
+        self.translated = Sum([f.translate(case, env) for f in self.sub_exprs])
         return self.translated
 
 
