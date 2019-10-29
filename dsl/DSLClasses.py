@@ -341,6 +341,14 @@ class Definition(object):
                 else:
                     case.add(symbol.translate(case, env) == Or(exprs), str(self))
 
+def add_local_vars(symbol_decls, q_vars, vars, sorts):
+    q_v = q_vars.copy() # shallow copy {String: Variable}
+    for v, s in zip(vars, sorts):
+        var = Variable(name=v)
+        var.type = symbol_decls[s.name]
+        q_v[v] = var
+    return q_v
+
 class Rule(object):
     def __init__(self, **kwargs):
         self.reading = kwargs.pop('reading')
@@ -360,9 +368,7 @@ class Rule(object):
         # .translated
 
     def annotate(self, symbol_decls, q_vars):
-        q_v = q_vars.copy() # shallow copy
-        for v, s in zip(self.vars, self.sorts):
-            q_v[v] = symbol_decls[s.name]
+        q_v = add_local_vars(symbol_decls, q_vars, self.vars, self.sorts)
         self.body.annotate(symbol_decls, q_v)
 
     def subtences(self):
@@ -465,9 +471,7 @@ class AQuantification(Expression):
 
 
     def annotate(self, symbol_decls, q_vars):
-        q_v = q_vars.copy() # shallow copy
-        for v, s in zip(self.vars, self.sorts):
-            q_v[v] = symbol_decls[s.name]
+        q_v = add_local_vars(symbol_decls, q_vars, self.vars, self.sorts)
         for e in self.sub_exprs: e.annotate(symbol_decls, q_v)
         self.type = 'Bool'
 
@@ -656,9 +660,7 @@ class AAggregate(Expression):
         return sys.intern(out)
 
     def annotate(self, symbol_decls, q_vars):   
-        q_v = q_vars.copy() # shallow copy
-        for v, s in zip(self.vars, self.sorts):
-            q_v[v] = symbol_decls[s.name]
+        q_v = add_local_vars(symbol_decls, q_vars, self.vars, self.sorts)
         for e in self.sub_exprs: e.annotate(symbol_decls, q_v)
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         
@@ -687,13 +689,16 @@ class AppliedSymbol(Expression):
         self.args = kwargs.pop('args')
         self.sub_exprs = self.args.sub_exprs
         self.str = repr(self)
+        # .symbol 
+        # .type
 
     def __repr__(self):
         return sys.intern(self.s.str + "(" + ",".join([x.str for x in self.sub_exprs]) + ")")
 
     def annotate(self, symbol_decls, q_vars):
         for e in self.sub_exprs: e.annotate(symbol_decls, q_vars)
-        self.type = q_vars.get(self.s.name, symbol_decls[self.s.name].type)
+        self.symbol = q_vars[self.s.name] if self.s.name in q_vars else symbol_decls[self.s.name]
+        self.type = self.symbol.type
 
     def subtences(self):
         out = super().subtences() # in case of predicate over boolean
@@ -732,14 +737,17 @@ class Variable(Expression):
         elif self.name == "false":
             self.type = 'Bool'
             self.translated = bool(False)
+        # .symbol
+        # .type
 
     def __repr__(self):
         return sys.intern(self.name)
 
     def annotate(self, symbol_decls, q_vars):
-        self.type = 'Bool' if self.name in ['true', 'false'] \
+        self.symbol = self if self.name in ['true', 'false'] \
             else q_vars[self.name] if self.name in q_vars \
-            else symbol_decls[self.name].type
+            else symbol_decls[self.name]
+        self.type = self.symbol.type
 
     def subtences(self):
         return {} if self.name in ['true', 'false'] \
