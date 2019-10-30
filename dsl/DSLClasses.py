@@ -65,7 +65,9 @@ class Vocabulary(object):
         self.declarations = kwargs.pop('declarations')
 
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
-                             'real': RangeDeclaration(name='real', elements=[])}
+                             'real': RangeDeclaration(name='real', elements=[]),
+                             'Bool': ConstructedTypeDeclaration(name='Bool', 
+                                        constructors=[Symbol(name='true'), Symbol(name='false')])}
         for s in self.declarations: 
             s.annotate(self.symbol_decls)
 
@@ -88,6 +90,7 @@ class ConstructedTypeDeclaration(object):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
         self.is_var = False
+        self.range = self.constructors # functional constructors are expanded
         # .type = None
         # .translated
         # .range # list of constructors
@@ -113,6 +116,7 @@ class ConstructedTypeDeclaration(object):
 
         env.type_scope[self.name] = self.translated
         env.range_scope[self.name] = cstrs
+        return self.translated
 
 
 class Constructor(object):
@@ -132,7 +136,7 @@ class Constructor(object):
 
 class RangeDeclaration(object):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
+        self.name = kwargs.pop('name') # maybe 'int', 'real'
         self.elements = kwargs.pop('elements')
         self.is_var = False
 
@@ -143,7 +147,8 @@ class RangeDeclaration(object):
             else: #TODO test that it is an integer ?
                 for i in range(x.fromI.translated, x.toI.translated + 1):
                     self.range.append(NumberConstant(number=str(i)))
-        # self.type = None
+        # .type = None
+        # .translated
 
     def __str__(self):
         return ( "type " + self.name
@@ -158,11 +163,17 @@ class RangeDeclaration(object):
     def translate(self, case: ConfigCase, env: Environment):
         els = [e.translated for e in self.range]
         case.enums[self.name] = els
-        if all(map(lambda x: type(x) == int, els)):
-            env.type_scope[self.name] = IntSort()
+        if self.name == 'int':
+            self.translated = IntSort() 
+        elif self.name == 'real':
+            self.translated = RealSort() 
+        elif all(map(lambda x: type(x) == int, els)):
+            self.translated = IntSort()
         else:
-            env.type_scope[self.name] = RealSort()
+            self.translated = RealSort()
         env.range_scope[self.name] = els
+        env.type_scope[self.name] = self.translated
+        return self.translated
 
 
 class SymbolDeclaration(object):
@@ -176,7 +187,7 @@ class SymbolDeclaration(object):
         self.is_var = True #TODO unless interpreted
 
         # .vocabulary: False if declared in quantifier, aggregate, rule
-        # .type: a declaration object, or 'Bool', 'real', 'int'
+        # .type: a declaration object
         # .domain: all possible arguments
         # .instances: {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
         # .range: all possible values
@@ -192,18 +203,13 @@ class SymbolDeclaration(object):
     def annotate(self, symbol_decls, vocabulary=True):
         self.vocabulary = vocabulary
         if vocabulary: symbol_decls[self.name] = self
-        self.domain = list(itertools.product(*[symbol_decls[s.name].range for s in self.sorts]))
-        if self.out.name == 'Bool':
-            self.type = 'Bool'
-            self.range = [Symbol(name="true"), Symbol(name="false")] #TODO annotate them 
-        elif self.out.name in ['real', 'int']:
-            self.type = self.out.name
-            self.range = None
-        elif self.out.name in symbol_decls:
-            self.type = symbol_decls[self.out.name]
-            self.range = self.type.range
-        else:
-            assert False, "Unknown type: " + self.out.name
+        for s in self.sorts:
+            s.annotate(symbol_decls)
+        self.out.annotate(symbol_decls)
+        self.domain = list(itertools.product(*[s.decl.range for s in self.sorts]))
+
+        self.type = self.out.decl
+        self.range = self.type.range
 
         self.instances = {}
         if vocabulary and not self.name.startswith('_'):
@@ -223,14 +229,14 @@ class SymbolDeclaration(object):
     def translate(self, case: ConfigCase, env: Environment):
         case.symbol_types[self.name] = self.out.name
         if len(self.sorts) == 0:
-            self.translated = case.Const(self.name, self.out.translate(env))
+            self.translated = case.Const(self.name, self.out.translate(case, env))
             self.normal = True
         elif self.out.name == 'Bool':
-            types = [x.translate(env) for x in self.sorts]
+            types = [x.translate(case, env) for x in self.sorts]
             rel_vars = [t.getRange(env) for t in self.sorts]
             self.translated = case.Predicate(self.name, types, rel_vars, True)
         else:
-            types = [x.translate(env) for x in self.sorts] + [self.out.translate(env)]
+            types = [x.translate(case, env) for x in self.sorts] + [self.out.translate(case, env)]
             rel_vars = [t.getRange(env) for t in self.sorts + [self.out]]
             self.translated = case.Function(self.name, types, rel_vars, True)
 
@@ -248,10 +254,14 @@ class Sort(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.str = sys.intern(self.name)
+        # .decl
 
     def __str__(self): return self.str
 
-    def translate(self, env: Environment):
+    def annotate(self, symbol_decls):
+        self.decl = symbol_decls[self.name]
+
+    def translate(self, case, env: Environment):
         if self.name in env.type_scope:
             return env.type_scope[self.name]
         elif self.name == "int":
@@ -861,7 +871,7 @@ class Interpretation(object):
 
     def translate(self, case: ConfigCase, env: Environment):
         case.interpreted[self.name] = True
-        function = 0 if self.decl.type == 'Bool' else -1
+        function = 0 if self.decl.out.name == 'Bool' else -1
         arity = len(self.tuples[0].args) # there must be at least one tuple !
         if function and 1 < arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
