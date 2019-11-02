@@ -58,6 +58,11 @@ class ConfigCase:
         #print("missing", {k:v for k,v in self.symbols.items() if k not in self.symbols2})
         #print("added", {k:v for k,v in self.symbols2.items() if k not in self.symbols})
 
+    def print(self):
+        out  = "\r\n\r\n".join(str(t) for t in self.typeConstraints) + "\r\n--\r\n"
+        out += "\r\n\r\n".join(str(t) for t in self.constraints)     + "\r\n"
+        return out
+        
 
 
     #################

@@ -1,4 +1,8 @@
 To do:
+    RequirePeek => PeekT(Material(CSpacer)) ?? 
+    translate range declaration as comparisons
+    3 typeConstraints for Prime(num) ???
+    
     new translation chain: annotate AST, expand quantifiers, interpret (ground) applied symbols, translate to Z3
 
     Support for constructor functions (p.6 of the IDP3 manual)

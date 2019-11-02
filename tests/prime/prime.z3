@@ -1,0 +1,42 @@
+ForAll(a1,
+       Implies(Prime(a1),
+               And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))
+
+ForAll(a1,
+       Implies(Prime(a1),
+               And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))
+
+ForAll(a1,
+       Implies(Prime(a1),
+               And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))
+--
+ForAll([ci0, cout],
+       Prime(ci0) ==
+       Or(And(ci0 == 1,
+              And(And(And(Or(Not(And(False, False)),
+                             Not(True)),
+                          Or(Not(And(True, False)),
+                             Not(False))),
+                      Or(Not(And(True, False)), Not(False))),
+                  Or(Not(And(True, False)), Not(False)))),
+          And(ci0 == 2,
+              And(And(And(Or(Not(And(False, True)),
+                             Not(True)),
+                          Or(Not(And(True, False)),
+                             Not(True))),
+                      Or(Not(And(True, False)), Not(False))),
+                  Or(Not(And(True, False)), Not(False)))),
+          And(ci0 == 3,
+              And(And(And(Or(Not(And(False, True)),
+                             Not(True)),
+                          Or(Not(And(True, True)),
+                             Not(False))),
+                      Or(Not(And(True, False)), Not(True))),
+                  Or(Not(And(True, False)), Not(False)))),
+          And(ci0 == 4,
+              And(And(And(Or(Not(And(False, True)),
+                             Not(True)),
+                          Or(Not(And(True, True)),
+                             Not(True))),
+                      Or(Not(And(True, True)), Not(False))),
+                  Or(Not(And(True, False)), Not(True))))))
