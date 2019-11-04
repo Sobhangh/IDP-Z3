@@ -19,13 +19,6 @@ class DSLException(Exception):
         return self.message
 
 
-class Environment:
-    def __init__(self, idp):
-        self.idp = idp
-        self.type_scope = {'Int': IntSort(), 'Bool': BoolSort(), 'Real': RealSort()}
-        self.range_scope = {}
-
-
 class Idp(object):
     def __init__(self, **kwargs):
         log("parsing done")
@@ -45,10 +38,9 @@ class Idp(object):
         log("annotated")
 
     def translate(self, case: ConfigCase):
-        env = Environment(self)
-        self.vocabulary.translate(case, env)
+        self.vocabulary.translate(case)
         log("vocabulary translated")
-        self.theory.translate(case, env)
+        self.theory.translate(case)
         log("theory translated")
         self.goal.translate(case)
         self.view.translate(case)
@@ -73,13 +65,13 @@ class Vocabulary(object):
                + "\n".join(str(i) for i in self.declarations)
                + "\n}\n" )
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         for i in self.declarations:
             if type(i) in [ConstructedTypeDeclaration, RangeDeclaration]:
-                i.translate(case, env)
+                i.translate(case)
         for i in self.declarations:
             if type(i) == SymbolDeclaration:
-                i.translate(case, env)
+                i.translate(case)
 
 
 class ConstructedTypeDeclaration(object):
@@ -88,6 +80,12 @@ class ConstructedTypeDeclaration(object):
         self.constructors = kwargs.pop('constructors')
         self.is_var = False
         self.range = self.constructors # functional constructors are expanded
+
+        if self.name == 'Bool':
+            self.translated = BoolSort()
+            self.constructors[0].translated = bool(True) 
+            self.constructors[1].translated = bool(False) 
+
         # .type = None
         # .translated
         # .range # list of constructors
@@ -106,13 +104,11 @@ class ConstructedTypeDeclaration(object):
         self.type = None
         self.range = self.constructors #TODO constructor functions
 
-    def translate(self, case: ConfigCase, env: Environment):
-        self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
-        for c, c3 in zip(self.constructors, cstrs):
-            c.translated = c3
-
-        env.type_scope[self.name] = self.translated
-        env.range_scope[self.name] = cstrs
+    def translate(self, case: ConfigCase):
+        if not hasattr(self, 'translated'):
+            self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
+            for c, c3 in zip(self.constructors, cstrs):
+                c.translated = c3
         return self.translated
 
 
@@ -132,7 +128,7 @@ class Constructor(object):
     def substitute(self, e0, e1): return self
     def expand_quantifiers(self, theory): return self
     def interpret(self, theory): return self
-    def translate(self, case, env): return self.translated
+    def translate(self, case): return self.translated
 
 
 class RangeDeclaration(object):
@@ -148,6 +144,11 @@ class RangeDeclaration(object):
             else: #TODO test that it is an integer ?
                 for i in range(x.fromI.translated, x.toI.translated + 1):
                     self.range.append(NumberConstant(number=str(i)))
+
+        if self.name == 'int':
+            self.translated = IntSort() 
+        elif self.name == 'real':
+            self.translated = RealSort() 
         # .type = None
         # .translated
 
@@ -161,19 +162,14 @@ class RangeDeclaration(object):
         symbol_decls[self.name] = self
         self.type = None
 
-    def translate(self, case: ConfigCase, env: Environment):
-        els = [e.translated for e in self.range]
-        case.enums[self.name] = els
-        if self.name == 'int':
-            self.translated = IntSort() 
-        elif self.name == 'real':
-            self.translated = RealSort() 
-        elif all(map(lambda x: type(x) == int, els)):
-            self.translated = IntSort()
-        else:
-            self.translated = RealSort()
-        env.range_scope[self.name] = els
-        env.type_scope[self.name] = self.translated
+    def translate(self, case: ConfigCase):
+        if not hasattr(self, 'translated'):
+            els = [e.translated for e in self.range]
+            case.enums[self.name] = els
+            if all(map(lambda x: type(x) == int, els)):
+                self.translated = IntSort()
+            else:
+                self.translated = RealSort()
         return self.translated
 
 
@@ -227,23 +223,23 @@ class SymbolDeclaration(object):
                     self.instances[expr.str] = expr
         
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         if not hasattr(self, 'translated'):
             case.symbol_types[self.name] = self.out.name
             if len(self.sorts) == 0:
-                self.translated = case.Const(self.name, self.out.translate(case, env))
+                self.translated = case.Const(self.name, self.out.translate(case))
                 self.normal = True
             elif self.out.name == 'Bool':
-                types = [x.translate(case, env) for x in self.sorts]
-                rel_vars = [t.getRange(env) for t in self.sorts]
+                types = [x.translate(case) for x in self.sorts]
+                rel_vars = [t.getRange() for t in self.sorts]
                 self.translated = case.Predicate(self.name, types, rel_vars, True)
             else:
-                types = [x.translate(case, env) for x in self.sorts] + [self.out.translate(case, env)]
-                rel_vars = [t.getRange(env) for t in self.sorts + [self.out]]
+                types = [x.translate(case) for x in self.sorts] + [self.out.translate(case)]
+                rel_vars = [t.getRange() for t in self.sorts + [self.out]]
                 self.translated = case.Function(self.name, types, rel_vars, True)
 
             for inst in self.instances.values():
-                inst.translate(case, env)
+                inst.translate(case)
 
             if self.vocabulary and len(self.sorts) == 0 and self.range: #TODO also for Functions ? (done in CaseConfig)
                 domain = in_list(self.translated, [v.translated for v in self.range])
@@ -263,25 +259,11 @@ class Sort(object):
     def annotate(self, symbol_decls):
         self.decl = symbol_decls[self.name]
 
-    def translate(self, case, env: Environment):
-        if self.name in env.type_scope:
-            return env.type_scope[self.name]
-        elif self.name == "int":
-            return IntSort()
-        elif self.name == "real":
-            return RealSort()
-        else:
-            raise Exception("Unknown sort: " + self.name)
+    def translate(self, case):
+        return self.decl.translated
 
-    def getRange(self, env: Environment):
-        if self.name in env.range_scope:
-            return env.range_scope[self.name]
-        elif self.name == "int":
-            return []
-        elif self.name == "real":
-            return []
-        else:
-            return universe(self.translate(env))
+    def getRange(self):
+        return [e.translated for e in self.decl.range]
 
 
 ################################ Theory ###############################
@@ -309,13 +291,13 @@ class Theory(object):
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
         self.definitions = [e.interpret         (self) for e in self.definitions]
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase,):
         for i in self.constraints:
             log("translating " + str(i)[:20])
-            c = i.translate(case, env)
+            c = i.translate(case)
             case.add(c, str(i))
         for d in self.definitions:
-            d.translate(case, env)
+            d.translate(case)
 
 
 class Definition(object):
@@ -346,9 +328,9 @@ class Definition(object):
             self.partition[symbol] = sum((r.interpret(theory) for r in rules), [])
         return self
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         for symbol, rules in self.partition.items():
-            z3_symb = symbol.translate(case, env)
+            z3_symb = symbol.translate(case)
             if type(z3_symb) == FuncDeclRef:
                 vars = [Const('ci'+str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
                     Const('cout', z3_symb.range())]
@@ -357,21 +339,21 @@ class Definition(object):
 
             exprs, outputVar = [], False
             for i in rules:
-                exprs.append(i.translate(vars, case, env))
+                exprs.append(i.translate(vars, case))
                 if i.out is not None:
                     outputVar = True
                     
             if outputVar:
                 case.add(ForAll(vars, 
-                                (applyTo(symbol.translate(case, env), vars[:-1]) == vars[-1]) == Or(exprs)), 
+                                (applyTo(symbol.translate(case), vars[:-1]) == vars[-1]) == Or(exprs)), 
                          str(self))
             else:
                 if len(vars) > 1:
                     case.add(ForAll(vars, 
-                                    applyTo(symbol.translate(case, env), vars[:-1]) == Or(exprs)), 
+                                    applyTo(symbol.translate(case), vars[:-1]) == Or(exprs)), 
                              str(self))
                 else:
-                    case.add(symbol.translate(case, env) == Or(exprs), str(self))
+                    case.add(symbol.translate(case) == Or(exprs), str(self))
 
 
 class Rule(object):
@@ -431,23 +413,23 @@ class Rule(object):
         self.body = self.body.interpret(theory)
         return [self]
 
-    def translate(self, new_vars, case: ConfigCase, env: Environment):
+    def translate(self, new_vars, case: ConfigCase):
         """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
 
         log("translating rule " + str(self.body)[:20])
         for v in self.q_decls.values():
-            v.translate(case, env)
+            v.translate(case)
 
         # translate self.vars into z3vars
         z3vars = []
         for var, sort in zip(self.vars, self.sorts):
-            z3var = Const(var, sort.translate(env))
+            z3var = Const(var, sort.translate())
             z3vars.append(z3var)
 
         out = [] # new_vars0=args0 & new_vars1=args1 .. & body(vars) #TODO move to expand_quantifiers
         for new_var, arg in zip(new_vars, self.args):
-            out.append(new_var == arg.translate(case, env))
-        out.append(self.body.translate(case, env))
+            out.append(new_var == arg.translate(case))
+        out.append(self.body.translate(case))
 
         if len(z3vars) == 0:
             self.translated = And(out)
@@ -482,10 +464,10 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
-    def translate(self, case: ConfigCase, env: Environment):
-        self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate(case, env)
-                            , self.sub_exprs[IfExpr.THEN].translate(case, env)
-                            , self.sub_exprs[IfExpr.ELSE].translate(case, env))
+    def translate(self, case: ConfigCase):
+        self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate(case)
+                            , self.sub_exprs[IfExpr.THEN].translate(case)
+                            , self.sub_exprs[IfExpr.ELSE].translate(case))
         return self.translated
 
 class AQuantification(Expression):
@@ -539,13 +521,13 @@ class AQuantification(Expression):
             self.vars, self.sorts = [], []
         return self
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         for v in self.q_decls.values():
-            v.translate(case, env)
+            v.translate(case)
         if not self.vars:
-            self.translated = self.sub_exprs[0].translate(case, env)
+            self.translated = self.sub_exprs[0].translate(case)
         else:
-            finalvars, forms = self.vars, [f.translate(case, env) for f in self.sub_exprs]
+            finalvars, forms = self.vars, [f.translate(case) for f in self.sub_exprs]
 
             if self.q == '∀':
                 forms = And(forms) if 1<len(forms) else forms[0]
@@ -608,20 +590,20 @@ class BinaryOperator(Expression):
         return {self.str: self} if self.operator[0] in '=<>≤≥≠' \
             else super().subtences()
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         # chained comparisons -> And()
         if self.operator[0] =='≠' and len(self.sub_exprs)==2:
-            x = self.sub_exprs[0].translate(case, env)
-            y = self.sub_exprs[1].translate(case, env)
+            x = self.sub_exprs[0].translate(case)
+            y = self.sub_exprs[1].translate(case)
             atom = x==y
             case.mark_atom(self, atom)
             out = Not(atom)
         elif self.operator[0] in '=<>≤≥≠':
             out = []
             for i in range(1, len(self.sub_exprs)):
-                x = self.sub_exprs[i-1].translate(case, env)
+                x = self.sub_exprs[i-1].translate(case)
                 function = BinaryOperator.MAP[self.operator[i - 1]]
-                y = self.sub_exprs[i].translate(case, env)
+                y = self.sub_exprs[i].translate(case)
                 try:
                     out = out + [function(x, y)]
                 except Z3Exception as E:
@@ -632,11 +614,11 @@ class BinaryOperator(Expression):
                 out = out[0]
             case.mark_atom(self, out)
         else:
-            out = self.sub_exprs[0].translate(case, env)
+            out = self.sub_exprs[0].translate(case)
 
             for i in range(1, len(self.sub_exprs)):
                 function = BinaryOperator.MAP[self.operator[i - 1]]
-                out = function(out, self.sub_exprs[i].translate(case, env))
+                out = function(out, self.sub_exprs[i].translate(case))
         self.translated = out
         return self.translated
 
@@ -668,8 +650,8 @@ class AUnary(Expression):
         self.type = self.sub_exprs[0].type
         return self
 
-    def translate(self, case: ConfigCase, env: Environment):
-        out = self.sub_exprs[0].translate(case, env)
+    def translate(self, case: ConfigCase):
+        out = self.sub_exprs[0].translate(case)
         function = AUnary.MAP[self.operator]
         self.translated = function(out)
         return self.translated
@@ -724,10 +706,10 @@ class AAggregate(Expression):
         self.sub_exprs = forms
         return self
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         for v in self.q_decls.values():
-            v.translate(case, env)
-        self.translated = Sum([f.translate(case, env) for f in self.sub_exprs])
+            v.translate(case)
+        self.translated = Sum([f.translate(case) for f in self.sub_exprs])
         return self.translated
 
 
@@ -764,13 +746,13 @@ class AppliedSymbol(Expression):
             return self
 
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         if not hasattr(self, "translated"):
             if self.s.name == 'abs':
-                arg = self.sub_exprs[0].translate(case,env)
+                arg = self.sub_exprs[0].translate(case)
                 self.translated = If(arg >= 0, arg, -arg)
             else:
-                arg = [x.translate(case, env) for x in self.sub_exprs]
+                arg = [x.translate(case) for x in self.sub_exprs]
                 self.translated = (self.decl.translated)(arg)
                 case.mark_atom(self, self.translated)
         return self.translated
@@ -812,7 +794,7 @@ class Variable(Expression):
             else {self.str: self} if self.type == 'Bool' \
             else {}
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         if not hasattr(self, 'translated'):
             out = self.decl.translated
             self.translated = out
@@ -840,7 +822,7 @@ class NumberConstant(Expression):
 
     def subtences(): return {}
 
-    def translate(self, case: ConfigCase, env: Environment):
+    def translate(self, case: ConfigCase):
         return self.translated
 
 class Brackets(Expression):
@@ -858,8 +840,8 @@ class Brackets(Expression):
         self.type = self.sub_exprs[0].type
         return self
 
-    def translate(self, case: ConfigCase, env: Environment):
-        self.translated = self.sub_exprs[0].translate(case, env)
+    def translate(self, case: ConfigCase):
+        self.translated = self.sub_exprs[0].translate(case)
         if self.reading: 
             self.sub_exprs[0].reading = self.reading
             self.translated.reading   = self.reading #TODO for explain
@@ -938,8 +920,8 @@ class Tuple(object):
 
     def interpret(self, theory): return self #TODO ?
 
-    def translate(self, case: ConfigCase, env: Environment):
-        return [arg.translate(case, env) for arg in self.args]
+    def translate(self, case: ConfigCase):
+        return [arg.translate(case) for arg in self.args]
 
 
 ################################ Goal, View ###############################
