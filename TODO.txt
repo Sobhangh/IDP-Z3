@@ -1,6 +1,5 @@
 To do:
     avoid quantifiers in definitions (head and body)
-    3 typeConstraints for Prime(num) ???
     
     new translation chain: annotate AST, expand quantifiers, interpret (ground) applied symbols, translate to Z3
 

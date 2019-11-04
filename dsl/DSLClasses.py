@@ -228,26 +228,27 @@ class SymbolDeclaration(object):
         
 
     def translate(self, case: ConfigCase, env: Environment):
-        case.symbol_types[self.name] = self.out.name
-        if len(self.sorts) == 0:
-            self.translated = case.Const(self.name, self.out.translate(case, env))
-            self.normal = True
-        elif self.out.name == 'Bool':
-            types = [x.translate(case, env) for x in self.sorts]
-            rel_vars = [t.getRange(env) for t in self.sorts]
-            self.translated = case.Predicate(self.name, types, rel_vars, True)
-        else:
-            types = [x.translate(case, env) for x in self.sorts] + [self.out.translate(case, env)]
-            rel_vars = [t.getRange(env) for t in self.sorts + [self.out]]
-            self.translated = case.Function(self.name, types, rel_vars, True)
+        if not hasattr(self, 'translated'):
+            case.symbol_types[self.name] = self.out.name
+            if len(self.sorts) == 0:
+                self.translated = case.Const(self.name, self.out.translate(case, env))
+                self.normal = True
+            elif self.out.name == 'Bool':
+                types = [x.translate(case, env) for x in self.sorts]
+                rel_vars = [t.getRange(env) for t in self.sorts]
+                self.translated = case.Predicate(self.name, types, rel_vars, True)
+            else:
+                types = [x.translate(case, env) for x in self.sorts] + [self.out.translate(case, env)]
+                rel_vars = [t.getRange(env) for t in self.sorts + [self.out]]
+                self.translated = case.Function(self.name, types, rel_vars, True)
 
-        for inst in self.instances.values():
-            inst.translate(case, env)
+            for inst in self.instances.values():
+                inst.translate(case, env)
 
-        if self.vocabulary and len(self.sorts) == 0 and self.range: #TODO also for Functions ? (done in CaseConfig)
-            domain = in_list(self.translated, [v.translated for v in self.range])
-            domain.reading = "Possible values for " + self.name
-            case.typeConstraints.append(domain)
+            if self.vocabulary and len(self.sorts) == 0 and self.range: #TODO also for Functions ? (done in CaseConfig)
+                domain = in_list(self.translated, [v.translated for v in self.range])
+                domain.reading = "Possible values for " + self.name
+                case.typeConstraints.append(domain)
         return self.translated
 
 

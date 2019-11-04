@@ -1,14 +1,6 @@
 ForAll(a1,
        Implies(Prime(a1),
                And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))
-
-ForAll(a1,
-       Implies(Prime(a1),
-               And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))
-
-ForAll(a1,
-       Implies(Prime(a1),
-               And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))
 --
 ForAll([ci0, cout],
        Prime(ci0) ==
