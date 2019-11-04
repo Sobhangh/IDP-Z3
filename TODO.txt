@@ -1,5 +1,5 @@
 To do:
-    annotate (applied) symbol should return constructor
+    avoid quantifiers in definitions (head and body)
     3 typeConstraints for Prime(num) ???
     
     new translation chain: annotate AST, expand quantifiers, interpret (ground) applied symbols, translate to Z3

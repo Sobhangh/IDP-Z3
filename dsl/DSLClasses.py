@@ -126,8 +126,11 @@ class Constructor(object):
     
     def __str__(self): return self.str
 
-    def annotate(self, symbol_decls, q_decls): pass
+    # A constructor behaves like an Expression
+    def annotate(self, symbol_decls, q_decls): return self
+    def subtences(self): return []
     def substitute(self, e0, e1): return self
+    def expand_quantifiers(self, theory): return self
     def interpret(self, theory): return self
     def translate(self, case, env): return self.translated
 
@@ -190,8 +193,7 @@ class SymbolDeclaration(object):
         # .instances: {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
         # .range: all possible values
         # .translated
-        # .interpretation : f:tuple -> z3Expr (only if it is given in a structure)
-        # .interpret2 : f:tuple -> Expression (only if it is given in a structure)
+        # .interpretation : f:tuple -> Expression (only if it is given in a structure)
 
     def __str__(self):
         return ( self.name
@@ -294,13 +296,14 @@ class Theory(object):
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
         self.subtences = {}
+        self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
         for e in self.constraints:
-            e.annotate(self.symbol_decls, {})
             self.subtences.update(e.subtences())
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
-        for e in self.definitions: 
-            e.annotate(self.symbol_decls, {})
+
+        self.definitions = [e.annotate(self.symbol_decls, {}) for e in self.definitions]
+        for e in self.definitions:
             self.subtences.update(e.subtences())
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
         self.definitions = [e.interpret         (self) for e in self.definitions]
@@ -320,11 +323,12 @@ class Definition(object):
         # .partition : {Symbol: [Transformed Rule]}
 
     def annotate(self, symbol_decls, q_decls):
-        for r in self.rules: r.annotate(symbol_decls, q_decls)
+        self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
 
         self.partition = {}
         for i in self.rules:
             self.partition.setdefault(symbol_decls[i.symbol.name], []).append(i)
+        return self
 
     def subtences(self):
         out = {}
@@ -393,10 +397,10 @@ class Rule(object):
         for s in self.q_decls.values():
             s.annotate(symbol_decls, vocabulary=False)
         q_v = {**q_decls, **self.q_decls} # merge
-        for arg in self.args:
-            arg.annotate(symbol_decls, q_v)
-        if self.out: self.out.annotate(symbol_decls, q_v)
-        self.body.annotate(symbol_decls, q_v)
+        self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
+        self.out = self.out.annotate(symbol_decls, q_v) if self.out else self.out
+        self.body = self.body.annotate(symbol_decls, q_v)
+        return self
 
     def subtences(self):
         return self.body.subtences() if not self.vars else {}
@@ -439,7 +443,7 @@ class Rule(object):
             z3var = Const(var, sort.translate(env))
             z3vars.append(z3var)
 
-        out = [] # new_vars0=args0 & new_vars1=args1 .. & body(vars)
+        out = [] # new_vars0=args0 & new_vars1=args1 .. & body(vars) #TODO move to expand_quantifiers
         for new_var, arg in zip(new_vars, self.args):
             out.append(new_var == arg.translate(case, env))
         out.append(self.body.translate(case, env))
@@ -472,9 +476,10 @@ class IfExpr(Expression):
                         + " else " + self.sub_exprs[IfExpr.ELSE].str)
 
     def annotate(self, symbol_decls, q_decls):
-        for e in self.sub_exprs: e.annotate(symbol_decls, q_decls)
+        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         #TODO verify consistency
         self.type = self.sub_exprs[IfExpr.THEN].type
+        return self
 
     def translate(self, case: ConfigCase, env: Environment):
         self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate(case, env)
@@ -505,8 +510,9 @@ class AQuantification(Expression):
         for s in self.q_decls.values():
             s.annotate(symbol_decls, vocabulary=False)
         q_v = {**q_decls, **self.q_decls} # merge
-        for e in self.sub_exprs: e.annotate(symbol_decls, q_v)
+        self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         self.type = 'Bool'
+        return self
 
     def subtences(self):
         #TODO optionally add subtences of sub_exprs
@@ -589,11 +595,12 @@ class BinaryOperator(Expression):
         return sys.intern(temp)
 
     def annotate(self, symbol_decls, q_decls):
-        for e in self.sub_exprs: e.annotate(symbol_decls, q_decls)
+        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.type = 'Bool' if self.operator[0] in '&|^∨⇒⇐⇔' \
                else 'Bool' if self.operator[0] in '=<>≤≥≠' \
                else 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
+        return self
 
     def subtences(self):
         #TODO collect subtences of aggregates within comparisons
@@ -620,7 +627,6 @@ class BinaryOperator(Expression):
                     raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
             if 1 < len(out):
                 out = And(out)
-                out.is_chained = True
             else:
                 out = out[0]
             case.mark_atom(self, out)
@@ -657,8 +663,9 @@ class AUnary(Expression):
         return sys.intern(self.operator + self.sub_exprs[0].str)
 
     def annotate(self, symbol_decls, q_decls):
-        for e in self.sub_exprs: e.annotate(symbol_decls, q_decls)
+        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.type = self.sub_exprs[0].type
+        return self
 
     def translate(self, case: ConfigCase, env: Environment):
         out = self.sub_exprs[0].translate(case, env)
@@ -699,8 +706,9 @@ class AAggregate(Expression):
         for s in self.q_decls.values():
             s.annotate(symbol_decls, vocabulary=False)
         q_v = {**q_decls, **self.q_decls} # merge
-        for e in self.sub_exprs: e.annotate(symbol_decls, q_v)
+        self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
+        return self
         
     def expand_quantifiers(self, theory):
         form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
@@ -737,9 +745,10 @@ class AppliedSymbol(Expression):
         return sys.intern(self.s.str + "(" + ",".join([x.str for x in self.sub_exprs]) + ")")
 
     def annotate(self, symbol_decls, q_decls):
-        for e in self.sub_exprs: e.annotate(symbol_decls, q_decls)
+        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.decl = q_decls[self.s.name] if self.s.name in q_decls else symbol_decls[self.s.name]
         self.type = self.decl.type
+        return self
 
     def subtences(self):
         out = super().subtences() # in case of predicate over boolean
@@ -748,8 +757,8 @@ class AppliedSymbol(Expression):
 
     def interpret(self, theory):
         sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
-        if hasattr(self.decl, "interpret2"):
-            return (self.decl.interpret2)(theory, 0, sub_exprs)
+        if hasattr(self.decl, "interpretation"):
+            return (self.decl.interpretation)(theory, 0, sub_exprs)
         else:
             return self
 
@@ -761,13 +770,8 @@ class AppliedSymbol(Expression):
                 self.translated = If(arg >= 0, arg, -arg)
             else:
                 arg = [x.translate(case, env) for x in self.sub_exprs]
-                out = (self.decl.translated)(arg)
-                if hasattr(self.decl, 'interpretation'):
-                    out.interpretation = (self.decl.interpretation)(0, arg)
-                    self.translated = out.interpretation
-                else:
-                    self.translated = out
-                case.mark_atom(self, out)
+                self.translated = (self.decl.translated)(arg)
+                case.mark_atom(self, self.translated)
         return self.translated
 
 class Arguments(object):
@@ -794,10 +798,13 @@ class Variable(Expression):
         return sys.intern(self.name)
 
     def annotate(self, symbol_decls, q_decls):
+        if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
+            return symbol_decls[self.name]
         self.decl = self if self.name in ['true', 'false'] \
             else q_decls[self.name] if self.name in q_decls \
             else symbol_decls[self.name]
         self.type = self.decl.type
+        return self
 
     def subtences(self):
         return {} if self.name in ['true', 'false'] \
@@ -807,11 +814,7 @@ class Variable(Expression):
     def translate(self, case: ConfigCase, env: Environment):
         if not hasattr(self, 'translated'):
             out = self.decl.translated
-            if hasattr(self.decl, 'interpretation'):
-                out.interpretation = (self.decl.interpretation)(0, [])
-                self.translated = out.interpretation
-            else:
-                self.translated = out
+            self.translated = out
             case.mark_atom(self, out) #TODO ??
         return self.translated
 
@@ -832,7 +835,7 @@ class NumberConstant(Expression):
     def __repr__(self):
         return sys.intern(self.number)
 
-    def annotate(self, symbol_decls, q_decls): pass
+    def annotate(self, symbol_decls, q_decls): return self
 
     def subtences(): return {}
 
@@ -850,8 +853,9 @@ class Brackets(Expression):
         return sys.intern("(" + self.sub_exprs[0].str + ")")
 
     def annotate(self, symbol_decls, q_decls):
-        for e in self.sub_exprs: e.annotate(symbol_decls, q_decls)
+        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.type = self.sub_exprs[0].type
+        return self
 
     def translate(self, case: ConfigCase, env: Environment):
         self.translated = self.sub_exprs[0].translate(case, env)
@@ -916,7 +920,8 @@ class Interpretation(object):
                                         then_f=interpret(theory, rank+1, args, list(tuples2)), 
                                         else_f=out)
                 return out
-        self.decl.interpret2 = interpret
+        self.decl.interpretation = interpret
+        self.decl.is_var = False
 
 
 
@@ -928,8 +933,7 @@ class Tuple(object):
         return ",".join([str(a) for a in self.args])
 
     def annotate(self, symbol_decls):
-        for arg in self.args:
-            arg.annotate(symbol_decls, {})
+        self.args = [arg.annotate(symbol_decls, {}) for arg in self.args]
 
     def interpret(self, theory): return self #TODO ?
 

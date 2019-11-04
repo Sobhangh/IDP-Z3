@@ -20,6 +20,7 @@ theory {
     !t[type] st[subtype]: typeOf(st) = t <=> isa(st, t).
     !st[subtype]: isa(st, typeOf(st)).
     Type = typeOf(Subtype).
+    isa(regular_triangle, triangle).
 }
 
 structure {

@@ -72,3 +72,5 @@ And(And(And(If(typeOf(regular_triangle) == triangle,
     If(typeOf(square) == quadrilateral, True, False))
 
 Type == typeOf(Subtype)
+
+True

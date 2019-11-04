@@ -84,10 +84,7 @@ def reifier(atoms, solver):
             const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
             reify[atom] = const
             unreify[const] = atom
-            if hasattr(atomZ3, 'interpretation'):
-                solver.add(const == atomZ3.interpretation)
-            else:
-                solver.add(const == atomZ3)
+            solver.add(const == atomZ3)
     return (reify, unreify)
 
 
