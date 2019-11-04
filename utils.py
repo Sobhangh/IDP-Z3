@@ -148,9 +148,6 @@ def is_number(s):
         return False
 
 
-def singleton(x):
-    return [], x
-
 
 def splitLast(l):
     return l[:-1], l[-1]

@@ -4,12 +4,11 @@ import re
 import sys
 
 from textx import metamodel_from_file
-from z3 import IntSort, BoolSort, RealSort, Or, Not, And, obj_to_string, Const, ForAll, Exists, substitute, Z3Exception, \
-    Sum, If, FuncDeclRef, BoolVal
-from z3.z3 import _py2expr
+from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
+    Sum, If, BoolVal
 
-from configcase import ConfigCase, singleton, in_list
-from utils import is_number, universe, applyTo, log, itertools
+from configcase import ConfigCase
+from utils import applyTo, log, itertools, in_list
 from ASTNode import Expression
 
 class DSLException(Exception):
@@ -331,7 +330,7 @@ class Definition(object):
     def translate(self, case: ConfigCase):
         for symbol, rules in self.partition.items():
             z3_symb = symbol.translate(case)
-            if type(z3_symb) == FuncDeclRef:
+            if 0 < len(symbol.sorts):
                 vars = [Const('ci'+str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
                     Const('cout', z3_symb.range())]
             else:
