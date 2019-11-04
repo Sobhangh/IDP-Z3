@@ -14,7 +14,8 @@ from DSLClasses import *
 
 dir = os.path.dirname(__file__)
 files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
-files += ["/home/pcarbonn/Documents/repos/sealconstraints/OmniSeal/specification.z3"]
+#files += ["/home/pcarbonn/Documents/repos/sealconstraints/OmniSeal/specification.z3"]
+#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/isa/isa.idp"]
 for file in files:
     print(file)
     model = idpparser.model_from_file(file)

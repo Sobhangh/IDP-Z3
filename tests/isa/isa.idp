@@ -1,0 +1,28 @@
+vocabulary {
+    type type constructed from {triangle, quadrilateral}
+    Type : type
+
+
+    type subtype constructed from
+        { regular_triangle
+        , right_triangle
+        , rectangle
+        , square}
+    Subtype : subtype
+
+    isa(subtype, type)
+    asi(type, subtype)
+    typeOf(subtype): type
+}
+
+theory {
+    !t[type] st[subtype]: isa(st,t) <=> asi(t, st).
+    !t[type] st[subtype]: typeOf(st) = t <=> isa(st, t).
+    !st[subtype]: isa(st, typeOf(st)).
+    Type = typeOf(Subtype).
+}
+
+structure {
+    isa = {regular_triangle, triangle; right_triangle, triangle;
+           rectangle, quadrilateral; square, quadrilateral}
+}

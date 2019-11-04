@@ -56,10 +56,9 @@ And(And(And(Angle(1) < 180, Angle(2) < 180), Angle(3) < 180),
     Angle(4) < 180)
 
 Equilateral ==
-And(And(And(Or(Length(1) == Length(1), Sides < 1),
-            Or(Length(2) == Length(1), Sides < 2)),
-        Or(Length(3) == Length(1), Sides < 3)),
-    Or(Length(4) == Length(1), Sides < 4))
+And(And(And(Or(True, Sides < 1), Or(False, Sides < 2)),
+        Or(False, Sides < 3)),
+    Or(False, Sides < 4))
 
 Or(Or(Or(Subtype == right_triangle,
          Subtype == regular_triangle),
@@ -90,21 +89,17 @@ And(Sides == 4,
         Or(Angle(4) == 90, Sides < 4)))
 
 Or(Not(Subtype == rectangle),
-   And(And(Length(1) == Length(3), Length(2) == Length(4)),
-       Not(Length(1) == Length(2))))
+   And(And(False, False), Not(False)))
 
 (Subtype == square) == And(Sides == 4, Equilateral)
 
-Or(Not(Type == triangle),
-   And(And(Length(1) <= Length(2) + Length(3),
-           Length(2) <= Length(3) + Length(1)),
-       Length(3) <= Length(1) + Length(2)))
+Or(Not(Type == triangle), And(And(True, True), True))
 
 Perimeter ==
-If(True, Length(1), 0) +
-If(True, Length(2), 0) +
-If(True, Length(3), 0) +
-If(True, Length(4), 0)
+ToReal(If(True, 1, 0) +
+       If(True, 2, 0) +
+       If(True, 3, 0) +
+       If(True, 4, 0))
 
 If(True, Angle(1), 0) +
 If(True, Angle(2), 0) +
@@ -112,8 +107,7 @@ If(True, Angle(3), 0) +
 If(True, Angle(4), 0) ==
 ToReal((Sides - 2)*180)
 
-And(And(And(Length(1) >= 0, Length(2) >= 0), Length(3) >= 0),
-    Length(4) >= 0)
+And(And(And(True, True), True), True)
 
 And(And(And(Angle(1) >= 0, Angle(2) >= 0), Angle(3) >= 0),
     Angle(4) >= 0)
@@ -127,14 +121,13 @@ And(And(And((Angle(1) == 0) == (Vertices < 1),
         (Angle(3) == 0) == (Vertices < 3)),
     (Angle(4) == 0) == (Vertices < 4))
 
-And(And(And((Length(1) == 0) == (Sides < 1),
-            (Length(2) == 0) == (Sides < 2)),
-        (Length(3) == 0) == (Sides < 3)),
-    (Length(4) == 0) == (Sides < 4))
+And(And(And((Sides < 1) == False, (Sides < 2) == False),
+        (Sides < 3) == False),
+    (Sides < 4) == False)
 
 ForAll([ci0, cout],
        Large(ci0) ==
-       Or(And(ci0 == 1, Length(1) > 10),
-          And(ci0 == 2, Length(2) > 10),
-          And(ci0 == 3, Length(3) > 10),
-          And(ci0 == 4, Length(4) > 10)))
+       Or(And(ci0 == 1, False),
+          And(ci0 == 2, False),
+          And(ci0 == 3, False),
+          And(ci0 == 4, False)))

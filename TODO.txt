@@ -1,6 +1,5 @@
 To do:
-    RequirePeek => PeekT(Material(CSpacer)) ?? 
-    translate range declaration as comparisons
+    annotate (applied) symbol should return constructor
     3 typeConstraints for Prime(num) ???
     
     new translation chain: annotate AST, expand quantifiers, interpret (ground) applied symbols, translate to Z3
@@ -43,6 +42,7 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
+    - translate range declaration as comparisons for typeConstraints
     - distinguish between x=1 entry and x=1 atom in output structure
     - simplify Or, And with only one element
     - p(real) should be possible

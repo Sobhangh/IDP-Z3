@@ -43,3 +43,11 @@ class Expression(object):
         else:
             self.sub_exprs = sub_exprs1
             return self.simplify1()
+
+    def interpret(self, theory):
+        sub_exprs1 = [e.interpret(theory) for e in self.sub_exprs]
+        if all(e0 == e1 for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
+            return self
+        else:
+            self.sub_exprs = sub_exprs1
+            return self.simplify1()

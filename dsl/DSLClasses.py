@@ -48,9 +48,6 @@ class Idp(object):
         env = Environment(self)
         self.vocabulary.translate(case, env)
         log("vocabulary translated")
-        if self.structure:
-            self.structure.translate(case, env)
-            log("structure translated")
         self.theory.translate(case, env)
         log("theory translated")
         self.goal.translate(case)
@@ -131,6 +128,7 @@ class Constructor(object):
 
     def annotate(self, symbol_decls, q_decls): pass
     def substitute(self, e0, e1): return self
+    def interpret(self, theory): return self
     def translate(self, case, env): return self.translated
 
 
@@ -192,7 +190,8 @@ class SymbolDeclaration(object):
         # .instances: {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
         # .range: all possible values
         # .translated
-        # .interpretation (only if it is given in a structure)
+        # .interpretation : f:tuple -> z3Expr (only if it is given in a structure)
+        # .interpret2 : f:tuple -> Expression (only if it is given in a structure)
 
     def __str__(self):
         return ( self.name
@@ -299,10 +298,12 @@ class Theory(object):
             e.annotate(self.symbol_decls, {})
             self.subtences.update(e.subtences())
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
+        self.constraints = [e.interpret         (self) for e in self.constraints]
         for e in self.definitions: 
             e.annotate(self.symbol_decls, {})
             self.subtences.update(e.subtences())
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
+        self.definitions = [e.interpret         (self) for e in self.definitions]
 
     def translate(self, case: ConfigCase, env: Environment):
         for i in self.constraints:
@@ -333,6 +334,11 @@ class Definition(object):
     def expand_quantifiers(self, theory):
         for symbol, rules in self.partition.items():
             self.partition[symbol] = sum((r.expand_quantifiers(theory) for r in rules), [])
+        return self
+
+    def interpret(self, theory):
+        for symbol, rules in self.partition.items():
+            self.partition[symbol] = sum((r.interpret(theory) for r in rules), [])
         return self
 
     def translate(self, case: ConfigCase, env: Environment):
@@ -415,7 +421,11 @@ class Rule(object):
                      args=Arguments(sub_exprs=args[:-1] if self.out else args), 
                      out=args[-1] if self.out else None, body=f) 
                 for (args, f) in forms]
-        
+
+    def interpret(self, theory):
+        self.body = self.body.interpret(theory)
+        return [self]
+
     def translate(self, new_vars, case: ConfigCase, env: Environment):
         """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
 
@@ -509,7 +519,7 @@ class AQuantification(Expression):
             if decl.range:
                 forms = [f.substitute(Symbol(name=var), val) for val in decl.range for f in forms]
             else:
-                final_vs.append((var, sort))
+                final_vs.append((var, decl))
         if 1 < len(forms):
             op = '∧' if self.q == '∀' else '∨'
             self.sub_exprs = [BinaryOperator(sub_exprs=forms, operator=[op]*(len(forms)-1))]
@@ -736,6 +746,14 @@ class AppliedSymbol(Expression):
         if self.type == 'Bool': out[self.str] = self
         return out
 
+    def interpret(self, theory):
+        sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
+        if hasattr(self.decl, "interpret2"):
+            return (self.decl.interpret2)(theory, 0, sub_exprs)
+        else:
+            return self
+
+
     def translate(self, case: ConfigCase, env: Environment):
         if not hasattr(self, "translated"):
             if self.s.name == 'abs':
@@ -853,55 +871,54 @@ class Structure(object):
         for i in self.interpretations:
             i.annotate(vocabulary.symbol_decls)
 
-    def translate(self, case: ConfigCase, env: Environment):
-        for i in self.interpretations:
-            i.translate(case, env)
-
 class Interpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.tuples = kwargs.pop('tuples')
-        self.default = kwargs.pop('default')
+        self.default = kwargs.pop('default') # later set to False for predicates
+        
+        # .function : -1 if function else 0
+        # .arity
         # .decl : symbol declaration
 
     def annotate(self, symbol_decls):
         self.decl = symbol_decls[self.name]
         for t in self.tuples:
             t.annotate(symbol_decls)
-
-    def translate(self, case: ConfigCase, env: Environment):
-        case.interpreted[self.name] = True
-        function = 0 if self.decl.out.name == 'Bool' else -1
-        arity = len(self.tuples[0].args) # there must be at least one tuple !
-        if function and 1 < arity and self.default is None:
+        self.function = 0 if self.decl.out.name == 'Bool' else -1
+        self.arity = len(self.tuples[0].args) # there must be at least one tuple !
+        if self.function and 1 < self.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
+        self.default = self.default if self.function else Symbol(name='false')
 
-        # create a macro and attach it to the symbol
-        def interpretation(rank, args, tuples=None):
-            tuples = [tuple.translate(case, env) for tuple in self.tuples] if tuples == None else tuples
-            if rank == arity+function: # return a value
-                if not function:
-                    return BoolVal(True)
+        def interpret(theory, rank, args, tuples=None):
+            tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
+            if rank == self.arity + self.function: # valid tuple -> return a value
+                if not self.function:
+                    return Symbol(name='true')
                 else:
                     if 1 < len(tuples):
                         #raise Exception("Duplicate values in structure for " + str(symbol))
                         print("Duplicate values in structure for " + str(self.name) + str(tuples[0]) )
-                    return tuples[0][rank]
+                    return tuples[0].args[rank]
             else: # constructs If-then-else recursively
-                out = self.default.translate(case, env) if function else BoolVal(False)
+                out = self.default
+                tuples.sort(key=lambda t: str(t.args[rank]))
+                groups = it.groupby(tuples, key=lambda t: t.args[rank])
 
-                tuples.sort(key=lambda t: str(t[rank]))
-                groups = it.groupby(tuples, key=lambda t: t[rank])
-
-                if type(args[rank]) == type(tuples[0][rank]): # immediately resolve
-                    for val, tuples2 in groups:
+                if type(args[rank]) in [Constructor, NumberConstant]:
+                    for val, tuples2 in groups: # try to resolve
                         if args[rank] == val:
-                            out = interpretation(rank+1, args, list(tuples2))
+                            out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = If(args[rank]==val, interpretation(rank+1, args, list(tuples2)), out)
+                        out = IfExpr(if_f=BinaryOperator(sub_exprs=[args[rank],val], operator='='), 
+                                        then_f=interpret(theory, rank+1, args, list(tuples2)), 
+                                        else_f=out)
                 return out
-        self.decl.interpretation = interpretation
+        self.decl.interpret2 = interpret
+
+
 
 class Tuple(object):
     def __init__(self, **kwargs):
@@ -913,6 +930,8 @@ class Tuple(object):
     def annotate(self, symbol_decls):
         for arg in self.args:
             arg.annotate(symbol_decls, {})
+
+    def interpret(self, theory): return self #TODO ?
 
     def translate(self, case: ConfigCase, env: Environment):
         return [arg.translate(case, env) for arg in self.args]
