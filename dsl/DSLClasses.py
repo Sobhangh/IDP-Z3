@@ -79,15 +79,14 @@ class ConstructedTypeDeclaration(object):
         self.constructors = kwargs.pop('constructors')
         self.is_var = False
         self.range = self.constructors # functional constructors are expanded
+        self.translated = None
 
         if self.name == 'Bool':
             self.translated = BoolSort()
             self.constructors[0].translated = bool(True) 
-            self.constructors[1].translated = bool(False) 
+            self.constructors[1].translated = bool(False)
 
-        # .type = None
-        # .translated
-        # .range # list of constructors
+        self.type = None
 
     def __str__(self):
         return ( "type " + self.name
@@ -100,11 +99,10 @@ class ConstructedTypeDeclaration(object):
         for c in self.constructors:
             c.type = self
             symbol_decls[c.name] = c
-        self.type = None
         self.range = self.constructors #TODO constructor functions
 
     def translate(self, case: ConfigCase):
-        if not hasattr(self, 'translated'):
+        if self.translated is None:
             self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
             for c, c3 in zip(self.constructors, cstrs):
                 c.translated = c3
@@ -116,8 +114,8 @@ class Constructor(object):
         self.name = kwargs.pop('name')
         self.is_var = False
         self.str = sys.intern(self.name)
-        # .type
-        # .translated
+        self.translated = None
+        self.type = None
     
     def __str__(self): return self.str
 
@@ -135,6 +133,7 @@ class RangeDeclaration(object):
         self.name = kwargs.pop('name') # maybe 'int', 'real'
         self.elements = kwargs.pop('elements')
         self.is_var = False
+        self.translated = None
 
         self.range = []
         for x in self.elements:
@@ -148,8 +147,7 @@ class RangeDeclaration(object):
             self.translated = IntSort() 
         elif self.name == 'real':
             self.translated = RealSort() 
-        # .type = None
-        # .translated
+        self.type = None
 
     def __str__(self):
         return ( "type " + self.name
@@ -159,10 +157,9 @@ class RangeDeclaration(object):
 
     def annotate(self, symbol_decls): 
         symbol_decls[self.name] = self
-        self.type = None
 
     def translate(self, case: ConfigCase):
-        if not hasattr(self, 'translated'):
+        if self.translated is None:
             els = [e.translated for e in self.range]
             case.enums[self.name] = els
             if all(map(lambda x: type(x) == int, els)):
@@ -181,14 +178,14 @@ class SymbolDeclaration(object):
             self.out = Sort(name='Bool')
 
         self.is_var = True #TODO unless interpreted
+        self.translated = None
 
-        # .vocabulary: False if declared in quantifier, aggregate, rule
-        # .type: a declaration object
-        # .domain: all possible arguments
-        # .instances: {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
-        # .range: all possible values
-        # .translated
-        # .interpretation : f:tuple -> Expression (only if it is given in a structure)
+        self.vocabulary = None # False if declared in quantifier, aggregate, rule
+        self.type = None # a declaration object
+        self.domain = None # all possible arguments
+        self.instances = None # {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
+        self.range = None # all possible values
+        self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
 
     def __str__(self):
         return ( self.name
@@ -223,7 +220,7 @@ class SymbolDeclaration(object):
         
 
     def translate(self, case: ConfigCase):
-        if not hasattr(self, 'translated'):
+        if self.translated is None:
             case.symbol_types[self.name] = self.out.name
             if len(self.sorts) == 0:
                 self.translated = case.Const(self.name, self.out.translate(case))
@@ -240,7 +237,7 @@ class SymbolDeclaration(object):
             for inst in self.instances.values():
                 inst.translate(case)
 
-            if self.vocabulary and len(self.sorts) == 0 and self.range: #TODO also for Functions ? (done in CaseConfig)
+            if self.vocabulary and len(self.sorts) == 0 and self.range and self.out.decl.name != 'Bool': #TODO also for Functions ? (done in CaseConfig)
                 domain = in_list(self.translated, [v.translated for v in self.range])
                 domain.reading = "Possible values for " + self.name
                 case.typeConstraints.append(domain)
@@ -251,7 +248,7 @@ class Sort(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.str = sys.intern(self.name)
-        # .decl
+        self.decl = None
 
     def __str__(self): return self.str
 
@@ -272,8 +269,8 @@ class Theory(object):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
-        # self.symbol_decls : {string: decl}
-        # self.subtences, i.e., sub-sentences.  {string: Expression}
+        self.symbol_decls = None # {string: decl}
+        self.subtences = None # i.e., sub-sentences.  {string: Expression}
 
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
@@ -302,7 +299,7 @@ class Theory(object):
 class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
-        # .partition : {Symbol: [Transformed Rule]}
+        self.partition = None # {Symbol: [Transformed Rule]}
 
     def annotate(self, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
@@ -373,7 +370,7 @@ class Rule(object):
             self.args.append(self.out)
         if self.body is None:
             self.body = Symbol(name='true')
-        # .translated
+        self.translated = None
 
     def annotate(self, symbol_decls, q_decls):
         for s in self.q_decls.values():
@@ -450,7 +447,8 @@ class IfExpr(Expression):
 
         self.sub_exprs = [self.if_f, self.then_f, self.else_f]
         self.str = repr(self)
-        # self.type
+        self.translated = None
+        self.type = None
 
     def __repr__(self):
         return sys.intern("if "    + self.sub_exprs[IfExpr.IF  ].str \
@@ -478,6 +476,8 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
         self.sub_exprs = [self.f]
         self.str = repr(self)
+        self.translated = None
+        self.type = 'Bool'
 
         self.q_decls = {v:SymbolDeclaration(name=Symbol(name=v), sorts=[], out=s) \
                         for v, s in zip(self.vars, self.sorts)}
@@ -493,7 +493,6 @@ class AQuantification(Expression):
             s.annotate(symbol_decls, vocabulary=False)
         q_v = {**q_decls, **self.q_decls} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
-        self.type = 'Bool'
         return self
 
     def subtences(self):
@@ -569,6 +568,8 @@ class BinaryOperator(Expression):
                 "∨" if op == "|" else "∧" if op == "&" else op
             , self.operator))
         self.str = repr(self)
+        self.translated = None
+        self.type = None
 
     def __repr__(self):
         temp = self.sub_exprs[0].str
@@ -640,6 +641,8 @@ class AUnary(Expression):
         self.operator = kwargs.pop('operator')
         self.sub_exprs = [self.f]
         self.str = repr(self)
+        self.translated = None
+        self.type = None
 
     def __repr__(self):
         return sys.intern(self.operator + self.sub_exprs[0].str)
@@ -671,6 +674,8 @@ class AAggregate(Expression):
                         for v, s in zip(self.vars, self.sorts)}
         self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
         self.str = repr(self)
+        self.translated = None
+        self.type = None
 
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
@@ -718,10 +723,10 @@ class AppliedSymbol(Expression):
         self.args = kwargs.pop('args')
         self.sub_exprs = self.args.sub_exprs
         self.str = repr(self)
-        # .decl 
-        # .type
+        self.translated = None
+        self.decl = None
+        self.type = None
         # .normal (only if ground) used on client side
-        # .translated
 
     def __repr__(self):
         return sys.intern(self.s.str + "(" + ",".join([x.str for x in self.sub_exprs]) + ")")
@@ -739,14 +744,14 @@ class AppliedSymbol(Expression):
 
     def interpret(self, theory):
         sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
-        if hasattr(self.decl, "interpretation"):
+        if self.decl.interpretation is not None:
             return (self.decl.interpretation)(theory, 0, sub_exprs)
         else:
             return self
 
 
     def translate(self, case: ConfigCase):
-        if not hasattr(self, "translated"):
+        if self.translated is None:
             if self.s.name == 'abs':
                 arg = self.sub_exprs[0].translate(case)
                 self.translated = If(arg >= 0, arg, -arg)
@@ -764,6 +769,7 @@ class Variable(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.str = repr(self)
+        self.translated = None
         self.sub_exprs = []
         if self.name == "true":
             self.type = 'Bool'
@@ -771,10 +777,9 @@ class Variable(Expression):
         elif self.name == "false":
             self.type = 'Bool'
             self.translated = bool(False)
-        # .decl
-        # .type
+        self.decl = None
+        self.type = None
         # .normal (only if ground)
-        # .translated
 
     def __repr__(self):
         return sys.intern(self.name)
@@ -794,7 +799,7 @@ class Variable(Expression):
             else {}
 
     def translate(self, case: ConfigCase):
-        if not hasattr(self, 'translated'):
+        if self.translated is None:
             out = self.decl.translated
             self.translated = out
             case.mark_atom(self, out) #TODO ??
@@ -830,6 +835,8 @@ class Brackets(Expression):
         self.reading = kwargs.pop('reading')
         self.sub_exprs = [self.f]
         self.str = repr(self)
+        self.translated = None
+        self.type = None
 
     def __repr__(self):
         return sys.intern("(" + self.sub_exprs[0].str + ")")
@@ -861,11 +868,11 @@ class Interpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.tuples = kwargs.pop('tuples')
-        self.default = kwargs.pop('default') # later set to False for predicates
+        self.default = kwargs.pop('default') # later set to false for predicates
         
-        # .function : -1 if function else 0
-        # .arity
-        # .decl : symbol declaration
+        self.function = None # -1 if function else 0
+        self.arity = None
+        self.decl = None # symbol declaration
 
     def annotate(self, symbol_decls):
         self.decl = symbol_decls[self.name]

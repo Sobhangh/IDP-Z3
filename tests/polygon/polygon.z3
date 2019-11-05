@@ -26,10 +26,6 @@ Or(Subtype == regular_triangle,
    Subtype == square,
    Subtype == irregular)
 
-Or(Convex == True, Convex == False)
-
-Or(Equilateral == True, Equilateral == False)
-
 ForAll(a1,
        Implies(Large(a1),
                And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))

@@ -80,13 +80,6 @@ Or(Use == As_Family_Dwelling,
    Use == Other_House,
    Use == No_House)
 
-Or(Domicile_Established == True,
-   Domicile_Established == False)
-
-Or(First_Ownership == True, First_Ownership == False)
-
-Or(Monument == True, Monument == False)
-
 Or(Resale == Less_Than_Three, Resale == Three_Or_More)
 
 Or(Transaction_Type == Public_Sale,
@@ -95,39 +88,6 @@ Or(Transaction_Type == Public_Sale,
 
 Or(Duration_Of_Agreement == Less_Than_9_years,
    Duration_Of_Agreement == More_than_9_Or_9_years)
-
-Or(Core_City == True, Core_City == False)
-
-Or(Mortgage_Loan_Allowance == True,
-   Mortgage_Loan_Allowance == False)
-
-Or(Clean_Purchase == True, Clean_Purchase == False)
-
-Or(First_Ownership == True, First_Ownership == False)
-
-Or(Causal_Connection == True, Causal_Connection == False)
-
-Or(Energy_Renovation_Planned == True,
-   Energy_Renovation_Planned == False)
-
-Or(Heritage_Investment == True,
-   Heritage_Investment == False)
-
-Or(Heritage_Plan == True, Heritage_Plan == False)
-
-Or(Professional_Declaration_Filed == True,
-   Professional_Declaration_Filed == False)
-
-Or(Guarantee_Satisfied == True,
-   Guarantee_Satisfied == False)
-
-Or(Additional_Security_Required == True,
-   Additional_Security_Required == False)
-
-Or(Additional_Security_Satisfied == True,
-   Additional_Security_Satisfied == False)
-
-Or(Additional_Terms == True, Additional_Terms == False)
 
 Or(Start_Dt_Dwelling_For_Social_Rent == 2015,
    Start_Dt_Dwelling_For_Social_Rent == 2016,
@@ -194,8 +154,6 @@ Or(Registration_Type == Family_Dwelling,
    Registration_Type == Heritage,
    Registration_Type == Dwelling_For_Social_Renting,
    Registration_Type == Other)
-
-Or(Professional_Buyer == True, Professional_Buyer == False)
 --
 (Tax == 1) ==
 And(Registration_Type == Heritage, Region == Flemish_Region)
