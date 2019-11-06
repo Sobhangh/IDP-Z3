@@ -54,7 +54,7 @@ class Vocabulary(object):
 
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
                              'real': RangeDeclaration(name='real', elements=[]),
-                             'Bool': ConstructedTypeDeclaration(name='Bool', 
+                             'bool': ConstructedTypeDeclaration(name='bool', 
                                         constructors=[Symbol(name='true'), Symbol(name='false')])}
         for s in self.declarations: 
             s.annotate(self.symbol_decls)
@@ -81,7 +81,7 @@ class ConstructedTypeDeclaration(object):
         self.range = self.constructors # functional constructors are expanded
         self.translated = None
 
-        if self.name == 'Bool':
+        if self.name == 'bool':
             self.translated = BoolSort()
             self.constructors[0].translated = bool(True) 
             self.constructors[1].translated = bool(False)
@@ -175,7 +175,7 @@ class SymbolDeclaration(object):
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
-            self.out = Sort(name='Bool')
+            self.out = Sort(name='bool')
 
         self.is_var = True #TODO unless interpreted
         self.translated = None
@@ -190,7 +190,7 @@ class SymbolDeclaration(object):
     def __str__(self):
         return ( self.name
                + ("({})".format(",".join(map(str, self.sorts))) if 0<len(self.sorts) else "")
-               + ("" if self.out.name == 'Bool' else " : " + self.out.name)
+               + ("" if self.out.name == 'bool' else " : " + self.out.name)
         )
 
     def annotate(self, symbol_decls, vocabulary=True):
@@ -227,7 +227,7 @@ class SymbolDeclaration(object):
                 self.translated = case.Const(self.name, self.out.translate(case)) if self.vocabulary \
                     else Const(self.name, self.out.translate(case))
                 self.normal = True
-            elif self.out.name == 'Bool':
+            elif self.out.name == 'bool':
                 types = [x.translate(case) for x in self.sorts]
                 rel_vars = [t.getRange() for t in self.sorts]
                 self.translated = case.Predicate(self.name, types, rel_vars, True)
@@ -239,7 +239,7 @@ class SymbolDeclaration(object):
             for inst in self.instances.values():
                 inst.translate(case)
 
-            if self.vocabulary and len(self.sorts) == 0 and self.range and self.out.decl.name != 'Bool': #TODO also for Functions ? (done in CaseConfig)
+            if self.vocabulary and len(self.sorts) == 0 and self.range and self.out.decl.name != 'bool': #TODO also for Functions ? (done in CaseConfig)
                 domain = in_list(self.translated, [v.translated for v in self.range])
                 domain.reading = "Possible values for " + self.name
                 case.typeConstraints.append(domain)
@@ -316,7 +316,7 @@ class Definition(object):
             if symbol not in self.q_decls:
                 q_v = {'[ci'+str(i)+"]" : 
                     declare_var('[ci'+str(i)+"]", sort) for i, sort in enumerate(symbol.sorts)}
-                if symbol.out.name != 'Bool':
+                if symbol.out.name != 'bool':
                     q_v['[cout]'] = declare_var('[cout]', symbol.out)
                 for s in q_v.values():
                     s.annotate(symbol_decls, vocabulary=False)
@@ -399,11 +399,11 @@ class Rule(object):
         out = []
         for new_var, arg in zip(new_vars, self.args):
             eq = BinaryOperator(sub_exprs=[new_var, arg], operator='=')
-            eq.type = 'Bool'
+            eq.type = 'bool'
             out += [eq]
         out += [self.body]
         self.body = BinaryOperator(sub_exprs=out, operator='∧' * (len(out)-1))
-        self.body.type = 'Bool'
+        self.body.type = 'bool'
         
         return self
 
@@ -499,7 +499,7 @@ class AQuantification(Expression):
         self.sub_exprs = [self.f]
         self.str = repr(self)
         self.translated = None
-        self.type = 'Bool'
+        self.type = 'bool'
 
         self.q_decls = {v:declare_var(v, s) \
                         for v, s in zip(self.vars, self.sorts)}
@@ -601,8 +601,8 @@ class BinaryOperator(Expression):
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
-        self.type = 'Bool' if self.operator[0] in '&|^∨⇒⇐⇔' \
-               else 'Bool' if self.operator[0] in '=<>≤≥≠' \
+        self.type = 'bool' if self.operator[0] in '&|^∨⇒⇐⇔' \
+               else 'bool' if self.operator[0] in '=<>≤≥≠' \
                else 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
         return self
@@ -765,7 +765,7 @@ class AppliedSymbol(Expression):
 
     def subtences(self):
         out = super().subtences() # in case of predicate over boolean
-        if self.type == 'Bool': out[self.str] = self
+        if self.type == 'bool': out[self.str] = self
         return out
 
     def interpret(self, theory):
@@ -798,10 +798,10 @@ class Variable(Expression):
         self.translated = None
         self.sub_exprs = []
         if self.name == "true":
-            self.type = 'Bool'
+            self.type = 'bool'
             self.translated = bool(True)
         elif self.name == "false":
-            self.type = 'Bool'
+            self.type = 'bool'
             self.translated = bool(False)
         self.decl = None
         self.type = None
@@ -821,7 +821,7 @@ class Variable(Expression):
 
     def subtences(self):
         return {} if self.name in ['true', 'false'] \
-            else {self.str: self} if self.type == 'Bool' \
+            else {self.str: self} if self.type == 'bool' \
             else {}
 
     def translate(self, case: ConfigCase):
@@ -905,7 +905,7 @@ class Interpretation(object):
         self.decl = symbol_decls[self.name]
         for t in self.tuples:
             t.annotate(symbol_decls)
-        self.function = 0 if self.decl.out.name == 'Bool' else -1
+        self.function = 0 if self.decl.out.name == 'bool' else -1
         self.arity = len(self.tuples[0].args) # there must be at least one tuple !
         if self.function and 1 < self.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))

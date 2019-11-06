@@ -564,8 +564,8 @@ class Structure:
         typ = atomZ3.sort().name()
         for symb in symbols_of(atomZ3, case.symbols, case.interpreted):
             s = self.m.setdefault(symb, {})
-            if typ == 'Bool':
-                symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
+            if typ == 'bool':
+                symbol = {"typ": 'Bool', "ct": ct_true, "cf": ct_false}
             elif case.symbol_types[symb] in case.enums:
                 symbol = { "typ": typ, "value": str(value)
                          , "values": [str(v) for v in case.enums[case.symbol_types[symb]]]}

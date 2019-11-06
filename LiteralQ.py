@@ -40,7 +40,7 @@ class Equality(object):
         self.subtence = subtence # an Expression
         self.value = value # a Z3 value
         self.str = subtence.str + " = " + str(value)
-        self.type = 'Bool'
+        self.type = 'bool'
         self.translated = (subtence.translated == value) #TODO
 
     def __str__(self): return self.str
