@@ -1,0 +1,3 @@
+[submodule "examples/sealconstraints"]
+	path = examples/sealconstraints
+	url = git@gitlab.com:EAVISE/sealconstraints.git
