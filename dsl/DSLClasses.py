@@ -557,8 +557,8 @@ class AQuantification(Expression):
                 forms = Or(forms) if 1<len(forms) else forms[0]
                 if len(finalvars) > 0: # not fully expanded !
                     forms = Exists(finalvars, forms)
-            case.mark_atom(self, forms)
             self.translated = forms
+        case.mark_atom(self, self.translated)
         return self.translated
 
 class BinaryOperator(Expression):
