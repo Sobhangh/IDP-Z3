@@ -177,7 +177,7 @@ class SymbolDeclaration(object):
         if self.out is None:
             self.out = Sort(name='bool')
 
-        self.is_var = True #TODO unless interpreted
+        self.is_var = True # unless interpreted later
         self.translated = None
 
         self.vocabulary = None # False if declared in quantifier, aggregate, rule
@@ -558,7 +558,6 @@ class AQuantification(Expression):
                 if len(finalvars) > 0: # not fully expanded !
                     forms = Exists(finalvars, forms)
             self.translated = forms
-        case.mark_atom(self, self.translated)
         return self.translated
 
 class BinaryOperator(Expression):
@@ -608,18 +607,16 @@ class BinaryOperator(Expression):
         return self
 
     def subtences(self):
-        #TODO collect subtences of aggregates within comparisons
-        return {self.str: self} if self.operator[0] in '=<>≤≥≠' \
-            else super().subtences()
+        if self.operator[0] in '=<>≤≥≠':
+            return {self.str: self} #TODO collect subtences of aggregates within comparisons
+        return super().subtences()
 
     def translate(self, case: ConfigCase):
         # chained comparisons -> And()
         if self.operator[0] =='≠' and len(self.sub_exprs)==2:
             x = self.sub_exprs[0].translate(case)
             y = self.sub_exprs[1].translate(case)
-            atom = x==y
-            case.mark_atom(self, atom)
-            out = Not(atom)
+            out = Not(x==y)
         elif self.operator[0] in '=<>≤≥≠':
             out = []
             for i in range(1, len(self.sub_exprs)):
@@ -634,7 +631,6 @@ class BinaryOperator(Expression):
                 out = And(out)
             else:
                 out = out[0]
-            case.mark_atom(self, out)
         elif self.operator[0] == '∧':
             out = And([e.translate(case) for e in self.sub_exprs])
         elif self.operator[0] == '∨':
@@ -784,7 +780,6 @@ class AppliedSymbol(Expression):
             else:
                 arg = [x.translate(case) for x in self.sub_exprs]
                 self.translated = (self.decl.translated)(arg)
-                case.mark_atom(self, self.translated)
         return self.translated
 
 class Arguments(object):
@@ -828,7 +823,6 @@ class Variable(Expression):
         if self.translated is None:
             out = self.decl.translated
             self.translated = out
-            case.mark_atom(self, out) #TODO ??
         return self.translated
     
 class Symbol(Variable): pass

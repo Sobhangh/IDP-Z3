@@ -25,7 +25,6 @@ class LiteralQ(object):
             return ""
         return ("" if self.truth else "? " if self.truth is None else "Not ") \
              + (self.subtence.reading if hasattr(self.subtence, 'reading')
-                 else self.subtence.atom_string if hasattr(self.subtence, 'atom_string')
                  else str(self.subtence))
 
     def to_json(self): return str(self)

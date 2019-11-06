@@ -58,7 +58,6 @@ def getAtoms(expr, valueMap, symbols):
     return out
 
 def atom_as_string(expr):
-    if hasattr(expr, 'atom_string'): return expr.atom_string
     return str(expr).replace("==", "=").replace("!=", "≠").replace("<=", "≤")
 
 

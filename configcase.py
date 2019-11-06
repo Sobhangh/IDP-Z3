@@ -102,19 +102,6 @@ class ConfigCase:
                 ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
         return p
 
-    def mark_atom(self, dsl_object, atomZ3):
-        """
-            Z3_code:    ASCII, with ==, <=, !=
-            atom_string:original code, using UTF-8 characters for connectives
-            reading:    string from code annotation
-            proposition:qsdfvqe13435(Z3_code)
-        """
-        if is_bool(atomZ3) and \
-            (is_quantifier(atomZ3) or not has_local_var(atomZ3, self.valueMap, self.symbols)): # AtomQ !
-
-            atom_string = str(dsl_object)
-            atomZ3.atom_string = atom_string # used in abstract()
-
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
 
@@ -400,7 +387,7 @@ class ConfigCase:
         reified = Function("qsdfvqe13435", StringSort(), BoolSort())
         for atom_string, atom in self.atoms.items():
             atomZ3 = atom.translated #TODO
-            if hasattr(atomZ3, 'atom_string'):
+            if atom.type == 'bool' or (hasattr(atom.decl, 'sorts') and atom.decl.type.name == 'bool'):
                 substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
         for literalQ in done:
             if is_bool(literalQ.subtence): #TODO
