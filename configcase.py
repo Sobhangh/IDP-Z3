@@ -28,40 +28,49 @@ from utils import *
 
 class ConfigCase:
 
-    def __init__(self, theory):
+    def __init__(self, idp):
         self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
-        self.symbols = {} # {string: Z3Expr}
-        self.args = {} # {Z3Expr: [ (Z3expr) ]}
+        self.symbols = {} # {string: Z3Expr}, including starting with '_'
         self.symbol_types = {} # {string: string} symbol -> idp_type
         self.interpreted = {} # from structure: {string: True}
 
-        self.atoms = {} # {atom_string: Z3expr} atoms + numeric terms !
-        self.Z3atoms = {} # {Z3_code: Z3expr}
+        self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
 
         self.assumptions = [] # [atomZ3]
         self.assumptionLs = {} # {literalQ : True} (needed for propagate)
         self.constraints = {} # {Z3expr: string}
         self.typeConstraints = []
         
-        theory.translate(self)
+        idp.translate(self)
 
+        for v in idp.vocabulary.symbol_decls.values():
+            if v.is_var:
+                self.atoms.update(v.instances)
+        self.atoms.update( {k: v for k, v in idp.theory.subtences.items()})
         # remove atoms based only on interpreted symbols
         self.atoms = {k:v for (k,v) in self.atoms.items() \
-            if symbols_of(v, self.symbols, self.interpreted) }
+            if symbols_of(v.translated, self.symbols, self.interpreted) } #TODO
+
+        ##TODO remove dead code
+        #self.symbols = {k: v.translated for k, v in idp.vocabulary.symbol_decls.items() if v.is_var}
+        #print("missing", {k:v for k,v in self.symbols.items() if k not in self.symbols2})
+        #print("added", {k:v for k,v in self.symbols2.items() if k not in self.symbols})
+
+    def print(self):
+        out  = "\r\n\r\n".join(str(t) for t in self.typeConstraints) + "\r\n--\r\n"
+        out += "\r\n\r\n".join(str(t) for t in self.constraints)     + "\r\n"
+        return out
+        
 
 
     #################
     # Helpers for translating idp code
     #################
 
-    def Const(self, txt: str, sort, normal=False):
+    def Const(self, txt: str, sort,):
         const = self.symbols.setdefault(txt, Const(txt, sort))
-        if normal: # this is a declared constant
-            const.normal = True
-            if not txt.startswith('_'):
-                self.atoms[txt] = const
         return const
 
     def EnumSort(self, name, objects):
@@ -78,12 +87,8 @@ class ConfigCase:
         args = list(itertools.product(*args))
         if not str(out).startswith('_'):
             self.symbols[str(out)] = out
-        self.args[out] = args
         for arg in list(args):
             expr = out(*arg)
-            expr.normal = True
-            if not str(expr).startswith('_'):
-                self.atoms[str(expr)] = expr
             if restrictive:
                 exp = in_list(expr, vals)
                 self.typeConstraints.append(exp)
@@ -97,24 +102,18 @@ class ConfigCase:
                 ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
         return p
 
-    def Atom(self, atomZ3, atom_string=None):
+    def mark_atom(self, dsl_object, atomZ3):
         """
             Z3_code:    ASCII, with ==, <=, !=
             atom_string:original code, using UTF-8 characters for connectives
             reading:    string from code annotation
             proposition:qsdfvqe13435(Z3_code)
         """
-        if is_bool(atomZ3) and (is_quantifier(atomZ3) or not has_local_var(atomZ3, self.valueMap, self.symbols)): # AtomQ !
-            atom_string = atom_string if atom_string else atom_as_string(atomZ3)
-            atomZ3.atom_string = atom_string
-            self.atoms.update({atom_string: atomZ3})
+        if is_bool(atomZ3) and \
+            (is_quantifier(atomZ3) or not has_local_var(atomZ3, self.valueMap, self.symbols)): # AtomQ !
 
-            if hasattr(atomZ3, 'reading'): # then use it
-                self.atoms[atom_string].reading = atomZ3.reading
-            elif not hasattr(self.atoms[atom_string], 'reading'): # then use default value
-                self.atoms[atom_string].reading = atom_string
-
-            self.Z3atoms[str(atomZ3)] = self.atoms[atom_string]
+            atom_string = str(dsl_object)
+            atomZ3.atom_string = atom_string # used in abstract()
 
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
@@ -138,20 +137,18 @@ class ConfigCase:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
                 if atom in self.atoms:
-                    atomZ3 = self.atoms[atom]
+                    atom = self.atoms[atom]
                     if json_atom["typ"] == "Bool":
                         if "ct" in json_atom and json_atom["ct"]:
-                            literalQ = LiteralQ(True, atomZ3)
+                            literalQ = LiteralQ(True, atom)
                         if "cf" in json_atom and json_atom["cf"]:
-                            literalQ = LiteralQ(False, atomZ3)
+                            literalQ = LiteralQ(False, atom)
                     elif json_atom["value"]:
-                        if json_atom["typ"] == "Int":
-                            value = int(json_atom["value"])
-                        elif json_atom["typ"] == "Real":
-                            value = float(json_atom["value"])
+                        if json_atom["typ"] in ["Int", "Real"]:
+                            value = eval(json_atom["value"])
                         else:
                             value = self.valueMap[json_atom["value"]]
-                        literalQ = LiteralQ(True, atomZ3 == value)
+                        literalQ = LiteralQ(True, Equality(atom, value))
                     else:
                         literalQ = None #TODO error ?
                     if literalQ is not None:
@@ -191,23 +188,23 @@ class ConfigCase:
         
         out = self.initial_structure()
         
-        todo = [ a for a in self.atoms.values() 
-                 if is_symbol(a.decl().name(), self.symbols) 
-                 or any([s in expanded_symbols for s in symbols_of(a, self.symbols, self.interpreted)]) ]
+        todo = [ a for a in self.atoms.values() #TODO
+                 if is_symbol(a.translated.decl().name(), self.symbols) 
+                 or any([s in expanded_symbols for s in symbols_of(a.translated, self.symbols, self.interpreted)]) ]
 
         amf = consequences(self.theory(with_assumptions=True), todo, {})
         for literalQ in amf:
-            out.addAtom(self, literalQ.atomZ3, literalQ.truth)
+            out.addAtom(self, literalQ.subtence, literalQ.truth)
 
         # useful for non linear assumptions
         """
         amf = consequences(self.theory(with_assumptions=False), todo, amf)
         for literalQ in amf:
-            out.addAtom(self, literalQ.atomZ3, literalQ.truth)
+            out.addAtom(self, literalQ.subtence, literalQ.truth)
         """
 
         for literalQ in self.assumptionLs.keys(): # needed to keep some numeric assignments
-            out.addAtom(self, literalQ.atomZ3, literalQ.truth)
+            out.addAtom(self, literalQ.subtence, literalQ.truth)
         return out.m
 
     def expand(self):
@@ -312,16 +309,15 @@ class ConfigCase:
 
     def explain(self, symbol, value):
         out = self.initial_structure()
-        for ass in self.assumptions: # add numeric assumptions
-            for atomZ3 in getAtoms(ass,self.valueMap, self.symbols).values():
-                out.initialise(self, atomZ3, False, False, "")    
+        for ass in self.assumptionLs: # add numeric assumptions
+            out.initialise(self, ass.subtence, False, False, "")    
 
         value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
             .replace("\\u2200", "∀").replace("\\u2203", "∃") \
             .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
             .replace("\\u2228", "∨").replace("\\u2227", "∧")
         if value in self.atoms:
-            to_explain = self.atoms[value] # value is an atom string
+            to_explain = self.atoms[value].translated #TODO value is an atom string
 
             # rules used in justification
             if not to_explain.sort()==BoolSort(): # calculate numeric value
@@ -337,9 +333,13 @@ class ConfigCase:
             def r1(a): return reify[a] if a in reify else a
             def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
             ps = {} # {reified: constraint}
-            constraints = list(self.constraints.keys()) + self.typeConstraints + self.assumptions
-            for i, constraint in enumerate(constraints):
+            for i, ass in enumerate(self.assumptionLs):
                 p = Const("wsdraqsesdf"+str(i), BoolSort())
+                ps[p] = ass
+                s.add(Implies(p, ass.asZ3()))
+            constraints = list(self.constraints.keys()) + self.typeConstraints
+            for i, constraint in enumerate(constraints):
+                p = Const("wsdraqsesdf"+str(i+len(self.assumptionLs)), BoolSort())
                 ps[p] = constraint
                 s.add(Implies(p, constraint))
             s.push()  
@@ -355,10 +355,10 @@ class ConfigCase:
                 unsatcore = s.unsat_core()
             
             if unsatcore:
-                for a1 in self.assumptions:
+                for a1 in self.assumptionLs:
                     for a2 in s.unsat_core():
-                        if str(a1) == str(ps[a2]): #TODO we might miss some equality
-                            out.addAtom(self, a1, True)
+                        if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
+                            out.addAtom(self, a1.subtence, a1.truth)
                 out.m["*laws*"] = []
                 for a1 in self.constraints.keys():
                     for a2 in s.unsat_core():
@@ -382,11 +382,7 @@ class ConfigCase:
         out["universal"] = [k for k in universal.keys() if k.truth is not None]
 
         out["given"] = []
-        for assumption in self.assumptions:
-            if is_not(assumption):
-                ass = LiteralQ(False, assumption.children()[0])
-            else:
-                ass = LiteralQ(True, assumption)
+        for ass in self.assumptionLs:
             universal[ass] = True
             out["given"] += [ass]
 
@@ -402,12 +398,13 @@ class ConfigCase:
         # substitutions = [(quantifier/chained, reified)] + [(consequences, truthvalue)]
         substitutions = []
         reified = Function("qsdfvqe13435", StringSort(), BoolSort())
-        for atom_string, atomZ3 in self.atoms.items():
+        for atom_string, atom in self.atoms.items():
+            atomZ3 = atom.translated #TODO
             if hasattr(atomZ3, 'atom_string'):
                 substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
         for literalQ in done:
-            if is_bool(literalQ.atomZ3):
-                substitutions += [(literalQ.atomZ3, BoolVal(literalQ.truth))]
+            if is_bool(literalQ.subtence): #TODO
+                substitutions += [(literalQ.subtence, BoolVal(literalQ.truth))]
 
         # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
         simplified = simplify(substitute(And(list(self.constraints.keys())), substitutions)) # it starts by the last substitution ??
@@ -415,18 +412,20 @@ class ConfigCase:
 
         # --> irrelevant
         irrelevant = []
-        for atom_string, atomZ3 in self.atoms.items():
+        for atom_string, atom in self.atoms.items():
+            atomZ3 = atom.translated #TODO
             if is_bool(atomZ3) \
-            and not LiteralQ(True , atomZ3) in done \
-            and not LiteralQ(False, atomZ3) in done:
+            and not LiteralQ(True , atom) in done \
+            and not LiteralQ(False, atom) in done:
                 string2 = atom_as_string(reified(StringVal(atom_string.encode('utf8'))))
                 if not string2 in relevants:
-                    irrelevant += [LiteralQ(True, atomZ3)]
+                    irrelevant += [LiteralQ(True, atom)]
         out["irrelevant"] = irrelevant
         done2 = done.union(set(irrelevant))
 
         # create keys for models using first symbol of atoms
-        for atomZ3 in self.atoms.values():
+        for atom in self.atoms.values():
+            atomZ3 = atom.translated #TODO
             for symb in symbols_of(atomZ3, self.symbols, self.interpreted).keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
                 break
@@ -439,16 +438,17 @@ class ConfigCase:
             theory2 = And(theory, And(self.typeConstraints))
 
             atoms = [] # [LiteralQ]
-            for atom_string, atomZ3 in self.atoms.items():
+            for atom_string, atom in self.atoms.items():
+                atomZ3 = atom.translated #TODO
                 if is_bool(atomZ3) \
-                and not LiteralQ(True , atomZ3) in done2 \
-                and not LiteralQ(False, atomZ3) in done2 \
+                and not LiteralQ(True , atom) in done2 \
+                and not LiteralQ(False, atom) in done2 \
                 and not atom_string in relevants :
-                    truth = solver.model().eval(reify[atomZ3])
+                    truth = solver.model().eval(reify[atom])
                     if truth == True:
-                        atoms += [ LiteralQ(True,  atomZ3) ]
+                        atoms += [ LiteralQ(True,  atom) ]
                     elif truth == False:
-                        atoms += [ LiteralQ(False, atomZ3) ]
+                        atoms += [ LiteralQ(False, atom) ]
                     else: #unknown
                         theory2 = And(theory2, 
                                       substitute(theory2, [(atomZ3, BoolVal(True))]),  # don't simplify !
@@ -456,43 +456,43 @@ class ConfigCase:
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
             # start with negations !
-            atoms.sort(key=lambda l: (l.truth, str(l.atomZ3)))
+            atoms.sort(key=lambda l: (l.truth, str(l.subtence)))
 
             # remove atoms that are irrelevant in AMF
             solver2 = Solver()
             solver2.add(theory2)
             solver2.add([l.asZ3() for l in done]) # universal + given + fixed (ignore irrelevant)
-            (reify2, _) = reifier([l.atomZ3 for l in atoms], solver2)
+            (reify2, _) = reifier([l.subtence for l in atoms], solver2)
             for i, literalQ in enumerate(atoms):
-                if not is_true(literalQ.atomZ3):
+                if literalQ.truth is not None:
                     solver2.push()
-                    a = reify2[literalQ.atomZ3] if not literalQ.truth else Not(reify2[literalQ.atomZ3])
+                    a = reify2[literalQ.subtence] if not literalQ.truth else Not(reify2[literalQ.subtence])
                     solver2.add(a)
                     solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
                     result = solver2.check()
                     solver2.pop()
                     if result == sat:
                         theory2 = And(theory2, 
-                                    substitute(theory2, [(literalQ.atomZ3, BoolVal(True))]),
-                                    substitute(theory2, [(literalQ.atomZ3, BoolVal(False))]))
+                                    substitute(theory2, [(literalQ.subtence.translated, BoolVal(True))]),
+                                    substitute(theory2, [(literalQ.subtence.translated, BoolVal(False))]))
                         solver2.add(theory2)
-                        atoms[i] = LiteralQ(True, BoolVal(True))
+                        atoms[i] = LiteralQ("irrelevant", literalQ.subtence) # represents True
 
             # remove atoms that are consequences of others in the AMF
             solver2 = Solver()
             solver2.add(self.typeConstraints) # without theory !
-            (reify2, _) = reifier([l.atomZ3 for l in atoms], solver2)
+            (reify2, _) = reifier([l.subtence for l in atoms], solver2)
             for i, literalQ in enumerate(atoms):
-                if not is_true(literalQ.atomZ3):
+                if literalQ.truth is not None:
                     solver2.push()
                     solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
 
                     # evaluate not(literalQ)
-                    a = reify2[literalQ.atomZ3] if not literalQ.truth else Not(reify2[literalQ.atomZ3])
+                    a = reify2[literalQ.subtence] if not literalQ.truth else Not(reify2[literalQ.subtence])
                     result, consq = solver2.consequences([], [a])
                     if result!=sat or consq: # remove it if it's a consequence
-                        atoms[i] = LiteralQ(True, BoolVal(True))
-                        # ??? theory2 = substitute(theory2, [(literalQ.atomZ3, BoolVal(literalQ.truth))])
+                        atoms[i] = LiteralQ("irrelevant", literalQ.subtence)
+                        # ??? theory2 = substitute(theory2, [(literalQ.subtence, BoolVal(literalQ.truth))])
                     solver2.pop()
 
             # add constraint to eliminate this model
@@ -503,7 +503,7 @@ class ConfigCase:
             # group atoms by symbols
             model = {}
             for l in atoms:
-                for symb in symbols_of(l.atomZ3, self.symbols, self.interpreted).keys():
+                for symb in symbols_of(l.subtence.translated, self.symbols, self.interpreted).keys():
                     model.setdefault(symb, []).append([ l ])
                     break
             # add to models
@@ -532,24 +532,25 @@ class ConfigCase:
 
     def initial_structure(self):
         out = Structure(self)
-        for atomZ3 in self.atoms.values():
-            out.initialise(self, atomZ3, False, False, "")
+        for atom in self.atoms.values():
+            out.initialise(self, atom, False, False, "")
         return out
 
 
     def model_to_json(self, s, reify, unreify):
         m = s.model()
         out = self.initial_structure()
-        for atomZ3 in self.atoms.values():
+        for atom in self.atoms.values():
+            atomZ3 = atom.translated #TODO
             # atom might not have an interpretation in model (if "don't care")
-            value = m.eval(reify[atomZ3], model_completion=True)
-            if is_bool(atomZ3):
+            value = m.eval(reify[atom], model_completion=True)
+            if is_bool(atomZ3): #TODO
                 if not (is_true(value) or is_false(value)):
                     #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                     print("*** ", atomZ3, " is not defined, and assumed false")
-                out.addAtom(self, atomZ3, True if is_true(value) else False)
+                out.addAtom(self, atom, True if is_true(value) else False)
             else: #TODO check that value is numeric ?
-                out.addValue(self, atomZ3, value)
+                out.addValue(self, atom, value)
         return out.m
     
 
@@ -557,8 +558,9 @@ class Structure:
     def __init__(self, case):
         self.m = {}
 
-    def initialise(self, case, atomZ3, ct_true, ct_false, value=""):
-        key = atom_as_string(atomZ3)
+    def initialise(self, case, atom, ct_true, ct_false, value=""):
+        atomZ3 = atom.translated #TODO
+        key = atom.str
         typ = atomZ3.sort().name()
         for symb in symbols_of(atomZ3, case.symbols, case.interpreted):
             s = self.m.setdefault(symb, {})
@@ -572,40 +574,36 @@ class Structure:
             else:
                 symbol = None
             if symbol: 
-                if hasattr(atomZ3, 'reading'):
-                    symbol['reading'] = atomZ3.reading
-                symbol['normal'] = hasattr(atomZ3, 'normal')
+                if hasattr(atom, 'reading'):
+                    symbol['reading'] = atom.reading
+                symbol['normal'] = hasattr(atom, 'normal')
                 s.setdefault(key, symbol)
                 break
 
-    def addAtom(self, case, atomZ3, truth):
+    def addAtom(self, case, atom, truth):
+        if truth and type(atom) == Equality:
+            self.addValue(case, atom.subtence, atom.value)
+        atomZ3 = atom.translated
         if not is_bool(atomZ3): return
-        if truth and is_eq(atomZ3): # try to interpret it as an assignment
-            if atomZ3.arg(1).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
-                self.addValue(case, atomZ3.arg(0), atomZ3.arg(1))
-            if atomZ3.arg(0).__class__.__name__ in ["IntNumRef", "RatNumRef", "AlgebraicNumRef", "DatatypeRef"]:  # is this really a value ?
-                self.addValue(case, atomZ3.arg(1), atomZ3.arg(0))
-        if is_not(atomZ3):
-            atomZ3 = atomZ3.arg(0)
-            truth = None if truth is None else not truth
-        key = atom_as_string(atomZ3)
+        key = atom.str
         for symb in symbols_of(atomZ3, case.symbols, case.interpreted).keys():
             s = self.m.setdefault(symb, {})
             if key in s:
                 if truth is None: s[key]["unknown"] = True
                 else:
                     s[key]["ct" if truth else "cf"] = True
-                if hasattr(atomZ3, 'reading'):
-                    s[key]['reading'] = atomZ3.reading
+                if hasattr(atom, 'reading'):
+                    s[key]['reading'] = atom.reading
 
-    def addValue(self, case, symbol, value):
-        key = atom_as_string(symbol)
+    def addValue(self, case, atom, value):
+        symbol = atom.translated
+        key = atom.str
         typ = symbol.sort().name()
         for symb in symbols_of(symbol, case.symbols, case.interpreted).keys():
             s = self.m.setdefault(str(symb), {})
             if key in s:
                 if typ in ["Real", "Int"]:
                     s[key]["value"] = str(eval(str(value).replace('?', ''))) # compute fraction
-                elif typ in case.enums and value.decl().name() != "if":
+                elif typ in case.enums: #TODO and type(atom) != IfExpr:
                     s[key]["value"] = str(value)
 

@@ -37,7 +37,7 @@ JSONEncoder.default = _default # Replace it.
 start = time.time()
 def log(action):
     global start
-    print(action, time.time()-start)
+    print("*** ", action, round(time.time()-start,3))
     start = time.time()
 
 
@@ -147,9 +147,6 @@ def is_number(s):
     except:
         return False
 
-
-def singleton(x):
-    return [], x
 
 
 def splitLast(l):

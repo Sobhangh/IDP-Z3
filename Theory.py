@@ -41,8 +41,10 @@ def symbols_of(expr, symbols, ignored): # returns a dict {string: string}
         if is_symbol(name, symbols) and not name in ignored and not name.startswith('_'):
             out[name] = name
     except: pass
-    for child in expr.children():
-        out.update(symbols_of(child, symbols, ignored))
+    try:
+        for child in expr.children():
+            out.update(symbols_of(child, symbols, ignored))
+    except: pass
     return out
 
 
@@ -70,21 +72,19 @@ def mk_solver(theory, atoms):
 
 def reifier(atoms, solver):
     # creates a proposition variable for each boolean expression
-    # returns ({atomZ3: predicate}, {predicate: atomZ3})
+    # returns ({atom: predicateZ3}, {predicateZ3: atom})
     count, (reify, unreify) = 0, ({}, {})
-    for atomZ3 in atoms:
+    for atom in atoms:
+        atomZ3 = atom.translated
         if not is_bool(atomZ3):
-            reify[atomZ3] = atomZ3
-            unreify[atomZ3] = atomZ3
+            reify[atom] = atomZ3
+            unreify[atomZ3] = atom
         else:
             count += 1
             const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
-            reify[atomZ3] = const
-            unreify[const] = atomZ3
-            if hasattr(atomZ3, 'interpretation'):
-                solver.add(const == atomZ3.interpretation)
-            else:
-                solver.add(const == atomZ3)
+            reify[atom] = const
+            unreify[const] = atom
+            solver.add(const == atomZ3)
     return (reify, unreify)
 
 
@@ -112,10 +112,16 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
             if is_not(consq):
                 t, consq = False, consq.arg(0)
             # try to unreify it
-            if consq in unreify:
+            if is_eq(consq):
+                symbol = consq.children()[0]
+                if symbol in unreify:
+                    out[ LiteralQ(t, Equality(unreify[symbol], consq.children()[1])) ] = True
+                else:
+                    print("???", str(consq))
+            elif consq in unreify:
                 out[LiteralQ(t, unreify[consq])] = True
             else:
-                out[LiteralQ(t, consq )] = True
+                print("???", str(consq))
         return out
     # else: # unknown satisfiability, e.g. due to non-linear equations
     # restart solver and continue 
@@ -141,8 +147,10 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                     t, consq = False, consq.arg(0)
                 if consq in unreify:
                     out[LiteralQ(t, unreify[consq])] = True
-                else:
-                    out[LiteralQ(t, consq )] = True
+                elif is_eq(consq):
+                    symbol = consq.children()[0]
+                    if symbol in unreify:
+                        out[ LiteralQ(t, Equality(unreify[symbol], consq.children()[1])) ] = True
         else: # unknown -> restart solver
             solver, _, unreify = mk_solver(theory, atoms)
 
@@ -160,7 +168,7 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                 if is_bool(reified):
                     out[LiteralQ(True if is_true(value) else False, unreify[reified])] = True
                 else:
-                    out[LiteralQ(True, reified == value)] = True
+                    out[LiteralQ(True, Equality(unreify[reified], value))] = True
             else:
                 print("can't propagate with", Not(reified == value))
     if result2 != sat:
