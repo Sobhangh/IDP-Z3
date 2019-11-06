@@ -217,13 +217,15 @@ class SymbolDeclaration(object):
                     expr.annotate(symbol_decls, {})
                     expr.normal = True
                     self.instances[expr.str] = expr
+        return self
         
 
     def translate(self, case: ConfigCase):
         if self.translated is None:
             case.symbol_types[self.name] = self.out.name
             if len(self.sorts) == 0:
-                self.translated = case.Const(self.name, self.out.translate(case))
+                self.translated = case.Const(self.name, self.out.translate(case)) if self.vocabulary \
+                    else Const(self.name, self.out.translate(case))
                 self.normal = True
             elif self.out.name == 'Bool':
                 types = [x.translate(case) for x in self.sorts]
@@ -242,6 +244,9 @@ class SymbolDeclaration(object):
                 domain.reading = "Possible values for " + self.name
                 case.typeConstraints.append(domain)
         return self.translated
+
+def declare_var(name, sort):
+    return SymbolDeclaration(name=Symbol(name=name), sorts=[], out=sort)
 
 
 class Sort(object):
@@ -300,13 +305,26 @@ class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
         self.partition = None # {Symbol: [Transformed Rule]}
+        self.q_decls = {} # {Symbol: {Variable: SymbolDeclaration}}
 
     def annotate(self, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
 
         self.partition = {}
-        for i in self.rules:
-            self.partition.setdefault(symbol_decls[i.symbol.name], []).append(i)
+        for r in self.rules:
+            symbol = symbol_decls[r.symbol.name]
+            if symbol not in self.q_decls:
+                q_v = {'[ci'+str(i)+"]" : 
+                    declare_var('[ci'+str(i)+"]", sort) for i, sort in enumerate(symbol.sorts)}
+                if symbol.out.name != 'Bool':
+                    q_v['[cout]'] = declare_var('[cout]', symbol.out)
+                for s in q_v.values():
+                    s.annotate(symbol_decls, vocabulary=False)
+                self.q_decls[symbol] = q_v
+            new_vars = [Variable(name=n).annotate({}, self.q_decls[symbol]) for n in self.q_decls[symbol]]
+            new_rule = r.rename_args(new_vars)
+            new_rule.annotate(symbol_decls, self.q_decls[symbol])
+            self.partition.setdefault(symbol, []).append(new_rule)
         return self
 
     def subtences(self):
@@ -326,13 +344,8 @@ class Definition(object):
 
     def translate(self, case: ConfigCase):
         for symbol, rules in self.partition.items():
-            z3_symb = symbol.translate(case)
-            if 0 < len(symbol.sorts):
-                vars = [Const('ci'+str(i), z3_symb.domain(i)) for i in range(0, z3_symb.arity())] + [
-                    Const('cout', z3_symb.range())]
-            else:
-                vars = [Const('c', z3_symb.sort())]
 
+            vars = [v.translate(case) for v in self.q_decls[symbol].values()]
             exprs, outputVar = [], False
             for i in rules:
                 exprs.append(i.translate(vars, case))
@@ -344,9 +357,9 @@ class Definition(object):
                                 (applyTo(symbol.translate(case), vars[:-1]) == vars[-1]) == Or(exprs)), 
                          str(self))
             else:
-                if len(vars) > 1:
+                if len(vars) > 0:
                     case.add(ForAll(vars, 
-                                    applyTo(symbol.translate(case), vars[:-1]) == Or(exprs)), 
+                                    applyTo(symbol.translate(case), vars) == Or(exprs)), 
                              str(self))
                 else:
                     case.add(symbol.translate(case) == Or(exprs), str(self))
@@ -363,7 +376,7 @@ class Rule(object):
         self.body = kwargs.pop('body')
 
         assert len(self.sorts) == len(self.vars)
-        self.q_decls = {v:SymbolDeclaration(name=Symbol(name=v), sorts=[], out=s) \
+        self.q_decls = {v:declare_var(v, s) \
                         for v, s in zip(self.vars, self.sorts)}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
@@ -381,6 +394,19 @@ class Rule(object):
         self.body = self.body.annotate(symbol_decls, q_v)
         return self
 
+    def rename_args(self, new_vars):
+        """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
+        out = []
+        for new_var, arg in zip(new_vars, self.args):
+            eq = BinaryOperator(sub_exprs=[new_var, arg], operator='=')
+            eq.type = 'Bool'
+            out += [eq]
+        out += [self.body]
+        self.body = BinaryOperator(sub_exprs=out, operator='∧' * (len(out)-1))
+        self.body.type = 'Bool'
+        
+        return self
+
     def subtences(self):
         return self.body.subtences() if not self.vars else {}
 
@@ -390,8 +416,8 @@ class Rule(object):
         for var, decl in self.q_decls.items():
             if decl.range:
                 forms = [([a.substitute(Symbol(name=var), val) for a in args], 
-                          f.substitute(Symbol(name=var), val)) 
-                          for val in decl.range for (args, f) in forms]
+                          f.substitute(Symbol(name=var), val)
+                         ) for val in decl.range for (args, f) in forms]
             else:
                 final_vs.append((var, sort))
         if final_vs:
@@ -400,10 +426,11 @@ class Rule(object):
         else:
             vars, sorts = [], []
 
-        return [Rule(reading=self.reading, vars=vars, sorts=sorts, symbol=self.symbol, 
+        out = [Rule(reading=self.reading, vars=vars, sorts=sorts, symbol=self.symbol, 
                      args=Arguments(sub_exprs=args[:-1] if self.out else args), 
                      out=args[-1] if self.out else None, body=f) 
                 for (args, f) in forms]
+        return out
 
     def interpret(self, theory):
         self.body = self.body.interpret(theory)
@@ -422,15 +449,10 @@ class Rule(object):
             z3var = Const(var, sort.translate())
             z3vars.append(z3var)
 
-        out = [] # new_vars0=args0 & new_vars1=args1 .. & body(vars) #TODO move to expand_quantifiers
-        for new_var, arg in zip(new_vars, self.args):
-            out.append(new_var == arg.translate(case))
-        out.append(self.body.translate(case))
-
         if len(z3vars) == 0:
-            self.translated = And(out)
+            self.translated = self.body.translate(case)
         else:
-            self.translated = Exists(z3vars, And(out))
+            self.translated = Exists(z3vars, self.body.translate(case))
         return self.translated
 
 # Expressions
@@ -479,7 +501,7 @@ class AQuantification(Expression):
         self.translated = None
         self.type = 'Bool'
 
-        self.q_decls = {v:SymbolDeclaration(name=Symbol(name=v), sorts=[], out=s) \
+        self.q_decls = {v:declare_var(v, s) \
                         for v, s in zip(self.vars, self.sorts)}
 
     def __repr__(self):
@@ -613,6 +635,10 @@ class BinaryOperator(Expression):
             else:
                 out = out[0]
             case.mark_atom(self, out)
+        elif self.operator[0] == '∧':
+            out = And([e.translate(case) for e in self.sub_exprs])
+        elif self.operator[0] == '∨':
+            out = Or ([e.translate(case) for e in self.sub_exprs])
         else:
             out = self.sub_exprs[0].translate(case)
 
@@ -670,7 +696,7 @@ class AAggregate(Expression):
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
-        self.q_decls = {v:SymbolDeclaration(name=Symbol(name=v), sorts=[], out=s) \
+        self.q_decls = {v:declare_var(v,s) \
                         for v, s in zip(self.vars, self.sorts)}
         self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
         self.str = repr(self)
@@ -804,9 +830,10 @@ class Variable(Expression):
             self.translated = out
             case.mark_atom(self, out) #TODO ??
         return self.translated
-
+    
 class Symbol(Variable): pass
 
+    
 class NumberConstant(Expression):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')

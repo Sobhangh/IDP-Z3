@@ -167,8 +167,8 @@ And(Registration_Type == Professional_Purchase,
     Region == Flemish_Region)
 
 (Tax == 6) ==
-And(Or(Or(Registration_Type == Energy_Efficient_Dwelling,
-          Registration_Type == Social_Purpose),
+And(Or(Registration_Type == Energy_Efficient_Dwelling,
+       Registration_Type == Social_Purpose,
        Registration_Type == Exchange_Unbuilt_Ground),
     Region == Flemish_Region)
 
@@ -184,55 +184,55 @@ And(Region == Flemish_Region, Registration_Type == Other)
 Or(Region == Brussels_Region, Region == Walloon_Region)
 
 (Registration_Type == Family_Dwelling) ==
-And(And(And(And(And(Type_Of_Real_Estate == Residential,
-                    Buyer == Natural_Person),
-                Domicile_Established),
-            Clean_Purchase),
-        Or(First_Ownership, Causal_Connection)),
+And(Type_Of_Real_Estate == Residential,
+    Buyer == Natural_Person,
+    Domicile_Established,
+    Clean_Purchase,
+    Or(First_Ownership, Causal_Connection),
     Or(Not(Energy_Renovation_Planned),
        Not(Term_Energy_Renovation == Certification_Date + 5)))
 
 (Registration_Type == Social_Dwelling) ==
-And(And(And(And(Buyer == Natural_Person,
-                Type_Of_Real_Estate == Residential),
-            Use == Social_Housing),
-        Or(Seller == Vlaamse_Mpy_Voor_Sociaal_Wonen,
-           Seller == ErkendeSocialeHuisvestingsMpy)),
+And(Buyer == Natural_Person,
+    Type_Of_Real_Estate == Residential,
+    Use == Social_Housing,
+    Or(Seller == Vlaamse_Mpy_Voor_Sociaal_Wonen,
+       Seller == ErkendeSocialeHuisvestingsMpy),
     Mortgage_Loan_Allowance)
 
 (Registration_Type == Energy_Efficient_Dwelling) ==
-And(And(And(And(And(And(Type_Of_Real_Estate == Residential,
-                        Buyer == Natural_Person),
-                    Domicile_Established),
-                Clean_Purchase),
-            Or(First_Ownership, Causal_Connection)),
-        Energy_Renovation_Planned),
+And(Type_Of_Real_Estate == Residential,
+    Buyer == Natural_Person,
+    Domicile_Established,
+    Clean_Purchase,
+    Or(First_Ownership, Causal_Connection),
+    Energy_Renovation_Planned,
     Term_Energy_Renovation == Certification_Date + 5)
 
 (Registration_Type == Dwelling_For_Social_Renting) ==
-And(And(And(Type_Of_Real_Estate == Residential,
-            Use == Social_Renting),
-        Start_Dt_Dwelling_For_Social_Rent ==
-        Certification_Date + 3),
+And(Type_Of_Real_Estate == Residential,
+    Use == Social_Renting,
+    Start_Dt_Dwelling_For_Social_Rent ==
+    Certification_Date + 3,
     Duration_Of_Agreement == Less_Than_9_years)
 
 (Registration_Type == Heritage) ==
-And(And(And(And(And(Type_Of_Real_Estate == Residential,
-                    Monument),
-                Use == As_Family_Dwelling),
-            Heritage_Investment),
-        Heritage_Plan),
+And(Type_Of_Real_Estate == Residential,
+    Monument,
+    Use == As_Family_Dwelling,
+    Heritage_Investment,
+    Heritage_Plan,
     Additional_Terms)
 
 (Registration_Type == Professional_Purchase) ==
-And(And(And(Professional_Buyer,
-            Not(Transaction_Type == Public_Sale)),
-        Use == For_Resale),
+And(Professional_Buyer,
+    Not(Transaction_Type == Public_Sale),
+    Use == For_Resale,
     Certification_Date_Sale == Certification_Date + 8)
 
 (Registration_Type == Social_Purpose) ==
-And(Or(Or(Seller == Mpy_Erkend_Door_VMSW,
-          Seller == Vlaams_Woningfonds),
+And(Or(Seller == Mpy_Erkend_Door_VMSW,
+       Seller == Vlaams_Woningfonds,
        Seller == Gelijksoortige_Rechtspersoon_EER),
     Use == Community_Purpose)
 
@@ -240,17 +240,13 @@ And(Or(Or(Seller == Mpy_Erkend_Door_VMSW,
 And(Additional_Terms, Not(Monument))
 
 (Registration_Type == Other) ==
-And(And(And(And(And(And(And(Not(Registration_Type ==
-                                Family_Dwelling),
-                            Not(Registration_Type ==
-                                Social_Dwelling)),
-                        Not(Registration_Type ==
-                            Energy_Efficient_Dwelling)),
-                    Not(Registration_Type ==
-                        Dwelling_For_Social_Renting)),
-                Not(Registration_Type == Heritage)),
-            Not(Registration_Type == Professional_Purchase)),
-        Not(Registration_Type == Social_Purpose)),
+And(Not(Registration_Type == Family_Dwelling),
+    Not(Registration_Type == Social_Dwelling),
+    Not(Registration_Type == Energy_Efficient_Dwelling),
+    Not(Registration_Type == Dwelling_For_Social_Renting),
+    Not(Registration_Type == Heritage),
+    Not(Registration_Type == Professional_Purchase),
+    Not(Registration_Type == Social_Purpose),
     Not(Registration_Type == Exchange_Unbuilt_Ground))
 
 Or(Not(Municipality == other_Municipal), Not(Core_City))
@@ -258,9 +254,9 @@ Or(Not(Municipality == other_Municipal), Not(Core_City))
 Or(Not(Not(Municipality == other_Municipal)), Core_City)
 
 Professional_Buyer ==
-And(And(And(Professional_Declaration_Filed,
-            Guarantee_Satisfied),
-        Or(And(Additional_Security_Required,
-               Additional_Security_Satisfied),
-           Not(Additional_Security_Required))),
+And(Professional_Declaration_Filed,
+    Guarantee_Satisfied,
+    Or(And(Additional_Security_Required,
+           Additional_Security_Satisfied),
+       Not(Additional_Security_Required)),
     Resale == Three_Or_More)
