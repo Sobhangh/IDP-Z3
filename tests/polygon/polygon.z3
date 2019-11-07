@@ -120,9 +120,9 @@ And((Sides < 1) == False,
     (Sides < 3) == False,
     (Sides < 4) == False)
 
-ForAll([ci0],
-       Large([ci0]) ==
-       Or(And([ci0] == 1, False),
-          And([ci0] == 2, False),
-          And([ci0] == 3, False),
-          And([ci0] == 4, False)))
+ForAll($Large$0,
+       Large($Large$0) ==
+       Or(And($Large$0 == 1, False),
+          And($Large$0 == 2, False),
+          And($Large$0 == 3, False),
+          And($Large$0 == 4, False)))

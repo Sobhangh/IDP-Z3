@@ -307,6 +307,9 @@ class Definition(object):
         self.partition = None # {Symbol: [Transformed Rule]}
         self.q_decls = {} # {Symbol: {Variable: SymbolDeclaration}}
 
+    def __str__(self):
+        return "Definition(s) of " + ",".join([k.name for k in self.partition.keys()])
+
     def annotate(self, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
 
@@ -314,10 +317,11 @@ class Definition(object):
         for r in self.rules:
             symbol = symbol_decls[r.symbol.name]
             if symbol not in self.q_decls:
-                q_v = {'[ci'+str(i)+"]" : 
-                    declare_var('[ci'+str(i)+"]", sort) for i, sort in enumerate(symbol.sorts)}
+                name = "$"+symbol.name+"$"
+                q_v = { name+str(i): 
+                    declare_var(name+str(i), sort) for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
-                    q_v['[cout]'] = declare_var('[cout]', symbol.out)
+                    q_v[name] = declare_var(name, symbol.out)
                 for s in q_v.values():
                     s.annotate(symbol_decls, vocabulary=False)
                 self.q_decls[symbol] = q_v
@@ -821,8 +825,7 @@ class Variable(Expression):
 
     def translate(self, case: ConfigCase):
         if self.translated is None:
-            out = self.decl.translated
-            self.translated = out
+            self.translated = self.decl.translated
         return self.translated
     
 class Symbol(Variable): pass

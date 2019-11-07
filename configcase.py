@@ -350,11 +350,11 @@ class ConfigCase:
                 for a1 in self.constraints.keys():
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
-                            out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else self.constraints[a1])
+                            out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(self.constraints[a1]))
                 for a1 in self.typeConstraints:
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
-                            out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else a1)
+                            out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(a1))
 
         return out.m
 
