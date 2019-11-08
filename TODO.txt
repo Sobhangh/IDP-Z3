@@ -1,8 +1,4 @@
 To do:
-    avoid quantifiers in definitions (head and body)
-    
-    new translation chain: annotate AST, expand quantifiers, interpret (ground) applied symbols, translate to Z3
-
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
         - generate list of constructors
@@ -20,6 +16,7 @@ Research topics / may take a while:
 
 
 Of dubious benefit / may never be done:
+    type enumeration in structure
     Type inference (p. 14 of the IDP3 manual)
     Support for type hierarchy
     Support for namespaces
@@ -41,6 +38,7 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
+    - avoid quantifiers in definitions
     - do we need Expression.type, if we have Expression.decl ?
     - translate range declaration as comparisons for typeConstraints
     - distinguish between x=1 entry and x=1 atom in output structure
