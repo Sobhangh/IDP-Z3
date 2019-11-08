@@ -9,17 +9,11 @@ from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists,
 
 from configcase import ConfigCase
 from utils import applyTo, log, itertools, in_list
-from ASTNode import Constructor, Expression, IfExpr, AQuantification, \
+from Expression import Constructor, Expression, IfExpr, AQuantification, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
                     declare_var
-
-class DSLException(Exception):
-    def __init__(self, message):
-        self.message = message
-    def __str__(self):
-        return self.message
 
 
 class Idp(object):

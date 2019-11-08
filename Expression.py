@@ -10,6 +10,14 @@ from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
 from configcase import ConfigCase
 
+
+class DSLException(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+
+        
 class Expression(object):
     # .str : normalized idp code, before transformations
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
