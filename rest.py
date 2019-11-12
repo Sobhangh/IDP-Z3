@@ -26,6 +26,7 @@ from flask_restful import Resource, Api, reqparse
 from textx import TextXError
 
 from configcase import *
+from LiteralQ import *
 from dsl.DSLClasses import idpparser
 
 # library to generate call graph, for documentation purposes
@@ -83,28 +84,24 @@ class eval(Resource):
         with z3lock:
             try:
                 args = parser.parse_args()
+                #print(args)
 
                 case = caseOf(args['code'])
 
                 method = args['method']
-                active = args['active']
-                #print(args)
-                out = {}
+                struct_json = args['active']
+                case.structure = loadStructure(case.idp, struct_json)
 
+                out = {}
                 if method == "propagate":
-                    case.loadStructureFromJson(active)
                     out = case.propagation(args['expanded'])
                 if method == "modelexpand":
-                    case.loadStructureFromJson(active)
                     out = case.expand()
                 if method == "relevance":
-                    case.loadStructureFromJson(active)
                     out = case.propagation(args['expanded']) #TODO
                 if method == "explain":
-                    case.loadStructureFromJson(active)
                     out = case.explain(args['symbol'], args['value'])
                 if method == "minimize":
-                    case.loadStructureFromJson(active)
                     out = case.optimize(args['symbol'], args['minimize'])
                 if method == "abstract":
                     if args['symbol'] != "": # theory to explain ?
@@ -115,7 +112,6 @@ class eval(Resource):
                         )
                         idpModel = idpparser.model_from_str(newTheory)
                         case = ConfigCase(idpModel)
-                    case.loadStructureFromJson(active)
                     out = case.abstract()
                 log("end /eval " + method)
                 return out

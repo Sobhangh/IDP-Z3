@@ -16,10 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
-import ast
-import json
 import re
-from typing import List
 from z3.z3 import _py2expr
 
 from LiteralQ import *
@@ -29,6 +26,7 @@ from utils import *
 class ConfigCase:
 
     def __init__(self, idp):
+        self.idp = idp
         self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
@@ -38,8 +36,7 @@ class ConfigCase:
 
         self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
 
-        self.assumptions = [] # [atomZ3]
-        self.assumptionLs = {} # {literalQ : True} (needed for propagate)
+        self.structure = {} # {literalQ : atomZ3} (needed for propagate)
         self.constraints = {} # {Z3expr: string}
         self.typeConstraints = []
         
@@ -107,40 +104,6 @@ class ConfigCase:
 
 
 
-    #################
-    # Helpers to load user's choices
-    #################
-
-    # Structure: symbol -> atom -> {ct,cf} -> true/false
-    def loadStructureFromJson(self, jsonstr):
-        json_data = ast.literal_eval(jsonstr \
-            .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
-            .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃")
-            .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
-            .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
-
-        self.assumptions, self.assumptionLs = [], {}
-        for sym in json_data:
-            for atom in json_data[sym]:
-                json_atom = json_data[sym][atom]
-                if atom in self.atoms:
-                    atom = self.atoms[atom]
-                    if json_atom["typ"] == "Bool":
-                        if "ct" in json_atom and json_atom["ct"]:
-                            literalQ = LiteralQ(True, atom)
-                        if "cf" in json_atom and json_atom["cf"]:
-                            literalQ = LiteralQ(False, atom)
-                    elif json_atom["value"]:
-                        if json_atom["typ"] in ["Int", "Real"]:
-                            value = eval(json_atom["value"])
-                        else:
-                            value = self.valueMap[json_atom["value"]]
-                        literalQ = LiteralQ(True, Equality(atom, value))
-                    else:
-                        literalQ = None #TODO error ?
-                    if literalQ is not None:
-                        self.assumptions.append(literalQ.asZ3())
-                        self.assumptionLs[literalQ] = True
 
     #################
     # INFERENCES
@@ -149,7 +112,7 @@ class ConfigCase:
     def theory(self, with_assumptions=False):
         return And(list(self.constraints.keys()) 
             + self.typeConstraints
-            + (self.assumptions if with_assumptions else []))
+            + (list(self.structure.values()) if with_assumptions else []))
 
     def metaJSON(self):
         "response to meta request"
@@ -183,14 +146,14 @@ class ConfigCase:
         for literalQ in amf:
             out.addAtom(self, literalQ.subtence, literalQ.truth)
 
-        # useful for non linear assumptions
+        # useful for non linear structure
         """
         amf = consequences(self.theory(with_assumptions=False), todo, amf)
         for literalQ in amf:
             out.addAtom(self, literalQ.subtence, literalQ.truth)
         """
 
-        for literalQ in self.assumptionLs.keys(): # needed to keep some numeric assignments
+        for literalQ in self.structure: # needed to keep some numeric assignments
             out.addAtom(self, literalQ.subtence, literalQ.truth)
         return out.m
 
@@ -202,51 +165,6 @@ class ConfigCase:
 
     def relevance(self): 
         out = self.initial_structure()
-        """ # not used, not working
-        solver = Solver()
-        theo1 = And(list(self.constraints.keys()))
-        solver.add(self.typeConstraints + self.assumptions)
-
-        for s in self.symbols.values():
-            solver.push()
-            if type(s) == FuncDeclRef:
-                type_list = [s.domain(i) for i in range(0, s.arity())] + [s.range()]
-                c = Function("temporaryFunction", type_list)
-
-                constants = [Const('vx'+str(i), s.domain(i)) for i in range(0, s.arity())]
-                arg_fill = [Const('vy'+str(i), s.domain(i)) for i in range(0, s.arity())]
-                solver.add(
-                    ForAll(constants,
-                           Or(And(pairwiseEquals(arg_fill, constants)),
-                              s(constants) == c(constants))))
-                var_list = [Var(i, s.domain(i)) for i in range(0, s.arity())]
-                theo2 = rewrite(theo1, s, applyTo(c, var_list))
-                type_transform = rewrite(And(self.typeConstraints + self.assumptions), s, applyTo(c, var_list))
-            else:
-                c = Const('temporaryConstant', s.sort())
-                solver.add(c != s)
-                theo2 = substitute(theo1, (s, c))
-                type_transform = substitute(And(self.typeConstraints + self.assumptions), (s, c))
-                arg_fill = []
-            solver.add(type_transform)
-            solver.add(theo1 != theo2)
-
-            argshandled = {}
-            for arg, val in self.relevantVals[s]:
-                strargs = json.dumps([obj_to_string(x) for x in arg])
-                if strargs in argshandled:
-                    continue
-                argshandled[strargs] = True
-
-                solver.push()
-                solver.add(And(pairwiseEquals(arg_fill, arg)))
-                a = solver.check()
-                solver.pop()
-                if not (a == unsat):
-                    out.fillApp(applyTo(s, arg))
-
-            solver.pop()
-        """
         return out.m
 
     def optimize(self, symbol, minimize):
@@ -296,7 +214,7 @@ class ConfigCase:
 
     def explain(self, symbol, value):
         out = self.initial_structure()
-        for ass in self.assumptionLs: # add numeric assumptions
+        for ass in self.structure: # add numeric structure
             out.initialise(self, ass.subtence, False, False, "")    
 
         value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
@@ -320,13 +238,13 @@ class ConfigCase:
             def r1(a): return reify[a] if a in reify else a
             def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
             ps = {} # {reified: constraint}
-            for i, ass in enumerate(self.assumptionLs):
+            for i, ass in enumerate(self.structure):
                 p = Const("wsdraqsesdf"+str(i), BoolSort())
                 ps[p] = ass
                 s.add(Implies(p, ass.asZ3()))
             constraints = list(self.constraints.keys()) + self.typeConstraints
             for i, constraint in enumerate(constraints):
-                p = Const("wsdraqsesdf"+str(i+len(self.assumptionLs)), BoolSort())
+                p = Const("wsdraqsesdf"+str(i+len(self.structure)), BoolSort())
                 ps[p] = constraint
                 s.add(Implies(p, constraint))
             s.push()  
@@ -342,7 +260,7 @@ class ConfigCase:
                 unsatcore = s.unsat_core()
             
             if unsatcore:
-                for a1 in self.assumptionLs:
+                for a1 in self.structure:
                     for a2 in s.unsat_core():
                         if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
                             out.addAtom(self, a1.subtence, a1.truth)
@@ -369,13 +287,13 @@ class ConfigCase:
         out["universal"] = [k for k in universal.keys() if k.truth is not None]
 
         out["given"] = []
-        for ass in self.assumptionLs:
+        for ass in self.structure:
             universal[ass] = True
             out["given"] += [ass]
 
-        # extract assumptions and their consequences
-        solver.add(self.assumptions)
-        theory2 = And([theory] + self.assumptions)
+        # find consequences of structure
+        solver.add(list(self.structure.values()))
+        theory2 = And([theory] + list(self.structure.values()))
         fixed = consequences(theory2, self.atoms.values(), universal, solver, reify, unreify)
         out["fixed"] = [k for k in fixed.keys() if k.truth is not None]
 

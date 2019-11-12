@@ -91,7 +91,7 @@ class Constructor(object):
 
 
 def declare_var(name, sort):
-    from DSLClasses import SymbolDeclaration
+    from dsl.DSLClasses import SymbolDeclaration
     return SymbolDeclaration(name=Symbol(name=name), sorts=[], out=sort)
 
 

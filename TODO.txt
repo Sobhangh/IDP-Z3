@@ -38,6 +38,7 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
+    - use FreshVar(sort) to create free variables
     - avoid quantifiers in definitions
     - do we need Expression.type, if we have Expression.decl ?
     - translate range declaration as comparisons for typeConstraints
