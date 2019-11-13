@@ -30,9 +30,6 @@ class ConfigCase:
         self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
-        self.symbols = {} # {string: Z3Expr}, including starting with '_'
-        self.symbol_types = {} # {string: string} symbol -> idp_type
-
         self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
 
         self.structure = {} # {literalQ : atomZ3} (needed for propagate)
@@ -46,10 +43,6 @@ class ConfigCase:
                 self.atoms.update(v.instances)
         self.atoms.update( {k: v for k, v in idp.theory.subtences.items() if v.unknown_symbols()})
 
-        ##TODO remove dead code
-        #self.symbols = {k: v.translated for k, v in idp.vocabulary.symbol_decls.items() if v.is_var}
-        #print("missing", {k:v for k,v in self.symbols.items() if k not in self.symbols2})
-        #print("added", {k:v for k,v in self.symbols2.items() if k not in self.symbols})
 
     def print(self):
         out  = "\r\n\r\n".join(str(t) for t in self.typeConstraints) + "\r\n--\r\n"
@@ -61,10 +54,6 @@ class ConfigCase:
     #################
     # Helpers for translating idp code
     #################
-
-    def Const(self, txt: str, sort,):
-        const = self.symbols.setdefault(txt, Const(txt, sort))
-        return const
 
     def EnumSort(self, name, objects):
         self.enums[name] = objects
@@ -78,8 +67,6 @@ class ConfigCase:
         rel_vars = list(map(lambda x: list(map(_py2expr, x)), rel_vars))
         args, vals = splitLast(rel_vars)
         args = list(itertools.product(*args))
-        if not str(out).startswith('_'):
-            self.symbols[str(out)] = out
         for arg in list(args):
             expr = out(*arg)
             if restrictive:
@@ -113,17 +100,17 @@ class ConfigCase:
     def metaJSON(self):
         "response to meta request"
         symbols = []
-        for i in self.symbols.values():
+        for i in self.idp.theory.unknown_symbols().values():
             symbol_type = "function"
-            if type(i) == BoolRef:
+            if type(i.translated) == BoolRef:
                 symbol_type = "proposition"
-            typ = self.symbol_types[str(i)]
+            typ = i.out.name
             symbols.append({
-                "idpname": str(i),
+                "idpname": str(i.name),
                 "type": symbol_type,
                 "priority": "core",
                 "showOptimize": True, # GUI is smart enough to show buttons appropriately
-                "view": "expanded" if str(i) == str(self.goal) else self.view
+                "view": "expanded" if str(i) == str(self.idp.goal) else self.view
             })
         out = {"title": "Interactive Consultant", "symbols": symbols}
         return out
@@ -134,9 +121,9 @@ class ConfigCase:
         
         out = self.initial_structure()
         
-        todo = [ a for a in self.atoms.values() #TODO
-                 if is_symbol(a.translated.decl().name(), self.symbols) 
-                 or any([s in expanded_symbols for s in a.unknown_symbols().keys()]) ]
+        todo = [ a for a in self.atoms.values()
+                 # if it is shown to the user
+                 if any([s in expanded_symbols for s in a.unknown_symbols().keys()]) ]
 
         amf = consequences(self.theory(with_assumptions=True), todo, {})
         for literalQ in amf:
@@ -180,9 +167,9 @@ class ConfigCase:
                         func_current_param += ", " + func_params_adder
         
         args = parse_func_with_params(symbol)
-        s = self.symbols[args[0]]
+        s = self.idp.theory.unknown_symbols()[args[0]]
         if 1<len(args):
-            s = s(args[1:])
+            s = (s.translated)(args[1:])
 
         solver = Optimize()
         solver.add(self.theory(with_assumptions=True))
@@ -309,7 +296,7 @@ class ConfigCase:
 
         # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
         simplified = simplify(substitute(And(list(self.constraints.keys())), substitutions)) # it starts by the last substitution ??
-        relevants = getAtoms(simplified, self.valueMap, self.symbols) # includes reified !
+        relevants = getAtoms(simplified, self.valueMap, self.idp.theory.unknown_symbols()) # includes reified !
 
         # --> irrelevant
         irrelevant = []
@@ -332,8 +319,6 @@ class ConfigCase:
                 break
         
         while solver.check() == sat and count < 50: # for each parametric model
-            #for symb in self.symbols.values():
-            #    print (symb, solver.model().eval(symb))
 
             # theory that forces irrelevant atoms to be irrelevant
             theory2 = And(theory, And(self.typeConstraints))
@@ -463,13 +448,13 @@ class Structure:
         atomZ3 = atom.translated #TODO
         key = atom.str
         typ = atomZ3.sort().name()
-        for symb in atom.unknown_symbols().keys():
-            s = self.m.setdefault(symb, {})
+        for symb in atom.unknown_symbols().values():
+            s = self.m.setdefault(symb.name, {})
             if typ == 'Bool':
                 symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
-            elif case.symbol_types[symb] in case.enums:
+            elif symb.out.name in case.enums:
                 symbol = { "typ": typ, "value": str(value)
-                         , "values": [str(v) for v in case.enums[case.symbol_types[symb]]]}
+                         , "values": [str(v) for v in case.enums[symb.out.name]]}
             elif typ in ["Real", "Int"]:
                 symbol = {"typ": typ, "value": str(value)} # default
             else:

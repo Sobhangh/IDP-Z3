@@ -39,7 +39,7 @@ class Idp(object):
         log("vocabulary translated")
         self.theory.translate(case)
         log("theory translated")
-        self.goal.translate(case)
+        #self.goal.translate(case)
         self.view.translate(case)
 
 
@@ -201,10 +201,8 @@ class SymbolDeclaration(object):
 
     def translate(self, case: ConfigCase):
         if self.translated is None:
-            case.symbol_types[self.name] = self.out.name
             if len(self.sorts) == 0:
-                self.translated = case.Const(self.name, self.out.translate(case)) if self.vocabulary \
-                    else Const(self.name, self.out.translate(case))
+                self.translated = Const(self.name, self.out.translate(case))
                 self.normal = True
             elif self.out.name == 'bool':
                 types = [x.translate(case) for x in self.sorts]
@@ -525,9 +523,8 @@ class Goal(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
 
-    def translate(self, case: ConfigCase):
-        case.goal = case.symbols[self.name] if self.name else ""
-        return
+    def __str__(self):
+        return self.name
 
 
 class View(object):
