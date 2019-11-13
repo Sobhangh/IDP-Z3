@@ -13,7 +13,7 @@ from dsl.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
-                    declare_var
+                    Fresh_Variable
 
 
 class Idp(object):
@@ -268,6 +268,14 @@ class Theory(object):
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
         self.definitions = [e.interpret         (self) for e in self.definitions]
 
+    def unknown_symbols(self):
+        out = {}
+        for c in self.constraints:
+            out.update(c.unknown_symbols())
+        for c in self.definitions:
+            out.update(c.unknown_symbols())
+        return out
+
     def translate(self, case: ConfigCase,):
         for i in self.constraints:
             log("translating " + str(i)[:20])
@@ -295,15 +303,12 @@ class Definition(object):
             if symbol not in self.q_decls:
                 name = "$"+symbol.name+"$"
                 q_v = { name+str(i): 
-                    declare_var(name+str(i), sort) for i, sort in enumerate(symbol.sorts)}
+                    Fresh_Variable(name+str(i), symbol_decls[sort.name]) \
+                        for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
-                    q_v[name] = declare_var(name, symbol.out)
-                for s in q_v.values():
-                    s.annotate(symbol_decls, vocabulary=False)
+                    q_v[name] = Fresh_Variable(name, symbol_decls[symbol.out.name])
                 self.q_decls[symbol] = q_v
-            new_vars = [Variable(name=n).annotate({}, self.q_decls[symbol]) for n in self.q_decls[symbol]]
-            new_rule = r.rename_args(new_vars)
-            new_rule.annotate(symbol_decls, self.q_decls[symbol])
+            new_rule = r.rename_args(self.q_decls[symbol])
             self.partition.setdefault(symbol, []).append(new_rule)
         return self
 
@@ -321,6 +326,13 @@ class Definition(object):
         for symbol, rules in self.partition.items():
             self.partition[symbol] = sum((r.interpret(theory) for r in rules), [])
         return self
+
+    def unknown_symbols(self):
+        out = {}
+        for symbol, rules in self.partition.items():
+            out[symbol.name] = symbol
+            for r in rules: out.update(r.unknown_symbols())
+        return out
 
     def translate(self, case: ConfigCase):
         for symbol, rules in self.partition.items():
@@ -356,8 +368,7 @@ class Rule(object):
         self.body = kwargs.pop('body')
 
         assert len(self.sorts) == len(self.vars)
-        self.q_decls = {v:declare_var(v, s) \
-                        for v, s in zip(self.vars, self.sorts)}
+        self.q_decls = {}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
             self.args.append(self.out)
@@ -366,8 +377,8 @@ class Rule(object):
         self.translated = None
 
     def annotate(self, symbol_decls, q_decls):
-        for s in self.q_decls.values():
-            s.annotate(symbol_decls, vocabulary=False)
+        self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
+                        for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
         self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
         self.out = self.out.annotate(symbol_decls, q_v) if self.out else self.out
@@ -377,7 +388,7 @@ class Rule(object):
     def rename_args(self, new_vars):
         """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
         out = []
-        for new_var, arg in zip(new_vars, self.args):
+        for new_var, arg in zip(new_vars.values(), self.args):
             eq = AComparison(sub_exprs=[new_var, arg], operator='=')
             eq.type = 'bool'
             out += [eq]
@@ -392,19 +403,15 @@ class Rule(object):
 
     def expand_quantifiers(self, theory):
         forms = [(self.args, self.body.expand_quantifiers(theory))]
-        final_vs = []
-        for var, decl in self.q_decls.items():
-            if decl.range:
-                forms = [([a.substitute(Symbol(name=var), val) for a in args], 
-                          f.substitute(Symbol(name=var), val)
-                         ) for val in decl.range for (args, f) in forms]
+        vars = []
+        for name, var in self.q_decls.items():
+            if var.decl.range:
+                forms = [([a.substitute(var, val) for a in args], 
+                          f.substitute(var, val)
+                         ) for val in var.decl.range for (args, f) in forms]
             else:
-                final_vs.append((var, sort))
-        if final_vs:
-            vs = list(zip(*final_vs))
-            vars, sorts = vs[0], vs[1]
-        else:
-            vars, sorts = [], []
+                vars.append(var)
+        sorts = [] # not used anymore
 
         out = [Rule(reading=self.reading, vars=vars, sorts=sorts, symbol=self.symbol, 
                      args=Arguments(sub_exprs=args[:-1] if self.out else args), 
@@ -416,6 +423,11 @@ class Rule(object):
         self.body = self.body.interpret(theory)
         return [self]
 
+    def unknown_symbols(self):
+        out = {}
+        out.update(self.body.unknown_symbols())
+        return out
+
     def translate(self, new_vars, case: ConfigCase):
         """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
 
@@ -423,16 +435,10 @@ class Rule(object):
         for v in self.q_decls.values():
             v.translate(case)
 
-        # translate self.vars into z3vars
-        z3vars = []
-        for var, sort in zip(self.vars, self.sorts):
-            z3var = Const(var, sort.translate())
-            z3vars.append(z3var)
-
-        if len(z3vars) == 0:
+        if len(self.vars) == 0:
             self.translated = self.body.translate(case)
         else:
-            self.translated = Exists(z3vars, self.body.translate(case))
+            self.translated = Exists([v.translate() for v in self.vars], self.body.translate(case))
         return self.translated
 
 # Expressions : see Expression.py

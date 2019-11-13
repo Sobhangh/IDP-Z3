@@ -6,7 +6,7 @@ import os
 import re
 import sys
 
-from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
+from z3 import FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
 from configcase import ConfigCase
 
@@ -23,6 +23,7 @@ class Expression(object):
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     # .type : a declaration object, or 'bool', 'real', 'int', or None
     # .translated : the Z3 equivalent
+    # ._unknown_symbols : list of uninterpreted symbols not starting with '_'
     
     def __eq__(self, other):
         return self.str == other.str
@@ -41,6 +42,11 @@ class Expression(object):
         "simplify this node only"
         return self
 
+    def reset(self):
+        # reset derived variables
+        self._unknown_symbols = None
+        self.translated = None
+
     def substitute(self, e0, e1):
         if self == e0: # based on .str !
             return e1
@@ -50,6 +56,7 @@ class Expression(object):
                 return self
             else:
                 out = copy.copy(self)
+                out.reset()
                 out.sub_exprs = sub_exprs1
                 out.str = repr(out)
                 return out.simplify1()
@@ -60,6 +67,7 @@ class Expression(object):
             return self
         else:
             self.sub_exprs = sub_exprs1
+            # no need to reset
             return self.simplify1()
 
     def interpret(self, theory):
@@ -68,7 +76,15 @@ class Expression(object):
             return self
         else:
             self.sub_exprs = sub_exprs1
+            self.reset()
             return self.simplify1()
+
+    def unknown_symbols(self):
+        if self._unknown_symbols is None:
+            self._unknown_symbols = {}
+            for e in self.sub_exprs:
+                self._unknown_symbols.update(e.unknown_symbols())
+        return self._unknown_symbols
 
 
 class Constructor(object):
@@ -87,12 +103,9 @@ class Constructor(object):
     def substitute(self, e0, e1): return self
     def expand_quantifiers(self, theory): return self
     def interpret(self, theory): return self
+    def unknown_symbols(self): return {}
     def translate(self, case): return self.translated
 
-
-def declare_var(name, sort):
-    from dsl.DSLClasses import SymbolDeclaration
-    return SymbolDeclaration(name=Symbol(name=name), sorts=[], out=sort)
 
 
 class IfExpr(Expression):
@@ -107,6 +120,7 @@ class IfExpr(Expression):
 
         self.sub_exprs = [self.if_f, self.then_f, self.else_f]
         self.str = repr(self)
+        self._unknown_symbols = None
         self.translated = None
         self.type = None
 
@@ -136,11 +150,11 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
         self.sub_exprs = [self.f]
         self.str = repr(self)
+        self.q_decls = {}
+        self._unknown_symbols = None
         self.translated = None
         self.type = 'bool'
 
-        self.q_decls = {v:declare_var(v, s) \
-                        for v, s in zip(self.vars, self.sorts)}
 
     def __repr__(self):
         return sys.intern(self.q \
@@ -149,8 +163,8 @@ class AQuantification(Expression):
 
 
     def annotate(self, symbol_decls, q_decls):
-        for s in self.q_decls.values():
-            s.annotate(symbol_decls, vocabulary=False)
+        self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
+                        for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         return self
@@ -161,22 +175,18 @@ class AQuantification(Expression):
 
     def expand_quantifiers(self, theory):
         forms = [self.sub_exprs[0].expand_quantifiers(theory)]
-        final_vs = []
-        for var, decl in self.q_decls.items():
-            if decl.range:
-                forms = [f.substitute(Symbol(name=var), val) for val in decl.range for f in forms]
+        self.vars = []
+        for name, var in self.q_decls.items():
+            if var.decl.range:
+                forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
-                final_vs.append((var, decl))
+                self.vars.append(var)
         if 1 < len(forms):
             op = '∧' if self.q == '∀' else '∨'
             self.sub_exprs = [BinaryOperator(sub_exprs=forms, operator=[op]*(len(forms)-1))]
         else:
             self.sub_exprs = forms
-        if final_vs:
-            vs = list(zip(*final_vs))
-            self.vars, self.sorts = vs[0], vs[1]
-        else:
-            self.vars, self.sorts = [], []
+        self.sorts = [] # not used
         return self
 
     def translate(self, case: ConfigCase):
@@ -227,6 +237,7 @@ class BinaryOperator(Expression):
                 "∨" if op == "|" else "∧" if op == "&" else op
             , self.operator))
         self.str = repr(self)
+        self._unknown_symbols = None
         self.translated = None
         self.type = None
 
@@ -301,6 +312,7 @@ class AUnary(Expression):
         self.operator = kwargs.pop('operator')
         self.sub_exprs = [self.f]
         self.str = repr(self)
+        self._unknown_symbols = None
         self.translated = None
         self.type = None
 
@@ -330,10 +342,10 @@ class AAggregate(Expression):
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
-        self.q_decls = {v:declare_var(v,s) \
-                        for v, s in zip(self.vars, self.sorts)}
+        self.q_decls = {}
         self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
         self.str = repr(self)
+        self._unknown_symbols = None
         self.translated = None
         self.type = None
 
@@ -350,8 +362,8 @@ class AAggregate(Expression):
         return sys.intern(out)
 
     def annotate(self, symbol_decls, q_decls):   
-        for s in self.q_decls.values():
-            s.annotate(symbol_decls, vocabulary=False)
+        self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
+                        for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
@@ -362,9 +374,9 @@ class AAggregate(Expression):
                     , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                     , else_f=NumberConstant(number='0'))
         forms = [form.expand_quantifiers(theory)]
-        for var, decl in self.q_decls.items():
-            if decl.range:
-                forms = [f.substitute(Symbol(name=var), val) for val in decl.range for f in forms]
+        for name, var in self.q_decls.items():
+            if var.decl.range:
+                forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
                 raise Exception('Can only quantify aggregates over finite domains')
         self.sub_exprs = forms
@@ -383,6 +395,7 @@ class AppliedSymbol(Expression):
         self.args = kwargs.pop('args')
         self.sub_exprs = self.args.sub_exprs
         self.str = repr(self)
+        self._unknown_symbols = None
         self.translated = None
         self.decl = None
         self.type = None
@@ -398,7 +411,7 @@ class AppliedSymbol(Expression):
         return self
 
     def subtences(self):
-        out = super().subtences() # in case of predicate over boolean
+        out = super().subtences()
         if self.type == 'bool': out[self.str] = self
         return out
 
@@ -409,6 +422,12 @@ class AppliedSymbol(Expression):
         else:
             return self
 
+    def unknown_symbols(self):
+        out = super().unknown_symbols()
+        if not self.decl.name.startswith('_') and self.decl.interpretation is None:
+            out[self.decl.name] = self.decl
+        return out
+        
 
     def translate(self, case: ConfigCase):
         if self.translated is None:
@@ -428,6 +447,7 @@ class Variable(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.str = repr(self)
+        self._unknown_symbols = None
         self.translated = None
         self.sub_exprs = []
         if self.name == "true":
@@ -457,18 +477,44 @@ class Variable(Expression):
             else {self.str: self} if self.type == 'bool' \
             else {}
 
+    def unknown_symbols(self):
+        return {} if self.name in ['true', 'false'] \
+            else {self.decl.name: self.decl} if not self.decl.name.startswith('_') and self.decl.interpretation is None \
+            else {}
+
     def translate(self, case: ConfigCase):
         if self.translated is None:
             self.translated = self.decl.translated
         return self.translated
     
 class Symbol(Variable): pass
-
     
+
+class Fresh_Variable(Expression):
+    def __init__(self, name, decl):
+        self.name = name
+        self.str = repr(self)
+        self.decl = decl
+        self.type = self.decl.type
+        self._unknown_symbols = {}
+        self.translated = None
+        self.sub_exprs = []
+
+    def __repr__(self):
+        return sys.intern(self.name)
+    
+    def subtences(self): return {}
+
+    def translate(self, case: ConfigCase):
+        if self.translated is None:
+            self.translated = FreshConst(self.decl.translated)
+        return self.translated
+
 class NumberConstant(Expression):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
         self.str = repr(self)
+        self._unknown_symbols = None
         self.sub_exprs = []
         try:
             self.translated = int(self.number)
@@ -493,6 +539,7 @@ class Brackets(Expression):
         self.reading = kwargs.pop('reading')
         self.sub_exprs = [self.f]
         self.str = repr(self)
+        self._unknown_symbols = None
         self.translated = None
         self.type = None
 

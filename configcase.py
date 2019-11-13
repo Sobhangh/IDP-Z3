@@ -32,7 +32,6 @@ class ConfigCase:
 
         self.symbols = {} # {string: Z3Expr}, including starting with '_'
         self.symbol_types = {} # {string: string} symbol -> idp_type
-        self.interpreted = {} # from structure: {string: True}
 
         self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
 
@@ -48,7 +47,7 @@ class ConfigCase:
         self.atoms.update( {k: v for k, v in idp.theory.subtences.items()})
         # remove atoms based only on interpreted symbols
         self.atoms = {k:v for (k,v) in self.atoms.items() \
-            if symbols_of(v.translated, self.symbols, self.interpreted) } #TODO
+            if symbols_of(v.translated, self.symbols) } #TODO
 
         ##TODO remove dead code
         #self.symbols = {k: v.translated for k, v in idp.vocabulary.symbol_decls.items() if v.is_var}
@@ -140,7 +139,7 @@ class ConfigCase:
         
         todo = [ a for a in self.atoms.values() #TODO
                  if is_symbol(a.translated.decl().name(), self.symbols) 
-                 or any([s in expanded_symbols for s in symbols_of(a.translated, self.symbols, self.interpreted)]) ]
+                 or any([s in expanded_symbols for s in symbols_of(a.translated, self.symbols)]) ]
 
         amf = consequences(self.theory(with_assumptions=True), todo, {})
         for literalQ in amf:
@@ -331,7 +330,7 @@ class ConfigCase:
         # create keys for models using first symbol of atoms
         for atom in self.atoms.values():
             atomZ3 = atom.translated #TODO
-            for symb in symbols_of(atomZ3, self.symbols, self.interpreted).keys():
+            for symb in symbols_of(atomZ3, self.symbols).keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
                 break
         
@@ -408,7 +407,7 @@ class ConfigCase:
             # group atoms by symbols
             model = {}
             for l in atoms:
-                for symb in symbols_of(l.subtence.translated, self.symbols, self.interpreted).keys():
+                for symb in symbols_of(l.subtence.translated, self.symbols).keys():
                     model.setdefault(symb, []).append([ l ])
                     break
             # add to models
@@ -467,7 +466,7 @@ class Structure:
         atomZ3 = atom.translated #TODO
         key = atom.str
         typ = atomZ3.sort().name()
-        for symb in symbols_of(atomZ3, case.symbols, case.interpreted):
+        for symb in symbols_of(atomZ3, case.symbols):
             s = self.m.setdefault(symb, {})
             if typ == 'Bool':
                 symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
@@ -491,7 +490,7 @@ class Structure:
         atomZ3 = atom.translated
         if not is_bool(atomZ3): return
         key = atom.str
-        for symb in symbols_of(atomZ3, case.symbols, case.interpreted).keys():
+        for symb in symbols_of(atomZ3, case.symbols).keys():
             s = self.m.setdefault(symb, {})
             if key in s:
                 if truth is None: s[key]["unknown"] = True
@@ -504,7 +503,7 @@ class Structure:
         symbol = atom.translated
         key = atom.str
         typ = symbol.sort().name()
-        for symb in symbols_of(symbol, case.symbols, case.interpreted).keys():
+        for symb in symbols_of(symbol, case.symbols).keys():
             s = self.m.setdefault(str(symb), {})
             if key in s:
                 if typ in ["Real", "Int"]:
