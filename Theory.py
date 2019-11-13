@@ -34,20 +34,6 @@ def has_local_var(expr, valueMap, symbols):
     return out
 
 
-def symbols_of(expr, symbols): # returns a dict {string: string}
-    out = {} # for unicity (ordered set)
-    try:
-        name = expr.decl().name()
-        if is_symbol(name, symbols) and not name.startswith('_'):
-            out[name] = name
-    except: pass
-    try:
-        for child in expr.children():
-            out.update(symbols_of(child, symbols))
-    except: pass
-    return out
-
-
 def getAtoms(expr, valueMap, symbols):
     out = {}  # Ordered dict: string -> Z3 object
     for child in expr.children():

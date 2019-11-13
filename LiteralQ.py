@@ -45,6 +45,9 @@ class Equality(object):
 
     def __str__(self): return self.str
 
+    def unknown_symbols(self):
+        return self.subtence.unknown_symbols()
+
 
 #################
 # load user's choices
