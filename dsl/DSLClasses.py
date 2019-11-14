@@ -141,8 +141,16 @@ class RangeDeclaration(object):
         symbol_decls[self.name] = self
 
     def check_bounds(self, var):
-        if not self.range: return None
-        sub_exprs = [BinaryOperator(sub_exprs=[var, val], operator = '=') for val in self.range]
+        if not self.elements: return None
+        sub_exprs = []
+        for x in self.elements:
+            if x.toI is None:
+                e = BinaryOperator(sub_exprs=[x.fromI, var], operator=['='])
+            else:
+                e = BinaryOperator(sub_exprs=[x.fromI, var, x.toI], operator=['≤', '≤'])
+            sub_exprs.append(e)
+        if len(sub_exprs) == 1:
+            return sub_exprs[0]
         return BinaryOperator(sub_exprs=sub_exprs, operator=['∨']*(len(sub_exprs)-1))
 
     def translate(self, case: ConfigCase):

@@ -1,26 +1,7 @@
-Or(Start_Dt_Dwelling_For_Social_Rent == 2015,
-   Start_Dt_Dwelling_For_Social_Rent == 2016,
-   Start_Dt_Dwelling_For_Social_Rent == 2017,
-   Start_Dt_Dwelling_For_Social_Rent == 2018,
-   Start_Dt_Dwelling_For_Social_Rent == 2019,
-   Start_Dt_Dwelling_For_Social_Rent == 2020,
-   Start_Dt_Dwelling_For_Social_Rent == 2021,
-   Start_Dt_Dwelling_For_Social_Rent == 2022,
-   Start_Dt_Dwelling_For_Social_Rent == 2023,
-   Start_Dt_Dwelling_For_Social_Rent == 2024,
-   Start_Dt_Dwelling_For_Social_Rent == 2025)
+And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
+    Start_Dt_Dwelling_For_Social_Rent <= 2025)
 
-Or(Certification_Date == 2015,
-   Certification_Date == 2016,
-   Certification_Date == 2017,
-   Certification_Date == 2018,
-   Certification_Date == 2019,
-   Certification_Date == 2020,
-   Certification_Date == 2021,
-   Certification_Date == 2022,
-   Certification_Date == 2023,
-   Certification_Date == 2024,
-   Certification_Date == 2025)
+And(Certification_Date >= 2015, Certification_Date <= 2025)
 
 Or(Tax == 1,
    Tax == 2,
@@ -30,29 +11,11 @@ Or(Tax == 1,
    Tax == 10,
    Tax == 12)
 
-Or(Term_Energy_Renovation == 2015,
-   Term_Energy_Renovation == 2016,
-   Term_Energy_Renovation == 2017,
-   Term_Energy_Renovation == 2018,
-   Term_Energy_Renovation == 2019,
-   Term_Energy_Renovation == 2020,
-   Term_Energy_Renovation == 2021,
-   Term_Energy_Renovation == 2022,
-   Term_Energy_Renovation == 2023,
-   Term_Energy_Renovation == 2024,
-   Term_Energy_Renovation == 2025)
+And(Term_Energy_Renovation >= 2015,
+    Term_Energy_Renovation <= 2025)
 
-Or(Certification_Date_Sale == 2015,
-   Certification_Date_Sale == 2016,
-   Certification_Date_Sale == 2017,
-   Certification_Date_Sale == 2018,
-   Certification_Date_Sale == 2019,
-   Certification_Date_Sale == 2020,
-   Certification_Date_Sale == 2021,
-   Certification_Date_Sale == 2022,
-   Certification_Date_Sale == 2023,
-   Certification_Date_Sale == 2024,
-   Certification_Date_Sale == 2025)
+And(Certification_Date_Sale >= 2015,
+    Certification_Date_Sale <= 2025)
 --
 (Tax == 1) ==
 And(Registration_Type == Heritage, Region == Flemish_Region)

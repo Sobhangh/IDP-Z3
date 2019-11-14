@@ -1,6 +1,6 @@
-Or(Sides == 3, Sides == 4)
+And(Sides >= 3, Sides <= 4)
 
-Or(Vertices == 3, Vertices == 4)
+And(Vertices >= 3, Vertices <= 4)
 
 ForAll(c!0,
        Implies(Large(c!0),
