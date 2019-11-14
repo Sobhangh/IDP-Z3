@@ -3,11 +3,7 @@ And(Sides >= 3, Sides <= 4)
 And(Vertices >= 3, Vertices <= 4)
 
 ForAll(c!0,
-       Implies(Large(c!0),
-               And(Or(c!0 == 1,
-                      c!0 == 2,
-                      c!0 == 3,
-                      c!0 == 4))))
+       Implies(Large(c!0), And(And(c!0 >= 1, c!0 <= 4))))
 --
 And(If(False, 4, If(False, 3, If(True, 2, If(False, 1, 5)))) >
     1,

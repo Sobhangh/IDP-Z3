@@ -5,7 +5,7 @@ import sys
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
-    Sum, If, BoolVal, Function
+    Sum, If, BoolVal, Function, FreshConst, Implies
 
 from configcase import ConfigCase
 from utils import applyTo, log, itertools, in_list
@@ -222,10 +222,22 @@ class SymbolDeclaration(object):
                 if self.out.name == 'bool':
                     types = [x.translate(case) for x in self.sorts]
                     rel_vars = [t.getRange() for t in self.sorts]
-                    self.translated = case.Predicate(self.name, types, rel_vars)
+                    self.translated = Function(self.name, types + [BoolSort()])
+
+                    argL, checks = [], []
+                    for i, x in enumerate(self.sorts):
+                        var = Fresh_Variable(str(i), x.decl)
+                        argL.append(var.translate(case))
+                        check = x.decl.check_bounds(var)
+                        if check is not None:
+                            checks.append(check.translate(case))
+                    if checks:
+                        case.typeConstraints.append(
+                            ForAll(argL, Implies( (self.translated)(*argL), And(checks))))
                 else:
                     types = [x.translate(case) for x in self.sorts] + [self.out.translate(case)]
                     self.translated = Function(self.name, types)
+                    #TODO verify range of arguments
 
             for inst in self.instances.values():
                 inst.translate(case)

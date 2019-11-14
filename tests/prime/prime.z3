@@ -1,9 +1,5 @@
 ForAll(c!25,
-       Implies(Prime(c!25),
-               And(Or(c!25 == 1,
-                      c!25 == 2,
-                      c!25 == 3,
-                      c!25 == 4))))
+       Implies(Prime(c!25), And(And(c!25 >= 1, c!25 <= 4))))
 --
 ForAll(c!26,
        Prime(c!26) ==

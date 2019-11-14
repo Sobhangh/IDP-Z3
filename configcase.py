@@ -62,13 +62,6 @@ class ConfigCase:
             self.valueMap[obj_to_string(i)] = i
         return out
 
-    def Predicate(self, name, types, rel_vars):
-        p = Function(name, types + [BoolSort()])
-        argL = [FreshConst(s) for s in types]
-        self.typeConstraints.append(
-            ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
-        return p
-
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
 
