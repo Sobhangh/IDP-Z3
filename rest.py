@@ -27,7 +27,7 @@ from textx import TextXError
 
 from configcase import *
 from LiteralQ import *
-from dsl.DSLClasses import idpparser
+from Idp import idpparser
 
 # library to generate call graph, for documentation purposes
 from pycallgraph2 import PyCallGraph

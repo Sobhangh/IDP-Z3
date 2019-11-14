@@ -1,6 +1,6 @@
 Interactive_Consultant is an interactive consultant based on logic theory. It uses the Z3 SMT solver.  It is hosted at https://autoconfigparam.herokuapp.com/
 
-It is made available under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).
+It is made available under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).  
 
 # Get started
 
@@ -17,6 +17,8 @@ python3 rest.py
 and open your browser at http://127.0.0.1:5000
 
 # Develop
+
+You may want to read about the [technical architecture](https://docs.google.com/document/d/1i0oFnk_ITwm2zkF36MzN9ezgZJe0_a7H9Tm1x1V-lKA/edit?usp=sharing).
 
 The website (including the default logic theory) is served from the static directory.  Its code is available at https://gitlab.com/krr/autoconfig3.  To update it:
 

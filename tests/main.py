@@ -5,12 +5,12 @@ import os,sys,inspect,time
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
-sys.path.insert(0,os.path.join(parentdir, 'dsl'))
+sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
 import configcase
 from Theory import *
 from utils import log
-from DSLClasses import *
+from Idp import *
 
 dir = os.path.dirname(__file__)
 files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]

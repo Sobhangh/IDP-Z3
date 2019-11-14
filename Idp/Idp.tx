@@ -1,0 +1,92 @@
+Idp:
+    vocabulary=Vocabulary
+    theory=Theory
+    structure=Structure?
+    goal=Goal?
+    view=View?
+;
+
+Comment:
+  /\/\/.*$/
+;
+
+Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
+  Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
+
+    ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
+      Constructor: name=ID;
+    RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
+      RangeElement: fromI=NumberConstant ('..' toI=NumberConstant)?;
+
+    SymbolDeclaration: name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
+      Sort: name=ID;
+      Symbol: name=ID;
+
+Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
+
+  Definition: '{' rules*=Rule '}';
+  Rule: ('[' reading=/[^\]]*/ ']')? 
+        ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Base)? ('<-' body=Expression)? '.' ;
+
+  Expression: IfExpr | Quantification;
+    IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
+
+    Quantification: AQuantification | RImplication;
+    RImplication:   ARImplication   | Equivalence;
+    Equivalence:    AEquivalence    | Implication;
+    Implication:    AImplication    | Disjunction;
+    Disjunction:    ADisjunction    | Conjunction;
+    Conjunction:    AConjunction    | Comparison;
+    Comparison:     AComparison     | SumMinus;
+    SumMinus:       ASumMinus       | MultDiv;
+    MultDiv:        AMultDiv        | Power;
+    Power:          APower          | Unary;
+    Unary:          AUnary          | Aggregate;
+    Aggregate:      AAggregate      | Base;
+
+
+    AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
+      Quantor: '∀' | '!' | '∃' | '?' ;
+    ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
+    AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
+    AImplication:  sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+;
+    ADisjunction:  sub_exprs=Conjunction (operator=DisjunctionOp  sub_exprs=Conjunction)+;
+    AConjunction:  sub_exprs=Comparison  (operator=ConjunctionOp  sub_exprs=Comparison )+;
+    AComparison:   sub_exprs=SumMinus    (operator=ComparisonOp   sub_exprs=SumMinus   )+;
+    ASumMinus:     sub_exprs=MultDiv     (operator=SumMinusOp     sub_exprs=MultDiv    )+;
+    AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
+    APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
+    AUnary:                        operator=UnaryOperator  f=Base;
+    AAggregate: aggtype=AggType '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
+      AggType: '#' | 'card' | 'sum';
+
+    RImplicationOp: '<=' | '⇐';
+    EquivalenceOp: '<=>' | '⇔';
+    ImplicationOp:  '=>' | '⇒';
+    DisjunctionOp:   '|' | '∨';
+    ConjunctionOp:   '&' | '∧';
+    ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
+    SumMinusOp:      '+' | '-';
+    MultDivOp:       '*' | '/' | '%';
+    UnaryOperator:   '-' | '~';
+    
+
+    Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
+
+      AppliedSymbol: s=Symbol args=Arguments;
+        Arguments: '(' sub_exprs*=Expression[','] ')';
+      Variable: name=ID;
+      NumberConstant: number=IDPFLOAT | number=INT;
+        IDPFLOAT: /[+-]?(\d+(\.\d+)?|\.\d+)/;
+      StringConstant: str=STRING;
+      Brackets: ('[' reading=/[^\]]*/ ']')? '(' f=Expression ')';
+
+
+Structure: 'structure' '{' interpretations*=Interpretation '}';
+  Interpretation: name=Symbol '=' '{' tuples+=Tuple[';'] '}' ('else' default=Base)?;
+  Tuple : args*=Base[','];
+
+Goal: 'goal' name=ID;
+
+View: 'view' viewType=ViewType;
+  ViewType: 'normal' | 'expanded';

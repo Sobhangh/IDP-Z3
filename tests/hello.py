@@ -4,13 +4,13 @@ import os,sys,inspect,time
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
-sys.path.insert(0,os.path.join(parentdir, 'dsl'))
+sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
 print(parentdir)
 import configcase
 from Theory import *
 from utils import log
-from DSLClasses import *
+from Idp import *
 
 
 

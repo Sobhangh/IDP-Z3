@@ -39,6 +39,7 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
+    - translate() should not need case as argument
     - explain: use consequences() for rules too ? or unsat_core for evidences ?
     - avoid quantifiers in definitions
     - do we need Expression.type, if we have Expression.decl ?

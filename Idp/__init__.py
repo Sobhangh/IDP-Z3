@@ -9,7 +9,7 @@ from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists,
 
 from configcase import ConfigCase
 from utils import applyTo, log, itertools, in_list
-from dsl.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
+from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
