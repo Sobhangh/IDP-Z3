@@ -62,24 +62,11 @@ class ConfigCase:
             self.valueMap[obj_to_string(i)] = i
         return out
 
-    def Function(self, name, types, rel_vars, restrictive=True):
-        out = Function(name, *types)
-        rel_vars = list(map(lambda x: list(map(_py2expr, x)), rel_vars))
-        args, vals = splitLast(rel_vars)
-        args = list(itertools.product(*args))
-        for arg in list(args):
-            expr = out(*arg)
-            if restrictive:
-                exp = in_list(expr, vals)
-                self.typeConstraints.append(exp)
-        return out
-
-    def Predicate(self, name, types, rel_vars, restrictive=True):
-        p = self.Function(name, types + [BoolSort()], rel_vars + [[True]], False)
-        if restrictive:
-            argL = [Const('a' + str(ind), s) for s, ind in zip(types, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
-            self.typeConstraints.append(
-                ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
+    def Predicate(self, name, types, rel_vars):
+        p = Function(name, types + [BoolSort()])
+        argL = [FreshConst(s) for s in types]
+        self.typeConstraints.append(
+            ForAll(argL, Implies(p(*argL), And([in_list(a, t) for a, t in zip(argL, rel_vars)]))))
         return p
 
     def add(self, constraint, source_code):

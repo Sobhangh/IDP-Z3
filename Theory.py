@@ -10,16 +10,6 @@ def is_really_constant(expr, valueMap):
         or is_string_value(expr) \
         or is_true(expr) or is_false(expr)
 
-    
-def has_ground_children(expr, valueMap):
-    return all([is_ground(child, valueMap) for child in expr.children()])
-
-
-def is_ground(expr, valueMap):
-    return is_really_constant(expr, valueMap) or \
-        (0 < len(expr.children()) and has_ground_children(expr, valueMap))
-        
-
 def is_symbol(symb, symbols):
     if is_expr(symb):
         symb = obj_to_string(symb)

@@ -5,21 +5,23 @@ Or(Subtype == regular_triangle,
    Subtype == rectangle,
    Subtype == square)
 
-ForAll([a1, a2],
-       Implies(isa(a1, a2),
-               And(Or(a1 == regular_triangle,
-                      a1 == right_triangle,
-                      a1 == rectangle,
-                      a1 == square),
-                   Or(a2 == triangle, a2 == quadrilateral))))
+ForAll([c!16, c!17],
+       Implies(isa(c!16, c!17),
+               And(Or(c!16 == regular_triangle,
+                      c!16 == right_triangle,
+                      c!16 == rectangle,
+                      c!16 == square),
+                   Or(c!17 == triangle,
+                      c!17 == quadrilateral))))
 
-ForAll([a1, a2],
-       Implies(asi(a1, a2),
-               And(Or(a1 == triangle, a1 == quadrilateral),
-                   Or(a2 == regular_triangle,
-                      a2 == right_triangle,
-                      a2 == rectangle,
-                      a2 == square))))
+ForAll([c!18, c!19],
+       Implies(asi(c!18, c!19),
+               And(Or(c!18 == triangle,
+                      c!18 == quadrilateral),
+                   Or(c!19 == regular_triangle,
+                      c!19 == right_triangle,
+                      c!19 == rectangle,
+                      c!19 == square))))
 
 Or(typeOf(regular_triangle) == triangle,
    typeOf(regular_triangle) == quadrilateral)

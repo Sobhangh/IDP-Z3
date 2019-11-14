@@ -44,10 +44,7 @@ def log(action):
 def in_list(q, ls):
     if not ls: return True # e.g. for int, real
     if len(ls)==1: return q == ls[0]
-    outp = []
-    for i in ls:
-        outp.append(q == i)
-    return Or(outp)
+    return Or([q == i for i in ls])
 
 
 def is_number(s):

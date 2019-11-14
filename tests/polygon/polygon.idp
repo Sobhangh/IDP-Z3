@@ -32,6 +32,7 @@ vocabulary {
 
 theory {
     { !n[side]: Large(n) <- 10 < Length(n).}
+    !n[side]: Length(n) < Length(n+1).
 
     [Definition of triangle]
     (Type=triangle      <=> Sides=3).
@@ -118,7 +119,7 @@ theory {
     //?n[side]: n=<Sides & Length(n)=Base.
 }
 structure {
-    Length = {1,1; 2,2; 3,3; 4,4} else 0
+    Length = {1,1; 2,2; 3,3; 4,4} else 5
 }
 
 view expanded

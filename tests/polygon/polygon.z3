@@ -4,32 +4,30 @@ Or(Vertices == 3, Vertices == 4)
 
 Or(Type == triangle, Type == quadrilateral)
 
-True
-
-True
-
-True
-
-True
-
-True
-
-True
-
-True
-
-True
-
 Or(Subtype == regular_triangle,
    Subtype == right_triangle,
    Subtype == rectangle,
    Subtype == square,
    Subtype == irregular)
 
-ForAll(a1,
-       Implies(Large(a1),
-               And(Or(a1 == 1, a1 == 2, a1 == 3, a1 == 4))))
+ForAll(c!0,
+       Implies(Large(c!0),
+               And(Or(c!0 == 1,
+                      c!0 == 2,
+                      c!0 == 3,
+                      c!0 == 4))))
 --
+And(If(False, 4, If(False, 3, If(True, 2, If(False, 1, 5)))) >
+    1,
+    If(False, 4, If(True, 3, If(False, 2, If(False, 1, 5)))) >
+    2,
+    If(True, 4, If(False, 3, If(False, 2, If(False, 1, 5)))) >
+    3,
+    If(False,
+       4,
+       If(False, 3, If(False, 2, If(False, 1, 5)))) >
+    4)
+
 (Type == triangle) == (Sides == 3)
 
 (Type == quadrilateral) == (Sides == 4)
@@ -120,9 +118,9 @@ And((Sides < 1) == False,
     (Sides < 3) == False,
     (Sides < 4) == False)
 
-ForAll(c!12,
-       Large(c!12) ==
-       Or(And(c!12 == 1, False),
-          And(c!12 == 2, False),
-          And(c!12 == 3, False),
-          And(c!12 == 4, False)))
+ForAll(c!14,
+       Large(c!14) ==
+       Or(And(c!14 == 1, False),
+          And(c!14 == 2, False),
+          And(c!14 == 3, False),
+          And(c!14 == 4, False)))

@@ -5,7 +5,7 @@ import sys
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
-    Sum, If, BoolVal
+    Sum, If, BoolVal, Function
 
 from configcase import ConfigCase
 from utils import applyTo, log, itertools, in_list
@@ -159,7 +159,6 @@ class SymbolDeclaration(object):
         self.is_var = True # unless interpreted later
         self.translated = None
 
-        self.vocabulary = None # False if declared in quantifier, aggregate, rule
         self.type = None # a declaration object
         self.domain = None # all possible arguments
         self.instances = None # {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
@@ -173,7 +172,6 @@ class SymbolDeclaration(object):
         )
 
     def annotate(self, symbol_decls, vocabulary=True):
-        self.vocabulary = vocabulary
         if vocabulary: symbol_decls[self.name] = self
         for s in self.sorts:
             s.annotate(symbol_decls)
@@ -204,22 +202,23 @@ class SymbolDeclaration(object):
             if len(self.sorts) == 0:
                 self.translated = Const(self.name, self.out.translate(case))
                 self.normal = True
-            elif self.out.name == 'bool':
-                types = [x.translate(case) for x in self.sorts]
-                rel_vars = [t.getRange() for t in self.sorts]
-                self.translated = case.Predicate(self.name, types, rel_vars, True)
             else:
-                types = [x.translate(case) for x in self.sorts] + [self.out.translate(case)]
-                rel_vars = [t.getRange() for t in self.sorts + [self.out]]
-                self.translated = case.Function(self.name, types, rel_vars, True)
+                if self.out.name == 'bool':
+                    types = [x.translate(case) for x in self.sorts]
+                    rel_vars = [t.getRange() for t in self.sorts]
+                    self.translated = case.Predicate(self.name, types, rel_vars)
+                else:
+                    types = [x.translate(case) for x in self.sorts] + [self.out.translate(case)]
+                    self.translated = Function(self.name, types)
 
             for inst in self.instances.values():
                 inst.translate(case)
+                if self.out.decl.name != 'bool' and self.range:
+                    domain = in_list(inst.translated, [v.translated for v in self.range])
+                    domain.reading = "Possible values for " + self.name
+                    case.typeConstraints.append(domain)
 
-            if self.vocabulary and len(self.sorts) == 0 and self.range and self.out.decl.name != 'bool': #TODO also for Functions ? (done in CaseConfig)
-                domain = in_list(self.translated, [v.translated for v in self.range])
-                domain.reading = "Possible values for " + self.name
-                case.typeConstraints.append(domain)
+
         return self.translated
 
 

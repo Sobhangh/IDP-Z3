@@ -528,7 +528,7 @@ class NumberConstant(Expression):
 
     def annotate(self, symbol_decls, q_decls): return self
 
-    def subtences(): return {}
+    def subtences(self): return {}
 
     def translate(self, case: ConfigCase):
         return self.translated
