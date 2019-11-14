@@ -9,7 +9,7 @@ from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists,
 
 from configcase import ConfigCase
 from utils import applyTo, log, itertools, in_list
-from dsl.Expression import Constructor, Expression, IfExpr, AQuantification, \
+from dsl.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
@@ -99,6 +99,9 @@ class ConstructedTypeDeclaration(object):
             symbol_decls[c.name] = c
         self.range = self.constructors #TODO constructor functions
 
+    def check_bounds(self, var):
+        return None
+
     def translate(self, case: ConfigCase):
         if self.translated is None:
             self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
@@ -136,6 +139,11 @@ class RangeDeclaration(object):
 
     def annotate(self, symbol_decls): 
         symbol_decls[self.name] = self
+
+    def check_bounds(self, var):
+        if not self.range: return None
+        sub_exprs = [BinaryOperator(sub_exprs=[var, val], operator = '=') for val in self.range]
+        return BinaryOperator(sub_exprs=sub_exprs, operator=['∨']*(len(sub_exprs)-1))
 
     def translate(self, case: ConfigCase):
         if self.translated is None:
@@ -214,11 +222,11 @@ class SymbolDeclaration(object):
             for inst in self.instances.values():
                 inst.translate(case)
                 if self.out.decl.name != 'bool' and self.range:
-                    domain = in_list(inst.translated, [v.translated for v in self.range])
-                    domain.reading = "Possible values for " + self.name
-                    case.typeConstraints.append(domain)
-
-
+                    domain = self.out.decl.check_bounds(inst)
+                    if domain is not None:
+                        domain = domain.translate(case)
+                        domain.reading = "Possible values for " + str(inst)
+                        case.typeConstraints.append(domain)
         return self.translated
 
 

@@ -1,7 +1,6 @@
 To do:
     check domain of arguments.  Or done at run time ?
         - now: Large(5) is unsatisfiable.  !n:Length(n+1) is accepted
-        - use decl.condition(var) for type typeConstraints
         - use comparison for rangeDeclaration
         - add constraint in-line (but reading ?)
     Support for constructor functions (p.6 of the IDP3 manual)

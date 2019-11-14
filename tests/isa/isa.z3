@@ -1,10 +1,3 @@
-Or(Type == triangle, Type == quadrilateral)
-
-Or(Subtype == regular_triangle,
-   Subtype == right_triangle,
-   Subtype == rectangle,
-   Subtype == square)
-
 ForAll([c!16, c!17],
        Implies(isa(c!16, c!17),
                And(Or(c!16 == regular_triangle,
@@ -22,18 +15,6 @@ ForAll([c!18, c!19],
                       c!19 == right_triangle,
                       c!19 == rectangle,
                       c!19 == square))))
-
-Or(typeOf(regular_triangle) == triangle,
-   typeOf(regular_triangle) == quadrilateral)
-
-Or(typeOf(right_triangle) == triangle,
-   typeOf(right_triangle) == quadrilateral)
-
-Or(typeOf(rectangle) == triangle,
-   typeOf(rectangle) == quadrilateral)
-
-Or(typeOf(square) == triangle,
-   typeOf(square) == quadrilateral)
 --
 And(asi(triangle, regular_triangle) == True,
     asi(quadrilateral, regular_triangle) == False,
