@@ -55,6 +55,7 @@ class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
         self.terms = {}
+        self.typeConstraints = []
 
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
                              'real': RangeDeclaration(name='real', elements=[]),
@@ -241,7 +242,7 @@ class SymbolDeclaration(object):
                     self.translated = Function(self.name, types + [BoolSort()])
 
                     if checks:
-                        case.typeConstraints.append(
+                        case.idp.vocabulary.typeConstraints.append(
                             ForAll(argL, Implies( (self.translated)(*argL), And(checks))))
                 else:
                     types = [x.translate(case) for x in self.sorts] + [self.out.translate(case)]
@@ -253,7 +254,7 @@ class SymbolDeclaration(object):
                     """
                     if check is not None: # Z3 cannot solve the constraint if infinite range, issue #2
                         checks.append(check.translate(case))
-                        case.typeConstraints.append(
+                        case.idp.vocabulary.typeConstraints.append(
                             ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
                     """        
             for inst in self.instances.values():
@@ -263,7 +264,7 @@ class SymbolDeclaration(object):
                     if domain is not None:
                         domain = domain.translate(case)
                         domain.reading = "Possible values for " + str(inst)
-                        case.typeConstraints.append(domain)
+                        case.idp.vocabulary.typeConstraints.append(domain)
         return self.translated
 
 

@@ -27,17 +27,17 @@ class ConfigCase:
 
     def __init__(self, idp):
         self.idp = idp
+        self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
+
         self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
-        self.structure = {} # {literalQ : atomZ3} (needed for propagate)
         self.constraints = {} # {Z3expr: string}
-        self.typeConstraints = []
         
         idp.translate(self)
 
     def print(self):
-        out  = "\r\n\r\n".join(str(t) for t in self.typeConstraints) + "\r\n--\r\n"
+        out  = "\r\n\r\n".join(str(t) for t in self.idp.vocabulary.typeConstraints) + "\r\n--\r\n"
         out += "\r\n\r\n".join(str(t) for t in self.constraints)     + "\r\n"
         return out
         
@@ -66,7 +66,7 @@ class ConfigCase:
 
     def theory(self, with_assumptions=False):
         return And(list(self.constraints.keys()) 
-            + self.typeConstraints
+            + self.idp.vocabulary.typeConstraints
             + (list(self.structure.values()) if with_assumptions else []))
 
     def metaJSON(self):
@@ -197,7 +197,7 @@ class ConfigCase:
                 p = Const("wsdraqsesdf"+str(i), BoolSort())
                 ps[p] = ass
                 s.add(Implies(p, ass.asZ3()))
-            constraints = list(self.constraints.keys()) + self.typeConstraints
+            constraints = list(self.constraints.keys()) + self.idp.vocabulary.typeConstraints
             for i, constraint in enumerate(constraints):
                 p = Const("wsdraqsesdf"+str(i+len(self.structure)), BoolSort())
                 ps[p] = constraint
@@ -224,7 +224,7 @@ class ConfigCase:
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
                             out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(self.constraints[a1]))
-                for a1 in self.typeConstraints:
+                for a1 in self.idp.vocabulary.typeConstraints:
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
                             out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(a1))
@@ -293,7 +293,7 @@ class ConfigCase:
         while solver.check() == sat and count < 50: # for each parametric model
 
             # theory that forces irrelevant atoms to be irrelevant
-            theory2 = And(theory, And(self.typeConstraints))
+            theory2 = And(theory, And(self.idp.vocabulary.typeConstraints))
 
             atoms = [] # [LiteralQ]
             for atom_string, atom in self.idp.atoms.items():
@@ -338,7 +338,7 @@ class ConfigCase:
 
             # remove atoms that are consequences of others in the AMF
             solver2 = Solver()
-            solver2.add(self.typeConstraints) # without theory !
+            solver2.add(self.idp.vocabulary.typeConstraints) # without theory !
             (reify2, _) = reifier([l.subtence for l in atoms], solver2)
             for i, literalQ in enumerate(atoms):
                 if literalQ.truth is not None:

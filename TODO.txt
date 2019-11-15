@@ -43,7 +43,6 @@ other NTH (refactoring)
     - explain: use consequences() for rules too ? or unsat_core for evidences ?
     - avoid quantifiers in definitions
     - do we need Expression.type, if we have Expression.decl ?
-    - translate range declaration as comparisons for typeConstraints
     - distinguish between x=1 entry and x=1 atom in output structure
     - simplify Or, And with only one element
     - p(real) should be possible
