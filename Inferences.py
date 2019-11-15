@@ -82,7 +82,7 @@ class ConfigCase:
                 "type": symbol_type,
                 "priority": "core",
                 "showOptimize": True, # GUI is smart enough to show buttons appropriately
-                "view": "expanded" if str(i) == str(self.idp.goal) else self.view
+                "view": "expanded" if i.name == str(self.idp.goal) else self.view
             })
         out = {"title": "Interactive Consultant", "symbols": symbols}
         return out
