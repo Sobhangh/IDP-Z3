@@ -29,6 +29,8 @@ class Idp(object):
         self.view = kwargs.pop('view')
         if self.view is None:
             self.view = View(viewType='normal')
+        
+        self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
 
         if self.structure: self.structure.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
@@ -41,6 +43,9 @@ class Idp(object):
         log("theory translated")
         #self.goal.translate(case)
         self.view.translate(case)
+        
+        self.atoms = {**self.vocabulary.terms, **self.theory.subtences}
+
 
 
 ################################ Vocabulary  ###############################
@@ -49,6 +54,7 @@ class Idp(object):
 class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
+        self.terms = {}
 
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
                              'real': RangeDeclaration(name='real', elements=[]),
@@ -69,6 +75,10 @@ class Vocabulary(object):
         for i in self.declarations:
             if type(i) == SymbolDeclaration:
                 i.translate(case)
+
+        for v in self.symbol_decls.values():
+            if v.is_var:
+                self.terms.update(v.instances)
 
 
 class ConstructedTypeDeclaration(object):
@@ -240,11 +250,12 @@ class SymbolDeclaration(object):
                     var = Fresh_Variable(str(len(self.sorts)), self.out.decl)
                     check = self.out.decl.check_bounds(var)
                     varZ3 = var.translate(case)
+                    """
                     if check is not None: # Z3 cannot solve the constraint if infinite range, issue #2
                         checks.append(check.translate(case))
                         case.typeConstraints.append(
                             ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
-                            
+                    """        
             for inst in self.instances.values():
                 inst.translate(case)
                 if self.out.decl.name != 'bool' and self.range:
@@ -288,16 +299,16 @@ class Theory(object):
         self.symbol_decls = vocabulary.symbol_decls
         self.subtences = {}
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
-        for e in self.constraints:
-            self.subtences.update(e.subtences())
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
+        for e in self.constraints:
+            self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
 
         self.definitions = [e.annotate(self.symbol_decls, {}) for e in self.definitions]
-        for e in self.definitions:
-            self.subtences.update(e.subtences())
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
         self.definitions = [e.interpret         (self) for e in self.definitions]
+        for e in self.definitions:
+            self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
 
     def unknown_symbols(self):
         out = {}
@@ -314,6 +325,7 @@ class Theory(object):
             case.add(c, str(i))
         for d in self.definitions:
             d.translate(case)
+
 
 
 class Definition(object):
@@ -456,6 +468,10 @@ class Rule(object):
 
     def unknown_symbols(self):
         out = {}
+        for arg in self.args: # in case they are expressions
+            out.update(arg.unknown_symbols())
+        if self.out is not None:
+            out.update(self.out.unknown_symbols())
         out.update(self.body.unknown_symbols())
         return out
 

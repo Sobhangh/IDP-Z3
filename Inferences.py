@@ -30,19 +30,11 @@ class ConfigCase:
         self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
-        self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
-
         self.structure = {} # {literalQ : atomZ3} (needed for propagate)
         self.constraints = {} # {Z3expr: string}
         self.typeConstraints = []
         
         idp.translate(self)
-
-        for v in idp.vocabulary.symbol_decls.values():
-            if v.is_var:
-                self.atoms.update(v.instances)
-        self.atoms.update( {k: v for k, v in idp.theory.subtences.items() if v.unknown_symbols()})
-
 
     def print(self):
         out  = "\r\n\r\n".join(str(t) for t in self.typeConstraints) + "\r\n--\r\n"
@@ -101,7 +93,7 @@ class ConfigCase:
         
         out = self.initial_structure()
         
-        todo = [ a for a in self.atoms.values()
+        todo = [ a for a in self.idp.atoms.values()
                  # if it is shown to the user
                  if any([s in expanded_symbols for s in a.unknown_symbols().keys()]) ]
 
@@ -122,7 +114,7 @@ class ConfigCase:
 
     def expand(self):
         theory = self.theory(with_assumptions=True)
-        solver, reify, unreify = mk_solver(theory, self.atoms.values())
+        solver, reify, unreify = mk_solver(theory, self.idp.atoms.values())
         solver.check()
         return self.model_to_json(solver, reify, unreify)
 
@@ -158,7 +150,7 @@ class ConfigCase:
         else:
             solver.maximize(s)
 
-        (reify, unreify) = reifier(self.atoms.values(), solver)
+        (reify, unreify) = reifier(self.idp.atoms.values(), solver)
         solver.check()
 
         # deal with strict inequalities, e.g. min(0<x)
@@ -184,20 +176,20 @@ class ConfigCase:
             .replace("\\u2200", "∀").replace("\\u2203", "∃") \
             .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
             .replace("\\u2228", "∨").replace("\\u2227", "∧")
-        if value in self.atoms:
-            to_explain = self.atoms[value].translated #TODO value is an atom string
+        if value in self.idp.atoms:
+            to_explain = self.idp.atoms[value].translated #TODO value is an atom string
 
             # rules used in justification
             if not to_explain.sort()==BoolSort(): # calculate numeric value
                 # TODO should be given by client
                 theory = self.theory(with_assumptions=True)
-                s, _, _ = mk_solver(theory, self.atoms.values())
+                s, _, _ = mk_solver(theory, self.idp.atoms.values())
                 s.check()
                 val = s.model().eval(to_explain)
                 to_explain = to_explain == val
 
             s = Solver()
-            (reify, unreify) = reifier(self.atoms.values(), s)
+            (reify, unreify) = reifier(self.idp.atoms.values(), s)
             def r1(a): return reify[a] if a in reify else a
             def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
             ps = {} # {reified: constraint}
@@ -243,10 +235,10 @@ class ConfigCase:
         out = {} # {category : [LiteralQ]}
 
         theory = self.theory(with_assumptions=False)
-        solver, reify, unreify = mk_solver(theory, self.atoms.values())
+        solver, reify, unreify = mk_solver(theory, self.idp.atoms.values())
 
         # extract fixed atoms from constraints
-        universal = consequences(theory, self.atoms.values(), {}, solver, reify, unreify)
+        universal = consequences(theory, self.idp.atoms.values(), {}, solver, reify, unreify)
         out["universal"] = [k for k in universal.keys() if k.truth is not None]
 
         out["given"] = []
@@ -257,7 +249,7 @@ class ConfigCase:
         # find consequences of structure
         solver.add(list(self.structure.values()))
         theory2 = And([theory] + list(self.structure.values()))
-        fixed = consequences(theory2, self.atoms.values(), universal, solver, reify, unreify)
+        fixed = consequences(theory2, self.idp.atoms.values(), universal, solver, reify, unreify)
         out["fixed"] = [k for k in fixed.keys() if k.truth is not None]
 
         models, count = {}, 0
@@ -266,7 +258,7 @@ class ConfigCase:
         # substitutions = [(quantifier/chained, reified)] + [(consequences, truthvalue)]
         substitutions = []
         reified = Function("qsdfvqe13435", StringSort(), BoolSort())
-        for atom_string, atom in self.atoms.items():
+        for atom_string, atom in self.idp.atoms.items():
             atomZ3 = atom.translated #TODO
             if atom.type == 'bool' or (hasattr(atom.decl, 'sorts') and atom.decl.type.name == 'bool'):
                 substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
@@ -280,7 +272,7 @@ class ConfigCase:
 
         # --> irrelevant
         irrelevant = []
-        for atom_string, atom in self.atoms.items():
+        for atom_string, atom in self.idp.atoms.items():
             atomZ3 = atom.translated #TODO
             if is_bool(atomZ3) \
             and not LiteralQ(True , atom) in done \
@@ -292,7 +284,7 @@ class ConfigCase:
         done2 = done.union(set(irrelevant))
 
         # create keys for models using first symbol of atoms
-        for atom in self.atoms.values():
+        for atom in self.idp.atoms.values():
             atomZ3 = atom.translated #TODO
             for symb in atom.unknown_symbols().keys():
                 models[symb] = [] # models[symb][row] = [relevant atoms]
@@ -304,7 +296,7 @@ class ConfigCase:
             theory2 = And(theory, And(self.typeConstraints))
 
             atoms = [] # [LiteralQ]
-            for atom_string, atom in self.atoms.items():
+            for atom_string, atom in self.idp.atoms.items():
                 atomZ3 = atom.translated #TODO
                 if is_bool(atomZ3) \
                 and not LiteralQ(True , atom) in done2 \
@@ -398,7 +390,7 @@ class ConfigCase:
 
     def initial_structure(self):
         out = Structure(self)
-        for atom in self.atoms.values():
+        for atom in self.idp.atoms.values():
             out.initialise(self, atom, False, False, "")
         return out
 
@@ -406,7 +398,7 @@ class ConfigCase:
     def model_to_json(self, s, reify, unreify):
         m = s.model()
         out = self.initial_structure()
-        for atom in self.atoms.values():
+        for atom in self.idp.atoms.values():
             atomZ3 = atom.translated #TODO
             # atom might not have an interpretation in model (if "don't care")
             value = m.eval(reify[atom], model_completion=True)
