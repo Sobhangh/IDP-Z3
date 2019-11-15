@@ -2,8 +2,8 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!0,
-       Implies(Large(c!0), And(And(c!0 >= 1, c!0 <= 4))))
+ForAll(c!4,
+       Implies(Large(c!4), And(And(c!4 >= 1, c!4 <= 4))))
 --
 And(If(False, 4, If(False, 3, If(True, 2, If(False, 1, 5)))) >
     1,
@@ -106,9 +106,9 @@ And((Sides < 1) == False,
     (Sides < 3) == False,
     (Sides < 4) == False)
 
-ForAll(c!14,
-       Large(c!14) ==
-       Or(And(c!14 == 1, False),
-          And(c!14 == 2, False),
-          And(c!14 == 3, False),
-          And(c!14 == 4, False)))
+ForAll(c!18,
+       Large(c!18) ==
+       Or(And(c!18 == 1, False),
+          And(c!18 == 2, False),
+          And(c!18 == 3, False),
+          And(c!18 == 4, False)))

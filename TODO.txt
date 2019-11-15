@@ -5,6 +5,7 @@ To do:
         - transform occurrences in source code, using If() if variables
     Lexicographic, Pareto and conditional optimization
     Support for dates
+    + issues on GitLab
 
 
 Research topics / may take a while:
@@ -16,7 +17,6 @@ Research topics / may take a while:
 
 
 Of dubious benefit / may never be done:
-    check bounds for arguments of function/predicate (e.g. Length(5)) (inline, i.e. at every occurrences)
     type enumeration in structure
     Type inference (p. 14 of the IDP3 manual)
     Support for type hierarchy
