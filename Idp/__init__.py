@@ -46,6 +46,14 @@ class Idp(object):
         
         self.atoms = {**self.vocabulary.terms, **self.theory.subtences}
 
+    def unknown_symbols(self):
+        todo = self.theory.unknown_symbols()
+
+        out = {} # reorder per vocabulary order
+        for symb in self.vocabulary.symbol_decls:
+            if symb in todo:
+                out[symb] = todo[symb]
+        return out
 
 
 ################################ Vocabulary  ###############################

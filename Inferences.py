@@ -72,7 +72,7 @@ class ConfigCase:
     def metaJSON(self):
         "response to meta request"
         symbols = []
-        for i in self.idp.theory.unknown_symbols().values():
+        for i in self.idp.unknown_symbols().values():
             symbol_type = "function"
             if type(i.translated) == BoolRef:
                 symbol_type = "proposition"
@@ -139,7 +139,7 @@ class ConfigCase:
                         func_current_param += ", " + func_params_adder
         
         args = parse_func_with_params(symbol)
-        s = self.idp.theory.unknown_symbols()[args[0]]
+        s = self.idp.unknown_symbols()[args[0]]
         if 1<len(args):
             s = (s.translated)(args[1:])
 
@@ -223,7 +223,7 @@ class ConfigCase:
                 for a1 in self.constraints.keys():
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
-                            out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(self.constraints[a1]))
+                            out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else self.constraints[a1])
                 for a1 in self.idp.vocabulary.typeConstraints:
                     for a2 in s.unsat_core():
                         if str(a1) == str(ps[a2]):
@@ -268,7 +268,7 @@ class ConfigCase:
 
         # relevants = getAtoms(simplify(substitute(self.constraints, substitutions)))
         simplified = simplify(substitute(And(list(self.constraints.keys())), substitutions)) # it starts by the last substitution ??
-        relevants = getAtoms(simplified, self.valueMap, self.idp.theory.unknown_symbols()) # includes reified !
+        relevants = getAtoms(simplified, self.valueMap, self.idp.unknown_symbols()) # includes reified !
 
         # --> irrelevant
         irrelevant = []
