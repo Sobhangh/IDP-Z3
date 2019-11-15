@@ -7,7 +7,7 @@ from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
     Sum, If, BoolVal, Function, FreshConst, Implies
 
-from configcase import ConfigCase
+from Inferences import ConfigCase
 from utils import applyTo, log, itertools, in_list
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \

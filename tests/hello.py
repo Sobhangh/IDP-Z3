@@ -7,7 +7,7 @@ sys.path.insert(0,parentdir)
 sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
 print(parentdir)
-import configcase
+import Inferences
 from Theory import *
 from utils import log
 from Idp import *

@@ -25,7 +25,7 @@ from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 from textx import TextXError
 
-from configcase import *
+from Inferences import *
 from LiteralQ import *
 from Idp import idpparser
 

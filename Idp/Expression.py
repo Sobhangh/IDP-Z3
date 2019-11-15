@@ -8,7 +8,7 @@ import sys
 
 from z3 import FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
-from configcase import ConfigCase
+from Inferences import ConfigCase
 
 
 class DSLException(Exception):
