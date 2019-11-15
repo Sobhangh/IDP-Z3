@@ -83,7 +83,7 @@ class Vocabulary(object):
                 i.translate(case)
         for i in self.declarations:
             if type(i) == SymbolDeclaration:
-                i.translate(case)
+                i.translate(case.idp)
 
         for v in self.symbol_decls.values():
             if v.is_var:
@@ -230,49 +230,49 @@ class SymbolDeclaration(object):
         return self
         
 
-    def translate(self, case: ConfigCase):
+    def translate(self, idp):
         if self.translated is None:
             if len(self.sorts) == 0:
-                self.translated = Const(self.name, self.out.translate(case))
+                self.translated = Const(self.name, self.out.translate())
                 self.normal = True
             else:
                 argL, checks = [], []
                 for i, x in enumerate(self.sorts):
                     var = Fresh_Variable(str(i), x.decl)
-                    argL.append(var.translate(case))
+                    argL.append(var.translate())
                     check = x.decl.check_bounds(var)
                     if check is not None:
-                        checks.append(check.translate(case))
+                        checks.append(check.translate())
 
                 if self.out.name == 'bool':
-                    types = [x.translate(case) for x in self.sorts]
+                    types = [x.translate() for x in self.sorts]
                     rel_vars = [t.getRange() for t in self.sorts]
                     self.translated = Function(self.name, types + [BoolSort()])
 
                     if checks:
-                        case.idp.vocabulary.typeConstraints.append(
+                        idp.vocabulary.typeConstraints.append(
                             ForAll(argL, Implies( (self.translated)(*argL), And(checks))))
                 else:
-                    types = [x.translate(case) for x in self.sorts] + [self.out.translate(case)]
+                    types = [x.translate() for x in self.sorts] + [self.out.translate()]
                     self.translated = Function(self.name, types)
 
                     var = Fresh_Variable(str(len(self.sorts)), self.out.decl)
                     check = self.out.decl.check_bounds(var)
-                    varZ3 = var.translate(case)
+                    varZ3 = var.translate()
                     """
                     if check is not None: # Z3 cannot solve the constraint if infinite range, issue #2
                         checks.append(check.translate(case))
-                        case.idp.vocabulary.typeConstraints.append(
+                        idp.vocabulary.typeConstraints.append(
                             ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
                     """        
             for inst in self.instances.values():
-                inst.translate(case)
+                inst.translate()
                 if self.out.decl.name != 'bool' and self.range:
                     domain = self.out.decl.check_bounds(inst)
                     if domain is not None:
-                        domain = domain.translate(case)
+                        domain = domain.translate()
                         domain.reading = "Possible values for " + str(inst)
-                        case.idp.vocabulary.typeConstraints.append(domain)
+                        idp.vocabulary.typeConstraints.append(domain)
         return self.translated
 
 
@@ -287,7 +287,7 @@ class Sort(object):
     def annotate(self, symbol_decls):
         self.decl = symbol_decls[self.name]
 
-    def translate(self, case):
+    def translate(self):
         return self.decl.translated
 
     def getRange(self):
@@ -330,7 +330,7 @@ class Theory(object):
     def translate(self, case: ConfigCase,):
         for i in self.constraints:
             log("translating " + str(i)[:20])
-            c = i.translate(case)
+            c = i.translate()
             case.add(c, str(i))
         for d in self.definitions:
             d.translate(case)
@@ -389,24 +389,24 @@ class Definition(object):
     def translate(self, case: ConfigCase):
         for symbol, rules in self.partition.items():
 
-            vars = [v.translate(case) for v in self.q_decls[symbol].values()]
+            vars = [v.translate() for v in self.q_decls[symbol].values()]
             exprs, outputVar = [], False
             for i in rules:
-                exprs.append(i.translate(vars, case))
+                exprs.append(i.translate(vars))
                 if i.out is not None:
                     outputVar = True
                     
             if outputVar:
                 case.add(ForAll(vars, 
-                                (applyTo(symbol.translate(case), vars[:-1]) == vars[-1]) == Or(exprs)), 
+                                (applyTo(symbol.translate(case.idp), vars[:-1]) == vars[-1]) == Or(exprs)), 
                          str(self))
             else:
                 if len(vars) > 0:
                     case.add(ForAll(vars, 
-                                    applyTo(symbol.translate(case), vars) == Or(exprs)), 
+                                    applyTo(symbol.translate(case.idp), vars) == Or(exprs)), 
                              str(self))
                 else:
-                    case.add(symbol.translate(case) == Or(exprs), str(self))
+                    case.add(symbol.translate(case.idp) == Or(exprs), str(self))
 
 
 class Rule(object):
@@ -484,17 +484,17 @@ class Rule(object):
         out.update(self.body.unknown_symbols())
         return out
 
-    def translate(self, new_vars, case: ConfigCase):
+    def translate(self, new_vars):
         """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
 
         log("translating rule " + str(self.body)[:20])
         for v in self.q_decls.values():
-            v.translate(case)
+            v.translate()
 
         if len(self.vars) == 0:
-            self.translated = self.body.translate(case)
+            self.translated = self.body.translate()
         else:
-            self.translated = Exists([v.translate() for v in self.vars], self.body.translate(case))
+            self.translated = Exists([v.translate() for v in self.vars], self.body.translate())
         return self.translated
 
 # Expressions : see Expression.py
@@ -572,7 +572,7 @@ class Tuple(object):
     def interpret(self, theory): return self #TODO ?
 
     def translate(self, case: ConfigCase):
-        return [arg.translate(case) for arg in self.args]
+        return [arg.translate() for arg in self.args]
 
 
 ################################ Goal, View ###############################

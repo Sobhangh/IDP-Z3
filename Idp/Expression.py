@@ -104,7 +104,7 @@ class Constructor(object):
     def expand_quantifiers(self, theory): return self
     def interpret(self, theory): return self
     def unknown_symbols(self): return {}
-    def translate(self, case): return self.translated
+    def translate(self): return self.translated
 
 
 
@@ -135,10 +135,10 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
-    def translate(self, case: ConfigCase):
-        self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate(case)
-                            , self.sub_exprs[IfExpr.THEN].translate(case)
-                            , self.sub_exprs[IfExpr.ELSE].translate(case))
+    def translate(self):
+        self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate()
+                            , self.sub_exprs[IfExpr.THEN].translate()
+                            , self.sub_exprs[IfExpr.ELSE].translate())
         return self.translated
 
 class AQuantification(Expression):
@@ -186,13 +186,13 @@ class AQuantification(Expression):
         self.sorts = [] # not used
         return self
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         for v in self.q_decls.values():
-            v.translate(case)
+            v.translate()
         if not self.vars:
-            self.translated = self.sub_exprs[0].translate(case)
+            self.translated = self.sub_exprs[0].translate()
         else:
-            finalvars, forms = self.vars, [f.translate(case) for f in self.sub_exprs]
+            finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
 
             if self.q == '∀':
                 forms = And(forms) if 1<len(forms) else forms[0]
@@ -257,18 +257,18 @@ class BinaryOperator(Expression):
             return {self.str: self} #TODO collect subtences of aggregates within comparisons
         return super().subtences()
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         # chained comparisons -> And()
         if self.operator[0] =='≠' and len(self.sub_exprs)==2:
-            x = self.sub_exprs[0].translate(case)
-            y = self.sub_exprs[1].translate(case)
+            x = self.sub_exprs[0].translate()
+            y = self.sub_exprs[1].translate()
             out = Not(x==y)
         elif self.operator[0] in '=<>≤≥≠':
             out = []
             for i in range(1, len(self.sub_exprs)):
-                x = self.sub_exprs[i-1].translate(case)
+                x = self.sub_exprs[i-1].translate()
                 function = BinaryOperator.MAP[self.operator[i - 1]]
-                y = self.sub_exprs[i].translate(case)
+                y = self.sub_exprs[i].translate()
                 try:
                     out = out + [function(x, y)]
                 except Z3Exception as E:
@@ -278,15 +278,15 @@ class BinaryOperator(Expression):
             else:
                 out = out[0]
         elif self.operator[0] == '∧':
-            out = And([e.translate(case) for e in self.sub_exprs])
+            out = And([e.translate() for e in self.sub_exprs])
         elif self.operator[0] == '∨':
-            out = Or ([e.translate(case) for e in self.sub_exprs])
+            out = Or ([e.translate() for e in self.sub_exprs])
         else:
-            out = self.sub_exprs[0].translate(case)
+            out = self.sub_exprs[0].translate()
 
             for i in range(1, len(self.sub_exprs)):
                 function = BinaryOperator.MAP[self.operator[i - 1]]
-                out = function(out, self.sub_exprs[i].translate(case))
+                out = function(out, self.sub_exprs[i].translate())
         self.translated = out
         return self.translated
 
@@ -328,8 +328,8 @@ class AUnary(Expression):
         self.type = self.sub_exprs[0].type
         return self
 
-    def translate(self, case: ConfigCase):
-        out = self.sub_exprs[0].translate(case)
+    def translate(self):
+        out = self.sub_exprs[0].translate()
         function = AUnary.MAP[self.operator]
         self.translated = function(out)
         return self.translated
@@ -386,10 +386,10 @@ class AAggregate(Expression):
         self.sub_exprs = forms
         return self
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         for v in self.q_decls.values():
-            v.translate(case)
-        self.translated = Sum([f.translate(case) for f in self.sub_exprs])
+            v.translate()
+        self.translated = Sum([f.translate() for f in self.sub_exprs])
         return self.translated
 
 
@@ -433,13 +433,13 @@ class AppliedSymbol(Expression):
         return out
         
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         if self.translated is None:
             if self.s.name == 'abs':
-                arg = self.sub_exprs[0].translate(case)
+                arg = self.sub_exprs[0].translate()
                 self.translated = If(arg >= 0, arg, -arg)
             else:
-                arg = [x.translate(case) for x in self.sub_exprs]
+                arg = [x.translate() for x in self.sub_exprs]
                 self.translated = (self.decl.translated)(arg)
         return self.translated
 
@@ -486,7 +486,7 @@ class Variable(Expression):
             else {self.decl.name: self.decl} if not self.decl.name.startswith('_') and self.decl.interpretation is None \
             else {}
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         if self.translated is None:
             self.translated = self.decl.translated
         return self.translated
@@ -509,7 +509,7 @@ class Fresh_Variable(Expression):
     
     def subtences(self): return {}
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         if self.translated is None:
             self.translated = FreshConst(self.decl.translated)
         return self.translated
@@ -534,7 +534,7 @@ class NumberConstant(Expression):
 
     def subtences(self): return {}
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         return self.translated
 
 class Brackets(Expression):
@@ -555,8 +555,8 @@ class Brackets(Expression):
         self.type = self.sub_exprs[0].type
         return self
 
-    def translate(self, case: ConfigCase):
-        self.translated = self.sub_exprs[0].translate(case)
+    def translate(self):
+        self.translated = self.sub_exprs[0].translate()
         if self.reading: 
             self.sub_exprs[0].reading = self.reading
             self.translated.reading   = self.reading #TODO for explain
