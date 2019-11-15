@@ -181,11 +181,8 @@ class AQuantification(Expression):
                 forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
                 self.vars.append(var)
-        if 1 < len(forms):
-            op = '∧' if self.q == '∀' else '∨'
-            self.sub_exprs = [BinaryOperator(sub_exprs=forms, operator=[op]*(len(forms)-1))]
-        else:
-            self.sub_exprs = forms
+        op = '∧' if self.q == '∀' else '∨'
+        self.sub_exprs = [ operation(op, forms) ]
         self.sorts = [] # not used
         return self
 
@@ -292,6 +289,13 @@ class BinaryOperator(Expression):
                 out = function(out, self.sub_exprs[i].translate(case))
         self.translated = out
         return self.translated
+
+def operation(op, operands):
+    if len(operands) == 1:
+        return operands[0]
+    if isinstance(op, str):
+        op = [op] * (len(operands)-1)
+    return BinaryOperator(sub_exprs=operands, operator=op)
 
 class AImplication(BinaryOperator): pass
 class AEquivalence(BinaryOperator): pass

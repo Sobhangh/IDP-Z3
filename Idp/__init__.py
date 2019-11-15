@@ -9,7 +9,7 @@ from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists,
 
 from Inferences import ConfigCase
 from utils import applyTo, log, itertools, in_list
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
+from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, operation, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
@@ -145,13 +145,11 @@ class RangeDeclaration(object):
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
-                e = BinaryOperator(sub_exprs=[x.fromI, var], operator=['='])
+                e = operation('=', [x.fromI, var])
             else:
-                e = BinaryOperator(sub_exprs=[x.fromI, var, x.toI], operator=['≤', '≤'])
+                e = operation(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
-        if len(sub_exprs) == 1:
-            return sub_exprs[0]
-        return BinaryOperator(sub_exprs=sub_exprs, operator=['∨']*(len(sub_exprs)-1))
+        return operation('∨', sub_exprs)
 
     def translate(self, case: ConfigCase):
         if self.translated is None:
