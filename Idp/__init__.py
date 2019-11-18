@@ -598,7 +598,7 @@ class View(object):
 
 ################################ Main ###############################
 
-dslFile = os.path.join(os.path.dirname(__file__), 'DSL.tx')
+dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True, classes=
         [ Idp, 

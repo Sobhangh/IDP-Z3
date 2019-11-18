@@ -1,7 +1,7 @@
 Idp:
     vocabulary=Vocabulary
     theory=Theory
-    interpretation=Interpretations?
+    interpretations=Interpretations?
     goal=Goal?
     view=View?
 ;
