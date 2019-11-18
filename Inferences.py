@@ -29,7 +29,6 @@ class ConfigCase:
         self.idp = idp
         self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
 
-        self.enums = {} # {string: [string] } idp_type -> DSLobject
         self.valueMap = {"True": True}
 
         self.constraints = {} # {Z3expr: string}
@@ -48,7 +47,6 @@ class ConfigCase:
     #################
 
     def EnumSort(self, name, objects):
-        self.enums[name] = objects
         out = EnumSort(name, objects)
         for i in out[1]:
             self.valueMap[obj_to_string(i)] = i
@@ -155,8 +153,10 @@ def optimize(case, symbol, minimize):
     
     args = parse_func_with_params(symbol)
     s = case.idp.unknown_symbols()[args[0]]
-    if 1<len(args):
-        s = (s.translated)(args[1:])
+    if len(args) == 1:
+        s = s.instances[args[0]].translated
+    else:
+        s = (s.instances[args[0]+ "(" + ",".join(args[1:]) + ")"]).translated
 
     solver = Optimize()
     solver.add(case.theory(with_assumptions=True))

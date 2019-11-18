@@ -102,9 +102,9 @@ class Structure_(object):
             s = self.m.setdefault(symb.name, {})
             if typ == 'Bool':
                 symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
-            elif symb.out.name in case.enums:
+            elif 0 < len(symb.range):
                 symbol = { "typ": typ, "value": str(value)
-                         , "values": [str(v) for v in case.enums[symb.out.name]]}
+                         , "values": [str(v) for v in symb.range]}
             elif typ in ["Real", "Int"]:
                 symbol = {"typ": typ, "value": str(value)} # default
             else:
@@ -135,12 +135,12 @@ class Structure_(object):
         symbol = atom.translated
         key = atom.str
         typ = symbol.sort().name()
-        for symb in atom.unknown_symbols().keys():
-            s = self.m.setdefault(str(symb), {})
+        for name, symb in atom.unknown_symbols().items():
+            s = self.m.setdefault(name, {})
             if key in s:
                 if typ in ["Real", "Int"]:
                     s[key]["value"] = str(eval(str(value).replace('?', ''))) # compute fraction
-                elif typ in case.enums: #TODO and type(atom) != IfExpr:
+                elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
                     s[key]["value"] = str(value)
 
     

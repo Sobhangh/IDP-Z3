@@ -175,7 +175,6 @@ class RangeDeclaration(object):
     def translate(self, case: ConfigCase):
         if self.translated is None:
             els = [e.translated for e in self.range]
-            case.enums[self.name] = els
             if all(map(lambda x: type(x) == int, els)):
                 self.translated = IntSort()
             else:
