@@ -7,6 +7,9 @@ To do:
     Support for dates
     + issues on GitLab
 
+IDP syntax changes:
+    move enumerations in vocabulary to the theory block
+    move enumerations in structure to the theory block
 
 Research topics / may take a while:
     Support for partial functions

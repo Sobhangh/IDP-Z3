@@ -1,6 +1,6 @@
 Most recent first:
 
-* abstract models: fix bug with checkCode, use given and consequences to simplify them, avoid negations
+* 9 sept 2019: abstract models: fix bug with checkCode, use given and consequences to simplify them, avoid negations
 * GUI: hide symbols starting with '\_'.  Replace '\_' by spaces in symbol names, constructors
 * GUI: 2 optimize buttons are now next to entry fields (not in box header).  (Remove "do not optimize" button)
 * grammar: "goal <symbol>" forces the goal to be shown expanded

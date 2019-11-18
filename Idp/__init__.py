@@ -112,6 +112,7 @@ class ConstructedTypeDeclaration(object):
                + "}")
 
     def annotate(self, symbol_decls):
+        assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
         symbol_decls[self.name] = self
         for c in self.constructors:
             c.type = self
@@ -156,7 +157,8 @@ class RangeDeclaration(object):
                + ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
                + "}")
 
-    def annotate(self, symbol_decls): 
+    def annotate(self, symbol_decls):
+        assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
         symbol_decls[self.name] = self
 
     def check_bounds(self, var):
@@ -205,7 +207,9 @@ class SymbolDeclaration(object):
         )
 
     def annotate(self, symbol_decls, vocabulary=True):
-        if vocabulary: symbol_decls[self.name] = self
+        if vocabulary: 
+            assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
+            symbol_decls[self.name] = self
         for s in self.sorts:
             s.annotate(symbol_decls)
         self.out.annotate(symbol_decls)
