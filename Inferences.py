@@ -19,7 +19,7 @@
 import re
 from z3.z3 import _py2expr
 
-from LiteralQ import *
+from Structure_ import *
 from Theory import *
 from utils import *
 

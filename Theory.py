@@ -1,7 +1,7 @@
 
 from z3 import *
 
-from LiteralQ import *
+from Structure_ import *
 from utils import *
 
 def is_really_constant(expr, valueMap):

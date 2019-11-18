@@ -26,7 +26,7 @@ from flask_restful import Resource, Api, reqparse
 from textx import TextXError
 
 from Inferences import *
-from LiteralQ import *
+from Structure_ import *
 from Idp import idpparser
 
 # library to generate call graph, for documentation purposes
