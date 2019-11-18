@@ -67,7 +67,7 @@ class ConfigCase:
 
     def model_to_json(self, s, reify, unreify):
         m = s.model()
-        out = Structure_(self)
+        out = Structure_(self.idp)
         for atom in self.idp.atoms.values():
             atomZ3 = atom.translated #TODO
             # atom might not have an interpretation in model (if "don't care")
@@ -76,9 +76,9 @@ class ConfigCase:
                 if not (is_true(value) or is_false(value)):
                     #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                     print("*** ", atomZ3, " is not defined, and assumed false")
-                out.addAtom(self, atom, True if is_true(value) else False)
+                out.addAtom(atom, True if is_true(value) else False)
             else: #TODO check that value is numeric ?
-                out.addValue(self, atom, value)
+                out.addValue(atom, value)
         return out.m
 
 
@@ -108,7 +108,7 @@ def metaJSON(case):
 def propagation(case, expanded_symbols):
     expanded_symbols = [] if expanded_symbols is None else expanded_symbols
     
-    out = Structure_(case)
+    out = Structure_(case.idp)
     
     todo = [ a for a in case.idp.atoms.values()
                 # if it is shown to the user
@@ -116,17 +116,17 @@ def propagation(case, expanded_symbols):
 
     amf = consequences(case.theory(with_assumptions=True), todo, {})
     for literalQ in amf:
-        out.addAtom(case, literalQ.subtence, literalQ.truth)
+        out.addAtom(literalQ.subtence, literalQ.truth)
 
     # useful for non linear structure
     """
     amf = consequences(case.theory(with_assumptions=False), todo, amf)
     for literalQ in amf:
-        out.addAtom(case, literalQ.subtence, literalQ.truth)
+        out.addAtom(literalQ.subtence, literalQ.truth)
     """
 
     for literalQ in case.structure: # needed to keep some numeric assignments
-        out.addAtom(case, literalQ.subtence, literalQ.truth)
+        out.addAtom(literalQ.subtence, literalQ.truth)
     return out.m
 
 def expand(case):
@@ -183,9 +183,7 @@ def optimize(case, symbol, minimize):
     return case.model_to_json(solver, reify, unreify)
 
 def explain(case, symbol, value):
-    out = Structure_(case)
-    for ass in case.structure: # add numeric structure
-        out.initialise(case, ass.subtence, False, False, "")    
+    out = Structure_(case.idp, case.structure)  
 
     value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
         .replace("\\u2200", "∀").replace("\\u2203", "∃") \
@@ -233,7 +231,7 @@ def explain(case, symbol, value):
             for a1 in case.structure:
                 for a2 in s.unsat_core():
                     if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
-                        out.addAtom(case, a1.subtence, a1.truth)
+                        out.addAtom(a1.subtence, a1.truth)
             out.m["*laws*"] = []
             for a1 in case.constraints.keys():
                 for a2 in s.unsat_core():

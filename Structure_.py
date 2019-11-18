@@ -1,4 +1,21 @@
+"""
+    Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
 
+    This file is part of Interactive_Consultant.
+
+    Interactive_Consultant is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Interactive_Consultant is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
+"""
 from z3 import *
 import ast
 
@@ -89,36 +106,40 @@ def loadStructure(idp, jsonstr):
 
 
 class Structure_(object):
-    def __init__(self, case):
+    def __init__(self, idp, structure=[]):
         self.m = {}
-        for atom in case.idp.atoms.values():
-            self.initialise(case, atom, False, False, "")
 
-    def initialise(self, case, atom, ct_true, ct_false, value=""):
-        atomZ3 = atom.translated #TODO
-        key = atom.str
-        typ = atomZ3.sort().name()
-        for symb in atom.unknown_symbols().values():
-            s = self.m.setdefault(symb.name, {})
-            if typ == 'Bool':
-                symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
-            elif 0 < len(symb.range):
-                symbol = { "typ": typ, "value": str(value)
-                         , "values": [str(v) for v in symb.range]}
-            elif typ in ["Real", "Int"]:
-                symbol = {"typ": typ, "value": str(value)} # default
-            else:
-                symbol = None
-            if symbol: 
-                if hasattr(atom, 'reading'):
-                    symbol['reading'] = atom.reading
-                symbol['normal'] = hasattr(atom, 'normal')
-                s.setdefault(key, symbol)
-                break
+        def initialise(atom, ct_true, ct_false, value=""):
+            atomZ3 = atom.translated #TODO
+            key = atom.str
+            typ = atomZ3.sort().name()
+            for symb in atom.unknown_symbols().values():
+                s = self.m.setdefault(symb.name, {})
+                if typ == 'Bool':
+                    symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
+                elif 0 < len(symb.range):
+                    symbol = { "typ": typ, "value": str(value)
+                            , "values": [str(v) for v in symb.range]}
+                elif typ in ["Real", "Int"]:
+                    symbol = {"typ": typ, "value": str(value)} # default
+                else:
+                    symbol = None
+                if symbol: 
+                    if hasattr(atom, 'reading'):
+                        symbol['reading'] = atom.reading
+                    symbol['normal'] = hasattr(atom, 'normal')
+                    s.setdefault(key, symbol)
+                    break
 
-    def addAtom(self, case, atom, truth):
+        for atom in idp.atoms.values():
+            initialise(atom, False, False, "")
+        for ass in structure: # add numeric structure
+            initialise(ass.subtence, False, False, "")  
+
+
+    def addAtom(self, atom, truth):
         if truth and type(atom) == Equality:
-            self.addValue(case, atom.subtence, atom.value)
+            self.addValue(atom.subtence, atom.value)
         atomZ3 = atom.translated
         if not is_bool(atomZ3): return
         key = atom.str
@@ -131,7 +152,7 @@ class Structure_(object):
                 if hasattr(atom, 'reading'):
                     s[key]['reading'] = atom.reading
 
-    def addValue(self, case, atom, value):
+    def addValue(self, atom, value):
         symbol = atom.translated
         key = atom.str
         typ = symbol.sort().name()
