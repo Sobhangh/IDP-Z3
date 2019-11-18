@@ -104,6 +104,27 @@ def loadStructure(idp, jsonstr):
                 structure[literalQ] = literalQ.asZ3()
     return structure
 
+#################
+# response to client
+# see docs/REST.md
+#################
+
+def model_to_json(idp, s, reify):
+    m = s.model()
+    out = Structure_(idp)
+    for atom in idp.atoms.values():
+        atomZ3 = atom.translated #TODO
+        # atom might not have an interpretation in model (if "don't care")
+        value = m.eval(reify[atom], model_completion=True)
+        if is_bool(atomZ3): #TODO
+            if not (is_true(value) or is_false(value)):
+                #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
+                print("*** ", atomZ3, " is not defined, and assumed false")
+            out.addAtom(atom, True if is_true(value) else False)
+        else: #TODO check that value is numeric ?
+            out.addValue(atom, value)
+    return out.m
+
 
 class Structure_(object):
     def __init__(self, idp, structure=[]):

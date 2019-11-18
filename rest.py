@@ -136,7 +136,7 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     case = caseOf(args['code'])
-                    return metaJSON(case)
+                    return metaJSON(case.idp)
                 except Exception as exc:
                     traceback.print_exc()
                     return repr(exc)

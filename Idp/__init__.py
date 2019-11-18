@@ -42,7 +42,7 @@ class Idp(object):
         self.theory.translate(case)
         log("theory translated")
         #self.goal.translate(case)
-        self.view.translate(case)
+        self.view.translate()
         
         self.atoms = {**self.vocabulary.terms, **self.theory.subtences}
 
@@ -595,8 +595,7 @@ class View(object):
     def __init__(self, **kwargs):
         self.viewType = kwargs.pop('viewType')
 
-    def translate(self, case: ConfigCase):
-        case.view = self.viewType
+    def translate(self):
         return
 
 ################################ Main ###############################

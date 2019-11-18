@@ -37,35 +37,15 @@ class ConfigCase:
             + self.idp.vocabulary.typeConstraints
             + (list(self.structure.values()) if with_assumptions else []))
 
-    #################
-    # Output structure
-    #################
-
-    def model_to_json(self, s, reify, unreify):
-        m = s.model()
-        out = Structure_(self.idp)
-        for atom in self.idp.atoms.values():
-            atomZ3 = atom.translated #TODO
-            # atom might not have an interpretation in model (if "don't care")
-            value = m.eval(reify[atom], model_completion=True)
-            if is_bool(atomZ3): #TODO
-                if not (is_true(value) or is_false(value)):
-                    #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
-                    print("*** ", atomZ3, " is not defined, and assumed false")
-                out.addAtom(atom, True if is_true(value) else False)
-            else: #TODO check that value is numeric ?
-                out.addValue(atom, value)
-        return out.m
-
 
 #################
 # INFERENCES
 #################
 
-def metaJSON(case):
+def metaJSON(idp):
     "response to meta request"
     symbols = []
-    for i in case.idp.unknown_symbols().values():
+    for i in idp.unknown_symbols().values():
         symbol_type = "function"
         if type(i.translated) == BoolRef:
             symbol_type = "proposition"
@@ -75,7 +55,7 @@ def metaJSON(case):
             "type": symbol_type,
             "priority": "core",
             "showOptimize": True, # GUI is smart enough to show buttons appropriately
-            "view": "expanded" if i.name == str(case.idp.goal) else case.view
+            "view": "expanded" if i.name == str(idp.goal) else idp.view.viewType
         })
     out = {"title": "Interactive Consultant", "symbols": symbols}
     return out
@@ -107,9 +87,9 @@ def propagation(case, expanded_symbols):
 
 def expand(case):
     theory = case.theory(with_assumptions=True)
-    solver, reify, unreify = mk_solver(theory, case.idp.atoms.values())
+    solver, reify, _ = mk_solver(theory, case.idp.atoms.values())
     solver.check()
-    return case.model_to_json(solver, reify, unreify)
+    return model_to_json(case.idp, solver, reify)
 
 def optimize(case, symbol, minimize):
     # symbol may be "angle(0)""
@@ -141,7 +121,7 @@ def optimize(case, symbol, minimize):
     else:
         solver.maximize(s)
 
-    (reify, unreify) = reifier(case.idp.atoms.values(), solver)
+    (reify, _) = reifier(case.idp.atoms.values(), solver)
     solver.check()
 
     # deal with strict inequalities, e.g. min(0<x)
@@ -156,7 +136,7 @@ def optimize(case, symbol, minimize):
             solver.pop() # get the last good one
             solver.check()
             break    
-    return case.model_to_json(solver, reify, unreify)
+    return model_to_json(case.idp, solver, reify)
 
 def explain(case, symbol, value):
     out = Structure_(case.idp, case.structure)  
