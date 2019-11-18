@@ -29,8 +29,6 @@ class ConfigCase:
         self.idp = idp
         self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
 
-        self.valueMap = {"True": True}
-
         self.constraints = {} # {Z3expr: string}
         
         idp.translate(self)
@@ -45,12 +43,6 @@ class ConfigCase:
     #################
     # Helpers for translating idp code
     #################
-
-    def EnumSort(self, name, objects):
-        out = EnumSort(name, objects)
-        for i in out[1]:
-            self.valueMap[obj_to_string(i)] = i
-        return out
 
     def add(self, constraint, source_code):
         self.constraints[constraint] = source_code
@@ -281,7 +273,7 @@ def abstract(case):
 
     # relevants = getAtoms(simplify(substitute(case.constraints, substitutions)))
     simplified = simplify(substitute(And(list(case.constraints.keys())), substitutions)) # it starts by the last substitution ??
-    relevants = getAtoms(simplified, case.valueMap, case.idp.unknown_symbols()) # includes reified !
+    relevants = getAtoms(simplified, case.idp.unknown_symbols()) # includes reified !
 
     # --> irrelevant
     irrelevant = []

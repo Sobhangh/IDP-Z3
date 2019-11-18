@@ -5,7 +5,7 @@ import sys
 
 from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
-    Sum, If, BoolVal, Function, FreshConst, Implies
+    Sum, If, BoolVal, Function, FreshConst, Implies, EnumSort
 
 from Inferences import ConfigCase
 from utils import applyTo, log, itertools, in_list
@@ -124,7 +124,7 @@ class ConstructedTypeDeclaration(object):
 
     def translate(self, case: ConfigCase):
         if self.translated is None:
-            self.translated, cstrs = case.EnumSort(self.name, [c.name for c in self.constructors])
+            self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
             for c, c3 in zip(self.constructors, cstrs):
                 c.translated = c3
         return self.translated

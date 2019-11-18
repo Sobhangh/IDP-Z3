@@ -21,9 +21,8 @@ from z3 import *
 from Structure_ import *
 from utils import *
 
-def is_really_constant(expr, valueMap):
-    return (obj_to_string(expr) in valueMap) \
-        or is_number(obj_to_string(expr)) \
+def is_really_constant(expr):
+    return is_number(obj_to_string(expr)) \
         or is_string_value(expr) \
         or is_true(expr) or is_false(expr)
 
@@ -33,20 +32,20 @@ def is_symbol(symb, symbols):
     return str(symb) in symbols
 
 
-def has_local_var(expr, valueMap, symbols):
+def has_local_var(expr, symbols):
     out = ( 0==len(expr.children()) and not is_symbol(expr, symbols) \
-            and not is_really_constant(expr, valueMap)) \
+            and not is_really_constant(expr)) \
         or ( 0 < len(expr.children()) \
-            and any([has_local_var(child, valueMap, symbols) for child in expr.children()]))
+            and any([has_local_var(child, symbols) for child in expr.children()]))
     return out
 
 
-def getAtoms(expr, valueMap, symbols):
+def getAtoms(expr, symbols):
     out = {}  # Ordered dict: string -> Z3 object
     for child in expr.children():
-        out.update(getAtoms(child, valueMap, symbols))
+        out.update(getAtoms(child, symbols))
     if is_bool(expr) and len(out) == 0 and not atom_as_string(expr).startswith('_') and \
-        ( not has_local_var(expr, valueMap, symbols) or is_quantifier(expr) ): # for quantified formulas
+        ( not has_local_var(expr, symbols) or is_quantifier(expr) ): # for quantified formulas
         out = {atom_as_string(expr): expr}
     return out
 
