@@ -94,15 +94,13 @@ class eval(Resource):
 
                 out = {}
                 if method == "propagate":
-                    out = case.propagation(args['expanded'])
+                    out = propagation(case, args['expanded'])
                 if method == "modelexpand":
-                    out = case.expand()
-                if method == "relevance":
-                    out = case.propagation(args['expanded']) #TODO
+                    out = expand(case)
                 if method == "explain":
-                    out = case.explain(args['symbol'], args['value'])
+                    out = explain(case, args['symbol'], args['value'])
                 if method == "minimize":
-                    out = case.optimize(args['symbol'], args['minimize'])
+                    out = optimize(case, args['symbol'], args['minimize'])
                 if method == "abstract":
                     if args['symbol'] != "": # theory to explain ?
                         newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
@@ -112,7 +110,7 @@ class eval(Resource):
                         )
                         idpModel = idpparser.model_from_str(newTheory)
                         case = ConfigCase(idpModel)
-                    out = case.abstract()
+                    out = abstract(case)
                 log("end /eval " + method)
                 return out
             except Exception as exc:
@@ -138,7 +136,7 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     case = caseOf(args['code'])
-                    return case.metaJSON()
+                    return metaJSON(case)
                 except Exception as exc:
                     traceback.print_exc()
                     return repr(exc)
