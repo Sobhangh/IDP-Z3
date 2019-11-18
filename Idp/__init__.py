@@ -21,7 +21,7 @@ class Idp(object):
         log("parsing done")
         self.vocabulary = kwargs.pop('vocabulary')
         self.theory = kwargs.pop('theory')
-        self.structure = kwargs.pop('structure')
+        self.interpretations = kwargs.pop('interpretations')
 
         self.goal = kwargs.pop('goal')
         if self.goal is None:
@@ -32,7 +32,7 @@ class Idp(object):
         
         self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
 
-        if self.structure: self.structure.annotate(self.vocabulary)
+        if self.interpretations: self.interpretations.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
         log("annotated")
 
@@ -505,7 +505,7 @@ class Rule(object):
 
 ################################ Structure ###############################
 
-class Structure(object):
+class Interpretations(object):
     def __init__(self, **kwargs):
         self.interpretations = kwargs.pop('interpretations')
 
@@ -608,6 +608,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True, classes=
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                     AppliedSymbol, Variable, NumberConstant, Brackets, Arguments,
-          Interpretation, Structure, Tuple,
+          Interpretations, Interpretation, Tuple,
           Goal, View
         ])
