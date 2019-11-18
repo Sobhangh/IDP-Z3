@@ -31,6 +31,7 @@ class Idp(object):
             self.view = View(viewType='normal')
         
         self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
+        self.translated = None # [Z3Expr]
 
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
@@ -43,6 +44,8 @@ class Idp(object):
         log("theory translated")
         #self.goal.translate(case)
         self.view.translate()
+
+        self.translated = self.vocabulary.translated + self.theory.translated
         
         self.atoms = {**self.vocabulary.terms, **self.theory.subtences}
 
@@ -63,7 +66,7 @@ class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
         self.terms = {}
-        self.typeConstraints = []
+        self.translated = []
 
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
                              'real': RangeDeclaration(name='real', elements=[]),
@@ -253,7 +256,7 @@ class SymbolDeclaration(object):
                     self.translated = Function(self.name, types + [BoolSort()])
 
                     if checks:
-                        idp.vocabulary.typeConstraints.append(
+                        idp.vocabulary.translated.append(
                             ForAll(argL, Implies( (self.translated)(*argL), And(checks))))
                 else:
                     types = [x.translate() for x in self.sorts] + [self.out.translate()]
@@ -265,7 +268,7 @@ class SymbolDeclaration(object):
                     """
                     if check is not None: # Z3 cannot solve the constraint if infinite range, issue #2
                         checks.append(check.translate(case))
-                        idp.vocabulary.typeConstraints.append(
+                        idp.vocabulary.translated.append(
                             ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
                     """        
             for inst in self.instances.values():
@@ -275,7 +278,7 @@ class SymbolDeclaration(object):
                     if domain is not None:
                         domain = domain.translate()
                         domain.reading = "Possible values for " + str(inst)
-                        idp.vocabulary.typeConstraints.append(domain)
+                        idp.vocabulary.translated.append(domain)
         return self.translated
 
 

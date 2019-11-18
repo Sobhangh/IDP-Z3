@@ -27,7 +27,7 @@ for file in files:
     if os.path.exists(z3):
         os.remove(z3)
     f = open(z3, "a")
-    f.write("\r\n\r\n".join(str(t) for t in c.idp.vocabulary.typeConstraints))
+    f.write("\r\n\r\n".join(str(t) for t in c.idp.vocabulary.translated))
     f.write("\r\n--\r\n")
     f.write("\r\n\r\n".join(str(t) for t in c.idp.theory.translated)     + "\r\n")
     f.close()

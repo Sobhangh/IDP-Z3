@@ -30,12 +30,10 @@ class ConfigCase:
         self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
         
         idp.translate(self)
-        
 
-    def theory(self, with_assumptions=False):
-        return And(self.idp.theory.translated 
-            + self.idp.vocabulary.typeConstraints
-            + (list(self.structure.values()) if with_assumptions else []))
+    def translate(self):
+        return And(self.idp.translated 
+            + (list(self.structure.values())))
 
 
 #################
@@ -70,13 +68,13 @@ def propagation(case, expanded_symbols):
                 # if it is shown to the user
                 if any([s in expanded_symbols for s in a.unknown_symbols().keys()]) ]
 
-    amf = consequences(case.theory(with_assumptions=True), todo, {})
+    amf = consequences(case.translate(), todo, {})
     for literalQ in amf:
         out.addAtom(literalQ.subtence, literalQ.truth)
 
     # useful for non linear structure
     """
-    amf = consequences(case.theory(with_assumptions=False), todo, amf)
+    amf = consequences(case.idp.translated, todo, amf)
     for literalQ in amf:
         out.addAtom(literalQ.subtence, literalQ.truth)
     """
@@ -86,7 +84,7 @@ def propagation(case, expanded_symbols):
     return out.m
 
 def expand(case):
-    theory = case.theory(with_assumptions=True)
+    theory = case.translate()
     solver, reify, _ = mk_solver(theory, case.idp.atoms.values())
     solver.check()
     return model_to_json(case.idp, solver, reify)
@@ -115,7 +113,7 @@ def optimize(case, symbol, minimize):
         s = (s.instances[args[0]+ "(" + ",".join(args[1:]) + ")"]).translated
 
     solver = Optimize()
-    solver.add(case.theory(with_assumptions=True))
+    solver.add(case.translate())
     if minimize:
         solver.minimize(s)
     else:
@@ -151,7 +149,7 @@ def explain(case, symbol, value):
         # rules used in justification
         if not to_explain.sort()==BoolSort(): # calculate numeric value
             # TODO should be given by client
-            theory = case.theory(with_assumptions=True)
+            theory = case.translate()
             s, _, _ = mk_solver(theory, case.idp.atoms.values())
             s.check()
             val = s.model().eval(to_explain)
@@ -166,8 +164,7 @@ def explain(case, symbol, value):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
             s.add(Implies(p, ass.asZ3()))
-        constraints = case.idp.theory.translated + case.idp.vocabulary.typeConstraints
-        for i, constraint in enumerate(constraints):
+        for i, constraint in enumerate(case.idp.translated):
             p = Const("wsdraqsesdf"+str(i+len(case.structure)), BoolSort())
             ps[p] = constraint
             s.add(Implies(p, constraint))
@@ -189,7 +186,7 @@ def explain(case, symbol, value):
                     if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
                         out.addAtom(a1.subtence, a1.truth)
             out.m["*laws*"] = []
-            for a1 in constraints:
+            for a1 in case.idp.translated:
                 for a2 in unsatcore:
                     if str(a1) == str(ps[a2]):
                         out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(a1))
@@ -199,7 +196,7 @@ def explain(case, symbol, value):
 def abstract(case):
     out = {} # {category : [LiteralQ]}
 
-    theory = case.theory(with_assumptions=False)
+    theory = And(case.idp.translated)
     solver, reify, unreify = mk_solver(theory, case.idp.atoms.values())
 
     # extract fixed atoms from constraints
@@ -258,7 +255,7 @@ def abstract(case):
     while solver.check() == sat and count < 50: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
-        theory2 = And(theory, And(case.idp.vocabulary.typeConstraints))
+        theory2 = And(theory, And(case.idp.vocabulary.translated)) # is this a way to copy theory ??
 
         atoms = [] # [LiteralQ]
         for atom_string, atom in case.idp.atoms.items():
@@ -303,7 +300,7 @@ def abstract(case):
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
-        solver2.add(case.idp.vocabulary.typeConstraints) # without theory !
+        solver2.add(case.idp.vocabulary.translated) # without theory !
         (reify2, _) = reifier([l.subtence for l in atoms], solver2)
         for i, literalQ in enumerate(atoms):
             if literalQ.truth is not None:
