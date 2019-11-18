@@ -30,17 +30,7 @@ class ConfigCase:
         self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
         
         idp.translate(self)
-
-    def print(self):
-        out  = "\r\n\r\n".join(str(t) for t in self.idp.vocabulary.typeConstraints) + "\r\n--\r\n"
-        out += "\r\n\r\n".join(str(t) for t in self.idp.theory.translated)     + "\r\n"
-        return out
         
-
-
-    #################
-    # Helpers for translating idp code
-    #################
 
     def theory(self, with_assumptions=False):
         return And(self.idp.theory.translated 
