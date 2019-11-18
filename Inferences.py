@@ -67,16 +67,9 @@ class ConfigCase:
     # Output structure
     #################
 
-    def initial_structure(self):
-        out = Structure(self)
-        for atom in self.idp.atoms.values():
-            out.initialise(self, atom, False, False, "")
-        return out
-
-
     def model_to_json(self, s, reify, unreify):
         m = s.model()
-        out = self.initial_structure()
+        out = Structure_(self)
         for atom in self.idp.atoms.values():
             atomZ3 = atom.translated #TODO
             # atom might not have an interpretation in model (if "don't care")
@@ -117,7 +110,7 @@ def metaJSON(case):
 def propagation(case, expanded_symbols):
     expanded_symbols = [] if expanded_symbols is None else expanded_symbols
     
-    out = case.initial_structure()
+    out = Structure_(case)
     
     todo = [ a for a in case.idp.atoms.values()
                 # if it is shown to the user
@@ -190,7 +183,7 @@ def optimize(case, symbol, minimize):
     return case.model_to_json(solver, reify, unreify)
 
 def explain(case, symbol, value):
-    out = case.initial_structure()
+    out = Structure_(case)
     for ass in case.structure: # add numeric structure
         out.initialise(case, ass.subtence, False, False, "")    
 
@@ -407,57 +400,3 @@ def abstract(case):
 
 
     
-
-class Structure:
-    def __init__(self, case):
-        self.m = {}
-
-    def initialise(self, case, atom, ct_true, ct_false, value=""):
-        atomZ3 = atom.translated #TODO
-        key = atom.str
-        typ = atomZ3.sort().name()
-        for symb in atom.unknown_symbols().values():
-            s = self.m.setdefault(symb.name, {})
-            if typ == 'Bool':
-                symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
-            elif symb.out.name in case.enums:
-                symbol = { "typ": typ, "value": str(value)
-                         , "values": [str(v) for v in case.enums[symb.out.name]]}
-            elif typ in ["Real", "Int"]:
-                symbol = {"typ": typ, "value": str(value)} # default
-            else:
-                symbol = None
-            if symbol: 
-                if hasattr(atom, 'reading'):
-                    symbol['reading'] = atom.reading
-                symbol['normal'] = hasattr(atom, 'normal')
-                s.setdefault(key, symbol)
-                break
-
-    def addAtom(self, case, atom, truth):
-        if truth and type(atom) == Equality:
-            self.addValue(case, atom.subtence, atom.value)
-        atomZ3 = atom.translated
-        if not is_bool(atomZ3): return
-        key = atom.str
-        for symb in atom.unknown_symbols().keys():
-            s = self.m.setdefault(symb, {})
-            if key in s:
-                if truth is None: s[key]["unknown"] = True
-                else:
-                    s[key]["ct" if truth else "cf"] = True
-                if hasattr(atom, 'reading'):
-                    s[key]['reading'] = atom.reading
-
-    def addValue(self, case, atom, value):
-        symbol = atom.translated
-        key = atom.str
-        typ = symbol.sort().name()
-        for symb in atom.unknown_symbols().keys():
-            s = self.m.setdefault(str(symb), {})
-            if key in s:
-                if typ in ["Real", "Int"]:
-                    s[key]["value"] = str(eval(str(value).replace('?', ''))) # compute fraction
-                elif typ in case.enums: #TODO and type(atom) != IfExpr:
-                    s[key]["value"] = str(value)
-

@@ -86,3 +86,61 @@ def loadStructure(idp, jsonstr):
             if literalQ is not None:
                 structure[literalQ] = literalQ.asZ3()
     return structure
+
+
+class Structure_(object):
+    def __init__(self, case):
+        self.m = {}
+        for atom in case.idp.atoms.values():
+            self.initialise(case, atom, False, False, "")
+
+    def initialise(self, case, atom, ct_true, ct_false, value=""):
+        atomZ3 = atom.translated #TODO
+        key = atom.str
+        typ = atomZ3.sort().name()
+        for symb in atom.unknown_symbols().values():
+            s = self.m.setdefault(symb.name, {})
+            if typ == 'Bool':
+                symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
+            elif symb.out.name in case.enums:
+                symbol = { "typ": typ, "value": str(value)
+                         , "values": [str(v) for v in case.enums[symb.out.name]]}
+            elif typ in ["Real", "Int"]:
+                symbol = {"typ": typ, "value": str(value)} # default
+            else:
+                symbol = None
+            if symbol: 
+                if hasattr(atom, 'reading'):
+                    symbol['reading'] = atom.reading
+                symbol['normal'] = hasattr(atom, 'normal')
+                s.setdefault(key, symbol)
+                break
+
+    def addAtom(self, case, atom, truth):
+        if truth and type(atom) == Equality:
+            self.addValue(case, atom.subtence, atom.value)
+        atomZ3 = atom.translated
+        if not is_bool(atomZ3): return
+        key = atom.str
+        for symb in atom.unknown_symbols().keys():
+            s = self.m.setdefault(symb, {})
+            if key in s:
+                if truth is None: s[key]["unknown"] = True
+                else:
+                    s[key]["ct" if truth else "cf"] = True
+                if hasattr(atom, 'reading'):
+                    s[key]['reading'] = atom.reading
+
+    def addValue(self, case, atom, value):
+        symbol = atom.translated
+        key = atom.str
+        typ = symbol.sort().name()
+        for symb in atom.unknown_symbols().keys():
+            s = self.m.setdefault(str(symb), {})
+            if key in s:
+                if typ in ["Real", "Int"]:
+                    s[key]["value"] = str(eval(str(value).replace('?', ''))) # compute fraction
+                elif typ in case.enums: #TODO and type(atom) != IfExpr:
+                    s[key]["value"] = str(value)
+
+    
