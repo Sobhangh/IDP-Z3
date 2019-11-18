@@ -28,14 +28,12 @@ class ConfigCase:
     def __init__(self, idp):
         self.idp = idp
         self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
-
-        self.constraints = {} # {Z3expr: string}
         
         idp.translate(self)
 
     def print(self):
         out  = "\r\n\r\n".join(str(t) for t in self.idp.vocabulary.typeConstraints) + "\r\n--\r\n"
-        out += "\r\n\r\n".join(str(t) for t in self.constraints)     + "\r\n"
+        out += "\r\n\r\n".join(str(t) for t in self.idp.theory.translated)     + "\r\n"
         return out
         
 
@@ -44,12 +42,8 @@ class ConfigCase:
     # Helpers for translating idp code
     #################
 
-    def add(self, constraint, source_code):
-        self.constraints[constraint] = source_code
-
-
     def theory(self, with_assumptions=False):
-        return And(list(self.constraints.keys()) 
+        return And(self.idp.theory.translated 
             + self.idp.vocabulary.typeConstraints
             + (list(self.structure.values()) if with_assumptions else []))
 
@@ -202,7 +196,7 @@ def explain(case, symbol, value):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
             s.add(Implies(p, ass.asZ3()))
-        constraints = list(case.constraints.keys()) + case.idp.vocabulary.typeConstraints
+        constraints = case.idp.theory.translated + case.idp.vocabulary.typeConstraints
         for i, constraint in enumerate(constraints):
             p = Const("wsdraqsesdf"+str(i+len(case.structure)), BoolSort())
             ps[p] = constraint
@@ -225,12 +219,8 @@ def explain(case, symbol, value):
                     if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
                         out.addAtom(a1.subtence, a1.truth)
             out.m["*laws*"] = []
-            for a1 in case.constraints.keys():
-                for a2 in s.unsat_core():
-                    if str(a1) == str(ps[a2]):
-                        out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else case.constraints[a1])
-            for a1 in case.idp.vocabulary.typeConstraints:
-                for a2 in s.unsat_core():
+            for a1 in constraints:
+                for a2 in unsatcore:
                     if str(a1) == str(ps[a2]):
                         out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(a1))
 
@@ -272,7 +262,7 @@ def abstract(case):
             substitutions += [(literalQ.subtence, BoolVal(literalQ.truth))]
 
     # relevants = getAtoms(simplify(substitute(case.constraints, substitutions)))
-    simplified = simplify(substitute(And(list(case.constraints.keys())), substitutions)) # it starts by the last substitution ??
+    simplified = simplify(substitute(And(case.idp.theory.translated), substitutions)) # it starts by the last substitution ??
     relevants = getAtoms(simplified, case.idp.unknown_symbols()) # includes reified !
 
     # --> irrelevant

@@ -306,6 +306,7 @@ class Theory(object):
         self.definitions = kwargs.pop('definitions')
         self.symbol_decls = None # {string: decl}
         self.subtences = None # i.e., sub-sentences.  {string: Expression}
+        self.translated = None
 
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
@@ -331,12 +332,12 @@ class Theory(object):
         return out
 
     def translate(self, case: ConfigCase,):
+        self.translated = []
         for i in self.constraints:
             log("translating " + str(i)[:20])
-            c = i.translate()
-            case.add(c, str(i))
+            self.translated.append(i.translate())
         for d in self.definitions:
-            d.translate(case)
+            self.translated += d.translate(case)
 
 
 
@@ -345,6 +346,7 @@ class Definition(object):
         self.rules = kwargs.pop('rules')
         self.partition = None # {Symbol: [Transformed Rule]}
         self.q_decls = {} # {Symbol: {Variable: SymbolDeclaration}}
+        self.translated = None
 
     def __str__(self):
         return "Definition(s) of " + ",".join([k.name for k in self.partition.keys()])
@@ -390,6 +392,7 @@ class Definition(object):
         return out
 
     def translate(self, case: ConfigCase):
+        self.translated = []
         for symbol, rules in self.partition.items():
 
             vars = [v.translate() for v in self.q_decls[symbol].values()]
@@ -400,16 +403,16 @@ class Definition(object):
                     outputVar = True
                     
             if outputVar:
-                case.add(ForAll(vars, 
-                                (applyTo(symbol.translate(case.idp), vars[:-1]) == vars[-1]) == Or(exprs)), 
-                         str(self))
+                expr = ForAll(vars, 
+                                (applyTo(symbol.translate(case.idp), vars[:-1]) == vars[-1]) == Or(exprs)) 
             else:
                 if len(vars) > 0:
-                    case.add(ForAll(vars, 
-                                    applyTo(symbol.translate(case.idp), vars) == Or(exprs)), 
-                             str(self))
+                    expr = ForAll(vars, 
+                                    applyTo(symbol.translate(case.idp), vars) == Or(exprs))
                 else:
-                    case.add(symbol.translate(case.idp) == Or(exprs), str(self))
+                    expr = symbol.translate(case.idp) == Or(exprs)
+            self.translated.append(expr)
+        return self.translated
 
 
 class Rule(object):
