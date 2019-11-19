@@ -65,44 +65,51 @@ class Equality(object):
     def unknown_symbols(self):
         return self.subtence.unknown_symbols()
 
-
+    
 #################
 # load user's choices
 # see docs/REST.md
 #################
 
-def loadStructure(idp, jsonstr):
-    json_data = ast.literal_eval(jsonstr \
-        .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
-        .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃")
-        .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
-        .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
+class ConfigCase:
+    def __init__(self, idp, jsonstr):
+        self.idp = idp
 
-    structure = {}
-    for sym in json_data:
-        for atom in json_data[sym]:
-            json_atom = json_data[sym][atom]
-            if atom in idp.theory.subtences:
-                atom = idp.theory.subtences[atom]
-            else:
-                symbol = idp.vocabulary.symbol_decls[sym]
-                atom = symbol.instances[atom]
-            if json_atom["typ"] == "Bool":
-                if "ct" in json_atom and json_atom["ct"]:
-                    literalQ = LiteralQ(True, atom)
-                if "cf" in json_atom and json_atom["cf"]:
-                    literalQ = LiteralQ(False, atom)
-            elif json_atom["value"]:
-                if json_atom["typ"] in ["Int", "Real"]:
-                    value = eval(json_atom["value"])
-                else:
-                    value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
-                literalQ = LiteralQ(True, Equality(atom, value))
-            else:
-                literalQ = None #TODO error ?
-            if literalQ is not None:
-                structure[literalQ] = literalQ.asZ3()
-    return structure
+        self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
+        if jsonstr:
+            json_data = ast.literal_eval(jsonstr \
+                .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
+                .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃")
+                .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
+                .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
+
+            for sym in json_data:
+                for atom in json_data[sym]:
+                    json_atom = json_data[sym][atom]
+                    if atom in idp.theory.subtences:
+                        atom = idp.theory.subtences[atom]
+                    else:
+                        symbol = idp.vocabulary.symbol_decls[sym]
+                        atom = symbol.instances[atom]
+                    if json_atom["typ"] == "Bool":
+                        if "ct" in json_atom and json_atom["ct"]:
+                            literalQ = LiteralQ(True, atom)
+                        if "cf" in json_atom and json_atom["cf"]:
+                            literalQ = LiteralQ(False, atom)
+                    elif json_atom["value"]:
+                        if json_atom["typ"] in ["Int", "Real"]:
+                            value = eval(json_atom["value"])
+                        else:
+                            value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
+                        literalQ = LiteralQ(True, Equality(atom, value))
+                    else:
+                        literalQ = None #TODO error ?
+                    if literalQ is not None:
+                        self.structure[literalQ] = literalQ.asZ3()
+
+        self.translated = And(self.idp.translated 
+            + (list(self.structure.values())))
+
 
 #################
 # response to client
@@ -185,4 +192,3 @@ class Structure_(object):
                 elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
                     s[key]["value"] = str(value)
 
-    

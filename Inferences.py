@@ -23,15 +23,6 @@ from Structure_ import *
 from Theory import *
 from utils import *
 
-class ConfigCase:
-
-    def __init__(self, idp):
-        self.idp = idp
-        self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
-
-    def translate(self):
-        return And(self.idp.translated 
-            + (list(self.structure.values())))
 
 
 #################
@@ -66,7 +57,7 @@ def propagation(case, expanded_symbols):
                 # if it is shown to the user
                 if any([s in expanded_symbols for s in a.unknown_symbols().keys()]) ]
 
-    amf = consequences(case.translate(), todo, {})
+    amf = consequences(case.translated, todo, {})
     for literalQ in amf:
         out.addAtom(literalQ.subtence, literalQ.truth)
 
@@ -82,7 +73,7 @@ def propagation(case, expanded_symbols):
     return out.m
 
 def expand(case):
-    theory = case.translate()
+    theory = case.translated
     solver, reify, _ = mk_solver(theory, case.idp.atoms.values())
     solver.check()
     return model_to_json(case.idp, solver, reify)
@@ -111,7 +102,7 @@ def optimize(case, symbol, minimize):
         s = (s.instances[args[0]+ "(" + ",".join(args[1:]) + ")"]).translated
 
     solver = Optimize()
-    solver.add(case.translate())
+    solver.add(case.translated)
     if minimize:
         solver.minimize(s)
     else:
@@ -147,7 +138,7 @@ def explain(case, symbol, value):
         # rules used in justification
         if not to_explain.sort()==BoolSort(): # calculate numeric value
             # TODO should be given by client
-            theory = case.translate()
+            theory = case.translated
             s, _, _ = mk_solver(theory, case.idp.atoms.values())
             s.check()
             val = s.model().eval(to_explain)
