@@ -1,4 +1,5 @@
 To do:
+    Fix isa
     reactivate full propagate
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
