@@ -50,12 +50,13 @@ def metaJSON(idp):
 
 def propagation(case, expanded_symbols):
     expanded_symbols = [] if expanded_symbols is None else expanded_symbols
-    
-    out = Structure_(case.idp)
+     
+    out = Structure_(case.idp)   
     
     todo = [ a for a in case.idp.atoms.values()
-                # if it is shown to the user
-                if any([s in expanded_symbols for s in a.unknown_symbols().keys()]) ]
+                if (hasattr(a, 'decl') and hasattr(a.decl, 'is_var') and a.decl.is_var)
+                 # if it is shown to the user
+                 or any([s in expanded_symbols for s in a.unknown_symbols().keys()]) ]
 
     amf = consequences(case.translated, todo, {})
     for literalQ in amf:
@@ -173,10 +174,11 @@ def explain(case, symbol, value):
                     if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
                         out.addAtom(a1.subtence, a1.truth)
             out.m["*laws*"] = []
-            for a1 in case.idp.translated:
+            for a1 in case.idp.theory.definitions + case.idp.theory.constraints: 
+                #TODO find the rule
                 for a2 in unsatcore:
-                    if str(a1) == str(ps[a2]):
-                        out.m["*laws*"].append(a1.reading if hasattr(a1, "reading") else str(a1))
+                    if str(a1.translated) == str(ps[a2]):
+                        out.m["*laws*"].append(a1.reading if hasattr(a1, 'reading') else str(a1))
 
     return out.m
 

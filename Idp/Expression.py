@@ -559,6 +559,5 @@ class Brackets(Expression):
         self.translated = self.sub_exprs[0].translate()
         if self.reading: 
             self.sub_exprs[0].reading = self.reading
-            self.translated.reading   = self.reading #TODO for explain
         return self.translated
 
