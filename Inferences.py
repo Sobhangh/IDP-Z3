@@ -28,8 +28,6 @@ class ConfigCase:
     def __init__(self, idp):
         self.idp = idp
         self.structure = {} # {literalQ : atomZ3} from the GUI (needed for propagate)
-        
-        idp.translate(self)
 
     def translate(self):
         return And(self.idp.translated 

@@ -37,12 +37,13 @@ class Idp(object):
         self.theory.annotate(self.vocabulary)
         log("annotated")
 
-    def translate(self, case: ConfigCase):
-        self.vocabulary.translate(case)
+        # translate
+        
+        self.vocabulary.translate(self)
         log("vocabulary translated")
-        self.theory.translate(case)
+        self.theory.translate(self)
         log("theory translated")
-        #self.goal.translate(case)
+        #self.goal.translate()
         self.view.translate()
 
         self.translated = self.vocabulary.translated + self.theory.translated
@@ -80,13 +81,13 @@ class Vocabulary(object):
                + "\n".join(str(i) for i in self.declarations)
                + "\n}\n" )
 
-    def translate(self, case: ConfigCase):
+    def translate(self, idp):
         for i in self.declarations:
             if type(i) in [ConstructedTypeDeclaration, RangeDeclaration]:
-                i.translate(case)
+                i.translate()
         for i in self.declarations:
             if type(i) == SymbolDeclaration:
-                i.translate(case.idp)
+                i.translate(idp)
 
         for v in self.symbol_decls.values():
             if v.is_var:
@@ -125,7 +126,7 @@ class ConstructedTypeDeclaration(object):
     def check_bounds(self, var):
         return None
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         if self.translated is None:
             self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
             for c, c3 in zip(self.constructors, cstrs):
@@ -175,7 +176,7 @@ class RangeDeclaration(object):
             sub_exprs.append(e)
         return operation('∨', sub_exprs)
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         if self.translated is None:
             els = [e.translated for e in self.range]
             if all(map(lambda x: type(x) == int, els)):
@@ -334,13 +335,13 @@ class Theory(object):
             out.update(c.unknown_symbols())
         return out
 
-    def translate(self, case: ConfigCase,):
+    def translate(self, idp):
         self.translated = []
         for i in self.constraints:
             log("translating " + str(i)[:20])
             self.translated.append(i.translate())
         for d in self.definitions:
-            self.translated += d.translate(case)
+            self.translated += d.translate(idp)
 
 
 
@@ -394,7 +395,7 @@ class Definition(object):
             for r in rules: out.update(r.unknown_symbols())
         return out
 
-    def translate(self, case: ConfigCase):
+    def translate(self, idp):
         self.translated = []
         for symbol, rules in self.partition.items():
 
@@ -407,13 +408,13 @@ class Definition(object):
                     
             if outputVar:
                 expr = ForAll(vars, 
-                                (applyTo(symbol.translate(case.idp), vars[:-1]) == vars[-1]) == Or(exprs)) 
+                                (applyTo(symbol.translate(idp), vars[:-1]) == vars[-1]) == Or(exprs)) 
             else:
                 if len(vars) > 0:
                     expr = ForAll(vars, 
-                                    applyTo(symbol.translate(case.idp), vars) == Or(exprs))
+                                    applyTo(symbol.translate(idp), vars) == Or(exprs))
                 else:
-                    expr = symbol.translate(case.idp) == Or(exprs)
+                    expr = symbol.translate(idp) == Or(exprs)
             self.translated.append(expr)
         return self.translated
 
