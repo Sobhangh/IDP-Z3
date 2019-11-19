@@ -50,5 +50,4 @@ other NTH (refactoring)
     - distinguish between x=1 entry and x=1 atom in output structure
     - simplify Or, And with only one element
     - p(real) should be possible
-    - client should send the literal to be explained, not the atom
 

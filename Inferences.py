@@ -128,10 +128,12 @@ def optimize(case, symbol, minimize):
 def explain(case, symbol, value):
     out = Structure_(case.idp, case.structure)  
 
+    negated = value.startswith('~')
     value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
         .replace("\\u2200", "∀").replace("\\u2203", "∃") \
         .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
         .replace("\\u2228", "∨").replace("\\u2227", "∧")
+    value = value[1:] if negated else value
     if value in case.idp.atoms:
         to_explain = case.idp.atoms[value].translated #TODO value is an atom string
 
@@ -143,6 +145,8 @@ def explain(case, symbol, value):
             s.check()
             val = s.model().eval(to_explain)
             to_explain = to_explain == val
+        if negated:
+            to_explain = Not(to_explain)
 
         s = Solver()
         (reify, unreify) = reifier(case.idp.atoms.values(), s)
@@ -162,12 +166,6 @@ def explain(case, symbol, value):
         s.add(Not(r2(to_explain)))
         s.check(list(ps.keys()))
         unsatcore = s.unsat_core()
-        if not unsatcore: # try to explain not(to_explain)
-            #TODO refactor: client should send us the literal, not the atom
-            s.pop()
-            s.add(r2(to_explain))
-            s.check(list(ps.keys()))
-            unsatcore = s.unsat_core()
         
         if unsatcore:
             for a1 in case.structure:

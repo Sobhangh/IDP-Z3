@@ -1,5 +1,6 @@
 Most recent first:
 
+* 19 nov 2019: REST API: atom in explain is now preceded by '~' if negated
 * 9 sept 2019: abstract models: fix bug with checkCode, use given and consequences to simplify them, avoid negations
 * GUI: hide symbols starting with '\_'.  Replace '\_' by spaces in symbol names, constructors
 * GUI: 2 optimize buttons are now next to entry fields (not in box header).  (Remove "do not optimize" button)
