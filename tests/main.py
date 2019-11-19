@@ -8,7 +8,7 @@ sys.path.insert(0,parentdir)
 sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
 import Inferences
-from Theory import *
+from Solver import *
 from utils import log
 from Idp import *
 
@@ -18,8 +18,8 @@ files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 #files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/isa/isa.idp"]
 for file in files:
     print(file)
-    model = idpparser.model_from_file(file)
-    c = ConfigCase(model)
+    idp = idpparser.model_from_file(file)
+    c = ConfigCase(idp, "")
 
     z3 = file.replace(".z3", ".z3z3")
     z3 = z3.replace(".idp", ".z3")

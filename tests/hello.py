@@ -8,7 +8,7 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
 print(parentdir)
 import Inferences
-from Theory import *
+from Solver import *
 from utils import log
 from Idp import *
 

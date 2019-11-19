@@ -20,7 +20,7 @@ import re
 from z3.z3 import _py2expr
 
 from Structure_ import *
-from Theory import *
+from Solver import *
 from utils import *
 
 
