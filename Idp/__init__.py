@@ -38,7 +38,7 @@ class Idp(object):
         log("annotated")
 
         # translate
-        
+
         self.vocabulary.translate(self)
         log("vocabulary translated")
         self.theory.translate(self)
@@ -538,6 +538,7 @@ class Interpretation(object):
         if self.function and 1 < self.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
         self.default = self.default if self.function else Symbol(name='false')
+        self.default = self.default.annotate(symbol_decls, {})
 
         def interpret(theory, rank, args, tuples=None):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
