@@ -52,18 +52,17 @@ class Expression(object):
             return e1
         else:
             sub_exprs1 = [e.substitute(e0, e1) for e in self.sub_exprs]
-            if all(e0 == e1 for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
+            if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
                 return self
             else:
                 out = copy.copy(self)
                 out.reset()
                 out.sub_exprs = sub_exprs1
-                out.str = repr(out)
                 return out.simplify1()
 
     def expand_quantifiers(self, theory):
         sub_exprs1 = [e.expand_quantifiers(theory) for e in self.sub_exprs]
-        if all(e0 == e1 for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
+        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
             return self
         else:
             self.sub_exprs = sub_exprs1
@@ -72,7 +71,7 @@ class Expression(object):
 
     def interpret(self, theory):
         sub_exprs1 = [e.interpret(theory) for e in self.sub_exprs]
-        if all(e0 == e1 for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
+        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
             return self
         else:
             self.sub_exprs = sub_exprs1
@@ -136,6 +135,35 @@ class IfExpr(Expression):
         #TODO verify consistency
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
+
+    def substitute(self, e0, e1):
+        if_ = self.sub_exprs[IfExpr.IF].substitute(e0, e1)
+        if id(if_) == id(TRUE):
+            return self.sub_exprs[IfExpr.THEN].substitute(e0, e1)
+        elif id(if_) == id(FALSE):
+            return self.sub_exprs[IfExpr.ELSE].substitute(e0, e1)
+        else:
+            then_ = self.sub_exprs[IfExpr.THEN].substitue(e0,e1)
+            else_ = self.sub_exprs[IfExpr.ELSE].substitue(e0,e1)
+            if id(then_) == id(TRUE):
+                if id(else_) == id(TRUE):
+                    return TRUE
+                elif id(else_) == id(FALSE):
+                    return if_
+            elif id(then_) == id(FALSE):
+                if id(else_) == id(FALSE):
+                    return FALSE
+                elif id(else_) == id(TRUE):
+                    return NOT(if_)
+        sub_exprs1 = [if_, then_, else_]
+        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
+            return self
+        else:
+            out = copy.copy(self)
+            out.reset()
+            out.sub_exprs = sub_exprs1
+            return out
+
 
     def translate(self):
         self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate()
@@ -336,6 +364,10 @@ class AUnary(Expression):
         self.translated = function(out)
         return self.translated
 
+def NOT(expr):
+    out = AUnary(operator='~', f=expr)
+    out.type = 'bool'
+    return out
 
 class AAggregate(Expression):
     CONDITION = 0
@@ -413,7 +445,7 @@ class AppliedSymbol(Expression):
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.decl = q_decls[self.s.name] if self.s.name in q_decls else symbol_decls[self.s.name]
-        self.type = self.decl.type
+        self.type = self.decl.type.name
         return self
 
     def subtences(self):
@@ -492,7 +524,7 @@ class Fresh_Variable(Expression):
         self.name = name
         self.str = repr(self)
         self.decl = decl
-        self.type = self.decl.type
+        self.type = self.decl.name
         self._unknown_symbols = {}
         self.translated = None
         self.sub_exprs = []

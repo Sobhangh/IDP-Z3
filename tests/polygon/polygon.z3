@@ -72,16 +72,9 @@ Or(Not(Subtype == rectangle), And(False, False, Not(False)))
 
 Or(Not(Type == triangle), And(True, True, True))
 
-Perimeter ==
-ToReal(If(True, 1, 0) +
-       If(True, 2, 0) +
-       If(True, 3, 0) +
-       If(True, 4, 0))
+Perimeter == 10
 
-If(True, Angle(1), 0) +
-If(True, Angle(2), 0) +
-If(True, Angle(3), 0) +
-If(True, Angle(4), 0) ==
+Angle(1) + Angle(2) + Angle(3) + Angle(4) ==
 ToReal((Sides - 2)*180)
 
 And(True, True, True, True)
