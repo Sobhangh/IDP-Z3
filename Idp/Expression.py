@@ -47,36 +47,27 @@ class Expression(object):
         self._unknown_symbols = None
         self.translated = None
 
+    def update_exprs(self, new_expr_generator):
+        sub_exprs1 = list(new_expr_generator)
+        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
+            return self
+        else:
+            out = copy.copy(self)
+            out.reset()
+            out.sub_exprs = sub_exprs1
+            return out.simplify1()
+
     def substitute(self, e0, e1):
         if self == e0: # based on .str !
             return e1
         else:
-            sub_exprs1 = [e.substitute(e0, e1) for e in self.sub_exprs]
-            if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
-                return self
-            else:
-                out = copy.copy(self)
-                out.reset()
-                out.sub_exprs = sub_exprs1
-                return out.simplify1()
+            return self.update_exprs(e.substitute(e0, e1) for e in self.sub_exprs)
 
     def expand_quantifiers(self, theory):
-        sub_exprs1 = [e.expand_quantifiers(theory) for e in self.sub_exprs]
-        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
-            return self
-        else:
-            self.sub_exprs = sub_exprs1
-            # no need to reset
-            return self.simplify1()
+        return self.update_exprs(e.expand_quantifiers(theory) for e in self.sub_exprs)
 
     def interpret(self, theory):
-        sub_exprs1 = [e.interpret(theory) for e in self.sub_exprs]
-        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
-            return self
-        else:
-            self.sub_exprs = sub_exprs1
-            self.reset()
-            return self.simplify1()
+        return self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
 
     def unknown_symbols(self):
         if self._unknown_symbols is None:
@@ -136,15 +127,16 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
-    def substitute(self, e0, e1):
-        if_ = self.sub_exprs[IfExpr.IF].substitute(e0, e1)
+    def update_exprs(self, new_expr_generator):
+        if_ = next(new_expr_generator)
         if id(if_) == id(TRUE):
-            return self.sub_exprs[IfExpr.THEN].substitute(e0, e1)
+            return next(new_expr_generator)
         elif id(if_) == id(FALSE):
-            return self.sub_exprs[IfExpr.ELSE].substitute(e0, e1)
+            next(new_expr_generator)
+            return next(new_expr_generator)
         else:
-            then_ = self.sub_exprs[IfExpr.THEN].substitue(e0,e1)
-            else_ = self.sub_exprs[IfExpr.ELSE].substitue(e0,e1)
+            then_ = next(new_expr_generator)
+            else_ = next(new_expr_generator)
             if id(then_) == id(TRUE):
                 if id(else_) == id(TRUE):
                     return TRUE
