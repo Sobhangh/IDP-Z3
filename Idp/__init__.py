@@ -13,7 +13,7 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, ope
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
-                    Fresh_Variable
+                    Fresh_Variable, TRUE, FALSE
 
 
 class Idp(object):
@@ -72,7 +72,9 @@ class Vocabulary(object):
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
                              'real': RangeDeclaration(name='real', elements=[]),
                              'bool': ConstructedTypeDeclaration(name='bool', 
-                                        constructors=[Symbol(name='true'), Symbol(name='false')])}
+                                        constructors=[TRUE, FALSE]),
+                             'true' : TRUE,
+                             'false': FALSE}
         for s in self.declarations: 
             s.annotate(self.symbol_decls)
 
@@ -435,7 +437,7 @@ class Rule(object):
         if self.out is not None:
             self.args.append(self.out)
         if self.body is None:
-            self.body = Symbol(name='true')
+            self.body = TRUE
         self.translated = None
 
     def annotate(self, symbol_decls, q_decls):
@@ -544,7 +546,7 @@ class Interpretation(object):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
             if rank == self.arity + self.function: # valid tuple -> return a value
                 if not self.function:
-                    return Symbol(name='true')
+                    return TRUE
                 else:
                     if 1 < len(tuples):
                         #raise Exception("Duplicate values in structure for " + str(symbol))

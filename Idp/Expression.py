@@ -99,13 +99,15 @@ class Constructor(object):
 
     # A constructor behaves like an Expression
     def annotate(self, symbol_decls, q_decls): return self
-    def subtences(self): return []
+    def subtences(self): return {}
     def substitute(self, e0, e1): return self
     def expand_quantifiers(self, theory): return self
     def interpret(self, theory): return self
     def unknown_symbols(self): return {}
     def translate(self): return self.translated
 
+TRUE  = Constructor(name='true')
+FALSE = Constructor(name='false')
 
 
 class IfExpr(Expression):
@@ -454,12 +456,6 @@ class Variable(Expression):
         self._unknown_symbols = None
         self.translated = None
         self.sub_exprs = []
-        if self.name == "true":
-            self.type = 'bool'
-            self.translated = bool(True)
-        elif self.name == "false":
-            self.type = 'bool'
-            self.translated = bool(False)
         self.decl = None
         self.type = None
         # .normal (only if ground)
@@ -470,20 +466,17 @@ class Variable(Expression):
     def annotate(self, symbol_decls, q_decls):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
             return symbol_decls[self.name]
-        self.decl = self if self.name in ['true', 'false'] \
-            else q_decls[self.name] if self.name in q_decls \
+        self.decl = q_decls[self.name] if self.name in q_decls \
             else symbol_decls[self.name]
         self.type = self.decl.type
         return self
 
     def subtences(self):
-        return {} if self.name in ['true', 'false'] \
-            else {self.str: self} if self.type == 'bool' \
+        return {self.str: self} if self.type == 'bool' \
             else {}
 
     def unknown_symbols(self):
-        return {} if self.name in ['true', 'false'] \
-            else {self.decl.name: self.decl} if not self.decl.name.startswith('_') and self.decl.interpretation is None \
+        return {self.decl.name: self.decl} if not self.decl.name.startswith('_') and self.decl.interpretation is None \
             else {}
 
     def translate(self):
