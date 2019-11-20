@@ -312,8 +312,38 @@ def operation(op, operands):
 class AImplication(BinaryOperator): pass
 class AEquivalence(BinaryOperator): pass
 class ARImplication(BinaryOperator): pass
-class ADisjunction(BinaryOperator): pass
-class AConjunction(BinaryOperator): pass
+class ADisjunction(BinaryOperator):
+    def update_exprs(self, new_expr_generator):
+        exprs = []
+        for expr in new_expr_generator:
+            if expr == TRUE:
+                return TRUE
+            if expr == FALSE:
+                pass
+            else:
+                exprs.append(expr)
+        if len(exprs) == 0:
+            return FALSE
+        if len(exprs) == 1:
+            return exprs[0]
+        return Expression.update_exprs(self, exprs)
+        
+class AConjunction(BinaryOperator):
+    def update_exprs(self, new_expr_generator):
+        exprs = []
+        for expr in new_expr_generator:
+            if expr == TRUE:
+                pass
+            if expr == FALSE:
+                return FALSE
+            else:
+                exprs.append(expr)
+        if len(exprs) == 0:
+            return TRUE
+        if len(exprs) == 1:
+            return exprs[0]
+        return Expression.update_exprs(self, exprs)
+
 class AComparison(BinaryOperator): pass
 
 def update_arith(self, family, new_expr_generator):
