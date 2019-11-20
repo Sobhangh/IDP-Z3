@@ -38,10 +38,6 @@ class Expression(object):
         for e in self.sub_exprs: out.update(e.subtences())
         return out
 
-    def simplify1(self):
-        "simplify this node only"
-        return self
-
     def reset(self):
         # reset derived variables
         self._unknown_symbols = None
@@ -55,7 +51,7 @@ class Expression(object):
             out = copy.copy(self)
             out.reset()
             out.sub_exprs = sub_exprs1
-            return out.simplify1()
+            return out
 
     def substitute(self, e0, e1):
         if self == e0: # based on .str !
@@ -148,13 +144,7 @@ class IfExpr(Expression):
                 elif id(else_) == id(TRUE):
                     return NOT(if_)
         sub_exprs1 = [if_, then_, else_]
-        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
-            return self
-        else:
-            out = copy.copy(self)
-            out.reset()
-            out.sub_exprs = sub_exprs1
-            return out
+        return Expression.update_exprs(self, sub_exprs1) # super().update_exprs
 
 
     def translate(self):
@@ -325,8 +315,55 @@ class ARImplication(BinaryOperator): pass
 class ADisjunction(BinaryOperator): pass
 class AConjunction(BinaryOperator): pass
 class AComparison(BinaryOperator): pass
-class ASumMinus(BinaryOperator): pass
-class AMultDiv(BinaryOperator): pass
+
+def update_arith(self, family, new_expr_generator):
+    # accumulate numbers in acc
+    acc, ops, exprs = 0 if family == '+' else 1, [], []
+    def add(op, expr):
+        nonlocal acc, ops, exprs
+        if type(expr) == NumberConstant:
+            if op == '+':
+                acc += expr.translated
+            elif op == '-':
+                acc -= expr.translated
+            elif op == '*':
+                acc *= expr.translated
+            elif op == '/':
+                if isinstance(acc, int) and expr.type == 'int': # integer division
+                    acc //= expr.translated
+                else:
+                    acc /= expr.translated
+        else:
+            ops.append(op)
+            exprs.append(expr)
+    add(family, next(new_expr_generator)) # this adds an operator
+    for op, expr in zip(self.operator, new_expr_generator):
+        add(op, expr)
+
+    # analyse results
+    if family == '*' and acc == 0:
+        return ZERO
+    elif (family == '+' and acc != 0) or (family == '*' and acc != 1):
+        exprs = [NumberConstant(number=str(acc))] + exprs
+    else:
+        del ops[0]
+    if len(exprs)==1: 
+        return exprs[0]
+    out = Expression.update_exprs(self, exprs) # super().udpate_exprs
+    out.operator = ops
+    return out
+
+
+class ASumMinus(BinaryOperator):
+    def update_exprs(self, new_expr_generator):
+        return update_arith(self, '+', new_expr_generator)
+
+class AMultDiv(BinaryOperator):
+    def update_exprs(self, new_expr_generator):
+        if any(op == '%' for op in self.operator): # special case !
+            return super().update_exprs(new_expr_generator)
+        return update_arith(self, '*', new_expr_generator)
+
 class APower(BinaryOperator): pass
 
 class AUnary(Expression):
@@ -553,6 +590,9 @@ class NumberConstant(Expression):
 
     def translate(self):
         return self.translated
+
+ZERO = NumberConstant(number='0')
+ONE  = NumberConstant(number='1')
 
 class Brackets(Expression):
     def __init__(self, **kwargs):

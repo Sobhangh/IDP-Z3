@@ -5,16 +5,7 @@ And(Vertices >= 3, Vertices <= 4)
 ForAll(c!4,
        Implies(Large(c!4), And(And(c!4 >= 1, c!4 <= 4))))
 --
-And(If(False, 4, If(False, 3, If(True, 2, If(False, 1, 5)))) >
-    1,
-    If(False, 4, If(True, 3, If(False, 2, If(False, 1, 5)))) >
-    2,
-    If(True, 4, If(False, 3, If(False, 2, If(False, 1, 5)))) >
-    3,
-    If(False,
-       4,
-       If(False, 3, If(False, 2, If(False, 1, 5)))) >
-    4)
+And(True, True, True, True)
 
 (Type == triangle) == (Sides == 3)
 
@@ -75,7 +66,7 @@ Or(Not(Type == triangle), And(True, True, True))
 Perimeter == 10
 
 Angle(1) + Angle(2) + Angle(3) + Angle(4) ==
-ToReal((Sides - 2)*180)
+ToReal(180*(-2 + Sides))
 
 And(True, True, True, True)
 

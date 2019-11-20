@@ -52,7 +52,7 @@ And(Type_Of_Real_Estate == Residential,
     Clean_Purchase,
     Or(First_Ownership, Causal_Connection),
     Or(Not(Energy_Renovation_Planned),
-       Not(Term_Energy_Renovation == Certification_Date + 5)))
+       Not(Term_Energy_Renovation == 5 + Certification_Date)))
 
 (Registration_Type == Social_Dwelling) ==
 And(Buyer == Natural_Person,
@@ -69,13 +69,13 @@ And(Type_Of_Real_Estate == Residential,
     Clean_Purchase,
     Or(First_Ownership, Causal_Connection),
     Energy_Renovation_Planned,
-    Term_Energy_Renovation == Certification_Date + 5)
+    Term_Energy_Renovation == 5 + Certification_Date)
 
 (Registration_Type == Dwelling_For_Social_Renting) ==
 And(Type_Of_Real_Estate == Residential,
     Use == Social_Renting,
     Start_Dt_Dwelling_For_Social_Rent ==
-    Certification_Date + 3,
+    3 + Certification_Date,
     Duration_Of_Agreement == Less_Than_9_years)
 
 (Registration_Type == Heritage) ==
@@ -90,7 +90,7 @@ And(Type_Of_Real_Estate == Residential,
 And(Professional_Buyer,
     Not(Transaction_Type == Public_Sale),
     Use == For_Resale,
-    Certification_Date_Sale == Certification_Date + 8)
+    Certification_Date_Sale == 8 + Certification_Date)
 
 (Registration_Type == Social_Purpose) ==
 And(Or(Seller == Mpy_Erkend_Door_VMSW,
