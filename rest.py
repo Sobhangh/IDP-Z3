@@ -17,6 +17,8 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+with_png = False
+
 import threading
 import traceback
 
@@ -173,8 +175,12 @@ def serve_examples_file(path):
 
 
 api.add_resource(HelloWorld, '/test')
-api.add_resource(eval, '/eval') # use evalWithGraph instead of eval, to generate call graphs.
-api.add_resource(meta, '/meta')
+if with_png:
+    api.add_resource(evalWithGraph, '/eval')
+    api.add_resource(metaWithGraph, '/meta')
+else:
+    api.add_resource(eval, '/eval')
+    api.add_resource(meta, '/meta')
 
 if __name__ == '__main__':
     app.run(debug=True)
