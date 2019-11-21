@@ -328,8 +328,22 @@ class AImplication(BinaryOperator):
                 return NOT(exprs[0]).copy_annotation(self)
         return Expression.update_exprs(self, exprs)
         
-class AEquivalence(BinaryOperator): pass
-class ARImplication(BinaryOperator): pass
+class AEquivalence(BinaryOperator):
+    def update_exprs(self, new_expr_generator): 
+        exprs = list(new_expr_generator)
+        if any(e == TRUE for e in exprs):
+            return operation('∧', exprs).copy_annotation(self)
+        if any(e == FALSE for e in exprs):
+            return operation('∧', [NOT(e) for e in exprs]).copy_annotation(self)
+        return Expression.update_exprs(self, exprs)
+    
+class ARImplication(BinaryOperator):
+    def annotate(self, symbol_decls, q_decls):
+        # reverse the implication
+        self.sub_exprs.reverse()
+        out = AImplication(sub_exprs=self.sub_exprs, operator=['⇒']*len(self.operator))
+        return out.annotate(symbol_decls, q_decls)
+
 class ADisjunction(BinaryOperator):
     def update_exprs(self, new_expr_generator):
         exprs = []
@@ -429,7 +443,15 @@ class AMultDiv(BinaryOperator):
                 return super().update_exprs(operands)
         return update_arith(self, '*', new_expr_generator)
 
-class APower(BinaryOperator): pass
+class APower(BinaryOperator):
+    def update_exprs(self, new_expr_generator):
+        operands = list(new_expr_generator)
+        if len(operands) == 2 \
+        and all(type(e) == NumberConstant for e in operands):
+            out = operands[0].translated ** operands[1].translated
+            return NumberConstant(number=str(out)).copy_annotation(self)
+        else:
+            return super().update_exprs(operands)
 
 classes = { '∧': AConjunction,
             '∨': ADisjunction,
@@ -598,7 +620,6 @@ class AppliedSymbol(Expression):
             out[self.decl.name] = self.decl
         return out
         
-
     def translate(self):
         if self.translated is None:
             if self.s.name == 'abs':

@@ -24,10 +24,10 @@ And(Angle(1) < 180,
 
 Equilateral == And(Sides < 2, Sides < 3, Sides < 4)
 
-Or(Or(Subtype == right_triangle,
+Or(Not(Sides == 3),
+   Or(Subtype == right_triangle,
       Subtype == regular_triangle,
-      Subtype == irregular),
-   Not(Sides == 3))
+      Subtype == irregular))
 
 (Subtype == regular_triangle) ==
 And(Sides == 3, Equilateral)
@@ -81,9 +81,9 @@ And((Angle(1) == 0) == (Vertices < 1),
     (Angle(3) == 0) == (Vertices < 3),
     (Angle(4) == 0) == (Vertices < 4))
 
-And((Sides < 1) == False,
-    (Sides < 2) == False,
-    (Sides < 3) == False,
-    (Sides < 4) == False)
+And(Not(Sides < 1),
+    Not(Sides < 2),
+    Not(Sides < 3),
+    Not(Sides < 4))
 
 ForAll(c!7, Large(c!7) == Or(False, False, False, False))
