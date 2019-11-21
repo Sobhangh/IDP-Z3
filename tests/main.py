@@ -1,5 +1,5 @@
 
-import os,sys,inspect,time
+import os,sys,inspect,time, pprint
 
 # add parent folder to import path
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -7,7 +7,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
-import Inferences
+from Inferences import *
 from Solver import *
 from utils import log
 from Idp import *
@@ -28,6 +28,14 @@ for file in files:
         os.remove(z3)
     f = open(z3, "a")
     f.write("\r\n\r\n".join(str(t) for t in c.idp.vocabulary.translated))
-    f.write("\r\n--\r\n")
+    f.write("\r\n-- theory\r\n")
     f.write("\r\n\r\n".join(str(t) for t in c.idp.theory.translated)     + "\r\n")
+    f.write("\r\n-- atoms\r\n")
+    f.write("\r\n".join(str(t) for t in c.idp.atoms)     + "\r\n")
+
+    case = ConfigCase(idp, "")
+    out = pprint.pformat(propagation(case, []), width = 120)
+    f.write("\r\n-- propagation\r\n")
+    f.write(out     + "\r\n")
+
     f.close()

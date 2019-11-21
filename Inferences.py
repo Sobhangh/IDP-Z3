@@ -74,8 +74,7 @@ def propagation(case, expanded_symbols):
     return out.m
 
 def expand(case):
-    theory = case.translated
-    solver, reify, _ = mk_solver(theory, case.idp.atoms.values())
+    solver, reify, _ = mk_solver(case.translated, case.idp.atoms.values())
     solver.check()
     return model_to_json(case.idp, solver, reify)
 
@@ -141,8 +140,7 @@ def explain(case, symbol, value):
         # rules used in justification
         if not to_explain.sort()==BoolSort(): # calculate numeric value
             # TODO should be given by client
-            theory = case.translated
-            s, _, _ = mk_solver(theory, case.idp.atoms.values())
+            s, _, _ = mk_solver(case.translated, case.idp.atoms.values())
             s.check()
             val = s.model().eval(to_explain)
             to_explain = to_explain == val
