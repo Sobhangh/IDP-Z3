@@ -33,16 +33,16 @@ class LiteralQ(object):
             and str(self.subtence) == str(other.subtence)
 
     def __repr__(self):
-        return str(self.truth) + ( self.subtence.reading if hasattr(self.subtence, 'reading')
-                                   else str(self.subtence)
-                                 )
-
+        return str(self.truth) \
+            + ( self.subtence.reading if self.subtence.reading
+                else str(self.subtence)
+              )
 
     def __str__(self):
         if self.truth == "irrelevant":
             return ""
         return ("" if self.truth else "? " if self.truth is None else "Not ") \
-             + (self.subtence.reading if hasattr(self.subtence, 'reading')
+             + (self.subtence.reading if self.subtence.reading
                  else str(self.subtence))
 
     def to_json(self): return str(self)
@@ -59,6 +59,7 @@ class Equality(object):
         self.str = subtence.str + " = " + str(value)
         self.type = 'bool'
         self.translated = (subtence.translated == value) #TODO
+        self.reading = ""
 
     def __str__(self): return self.str
 
@@ -153,7 +154,7 @@ class Structure_(object):
                 else:
                     symbol = None
                 if symbol: 
-                    if hasattr(atom, 'reading'):
+                    if atom.reading:
                         symbol['reading'] = atom.reading
                     symbol['normal'] = hasattr(atom, 'normal')
                     s.setdefault(key, symbol)
@@ -177,7 +178,7 @@ class Structure_(object):
                 if truth is None: s[key]["unknown"] = True
                 else:
                     s[key]["ct" if truth else "cf"] = True
-                if hasattr(atom, 'reading'):
+                if atom.reading:
                     s[key]['reading'] = atom.reading
 
     def addValue(self, atom, value):

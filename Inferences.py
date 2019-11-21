@@ -178,7 +178,7 @@ def explain(case, symbol, value):
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.translated) == str(ps[a2]):
-                        out.m["*laws*"].append(a1.reading if hasattr(a1, 'reading') else str(a1))
+                        out.m["*laws*"].append(a1.reading if a1.reading else str(a1))
 
     return out.m
 
@@ -211,7 +211,7 @@ def abstract(case):
     reified = Function("qsdfvqe13435", StringSort(), BoolSort())
     for atom_string, atom in case.idp.atoms.items():
         atomZ3 = atom.translated #TODO
-        if atom.type == 'bool' or (hasattr(atom.decl, 'sorts') and atom.decl.type.name == 'bool'):
+        if atom.type == 'bool' or (hasattr(atom, 'decl') and atom.decl.type.name == 'bool'):
             substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
     for literalQ in done:
         if is_bool(literalQ.subtence): #TODO

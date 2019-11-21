@@ -22,18 +22,22 @@ class Expression(object):
     # .str : normalized idp code, before transformations
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     # .type : a declaration object, or 'bool', 'real', 'int', or None
+    # .is_subtence : True if sub-sentence in original code
     # .translated : the Z3 equivalent
     # ._unknown_symbols : list of uninterpreted symbols not starting with '_'
+    # .reading : English reading
     
     def __eq__(self, other):
-        return self.str == other.str
+        return repr(self) == repr(other)
     
     def __hash__(self):
-        return hash(self.str)
+        return hash(str(self))
 
     def __str__(self): return self.str
 
     def subtences(self):
+        if self.is_subtence:
+            return {self.str: self} #TODO possibly go deeper
         out = {}
         for e in self.sub_exprs: out.update(e.subtences())
         return out
@@ -42,6 +46,13 @@ class Expression(object):
         # reset derived variables
         self._unknown_symbols = None
         self.translated = None
+
+    def copy_annotation(self, other):
+        out = copy.copy(self)
+        out.str = other.str
+        out.reading = other.reading
+        out.is_subtence = other.is_subtence
+        return out
 
     def update_exprs(self, new_expr_generator):
         sub_exprs1 = list(new_expr_generator)
@@ -54,7 +65,7 @@ class Expression(object):
             return out
 
     def substitute(self, e0, e1):
-        if self == e0: # based on .str !
+        if self == e0: # based on repr !
             return e1
         else:
             return self.update_exprs(e.substitute(e0, e1) for e in self.sub_exprs)
@@ -80,6 +91,8 @@ class Constructor(object):
         self.str = sys.intern(self.name)
         self.translated = None
         self.type = None
+        self.reading = None
+        self.is_subtence = False
     
     def __str__(self): return self.str
 
@@ -91,6 +104,7 @@ class Constructor(object):
     def interpret(self, theory): return self
     def unknown_symbols(self): return {}
     def translate(self): return self.translated
+    def copy_annotation(self, other): return self
 
 TRUE  = Constructor(name='true')
 FALSE = Constructor(name='false')
@@ -111,6 +125,8 @@ class IfExpr(Expression):
         self._unknown_symbols = None
         self.translated = None
         self.type = None
+        self.reading = None
+        self.is_subtence = False
 
     def __repr__(self):
         return sys.intern("if "    + self.sub_exprs[IfExpr.IF  ].str \
@@ -126,23 +142,23 @@ class IfExpr(Expression):
     def update_exprs(self, new_expr_generator):
         if_ = next(new_expr_generator)
         if if_ == TRUE:
-            return next(new_expr_generator)
+            return next(new_expr_generator).copy_annotation(self)
         elif if_ == FALSE:
             next(new_expr_generator)
-            return next(new_expr_generator)
+            return next(new_expr_generator).copy_annotation(self)
         else:
             then_ = next(new_expr_generator)
             else_ = next(new_expr_generator)
             if then_ == TRUE:
                 if else_ == TRUE:
-                    return TRUE
+                    return TRUE.copy_annotation(self)
                 elif else_ == FALSE:
-                    return if_
+                    return if_.copy_annotation(self)
             elif then_ == FALSE:
                 if else_ == FALSE:
-                    return FALSE
+                    return FALSE.copy_annotation(self)
                 elif else_ == TRUE:
-                    return NOT(if_)
+                    return NOT(if_).copy_annotation(self)
         sub_exprs1 = [if_, then_, else_]
         return Expression.update_exprs(self, sub_exprs1) # super().update_exprs
 
@@ -166,13 +182,13 @@ class AQuantification(Expression):
         self._unknown_symbols = None
         self.translated = None
         self.type = 'bool'
-
+        self.reading = None
+        self.is_subtence = True
 
     def __repr__(self):
         return sys.intern(self.q \
             + "".join([v + "[" + s.str + "]" for v, s in zip(self.vars, self.sorts)]) \
             + " : " + self.sub_exprs[0].str)
-
 
     def annotate(self, symbol_decls, q_decls):
         self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
@@ -180,10 +196,6 @@ class AQuantification(Expression):
         q_v = {**q_decls, **self.q_decls} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         return self
-
-    def subtences(self):
-        #TODO optionally add subtences of sub_exprs
-        return {self.str: self}
 
     def expand_quantifiers(self, theory):
         forms = [self.sub_exprs[0].expand_quantifiers(theory)]
@@ -196,7 +208,7 @@ class AQuantification(Expression):
         op = '∧' if self.q == '∀' else '∨'
         out = operation(op, forms)
         if not self.vars:
-            return out
+            return out.copy_annotation(self)
         self.sub_exprs = [ out ]
         self.sorts = [] # not used
         return self
@@ -252,6 +264,8 @@ class BinaryOperator(Expression):
         self._unknown_symbols = None
         self.translated = None
         self.type = None
+        self.reading = None
+        self.is_subtence = self.operator[0] in '=<>≤≥≠'
 
     def __repr__(self):
         temp = self.sub_exprs[0].str
@@ -266,11 +280,6 @@ class BinaryOperator(Expression):
                else 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
         return self
-
-    def subtences(self):
-        if self.operator[0] in '=<>≤≥≠':
-            return {self.str: self} #TODO collect subtences of aggregates within comparisons
-        return super().subtences()
 
     def translate(self):
         # chained comparisons -> And()
@@ -310,13 +319,13 @@ class AImplication(BinaryOperator):
         exprs = list(new_expr_generator)
         if len(exprs) == 2: #TODO deal with associativity
             if exprs[0] == FALSE: # (false => p) is true
-                return TRUE
+                return TRUE.copy_annotation(self)
             if exprs[0] == TRUE: # (true => p) is p
-                return exprs[1]
+                return exprs[1].copy_annotation(self)
             if exprs[1] == TRUE: # (p => true) is true
-                return TRUE
+                return TRUE.copy_annotation(self)
             if exprs[1] == FALSE: # (p => false) is ~p
-                return NOT(exprs[0])
+                return NOT(exprs[0]).copy_annotation(self)
         return Expression.update_exprs(self, exprs)
         
 class AEquivalence(BinaryOperator): pass
@@ -326,15 +335,15 @@ class ADisjunction(BinaryOperator):
         exprs = []
         for expr in new_expr_generator:
             if expr == TRUE:
-                return TRUE
+                return TRUE.copy_annotation(self)
             if expr == FALSE:
                 pass
             else:
                 exprs.append(expr)
         if len(exprs) == 0:
-            return FALSE
+            return FALSE.copy_annotation(self)
         if len(exprs) == 1:
-            return exprs[0]
+            return exprs[0].copy_annotation(self)
         return Expression.update_exprs(self, exprs)
         
 class AConjunction(BinaryOperator):
@@ -344,13 +353,13 @@ class AConjunction(BinaryOperator):
             if expr == TRUE:
                 pass
             elif expr == FALSE:
-                return FALSE
+                return FALSE.copy_annotation(self)
             else:
                 exprs.append(expr)
         if len(exprs) == 0:
-            return TRUE
+            return TRUE.copy_annotation(self)
         if len(exprs) == 1:
-            return exprs[0]
+            return exprs[0].copy_annotation(self)
         return Expression.update_exprs(self, exprs)
 
 class AComparison(BinaryOperator):
@@ -360,9 +369,9 @@ class AComparison(BinaryOperator):
             acc = operands[0]
             for op, expr in zip(self.operator, operands[1:]):
                 if not (BinaryOperator.MAP[op]) (acc.translated, expr.translated):
-                    return FALSE
+                    return FALSE.copy_annotation(self)
                 acc = expr
-            return TRUE
+            return TRUE.copy_annotation(self)
         return Expression.update_exprs(self, operands)
 
 
@@ -392,13 +401,13 @@ def update_arith(self, family, new_expr_generator):
 
     # analyse results
     if family == '*' and acc == 0:
-        return ZERO
+        return ZERO.copy_annotation(self)
     elif (family == '+' and acc != 0) or (family == '*' and acc != 1):
         exprs = [NumberConstant(number=str(acc))] + exprs
     else:
         del ops[0]
     if len(exprs)==1: 
-        return exprs[0]
+        return exprs[0].copy_annotation(self)
     out = Expression.update_exprs(self, exprs) # super().udpate_exprs
     out.operator = ops
     return out
@@ -415,7 +424,7 @@ class AMultDiv(BinaryOperator):
             if len(operands) == 2 \
             and all(type(e) == NumberConstant for e in operands):
                 out = operands[0].translated % operands[1].translated
-                return NumberConstant(number=str(out))
+                return NumberConstant(number=str(out)).copy_annotation(self)
             else:
                 return super().update_exprs(operands)
         return update_arith(self, '*', new_expr_generator)
@@ -461,6 +470,8 @@ class AUnary(Expression):
         self._unknown_symbols = None
         self.translated = None
         self.type = None
+        self.reading = None
+        self.is_subtence = False
 
     def __repr__(self):
         return sys.intern(self.operator + self.sub_exprs[0].str)
@@ -474,9 +485,9 @@ class AUnary(Expression):
         operand = next(new_expr_generator)
         if self.operator == '~':
             if operand == TRUE:
-                return FALSE
+                return FALSE.copy_annotation(self)
             if operand == FALSE:
-                return TRUE
+                return TRUE.copy_annotation(self)
         return Expression.update_exprs(self, [operand])
 
     def translate(self):
@@ -507,6 +518,8 @@ class AAggregate(Expression):
         self._unknown_symbols = None
         self.translated = None
         self.type = None
+        self.reading = None
+        self.is_subtence = False
 
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
@@ -558,7 +571,9 @@ class AppliedSymbol(Expression):
         self.translated = None
         self.decl = None
         self.type = None
+        self.reading = None
         # .normal (only if ground) used on client side
+        self.is_subtence = None
 
     def __repr__(self):
         return sys.intern(self.s.str + "(" + ",".join([x.str for x in self.sub_exprs]) + ")")
@@ -567,12 +582,8 @@ class AppliedSymbol(Expression):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.decl = q_decls[self.s.name] if self.s.name in q_decls else symbol_decls[self.s.name]
         self.type = self.decl.type.name
+        self.is_subtence = self.type == 'bool'
         return self
-
-    def subtences(self):
-        out = super().subtences()
-        if self.type == 'bool': out[self.str] = self
-        return out
 
     def interpret(self, theory):
         sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
@@ -611,7 +622,9 @@ class Variable(Expression):
         self.sub_exprs = []
         self.decl = None
         self.type = None
+        self.reading = None
         # .normal (only if ground)
+        self.is_subtence = None
 
     def __repr__(self):
         return sys.intern(self.name)
@@ -622,11 +635,8 @@ class Variable(Expression):
         self.decl = q_decls[self.name] if self.name in q_decls \
             else symbol_decls[self.name]
         self.type = self.decl.type
+        self.is_subtence = self.type == 'bool'
         return self
-
-    def subtences(self):
-        return {self.str: self} if self.type == 'bool' \
-            else {}
 
     def unknown_symbols(self):
         return {self.decl.name: self.decl} if not self.decl.name.startswith('_') and self.decl.interpretation is None \
@@ -649,11 +659,11 @@ class Fresh_Variable(Expression):
         self._unknown_symbols = {}
         self.translated = None
         self.sub_exprs = []
+        self.reading = None
+        self.is_subtence = False
 
     def __repr__(self):
         return sys.intern(self.name)
-    
-    def subtences(self): return {}
 
     def translate(self):
         if self.translated is None:
@@ -672,13 +682,12 @@ class NumberConstant(Expression):
         except ValueError:
             self.translated = float(self.number)
             self.type = 'real'
+        self.is_subtence = False
     
     def __repr__(self):
         return sys.intern(self.number)
 
     def annotate(self, symbol_decls, q_decls): return self
-
-    def subtences(self): return {}
 
     def translate(self):
         return self.translated
@@ -695,6 +704,7 @@ class Brackets(Expression):
         self._unknown_symbols = None
         self.translated = None
         self.type = None
+        self.is_subtence = False
 
     def __repr__(self):
         return sys.intern("(" + self.sub_exprs[0].str + ")")
