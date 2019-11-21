@@ -125,23 +125,23 @@ class IfExpr(Expression):
 
     def update_exprs(self, new_expr_generator):
         if_ = next(new_expr_generator)
-        if id(if_) == id(TRUE):
+        if if_ == TRUE:
             return next(new_expr_generator)
-        elif id(if_) == id(FALSE):
+        elif if_ == FALSE:
             next(new_expr_generator)
             return next(new_expr_generator)
         else:
             then_ = next(new_expr_generator)
             else_ = next(new_expr_generator)
-            if id(then_) == id(TRUE):
-                if id(else_) == id(TRUE):
+            if then_ == TRUE:
+                if else_ == TRUE:
                     return TRUE
-                elif id(else_) == id(FALSE):
+                elif else_ == FALSE:
                     return if_
-            elif id(then_) == id(FALSE):
-                if id(else_) == id(FALSE):
+            elif then_ == FALSE:
+                if else_ == FALSE:
                     return FALSE
-                elif id(else_) == id(TRUE):
+                elif else_ == TRUE:
                     return NOT(if_)
         sub_exprs1 = [if_, then_, else_]
         return Expression.update_exprs(self, sub_exprs1) # super().update_exprs
@@ -194,7 +194,10 @@ class AQuantification(Expression):
             else:
                 self.vars.append(var)
         op = '∧' if self.q == '∀' else '∨'
-        self.sub_exprs = [ operation(op, forms) ]
+        out = operation(op, forms)
+        if not self.vars:
+            return out
+        self.sub_exprs = [ out ]
         self.sorts = [] # not used
         return self
 
@@ -234,7 +237,7 @@ class BinaryOperator(Expression):
             '>': lambda x, y: x > y,
             '≤': lambda x, y: x <= y,
             '≥': lambda x, y: x >= y,
-            '≠': lambda x, y: Not(x == y)
+            '≠': lambda x, y: x != y
             }
 
     def __init__(self, **kwargs):
@@ -302,14 +305,20 @@ class BinaryOperator(Expression):
         self.translated = out
         return self.translated
 
-def operation(op, operands):
-    if len(operands) == 1:
-        return operands[0]
-    if isinstance(op, str):
-        op = [op] * (len(operands)-1)
-    return BinaryOperator(sub_exprs=operands, operator=op)
-
-class AImplication(BinaryOperator): pass
+class AImplication(BinaryOperator):
+    def update_exprs(self, new_expr_generator): 
+        exprs = list(new_expr_generator)
+        if len(exprs) == 2: #TODO deal with associativity
+            if exprs[0] == FALSE: # (false => p) is true
+                return TRUE
+            if exprs[0] == TRUE: # (true => p) is p
+                return exprs[1]
+            if exprs[1] == TRUE: # (p => true) is true
+                return TRUE
+            if exprs[1] == FALSE: # (p => false) is ~p
+                return NOT(exprs[0])
+        return Expression.update_exprs(self, exprs)
+        
 class AEquivalence(BinaryOperator): pass
 class ARImplication(BinaryOperator): pass
 class ADisjunction(BinaryOperator):
@@ -334,7 +343,7 @@ class AConjunction(BinaryOperator):
         for expr in new_expr_generator:
             if expr == TRUE:
                 pass
-            if expr == FALSE:
+            elif expr == FALSE:
                 return FALSE
             else:
                 exprs.append(expr)
@@ -344,7 +353,18 @@ class AConjunction(BinaryOperator):
             return exprs[0]
         return Expression.update_exprs(self, exprs)
 
-class AComparison(BinaryOperator): pass
+class AComparison(BinaryOperator):
+    def update_exprs(self, new_expr_generator):
+        operands = list(new_expr_generator)
+        if all(type(e) == NumberConstant for e in operands):
+            acc = operands[0]
+            for op, expr in zip(self.operator, operands[1:]):
+                if not (BinaryOperator.MAP[op]) (acc.translated, expr.translated):
+                    return FALSE
+                acc = expr
+            return TRUE
+        return Expression.update_exprs(self, operands)
+
 
 def update_arith(self, family, new_expr_generator):
     # accumulate numbers in acc
@@ -391,10 +411,43 @@ class ASumMinus(BinaryOperator):
 class AMultDiv(BinaryOperator):
     def update_exprs(self, new_expr_generator):
         if any(op == '%' for op in self.operator): # special case !
-            return super().update_exprs(new_expr_generator)
+            operands = list(new_expr_generator)
+            if len(operands) == 2 \
+            and all(type(e) == NumberConstant for e in operands):
+                out = operands[0].translated % operands[1].translated
+                return NumberConstant(number=str(out))
+            else:
+                return super().update_exprs(operands)
         return update_arith(self, '*', new_expr_generator)
 
 class APower(BinaryOperator): pass
+
+classes = { '∧': AConjunction,
+            '∨': ADisjunction,
+            '⇒': AImplication,
+            '⇐': ARImplication,
+            '⇔': AEquivalence,
+            '+': ASumMinus,
+            '-': ASumMinus,
+            '*': AMultDiv,
+            '/': AMultDiv,
+            '%': AMultDiv,
+            '^': APower,
+            '=': AConjunction,
+            '<': AConjunction,
+            '>': AConjunction,
+            '≤': AConjunction,
+            '≥': AConjunction,
+            '≠': AConjunction,
+            }
+
+def operation(ops, operands):
+    if len(operands) == 1:
+        return operands[0]
+    if isinstance(ops, str):
+        ops = [ops] * (len(operands)-1)
+    out = (classes[ops[0]]) (sub_exprs=operands, operator=ops)
+    return out.update_exprs(operands) # simplify it
 
 class AUnary(Expression):
     MAP = {'-': lambda x: 0 - x,
@@ -417,6 +470,15 @@ class AUnary(Expression):
         self.type = self.sub_exprs[0].type
         return self
 
+    def update_exprs(self, new_expr_generator):
+        operand = next(new_expr_generator)
+        if self.operator == '~':
+            if operand == TRUE:
+                return FALSE
+            if operand == FALSE:
+                return TRUE
+        return Expression.update_exprs(self, [operand])
+
     def translate(self):
         out = self.sub_exprs[0].translate()
         function = AUnary.MAP[self.operator]
@@ -426,7 +488,7 @@ class AUnary(Expression):
 def NOT(expr):
     out = AUnary(operator='~', f=expr)
     out.type = 'bool'
-    return out
+    return out.update_exprs(e for e in [expr]) # simplify if possible
 
 class AAggregate(Expression):
     CONDITION = 0
@@ -638,13 +700,7 @@ class Brackets(Expression):
         return sys.intern("(" + self.sub_exprs[0].str + ")")
 
     def annotate(self, symbol_decls, q_decls):
-        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
-        self.type = self.sub_exprs[0].type
-        return self
-
-    def translate(self):
-        self.translated = self.sub_exprs[0].translate()
-        if self.reading: 
-            self.sub_exprs[0].reading = self.reading
-        return self.translated
+        out = self.f.annotate(symbol_decls, q_decls)
+        out.reading = self.reading
+        return out
 

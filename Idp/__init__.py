@@ -37,6 +37,12 @@ class Idp(object):
         self.theory.annotate(self.vocabulary)
         log("annotated")
 
+        """
+        for c in self.theory.constraints:
+            print(repr(c))
+        for c in self.theory.definitions:
+            print(repr(c))
+        """
         # translate
 
         self.vocabulary.translate(self)
@@ -357,6 +363,13 @@ class Definition(object):
     def __str__(self):
         return "Definition(s) of " + ",".join([k.name for k in self.partition.keys()])
 
+    def __repr__(self):
+        out = []
+        for symbol, rules in self.partition.items():
+            for rule in rules:
+                out.append(repr(rule))
+        return "\r\n".join(out)
+
     def annotate(self, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
 
@@ -440,6 +453,9 @@ class Rule(object):
             self.body = TRUE
         self.translated = None
 
+    def __repr__(self):
+        return repr(self.body)
+
     def annotate(self, symbol_decls, q_decls):
         self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
                         for v, s in zip(self.vars, self.sorts)}
@@ -453,11 +469,11 @@ class Rule(object):
         """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
         out = []
         for new_var, arg in zip(new_vars.values(), self.args):
-            eq = AComparison(sub_exprs=[new_var, arg], operator='=')
+            eq = operation('=', [new_var, arg])
             eq.type = 'bool'
             out += [eq]
         out += [self.body]
-        self.body = AConjunction(sub_exprs=out, operator='∧' * (len(out)-1))
+        self.body = operation('∧', out)
         self.body.type = 'bool'
         
         return self
@@ -563,7 +579,7 @@ class Interpretation(object):
                             out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = IfExpr(if_f=AComparison(sub_exprs=[args[rank],val], operator='='), 
+                        out = IfExpr(if_f=operation('=', [args[rank],val]), 
                                         then_f=interpret(theory, rank+1, args, list(tuples2)), 
                                         else_f=out)
                 return out

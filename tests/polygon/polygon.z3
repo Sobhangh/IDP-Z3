@@ -5,7 +5,7 @@ And(Vertices >= 3, Vertices <= 4)
 ForAll(c!4,
        Implies(Large(c!4), And(And(c!4 >= 1, c!4 <= 4))))
 --
-And(True, True, True, True)
+True
 
 (Type == triangle) == (Sides == 3)
 
@@ -22,11 +22,7 @@ And(Angle(1) < 180,
     Angle(3) < 180,
     Angle(4) < 180)
 
-Equilateral ==
-And(Or(True, Sides < 1),
-    Or(False, Sides < 2),
-    Or(False, Sides < 3),
-    Or(False, Sides < 4))
+Equilateral == And(Sides < 2, Sides < 3, Sides < 4)
 
 Or(Or(Subtype == right_triangle,
       Subtype == regular_triangle,
@@ -57,18 +53,18 @@ And(Sides == 4,
         Or(Angle(3) == 90, Sides < 3),
         Or(Angle(4) == 90, Sides < 4)))
 
-Or(Not(Subtype == rectangle), And(False, False, Not(False)))
+Not(Subtype == rectangle)
 
 (Subtype == square) == And(Sides == 4, Equilateral)
 
-Or(Not(Type == triangle), And(True, True, True))
+True
 
 Perimeter == 10
 
 Angle(1) + Angle(2) + Angle(3) + Angle(4) ==
 ToReal(180*(-2 + Sides))
 
-And(True, True, True, True)
+True
 
 And(Angle(1) >= 0,
     Angle(2) >= 0,
@@ -90,9 +86,4 @@ And((Sides < 1) == False,
     (Sides < 3) == False,
     (Sides < 4) == False)
 
-ForAll(c!18,
-       Large(c!18) ==
-       Or(And(c!18 == 1, False),
-          And(c!18 == 2, False),
-          And(c!18 == 3, False),
-          And(c!18 == 4, False)))
+ForAll(c!7, Large(c!7) == Or(False, False, False, False))

@@ -1,25 +1,6 @@
-ForAll(c!31,
-       Implies(Prime(c!31), And(And(c!31 >= 1, c!31 <= 4))))
+ForAll(c!15,
+       Implies(Prime(c!15), And(And(c!15 >= 1, c!15 <= 4))))
 --
-ForAll(c!32,
-       Prime(c!32) ==
-       Or(And(c!32 == 1,
-              And(Or(Not(And(False, False)), Not(True)),
-                  Or(Not(And(True, False)), Not(False)),
-                  Or(Not(And(True, False)), Not(False)),
-                  Or(Not(And(True, False)), Not(False)))),
-          And(c!32 == 2,
-              And(Or(Not(And(False, True)), Not(True)),
-                  Or(Not(And(True, False)), Not(True)),
-                  Or(Not(And(True, False)), Not(False)),
-                  Or(Not(And(True, False)), Not(False)))),
-          And(c!32 == 3,
-              And(Or(Not(And(False, True)), Not(True)),
-                  Or(Not(And(True, True)), Not(False)),
-                  Or(Not(And(True, False)), Not(True)),
-                  Or(Not(And(True, False)), Not(False)))),
-          And(c!32 == 4,
-              And(Or(Not(And(False, True)), Not(True)),
-                  Or(Not(And(True, True)), Not(True)),
-                  Or(Not(And(True, True)), Not(False)),
-                  Or(Not(And(True, False)), Not(True))))))
+ForAll(c!16,
+       Prime(c!16) ==
+       Or(c!16 == 1, c!16 == 2, c!16 == 3, False))

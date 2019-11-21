@@ -1,5 +1,5 @@
 
 --
-ForAll(c!19,
-       (LipLen == c!19) ==
-       Or(And(c!19 == Short, JacketDesign == Design_230)))
+ForAll(c!8,
+       (LipLen == c!8) ==
+       Or(And(c!8 == Short, JacketDesign == Design_230)))
