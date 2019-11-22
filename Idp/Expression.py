@@ -37,9 +37,11 @@ def immutable(func):
                 if ops: out.operator = ops
                 return out
         out = copy.copy(value)
+        # copy initial annotation
         out.code = self.code
         out.reading = self.reading
         out.is_subtence = self.is_subtence
+        out.type = self.type
         return out
     return wrapper_decorator
         
@@ -47,11 +49,11 @@ class Expression(object):
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     def __init__(self):
         self.code = sys.intern(str(self)) # normalized idp code, before transformations
-        self.reading = None # English reading
-        self.is_subtence = None # True if sub-sentence in original code
-        self._unknown_symbols = None # list of uninterpreted symbols not starting with '_'
-        self.type = None # a declaration object, or 'bool', 'real', 'int', or None
-        self.translated = None # the Z3 equivalent
+        self.reading = None               # English reading
+        self.is_subtence = None           # True if sub-sentence in original code
+        self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
+        self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
+        self.translated = None            # the Z3 equivalent
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -90,29 +92,19 @@ class Expression(object):
         return self._unknown_symbols
 
 
-class Constructor(object):
+class Constructor(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.is_var = False
-        self.code = sys.intern(str(self))
-        self.translated = None
-        self.type = None
-        self.reading = None
+        self.sub_exprs = []
+
+        super().__init__()
+        
         self.is_subtence = False
     
     def __str__(self): return self.name
-    def __eq__(self, other):
-        return str(self) == str(other)
-
-    # A constructor behaves like an Expression
     def annotate(self, symbol_decls, q_decls): return self
-    def subtences(self): return {}
-    def substitute(self, e0, e1): return self
-    def expand_quantifiers(self, theory): return self
-    def interpret(self, theory): return self
-    def unknown_symbols(self): return {}
     def translate(self): return self.translated
-    def copy_annotation(self, other): return self
 
 TRUE  = Constructor(name='true')
 FALSE = Constructor(name='false')
@@ -132,7 +124,7 @@ class IfExpr(Expression):
         super().__init__()
 
         self.is_subtence = False
-        
+
     def __str__(self):
         return "if "    + self.sub_exprs[IfExpr.IF  ].code \
              + " then " + self.sub_exprs[IfExpr.THEN].code \
@@ -572,6 +564,7 @@ class AAggregate(Expression):
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         return self
         
+    @immutable
     def expand_quantifiers(self, theory):
         form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
                     , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
@@ -582,8 +575,7 @@ class AAggregate(Expression):
                 forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
                 raise Exception('Can only quantify aggregates over finite domains')
-        self.sub_exprs = forms
-        return self
+        return forms
 
     def translate(self):
         for v in self.q_decls.values():
@@ -612,6 +604,7 @@ class AppliedSymbol(Expression):
         self.is_subtence = self.type == 'bool'
         return self
 
+    @immutable
     def interpret(self, theory):
         sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
         if self.decl.interpretation is not None:
