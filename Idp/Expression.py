@@ -1,6 +1,7 @@
 
 
 import copy
+import functools
 import itertools as it
 import os
 import re
@@ -17,6 +18,30 @@ class DSLException(Exception):
     def __str__(self):
         return self.message
 
+def immutable(func):
+    @functools.wraps(func)
+    def wrapper_decorator(self, new_expr_generator):
+        value, ops = func(self, new_expr_generator), None
+        if isinstance(value, tuple):
+            ops = value[1]
+            value = value[0]
+        if isinstance(value, list):
+            if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, value)): # not changed !
+                return self
+            else:
+                out = copy.copy(self)
+                out.sub_exprs = value
+                # reset derived values
+                out._unknown_symbols = None
+                out.translated = None
+                if ops: out.operator = ops
+                return out
+        out = copy.copy(value)
+        out.code = self.code
+        out.reading = self.reading
+        out.is_subtence = self.is_subtence
+        return out
+    return wrapper_decorator
         
 class Expression(object):
     # .code : normalized idp code, before transformations
@@ -42,27 +67,9 @@ class Expression(object):
         for e in self.sub_exprs: out.update(e.subtences())
         return out
 
-    def reset(self):
-        # reset derived variables
-        self._unknown_symbols = None
-        self.translated = None
-
-    def copy_annotation(self, other):
-        out = copy.copy(self)
-        out.code = other.code
-        out.reading = other.reading
-        out.is_subtence = other.is_subtence
-        return out
-
+    @immutable
     def update_exprs(self, new_expr_generator):
-        sub_exprs1 = list(new_expr_generator)
-        if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, sub_exprs1)): # not changed !
-            return self
-        else:
-            out = copy.copy(self)
-            out.reset()
-            out.sub_exprs = sub_exprs1
-            return out
+        return list(new_expr_generator)
 
     def substitute(self, e0, e1):
         if self == e0: # based on repr !
@@ -94,7 +101,9 @@ class Constructor(object):
         self.reading = None
         self.is_subtence = False
     
-    def __str__(self): return self.code
+    def __repr__(self): return sys.intern(self.name)
+    def __eq__(self, other):
+        return repr(self) == repr(other)
 
     # A constructor behaves like an Expression
     def annotate(self, symbol_decls, q_decls): return self
@@ -139,28 +148,28 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
+    @immutable
     def update_exprs(self, new_expr_generator):
         if_ = next(new_expr_generator)
         if if_ == TRUE:
-            return next(new_expr_generator).copy_annotation(self)
+            return next(new_expr_generator)
         elif if_ == FALSE:
             next(new_expr_generator)
-            return next(new_expr_generator).copy_annotation(self)
+            return next(new_expr_generator)
         else:
             then_ = next(new_expr_generator)
             else_ = next(new_expr_generator)
             if then_ == TRUE:
                 if else_ == TRUE:
-                    return TRUE.copy_annotation(self)
+                    return TRUE
                 elif else_ == FALSE:
-                    return if_.copy_annotation(self)
+                    return if_
             elif then_ == FALSE:
                 if else_ == FALSE:
-                    return FALSE.copy_annotation(self)
+                    return FALSE
                 elif else_ == TRUE:
-                    return NOT(if_).copy_annotation(self)
-        sub_exprs1 = [if_, then_, else_]
-        return Expression.update_exprs(self, sub_exprs1) # super().update_exprs
+                    return NOT(if_)
+        return [if_, then_, else_]
 
 
     def translate(self):
@@ -197,9 +206,11 @@ class AQuantification(Expression):
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         return self
 
+    @immutable
     def expand_quantifiers(self, theory):
         forms = [self.sub_exprs[0].expand_quantifiers(theory)]
         self.vars = []
+        self.sorts = [] # not used
         for name, var in self.q_decls.items():
             if var.decl.range:
                 forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
@@ -207,11 +218,7 @@ class AQuantification(Expression):
                 self.vars.append(var)
         op = '∧' if self.q == '∀' else '∨'
         out = operation(op, forms)
-        if not self.vars:
-            return out.copy_annotation(self)
-        self.sub_exprs = [ out ]
-        self.sorts = [] # not used
-        return self
+        return out if not self.vars else [out]
 
     def translate(self):
         for v in self.q_decls.values():
@@ -315,27 +322,31 @@ class BinaryOperator(Expression):
         return self.translated
 
 class AImplication(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator): 
         exprs = list(new_expr_generator)
         if len(exprs) == 2: #TODO deal with associativity
             if exprs[0] == FALSE: # (false => p) is true
-                return TRUE.copy_annotation(self)
+                return TRUE
             if exprs[0] == TRUE: # (true => p) is p
-                return exprs[1].copy_annotation(self)
+                return exprs[1]
             if exprs[1] == TRUE: # (p => true) is true
-                return TRUE.copy_annotation(self)
+                return TRUE
             if exprs[1] == FALSE: # (p => false) is ~p
-                return NOT(exprs[0]).copy_annotation(self)
-        return Expression.update_exprs(self, exprs)
+                return NOT(exprs[0])
+        return exprs
         
 class AEquivalence(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator): 
         exprs = list(new_expr_generator)
         if any(e == TRUE for e in exprs):
-            return operation('∧', exprs).copy_annotation(self)
+            return operation('∧', exprs)
         if any(e == FALSE for e in exprs):
-            return operation('∧', [NOT(e) for e in exprs]).copy_annotation(self)
-        return Expression.update_exprs(self, exprs)
+            return operation('∧', [NOT(e) for e in exprs])
+        return exprs
     
 class ARImplication(BinaryOperator):
     def annotate(self, symbol_decls, q_decls):
@@ -345,48 +356,54 @@ class ARImplication(BinaryOperator):
         return out.annotate(symbol_decls, q_decls)
 
 class ADisjunction(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator):
         exprs = []
         for expr in new_expr_generator:
             if expr == TRUE:
-                return TRUE.copy_annotation(self)
+                return TRUE
             if expr == FALSE:
                 pass
             else:
                 exprs.append(expr)
         if len(exprs) == 0:
-            return FALSE.copy_annotation(self)
+            return FALSE
         if len(exprs) == 1:
-            return exprs[0].copy_annotation(self)
-        return Expression.update_exprs(self, exprs)
+            return exprs[0]
+        return exprs
         
 class AConjunction(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator):
         exprs = []
         for expr in new_expr_generator:
             if expr == TRUE:
                 pass
             elif expr == FALSE:
-                return FALSE.copy_annotation(self)
+                return FALSE
             else:
                 exprs.append(expr)
         if len(exprs) == 0:
-            return TRUE.copy_annotation(self)
+            return TRUE
         if len(exprs) == 1:
-            return exprs[0].copy_annotation(self)
-        return Expression.update_exprs(self, exprs)
+            return exprs[0]
+        return exprs
 
 class AComparison(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator):
         operands = list(new_expr_generator)
         if all(type(e) == NumberConstant for e in operands):
             acc = operands[0]
             for op, expr in zip(self.operator, operands[1:]):
                 if not (BinaryOperator.MAP[op]) (acc.translated, expr.translated):
-                    return FALSE.copy_annotation(self)
+                    return FALSE
                 acc = expr
-            return TRUE.copy_annotation(self)
-        return Expression.update_exprs(self, operands)
+            return TRUE
+        return operands
 
 
 def update_arith(self, family, new_expr_generator):
@@ -415,43 +432,47 @@ def update_arith(self, family, new_expr_generator):
 
     # analyse results
     if family == '*' and acc == 0:
-        return ZERO.copy_annotation(self)
+        return ZERO
     elif (family == '+' and acc != 0) or (family == '*' and acc != 1):
         exprs = [NumberConstant(number=str(acc))] + exprs
     else:
         del ops[0]
     if len(exprs)==1: 
-        return exprs[0].copy_annotation(self)
-    out = Expression.update_exprs(self, exprs) # super().udpate_exprs
-    out.operator = ops
-    return out
+        return exprs[0]
+    return (exprs, ops)
 
 
 class ASumMinus(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator):
         return update_arith(self, '+', new_expr_generator)
 
 class AMultDiv(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator):
         if any(op == '%' for op in self.operator): # special case !
             operands = list(new_expr_generator)
             if len(operands) == 2 \
             and all(type(e) == NumberConstant for e in operands):
                 out = operands[0].translated % operands[1].translated
-                return NumberConstant(number=str(out)).copy_annotation(self)
+                return NumberConstant(number=str(out))
             else:
-                return super().update_exprs(operands)
+                return operands
         return update_arith(self, '*', new_expr_generator)
 
 class APower(BinaryOperator):
+
+    @immutable
     def update_exprs(self, new_expr_generator):
         operands = list(new_expr_generator)
         if len(operands) == 2 \
         and all(type(e) == NumberConstant for e in operands):
             out = operands[0].translated ** operands[1].translated
-            return NumberConstant(number=str(out)).copy_annotation(self)
+            return NumberConstant(number=str(out))
         else:
-            return super().update_exprs(operands)
+            return operands
 
 classes = { '∧': AConjunction,
             '∨': ADisjunction,
@@ -503,14 +524,15 @@ class AUnary(Expression):
         self.type = self.sub_exprs[0].type
         return self
 
+    @immutable
     def update_exprs(self, new_expr_generator):
         operand = next(new_expr_generator)
         if self.operator == '~':
             if operand == TRUE:
-                return FALSE.copy_annotation(self)
+                return FALSE
             if operand == FALSE:
-                return TRUE.copy_annotation(self)
-        return Expression.update_exprs(self, [operand])
+                return TRUE
+        return [operand]
 
     def translate(self):
         out = self.sub_exprs[0].translate()
