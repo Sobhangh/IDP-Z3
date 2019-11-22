@@ -56,12 +56,12 @@ class Equality(object):
     def __init__(self, subtence, value):
         self.subtence = subtence # an Expression
         self.value = value # a Z3 value
-        self.str = subtence.str + " = " + str(value)
+        self.code = subtence.code + " = " + str(value)
         self.type = 'bool'
         self.translated = (subtence.translated == value) #TODO
         self.reading = ""
 
-    def __str__(self): return self.str
+    def __str__(self): return self.code
 
     def unknown_symbols(self):
         return self.subtence.unknown_symbols()
@@ -140,7 +140,7 @@ class Structure_(object):
 
         def initialise(atom, ct_true, ct_false, value=""):
             atomZ3 = atom.translated #TODO
-            key = atom.str
+            key = atom.code
             typ = atomZ3.sort().name()
             for symb in atom.unknown_symbols().values():
                 s = self.m.setdefault(symb.name, {})
@@ -171,7 +171,7 @@ class Structure_(object):
             self.addValue(atom.subtence, atom.value)
         atomZ3 = atom.translated
         if not is_bool(atomZ3): return
-        key = atom.str
+        key = atom.code
         for symb in atom.unknown_symbols().keys():
             s = self.m.setdefault(symb, {})
             if key in s:
@@ -183,7 +183,7 @@ class Structure_(object):
 
     def addValue(self, atom, value):
         symbol = atom.translated
-        key = atom.str
+        key = atom.code
         typ = symbol.sort().name()
         for name, symb in atom.unknown_symbols().items():
             s = self.m.setdefault(name, {})

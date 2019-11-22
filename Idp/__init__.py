@@ -235,13 +235,13 @@ class SymbolDeclaration(object):
                 expr = Variable(name=self.name)
                 expr.annotate(symbol_decls, {})
                 expr.normal = True
-                self.instances[expr.str] = expr
+                self.instances[expr.code] = expr
             else:
                 for arg in list(self.domain):
                     expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                     expr.annotate(symbol_decls, {})
                     expr.normal = True
-                    self.instances[expr.str] = expr
+                    self.instances[expr.code] = expr
         return self
         
 
@@ -294,10 +294,10 @@ class SymbolDeclaration(object):
 class Sort(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.str = sys.intern(self.name)
+        self.code = sys.intern(self.name)
         self.decl = None
 
-    def __str__(self): return self.str
+    def __str__(self): return self.code
 
     def annotate(self, symbol_decls):
         self.decl = symbol_decls[self.name]
