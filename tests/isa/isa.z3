@@ -18,10 +18,10 @@ And(typeOf(regular_triangle) == triangle,
     Not(typeOf(square) == triangle),
     typeOf(square) == quadrilateral)
 
-And(If(typeOf(regular_triangle) == triangle, True, False),
-    If(typeOf(right_triangle) == triangle, True, False),
-    If(typeOf(rectangle) == quadrilateral, True, False),
-    If(typeOf(square) == quadrilateral, True, False))
+And(typeOf(regular_triangle) == triangle,
+    typeOf(right_triangle) == triangle,
+    typeOf(rectangle) == quadrilateral,
+    typeOf(square) == quadrilateral)
 
 Type == typeOf(Subtype)
 

@@ -161,9 +161,10 @@ class IfExpr(Expression):
 
 
     def translate(self):
-        self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate()
-                            , self.sub_exprs[IfExpr.THEN].translate()
-                            , self.sub_exprs[IfExpr.ELSE].translate())
+        if self.translated is None:
+            self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate()
+                                , self.sub_exprs[IfExpr.THEN].translate()
+                                , self.sub_exprs[IfExpr.ELSE].translate())
         return self.translated
 
 class AQuantification(Expression):
@@ -208,22 +209,23 @@ class AQuantification(Expression):
         return out if not self.vars else [out]
 
     def translate(self):
-        for v in self.q_decls.values():
-            v.translate()
-        if not self.vars:
-            self.translated = self.sub_exprs[0].translate()
-        else:
-            finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
-
-            if self.q == '∀':
-                forms = And(forms) if 1<len(forms) else forms[0]
-                if len(finalvars) > 0: # not fully expanded !
-                    forms = ForAll(finalvars, forms)
+        if self.translated is None:
+            for v in self.q_decls.values():
+                v.translate()
+            if not self.vars:
+                self.translated = self.sub_exprs[0].translate()
             else:
-                forms = Or(forms) if 1<len(forms) else forms[0]
-                if len(finalvars) > 0: # not fully expanded !
-                    forms = Exists(finalvars, forms)
-            self.translated = forms
+                finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
+
+                if self.q == '∀':
+                    forms = And(forms) if 1<len(forms) else forms[0]
+                    if len(finalvars) > 0: # not fully expanded !
+                        forms = ForAll(finalvars, forms)
+                else:
+                    forms = Or(forms) if 1<len(forms) else forms[0]
+                    if len(finalvars) > 0: # not fully expanded !
+                        forms = Exists(finalvars, forms)
+                self.translated = forms
         return self.translated
 
 class BinaryOperator(Expression):
@@ -274,36 +276,37 @@ class BinaryOperator(Expression):
         return self
 
     def translate(self):
-        # chained comparisons -> And()
-        if self.operator[0] =='≠' and len(self.sub_exprs)==2:
-            x = self.sub_exprs[0].translate()
-            y = self.sub_exprs[1].translate()
-            out = Not(x==y)
-        elif self.operator[0] in '=<>≤≥≠':
-            out = []
-            for i in range(1, len(self.sub_exprs)):
-                x = self.sub_exprs[i-1].translate()
-                function = BinaryOperator.MAP[self.operator[i - 1]]
-                y = self.sub_exprs[i].translate()
-                try:
-                    out = out + [function(x, y)]
-                except Z3Exception as E:
-                    raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
-            if 1 < len(out):
-                out = And(out)
+        if self.translated is None:
+            # chained comparisons -> And()
+            if self.operator[0] =='≠' and len(self.sub_exprs)==2:
+                x = self.sub_exprs[0].translate()
+                y = self.sub_exprs[1].translate()
+                out = Not(x==y)
+            elif self.operator[0] in '=<>≤≥≠':
+                out = []
+                for i in range(1, len(self.sub_exprs)):
+                    x = self.sub_exprs[i-1].translate()
+                    function = BinaryOperator.MAP[self.operator[i - 1]]
+                    y = self.sub_exprs[i].translate()
+                    try:
+                        out = out + [function(x, y)]
+                    except Z3Exception as E:
+                        raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
+                if 1 < len(out):
+                    out = And(out)
+                else:
+                    out = out[0]
+            elif self.operator[0] == '∧':
+                out = And([e.translate() for e in self.sub_exprs])
+            elif self.operator[0] == '∨':
+                out = Or ([e.translate() for e in self.sub_exprs])
             else:
-                out = out[0]
-        elif self.operator[0] == '∧':
-            out = And([e.translate() for e in self.sub_exprs])
-        elif self.operator[0] == '∨':
-            out = Or ([e.translate() for e in self.sub_exprs])
-        else:
-            out = self.sub_exprs[0].translate()
+                out = self.sub_exprs[0].translate()
 
-            for i in range(1, len(self.sub_exprs)):
-                function = BinaryOperator.MAP[self.operator[i - 1]]
-                out = function(out, self.sub_exprs[i].translate())
-        self.translated = out
+                for i in range(1, len(self.sub_exprs)):
+                    function = BinaryOperator.MAP[self.operator[i - 1]]
+                    out = function(out, self.sub_exprs[i].translate())
+            self.translated = out
         return self.translated
 
 class AImplication(BinaryOperator):
@@ -470,12 +473,12 @@ classes = { '∧': AConjunction,
             '/': AMultDiv,
             '%': AMultDiv,
             '^': APower,
-            '=': AConjunction,
-            '<': AConjunction,
-            '>': AConjunction,
-            '≤': AConjunction,
-            '≥': AConjunction,
-            '≠': AConjunction,
+            '=': AComparison,
+            '<': AComparison,
+            '>': AComparison,
+            '≤': AComparison,
+            '≥': AComparison,
+            '≠': AComparison,
             }
 
 def operation(ops, operands):
@@ -517,9 +520,10 @@ class AUnary(Expression):
         return [operand]
 
     def translate(self):
-        out = self.sub_exprs[0].translate()
-        function = AUnary.MAP[self.operator]
-        self.translated = function(out)
+        if self.translated is None:
+            out = self.sub_exprs[0].translate()
+            function = AUnary.MAP[self.operator]
+            self.translated = function(out)
         return self.translated
 
 def NOT(expr):
@@ -578,9 +582,10 @@ class AAggregate(Expression):
         return forms
 
     def translate(self):
-        for v in self.q_decls.values():
-            v.translate()
-        self.translated = Sum([f.translate() for f in self.sub_exprs])
+        if self.translated is None:
+            for v in self.q_decls.values():
+                v.translate()
+            self.translated = Sum([f.translate() for f in self.sub_exprs])
         return self.translated
 
 
@@ -608,7 +613,9 @@ class AppliedSymbol(Expression):
     def interpret(self, theory):
         sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
         if self.decl.interpretation is not None:
-            return (self.decl.interpretation)(theory, 0, sub_exprs)
+            out = (self.decl.interpretation)(theory, 0, sub_exprs)
+            self.code = str(out) # we don't want this symbol in the code
+            return out
         else:
             return self
 
