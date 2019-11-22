@@ -7,7 +7,7 @@ import os
 import re
 import sys
 
-from z3 import FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
+from z3 import FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
 
 from Inferences import ConfigCase
 
@@ -42,10 +42,12 @@ def immutable(func):
         out.reading = self.reading
         out.is_subtence = self.is_subtence
         out.type = self.type
+        # out.normal is not set, normally
         return out
     return wrapper_decorator
         
 class Expression(object):
+    COUNT = 0
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     def __init__(self):
         self.code = sys.intern(str(self)) # normalized idp code, before transformations
@@ -54,6 +56,8 @@ class Expression(object):
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
         self.translated = None            # the Z3 equivalent
+        self._reified = None               # 
+        # .normal : only set in .instances
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -90,6 +94,15 @@ class Expression(object):
             for e in self.sub_exprs:
                 self._unknown_symbols.update(e.unknown_symbols())
         return self._unknown_symbols
+
+    def reified(self):
+        if self._reified is None:
+            if self.type == 'bool':
+                self._reified = Const('*'+str(Expression.COUNT), BoolSort())
+                Expression.COUNT += 1
+            else:
+                self._reified = self.translate()
+        return self._reified
 
 
 class Constructor(Expression):
@@ -158,7 +171,6 @@ class IfExpr(Expression):
                 elif else_ == TRUE:
                     return NOT(if_)
         return [if_, then_, else_]
-
 
     def translate(self):
         if self.translated is None:
@@ -501,6 +513,7 @@ class AUnary(Expression):
         super().__init__()
 
         self.is_subtence = False
+
     def __str__(self):
         return self.operator + self.sub_exprs[0].code
 
@@ -655,10 +668,15 @@ class Variable(Expression):
     def annotate(self, symbol_decls, q_decls):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
             return symbol_decls[self.name]
-        self.decl = q_decls[self.name] if self.name in q_decls \
-            else symbol_decls[self.name]
-        self.type = self.decl.type
-        self.is_subtence = self.type == 'bool'
+        if self.name in q_decls:
+            self.decl = q_decls[self.name]
+            self.type = self.decl.type
+            self.is_subtence = False
+        else:
+            self.decl = symbol_decls[self.name]
+            self.type = self.decl.type.name
+            self.is_subtence = self.type == 'bool'
+            self.normal = True # make sure it is visible in GUI
         return self
 
     def unknown_symbols(self):

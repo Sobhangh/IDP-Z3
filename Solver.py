@@ -65,17 +65,11 @@ def reifier(atoms, solver):
     # creates a proposition variable for each boolean expression
     # returns ({atom: predicateZ3}, {predicateZ3: atom})
     count, (reify, unreify) = 0, ({}, {})
-    for atom in atoms:
-        atomZ3 = atom.translated
-        if not is_bool(atomZ3):
-            reify[atom] = atomZ3
-            unreify[atomZ3] = atom
-        else:
-            count += 1
-            const = Const("iuzctedvqsdgqe"+str(count), BoolSort())
-            reify[atom] = const
-            unreify[const] = atom
-            solver.add(const == atomZ3)
+    for atom in atoms.values():
+        reify[atom] = atom.reified()
+        unreify[atom.reified()] = atom
+        if atom.type == 'bool':
+            solver.add(atom.reified() == atom.translated)
     return (reify, unreify)
 
 
@@ -85,10 +79,10 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
     """
 
     if solver is None:
-        solver, _, unreify = mk_solver(theory, atoms)
+        solver, reify, unreify = mk_solver(theory, atoms)
 
     out = {} # {LiteralQ: True}
-    todo = [k for (k,v) in unreify.items() \
+    todo = [k for (v,k) in reify.items() \
             if not LiteralQ(True, v) in ignored and not LiteralQ(False, v) in ignored]
 
 
