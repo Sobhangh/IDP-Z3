@@ -44,21 +44,20 @@ def immutable(func):
     return wrapper_decorator
         
 class Expression(object):
-    # .code : normalized idp code, before transformations
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
-    # .type : a declaration object, or 'bool', 'real', 'int', or None
-    # .is_subtence : True if sub-sentence in original code
-    # .translated : the Z3 equivalent
-    # ._unknown_symbols : list of uninterpreted symbols not starting with '_'
-    # .reading : English reading
-    
+    def __init__(self):
+        self.code = sys.intern(str(self)) # normalized idp code, before transformations
+        self.reading = None # English reading
+        self.is_subtence = None # True if sub-sentence in original code
+        self._unknown_symbols = None # list of uninterpreted symbols not starting with '_'
+        self.type = None # a declaration object, or 'bool', 'real', 'int', or None
+        self.translated = None # the Z3 equivalent
+
     def __eq__(self, other):
-        return repr(self) == repr(other)
+        return str(self) == str(other)
     
     def __hash__(self):
         return hash(self.code)
-
-    def __str__(self): return self.code
 
     def subtences(self):
         if self.is_subtence:
@@ -95,15 +94,15 @@ class Constructor(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.is_var = False
-        self.code = sys.intern(self.name)
+        self.code = sys.intern(str(self))
         self.translated = None
         self.type = None
         self.reading = None
         self.is_subtence = False
     
-    def __repr__(self): return sys.intern(self.name)
+    def __str__(self): return self.name
     def __eq__(self, other):
-        return repr(self) == repr(other)
+        return str(self) == str(other)
 
     # A constructor behaves like an Expression
     def annotate(self, symbol_decls, q_decls): return self
@@ -130,17 +129,14 @@ class IfExpr(Expression):
         self.else_f = kwargs.pop('else_f')
 
         self.sub_exprs = [self.if_f, self.then_f, self.else_f]
-        self.code = repr(self)
-        self._unknown_symbols = None
-        self.translated = None
-        self.type = None
-        self.reading = None
-        self.is_subtence = False
+        super().__init__()
 
-    def __repr__(self):
-        return sys.intern("if "    + self.sub_exprs[IfExpr.IF  ].code \
-                        + " then " + self.sub_exprs[IfExpr.THEN].code \
-                        + " else " + self.sub_exprs[IfExpr.ELSE].code)
+        self.is_subtence = False
+        
+    def __str__(self):
+        return "if "    + self.sub_exprs[IfExpr.IF  ].code \
+             + " then " + self.sub_exprs[IfExpr.THEN].code \
+             + " else " + self.sub_exprs[IfExpr.ELSE].code
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
@@ -185,19 +181,18 @@ class AQuantification(Expression):
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.f = kwargs.pop('f')
+
         self.sub_exprs = [self.f]
-        self.code = repr(self)
+        super().__init__()
+
         self.q_decls = {}
-        self._unknown_symbols = None
-        self.translated = None
         self.type = 'bool'
-        self.reading = None
         self.is_subtence = True
 
-    def __repr__(self):
-        return sys.intern(self.q \
+    def __str__(self):
+        return self.q \
             + "".join([v + "[" + s.code + "]" for v, s in zip(self.vars, self.sorts)]) \
-            + " : " + self.sub_exprs[0].code)
+            + " : " + self.sub_exprs[0].code
 
     def annotate(self, symbol_decls, q_decls):
         self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
@@ -262,23 +257,21 @@ class BinaryOperator(Expression):
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
         self.operator = kwargs.pop('operator')
+
         self.operator = list(map(
             lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
                 "∨" if op == "|" else "∧" if op == "&" else op
             , self.operator))
-        self.code = repr(self)
-        self._unknown_symbols = None
-        self.translated = None
-        self.type = None
-        self.reading = None
+        super().__init__()
+
         self.is_subtence = self.operator[0] in '=<>≤≥≠'
 
-    def __repr__(self):
+    def __str__(self):
         temp = self.sub_exprs[0].code
         for i in range(1, len(self.sub_exprs)):
             temp += " " + self.operator[i-1] + " " + self.sub_exprs[i].code
-        return sys.intern(temp)
+        return temp
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
@@ -508,16 +501,13 @@ class AUnary(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
-        self.sub_exprs = [self.f]
-        self.code = repr(self)
-        self._unknown_symbols = None
-        self.translated = None
-        self.type = None
-        self.reading = None
-        self.is_subtence = False
 
-    def __repr__(self):
-        return sys.intern(self.operator + self.sub_exprs[0].code)
+        self.sub_exprs = [self.f]
+        super().__init__()
+
+        self.is_subtence = False
+    def __str__(self):
+        return self.operator + self.sub_exprs[0].code
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
@@ -556,13 +546,10 @@ class AAggregate(Expression):
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
-        self.q_decls = {}
         self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
-        self.code = repr(self)
-        self._unknown_symbols = None
-        self.translated = None
-        self.type = None
-        self.reading = None
+        super().__init__()
+
+        self.q_decls = {}
         self.is_subtence = False
 
         if self.aggtype == "sum" and self.out is None:
@@ -570,12 +557,12 @@ class AAggregate(Expression):
         if self.aggtype != "sum" and self.out is not None:
             raise Exception("Can't have output variable for #")
 
-    def __repr__(self):
+    def __str__(self):
         out = self.aggtype + "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
         out += ":" + self.sub_exprs[AAggregate.CONDITION].code
         if self.out: out += " : " + self.sub_exprs[AAggregate.OUT].code
         out += "}"
-        return sys.intern(out)
+        return out
 
     def annotate(self, symbol_decls, q_decls):   
         self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
@@ -609,18 +596,14 @@ class AppliedSymbol(Expression):
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
-        self.sub_exprs = self.args.sub_exprs
-        self.code = repr(self)
-        self._unknown_symbols = None
-        self.translated = None
-        self.decl = None
-        self.type = None
-        self.reading = None
-        # .normal (only if ground) used on client side
-        self.is_subtence = None
 
-    def __repr__(self):
-        return sys.intern(self.s.code + "(" + ",".join([x.code for x in self.sub_exprs]) + ")")
+        self.sub_exprs = self.args.sub_exprs
+        super().__init__()
+
+        self.decl = None
+
+    def __str__(self):
+        return self.s.code + "(" + ",".join([x.code for x in self.sub_exprs]) + ")"
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
@@ -655,22 +638,19 @@ class AppliedSymbol(Expression):
 class Arguments(object):
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
+        super().__init__()
 
 class Variable(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.code = repr(self)
-        self._unknown_symbols = None
-        self.translated = None
+
+        super().__init__()
+
         self.sub_exprs = []
         self.decl = None
-        self.type = None
-        self.reading = None
-        # .normal (only if ground)
-        self.is_subtence = None
 
-    def __repr__(self):
-        return sys.intern(self.name)
+    def __str__(self):
+        return self.name
 
     def annotate(self, symbol_decls, q_decls):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
@@ -696,17 +676,17 @@ class Symbol(Variable): pass
 class Fresh_Variable(Expression):
     def __init__(self, name, decl):
         self.name = name
-        self.code = repr(self)
         self.decl = decl
+
+        super().__init__()
+
         self.type = self.decl.name
         self._unknown_symbols = {}
-        self.translated = None
         self.sub_exprs = []
-        self.reading = None
         self.is_subtence = False
 
-    def __repr__(self):
-        return sys.intern(self.name)
+    def __str__(self):
+        return self.name
 
     def translate(self):
         if self.translated is None:
@@ -716,8 +696,9 @@ class Fresh_Variable(Expression):
 class NumberConstant(Expression):
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
-        self.code = repr(self)
-        self._unknown_symbols = None
+
+        super().__init__()
+
         self.sub_exprs = []
         try:
             self.translated = int(self.number)
@@ -727,8 +708,8 @@ class NumberConstant(Expression):
             self.type = 'real'
         self.is_subtence = False
     
-    def __repr__(self):
-        return sys.intern(self.number)
+    def __str__(self):
+        return self.number
 
     def annotate(self, symbol_decls, q_decls): return self
 
@@ -741,16 +722,16 @@ ONE  = NumberConstant(number='1')
 class Brackets(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        self.reading = kwargs.pop('reading')
+        reading = kwargs.pop('reading')
         self.sub_exprs = [self.f]
-        self.code = repr(self)
-        self._unknown_symbols = None
-        self.translated = None
-        self.type = None
+
+        super().__init__()
+        self.reading = reading
+
         self.is_subtence = False
 
-    def __repr__(self):
-        return sys.intern("(" + self.sub_exprs[0].code + ")")
+    def __str__(self):
+        return "(" + self.sub_exprs[0].code + ")"
 
     def annotate(self, symbol_decls, q_decls):
         out = self.f.annotate(symbol_decls, q_decls)
