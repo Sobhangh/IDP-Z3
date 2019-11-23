@@ -753,7 +753,18 @@ class Brackets(Expression):
         return f"({self.sub_exprs[0].code})"
 
     def annotate(self, symbol_decls, q_decls):
-        out = self.f.annotate(symbol_decls, q_decls)
-        out.reading = self.reading
-        return out
+        self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_decls)]
+        self.type = self.sub_exprs[0].type
+        self.sub_exprs[0].reading = self.reading
+        return self
+
+    @immutable
+    def update_exprs(self, new_expr_generator):
+        expr = next(new_expr_generator)
+        if type(expr) in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable]:
+            return expr # simplify by removing brackets around terms
+        return [expr]
+
+    def translate(self):
+        return self.sub_exprs[0].translate()
 
