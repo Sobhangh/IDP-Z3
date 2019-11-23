@@ -12,7 +12,7 @@ Prime(3)
 Prime(4)
 
 -- propagation
-{'Prime': {'Prime(1)': {'cf': False, 'ct': True, 'normal': True, 'typ': 'Bool'},
-           'Prime(2)': {'cf': False, 'ct': True, 'normal': True, 'typ': 'Bool'},
-           'Prime(3)': {'cf': False, 'ct': True, 'normal': True, 'typ': 'Bool'},
-           'Prime(4)': {'cf': True, 'ct': False, 'normal': True, 'typ': 'Bool'}}}
+{'Prime': {'Prime(1)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(1)', 'typ': 'Bool'},
+           'Prime(2)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(2)', 'typ': 'Bool'},
+           'Prime(3)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(3)', 'typ': 'Bool'},
+           'Prime(4)': {'cf': True, 'ct': False, 'normal': True, 'reading': 'Prime(4)', 'typ': 'Bool'}}}

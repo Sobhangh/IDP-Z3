@@ -51,12 +51,12 @@ class Expression(object):
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     def __init__(self):
         self.code = sys.intern(str(self)) # normalized idp code, before transformations
-        self.reading = None               # English reading
+        self.reading = self.code          # English reading
         self.is_subtence = None           # True if sub-sentence in original code
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
         self.translated = None            # the Z3 equivalent
-        self._reified = None               # 
+        self._reified = None
         # .normal : only set in .instances
 
     def __eq__(self, other):
