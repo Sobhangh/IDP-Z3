@@ -139,9 +139,9 @@ class IfExpr(Expression):
         self.is_subtence = False
 
     def __str__(self):
-        return "if "    + self.sub_exprs[IfExpr.IF  ].code \
-             + " then " + self.sub_exprs[IfExpr.THEN].code \
-             + " else " + self.sub_exprs[IfExpr.ELSE].code
+        return ( f" if   {self.sub_exprs[IfExpr.IF  ].code}"
+                 f" then {self.sub_exprs[IfExpr.THEN].code}"
+                 f" else {self.sub_exprs[IfExpr.ELSE].code}" )
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
@@ -195,9 +195,8 @@ class AQuantification(Expression):
         self.is_subtence = True
 
     def __str__(self):
-        return self.q \
-            + "".join([v + "[" + s.code + "]" for v, s in zip(self.vars, self.sorts)]) \
-            + " : " + self.sub_exprs[0].code
+        vars = ''.join([f"{v}[{s.code}]" for v, s in zip(self.vars, self.sorts)])
+        return f"{self.q}{vars} : {self.sub_exprs[0].code}"
 
     def annotate(self, symbol_decls, q_decls):
         self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
@@ -276,7 +275,7 @@ class BinaryOperator(Expression):
     def __str__(self):
         temp = self.sub_exprs[0].code
         for i in range(1, len(self.sub_exprs)):
-            temp += " " + self.operator[i-1] + " " + self.sub_exprs[i].code
+            temp += f" {self.operator[i-1]} {self.sub_exprs[i].code}"
         return temp
 
     def annotate(self, symbol_decls, q_decls):
@@ -515,7 +514,7 @@ class AUnary(Expression):
         self.is_subtence = False
 
     def __str__(self):
-        return self.operator + self.sub_exprs[0].code
+        return f"{self.operator}({self.sub_exprs[0].code})"
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
@@ -567,10 +566,12 @@ class AAggregate(Expression):
             raise Exception("Can't have output variable for #")
 
     def __str__(self):
-        out = self.aggtype + "{" + "".join([str(v) + "[" + str(s) + "]" for v, s in zip(self.vars, self.sorts)])
-        out += ":" + self.sub_exprs[AAggregate.CONDITION].code
-        if self.out: out += " : " + self.sub_exprs[AAggregate.OUT].code
-        out += "}"
+        vars = "".join([f"{str(v)}[{str(s)}]" for v, s in zip(self.vars, self.sorts)])
+        output = f" : {self.sub_exprs[AAggregate.OUT].code}" if self.out else ""
+        out = ( f"{self.aggtype}{{{vars} : "
+                f"{self.sub_exprs[AAggregate.CONDITION].code}"
+                f"{output}}}"
+              )
         return out
 
     def annotate(self, symbol_decls, q_decls):   
@@ -613,7 +614,7 @@ class AppliedSymbol(Expression):
         self.decl = None
 
     def __str__(self):
-        return self.s.code + "(" + ",".join([x.code for x in self.sub_exprs]) + ")"
+        return f"{self.s.code}({','.join([x.code for x in self.sub_exprs])})"
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
@@ -749,7 +750,7 @@ class Brackets(Expression):
         self.is_subtence = False
 
     def __str__(self):
-        return "(" + self.sub_exprs[0].code + ")"
+        return f"({self.sub_exprs[0].code})"
 
     def annotate(self, symbol_decls, q_decls):
         out = self.f.annotate(symbol_decls, q_decls)

@@ -8,7 +8,7 @@ from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists,
     Sum, If, BoolVal, Function, FreshConst, Implies, EnumSort
 
 from Inferences import ConfigCase
-from utils import applyTo, log, itertools, in_list
+from utils import applyTo, log, itertools, in_list, nl
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, operation, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
@@ -85,9 +85,10 @@ class Vocabulary(object):
             s.annotate(self.symbol_decls)
 
     def __str__(self):
-        return ( "vocabulary {\n"
-               + "\n".join(str(i) for i in self.declarations)
-               + "\n}\n" )
+        return ( f"vocabulary {{{nl}"
+                 f"{nl.join(str(i) for i in self.declarations)}"
+                 f"{nl}}}{nl}"
+               )
 
     def translate(self, idp):
         for i in self.declarations:
@@ -118,10 +119,9 @@ class ConstructedTypeDeclaration(object):
         self.type = None
 
     def __str__(self):
-        return ( "type " + self.name
-               + " constructed from {"
-               + ",".join(map(str, self.constructors))
-               + "}")
+        return ( f"type {self.name} constructed from "
+                 f"{{{','.join(map(str, self.constructors))}}}"
+               )
 
     def annotate(self, symbol_decls):
         assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
@@ -164,10 +164,8 @@ class RangeDeclaration(object):
         self.type = None
 
     def __str__(self):
-        return ( "type " + self.name
-               + " = {"
-               + ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
-               + "}")
+        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
+        return f"type {self.name} = {{{elements}}}"
 
     def annotate(self, symbol_decls):
         assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
@@ -212,9 +210,9 @@ class SymbolDeclaration(object):
         self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
 
     def __str__(self):
-        return ( self.name
-               + ("({})".format(",".join(map(str, self.sorts))) if 0<len(self.sorts) else "")
-               + ("" if self.out.name == 'bool' else " : " + self.out.name)
+        return ( f"{self.name}"
+                 f"({','.join(map(str, self.sorts)) if 0<len(self.sorts) else ''})"
+                 f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}"
         )
 
     def annotate(self, symbol_decls, vocabulary=True):
@@ -368,7 +366,7 @@ class Definition(object):
         for symbol, rules in self.partition.items():
             for rule in rules:
                 out.append(repr(rule))
-        return "\r\n".join(out)
+        return nl.join(out)
 
     def annotate(self, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]

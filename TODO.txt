@@ -43,6 +43,9 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
+    - compute .code for any expand quantifier
+    - simplify bracket only if term (for () in .code)
+    - Expr.subtence -> Expr.ranking ?
     - cache for Expression.__str__
     - explain: use consequences() for rules too ? or unsat_core for evidences ?
     - avoid quantifiers in definitions

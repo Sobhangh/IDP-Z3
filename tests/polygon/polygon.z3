@@ -120,8 +120,8 @@ Subtype = irregular
 Subtype = square
 Subtype = rectangle
 ∀n[side] : Angle(n) = 90 ∨ Sides < n
-Perimeter = sum{n[side]:true : Length(n)}
-sum{n[side]:true : Angle(n)} = (Sides - 2) * 180
+Perimeter = sum{n[side] : true : Length(n)}
+sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : Angle(n) = 0 ⇔ Vertices < n
@@ -132,12 +132,12 @@ sum{n[side]:true : Angle(n)} = (Sides - 2) * 180
            'Angle(2)': {'normal': True, 'typ': 'Real', 'value': ''},
            'Angle(3)': {'normal': True, 'typ': 'Real', 'value': ''},
            'Angle(4)': {'normal': True, 'typ': 'Real', 'value': ''},
-           'sum{n[side]:true : Angle(n)} = (Sides - 2) * 180': {'cf': False,
-                                                                'ct': False,
-                                                                'normal': False,
-                                                                'reading': 'The sum of the angles is 180° for a '
-                                                                           'triangle, and 360° for a quadrilateral',
-                                                                'typ': 'Bool'},
+           'sum{n[side] : true : Angle(n)} = (Sides - 2) * 180': {'cf': False,
+                                                                  'ct': False,
+                                                                  'normal': False,
+                                                                  'reading': 'The sum of the angles is 180° for a '
+                                                                             'triangle, and 360° for a quadrilateral',
+                                                                  'typ': 'Bool'},
            '∀n[side] : Angle(n) < 180': {'cf': False,
                                          'ct': False,
                                          'normal': False,
@@ -180,12 +180,12 @@ sum{n[side]:true : Angle(n)} = (Sides - 2) * 180
            'Large(3)': {'cf': True, 'ct': False, 'normal': True, 'typ': 'Bool'},
            'Large(4)': {'cf': True, 'ct': False, 'normal': True, 'typ': 'Bool'}},
  'Perimeter': {'Perimeter': {'normal': True, 'typ': 'Real', 'value': '10'},
-               'Perimeter = sum{n[side]:true : Length(n)}': {'cf': False,
-                                                             'ct': False,
-                                                             'normal': False,
-                                                             'reading': 'The perimeter is the sum of the lengths of '
-                                                                        'the sides',
-                                                             'typ': 'Bool'}},
+               'Perimeter = sum{n[side] : true : Length(n)}': {'cf': False,
+                                                               'ct': False,
+                                                               'normal': False,
+                                                               'reading': 'The perimeter is the sum of the lengths of '
+                                                                          'the sides',
+                                                               'typ': 'Bool'}},
  'Sides': {'Sides': {'normal': True, 'typ': 'Int', 'value': '4', 'values': ['3', '4']},
            'Sides = 3': {'cf': False, 'ct': False, 'normal': False, 'typ': 'Bool'},
            'Sides = 4': {'cf': False, 'ct': True, 'normal': False, 'typ': 'Bool'},
