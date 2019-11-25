@@ -37,6 +37,8 @@ def immutable(func):
                 out.translated = None
                 if ops: out.operator = ops
                 return out
+        if type(value) in [Fresh_Variable, Constructor]:
+            return value # do not copy it
         # replace by new structure
         out = copy.copy(value)
         # copy initial annotation
@@ -500,6 +502,9 @@ def operation(ops, operands):
         return operands[0]
     if isinstance(ops, str):
         ops = [ops] * (len(operands)-1)
+    # add () around operands, and simplify
+    operands = [Brackets(f=o, reading='') for o in operands]
+    operands = [o.update_exprs(o1 for o1 in o.sub_exprs) for o in operands]
     out = (classes[ops[0]]) (sub_exprs=operands, operator=ops)
     return out.update_exprs(operands) # simplify it
 
