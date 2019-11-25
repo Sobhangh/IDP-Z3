@@ -452,7 +452,7 @@ class Rule(object):
         self.translated = None
 
     def __repr__(self):
-        return repr(self.body)
+        return "Rule:" + repr(self.body)
 
     def annotate(self, symbol_decls, q_decls):
         self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \

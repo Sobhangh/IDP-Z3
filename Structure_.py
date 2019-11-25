@@ -52,10 +52,10 @@ class Equality(object):
     def __init__(self, subtence, value):
         self.subtence = subtence # an Expression
         self.value = value # a Z3 value
-        self.code = subtence.code + " = " + str(value)
+        self.code = f"{subtence.code} = {str(value)}"
         self.type = 'bool'
-        self.translated = (subtence.translated == value) #TODO
-        self.reading = ""
+        self.translated = (subtence.translated == value)
+        self.reading = "" #TODO
 
     def __str__(self): return self.code
 
@@ -117,13 +117,12 @@ def model_to_json(idp, s, reify):
     m = s.model()
     out = Structure_(idp)
     for atom in idp.atoms.values():
-        atomZ3 = atom.translated #TODO
         # atom might not have an interpretation in model (if "don't care")
         value = m.eval(reify[atom], model_completion=True)
-        if is_bool(atomZ3): #TODO
+        if atom.type == 'bool':
             if not (is_true(value) or is_false(value)):
                 #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
-                print("*** ", atomZ3, " is not defined, and assumed false")
+                print("*** ", atom.reading, " is not defined, and assumed false")
             out.addAtom(atom, True if is_true(value) else False)
         else: #TODO check that value is numeric ?
             out.addValue(atom, value)
@@ -164,8 +163,7 @@ class Structure_(object):
     def addAtom(self, atom, truth):
         if truth and type(atom) == Equality:
             self.addValue(atom.subtence, atom.value)
-        atomZ3 = atom.translated
-        if not is_bool(atomZ3): return
+        if atom.type != 'bool': return
         key = atom.code
         for symb in atom.unknown_symbols().keys():
             s = self.m.setdefault(symb, {})

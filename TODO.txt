@@ -43,10 +43,9 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
-    - compute .code for any expand quantifier ?
-    - AppliedSymbol is_subtence if no Fresh_Variable !
+    - compute .code for any expand quantifier ? 
+    - AppliedSymbol is_subtence only if no Fresh_Variable !
     - Expr.subtence -> Expr.ranking ?
-    - cache for Expression.__str__
     - explain: use consequences() for rules too ? or unsat_core for evidences ?
     - avoid quantifiers in definitions
     - do we need Expression.type, if we have Expression.decl ?

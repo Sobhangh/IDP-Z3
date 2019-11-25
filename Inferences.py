@@ -89,7 +89,7 @@ def optimize(case, symbol, minimize):
             func_current_param = func_params_adder = "([_a-zA-Z0-9.]+)"
             for count in range(10): # max 10 arguments
                 try:
-                    p = re.compile(func_name + "\(" + func_current_param + "\)$")
+                    p = re.compile(f"{func_name}\({func_current_param}\)$")
                     return p.match(inp).groups()
                 except:
                     func_current_param += ", " + func_params_adder
@@ -99,7 +99,7 @@ def optimize(case, symbol, minimize):
     if len(args) == 1:
         s = s.instances[args[0]].translated
     else:
-        s = (s.instances[args[0]+ "(" + ",".join(args[1:]) + ")"]).translated
+        s = (s.instances[ f"{args[0]}({','.join(args[1:])})" ]).translated
 
     solver = Optimize()
     solver.add(case.translated)
