@@ -21,6 +21,8 @@ class DSLException(Exception):
 def immutable(func):
     @functools.wraps(func)
     def wrapper_decorator(self, new_expr_generator):
+        if isinstance(new_expr_generator, list):
+            new_expr_generator = iter(new_expr_generator)
         value, ops = func(self, new_expr_generator), None
         if isinstance(value, tuple):
             ops = value[1]
@@ -562,7 +564,7 @@ class AUnary(Expression):
 def NOT(expr):
     out = AUnary(operator='~', f=expr)
     out.type = 'bool'
-    return out.update_exprs(e for e in [expr]) # simplify if possible
+    return out.update_exprs([expr]) # simplify if possible
 
 class AAggregate(Expression):
     CONDITION = 0

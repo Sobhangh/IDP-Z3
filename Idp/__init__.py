@@ -580,7 +580,7 @@ class Interpretation(object):
                         out = IfExpr(if_f=operation('=', [args[rank],val]), 
                                         then_f=interpret(theory, rank+1, args, list(tuples2)), 
                                         else_f=out)
-                        out = out.update_exprs(e for e in out.sub_exprs) # simplify
+                        out = out.update_exprs(out.sub_exprs) # simplify
                 return out
         self.decl.interpretation = interpret
         self.decl.is_var = False
