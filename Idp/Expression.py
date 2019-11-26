@@ -26,7 +26,6 @@ import sys
 
 from z3 import FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
 
-from Inferences import ConfigCase
 
 
 class DSLException(Exception):

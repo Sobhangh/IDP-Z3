@@ -8,6 +8,7 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
 print(parentdir)
 import Inferences
+from Case import *
 from Solver import *
 from utils import log
 from Idp import *
@@ -20,10 +21,10 @@ model: File = idpparser.model_from_file(file)
 
 log("parse")
 if False:
-    cProfile.run('ConfigCase(model.translate)')
+    cProfile.run('Case(model.translate)')
 else:
     for i in range(1):
-        c = ConfigCase(model)
+        c = Case(model)
         #print(c.interpretations)
         log("translate")
         print(simplify(c.translate()))

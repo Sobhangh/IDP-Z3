@@ -69,7 +69,7 @@ def propagation(case, expanded_symbols):
         out.addAtom(literalQ.subtence, literalQ.truth)
     """
 
-    for literalQ in case.structure: # needed to keep some numeric assignments
+    for literalQ in case.given: # needed to keep some numeric assignments
         out.addAtom(literalQ.subtence, literalQ.truth)
     return out.m
 
@@ -126,7 +126,7 @@ def optimize(case, symbol, minimize):
     return model_to_json(case.idp, solver, reify)
 
 def explain(case, symbol, value):
-    out = Structure_(case.idp, case.structure)  
+    out = Structure_(case.idp, case.given)  
 
     negated = value.startswith('~')
     value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
@@ -152,12 +152,12 @@ def explain(case, symbol, value):
         def r1(a): return reify[a] if a in reify else a
         def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
         ps = {} # {reified: constraint}
-        for i, ass in enumerate(case.structure):
+        for i, ass in enumerate(case.given):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
             s.add(Implies(p, ass.asZ3()))
         for i, constraint in enumerate(case.idp.translated):
-            p = Const("wsdraqsesdf"+str(i+len(case.structure)), BoolSort())
+            p = Const("wsdraqsesdf"+str(i+len(case.given)), BoolSort())
             ps[p] = constraint
             s.add(Implies(p, constraint))
         s.push()  
@@ -167,7 +167,7 @@ def explain(case, symbol, value):
         unsatcore = s.unsat_core()
         
         if unsatcore:
-            for a1 in case.structure:
+            for a1 in case.given:
                 for a2 in s.unsat_core():
                     if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
                         out.addAtom(a1.subtence, a1.truth)
@@ -191,13 +191,13 @@ def abstract(case):
     out["universal"] = [k for k in universal.keys() if k.truth is not None]
 
     out["given"] = []
-    for ass in case.structure:
+    for ass in case.given:
         universal[ass] = True
         out["given"] += [ass]
 
     # find consequences of structure
-    solver.add(list(case.structure.values()))
-    theory2 = And([theory] + list(case.structure.values()))
+    solver.add(list(case.given.values()))
+    theory2 = And([theory] + list(case.given.values()))
     fixed = consequences(theory2, case.idp.atoms, universal, solver, reify, unreify)
     out["fixed"] = [k for k in fixed.keys() if k.truth is not None]
 

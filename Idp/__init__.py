@@ -26,7 +26,6 @@ from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
     Sum, If, BoolVal, Function, FreshConst, Implies, EnumSort
 
-from Inferences import ConfigCase
 from utils import applyTo, log, itertools, in_list, nl
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, operation, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
@@ -293,7 +292,7 @@ class SymbolDeclaration(object):
                     varZ3 = var.translate()
                     """
                     if check is not None: # Z3 cannot solve the constraint if infinite range, issue #2
-                        checks.append(check.translate(case))
+                        checks.append(check.translate())
                         idp.vocabulary.translated.append(
                             ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
                     """        
@@ -618,7 +617,7 @@ class Tuple(object):
 
     def interpret(self, theory): return self #TODO ?
 
-    def translate(self, case: ConfigCase):
+    def translate(self):
         return [arg.translate() for arg in self.args]
 
 

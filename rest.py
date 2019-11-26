@@ -27,6 +27,7 @@ from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 from textx import TextXError
 
+from Case import *
 from Inferences import *
 from Structure_ import *
 from Idp import idpparser
@@ -91,7 +92,7 @@ class eval(Resource):
 
                 method = args['method']
                 struct_json = args['active']
-                case = ConfigCase(idp, struct_json)
+                case = Case(idp, struct_json)
 
                 out = {}
                 if method == "propagate":
@@ -110,7 +111,7 @@ class eval(Resource):
                                     + "\n}"
                         )
                         idpModel = idpparser.model_from_str(newTheory)
-                        case = ConfigCase(idpModel)
+                        case = Case(idpModel)
                     out = abstract(case)
                 log("end /eval " + method)
                 return out
