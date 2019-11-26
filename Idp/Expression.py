@@ -37,13 +37,11 @@ def immutable(func):
                 out.translated = None
                 if ops: out.operator = ops
                 return out
-        if type(value) in [Fresh_Variable, Constructor]:
-            return value # do not copy it
-        # replace by new structure
-        out = copy.copy(value)
+        # replace by new Brackets node
+        value.is_subtence = self.is_subtence
+        out = Brackets(f=value, reading=self.reading)
         # copy initial annotation
         out.code = self.code
-        out.reading = self.reading
         out.is_subtence = self.is_subtence
         out.type = self.type
         # out.normal is not set, normally
@@ -64,7 +62,12 @@ class Expression(object):
         self._reified = None
         # .normal : only set in .instances
 
-    def __eq__(self, other): #TODO str() uses .code ==> works only for TRUE, FALSE, ..;
+    def __eq__(self, other):
+        if isinstance(self, Brackets):
+            return self.sub_exprs[0] == other
+        if isinstance(other, Brackets):
+            return self == other.sub_exprs[0]
+        # beware: this does not ignore meaningless brackets deeper in the tree
         return self.str == other.str
     
     def __hash__(self):
@@ -76,6 +79,9 @@ class Expression(object):
         out = {}
         for e in self.sub_exprs: out.update(e.subtences())
         return out
+
+    def as_NumberConstant(self):
+        return None
 
     @immutable
     def update_exprs(self, new_expr_generator):
@@ -400,9 +406,10 @@ class AComparison(BinaryOperator):
     @immutable
     def update_exprs(self, new_expr_generator):
         operands = list(new_expr_generator)
-        if all(type(e) == NumberConstant for e in operands):
-            acc = operands[0]
-            for op, expr in zip(self.operator, operands[1:]):
+        operands1 = [e.as_NumberConstant() for e in operands]
+        if all(e is not None for e in operands1):
+            acc = operands1[0]
+            for op, expr in zip(self.operator, operands1[1:]):
                 if not (BinaryOperator.MAP[op]) (acc.translated, expr.translated):
                     return FALSE
                 acc = expr
@@ -415,18 +422,19 @@ def update_arith(self, family, new_expr_generator):
     acc, ops, exprs = 0 if family == '+' else 1, [], []
     def add(op, expr):
         nonlocal acc, ops, exprs
-        if type(expr) == NumberConstant:
+        expr1 = expr.as_NumberConstant()
+        if expr1 is not None:
             if op == '+':
-                acc += expr.translated
+                acc += expr1.translated
             elif op == '-':
-                acc -= expr.translated
+                acc -= expr1.translated
             elif op == '*':
-                acc *= expr.translated
+                acc *= expr1.translated
             elif op == '/':
-                if isinstance(acc, int) and expr.type == 'int': # integer division
-                    acc //= expr.translated
+                if isinstance(acc, int) and expr1.type == 'int': # integer division
+                    acc //= expr1.translated
                 else:
-                    acc /= expr.translated
+                    acc /= expr1.translated
         else:
             ops.append(op)
             exprs.append(expr)
@@ -458,9 +466,10 @@ class AMultDiv(BinaryOperator):
     def update_exprs(self, new_expr_generator):
         if any(op == '%' for op in self.operator): # special case !
             operands = list(new_expr_generator)
+            operands1 = [e.as_NumberConstant() for e in operands]
             if len(operands) == 2 \
-            and all(type(e) == NumberConstant for e in operands):
-                out = operands[0].translated % operands[1].translated
+            and all(e is not None for e in operands1):
+                out = operands1[0].translated % operands1[1].translated
                 return NumberConstant(number=str(out))
             else:
                 return operands
@@ -471,9 +480,10 @@ class APower(BinaryOperator):
     @immutable
     def update_exprs(self, new_expr_generator):
         operands = list(new_expr_generator)
+        operands1 = [e.as_NumberConstant() for e in operands]
         if len(operands) == 2 \
-        and all(type(e) == NumberConstant for e in operands):
-            out = operands[0].translated ** operands[1].translated
+        and all(e is not None for e in operands1):
+            out = operands1[0].translated ** operands1[1].translated
             return NumberConstant(number=str(out))
         else:
             return operands
@@ -502,9 +512,12 @@ def operation(ops, operands):
         return operands[0]
     if isinstance(ops, str):
         ops = [ops] * (len(operands)-1)
-    # add () around operands, and simplify
-    operands = [Brackets(f=o, reading='') for o in operands]
-    operands = [o.update_exprs(o1 for o1 in o.sub_exprs) for o in operands]
+    operands1 = []
+    for o in operands:
+        if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, Brackets]:
+            # add () around operands, to avoid ambiguity in str()
+            o = Brackets(f=o, reading='')
+        operands1.append(o)
     out = (classes[ops[0]]) (sub_exprs=operands, operator=ops)
     return out.update_exprs(operands) # simplify it
 
@@ -635,8 +648,8 @@ class AppliedSymbol(Expression):
     def interpret(self, theory):
         sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
         if self.decl.interpretation is not None:
+            self.is_subtence = False
             out = (self.decl.interpretation)(theory, 0, sub_exprs)
-            self.code = str(out) #TODO Omniseal we don't want this symbol in the code
             return out
         else:
             return self
@@ -738,6 +751,8 @@ class NumberConstant(Expression):
     def __str__(self):
         return self.number
 
+    def as_NumberConstant(self): return self
+
     def annotate(self, symbol_decls, q_decls): return self
 
     def translate(self):
@@ -760,6 +775,9 @@ class Brackets(Expression):
     def __str__(self):
         return f"({self.sub_exprs[0].str})"
 
+    def as_NumberConstant(self): 
+        return self.sub_exprs[0].as_NumberConstant()
+
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_decls)]
         self.type = self.sub_exprs[0].type
@@ -769,10 +787,9 @@ class Brackets(Expression):
     @immutable
     def update_exprs(self, new_expr_generator):
         expr = next(new_expr_generator)
-        if type(expr) in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, Brackets]:
-            return expr # simplify by removing brackets around terms
         return [expr]
 
     def translate(self):
-        return self.sub_exprs[0].translate()
+        self.translated = self.sub_exprs[0].translate()
+        return self.translated
 
