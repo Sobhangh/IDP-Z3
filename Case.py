@@ -19,6 +19,7 @@
 
 from z3 import And
 
+from Idp.Expression import Brackets
 from Structure_ import json_to_literals
 
 class Case:
@@ -34,14 +35,25 @@ class Case:
 
         # initialisation
         self.atoms = self.idp.atoms # {atom_string: Expression} atoms + numeric terms !
-        self.universal = []
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # Definitions
+
+        self.universals = [] # [literalQ]
         self.consequences = [] # [literalQ]
         self.irrelevant = [] # [Expression] subtences
         self.simplified = self.idp.theory.constraints # [Expression]
 
         # find universals
+        l1, l2 = [], []
+        for c in self.simplified:
+            if c.code in self.atoms: # universal
+                l1.append(c)
+            elif isinstance(c, Brackets) and c.sub_exprs[0].code in self.atoms:
+                l1.append(c)
+            else:
+                l2.append(c)
+        self.universals, self.simplified = l1, l2
+        
         # simplify self.simplified using given
         # find immediate consequences
         # update consequences using propagation
@@ -52,7 +64,7 @@ class Case:
         self.translated = And(
             self.typeConstraints.translated
             + [d.translate(self.idp) for d in self.definitions]
-            + [c.translate() for c in self.universal + self.simplified]
+            + [c.translate() for c in self.universals + self.simplified]
             + (list(self.given.values())))
         return self.translated
 
