@@ -58,7 +58,7 @@ def propagation(case, expanded_symbols):
                  # if it is shown to the user
                  or any([s in expanded_symbols for s in a.unknown_symbols().keys()]) }
 
-    amf = consequences(case.translated, todo, {})
+    amf = consequences(case.translate(), todo, {})
     for literalQ in amf:
         out.addAtom(literalQ.subtence, literalQ.truth)
 
@@ -74,7 +74,7 @@ def propagation(case, expanded_symbols):
     return out.m
 
 def expand(case):
-    solver, reify, _ = mk_solver(case.translated, case.idp.atoms)
+    solver, reify, _ = mk_solver(case.translate(), case.idp.atoms)
     solver.check()
     return model_to_json(case.idp, solver, reify)
 
@@ -102,7 +102,7 @@ def optimize(case, symbol, minimize):
         s = (s.instances[ f"{args[0]}({','.join(args[1:])})" ]).translated
 
     solver = Optimize()
-    solver.add(case.translated)
+    solver.add(case.translate())
     if minimize:
         solver.minimize(s)
     else:
@@ -140,7 +140,7 @@ def explain(case, symbol, value):
         # rules used in justification
         if not to_explain.sort()==BoolSort(): # calculate numeric value
             # TODO should be given by client
-            s, _, _ = mk_solver(case.translated, case.idp.atoms)
+            s, _, _ = mk_solver(case.translate(), case.idp.atoms)
             s.check()
             val = s.model().eval(to_explain)
             to_explain = to_explain == val

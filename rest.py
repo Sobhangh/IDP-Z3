@@ -92,7 +92,7 @@ class eval(Resource):
 
                 method = args['method']
                 struct_json = args['active']
-                case = Case(idp, struct_json)
+                case = make_case(idp, struct_json)
 
                 out = {}
                 if method == "propagate":
@@ -111,7 +111,7 @@ class eval(Resource):
                                     + "\n}"
                         )
                         idpModel = idpparser.model_from_str(newTheory)
-                        case = Case(idpModel)
+                        case = make_case(idpModel)
                     out = abstract(case)
                 log("end /eval " + method)
                 return out

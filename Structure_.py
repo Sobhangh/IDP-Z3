@@ -120,7 +120,7 @@ def model_to_json(idp, s, reify):
                 print("*** ", atom.reading, " is not defined, and assumed false")
             out.addAtom(atom, True if is_true(value) else False)
         else: #TODO check that value is numeric ?
-            out.addValue(atom, value)
+            out.addAtom(Equality(atom, value), True)
     return out.m
 
 
@@ -157,7 +157,16 @@ class Structure_(object):
 
     def addAtom(self, atom, truth):
         if truth and type(atom) == Equality:
-            self.addValue(atom.subtence, atom.value)
+            symbol = atom.subtence.translated
+            key = atom.subtence.code
+            typ = symbol.sort().name()
+            for name, symb in atom.subtence.unknown_symbols().items():
+                s = self.m.setdefault(name, {})
+                if key in s:
+                    if typ in ["Real", "Int"]:
+                        s[key]["value"] = str(eval(str(atom.value).replace('?', ''))) # compute fraction
+                    elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
+                        s[key]["value"] = str(atom.value)
         if atom.type != 'bool': return
         key = atom.code
         for symb in atom.unknown_symbols().keys():
@@ -167,16 +176,4 @@ class Structure_(object):
                 else:
                     s[key]["ct" if truth else "cf"] = True
                 s[key]['reading'] = atom.reading
-
-    def addValue(self, atom, value):
-        symbol = atom.translated
-        key = atom.code
-        typ = symbol.sort().name()
-        for name, symb in atom.unknown_symbols().items():
-            s = self.m.setdefault(name, {})
-            if key in s:
-                if typ in ["Real", "Int"]:
-                    s[key]["value"] = str(eval(str(value).replace('?', ''))) # compute fraction
-                elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
-                    s[key]["value"] = str(value)
 

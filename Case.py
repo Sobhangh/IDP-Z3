@@ -22,9 +22,47 @@ from z3 import And
 from Structure_ import json_to_literals
 
 class Case:
-    def __init__(self, idp, jsonstr):
-        self.idp = idp
-        self.given = json_to_literals(idp, jsonstr)
+    """
+    Contains a state of problem solving
+    """
+    cache = {}
 
-        self.translated = And(self.idp.translated 
+    def __init__(self, idp, jsonstr):
+
+        self.idp = idp # Idp vocabulary and theory
+        self.given = json_to_literals(idp, jsonstr) # {literalQ : atomZ3} from the user interface
+
+        # initialisation
+        self.atoms = self.idp.atoms # {atom_string: Expression} atoms + numeric terms !
+        self.universal = []
+        self.typeConstraints = self.idp.vocabulary
+        self.definitions = self.idp.theory.definitions # Definitions
+        self.consequences = [] # [literalQ]
+        self.irrelevant = [] # [Expression] subtences
+        self.simplified = self.idp.theory.constraints # [Expression]
+
+        # find universals
+        # simplify self.simplified using given
+        # find immediate consequences
+        # update consequences using propagation
+        # simplify self.simplified using all consequences
+        # find irrelevant
+
+    def translate(self):
+        self.translated = And(
+            self.typeConstraints.translated
+            + [d.translate(self.idp) for d in self.definitions]
+            + [c.translate() for c in self.universal + self.simplified]
             + (list(self.given.values())))
+        return self.translated
+
+def make_case(idp, jsonstr):
+        if (idp, jsonstr) in Case.cache:
+            return Case.cache[(idp, jsonstr)]
+
+        case = Case(idp, jsonstr)
+
+        if 20<len(Case.cache):
+            del Case.cache[0] # remove oldest entry, to prevent memory overflow
+        Case.cache[(idp, jsonstr)] = case
+        return case
