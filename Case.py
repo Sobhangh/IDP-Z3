@@ -19,8 +19,9 @@
 
 from z3 import And
 
-from Idp.Expression import Brackets
-from Structure_ import json_to_literals
+from Idp.Expression import Brackets, TRUE, FALSE, NumberConstant, AComparison, AUnary
+from Structure_ import json_to_literals, Equality, LiteralQ
+from utils import *
 
 class Case:
     """
@@ -31,28 +32,29 @@ class Case:
     def __init__(self, idp, jsonstr):
 
         self.idp = idp # Idp vocabulary and theory
-        self.given = json_to_literals(idp, jsonstr) # {literalQ : atomZ3} from the user interface
+        self.given = json_to_literals(idp, jsonstr) # {LiteralQ : atomZ3} from the user interface
 
         # initialisation
         self.atoms = self.idp.atoms # {atom_string: Expression} atoms + numeric terms !
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # Definitions
 
-        self.universals = [] # [literalQ]
-        self.consequences = [] # [literalQ]
+        self.universals = [] # [LiteralQ]
+        self.consequences = [] # [LiteralQ]
         self.irrelevant = [] # [Expression] subtences
         self.simplified = self.idp.theory.constraints # [Expression]
 
+        if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
+
         # find universals
-        l1, l2 = [], []
-        for c in self.simplified:
-            if c.code in self.atoms: # universal
-                l1.append(c)
-            elif isinstance(c, Brackets) and c.sub_exprs[0].code in self.atoms:
-                l1.append(c)
+        self.universals, l1 = [], []
+        for i, c in enumerate(self.simplified):
+            u = self.expr_to_literal(c)
+            if u:
+                self.universals.append(u[0])
             else:
-                l2.append(c)
-        self.universals, self.simplified = l1, l2
+                l1.append(c)
+        self.simplified = l1
         
         # simplify self.simplified using given
         # find immediate consequences
@@ -60,12 +62,31 @@ class Case:
         # simplify self.simplified using all consequences
         # find irrelevant
 
+        if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
+
+    def __str__(self):
+        return (# f"Type: {self.typeConstraints}"
+                f"Definitions: {nl.join(repr(d) for d in self.definitions)}{nl}"
+                f"Universals: {nl.join(repr(c) for c in self.universals)}{nl}"
+                f"Simplified: {nl.join(str(c) for c in self.simplified)}{nl}"
+        )
+
+    def expr_to_literal(self, expr, truth=True):
+        if expr.code in self.atoms: # found it !
+            return [LiteralQ(truth, expr)]
+        if isinstance(expr, Brackets):
+            return self.expr_to_literal(expr.sub_exprs[0], truth)
+        if isinstance(expr, AUnary) and expr.operator == '~':
+            return self.expr_to_literal(expr.sub_exprs[0], not truth)
+        return []
+
     def translate(self):
         self.translated = And(
             self.typeConstraints.translated
-            + [d.translate(self.idp) for d in self.definitions]
-            + [c.translate() for c in self.universals + self.simplified]
-            + (list(self.given.values())))
+            + sum((d.translate(self.idp) for d in self.definitions), [])
+            + [c.subtence.translate() for c in self.universals]
+            + [c.translate() for c in self.simplified]
+            + (list(self.given.values())) )
         return self.translated
 
 def make_case(idp, jsonstr):

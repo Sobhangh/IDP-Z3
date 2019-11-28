@@ -11,6 +11,15 @@ Prime(2)
 Prime(3)
 Prime(4)
 
+-- case
+Definitions: Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
+Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)
+Rule:∀[][[]]: Prime(3) ⇔($Prime$0 = 3)
+Rule:∀[][[]]: Prime(4) ⇔(false)
+Universals: 
+Simplified: 
+
+
 -- propagation
 {'Prime': {'Prime(1)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(1)', 'typ': 'Bool'},
            'Prime(2)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(2)', 'typ': 'Bool'},

@@ -470,7 +470,9 @@ class Rule(object):
         self.translated = None
 
     def __repr__(self):
-        return "Rule:" + repr(self.body)
+        return ( f"Rule:∀{self.vars}[{self.sorts}]: "
+                 f"{self.symbol}({','.join(str(e) for e in self.args)}) "
+                 f"⇔{str(self.body)}" )
 
     def annotate(self, symbol_decls, q_decls):
         self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \

@@ -50,7 +50,7 @@ def immutable(func):
                 out = copy.copy(self)
                 out.sub_exprs = value
                 # reset derived values
-                out.str = sys.intern(str(self))
+                out.str = sys.intern(self.str_())
                 out._unknown_symbols = None
                 out.translated = None
                 if ops: out.operator = ops
@@ -70,7 +70,7 @@ class Expression(object):
     COUNT = 0
     # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     def __init__(self):
-        self.code = sys.intern(str(self)) # normalized idp code, before transformations
+        self.code = sys.intern(self.str_())# normalized idp code, before transformations
         self.str = self.code              # memoization of str()
         self.reading = self.code          # English reading
         self.is_subtence = None           # True if sub-sentence in original code
@@ -145,6 +145,7 @@ class Constructor(Expression):
         self.is_subtence = False
     
     def __str__(self): return self.name
+    def str_   (self): return self.name
     def annotate(self, symbol_decls, q_decls): return self
     def translate(self): return self.translated
 
@@ -168,6 +169,10 @@ class IfExpr(Expression):
         self.is_subtence = False
 
     def __str__(self):
+        return ( f" if   {str(self.sub_exprs[IfExpr.IF  ])}"
+                 f" then {str(self.sub_exprs[IfExpr.THEN])}"
+                 f" else {str(self.sub_exprs[IfExpr.ELSE])}" )
+    def str_(self):
         return ( f" if   {self.sub_exprs[IfExpr.IF  ].str}"
                  f" then {self.sub_exprs[IfExpr.THEN].str}"
                  f" else {self.sub_exprs[IfExpr.ELSE].str}" )
@@ -224,6 +229,9 @@ class AQuantification(Expression):
         self.is_subtence = True
 
     def __str__(self):
+        vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+        return f"{self.q}{vars} : {str(self.sub_exprs[0])}"
+    def str_(self):
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
@@ -302,6 +310,11 @@ class BinaryOperator(Expression):
         self.is_subtence = self.operator[0] in '=<>≤≥≠'
 
     def __str__(self):
+        temp = str(self.sub_exprs[0])
+        for i in range(1, len(self.sub_exprs)):
+            temp += f" {self.operator[i-1]} {str(self.sub_exprs[i])}"
+        return temp
+    def str_(self):
         temp = self.sub_exprs[0].str
         for i in range(1, len(self.sub_exprs)):
             temp += f" {self.operator[i-1]} {self.sub_exprs[i].str}"
@@ -553,6 +566,8 @@ class AUnary(Expression):
         self.is_subtence = False
 
     def __str__(self):
+        return f"{self.operator}({str(self.sub_exprs[0])})"
+    def str_(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
     def annotate(self, symbol_decls, q_decls):
@@ -606,6 +621,14 @@ class AAggregate(Expression):
 
     def __str__(self):
         vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+        output = f" : {str(self.sub_exprs[AAggregate.OUT])}" if self.out else ""
+        out = ( f"{self.aggtype}{{{vars} : "
+                f"{str(self.sub_exprs[AAggregate.CONDITION])}"
+                f"{output}}}"
+              )
+        return out
+    def str_(self):
+        vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
         out = ( f"{self.aggtype}{{{vars} : "
                 f"{self.sub_exprs[AAggregate.CONDITION].str}"
@@ -653,6 +676,8 @@ class AppliedSymbol(Expression):
         self.decl = None
 
     def __str__(self):
+        return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
+    def str_(self):
         return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
 
     def annotate(self, symbol_decls, q_decls):
@@ -702,8 +727,8 @@ class Variable(Expression):
         self.sub_exprs = []
         self.decl = None
 
-    def __str__(self):
-        return self.name
+    def __str__(self): return self.name
+    def str_   (self): return self.name
 
     def annotate(self, symbol_decls, q_decls):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
@@ -743,8 +768,8 @@ class Fresh_Variable(Expression):
         self.sub_exprs = []
         self.is_subtence = False
 
-    def __str__(self):
-        return self.name
+    def __str__(self): return self.name
+    def str_   (self): return self.name
 
     def translate(self):
         if self.translated is None:
@@ -766,8 +791,8 @@ class NumberConstant(Expression):
             self.type = 'real'
         self.is_subtence = False
     
-    def __str__(self):
-        return self.number
+    def __str__(self): return self.number
+    def str_   (self): return self.number
 
     def as_NumberConstant(self): return self
 
@@ -790,8 +815,8 @@ class Brackets(Expression):
 
         self.is_subtence = False
 
-    def __str__(self):
-        return f"({self.sub_exprs[0].str})"
+    def __str__(self): return f"({str(self.sub_exprs[0])})"
+    def str_   (self): return f"({self.sub_exprs[0].str})"
 
     def as_NumberConstant(self): 
         return self.sub_exprs[0].as_NumberConstant()

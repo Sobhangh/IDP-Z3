@@ -155,7 +155,7 @@ def explain(case, symbol, value):
         for i, ass in enumerate(case.given):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
-            s.add(Implies(p, ass.asZ3()))
+            s.add(Implies(p, ass.translate()))
         for i, constraint in enumerate(case.idp.translated):
             p = Const("wsdraqsesdf"+str(i+len(case.given)), BoolSort())
             ps[p] = constraint
@@ -268,14 +268,14 @@ def abstract(case):
         # remove atoms that are irrelevant in AMF
         solver2 = Solver()
         solver2.add(theory2)
-        solver2.add([l.asZ3() for l in done]) # universal + given + fixed (ignore irrelevant)
+        solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
         (reify2, _) = reifier({str(l.subtence) : l.subtence for l in atoms}, solver2)
         for i, literalQ in enumerate(atoms):
             if literalQ.truth is not None:
                 solver2.push()
                 a = reify2[literalQ.subtence] if not literalQ.truth else Not(reify2[literalQ.subtence])
                 solver2.add(a)
-                solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
+                solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
                 result = solver2.check()
                 solver2.pop()
                 if result == sat:
@@ -292,7 +292,7 @@ def abstract(case):
         for i, literalQ in enumerate(atoms):
             if literalQ.truth is not None:
                 solver2.push()
-                solver2.add(And([l.asZ3() for j, l in enumerate(atoms) if j != i]))
+                solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(literalQ)
                 a = reify2[literalQ.subtence] if not literalQ.truth else Not(reify2[literalQ.subtence])
@@ -303,7 +303,7 @@ def abstract(case):
                 solver2.pop()
 
         # add constraint to eliminate this model
-        modelZ3 = Not(And( [l.asZ3() for l in atoms] ))
+        modelZ3 = Not(And( [l.translate() for l in atoms] ))
         theory = And(theory, modelZ3)
         solver.add(modelZ3)
 

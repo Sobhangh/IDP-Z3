@@ -9,6 +9,12 @@ LipLen
 JacketDesign
 JacketDesign = Design_230
 
+-- case
+Definitions: Rule:∀[][[]]: LipLen(Short) ⇔$LipLen$ = Short ∧ JacketDesign = Design_230
+Universals: 
+Simplified: 
+
+
 -- propagation
 {'JacketDesign': {'JacketDesign': {'normal': True,
                                    'reading': 'JacketDesign',

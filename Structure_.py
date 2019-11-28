@@ -33,7 +33,8 @@ class LiteralQ(object):
             and str(self.subtence) == str(other.subtence)
 
     def __repr__(self):
-        return str(self.truth) + self.subtence.reading
+        return ( f"{'' if self.truth else '~'}"
+                 f"{str(self.subtence)}" )
 
     def __str__(self):
         if self.truth == "irrelevant":
@@ -43,7 +44,7 @@ class LiteralQ(object):
 
     def to_json(self): return str(self)
 
-    def asZ3(self):
+    def translate(self):
         if self.truth == "irrelevant":
             return BoolVal(True)
         return self.subtence.translated if self.truth else Not(self.subtence.translated)
@@ -99,7 +100,7 @@ def json_to_literals(idp, jsonstr):
                 else:
                     literalQ = None #TODO error ?
                 if literalQ is not None:
-                    literals[literalQ] = literalQ.asZ3()
+                    literals[literalQ] = literalQ.translate()
     return literals
 
 
