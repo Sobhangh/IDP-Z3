@@ -98,8 +98,7 @@ class Expression(object):
         for e in self.sub_exprs: out.update(e.subtences())
         return out
 
-    def as_NumberConstant(self):
-        return None
+    def as_ground(self): return None
 
     @immutable
     def update_exprs(self, new_expr_generator):
@@ -147,6 +146,7 @@ class Constructor(Expression):
     def __str__(self): return self.name
     def str_   (self): return self.name
     def annotate(self, symbol_decls, q_decls): return self
+    def as_ground(self): return self
     def translate(self): return self.translated
 
 TRUE  = Constructor(name='true')
@@ -437,7 +437,7 @@ class AComparison(BinaryOperator):
     @immutable
     def update_exprs(self, new_expr_generator):
         operands = list(new_expr_generator)
-        operands1 = [e.as_NumberConstant() for e in operands]
+        operands1 = [e.as_ground() for e in operands]
         if all(e is not None for e in operands1):
             acc = operands1[0]
             for op, expr in zip(self.operator, operands1[1:]):
@@ -457,7 +457,7 @@ def update_arith(self, family, new_expr_generator):
     ops, exprs = [], []
     def add(op, expr):
         nonlocal acc, ops, exprs
-        expr1 = expr.as_NumberConstant()
+        expr1 = expr.as_ground()
         if expr1 is not None:
             if op == '+':
                 acc += expr1.translated
@@ -501,7 +501,7 @@ class AMultDiv(BinaryOperator):
     def update_exprs(self, new_expr_generator):
         if any(op == '%' for op in self.operator): # special case !
             operands = list(new_expr_generator)
-            operands1 = [e.as_NumberConstant() for e in operands]
+            operands1 = [e.as_ground() for e in operands]
             if len(operands) == 2 \
             and all(e is not None for e in operands1):
                 out = operands1[0].translated % operands1[1].translated
@@ -515,7 +515,7 @@ class APower(BinaryOperator):
     @immutable
     def update_exprs(self, new_expr_generator):
         operands = list(new_expr_generator)
-        operands1 = [e.as_NumberConstant() for e in operands]
+        operands1 = [e.as_ground() for e in operands]
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
             out = operands1[0].translated ** operands1[1].translated
@@ -798,7 +798,7 @@ class NumberConstant(Expression):
     def __str__(self): return self.number
     def str_   (self): return self.number
 
-    def as_NumberConstant(self): return self
+    def as_ground(self): return self
 
     def annotate(self, symbol_decls, q_decls): return self
 
@@ -822,8 +822,8 @@ class Brackets(Expression):
     def __str__(self): return f"({str(self.sub_exprs[0])})"
     def str_   (self): return f"({self.sub_exprs[0].str})"
 
-    def as_NumberConstant(self): 
-        return self.sub_exprs[0].as_NumberConstant()
+    def as_ground(self): 
+        return self.sub_exprs[0].as_ground()
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_decls)]

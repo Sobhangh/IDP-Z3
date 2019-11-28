@@ -19,6 +19,11 @@
 from z3 import *
 import ast
 
+import Idp
+from Idp.Expression import TRUE, FALSE, AComparison
+from utils import *
+
+
 class LiteralQ(object):
     def __init__(self, truth, subtence):
         self.truth = truth # Bool, "irrelevant", None = unknown, 
@@ -41,6 +46,28 @@ class LiteralQ(object):
             return ""
         return ("" if self.truth else "? " if self.truth is None else "Not ") \
              + self.subtence.reading
+
+    def as_substitution(self, case):
+        if isinstance(self.truth, bool): # ignore irrelevant, unknown
+            old = self.subtence
+            new = TRUE if self.truth else FALSE
+            if self.truth:
+                if isinstance(old, Equality):
+                    if is_number(old.value):
+                        new = NumberConstant(number=str(old.value))
+                        old = old.subtence
+                    elif str(old.value) in case.idp.vocabulary.symbol_decls:
+                        new = case.idp.vocabulary.symbol_decls[str(old.value)]
+                        old = old.subtence
+                elif isinstance(old, AComparison) and len(old.operator) == 1 and old.operator[0] == '=':
+                    if type(old.sub_exprs[1]) in [Idp.Constructor, Idp.NumberConstant]:
+                        new = old.sub_exprs[1]
+                        old = old.sub_exprs[0]
+                    elif isinstance(old.sub_exprs[0], Constructor):
+                        new = old.sub_exprs[0]
+                        old = old.sub_exprs[1]
+            return old, new
+        return None, None
 
     def to_json(self): return str(self)
 

@@ -5,7 +5,7 @@ And(Vertices >= 3, Vertices <= 4)
 ForAll(c!19,
        Implies(Large(c!19), And(And(c!19 >= 1, c!19 <= 4))))
 -- theory
-Sides == 3
+Subtype == regular_triangle
 
 (Type == triangle) == (Sides == 3)
 
@@ -138,8 +138,9 @@ Large(4)
 Base
 Height
 Surface
-Sides = 3
+Subtype = regular_triangle
 Type = triangle
+Sides = 3
 Type = quadrilateral
 Sides = 4
 Vertices = 3
@@ -147,7 +148,6 @@ Vertices = 4
 ∀n[side] : Angle(n) < 180
 ∀n[side] : Length(n) = Length(1) ∨ Sides < n
 Subtype = right_triangle
-Subtype = regular_triangle
 Subtype = irregular
 ∀n[side] : Angle(n) = 60 ∨ Sides < n
 ∃n[side] : Angle(n) = 90
@@ -178,7 +178,7 @@ Surface = -(1)
 Definitions:
   
 Universals:
-  Sides = 3
+  Subtype = regular_triangle
   Perimeter = sum{n[side] : ((Length(1))) : ((Length(2)))}
   sum{n[side] : ((Angle(1))) : ((Angle(2)))} = 180 * (-2 + Sides)
   (0 ≤ (Length(1)) ∧ 0 ≤ (Length(2)) ∧ 0 ≤ (Length(3)) ∧ 0 ≤ (Length(4)))
@@ -190,30 +190,31 @@ Universals:
   0 ≤ Height
   (1 ≤ Sides ∧ (Length(1)) = Base ∨ 2 ≤ Sides ∧ (Length(2)) = Base ∨ 3 ≤ Sides ∧ (Length(3)) = Base ∨ 4 ≤ Sides ∧ (Length(4)) = Base)
 Consequences:
-  Type = triangle
-  ~Type = quadrilateral
-  Convex
-  ~Subtype = square
-  Surface = 0.5 * (Base * Height)
-  ((Angle(1)) < 180 ∧ (Angle(2)) < 180 ∧ (Angle(3)) < 180 ∧ (Angle(4)) < 180)
-  ~Subtype = rectangle
+  
 Simplified:
-  ((((Vertices = 3))) ∧ (((~(Vertices = 4)))))
-  (Equilateral ⇔ ((((Length(1)) = (Length(1))) ∧ ((Length(2)) = (Length(1))) ∧ ((Length(3)) = (Length(1))))))
-  ((Subtype = right_triangle ∨ Subtype = regular_triangle ∨ Subtype = irregular))
-  (Subtype = regular_triangle ⇔ (Equilateral))
-  (Subtype = regular_triangle ⇔ (((((Angle(1)) = 60) ∧ ((Angle(2)) = 60) ∧ ((Angle(3)) = 60)))))
-  (Subtype = right_triangle ⇔ ((((Angle(1)) = 90 ∨ (Angle(2)) = 90 ∨ (Angle(3)) = 90 ∨ (Angle(4)) = 90))))
+  (Type = triangle ⇔ Sides = 3)
+  (Type = quadrilateral ⇔ Sides = 4)
+  ((Vertices = 3 ⇔ Sides = 3) ∧ (Vertices = 4 ⇔ Sides = 4))
+  (Sides = 3 ⇒ Convex)
+  (Convex ⇔ (((Angle(1)) < 180 ∧ (Angle(2)) < 180 ∧ (Angle(3)) < 180 ∧ (Angle(4)) < 180)))
+  (Equilateral ⇔ (((Length(1)) = (Length(1)) ∨ Sides < 1 ∧ (Length(2)) = (Length(1)) ∨ Sides < 2 ∧ (Length(3)) = (Length(1)) ∨ Sides < 3 ∧ (Length(4)) = (Length(1)) ∨ Sides < 4)))
   ((true))
-  ((((Length(1)) ≤ (Length(2)) + (Length(3))) ∧ ((Length(2)) ≤ (Length(3)) + (Length(1))) ∧ ((Length(3)) ≤ (Length(1)) + (Length(2)))))
+  (((Sides = 3 ∧ Equilateral)))
+  (((Sides = 3 ∧ (((Angle(1)) = 60 ∨ Sides < 1 ∧ (Angle(2)) = 60 ∨ Sides < 2 ∧ (Angle(3)) = 60 ∨ Sides < 3 ∧ (Angle(4)) = 60 ∨ Sides < 4)))))
+  (((~(Sides = 3 ∧ (((Angle(1)) = 90 ∨ (Angle(2)) = 90 ∨ (Angle(3)) = 90 ∨ (Angle(4)) = 90))))))
+  (((~(Sides = 4 ∧ (((Angle(1)) = 90 ∨ Sides < 1 ∧ (Angle(2)) = 90 ∨ Sides < 2 ∧ (Angle(3)) = 90 ∨ Sides < 3 ∧ (Angle(4)) = 90 ∨ Sides < 4))))))
+  ((true))
+  (((~(Sides = 4 ∧ Equilateral))))
+  (Type = triangle ⇒ ((Length(1)) ≤ (Length(2)) + (Length(3))) ∧ ((Length(2)) ≤ (Length(3)) + (Length(1))) ∧ ((Length(3)) ≤ (Length(1)) + (Length(2))))
+  Type = triangle ⇒ Surface = 0.5 * (Base * Height)
   (true)
-  Subtype = irregular ⇒ Surface = -(1)
+  (true)
 
 
 -- propagation
-{'Angle': {'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': ''},
-           'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': ''},
-           'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': ''},
+{'Angle': {'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': '60'},
+           'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': '60'},
+           'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': '60'},
            'Angle(4)': {'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': '0'},
            'sum{n[side] : true : Angle(n)} = (Sides - 2) * 180': {'cf': False,
                                                                   'ct': False,
@@ -258,8 +259,8 @@ Simplified:
                                         'typ': 'Bool'}},
  'Base': {'0 ≤ Base': {'cf': False, 'ct': False, 'normal': False, 'reading': '0 ≤ Base', 'typ': 'Bool'},
           'Base': {'normal': True, 'reading': 'Base', 'typ': 'Real', 'value': ''}},
- 'Convex': {'Convex': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Convex', 'typ': 'Bool'}},
- 'Equilateral': {'Equilateral': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Equilateral', 'typ': 'Bool'}},
+ 'Convex': {'Convex': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Convex', 'typ': 'Bool'}},
+ 'Equilateral': {'Equilateral': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Equilateral', 'typ': 'Bool'}},
  'Height': {'0 ≤ Height': {'cf': False, 'ct': False, 'normal': False, 'reading': '0 ≤ Height', 'typ': 'Bool'},
             'Height': {'normal': True, 'reading': 'Height', 'typ': 'Real', 'value': ''}},
  'Large': {'Large(1)': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Large(1)', 'typ': 'Bool'},
@@ -333,7 +334,7 @@ Simplified:
  'Subtype': {'Subtype': {'normal': True,
                          'reading': 'Subtype',
                          'typ': 'subtype',
-                         'value': '',
+                         'value': 'regular_triangle',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype = irregular': {'cf': False,
                                      'ct': False,
@@ -345,11 +346,7 @@ Simplified:
                                      'normal': False,
                                      'reading': 'Subtype = rectangle',
                                      'typ': 'Bool'},
-             'Subtype = regular_triangle': {'cf': False,
-                                            'ct': False,
-                                            'normal': False,
-                                            'reading': 'Subtype = regular_triangle',
-                                            'typ': 'Bool'},
+             'Subtype = regular_triangle': {'cf': False, 'ct': True, 'normal': False, 'reading': '', 'typ': 'Bool'},
              'Subtype = right_triangle': {'cf': False,
                                           'ct': False,
                                           'normal': False,
@@ -375,14 +372,14 @@ Simplified:
  'Type': {'Type': {'normal': True,
                    'reading': 'Type',
                    'typ': 'type',
-                   'value': '',
+                   'value': 'triangle',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'cf': False,
                                    'ct': False,
                                    'normal': False,
                                    'reading': 'Type = quadrilateral',
                                    'typ': 'Bool'},
-          'Type = triangle': {'cf': False, 'ct': False, 'normal': False, 'reading': 'Type = triangle', 'typ': 'Bool'}},
+          'Type = triangle': {'cf': False, 'ct': True, 'normal': False, 'reading': '', 'typ': 'Bool'}},
  'Vertices': {'Vertices': {'normal': True, 'reading': 'Vertices', 'typ': 'Int', 'value': '3', 'values': ['3', '4']},
               'Vertices = 3': {'cf': False, 'ct': True, 'normal': False, 'reading': '', 'typ': 'Bool'},
               'Vertices = 4': {'cf': False, 'ct': False, 'normal': False, 'reading': 'Vertices = 4', 'typ': 'Bool'}}}

@@ -31,7 +31,7 @@ vocabulary {
 }
 
 theory {
-    Sides=3. 
+    Subtype=regular_triangle. 
 
     [Definition of triangle]
     (Type=triangle      <=> Sides=3).

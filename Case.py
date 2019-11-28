@@ -19,7 +19,7 @@
 from copy import copy
 from z3 import And
 
-from Idp.Expression import Brackets, TRUE, FALSE, NumberConstant, AComparison, AUnary
+from Idp.Expression import Brackets, AUnary
 from Structure_ import json_to_literals, Equality, LiteralQ
 from utils import *
 
@@ -60,21 +60,9 @@ class Case:
         todo = list(self.given.keys()) + self.universals
         while todo:
             lit = todo.pop(0)
-            if isinstance(lit.truth, bool): # ignore irrelevant, unknown
-                old = lit.subtence
-                new = TRUE if lit.truth else FALSE
-                if isinstance(old, Equality):
-                    if lit.truth and is_number(old.value):
-                        new = NumberConstant(number=str(old.value))
-                        old = old.subtence
-                    #TODO Constructors
-                elif isinstance(old, AComparison) and len(old.operator) == 1 and old.operator[0] == '=':
-                    if old.sub_exprs[1].type in ['int', 'real'] \
-                    and isinstance(old.sub_exprs[1], NumberConstant):
-                        new = old.sub_exprs[1]
-                        old = old.sub_exprs[0]
-                    #TODO NumberConstant or Constructor
+            old, new = lit.as_substitution(self)
 
+            if new is not None:
                 l1 = []
                 for c in self.simplified:
                     c1 = c.substitute(old, new)
