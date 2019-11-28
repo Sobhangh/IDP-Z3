@@ -128,39 +128,44 @@ sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
 ∀n[side] : Length(n) = 0 ⇔ Sides < n
 
 -- case
-Definitions: Rule:∀[][[]]: Large(1) ⇔(false)
+Definitions:
+  Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
 Rule:∀[][[]]: Large(3) ⇔(false)
 Rule:∀[][[]]: Large(4) ⇔(false)
-Universals: ~Subtype = rectangle
-Perimeter = sum{n[side] : ((1)) : ((2))}
-sum{n[side] : ((Angle(1))) : ((Angle(2)))} = 180 * (-2 + Sides)
-(0 ≤ (Angle(1)) ∧ 0 ≤ (Angle(2)) ∧ 0 ≤ (Angle(3)) ∧ 0 ≤ (Angle(4)))
-((Angle(1)) ≠ 180 ∧ (Angle(2)) ≠ 180 ∧ (Angle(3)) ≠ 180 ∧ (Angle(4)) ≠ 180)
-((Angle(1)) = 0 ⇔ Vertices < 1 ∧ (Angle(2)) = 0 ⇔ Vertices < 2 ∧ (Angle(3)) = 0 ⇔ Vertices < 3 ∧ (Angle(4)) = 0 ⇔ Vertices < 4)
-(((~(Sides < 1))) ∧ ((~(Sides < 2))) ∧ ((~(Sides < 3))) ∧ ((~(Sides < 4))))
-Simplified: ((true))
-(Type = triangle ⇔ Sides = 3)
-(Type = quadrilateral ⇔ Sides = 4)
-((Vertices = 3 ⇔ Sides = 3) ∧ (Vertices = 4 ⇔ Sides = 4))
-(Sides = 3 ⇒ Convex)
-(Convex ⇔ (((Angle(1)) < 180 ∧ (Angle(2)) < 180 ∧ (Angle(3)) < 180 ∧ (Angle(4)) < 180)))
-(Equilateral ⇔ (((Sides < 2) ∧ (Sides < 3) ∧ (Sides < 4))))
-(Sides = 3 ⇒ Subtype = right_triangle ∨ Subtype = regular_triangle ∨ Subtype = irregular)
-(Subtype = regular_triangle ⇔ Sides = 3 ∧ Equilateral)
-(Subtype = regular_triangle ⇔ Sides = 3 ∧ (((Angle(1)) = 60 ∨ Sides < 1 ∧ (Angle(2)) = 60 ∨ Sides < 2 ∧ (Angle(3)) = 60 ∨ Sides < 3 ∧ (Angle(4)) = 60 ∨ Sides < 4)))
-(Subtype = right_triangle ⇔ Sides = 3 ∧ (((Angle(1)) = 90 ∨ (Angle(2)) = 90 ∨ (Angle(3)) = 90 ∨ (Angle(4)) = 90)))
-(Subtype = square ∨ Subtype = rectangle ⇔ Sides = 4 ∧ (((Angle(1)) = 90 ∨ Sides < 1 ∧ (Angle(2)) = 90 ∨ Sides < 2 ∧ (Angle(3)) = 90 ∨ Sides < 3 ∧ (Angle(4)) = 90 ∨ Sides < 4)))
-(Subtype = square ⇔ Sides = 4 ∧ Equilateral)
-((true))
-(((true)))
+Universals:
+  ~Subtype = rectangle
+  Perimeter = sum{n[side] : ((1)) : ((2))}
+  sum{n[side] : ((Angle(1))) : ((Angle(2)))} = 180 * (-2 + Sides)
+  (0 ≤ (Angle(1)) ∧ 0 ≤ (Angle(2)) ∧ 0 ≤ (Angle(3)) ∧ 0 ≤ (Angle(4)))
+  ((Angle(1)) ≠ 180 ∧ (Angle(2)) ≠ 180 ∧ (Angle(3)) ≠ 180 ∧ (Angle(4)) ≠ 180)
+  ((Angle(1)) = 0 ⇔ Vertices < 1 ∧ (Angle(2)) = 0 ⇔ Vertices < 2 ∧ (Angle(3)) = 0 ⇔ Vertices < 3 ∧ (Angle(4)) = 0 ⇔ Vertices < 4)
+  (((~(Sides < 1))) ∧ ((~(Sides < 2))) ∧ ((~(Sides < 3))) ∧ ((~(Sides < 4))))
+Consequences:
+  
+Simplified:
+  ((true))
+  (Type = triangle ⇔ Sides = 3)
+  (Type = quadrilateral ⇔ Sides = 4)
+  ((Vertices = 3 ⇔ Sides = 3) ∧ (Vertices = 4 ⇔ Sides = 4))
+  (Sides = 3 ⇒ Convex)
+  (Convex ⇔ (((Angle(1)) < 180 ∧ (Angle(2)) < 180 ∧ (Angle(3)) < 180 ∧ (Angle(4)) < 180)))
+  (Equilateral ⇔ (((Sides < 2) ∧ (Sides < 3) ∧ (Sides < 4))))
+  (Sides = 3 ⇒ Subtype = right_triangle ∨ Subtype = regular_triangle ∨ Subtype = irregular)
+  (Subtype = regular_triangle ⇔ Sides = 3 ∧ Equilateral)
+  (Subtype = regular_triangle ⇔ Sides = 3 ∧ (((Angle(1)) = 60 ∨ Sides < 1 ∧ (Angle(2)) = 60 ∨ Sides < 2 ∧ (Angle(3)) = 60 ∨ Sides < 3 ∧ (Angle(4)) = 60 ∨ Sides < 4)))
+  (Subtype = right_triangle ⇔ Sides = 3 ∧ (((Angle(1)) = 90 ∨ (Angle(2)) = 90 ∨ (Angle(3)) = 90 ∨ (Angle(4)) = 90)))
+  ((Subtype = square) ⇔ Sides = 4 ∧ (((Angle(1)) = 90 ∨ Sides < 1 ∧ (Angle(2)) = 90 ∨ Sides < 2 ∧ (Angle(3)) = 90 ∨ Sides < 3 ∧ (Angle(4)) = 90 ∨ Sides < 4)))
+  (Subtype = square ⇔ Sides = 4 ∧ Equilateral)
+  ((true))
+  (((true)))
 
 
 -- propagation
-{'Angle': {'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': '90'},
-           'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': '90'},
-           'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': '90'},
-           'Angle(4)': {'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': '90'},
+{'Angle': {'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': ''},
+           'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': ''},
+           'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': ''},
+           'Angle(4)': {'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': ''},
            'sum{n[side] : true : Angle(n)} = (Sides - 2) * 180': {'cf': False,
                                                                   'ct': False,
                                                                   'normal': False,
@@ -202,7 +207,7 @@ Simplified: ((true))
                                         'normal': False,
                                         'reading': 'One angle is 90°',
                                         'typ': 'Bool'}},
- 'Convex': {'Convex': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Convex', 'typ': 'Bool'}},
+ 'Convex': {'Convex': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Convex', 'typ': 'Bool'}},
  'Equilateral': {'Equilateral': {'cf': True, 'ct': False, 'normal': True, 'reading': 'Equilateral', 'typ': 'Bool'}},
  'Large': {'Large(1)': {'cf': True, 'ct': False, 'normal': True, 'reading': 'Large(1)', 'typ': 'Bool'},
            'Large(2)': {'cf': True, 'ct': False, 'normal': True, 'reading': 'Large(2)', 'typ': 'Bool'},

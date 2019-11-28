@@ -20,7 +20,7 @@ files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 for file in files:
     print(file)
     idp = idpparser.model_from_file(file)
-    c = Case(idp, "")
+    case = Case(idp, "")
 
     z3 = file.replace(".z3", ".z3z3")
     z3 = z3.replace(".idp", ".z3")
@@ -28,13 +28,12 @@ for file in files:
     if os.path.exists(z3):
         os.remove(z3)
     f = open(z3, "a")
-    f.write("\r\n\r\n".join(str(t) for t in c.idp.vocabulary.translated))
+    f.write("\r\n\r\n".join(str(t) for t in case.idp.vocabulary.translated))
     f.write("\r\n-- theory\r\n")
-    f.write("\r\n\r\n".join(str(t) for t in c.idp.theory.translated)     + "\r\n")
+    f.write("\r\n\r\n".join(str(t) for t in case.idp.theory.translated)     + "\r\n")
     f.write("\r\n-- atoms\r\n")
-    f.write("\r\n".join(str(t) for t in c.idp.atoms)     + "\r\n")
+    f.write("\r\n".join(str(t) for t in case.idp.atoms)     + "\r\n")
 
-    case = Case(idp, "")
     f.write("\r\n-- case\r\n")
     f.write(str(case)+ "\r\n")
     out = pprint.pformat(propagation(case, []), width = 120)

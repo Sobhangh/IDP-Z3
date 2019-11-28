@@ -1,9 +1,9 @@
-ForAll(c!30,
-       Implies(Prime(c!30), And(And(c!30 >= 1, c!30 <= 4))))
+ForAll(c!47,
+       Implies(Prime(c!47), And(And(c!47 >= 1, c!47 <= 4))))
 -- theory
-ForAll(c!31,
-       Prime(c!31) ==
-       Or(c!31 == 1, c!31 == 2, c!31 == 3, False))
+ForAll(c!48,
+       Prime(c!48) ==
+       Or(c!48 == 1, c!48 == 2, c!48 == 3, False))
 
 -- atoms
 Prime(1)
@@ -12,12 +12,17 @@ Prime(3)
 Prime(4)
 
 -- case
-Definitions: Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
+Definitions:
+  Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
 Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)
 Rule:∀[][[]]: Prime(3) ⇔($Prime$0 = 3)
 Rule:∀[][[]]: Prime(4) ⇔(false)
-Universals: 
-Simplified: 
+Universals:
+  
+Consequences:
+  
+Simplified:
+  
 
 
 -- propagation

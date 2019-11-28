@@ -450,7 +450,11 @@ class AComparison(BinaryOperator):
 
 def update_arith(self, family, new_expr_generator):
     # accumulate numbers in acc
-    acc, ops, exprs = 0 if family == '+' else 1, [], []
+    if self.type == 'int':
+        acc = 0 if family == '+' else 1
+    else:
+        acc = 0.0 if family == '+' else 1.0
+    ops, exprs = [], []
     def add(op, expr):
         nonlocal acc, ops, exprs
         expr1 = expr.as_NumberConstant()

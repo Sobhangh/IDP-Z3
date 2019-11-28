@@ -48,12 +48,17 @@ typeOf(square)
 Type = typeOf(Subtype)
 
 -- case
-Definitions: 
-Universals: ((((asi(triangle,regular_triangle)))) ∧ ((~((asi(quadrilateral,regular_triangle))))) ∧ (((asi(triangle,right_triangle)))) ∧ ((~((asi(quadrilateral,right_triangle))))) ∧ ((~((asi(triangle,rectangle))))) ∧ (((asi(quadrilateral,rectangle)))) ∧ ((~((asi(triangle,square))))) ∧ (((asi(quadrilateral,square)))))
-((((typeOf(regular_triangle)) = triangle)) ∧ ((~((typeOf(regular_triangle)) = quadrilateral))) ∧ (((typeOf(right_triangle)) = triangle)) ∧ ((~((typeOf(right_triangle)) = quadrilateral))) ∧ ((~((typeOf(rectangle)) = triangle))) ∧ (((typeOf(rectangle)) = quadrilateral)) ∧ ((~((typeOf(square)) = triangle))) ∧ (((typeOf(square)) = quadrilateral)))
-((((typeOf(regular_triangle)) = triangle)) ∧ (((typeOf(right_triangle)) = triangle)) ∧ (((typeOf(rectangle)) = quadrilateral)) ∧ (((typeOf(square)) = quadrilateral)))
-Type = (typeOf(Subtype))
-Simplified: (true)
+Definitions:
+  
+Universals:
+  ((((asi(triangle,regular_triangle)))) ∧ ((~((asi(quadrilateral,regular_triangle))))) ∧ (((asi(triangle,right_triangle)))) ∧ ((~((asi(quadrilateral,right_triangle))))) ∧ ((~((asi(triangle,rectangle))))) ∧ (((asi(quadrilateral,rectangle)))) ∧ ((~((asi(triangle,square))))) ∧ (((asi(quadrilateral,square)))))
+  ((((typeOf(regular_triangle)) = triangle)) ∧ ((~((typeOf(regular_triangle)) = quadrilateral))) ∧ (((typeOf(right_triangle)) = triangle)) ∧ ((~((typeOf(right_triangle)) = quadrilateral))) ∧ ((~((typeOf(rectangle)) = triangle))) ∧ (((typeOf(rectangle)) = quadrilateral)) ∧ ((~((typeOf(square)) = triangle))) ∧ (((typeOf(square)) = quadrilateral)))
+  ((((typeOf(regular_triangle)) = triangle)) ∧ (((typeOf(right_triangle)) = triangle)) ∧ (((typeOf(rectangle)) = quadrilateral)) ∧ (((typeOf(square)) = quadrilateral)))
+  Type = (typeOf(Subtype))
+Consequences:
+  
+Simplified:
+  (true)
 
 
 -- propagation

@@ -43,6 +43,7 @@ def log(action):
 
 
 nl = "\r\n"
+indented = "\r\n  "
 
 def in_list(q, ls):
     if not ls: return True # e.g. for int, real

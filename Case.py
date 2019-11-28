@@ -16,7 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+from copy import copy
 from z3 import And
 
 from Idp.Expression import Brackets, TRUE, FALSE, NumberConstant, AComparison, AUnary
@@ -46,7 +46,7 @@ class Case:
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
-        # find universals
+        # find immediate universals
         self.universals, l1 = [], []
         for i, c in enumerate(self.simplified):
             u = self.expr_to_literal(c)
@@ -57,18 +57,49 @@ class Case:
         self.simplified = l1
         
         # simplify self.simplified using given
-        # find immediate consequences
+        todo = list(self.given.keys()) + self.universals
+        while todo:
+            lit = todo.pop(0)
+            if isinstance(lit.truth, bool): # ignore irrelevant, unknown
+                old = lit.subtence
+                new = TRUE if lit.truth else FALSE
+                if isinstance(old, Equality):
+                    if lit.truth and is_number(old.value):
+                        new = NumberConstant(number=str(old.value))
+                        old = old.subtence
+                    #TODO Constructors
+                elif isinstance(old, AComparison) and len(old.operator) == 1 and old.operator[0] == '=':
+                    if old.sub_exprs[1].type in ['int', 'real'] \
+                    and isinstance(old.sub_exprs[1], NumberConstant):
+                        new = old.sub_exprs[1]
+                        old = old.sub_exprs[0]
+                    #TODO NumberConstant or Constructor
+
+                l1 = []
+                for c in self.simplified:
+                    c1 = c.substitute(old, new)
+                    # find immediate consequences
+                    u = self.expr_to_literal(c1)
+                    if u:
+                        self.consequences.append(u[0])
+                        todo.append(u[0])
+                    else:
+                        l1.append(c1)
+                self.simplified = l1
+
         # update consequences using propagation
         # simplify self.simplified using all consequences
+        # simplify universal, using all consequences
         # find irrelevant
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self):
         return (# f"Type: {self.typeConstraints}"
-                f"Definitions: {nl.join(repr(d) for d in self.definitions)}{nl}"
-                f"Universals: {nl.join(repr(c) for c in self.universals)}{nl}"
-                f"Simplified: {nl.join(str(c) for c in self.simplified)}{nl}"
+                f"Definitions:{indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
+                f"Universals:{indented}{indented.join(repr(c) for c in self.universals)}{nl}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.consequences)}{nl}"
+                f"Simplified:{indented}{indented.join(str(c) for c in self.simplified)}{nl}"
         )
 
     def expr_to_literal(self, expr, truth=True):

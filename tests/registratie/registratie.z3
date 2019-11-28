@@ -205,27 +205,32 @@ Municipality ≠ other_Municipal
 Resale = Three_Or_More
 
 -- case
-Definitions: 
-Universals: 
-Simplified: (Tax = 1 ⇔ Registration_Type = Heritage ∧ Region = Flemish_Region)
-Tax = 2 ⇔ Registration_Type = Social_Dwelling ∧ Region = Flemish_Region
-Tax = 4 ⇔ Registration_Type = Professional_Purchase ∧ Region = Flemish_Region
-(Tax = 6 ⇔ (Registration_Type = Energy_Efficient_Dwelling ∨ Registration_Type = Social_Purpose ∨ Registration_Type = Exchange_Unbuilt_Ground) ∧ Region = Flemish_Region)
-Tax = 7 ⇔ (Registration_Type = Family_Dwelling ∨ Registration_Type = Dwelling_For_Social_Renting) ∧ Region = Flemish_Region
-Tax = 10 ⇔ Region = Flemish_Region ∧ Registration_Type = Other
-(Tax = 12 ⇔ Region = Brussels_Region ∨ Region = Walloon_Region)
-Registration_Type = Family_Dwelling ⇔ Type_Of_Real_Estate = Residential ∧ Buyer = Natural_Person ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ (~(Energy_Renovation_Planned) ∨ Term_Energy_Renovation ≠ 5 + Certification_Date)
-Registration_Type = Social_Dwelling ⇔ Buyer = Natural_Person ∧ Type_Of_Real_Estate = Residential ∧ Use = Social_Housing ∧ (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ Seller = ErkendeSocialeHuisvestingsMpy) ∧ Mortgage_Loan_Allowance
-Registration_Type = Energy_Efficient_Dwelling ⇔ Type_Of_Real_Estate = Residential ∧ Buyer = Natural_Person ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ Term_Energy_Renovation = 5 + Certification_Date
-Registration_Type = Dwelling_For_Social_Renting ⇔ Type_Of_Real_Estate = Residential ∧ Use = Social_Renting ∧ Start_Dt_Dwelling_For_Social_Rent = 3 + Certification_Date ∧ Duration_Of_Agreement = Less_Than_9_years
-(Registration_Type = Heritage ⇔ Type_Of_Real_Estate = Residential ∧ Monument ∧ Use = As_Family_Dwelling ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms)
-Registration_Type = Professional_Purchase ⇔ Professional_Buyer ∧ Transaction_Type ≠ Public_Sale ∧ Use = For_Resale ∧ Certification_Date_Sale = 8 + Certification_Date
-(Registration_Type = Social_Purpose ⇔ (Seller = Mpy_Erkend_Door_VMSW ∨ Seller = Vlaams_Woningfonds ∨ Seller = Gelijksoortige_Rechtspersoon_EER) ∧ Use = Community_Purpose)
-Registration_Type = Exchange_Unbuilt_Ground ⇔ Additional_Terms ∧ ~(Monument)
-Registration_Type = Other ⇔ Registration_Type ≠ Family_Dwelling ∧ Registration_Type ≠ Social_Dwelling ∧ Registration_Type ≠ Energy_Efficient_Dwelling ∧ Registration_Type ≠ Dwelling_For_Social_Renting ∧ Registration_Type ≠ Heritage ∧ Registration_Type ≠ Professional_Purchase ∧ Registration_Type ≠ Social_Purpose ∧ Registration_Type ≠ Exchange_Unbuilt_Ground
-Municipality = other_Municipal ⇒ ~(Core_City)
-Municipality ≠ other_Municipal ⇒ Core_City
-Professional_Buyer ⇔ Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ (Additional_Security_Required ∧ Additional_Security_Satisfied ∨ ~(Additional_Security_Required)) ∧ Resale = Three_Or_More
+Definitions:
+  
+Universals:
+  
+Consequences:
+  
+Simplified:
+  (Tax = 1 ⇔ Registration_Type = Heritage ∧ Region = Flemish_Region)
+  Tax = 2 ⇔ Registration_Type = Social_Dwelling ∧ Region = Flemish_Region
+  Tax = 4 ⇔ Registration_Type = Professional_Purchase ∧ Region = Flemish_Region
+  (Tax = 6 ⇔ (Registration_Type = Energy_Efficient_Dwelling ∨ Registration_Type = Social_Purpose ∨ Registration_Type = Exchange_Unbuilt_Ground) ∧ Region = Flemish_Region)
+  Tax = 7 ⇔ (Registration_Type = Family_Dwelling ∨ Registration_Type = Dwelling_For_Social_Renting) ∧ Region = Flemish_Region
+  Tax = 10 ⇔ Region = Flemish_Region ∧ Registration_Type = Other
+  (Tax = 12 ⇔ Region = Brussels_Region ∨ Region = Walloon_Region)
+  Registration_Type = Family_Dwelling ⇔ Type_Of_Real_Estate = Residential ∧ Buyer = Natural_Person ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ (~(Energy_Renovation_Planned) ∨ Term_Energy_Renovation ≠ 5 + Certification_Date)
+  Registration_Type = Social_Dwelling ⇔ Buyer = Natural_Person ∧ Type_Of_Real_Estate = Residential ∧ Use = Social_Housing ∧ (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ Seller = ErkendeSocialeHuisvestingsMpy) ∧ Mortgage_Loan_Allowance
+  Registration_Type = Energy_Efficient_Dwelling ⇔ Type_Of_Real_Estate = Residential ∧ Buyer = Natural_Person ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ Term_Energy_Renovation = 5 + Certification_Date
+  Registration_Type = Dwelling_For_Social_Renting ⇔ Type_Of_Real_Estate = Residential ∧ Use = Social_Renting ∧ Start_Dt_Dwelling_For_Social_Rent = 3 + Certification_Date ∧ Duration_Of_Agreement = Less_Than_9_years
+  (Registration_Type = Heritage ⇔ Type_Of_Real_Estate = Residential ∧ Monument ∧ Use = As_Family_Dwelling ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms)
+  Registration_Type = Professional_Purchase ⇔ Professional_Buyer ∧ Transaction_Type ≠ Public_Sale ∧ Use = For_Resale ∧ Certification_Date_Sale = 8 + Certification_Date
+  (Registration_Type = Social_Purpose ⇔ (Seller = Mpy_Erkend_Door_VMSW ∨ Seller = Vlaams_Woningfonds ∨ Seller = Gelijksoortige_Rechtspersoon_EER) ∧ Use = Community_Purpose)
+  Registration_Type = Exchange_Unbuilt_Ground ⇔ Additional_Terms ∧ ~(Monument)
+  Registration_Type = Other ⇔ Registration_Type ≠ Family_Dwelling ∧ Registration_Type ≠ Social_Dwelling ∧ Registration_Type ≠ Energy_Efficient_Dwelling ∧ Registration_Type ≠ Dwelling_For_Social_Renting ∧ Registration_Type ≠ Heritage ∧ Registration_Type ≠ Professional_Purchase ∧ Registration_Type ≠ Social_Purpose ∧ Registration_Type ≠ Exchange_Unbuilt_Ground
+  Municipality = other_Municipal ⇒ ~(Core_City)
+  Municipality ≠ other_Municipal ⇒ Core_City
+  Professional_Buyer ⇔ Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ (Additional_Security_Required ∧ Additional_Security_Satisfied ∨ ~(Additional_Security_Required)) ∧ Resale = Three_Or_More
 
 
 -- propagation

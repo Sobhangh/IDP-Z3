@@ -1,8 +1,8 @@
 
 -- theory
-ForAll(c!15,
-       (LipLen == c!15) ==
-       Or(And(c!15 == Short, JacketDesign == Design_230)))
+ForAll(c!32,
+       (LipLen == c!32) ==
+       Or(And(c!32 == Short, JacketDesign == Design_230)))
 
 -- atoms
 LipLen
@@ -10,9 +10,14 @@ JacketDesign
 JacketDesign = Design_230
 
 -- case
-Definitions: Rule:∀[][[]]: LipLen(Short) ⇔$LipLen$ = Short ∧ JacketDesign = Design_230
-Universals: 
-Simplified: 
+Definitions:
+  Rule:∀[][[]]: LipLen(Short) ⇔$LipLen$ = Short ∧ JacketDesign = Design_230
+Universals:
+  
+Consequences:
+  
+Simplified:
+  
 
 
 -- propagation
