@@ -128,12 +128,12 @@ sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
 ∀n[side] : Length(n) = 0 ⇔ Sides < n
 
 -- case
-Definitions:
+Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
 Rule:∀[][[]]: Large(3) ⇔(false)
 Rule:∀[][[]]: Large(4) ⇔(false)
-Universals:
+Universals:  
   ~Subtype = rectangle
   Perimeter = sum{n[side] : ((1)) : ((2))}
   sum{n[side] : ((Angle(1))) : ((Angle(2)))} = 180 * (-2 + Sides)
@@ -143,7 +143,7 @@ Universals:
   (((~(Sides < 1))) ∧ ((~(Sides < 2))) ∧ ((~(Sides < 3))) ∧ ((~(Sides < 4))))
 Consequences:
   
-Simplified:
+Simplified:  
   ((true))
   (Type = triangle ⇔ Sides = 3)
   (Type = quadrilateral ⇔ Sides = 4)
@@ -236,15 +236,15 @@ Simplified:
  'Subtype': {'Subtype': {'normal': True,
                          'reading': 'Subtype',
                          'typ': 'subtype',
-                         'value': 'rectangle',
+                         'value': 'irregular',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype = irregular': {'cf': False,
-                                     'ct': False,
+                                     'ct': True,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
                                      'typ': 'Bool'},
              'Subtype = rectangle': {'cf': False,
-                                     'ct': True,
+                                     'ct': False,
                                      'normal': False,
                                      'reading': 'Subtype = rectangle',
                                      'typ': 'Bool'},

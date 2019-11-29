@@ -69,6 +69,11 @@ class LiteralQ(object):
     def mk_universal  (self): return LiteralQ(self.truth | Truth.UNIVERSAL  , self.subtence)
     def mk_consequence(self): return LiteralQ(self.truth | Truth.CONSEQUENCE, self.subtence)
 
+    def is_given      (self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.GIVEN
+    def is_universal  (self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.UNIVERSAL
+    def is_consequence(self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.CONSEQUENCE
+    def is_irrelevant (self): return self.truth == Truth.IRRELEVANT
+
     def as_substitution(self, case):
         if self.truth.is_known():
             old = self.subtence

@@ -175,9 +175,9 @@ Surface = -(1)
 ∃n[side] : n ≤ Sides ∧ Length(n) = Base
 
 -- case
-Definitions:
+Definitions: 
   
-Universals:
+Universals:  
   Subtype = regular_triangle
   Perimeter = sum{n[side] : ((Length(1))) : ((Length(2)))}
   sum{n[side] : ((Angle(1))) : ((Angle(2)))} = 180 * (-2 + Sides)
@@ -191,7 +191,7 @@ Universals:
   (1 ≤ Sides ∧ (Length(1)) = Base ∨ 2 ≤ Sides ∧ (Length(2)) = Base ∨ 3 ≤ Sides ∧ (Length(3)) = Base ∨ 4 ≤ Sides ∧ (Length(4)) = Base)
 Consequences:
   
-Simplified:
+Simplified:  
   (Type = triangle ⇔ Sides = 3)
   (Type = quadrilateral ⇔ Sides = 4)
   ((Vertices = 3 ⇔ Sides = 3) ∧ (Vertices = 4 ⇔ Sides = 4))

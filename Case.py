@@ -37,29 +37,32 @@ class Case:
         # initialisation
         self.atoms = self.idp.atoms # {atom_string: Expression} atoms + numeric terms !
         self.typeConstraints = self.idp.vocabulary
-        self.definitions = self.idp.theory.definitions # Definitions
-
-        self.universals = [] # [LiteralQ]
-        self.consequences = [] # [LiteralQ]
-        self.irrelevant = [] # [Expression] subtences
+        self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified = self.idp.theory.constraints # [Expression]
+
+        self.literals = {} # {subtence: LiteralQ}, with truth value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
+        # initialize .literals
+        self.literals = {s: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
+        for l in self.given:
+            self.literals[l.subtence] = l.mk_given()
+
         # find immediate universals
-        self.universals, l1 = [], []
+        l1 = []
         for i, c in enumerate(self.simplified):
             u = self.expr_to_literal(c)
             if u:
-                self.universals.append(u[0])
+                self.literals[u[0].subtence] = u[0].mk_universal()
             else:
                 l1.append(c)
         self.simplified = l1
         
         # simplify self.simplified using given
-        todo = list(self.given.keys()) + self.universals
-        while todo:
-            lit = todo.pop(0)
+        to_propagate = list(l for l in self.literals.values() if l.truth.is_known())
+        while to_propagate:
+            lit = to_propagate.pop(0)
             old, new = lit.as_substitution(self)
 
             if new is not None:
@@ -69,8 +72,8 @@ class Case:
                     # find immediate consequences
                     u = self.expr_to_literal(c1)
                     if u:
-                        self.consequences.append(u[0])
-                        todo.append(u[0])
+                        self.literals[u[0].subtence] = u[0].mk_consequence()
+                        to_propagate.append(u[0])
                     else:
                         l1.append(c1)
                 self.simplified = l1
@@ -84,10 +87,10 @@ class Case:
 
     def __str__(self):
         return (# f"Type: {self.typeConstraints}"
-                f"Definitions:{indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
-                f"Universals:{indented}{indented.join(repr(c) for c in self.universals)}{nl}"
-                f"Consequences:{indented}{indented.join(repr(c) for c in self.consequences)}{nl}"
-                f"Simplified:{indented}{indented.join(str(c) for c in self.simplified)}{nl}"
+                f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
+                f"Universals:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_universal())}{nl}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.literals.values() if c.is_consequence())}{nl}"
+                f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
         )
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):
@@ -103,9 +106,9 @@ class Case:
         self.translated = And(
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
-            + [c.subtence.translate() for c in self.universals]
+            + [l.translate() for l in self.literals.values() if l.truth.is_known()]
             + [c.translate() for c in self.simplified]
-            + (list(self.given.values())) )
+            )
         return self.translated
 
 def make_case(idp, jsonstr):

@@ -205,13 +205,13 @@ Municipality ≠ other_Municipal
 Resale = Three_Or_More
 
 -- case
-Definitions:
+Definitions: 
   
-Universals:
+Universals:  
   
 Consequences:
   
-Simplified:
+Simplified:  
   (Tax = 1 ⇔ Registration_Type = Heritage ∧ Region = Flemish_Region)
   Tax = 2 ⇔ Registration_Type = Social_Dwelling ∧ Region = Flemish_Region
   Tax = 4 ⇔ Registration_Type = Professional_Purchase ∧ Region = Flemish_Region

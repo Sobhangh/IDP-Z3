@@ -13,16 +13,16 @@ Prime(3)
 Prime(4)
 
 -- case
-Definitions:
+Definitions: 
   Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
 Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)
 Rule:∀[][[]]: Prime(3) ⇔($Prime$0 = 3)
 Rule:∀[][[]]: Prime(4) ⇔(false)
-Universals:
+Universals:  
   
 Consequences:
   
-Simplified:
+Simplified:  
   
 
 
