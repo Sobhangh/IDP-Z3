@@ -29,7 +29,7 @@ Simplified:
                   'JacketDesign = Design_230': {'cf': False,
                                                 'ct': True,
                                                 'normal': False,
-                                                'reading': '',
+                                                'reading': 'JacketDesign = Design_230',
                                                 'typ': 'Bool'}},
  'LipLen': {'LipLen': {'normal': True,
                        'reading': 'LipLen',

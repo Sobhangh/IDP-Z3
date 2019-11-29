@@ -17,6 +17,7 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 from z3 import *
+from enum import IntFlag
 import ast
 
 import Idp
@@ -24,34 +25,55 @@ from Idp.Expression import TRUE, FALSE, AComparison
 from utils import *
 
 
+class Truth(IntFlag):
+    FALSE       = 0
+    TRUE        = 1
+    UNKNOWN     = 3
+    GIVEN       = 4
+    UNIVERSAL   = 8
+    CONSEQUENCE = 16
+    IRRELEVANT  = 255
+
+    def Not(self): return ~(self) & 1
+    def is_known(self): return self & Truth.UNKNOWN != Truth.UNKNOWN
+    def is_true(self): return self & 3 == Truth.TRUE
+    def to_bool(self): return self & 1 # beware: UNKNOWN = True !
+
+
 class LiteralQ(object):
-    def __init__(self, truth, subtence):
-        self.truth = truth # Bool, "irrelevant", None = unknown, 
+    def __init__(self, truth : Truth, subtence):
+        self.truth = truth
         self.subtence = subtence
 
     def __hash__(self):
-        return hash((self.truth, str(self.subtence)))
+        return hash((self.truth & 3, str(self.subtence)))
 
     def __eq__(self, other):
-        return self.truth == other.truth \
+        return self.truth & 3 == other.truth & 3 \
             and type(self.subtence) == type (other.subtence) \
             and str(self.subtence) == str(other.subtence)
 
     def __repr__(self):
-        return ( f"{'' if self.truth else '~'}"
+        return ( f"{'' if self.truth.is_true() else '~'}"
                  f"{str(self.subtence)}" )
 
     def __str__(self):
-        if self.truth == "irrelevant":
+        if self.truth == Truth.IRRELEVANT:
             return ""
-        return ("" if self.truth else "? " if self.truth is None else "Not ") \
+        return ("" if self.truth.is_true() else \
+                "? " if not self.truth.is_known() \
+                else "Not ") \
              + self.subtence.reading
 
+    def mk_given      (self): return LiteralQ(self.truth | Truth.GIVEN      , self.subtence)
+    def mk_universal  (self): return LiteralQ(self.truth | Truth.UNIVERSAL  , self.subtence)
+    def mk_consequence(self): return LiteralQ(self.truth | Truth.CONSEQUENCE, self.subtence)
+
     def as_substitution(self, case):
-        if isinstance(self.truth, bool): # ignore irrelevant, unknown
+        if self.truth.is_known():
             old = self.subtence
-            new = TRUE if self.truth else FALSE
-            if self.truth:
+            new = TRUE if self.truth.is_true() else FALSE
+            if self.truth.is_true():  # analyze equalities
                 if isinstance(old, Equality):
                     if is_number(old.value):
                         new = NumberConstant(number=str(old.value))
@@ -72,18 +94,19 @@ class LiteralQ(object):
     def to_json(self): return str(self)
 
     def translate(self):
-        if self.truth == "irrelevant":
+        if self.truth == Truth.IRRELEVANT:
             return BoolVal(True)
-        return self.subtence.translated if self.truth else Not(self.subtence.translated)
+        return self.subtence.translated if self.truth & 1 else Not(self.subtence.translated)
 
 class Equality(object):
     def __init__(self, subtence, value):
         self.subtence = subtence # an Expression
         self.value = value # a Z3 value
-        self.code = f"{subtence.code} = {str(value)}"
+        self.code = sys.intern(f"{subtence.code} = {str(value)}")
+        self.str = self.code
         self.type = 'bool'
         self.translated = (subtence.translated == value)
-        self.reading = "" #TODO
+        self.reading = self.code #TODO find original code (parenthesis !)
 
     def __str__(self): return self.code
 
@@ -115,15 +138,15 @@ def json_to_literals(idp, jsonstr):
                     atom = symbol.instances[atom]
                 if json_atom["typ"] == "Bool":
                     if "ct" in json_atom and json_atom["ct"]:
-                        literalQ = LiteralQ(True, atom)
+                        literalQ = LiteralQ(Truth.TRUE, atom).mk_given()
                     if "cf" in json_atom and json_atom["cf"]:
-                        literalQ = LiteralQ(False, atom)
+                        literalQ = LiteralQ(Truth.FALSE, atom).mk_given()
                 elif json_atom["value"]:
                     if json_atom["typ"] in ["Int", "Real"]:
                         value = eval(json_atom["value"])
                     else:
                         value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
-                    literalQ = LiteralQ(True, Equality(atom, value))
+                    literalQ = LiteralQ(Truth.TRUE, Equality(atom, value)).mk_given()
                 else:
                     literalQ = None #TODO error ?
                 if literalQ is not None:

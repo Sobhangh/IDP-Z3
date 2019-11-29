@@ -83,7 +83,7 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
 
     out = {} # {LiteralQ: True}
     todo = [k for (v,k) in reify.items() \
-            if not LiteralQ(True, v) in ignored and not LiteralQ(False, v) in ignored]
+            if not LiteralQ(Truth.TRUE, v) in ignored and not LiteralQ(Truth.FALSE, v) in ignored]
 
 
     # try mass propagation first
@@ -96,6 +96,7 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
             t = True
             if is_not(consq):
                 t, consq = False, consq.arg(0)
+            t = Truth.TRUE if t else Truth.FALSE
             # try to unreify it
             if is_eq(consq):
                 symbol = consq.children()[0]
@@ -130,6 +131,7 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                 t = True
                 if is_not(consq):
                     t, consq = False, consq.arg(0)
+                t = Truth.TRUE if t else Truth.FALSE
                 if consq in unreify:
                     out[LiteralQ(t, unreify[consq])] = True
                 elif is_eq(consq):
@@ -151,9 +153,9 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                 pass
             elif result3 == unsat: # atomZ3 can have only one value
                 if is_bool(reified):
-                    out[LiteralQ(True if is_true(value) else False, unreify[reified])] = True
+                    out[LiteralQ(Truth.TRUE if is_true(value) else Truth.FALSE, unreify[reified])] = True
                 else:
-                    out[LiteralQ(True, Equality(unreify[reified], value))] = True
+                    out[LiteralQ(Truth.TRUE, Equality(unreify[reified], value))] = True
             else:
                 print("can't propagate with", Not(reified == value))
     if result2 != sat:

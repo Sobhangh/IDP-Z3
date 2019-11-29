@@ -20,7 +20,7 @@ from copy import copy
 from z3 import And
 
 from Idp.Expression import Brackets, AUnary
-from Structure_ import json_to_literals, Equality, LiteralQ
+from Structure_ import json_to_literals, Equality, LiteralQ, Truth
 from utils import *
 
 class Case:
@@ -90,13 +90,13 @@ class Case:
                 f"Simplified:{indented}{indented.join(str(c) for c in self.simplified)}{nl}"
         )
 
-    def expr_to_literal(self, expr, truth=True):
+    def expr_to_literal(self, expr, truth=Truth.TRUE):
         if expr.code in self.atoms: # found it !
             return [LiteralQ(truth, expr)]
         if isinstance(expr, Brackets):
             return self.expr_to_literal(expr.sub_exprs[0], truth)
         if isinstance(expr, AUnary) and expr.operator == '~':
-            return self.expr_to_literal(expr.sub_exprs[0], not truth)
+            return self.expr_to_literal(expr.sub_exprs[0], truth.Not() )
         return []
 
     def translate(self):
