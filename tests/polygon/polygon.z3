@@ -111,21 +111,21 @@ Sides = 4
 Vertices = 3
 Vertices = 4
 ∀n[side] : Angle(n) < 180
-∀n[side] : Length(n) = Length(1) ∨ Sides < n
+∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Subtype = right_triangle
 Subtype = regular_triangle
 Subtype = irregular
-∀n[side] : Angle(n) = 60 ∨ Sides < n
+∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
 ∃n[side] : Angle(n) = 90
 Subtype = square
 Subtype = rectangle
-∀n[side] : Angle(n) = 90 ∨ Sides < n
-Perimeter = sum{n[side] : true : Length(n)}
-sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
+∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+Perimeter = (sum{n[side] : true : Length(n)})
+(sum{n[side] : true : Angle(n)}) = (((Sides - 2)) * 180)
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
-∀n[side] : Angle(n) = 0 ⇔ Vertices < n
-∀n[side] : Length(n) = 0 ⇔ Sides < n
+∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
+∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 
 -- case
 Definitions: 
@@ -135,63 +135,66 @@ Rule:∀[][[]]: Large(3) ⇔(false)
 Rule:∀[][[]]: Large(4) ⇔(false)
 Universals:  
   ~Subtype = rectangle
-  Perimeter = sum{n[side] : ((1)) : ((2))}
-  sum{n[side] : ((Angle(1))) : ((Angle(2)))} = 180 * (-2 + Sides)
-  (0 ≤ (Angle(1)) ∧ 0 ≤ (Angle(2)) ∧ 0 ≤ (Angle(3)) ∧ 0 ≤ (Angle(4)))
-  ((Angle(1)) ≠ 180 ∧ (Angle(2)) ≠ 180 ∧ (Angle(3)) ≠ 180 ∧ (Angle(4)) ≠ 180)
-  ((Angle(1)) = 0 ⇔ Vertices < 1 ∧ (Angle(2)) = 0 ⇔ Vertices < 2 ∧ (Angle(3)) = 0 ⇔ Vertices < 3 ∧ (Angle(4)) = 0 ⇔ Vertices < 4)
-  (((~(Sides < 1))) ∧ ((~(Sides < 2))) ∧ ((~(Sides < 3))) ∧ ((~(Sides < 4))))
+  Perimeter = (sum{n[side] : ((1)) : ((2))})
+  (sum{n[side] : ((Angle(1))) : ((Angle(2)))}) = (180 * ((-2 + Sides)))
+  ((0 ≤ ((Angle(1)))) ∧ (0 ≤ ((Angle(2)))) ∧ (0 ≤ ((Angle(3)))) ∧ (0 ≤ ((Angle(4)))))
+  ((((Angle(1))) ≠ 180) ∧ (((Angle(2))) ≠ 180) ∧ (((Angle(3))) ≠ 180) ∧ (((Angle(4))) ≠ 180))
+  (((((Angle(1))) = 0) ⇔ (Vertices < 1)) ∧ ((((Angle(2))) = 0) ⇔ (Vertices < 2)) ∧ ((((Angle(3))) = 0) ⇔ (Vertices < 3)) ∧ ((((Angle(4))) = 0) ⇔ (Vertices < 4)))
+  ((((~(Sides < 1)))) ∧ (((~(Sides < 2)))) ∧ (((~(Sides < 3)))) ∧ (((~(Sides < 4)))))
 Consequences:
   
 Simplified:  
   ((true))
-  (Type = triangle ⇔ Sides = 3)
-  (Type = quadrilateral ⇔ Sides = 4)
-  ((Vertices = 3 ⇔ Sides = 3) ∧ (Vertices = 4 ⇔ Sides = 4))
-  (Sides = 3 ⇒ Convex)
-  (Convex ⇔ (((Angle(1)) < 180 ∧ (Angle(2)) < 180 ∧ (Angle(3)) < 180 ∧ (Angle(4)) < 180)))
-  (Equilateral ⇔ (((Sides < 2) ∧ (Sides < 3) ∧ (Sides < 4))))
-  (Sides = 3 ⇒ Subtype = right_triangle ∨ Subtype = regular_triangle ∨ Subtype = irregular)
-  (Subtype = regular_triangle ⇔ Sides = 3 ∧ Equilateral)
-  (Subtype = regular_triangle ⇔ Sides = 3 ∧ (((Angle(1)) = 60 ∨ Sides < 1 ∧ (Angle(2)) = 60 ∨ Sides < 2 ∧ (Angle(3)) = 60 ∨ Sides < 3 ∧ (Angle(4)) = 60 ∨ Sides < 4)))
-  (Subtype = right_triangle ⇔ Sides = 3 ∧ (((Angle(1)) = 90 ∨ (Angle(2)) = 90 ∨ (Angle(3)) = 90 ∨ (Angle(4)) = 90)))
-  ((Subtype = square) ⇔ Sides = 4 ∧ (((Angle(1)) = 90 ∨ Sides < 1 ∧ (Angle(2)) = 90 ∨ Sides < 2 ∧ (Angle(3)) = 90 ∨ Sides < 3 ∧ (Angle(4)) = 90 ∨ Sides < 4)))
-  (Subtype = square ⇔ Sides = 4 ∧ Equilateral)
+  ((Type = triangle) ⇔ (Sides = 3))
+  ((Type = quadrilateral) ⇔ (Sides = 4))
+  ((((Vertices = 3) ⇔ (Sides = 3))) ∧ (((Vertices = 4) ⇔ (Sides = 4))))
+  ((Sides = 3) ⇒ Convex)
+  (Convex ⇔ ((((((Angle(1))) < 180) ∧ (((Angle(2))) < 180) ∧ (((Angle(3))) < 180) ∧ (((Angle(4))) < 180)))))
+  (Equilateral ⇔ (((((Sides < 2)) ∧ ((Sides < 3)) ∧ ((Sides < 4))))))
+  ((Sides = 3) ⇒ ((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
+  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))
+  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ (((((((Angle(1))) = 60) ∨ (Sides < 1)) ∧ ((((Angle(2))) = 60) ∨ (Sides < 2)) ∧ ((((Angle(3))) = 60) ∨ (Sides < 3)) ∧ ((((Angle(4))) = 60) ∨ (Sides < 4)))))))
+  ((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ ((((((Angle(1))) = 90) ∨ (((Angle(2))) = 90) ∨ (((Angle(3))) = 90) ∨ (((Angle(4))) = 90))))))
+  (((Subtype = square)) ⇔ ((Sides = 4) ∧ (((((((Angle(1))) = 90) ∨ (Sides < 1)) ∧ ((((Angle(2))) = 90) ∨ (Sides < 2)) ∧ ((((Angle(3))) = 90) ∨ (Sides < 3)) ∧ ((((Angle(4))) = 90) ∨ (Sides < 4)))))))
+  ((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))
   ((true))
   (((true)))
+Irrelevant:  
+  
 
 
 -- propagation
-{'Angle': {'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': ''},
+{'Angle': {'(sum{n[side] : true : Angle(n)}) = (((Sides - 2)) * 180)': {'cf': False,
+                                                                        'ct': False,
+                                                                        'normal': False,
+                                                                        'reading': 'The sum of the angles is 180° for '
+                                                                                   'a triangle, and 360° for a '
+                                                                                   'quadrilateral',
+                                                                        'typ': 'Bool'},
+           'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': ''},
            'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': ''},
            'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': ''},
            'Angle(4)': {'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': ''},
-           'sum{n[side] : true : Angle(n)} = (Sides - 2) * 180': {'cf': False,
-                                                                  'ct': False,
-                                                                  'normal': False,
-                                                                  'reading': 'The sum of the angles is 180° for a '
-                                                                             'triangle, and 360° for a quadrilateral',
-                                                                  'typ': 'Bool'},
+           '∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)': {'cf': False,
+                                                          'ct': False,
+                                                          'normal': False,
+                                                          'reading': 'A polygon with N vertices has N angles',
+                                                          'typ': 'Bool'},
+           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'cf': False,
+                                                        'ct': False,
+                                                        'normal': False,
+                                                        'reading': 'All angles are 60°',
+                                                        'typ': 'Bool'},
+           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': False,
+                                                        'ct': False,
+                                                        'normal': False,
+                                                        'reading': 'All angles are 90°',
+                                                        'typ': 'Bool'},
            '∀n[side] : Angle(n) < 180': {'cf': False,
                                          'ct': False,
                                          'normal': False,
                                          'reading': 'All angles are below 180°',
                                          'typ': 'Bool'},
-           '∀n[side] : Angle(n) = 0 ⇔ Vertices < n': {'cf': False,
-                                                      'ct': False,
-                                                      'normal': False,
-                                                      'reading': 'A polygon with N vertices has N angles',
-                                                      'typ': 'Bool'},
-           '∀n[side] : Angle(n) = 60 ∨ Sides < n': {'cf': False,
-                                                    'ct': False,
-                                                    'normal': False,
-                                                    'reading': 'All angles are 60°',
-                                                    'typ': 'Bool'},
-           '∀n[side] : Angle(n) = 90 ∨ Sides < n': {'cf': False,
-                                                    'ct': False,
-                                                    'normal': False,
-                                                    'reading': 'All angles are 90°',
-                                                    'typ': 'Bool'},
            '∀x[side] : 0 ≤ Angle(x)': {'cf': False,
                                        'ct': False,
                                        'normal': False,
@@ -214,25 +217,25 @@ Simplified:
            'Large(3)': {'cf': True, 'ct': False, 'normal': True, 'reading': 'Large(3)', 'typ': 'Bool'},
            'Large(4)': {'cf': True, 'ct': False, 'normal': True, 'reading': 'Large(4)', 'typ': 'Bool'}},
  'Perimeter': {'Perimeter': {'normal': True, 'reading': 'Perimeter', 'typ': 'Real', 'value': '10'},
-               'Perimeter = sum{n[side] : true : Length(n)}': {'cf': False,
-                                                               'ct': False,
-                                                               'normal': False,
-                                                               'reading': 'The perimeter is the sum of the lengths of '
-                                                                          'the sides',
-                                                               'typ': 'Bool'}},
+               'Perimeter = (sum{n[side] : true : Length(n)})': {'cf': False,
+                                                                 'ct': False,
+                                                                 'normal': False,
+                                                                 'reading': 'The perimeter is the sum of the lengths '
+                                                                            'of the sides',
+                                                                 'typ': 'Bool'}},
  'Sides': {'Sides': {'normal': True, 'reading': 'Sides', 'typ': 'Int', 'value': '4', 'values': ['3', '4']},
            'Sides = 3': {'cf': False, 'ct': False, 'normal': False, 'reading': 'Sides = 3', 'typ': 'Bool'},
            'Sides = 4': {'cf': False, 'ct': True, 'normal': False, 'reading': 'Sides = 4', 'typ': 'Bool'},
-           '∀n[side] : Length(n) = 0 ⇔ Sides < n': {'cf': False,
-                                                    'ct': False,
-                                                    'normal': False,
-                                                    'reading': 'A polygon with N sides has N lengths',
-                                                    'typ': 'Bool'},
-           '∀n[side] : Length(n) = Length(1) ∨ Sides < n': {'cf': False,
-                                                            'ct': False,
-                                                            'normal': False,
-                                                            'reading': 'All sides have the same length',
-                                                            'typ': 'Bool'}},
+           '∀n[side] : (Length(n) = 0) ⇔ (Sides < n)': {'cf': False,
+                                                        'ct': False,
+                                                        'normal': False,
+                                                        'reading': 'A polygon with N sides has N lengths',
+                                                        'typ': 'Bool'},
+           '∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)': {'cf': False,
+                                                                'ct': False,
+                                                                'normal': False,
+                                                                'reading': 'All sides have the same length',
+                                                                'typ': 'Bool'}},
  'Subtype': {'Subtype': {'normal': True,
                          'reading': 'Subtype',
                          'typ': 'subtype',

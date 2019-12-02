@@ -310,14 +310,26 @@ class BinaryOperator(Expression):
         self.is_subtence = self.operator[0] in '=<>≤≥≠'
 
     def __str__(self):
-        temp = str(self.sub_exprs[0])
+        def parenthesis(x):
+            # add () around operands, to avoid ambiguity in str()
+            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant]:
+                return f"({str(x)})"
+            else:
+                return f"{str(x)}"
+        temp = parenthesis(self.sub_exprs[0])
         for i in range(1, len(self.sub_exprs)):
-            temp += f" {self.operator[i-1]} {str(self.sub_exprs[i])}"
+            temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
         return temp
     def str_(self):
-        temp = self.sub_exprs[0].str
+        def parenthesis(x):
+            # add () around operands, to avoid ambiguity in str()
+            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant]:
+                return f"({x.str})"
+            else:
+                return f"{x.str}"
+        temp = parenthesis(self.sub_exprs[0])
         for i in range(1, len(self.sub_exprs)):
-            temp += f" {self.operator[i-1]} {self.sub_exprs[i].str}"
+            temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
         return temp
 
     def annotate(self, symbol_decls, q_decls):
@@ -549,7 +561,7 @@ def operation(ops, operands):
         ops = [ops] * (len(operands)-1)
     operands1 = []
     for o in operands:
-        if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, Brackets]:
+        if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
             # add () around operands, to avoid ambiguity in str()
             o = Brackets(f=o, reading='')
         operands1.append(o)

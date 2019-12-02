@@ -43,7 +43,7 @@ typeOf(right_triangle)
 typeOf(rectangle)
 typeOf(square)
 ∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
-∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)
+∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
 ∀st[subtype] : isa(st,typeOf(st))
 Type = typeOf(Subtype)
 
@@ -51,14 +51,16 @@ Type = typeOf(Subtype)
 Definitions: 
   
 Universals:  
-  ((((asi(triangle,regular_triangle)))) ∧ ((~((asi(quadrilateral,regular_triangle))))) ∧ (((asi(triangle,right_triangle)))) ∧ ((~((asi(quadrilateral,right_triangle))))) ∧ ((~((asi(triangle,rectangle))))) ∧ (((asi(quadrilateral,rectangle)))) ∧ ((~((asi(triangle,square))))) ∧ (((asi(quadrilateral,square)))))
-  ((((typeOf(regular_triangle)) = triangle)) ∧ ((~((typeOf(regular_triangle)) = quadrilateral))) ∧ (((typeOf(right_triangle)) = triangle)) ∧ ((~((typeOf(right_triangle)) = quadrilateral))) ∧ ((~((typeOf(rectangle)) = triangle))) ∧ (((typeOf(rectangle)) = quadrilateral)) ∧ ((~((typeOf(square)) = triangle))) ∧ (((typeOf(square)) = quadrilateral)))
-  ((((typeOf(regular_triangle)) = triangle)) ∧ (((typeOf(right_triangle)) = triangle)) ∧ (((typeOf(rectangle)) = quadrilateral)) ∧ (((typeOf(square)) = quadrilateral)))
-  Type = (typeOf(Subtype))
+  (((((asi(triangle,regular_triangle))))) ∧ (((~((asi(quadrilateral,regular_triangle)))))) ∧ ((((asi(triangle,right_triangle))))) ∧ (((~((asi(quadrilateral,right_triangle)))))) ∧ (((~((asi(triangle,rectangle)))))) ∧ ((((asi(quadrilateral,rectangle))))) ∧ (((~((asi(triangle,square)))))) ∧ ((((asi(quadrilateral,square))))))
+  ((((((typeOf(regular_triangle))) = triangle))) ∧ (((~(((typeOf(regular_triangle))) = quadrilateral)))) ∧ (((((typeOf(right_triangle))) = triangle))) ∧ (((~(((typeOf(right_triangle))) = quadrilateral)))) ∧ (((~(((typeOf(rectangle))) = triangle)))) ∧ (((((typeOf(rectangle))) = quadrilateral))) ∧ (((~(((typeOf(square))) = triangle)))) ∧ (((((typeOf(square))) = quadrilateral))))
+  ((((((typeOf(regular_triangle))) = triangle))) ∧ (((((typeOf(right_triangle))) = triangle))) ∧ (((((typeOf(rectangle))) = quadrilateral))) ∧ (((((typeOf(square))) = quadrilateral))))
+  Type = ((typeOf(Subtype)))
 Consequences:
   
 Simplified:  
   (true)
+Irrelevant:  
+  
 
 
 -- propagation
@@ -147,9 +149,9 @@ Simplified:
                                                   'normal': False,
                                                   'reading': '∀st[subtype] : isa(st,typeOf(st))',
                                                   'typ': 'Bool'},
-            '∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)': {'cf': False,
-                                                                 'ct': False,
-                                                                 'normal': False,
-                                                                 'reading': '∀t[type]st[subtype] : typeOf(st) = t ⇔ '
-                                                                            'isa(st,t)',
-                                                                 'typ': 'Bool'}}}
+            '∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)': {'cf': False,
+                                                                   'ct': False,
+                                                                   'normal': False,
+                                                                   'reading': '∀t[type]st[subtype] : (typeOf(st) = t) '
+                                                                              '⇔ isa(st,t)',
+                                                                   'typ': 'Bool'}}}

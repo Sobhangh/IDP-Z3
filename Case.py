@@ -40,21 +40,21 @@ class Case:
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified = self.idp.theory.constraints # [Expression]
 
-        self.literals = {} # {subtence: LiteralQ}, with truth value
+        self.literals = {} # {subtence.code: LiteralQ}, with truth value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
         # initialize .literals
-        self.literals = {s: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
+        self.literals = {s.code: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
         for l in self.given:
-            self.literals[l.subtence] = l.mk_given()
+            self.literals[l.subtence.code] = l.mk_given()
 
         # find immediate universals
         l1 = []
         for i, c in enumerate(self.simplified):
             u = self.expr_to_literal(c)
             if u:
-                self.literals[u[0].subtence] = u[0].mk_universal()
+                self.literals[u[0].subtence.code] = u[0].mk_universal()
             else:
                 l1.append(c)
         self.simplified = l1
@@ -72,7 +72,7 @@ class Case:
                     # find immediate consequences
                     u = self.expr_to_literal(c1)
                     if u:
-                        self.literals[u[0].subtence] = u[0].mk_consequence()
+                        self.literals[u[0].subtence.code] = u[0].mk_consequence()
                         to_propagate.append(u[0])
                     else:
                         l1.append(c1)
@@ -81,7 +81,20 @@ class Case:
         # update consequences using propagation
         # simplify self.simplified using all consequences
         # simplify universal, using all consequences
+        
         # find irrelevant
+        def mark_relevant(expr):
+            nonlocal self
+            if expr.code in self.literals:
+                self.literals[expr.code] = self.literals[expr.code].mk_relevant()
+            for e in expr.sub_exprs:
+                mark_relevant(e)
+        for expr in self.simplified:
+            mark_relevant(expr)
+        for d in self.definitions:
+            for symb in d.partition.values():
+                for r in symb:
+                    mark_relevant(r.body)
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -91,6 +104,7 @@ class Case:
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_universal())}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.literals.values() if c.is_consequence())}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
+                f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_irrelevant())}{nl}"
         )
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):
@@ -117,7 +131,8 @@ def make_case(idp, jsonstr):
 
         case = Case(idp, jsonstr)
 
-        if 20<len(Case.cache):
-            del Case.cache[0] # remove oldest entry, to prevent memory overflow
+        if 100<len(Case.cache):
+            # remove oldest entry, to prevent memory overflow
+            Case.cache = {k:v for k,v in list(Case.cache.items())[1:]}
         Case.cache[(idp, jsonstr)] = case
         return case

@@ -144,20 +144,21 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
         if optimal and result2 == sat: # try optimal propagation
             value = solver2.model().eval(reified)
 
-            solver.push()
-            solver.add(Not(reified == value))
-            result3 = solver.check()
-            solver.pop()
+            if str(value) != str(reified): # exclude Length(1) == Length(1) (irrelevant)
+                solver.push()
+                solver.add(Not(reified == value))
+                result3 = solver.check()
+                solver.pop()
 
-            if result3 == sat:
-                pass
-            elif result3 == unsat: # atomZ3 can have only one value
-                if is_bool(reified):
-                    out[LiteralQ(Truth.TRUE if is_true(value) else Truth.FALSE, unreify[reified])] = True
+                if result3 == sat:
+                    pass
+                elif result3 == unsat: # atomZ3 can have only one value
+                    if is_bool(reified):
+                        out[LiteralQ(Truth.TRUE if is_true(value) else Truth.FALSE, unreify[reified])] = True
+                    else:
+                        out[LiteralQ(Truth.TRUE, Equality(unreify[reified], value))] = True
                 else:
-                    out[LiteralQ(Truth.TRUE, Equality(unreify[reified], value))] = True
-            else:
-                print("can't propagate with", Not(reified == value))
+                    print("can't propagate with", Not(reified == value))
     if result2 != sat:
         #TODO reify the non linear equations, find their thruth value, then use a solver ?
         print("can't find a model")

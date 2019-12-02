@@ -11,12 +11,14 @@ JacketDesign = Design_230
 
 -- case
 Definitions: 
-  Rule:∀[][[]]: LipLen(Short) ⇔$LipLen$ = Short ∧ JacketDesign = Design_230
+  Rule:∀[][[]]: LipLen(Short) ⇔($LipLen$ = Short) ∧ (JacketDesign = Design_230)
 Universals:  
   
 Consequences:
   
 Simplified:  
+  
+Irrelevant:  
   
 
 

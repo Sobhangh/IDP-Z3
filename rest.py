@@ -75,7 +75,8 @@ def caseOf(code):
     else:
         idp = idpparser.model_from_str(code)
         if 20<len(idps):
-            del idps[0] # remove oldest entry, to prevent memory overflow
+            # remove oldest entry, to prevent memory overflow
+            idps = {k:v for k,v in list(idps.items())[1:]}
         idps[code] = idp
         return idp
 

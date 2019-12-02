@@ -24,6 +24,8 @@ Consequences:
   
 Simplified:  
   
+Irrelevant:  
+  
 
 
 -- propagation

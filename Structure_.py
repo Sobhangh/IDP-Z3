@@ -68,6 +68,8 @@ class LiteralQ(object):
     def mk_given      (self): return LiteralQ(self.truth | Truth.GIVEN      , self.subtence)
     def mk_universal  (self): return LiteralQ(self.truth | Truth.UNIVERSAL  , self.subtence)
     def mk_consequence(self): return LiteralQ(self.truth | Truth.CONSEQUENCE, self.subtence)
+    def mk_relevant   (self): return LiteralQ(Truth.UNKNOWN, self.subtence) if self.truth == Truth.IRRELEVANT \
+                                     else self
 
     def is_given      (self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.GIVEN
     def is_universal  (self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.UNIVERSAL
@@ -101,7 +103,7 @@ class LiteralQ(object):
     def translate(self):
         if self.truth == Truth.IRRELEVANT:
             return BoolVal(True)
-        return self.subtence.translated if self.truth & 1 else Not(self.subtence.translated)
+        return self.subtence.translate() if self.truth & 1 else Not(self.subtence.translate())
 
 class Equality(object):
     def __init__(self, subtence, value):
@@ -117,6 +119,8 @@ class Equality(object):
 
     def unknown_symbols(self):
         return self.subtence.unknown_symbols()
+
+    def translate(self): return self.translated
 
     
 #################
@@ -174,9 +178,9 @@ def model_to_json(idp, s, reify):
             if not (is_true(value) or is_false(value)):
                 #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                 print("*** ", atom.reading, " is not defined, and assumed false")
-            out.addAtom(atom, True if is_true(value) else False)
+            out.addAtom(atom, Truth.TRUE if is_true(value) else Truth.FALSE)
         else: #TODO check that value is numeric ?
-            out.addAtom(Equality(atom, value), True)
+            out.addAtom(Equality(atom, value), Truth.TRUE)
     return out.m
 
 
@@ -212,7 +216,7 @@ class Structure_(object):
 
 
     def addAtom(self, atom, truth):
-        if truth and type(atom) == Equality:
+        if truth.is_true() and type(atom) == Equality:
             symbol = atom.subtence.translated
             key = atom.subtence.code
             typ = symbol.sort().name()
@@ -228,8 +232,9 @@ class Structure_(object):
         for symb in atom.unknown_symbols().keys():
             s = self.m.setdefault(symb, {})
             if key in s:
-                if truth is None: s[key]["unknown"] = True
+                if truth.is_known(): 
+                    s[key]["ct" if truth.is_true() else "cf"] = True
                 else:
-                    s[key]["ct" if truth else "cf"] = True
+                    s[key]["unknown"] = True
                 s[key]['reading'] = atom.reading
 
