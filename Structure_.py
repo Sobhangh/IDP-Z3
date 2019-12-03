@@ -168,10 +168,10 @@ def json_to_literals(idp, jsonstr):
 # see docs/REST.md
 #################
 
-def model_to_json(idp, s, reify):
+def model_to_json(case, s, reify):
     m = s.model()
-    out = Structure_(idp)
-    for atom in idp.atoms.values():
+    out = Structure_(case)
+    for atom in case.idp.atoms.values():
         # atom might not have an interpretation in model (if "don't care")
         value = m.eval(reify[atom], model_completion=True)
         if atom.type == 'bool':
@@ -185,22 +185,26 @@ def model_to_json(idp, s, reify):
 
 
 class Structure_(object):
-    def __init__(self, idp, structure=[]):
+    def __init__(self, case, structure=[]):
         self.m = {}
 
-        def initialise(atom, ct_true, ct_false, value=""):
+        def initialise(atom):
             atomZ3 = atom.translated #TODO
             key = atom.code
             typ = atomZ3.sort().name()
             for symb in atom.unknown_symbols().values():
                 s = self.m.setdefault(symb.name, {})
                 if typ == 'Bool':
-                    symbol = {"typ": typ, "ct": ct_true, "cf": ct_false}
+                    symbol = {"typ": typ, "ct": False, "cf": False}
+                    if atom.code in case.literals:
+                        symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
+                    else:
+                        pass #TODO defined symbol
                 elif 0 < len(symb.range):
-                    symbol = { "typ": typ, "value": str(value)
+                    symbol = { "typ": typ, "value": ""
                             , "values": [str(v) for v in symb.range]}
                 elif typ in ["Real", "Int"]:
-                    symbol = {"typ": typ, "value": str(value)} # default
+                    symbol = {"typ": typ, "value": ""} # default
                 else:
                     symbol = None
                 if symbol: 
@@ -209,10 +213,10 @@ class Structure_(object):
                     s.setdefault(key, symbol)
                     break
 
-        for atom in idp.atoms.values():
-            initialise(atom, False, False, "")
+        for atom in case.idp.atoms.values():
+            initialise(atom)
         for ass in structure: # add numeric input for Explain
-            initialise(ass.subtence, False, False, "")  
+            initialise(ass.subtence)  
 
 
     def addAtom(self, atom, truth):
@@ -232,6 +236,7 @@ class Structure_(object):
         for symb in atom.unknown_symbols().keys():
             s = self.m.setdefault(symb, {})
             if key in s:
+                s[key]["irrelevant"] = False
                 if truth.is_known(): 
                     s[key]["ct" if truth.is_true() else "cf"] = True
                 else:

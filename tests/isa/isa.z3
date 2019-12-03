@@ -51,10 +51,10 @@ Type = typeOf(Subtype)
 Definitions: 
   
 Universals:  
-  (((((asi(triangle,regular_triangle))))) ∧ (((~((asi(quadrilateral,regular_triangle)))))) ∧ ((((asi(triangle,right_triangle))))) ∧ (((~((asi(quadrilateral,right_triangle)))))) ∧ (((~((asi(triangle,rectangle)))))) ∧ ((((asi(quadrilateral,rectangle))))) ∧ (((~((asi(triangle,square)))))) ∧ ((((asi(quadrilateral,square))))))
-  ((((((typeOf(regular_triangle))) = triangle))) ∧ (((~(((typeOf(regular_triangle))) = quadrilateral)))) ∧ (((((typeOf(right_triangle))) = triangle))) ∧ (((~(((typeOf(right_triangle))) = quadrilateral)))) ∧ (((~(((typeOf(rectangle))) = triangle)))) ∧ (((((typeOf(rectangle))) = quadrilateral))) ∧ (((~(((typeOf(square))) = triangle)))) ∧ (((((typeOf(square))) = quadrilateral))))
-  ((((((typeOf(regular_triangle))) = triangle))) ∧ (((((typeOf(right_triangle))) = triangle))) ∧ (((((typeOf(rectangle))) = quadrilateral))) ∧ (((((typeOf(square))) = quadrilateral))))
-  Type = ((typeOf(Subtype)))
+  (((asi(triangle,regular_triangle))) ∧ ((~(asi(quadrilateral,regular_triangle)))) ∧ ((asi(triangle,right_triangle))) ∧ ((~(asi(quadrilateral,right_triangle)))) ∧ ((~(asi(triangle,rectangle)))) ∧ ((asi(quadrilateral,rectangle))) ∧ ((~(asi(triangle,square)))) ∧ ((asi(quadrilateral,square))))
+  (((typeOf(regular_triangle) = triangle)) ∧ ((~(typeOf(regular_triangle) = quadrilateral))) ∧ ((typeOf(right_triangle) = triangle)) ∧ ((~(typeOf(right_triangle) = quadrilateral))) ∧ ((~(typeOf(rectangle) = triangle))) ∧ ((typeOf(rectangle) = quadrilateral)) ∧ ((~(typeOf(square) = triangle))) ∧ ((typeOf(square) = quadrilateral)))
+  (((typeOf(regular_triangle) = triangle)) ∧ ((typeOf(right_triangle) = triangle)) ∧ ((typeOf(rectangle) = quadrilateral)) ∧ ((typeOf(square) = quadrilateral)))
+  Type = typeOf(Subtype)
 Consequences:
   
 Simplified:  
@@ -76,51 +76,61 @@ Irrelevant:
                    'values': ['triangle', 'quadrilateral']},
           'Type = typeOf(Subtype)': {'cf': False,
                                      'ct': False,
+                                     'irrelevant': False,
                                      'normal': False,
                                      'reading': 'Type = typeOf(Subtype)',
                                      'typ': 'Bool'}},
  'asi': {'asi(quadrilateral,rectangle)': {'cf': False,
                                           'ct': True,
+                                          'irrelevant': False,
                                           'normal': True,
                                           'reading': 'asi(quadrilateral,rectangle)',
                                           'typ': 'Bool'},
          'asi(quadrilateral,regular_triangle)': {'cf': True,
                                                  'ct': False,
+                                                 'irrelevant': False,
                                                  'normal': True,
                                                  'reading': 'asi(quadrilateral,regular_triangle)',
                                                  'typ': 'Bool'},
          'asi(quadrilateral,right_triangle)': {'cf': True,
                                                'ct': False,
+                                               'irrelevant': False,
                                                'normal': True,
                                                'reading': 'asi(quadrilateral,right_triangle)',
                                                'typ': 'Bool'},
          'asi(quadrilateral,square)': {'cf': False,
                                        'ct': True,
+                                       'irrelevant': False,
                                        'normal': True,
                                        'reading': 'asi(quadrilateral,square)',
                                        'typ': 'Bool'},
          'asi(triangle,rectangle)': {'cf': True,
                                      'ct': False,
+                                     'irrelevant': False,
                                      'normal': True,
                                      'reading': 'asi(triangle,rectangle)',
                                      'typ': 'Bool'},
          'asi(triangle,regular_triangle)': {'cf': False,
                                             'ct': True,
+                                            'irrelevant': False,
                                             'normal': True,
                                             'reading': 'asi(triangle,regular_triangle)',
                                             'typ': 'Bool'},
          'asi(triangle,right_triangle)': {'cf': False,
                                           'ct': True,
+                                          'irrelevant': False,
                                           'normal': True,
                                           'reading': 'asi(triangle,right_triangle)',
                                           'typ': 'Bool'},
          'asi(triangle,square)': {'cf': True,
                                   'ct': False,
+                                  'irrelevant': False,
                                   'normal': True,
                                   'reading': 'asi(triangle,square)',
                                   'typ': 'Bool'},
          '∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)': {'cf': False,
                                                          'ct': False,
+                                                         'irrelevant': False,
                                                          'normal': False,
                                                          'reading': '∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)',
                                                          'typ': 'Bool'}},
@@ -146,11 +156,13 @@ Irrelevant:
                                'values': ['triangle', 'quadrilateral']},
             '∀st[subtype] : isa(st,typeOf(st))': {'cf': False,
                                                   'ct': False,
+                                                  'irrelevant': False,
                                                   'normal': False,
                                                   'reading': '∀st[subtype] : isa(st,typeOf(st))',
                                                   'typ': 'Bool'},
             '∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)': {'cf': False,
                                                                    'ct': False,
+                                                                   'irrelevant': False,
                                                                    'normal': False,
                                                                    'reading': '∀t[type]st[subtype] : (typeOf(st) = t) '
                                                                               '⇔ isa(st,t)',

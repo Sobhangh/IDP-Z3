@@ -51,7 +51,7 @@ def metaJSON(idp):
 def propagation(case, expanded_symbols):
     expanded_symbols = [] if expanded_symbols is None else expanded_symbols
      
-    out = Structure_(case.idp)   
+    out = Structure_(case)   
     
     todo = { k:a for (k,a) in case.idp.atoms.items()
                 if (hasattr(a, 'decl') and hasattr(a.decl, 'is_var') and a.decl.is_var)
@@ -76,7 +76,7 @@ def propagation(case, expanded_symbols):
 def expand(case):
     solver, reify, _ = mk_solver(case.translate(), case.idp.atoms)
     solver.check()
-    return model_to_json(case.idp, solver, reify)
+    return model_to_json(case, solver, reify)
 
 def optimize(case, symbol, minimize):
     # symbol may be "angle(0)""
@@ -123,10 +123,10 @@ def optimize(case, symbol, minimize):
             solver.pop() # get the last good one
             solver.check()
             break    
-    return model_to_json(case.idp, solver, reify)
+    return model_to_json(case, solver, reify)
 
 def explain(case, symbol, value):
-    out = Structure_(case.idp, case.given)  
+    out = Structure_(case, case.given)  
 
     negated = value.startswith('~')
     value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \

@@ -81,7 +81,7 @@ class Case:
         # update consequences using propagation
         # simplify self.simplified using all consequences
         # simplify universal, using all consequences
-        
+
         # find irrelevant
         def mark_relevant(expr):
             nonlocal self
@@ -104,7 +104,7 @@ class Case:
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_universal())}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.literals.values() if c.is_consequence())}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_irrelevant())}{nl}"
+                f"Irrelevant:  {indented}{indented.join(str(c.subtence) for c in self.literals.values() if c.is_irrelevant())}{nl}"
         )
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):

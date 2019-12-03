@@ -1,8 +1,8 @@
 
 -- theory
-ForAll(c!117,
-       (LipLen == c!117) ==
-       Or(And(c!117 == Short, JacketDesign == Design_230)))
+ForAll(c!211,
+       (LipLen == c!211) ==
+       Or(And(c!211 == Short, JacketDesign == Design_230)))
 
 -- atoms
 LipLen
@@ -30,6 +30,7 @@ Irrelevant:
                                    'values': ['Design_230', 'Design_400HP']},
                   'JacketDesign = Design_230': {'cf': False,
                                                 'ct': True,
+                                                'irrelevant': False,
                                                 'normal': False,
                                                 'reading': 'JacketDesign = Design_230',
                                                 'typ': 'Bool'}},

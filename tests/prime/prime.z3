@@ -1,10 +1,10 @@
-ForAll(c!132,
-       Implies(Prime(c!132),
-               And(And(c!132 >= 1, c!132 <= 4))))
+ForAll(c!226,
+       Implies(Prime(c!226),
+               And(And(c!226 >= 1, c!226 <= 4))))
 -- theory
-ForAll(c!133,
-       Prime(c!133) ==
-       Or(c!133 == 1, c!133 == 2, c!133 == 3, False))
+ForAll(c!227,
+       Prime(c!227) ==
+       Or(c!227 == 1, c!227 == 2, c!227 == 3, False))
 
 -- atoms
 Prime(1)
@@ -29,7 +29,27 @@ Irrelevant:
 
 
 -- propagation
-{'Prime': {'Prime(1)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(1)', 'typ': 'Bool'},
-           'Prime(2)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(2)', 'typ': 'Bool'},
-           'Prime(3)': {'cf': False, 'ct': True, 'normal': True, 'reading': 'Prime(3)', 'typ': 'Bool'},
-           'Prime(4)': {'cf': True, 'ct': False, 'normal': True, 'reading': 'Prime(4)', 'typ': 'Bool'}}}
+{'Prime': {'Prime(1)': {'cf': False,
+                        'ct': True,
+                        'irrelevant': False,
+                        'normal': True,
+                        'reading': 'Prime(1)',
+                        'typ': 'Bool'},
+           'Prime(2)': {'cf': False,
+                        'ct': True,
+                        'irrelevant': False,
+                        'normal': True,
+                        'reading': 'Prime(2)',
+                        'typ': 'Bool'},
+           'Prime(3)': {'cf': False,
+                        'ct': True,
+                        'irrelevant': False,
+                        'normal': True,
+                        'reading': 'Prime(3)',
+                        'typ': 'Bool'},
+           'Prime(4)': {'cf': True,
+                        'ct': False,
+                        'irrelevant': False,
+                        'normal': True,
+                        'reading': 'Prime(4)',
+                        'typ': 'Bool'}}}

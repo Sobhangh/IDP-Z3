@@ -50,12 +50,14 @@ def immutable(func):
                 out = copy.copy(self)
                 out.sub_exprs = value
                 # reset derived values
-                out.str = sys.intern(self.str_())
+                out.str = sys.intern(str(out))
                 out._unknown_symbols = None
                 out.translated = None
                 if ops: out.operator = ops
                 return out
-        # replace by new Brackets node
+        if id(value) == id(self): # not changed !
+            return self
+        # replace by new Brackets node, to keep annotations
         value.is_subtence = self.is_subtence
         out = Brackets(f=value, reading=self.reading)
         # copy initial annotation
@@ -312,7 +314,7 @@ class BinaryOperator(Expression):
     def __str__(self):
         def parenthesis(x):
             # add () around operands, to avoid ambiguity in str()
-            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant]:
+            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
                 return f"({str(x)})"
             else:
                 return f"{str(x)}"
@@ -323,7 +325,7 @@ class BinaryOperator(Expression):
     def str_(self):
         def parenthesis(x):
             # add () around operands, to avoid ambiguity in str()
-            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant]:
+            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
                 return f"({x.str})"
             else:
                 return f"{x.str}"
