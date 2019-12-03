@@ -87,6 +87,8 @@ class Case:
             nonlocal self
             if expr.code in self.literals:
                 self.literals[expr.code] = self.literals[expr.code].mk_relevant()
+            if expr.str in self.literals:
+                self.literals[expr.str] = self.literals[expr.str].mk_relevant()
             for e in expr.sub_exprs:
                 mark_relevant(e)
         for expr in self.simplified:

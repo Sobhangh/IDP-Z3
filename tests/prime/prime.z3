@@ -1,10 +1,10 @@
-ForAll(c!226,
-       Implies(Prime(c!226),
-               And(And(c!226 >= 1, c!226 <= 4))))
+ForAll(c!194,
+       Implies(Prime(c!194),
+               And(And(c!194 >= 1, c!194 <= 4))))
 -- theory
-ForAll(c!227,
-       Prime(c!227) ==
-       Or(c!227 == 1, c!227 == 2, c!227 == 3, False))
+ForAll(c!195,
+       Prime(c!195) ==
+       Or(c!195 == 1, c!195 == 2, c!195 == 3, False))
 
 -- atoms
 Prime(1)

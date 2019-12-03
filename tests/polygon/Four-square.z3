@@ -2,9 +2,9 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!168,
-       Implies(Large(c!168),
-               And(And(c!168 >= 1, c!168 <= 4))))
+ForAll(c!136,
+       Implies(Large(c!136),
+               And(And(c!136 >= 1, c!136 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -160,7 +160,7 @@ Subtype = square
 Subtype = rectangle
 Length(1) = Length(3)
 Length(2) = Length(4)
-Length(1) ≠ Length(2)
+Length(1) = Length(2)
 Length(1) ≤ (Length(2) + Length(3))
 Length(2) ≤ (Length(3) + Length(1))
 Length(3) ≤ (Length(1) + Length(2))
@@ -187,7 +187,7 @@ Universals:
   (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180 * (-2 + Sides))
   ((0 ≤ Length(1)) ∧ (0 ≤ Length(2)) ∧ (0 ≤ Length(3)) ∧ (0 ≤ Length(4)))
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
-  ((Angle(1) ≠ 180) ∧ (Angle(2) ≠ 180) ∧ (Angle(3) ≠ 180) ∧ (Angle(4) ≠ 180))
+  ((~(Angle(1) = 180)) ∧ (~(Angle(2) = 180)) ∧ (~(Angle(3) = 180)) ∧ (~(Angle(4) = 180)))
   (((Angle(1) = 0) ⇔ (Vertices < 1)) ∧ ((Angle(2) = 0) ⇔ (Vertices < 2)) ∧ ((Angle(3) = 0) ⇔ (Vertices < 3)) ∧ ((Angle(4) = 0) ⇔ (Vertices < 4)))
   (((Length(1) = 0) ⇔ (Sides < 1)) ∧ ((Length(2) = 0) ⇔ (Sides < 2)) ∧ ((Length(3) = 0) ⇔ (Sides < 3)) ∧ ((Length(4) = 0) ⇔ (Sides < 4)))
   0 ≤ Base
@@ -207,7 +207,7 @@ Simplified:
   ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ ((((Angle(1) = 60) ∨ (Sides < 1)) ∧ ((Angle(2) = 60) ∨ (Sides < 2)) ∧ ((Angle(3) = 60) ∨ (Sides < 3)) ∧ ((Angle(4) = 60) ∨ (Sides < 4))))))
   ((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
   (((Subtype = square) ∨ (Subtype = rectangle)) ⇔ (Sides = 4))
-  ((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (Length(1) ≠ Length(2))))
+  ((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (~(Length(1) = Length(2)))))
   ((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))
   ((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))
   (Type = triangle) ⇒ (Surface = (0.5 * (Base * Height)))
@@ -298,22 +298,42 @@ Irrelevant:
                            'reading': '0 ≤ Height',
                            'typ': 'Bool'},
             'Height': {'normal': True, 'reading': 'Height', 'typ': 'Real', 'value': ''}},
- 'Large': {'Large(1)': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Large(1)', 'typ': 'Bool'},
-           'Large(2)': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Large(2)', 'typ': 'Bool'},
-           'Large(3)': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Large(3)', 'typ': 'Bool'},
-           'Large(4)': {'cf': False, 'ct': False, 'normal': True, 'reading': 'Large(4)', 'typ': 'Bool'}},
+ 'Large': {'Large(1)': {'cf': False,
+                        'ct': False,
+                        'irrelevant': True,
+                        'normal': True,
+                        'reading': 'Large(1)',
+                        'typ': 'Bool'},
+           'Large(2)': {'cf': False,
+                        'ct': False,
+                        'irrelevant': True,
+                        'normal': True,
+                        'reading': 'Large(2)',
+                        'typ': 'Bool'},
+           'Large(3)': {'cf': False,
+                        'ct': False,
+                        'irrelevant': True,
+                        'normal': True,
+                        'reading': 'Large(3)',
+                        'typ': 'Bool'},
+           'Large(4)': {'cf': False,
+                        'ct': False,
+                        'irrelevant': True,
+                        'normal': True,
+                        'reading': 'Large(4)',
+                        'typ': 'Bool'}},
  'Length': {'Length(1)': {'normal': True, 'reading': 'Length(1)', 'typ': 'Real', 'value': ''},
+            'Length(1) = Length(2)': {'cf': False,
+                                      'ct': False,
+                                      'irrelevant': False,
+                                      'normal': False,
+                                      'reading': 'Length(1) = Length(2)',
+                                      'typ': 'Bool'},
             'Length(1) = Length(3)': {'cf': False,
                                       'ct': False,
                                       'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(1) = Length(3)',
-                                      'typ': 'Bool'},
-            'Length(1) ≠ Length(2)': {'cf': False,
-                                      'ct': False,
-                                      'irrelevant': False,
-                                      'normal': False,
-                                      'reading': 'Length(1) ≠ Length(2)',
                                       'typ': 'Bool'},
             'Length(1) ≤ (Length(2) + Length(3))': {'cf': False,
                                                     'ct': False,

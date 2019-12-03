@@ -71,7 +71,7 @@ theory {
                                                      (!n[side]: Angle(n)=90| Angle(n)=0)).
 
     [In a rectangle, opposite side have the same length, and adjacent sides have different lengths]
-    (Subtype=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2)).
+    (Subtype=rectangle => Length(3)=Length(1) & Length(2)=Length(4) & Length(2)~=Length(1)).
 
     [A square is an equilateral quadrilateral]
     (Subtype=square    <=> Sides=4 & Equilateral).

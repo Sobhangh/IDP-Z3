@@ -2,8 +2,8 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!51,
-       Implies(Large(c!51), And(And(c!51 >= 1, c!51 <= 4))))
+ForAll(c!19,
+       Implies(Large(c!19), And(And(c!19 >= 1, c!19 <= 4))))
 -- theory
 True
 
@@ -86,7 +86,7 @@ And(Not(Sides < 1),
     Not(Sides < 3),
     Not(Sides < 4))
 
-ForAll(c!54, Large(c!54) == Or(False, False, False, False))
+ForAll(c!22, Large(c!22) == Or(False, False, False, False))
 
 -- atoms
 Sides
@@ -138,7 +138,7 @@ Universals:
   Perimeter = (sum{n[side] : ((1)) : ((2))})
   (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180 * (-2 + Sides))
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
-  ((Angle(1) ≠ 180) ∧ (Angle(2) ≠ 180) ∧ (Angle(3) ≠ 180) ∧ (Angle(4) ≠ 180))
+  ((~(Angle(1) = 180)) ∧ (~(Angle(2) = 180)) ∧ (~(Angle(3) = 180)) ∧ (~(Angle(4) = 180)))
   (((Angle(1) = 0) ⇔ (Vertices < 1)) ∧ ((Angle(2) = 0) ⇔ (Vertices < 2)) ∧ ((Angle(3) = 0) ⇔ (Vertices < 3)) ∧ ((Angle(4) = 0) ⇔ (Vertices < 4)))
   (((~(Sides < 1))) ∧ ((~(Sides < 2))) ∧ ((~(Sides < 3))) ∧ ((~(Sides < 4))))
 Consequences:

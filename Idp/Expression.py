@@ -307,6 +307,7 @@ class BinaryOperator(Expression):
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
                 "∨" if op == "|" else "∧" if op == "&" else op
             , self.operator))
+
         super().__init__()
 
         self.is_subtence = self.operator[0] in '=<>≤≥≠'
@@ -447,6 +448,12 @@ class AConjunction(BinaryOperator):
         return exprs
 
 class AComparison(BinaryOperator):
+    def annotate(self, symbol_decls, q_decls):
+        # a≠b --> Not(a=b)
+        if len(self.sub_exprs) == 2 and self.operator == ['≠']:
+            out = NOT(AComparison(sub_exprs=self.sub_exprs, operator='='))
+            return out.annotate(symbol_decls, q_decls)
+        return super().annotate(symbol_decls, q_decls)
 
     @immutable
     def update_exprs(self, new_expr_generator):
