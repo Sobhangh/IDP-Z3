@@ -1,0 +1,12 @@
+vocabulary {
+    
+     Base : real
+     p
+}
+
+theory {
+
+p => 16.0 = Base*Base.
+0 < Base.
+p.
+}

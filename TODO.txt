@@ -1,5 +1,6 @@
 To do:
     reactivate full propagate
+    relevance: goal is relevant
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
         - generate list of constructors
@@ -43,7 +44,8 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
-    - compute .code for any expand quantifier ? 
+    - sort operands of equality
+    - remove "from z3 import *"
     - AppliedSymbol is_subtence only if no Fresh_Variable !
     - Expr.subtence -> Expr.ranking ?
     - explain: use consequences() for rules too ? or unsat_core for evidences ?

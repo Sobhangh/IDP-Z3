@@ -200,6 +200,7 @@ class Structure_(object):
                         symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
                     else:
                         symbol["irrelevant"] = True # unused symbol instance (Large(1))
+                    symbol["irrelevant"] = False #TODO disabling until fully working
                 elif 0 < len(symb.range):
                     symbol = { "typ": typ, "value": ""
                             , "values": [str(v) for v in symb.range]}
