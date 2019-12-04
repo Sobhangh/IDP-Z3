@@ -2,8 +2,9 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!19,
-       Implies(Large(c!19), And(And(c!19 >= 1, c!19 <= 4))))
+ForAll(c!131,
+       Implies(Large(c!131),
+               And(And(c!131 >= 1, c!131 <= 4))))
 -- theory
 True
 
@@ -86,7 +87,8 @@ And(Not(Sides < 1),
     Not(Sides < 3),
     Not(Sides < 4))
 
-ForAll(c!22, Large(c!22) == Or(False, False, False, False))
+ForAll(c!134,
+       Large(c!134) == Or(False, False, False, False))
 
 -- atoms
 Sides

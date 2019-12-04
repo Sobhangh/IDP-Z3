@@ -59,7 +59,7 @@ class Case:
                 l1.append(c)
         self.simplified = l1
         
-        # simplify self.simplified using given
+        # simplify all using given and universals
         to_propagate = list(l for l in self.literals.values() if l.truth.is_known())
         while to_propagate:
             lit = to_propagate.pop(0)
@@ -77,6 +77,21 @@ class Case:
                     else:
                         l1.append(c1)
                 self.simplified = l1
+
+                # now for literals
+                for u in self.literals.values():
+                    if u != lit:
+                        simple_u = u.subtence.substitute(old, new)
+                        if simple_u != u.subtence:
+                            self.literals[u.subtence.code] = LiteralQ(u.truth, simple_u)
+                            # find immediate consequences
+                            if u.truth.is_known(): # you can't propagate otherwise
+                                ls = self.expr_to_literal(simple_u)
+                                if ls and ls[0] != u:
+                                    out = ls[0] if u.truth.is_true() else ls[0].Not()
+                                    to_propagate.append(out)
+
+                #TODO typeConstraints ?
 
         # update consequences using propagation
         # simplify self.simplified using all consequences

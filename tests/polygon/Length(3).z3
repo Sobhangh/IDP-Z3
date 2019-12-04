@@ -2,8 +2,9 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!4,
-       Implies(Large(c!4), And(And(c!4 >= 1, c!4 <= 4))))
+ForAll(c!116,
+       Implies(Large(c!116),
+               And(And(c!116 >= 1, c!116 <= 4))))
 -- theory
 Sides == 3
 
@@ -57,7 +58,7 @@ Simplified:
   (true)
   Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
 Irrelevant:  
-  Sides = 4
+  (false)
 
 
 -- propagation
@@ -68,7 +69,7 @@ Irrelevant:
  'Base': {'Base': {'normal': True, 'reading': 'Base', 'typ': 'Real', 'value': ''}},
  'Convex': {'Convex': {'cf': False,
                        'ct': False,
-                       'irrelevant': True,
+                       'irrelevant': False,
                        'normal': True,
                        'reading': 'Convex',
                        'typ': 'Bool'}},
@@ -81,25 +82,25 @@ Irrelevant:
  'Height': {'Height': {'normal': True, 'reading': 'Height', 'typ': 'Real', 'value': ''}},
  'Large': {'Large(1)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(1)',
                         'typ': 'Bool'},
            'Large(2)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(2)',
                         'typ': 'Bool'},
            'Large(3)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(3)',
                         'typ': 'Bool'},
            'Large(4)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(4)',
                         'typ': 'Bool'}},
@@ -129,7 +130,7 @@ Irrelevant:
                          'typ': 'Bool'},
            'Sides = 4': {'cf': False,
                          'ct': False,
-                         'irrelevant': True,
+                         'irrelevant': False,
                          'normal': False,
                          'reading': 'Sides = 4',
                          'typ': 'Bool'}},

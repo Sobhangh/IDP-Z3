@@ -34,10 +34,11 @@ class Truth(IntFlag):
     CONSEQUENCE = 16
     IRRELEVANT  = 255
 
-    def Not(self): return ~(self) & 1
+    def Not(self): return (self & 252) | ((~self) & 1 if self.is_known() else Truth.UNKNOWN)
     def is_known(self): return self & Truth.UNKNOWN != Truth.UNKNOWN
     def is_true(self): return self & 3 == Truth.TRUE
     def to_bool(self): return self & 1 # beware: UNKNOWN = True !
+    def is_irrelevant(self): return self & 252 == Truth.IRRELEVANT & 252
 
 
 class LiteralQ(object):
@@ -58,23 +59,24 @@ class LiteralQ(object):
                  f"{str(self.subtence)}" )
 
     def __str__(self):
-        if self.truth == Truth.IRRELEVANT:
+        if self.is_irrelevant():
             return ""
         return ("" if self.truth.is_true() else \
                 "? " if not self.truth.is_known() \
                 else "Not ") \
              + self.subtence.reading
 
+    def Not           (self): return LiteralQ(self.truth.Not()              , self.subtence)
     def mk_given      (self): return LiteralQ(self.truth | Truth.GIVEN      , self.subtence)
     def mk_universal  (self): return LiteralQ(self.truth | Truth.UNIVERSAL  , self.subtence)
     def mk_consequence(self): return LiteralQ(self.truth | Truth.CONSEQUENCE, self.subtence)
-    def mk_relevant   (self): return LiteralQ(Truth.UNKNOWN, self.subtence) if self.truth == Truth.IRRELEVANT \
+    def mk_relevant   (self): return LiteralQ(Truth.UNKNOWN, self.subtence) if self.is_irrelevant() \
                                      else self
 
-    def is_given      (self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.GIVEN
-    def is_universal  (self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.UNIVERSAL
-    def is_consequence(self): return self.truth != Truth.IRRELEVANT and self.truth & Truth.CONSEQUENCE
-    def is_irrelevant (self): return self.truth == Truth.IRRELEVANT
+    def is_given      (self): return not self.is_irrelevant() and self.truth & Truth.GIVEN
+    def is_universal  (self): return not self.is_irrelevant() and self.truth & Truth.UNIVERSAL
+    def is_consequence(self): return not self.is_irrelevant() and self.truth & Truth.CONSEQUENCE
+    def is_irrelevant (self): return self.truth.is_irrelevant()
 
     def as_substitution(self, case):
         if self.truth.is_known():

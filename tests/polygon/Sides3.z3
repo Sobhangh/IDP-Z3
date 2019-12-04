@@ -2,21 +2,18 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!248,
-       Implies(Large(c!248),
-               And(And(c!248 >= 1, c!248 <= 4))))
+ForAll(c!4,
+       Implies(Large(c!4), And(And(c!4 >= 1, c!4 <= 4))))
 -- theory
-And(Or(Angle(1) == 90, Sides < 1),
-    Or(Angle(2) == 90, Sides < 2),
-    Or(Angle(3) == 90, Sides < 3),
-    Or(Angle(4) == 90, Sides < 4))
+Sides == 3
 
 (Type == triangle) == (Sides == 3)
 
 (Type == quadrilateral) == (Sides == 4)
 
-And((Vertices == 3) == (Sides == 3),
-    (Vertices == 4) == (Sides == 4))
+(Vertices == 3) == (Sides == 3)
+
+(Vertices == 4) == (Sides == 4)
 
 Or(Not(Sides == 3), Convex)
 
@@ -142,9 +139,8 @@ Large(4)
 Base
 Height
 Surface
-∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
-Type = triangle
 Sides = 3
+Type = triangle
 Type = quadrilateral
 Sides = 4
 Vertices = 3
@@ -158,6 +154,7 @@ Subtype = irregular
 ∃n[side] : Angle(n) = 90
 Subtype = square
 Subtype = rectangle
+∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
 Length(1) = Length(3)
 Length(2) = Length(4)
 Length(1) = Length(2)
@@ -182,39 +179,44 @@ Surface = (-(1))
 Definitions: 
   
 Universals:  
-  (((Angle(1) = 90) ∨ (Sides < 1)) ∧ ((Angle(2) = 90) ∨ (Sides < 2)) ∧ ((Angle(3) = 90) ∨ (Sides < 3)) ∧ ((Angle(4) = 90) ∨ (Sides < 4)))
+  Sides = 3
   Perimeter = (sum{n[side] : (Length(1)) : (Length(2))})
-  (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180 * (-2 + Sides))
+  (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180)
   ((0 ≤ Length(1)) ∧ (0 ≤ Length(2)) ∧ (0 ≤ Length(3)) ∧ (0 ≤ Length(4)))
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
   ((~(Angle(1) = 180)) ∧ (~(Angle(2) = 180)) ∧ (~(Angle(3) = 180)) ∧ (~(Angle(4) = 180)))
-  (((Angle(1) = 0) ⇔ (Vertices < 1)) ∧ ((Angle(2) = 0) ⇔ (Vertices < 2)) ∧ ((Angle(3) = 0) ⇔ (Vertices < 3)) ∧ ((Angle(4) = 0) ⇔ (Vertices < 4)))
-  (((Length(1) = 0) ⇔ (Sides < 1)) ∧ ((Length(2) = 0) ⇔ (Sides < 2)) ∧ ((Length(3) = 0) ⇔ (Sides < 3)) ∧ ((Length(4) = 0) ⇔ (Sides < 4)))
+  (((~(Angle(1) = 0))) ∧ ((~(Angle(2) = 0))) ∧ ((~(Angle(3) = 0))) ∧ ((Angle(4) = 0)))
+  (((~(Length(1) = 0))) ∧ ((~(Length(2) = 0))) ∧ ((~(Length(3) = 0))) ∧ ((Length(4) = 0)))
   0 ≤ Base
   0 ≤ Height
-  (((1 ≤ Sides) ∧ (Length(1) = Base)) ∨ ((2 ≤ Sides) ∧ (Length(2) = Base)) ∨ ((3 ≤ Sides) ∧ (Length(3) = Base)) ∨ ((4 ≤ Sides) ∧ (Length(4) = Base)))
+  ((Length(1) = Base) ∨ (Length(2) = Base) ∨ (Length(3) = Base))
 Consequences:
-  
+  Type = triangle
+  ~(false)
+  Vertices = 3
+  ~(false)
+  Convex
+  ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))
+  ~Subtype = square
+  ~Subtype = rectangle
+  Surface = (0.5 * (Base * Height))
 Simplified:  
-  ((Type = triangle) ⇔ (Sides = 3))
-  ((Type = quadrilateral) ⇔ (Sides = 4))
-  (((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))
-  ((Sides = 3) ⇒ Convex)
-  (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
-  (Equilateral ⇔ ((((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)))))
-  ((Sides = 3) ⇒ ((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
-  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))
-  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ ((((Angle(1) = 60) ∨ (Sides < 1)) ∧ ((Angle(2) = 60) ∨ (Sides < 2)) ∧ ((Angle(3) = 60) ∨ (Sides < 3)) ∧ ((Angle(4) = 60) ∨ (Sides < 4))))))
-  ((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
-  (((Subtype = square) ∨ (Subtype = rectangle)) ⇔ (Sides = 4))
-  ((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (~(Length(1) = Length(2)))))
-  ((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))
-  ((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))
-  (Type = triangle) ⇒ (Surface = (0.5 * (Base * Height)))
-  ((Subtype = square) ∨ (Subtype = rectangle)) ⇒ (Surface = (Length(1) * Length(2)))
+  (Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))))
+  (((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
+  ((Subtype = regular_triangle) ⇔ (Equilateral))
+  ((Subtype = regular_triangle) ⇔ ((((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60)))))
+  ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
+  ((true))
+  (((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))
+  (true)
   (Subtype = irregular) ⇒ (Surface = (-(1)))
 Irrelevant:  
-  
+  (false)
+  ((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
+  Length(1) = Length(3)
+  Length(2) = Length(4)
+  Length(1) = Length(2)
+  Surface = (Length(1) * Length(2))
 
 
 -- propagation
@@ -229,7 +231,7 @@ Irrelevant:
            'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': ''},
            'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': ''},
            'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': ''},
-           'Angle(4)': {'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': ''},
+           'Angle(4)': {'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': '0'},
            '∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)': {'cf': False,
                                                           'ct': False,
                                                           'irrelevant': False,
@@ -280,7 +282,7 @@ Irrelevant:
                        'typ': 'Bool'},
           'Base': {'normal': True, 'reading': 'Base', 'typ': 'Real', 'value': ''}},
  'Convex': {'Convex': {'cf': False,
-                       'ct': False,
+                       'ct': True,
                        'irrelevant': False,
                        'normal': True,
                        'reading': 'Convex',
@@ -361,7 +363,7 @@ Irrelevant:
                                                     'normal': False,
                                                     'reading': '',
                                                     'typ': 'Bool'},
-            'Length(4)': {'normal': True, 'reading': 'Length(4)', 'typ': 'Real', 'value': ''},
+            'Length(4)': {'normal': True, 'reading': 'Length(4)', 'typ': 'Real', 'value': '0'},
             '∀n[side] : (Length(n) = 0) ⇔ (Sides < n)': {'cf': False,
                                                          'ct': False,
                                                          'irrelevant': False,
@@ -388,9 +390,9 @@ Irrelevant:
                                                                  'reading': 'The perimeter is the sum of the lengths '
                                                                             'of the sides',
                                                                  'typ': 'Bool'}},
- 'Sides': {'Sides': {'normal': True, 'reading': 'Sides', 'typ': 'Int', 'value': '', 'values': ['3', '4']},
+ 'Sides': {'Sides': {'normal': True, 'reading': 'Sides', 'typ': 'Int', 'value': '3', 'values': ['3', '4']},
            'Sides = 3': {'cf': False,
-                         'ct': False,
+                         'ct': True,
                          'irrelevant': False,
                          'normal': False,
                          'reading': 'Sides = 3',
@@ -464,7 +466,7 @@ Irrelevant:
  'Type': {'Type': {'normal': True,
                    'reading': 'Type',
                    'typ': 'type',
-                   'value': '',
+                   'value': 'triangle',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'cf': False,
                                    'ct': False,
@@ -473,14 +475,14 @@ Irrelevant:
                                    'reading': 'Type = quadrilateral',
                                    'typ': 'Bool'},
           'Type = triangle': {'cf': False,
-                              'ct': False,
+                              'ct': True,
                               'irrelevant': False,
                               'normal': False,
                               'reading': 'Type = triangle',
                               'typ': 'Bool'}},
- 'Vertices': {'Vertices': {'normal': True, 'reading': 'Vertices', 'typ': 'Int', 'value': '', 'values': ['3', '4']},
+ 'Vertices': {'Vertices': {'normal': True, 'reading': 'Vertices', 'typ': 'Int', 'value': '3', 'values': ['3', '4']},
               'Vertices = 3': {'cf': False,
-                               'ct': False,
+                               'ct': True,
                                'irrelevant': False,
                                'normal': False,
                                'reading': 'Vertices = 3',

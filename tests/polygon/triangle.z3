@@ -2,8 +2,9 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!34,
-       Implies(Large(c!34), And(And(c!34 >= 1, c!34 <= 4))))
+ForAll(c!146,
+       Implies(Large(c!146),
+               And(And(c!146 >= 1, c!146 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -210,10 +211,10 @@ Simplified:
   (true)
   (true)
 Irrelevant:  
-  Subtype = right_triangle
-  Subtype = irregular
-  Subtype = square
-  Subtype = rectangle
+  (false)
+  (false)
+  (false)
+  (false)
   Length(1) = Length(3)
   Length(2) = Length(4)
   Length(1) = Length(2)
@@ -304,38 +305,38 @@ Irrelevant:
             'Height': {'normal': True, 'reading': 'Height', 'typ': 'Real', 'value': ''}},
  'Large': {'Large(1)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(1)',
                         'typ': 'Bool'},
            'Large(2)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(2)',
                         'typ': 'Bool'},
            'Large(3)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(3)',
                         'typ': 'Bool'},
            'Large(4)': {'cf': False,
                         'ct': False,
-                        'irrelevant': True,
+                        'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(4)',
                         'typ': 'Bool'}},
  'Length': {'Length(1)': {'normal': True, 'reading': 'Length(1)', 'typ': 'Real', 'value': ''},
             'Length(1) = Length(2)': {'cf': False,
                                       'ct': False,
-                                      'irrelevant': True,
+                                      'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(1) = Length(2)',
                                       'typ': 'Bool'},
             'Length(1) = Length(3)': {'cf': False,
                                       'ct': False,
-                                      'irrelevant': True,
+                                      'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(1) = Length(3)',
                                       'typ': 'Bool'},
@@ -348,7 +349,7 @@ Irrelevant:
             'Length(2)': {'normal': True, 'reading': 'Length(2)', 'typ': 'Real', 'value': ''},
             'Length(2) = Length(4)': {'cf': False,
                                       'ct': False,
-                                      'irrelevant': True,
+                                      'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(2) = Length(4)',
                                       'typ': 'Bool'},
@@ -418,13 +419,13 @@ Irrelevant:
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype = irregular': {'cf': False,
                                      'ct': False,
-                                     'irrelevant': True,
+                                     'irrelevant': False,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
                                      'typ': 'Bool'},
              'Subtype = rectangle': {'cf': False,
                                      'ct': False,
-                                     'irrelevant': True,
+                                     'irrelevant': False,
                                      'normal': False,
                                      'reading': 'Subtype = rectangle',
                                      'typ': 'Bool'},
@@ -436,13 +437,13 @@ Irrelevant:
                                             'typ': 'Bool'},
              'Subtype = right_triangle': {'cf': False,
                                           'ct': False,
-                                          'irrelevant': True,
+                                          'irrelevant': False,
                                           'normal': False,
                                           'reading': 'Subtype = right_triangle',
                                           'typ': 'Bool'},
              'Subtype = square': {'cf': False,
                                   'ct': False,
-                                  'irrelevant': True,
+                                  'irrelevant': False,
                                   'normal': False,
                                   'reading': 'Subtype = square',
                                   'typ': 'Bool'}},
@@ -455,13 +456,13 @@ Irrelevant:
                                                  'typ': 'Bool'},
              'Surface = (-(1))': {'cf': False,
                                   'ct': False,
-                                  'irrelevant': True,
+                                  'irrelevant': False,
                                   'normal': False,
                                   'reading': 'Surface = (-(1))',
                                   'typ': 'Bool'},
              'Surface = (Length(1) * Length(2))': {'cf': False,
                                                    'ct': False,
-                                                   'irrelevant': True,
+                                                   'irrelevant': False,
                                                    'normal': False,
                                                    'reading': 'Surface = (Length(1) * Length(2))',
                                                    'typ': 'Bool'}},
