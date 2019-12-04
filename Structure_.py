@@ -124,6 +124,12 @@ class Equality(object):
 
     def translate(self): return self.translated
 
+    def substitute(self, e0, e1):
+        out = self.subtence.substitute(e0, e1)
+        if id(out) == id(self.subtence):
+            return self
+        return Equality(out, value)
+
     
 #################
 # load user's choices
