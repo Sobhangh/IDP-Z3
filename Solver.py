@@ -16,7 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
-from z3 import *
+from z3 import Solver, sat, unsat, is_not, is_eq, is_bool, is_expr, obj_to_string, is_string_value
 
 from Structure_ import *
 from utils import *

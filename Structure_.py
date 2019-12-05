@@ -16,9 +16,11 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
-from z3 import *
-from enum import IntFlag
 import ast
+from enum import IntFlag
+import sys
+from z3 import Constructor, Not, BoolVal, is_true, is_false
+
 
 import Idp
 from Idp.Expression import TRUE, FALSE, AComparison

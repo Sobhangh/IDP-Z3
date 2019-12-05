@@ -19,6 +19,7 @@
 
 with_png = False
 
+import os
 import threading
 import traceback
 
