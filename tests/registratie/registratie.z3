@@ -195,6 +195,21 @@ Municipality = other_Municipal
 Resale = Three_Or_More
 
 -- case
+Type:        
+  And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
+    Start_Dt_Dwelling_For_Social_Rent <= 2025)
+  And(Certification_Date >= 2015, Certification_Date <= 2025)
+  Or(Tax == 1,
+   Tax == 2,
+   Tax == 4,
+   Tax == 7,
+   Tax == 6,
+   Tax == 10,
+   Tax == 12)
+  And(Term_Energy_Renovation >= 2015,
+    Term_Energy_Renovation <= 2025)
+  And(Certification_Date_Sale >= 2015,
+    Certification_Date_Sale <= 2025)
 Definitions: 
   
 Universals:  

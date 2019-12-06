@@ -2,9 +2,9 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!248,
-       Implies(Large(c!248),
-               And(And(c!248 >= 1, c!248 <= 4))))
+ForAll(c!143,
+       Implies(Large(c!143),
+               And(And(c!143 >= 1, c!143 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -179,6 +179,12 @@ Surface = (-(1))
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
 
 -- case
+Type:        
+  And(Sides >= 3, Sides <= 4)
+  And(Vertices >= 3, Vertices <= 4)
+  ForAll(c!143,
+       Implies(Large(c!143),
+               And(And(c!143 >= 1, c!143 <= 4))))
 Definitions: 
   
 Universals:  

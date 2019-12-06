@@ -219,6 +219,7 @@ class SymbolDeclaration(object):
             self.out = Sort(name='bool')
 
         self.is_var = True # unless interpreted later
+        self.typeConstraints = []
         self.translated = None
 
         self.type = None # a declaration object
@@ -258,8 +259,32 @@ class SymbolDeclaration(object):
                     expr.annotate(symbol_decls, {})
                     expr.normal = True
                     self.instances[expr.code] = expr
-        return self
         
+        if self.out.decl.name != 'bool' and self.range:
+            for inst in self.instances.values():
+                domain = self.out.decl.check_bounds(inst)
+                if domain is not None:
+                    domain.reading = "Possible values for " + str(inst)
+                    self.typeConstraints.append(domain)
+        return self
+
+    def check_bounds(self, vars):
+        out = []
+        for var in vars:
+            check = var.decl.check_bounds(var)
+            if check is not None:
+                out.append(check)
+        """ TODO
+        if self.out.decl.name != 'bool' and self.range:
+            applied = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=vars))
+            applied.decl = self
+            applied.type = applied.decl.type.name
+            domain = self.out.decl.check_bounds(applied)
+            if domain is not None:
+                domain.reading = "Possible values for " + str(vars)
+                out.append(domain)
+        """
+        return out
 
     def translate(self, idp):
         if self.translated is None:
@@ -267,19 +292,17 @@ class SymbolDeclaration(object):
                 self.translated = Const(self.name, self.out.translate())
                 self.normal = True
             else:
-                argL, checks = [], []
-                for i, x in enumerate(self.sorts):
-                    var = Fresh_Variable(str(i), x.decl)
-                    argL.append(var.translate())
-                    check = x.decl.check_bounds(var)
-                    if check is not None:
-                        checks.append(check.translate())
+                argL = list(map( lambda t: Fresh_Variable(str(t[0]), t[1].decl)
+                               , enumerate(self.sorts)))
 
                 if self.out.name == 'bool':
                     types = [x.translate() for x in self.sorts]
                     rel_vars = [t.getRange() for t in self.sorts]
                     self.translated = Function(self.name, types + [BoolSort()])
 
+                    checks = self.check_bounds(argL)
+                    checks = list(c.translate() for c in checks)
+                    argL = list(c.translate() for c in argL)
                     if checks:
                         idp.vocabulary.translated.append(
                             ForAll(argL, Implies( (self.translated)(*argL), And(checks))))
@@ -295,15 +318,9 @@ class SymbolDeclaration(object):
                         checks.append(check.translate())
                         idp.vocabulary.translated.append(
                             ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
-                    """        
-            for inst in self.instances.values():
-                inst.translate()
-                if self.out.decl.name != 'bool' and self.range:
-                    domain = self.out.decl.check_bounds(inst)
-                    if domain is not None:
-                        domain = domain.translate()
-                        domain.reading = "Possible values for " + str(inst)
-                        idp.vocabulary.translated.append(domain)
+                    """
+            for c in self.typeConstraints: #TODO to be moved to Case
+                idp.vocabulary.translated.append(c.translate())
         return self.translated
 
 
@@ -340,6 +357,7 @@ class Theory(object):
         self.symbol_decls = vocabulary.symbol_decls
         self.subtences = {}
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
+        #TODO check argument ranges
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
         for e in self.constraints:
@@ -402,6 +420,7 @@ class Definition(object):
                 self.q_decls[symbol] = q_v
             new_rule = r.rename_args(self.q_decls[symbol])
             self.partition.setdefault(symbol, []).append(new_rule)
+            #TODO attach interpretation to symbols
         return self
 
     def subtences(self):

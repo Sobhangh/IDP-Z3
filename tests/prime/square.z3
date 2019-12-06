@@ -13,6 +13,8 @@ p
 0 < Base
 
 -- case
+Type:        
+  
 Definitions: 
   
 Universals:  

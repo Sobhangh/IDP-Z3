@@ -2,9 +2,8 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!146,
-       Implies(Large(c!146),
-               And(And(c!146 >= 1, c!146 <= 4))))
+ForAll(c!43,
+       Implies(Large(c!43), And(And(c!43 >= 1, c!43 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -176,6 +175,11 @@ Surface = (-(1))
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
 
 -- case
+Type:        
+  And(Sides >= 3, Sides <= 4)
+  And(Vertices >= 3, Vertices <= 4)
+  ForAll(c!43,
+       Implies(Large(c!43), And(And(c!43 >= 1, c!43 <= 4))))
 Definitions: 
   
 Universals:  

@@ -48,6 +48,8 @@ typeOf(square)
 Type = typeOf(Subtype)
 
 -- case
+Type:        
+  
 Definitions: 
   
 Universals:  

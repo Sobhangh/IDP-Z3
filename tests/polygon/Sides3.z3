@@ -2,8 +2,8 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!4,
-       Implies(Large(c!4), And(And(c!4 >= 1, c!4 <= 4))))
+ForAll(c!2,
+       Implies(Large(c!2), And(And(c!2 >= 1, c!2 <= 4))))
 -- theory
 Sides == 3
 
@@ -176,6 +176,11 @@ Surface = (-(1))
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
 
 -- case
+Type:        
+  And(Sides >= 3, Sides <= 4)
+  And(Vertices >= 3, Vertices <= 4)
+  ForAll(c!2,
+       Implies(Large(c!2), And(And(c!2 >= 1, c!2 <= 4))))
 Definitions: 
   
 Universals:  

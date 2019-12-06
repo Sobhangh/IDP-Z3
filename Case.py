@@ -91,13 +91,10 @@ class Case:
                                     out = ls[0] if u.truth.is_true() else ls[0].Not()
                                     to_propagate.append(out)
 
-                #TODO typeConstraints ?
+        #TODO determine relevant symbols
+        #TODO remove irrelevant domain conditions
 
-        # update consequences using propagation
-        # simplify self.simplified using all consequences
-        # simplify universal, using all consequences
-
-        # find irrelevant
+        # find relevant subtences
         def mark_relevant(expr):
             nonlocal self
             if expr.code in self.literals:
@@ -116,7 +113,7 @@ class Case:
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self):
-        return (# f"Type: {self.typeConstraints}"
+        return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translated)}{nl}"
                 f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_universal())}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.literals.values() if c.is_consequence())}{nl}"

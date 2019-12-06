@@ -199,7 +199,7 @@ class Structure_(object):
         self.m = {}
 
         def initialise(atom):
-            atomZ3 = atom.translated #TODO
+            atomZ3 = atom.translate() #TODO
             key = atom.code
             typ = atomZ3.sort().name()
             for symb in atom.unknown_symbols().values():

@@ -2,9 +2,8 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!116,
-       Implies(Large(c!116),
-               And(And(c!116 >= 1, c!116 <= 4))))
+ForAll(c!17,
+       Implies(Large(c!17), And(And(c!17 >= 1, c!17 <= 4))))
 -- theory
 Sides == 3
 
@@ -48,6 +47,11 @@ Length(3) = Length(1)
 Sides = 4
 
 -- case
+Type:        
+  And(Sides >= 3, Sides <= 4)
+  And(Vertices >= 3, Vertices <= 4)
+  ForAll(c!17,
+       Implies(Large(c!17), And(And(c!17 >= 1, c!17 <= 4))))
 Definitions: 
   
 Universals:  

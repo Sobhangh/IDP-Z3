@@ -2,9 +2,8 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!131,
-       Implies(Large(c!131),
-               And(And(c!131 >= 1, c!131 <= 4))))
+ForAll(c!30,
+       Implies(Large(c!30), And(And(c!30 >= 1, c!30 <= 4))))
 -- theory
 True
 
@@ -87,8 +86,7 @@ And(Not(Sides < 1),
     Not(Sides < 3),
     Not(Sides < 4))
 
-ForAll(c!134,
-       Large(c!134) == Or(False, False, False, False))
+ForAll(c!33, Large(c!33) == Or(False, False, False, False))
 
 -- atoms
 Sides
@@ -130,6 +128,11 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 
 -- case
+Type:        
+  And(Sides >= 3, Sides <= 4)
+  And(Vertices >= 3, Vertices <= 4)
+  ForAll(c!30,
+       Implies(Large(c!30), And(And(c!30 >= 1, c!30 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
