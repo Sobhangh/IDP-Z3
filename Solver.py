@@ -108,7 +108,8 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                 out[LiteralQ(t, unreify[consq])] = True
             else:
                 print("???", str(consq))
-        return out
+        # return out # if non-optimal propagation
+        
     # else: # unknown satisfiability, e.g. due to non-linear equations
     # restart solver and continue 
     solver, _, unreify = mk_solver(theory, atoms)
