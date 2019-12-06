@@ -1,21 +1,4 @@
-And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
-    Start_Dt_Dwelling_For_Social_Rent <= 2025)
 
-And(Certification_Date >= 2015, Certification_Date <= 2025)
-
-Or(Tax == 1,
-   Tax == 2,
-   Tax == 4,
-   Tax == 7,
-   Tax == 6,
-   Tax == 10,
-   Tax == 12)
-
-And(Term_Energy_Renovation >= 2015,
-    Term_Energy_Renovation <= 2025)
-
-And(Certification_Date_Sale >= 2015,
-    Certification_Date_Sale <= 2025)
 -- theory
 (Tax == 1) ==
 And(Registration_Type == Heritage, Region == Flemish_Region)
@@ -123,6 +106,25 @@ And(Professional_Declaration_Filed,
        Not(Additional_Security_Required)),
     Resale == Three_Or_More)
 
+And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
+    Start_Dt_Dwelling_For_Social_Rent <= 2025)
+
+And(Certification_Date >= 2015, Certification_Date <= 2025)
+
+Or(Tax == 1,
+   Tax == 2,
+   Tax == 4,
+   Tax == 7,
+   Tax == 6,
+   Tax == 10,
+   Tax == 12)
+
+And(Term_Energy_Renovation >= 2015,
+    Term_Energy_Renovation <= 2025)
+
+And(Certification_Date_Sale >= 2015,
+    Certification_Date_Sale <= 2025)
+
 -- atoms
 Region
 Municipality
@@ -196,20 +198,7 @@ Resale = Three_Or_More
 
 -- case
 Type:        
-  And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
-    Start_Dt_Dwelling_For_Social_Rent <= 2025)
-  And(Certification_Date >= 2015, Certification_Date <= 2025)
-  Or(Tax == 1,
-   Tax == 2,
-   Tax == 4,
-   Tax == 7,
-   Tax == 6,
-   Tax == 10,
-   Tax == 12)
-  And(Term_Energy_Renovation >= 2015,
-    Term_Energy_Renovation <= 2025)
-  And(Certification_Date_Sale >= 2015,
-    Certification_Date_Sale <= 2025)
+  
 Definitions: 
   
 Universals:  
@@ -236,6 +225,11 @@ Simplified:
   (Municipality = other_Municipal) ⇒ (~(Core_City))
   (~(Municipality = other_Municipal)) ⇒ Core_City
   Professional_Buyer ⇔ (Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More))
+  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+  2015 ≤ Certification_Date ≤ 2025
+  (1 = Tax) ∨ (2 = Tax) ∨ (4 = Tax) ∨ (7 = Tax) ∨ (6 = Tax) ∨ (10 = Tax) ∨ (12 = Tax)
+  2015 ≤ Term_Energy_Renovation ≤ 2025
+  2015 ≤ Certification_Date_Sale ≤ 2025
 Irrelevant:  
   
 

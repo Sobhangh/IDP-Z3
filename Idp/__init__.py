@@ -212,7 +212,7 @@ class RangeDeclaration(object):
 
 class SymbolDeclaration(object):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name').name # a string, not a Symbol
+        self.name = sys.intern(kwargs.pop('name').name) # a string, not a Symbol
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
@@ -264,6 +264,7 @@ class SymbolDeclaration(object):
             for inst in self.instances.values():
                 domain = self.out.decl.check_bounds(inst)
                 if domain is not None:
+                    domain.if_symbol = self.name
                     domain.reading = "Possible values for " + str(inst)
                     self.typeConstraints.append(domain)
         return self
@@ -319,8 +320,6 @@ class SymbolDeclaration(object):
                         idp.vocabulary.translated.append(
                             ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
                     """
-            for c in self.typeConstraints: #TODO to be moved to Case
-                idp.vocabulary.translated.append(c.translate())
         return self.translated
 
 
@@ -355,6 +354,7 @@ class Theory(object):
 
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
+
         self.subtences = {}
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
         #TODO check argument ranges
@@ -362,6 +362,10 @@ class Theory(object):
         self.constraints = [e.interpret         (self) for e in self.constraints]
         for e in self.constraints:
             self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
+
+        for decl in self.symbol_decls.values():
+            if type(decl) == SymbolDeclaration:
+                self.constraints.extend(decl.typeConstraints)
 
         self.definitions = [e.annotate(self.symbol_decls, {}) for e in self.definitions]
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]

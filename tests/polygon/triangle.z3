@@ -1,7 +1,3 @@
-And(Sides >= 3, Sides <= 4)
-
-And(Vertices >= 3, Vertices <= 4)
-
 ForAll(c!43,
        Implies(Large(c!43), And(And(c!43 >= 1, c!43 <= 4))))
 -- theory
@@ -115,6 +111,10 @@ Or(And(Sides >= 1, Length(1) == Base),
    And(Sides >= 3, Length(3) == Base),
    And(Sides >= 4, Length(4) == Base))
 
+And(Sides >= 3, Sides <= 4)
+
+And(Vertices >= 3, Vertices <= 4)
+
 -- atoms
 Sides
 Vertices
@@ -176,8 +176,6 @@ Surface = (-(1))
 
 -- case
 Type:        
-  And(Sides >= 3, Sides <= 4)
-  And(Vertices >= 3, Vertices <= 4)
   ForAll(c!43,
        Implies(Large(c!43), And(And(c!43 >= 1, c!43 <= 4))))
 Definitions: 
@@ -214,6 +212,8 @@ Simplified:
   (Type = triangle) ⇒ (Surface = (0.5 * (Base * Height)))
   (true)
   (true)
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
 Irrelevant:  
   (false)
   (false)

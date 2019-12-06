@@ -1,7 +1,3 @@
-And(Sides >= 3, Sides <= 4)
-
-And(Vertices >= 3, Vertices <= 4)
-
 ForAll(c!17,
        Implies(Large(c!17), And(And(c!17 >= 1, c!17 <= 4))))
 -- theory
@@ -16,6 +12,10 @@ And(Or(Length(1) == Length(1), Sides < 1),
     Or(Length(4) == Length(1), Sides < 4))
 
 (Subtype == rectangle) == (Sides == 4)
+
+And(Sides >= 3, Sides <= 4)
+
+And(Vertices >= 3, Vertices <= 4)
 
 -- atoms
 Sides
@@ -48,8 +48,6 @@ Sides = 4
 
 -- case
 Type:        
-  And(Sides >= 3, Sides <= 4)
-  And(Vertices >= 3, Vertices <= 4)
   ForAll(c!17,
        Implies(Large(c!17), And(And(c!17 >= 1, c!17 <= 4))))
 Definitions: 
@@ -61,6 +59,8 @@ Consequences:
 Simplified:  
   (true)
   Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
+  (true)
+  3 ≤ Vertices ≤ 4
 Irrelevant:  
   (false)
 

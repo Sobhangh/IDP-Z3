@@ -1,7 +1,3 @@
-And(Sides >= 3, Sides <= 4)
-
-And(Vertices >= 3, Vertices <= 4)
-
 ForAll(c!30,
        Implies(Large(c!30), And(And(c!30 >= 1, c!30 <= 4))))
 -- theory
@@ -86,6 +82,10 @@ And(Not(Sides < 1),
     Not(Sides < 3),
     Not(Sides < 4))
 
+And(Sides >= 3, Sides <= 4)
+
+And(Vertices >= 3, Vertices <= 4)
+
 ForAll(c!33, Large(c!33) == Or(False, False, False, False))
 
 -- atoms
@@ -129,8 +129,6 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  And(Sides >= 3, Sides <= 4)
-  And(Vertices >= 3, Vertices <= 4)
   ForAll(c!30,
        Implies(Large(c!30), And(And(c!30 >= 1, c!30 <= 4))))
 Definitions: 
@@ -164,6 +162,8 @@ Simplified:
   ((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))
   ((true))
   (((true)))
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
 Irrelevant:  
   
 

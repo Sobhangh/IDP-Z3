@@ -80,6 +80,7 @@ class Expression(object):
         self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
         self.translated = None            # the Z3 equivalent
         self._reified = None
+        self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         # .normal : only set in .instances
 
     def __eq__(self, other):
