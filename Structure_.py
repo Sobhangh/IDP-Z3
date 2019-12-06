@@ -23,7 +23,7 @@ from z3 import Constructor, Not, BoolVal, is_true, is_false
 
 
 import Idp
-from Idp.Expression import TRUE, FALSE, AComparison
+from Idp.Expression import TRUE, FALSE, AComparison, NumberConstant
 from utils import *
 
 

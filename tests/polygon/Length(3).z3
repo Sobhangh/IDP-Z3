@@ -1,5 +1,6 @@
-ForAll(c!17,
-       Implies(Large(c!17), And(And(c!17 >= 1, c!17 <= 4))))
+ForAll(c!112,
+       Implies(Large(c!112),
+               And(And(c!112 >= 1, c!112 <= 4))))
 -- theory
 Sides == 3
 
@@ -48,8 +49,9 @@ Sides = 4
 
 -- case
 Type:        
-  ForAll(c!17,
-       Implies(Large(c!17), And(And(c!17 >= 1, c!17 <= 4))))
+  ForAll(c!112,
+       Implies(Large(c!112),
+               And(And(c!112 >= 1, c!112 <= 4))))
 Definitions: 
   
 Universals:  

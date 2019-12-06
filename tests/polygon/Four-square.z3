@@ -1,6 +1,6 @@
-ForAll(c!143,
-       Implies(Large(c!143),
-               And(And(c!143 >= 1, c!143 <= 4))))
+ForAll(c!393,
+       Implies(Large(c!393),
+               And(And(c!393 >= 1, c!393 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -180,9 +180,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!143,
-       Implies(Large(c!143),
-               And(And(c!143 >= 1, c!143 <= 4))))
+  ForAll(c!393,
+       Implies(Large(c!393),
+               And(And(c!393 >= 1, c!393 <= 4))))
 Definitions: 
   
 Universals:  
