@@ -4,7 +4,7 @@ ForAll(c!464,
 -- theory
 ForAll(c!465,
        Prime(c!465) ==
-       Or(c!465 == 1, c!465 == 2, c!465 == 3, False))
+       Or(c!465 == 1, c!465 == 2, c!465 == 3))
 
 -- atoms
 Prime(1)

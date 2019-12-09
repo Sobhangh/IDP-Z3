@@ -43,7 +43,6 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
-    - polygon test: simplify Or(false, false)
     - batch substitute in Case.init
     - sort the operands of equality
     - AppliedSymbol is_subtence only if no Fresh_Variable !

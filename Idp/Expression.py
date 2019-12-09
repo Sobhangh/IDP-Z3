@@ -113,6 +113,9 @@ class Expression(object):
         else:
             return self.update_exprs(e.substitute(e0, e1) for e in self.sub_exprs)
 
+    def simplify1(self):
+        return self.update_exprs(self.sub_exprs)
+
     def expand_quantifiers(self, theory):
         return self.update_exprs(e.expand_quantifiers(theory) for e in self.sub_exprs)
 
@@ -576,7 +579,7 @@ def operation(ops, operands):
             o = Brackets(f=o, reading='')
         operands1.append(o)
     out = (classes[ops[0]]) (sub_exprs=operands, operator=ops)
-    return out.update_exprs(operands) # simplify it
+    return out.simplify1()
 
 class AUnary(Expression):
     MAP = {'-': lambda x: 0 - x,
@@ -621,7 +624,7 @@ class AUnary(Expression):
 def NOT(expr):
     out = AUnary(operator='~', f=expr)
     out.type = 'bool'
-    return out.update_exprs([expr]) # simplify if possible
+    return out.simplify1()
 
 class AAggregate(Expression):
     CONDITION = 0

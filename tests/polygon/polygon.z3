@@ -87,8 +87,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!216,
-       Large(c!216) == Or(False, False, False, False))
+ForAll(c!216, Large(c!216) == False)
 
 -- atoms
 Sides

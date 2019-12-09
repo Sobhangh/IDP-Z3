@@ -460,15 +460,17 @@ class Definition(object):
                 if i.out is not None:
                     outputVar = True
                     
+            ors = list(e for e in exprs if e is not False)
+            ors = exprs[0] if ors == [] else Or(ors)
             if outputVar:
                 expr = ForAll(vars, 
-                                (applyTo(symbol.translate(idp), vars[:-1]) == vars[-1]) == Or(exprs)) 
+                                (applyTo(symbol.translate(idp), vars[:-1]) == vars[-1]) == ors) 
             else:
                 if len(vars) > 0:
                     expr = ForAll(vars, 
-                                    applyTo(symbol.translate(idp), vars) == Or(exprs))
+                                    applyTo(symbol.translate(idp), vars) == ors)
                 else:
-                    expr = symbol.translate(idp) == Or(exprs)
+                    expr = symbol.translate(idp) == ors
             self.translated.append(expr)
         return self.translated
 
@@ -623,11 +625,10 @@ class Interpretation(object):
                         out = IfExpr(if_f=operation('=', [args[rank],val]), 
                                         then_f=interpret(theory, rank+1, args, list(tuples2)), 
                                         else_f=out)
-                        out = out.update_exprs(out.sub_exprs) # simplify
+                        out = out.simplify1()
                 return out
         self.decl.interpretation = interpret
         self.decl.is_var = False
-
 
 
 class Tuple(object):
