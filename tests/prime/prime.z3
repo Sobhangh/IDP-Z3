@@ -1,10 +1,10 @@
-ForAll(c!464,
-       Implies(Prime(c!464),
-               And(And(c!464 >= 1, c!464 <= 4))))
+ForAll(c!462,
+       Implies(Prime(c!462),
+               And(And(c!462 >= 1, c!462 <= 4))))
 -- theory
-ForAll(c!465,
-       Prime(c!465) ==
-       Or(c!465 == 1, c!465 == 2, c!465 == 3))
+ForAll(c!463,
+       Prime(c!463) ==
+       Or(c!463 == 1, c!463 == 2, c!463 == 3))
 
 -- atoms
 Prime(1)
@@ -14,9 +14,9 @@ Prime(4)
 
 -- case
 Type:        
-  ForAll(c!464,
-       Implies(Prime(c!464),
-               And(And(c!464 >= 1, c!464 <= 4))))
+  ForAll(c!462,
+       Implies(Prime(c!462),
+               And(And(c!462 >= 1, c!462 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
 Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)

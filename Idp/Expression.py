@@ -125,8 +125,9 @@ class Expression(object):
     def unknown_symbols(self):
         if self._unknown_symbols is None:
             self._unknown_symbols = {}
-            for e in self.sub_exprs:
-                self._unknown_symbols.update(e.unknown_symbols())
+            if self.if_symbol is None:
+                for e in self.sub_exprs:
+                    self._unknown_symbols.update(e.unknown_symbols())
         return self._unknown_symbols
 
     def reified(self):
@@ -728,7 +729,7 @@ class AppliedSymbol(Expression):
 
     def unknown_symbols(self):
         out = super().unknown_symbols()
-        if not self.decl.name.startswith('_') and self.decl.interpretation is None:
+        if self.decl.interpretation is None:
             out[self.decl.name] = self.decl
         return out
         
@@ -774,7 +775,7 @@ class Variable(Expression):
         return self
 
     def unknown_symbols(self):
-        return {self.decl.name: self.decl} if not self.decl.name.startswith('_') and self.decl.interpretation is None \
+        return {self.decl.name: self.decl} if self.decl.interpretation is None \
             else {}
 
     def translate(self):

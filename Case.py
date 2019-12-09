@@ -91,8 +91,14 @@ class Case:
                                     out = ls[0] if u.truth.is_true() else ls[0].Not()
                                     to_propagate.append(out)
 
-        #TODO determine relevant symbols
-        #TODO remove irrelevant domain conditions
+        # determine relevant symbols
+        symbols = {}
+        for e in self.simplified:
+            symbols.update(e.unknown_symbols())
+
+        # remove irrelevant domain conditions
+        self.simplified = list(e for e in self.simplified
+                if e.if_symbol is None or e.if_symbol in symbols)
 
         # find relevant subtences
         def mark_relevant(expr):

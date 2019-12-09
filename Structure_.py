@@ -203,26 +203,27 @@ class Structure_(object):
             key = atom.code
             typ = atomZ3.sort().name()
             for symb in atom.unknown_symbols().values():
-                s = self.m.setdefault(symb.name, {})
-                if typ == 'Bool':
-                    symbol = {"typ": typ, "ct": False, "cf": False}
-                    if atom.code in case.literals:
-                        symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
+                if not symb.name.startswith('_'):
+                    s = self.m.setdefault(symb.name, {})
+                    if typ == 'Bool':
+                        symbol = {"typ": typ, "ct": False, "cf": False}
+                        if atom.code in case.literals:
+                            symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
+                        else:
+                            symbol["irrelevant"] = True # unused symbol instance (Large(1))
+                        symbol["irrelevant"] = False #TODO disabling until fully working
+                    elif 0 < len(symb.range):
+                        symbol = { "typ": typ, "value": ""
+                                , "values": [str(v) for v in symb.range]}
+                    elif typ in ["Real", "Int"]:
+                        symbol = {"typ": typ, "value": ""} # default
                     else:
-                        symbol["irrelevant"] = True # unused symbol instance (Large(1))
-                    symbol["irrelevant"] = False #TODO disabling until fully working
-                elif 0 < len(symb.range):
-                    symbol = { "typ": typ, "value": ""
-                            , "values": [str(v) for v in symb.range]}
-                elif typ in ["Real", "Int"]:
-                    symbol = {"typ": typ, "value": ""} # default
-                else:
-                    symbol = None
-                if symbol: 
-                    symbol['reading'] = atom.reading
-                    symbol['normal'] = hasattr(atom, 'normal')
-                    s.setdefault(key, symbol)
-                    break
+                        symbol = None
+                    if symbol: 
+                        symbol['reading'] = atom.reading
+                        symbol['normal'] = hasattr(atom, 'normal')
+                        s.setdefault(key, symbol)
+                        break
 
         for atom in case.idp.atoms.values():
             initialise(atom)
@@ -236,12 +237,13 @@ class Structure_(object):
             key = atom.subtence.code
             typ = symbol.sort().name()
             for name, symb in atom.subtence.unknown_symbols().items():
-                s = self.m.setdefault(name, {})
-                if key in s:
-                    if typ in ["Real", "Int"]:
-                        s[key]["value"] = str(eval(str(atom.value).replace('?', ''))) # compute fraction
-                    elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
-                        s[key]["value"] = str(atom.value)
+                if not symb.name.startswith('_'):
+                    s = self.m.setdefault(name, {})
+                    if key in s:
+                        if typ in ["Real", "Int"]:
+                            s[key]["value"] = str(eval(str(atom.value).replace('?', ''))) # compute fraction
+                        elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
+                            s[key]["value"] = str(atom.value)
         if atom.type != 'bool': return
         key = atom.code
         for symb in atom.unknown_symbols().keys():

@@ -62,7 +62,6 @@ Simplified:
   (true)
   Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
   (true)
-  3 ≤ Vertices ≤ 4
 Irrelevant:  
   (false)
 
