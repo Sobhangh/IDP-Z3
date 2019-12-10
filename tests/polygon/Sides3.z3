@@ -184,8 +184,8 @@ Definitions:
   
 Universals:  
   Sides = 3
-  Perimeter = (sum{n[side] : (Length(1)) : (Length(2))})
-  (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180)
+  Perimeter = (sum{(Length(1)),(Length(2)),(Length(3)),(Length(4))})
+  (sum{(Angle(1)),(Angle(2)),(Angle(3)),(Angle(4))}) = (180)
   ((0 ≤ Length(1)) ∧ (0 ≤ Length(2)) ∧ (0 ≤ Length(3)) ∧ (0 ≤ Length(4)))
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
   ((~(Angle(1) = 180)) ∧ (~(Angle(2) = 180)) ∧ (~(Angle(3) = 180)) ∧ (~(Angle(4) = 180)))

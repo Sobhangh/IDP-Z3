@@ -1,6 +1,6 @@
-ForAll(c!392,
-       Implies(Large(c!392),
-               And(And(c!392 >= 1, c!392 <= 4))))
+ForAll(c!389,
+       Implies(Large(c!389),
+               And(And(c!389 >= 1, c!389 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -178,37 +178,34 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!392,
-       Implies(Large(c!392),
-               And(And(c!392 >= 1, c!392 <= 4))))
+  ForAll(c!389,
+       Implies(Large(c!389),
+               And(And(c!389 >= 1, c!389 <= 4))))
 Definitions: 
   
 Universals:  
   Subtype = regular_triangle
-  Perimeter = (sum{n[side] : (Length(1)) : (Length(2))})
-  (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180 * (-2 + Sides))
+  Perimeter = (sum{(Length(1)),(Length(2)),(Length(3)),(Length(4))})
+  (sum{(Angle(1)),(Angle(2)),(Angle(3)),(Angle(4))}) = (180)
   ((0 ≤ Length(1)) ∧ (0 ≤ Length(2)) ∧ (0 ≤ Length(3)) ∧ (0 ≤ Length(4)))
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
   ((~(Angle(1) = 180)) ∧ (~(Angle(2) = 180)) ∧ (~(Angle(3) = 180)) ∧ (~(Angle(4) = 180)))
-  (((Angle(1) = 0) ⇔ (Vertices < 1)) ∧ ((Angle(2) = 0) ⇔ (Vertices < 2)) ∧ ((Angle(3) = 0) ⇔ (Vertices < 3)) ∧ ((Angle(4) = 0) ⇔ (Vertices < 4)))
-  (((Length(1) = 0) ⇔ (Sides < 1)) ∧ ((Length(2) = 0) ⇔ (Sides < 2)) ∧ ((Length(3) = 0) ⇔ (Sides < 3)) ∧ ((Length(4) = 0) ⇔ (Sides < 4)))
+  (((~(Angle(1) = 0))) ∧ ((~(Angle(2) = 0))) ∧ ((~(Angle(3) = 0))) ∧ ((Angle(4) = 0)))
+  (((~(Length(1) = 0))) ∧ ((~(Length(2) = 0))) ∧ ((~(Length(3) = 0))) ∧ ((Length(4) = 0)))
   0 ≤ Base
   0 ≤ Height
-  (((1 ≤ Sides) ∧ (Length(1) = Base)) ∨ ((2 ≤ Sides) ∧ (Length(2) = Base)) ∨ ((3 ≤ Sides) ∧ (Length(3) = Base)) ∨ ((4 ≤ Sides) ∧ (Length(4) = Base)))
+  ((Length(1) = Base) ∨ (Length(2) = Base) ∨ (Length(3) = Base))
 Consequences:
   Type = triangle
   Sides = 3
-  ~Type = quadrilateral
-  ~Sides = 4
   Vertices = 3
-  ~Vertices = 4
   Convex
   ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))
   Equilateral
   ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))
   ((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60))
   ~((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90))
-  ~(((Angle(1) = 90) ∨ (Sides < 1)) ∧ ((Angle(2) = 90) ∨ (Sides < 2)) ∧ ((Angle(3) = 90) ∨ (Sides < 3)) ∧ ((Angle(4) = 90) ∨ (Sides < 4)))
+  ~((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
   Length(1) = Length(3)
   ~Length(2) = Length(4)
   Length(1) = Length(2)

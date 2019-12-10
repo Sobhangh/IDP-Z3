@@ -1,6 +1,6 @@
-ForAll(c!516,
-       Implies(Large(c!516),
-               And(And(c!516 >= 1, c!516 <= 4))))
+ForAll(c!509,
+       Implies(Large(c!509),
+               And(And(c!509 >= 1, c!509 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -181,15 +181,15 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!516,
-       Implies(Large(c!516),
-               And(And(c!516 >= 1, c!516 <= 4))))
+  ForAll(c!509,
+       Implies(Large(c!509),
+               And(And(c!509 >= 1, c!509 <= 4))))
 Definitions: 
   
 Universals:  
   (((Angle(1) = 90) ∨ (Sides < 1)) ∧ ((Angle(2) = 90) ∨ (Sides < 2)) ∧ ((Angle(3) = 90) ∨ (Sides < 3)) ∧ ((Angle(4) = 90) ∨ (Sides < 4)))
-  Perimeter = (sum{n[side] : (Length(1)) : (Length(2))})
-  (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180 * (-2 + Sides))
+  Perimeter = (sum{(Length(1)),(Length(2)),(Length(3)),(Length(4))})
+  (sum{(Angle(1)),(Angle(2)),(Angle(3)),(Angle(4))}) = (180 * (-2 + Sides))
   ((0 ≤ Length(1)) ∧ (0 ≤ Length(2)) ∧ (0 ≤ Length(3)) ∧ (0 ≤ Length(4)))
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
   ((~(Angle(1) = 180)) ∧ (~(Angle(2) = 180)) ∧ (~(Angle(3) = 180)) ∧ (~(Angle(4) = 180)))

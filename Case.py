@@ -62,39 +62,7 @@ class Case:
         
         # simplify all using given and universals
         to_propagate = list(l for l in self.literals.values() if l.truth.is_known())
-        while to_propagate:
-            lit = to_propagate.pop(0)
-            old, new = lit.as_substitution(self)
-
-            if new is not None:
-                l1 = []
-                for c in self.simplified:
-                    c1 = c.substitute(old, new)
-                    # find immediate consequences
-                    u = self.expr_to_literal(c1)
-                    if u:
-                        self.literals[u[0].subtence.code] = u[0].mk_consequence()
-                        to_propagate.append(u[0])
-                    elif not c1 == TRUE:
-                        l1.append(c1)
-                self.simplified = l1
-
-                # now for literals
-                for u in self.literals.values():
-                    if u != lit:
-                        simple_u = u.subtence.substitute(old, new)
-                        if simple_u != u.subtence:
-                            if simple_u == TRUE:
-                                u.truth = Truth.TRUE
-                            if simple_u == FALSE:
-                                u.truth = Truth.FALSE
-                            self.literals[u.subtence.code] = LiteralQ(u.truth, simple_u)
-                            # find immediate consequences
-                            if u.truth.is_known(): # you can't propagate otherwise
-                                ls = self.expr_to_literal(simple_u)
-                                if ls and ls[0] != u:
-                                    out = ls[0] if u.truth.is_true() else ls[0].Not()
-                                    to_propagate.append(out)
+        self.propagate(to_propagate)
 
         solver, _, _ = mk_solver(self.translate(), {})
         result = solver.check()
@@ -117,24 +85,7 @@ class Case:
                         if res2 == unsat:
                             lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom).mk_consequence()
                             self.literals[key] = lit
-
-                            to_propagate = [lit]
-                            while to_propagate:
-                                lit = to_propagate.pop(0)
-                                old, new = lit.as_substitution(self)            
-                                if new is not None:
-                                    l1 = []
-                                    for c in self.simplified:
-                                        c1 = c.substitute(old, new)
-                                        # find immediate consequences
-                                        u = self.expr_to_literal(c1)
-                                        if u:
-                                            self.literals[u[0].subtence.code] = u[0].mk_consequence()
-                                            to_propagate.append(u[0])
-                                        elif not c1 == TRUE:
-                                            l1.append(c1)
-                                    self.simplified = l1
-
+                            self.propagate([lit])
         
         # determine relevant symbols
         symbols = {}
@@ -171,6 +122,41 @@ class Case:
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
                 f"Irrelevant:  {indented}{indented.join(str(c.subtence) for c in self.literals.values() if c.is_irrelevant())}{nl}"
         )
+
+    def propagate(self, to_propagate):
+        while to_propagate:
+            lit = to_propagate.pop(0)
+            old, new = lit.as_substitution(self)
+
+            if new is not None:
+                l1 = []
+                for c in self.simplified:
+                    c1 = c.substitute(old, new)
+                    # find immediate consequences
+                    u = self.expr_to_literal(c1)
+                    if u:
+                        self.literals[u[0].subtence.code] = u[0].mk_consequence()
+                        to_propagate.append(u[0])
+                    elif not c1 == TRUE:
+                        l1.append(c1)
+                self.simplified = l1
+
+                # now for literals
+                for u in self.literals.values():
+                    if u != lit:
+                        simple_u = u.subtence.substitute(old, new)
+                        if simple_u != u.subtence:
+                            if simple_u == TRUE:
+                                u.truth = Truth.TRUE
+                            if simple_u == FALSE:
+                                u.truth = Truth.FALSE
+                            self.literals[u.subtence.code] = LiteralQ(u.truth, simple_u)
+                            # find immediate consequences
+                            if u.truth.is_known(): # you can't propagate otherwise
+                                ls = self.expr_to_literal(simple_u)
+                                if ls and ls[0] != u:
+                                    out = ls[0] if u.truth.is_true() else ls[0].Not()
+                                    to_propagate.append(out)
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):
         if expr.code in self.atoms: # found it !

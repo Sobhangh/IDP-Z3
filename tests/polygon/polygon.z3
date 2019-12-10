@@ -139,27 +139,18 @@ Rule:∀[][[]]: Large(2) ⇔(false)
 Rule:∀[][[]]: Large(3) ⇔(false)
 Rule:∀[][[]]: Large(4) ⇔(false)
 Universals:  
-  ~Subtype = rectangle
-  Perimeter = (sum{n[side] : ((1)) : ((2))})
-  (sum{n[side] : (Angle(1)) : (Angle(2))}) = (180 * (-2 + Sides))
+  Perimeter = (sum{((1)),((2)),((3)),((4))})
+  (sum{(Angle(1)),(Angle(2)),(Angle(3)),(Angle(4))}) = (360)
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
   ((~(Angle(1) = 180)) ∧ (~(Angle(2) = 180)) ∧ (~(Angle(3) = 180)) ∧ (~(Angle(4) = 180)))
-  (((Angle(1) = 0) ⇔ (Vertices < 1)) ∧ ((Angle(2) = 0) ⇔ (Vertices < 2)) ∧ ((Angle(3) = 0) ⇔ (Vertices < 3)) ∧ ((Angle(4) = 0) ⇔ (Vertices < 4)))
-  (((~(Sides < 1))) ∧ ((~(Sides < 2))) ∧ ((~(Sides < 3))) ∧ ((~(Sides < 4))))
+  (((~(Angle(1) = 0))) ∧ ((~(Angle(2) = 0))) ∧ ((~(Angle(3) = 0))) ∧ ((~(Angle(4) = 0))))
 Consequences:
-  ~Type = triangle
-  ~Sides = 3
   Type = quadrilateral
   Sides = 4
-  ~Vertices = 3
   Vertices = 4
   ~Equilateral
-  ~((Sides < 2) ∧ (Sides < 3) ∧ (Sides < 4))
-  ~Subtype = right_triangle
-  ~Subtype = regular_triangle
   Subtype = irregular
-  ~(((Angle(1) = 60) ∨ (Sides < 1)) ∧ ((Angle(2) = 60) ∨ (Sides < 2)) ∧ ((Angle(3) = 60) ∨ (Sides < 3)) ∧ ((Angle(4) = 60) ∨ (Sides < 4)))
-  ~Subtype = square
+  ~((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60) ∧ (Angle(4) = 60))
   ~((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90) ∧ (Angle(4) = 90))
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))

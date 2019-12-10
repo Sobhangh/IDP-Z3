@@ -650,12 +650,18 @@ class AAggregate(Expression):
             raise Exception("Can't have output variable for #")
 
     def __str__(self):
-        vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-        output = f" : {str(self.sub_exprs[AAggregate.OUT])}" if self.out else ""
-        out = ( f"{self.aggtype}{{{vars} : "
-                f"{str(self.sub_exprs[AAggregate.CONDITION])}"
-                f"{output}}}"
-              )
+        if self.vars is not None:
+            vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+            output = f" : {str(self.sub_exprs[AAggregate.OUT])}" if self.out else ""
+            out = ( f"{self.aggtype}{{{vars} : "
+                    f"{str(self.sub_exprs[AAggregate.CONDITION])}"
+                    f"{output}}}"
+                )
+        else:
+            out = ( f"{self.aggtype}{{"
+                    f"{','.join(str(e) for e in self.sub_exprs)}"
+                    f"}}"
+            )
         return out
     def str_(self):
         vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
@@ -685,6 +691,7 @@ class AAggregate(Expression):
                 forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
                 raise Exception('Can only quantify aggregates over finite domains')
+        self.vars = None # flag to indicate changes
         return forms
 
     def translate(self):
