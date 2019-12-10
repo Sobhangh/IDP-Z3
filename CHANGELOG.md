@@ -1,4 +1,14 @@
-Most recent first:
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
+
+
+## [Unreleased]
+
+## [0.1.0] - 2019-12-10
+### Added
 
 * 19 nov 2019: REST API: atom in explain is now preceded by '~' if negated
 * 9 sept 2019: abstract models: fix bug with checkCode, use given and consequences to simplify them, avoid negations
