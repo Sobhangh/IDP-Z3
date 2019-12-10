@@ -1,6 +1,6 @@
-ForAll(c!291,
-       Implies(Large(c!291),
-               And(And(c!291 >= 1, c!291 <= 4))))
+ForAll(c!392,
+       Implies(Large(c!392),
+               And(And(c!392 >= 1, c!392 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -101,7 +101,8 @@ Or(Not(Type == triangle), Surface == 1/2*Base*Height)
 Or(Not(Or(Subtype == square, Subtype == rectangle)),
    Surface == Length(1)*Length(2))
 
-Or(Not(Subtype == irregular), Surface == -1)
+Or(Not(And(Subtype == irregular, Sides == 4)),
+   Surface == -1)
 
 Base >= 0
 
@@ -177,9 +178,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!291,
-       Implies(Large(c!291),
-               And(And(c!291 >= 1, c!291 <= 4))))
+  ForAll(c!392,
+       Implies(Large(c!392),
+               And(And(c!392 >= 1, c!392 <= 4))))
 Definitions: 
   
 Universals:  
@@ -195,35 +196,29 @@ Universals:
   0 ≤ Height
   (((1 ≤ Sides) ∧ (Length(1) = Base)) ∨ ((2 ≤ Sides) ∧ (Length(2) = Base)) ∨ ((3 ≤ Sides) ∧ (Length(3) = Base)) ∨ ((4 ≤ Sides) ∧ (Length(4) = Base)))
 Consequences:
-  
-Simplified:  
-  ((Type = triangle) ⇔ (Sides = 3))
-  ((Type = quadrilateral) ⇔ (Sides = 4))
-  (((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))
-  ((Sides = 3) ⇒ Convex)
-  (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
-  (Equilateral ⇔ ((((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)))))
-  ((true))
-  ((((Sides = 3) ∧ Equilateral)))
-  ((((Sides = 3) ∧ ((((Angle(1) = 60) ∨ (Sides < 1)) ∧ ((Angle(2) = 60) ∨ (Sides < 2)) ∧ ((Angle(3) = 60) ∨ (Sides < 3)) ∧ ((Angle(4) = 60) ∨ (Sides < 4)))))))
-  (((~((Sides = 3) ∧ (((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))))
-  (((~((Sides = 4) ∧ ((((Angle(1) = 90) ∨ (Sides < 1)) ∧ ((Angle(2) = 90) ∨ (Sides < 2)) ∧ ((Angle(3) = 90) ∨ (Sides < 3)) ∧ ((Angle(4) = 90) ∨ (Sides < 4))))))))
-  ((true))
-  (((~((Sides = 4) ∧ Equilateral))))
-  ((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))
-  (Type = triangle) ⇒ (Surface = (0.5 * (Base * Height)))
-  (true)
-  (true)
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
-Irrelevant:  
-  (false)
-  (false)
-  (false)
-  (false)
+  Type = triangle
+  Sides = 3
+  ~Type = quadrilateral
+  ~Sides = 4
+  Vertices = 3
+  ~Vertices = 4
+  Convex
+  ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))
+  Equilateral
+  ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))
+  ((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60))
+  ~((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90))
+  ~(((Angle(1) = 90) ∨ (Sides < 1)) ∧ ((Angle(2) = 90) ∨ (Sides < 2)) ∧ ((Angle(3) = 90) ∨ (Sides < 3)) ∧ ((Angle(4) = 90) ∨ (Sides < 4)))
   Length(1) = Length(3)
-  Length(2) = Length(4)
+  ~Length(2) = Length(4)
   Length(1) = Length(2)
+  Length(1) ≤ (Length(2) + Length(3))
+  Length(2) ≤ (Length(3) + Length(1))
+  Length(3) ≤ (Length(1) + Length(2))
+  Surface = (0.5 * (Base * Height))
+Simplified:  
+  
+Irrelevant:  
   Surface = (Length(1) * Length(2))
   Surface = (-(1))
 

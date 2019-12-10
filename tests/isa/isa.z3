@@ -60,7 +60,7 @@ Universals:
 Consequences:
   
 Simplified:  
-  (true)
+  
 Irrelevant:  
   
 

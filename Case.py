@@ -17,9 +17,10 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 from copy import copy
-from z3 import And
+from z3 import And, Not, sat, unsat, is_true
 
-from Idp.Expression import Brackets, AUnary
+from Idp.Expression import Brackets, AUnary, TRUE, FALSE
+from Solver import mk_solver
 from Structure_ import json_to_literals, Equality, LiteralQ, Truth
 from utils import *
 
@@ -74,7 +75,7 @@ class Case:
                     if u:
                         self.literals[u[0].subtence.code] = u[0].mk_consequence()
                         to_propagate.append(u[0])
-                    else:
+                    elif not c1 == TRUE:
                         l1.append(c1)
                 self.simplified = l1
 
@@ -83,6 +84,10 @@ class Case:
                     if u != lit:
                         simple_u = u.subtence.substitute(old, new)
                         if simple_u != u.subtence:
+                            if simple_u == TRUE:
+                                u.truth = Truth.TRUE
+                            if simple_u == FALSE:
+                                u.truth = Truth.FALSE
                             self.literals[u.subtence.code] = LiteralQ(u.truth, simple_u)
                             # find immediate consequences
                             if u.truth.is_known(): # you can't propagate otherwise
@@ -91,6 +96,46 @@ class Case:
                                     out = ls[0] if u.truth.is_true() else ls[0].Not()
                                     to_propagate.append(out)
 
+        solver, _, _ = mk_solver(self.translate(), {})
+        result = solver.check()
+        if result == sat:
+            # determine all consequences
+            for key, l in self.literals.items():
+                if not l.truth.is_known():
+                    atom = l.subtence
+                    solver.push()
+                    solver.add(atom.reified()==atom.translate())
+                    res1 = solver.check()
+                    if res1 == sat:
+                        val1 = solver.model().eval(atom.reified())
+                        solver.push()
+                        solver.add(Not(atom.reified()==val1))
+                        res2 = solver.check()
+                        solver.pop()
+                        solver.pop()
+
+                        if res2 == unsat:
+                            lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom).mk_consequence()
+                            self.literals[key] = lit
+
+                            to_propagate = [lit]
+                            while to_propagate:
+                                lit = to_propagate.pop(0)
+                                old, new = lit.as_substitution(self)            
+                                if new is not None:
+                                    l1 = []
+                                    for c in self.simplified:
+                                        c1 = c.substitute(old, new)
+                                        # find immediate consequences
+                                        u = self.expr_to_literal(c1)
+                                        if u:
+                                            self.literals[u[0].subtence.code] = u[0].mk_consequence()
+                                            to_propagate.append(u[0])
+                                        elif not c1 == TRUE:
+                                            l1.append(c1)
+                                    self.simplified = l1
+
+        
         # determine relevant symbols
         symbols = {}
         for e in self.simplified:

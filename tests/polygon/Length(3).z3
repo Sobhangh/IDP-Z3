@@ -1,6 +1,6 @@
-ForAll(c!112,
-       Implies(Large(c!112),
-               And(And(c!112 >= 1, c!112 <= 4))))
+ForAll(c!160,
+       Implies(Large(c!160),
+               And(And(c!160 >= 1, c!160 <= 4))))
 -- theory
 Sides == 3
 
@@ -49,9 +49,9 @@ Sides = 4
 
 -- case
 Type:        
-  ForAll(c!112,
-       Implies(Large(c!112),
-               And(And(c!112 >= 1, c!112 <= 4))))
+  ForAll(c!160,
+       Implies(Large(c!160),
+               And(And(c!160 >= 1, c!160 <= 4))))
 Definitions: 
   
 Universals:  
@@ -59,11 +59,9 @@ Universals:
 Consequences:
   ~Subtype = rectangle
 Simplified:  
-  (true)
   Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
-  (true)
 Irrelevant:  
-  (false)
+  
 
 
 -- propagation

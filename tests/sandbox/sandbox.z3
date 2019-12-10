@@ -1,8 +1,8 @@
 
 -- theory
-ForAll(c!434,
-       (LipLen == c!434) ==
-       Or(And(c!434 == Short, JacketDesign == Design_230)))
+ForAll(c!560,
+       (LipLen == c!560) ==
+       Or(And(c!560 == Short, JacketDesign == Design_230)))
 
 -- atoms
 LipLen
@@ -17,7 +17,7 @@ Definitions:
 Universals:  
   
 Consequences:
-  
+  JacketDesign = Design_230
 Simplified:  
   
 Irrelevant:  

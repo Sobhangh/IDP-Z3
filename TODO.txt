@@ -1,3 +1,5 @@
+use universals for relevance too ? for simplification, propagation (not for display)
+
 To do:
     Relevance
     Support for constructor functions (p.6 of the IDP3 manual)

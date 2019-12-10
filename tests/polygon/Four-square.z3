@@ -1,6 +1,6 @@
-ForAll(c!391,
-       Implies(Large(c!391),
-               And(And(c!391 >= 1, c!391 <= 4))))
+ForAll(c!516,
+       Implies(Large(c!516),
+               And(And(c!516 >= 1, c!516 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -104,7 +104,8 @@ Or(Not(Type == triangle), Surface == 1/2*Base*Height)
 Or(Not(Or(Subtype == square, Subtype == rectangle)),
    Surface == Length(1)*Length(2))
 
-Or(Not(Subtype == irregular), Surface == -1)
+Or(Not(And(Subtype == irregular, Sides == 4)),
+   Surface == -1)
 
 Base >= 0
 
@@ -180,9 +181,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!391,
-       Implies(Large(c!391),
-               And(And(c!391 >= 1, c!391 <= 4))))
+  ForAll(c!516,
+       Implies(Large(c!516),
+               And(And(c!516 >= 1, c!516 <= 4))))
 Definitions: 
   
 Universals:  
@@ -216,7 +217,7 @@ Simplified:
   ((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))
   (Type = triangle) ⇒ (Surface = (0.5 * (Base * Height)))
   ((Subtype = square) ∨ (Subtype = rectangle)) ⇒ (Surface = (Length(1) * Length(2)))
-  (Subtype = irregular) ⇒ (Surface = (-(1)))
+  ((Subtype = irregular) ∧ (Sides = 4)) ⇒ (Surface = (-(1)))
   3 ≤ Sides ≤ 4
   3 ≤ Vertices ≤ 4
 Irrelevant:  

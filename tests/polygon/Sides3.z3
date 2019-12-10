@@ -101,7 +101,8 @@ Or(Not(Type == triangle), Surface == 1/2*Base*Height)
 Or(Not(Or(Subtype == square, Subtype == rectangle)),
    Surface == Length(1)*Length(2))
 
-Or(Not(Subtype == irregular), Surface == -1)
+Or(Not(And(Subtype == irregular, Sides == 4)),
+   Surface == -1)
 
 Base >= 0
 
@@ -195,13 +196,16 @@ Universals:
   ((Length(1) = Base) ∨ (Length(2) = Base) ∨ (Length(3) = Base))
 Consequences:
   Type = triangle
-  ~(false)
   Vertices = 3
-  ~(false)
   Convex
   ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))
   ~Subtype = square
   ~Subtype = rectangle
+  ~((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
+  ~Length(2) = Length(4)
+  Length(1) ≤ (Length(2) + Length(3))
+  Length(2) ≤ (Length(3) + Length(1))
+  Length(3) ≤ (Length(1) + Length(2))
   Surface = (0.5 * (Base * Height))
 Simplified:  
   (Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))))
@@ -209,19 +213,11 @@ Simplified:
   ((Subtype = regular_triangle) ⇔ (Equilateral))
   ((Subtype = regular_triangle) ⇔ ((((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60)))))
   ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
-  ((true))
-  (((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))
-  (true)
-  (Subtype = irregular) ⇒ (Surface = (-(1)))
-  (true)
-  (true)
 Irrelevant:  
-  (false)
-  ((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
   Length(1) = Length(3)
-  Length(2) = Length(4)
   Length(1) = Length(2)
   Surface = (Length(1) * Length(2))
+  Surface = (-(1))
 
 
 -- propagation

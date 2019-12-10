@@ -1,6 +1,6 @@
-ForAll(c!211,
-       Implies(Large(c!211),
-               And(And(c!211 >= 1, c!211 <= 4))))
+ForAll(c!273,
+       Implies(Large(c!273),
+               And(And(c!273 >= 1, c!273 <= 4))))
 -- theory
 True
 
@@ -87,7 +87,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!214, Large(c!214) == False)
+ForAll(c!276, Large(c!276) == False)
 
 -- atoms
 Sides
@@ -130,9 +130,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  ForAll(c!211,
-       Implies(Large(c!211),
-               And(And(c!211 >= 1, c!211 <= 4))))
+  ForAll(c!273,
+       Implies(Large(c!273),
+               And(And(c!273 >= 1, c!273 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
@@ -147,27 +147,24 @@ Universals:
   (((Angle(1) = 0) ⇔ (Vertices < 1)) ∧ ((Angle(2) = 0) ⇔ (Vertices < 2)) ∧ ((Angle(3) = 0) ⇔ (Vertices < 3)) ∧ ((Angle(4) = 0) ⇔ (Vertices < 4)))
   (((~(Sides < 1))) ∧ ((~(Sides < 2))) ∧ ((~(Sides < 3))) ∧ ((~(Sides < 4))))
 Consequences:
-  
+  ~Type = triangle
+  ~Sides = 3
+  Type = quadrilateral
+  Sides = 4
+  ~Vertices = 3
+  Vertices = 4
+  ~Equilateral
+  ~((Sides < 2) ∧ (Sides < 3) ∧ (Sides < 4))
+  ~Subtype = right_triangle
+  ~Subtype = regular_triangle
+  Subtype = irregular
+  ~(((Angle(1) = 60) ∨ (Sides < 1)) ∧ ((Angle(2) = 60) ∨ (Sides < 2)) ∧ ((Angle(3) = 60) ∨ (Sides < 3)) ∧ ((Angle(4) = 60) ∨ (Sides < 4)))
+  ~Subtype = square
+  ~((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90) ∧ (Angle(4) = 90))
 Simplified:  
-  ((true))
-  ((Type = triangle) ⇔ (Sides = 3))
-  ((Type = quadrilateral) ⇔ (Sides = 4))
-  (((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))
-  ((Sides = 3) ⇒ Convex)
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
-  (Equilateral ⇔ (((Sides < 2) ∧ (Sides < 3) ∧ (Sides < 4))))
-  ((Sides = 3) ⇒ ((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
-  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))
-  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ ((((Angle(1) = 60) ∨ (Sides < 1)) ∧ ((Angle(2) = 60) ∨ (Sides < 2)) ∧ ((Angle(3) = 60) ∨ (Sides < 3)) ∧ ((Angle(4) = 60) ∨ (Sides < 4))))))
-  ((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
-  ((Subtype = square) ⇔ ((Sides = 4) ∧ ((((Angle(1) = 90) ∨ (Sides < 1)) ∧ ((Angle(2) = 90) ∨ (Sides < 2)) ∧ ((Angle(3) = 90) ∨ (Sides < 3)) ∧ ((Angle(4) = 90) ∨ (Sides < 4))))))
-  ((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))
-  ((true))
-  (((true)))
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
 Irrelevant:  
-  
+  ((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90))
 
 
 -- propagation

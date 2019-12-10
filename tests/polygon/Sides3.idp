@@ -112,7 +112,7 @@ theory {
     // TODO : surface
     Type=triangle => Surface = (Base * Height)/2.
     Subtype=square | Subtype=rectangle => Surface = Length(1)*Length(2).
-    Subtype=irregular => Surface = -1.
+    Subtype=irregular & Sides = 4 => Surface = -1.
     0 =< Base.
     0 =< Height.
     ?n[side]: n=<Sides & Length(n)=Base.
