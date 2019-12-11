@@ -19,7 +19,7 @@
 from copy import copy
 from z3 import And, Not, sat, unsat, unknown, is_true
 
-from Idp.Expression import Brackets, AUnary, TRUE, FALSE
+from Idp.Expression import Brackets, AUnary, AConjunction, TRUE, FALSE
 from Solver import mk_solver
 from Structure_ import json_to_literals, Equality, LiteralQ, Truth
 from utils import *
@@ -42,6 +42,7 @@ class Case:
         self.simplified = self.idp.theory.constraints # [Expression]
 
         self.literals = {} # {subtence.code: LiteralQ}, with truth value
+        self.original_literals = {} # {subtence.code: LiteralQ}, with truth value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -49,13 +50,15 @@ class Case:
         self.literals = {s.code: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
         for l in self.given:
             self.literals[l.subtence.code] = l.mk_given()
+        self.original_literals = copy(self.literals)
 
         # find immediate universals
         l1 = []
         for i, c in enumerate(self.simplified):
             u = self.expr_to_literal(c)
             if u:
-                self.literals[u[0].subtence.code] = u[0].mk_universal()
+                for l in u:
+                    self.literals[l.subtence.code] = l.mk_universal()
             else:
                 l1.append(c)
         self.simplified = l1
@@ -93,7 +96,6 @@ class Case:
                         solver, _, _ = mk_solver(self.translate(), {})
                         result = solver.check()
 
-        
         # determine relevant symbols
         symbols = {}
         for e in self.simplified:
@@ -142,8 +144,9 @@ class Case:
                     # find immediate consequences
                     u = self.expr_to_literal(c1)
                     if u:
-                        self.literals[u[0].subtence.code] = u[0].mk_consequence()
-                        to_propagate.append(u[0])
+                        for l in u:
+                            self.literals[l.subtence.code] = l.mk_consequence()
+                            to_propagate.append(l)
                     elif not c1 == TRUE:
                         l1.append(c1)
                 self.simplified = l1
@@ -160,10 +163,11 @@ class Case:
                             self.literals[u.subtence.code] = LiteralQ(u.truth, simple_u)
                             # find immediate consequences
                             if u.truth.is_known(): # you can't propagate otherwise
-                                ls = self.expr_to_literal(simple_u)
-                                if ls and ls[0] != u:
-                                    out = ls[0] if u.truth.is_true() else ls[0].Not()
-                                    to_propagate.append(out)
+                                for l in self.expr_to_literal(simple_u):
+                                    if l != u:
+                                        l = l if u.truth.is_true() else l.Not()
+                                        to_propagate.append(l)
+
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):
         if expr.code in self.atoms: # found it !

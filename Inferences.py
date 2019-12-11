@@ -51,12 +51,18 @@ def metaJSON(idp):
 def propagation(case, expanded_symbols):
     expanded_symbols = [] if expanded_symbols is None else expanded_symbols
      
-    out = Structure_(case)   
+    out = Structure_(case)
+
+    # subtences
+    for key, l in case.literals.items():
+        if l.truth.is_known() and key in case.original_literals:
+            lit = case.original_literals[key] # needed for original unknown_symbols
+            if any([s in expanded_symbols for s in lit.subtence.unknown_symbols().keys()]):
+                out.addAtom(lit.subtence, l.truth)
     
+    # numeric
     todo = { k:a for (k,a) in case.idp.atoms.items()
-                if (hasattr(a, 'decl') and hasattr(a.decl, 'is_var') and a.decl.is_var)
-                 # if it is shown to the user
-                 or any([s in expanded_symbols for s in a.unknown_symbols().keys()]) }
+                if (hasattr(a, 'decl') and hasattr(a.decl, 'is_var') and a.decl.is_var) }
 
     amf = consequences(case.translate(), todo, {})
     for literalQ in amf:
