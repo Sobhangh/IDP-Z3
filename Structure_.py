@@ -130,7 +130,7 @@ class Equality(object):
         out = self.subtence.substitute(e0, e1)
         if id(out) == id(self.subtence):
             return self
-        return Equality(out, value)
+        return Equality(out, self.value)
 
     
 #################

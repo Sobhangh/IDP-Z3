@@ -10,8 +10,9 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 from Case import *
 from Inferences import *
 from Solver import *
-from utils import log
+from utils import log, start
 from Idp import *
+
 
 dir = os.path.dirname(__file__)
 files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
@@ -41,3 +42,4 @@ for file in files:
     f.write(out     + "\r\n")
 
     f.close()
+print("*** Total: ", round(time.time()-start,3))

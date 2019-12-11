@@ -131,6 +131,8 @@ class ConstructedTypeDeclaration(object):
 
         if self.name == 'bool':
             self.translated = BoolSort()
+            self.constructors[0].type = 'bool'
+            self.constructors[1].type = 'bool'
             self.constructors[0].translated = bool(True) 
             self.constructors[1].translated = bool(False)
 

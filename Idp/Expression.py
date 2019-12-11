@@ -315,6 +315,10 @@ class BinaryOperator(Expression):
 
         super().__init__()
 
+        self.type = 'bool' if self.operator[0] in '&|∧∨⇒⇐⇔' \
+               else 'bool' if self.operator[0] in '=<>≤≥≠' \
+               else None
+
         self.is_subtence = self.operator[0] in '=<>≤≥≠'
 
     def __str__(self):
@@ -342,9 +346,8 @@ class BinaryOperator(Expression):
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
-        self.type = 'bool' if self.operator[0] in '&|^∨⇒⇐⇔' \
-               else 'bool' if self.operator[0] in '=<>≤≥≠' \
-               else 'real' if any(e.type == 'real' for e in self.sub_exprs) \
+        if self.type is None:
+            self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
         return self
 

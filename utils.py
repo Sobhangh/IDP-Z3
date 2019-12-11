@@ -50,6 +50,7 @@ def in_list(q, ls):
 
 
 def is_number(s):
+    if str(s) in ['True', 'False']: return False
     try:
         float(eval(str(s))) # accepts "2/3"
         return True
