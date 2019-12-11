@@ -19,7 +19,7 @@
 from copy import copy
 from z3 import And, Not, sat, unsat, unknown, is_true
 
-from Idp.Expression import Brackets, AUnary, AConjunction, TRUE, FALSE
+from Idp.Expression import Brackets, AUnary, TRUE, FALSE
 from Solver import mk_solver
 from Structure_ import json_to_literals, Equality, LiteralQ, Truth
 from utils import *
@@ -30,10 +30,11 @@ class Case:
     """
     cache = {}
 
-    def __init__(self, idp, jsonstr):
+    def __init__(self, idp, jsonstr, expanded_symbols):
 
         self.idp = idp # Idp vocabulary and theory
         self.given = json_to_literals(idp, jsonstr) # {LiteralQ : atomZ3} from the user interface
+        self.expanded_symbols = expanded_symbols
 
         # initialisation
         self.atoms = self.idp.atoms # {atom_string: Expression} atoms + numeric terms !
@@ -70,9 +71,11 @@ class Case:
         solver, _, _ = mk_solver(self.translate(), {})
         result = solver.check()
         if result == sat:
-            # determine all consequences
+            # determine consequences on expanded symbols only (for speed)
             for key, l in self.literals.items():
-                if not l.truth.is_known():
+                expr = self.original_literals[key].subtence
+                if not l.truth.is_known() \
+                and any(s in self.expanded_symbols for s in expr.unknown_symbols().keys()):
                     atom = l.subtence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())
@@ -86,8 +89,8 @@ class Case:
                             solver.pop()
 
                             if res2 == unsat:
-                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom).mk_consequence()
-                                self.literals[key] = lit
+                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
+                                self.literals[key] = lit.mk_consequence()
                                 self.propagate([lit])
                             elif res2 == unknown:
                                 res1 = unknown
@@ -187,14 +190,15 @@ class Case:
             )
         return self.translated
 
-def make_case(idp, jsonstr):
-        if (idp, jsonstr) in Case.cache:
-            return Case.cache[(idp, jsonstr)]
+def make_case(idp, jsonstr, expanded_symbols):
 
-        case = Case(idp, jsonstr)
+        if (idp, jsonstr, expanded_symbols) in Case.cache:
+            return Case.cache[(idp, jsonstr, expanded_symbols)]
+
+        case = Case(idp, jsonstr, expanded_symbols)
 
         if 100<len(Case.cache):
             # remove oldest entry, to prevent memory overflow
             Case.cache = {k:v for k,v in list(Case.cache.items())[1:]}
-        Case.cache[(idp, jsonstr)] = case
+        Case.cache[(idp, jsonstr, expanded_symbols)] = case
         return case

@@ -91,14 +91,15 @@ class eval(Resource):
                 #print(args)
 
                 idp = caseOf(args['code'])
-
                 method = args['method']
                 struct_json = args['active']
-                case = make_case(idp, struct_json)
+                expanded_symbols = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
+
+                case = make_case(idp, struct_json, expanded_symbols)
 
                 out = {}
                 if method == "propagate":
-                    out = propagation(case, args['expanded'])
+                    out = propagation(case, expanded_symbols)
                 if method == "modelexpand":
                     out = expand(case)
                 if method == "explain":

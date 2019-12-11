@@ -52,6 +52,7 @@ class LiteralQ(object):
         return hash((self.truth & 3, str(self.subtence)))
 
     def __eq__(self, other):
+        # ignores the modality of truth !
         return self.truth & 3 == other.truth & 3 \
             and type(self.subtence) == type (other.subtence) \
             and str(self.subtence) == str(other.subtence)

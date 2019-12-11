@@ -21,7 +21,7 @@ files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 for file in files:
     print(file)
     idp = idpparser.model_from_file(file)
-    case = Case(idp, "")
+    case = Case(idp, "", [])
 
     z3 = file.replace(".z3", ".z3z3")
     z3 = z3.replace(".idp", ".z3")
