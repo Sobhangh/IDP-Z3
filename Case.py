@@ -17,7 +17,7 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 from copy import copy
-from z3 import And, Not, sat, unsat, is_true
+from z3 import And, Not, sat, unsat, unknown, is_true
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE
 from Solver import mk_solver
@@ -76,16 +76,23 @@ class Case:
                     res1 = solver.check()
                     if res1 == sat:
                         val1 = solver.model().eval(atom.reified())
-                        solver.push()
-                        solver.add(Not(atom.reified()==val1))
-                        res2 = solver.check()
-                        solver.pop()
-                        solver.pop()
+                        if str(val1) != str(atom.reified()): # if not irrelevant
+                            solver.push()
+                            solver.add(Not(atom.reified()==val1))
+                            res2 = solver.check()
+                            solver.pop()
 
-                        if res2 == unsat:
-                            lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom).mk_consequence()
-                            self.literals[key] = lit
-                            self.propagate([lit])
+                            if res2 == unsat:
+                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom).mk_consequence()
+                                self.literals[key] = lit
+                                self.propagate([lit])
+                            elif res2 == unknown:
+                                res1 = unknown
+                    solver.pop()
+                    if res1 == unknown: # restart solver
+                        solver, _, _ = mk_solver(self.translate(), {})
+                        result = solver.check()
+
         
         # determine relevant symbols
         symbols = {}

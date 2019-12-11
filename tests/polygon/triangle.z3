@@ -1,6 +1,6 @@
-ForAll(c!389,
-       Implies(Large(c!389),
-               And(And(c!389 >= 1, c!389 <= 4))))
+ForAll(c!392,
+       Implies(Large(c!392),
+               And(And(c!392 >= 1, c!392 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -178,9 +178,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!389,
-       Implies(Large(c!389),
-               And(And(c!389 >= 1, c!389 <= 4))))
+  ForAll(c!392,
+       Implies(Large(c!392),
+               And(And(c!392 >= 1, c!392 <= 4))))
 Definitions: 
   
 Universals:  
@@ -213,11 +213,11 @@ Consequences:
   Length(2) ≤ (Length(3) + Length(1))
   Length(3) ≤ (Length(1) + Length(2))
   Surface = (0.5 * (Base * Height))
+  ~Surface = (-(1))
 Simplified:  
   
 Irrelevant:  
   Surface = (Length(1) * Length(2))
-  Surface = (-(1))
 
 
 -- propagation

@@ -207,6 +207,7 @@ Consequences:
   Length(2) ≤ (Length(3) + Length(1))
   Length(3) ≤ (Length(1) + Length(2))
   Surface = (0.5 * (Base * Height))
+  ~Surface = (-(1))
 Simplified:  
   (Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))))
   (((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
@@ -217,7 +218,6 @@ Irrelevant:
   Length(1) = Length(3)
   Length(1) = Length(2)
   Surface = (Length(1) * Length(2))
-  Surface = (-(1))
 
 
 -- propagation
