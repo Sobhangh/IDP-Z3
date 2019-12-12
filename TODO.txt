@@ -2,6 +2,8 @@ To do:
     Relevance
         - 'check code' button
         - propagate numeric values better ?
+        - non-linear equations ?
+        - consequences must be in case.simplified ?
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
         - generate list of constructors
