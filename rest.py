@@ -93,19 +93,13 @@ class eval(Resource):
                 idp = caseOf(args['code'])
                 method = args['method']
                 struct_json = args['active']
+                expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                expanded_symbols = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
-                if method == "abstract": #TODO ?
-                    expanded_symbols = {}
-                    for expr in idp.theory.subtences.values():
-                        expanded_symbols.update(expr.unknown_symbols())
-                    expanded_symbols = tuple(expanded_symbols.keys())
-
-                case = make_case(idp, struct_json, expanded_symbols)
+                case = make_case(idp, struct_json, expanded)
 
                 out = {}
                 if method == "propagate":
-                    out = propagation(case, expanded_symbols)
+                    out = propagation(case)
                 if method == "modelexpand":
                     out = expand(case)
                 if method == "explain":
@@ -120,7 +114,11 @@ class eval(Resource):
                                     + "\n}"
                         )
                         idpModel = idpparser.model_from_str(newTheory)
-                        case = make_case(idpModel) #TODO
+                        expanded = {}
+                        for expr in idpModel.theory.subtences.values():
+                            expanded.update(expr.unknown_symbols())
+                        expanded = tuple(expanded.keys())
+                        case = make_case(idpModel, "", expanded)
                     out = abstract(case)
                 log("end /eval " + method)
                 return out

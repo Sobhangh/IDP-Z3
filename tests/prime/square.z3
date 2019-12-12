@@ -30,13 +30,13 @@ Irrelevant:
 
 -- propagation
 {'Base': {'0 < Base': {'cf': False,
-                       'ct': False,
+                       'ct': True,
                        'irrelevant': False,
                        'normal': False,
                        'reading': '0 < Base',
                        'typ': 'Bool'},
           '16.0 = (Base * Base)': {'cf': False,
-                                   'ct': False,
+                                   'ct': True,
                                    'irrelevant': False,
                                    'normal': False,
                                    'reading': '16.0 = (Base * Base)',

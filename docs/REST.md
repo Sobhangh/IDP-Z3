@@ -37,7 +37,7 @@ GET request :
         }
     - code : string
     - method : "propagate" | ""modelexpand" | "explain" | "minimize" | "abstract"
-    - expanded : [string]  // for propagate
+    - expanded : [string]
     - value : string // for explain: string of atom, preceded by '~' if negated
 
 GET response for "propagate" :

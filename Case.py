@@ -30,11 +30,11 @@ class Case:
     """
     cache = {}
 
-    def __init__(self, idp, jsonstr, expanded_symbols):
+    def __init__(self, idp, jsonstr, expanded):
 
         self.idp = idp # Idp vocabulary and theory
         self.given = json_to_literals(idp, jsonstr) # {LiteralQ : atomZ3} from the user interface
-        self.expanded_symbols = expanded_symbols
+        self.expanded_symbols = set(expanded)
 
         # initialisation
         self.atoms = self.idp.atoms # {atom_string: Expression} atoms + numeric terms !
@@ -190,15 +190,15 @@ class Case:
             )
         return self.translated
 
-def make_case(idp, jsonstr, expanded_symbols):
+def make_case(idp, jsonstr, expanded):
 
-        if (idp, jsonstr, expanded_symbols) in Case.cache:
-            return Case.cache[(idp, jsonstr, expanded_symbols)]
+        if (idp, jsonstr, expanded) in Case.cache:
+            return Case.cache[(idp, jsonstr, expanded)]
 
-        case = Case(idp, jsonstr, expanded_symbols)
+        case = Case(idp, jsonstr, expanded)
 
         if 100<len(Case.cache):
             # remove oldest entry, to prevent memory overflow
             Case.cache = {k:v for k,v in list(Case.cache.items())[1:]}
-        Case.cache[(idp, jsonstr, expanded_symbols)] = case
+        Case.cache[(idp, jsonstr, expanded)] = case
         return case
