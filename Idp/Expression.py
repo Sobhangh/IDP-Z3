@@ -864,7 +864,8 @@ class Brackets(Expression):
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_decls)]
         self.type = self.sub_exprs[0].type
-        self.sub_exprs[0].reading = self.reading
+        if self.reading:
+            self.sub_exprs[0].reading = self.reading
         return self
 
     @immutable

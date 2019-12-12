@@ -189,62 +189,26 @@ def explain(case, symbol, value):
 def abstract(case):
     out = {} # {category : [LiteralQ]}
 
-    theory = And(case.idp.translated)
-    solver, reify, unreify = mk_solver(theory, case.idp.atoms)
-
     # extract fixed atoms from constraints
-    universal = consequences(theory, case.idp.atoms, {}, solver, reify, unreify)
-    out["universal"] = [k.mk_universal() for k in universal.keys() if k.truth.is_known()]
-
-    out["given"] = []
-    for ass in case.given:
-        universal[ass] = True
-        out["given"] += [ass]
-
-    # find consequences of structure
-    solver.add(list(case.given.values()))
-    theory2 = And([theory] + list(case.given.values()))
-    fixed = consequences(theory2, case.idp.atoms, universal, solver, reify, unreify)
-    out["fixed"] = [k.mk_consequence() for k in fixed.keys() if k.truth.is_known()]
-
-    models, count = {}, 0
-    done = set(out["universal"] + out["given"] + out["fixed"])
-
-    # substitutions = [(quantifier/chained, reified)] + [(consequences, truthvalue)]
-    substitutions = []
-    reified = Function("qsdfvqe13435", StringSort(), BoolSort())
-    for atom_string, atom in case.idp.atoms.items():
-        atomZ3 = atom.translated #TODO
-        if atom.type == 'bool' :
-            substitutions += [(atomZ3, reified(StringVal(atom_string.encode('utf8'))))]
-    for literalQ in done:
-        if is_bool(literalQ.subtence): #TODO
-            substitutions += [(literalQ.subtence, BoolVal(literalQ.truth.to_bool()))]
-
-    # relevants = getAtoms(simplify(substitute(case.constraints, substitutions)))
-    simplified = simplify(substitute(And(case.idp.theory.translated), substitutions)) # it starts by the last substitution ??
-    relevants = getAtoms(simplified, case.idp.unknown_symbols()) # includes reified !
-
-    # --> irrelevant
-    irrelevant = []
-    for atom_string, atom in case.idp.atoms.items():
-        atomZ3 = atom.translated #TODO
-        if is_bool(atomZ3) \
-        and not LiteralQ(Truth.TRUE , atom) in done \
-        and not LiteralQ(Truth.FALSE, atom) in done:
-            string2 = atom_as_string(reified(StringVal(atom_string.encode('utf8'))))
-            if not string2 in relevants:
-                irrelevant += [LiteralQ(Truth.IRRELEVANT, atom)]
-    out["irrelevant"] = irrelevant
-    done2 = done.union(set(irrelevant))
+    out["universal"] = list(l for l in case.literals.values() if l.is_universal())
+    out["given"    ] = list(l for l in case.literals.values() if l.is_given())
+    out["fixed"    ] = list(l for l in case.literals.values() if l.is_consequence())
+    out["irrelevant"]= list(LiteralQ(Truth.TRUE, l.subtence) for l in case.literals.values() if l.is_irrelevant())
+    relevants = set (str(l.subtence) for l in case.literals.values() if not l.truth.is_known() and not l.is_irrelevant())
 
     # create keys for models using first symbol of atoms
+    models, count = {}, 0
     for atom in case.idp.atoms.values():
         atomZ3 = atom.translated #TODO
         for symb in atom.unknown_symbols().keys():
             models[symb] = [] # models[symb][row] = [relevant atoms]
             break
     
+    done = set(out["universal"] + out["given"] + out["fixed"])
+    done2 = done.union(set(out["irrelevant"]))
+    theory = And(case.idp.translated)
+    solver, reify, unreify = mk_solver(theory, case.idp.atoms)
+    solver.add(list(case.given.values()))
     while solver.check() == sat and count < 50: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
@@ -256,7 +220,7 @@ def abstract(case):
             if is_bool(atomZ3) \
             and not LiteralQ(Truth.TRUE , atom) in done2 \
             and not LiteralQ(Truth.FALSE, atom) in done2 \
-            and not atom_string in relevants :
+            and atom_string in relevants :
                 truth = solver.model().eval(reify[atom])
                 if truth == True:
                     atoms += [ LiteralQ(Truth.TRUE,  atom) ]

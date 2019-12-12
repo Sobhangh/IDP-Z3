@@ -20,8 +20,13 @@ files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 #files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/sandbox/sandbox.idp"]
 for file in files:
     print(file)
-    idp = idpparser.model_from_file(file)
-    case = Case(idp, "", [])
+    idp = idpparser.model_from_file(file)  
+
+    expanded_symbols = {}
+    for expr in idp.theory.subtences.values():
+        expanded_symbols.update(expr.unknown_symbols())
+    expanded_symbols = tuple(expanded_symbols.keys())
+    case = Case(idp, "", expanded_symbols)
 
     z3 = file.replace(".z3", ".z3z3")
     z3 = z3.replace(".idp", ".z3")

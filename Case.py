@@ -99,7 +99,7 @@ class Case:
                         solver, _, _ = mk_solver(self.translate(), {})
                         result = solver.check()
 
-        # determine relevant symbols
+        #TODO determine relevant symbols
         symbols = {}
         for e in self.simplified:
             symbols.update(e.unknown_symbols())
