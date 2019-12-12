@@ -54,10 +54,9 @@ def propagation(case):
 
     # subtences
     for key, l in case.literals.items():
-        if l.truth.is_known() and key in case.original_literals:
-            lit = case.original_literals[key] # needed for original unknown_symbols
-            if any([s in case.expanded_symbols for s in lit.subtence.unknown_symbols().keys()]):
-                out.addAtom(lit.subtence, l.truth)
+        if l.truth.is_known():
+            if any([s in case.expanded_symbols for s in l.subtence.unknown_symbols().keys()]):
+                out.addAtom(l.subtence, l.truth)
     
     # numeric
     todo = { k:a for (k,a) in case.idp.atoms.items()

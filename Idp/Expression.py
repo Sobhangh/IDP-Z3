@@ -51,7 +51,6 @@ def immutable(func):
                 out.sub_exprs = value
                 # reset derived values
                 out.str = sys.intern(str(out))
-                out._unknown_symbols = None
                 out.translated = None
                 if ops: out.operator = ops
                 return out

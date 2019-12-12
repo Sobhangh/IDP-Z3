@@ -1,6 +1,7 @@
 To do:
     Relevance
         - 'check code' button
+        - propagate numeric values better ?
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
         - generate list of constructors

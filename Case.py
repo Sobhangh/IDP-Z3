@@ -43,7 +43,6 @@ class Case:
         self.simplified = self.idp.theory.constraints # [Expression]
 
         self.literals = {} # {subtence.code: LiteralQ}, with truth value
-        self.original_literals = {} # {subtence.code: LiteralQ}, with truth value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -51,7 +50,6 @@ class Case:
         self.literals = {s.code: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
         for l in self.given:
             self.literals[l.subtence.code] = l.mk_given()
-        self.original_literals = copy(self.literals)
 
         # find immediate universals
         l1 = []
@@ -73,9 +71,8 @@ class Case:
         if result == sat:
             # determine consequences on expanded symbols only (for speed)
             for key, l in self.literals.items():
-                expr = self.original_literals[key].subtence
                 if not l.truth.is_known() \
-                and any(s in self.expanded_symbols for s in expr.unknown_symbols().keys()):
+                and any(s in self.expanded_symbols for s in l.subtence.unknown_symbols().keys()):
                     atom = l.subtence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())
