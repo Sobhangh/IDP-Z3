@@ -790,6 +790,9 @@ class Variable(Expression):
         return {self.decl.name: self.decl} if self.decl.interpretation is None \
             else {}
 
+    def reified(self):
+        return self.translate()
+
     def translate(self):
         if self.translated is None:
             self.translated = self.decl.translated

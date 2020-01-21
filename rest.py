@@ -111,7 +111,8 @@ class eval(Resource):
                         newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
                                     + "theory {\n"
                                     + args['symbol']
-                                    + "\n}"
+                                    + "\n}\n"
+                                    + "view expanded"
                         )
                         idpModel = idpparser.model_from_str(newTheory)
                         expanded = {}

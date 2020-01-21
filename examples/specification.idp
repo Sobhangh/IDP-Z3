@@ -107,7 +107,7 @@ theory {
 
 
     // TODO : surface
-    //Type=triangle => Surface = (Base * Height)/2.
+    //Type=triangle => Surface = (Base * Height)/2.0.
     //Subtype=square | Subtype=rectangle => Surface = Length(1)*Length(2).
     //Subtype=irregular & Sides = 4 => Surface = -1.
     //0 =< Base.

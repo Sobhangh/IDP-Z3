@@ -231,8 +231,9 @@ class SymbolDeclaration(object):
         self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
 
     def __str__(self):
+        args = ','.join(map(str, self.sorts)) if 0<len(self.sorts) else ''
         return ( f"{self.name}"
-                 f"({','.join(map(str, self.sorts)) if 0<len(self.sorts) else ''})"
+                 f"{ '('+args+')' if args else ''}"
                  f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}"
         )
 
