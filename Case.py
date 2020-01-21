@@ -37,14 +37,17 @@ class Case:
         self.expanded_symbols = set(expanded)
 
         # initialisation
-        self.atoms = self.idp.atoms # {atom_string: Expression} atoms + numeric terms !
+        self.atoms = self.idp.atoms # {atom_string: Expression} original atoms + numeric terms !
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified = self.idp.theory.constraints # [Expression]
 
-        self.literals = {} # {subtence.code: LiteralQ}, with truth value
+        self.literals = {} # {subtence.code: LiteralQ}, atoms + given, with simplified formula and truth value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
+
+        for atom in self.atoms.values():
+            atom.is_visible = any(s in self.expanded_symbols for s in atom.unknown_symbols().keys())
 
         # initialize .literals
         self.literals = {s.code: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
@@ -71,30 +74,33 @@ class Case:
         if result == sat:
             # determine consequences on expanded symbols only (for speed)
             for key, l in self.literals.items():
-                if not l.truth.is_known() \
-                and any(s in self.expanded_symbols for s in l.subtence.unknown_symbols().keys()):
-                    atom = l.subtence
-                    solver.push()
-                    solver.add(atom.reified()==atom.translate())
-                    res1 = solver.check()
-                    if res1 == sat:
-                        val1 = solver.model().eval(atom.reified())
-                        if str(val1) != str(atom.reified()): # if not irrelevant
-                            solver.push()
-                            solver.add(Not(atom.reified()==val1))
-                            res2 = solver.check()
-                            solver.pop()
+                if not l.truth.is_known():
+                    if self.atoms[l.subtence.code].is_visible:
+                        atom = l.subtence
+                        solver.push()
+                        solver.add(atom.reified()==atom.translate())
+                        res1 = solver.check()
+                        if res1 == sat:
+                            val1 = solver.model().eval(atom.reified())
+                            if str(val1) != str(atom.reified()): # if not irrelevant
+                                solver.push()
+                                solver.add(Not(atom.reified()==val1))
+                                res2 = solver.check()
+                                solver.pop()
 
-                            if res2 == unsat:
-                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
-                                self.literals[key] = lit.mk_consequence()
-                                self.propagate([lit])
-                            elif res2 == unknown:
-                                res1 = unknown
-                    solver.pop()
-                    if res1 == unknown: # restart solver
-                        solver, _, _ = mk_solver(self.translate(), {})
-                        result = solver.check()
+                                if res2 == unsat:
+                                    lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
+                                    self.literals[key] = lit.mk_consequence()
+                                    self.propagate([lit])
+                                elif res2 == unknown:
+                                    res1 = unknown
+                        solver.pop()
+                        if res1 == unknown: # restart solver
+                            solver, _, _ = mk_solver(self.translate(), {})
+                            result = solver.check()
+                    else:
+                        print(l.subtence.code, self.atoms[l.subtence.code].is_visible)
+
 
         #TODO determine relevant symbols
         symbols = {}
@@ -170,6 +176,7 @@ class Case:
 
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):
+        # returns a literal for the matching atom in self.atoms, or []
         if expr.code in self.atoms: # found it !
             return [LiteralQ(truth, expr)]
         if isinstance(expr, Brackets):

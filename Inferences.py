@@ -54,8 +54,8 @@ def propagation(case):
 
     # subtences
     for key, l in case.literals.items():
-        if l.truth.is_known():
-            if any([s in case.expanded_symbols for s in l.subtence.unknown_symbols().keys()]):
+        if l.truth.is_known() and l.subtence.code in case.atoms:
+            if case.atoms[l.subtence.code].is_visible:
                 out.addAtom(l.subtence, l.truth)
     
     # numeric

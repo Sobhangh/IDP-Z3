@@ -198,6 +198,7 @@ def model_to_json(case, s, reify):
 class Structure_(object):
     def __init__(self, case, structure=[]):
         self.m = {}
+        self.case = case
 
         def initialise(atom):
             atomZ3 = atom.translate() #TODO
@@ -237,7 +238,7 @@ class Structure_(object):
             symbol = atom.subtence.translated
             key = atom.subtence.code
             typ = symbol.sort().name()
-            for name, symb in atom.subtence.unknown_symbols().items():
+            for name, symb in atom.unknown_symbols().items():
                 if not symb.name.startswith('_'):
                     s = self.m.setdefault(name, {})
                     if key in s:
@@ -247,13 +248,14 @@ class Structure_(object):
                             s[key]["value"] = str(atom.value)
         if atom.type != 'bool': return
         key = atom.code
-        for symb in atom.unknown_symbols().keys():
-            s = self.m.setdefault(symb, {})
-            if key in s:
-                s[key]["irrelevant"] = False
-                if truth.is_known(): 
-                    s[key]["ct" if truth.is_true() else "cf"] = True
-                else:
-                    s[key]["unknown"] = True
-                s[key]['reading'] = atom.reading
+        if key in self.case.atoms:
+            for symb in self.case.atoms[key].unknown_symbols().keys():
+                s = self.m.setdefault(symb, {})
+                if key in s:
+                    s[key]["irrelevant"] = False
+                    if truth.is_known():
+                        s[key]["ct" if truth.is_true() else "cf"] = True
+                    else:
+                        s[key]["unknown"] = True
+                    s[key]['reading'] = atom.reading
 

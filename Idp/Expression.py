@@ -51,6 +51,7 @@ def immutable(func):
                 out.sub_exprs = value
                 # reset derived values
                 out.str = sys.intern(str(out))
+                out._unknown_symbols = None
                 out.translated = None
                 if ops: out.operator = ops
                 return out
@@ -62,6 +63,7 @@ def immutable(func):
         # copy initial annotation
         out.code = self.code
         out.is_subtence = self.is_subtence
+        out.is_visible = self.is_visible
         out.type = self.type
         # out.normal is not set, normally
         return out
@@ -77,6 +79,7 @@ class Expression(object):
         self.is_subtence = None           # True if sub-sentence in original code
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
+        self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self.translated = None            # the Z3 equivalent
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
