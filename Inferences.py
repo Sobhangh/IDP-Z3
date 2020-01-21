@@ -192,7 +192,6 @@ def abstract(case):
     out["given"    ] = list(l for l in case.literals.values() if l.is_given())
     out["fixed"    ] = list(l for l in case.literals.values() if l.is_consequence())
     out["irrelevant"]= list(LiteralQ(Truth.TRUE, l.subtence) for l in case.literals.values() if l.is_irrelevant())
-    relevants = set (str(l.subtence) for l in case.literals.values() if not l.truth.is_known() and not l.is_irrelevant())
 
     # create keys for models using first symbol of atoms
     models, count = {}, 0
@@ -203,7 +202,6 @@ def abstract(case):
             break
     
     done = set(out["universal"] + out["given"] + out["fixed"])
-    done2 = done.union(set(out["irrelevant"]))
     theory = And(case.idp.translated)
     solver, reify, unreify = mk_solver(theory, case.idp.atoms)
     solver.add(list(case.given.values()))
@@ -214,21 +212,19 @@ def abstract(case):
 
         atoms = [] # [LiteralQ]
         for atom_string, atom in case.idp.atoms.items():
-            atomZ3 = atom.translated #TODO
-            if is_bool(atomZ3) \
-            and not LiteralQ(Truth.TRUE , atom) in done2 \
-            and not LiteralQ(Truth.FALSE, atom) in done2 \
-            and atom_string in relevants :
-                truth = solver.model().eval(reify[atom])
-                if truth == True:
-                    atoms += [ LiteralQ(Truth.TRUE,  atom) ]
-                elif truth == False:
-                    atoms += [ LiteralQ(Truth.FALSE, atom) ]
-                else: #unknown
-                    theory2 = And(theory2, 
-                                    substitute(theory2, [(atomZ3, BoolVal(True))]),  # don't simplify !
-                                    substitute(theory2, [(atomZ3, BoolVal(False))])) # it would break later substitutions
-                # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
+            if atom_string in case.literals: # an atom
+                literal = case.literals[atom_string]
+                if literal.truth == Truth.UNKNOWN:
+                    truth = solver.model().eval(reify[atom])
+                    if truth == True:
+                        atoms += [ LiteralQ(Truth.TRUE,  atom) ]
+                    elif truth == False:
+                        atoms += [ LiteralQ(Truth.FALSE, atom) ]
+                    else: #unknown
+                        theory2 = And(theory2,
+                                        substitute(theory2, [(atomZ3, BoolVal(True))]),  # don't simplify !
+                                        substitute(theory2, [(atomZ3, BoolVal(False))])) # it would break later substitutions
+                    # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
         atoms.sort(key=lambda l: (l.truth, str(l.subtence)))
