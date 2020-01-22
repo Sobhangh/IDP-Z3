@@ -37,7 +37,9 @@ class Case:
         self.expanded_symbols = set(expanded)
 
         # initialisation
-        self.atoms = self.idp.atoms # {atom_string: Expression} original atoms + numeric terms !
+
+        # Lines in the GUI
+        self.GUILines = {**idp.vocabulary.terms, **idp.theory.subtences} # {atom_string: Expression}
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified = self.idp.theory.constraints # [Expression]
@@ -46,8 +48,8 @@ class Case:
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
-        for atom in self.atoms.values():
-            atom.is_visible = any(s in self.expanded_symbols for s in atom.unknown_symbols().keys())
+        for GuiLine in self.GUILines.values():
+            GuiLine.is_visible = any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .literals
         self.literals = {s.code: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
@@ -75,7 +77,7 @@ class Case:
             # determine consequences on expanded symbols only (for speed)
             for key, l in self.literals.items():
                 if not l.truth.is_known():
-                    if self.atoms[l.subtence.code].is_visible:
+                    if self.GUILines[l.subtence.code].is_visible:
                         atom = l.subtence
                         solver.push()
                         solver.add(atom.reified()==atom.translate())
@@ -99,7 +101,7 @@ class Case:
                             solver, _, _ = mk_solver(self.translate(), {})
                             result = solver.check()
                     else:
-                        print(l.subtence.code, self.atoms[l.subtence.code].is_visible)
+                        print(l.subtence.code, self.GUILines[l.subtence.code].is_visible)
 
 
         #TODO determine relevant symbols
@@ -176,8 +178,8 @@ class Case:
 
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):
-        # returns a literal for the matching atom in self.atoms, or []
-        if expr.code in self.atoms: # found it !
+        # returns a literal for the matching atom in self.GUILines, or []
+        if expr.code in self.GUILines: # found it !
             return [LiteralQ(truth, expr)]
         if isinstance(expr, Brackets):
             return self.expr_to_literal(expr.sub_exprs[0], truth)

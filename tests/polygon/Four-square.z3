@@ -1,6 +1,6 @@
-ForAll(c!515,
-       Implies(Large(c!515),
-               And(And(c!515 >= 1, c!515 <= 4))))
+ForAll(c!513,
+       Implies(Large(c!513),
+               And(And(c!513 >= 1, c!513 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -181,9 +181,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!515,
-       Implies(Large(c!515),
-               And(And(c!515 >= 1, c!515 <= 4))))
+  ForAll(c!513,
+       Implies(Large(c!513),
+               And(And(c!513 >= 1, c!513 <= 4))))
 Definitions: 
   
 Universals:  
@@ -233,9 +233,9 @@ Irrelevant:
                                                                                  'triangle, and 360° for a '
                                                                                  'quadrilateral',
                                                                       'typ': 'Bool'},
-           'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': ''},
-           'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': ''},
-           'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': ''},
+           'Angle(1)': {'normal': True, 'reading': 'Angle(1)', 'typ': 'Real', 'value': '90'},
+           'Angle(2)': {'normal': True, 'reading': 'Angle(2)', 'typ': 'Real', 'value': '90'},
+           'Angle(3)': {'normal': True, 'reading': 'Angle(3)', 'typ': 'Real', 'value': '90'},
            'Angle(4)': {'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': ''},
            '∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)': {'cf': False,
                                                           'ct': True,
@@ -287,7 +287,7 @@ Irrelevant:
                        'typ': 'Bool'},
           'Base': {'normal': True, 'reading': 'Base', 'typ': 'Real', 'value': ''}},
  'Convex': {'Convex': {'cf': False,
-                       'ct': False,
+                       'ct': True,
                        'irrelevant': False,
                        'normal': True,
                        'reading': 'Convex',
@@ -395,7 +395,7 @@ Irrelevant:
                                                                  'reading': 'The perimeter is the sum of the lengths '
                                                                             'of the sides',
                                                                  'typ': 'Bool'}},
- 'Sides': {'Sides': {'normal': True, 'reading': 'Sides', 'typ': 'Int', 'value': '', 'values': ['3', '4']},
+ 'Sides': {'Sides': {'normal': True, 'reading': 'Sides', 'typ': 'Int', 'value': '4', 'values': ['3', '4']},
            'Sides = 3': {'cf': False,
                          'ct': False,
                          'irrelevant': False,
@@ -403,7 +403,7 @@ Irrelevant:
                          'reading': 'Sides = 3',
                          'typ': 'Bool'},
            'Sides = 4': {'cf': False,
-                         'ct': False,
+                         'ct': True,
                          'irrelevant': False,
                          'normal': False,
                          'reading': 'Sides = 4',
@@ -471,10 +471,10 @@ Irrelevant:
  'Type': {'Type': {'normal': True,
                    'reading': 'Type',
                    'typ': 'type',
-                   'value': '',
+                   'value': 'quadrilateral',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'cf': False,
-                                   'ct': False,
+                                   'ct': True,
                                    'irrelevant': False,
                                    'normal': False,
                                    'reading': 'Type = quadrilateral',
@@ -485,7 +485,7 @@ Irrelevant:
                               'normal': False,
                               'reading': 'Type = triangle',
                               'typ': 'Bool'}},
- 'Vertices': {'Vertices': {'normal': True, 'reading': 'Vertices', 'typ': 'Int', 'value': '', 'values': ['3', '4']},
+ 'Vertices': {'Vertices': {'normal': True, 'reading': 'Vertices', 'typ': 'Int', 'value': '4', 'values': ['3', '4']},
               'Vertices = 3': {'cf': False,
                                'ct': False,
                                'irrelevant': False,
@@ -493,7 +493,7 @@ Irrelevant:
                                'reading': 'Vertices = 3',
                                'typ': 'Bool'},
               'Vertices = 4': {'cf': False,
-                               'ct': False,
+                               'ct': True,
                                'irrelevant': False,
                                'normal': False,
                                'reading': 'Vertices = 4',

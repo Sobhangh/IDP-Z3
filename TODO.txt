@@ -1,6 +1,5 @@
 To do:
     Relevance
-        - 'check code' button
         - propagate numeric values better ?
         - non-linear equations ?
         - consequences must be in case.simplified ?

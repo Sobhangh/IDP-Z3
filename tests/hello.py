@@ -28,10 +28,10 @@ else:
         #print(c.interpretations)
         log("translate")
         print(simplify(c.translate()))
-        solver, _, _ = mk_solver(c.translate(), c.idp.atoms)
+        solver, _, _ = mk_solver(c.translate(), c.GUILines)
         print(solver.check())
         log("solve")
-        print(list(str(l) for l in consequences(c.translate(), c.idp.atoms, {}).keys()))
+        print(list(str(l) for l in consequences(c.translate(), c.GUILines, {}).keys()))
 
 # solver = c.mk_solver()
 # print(solver)

@@ -38,7 +38,7 @@ for file in files:
     f.write("\r\n-- theory\r\n")
     f.write("\r\n\r\n".join(str(t) for t in case.idp.theory.translated)     + "\r\n")
     f.write("\r\n-- atoms\r\n")
-    f.write("\r\n".join(str(t) for t in case.idp.atoms)     + "\r\n")
+    f.write("\r\n".join(str(t) for t in case.GUILines)     + "\r\n")
 
     f.write("\r\n-- case\r\n")
     f.write(str(case)+ "\r\n")

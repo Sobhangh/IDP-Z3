@@ -182,7 +182,7 @@ def json_to_literals(idp, jsonstr):
 def model_to_json(case, s, reify):
     m = s.model()
     out = Structure_(case)
-    for atom in case.idp.atoms.values():
+    for atom in case.GUILines.values():
         # atom might not have an interpretation in model (if "don't care")
         value = m.eval(reify[atom], model_completion=True)
         if atom.type == 'bool':
@@ -227,8 +227,8 @@ class Structure_(object):
                         s.setdefault(key, symbol)
                         break
 
-        for atom in case.idp.atoms.values():
-            initialise(atom)
+        for GuiLine in case.GUILines.values():
+            initialise(GuiLine)
         for ass in structure: # add numeric input for Explain
             initialise(ass.subtence)  
 
@@ -248,8 +248,8 @@ class Structure_(object):
                             s[key]["value"] = str(atom.value)
         if atom.type != 'bool': return
         key = atom.code
-        if key in self.case.atoms:
-            for symb in self.case.atoms[key].unknown_symbols().keys():
+        if key in self.case.GUILines:
+            for symb in self.case.GUILines[key].unknown_symbols().keys():
                 s = self.m.setdefault(symb, {})
                 if key in s:
                     s[key]["irrelevant"] = False

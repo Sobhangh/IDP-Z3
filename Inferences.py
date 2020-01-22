@@ -54,12 +54,12 @@ def propagation(case):
 
     # subtences
     for key, l in case.literals.items():
-        if l.truth.is_known() and l.subtence.code in case.atoms:
-            if case.atoms[l.subtence.code].is_visible:
+        if l.truth.is_known() and l.subtence.code in case.GUILines:
+            if case.GUILines[l.subtence.code].is_visible:
                 out.addAtom(l.subtence, l.truth)
     
     # numeric
-    todo = { k:a for (k,a) in case.idp.atoms.items()
+    todo = { k:a for (k,a) in case.GUILines.items()
                 if (hasattr(a, 'decl') and hasattr(a.decl, 'is_var') and a.decl.is_var) }
 
     amf = consequences(case.translate(), todo, {})
@@ -78,7 +78,7 @@ def propagation(case):
     return out.m
 
 def expand(case):
-    solver, reify, _ = mk_solver(case.translate(), case.idp.atoms)
+    solver, reify, _ = mk_solver(case.translate(), case.GUILines)
     solver.check()
     return model_to_json(case, solver, reify)
 
@@ -112,7 +112,7 @@ def optimize(case, symbol, minimize):
     else:
         solver.maximize(s)
 
-    (reify, _) = reifier(case.idp.atoms, solver)
+    (reify, _) = reifier(case.GUILines, solver)
     solver.check()
 
     # deal with strict inequalities, e.g. min(0<x)
@@ -138,13 +138,13 @@ def explain(case, symbol, value):
         .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
         .replace("\\u2228", "∨").replace("\\u2227", "∧")
     value = value[1:] if negated else value
-    if value in case.idp.atoms:
-        to_explain = case.idp.atoms[value].translated #TODO value is an atom string
+    if value in case.GUILines:
+        to_explain = case.GUILines[value].translated #TODO value is an atom string
 
         # rules used in justification
         if not to_explain.sort()==BoolSort(): # calculate numeric value
             # TODO should be given by client
-            s, _, _ = mk_solver(case.translate(), case.idp.atoms)
+            s, _, _ = mk_solver(case.translate(), case.GUILines)
             s.check()
             val = s.model().eval(to_explain)
             to_explain = to_explain == val
@@ -152,7 +152,7 @@ def explain(case, symbol, value):
             to_explain = Not(to_explain)
 
         s = Solver()
-        (reify, unreify) = reifier(case.idp.atoms, s)
+        (reify, unreify) = reifier(case.GUILines, s)
         def r1(a): return reify[a] if a in reify else a
         def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
         ps = {} # {reified: constraint}
@@ -195,15 +195,15 @@ def abstract(case):
 
     # create keys for models using first symbol of atoms
     models, count = {}, 0
-    for atom in case.idp.atoms.values():
-        atomZ3 = atom.translated #TODO
-        for symb in atom.unknown_symbols().keys():
+    for GuiLine in case.GUILines.values():
+        atomZ3 = GuiLine.translated #TODO
+        for symb in GuiLine.unknown_symbols().keys():
             models[symb] = [] # models[symb][row] = [relevant atoms]
             break
     
     done = set(out["universal"] + out["given"] + out["fixed"])
     theory = And(case.idp.translated)
-    solver, reify, unreify = mk_solver(theory, case.idp.atoms)
+    solver, reify, unreify = mk_solver(theory, case.GUILines)
     solver.add(list(case.given.values()))
     while solver.check() == sat and count < 50: # for each parametric model
 
@@ -211,7 +211,7 @@ def abstract(case):
         theory2 = And(theory, And(case.idp.vocabulary.translated)) # is this a way to copy theory ??
 
         atoms = [] # [LiteralQ]
-        for atom_string, atom in case.idp.atoms.items():
+        for atom_string, atom in case.GUILines.items():
             if atom_string in case.literals: # an atom
                 literal = case.literals[atom_string]
                 if literal.truth == Truth.UNKNOWN:

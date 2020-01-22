@@ -48,7 +48,6 @@ class Idp(object):
         if self.view is None:
             self.view = View(viewType='normal')
         
-        self.atoms = {} # {atom_string: Expression} atoms + numeric terms !
         self.translated = None # [Z3Expr]
 
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
@@ -71,8 +70,6 @@ class Idp(object):
         self.view.translate()
 
         self.translated = self.vocabulary.translated + self.theory.translated
-        
-        self.atoms = {**self.vocabulary.terms, **self.theory.subtences}
 
     def unknown_symbols(self):
         todo = self.theory.unknown_symbols()
