@@ -1,6 +1,6 @@
-ForAll(c!274,
-       Implies(Large(c!274),
-               And(And(c!274 >= 1, c!274 <= 4))))
+ForAll(c!253,
+       Implies(Large(c!253),
+               And(And(c!253 >= 1, c!253 <= 4))))
 -- theory
 True
 
@@ -87,7 +87,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!277, Large(c!277) == False)
+ForAll(c!256, Large(c!256) == False)
 
 -- atoms
 Sides
@@ -130,15 +130,16 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  ForAll(c!274,
-       Implies(Large(c!274),
-               And(And(c!274 >= 1, c!274 <= 4))))
+  ForAll(c!253,
+       Implies(Large(c!253),
+               And(And(c!253 >= 1, c!253 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
 Rule:∀[][[]]: Large(3) ⇔(false)
 Rule:∀[][[]]: Large(4) ⇔(false)
 Universals:  
+  ~Subtype = rectangle
   Perimeter = (sum{((1)),((2)),((3)),((4))})
   (sum{(Angle(1)),(Angle(2)),(Angle(3)),(Angle(4))}) = (360)
   ((0 ≤ Angle(1)) ∧ (0 ≤ Angle(2)) ∧ (0 ≤ Angle(3)) ∧ (0 ≤ Angle(4)))
@@ -149,12 +150,15 @@ Consequences:
   Sides = 4
   Vertices = 4
   ~Equilateral
-  Subtype = irregular
-  ~((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60) ∧ (Angle(4) = 60))
+  ~Subtype = right_triangle
+  ~Subtype = regular_triangle
+  ~Subtype = square
   ~((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90) ∧ (Angle(4) = 90))
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
+  Subtype = irregular
+  ((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60) ∧ (Angle(4) = 60))
   ((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90))
 
 
@@ -177,7 +181,7 @@ Irrelevant:
                                                           'normal': False,
                                                           'reading': 'A polygon with N vertices has N angles',
                                                           'typ': 'Bool'},
-           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'cf': True,
+           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'cf': False,
                                                         'ct': False,
                                                         'irrelevant': False,
                                                         'normal': False,

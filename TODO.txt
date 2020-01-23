@@ -46,6 +46,7 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
+    - merge Case.literals into Case.atoms
     - batch substitute in Case.init
     - sort the operands of equality
     - AppliedSymbol is_subtence only if no Fresh_Variable !

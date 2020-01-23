@@ -201,13 +201,10 @@ Consequences:
   ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))
   ~Subtype = square
   ~Subtype = rectangle
-  ~((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
-  ~Length(2) = Length(4)
   Length(1) ≤ (Length(2) + Length(3))
   Length(2) ≤ (Length(3) + Length(1))
   Length(3) ≤ (Length(1) + Length(2))
   Surface = (0.5 * (Base * Height))
-  ~Surface = (-(1))
 Simplified:  
   (Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))))
   (((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
@@ -215,9 +212,12 @@ Simplified:
   ((Subtype = regular_triangle) ⇔ ((((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60)))))
   ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
 Irrelevant:  
+  ((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
   Length(1) = Length(3)
+  Length(2) = Length(4)
   Length(1) = Length(2)
   Surface = (Length(1) * Length(2))
+  Surface = (-(1))
 
 
 -- propagation
@@ -245,7 +245,7 @@ Irrelevant:
                                                         'normal': False,
                                                         'reading': 'All angles are 60°',
                                                         'typ': 'Bool'},
-           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': True,
+           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': False,
                                                         'ct': False,
                                                         'irrelevant': False,
                                                         'normal': False,
@@ -345,7 +345,7 @@ Irrelevant:
                                                     'reading': 'Length(1) ≤ (Length(2) + Length(3))',
                                                     'typ': 'Bool'},
             'Length(2)': {'normal': True, 'reading': 'Length(2)', 'typ': 'Real', 'value': ''},
-            'Length(2) = Length(4)': {'cf': True,
+            'Length(2) = Length(4)': {'cf': False,
                                       'ct': False,
                                       'irrelevant': False,
                                       'normal': False,
@@ -452,7 +452,7 @@ Irrelevant:
                                                  'normal': False,
                                                  'reading': 'Surface = ((Base * Height) / 2)',
                                                  'typ': 'Bool'},
-             'Surface = (-(1))': {'cf': True,
+             'Surface = (-(1))': {'cf': False,
                                   'ct': False,
                                   'irrelevant': False,
                                   'normal': False,

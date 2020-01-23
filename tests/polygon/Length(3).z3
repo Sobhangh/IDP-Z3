@@ -1,6 +1,6 @@
-ForAll(c!163,
-       Implies(Large(c!163),
-               And(And(c!163 >= 1, c!163 <= 4))))
+ForAll(c!146,
+       Implies(Large(c!146),
+               And(And(c!146 >= 1, c!146 <= 4))))
 -- theory
 Sides == 3
 
@@ -49,9 +49,9 @@ Sides = 4
 
 -- case
 Type:        
-  ForAll(c!163,
-       Implies(Large(c!163),
-               And(And(c!163 >= 1, c!163 <= 4))))
+  ForAll(c!146,
+       Implies(Large(c!146),
+               And(And(c!146 >= 1, c!146 <= 4))))
 Definitions: 
   
 Universals:  
@@ -61,7 +61,7 @@ Consequences:
 Simplified:  
   Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
 Irrelevant:  
-  
+  Length(3) = Length(1)
 
 
 -- propagation

@@ -25,6 +25,7 @@ import re
 import sys
 
 from z3 import FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
+from utils import mergeDicts
 
 
 
@@ -52,6 +53,7 @@ def immutable(func):
                 # reset derived values
                 out.str = sys.intern(str(out))
                 out._unknown_symbols = None
+                out._subtences = None
                 out.translated = None
                 if ops: out.operator = ops
                 return out
@@ -83,6 +85,7 @@ class Expression(object):
         self.translated = None            # the Z3 equivalent
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
+        self._subtences = None            # memoization of .subtences()
         # .normal : only set in .instances
 
     def __eq__(self, other):
@@ -97,11 +100,12 @@ class Expression(object):
         return hash(self.code)
 
     def subtences(self):
-        if self.is_subtence:
-            return {self.code: self} #TODO possibly go deeper
-        out = {}
-        for e in self.sub_exprs: out.update(e.subtences())
-        return out
+        if self._subtences is None:
+            if self.is_subtence:
+                self._subtences = {self.code: self} #TODO possibly go deeper
+            else:
+                self._subtences = mergeDicts(e.subtences() for e in self.sub_exprs)
+        return self._subtences
 
     def as_ground(self): return None
 
@@ -126,10 +130,8 @@ class Expression(object):
 
     def unknown_symbols(self):
         if self._unknown_symbols is None:
-            self._unknown_symbols = {}
-            if self.if_symbol is None:
-                for e in self.sub_exprs:
-                    self._unknown_symbols.update(e.unknown_symbols())
+            self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs) \
+                if self.if_symbol is None else {}
         return self._unknown_symbols
 
     def reified(self):

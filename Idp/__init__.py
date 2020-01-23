@@ -26,7 +26,7 @@ from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
     Sum, If, BoolVal, Function, FreshConst, Implies, EnumSort
 
-from utils import applyTo, log, itertools, in_list, nl
+from utils import applyTo, log, itertools, in_list, nl, mergeDicts
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, operation, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
@@ -374,12 +374,8 @@ class Theory(object):
             self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
 
     def unknown_symbols(self):
-        out = {}
-        for c in self.constraints:
-            out.update(c.unknown_symbols())
-        for c in self.definitions:
-            out.update(c.unknown_symbols())
-        return out
+        return mergeDicts(c.unknown_symbols() 
+            for c in self.constraints + self.definitions)
 
     def translate(self, idp):
         self.translated = []
@@ -428,9 +424,7 @@ class Definition(object):
         return self
 
     def subtences(self):
-        out = {}
-        for r in self.rules: out.update(r.subtences())
-        return out
+        return mergeDicts(r.subtences() for r in self.rules)
 
     def expand_quantifiers(self, theory):
         for symbol, rules in self.partition.items():
@@ -547,9 +541,7 @@ class Rule(object):
         return [self]
 
     def unknown_symbols(self):
-        out = {}
-        for arg in self.args: # in case they are expressions
-            out.update(arg.unknown_symbols())
+        out = mergeDicts(arg.unknown_symbols() for arg in self.args) # in case they are expressions
         if self.out is not None:
             out.update(self.out.unknown_symbols())
         out.update(self.body.unknown_symbols())

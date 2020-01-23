@@ -16,6 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
+from collections import ChainMap
 import itertools, time
 
 
@@ -68,3 +69,6 @@ def applyTo(sym, arg):
         return sym
     return sym(arg)
 
+def mergeDicts(l):
+    # merge a list of dicts (possibly a comprehension
+    return dict(ChainMap(*reversed(list(l))))

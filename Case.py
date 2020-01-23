@@ -42,7 +42,7 @@ class Case:
         self.GUILines = {**idp.vocabulary.terms, **idp.theory.subtences} # {atom_string: Expression}
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
-        self.simplified = self.idp.theory.constraints # [Expression]
+        self.simplified =  [] # [Expression]
 
         self.literals = {} # {subtence.code: LiteralQ}, atoms + given, with simplified formula and truth value
 
@@ -57,15 +57,13 @@ class Case:
             self.literals[l.subtence.code] = l.mk_given()
 
         # find immediate universals
-        l1 = []
-        for i, c in enumerate(self.simplified):
+        for i, c in enumerate(self.idp.theory.constraints):
             u = self.expr_to_literal(c)
             if u:
                 for l in u:
                     self.literals[l.subtence.code] = l.mk_universal()
             else:
-                l1.append(c)
-        self.simplified = l1
+                self.simplified.append(c)
         
         # simplify all using given and universals
         to_propagate = list(l for l in self.literals.values() if l.truth.is_known())
@@ -76,44 +74,41 @@ class Case:
         if result == sat:
             # determine consequences on expanded symbols only (for speed)
             for key, l in self.literals.items():
-                if not l.truth.is_known():
-                    if self.GUILines[l.subtence.code].is_visible:
-                        atom = l.subtence
-                        solver.push()
-                        solver.add(atom.reified()==atom.translate())
-                        res1 = solver.check()
-                        if res1 == sat:
-                            val1 = solver.model().eval(atom.reified())
-                            if str(val1) != str(atom.reified()): # if not irrelevant
-                                solver.push()
-                                solver.add(Not(atom.reified()==val1))
-                                res2 = solver.check()
-                                solver.pop()
+                if not l.truth.is_known() \
+                and self.GUILines[l.subtence.code].is_visible \
+                and key in self.get_relevant_subtences():
+                    atom = l.subtence
+                    solver.push()
+                    solver.add(atom.reified()==atom.translate())
+                    res1 = solver.check()
+                    if res1 == sat:
+                        val1 = solver.model().eval(atom.reified())
+                        if str(val1) != str(atom.reified()): # if not irrelevant
+                            solver.push()
+                            solver.add(Not(atom.reified()==val1))
+                            res2 = solver.check()
+                            solver.pop()
 
-                                if res2 == unsat:
-                                    lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
-                                    self.literals[key] = lit.mk_consequence()
-                                    self.propagate([lit])
-                                elif res2 == unknown:
-                                    res1 = unknown
-                        solver.pop()
-                        if res1 == unknown: # restart solver
-                            solver, _, _ = mk_solver(self.translate(), {})
-                            result = solver.check()
-                    else:
-                        print(l.subtence.code, self.GUILines[l.subtence.code].is_visible)
+                            if res2 == unsat:
+                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
+                                self.literals[key] = lit.mk_consequence()
+                                self.propagate([lit])
+                            elif res2 == unknown:
+                                res1 = unknown
+                    solver.pop()
+                    if res1 == unknown: # restart solver
+                        solver, _, _ = mk_solver(self.translate(), {})
+                        result = solver.check()
 
 
-        #TODO determine relevant symbols
-        symbols = {}
-        for e in self.simplified:
-            symbols.update(e.unknown_symbols())
+        # determine relevant symbols
+        relevant_subtences = self.get_relevant_subtences()
 
-        # remove irrelevant domain conditions
-        self.simplified = list(e for e in self.simplified
-                if e.if_symbol is None or e.if_symbol in symbols)
+        for k, l in self.literals.items():
+            if k in relevant_subtences:
+                self.literals[k] = l.mk_relevant()
 
-        # find relevant subtences
+        # find relevant subtences in definitions  #TODO
         def mark_relevant(expr):
             nonlocal self
             if expr.code in self.literals:
@@ -122,8 +117,6 @@ class Case:
                 self.literals[expr.str] = self.literals[expr.str].mk_relevant()
             for e in expr.sub_exprs:
                 mark_relevant(e)
-        for expr in self.simplified:
-            mark_relevant(expr)
         for d in self.definitions:
             for symb in d.partition.values():
                 for r in symb:
@@ -139,6 +132,21 @@ class Case:
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
                 f"Irrelevant:  {indented}{indented.join(str(c.subtence) for c in self.literals.values() if c.is_irrelevant())}{nl}"
         )
+
+    def get_relevant_subtences(self):
+        # determine relevant symbols
+        symbols = mergeDicts( e.unknown_symbols() for e in self.simplified )
+
+        # remove irrelevant domain conditions
+        self.simplified = list(e for e in self.simplified
+                if e.if_symbol is None or e.if_symbol in symbols)
+
+        # determine relevant subtences
+        relevant_subtences = mergeDicts( e.subtences() for e in self.simplified )
+        relevant_subtences.update(mergeDicts( r.body.subtences() #TODO
+            for d in self.definitions for symb in d.partition.values() for r in symb))
+
+        return relevant_subtences
 
     def propagate(self, to_propagate):
         while to_propagate:

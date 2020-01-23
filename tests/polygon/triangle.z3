@@ -1,6 +1,6 @@
-ForAll(c!390,
-       Implies(Large(c!390),
-               And(And(c!390 >= 1, c!390 <= 4))))
+ForAll(c!357,
+       Implies(Large(c!357),
+               And(And(c!357 >= 1, c!357 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -178,9 +178,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!390,
-       Implies(Large(c!390),
-               And(And(c!390 >= 1, c!390 <= 4))))
+  ForAll(c!357,
+       Implies(Large(c!357),
+               And(And(c!357 >= 1, c!357 <= 4))))
 Definitions: 
   
 Universals:  
@@ -205,19 +205,19 @@ Consequences:
   ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))
   ((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60))
   ~((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90))
-  ~((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
-  Length(1) = Length(3)
-  ~Length(2) = Length(4)
-  Length(1) = Length(2)
   Length(1) ≤ (Length(2) + Length(3))
   Length(2) ≤ (Length(3) + Length(1))
   Length(3) ≤ (Length(1) + Length(2))
   Surface = (0.5 * (Base * Height))
-  ~Surface = (-(1))
 Simplified:  
   
 Irrelevant:  
+  ((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
+  Length(1) = Length(3)
+  Length(2) = Length(4)
+  Length(1) = Length(2)
   Surface = (Length(1) * Length(2))
+  Surface = (-(1))
 
 
 -- propagation
@@ -245,7 +245,7 @@ Irrelevant:
                                                         'normal': False,
                                                         'reading': 'All angles are 60°',
                                                         'typ': 'Bool'},
-           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': True,
+           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': False,
                                                         'ct': False,
                                                         'irrelevant': False,
                                                         'normal': False,
@@ -327,13 +327,13 @@ Irrelevant:
                         'typ': 'Bool'}},
  'Length': {'Length(1)': {'normal': True, 'reading': 'Length(1)', 'typ': 'Real', 'value': ''},
             'Length(1) = Length(2)': {'cf': False,
-                                      'ct': True,
+                                      'ct': False,
                                       'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(1) = Length(2)',
                                       'typ': 'Bool'},
             'Length(1) = Length(3)': {'cf': False,
-                                      'ct': True,
+                                      'ct': False,
                                       'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(1) = Length(3)',
@@ -345,7 +345,7 @@ Irrelevant:
                                                     'reading': 'Length(1) ≤ (Length(2) + Length(3))',
                                                     'typ': 'Bool'},
             'Length(2)': {'normal': True, 'reading': 'Length(2)', 'typ': 'Real', 'value': ''},
-            'Length(2) = Length(4)': {'cf': True,
+            'Length(2) = Length(4)': {'cf': False,
                                       'ct': False,
                                       'irrelevant': False,
                                       'normal': False,
@@ -452,7 +452,7 @@ Irrelevant:
                                                  'normal': False,
                                                  'reading': 'Surface = ((Base * Height) / 2)',
                                                  'typ': 'Bool'},
-             'Surface = (-(1))': {'cf': True,
+             'Surface = (-(1))': {'cf': False,
                                   'ct': False,
                                   'irrelevant': False,
                                   'normal': False,
