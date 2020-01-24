@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Added
 
+* add 'status' (UNKNOWN, GIVEN, UNIVERSAL, ...) to the GET response of /eval
+
 ## [0.2.0] - 2020-01-22
 ### Changed
 

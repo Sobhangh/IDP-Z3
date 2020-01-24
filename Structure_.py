@@ -39,8 +39,8 @@ class Truth(IntFlag):
     def Not(self): return (self & 252) | ((~self) & 1 if self.is_known() else Truth.UNKNOWN)
     def is_known(self): return self & Truth.UNKNOWN != Truth.UNKNOWN
     def is_true(self): return self & 3 == Truth.TRUE
-    def to_bool(self): return self & 1 # beware: UNKNOWN = True !
-    def is_irrelevant(self): return self & 252 == Truth.IRRELEVANT & 252
+    def to_bool(self): return bool(self & 1) # beware: UNKNOWN = True !
+    def is_irrelevant(self): return self & 254 == 254
 
 
 class LiteralQ(object):
@@ -59,7 +59,7 @@ class LiteralQ(object):
 
     def __repr__(self):
         return ( f"{'' if self.truth.is_true() else '~'}"
-                 f"{str(self.subtence)}" )
+                 f"{str(self.subtence.code)}" )
 
     def __str__(self):
         if self.is_irrelevant():
@@ -80,6 +80,13 @@ class LiteralQ(object):
     def is_universal  (self): return not self.is_irrelevant() and self.truth & Truth.UNIVERSAL
     def is_consequence(self): return not self.is_irrelevant() and self.truth & Truth.CONSEQUENCE
     def is_irrelevant (self): return self.truth.is_irrelevant()
+
+    def status(self):
+        return ("GIVEN"      if self.is_given()       else
+               "UNIVERSAL"   if self.is_universal()   else
+               "CONSEQUENCE" if self.is_consequence() else
+               #TODOIRRELEVANT "IRRELEVANT"  if self.is_irrelevant()  else
+               "UNKNOWN")
 
     def as_substitution(self, case):
         if self.truth.is_known():
@@ -210,10 +217,12 @@ class Structure_(object):
                     if typ == 'Bool':
                         symbol = {"typ": typ, "ct": False, "cf": False}
                         if atom.code in case.literals:
+                            symbol["status"] = case.literals[atom.code].status()
                             symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
                         else:
+                            symbol["status"] = "UNKNOWN" #TODOIRRELEVANT "IRRELEVANT"
                             symbol["irrelevant"] = True # unused symbol instance (Large(1))
-                        symbol["irrelevant"] = False #TODO disabling until fully working
+                        symbol["irrelevant"] = False #TODOIRRELEVANT
                     elif 0 < len(symb.range):
                         symbol = { "typ": typ, "value": ""
                                 , "values": [str(v) for v in symb.range]}
@@ -252,8 +261,8 @@ class Structure_(object):
             for symb in self.case.GUILines[key].unknown_symbols().keys():
                 s = self.m.setdefault(symb, {})
                 if key in s:
-                    s[key]["irrelevant"] = False
                     if truth.is_known():
+                        s[key]["value"] = truth.to_bool()
                         s[key]["ct" if truth.is_true() else "cf"] = True
                     else:
                         s[key]["unknown"] = True

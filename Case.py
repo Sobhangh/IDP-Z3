@@ -173,9 +173,9 @@ class Case:
                         simple_u = u.subtence.substitute(old, new)
                         if simple_u != u.subtence:
                             if simple_u == TRUE:
-                                u.truth = Truth.TRUE
+                                u.truth = Truth.TRUE | Truth.CONSEQUENCE
                             if simple_u == FALSE:
-                                u.truth = Truth.FALSE
+                                u.truth = Truth.FALSE | Truth.CONSEQUENCE
                             self.literals[u.subtence.code] = LiteralQ(u.truth, simple_u)
                             # find immediate consequences
                             if u.truth.is_known(): # you can't propagate otherwise

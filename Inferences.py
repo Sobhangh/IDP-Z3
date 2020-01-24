@@ -64,6 +64,8 @@ def propagation(case):
 
     amf = consequences(case.translate(), todo, {})
     for literalQ in amf:
+        if literalQ.subtence.code in case.literals:
+            case.literals[literalQ.subtence.code] = literalQ.mk_consequence()
         out.addAtom(literalQ.subtence, literalQ.truth)
 
     # useful for non linear structure

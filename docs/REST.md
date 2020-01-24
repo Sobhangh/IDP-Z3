@@ -40,13 +40,14 @@ GET request :
     - expanded : [string]
     - value : string // for explain: string of atom, preceded by '~' if negated
 
-GET response for "propagate" :
+GET response :
 
     - <symbol> : { 
         - <atom> : {            // <symbol> and <atom> are string
             - typ : "Bool" | "Int" | "Real" | <custom type>
             - value : string    // representation of the value
             - values : []       // optional
+            - status : string   // UNKNOWN, GIVEN, UNIVERSAL, CONSEQUENCE, IRRELEVANT
             - ct : Bool         // for Bool
             - cf : Bool         // for Bool
             - reading : string  // optional
