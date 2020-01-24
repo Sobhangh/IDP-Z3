@@ -143,6 +143,9 @@ class Expression(object):
                 self._reified = self.translate()
         return self._reified
 
+    def is_environmental(self):
+        return any(e.is_environmental() for e in self.sub_exprs)
+
 
 class Constructor(Expression):
     def __init__(self, **kwargs):
@@ -794,6 +797,9 @@ class Variable(Expression):
 
     def reified(self):
         return self.translate()
+
+    def is_environmental(self):
+        return self.decl.environmental
 
     def translate(self):
         if self.translated is None:

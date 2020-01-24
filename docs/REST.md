@@ -45,6 +45,7 @@ GET response :
     - <symbol> : { 
         - <atom> : {            // <symbol> and <atom> are string
             - typ : "Bool" | "Int" | "Real" | <custom type>
+            - environmental : Bool // True if not a decision variable
             - value : string    // representation of the value
             - values : []       // optional
             - status : string   // UNKNOWN, GIVEN, UNIVERSAL, CONSEQUENCE, IRRELEVANT

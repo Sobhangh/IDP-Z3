@@ -85,7 +85,7 @@ class LiteralQ(object):
         return ("GIVEN"      if self.is_given()       else
                "UNIVERSAL"   if self.is_universal()   else
                "CONSEQUENCE" if self.is_consequence() else
-               #TODOIRRELEVANT "IRRELEVANT"  if self.is_irrelevant()  else
+               "IRRELEVANT"  if self.is_irrelevant()  else #TODOIRRELEVANT 
                "UNKNOWN")
 
     def as_substitution(self, case):
@@ -131,6 +131,9 @@ class Equality(object):
 
     def unknown_symbols(self):
         return self.subtence.unknown_symbols()
+
+    def is_environmental(self):
+        return self.subtence.is_environmental()
 
     def translate(self): return self.translated
 
@@ -220,9 +223,9 @@ class Structure_(object):
                             symbol["status"] = case.literals[atom.code].status()
                             symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
                         else:
-                            symbol["status"] = "UNKNOWN" #TODOIRRELEVANT "IRRELEVANT"
+                            symbol["status"] = "IRRELEVANT" #TODOIRRELEVANT "UNKNOWN"
                             symbol["irrelevant"] = True # unused symbol instance (Large(1))
-                        symbol["irrelevant"] = False #TODOIRRELEVANT
+                        #symbol["irrelevant"] = False #TODOIRRELEVANT
                     elif 0 < len(symb.range):
                         symbol = { "typ": typ, "value": ""
                                 , "values": [str(v) for v in symb.range]}
@@ -233,6 +236,7 @@ class Structure_(object):
                     if symbol: 
                         symbol['reading'] = atom.reading
                         symbol['normal'] = hasattr(atom, 'normal')
+                        symbol['environmental'] = atom.is_environmental()
                         s.setdefault(key, symbol)
                         break
 

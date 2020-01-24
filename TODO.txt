@@ -1,5 +1,6 @@
 To do:
     Relevance
+        - consequence is AND ==> propagate each conjunct
         - propagate numeric values better ?
         - non-linear equations ?
         - consequences must be in case.simplified ?

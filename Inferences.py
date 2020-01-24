@@ -64,7 +64,7 @@ def propagation(case):
 
     amf = consequences(case.translate(), todo, {})
     for literalQ in amf:
-        if literalQ.subtence.code in case.literals:
+        if literalQ.subtence.code in case.literals and not case.literals[literalQ.subtence.code].is_given():
             case.literals[literalQ.subtence.code] = literalQ.mk_consequence()
         out.addAtom(literalQ.subtence, literalQ.truth)
 

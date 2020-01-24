@@ -1,5 +1,6 @@
 Idp:
     vocabulary=Vocabulary
+    decision=Decision?
     theory=Theory
     interpretations=Interpretations?
     goal=Goal?
@@ -21,6 +22,8 @@ Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
     SymbolDeclaration: name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
       Sort: name=ID;
       Symbol: name=ID;
+
+Decision: 'decision' '{' (declarations=Declaration)* '}';
 
 Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
 

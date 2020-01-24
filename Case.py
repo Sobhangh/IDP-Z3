@@ -155,34 +155,38 @@ class Case:
 
             if new is not None:
                 l1 = []
-                for c in self.simplified:
-                    c1 = c.substitute(old, new)
+                for constraint in self.simplified:
+                    new_constraint = constraint.substitute(old, new)
                     # find immediate consequences
-                    u = self.expr_to_literal(c1)
-                    if u:
-                        for l in u:
-                            self.literals[l.subtence.code] = l.mk_consequence()
-                            to_propagate.append(l)
-                    elif not c1 == TRUE:
-                        l1.append(c1)
+                    consequences = self.expr_to_literal(new_constraint)
+                    if consequences:
+                        for consequence in consequences:
+                            literal = self.literals[consequence.subtence.code]
+                            if not literal.truth.is_known():
+                                literal.truth = consequence.truth
+                                self.literals[consequence.subtence.code] = literal.mk_consequence()
+                                to_propagate.append(literal)
+                    elif not new_constraint == TRUE:
+                        l1.append(new_constraint)
                 self.simplified = l1
 
                 # now for literals
-                for u in self.literals.values():
-                    if u != lit:
-                        simple_u = u.subtence.substitute(old, new)
-                        if simple_u != u.subtence:
-                            if simple_u == TRUE:
-                                u.truth = Truth.TRUE | Truth.CONSEQUENCE
-                            if simple_u == FALSE:
-                                u.truth = Truth.FALSE | Truth.CONSEQUENCE
-                            self.literals[u.subtence.code] = LiteralQ(u.truth, simple_u)
-                            # find immediate consequences
-                            if u.truth.is_known(): # you can't propagate otherwise
-                                for l in self.expr_to_literal(simple_u):
-                                    if l != u:
-                                        l = l if u.truth.is_true() else l.Not()
-                                        to_propagate.append(l)
+                for literal in self.literals.values():
+                    if literal != lit:
+                        new_constraint = literal.subtence.substitute(old, new)
+                        if new_constraint != literal.subtence: # changed !
+                            literal.subtence = new_constraint
+                            if not literal.truth.is_known():
+                                # find immediate consequences
+                                if new_constraint == TRUE: #TODO move to expr_to_literal ?
+                                    literal.truth = Truth.TRUE | Truth.CONSEQUENCE
+                                if new_constraint == FALSE:
+                                    literal.truth = Truth.FALSE | Truth.CONSEQUENCE
+                                if literal.truth.is_known(): # you can't propagate otherwise
+                                    for consequence in self.expr_to_literal(new_constraint):
+                                        if consequence != literal:
+                                            consequence = consequence if literal.truth.is_true() else consequence.Not()
+                                            to_propagate.append(consequence)
 
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):

@@ -38,6 +38,7 @@ class Idp(object):
     def __init__(self, **kwargs):
         log("parsing done")
         self.vocabulary = kwargs.pop('vocabulary')
+        self.decision = kwargs.pop('decision')
         self.theory = kwargs.pop('theory')
         self.interpretations = kwargs.pop('interpretations')
 
@@ -49,6 +50,11 @@ class Idp(object):
             self.view = View(viewType='normal')
         
         self.translated = None # [Z3Expr]
+
+        if self.decision is not None:
+            for decl in self.vocabulary.symbol_decls.values():
+                decl.environmental = True
+            self.vocabulary.update(self.decision)
 
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
@@ -105,6 +111,11 @@ class Vocabulary(object):
                  f"{nl}}}{nl}"
                )
 
+    def update(self, other):
+        self.declarations.extend(other.declarations)
+        self.terms       .update(other.terms)
+        self.symbol_decls.update(other.symbol_decls)
+
     def translate(self, idp):
         for i in self.declarations:
             if type(i) in [ConstructedTypeDeclaration, RangeDeclaration]:
@@ -117,6 +128,8 @@ class Vocabulary(object):
             if v.is_var:
                 self.terms.update(v.instances)
 
+class Decision(Vocabulary):
+    pass
 
 class ConstructedTypeDeclaration(object):
     def __init__(self, **kwargs):
@@ -226,6 +239,7 @@ class SymbolDeclaration(object):
         self.instances = None # {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
         self.range = None # all possible values
         self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
+        self.environmental = False # true if in declared (environmental) vocabulary and there is a decision vocabulary
 
     def __str__(self):
         args = ','.join(map(str, self.sorts)) if 0<len(self.sorts) else ''
@@ -662,7 +676,7 @@ dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True, classes=
         [ Idp, 
-          Vocabulary, ConstructedTypeDeclaration, Constructor, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
+          Vocabulary, Decision, ConstructedTypeDeclaration, Constructor, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
           Theory, Definition, Rule, IfExpr, AQuantification, 
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,
