@@ -1,10 +1,10 @@
 {
-  "dirty": true,
-  "raw": "v0.1-91-ga4d319b-dirty",
-  "hash": "ga4d319b",
-  "distance": 91,
+  "dirty": false,
+  "raw": "v0.1-93-gc87dc70",
+  "hash": "gc87dc70",
+  "distance": 93,
   "tag": "v0.1",
   "semver": null,
-  "suffix": "91-ga4d319b-dirty",
+  "suffix": "93-gc87dc70",
   "semverString": ""
 }

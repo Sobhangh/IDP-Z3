@@ -143,9 +143,14 @@ class Expression(object):
                 self._reified = self.translate()
         return self._reified
 
-    def is_environmental(self):
-        return any(e.is_environmental() for e in self.sub_exprs)
+    def has_environmental(self, truth):
+        # returns true if it contains a variable whose environmental property is 'truth
+        return any(e.has_environmental(truth) for e in self.sub_exprs)
 
+    def has_decision(self, with_decision):
+        if with_decision == True: return True
+        # with_decision is None
+        return not self.has_environmental(False) # true if expression does not contain a decision
 
 class Constructor(Expression):
     def __init__(self, **kwargs):
@@ -798,8 +803,8 @@ class Variable(Expression):
     def reified(self):
         return self.translate()
 
-    def is_environmental(self):
-        return self.decl.environmental
+    def has_environmental(self, truth):
+        return self.decl.environmental == truth
 
     def translate(self):
         if self.translated is None:

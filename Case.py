@@ -64,42 +64,15 @@ class Case:
                     self.literals[l.subtence.code] = l.mk_universal()
             else:
                 self.simplified.append(c)
-        
-        # simplify all using given and universals
-        to_propagate = list(l for l in self.literals.values() if l.truth.is_known())
-        self.propagate(to_propagate)
 
-        solver, _, _ = mk_solver(self.translate(), {})
-        result = solver.check()
-        if result == sat:
-            # determine consequences on expanded symbols only (for speed)
-            for key, l in self.literals.items():
-                if not l.truth.is_known() \
-                and self.GUILines[l.subtence.code].is_visible \
-                and key in self.get_relevant_subtences():
-                    atom = l.subtence
-                    solver.push()
-                    solver.add(atom.reified()==atom.translate())
-                    res1 = solver.check()
-                    if res1 == sat:
-                        val1 = solver.model().eval(atom.reified())
-                        if str(val1) != str(atom.reified()): # if not irrelevant
-                            solver.push()
-                            solver.add(Not(atom.reified()==val1))
-                            res2 = solver.check()
-                            solver.pop()
-
-                            if res2 == unsat:
-                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
-                                self.literals[key] = lit.mk_consequence()
-                                self.propagate([lit])
-                            elif res2 == unknown:
-                                res1 = unknown
-                    solver.pop()
-                    if res1 == unknown: # restart solver
-                        solver, _, _ = mk_solver(self.translate(), {})
-                        result = solver.check()
-
+        # first, consider only environmental facts and theory (exclude any statement containing decisions)
+        self.full_propagate(decision=None)
+        # convert CONSEQUENCEs into ENV_CONSQs
+        for key, literal in self.literals.items():
+            if literal.is_consequence():
+                self.literals[key] = literal.mk_env_consq()
+        # now consider all facts and theories
+        self.full_propagate(decision=True)
 
         # determine relevant symbols
         relevant_subtences = self.get_relevant_subtences()
@@ -148,7 +121,48 @@ class Case:
 
         return relevant_subtences
 
-    def propagate(self, to_propagate):
+    def full_propagate(self, decision):
+
+        # simplify all using given and universals
+        to_propagate = list(l for l in self.literals.values() 
+            if l.truth.is_known() and l.has_decision(decision))
+        self.propagate(to_propagate, decision)
+
+        solver, _, _ = mk_solver(self.translate(decision), {})
+        result = solver.check()
+        if result == sat:
+            # determine consequences on expanded symbols only (for speed)
+            for key, l in self.literals.items():
+                if not l.truth.is_known() \
+                and l.has_decision(decision) \
+                and self.GUILines[l.subtence.code].is_visible \
+                and key in self.get_relevant_subtences():
+                    atom = l.subtence
+                    solver.push()
+                    solver.add(atom.reified()==atom.translate())
+                    res1 = solver.check()
+                    if res1 == sat:
+                        val1 = solver.model().eval(atom.reified())
+                        if str(val1) != str(atom.reified()): # if not irrelevant
+                            solver.push()
+                            solver.add(Not(atom.reified()==val1))
+                            res2 = solver.check()
+                            solver.pop()
+
+                            if res2 == unsat:
+                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
+                                self.literals[key] = lit.mk_consequence()
+                                self.propagate([lit], decision)
+                            elif res2 == unknown:
+                                res1 = unknown
+                    solver.pop()
+                    if res1 == unknown: # restart solver
+                        solver, _, _ = mk_solver(self.translate(decision), {})
+                        result = solver.check()
+        elif result == unsat:
+            raise Exception("Not satisfiable !")
+
+    def propagate(self, to_propagate, decision):
         while to_propagate:
             lit = to_propagate.pop(0)
             old, new = lit.as_substitution(self)
@@ -165,14 +179,16 @@ class Case:
                             if not literal.truth.is_known():
                                 literal.truth = consequence.truth
                                 self.literals[consequence.subtence.code] = literal.mk_consequence()
-                                to_propagate.append(literal)
+                                if constraint.has_decision(decision):
+                                    to_propagate.append(literal)
                     elif not new_constraint == TRUE:
                         l1.append(new_constraint)
+
                 self.simplified = l1
 
                 # simplify literals
                 for literal in self.literals.values():
-                    if literal != lit:
+                    if literal != lit and literal.has_decision(decision):
                         new_constraint = literal.subtence.substitute(old, new)
                         if new_constraint != literal.subtence: # changed !
                             literal.subtence = new_constraint
@@ -191,12 +207,11 @@ class Case:
             return self.expr_to_literal(expr.sub_exprs[0], truth.Not() )
         return []
 
-    def translate(self):
+    def translate(self, decision=True):
         self.translated = And(
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
-            + [l.translate() for l in self.literals.values() if l.truth.is_known()]
-            + [c.translate() for c in self.simplified]
+            + [l.translate() for l in self.literals.values() if l.truth.is_known() and l.has_decision(decision)]
             )
         return self.translated
 

@@ -33,7 +33,8 @@ class Truth(IntFlag):
     UNKNOWN     = 3
     GIVEN       = 4
     UNIVERSAL   = 8
-    CONSEQUENCE = 16
+    ENV_CONSQ   = 16
+    CONSEQUENCE = 32
     IRRELEVANT  = 255
 
     def Not(self): return (self & 252) | ((~self) & 1 if self.is_known() else Truth.UNKNOWN)
@@ -72,18 +73,23 @@ class LiteralQ(object):
     def Not           (self): return LiteralQ(self.truth.Not()              , self.subtence)
     def mk_given      (self): return LiteralQ(self.truth | Truth.GIVEN      , self.subtence)
     def mk_universal  (self): return LiteralQ(self.truth | Truth.UNIVERSAL  , self.subtence)
-    def mk_consequence(self): return LiteralQ(self.truth | Truth.CONSEQUENCE, self.subtence)
+    def mk_env_consq  (self): return LiteralQ(self.truth | Truth.ENV_CONSQ  , self.subtence)
+    def mk_consequence(self): 
+        if self.is_env_consq(): return self
+        return LiteralQ(self.truth | Truth.CONSEQUENCE, self.subtence)
     def mk_relevant   (self): return LiteralQ(Truth.UNKNOWN, self.subtence) if self.is_irrelevant() \
                                      else self
 
     def is_given      (self): return not self.is_irrelevant() and self.truth & Truth.GIVEN
     def is_universal  (self): return not self.is_irrelevant() and self.truth & Truth.UNIVERSAL
+    def is_env_consq  (self): return not self.is_irrelevant() and self.truth & Truth.ENV_CONSQ
     def is_consequence(self): return not self.is_irrelevant() and self.truth & Truth.CONSEQUENCE
     def is_irrelevant (self): return self.truth.is_irrelevant()
 
     def status(self):
         return ("GIVEN"      if self.is_given()       else
                "UNIVERSAL"   if self.is_universal()   else
+               "ENV_CONSQ"   if self.is_env_consq()   else
                "CONSEQUENCE" if self.is_consequence() else
                "IRRELEVANT"  if self.is_irrelevant()  else #TODOIRRELEVANT 
                "UNKNOWN")
@@ -112,6 +118,9 @@ class LiteralQ(object):
 
     def to_json(self): return str(self)
 
+    def has_decision(self, with_decision):
+        return self.subtence.has_decision(with_decision)
+
     def translate(self):
         if self.truth == Truth.IRRELEVANT:
             return BoolVal(True)
@@ -132,8 +141,11 @@ class Equality(object):
     def unknown_symbols(self):
         return self.subtence.unknown_symbols()
 
-    def is_environmental(self):
-        return self.subtence.is_environmental()
+    def has_environmental(self, truth):
+        return self.subtence.has_environmental(truth)
+
+    def has_decision(self, with_decision):
+        return self.subtence.has_decision(with_decision)
 
     def translate(self): return self.translated
 
@@ -236,7 +248,7 @@ class Structure_(object):
                     if symbol: 
                         symbol['reading'] = atom.reading
                         symbol['normal'] = hasattr(atom, 'normal')
-                        symbol['environmental'] = atom.is_environmental()
+                        symbol['environmental'] = atom.has_environmental(True)
                         s.setdefault(key, symbol)
                         break
 
