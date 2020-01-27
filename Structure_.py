@@ -77,7 +77,8 @@ class LiteralQ(object):
     def mk_consequence(self): 
         if self.is_env_consq(): return self
         return LiteralQ(self.truth | Truth.CONSEQUENCE, self.subtence)
-    def mk_relevant   (self): return LiteralQ(Truth.UNKNOWN, self.subtence) if self.is_irrelevant() \
+    def mk_relevant   (self): 
+        return LiteralQ(Truth.UNKNOWN, self.subtence) if self.is_irrelevant() \
                                      else self
 
     def is_given      (self): return not self.is_irrelevant() and self.truth & Truth.GIVEN
@@ -91,7 +92,7 @@ class LiteralQ(object):
                "UNIVERSAL"   if self.is_universal()   else
                "ENV_CONSQ"   if self.is_env_consq()   else
                "CONSEQUENCE" if self.is_consequence() else
-               "IRRELEVANT"  if self.is_irrelevant()  else #TODOIRRELEVANT 
+               "IRRELEVANT"  if self.is_irrelevant()  else 
                "UNKNOWN")
 
     def as_substitution(self, case):
@@ -235,9 +236,8 @@ class Structure_(object):
                             symbol["status"] = case.literals[atom.code].status()
                             symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
                         else:
-                            symbol["status"] = "IRRELEVANT" #TODOIRRELEVANT "UNKNOWN"
-                            symbol["irrelevant"] = True # unused symbol instance (Large(1))
-                        #symbol["irrelevant"] = False #TODOIRRELEVANT
+                            symbol["status"] = "UNKNOWN" #TODO 
+                            symbol["irrelevant"] = False # unused symbol instance (Large(1))
                     elif 0 < len(symb.range):
                         symbol = { "typ": typ, "value": ""
                                 , "values": [str(v) for v in symb.range]}

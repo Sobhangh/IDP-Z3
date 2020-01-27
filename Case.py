@@ -65,12 +65,13 @@ class Case:
             else:
                 self.simplified.append(c)
 
-        # first, consider only environmental facts and theory (exclude any statement containing decisions)
-        self.full_propagate(decision=None)
-        # convert CONSEQUENCEs into ENV_CONSQs
-        for key, literal in self.literals.items():
-            if literal.is_consequence():
-                self.literals[key] = literal.mk_env_consq()
+        if idp.decision:
+            # first, consider only environmental facts and theory (exclude any statement containing decisions)
+            self.full_propagate(decision=None)
+            # convert CONSEQUENCEs into ENV_CONSQs
+            for key, literal in self.literals.items():
+                if literal.is_consequence():
+                    self.literals[key] = literal.mk_env_consq()
         # now consider all facts and theories
         self.full_propagate(decision=True)
 
@@ -78,22 +79,8 @@ class Case:
         relevant_subtences = self.get_relevant_subtences()
 
         for k, l in self.literals.items():
-            if k in relevant_subtences:
+            if (k in relevant_subtences) or self.definitions: #TODO support for definitions
                 self.literals[k] = l.mk_relevant()
-
-        # find relevant subtences in definitions  #TODO
-        def mark_relevant(expr):
-            nonlocal self
-            if expr.code in self.literals:
-                self.literals[expr.code] = self.literals[expr.code].mk_relevant()
-            if expr.str in self.literals:
-                self.literals[expr.str] = self.literals[expr.str].mk_relevant()
-            for e in expr.sub_exprs:
-                mark_relevant(e)
-        for d in self.definitions:
-            for symb in d.partition.values():
-                for r in symb:
-                    mark_relevant(r.body)
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -212,6 +199,7 @@ class Case:
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
             + [l.translate() for l in self.literals.values() if l.truth.is_known() and l.has_decision(decision)]
+            + [c.translate() for c in self.simplified]
             )
         return self.translated
 
