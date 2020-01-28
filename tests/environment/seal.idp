@@ -1,7 +1,7 @@
-vocabulary {
+vocabulary environment {
     Depth : real
 }
-decision {
+vocabulary decision {
     type csid constructed from {b, c, d, e, f}
     cSID : csid
 }

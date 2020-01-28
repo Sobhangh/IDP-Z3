@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Added
 
+* support for named vocabulary ('environment', 'decision')
+* add 'ENV_CONSQ' status, and upgrade GUI accordingly
 * add 'status' (UNKNOWN, GIVEN, UNIVERSAL, ...) to the GET response of /eval
 * add 'environmental' to the GET response of /eval
 

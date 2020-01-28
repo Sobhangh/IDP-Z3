@@ -11,7 +11,7 @@ Comment:
   /\/\/.*$/
 ;
 
-Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
+Vocabulary: 'vocabulary' 'environment'? '{' (declarations=Declaration)* '}';
   Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
     ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
@@ -23,7 +23,7 @@ Vocabulary: 'vocabulary' '{' (declarations=Declaration)* '}';
       Sort: name=ID;
       Symbol: name=ID;
 
-Decision: 'decision' '{' (declarations=Declaration)* '}';
+Decision: 'vocabulary' 'decision' '{' (declarations=Declaration)* '}';
 
 Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
 

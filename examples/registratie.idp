@@ -1,9 +1,5 @@
-vocabulary {
+vocabulary environment {
 type location constructed from {Flemish_Region, Walloon_Region, Brussels_Region}
-
-type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
-
-type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
 
 type real_Estate_Type constructed from {Residential, Residential_Building_Land, Other_Real_Estate}
 
@@ -76,15 +72,21 @@ Additional_Terms
 Start_Dt_Dwelling_For_Social_Rent : date
 
 Certification_Date : date
-Tax : tax_Rate
 
 Term_Energy_Renovation : date
 Certification_Date_Sale : date
 //DomicileDate : date
 
-Registration_Type : registration_Type
 //IsDiscount: DiscountType
 Professional_Buyer
+}
+
+vocabulary decision {
+type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
+type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
+
+Tax : tax_Rate
+Registration_Type : registration_Type
 }
 
 theory {
