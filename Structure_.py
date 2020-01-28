@@ -271,6 +271,7 @@ class Structure_(object):
                             s[key]["value"] = str(eval(str(atom.value).replace('?', ''))) # compute fraction
                         elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
                             s[key]["value"] = str(atom.value)
+                        s[key]["status"] = LiteralQ(truth, atom).status() #TODO simplify
         if atom.type != 'bool': return
         key = atom.code
         if key in self.case.GUILines:

@@ -1,7 +1,7 @@
 To do:
     Relevance
+        - no need to confirm numeric consequences from environment only
         - consequence is AND ==> propagate each conjunct
-        - propagate numeric values better ?
         - non-linear equations ?
         - consequences must be in case.simplified ?
     Support for constructor functions (p.6 of the IDP3 manual)
