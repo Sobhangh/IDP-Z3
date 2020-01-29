@@ -100,7 +100,7 @@ class LiteralQ(object):
             old = self.subtence
             new = TRUE if self.truth.is_true() else FALSE
             if self.truth.is_true():  # analyze equalities
-                if isinstance(old, Equality):
+                if isinstance(old, Equality) and type(self) != Term:
                     if is_number(old.value):
                         new = NumberConstant(number=str(old.value))
                         old = old.subtence
@@ -125,16 +125,27 @@ class LiteralQ(object):
     def translate(self):
         if self.truth == Truth.IRRELEVANT:
             return BoolVal(True)
-        return self.subtence.translate() if self.truth & 1 else Not(self.subtence.translate())
+        if self.subtence.type == 'bool':
+            return self.subtence.translate() if self.truth & 1 else Not(self.subtence.translate())
+        return self.subtence.translate()
+
+class Term(LiteralQ):
+    """ represents an applied symbol of unknown values """
+    pass
 
 class Equality(object):
     def __init__(self, subtence, value):
         self.subtence = subtence # an Expression
-        self.value = value # a Z3 value
-        self.code = sys.intern(f"{subtence.code} = {str(value)}")
+        self.value = value # a Z3 value or None
+        if value is not None:
+            self.type = 'bool'
+            self.code = sys.intern(f"{subtence.code} = {str(value)}")
+            self.translated = (subtence.translated == value)
+        else:
+            self.type = 'int'
+            self.code = sys.intern(subtence.code)
+            self.translated = subtence.translated
         self.str = self.code
-        self.type = 'bool'
-        self.translated = (subtence.translated == value)
         self.reading = self.code #TODO find original code (parenthesis !)
 
     def __str__(self): return self.code
@@ -148,13 +159,22 @@ class Equality(object):
     def has_decision(self, with_decision):
         return self.subtence.has_decision(with_decision)
 
-    def translate(self): return self.translated
+    def translate(self): 
+        if self.value is not None:
+            return self.subtence.translated == self.value
+        else:
+            return self.subtence.translate()
 
     def substitute(self, e0, e1):
-        out = self.subtence.substitute(e0, e1)
-        if id(out) == id(self.subtence):
-            return self
-        return Equality(out, self.value)
+        if self.subtence == e0:
+            return Equality(self.subtence, e1.translate())
+        return self
+
+    def subtences(self):
+        return {} #TODO ?
+
+    def reified(self):
+        return self.subtence.reified()
 
     
 #################

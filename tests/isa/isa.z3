@@ -58,7 +58,18 @@ Universals:
   ∀st[subtype] : isa(st,typeOf(st))
   Type = typeOf(Subtype)
 Consequences:
-  
+  asi(triangle,regular_triangle)
+  asi(triangle,right_triangle)
+  ~asi(triangle,rectangle)
+  ~asi(triangle,square)
+  ~asi(quadrilateral,regular_triangle)
+  ~asi(quadrilateral,right_triangle)
+  asi(quadrilateral,rectangle)
+  asi(quadrilateral,square)
+  typeOf(regular_triangle) = triangle
+  typeOf(right_triangle) = triangle
+  typeOf(rectangle) = quadrilateral
+  typeOf(square) = quadrilateral
 Simplified:  
   
 Irrelevant:  
@@ -93,7 +104,7 @@ Irrelevant:
                                           'irrelevant': False,
                                           'normal': True,
                                           'reading': 'asi(quadrilateral,rectangle)',
-                                          'status': 'UNKNOWN',
+                                          'status': 'CONSEQUENCE',
                                           'typ': 'Bool',
                                           'value': True},
          'asi(quadrilateral,regular_triangle)': {'cf': True,
@@ -102,7 +113,7 @@ Irrelevant:
                                                  'irrelevant': False,
                                                  'normal': True,
                                                  'reading': 'asi(quadrilateral,regular_triangle)',
-                                                 'status': 'UNKNOWN',
+                                                 'status': 'CONSEQUENCE',
                                                  'typ': 'Bool',
                                                  'value': False},
          'asi(quadrilateral,right_triangle)': {'cf': True,
@@ -111,7 +122,7 @@ Irrelevant:
                                                'irrelevant': False,
                                                'normal': True,
                                                'reading': 'asi(quadrilateral,right_triangle)',
-                                               'status': 'UNKNOWN',
+                                               'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': False},
          'asi(quadrilateral,square)': {'cf': False,
@@ -120,7 +131,7 @@ Irrelevant:
                                        'irrelevant': False,
                                        'normal': True,
                                        'reading': 'asi(quadrilateral,square)',
-                                       'status': 'UNKNOWN',
+                                       'status': 'CONSEQUENCE',
                                        'typ': 'Bool',
                                        'value': True},
          'asi(triangle,rectangle)': {'cf': True,
@@ -129,7 +140,7 @@ Irrelevant:
                                      'irrelevant': False,
                                      'normal': True,
                                      'reading': 'asi(triangle,rectangle)',
-                                     'status': 'UNKNOWN',
+                                     'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': False},
          'asi(triangle,regular_triangle)': {'cf': False,
@@ -138,7 +149,7 @@ Irrelevant:
                                             'irrelevant': False,
                                             'normal': True,
                                             'reading': 'asi(triangle,regular_triangle)',
-                                            'status': 'UNKNOWN',
+                                            'status': 'CONSEQUENCE',
                                             'typ': 'Bool',
                                             'value': True},
          'asi(triangle,right_triangle)': {'cf': False,
@@ -147,7 +158,7 @@ Irrelevant:
                                           'irrelevant': False,
                                           'normal': True,
                                           'reading': 'asi(triangle,right_triangle)',
-                                          'status': 'UNKNOWN',
+                                          'status': 'CONSEQUENCE',
                                           'typ': 'Bool',
                                           'value': True},
          'asi(triangle,square)': {'cf': True,
@@ -156,7 +167,7 @@ Irrelevant:
                                   'irrelevant': False,
                                   'normal': True,
                                   'reading': 'asi(triangle,square)',
-                                  'status': 'UNKNOWN',
+                                  'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
          '∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)': {'cf': False,

@@ -19,9 +19,9 @@
 from copy import copy
 from z3 import And, Not, sat, unsat, unknown, is_true
 
-from Idp.Expression import Brackets, AUnary, TRUE, FALSE
+from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable
 from Solver import mk_solver
-from Structure_ import json_to_literals, Equality, LiteralQ, Truth
+from Structure_ import json_to_literals, Equality, LiteralQ, Term, Truth
 from utils import *
 
 class Case:
@@ -49,12 +49,12 @@ class Case:
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
         for GuiLine in self.GUILines.values():
-            GuiLine.is_visible = any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
+            GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
+                or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .literals
-        self.literals = {s.code: LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
-        for l in self.given:
-            self.literals[l.subtence.code] = l.mk_given()
+        self.literals = {s.code : LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
+        self.literals.update({ l.subtence.code : l.mk_given() for l in self.given })
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
@@ -64,6 +64,10 @@ class Case:
                     self.literals[l.subtence.code] = l.mk_universal()
             else:
                 self.simplified.append(c)
+
+        self.literals.update({ k : Term(Truth.IRRELEVANT, Equality(t, None)) 
+            for k, t in idp.vocabulary.terms.items()
+            if k not in self.literals })
 
         if idp.decision:
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
@@ -76,7 +80,7 @@ class Case:
         self.full_propagate(decision=True)
 
         # determine relevant symbols
-        relevant_subtences = self.get_relevant_subtences()
+        relevant_subtences = self.get_relevant_subtences(decision=True)
 
         for k, l in self.literals.items():
             if (k in relevant_subtences) or self.definitions: #TODO support for definitions
@@ -90,22 +94,31 @@ class Case:
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_universal())}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.literals.values() if c.is_consequence())}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(str(c.subtence) for c in self.literals.values() if c.is_irrelevant())}{nl}"
+                f"Irrelevant:  {indented}{indented.join(str(c.subtence) for c in self.literals.values() if c.is_irrelevant() and type(c) != Term)}{nl}"
         )
 
-    def get_relevant_subtences(self):
-        # determine relevant symbols
-        symbols = mergeDicts( e.unknown_symbols() for e in self.simplified )
+    def get_relevant_subtences(self, decision):
+        #TODO performance.  This method is called many times !
+        constraints = (
+            [l.subtence for k, l in self.literals.items() 
+                    if l.truth.is_known() and l.has_decision(decision) 
+                    and not type(l) == Term]
+            + [e for e in self.simplified]
+            + [r.body for d in self.definitions for symb in d.partition.values() for r in symb])
+
+        # determine relevant symbols (including defined ones)
+        symbols = mergeDicts( e.unknown_symbols() for e in constraints )
+        symbols.update({symb.name: symb for d in self.definitions for symb in d.partition})
 
         # remove irrelevant domain conditions
         self.simplified = list(e for e in self.simplified
                 if e.if_symbol is None or e.if_symbol in symbols)
 
         # determine relevant subtences
-        relevant_subtences = mergeDicts( e.subtences() for e in self.simplified )
+        relevant_subtences = mergeDicts( e.subtences() for e in constraints )
         relevant_subtences.update(mergeDicts( r.body.subtences() #TODO
             for d in self.definitions for symb in d.partition.values() for r in symb))
-
+        relevant_subtences.update(mergeDicts(s.instances for s in symbols.values()))
         return relevant_subtences
 
     def full_propagate(self, decision):
@@ -118,12 +131,15 @@ class Case:
         solver, _, _ = mk_solver(self.translate(decision), {})
         result = solver.check()
         if result == sat:
+            todo = self.literals.keys()
+
             # determine consequences on expanded symbols only (for speed)
-            for key, l in self.literals.items():
-                if not l.truth.is_known() \
-                and l.has_decision(decision) \
-                and self.GUILines[l.subtence.code].is_visible \
-                and key in self.get_relevant_subtences():
+            for key in todo:
+                l = self.literals[key]
+                if ( not l.truth.is_known()
+                and l.has_decision(decision)
+                and self.GUILines[key].is_visible
+                and key in self.get_relevant_subtences(decision) ):
                     atom = l.subtence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())
@@ -137,7 +153,14 @@ class Case:
                             solver.pop()
 
                             if res2 == unsat:
-                                lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
+                                if type(l) == Term:
+                                    if atom.subtence.decl.out.code == 'bool':
+                                        val1 = Truth.TRUE if val1 else Truth.FALSE
+                                        lit = LiteralQ(val1, atom.subtence)
+                                    else:
+                                        lit = LiteralQ(Truth.TRUE, Equality(atom.subtence, val1))
+                                else:
+                                    lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
                                 self.literals[key] = lit.mk_consequence()
                                 self.propagate([lit], decision)
                             elif res2 == unknown:
@@ -175,12 +198,15 @@ class Case:
 
                 # simplify literals
                 for literal in self.literals.values():
-                    if literal != lit and literal.has_decision(decision):
+                    if literal != lit and not literal.truth.is_known() and literal.has_decision(decision):
                         new_constraint = literal.subtence.substitute(old, new)
                         if new_constraint != literal.subtence: # changed !
                             literal.subtence = new_constraint
-                            if not literal.truth.is_known() and new_constraint in [TRUE, FALSE]:
+                            if new_constraint in [TRUE, FALSE]:
                                 literal.truth = Truth.CONSEQUENCE | (Truth.TRUE if new_constraint == TRUE else Truth.FALSE)
+                                to_propagate.append(literal)
+                            elif type(literal) == Term:
+                                literal.truth = Truth.CONSEQUENCE | Truth.TRUE
                                 to_propagate.append(literal)
 
 
@@ -198,7 +224,9 @@ class Case:
         self.translated = And(
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
-            + [l.translate() for l in self.literals.values() if l.truth.is_known() and l.has_decision(decision)]
+            + [l.translate() for k, l in self.literals.items() 
+                    if l.truth.is_known() and l.has_decision(decision) 
+                    and not type(l) == Term]
             + [c.translate() for c in self.simplified]
             )
         return self.translated

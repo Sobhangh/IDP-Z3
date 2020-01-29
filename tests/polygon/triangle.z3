@@ -1,6 +1,6 @@
-ForAll(c!357,
-       Implies(Large(c!357),
-               And(And(c!357 >= 1, c!357 <= 4))))
+ForAll(c!194,
+       Implies(Large(c!194),
+               And(And(c!194 >= 1, c!194 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -178,9 +178,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!357,
-       Implies(Large(c!357),
-               And(And(c!357 >= 1, c!357 <= 4))))
+  ForAll(c!194,
+       Implies(Large(c!194),
+               And(And(c!194 >= 1, c!194 <= 4))))
 Definitions: 
   
 Universals:  
@@ -212,16 +212,25 @@ Consequences:
   ~∃n[side] : Angle(n) = 90
   ~Subtype = square
   ~Subtype = rectangle
+  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   Length(1) ≤ (Length(2) + Length(3))
   Length(2) ≤ (Length(3) + Length(1))
   Length(3) ≤ (Length(1) + Length(2))
   Surface = ((Base * Height) / 2)
+  Sides = 3
+  Vertices = 3
+  Type = triangle
+  Length(4) = 0
+  Angle(1) = 60
+  Angle(2) = 60
+  Angle(3) = 60
+  Angle(4) = 0
+  Subtype = regular_triangle
 Simplified:  
   
 Irrelevant:  
-  ((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
   Length(1) = Length(3)
-  Length(2) = Length(4)
+  Length(2) = (0)
   Length(1) = Length(2)
   Surface = (Length(1) * Length(2))
   Surface = (-(1))
@@ -281,14 +290,15 @@ Irrelevant:
                                                         'status': 'CONSEQUENCE',
                                                         'typ': 'Bool',
                                                         'value': True},
-           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': False,
+           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': True,
                                                         'ct': False,
                                                         'environmental': False,
-                                                        'irrelevant': True,
+                                                        'irrelevant': False,
                                                         'normal': False,
                                                         'reading': 'All angles are 90°',
-                                                        'status': 'IRRELEVANT',
-                                                        'typ': 'Bool'},
+                                                        'status': 'CONSEQUENCE',
+                                                        'typ': 'Bool',
+                                                        'value': False},
            '∀n[side] : Angle(n) < 180': {'cf': False,
                                          'ct': True,
                                          'environmental': False,
@@ -366,34 +376,34 @@ Irrelevant:
  'Large': {'Large(1)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(1)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(2)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(2)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(3)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(3)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(4)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(4)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'}},
  'Length': {'Length(1)': {'environmental': False, 'normal': True, 'reading': 'Length(1)', 'typ': 'Real', 'value': ''},
             'Length(1) = Length(2)': {'cf': False,

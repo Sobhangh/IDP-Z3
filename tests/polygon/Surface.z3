@@ -1,6 +1,6 @@
-ForAll(c!467,
-       Implies(Large(c!467),
-               And(And(c!467 >= 1, c!467 <= 4))))
+ForAll(c!247,
+       Implies(Large(c!247),
+               And(And(c!247 >= 1, c!247 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -99,23 +99,6 @@ And((Length(1) == 0) == (Sides < 1),
     (Length(3) == 0) == (Sides < 3),
     (Length(4) == 0) == (Sides < 4))
 
-Or(Not(Type == triangle), Surface == 1/2*Base*Height)
-
-Or(Not(Or(Subtype == square, Subtype == rectangle)),
-   Surface == Length(1)*Length(2))
-
-Or(Not(And(Subtype == irregular, Sides == 4)),
-   Surface == -1)
-
-Base >= 0
-
-Height >= 0
-
-Or(And(Sides >= 1, Length(1) == Base),
-   And(Sides >= 2, Length(2) == Base),
-   And(Sides >= 3, Length(3) == Base),
-   And(Sides >= 4, Length(4) == Base))
-
 And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
@@ -172,18 +155,12 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
-Surface = ((Base * Height) / 2)
-Surface = (Length(1) * Length(2))
-Surface = (-(1))
-0 ≤ Base
-0 ≤ Height
-∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
 
 -- case
 Type:        
-  ForAll(c!467,
-       Implies(Large(c!467),
-               And(And(c!467 >= 1, c!467 <= 4))))
+  ForAll(c!247,
+       Implies(Large(c!247),
+               And(And(c!247 >= 1, c!247 <= 4))))
 Definitions: 
   
 Universals:  
@@ -195,33 +172,38 @@ Universals:
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
-  0 ≤ Base
-  0 ≤ Height
-  ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
 Consequences:
-  
+  ~Type = triangle
+  ~Sides = 3
+  Type = quadrilateral
+  Sides = 4
+  ~Vertices = 3
+  Vertices = 4
+  Convex
+  ∀n[side] : Angle(n) < 180
+  ~Subtype = right_triangle
+  ~Subtype = regular_triangle
+  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+  ∃n[side] : Angle(n) = 90
+  Length(1) = Length(3)
+  Length(2) = Length(4)
+  Sides = 4
+  Vertices = 4
+  Type = quadrilateral
+  Angle(1) = 90
+  Angle(2) = 90
+  Angle(3) = 90
+  Angle(4) = 90
 Simplified:  
-  ((Type = triangle) ⇔ (Sides = 3))
-  ((Type = quadrilateral) ⇔ (Sides = 4))
-  (((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))
-  ((Sides = 3) ⇒ Convex)
-  (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
-  (Equilateral ⇔ ((((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)))))
-  ((Sides = 3) ⇒ ((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
-  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))
-  ((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ ((((Angle(1) = 60) ∨ (Sides < 1)) ∧ ((Angle(2) = 60) ∨ (Sides < 2)) ∧ ((Angle(3) = 60) ∨ (Sides < 3)) ∧ ((Angle(4) = 60) ∨ (Sides < 4))))))
-  ((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
-  (((Subtype = square) ∨ (Subtype = rectangle)) ⇔ (Sides = 4))
-  ((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (~(Length(1) = Length(2)))))
-  ((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))
-  ((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))
-  (Type = triangle) ⇒ (Surface = (0.5 * (Base * Height)))
-  ((Subtype = square) ∨ (Subtype = rectangle)) ⇒ (Surface = (Length(1) * Length(2)))
-  ((Subtype = irregular) ∧ (Sides = 4)) ⇒ (Surface = (-(1)))
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
+  (Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) ∧ (Length(4) = Length(1)))))
+  ((((Subtype = square) ∨ (Subtype = rectangle))))
+  ((Subtype = rectangle) ⇒ (~(Length(1) = Length(2))))
+  ((Subtype = square) ⇔ (Equilateral))
 Irrelevant:  
-  
+  Subtype = irregular
+  Length(1) ≤ (Length(2) + Length(3))
+  Length(2) ≤ (Length(3) + Length(1))
+  Length(3) ≤ (Length(1) + Length(2))
 
 
 -- propagation
@@ -254,7 +236,12 @@ Irrelevant:
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '90'},
-           'Angle(4)': {'environmental': False, 'normal': True, 'reading': 'Angle(4)', 'typ': 'Real', 'value': ''},
+           'Angle(4)': {'environmental': False,
+                        'normal': True,
+                        'reading': 'Angle(4)',
+                        'status': 'CONSEQUENCE',
+                        'typ': 'Real',
+                        'value': '90'},
            '∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)': {'cf': False,
                                                           'ct': True,
                                                           'environmental': False,
@@ -264,14 +251,15 @@ Irrelevant:
                                                           'status': 'UNIVERSAL',
                                                           'typ': 'Bool',
                                                           'value': True},
-           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'cf': False,
+           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'cf': True,
                                                         'ct': False,
                                                         'environmental': False,
                                                         'irrelevant': False,
                                                         'normal': False,
                                                         'reading': 'All angles are 60°',
-                                                        'status': 'UNKNOWN',
-                                                        'typ': 'Bool'},
+                                                        'status': 'CONSEQUENCE',
+                                                        'typ': 'Bool',
+                                                        'value': False},
            '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': False,
                                                         'ct': True,
                                                         'environmental': False,
@@ -282,13 +270,14 @@ Irrelevant:
                                                         'typ': 'Bool',
                                                         'value': True},
            '∀n[side] : Angle(n) < 180': {'cf': False,
-                                         'ct': False,
+                                         'ct': True,
                                          'environmental': False,
                                          'irrelevant': False,
                                          'normal': False,
                                          'reading': 'All angles are below 180°',
-                                         'status': 'UNKNOWN',
-                                         'typ': 'Bool'},
+                                         'status': 'CONSEQUENCE',
+                                         'typ': 'Bool',
+                                         'value': True},
            '∀x[side] : 0 ≤ Angle(x)': {'cf': False,
                                        'ct': True,
                                        'environmental': False,
@@ -308,30 +297,22 @@ Irrelevant:
                                          'typ': 'Bool',
                                          'value': True},
            '∃n[side] : Angle(n) = 90': {'cf': False,
-                                        'ct': False,
+                                        'ct': True,
                                         'environmental': False,
                                         'irrelevant': False,
                                         'normal': False,
                                         'reading': 'One angle is 90°',
-                                        'status': 'UNKNOWN',
-                                        'typ': 'Bool'}},
- 'Base': {'0 ≤ Base': {'cf': False,
-                       'ct': True,
-                       'environmental': False,
-                       'irrelevant': False,
-                       'normal': False,
-                       'reading': '0 ≤ Base',
-                       'status': 'UNIVERSAL',
-                       'typ': 'Bool',
-                       'value': True},
-          'Base': {'environmental': False, 'normal': True, 'reading': 'Base', 'typ': 'Real', 'value': ''}},
+                                        'status': 'CONSEQUENCE',
+                                        'typ': 'Bool',
+                                        'value': True}},
+ 'Base': {'Base': {'environmental': False, 'normal': True, 'reading': 'Base', 'typ': 'Real', 'value': ''}},
  'Convex': {'Convex': {'cf': False,
                        'ct': True,
                        'environmental': False,
                        'irrelevant': False,
                        'normal': True,
                        'reading': 'Convex',
-                       'status': 'UNKNOWN',
+                       'status': 'CONSEQUENCE',
                        'typ': 'Bool',
                        'value': True}},
  'Equilateral': {'Equilateral': {'cf': False,
@@ -342,47 +323,38 @@ Irrelevant:
                                  'reading': 'Equilateral',
                                  'status': 'UNKNOWN',
                                  'typ': 'Bool'}},
- 'Height': {'0 ≤ Height': {'cf': False,
-                           'ct': True,
-                           'environmental': False,
-                           'irrelevant': False,
-                           'normal': False,
-                           'reading': '0 ≤ Height',
-                           'status': 'UNIVERSAL',
-                           'typ': 'Bool',
-                           'value': True},
-            'Height': {'environmental': False, 'normal': True, 'reading': 'Height', 'typ': 'Real', 'value': ''}},
+ 'Height': {'Height': {'environmental': False, 'normal': True, 'reading': 'Height', 'typ': 'Real', 'value': ''}},
  'Large': {'Large(1)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(1)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(2)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(2)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(3)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(3)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(4)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(4)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'}},
  'Length': {'Length(1)': {'environmental': False, 'normal': True, 'reading': 'Length(1)', 'typ': 'Real', 'value': ''},
             'Length(1) = Length(2)': {'cf': False,
@@ -394,46 +366,48 @@ Irrelevant:
                                       'status': 'UNKNOWN',
                                       'typ': 'Bool'},
             'Length(1) = Length(3)': {'cf': False,
-                                      'ct': False,
+                                      'ct': True,
                                       'environmental': False,
                                       'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(1) = Length(3)',
-                                      'status': 'UNKNOWN',
-                                      'typ': 'Bool'},
+                                      'status': 'CONSEQUENCE',
+                                      'typ': 'Bool',
+                                      'value': True},
             'Length(1) ≤ (Length(2) + Length(3))': {'cf': False,
                                                     'ct': False,
                                                     'environmental': False,
-                                                    'irrelevant': False,
+                                                    'irrelevant': True,
                                                     'normal': False,
                                                     'reading': 'Length(1) ≤ (Length(2) + Length(3))',
-                                                    'status': 'UNKNOWN',
+                                                    'status': 'IRRELEVANT',
                                                     'typ': 'Bool'},
             'Length(2)': {'environmental': False, 'normal': True, 'reading': 'Length(2)', 'typ': 'Real', 'value': ''},
             'Length(2) = Length(4)': {'cf': False,
-                                      'ct': False,
+                                      'ct': True,
                                       'environmental': False,
                                       'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Length(2) = Length(4)',
-                                      'status': 'UNKNOWN',
-                                      'typ': 'Bool'},
+                                      'status': 'CONSEQUENCE',
+                                      'typ': 'Bool',
+                                      'value': True},
             'Length(2) ≤ (Length(3) + Length(1))': {'cf': False,
                                                     'ct': False,
                                                     'environmental': False,
-                                                    'irrelevant': False,
+                                                    'irrelevant': True,
                                                     'normal': False,
                                                     'reading': 'Length(2) ≤ (Length(3) + Length(1))',
-                                                    'status': 'UNKNOWN',
+                                                    'status': 'IRRELEVANT',
                                                     'typ': 'Bool'},
             'Length(3)': {'environmental': False, 'normal': True, 'reading': 'Length(3)', 'typ': 'Real', 'value': ''},
             'Length(3) ≤ (Length(1) + Length(2))': {'cf': False,
                                                     'ct': False,
                                                     'environmental': False,
-                                                    'irrelevant': False,
+                                                    'irrelevant': True,
                                                     'normal': False,
                                                     'reading': 'Length(3) ≤ (Length(1) + Length(2))',
-                                                    'status': 'UNKNOWN',
+                                                    'status': 'IRRELEVANT',
                                                     'typ': 'Bool'},
             'Length(4)': {'environmental': False, 'normal': True, 'reading': 'Length(4)', 'typ': 'Real', 'value': ''},
             '∀n[side] : (Length(n) = 0) ⇔ (Sides < n)': {'cf': False,
@@ -484,32 +458,24 @@ Irrelevant:
                      'typ': 'Int',
                      'value': '4',
                      'values': ['3', '4']},
-           'Sides = 3': {'cf': False,
+           'Sides = 3': {'cf': True,
                          'ct': False,
                          'environmental': False,
                          'irrelevant': False,
                          'normal': False,
                          'reading': 'Sides = 3',
-                         'status': 'UNKNOWN',
-                         'typ': 'Bool'},
+                         'status': 'CONSEQUENCE',
+                         'typ': 'Bool',
+                         'value': False},
            'Sides = 4': {'cf': False,
                          'ct': True,
                          'environmental': False,
                          'irrelevant': False,
                          'normal': False,
                          'reading': 'Sides = 4',
-                         'status': 'UNKNOWN',
+                         'status': 'CONSEQUENCE',
                          'typ': 'Bool',
-                         'value': True},
-           '∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)': {'cf': False,
-                                                           'ct': True,
-                                                           'environmental': False,
-                                                           'irrelevant': False,
-                                                           'normal': False,
-                                                           'reading': '∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)',
-                                                           'status': 'UNIVERSAL',
-                                                           'typ': 'Bool',
-                                                           'value': True}},
+                         'value': True}},
  'Subtype': {'Subtype': {'environmental': False,
                          'normal': True,
                          'reading': 'Subtype',
@@ -519,10 +485,10 @@ Irrelevant:
              'Subtype = irregular': {'cf': False,
                                      'ct': False,
                                      'environmental': False,
-                                     'irrelevant': False,
+                                     'irrelevant': True,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
-                                     'status': 'UNKNOWN',
+                                     'status': 'IRRELEVANT',
                                      'typ': 'Bool'},
              'Subtype = rectangle': {'cf': False,
                                      'ct': False,
@@ -532,22 +498,24 @@ Irrelevant:
                                      'reading': 'Subtype = rectangle',
                                      'status': 'UNKNOWN',
                                      'typ': 'Bool'},
-             'Subtype = regular_triangle': {'cf': False,
+             'Subtype = regular_triangle': {'cf': True,
                                             'ct': False,
                                             'environmental': False,
                                             'irrelevant': False,
                                             'normal': False,
                                             'reading': 'Subtype = regular_triangle',
-                                            'status': 'UNKNOWN',
-                                            'typ': 'Bool'},
-             'Subtype = right_triangle': {'cf': False,
+                                            'status': 'CONSEQUENCE',
+                                            'typ': 'Bool',
+                                            'value': False},
+             'Subtype = right_triangle': {'cf': True,
                                           'ct': False,
                                           'environmental': False,
                                           'irrelevant': False,
                                           'normal': False,
                                           'reading': 'Subtype = right_triangle',
-                                          'status': 'UNKNOWN',
-                                          'typ': 'Bool'},
+                                          'status': 'CONSEQUENCE',
+                                          'typ': 'Bool',
+                                          'value': False},
              'Subtype = square': {'cf': False,
                                   'ct': False,
                                   'environmental': False,
@@ -556,31 +524,7 @@ Irrelevant:
                                   'reading': 'Subtype = square',
                                   'status': 'UNKNOWN',
                                   'typ': 'Bool'}},
- 'Surface': {'Surface': {'environmental': False, 'normal': True, 'reading': 'Surface', 'typ': 'Real', 'value': ''},
-             'Surface = ((Base * Height) / 2)': {'cf': False,
-                                                 'ct': False,
-                                                 'environmental': False,
-                                                 'irrelevant': False,
-                                                 'normal': False,
-                                                 'reading': 'Surface = ((Base * Height) / 2)',
-                                                 'status': 'UNKNOWN',
-                                                 'typ': 'Bool'},
-             'Surface = (-(1))': {'cf': False,
-                                  'ct': False,
-                                  'environmental': False,
-                                  'irrelevant': False,
-                                  'normal': False,
-                                  'reading': 'Surface = (-(1))',
-                                  'status': 'UNKNOWN',
-                                  'typ': 'Bool'},
-             'Surface = (Length(1) * Length(2))': {'cf': False,
-                                                   'ct': False,
-                                                   'environmental': False,
-                                                   'irrelevant': False,
-                                                   'normal': False,
-                                                   'reading': 'Surface = (Length(1) * Length(2))',
-                                                   'status': 'UNKNOWN',
-                                                   'typ': 'Bool'}},
+ 'Surface': {'Surface': {'environmental': False, 'normal': True, 'reading': 'Surface', 'typ': 'Real', 'value': ''}},
  'Type': {'Type': {'environmental': False,
                    'normal': True,
                    'reading': 'Type',
@@ -594,17 +538,18 @@ Irrelevant:
                                    'irrelevant': False,
                                    'normal': False,
                                    'reading': 'Type = quadrilateral',
-                                   'status': 'UNKNOWN',
+                                   'status': 'CONSEQUENCE',
                                    'typ': 'Bool',
                                    'value': True},
-          'Type = triangle': {'cf': False,
+          'Type = triangle': {'cf': True,
                               'ct': False,
                               'environmental': False,
                               'irrelevant': False,
                               'normal': False,
                               'reading': 'Type = triangle',
-                              'status': 'UNKNOWN',
-                              'typ': 'Bool'}},
+                              'status': 'CONSEQUENCE',
+                              'typ': 'Bool',
+                              'value': False}},
  'Vertices': {'Vertices': {'environmental': False,
                            'normal': True,
                            'reading': 'Vertices',
@@ -612,20 +557,21 @@ Irrelevant:
                            'typ': 'Int',
                            'value': '4',
                            'values': ['3', '4']},
-              'Vertices = 3': {'cf': False,
+              'Vertices = 3': {'cf': True,
                                'ct': False,
                                'environmental': False,
                                'irrelevant': False,
                                'normal': False,
                                'reading': 'Vertices = 3',
-                               'status': 'UNKNOWN',
-                               'typ': 'Bool'},
+                               'status': 'CONSEQUENCE',
+                               'typ': 'Bool',
+                               'value': False},
               'Vertices = 4': {'cf': False,
                                'ct': True,
                                'environmental': False,
                                'irrelevant': False,
                                'normal': False,
                                'reading': 'Vertices = 4',
-                               'status': 'UNKNOWN',
+                               'status': 'CONSEQUENCE',
                                'typ': 'Bool',
                                'value': True}}}

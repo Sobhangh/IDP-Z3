@@ -47,7 +47,7 @@ def immutable(func):
         if isinstance(value, list):
             if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, value)): # not changed !
                 return self
-            else:
+            else: # create a modified copy
                 out = copy.copy(self)
                 out.sub_exprs = value
                 # reset derived values
@@ -59,16 +59,7 @@ def immutable(func):
                 return out
         if id(value) == id(self): # not changed !
             return self
-        # replace by new Brackets node, to keep annotations
-        value.is_subtence = self.is_subtence
-        out = Brackets(f=value, reading=self.reading)
-        # copy initial annotation
-        out.code = self.code
-        out.is_subtence = self.is_subtence
-        out.is_visible = self.is_visible
-        out.type = self.type
-        # out.normal is not set, normally
-        return out
+        return self.substitute(self, value)
     return wrapper_decorator
         
 class Expression(object):
@@ -115,7 +106,18 @@ class Expression(object):
 
     def substitute(self, e0, e1):
         if self == e0: # based on repr !
-            return e1
+            if type(e0) == Fresh_Variable:
+                return e1 # no need to have brackets
+            # replace by new Brackets node, to keep annotations
+            e1.is_subtence = self.is_subtence
+            out = Brackets(f=e1, reading=self.reading)
+            # copy initial annotation
+            out.code = self.code
+            out.is_subtence = self.is_subtence
+            out.is_visible = self.is_visible
+            out.type = self.type
+            # out.normal is not set, normally
+            return out
         else:
             return self.update_exprs(e.substitute(e0, e1) for e in self.sub_exprs)
 
@@ -828,6 +830,9 @@ class Fresh_Variable(Expression):
 
     def __str__(self): return self.name
     def str_   (self): return self.name
+
+    def substitute(self, e0, e1):
+        return e1 if self == e0 else self
 
     def translate(self):
         if self.translated is None:

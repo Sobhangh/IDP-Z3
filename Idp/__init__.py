@@ -93,7 +93,7 @@ class Idp(object):
 class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
-        self.terms = {}
+        self.terms = {} # {string: Variable or AppliedSymbol} not starting with '_'
         self.translated = []
 
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
@@ -236,7 +236,7 @@ class SymbolDeclaration(object):
 
         self.type = None # a declaration object
         self.domain = None # all possible arguments
-        self.instances = None # {string: Variable or AppliedSymbol} translated applied symbols, not starting with '_'
+        self.instances = None # {string: Variable or AppliedSymbol} not starting with '_'
         self.range = None # all possible values
         self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
         self.environmental = False # true if in declared (environmental) vocabulary and there is a decision vocabulary

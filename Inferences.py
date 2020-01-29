@@ -52,32 +52,11 @@ def propagation(case):
      
     out = Structure_(case)
 
-    # subtences
     for key, l in case.literals.items():
-        if l.truth.is_known() and l.subtence.code in case.GUILines:
-            if case.GUILines[l.subtence.code].is_visible:
+        if l.truth.is_known() and key in case.GUILines:
+            if case.GUILines[key].is_visible:
                 out.addAtom(l.subtence, l.truth)
-    
-    # numeric
-    todo = { k:a for (k,a) in case.GUILines.items()
-                if (hasattr(a, 'decl') and hasattr(a.decl, 'is_var') and a.decl.is_var) }
 
-    amf = consequences(case.translate(), todo, {})
-    for literalQ in amf:
-        literalQ = literalQ.mk_consequence()
-        if literalQ.subtence.code in case.literals and not case.literals[literalQ.subtence.code].is_given():
-            case.literals[literalQ.subtence.code] = literalQ
-        out.addAtom(literalQ.subtence, literalQ.truth)
-
-    # useful for non linear structure
-    """
-    amf = consequences(case.idp.translated, todo, amf)
-    for literalQ in amf:
-        out.addAtom(literalQ.subtence, literalQ.truth)
-    """
-
-    for literalQ in case.given: # needed to keep some numeric assignments
-        out.addAtom(literalQ.subtence, literalQ.truth)
     return out.m
 
 def expand(case):
@@ -215,9 +194,9 @@ def abstract(case):
 
         atoms = [] # [LiteralQ]
         for atom_string, atom in case.GUILines.items():
-            if atom_string in case.literals: # an atom
+            if atom_string in case.literals:
                 literal = case.literals[atom_string]
-                if literal.truth == Truth.UNKNOWN:
+                if literal.truth == Truth.UNKNOWN and atom.type == 'bool':
                     truth = solver.model().eval(reify[atom])
                     if truth == True:
                         atoms += [ LiteralQ(Truth.TRUE,  atom) ]

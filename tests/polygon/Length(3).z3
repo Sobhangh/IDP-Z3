@@ -1,6 +1,5 @@
-ForAll(c!146,
-       Implies(Large(c!146),
-               And(And(c!146 >= 1, c!146 <= 4))))
+ForAll(c!89,
+       Implies(Large(c!89), And(And(c!89 >= 1, c!89 <= 4))))
 -- theory
 Sides == 3
 
@@ -49,9 +48,8 @@ Sides = 4
 
 -- case
 Type:        
-  ForAll(c!146,
-       Implies(Large(c!146),
-               And(And(c!146 >= 1, c!146 <= 4))))
+  ForAll(c!89,
+       Implies(Large(c!89), And(And(c!89 >= 1, c!89 <= 4))))
 Definitions: 
   
 Universals:  
@@ -59,6 +57,7 @@ Universals:
 Consequences:
   ~Subtype = rectangle
   ~Sides = 4
+  Sides = 3
 Simplified:  
   Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
 Irrelevant:  
@@ -74,10 +73,10 @@ Irrelevant:
  'Convex': {'Convex': {'cf': False,
                        'ct': False,
                        'environmental': False,
-                       'irrelevant': False,
+                       'irrelevant': True,
                        'normal': True,
                        'reading': 'Convex',
-                       'status': 'UNKNOWN',
+                       'status': 'IRRELEVANT',
                        'typ': 'Bool'}},
  'Equilateral': {'Equilateral': {'cf': False,
                                  'ct': False,
@@ -91,34 +90,34 @@ Irrelevant:
  'Large': {'Large(1)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(1)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(2)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(2)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(3)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(3)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'},
            'Large(4)': {'cf': False,
                         'ct': False,
                         'environmental': False,
-                        'irrelevant': False,
+                        'irrelevant': True,
                         'normal': True,
                         'reading': 'Large(4)',
-                        'status': 'UNKNOWN',
+                        'status': 'IRRELEVANT',
                         'typ': 'Bool'}},
  'Length': {'Length(1)': {'environmental': False, 'normal': True, 'reading': 'Length(1)', 'typ': 'Real', 'value': ''},
             'Length(2)': {'environmental': False, 'normal': True, 'reading': 'Length(2)', 'typ': 'Real', 'value': ''},

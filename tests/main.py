@@ -18,6 +18,9 @@ dir = os.path.dirname(__file__)
 files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 #files += ["/home/pcarbonn/Documents/repos/sealconstraints/OmniSeal/specification.z3"]
 #files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/sandbox/sandbox.idp"]
+#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/isa/isa.idp"]
+#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/prime/prime.idp"]
+#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/polygon/Length(3).idp"]
 for file in files:
     print(file)
     idp = idpparser.model_from_file(file)  

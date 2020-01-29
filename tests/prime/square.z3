@@ -22,6 +22,7 @@ Universals:
   0 < Base
 Consequences:
   16.0 = (Base * Base)
+  Base = 4
 Simplified:  
   
 Irrelevant:  

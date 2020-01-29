@@ -1,10 +1,10 @@
-ForAll(c!574,
-       Implies(Prime(c!574),
-               And(And(c!574 >= 1, c!574 <= 4))))
+ForAll(c!334,
+       Implies(Prime(c!334),
+               And(And(c!334 >= 1, c!334 <= 4))))
 -- theory
-ForAll(c!575,
-       Prime(c!575) ==
-       Or(c!575 == 1, c!575 == 2, c!575 == 3))
+ForAll(c!335,
+       Prime(c!335) ==
+       Or(c!335 == 1, c!335 == 2, c!335 == 3))
 
 -- atoms
 Prime(1)
@@ -14,9 +14,9 @@ Prime(4)
 
 -- case
 Type:        
-  ForAll(c!574,
-       Implies(Prime(c!574),
-               And(And(c!574 >= 1, c!574 <= 4))))
+  ForAll(c!334,
+       Implies(Prime(c!334),
+               And(And(c!334 >= 1, c!334 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
 Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)
@@ -25,7 +25,10 @@ Rule:∀[][[]]: Prime(4) ⇔(false)
 Universals:  
   
 Consequences:
-  
+  Prime(1)
+  Prime(2)
+  Prime(3)
+  ~Prime(4)
 Simplified:  
   
 Irrelevant:  
@@ -39,7 +42,7 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Prime(1)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': True},
            'Prime(2)': {'cf': False,
@@ -48,7 +51,7 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Prime(2)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': True},
            'Prime(3)': {'cf': False,
@@ -57,7 +60,7 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Prime(3)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': True},
            'Prime(4)': {'cf': True,
@@ -66,6 +69,6 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Prime(4)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False}}}

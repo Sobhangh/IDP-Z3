@@ -1,6 +1,6 @@
-ForAll(c!253,
-       Implies(Large(c!253),
-               And(And(c!253 >= 1, c!253 <= 4))))
+ForAll(c!122,
+       Implies(Large(c!122),
+               And(And(c!122 >= 1, c!122 <= 4))))
 -- theory
 True
 
@@ -87,7 +87,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!256, Large(c!256) == False)
+ForAll(c!125, Large(c!125) == False)
 
 -- atoms
 Sides
@@ -130,9 +130,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  ForAll(c!253,
-       Implies(Large(c!253),
-               And(And(c!253 >= 1, c!253 <= 4))))
+  ForAll(c!122,
+       Implies(Large(c!122),
+               And(And(c!122 >= 1, c!122 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
@@ -157,8 +157,18 @@ Consequences:
   ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
   ~Subtype = right_triangle
   ~Subtype = regular_triangle
+  Subtype = irregular
   ~Subtype = square
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+  Sides = 4
+  Vertices = 4
+  Type = quadrilateral
+  Subtype = irregular
+  Perimeter = 10
+  ~Large(1)
+  ~Large(2)
+  ~Large(3)
+  ~Large(4)
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
@@ -264,7 +274,7 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(1)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(2)': {'cf': True,
@@ -273,7 +283,7 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(2)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(3)': {'cf': True,
@@ -282,7 +292,7 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(3)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(4)': {'cf': True,
@@ -291,7 +301,7 @@ Irrelevant:
                         'irrelevant': False,
                         'normal': True,
                         'reading': 'Large(4)',
-                        'status': 'UNKNOWN',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False}},
  'Perimeter': {'Perimeter': {'environmental': False,
@@ -366,7 +376,7 @@ Irrelevant:
                                      'irrelevant': False,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
-                                     'status': 'UNKNOWN',
+                                     'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': True},
              'Subtype = rectangle': {'cf': True,
