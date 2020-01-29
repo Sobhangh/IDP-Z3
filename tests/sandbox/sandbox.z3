@@ -28,6 +28,7 @@ Irrelevant:
 
 -- propagation
 {'JacketDesign': {'JacketDesign': {'environmental': False,
+                                   'irrelevant': False,
                                    'normal': True,
                                    'reading': 'JacketDesign',
                                    'status': 'CONSEQUENCE',
@@ -44,6 +45,7 @@ Irrelevant:
                                                 'typ': 'Bool',
                                                 'value': True}},
  'LipLen': {'LipLen': {'environmental': False,
+                       'irrelevant': False,
                        'normal': True,
                        'reading': 'LipLen',
                        'status': 'CONSEQUENCE',

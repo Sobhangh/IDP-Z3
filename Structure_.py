@@ -250,14 +250,9 @@ class Structure_(object):
             for symb in atom.unknown_symbols().values():
                 if not symb.name.startswith('_'):
                     s = self.m.setdefault(symb.name, {})
+
                     if typ == 'Bool':
                         symbol = {"typ": typ, "ct": False, "cf": False}
-                        if atom.code in case.literals:
-                            symbol["status"] = case.literals[atom.code].status()
-                            symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
-                        else:
-                            symbol["status"] = "UNKNOWN" #TODO 
-                            symbol["irrelevant"] = False # unused symbol instance (Large(1))
                     elif 0 < len(symb.range):
                         symbol = { "typ": typ, "value": ""
                                 , "values": [str(v) for v in symb.range]}
@@ -265,7 +260,14 @@ class Structure_(object):
                         symbol = {"typ": typ, "value": ""} # default
                     else:
                         symbol = None
+                        
                     if symbol: 
+                        if atom.code in case.literals:
+                            symbol["status"] = case.literals[atom.code].status()
+                            symbol["irrelevant"] = case.literals[atom.code].is_irrelevant()
+                        else:
+                            symbol["status"] = "UNKNOWN" #TODO 
+                            symbol["irrelevant"] = False # unused symbol instance (Large(1))
                         symbol['reading'] = atom.reading
                         symbol['normal'] = hasattr(atom, 'normal')
                         symbol['environmental'] = atom.has_environmental(True)

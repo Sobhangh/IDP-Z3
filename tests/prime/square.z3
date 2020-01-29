@@ -49,6 +49,7 @@ Irrelevant:
                                    'typ': 'Bool',
                                    'value': True},
           'Base': {'environmental': False,
+                   'irrelevant': False,
                    'normal': True,
                    'reading': 'Base',
                    'status': 'CONSEQUENCE',
