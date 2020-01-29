@@ -28,6 +28,7 @@ Irrelevant:
 {'JacketDesign': {'JacketDesign': {'environmental': False,
                                    'normal': True,
                                    'reading': 'JacketDesign',
+                                   'status': 'CONSEQUENCE',
                                    'typ': 'jaDes',
                                    'value': 'Design_230',
                                    'values': ['Design_230', 'Design_400HP']},
@@ -43,6 +44,7 @@ Irrelevant:
  'LipLen': {'LipLen': {'environmental': False,
                        'normal': True,
                        'reading': 'LipLen',
+                       'status': 'CONSEQUENCE',
                        'typ': 'lipLen',
                        'value': 'Short',
                        'values': ['Short', 'Standard']}}}
