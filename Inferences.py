@@ -52,10 +52,10 @@ def propagation(case):
      
     out = Structure_(case)
 
-    for key, l in case.literals.items():
+    for key, l in case.assignments.items():
         if l.truth.is_known() and key in case.GUILines:
             if case.GUILines[key].is_visible:
-                out.addAtom(l.subtence, l.truth)
+                out.addAtom(l.sentence, l.truth)
 
     return out.m
 
@@ -155,8 +155,8 @@ def explain(case, symbol, value):
         if unsatcore:
             for a1 in case.given:
                 for a2 in s.unsat_core():
-                    if type(ps[a2]) == LiteralQ and a1 == ps[a2]: #TODO we might miss some equality
-                        out.addAtom(a1.subtence, a1.truth)
+                    if type(ps[a2]) == Assignment and a1 == ps[a2]: #TODO we might miss some equality
+                        out.addAtom(a1.sentence, a1.truth)
             out.m["*laws*"] = []
             for a1 in case.idp.theory.definitions + case.idp.theory.constraints: 
                 #TODO find the rule
@@ -167,13 +167,13 @@ def explain(case, symbol, value):
     return out.m
 
 def abstract(case):
-    out = {} # {category : [LiteralQ]}
+    out = {} # {category : [Assignment]}
 
     # extract fixed atoms from constraints
-    out["universal"] = list(l for l in case.literals.values() if l.is_universal())
-    out["given"    ] = list(l for l in case.literals.values() if l.is_given())
-    out["fixed"    ] = list(l for l in case.literals.values() if l.is_consequence())
-    out["irrelevant"]= list(LiteralQ(Truth.TRUE, l.subtence) for l in case.literals.values() if l.is_irrelevant())
+    out["universal"] = list(l for l in case.assignments.values() if l.is_universal())
+    out["given"    ] = list(l for l in case.assignments.values() if l.is_given())
+    out["fixed"    ] = list(l for l in case.assignments.values() if l.is_consequence())
+    out["irrelevant"]= list(Assignment(Truth.TRUE, l.sentence) for l in case.assignments.values() if l.is_irrelevant())
 
     # create keys for models using first symbol of atoms
     models, count = {}, 0
@@ -192,16 +192,16 @@ def abstract(case):
         # theory that forces irrelevant atoms to be irrelevant
         theory2 = And(theory, And(case.idp.vocabulary.translated)) # is this a way to copy theory ??
 
-        atoms = [] # [LiteralQ]
+        atoms = [] # [Assignment]
         for atom_string, atom in case.GUILines.items():
-            if atom_string in case.literals:
-                literal = case.literals[atom_string]
-                if literal.truth == Truth.UNKNOWN and atom.type == 'bool':
+            if atom_string in case.assignments:
+                assignment = case.assignments[atom_string]
+                if assignment.truth == Truth.UNKNOWN and atom.type == 'bool':
                     truth = solver.model().eval(reify[atom])
                     if truth == True:
-                        atoms += [ LiteralQ(Truth.TRUE,  atom) ]
+                        atoms += [ Assignment(Truth.TRUE,  atom) ]
                     elif truth == False:
-                        atoms += [ LiteralQ(Truth.FALSE, atom) ]
+                        atoms += [ Assignment(Truth.FALSE, atom) ]
                     else: #unknown
                         theory2 = And(theory2,
                                         substitute(theory2, [(atomZ3, BoolVal(True))]),  # don't simplify !
@@ -209,45 +209,45 @@ def abstract(case):
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
-        atoms.sort(key=lambda l: (l.truth, str(l.subtence)))
+        atoms.sort(key=lambda l: (l.truth, str(l.sentence)))
 
         # remove atoms that are irrelevant in AMF
         solver2 = Solver()
         solver2.add(theory2)
         solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
-        (reify2, _) = reifier({str(l.subtence) : l.subtence for l in atoms}, solver2)
+        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, literalQ in enumerate(atoms):
             if literalQ.truth.is_known():
                 solver2.push()
-                a = Not(reify2[literalQ.subtence]) if literalQ.truth.is_true() else \
-                    reify2[literalQ.subtence]
+                a = Not(reify2[literalQ.sentence]) if literalQ.truth.is_true() else \
+                    reify2[literalQ.sentence]
                 solver2.add(a)
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
                 result = solver2.check()
                 solver2.pop()
                 if result == sat:
                     theory2 = And(theory2, 
-                                substitute(theory2, [(literalQ.subtence.translated, BoolVal(True))]),
-                                substitute(theory2, [(literalQ.subtence.translated, BoolVal(False))]))
+                                substitute(theory2, [(literalQ.sentence.translated, BoolVal(True))]),
+                                substitute(theory2, [(literalQ.sentence.translated, BoolVal(False))]))
                     solver2.add(theory2)
-                    atoms[i] = LiteralQ(Truth.IRRELEVANT, literalQ.subtence) # represents True
+                    atoms[i] = Assignment(Truth.IRRELEVANT, literalQ.sentence) # represents True
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
         solver2.add(case.idp.vocabulary.translated) # without theory !
-        (reify2, _) = reifier({str(l.subtence) : l.subtence for l in atoms}, solver2)
+        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, literalQ in enumerate(atoms):
             if literalQ.truth.is_known():
                 solver2.push()
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(literalQ)
-                a = Not(reify2[literalQ.subtence]) if literalQ.truth.is_true() else \
-                    reify2[literalQ.subtence]
+                a = Not(reify2[literalQ.sentence]) if literalQ.truth.is_true() else \
+                    reify2[literalQ.sentence]
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
-                    atoms[i] = LiteralQ(Truth.IRRELEVANT, literalQ.subtence)
-                    # ??? theory2 = substitute(theory2, [(literalQ.subtence, BoolVal(literalQ.truth & 1))])
+                    atoms[i] = Assignment(Truth.IRRELEVANT, literalQ.sentence)
+                    # ??? theory2 = substitute(theory2, [(literalQ.sentence, BoolVal(literalQ.truth & 1))])
                 solver2.pop()
 
         # add constraint to eliminate this model
@@ -258,7 +258,7 @@ def abstract(case):
         # group atoms by symbols
         model = {}
         for l in atoms:
-            for symb in l.subtence.unknown_symbols().keys():
+            for symb in l.sentence.unknown_symbols().keys():
                 model.setdefault(symb, []).append([ l ])
                 break
         # add to models

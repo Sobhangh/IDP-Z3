@@ -21,7 +21,7 @@ from z3 import And, Not, sat, unsat, unknown, is_true
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable
 from Solver import mk_solver
-from Structure_ import json_to_literals, Equality, LiteralQ, Term, Truth
+from Structure_ import json_to_literals, Equality, Assignment, Term, Truth
 from utils import *
 
 class Case:
@@ -33,7 +33,7 @@ class Case:
     def __init__(self, idp, jsonstr, expanded):
 
         self.idp = idp # Idp vocabulary and theory
-        self.given = json_to_literals(idp, jsonstr) # {LiteralQ : atomZ3} from the user interface
+        self.given = json_to_literals(idp, jsonstr) # {Assignment : atomZ3} from the user interface
         self.expanded_symbols = set(expanded)
 
         # initialisation
@@ -44,7 +44,7 @@ class Case:
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified =  [] # [Expression]
 
-        self.literals = {} # {subtence.code: LiteralQ}, atoms + given, with simplified formula and truth value
+        self.assignments = {} # {sentence.code: Assignment}, atoms + given, with simplified formula and truth value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -52,55 +52,55 @@ class Case:
             GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
-        # initialize .literals
-        self.literals = {s.code : LiteralQ(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
-        self.literals.update({ l.subtence.code : l.mk_given() for l in self.given })
+        # initialize .assignments
+        self.assignments = {s.code : Assignment(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
+        self.assignments.update({ l.sentence.code : l.mk_given() for l in self.given })
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
             u = self.expr_to_literal(c)
             if u:
                 for l in u:
-                    self.literals[l.subtence.code] = l.mk_universal()
+                    self.assignments[l.sentence.code] = l.mk_universal()
             else:
                 self.simplified.append(c)
 
-        self.literals.update({ k : Term(Truth.IRRELEVANT, Equality(t, None)) 
+        self.assignments.update({ k : Term(Truth.IRRELEVANT, Equality(t, None)) 
             for k, t in idp.vocabulary.terms.items()
-            if k not in self.literals })
+            if k not in self.assignments })
 
         if idp.decision:
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(decision=None)
             # convert CONSEQUENCEs into ENV_CONSQs
-            for key, literal in self.literals.items():
-                if literal.is_consequence():
-                    self.literals[key] = literal.mk_env_consq()
+            for key, assignment in self.assignments.items():
+                if assignment.is_consequence():
+                    self.assignments[key] = assignment.mk_env_consq()
         # now consider all facts and theories
         self.full_propagate(decision=True)
 
         # determine relevant symbols
         relevant_subtences = self.get_relevant_subtences(decision=True)
 
-        for k, l in self.literals.items():
+        for k, l in self.assignments.items():
             if (k in relevant_subtences) or self.definitions: #TODO support for definitions
-                self.literals[k] = l.mk_relevant()
+                self.assignments[k] = l.mk_relevant()
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self):
         return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translated)}{nl}"
                 f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
-                f"Universals:  {indented}{indented.join(repr(c) for c in self.literals.values() if c.is_universal())}{nl}"
-                f"Consequences:{indented}{indented.join(repr(c) for c in self.literals.values() if c.is_consequence())}{nl}"
+                f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.is_universal())}{nl}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.is_consequence())}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(str(c.subtence) for c in self.literals.values() if c.is_irrelevant() and type(c) != Term)}{nl}"
+                f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if c.is_irrelevant() and type(c) != Term)}{nl}"
         )
 
     def get_relevant_subtences(self, decision):
         #TODO performance.  This method is called many times !
         constraints = (
-            [l.subtence for k, l in self.literals.items() 
+            [l.sentence for k, l in self.assignments.items() 
                     if l.truth.is_known() and l.has_decision(decision) 
                     and not type(l) == Term]
             + [e for e in self.simplified]
@@ -124,23 +124,23 @@ class Case:
     def full_propagate(self, decision):
 
         # simplify all using given and universals
-        to_propagate = list(l for l in self.literals.values() 
+        to_propagate = list(l for l in self.assignments.values() 
             if l.truth.is_known() and l.has_decision(decision))
         self.propagate(to_propagate, decision)
 
         solver, _, _ = mk_solver(self.translate(decision), {})
         result = solver.check()
         if result == sat:
-            todo = self.literals.keys()
+            todo = self.assignments.keys()
 
             # determine consequences on expanded symbols only (for speed)
             for key in todo:
-                l = self.literals[key]
+                l = self.assignments[key]
                 if ( not l.truth.is_known()
                 and l.has_decision(decision)
                 and self.GUILines[key].is_visible
                 and key in self.get_relevant_subtences(decision) ):
-                    atom = l.subtence
+                    atom = l.sentence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())
                     res1 = solver.check()
@@ -154,15 +154,15 @@ class Case:
 
                             if res2 == unsat:
                                 if type(l) == Term:
-                                    if atom.subtence.decl.out.code == 'bool':
+                                    if atom.sentence.decl.out.code == 'bool':
                                         val1 = Truth.TRUE if val1 else Truth.FALSE
-                                        lit = LiteralQ(val1, atom.subtence)
+                                        ass = Assignment(val1, atom.sentence)
                                     else:
-                                        lit = LiteralQ(Truth.TRUE, Equality(atom.subtence, val1))
+                                        ass = Assignment(Truth.TRUE, Equality(atom.sentence, val1))
                                 else:
-                                    lit = LiteralQ(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
-                                self.literals[key] = lit.mk_consequence()
-                                self.propagate([lit], decision)
+                                    ass = Assignment(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
+                                self.assignments[key] = ass.mk_consequence()
+                                self.propagate([ass], decision)
                             elif res2 == unknown:
                                 res1 = unknown
                     solver.pop()
@@ -170,12 +170,13 @@ class Case:
                         solver, _, _ = mk_solver(self.translate(decision), {})
                         result = solver.check()
         elif result == unsat:
+            print(self.translate(decision))
             raise Exception("Not satisfiable !")
 
     def propagate(self, to_propagate, decision):
         while to_propagate:
-            lit = to_propagate.pop(0)
-            old, new = lit.as_substitution(self)
+            ass = to_propagate.pop(0)
+            old, new = ass.as_substitution(self)
 
             if new is not None:
                 # simplify constraints
@@ -185,35 +186,35 @@ class Case:
                     consequences = self.expr_to_literal(new_constraint)
                     if consequences:
                         for consequence in consequences:
-                            literal = self.literals[consequence.subtence.code]
-                            if not literal.truth.is_known():
-                                literal.truth = consequence.truth
-                                self.literals[consequence.subtence.code] = literal.mk_consequence()
+                            assignment = self.assignments[consequence.sentence.code]
+                            if not assignment.truth.is_known():
+                                assignment.truth = consequence.truth
+                                self.assignments[consequence.sentence.code] = assignment.mk_consequence()
                                 if constraint.has_decision(decision):
-                                    to_propagate.append(literal)
+                                    to_propagate.append(assignment)
                     elif not new_constraint == TRUE:
                         l1.append(new_constraint)
 
                 self.simplified = l1
 
-                # simplify literals
-                for literal in self.literals.values():
-                    if literal != lit and not literal.truth.is_known() and literal.has_decision(decision):
-                        new_constraint = literal.subtence.substitute(old, new)
-                        if new_constraint != literal.subtence: # changed !
-                            literal.subtence = new_constraint
+                # simplify assignments
+                for assignment in self.assignments.values():
+                    if assignment != ass and not assignment.truth.is_known() and assignment.has_decision(decision):
+                        new_constraint = assignment.sentence.substitute(old, new)
+                        if new_constraint != assignment.sentence: # changed !
+                            assignment.sentence = new_constraint
                             if new_constraint in [TRUE, FALSE]:
-                                literal.truth = Truth.CONSEQUENCE | (Truth.TRUE if new_constraint == TRUE else Truth.FALSE)
-                                to_propagate.append(literal)
-                            elif type(literal) == Term:
-                                literal.truth = Truth.CONSEQUENCE | Truth.TRUE
-                                to_propagate.append(literal)
+                                assignment.truth = Truth.CONSEQUENCE | (Truth.TRUE if new_constraint == TRUE else Truth.FALSE)
+                                to_propagate.append(assignment)
+                            elif type(assignment) == Term:
+                                assignment.truth = Truth.CONSEQUENCE | Truth.TRUE
+                                to_propagate.append(assignment)
 
 
     def expr_to_literal(self, expr, truth=Truth.TRUE):
-        # returns a literal for the matching atom in self.GUILines, or []
+        # returns an assignment for the matching atom in self.GUILines, or []
         if expr.code in self.GUILines: # found it !
-            return [LiteralQ(truth, expr)]
+            return [Assignment(truth, expr)]
         if isinstance(expr, Brackets):
             return self.expr_to_literal(expr.sub_exprs[0], truth)
         if isinstance(expr, AUnary) and expr.operator == '~':
@@ -224,7 +225,7 @@ class Case:
         self.translated = And(
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
-            + [l.translate() for k, l in self.literals.items() 
+            + [l.translate() for k, l in self.assignments.items() 
                     if l.truth.is_known() and l.has_decision(decision) 
                     and not type(l) == Term]
             + [c.translate() for c in self.simplified]

@@ -48,9 +48,9 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
     if solver is None:
         solver, reify, unreify = mk_solver(theory, atoms)
 
-    out = {} # {LiteralQ: True}
+    out = {} # {Assignment: True}
     todo = [k for (v,k) in reify.items() \
-            if not LiteralQ(Truth.TRUE, v) in ignored and not LiteralQ(Truth.FALSE, v) in ignored]
+            if not Assignment(Truth.TRUE, v) in ignored and not Assignment(Truth.FALSE, v) in ignored]
 
 
     # try mass propagation first
@@ -68,11 +68,11 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
             if is_eq(consq):
                 symbol = consq.children()[0]
                 if symbol in unreify:
-                    out[ LiteralQ(t, Equality(unreify[symbol], consq.children()[1])) ] = True
+                    out[ Assignment(t, Equality(unreify[symbol], consq.children()[1])) ] = True
                 else:
                     print("???", str(consq))
             elif consq in unreify:
-                out[LiteralQ(t, unreify[consq])] = True
+                out[Assignment(t, unreify[consq])] = True
             else:
                 print("???", str(consq))
         # return out # if non-optimal propagation
@@ -101,11 +101,11 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                     t, consq = False, consq.arg(0)
                 t = Truth.TRUE if t else Truth.FALSE
                 if consq in unreify:
-                    out[LiteralQ(t, unreify[consq])] = True
+                    out[Assignment(t, unreify[consq])] = True
                 elif is_eq(consq):
                     symbol = consq.children()[0]
                     if symbol in unreify:
-                        out[ LiteralQ(t, Equality(unreify[symbol], consq.children()[1])) ] = True
+                        out[ Assignment(t, Equality(unreify[symbol], consq.children()[1])) ] = True
         else: # unknown -> restart solver
             solver, _, unreify = mk_solver(theory, atoms)
 
@@ -122,9 +122,9 @@ def consequences(theory, atoms, ignored, solver=None, reify=None, unreify=None):
                     pass
                 elif result3 == unsat: # atomZ3 can have only one value
                     if is_bool(reified):
-                        out[LiteralQ(Truth.TRUE if is_true(value) else Truth.FALSE, unreify[reified])] = True
+                        out[Assignment(Truth.TRUE if is_true(value) else Truth.FALSE, unreify[reified])] = True
                     else:
-                        out[LiteralQ(Truth.TRUE, Equality(unreify[reified], value))] = True
+                        out[Assignment(Truth.TRUE, Equality(unreify[reified], value))] = True
                 else:
                     print("can't propagate with", Not(reified == value))
     if result2 != sat:

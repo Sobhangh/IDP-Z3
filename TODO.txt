@@ -1,9 +1,6 @@
 To do:
-    Relevance
-        - no need to confirm numeric consequences from environment only
-        - consequence is AND ==> propagate each conjunct
-        - non-linear equations ?
-        - consequences must be in case.simplified ?
+    Relevance:
+        - relevance with definitions
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
         - generate list of constructors
@@ -47,13 +44,15 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
+    - consequence is AND ==> propagate each conjunct
+    - move consequences into case.simplified ?
     - remove .relevant, ct, cf from Structure
-    - separate status from truth and simplify in LiteralQ
-    - merge Case.literals and Case.atoms to be like Structure
+    - separate status from truth and simplify in Assignment
+    - merge Case.assignments and Case.atoms to be like Structure
     - batch substitute in Case.init
     - sort the operands of equality
     - AppliedSymbol is_subtence only if no Fresh_Variable !
-    - Expr.subtence -> Expr.ranking ?
+    - Expr.sentence -> Expr.ranking ?
     - explain: use consequences() for rules too ? or unsat_core for evidences ?
     - avoid quantifiers in definitions
     - do we need Expression.type, if we have Expression.decl ?
