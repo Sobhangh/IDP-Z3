@@ -6,19 +6,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [Unreleased]
-### Added
+### API
 
-* support for named vocabulary ('environment', 'decision')
-* add 'ENV_CONSQ' status, and upgrade GUI accordingly
 * add 'status' (UNKNOWN, GIVEN, UNIVERSAL, ...) to the GET response of /eval
-* add 'environmental' to the GET response of /eval
+* support for separate environment and decision vocabulary, with improved propagation.
+    * add 'ENV_CONSQ' status
+    * add 'environmental' to the GET response of /eval
+
+### GUI
+
+* Improved color coding of buttons.  
+* Hide irrelevant sentences / symbols (for theories without definitions).
+* More compact symbol panel: header is not shown if only one sentence is shown.
+
+### Fixed
+
+* [Issue #2](https://gitlab.com/krr/autoconfigz3/issues/2)
 
 ## [0.2.0] - 2020-01-22
-### Changed
+### API
 
 * 'expanded' is now expected on any 'eval' call.  It contains a list of symbol names. The server will determine if any subtences that contain any of those symbols is a consequence of user's input, and ignore the others (for performance reasons).
 
-* GUI: user's input is used to simplify the theory, before sending it to Z3. This may result in better propagation in some cases.  Later, it will be used to determine relevance.
+### GUI
+
+* user's input is used to simplify the theory, before sending it to Z3. This may result in better propagation in some cases.  Later, it will be used to determine relevance.
 
 ### Fixed
 
