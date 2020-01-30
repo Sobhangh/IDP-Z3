@@ -145,6 +145,10 @@ class ConstructedTypeDeclaration(object):
             self.constructors[1].type = 'bool'
             self.constructors[0].translated = bool(True) 
             self.constructors[1].translated = bool(False)
+        else:
+            self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
+            for c, c3 in zip(self.constructors, cstrs):
+                c.translated = c3
 
         self.type = None
 
@@ -165,10 +169,6 @@ class ConstructedTypeDeclaration(object):
         return None
 
     def translate(self):
-        if self.translated is None:
-            self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
-            for c, c3 in zip(self.constructors, cstrs):
-                c.translated = c3
         return self.translated
 
 

@@ -484,7 +484,7 @@ class AComparison(BinaryOperator):
         if all(e is not None for e in operands1):
             acc = operands1[0]
             for op, expr in zip(self.operator, operands1[1:]):
-                if not (BinaryOperator.MAP[op]) (acc.translated, expr.translated):
+                if not (BinaryOperator.MAP[op]) (acc.translate(), expr.translate()):
                     return FALSE
                 acc = expr
             return TRUE
