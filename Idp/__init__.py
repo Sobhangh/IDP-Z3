@@ -133,6 +133,7 @@ class Decision(Vocabulary):
     pass
 
 class ConstructedTypeDeclaration(object):
+    COUNT = -1
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
@@ -150,6 +151,8 @@ class ConstructedTypeDeclaration(object):
             self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
             for c, c3 in zip(self.constructors, cstrs):
                 c.translated = c3
+                c.index = ConstructedTypeDeclaration.COUNT
+                ConstructedTypeDeclaration.COUNT -= 1
 
         self.type = None
 

@@ -159,6 +159,7 @@ class Constructor(Expression):
         self.name = kwargs.pop('name')
         self.is_var = False
         self.sub_exprs = []
+        self.index = None # int
 
         super().__init__()
         
@@ -167,7 +168,7 @@ class Constructor(Expression):
     def __str__(self): return self.name
     def str_   (self): return self.name
     def annotate(self, symbol_decls, q_decls): return self
-    def as_ground(self): return self
+    def as_ground(self): return self.index
     def translate(self): return self.translated
 
 TRUE  = Constructor(name='true')
@@ -484,7 +485,7 @@ class AComparison(BinaryOperator):
         if all(e is not None for e in operands1):
             acc = operands1[0]
             for op, expr in zip(self.operator, operands1[1:]):
-                if not (BinaryOperator.MAP[op]) (acc.translate(), expr.translate()):
+                if not (BinaryOperator.MAP[op]) (acc, expr):
                     return FALSE
                 acc = expr
             return TRUE
@@ -503,16 +504,16 @@ def update_arith(self, family, new_expr_generator):
         expr1 = expr.as_ground()
         if expr1 is not None:
             if op == '+':
-                acc += expr1.translated
+                acc += expr1
             elif op == '-':
-                acc -= expr1.translated
+                acc -= expr1
             elif op == '*':
-                acc *= expr1.translated
+                acc *= expr1
             elif op == '/':
-                if isinstance(acc, int) and expr1.type == 'int': # integer division
-                    acc //= expr1.translated
+                if isinstance(acc, int) and expr.type == 'int': # integer division
+                    acc //= expr1
                 else:
-                    acc /= expr1.translated
+                    acc /= expr1
         else:
             ops.append(op)
             exprs.append(expr)
@@ -547,7 +548,7 @@ class AMultDiv(BinaryOperator):
             operands1 = [e.as_ground() for e in operands]
             if len(operands) == 2 \
             and all(e is not None for e in operands1):
-                out = operands1[0].translated % operands1[1].translated
+                out = operands1[0] % operands1[1]
                 return NumberConstant(number=str(out))
             else:
                 return operands
@@ -561,7 +562,7 @@ class APower(BinaryOperator):
         operands1 = [e.as_ground() for e in operands]
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
-            out = operands1[0].translated ** operands1[1].translated
+            out = operands1[0] ** operands1[1]
             return NumberConstant(number=str(out))
         else:
             return operands
@@ -857,7 +858,7 @@ class NumberConstant(Expression):
     def __str__(self): return self.number
     def str_   (self): return self.number
 
-    def as_ground(self): return self
+    def as_ground(self): return self.translated
 
     def annotate(self, symbol_decls, q_decls): return self
 
