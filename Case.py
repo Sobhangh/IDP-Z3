@@ -109,6 +109,8 @@ class Case:
         # determine relevant symbols (including defined ones)
         symbols = mergeDicts( e.unknown_symbols() for e in constraints )
         symbols.update({symb.name: symb for d in self.definitions for symb in d.partition})
+        if self.idp.goal.decl is not None:
+            symbols.update({self.idp.goal.decl.name : self.idp.goal.decl})
 
         # remove irrelevant domain conditions
         self.simplified = list(e for e in self.simplified
@@ -192,6 +194,8 @@ class Case:
                                 self.assignments[consequence.sentence.code] = assignment.mk_consequence()
                                 if constraint.has_decision(decision):
                                     to_propagate.append(assignment)
+                            elif assignment.truth.to_bool() != consequence.truth.to_bool():
+                                l1.append(FALSE) # inconsistent !
                     elif not new_constraint == TRUE:
                         l1.append(new_constraint)
 
@@ -199,13 +203,17 @@ class Case:
 
                 # simplify assignments
                 for assignment in self.assignments.values():
-                    if assignment != ass and not assignment.truth.is_known() and assignment.has_decision(decision):
+                    if assignment != ass and assignment.has_decision(decision):
                         new_constraint = assignment.sentence.substitute(old, new)
                         if new_constraint != assignment.sentence: # changed !
                             assignment.sentence = new_constraint
                             if new_constraint in [TRUE, FALSE]:
-                                assignment.truth = Truth.CONSEQUENCE | (Truth.TRUE if new_constraint == TRUE else Truth.FALSE)
-                                to_propagate.append(assignment)
+                                if not assignment.truth.is_known():
+                                    assignment.truth = Truth.CONSEQUENCE | (Truth.TRUE if new_constraint == TRUE else Truth.FALSE)
+                                    to_propagate.append(assignment)
+                                elif (new_constraint==TRUE and not assignment.truth.to_bool()) \
+                                or   (new_constraint==FALSE and    assignment.truth.to_bool()):
+                                    self.simplified = [FALSE] # inconsistent
                             elif type(assignment) == Term:
                                 assignment.truth = Truth.CONSEQUENCE | Truth.TRUE
                                 to_propagate.append(assignment)

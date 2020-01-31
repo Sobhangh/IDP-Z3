@@ -140,7 +140,7 @@ class Equality(object):
         if value is not None:
             self.type = 'bool'
             self.code = sys.intern(f"{sentence.code} = {str(value)}")
-            self.translated = (sentence.translated == value)
+            self.translated = (sentence.translate() == value)
         else:
             self.type = 'int'
             self.code = sys.intern(sentence.code)

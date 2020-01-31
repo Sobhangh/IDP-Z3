@@ -1,6 +1,6 @@
-ForAll(c!247,
-       Implies(Large(c!247),
-               And(And(c!247 >= 1, c!247 <= 4))))
+ForAll(c!249,
+       Implies(Large(c!249),
+               And(And(c!249 >= 1, c!249 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -158,9 +158,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  ForAll(c!247,
-       Implies(Large(c!247),
-               And(And(c!247 >= 1, c!247 <= 4))))
+  ForAll(c!249,
+       Implies(Large(c!249),
+               And(And(c!249 >= 1, c!249 <= 4))))
 Definitions: 
   
 Universals:  

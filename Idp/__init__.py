@@ -58,6 +58,7 @@ class Idp(object):
 
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
+        self.goal.annotate(self.vocabulary)
         log("annotated")
 
         """
@@ -658,9 +659,14 @@ class Tuple(object):
 class Goal(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+        self.decl = None
 
     def __str__(self):
         return self.name
+
+    def annotate(self, vocabulary):
+        if self.name in vocabulary.symbol_decls:
+            self.decl = vocabulary.symbol_decls[self.name]
 
 
 class View(object):

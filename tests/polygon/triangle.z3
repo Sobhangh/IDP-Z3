@@ -1,6 +1,6 @@
-ForAll(c!194,
-       Implies(Large(c!194),
-               And(And(c!194 >= 1, c!194 <= 4))))
+ForAll(c!196,
+       Implies(Large(c!196),
+               And(And(c!196 >= 1, c!196 <= 4))))
 -- theory
 Subtype == regular_triangle
 
@@ -178,9 +178,9 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!194,
-       Implies(Large(c!194),
-               And(And(c!194 >= 1, c!194 <= 4))))
+  ForAll(c!196,
+       Implies(Large(c!196),
+               And(And(c!196 >= 1, c!196 <= 4))))
 Definitions: 
   
 Universals:  

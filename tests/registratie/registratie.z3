@@ -1,115 +1,119 @@
 
 -- theory
-(Tax == 1) ==
-And(Registration_Type == Heritage, Region == Flemish_Region)
+Or(Not(Tax == 1),
+   And(Registration_Type == Heritage,
+       Region == Flemish_Region))
 
-(Tax == 2) ==
-And(Registration_Type == Social_Dwelling,
-    Region == Flemish_Region)
+Or(Not(Tax == 2),
+   And(Registration_Type == Social_Dwelling,
+       Region == Flemish_Region))
 
-(Tax == 4) ==
-And(Registration_Type == Professional_Purchase,
-    Region == Flemish_Region)
+Or(Not(Tax == 4),
+   And(Registration_Type == Professional_Purchase,
+       Region == Flemish_Region))
 
-(Tax == 6) ==
-And(Or(Registration_Type == Energy_Efficient_Dwelling,
-       Registration_Type == Social_Purpose,
-       Registration_Type == Exchange_Unbuilt_Ground),
-    Region == Flemish_Region)
+Or(Not(Tax == 6),
+   And(Or(Registration_Type == Energy_Efficient_Dwelling,
+          Registration_Type == Social_Purpose,
+          Registration_Type == Exchange_Unbuilt_Ground),
+       Region == Flemish_Region))
 
-(Tax == 7) ==
-And(Or(Registration_Type == Family_Dwelling,
-       Registration_Type == Dwelling_For_Social_Renting),
-    Region == Flemish_Region)
+Or(Not(Tax == 7),
+   And(Or(Registration_Type == Family_Dwelling,
+          Registration_Type == Dwelling_For_Social_Renting),
+       Region == Flemish_Region))
 
-(Tax == 10) ==
-And(Region == Flemish_Region, Registration_Type == Other)
+Or(Not(Tax == 10),
+   And(Region == Flemish_Region, Registration_Type == Other))
 
-(Tax == 12) ==
-Or(Region == Brussels_Region, Region == Walloon_Region)
+Or(Not(Tax == 12),
+   Or(Region == Brussels_Region, Region == Walloon_Region))
 
-(Registration_Type == Family_Dwelling) ==
-And(Type_Of_Real_Estate == Residential,
-    Buyer == Natural_Person,
-    Domicile_Established,
-    Clean_Purchase,
-    Or(First_Ownership, Causal_Connection),
-    Or(Not(Energy_Renovation_Planned),
-       Not(Term_Energy_Renovation == 5 + Certification_Date)))
+Or(Not(Registration_Type == Family_Dwelling),
+   And(Type_Of_Real_Estate == Residential,
+       Buyer == Natural_Person,
+       Domicile_Established,
+       Clean_Purchase,
+       Or(First_Ownership, Causal_Connection),
+       Or(Not(Energy_Renovation_Planned),
+          Not(Term_Energy_Renovation ==
+              5 + Certification_Date))))
 
-(Registration_Type == Social_Dwelling) ==
-And(Buyer == Natural_Person,
-    Type_Of_Real_Estate == Residential,
-    Use == Social_Housing,
-    Or(Seller == Vlaamse_Mpy_Voor_Sociaal_Wonen,
-       Seller == ErkendeSocialeHuisvestingsMpy),
-    Mortgage_Loan_Allowance)
+Or(Not(Registration_Type == Social_Dwelling),
+   And(Buyer == Natural_Person,
+       Type_Of_Real_Estate == Residential,
+       Use == Social_Housing,
+       Or(Seller == Vlaamse_Mpy_Voor_Sociaal_Wonen,
+          Seller == ErkendeSocialeHuisvestingsMpy),
+       Mortgage_Loan_Allowance))
 
-(Registration_Type == Energy_Efficient_Dwelling) ==
-And(Type_Of_Real_Estate == Residential,
-    Buyer == Natural_Person,
-    Domicile_Established,
-    Clean_Purchase,
-    Or(First_Ownership, Causal_Connection),
-    Energy_Renovation_Planned,
-    Term_Energy_Renovation == 5 + Certification_Date)
+Or(Not(Registration_Type == Energy_Efficient_Dwelling),
+   And(Type_Of_Real_Estate == Residential,
+       Buyer == Natural_Person,
+       Domicile_Established,
+       Clean_Purchase,
+       Or(First_Ownership, Causal_Connection),
+       Energy_Renovation_Planned,
+       Term_Energy_Renovation == 5 + Certification_Date))
 
-(Registration_Type == Dwelling_For_Social_Renting) ==
-And(Type_Of_Real_Estate == Residential,
-    Use == Social_Renting,
-    Start_Dt_Dwelling_For_Social_Rent ==
-    3 + Certification_Date,
-    Duration_Of_Agreement == Less_Than_9_years)
+Or(Not(Registration_Type == Dwelling_For_Social_Renting),
+   And(Type_Of_Real_Estate == Residential,
+       Use == Social_Renting,
+       Start_Dt_Dwelling_For_Social_Rent ==
+       3 + Certification_Date,
+       Duration_Of_Agreement == Less_Than_9_years))
 
-(Registration_Type == Heritage) ==
-And(Type_Of_Real_Estate == Residential,
-    Monument,
-    Use == As_Family_Dwelling,
-    Heritage_Investment,
-    Heritage_Plan,
-    Additional_Terms)
+Or(Not(Registration_Type == Heritage),
+   And(Type_Of_Real_Estate == Residential,
+       Monument,
+       Use == As_Family_Dwelling,
+       Heritage_Investment,
+       Heritage_Plan,
+       Additional_Terms))
 
-(Registration_Type == Professional_Purchase) ==
-And(Professional_Buyer,
-    Not(Transaction_Type == Public_Sale),
-    Use == For_Resale,
-    Certification_Date_Sale == 8 + Certification_Date)
+Or(Not(Registration_Type == Professional_Purchase),
+   And(Professional_Buyer,
+       Not(Transaction_Type == Public_Sale),
+       Use == For_Resale,
+       Certification_Date_Sale == 8 + Certification_Date))
 
-(Registration_Type == Social_Purpose) ==
-And(Or(Seller == Mpy_Erkend_Door_VMSW,
-       Seller == Vlaams_Woningfonds,
-       Seller == Gelijksoortige_Rechtspersoon_EER),
-    Use == Community_Purpose)
+Or(Not(Registration_Type == Social_Purpose),
+   And(Or(Seller == Mpy_Erkend_Door_VMSW,
+          Seller == Vlaams_Woningfonds,
+          Seller == Gelijksoortige_Rechtspersoon_EER),
+       Use == Community_Purpose))
 
-(Registration_Type == Exchange_Unbuilt_Ground) ==
-And(Additional_Terms, Not(Monument))
+Or(Not(Registration_Type == Exchange_Unbuilt_Ground),
+   And(Additional_Terms, Not(Monument)))
 
-(Registration_Type == Other) ==
-And(Not(Registration_Type == Family_Dwelling),
-    Not(Registration_Type == Social_Dwelling),
-    Not(Registration_Type == Energy_Efficient_Dwelling),
-    Not(Registration_Type == Dwelling_For_Social_Renting),
-    Not(Registration_Type == Heritage),
-    Not(Registration_Type == Professional_Purchase),
-    Not(Registration_Type == Social_Purpose),
-    Not(Registration_Type == Exchange_Unbuilt_Ground))
+Or(Not(Registration_Type == Other),
+   And(Not(Registration_Type == Family_Dwelling),
+       Not(Registration_Type == Social_Dwelling),
+       Not(Registration_Type == Energy_Efficient_Dwelling),
+       Not(Registration_Type == Dwelling_For_Social_Renting),
+       Not(Registration_Type == Heritage),
+       Not(Registration_Type == Professional_Purchase),
+       Not(Registration_Type == Social_Purpose),
+       Not(Registration_Type == Exchange_Unbuilt_Ground)))
 
-Or(Not(Municipality == other_Municipal), Not(Core_City))
-
-Or(Not(Not(Municipality == other_Municipal)), Core_City)
-
-Professional_Buyer ==
-And(Professional_Declaration_Filed,
-    Guarantee_Satisfied,
-    Or(And(Additional_Security_Required,
-           Additional_Security_Satisfied),
-       Not(Additional_Security_Required)),
-    Resale == Three_Or_More)
+Or(Not(Professional_Buyer),
+   And(Professional_Declaration_Filed,
+       Guarantee_Satisfied,
+       Or(And(Additional_Security_Required,
+              Additional_Security_Satisfied),
+          Not(Additional_Security_Required)),
+       Resale == Three_Or_More))
 
 And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
     Start_Dt_Dwelling_For_Social_Rent <= 2025)
 
 And(Certification_Date >= 2015, Certification_Date <= 2025)
+
+And(Term_Energy_Renovation >= 2015,
+    Term_Energy_Renovation <= 2025)
+
+And(Certification_Date_Sale >= 2015,
+    Certification_Date_Sale <= 2025)
 
 Or(Tax == 1,
    Tax == 2,
@@ -118,12 +122,6 @@ Or(Tax == 1,
    Tax == 6,
    Tax == 10,
    Tax == 12)
-
-And(Term_Energy_Renovation >= 2015,
-    Term_Energy_Renovation <= 2025)
-
-And(Certification_Date_Sale >= 2015,
-    Certification_Date_Sale <= 2025)
 
 -- atoms
 Region
@@ -152,11 +150,11 @@ Additional_Security_Satisfied
 Additional_Terms
 Start_Dt_Dwelling_For_Social_Rent
 Certification_Date
-Tax
 Term_Energy_Renovation
 Certification_Date_Sale
-Registration_Type
 Professional_Buyer
+Registration_Type
+Tax
 Tax = 1
 Registration_Type = Heritage
 Region = Flemish_Region
@@ -193,7 +191,6 @@ Seller = Mpy_Erkend_Door_VMSW
 Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
 Use = Community_Purpose
-Municipality = other_Municipal
 Resale = Three_Or_More
 
 -- case
@@ -206,30 +203,28 @@ Universals:
 Consequences:
   
 Simplified:  
-  ((Tax = 1) ⇔ ((Registration_Type = Heritage) ∧ (Region = Flemish_Region)))
-  (Tax = 2) ⇔ ((Registration_Type = Social_Dwelling) ∧ (Region = Flemish_Region))
-  (Tax = 4) ⇔ ((Registration_Type = Professional_Purchase) ∧ (Region = Flemish_Region))
-  ((Tax = 6) ⇔ (((Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground)) ∧ (Region = Flemish_Region)))
-  (Tax = 7) ⇔ (((Registration_Type = Family_Dwelling) ∨ (Registration_Type = Dwelling_For_Social_Renting)) ∧ (Region = Flemish_Region))
-  (Tax = 10) ⇔ ((Region = Flemish_Region) ∧ (Registration_Type = Other))
-  ((Tax = 12) ⇔ ((Region = Brussels_Region) ∨ (Region = Walloon_Region)))
-  (Registration_Type = Family_Dwelling) ⇔ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ ((~(Energy_Renovation_Planned)) ∨ (~(Term_Energy_Renovation = (5 + Certification_Date)))))
-  (Registration_Type = Social_Dwelling) ⇔ ((Buyer = Natural_Person) ∧ (Type_Of_Real_Estate = Residential) ∧ (Use = Social_Housing) ∧ ((Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen) ∨ (Seller = ErkendeSocialeHuisvestingsMpy)) ∧ Mortgage_Loan_Allowance)
-  (Registration_Type = Energy_Efficient_Dwelling) ⇔ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ (Term_Energy_Renovation = (5 + Certification_Date)))
-  (Registration_Type = Dwelling_For_Social_Renting) ⇔ ((Type_Of_Real_Estate = Residential) ∧ (Use = Social_Renting) ∧ (Start_Dt_Dwelling_For_Social_Rent = (3 + Certification_Date)) ∧ (Duration_Of_Agreement = Less_Than_9_years))
-  ((Registration_Type = Heritage) ⇔ ((Type_Of_Real_Estate = Residential) ∧ Monument ∧ (Use = As_Family_Dwelling) ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms))
-  (Registration_Type = Professional_Purchase) ⇔ (Professional_Buyer ∧ (~(Transaction_Type = Public_Sale)) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (8 + Certification_Date)))
-  ((Registration_Type = Social_Purpose) ⇔ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
-  (Registration_Type = Exchange_Unbuilt_Ground) ⇔ (Additional_Terms ∧ (~(Monument)))
-  (Registration_Type = Other) ⇔ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Professional_Purchase)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
-  (Municipality = other_Municipal) ⇒ (~(Core_City))
-  (~(Municipality = other_Municipal)) ⇒ Core_City
-  Professional_Buyer ⇔ (Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More))
+  ((Tax = 1) ⇒ ((Registration_Type = Heritage) ∧ (Region = Flemish_Region)))
+  (Tax = 2) ⇒ ((Registration_Type = Social_Dwelling) ∧ (Region = Flemish_Region))
+  (Tax = 4) ⇒ ((Registration_Type = Professional_Purchase) ∧ (Region = Flemish_Region))
+  ((Tax = 6) ⇒ (((Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground)) ∧ (Region = Flemish_Region)))
+  (Tax = 7) ⇒ (((Registration_Type = Family_Dwelling) ∨ (Registration_Type = Dwelling_For_Social_Renting)) ∧ (Region = Flemish_Region))
+  (Tax = 10) ⇒ ((Region = Flemish_Region) ∧ (Registration_Type = Other))
+  ((Tax = 12) ⇒ ((Region = Brussels_Region) ∨ (Region = Walloon_Region)))
+  (Registration_Type = Family_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ ((~(Energy_Renovation_Planned)) ∨ (~(Term_Energy_Renovation = (5 + Certification_Date)))))
+  (Registration_Type = Social_Dwelling) ⇒ ((Buyer = Natural_Person) ∧ (Type_Of_Real_Estate = Residential) ∧ (Use = Social_Housing) ∧ ((Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen) ∨ (Seller = ErkendeSocialeHuisvestingsMpy)) ∧ Mortgage_Loan_Allowance)
+  (Registration_Type = Energy_Efficient_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ (Term_Energy_Renovation = (5 + Certification_Date)))
+  (Registration_Type = Dwelling_For_Social_Renting) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Use = Social_Renting) ∧ (Start_Dt_Dwelling_For_Social_Rent = (3 + Certification_Date)) ∧ (Duration_Of_Agreement = Less_Than_9_years))
+  ((Registration_Type = Heritage) ⇒ ((Type_Of_Real_Estate = Residential) ∧ Monument ∧ (Use = As_Family_Dwelling) ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms))
+  (Registration_Type = Professional_Purchase) ⇒ (Professional_Buyer ∧ (~(Transaction_Type = Public_Sale)) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (8 + Certification_Date)))
+  ((Registration_Type = Social_Purpose) ⇒ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
+  (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
+  (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Professional_Purchase)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
+  Professional_Buyer ⇒ (Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More))
   2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
   2015 ≤ Certification_Date ≤ 2025
-  (1 = Tax) ∨ (2 = Tax) ∨ (4 = Tax) ∨ (7 = Tax) ∨ (6 = Tax) ∨ (10 = Tax) ∨ (12 = Tax)
   2015 ≤ Term_Energy_Renovation ≤ 2025
   2015 ≤ Certification_Date_Sale ≤ 2025
+  (1 = Tax) ∨ (2 = Tax) ∨ (4 = Tax) ∨ (7 = Tax) ∨ (6 = Tax) ∨ (10 = Tax) ∨ (12 = Tax)
 Irrelevant:  
   
 
@@ -237,7 +232,7 @@ Irrelevant:
 -- propagation
 {'Additional_Security_Required': {'Additional_Security_Required': {'cf': False,
                                                                    'ct': False,
-                                                                   'environmental': False,
+                                                                   'environmental': True,
                                                                    'irrelevant': False,
                                                                    'normal': True,
                                                                    'reading': 'Additional_Security_Required',
@@ -245,7 +240,7 @@ Irrelevant:
                                                                    'typ': 'Bool'}},
  'Additional_Security_Satisfied': {'Additional_Security_Satisfied': {'cf': False,
                                                                      'ct': False,
-                                                                     'environmental': False,
+                                                                     'environmental': True,
                                                                      'irrelevant': False,
                                                                      'normal': True,
                                                                      'reading': 'Additional_Security_Satisfied',
@@ -253,13 +248,13 @@ Irrelevant:
                                                                      'typ': 'Bool'}},
  'Additional_Terms': {'Additional_Terms': {'cf': False,
                                            'ct': False,
-                                           'environmental': False,
+                                           'environmental': True,
                                            'irrelevant': False,
                                            'normal': True,
                                            'reading': 'Additional_Terms',
                                            'status': 'UNKNOWN',
                                            'typ': 'Bool'}},
- 'Buyer': {'Buyer': {'environmental': False,
+ 'Buyer': {'Buyer': {'environmental': True,
                      'irrelevant': False,
                      'normal': True,
                      'reading': 'Buyer',
@@ -269,7 +264,7 @@ Irrelevant:
                      'values': ['Natural_Person', 'Legal_Person', 'Mixed']},
            'Buyer = Natural_Person': {'cf': False,
                                       'ct': False,
-                                      'environmental': False,
+                                      'environmental': True,
                                       'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Buyer = Natural_Person',
@@ -277,13 +272,13 @@ Irrelevant:
                                       'typ': 'Bool'}},
  'Causal_Connection': {'Causal_Connection': {'cf': False,
                                              'ct': False,
-                                             'environmental': False,
+                                             'environmental': True,
                                              'irrelevant': False,
                                              'normal': True,
                                              'reading': 'Causal_Connection',
                                              'status': 'UNKNOWN',
                                              'typ': 'Bool'}},
- 'Certification_Date': {'Certification_Date': {'environmental': False,
+ 'Certification_Date': {'Certification_Date': {'environmental': True,
                                                'irrelevant': False,
                                                'normal': True,
                                                'reading': 'Certification_Date',
@@ -301,7 +296,7 @@ Irrelevant:
                                                           '2023',
                                                           '2024',
                                                           '2025']}},
- 'Certification_Date_Sale': {'Certification_Date_Sale': {'environmental': False,
+ 'Certification_Date_Sale': {'Certification_Date_Sale': {'environmental': True,
                                                          'irrelevant': False,
                                                          'normal': True,
                                                          'reading': 'Certification_Date_Sale',
@@ -321,7 +316,7 @@ Irrelevant:
                                                                     '2025']},
                              'Certification_Date_Sale = (Certification_Date + 8)': {'cf': False,
                                                                                     'ct': False,
-                                                                                    'environmental': False,
+                                                                                    'environmental': True,
                                                                                     'irrelevant': False,
                                                                                     'normal': False,
                                                                                     'reading': 'Certification_Date_Sale '
@@ -331,7 +326,7 @@ Irrelevant:
                                                                                     'typ': 'Bool'}},
  'Clean_Purchase': {'Clean_Purchase': {'cf': False,
                                        'ct': False,
-                                       'environmental': False,
+                                       'environmental': True,
                                        'irrelevant': False,
                                        'normal': True,
                                        'reading': 'Clean_Purchase',
@@ -339,21 +334,21 @@ Irrelevant:
                                        'typ': 'Bool'}},
  'Core_City': {'Core_City': {'cf': False,
                              'ct': False,
-                             'environmental': False,
-                             'irrelevant': False,
+                             'environmental': True,
+                             'irrelevant': True,
                              'normal': True,
                              'reading': 'Core_City',
-                             'status': 'UNKNOWN',
+                             'status': 'IRRELEVANT',
                              'typ': 'Bool'}},
  'Domicile_Established': {'Domicile_Established': {'cf': False,
                                                    'ct': False,
-                                                   'environmental': False,
+                                                   'environmental': True,
                                                    'irrelevant': False,
                                                    'normal': True,
                                                    'reading': 'Domicile_Established',
                                                    'status': 'UNKNOWN',
                                                    'typ': 'Bool'}},
- 'Duration_Of_Agreement': {'Duration_Of_Agreement': {'environmental': False,
+ 'Duration_Of_Agreement': {'Duration_Of_Agreement': {'environmental': True,
                                                      'irrelevant': False,
                                                      'normal': True,
                                                      'reading': 'Duration_Of_Agreement',
@@ -363,7 +358,7 @@ Irrelevant:
                                                      'values': ['Less_Than_9_years', 'More_than_9_Or_9_years']},
                            'Duration_Of_Agreement = Less_Than_9_years': {'cf': False,
                                                                          'ct': False,
-                                                                         'environmental': False,
+                                                                         'environmental': True,
                                                                          'irrelevant': False,
                                                                          'normal': False,
                                                                          'reading': 'Duration_Of_Agreement = '
@@ -372,7 +367,7 @@ Irrelevant:
                                                                          'typ': 'Bool'}},
  'Energy_Renovation_Planned': {'Energy_Renovation_Planned': {'cf': False,
                                                              'ct': False,
-                                                             'environmental': False,
+                                                             'environmental': True,
                                                              'irrelevant': False,
                                                              'normal': True,
                                                              'reading': 'Energy_Renovation_Planned',
@@ -380,7 +375,7 @@ Irrelevant:
                                                              'typ': 'Bool'}},
  'First_Ownership': {'First_Ownership': {'cf': False,
                                          'ct': False,
-                                         'environmental': False,
+                                         'environmental': True,
                                          'irrelevant': False,
                                          'normal': True,
                                          'reading': 'First_Ownership',
@@ -388,7 +383,7 @@ Irrelevant:
                                          'typ': 'Bool'}},
  'Guarantee_Satisfied': {'Guarantee_Satisfied': {'cf': False,
                                                  'ct': False,
-                                                 'environmental': False,
+                                                 'environmental': True,
                                                  'irrelevant': False,
                                                  'normal': True,
                                                  'reading': 'Guarantee_Satisfied',
@@ -396,7 +391,7 @@ Irrelevant:
                                                  'typ': 'Bool'}},
  'Heritage_Investment': {'Heritage_Investment': {'cf': False,
                                                  'ct': False,
-                                                 'environmental': False,
+                                                 'environmental': True,
                                                  'irrelevant': False,
                                                  'normal': True,
                                                  'reading': 'Heritage_Investment',
@@ -404,7 +399,7 @@ Irrelevant:
                                                  'typ': 'Bool'}},
  'Heritage_Plan': {'Heritage_Plan': {'cf': False,
                                      'ct': False,
-                                     'environmental': False,
+                                     'environmental': True,
                                      'irrelevant': False,
                                      'normal': True,
                                      'reading': 'Heritage_Plan',
@@ -412,7 +407,7 @@ Irrelevant:
                                      'typ': 'Bool'}},
  'Monument': {'Monument': {'cf': False,
                            'ct': False,
-                           'environmental': False,
+                           'environmental': True,
                            'irrelevant': False,
                            'normal': True,
                            'reading': 'Monument',
@@ -420,17 +415,17 @@ Irrelevant:
                            'typ': 'Bool'}},
  'Mortgage_Loan_Allowance': {'Mortgage_Loan_Allowance': {'cf': False,
                                                          'ct': False,
-                                                         'environmental': False,
+                                                         'environmental': True,
                                                          'irrelevant': False,
                                                          'normal': True,
                                                          'reading': 'Mortgage_Loan_Allowance',
                                                          'status': 'UNKNOWN',
                                                          'typ': 'Bool'}},
- 'Municipality': {'Municipality': {'environmental': False,
-                                   'irrelevant': False,
+ 'Municipality': {'Municipality': {'environmental': True,
+                                   'irrelevant': True,
                                    'normal': True,
                                    'reading': 'Municipality',
-                                   'status': 'UNKNOWN',
+                                   'status': 'IRRELEVANT',
                                    'typ': 'municipality',
                                    'value': '',
                                    'values': ['other_Municipal',
@@ -487,18 +482,10 @@ Irrelevant:
                                               'Bertem',
                                               'Huldenberg',
                                               'Kortenberg',
-                                              'Tervuren']},
-                  'Municipality = other_Municipal': {'cf': False,
-                                                     'ct': False,
-                                                     'environmental': False,
-                                                     'irrelevant': False,
-                                                     'normal': False,
-                                                     'reading': 'Municipality = other_Municipal',
-                                                     'status': 'UNKNOWN',
-                                                     'typ': 'Bool'}},
+                                              'Tervuren']}},
  'Professional_Buyer': {'Professional_Buyer': {'cf': False,
                                                'ct': False,
-                                               'environmental': False,
+                                               'environmental': True,
                                                'irrelevant': False,
                                                'normal': True,
                                                'reading': 'Professional_Buyer',
@@ -506,13 +493,13 @@ Irrelevant:
                                                'typ': 'Bool'}},
  'Professional_Declaration_Filed': {'Professional_Declaration_Filed': {'cf': False,
                                                                        'ct': False,
-                                                                       'environmental': False,
+                                                                       'environmental': True,
                                                                        'irrelevant': False,
                                                                        'normal': True,
                                                                        'reading': 'Professional_Declaration_Filed',
                                                                        'status': 'UNKNOWN',
                                                                        'typ': 'Bool'}},
- 'Region': {'Region': {'environmental': False,
+ 'Region': {'Region': {'environmental': True,
                        'irrelevant': False,
                        'normal': True,
                        'reading': 'Region',
@@ -522,7 +509,7 @@ Irrelevant:
                        'values': ['Flemish_Region', 'Walloon_Region', 'Brussels_Region']},
             'Region = Brussels_Region': {'cf': False,
                                          'ct': False,
-                                         'environmental': False,
+                                         'environmental': True,
                                          'irrelevant': False,
                                          'normal': False,
                                          'reading': 'Region = Brussels_Region',
@@ -530,7 +517,7 @@ Irrelevant:
                                          'typ': 'Bool'},
             'Region = Flemish_Region': {'cf': False,
                                         'ct': False,
-                                        'environmental': False,
+                                        'environmental': True,
                                         'irrelevant': False,
                                         'normal': False,
                                         'reading': 'Region = Flemish_Region',
@@ -538,7 +525,7 @@ Irrelevant:
                                         'typ': 'Bool'},
             'Region = Walloon_Region': {'cf': False,
                                         'ct': False,
-                                        'environmental': False,
+                                        'environmental': True,
                                         'irrelevant': False,
                                         'normal': False,
                                         'reading': 'Region = Walloon_Region',
@@ -636,7 +623,7 @@ Irrelevant:
                                                               'reading': 'Registration_Type = Social_Purpose',
                                                               'status': 'UNKNOWN',
                                                               'typ': 'Bool'}},
- 'Resale': {'Resale': {'environmental': False,
+ 'Resale': {'Resale': {'environmental': True,
                        'irrelevant': False,
                        'normal': True,
                        'reading': 'Resale',
@@ -646,13 +633,13 @@ Irrelevant:
                        'values': ['Less_Than_Three', 'Three_Or_More']},
             'Resale = Three_Or_More': {'cf': False,
                                        'ct': False,
-                                       'environmental': False,
+                                       'environmental': True,
                                        'irrelevant': False,
                                        'normal': False,
                                        'reading': 'Resale = Three_Or_More',
                                        'status': 'UNKNOWN',
                                        'typ': 'Bool'}},
- 'Seller': {'Seller': {'environmental': False,
+ 'Seller': {'Seller': {'environmental': True,
                        'irrelevant': False,
                        'normal': True,
                        'reading': 'Seller',
@@ -666,7 +653,7 @@ Irrelevant:
                                   'ErkendeSocialeHuisvestingsMpy']},
             'Seller = ErkendeSocialeHuisvestingsMpy': {'cf': False,
                                                        'ct': False,
-                                                       'environmental': False,
+                                                       'environmental': True,
                                                        'irrelevant': False,
                                                        'normal': False,
                                                        'reading': 'Seller = ErkendeSocialeHuisvestingsMpy',
@@ -674,7 +661,7 @@ Irrelevant:
                                                        'typ': 'Bool'},
             'Seller = Gelijksoortige_Rechtspersoon_EER': {'cf': False,
                                                           'ct': False,
-                                                          'environmental': False,
+                                                          'environmental': True,
                                                           'irrelevant': False,
                                                           'normal': False,
                                                           'reading': 'Seller = Gelijksoortige_Rechtspersoon_EER',
@@ -682,7 +669,7 @@ Irrelevant:
                                                           'typ': 'Bool'},
             'Seller = Mpy_Erkend_Door_VMSW': {'cf': False,
                                               'ct': False,
-                                              'environmental': False,
+                                              'environmental': True,
                                               'irrelevant': False,
                                               'normal': False,
                                               'reading': 'Seller = Mpy_Erkend_Door_VMSW',
@@ -690,7 +677,7 @@ Irrelevant:
                                               'typ': 'Bool'},
             'Seller = Vlaams_Woningfonds': {'cf': False,
                                             'ct': False,
-                                            'environmental': False,
+                                            'environmental': True,
                                             'irrelevant': False,
                                             'normal': False,
                                             'reading': 'Seller = Vlaams_Woningfonds',
@@ -698,13 +685,13 @@ Irrelevant:
                                             'typ': 'Bool'},
             'Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen': {'cf': False,
                                                         'ct': False,
-                                                        'environmental': False,
+                                                        'environmental': True,
                                                         'irrelevant': False,
                                                         'normal': False,
                                                         'reading': 'Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen',
                                                         'status': 'UNKNOWN',
                                                         'typ': 'Bool'}},
- 'Start_Dt_Dwelling_For_Social_Rent': {'Start_Dt_Dwelling_For_Social_Rent': {'environmental': False,
+ 'Start_Dt_Dwelling_For_Social_Rent': {'Start_Dt_Dwelling_For_Social_Rent': {'environmental': True,
                                                                              'irrelevant': False,
                                                                              'normal': True,
                                                                              'reading': 'Start_Dt_Dwelling_For_Social_Rent',
@@ -724,7 +711,7 @@ Irrelevant:
                                                                                         '2025']},
                                        'Start_Dt_Dwelling_For_Social_Rent = (Certification_Date + 3)': {'cf': False,
                                                                                                         'ct': False,
-                                                                                                        'environmental': False,
+                                                                                                        'environmental': True,
                                                                                                         'irrelevant': False,
                                                                                                         'normal': False,
                                                                                                         'reading': 'Start_Dt_Dwelling_For_Social_Rent '
@@ -798,7 +785,7 @@ Irrelevant:
                      'reading': 'Tax = 7',
                      'status': 'UNKNOWN',
                      'typ': 'Bool'}},
- 'Term_Energy_Renovation': {'Term_Energy_Renovation': {'environmental': False,
+ 'Term_Energy_Renovation': {'Term_Energy_Renovation': {'environmental': True,
                                                        'irrelevant': False,
                                                        'normal': True,
                                                        'reading': 'Term_Energy_Renovation',
@@ -818,14 +805,14 @@ Irrelevant:
                                                                   '2025']},
                             'Term_Energy_Renovation = (Certification_Date + 5)': {'cf': False,
                                                                                   'ct': False,
-                                                                                  'environmental': False,
+                                                                                  'environmental': True,
                                                                                   'irrelevant': False,
                                                                                   'normal': False,
                                                                                   'reading': 'Term_Energy_Renovation = '
                                                                                              '(Certification_Date + 5)',
                                                                                   'status': 'UNKNOWN',
                                                                                   'typ': 'Bool'}},
- 'Transaction_Type': {'Transaction_Type': {'environmental': False,
+ 'Transaction_Type': {'Transaction_Type': {'environmental': True,
                                            'irrelevant': False,
                                            'normal': True,
                                            'reading': 'Transaction_Type',
@@ -835,13 +822,13 @@ Irrelevant:
                                            'values': ['Public_Sale', 'Out_Hand', 'Public_Sale_Community']},
                       'Transaction_Type = Public_Sale': {'cf': False,
                                                          'ct': False,
-                                                         'environmental': False,
+                                                         'environmental': True,
                                                          'irrelevant': False,
                                                          'normal': False,
                                                          'reading': 'Transaction_Type = Public_Sale',
                                                          'status': 'UNKNOWN',
                                                          'typ': 'Bool'}},
- 'Type_Of_Real_Estate': {'Type_Of_Real_Estate': {'environmental': False,
+ 'Type_Of_Real_Estate': {'Type_Of_Real_Estate': {'environmental': True,
                                                  'irrelevant': False,
                                                  'normal': True,
                                                  'reading': 'Type_Of_Real_Estate',
@@ -853,13 +840,13 @@ Irrelevant:
                                                             'Other_Real_Estate']},
                          'Type_Of_Real_Estate = Residential': {'cf': False,
                                                                'ct': False,
-                                                               'environmental': False,
+                                                               'environmental': True,
                                                                'irrelevant': False,
                                                                'normal': False,
                                                                'reading': 'Type_Of_Real_Estate = Residential',
                                                                'status': 'UNKNOWN',
                                                                'typ': 'Bool'}},
- 'Use': {'Use': {'environmental': False,
+ 'Use': {'Use': {'environmental': True,
                  'irrelevant': False,
                  'normal': True,
                  'reading': 'Use',
@@ -875,7 +862,7 @@ Irrelevant:
                             'No_House']},
          'Use = As_Family_Dwelling': {'cf': False,
                                       'ct': False,
-                                      'environmental': False,
+                                      'environmental': True,
                                       'irrelevant': False,
                                       'normal': False,
                                       'reading': 'Use = As_Family_Dwelling',
@@ -883,7 +870,7 @@ Irrelevant:
                                       'typ': 'Bool'},
          'Use = Community_Purpose': {'cf': False,
                                      'ct': False,
-                                     'environmental': False,
+                                     'environmental': True,
                                      'irrelevant': False,
                                      'normal': False,
                                      'reading': 'Use = Community_Purpose',
@@ -891,7 +878,7 @@ Irrelevant:
                                      'typ': 'Bool'},
          'Use = For_Resale': {'cf': False,
                               'ct': False,
-                              'environmental': False,
+                              'environmental': True,
                               'irrelevant': False,
                               'normal': False,
                               'reading': 'Use = For_Resale',
@@ -899,7 +886,7 @@ Irrelevant:
                               'typ': 'Bool'},
          'Use = Social_Housing': {'cf': False,
                                   'ct': False,
-                                  'environmental': False,
+                                  'environmental': True,
                                   'irrelevant': False,
                                   'normal': False,
                                   'reading': 'Use = Social_Housing',
@@ -907,7 +894,7 @@ Irrelevant:
                                   'typ': 'Bool'},
          'Use = Social_Renting': {'cf': False,
                                   'ct': False,
-                                  'environmental': False,
+                                  'environmental': True,
                                   'irrelevant': False,
                                   'normal': False,
                                   'reading': 'Use = Social_Renting',

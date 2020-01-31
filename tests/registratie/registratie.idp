@@ -1,9 +1,5 @@
-vocabulary {
+vocabulary environment {
 type location constructed from {Flemish_Region, Walloon_Region, Brussels_Region}
-
-type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
-
-type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
 
 type real_Estate_Type constructed from {Residential, Residential_Building_Land, Other_Real_Estate}
 
@@ -76,15 +72,21 @@ Additional_Terms
 Start_Dt_Dwelling_For_Social_Rent : date
 
 Certification_Date : date
-Tax : tax_Rate
 
 Term_Energy_Renovation : date
 Certification_Date_Sale : date
 //DomicileDate : date
 
-Registration_Type : registration_Type
 //IsDiscount: DiscountType
 Professional_Buyer
+}
+
+vocabulary decision {
+type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
+type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
+
+Registration_Type : registration_Type
+Tax : tax_Rate
 }
 
 theory {
@@ -92,42 +94,42 @@ theory {
      // Tax
 
 [Registration rate for heritage in Flemish Region is 1%.](
-Tax = 1 <=>
+Tax = 1 =>
     Registration_Type = Heritage
     & Region = Flemish_Region
 ).
 
-Tax = 2 <=> // correct amount is 1; 5
+Tax = 2 => // correct amount is 1; 5
     Registration_Type = Social_Dwelling
     & Region = Flemish_Region
 .
 
-Tax = 4 <=>
+Tax = 4 =>
     Registration_Type = Professional_Purchase
     & Region = Flemish_Region
 .
 
 [The tax rate is 6% for social purpose sales in the Flemish Region.]
-(Tax = 6 <=>
+(Tax = 6 =>
     (Registration_Type = Energy_Efficient_Dwelling
     | Registration_Type = Social_Purpose
     | Registration_Type = Exchange_Unbuilt_Ground)
     & Region = Flemish_Region
 ).
 
-Tax = 7 <=>
+Tax = 7 =>
     (Registration_Type = Family_Dwelling
     | Registration_Type = Dwelling_For_Social_Renting)
     & Region = Flemish_Region
 .
 
-Tax = 10 <=>
+Tax = 10 =>
     Region = Flemish_Region
     & Registration_Type = Other
 .
 
 [The tax rate is 12% only in Brussels and Wallonia](
-Tax = 12 <=>
+Tax = 12 =>
     Region = Brussels_Region
     | Region = Walloon_Region
 ).
@@ -138,7 +140,7 @@ Tax = 12 <=>
 // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
 
 
-Registration_Type = Family_Dwelling <=>
+Registration_Type = Family_Dwelling =>
     Type_Of_Real_Estate = Residential
     & Buyer = Natural_Person
     & Domicile_Established
@@ -147,7 +149,7 @@ Registration_Type = Family_Dwelling <=>
     & (~ Energy_Renovation_Planned | Term_Energy_Renovation ~= Certification_Date + 5)
 .
 
-Registration_Type = Social_Dwelling <=>     
+Registration_Type = Social_Dwelling =>     
     Buyer = Natural_Person
     & Type_Of_Real_Estate = Residential
     & Use = Social_Housing
@@ -155,7 +157,7 @@ Registration_Type = Social_Dwelling <=>
     & Mortgage_Loan_Allowance
 .
 
-Registration_Type = Energy_Efficient_Dwelling <=>
+Registration_Type = Energy_Efficient_Dwelling =>
     Type_Of_Real_Estate = Residential
     & Buyer = Natural_Person
     & Domicile_Established
@@ -165,7 +167,7 @@ Registration_Type = Energy_Efficient_Dwelling <=>
     & Term_Energy_Renovation = Certification_Date + 5
 .
 
-Registration_Type = Dwelling_For_Social_Renting <=>
+Registration_Type = Dwelling_For_Social_Renting =>
     Type_Of_Real_Estate = Residential
     & Use = Social_Renting
     & Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3
@@ -173,7 +175,7 @@ Registration_Type = Dwelling_For_Social_Renting <=>
 .
 
 [An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
-(Registration_Type = Heritage <=>
+(Registration_Type = Heritage =>
     Type_Of_Real_Estate = Residential
     & Monument
     & Use = As_Family_Dwelling
@@ -182,7 +184,7 @@ Registration_Type = Dwelling_For_Social_Renting <=>
     & Additional_Terms)
 .
 
-Registration_Type = Professional_Purchase <=> 
+Registration_Type = Professional_Purchase => 
     Professional_Buyer
     & Transaction_Type  ~= Public_Sale
     & Use = For_Resale
@@ -190,18 +192,18 @@ Registration_Type = Professional_Purchase <=>
 .
 
 [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.](
-Registration_Type = Social_Purpose <=>     
+Registration_Type = Social_Purpose =>     
     (Seller = Mpy_Erkend_Door_VMSW
     | Seller = Vlaams_Woningfonds
     | Seller = Gelijksoortige_Rechtspersoon_EER)
     & Use = Community_Purpose
 ).
 
-Registration_Type = Exchange_Unbuilt_Ground <=> 
+Registration_Type = Exchange_Unbuilt_Ground => 
     Additional_Terms
     & ~Monument.
 
-Registration_Type = Other <=>     // @EXPLAIN: Registration_Type cannot be Other
+Registration_Type = Other =>     // @EXPLAIN: Registration_Type cannot be Other
     Registration_Type ~= Family_Dwelling
     & Registration_Type ~= Social_Dwelling
     & Registration_Type ~= Energy_Efficient_Dwelling
@@ -216,13 +218,10 @@ Registration_Type = Other <=>     // @EXPLAIN: Registration_Type cannot be Other
 //? x[registration_Type]: Registration_Type = x.
 
 
-Municipality = other_Municipal => ~ Core_City.
-
-Municipality ~= other_Municipal => Core_City.
 
 
     
-Professional_Buyer <=>
+Professional_Buyer =>
     Professional_Declaration_Filed
     & Guarantee_Satisfied
     & (Additional_Security_Required & Additional_Security_Satisfied
