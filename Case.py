@@ -69,18 +69,18 @@ class Case:
             for k, t in idp.vocabulary.terms.items()
             if k not in self.assignments })
 
-        if idp.decision:
+        if idp.decision: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
-            self.full_propagate(decision=None)
+            self.full_propagate(all_=False)
             # convert CONSEQUENCEs into ENV_CONSQs
             for key, assignment in self.assignments.items():
                 if assignment.is_consequence():
                     self.assignments[key] = assignment.mk_env_consq()
         # now consider all facts and theories
-        self.full_propagate(decision=True)
+        self.full_propagate(all_=True)
 
         # determine relevant symbols
-        relevant_subtences = self.get_relevant_subtences(decision=True)
+        relevant_subtences = self.get_relevant_subtences(all_=True)
 
         for k, l in self.assignments.items():
             if (k in relevant_subtences) or self.definitions: #TODO support for definitions
@@ -97,11 +97,11 @@ class Case:
                 f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if c.is_irrelevant() and type(c) != Term)}{nl}"
         )
 
-    def get_relevant_subtences(self, decision):
+    def get_relevant_subtences(self, all_):
         #TODO performance.  This method is called many times !
         constraints = (
             [l.sentence for k, l in self.assignments.items() 
-                    if l.truth.is_known() and l.has_decision(decision) 
+                    if l.truth.is_known() and (all_ or l.is_environmental) 
                     and not type(l) == Term]
             + [e for e in self.simplified]
             + [r.body for d in self.definitions for symb in d.partition.values() for r in symb])
@@ -123,14 +123,14 @@ class Case:
         relevant_subtences.update(mergeDicts(s.instances for s in symbols.values()))
         return relevant_subtences
 
-    def full_propagate(self, decision):
+    def full_propagate(self, all_):
 
         # simplify all using given and universals
         to_propagate = list(l for l in self.assignments.values() 
-            if l.truth.is_known() and l.has_decision(decision))
-        self.propagate(to_propagate, decision)
+            if l.truth.is_known() and (all_ or l.is_environmental))
+        self.propagate(to_propagate, all_)
 
-        solver, _, _ = mk_solver(self.translate(decision), {})
+        solver, _, _ = mk_solver(self.translate(all_), {})
         result = solver.check()
         if result == sat:
             todo = self.assignments.keys()
@@ -139,9 +139,9 @@ class Case:
             for key in todo:
                 l = self.assignments[key]
                 if ( not l.truth.is_known()
-                and l.has_decision(decision)
+                and (all_ or l.is_environmental)
                 and self.GUILines[key].is_visible
-                and key in self.get_relevant_subtences(decision) ):
+                and key in self.get_relevant_subtences(all_) ):
                     atom = l.sentence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())
@@ -163,19 +163,20 @@ class Case:
                                         ass = Assignment(Truth.TRUE, Equality(atom.sentence, val1))
                                 else:
                                     ass = Assignment(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
+                                ass.is_environmental = l.is_environmental # keep original property
                                 self.assignments[key] = ass.mk_consequence()
-                                self.propagate([ass], decision)
+                                self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
                     solver.pop()
                     if res1 == unknown: # restart solver
-                        solver, _, _ = mk_solver(self.translate(decision), {})
+                        solver, _, _ = mk_solver(self.translate(all_), {})
                         result = solver.check()
         elif result == unsat:
-            print(self.translate(decision))
+            print(self.translate(all_))
             raise Exception("Not satisfiable !")
 
-    def propagate(self, to_propagate, decision):
+    def propagate(self, to_propagate, all_):
         while to_propagate:
             ass = to_propagate.pop(0)
             old, new = ass.as_substitution(self)
@@ -192,7 +193,7 @@ class Case:
                             if not assignment.truth.is_known():
                                 assignment.truth = consequence.truth
                                 self.assignments[consequence.sentence.code] = assignment.mk_consequence()
-                                if constraint.has_decision(decision):
+                                if (all_ or assignment.is_environmental):
                                     to_propagate.append(assignment)
                             elif assignment.truth.to_bool() != consequence.truth.to_bool():
                                 l1.append(FALSE) # inconsistent !
@@ -203,7 +204,7 @@ class Case:
 
                 # simplify assignments
                 for assignment in self.assignments.values():
-                    if assignment != ass and assignment.has_decision(decision):
+                    if assignment != ass and (all_ or assignment.is_environmental):
                         new_constraint = assignment.sentence.substitute(old, new)
                         if new_constraint != assignment.sentence: # changed !
                             assignment.sentence = new_constraint
@@ -229,12 +230,12 @@ class Case:
             return self.expr_to_literal(expr.sub_exprs[0], truth.Not() )
         return []
 
-    def translate(self, decision=True):
+    def translate(self, all_=True):
         self.translated = And(
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
-                    if l.truth.is_known() and l.has_decision(decision) 
+                    if l.truth.is_known() and (all_ or l.is_environmental) 
                     and not type(l) == Term]
             + [c.translate() for c in self.simplified]
             )

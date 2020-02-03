@@ -48,6 +48,7 @@ class Assignment(object):
     def __init__(self, truth : Truth, sentence):
         self.truth = truth
         self.sentence = sentence
+        self.is_environmental = not sentence.has_environmental(False)
 
     def __hash__(self):
         return hash((self.truth & 3, str(self.sentence)))
@@ -119,9 +120,6 @@ class Assignment(object):
 
     def to_json(self): return str(self)
 
-    def has_decision(self, with_decision):
-        return self.sentence.has_decision(with_decision)
-
     def translate(self):
         if self.truth == Truth.IRRELEVANT:
             return BoolVal(True)
@@ -155,9 +153,6 @@ class Equality(object):
 
     def has_environmental(self, truth):
         return self.sentence.has_environmental(truth)
-
-    def has_decision(self, with_decision):
-        return self.sentence.has_decision(with_decision)
 
     def translate(self): 
         if self.value is not None:

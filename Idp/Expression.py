@@ -149,11 +149,6 @@ class Expression(object):
         # returns true if it contains a variable whose environmental property is 'truth
         return any(e.has_environmental(truth) for e in self.sub_exprs)
 
-    def has_decision(self, with_decision):
-        if with_decision == True: return True
-        # with_decision is None
-        return not self.has_environmental(False) # true if expression does not contain a decision
-
 class Constructor(Expression):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
@@ -767,6 +762,10 @@ class AppliedSymbol(Expression):
                 arg = [x.translate() for x in self.sub_exprs]
                 self.translated = (self.decl.translated)(arg)
         return self.translated
+
+    def has_environmental(self, truth):
+        return self.decl.environmental == truth \
+            or any(e.has_environmental(truth) for e in self.sub_exprs)
 
 class Arguments(object):
     def __init__(self, **kwargs):
