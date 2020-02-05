@@ -850,7 +850,7 @@ class NumberConstant(Expression):
             self.translated = int(self.number)
             self.type = 'int'
         except ValueError:
-            self.translated = float(self.number)
+            self.translated = float(eval(self.number))
             self.type = 'real'
         self.is_subtence = False
     
