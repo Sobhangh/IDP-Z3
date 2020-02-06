@@ -1,6 +1,6 @@
-ForAll(c!247,
-       Implies(Large(c!247),
-               And(And(c!247 >= 1, c!247 <= 4))))
+ForAll(c!361,
+       Implies(Large(c!361),
+               And(And(c!361 >= 1, c!361 <= 4))))
 -- theory
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -158,9 +158,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  ForAll(c!247,
-       Implies(Large(c!247),
-               And(And(c!247 >= 1, c!247 <= 4))))
+  ForAll(c!361,
+       Implies(Large(c!361),
+               And(And(c!361 >= 1, c!361 <= 4))))
 Definitions: 
   
 Universals:  
@@ -183,10 +183,13 @@ Consequences:
   ∀n[side] : Angle(n) < 180
   ~Subtype = right_triangle
   ~Subtype = regular_triangle
+  ~Subtype = irregular
   ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
   ∃n[side] : Angle(n) = 90
   Length(1) = Length(3)
   Length(2) = Length(4)
+  Length(1) ≤ (Length(2) + Length(3))
+  Length(3) ≤ (Length(1) + Length(2))
   Sides = 4
   Vertices = 4
   Type = quadrilateral
@@ -200,10 +203,7 @@ Simplified:
   ((Subtype = rectangle) ⇒ (~(Length(1) = Length(2))))
   ((Subtype = square) ⇔ (Equilateral))
 Irrelevant:  
-  Subtype = irregular
-  Length(1) ≤ (Length(2) + Length(3))
-  Length(2) ≤ (Length(3) + Length(1))
-  Length(3) ≤ (Length(1) + Length(2))
+  
 
 
 -- propagation
@@ -397,13 +397,14 @@ Irrelevant:
                                       'typ': 'Bool',
                                       'value': True},
             'Length(1) ≤ (Length(2) + Length(3))': {'cf': False,
-                                                    'ct': False,
+                                                    'ct': True,
                                                     'environmental': False,
                                                     'normal': False,
                                                     'reading': 'Length(1) ≤ (Length(2) + Length(3))',
-                                                    'relevant': False,
-                                                    'status': 'UNKNOWN',
-                                                    'typ': 'Bool'},
+                                                    'relevant': True,
+                                                    'status': 'CONSEQUENCE',
+                                                    'typ': 'Bool',
+                                                    'value': True},
             'Length(2)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(2)',
@@ -425,7 +426,7 @@ Irrelevant:
                                                     'environmental': False,
                                                     'normal': False,
                                                     'reading': 'Length(2) ≤ (Length(3) + Length(1))',
-                                                    'relevant': False,
+                                                    'relevant': True,
                                                     'status': 'UNKNOWN',
                                                     'typ': 'Bool'},
             'Length(3)': {'environmental': False,
@@ -436,13 +437,14 @@ Irrelevant:
                           'typ': 'Real',
                           'value': ''},
             'Length(3) ≤ (Length(1) + Length(2))': {'cf': False,
-                                                    'ct': False,
+                                                    'ct': True,
                                                     'environmental': False,
                                                     'normal': False,
                                                     'reading': 'Length(3) ≤ (Length(1) + Length(2))',
-                                                    'relevant': False,
-                                                    'status': 'UNKNOWN',
-                                                    'typ': 'Bool'},
+                                                    'relevant': True,
+                                                    'status': 'CONSEQUENCE',
+                                                    'typ': 'Bool',
+                                                    'value': True},
             'Length(4)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(4)',
@@ -527,14 +529,15 @@ Irrelevant:
                          'typ': 'subtype',
                          'value': '',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
-             'Subtype = irregular': {'cf': False,
+             'Subtype = irregular': {'cf': True,
                                      'ct': False,
                                      'environmental': False,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
-                                     'relevant': False,
-                                     'status': 'UNKNOWN',
-                                     'typ': 'Bool'},
+                                     'relevant': True,
+                                     'status': 'CONSEQUENCE',
+                                     'typ': 'Bool',
+                                     'value': False},
              'Subtype = rectangle': {'cf': False,
                                      'ct': False,
                                      'environmental': False,

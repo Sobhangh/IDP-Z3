@@ -1,9 +1,9 @@
 
 -- theory
-ForAll([c!330, c!331],
-       (codeOf(c!330) == c!331) ==
-       Or(And(c!330 == red, c!331 == a),
-          And(c!330 == blue, c!331 == b)))
+ForAll([c!484, c!485],
+       (codeOf(c!484) == c!485) ==
+       Or(And(c!484 == red, c!485 == a),
+          And(c!484 == blue, c!485 == b)))
 
 -- atoms
 codeOf(red)

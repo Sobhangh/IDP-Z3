@@ -18,7 +18,7 @@
 """
 from z3 import And, Not, sat, unsat, unknown, is_true
 
-from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable
+from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction
 from Solver import mk_solver
 from Structure_ import json_to_literals, Equality, Assignment, Term, Status
 from utils import *
@@ -78,14 +78,6 @@ class Case:
         # now consider all facts and theories
         self.full_propagate(all_=True)
 
-        # determine relevant symbols
-        relevant_subtences = self.get_relevant_subtences(all_=True)
-
-        for k, l in self.assignments.items():
-            if l.status != Status.UNKNOWN \
-            or (k in relevant_subtences or self.definitions): #TODO support for definitions
-                l.relevant = True
-
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self):
@@ -130,6 +122,14 @@ class Case:
             if l.truth is not None and (all_ or l.is_environmental))
         self.propagate(to_propagate, all_)
 
+        # determine relevant symbols
+        if all_:
+            relevant_subtences = self.get_relevant_subtences(all_=True)
+
+            for k, l in self.assignments.items():
+                if k in relevant_subtences or self.definitions: #TODO support for definitions
+                    l.relevant = True
+
         solver, _, _ = mk_solver(self.translate(all_), {})
         result = solver.check()
         if result == sat:
@@ -140,8 +140,8 @@ class Case:
                 l = self.assignments[key]
                 if ( l.truth is None
                 and (all_ or l.is_environmental)
-                and self.GUILines[key].is_visible
-                and key in self.get_relevant_subtences(all_) ):
+                # and key in self.get_relevant_subtences(all_) 
+                and self.GUILines[key].is_visible):
                     atom = l.sentence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())
@@ -161,6 +161,7 @@ class Case:
                                         ass = Assignment(atom.variable, is_true(val1), Status.CONSEQUENCE)
                                     else:
                                         ass = Assignment(Equality(atom.variable, val1), True, Status.CONSEQUENCE)
+                                    ass.relevant = True
                                     self.assignments[key] = ass
                                 else:
                                     ass = l.update(None, is_true(val1), Status.CONSEQUENCE, self)
@@ -229,6 +230,10 @@ class Case:
             return self.expr_to_literal(expr.sub_exprs[0], truth)
         if isinstance(expr, AUnary) and expr.operator == '~':
             return self.expr_to_literal(expr.sub_exprs[0], not truth )
+        if truth and isinstance(expr, AConjunction):
+            return [l for e in expr.sub_exprs for l in self.expr_to_literal(e, truth)]
+        if not truth and isinstance(expr, ADisjunction):
+            return [l for e in expr.sub_exprs for l in self.expr_to_literal(e, truth)]
         return []
 
     def translate(self, all_=True):

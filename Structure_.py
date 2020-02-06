@@ -110,6 +110,7 @@ class Term(Assignment):
 
     def assign(self, value, case):
         ass = Assignment(Equality(self.sentence.variable, value), True, Status.CONSEQUENCE)
+        ass.relevant = True
         case.assignments[self.sentence.code] = ass
         return ass
 

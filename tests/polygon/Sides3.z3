@@ -204,10 +204,13 @@ Consequences:
   ∀n[side] : Angle(n) < 180
   ~Subtype = square
   ~Subtype = rectangle
+  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+  ~Length(2) = Length(4)
   Length(1) ≤ (Length(2) + Length(3))
   Length(2) ≤ (Length(3) + Length(1))
   Length(3) ≤ (Length(1) + Length(2))
   Surface = ((Base * Height) / 2)
+  ~Surface = (-(1))
   Sides = 3
   Vertices = 3
   Type = triangle
@@ -285,14 +288,15 @@ Irrelevant:
                                                         'relevant': True,
                                                         'status': 'UNKNOWN',
                                                         'typ': 'Bool'},
-           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': False,
+           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': True,
                                                         'ct': False,
                                                         'environmental': False,
                                                         'normal': False,
                                                         'reading': 'All angles are 90°',
                                                         'relevant': False,
-                                                        'status': 'UNKNOWN',
-                                                        'typ': 'Bool'},
+                                                        'status': 'CONSEQUENCE',
+                                                        'typ': 'Bool',
+                                                        'value': False},
            '∀n[side] : Angle(n) < 180': {'cf': False,
                                          'ct': True,
                                          'environmental': False,
@@ -448,14 +452,15 @@ Irrelevant:
                           'status': 'UNKNOWN',
                           'typ': 'Real',
                           'value': ''},
-            'Length(2) = Length(4)': {'cf': False,
+            'Length(2) = Length(4)': {'cf': True,
                                       'ct': False,
                                       'environmental': False,
                                       'normal': False,
                                       'reading': 'Length(2) = Length(4)',
                                       'relevant': False,
-                                      'status': 'UNKNOWN',
-                                      'typ': 'Bool'},
+                                      'status': 'CONSEQUENCE',
+                                      'typ': 'Bool',
+                                      'value': False},
             'Length(2) ≤ (Length(3) + Length(1))': {'cf': False,
                                                     'ct': True,
                                                     'environmental': False,
@@ -632,14 +637,15 @@ Irrelevant:
                                                  'status': 'CONSEQUENCE',
                                                  'typ': 'Bool',
                                                  'value': True},
-             'Surface = (-(1))': {'cf': False,
+             'Surface = (-(1))': {'cf': True,
                                   'ct': False,
                                   'environmental': False,
                                   'normal': False,
                                   'reading': 'Surface = (-(1))',
                                   'relevant': False,
-                                  'status': 'UNKNOWN',
-                                  'typ': 'Bool'},
+                                  'status': 'CONSEQUENCE',
+                                  'typ': 'Bool',
+                                  'value': False},
              'Surface = (Length(1) * Length(2))': {'cf': False,
                                                    'ct': False,
                                                    'environmental': False,

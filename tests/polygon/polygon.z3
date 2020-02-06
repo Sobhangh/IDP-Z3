@@ -1,6 +1,6 @@
-ForAll(c!122,
-       Implies(Large(c!122),
-               And(And(c!122 >= 1, c!122 <= 4))))
+ForAll(c!202,
+       Implies(Large(c!202),
+               And(And(c!202 >= 1, c!202 <= 4))))
 -- theory
 True
 
@@ -87,7 +87,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!125, Large(c!125) == False)
+ForAll(c!205, Large(c!205) == False)
 
 -- atoms
 Sides
@@ -130,9 +130,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  ForAll(c!122,
-       Implies(Large(c!122),
-               And(And(c!122 >= 1, c!122 <= 4))))
+  ForAll(c!202,
+       Implies(Large(c!202),
+               And(And(c!202 >= 1, c!202 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
@@ -158,6 +158,7 @@ Consequences:
   ~Subtype = right_triangle
   ~Subtype = regular_triangle
   Subtype = irregular
+  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
   ~Subtype = square
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   Sides = 4
@@ -224,14 +225,15 @@ Irrelevant:
                                                           'status': 'UNIVERSAL',
                                                           'typ': 'Bool',
                                                           'value': True},
-           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'cf': False,
+           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'cf': True,
                                                         'ct': False,
                                                         'environmental': False,
                                                         'normal': False,
                                                         'reading': 'All angles are 60°',
                                                         'relevant': True,
-                                                        'status': 'UNKNOWN',
-                                                        'typ': 'Bool'},
+                                                        'status': 'CONSEQUENCE',
+                                                        'typ': 'Bool',
+                                                        'value': False},
            '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'cf': True,
                                                         'ct': False,
                                                         'environmental': False,
