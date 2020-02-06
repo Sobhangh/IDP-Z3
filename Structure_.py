@@ -34,13 +34,13 @@ class Status(IntFlag):
     UNIVERSAL   = 4
     ENV_CONSQ   = 8
     CONSEQUENCE = 16
-    IRRELEVANT  = 31
 
 class Assignment(object):
     def __init__(self, sentence, truth: Optional[bool], status: Status):
         self.truth = truth
         self.sentence = sentence
         self.status = status
+        self.relevant = False
         self.is_environmental = not sentence.has_environmental(False)
 
     def update(self, sentence, truth, status, case):
@@ -53,12 +53,11 @@ class Assignment(object):
         return out
 
     def __hash__(self):
-        return hash((str(self.sentence), self.truth, self.status & 1))
+        return hash((str(self.sentence), self.truth))
 
     def __eq__(self, other):
         # ignores the modality of truth !
         return self.truth == other.truth \
-            and self.status & 1 == other.status & 1 \
             and type(self.sentence) == type (other.sentence) \
             and str(self.sentence) == str(other.sentence)
 
@@ -67,17 +66,10 @@ class Assignment(object):
                  f"{str(self.sentence.code)}" )
 
     def __str__(self):
-        if self.status == Status.IRRELEVANT:
-            return ""
         return ("" if self.truth else \
                 "? " if self.truth is None \
                 else "Not ") \
              + self.sentence.reading
-
-    def mk_relevant   (self): 
-        return Assignment(self.sentence, self.truth, Status.UNKNOWN) if self.status == Status.IRRELEVANT \
-                else self
-
 
     def as_substitution(self, case):
         if self.truth is not None:
@@ -104,8 +96,6 @@ class Assignment(object):
     def to_json(self): return str(self)
 
     def translate(self):
-        if self.status == Status.IRRELEVANT:
-            return BoolVal(True)
         if self.truth is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
@@ -252,10 +242,10 @@ class Structure_(object):
                     if symbol: 
                         if atom.code in case.assignments:
                             symbol["status"] = case.assignments[atom.code].status.name
-                            symbol["irrelevant"] = case.assignments[atom.code].status == Status.IRRELEVANT
+                            symbol["relevant"] = case.assignments[atom.code].relevant
                         else:
                             symbol["status"] = "UNKNOWN" #TODO 
-                            symbol["irrelevant"] = False # unused symbol instance (Large(1))
+                            symbol["relevant"] = True # unused symbol instance (Large(1))
                         symbol['reading'] = atom.reading
                         symbol['normal'] = hasattr(atom, 'normal')
                         symbol['environmental'] = atom.has_environmental(True)

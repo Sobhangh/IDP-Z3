@@ -173,7 +173,8 @@ def abstract(case):
     out["universal"] = list(l for l in case.assignments.values() if l.status == Status.UNIVERSAL)
     out["given"    ] = list(l for l in case.assignments.values() if l.status == Status.GIVEN)
     out["fixed"    ] = list(l for l in case.assignments.values() if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
-    out["irrelevant"]= list(Assignment(l.sentence, True, Status.UNKNOWN) for l in case.assignments.values() if l.status == Status.IRRELEVANT)
+    out["irrelevant"]= list(l for l in case.assignments.values() 
+        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] and not l.relevant)
 
     # create keys for models using first symbol of atoms
     models, count = {}, 0
@@ -196,7 +197,8 @@ def abstract(case):
         for atom_string, atom in case.GUILines.items():
             if atom_string in case.assignments:
                 assignment = case.assignments[atom_string]
-                if assignment.truth is None and assignment.status != Status.IRRELEVANT and atom.type == 'bool':
+                if assignment.truth is None \
+                and assignment.relevant and atom.type == 'bool':
                     truth = solver.model().eval(reify[atom])
                     if truth == True:
                         atoms += [ Assignment(atom, True , Status.UNKNOWN) ]
@@ -230,7 +232,7 @@ def abstract(case):
                                 substitute(theory2, [(assignment.sentence.translated, BoolVal(True))]),
                                 substitute(theory2, [(assignment.sentence.translated, BoolVal(False))]))
                     solver2.add(theory2)
-                    atoms[i] = Assignment(assignment.sentence, True, Status.IRRELEVANT)
+                    atoms[i] = Assignment(assignment.sentence, True, Status.UNKNOWN)
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
@@ -246,7 +248,7 @@ def abstract(case):
                     reify2[assignment.sentence]
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
-                    atoms[i] = Assignment(assignment.sentence, True, Status.IRRELEVANT)
+                    atoms[i] = Assignment(TRUE, True, Status.UNKNOWN)
                     # ??? theory2 = substitute(theory2, [(assignment.sentence, BoolVal(assignment.truth & 1))])
                 solver2.pop()
 
@@ -258,9 +260,10 @@ def abstract(case):
         # group atoms by symbols
         model = {}
         for l in atoms:
-            for symb in l.sentence.unknown_symbols().keys():
-                model.setdefault(symb, []).append([ l ])
-                break
+            if l.sentence != TRUE:
+                for symb in l.sentence.unknown_symbols().keys():
+                    model.setdefault(symb, []).append([ l ])
+                    break
         # add to models
         for k,v in models.items(): # add model
             models[k] = v + [ model[k] if k in model else [] ]

@@ -52,7 +52,7 @@ class Case:
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .assignments
-        self.assignments = {s.code : Assignment(s, None, Status.IRRELEVANT) for s in self.idp.theory.subtences.values()}
+        self.assignments = {s.code : Assignment(s, None, Status.UNKNOWN) for s in self.idp.theory.subtences.values()}
         self.assignments.update({ l.sentence.code : l for l in self.given })
 
         # find immediate universals
@@ -64,7 +64,7 @@ class Case:
             else:
                 self.simplified.append(c)
 
-        self.assignments.update({ k : Term(Equality(t, None), None, Status.IRRELEVANT) 
+        self.assignments.update({ k : Term(Equality(t, None), None, Status.UNKNOWN) 
             for k, t in idp.vocabulary.terms.items()
             if k not in self.assignments })
 
@@ -82,9 +82,9 @@ class Case:
         relevant_subtences = self.get_relevant_subtences(all_=True)
 
         for k, l in self.assignments.items():
-            if l.status == Status.IRRELEVANT \
-            and (k in relevant_subtences or self.definitions): #TODO support for definitions
-                l.status = Status.UNKNOWN # no need to make a copy here
+            if l.status != Status.UNKNOWN \
+            or (k in relevant_subtences or self.definitions): #TODO support for definitions
+                l.relevant = True
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -94,7 +94,7 @@ class Case:
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == Status.UNIVERSAL)}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if c.status == Status.IRRELEVANT and type(c) != Term)}{nl}"
+                f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if not c.relevant and type(c) != Term)}{nl}"
         )
 
     def get_relevant_subtences(self, all_):

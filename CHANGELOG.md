@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [Unreleased]
+### API
+
+* add 'relevant' field, remove 'IRRELEVANT' value in Get /eval response
 
 ## [0.3.2] - 2020-01-30
 ### Fixed

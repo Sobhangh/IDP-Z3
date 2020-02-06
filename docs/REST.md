@@ -48,7 +48,8 @@ GET response :
             - environmental : Bool // True if not a decision variable
             - value : string    // representation of the value
             - values : []       // optional
-            - status : string   // UNKNOWN, GIVEN, UNIVERSAL, ENV_CONSQ, CONSEQUENCE, IRRELEVANT
+            - status : string   // UNKNOWN, GIVEN, UNIVERSAL, ENV_CONSQ, CONSEQUENCE
+            - relevant: Bool
             - ct : Bool         // for Bool
             - cf : Bool         // for Bool
             - reading : string  // optional
