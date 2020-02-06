@@ -47,7 +47,6 @@ other NTH (refactoring)
     - consequence is AND ==> propagate each conjunct
     - move consequences into case.simplified ?
     - remove .relevant, ct, cf from Structure
-    - separate status from truth and simplify in Assignment
     - merge Case.assignments and Case.atoms to be like Structure
     - batch substitute in Case.init
     - sort the operands of equality

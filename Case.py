@@ -16,12 +16,11 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
-from copy import copy
 from z3 import And, Not, sat, unsat, unknown, is_true
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable
 from Solver import mk_solver
-from Structure_ import json_to_literals, Equality, Assignment, Term, Truth
+from Structure_ import json_to_literals, Equality, Assignment, Term, Status
 from utils import *
 
 class Case:
@@ -53,19 +52,19 @@ class Case:
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .assignments
-        self.assignments = {s.code : Assignment(Truth.IRRELEVANT, s) for s in self.idp.theory.subtences.values()}
-        self.assignments.update({ l.sentence.code : l.mk_given() for l in self.given })
+        self.assignments = {s.code : Assignment(s, None, Status.IRRELEVANT) for s in self.idp.theory.subtences.values()}
+        self.assignments.update({ l.sentence.code : l for l in self.given })
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
             u = self.expr_to_literal(c)
             if u:
                 for l in u:
-                    self.assignments[l.sentence.code] = l.mk_universal()
+                    l.update(None, None, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
 
-        self.assignments.update({ k : Term(Truth.IRRELEVANT, Equality(t, None)) 
+        self.assignments.update({ k : Term(Equality(t, None), None, Status.IRRELEVANT) 
             for k, t in idp.vocabulary.terms.items()
             if k not in self.assignments })
 
@@ -74,8 +73,8 @@ class Case:
             self.full_propagate(all_=False)
             # convert CONSEQUENCEs into ENV_CONSQs
             for key, assignment in self.assignments.items():
-                if assignment.is_consequence():
-                    self.assignments[key] = assignment.mk_env_consq()
+                if assignment.status == Status.CONSEQUENCE:
+                    assignment.status = Status.ENV_CONSQ # no need to make a copy here
         # now consider all facts and theories
         self.full_propagate(all_=True)
 
@@ -83,25 +82,26 @@ class Case:
         relevant_subtences = self.get_relevant_subtences(all_=True)
 
         for k, l in self.assignments.items():
-            if (k in relevant_subtences) or self.definitions: #TODO support for definitions
-                self.assignments[k] = l.mk_relevant()
+            if l.status == Status.IRRELEVANT \
+            and (k in relevant_subtences or self.definitions): #TODO support for definitions
+                l.status = Status.UNKNOWN # no need to make a copy here
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self):
         return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translated)}{nl}"
                 f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
-                f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.is_universal())}{nl}"
-                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.is_consequence())}{nl}"
+                f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == Status.UNIVERSAL)}{nl}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if c.is_irrelevant() and type(c) != Term)}{nl}"
+                f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if c.status == Status.IRRELEVANT and type(c) != Term)}{nl}"
         )
 
     def get_relevant_subtences(self, all_):
         #TODO performance.  This method is called many times !
         constraints = (
             [l.sentence for k, l in self.assignments.items() 
-                    if l.truth.is_known() and (all_ or l.is_environmental) 
+                    if l.truth is not None and (all_ or l.is_environmental) 
                     and not type(l) == Term]
             + [e for e in self.simplified]
             + [r.body for d in self.definitions for symb in d.partition.values() for r in symb])
@@ -127,7 +127,7 @@ class Case:
 
         # simplify all using given and universals
         to_propagate = list(l for l in self.assignments.values() 
-            if l.truth.is_known() and (all_ or l.is_environmental))
+            if l.truth is not None and (all_ or l.is_environmental))
         self.propagate(to_propagate, all_)
 
         solver, _, _ = mk_solver(self.translate(all_), {})
@@ -138,7 +138,7 @@ class Case:
             # determine consequences on expanded symbols only (for speed)
             for key in todo:
                 l = self.assignments[key]
-                if ( not l.truth.is_known()
+                if ( l.truth is None
                 and (all_ or l.is_environmental)
                 and self.GUILines[key].is_visible
                 and key in self.get_relevant_subtences(all_) ):
@@ -156,15 +156,14 @@ class Case:
 
                             if res2 == unsat:
                                 if type(l) == Term:
-                                    if atom.sentence.decl.out.code == 'bool':
-                                        val1 = Truth.TRUE if val1 else Truth.FALSE
-                                        ass = Assignment(val1, atom.sentence)
+                                    # need to convert Term into Assignment
+                                    if atom.variable.decl.out.code == 'bool':
+                                        ass = Assignment(atom.variable, is_true(val1), Status.CONSEQUENCE)
                                     else:
-                                        ass = Assignment(Truth.TRUE, Equality(atom.sentence, val1))
+                                        ass = Assignment(Equality(atom.variable, val1), True, Status.CONSEQUENCE)
+                                    self.assignments[key] = ass
                                 else:
-                                    ass = Assignment(Truth.TRUE if is_true(val1) else Truth.FALSE, atom)
-                                ass.is_environmental = l.is_environmental # keep original property
-                                self.assignments[key] = ass.mk_consequence()
+                                    ass = l.update(None, is_true(val1), Status.CONSEQUENCE, self)
                                 self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
@@ -190,12 +189,11 @@ class Case:
                     if consequences:
                         for consequence in consequences:
                             assignment = self.assignments[consequence.sentence.code]
-                            if not assignment.truth.is_known():
-                                assignment.truth = consequence.truth
-                                self.assignments[consequence.sentence.code] = assignment.mk_consequence()
+                            if assignment.truth is None:
+                                out = assignment.update(None, consequence.truth, Status.CONSEQUENCE, self)
                                 if (all_ or assignment.is_environmental):
-                                    to_propagate.append(assignment)
-                            elif assignment.truth.to_bool() != consequence.truth.to_bool():
+                                    to_propagate.append(out)
+                            elif assignment.truth != consequence.truth:
                                 l1.append(FALSE) # inconsistent !
                     elif not new_constraint == TRUE:
                         l1.append(new_constraint)
@@ -207,27 +205,31 @@ class Case:
                     if assignment != ass and (all_ or assignment.is_environmental):
                         new_constraint = assignment.sentence.substitute(old, new)
                         if new_constraint != assignment.sentence: # changed !
-                            assignment.sentence = new_constraint
-                            if new_constraint in [TRUE, FALSE]:
-                                if not assignment.truth.is_known():
-                                    assignment.truth = Truth.CONSEQUENCE | (Truth.TRUE if new_constraint == TRUE else Truth.FALSE)
-                                    to_propagate.append(assignment)
-                                elif (new_constraint==TRUE and not assignment.truth.to_bool()) \
-                                or   (new_constraint==FALSE and    assignment.truth.to_bool()):
+                            if type(assignment) == Term:
+                                #TODO make an Assignment if ground 
+                                out = assignment.update(new_constraint, True, Status.CONSEQUENCE, self)
+                                to_propagate.append(out)
+                            elif new_constraint in [TRUE, FALSE]:
+                                if assignment.truth is None:
+                                    out = assignment.update(new_constraint, (new_constraint == TRUE), Status.CONSEQUENCE, self)
+                                    to_propagate.append(out)
+                                elif (new_constraint==TRUE  and not assignment.truth) \
+                                or   (new_constraint==FALSE and     assignment.truth):
                                     self.simplified = [FALSE] # inconsistent
-                            elif type(assignment) == Term:
-                                assignment.truth = Truth.CONSEQUENCE | Truth.TRUE
-                                to_propagate.append(assignment)
+                                else:
+                                    pass # no change
+                            else:
+                                assignment.update(new_constraint, None, None, self)
 
 
-    def expr_to_literal(self, expr, truth=Truth.TRUE):
+    def expr_to_literal(self, expr, truth=True):
         # returns an assignment for the matching atom in self.GUILines, or []
         if expr.code in self.GUILines: # found it !
-            return [Assignment(truth, expr)]
+            return [Assignment(expr, truth, Status.UNKNOWN)]
         if isinstance(expr, Brackets):
             return self.expr_to_literal(expr.sub_exprs[0], truth)
         if isinstance(expr, AUnary) and expr.operator == '~':
-            return self.expr_to_literal(expr.sub_exprs[0], truth.Not() )
+            return self.expr_to_literal(expr.sub_exprs[0], not truth )
         return []
 
     def translate(self, all_=True):
@@ -235,7 +237,7 @@ class Case:
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
-                    if l.truth.is_known() and (all_ or l.is_environmental) 
+                    if l.truth is not None and (all_ or l.is_environmental) 
                     and not type(l) == Term]
             + [c.translate() for c in self.simplified]
             )
