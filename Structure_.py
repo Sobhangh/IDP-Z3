@@ -21,7 +21,7 @@ from copy import copy
 from enum import IntFlag
 import sys
 from typing import Optional
-from z3 import Constructor, Not, BoolVal, is_true, is_false
+from z3 import Constructor, Not, BoolVal, is_true, is_false, is_bool
 
 import Idp
 from Idp.Expression import TRUE, FALSE, AComparison, NumberConstant
@@ -84,7 +84,7 @@ class Assignment(object):
             old = self.sentence
             new = TRUE if self.truth else FALSE
             if self.truth:  # analyze equalities
-                if isinstance(old, Equality) and type(self) != Term:
+                if isinstance(old, Equality):
                     if is_number(old.value):
                         new = NumberConstant(number=str(old.value))
                         old = old.variable
@@ -114,7 +114,15 @@ class Assignment(object):
 
 class Term(Assignment):
     """ represents an applied symbol of unknown values """
-    pass
+    
+    def as_substitution(self, case):
+        return None, None
+
+    def assign(self, value, case):
+        ass = Assignment(Equality(self.sentence.variable, value), True, Status.CONSEQUENCE)
+        case.assignments[self.sentence.code] = ass
+        return ass
+
 
 class Equality(object):
     def __init__(self, variable, value):

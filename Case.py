@@ -206,8 +206,7 @@ class Case:
                         new_constraint = assignment.sentence.substitute(old, new)
                         if new_constraint != assignment.sentence: # changed !
                             if type(assignment) == Term:
-                                #TODO make an Assignment if ground 
-                                out = assignment.update(new_constraint, True, Status.CONSEQUENCE, self)
+                                out = assignment.assign(new_constraint.value, self)
                                 to_propagate.append(out)
                             elif new_constraint in [TRUE, FALSE]:
                                 if assignment.truth is None:
