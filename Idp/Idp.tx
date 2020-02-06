@@ -80,7 +80,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
         Arguments: '(' sub_exprs*=Expression[','] ')';
       Variable: name=ID;
       NumberConstant: number=IDPFLOAT | number=INT;
-        IDPFLOAT: /[+-]?(\d+(\.\d+)?|\.\d+)/;
+        IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       StringConstant: str=STRING;
       Brackets: ('[' reading=/[^\]]*/ ']')? '(' f=Expression ')';
 
