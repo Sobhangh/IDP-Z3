@@ -74,7 +74,7 @@ class Case:
             # convert CONSEQUENCEs into ENV_CONSQs
             for key, assignment in self.assignments.items():
                 if assignment.status == Status.CONSEQUENCE:
-                    assignment.status = Status.ENV_CONSQ # no need to make a copy here
+                    assignment.status = Status.ENV_CONSQ
         # now consider all facts and theories
         self.full_propagate(all_=True)
 

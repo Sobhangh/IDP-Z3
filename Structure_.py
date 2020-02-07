@@ -17,7 +17,6 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 import ast
-from copy import copy
 from enum import IntFlag
 import sys
 from typing import Optional
@@ -44,13 +43,12 @@ class Assignment(object):
         self.is_environmental = not sentence.has_environmental(False)
 
     def update(self, sentence, truth, status, case):
-        """ make a copy, and save it in case.assignments """
-        out = copy(self)
-        if sentence is not None: out.sentence = sentence
-        if truth    is not None: out.truth    = truth
-        if status   is not None: out.status   = status
-        case.assignments[self.sentence.code] = out
-        return out
+        """ update and save it in case.assignments """
+        if sentence is not None: self.sentence = sentence
+        if truth    is not None: self.truth    = truth
+        if status   is not None: self.status   = status
+        case.assignments[self.sentence.code] = self
+        return self
 
     def __hash__(self):
         return hash((str(self.sentence), self.truth))
