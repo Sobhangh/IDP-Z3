@@ -44,14 +44,16 @@ Of dubious benefit / may never be done:
 
 
 other NTH (refactoring)
-    - move consequences into case.simplified ?
+    - remove Assignment.__hash__, .__eq__
+    - merge Case.assignments and Case.GUILines to be like Structure
     - remove ct, cf from Structure
-    - merge Case.assignments and Case.atoms to be like Structure
+    - remove reifier, Solver.py --> expr.reified(solver)
+
+    - move consequences into case.simplified ?
     - batch substitute in Case.init
     - sort the operands of equality
     - AppliedSymbol is_subtence only if no Fresh_Variable !
     - Expr.sentence -> Expr.ranking ?
-    - explain: use consequences() for rules too ? or unsat_core for evidences ?
     - avoid quantifiers in definitions
     - do we need Expression.type, if we have Expression.decl ?
     - distinguish between x=1 entry and x=1 atom in output structure
