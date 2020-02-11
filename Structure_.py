@@ -189,6 +189,7 @@ def json_to_literals(idp, jsonstr):
                     else:
                         value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
                     assignment = Assignment(Equality(atom, value), True, Status.GIVEN)
+                    assignment.relevant = True
                 else:
                     assignment = None #TODO error ?
                 if assignment is not None:

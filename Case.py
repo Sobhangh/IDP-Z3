@@ -197,7 +197,7 @@ class Case:
 
                 # simplify assignments
                 for assignment in self.assignments.values():
-                    if assignment != ass and (all_ or assignment.is_environmental):
+                    if assignment.sentence != ass.sentence and (all_ or assignment.is_environmental):
                         new_constraint = assignment.sentence.substitute(old, new)
                         if new_constraint != assignment.sentence: # changed !
                             if type(assignment) == Term:
