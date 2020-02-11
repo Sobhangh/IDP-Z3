@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 
 * add 'relevant' field, remove 'IRRELEVANT' value in Get /eval response
+* remove 'ct', 'cf' from /eval Request
 
 ## [0.3.2] - 2020-01-30
 ### Fixed

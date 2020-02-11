@@ -30,8 +30,6 @@ GET request :
             - <atom> : {
                 - typ : "Bool" | "Int" | "Real" | <custom type>
                 - value: string
-                - ct : Bool     // certainly true
-                - cf : Bool     // certainly false
                 }  
             }
         }
@@ -50,8 +48,8 @@ GET response :
             - values : []       // optional
             - status : string   // UNKNOWN, GIVEN, UNIVERSAL, ENV_CONSQ, CONSEQUENCE
             - relevant: Bool
-            - ct : Bool         // for Bool
-            - cf : Bool         // for Bool
+            - ct : Bool         // DEPRECATED use value+status instead
+            - cf : Bool         // DEPRECATED use value+status instead
             - reading : string  // optional
             - normal : Bool     // false if to be shown in expanded view only
             }

@@ -179,10 +179,10 @@ def json_to_literals(idp, jsonstr):
                     symbol = idp.vocabulary.symbol_decls[sym]
                     atom = symbol.instances[atom]
                 if json_atom["typ"] == "Bool":
-                    if "ct" in json_atom and json_atom["ct"]:
-                        assignment = Assignment(atom, True, Status.GIVEN)
-                    if "cf" in json_atom and json_atom["cf"]:
-                        assignment = Assignment(atom, False, Status.GIVEN)
+                    if "value" in json_atom:
+                        assignment = Assignment(atom, json_atom["value"], Status.GIVEN)
+                    else:
+                        assignment = None
                 elif json_atom["value"]:
                     if json_atom["typ"] in ["Int", "Real"]:
                         value = eval(json_atom["value"])
