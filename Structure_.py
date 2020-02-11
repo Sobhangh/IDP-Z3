@@ -108,8 +108,8 @@ class Term(Assignment):
     def as_substitution(self, case):
         return None, None
 
-    def assign(self, value, case):
-        ass = Assignment(Equality(self.sentence.variable, value), True, Status.CONSEQUENCE)
+    def assign(self, value, case, CONSQ):
+        ass = Assignment(Equality(self.sentence.variable, value), True, CONSQ)
         ass.relevant = True
         case.assignments[self.sentence.code] = ass
         return ass

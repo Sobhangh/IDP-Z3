@@ -38,7 +38,7 @@ class Case:
         # initialisation
 
         # Lines in the GUI
-        self.GUILines = {**idp.vocabulary.terms, **idp.theory.subtences} # {atom_string: Expression}
+        self.GUILines = {**idp.vocabulary.terms, **idp.theory.subtences} # DEPRECATED use self.assignments instead # {atom_string: Expression}
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified =  [] # [Expression]
@@ -71,12 +71,7 @@ class Case:
         if idp.decision: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
-            # convert CONSEQUENCEs into ENV_CONSQs
-            for key, assignment in self.assignments.items():
-                if assignment.status == Status.CONSEQUENCE:
-                    assignment.status = Status.ENV_CONSQ
-        # now consider all facts and theories
-        self.full_propagate(all_=True)
+        self.full_propagate(all_=True) # now consider all facts and theories
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -88,34 +83,32 @@ class Case:
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
                 f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if not c.relevant and type(c) != Term)}{nl}"
         )
-
+        
     def get_relevant_subtences(self, all_):
-        #TODO performance.  This method is called many times !
-        constraints = (
-            [l.sentence for k, l in self.assignments.items() 
+        #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
+        if self.definitions: #TODO definitions ?
+            return {}
+        constraints = ( self.simplified
+            + [l.sentence for k, l in self.assignments.items() 
                     if l.truth is not None and (all_ or l.is_environmental) 
-                    and not type(l) == Term]
-            + [e for e in self.simplified]
-            + [r.body for d in self.definitions for symb in d.partition.values() for r in symb])
+                    and not type(l) == Term])
 
         # determine relevant symbols (including defined ones)
         symbols = mergeDicts( e.unknown_symbols() for e in constraints )
-        symbols.update({symb.name: symb for d in self.definitions for symb in d.partition})
         if self.idp.goal.decl is not None:
             symbols.update({self.idp.goal.decl.name : self.idp.goal.decl})
 
         # remove irrelevant domain conditions
-        self.simplified = list(e for e in self.simplified
-                if e.if_symbol is None or e.if_symbol in symbols)
+        self.simplified = list(filter(lambda e: e.if_symbol is None or e.if_symbol in symbols
+                                     , self.simplified))
 
         # determine relevant subtences
         relevant_subtences = mergeDicts( e.subtences() for e in constraints )
-        relevant_subtences.update(mergeDicts( r.body.subtences() #TODO
-            for d in self.definitions for symb in d.partition.values() for r in symb))
         relevant_subtences.update(mergeDicts(s.instances for s in symbols.values()))
         return relevant_subtences
 
     def full_propagate(self, all_):
+        CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
 
         # simplify all using given and universals
         to_propagate = list(l for l in self.assignments.values() 
@@ -158,13 +151,13 @@ class Case:
                                 if type(l) == Term:
                                     # need to convert Term into Assignment
                                     if atom.variable.decl.out.code == 'bool':
-                                        ass = Assignment(atom.variable, is_true(val1), Status.CONSEQUENCE)
+                                        ass = Assignment(atom.variable, is_true(val1), CONSQ)
                                     else:
-                                        ass = Assignment(Equality(atom.variable, val1), True, Status.CONSEQUENCE)
+                                        ass = Assignment(Equality(atom.variable, val1), True, CONSQ)
                                     ass.relevant = True
                                     self.assignments[key] = ass
                                 else:
-                                    ass = l.update(None, is_true(val1), Status.CONSEQUENCE, self)
+                                    ass = l.update(None, is_true(val1), CONSQ, self)
                                 self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
@@ -177,6 +170,7 @@ class Case:
             raise Exception("Not satisfiable !")
 
     def propagate(self, to_propagate, all_):
+        CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
         while to_propagate:
             ass = to_propagate.pop(0)
             old, new = ass.as_substitution(self)
@@ -191,7 +185,7 @@ class Case:
                         for consequence in consequences:
                             assignment = self.assignments[consequence.sentence.code]
                             if assignment.truth is None:
-                                out = assignment.update(None, consequence.truth, Status.CONSEQUENCE, self)
+                                out = assignment.update(None, consequence.truth, CONSQ, self)
                                 if (all_ or assignment.is_environmental):
                                     to_propagate.append(out)
                             elif assignment.truth != consequence.truth:
@@ -207,11 +201,11 @@ class Case:
                         new_constraint = assignment.sentence.substitute(old, new)
                         if new_constraint != assignment.sentence: # changed !
                             if type(assignment) == Term:
-                                out = assignment.assign(new_constraint.value, self)
+                                out = assignment.assign(new_constraint.value, self, CONSQ)
                                 to_propagate.append(out)
                             elif new_constraint in [TRUE, FALSE]:
                                 if assignment.truth is None:
-                                    out = assignment.update(new_constraint, (new_constraint == TRUE), Status.CONSEQUENCE, self)
+                                    out = assignment.update(new_constraint, (new_constraint == TRUE), CONSQ, self)
                                     to_propagate.append(out)
                                 elif (new_constraint==TRUE  and not assignment.truth) \
                                 or   (new_constraint==FALSE and     assignment.truth):
