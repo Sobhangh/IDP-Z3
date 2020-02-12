@@ -1,5 +1,5 @@
 vocabulary {
-    
+
     type sides = {3..4}
     Sides: sides
     Vertices: sides
@@ -54,6 +54,11 @@ theory {
     [A triangle is regular, right, or irregular]
     ( Subtype=right_triangle | Subtype=regular_triangle | Subtype=irregular <= Sides=3).
 
+    [A quadrilateral is a square, a rectangle, or irregular]
+    (Subtype=square | Subtype=rectangle | Subtype=irregular <= Sides=4).
+
+    [Squares and rectangles are quadrilaterals]
+    (Subtype=square | Subtype=rectangle => Sides=4).
 
     [A regular triangle is an equilateral triangle]
     (Subtype=regular_triangle <=> Sides=3 & Equilateral).
@@ -67,8 +72,8 @@ theory {
                                            (?n[side]: Angle(n)=90)).
 
     [All angles are 90° in squares and rectangles]
-    (Subtype=square | Subtype=rectangle <=> Sides=4 & [All angles are 90°]
-                                                     (!n[side]: Angle(n)=90| Angle(n)=0)).
+    (Sides=4 & (Subtype=square | Subtype=rectangle) <=> [All angles are 90°]
+                                            (!n[side]: Angle(n)=90| Angle(n)=0)).
 
     [In a rectangle, opposite side have the same length, and adjacent sides have different lengths]
     (Subtype=rectangle => Length(3)=Length(1) & Length(2)=Length(4) & Length(2)~=Length(1)).
