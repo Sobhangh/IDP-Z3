@@ -104,7 +104,7 @@ class Assignment(object):
 
 class Term(Assignment):
     """ represents an applied symbol of unknown values """
-    
+
     def as_substitution(self, case):
         return None, None
 
@@ -138,7 +138,7 @@ class Equality(object):
     def has_environmental(self, truth):
         return self.variable.has_environmental(truth)
 
-    def translate(self): 
+    def translate(self):
         if self.value is not None:
             return self.variable.translated == self.value
         else:
@@ -155,7 +155,7 @@ class Equality(object):
     def reified(self):
         return self.variable.reified()
 
-    
+
 #################
 # load user's choices
 # see docs/REST.md
@@ -223,6 +223,16 @@ class Structure_(object):
         self.m = {}
         self.case = case
 
+        self.m[' Global'] = {}
+        self.m[' Global']['env_dec'] = bool(case.idp.decision)
+
+        self.m[' Global']['env_done'] = True
+        if case.idp.decision:
+            for l in case.assignments.values():
+                if l.is_environmental and l.relevant and l.status == Status.UNKNOWN:
+                    self.m[' Global']['env_done'] = False
+                    break
+
         def initialise(atom):
             atomZ3 = atom.translate() #TODO
             key = atom.code
@@ -240,13 +250,13 @@ class Structure_(object):
                         symbol = {"typ": typ, "value": ""} # default
                     else:
                         symbol = None
-                        
-                    if symbol: 
+
+                    if symbol:
                         if atom.code in case.assignments:
                             symbol["status"] = case.assignments[atom.code].status.name
                             symbol["relevant"] = case.assignments[atom.code].relevant
                         else:
-                            symbol["status"] = "UNKNOWN" #TODO 
+                            symbol["status"] = "UNKNOWN" #TODO
                             symbol["relevant"] = True # unused symbol instance (Large(1))
                         symbol['reading'] = atom.reading
                         symbol['normal'] = hasattr(atom, 'normal')
@@ -257,7 +267,7 @@ class Structure_(object):
         for GuiLine in case.GUILines.values():
             initialise(GuiLine)
         for ass in structure: # add numeric input for Explain
-            initialise(ass.sentence)  
+            initialise(ass.sentence)
 
 
     def addAtom(self, atom, truth, status: Status):

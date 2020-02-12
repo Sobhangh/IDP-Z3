@@ -6,7 +6,7 @@ This page returns general settings, and is expected to be deprecated.
 
 POST request:
 
-    - "code" : string 
+    - "code" : string
 
 POST result:
 
@@ -23,14 +23,14 @@ POST result:
 
 This page performs various inferences.
 
-GET request : 
+GET request :
 
     - active : {            // list of choices made by the user
         - <symbol> : {
             - <atom> : {
                 - typ : "Bool" | "Int" | "Real" | <custom type>
                 - value: string
-                }  
+                }
             }
         }
     - code : string
@@ -40,7 +40,11 @@ GET request :
 
 GET response :
 
-    - <symbol> : { 
+    - ' Global' : {             // with a leading space to avoid conflict with symbols
+        - env_dec: Bool         // true if we separate environmental/decision variables
+        - env_done: Bool        // true if all relevant environmental variables are given
+    }
+    - <symbol> : {
         - <atom> : {            // <symbol> and <atom> are string
             - typ : "Bool" | "Int" | "Real" | <custom type>
             - environmental : Bool // True if not a decision variable
@@ -53,7 +57,7 @@ GET response :
             - reading : string  // optional
             - normal : Bool     // false if to be shown in expanded view only
             }
-        } 
+        }
 
 
 
@@ -63,4 +67,3 @@ GET response :
 
 
 
-    

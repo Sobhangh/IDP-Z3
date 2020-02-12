@@ -1,6 +1,8 @@
 To do:
-    Relevance:
-        - relevance with definitions
+    Environmental: do not split vocabulary, use Goal instead ?
+    Relevance: definitions
+    Explanations: inject values in message
+
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
         - generate list of constructors
@@ -9,9 +11,10 @@ To do:
     Support for dates
     + issues on GitLab
 
-IDP syntax changes:
+Syntax changes:
     move enumerations in vocabulary to the theory block
     move enumerations in structure to the theory block
+    'Expand all' or list (instead of View expanded/normal)
 
 Research topics / may take a while:
     Support for partial functions
@@ -22,7 +25,6 @@ Research topics / may take a while:
 
 
 Of dubious benefit / may never be done:
-    type enumeration in structure
     Type inference (p. 14 of the IDP3 manual)
     Support for type hierarchy
     Support for namespaces
