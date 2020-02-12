@@ -36,7 +36,8 @@ Irrelevant:
 
 
 -- propagation
-{'Prime': {'Prime(1)': {'cf': False,
+{' Global': {'env_dec': False, 'env_done': True},
+ 'Prime': {'Prime(1)': {'cf': False,
                         'ct': True,
                         'environmental': False,
                         'normal': True,

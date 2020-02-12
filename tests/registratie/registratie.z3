@@ -230,7 +230,8 @@ Irrelevant:
 
 
 -- propagation
-{'Additional_Security_Required': {'Additional_Security_Required': {'cf': False,
+{' Global': {'env_dec': True, 'env_done': False},
+ 'Additional_Security_Required': {'Additional_Security_Required': {'cf': False,
                                                                    'ct': False,
                                                                    'environmental': True,
                                                                    'normal': True,

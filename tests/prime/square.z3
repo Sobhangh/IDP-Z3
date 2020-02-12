@@ -30,7 +30,8 @@ Irrelevant:
 
 
 -- propagation
-{'Base': {'0 < Base': {'cf': False,
+{' Global': {'env_dec': False, 'env_done': True},
+ 'Base': {'0 < Base': {'cf': False,
                        'ct': True,
                        'environmental': False,
                        'normal': False,

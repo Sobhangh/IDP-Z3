@@ -77,7 +77,8 @@ Irrelevant:
 
 
 -- propagation
-{'Subtype': {'Subtype': {'environmental': False,
+{' Global': {'env_dec': False, 'env_done': True},
+ 'Subtype': {'Subtype': {'environmental': False,
                          'normal': True,
                          'reading': 'Subtype',
                          'relevant': True,

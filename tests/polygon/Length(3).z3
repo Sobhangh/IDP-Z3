@@ -67,7 +67,8 @@ Irrelevant:
 
 
 -- propagation
-{'Angle': {'Angle(1)': {'environmental': False,
+{' Global': {'env_dec': False, 'env_done': True},
+ 'Angle': {'Angle(1)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(1)',
                         'relevant': False,

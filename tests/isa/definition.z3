@@ -29,7 +29,8 @@ Irrelevant:
 
 
 -- propagation
-{'codeOf': {'codeOf(blue)': {'environmental': False,
+{' Global': {'env_dec': False, 'env_done': True},
+ 'codeOf': {'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
                              'relevant': True,

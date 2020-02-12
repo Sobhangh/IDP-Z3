@@ -27,7 +27,8 @@ Irrelevant:
 
 
 -- propagation
-{'JacketDesign': {'JacketDesign': {'environmental': False,
+{' Global': {'env_dec': False, 'env_done': True},
+ 'JacketDesign': {'JacketDesign': {'environmental': False,
                                    'normal': True,
                                    'reading': 'JacketDesign',
                                    'relevant': True,

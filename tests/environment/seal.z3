@@ -44,7 +44,8 @@ Irrelevant:
 
 
 -- propagation
-{'Depth': {'2.104 ≤ Depth ≤ 2.476': {'cf': False,
+{' Global': {'env_dec': True, 'env_done': False},
+ 'Depth': {'2.104 ≤ Depth ≤ 2.476': {'cf': False,
                                      'ct': False,
                                      'environmental': True,
                                      'normal': False,

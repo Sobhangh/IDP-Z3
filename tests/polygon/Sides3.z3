@@ -232,7 +232,8 @@ Irrelevant:
 
 
 -- propagation
-{'Angle': {'(sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)': {'cf': False,
+{' Global': {'env_dec': False, 'env_done': True},
+ 'Angle': {'(sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)': {'cf': False,
                                                                       'ct': True,
                                                                       'environmental': False,
                                                                       'normal': False,
