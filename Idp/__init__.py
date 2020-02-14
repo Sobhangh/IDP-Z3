@@ -48,7 +48,7 @@ class Idp(object):
         self.view = kwargs.pop('view')
         if self.view is None:
             self.view = View(viewType='normal')
-        
+
         self.translated = None # [Z3Expr]
 
         if self.decision is not None:
@@ -99,11 +99,11 @@ class Vocabulary(object):
 
         self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
                              'real': RangeDeclaration(name='real', elements=[]),
-                             'bool': ConstructedTypeDeclaration(name='bool', 
+                             'bool': ConstructedTypeDeclaration(name='bool',
                                         constructors=[TRUE, FALSE]),
                              'true' : TRUE,
                              'false': FALSE}
-        for s in self.declarations: 
+        for s in self.declarations:
             s.annotate(self.symbol_decls)
 
     def __str__(self):
@@ -145,7 +145,7 @@ class ConstructedTypeDeclaration(object):
             self.translated = BoolSort()
             self.constructors[0].type = 'bool'
             self.constructors[1].type = 'bool'
-            self.constructors[0].translated = bool(True) 
+            self.constructors[0].translated = bool(True)
             self.constructors[1].translated = bool(False)
         else:
             self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
@@ -192,9 +192,9 @@ class RangeDeclaration(object):
                     self.range.append(NumberConstant(number=str(i)))
 
         if self.name == 'int':
-            self.translated = IntSort() 
+            self.translated = IntSort()
         elif self.name == 'real':
-            self.translated = RealSort() 
+            self.translated = RealSort()
         self.type = None
 
     def __str__(self):
@@ -253,7 +253,7 @@ class SymbolDeclaration(object):
         )
 
     def annotate(self, symbol_decls, vocabulary=True):
-        if vocabulary: 
+        if vocabulary:
             assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
             symbol_decls[self.name] = self
         for s in self.sorts:
@@ -277,7 +277,7 @@ class SymbolDeclaration(object):
                     expr.annotate(symbol_decls, {})
                     expr.normal = True
                     self.instances[expr.code] = expr
-        
+
         if self.out.decl.name != 'bool' and self.range:
             for inst in self.instances.values():
                 domain = self.out.decl.check_bounds(inst)
@@ -392,7 +392,7 @@ class Theory(object):
             self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
 
     def unknown_symbols(self):
-        return mergeDicts(c.unknown_symbols() 
+        return mergeDicts(c.unknown_symbols()
             for c in self.constraints + self.definitions)
 
     def translate(self, idp):
@@ -430,7 +430,7 @@ class Definition(object):
             symbol = symbol_decls[r.symbol.name]
             if symbol not in self.q_decls:
                 name = "$"+symbol.name+"$"
-                q_v = { name+str(i): 
+                q_v = { name+str(i):
                     Fresh_Variable(name+str(i), symbol_decls[sort.name]) \
                         for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
@@ -462,28 +462,29 @@ class Definition(object):
         return out
 
     def translate(self, idp):
-        self.translated = []
-        for symbol, rules in self.partition.items():
+        if self.translated is None:
+            self.translated = []
+            for symbol, rules in self.partition.items():
 
-            vars = [v.translate() for v in self.q_decls[symbol].values()]
-            exprs, outputVar = [], False
-            for i in rules:
-                exprs.append(i.translate(vars))
-                if i.out is not None:
-                    outputVar = True
-                    
-            ors = list(e for e in exprs if e is not False)
-            ors = exprs[0] if ors == [] else Or(ors)
-            if outputVar:
-                expr = ForAll(vars, 
-                                (applyTo(symbol.translate(idp), vars[:-1]) == vars[-1]) == ors) 
-            else:
-                if len(vars) > 0:
-                    expr = ForAll(vars, 
-                                    applyTo(symbol.translate(idp), vars) == ors)
+                vars = [v.translate() for v in self.q_decls[symbol].values()]
+                exprs, outputVar = [], False
+                for i in rules:
+                    exprs.append(i.translate(vars))
+                    if i.out is not None:
+                        outputVar = True
+
+                ors = list(e for e in exprs if e is not False)
+                ors = exprs[0] if ors == [] else Or(ors)
+                if outputVar:
+                    expr = ForAll(vars,
+                                    (applyTo(symbol.translate(idp), vars[:-1]) == vars[-1]) == ors)
                 else:
-                    expr = symbol.translate(idp) == ors
-            self.translated.append(expr)
+                    if len(vars) > 0:
+                        expr = ForAll(vars,
+                                        applyTo(symbol.translate(idp), vars) == ors)
+                    else:
+                        expr = symbol.translate(idp) == ors
+                self.translated.append(expr)
         return self.translated
 
 
@@ -530,7 +531,7 @@ class Rule(object):
         out += [self.body]
         self.body = operation('∧', out)
         self.body.type = 'bool'
-        
+
         return self
 
     def subtences(self):
@@ -541,16 +542,16 @@ class Rule(object):
         vars = []
         for name, var in self.q_decls.items():
             if var.decl.range:
-                forms = [([a.substitute(var, val) for a in args], 
+                forms = [([a.substitute(var, val) for a in args],
                           f.substitute(var, val)
                          ) for val in var.decl.range for (args, f) in forms]
             else:
                 vars.append(var)
         sorts = [] # not used anymore
 
-        out = [Rule(reading=self.reading, vars=vars, sorts=sorts, symbol=self.symbol, 
-                     args=Arguments(sub_exprs=args[:-1] if self.out else args), 
-                     out=args[-1] if self.out else None, body=f) 
+        out = [Rule(reading=self.reading, vars=vars, sorts=sorts, symbol=self.symbol,
+                     args=Arguments(sub_exprs=args[:-1] if self.out else args),
+                     out=args[-1] if self.out else None, body=f)
                 for (args, f) in forms]
         return out
 
@@ -595,7 +596,7 @@ class Interpretation(object):
         self.name = kwargs.pop('name').name
         self.tuples = kwargs.pop('tuples')
         self.default = kwargs.pop('default') # later set to false for predicates
-        
+
         self.function = None # -1 if function else 0
         self.arity = None
         self.decl = None # symbol declaration
@@ -632,8 +633,8 @@ class Interpretation(object):
                             out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = IfExpr(if_f=operation('=', [args[rank],val]), 
-                                        then_f=interpret(theory, rank+1, args, list(tuples2)), 
+                        out = IfExpr(if_f=operation('=', [args[rank],val]),
+                                        then_f=interpret(theory, rank+1, args, list(tuples2)),
                                         else_f=out)
                         out = out.simplify1()
                 return out
@@ -684,10 +685,10 @@ class View(object):
 dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True, classes=
-        [ Idp, 
+        [ Idp,
           Vocabulary, Decision, ConstructedTypeDeclaration, Constructor, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
-          Theory, Definition, Rule, IfExpr, AQuantification, 
-                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  
+          Theory, Definition, Rule, IfExpr, AQuantification,
+                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                     AppliedSymbol, Variable, NumberConstant, Brackets, Arguments,
           Interpretations, Interpretation, Tuple,
