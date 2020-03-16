@@ -1,11 +1,9 @@
-Entry of number --> CONSEQUENCE !
-
 To do:
     Environmental: do not split vocabulary, use Goal instead ?
     Relevance: definitions
     Explanations: inject values in message
     Float ranges
-    
+
 
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar

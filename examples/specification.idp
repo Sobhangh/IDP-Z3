@@ -72,7 +72,7 @@ theory {
                                            (?n[side]: Angle(n)=90)).
 
     [All angles are 90° in squares and rectangles]
-    (Sides=4 & (Subtype=square | Subtype=rectangle) <=> [All angles are 90°]
+    (Sides=4 & Subtype~=irregular <=> [All angles are 90°]
                                             (!n[side]: Angle(n)=90| Angle(n)=0)).
 
     [In a rectangle, opposite side have the same length, and adjacent sides have different lengths]
