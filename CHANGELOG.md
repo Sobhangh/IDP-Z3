@@ -6,14 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [Unreleased]
+
+
+## [0.4.0] - 2020-03-16
 ### API
+* add EXPANDED status
 * use 'relevant' field, not 'RELEVANT' value in Get /eval response
 * remove 'ct', 'cf' from /eval Request
 * add global variables for environmental vs decision variables
 ### GUI
 * green box around decision symbols
-* use transparency for irrelevant symbols
-* disable expansion & optimisation when missing environmental data
+* use transparency for irrelevant symbols, unexpected value of sentences to be verified
 
 
 ## [0.3.2] - 2020-01-30

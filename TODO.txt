@@ -1,5 +1,4 @@
 To do:
-    Environmental: do not split vocabulary, use Goal instead ?
     Relevance: definitions
     Explanations: inject values in message
     Float ranges
