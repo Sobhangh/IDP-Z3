@@ -1,7 +1,11 @@
+Entry of number --> CONSEQUENCE !
+
 To do:
     Environmental: do not split vocabulary, use Goal instead ?
     Relevance: definitions
     Explanations: inject values in message
+    Float ranges
+    
 
     Support for constructor functions (p.6 of the IDP3 manual)
         - grammar
@@ -19,8 +23,6 @@ Syntax changes:
 Research topics / may take a while:
     Support for partial functions
     Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
-    Relevance
-    Environmental vs Decision variables
     Support for non-linear equations
 
 
@@ -48,8 +50,8 @@ Of dubious benefit / may never be done:
 other NTH (refactoring)
     - remove Assignment.__hash__, .__eq__
     - merge Case.assignments and Case.GUILines to be like Structure
-    - remove ct, cf from Structure
     - remove reifier, Solver.py --> expr.reified(solver)
+    - simplify the generation of Structure_
 
     - move consequences into case.simplified ?
     - batch substitute in Case.init

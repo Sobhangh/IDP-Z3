@@ -42,7 +42,6 @@ GET response :
 
     - ' Global' : {             // with a leading space to avoid conflict with symbols
         - env_dec: Bool         // true if we separate environmental/decision variables
-        - env_done: Bool        // true if all relevant environmental variables are given
     }
     - <symbol> : {
         - <atom> : {            // <symbol> and <atom> are string
@@ -50,10 +49,8 @@ GET response :
             - environmental : Bool // True if not a decision variable
             - value : string    // representation of the value
             - values : []       // optional
-            - status : string   // UNKNOWN, GIVEN, UNIVERSAL, ENV_CONSQ, CONSEQUENCE
+            - status : string   // UNKNOWN, GIVEN, UNIVERSAL, ENV_CONSQ, CONSEQUENCE, EXPANDED
             - relevant: Bool
-            - ct : Bool         // DEPRECATED use value+status instead
-            - cf : Bool         // DEPRECATED use value+status instead
             - reading : string  // optional
             - normal : Bool     // false if to be shown in expanded view only
             }

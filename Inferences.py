@@ -51,11 +51,7 @@ def metaJSON(idp):
 def propagation(case):
      
     out = Structure_(case)
-
-    for key, l in case.assignments.items():
-        if l.truth is not None and key in case.GUILines:
-            if case.GUILines[key].is_visible:
-                out.addAtom(l.sentence, l.truth, l.status)
+    out.fill(case)
 
     return out.m
 
@@ -138,7 +134,7 @@ def explain(case, symbol, value):
         def r1(a): return reify[a] if a in reify else a
         def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
         ps = {} # {reified: constraint}
-        for i, ass in enumerate(case.given):
+        for i, ass in enumerate(case.given.values()):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
             s.add(Implies(p, ass.translate()))
@@ -153,7 +149,7 @@ def explain(case, symbol, value):
         unsatcore = s.unsat_core()
         
         if unsatcore:
-            for a1 in case.given:
+            for a1 in case.given.values():
                 for a2 in s.unsat_core():
                     if type(ps[a2]) == Assignment and a1 == ps[a2]: #TODO we might miss some equality
                         out.addAtom(a1.sentence, a1.truth, a1.status)
@@ -187,7 +183,7 @@ def abstract(case):
     done = set(out["universal"] + out["given"] + out["fixed"])
     theory = And(case.idp.translated)
     solver, reify, unreify = mk_solver(theory, case.GUILines)
-    solver.add(list(case.given.values()))
+    solver.add([ass.translate() for ass in case.given.values()])
     while solver.check() == sat and count < 50: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant

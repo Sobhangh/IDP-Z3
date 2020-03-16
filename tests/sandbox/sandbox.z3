@@ -27,7 +27,7 @@ Irrelevant:
 
 
 -- propagation
-{' Global': {'env_dec': False, 'env_done': True},
+{' Global': {'env_dec': False},
  'JacketDesign': {'JacketDesign': {'environmental': False,
                                    'normal': True,
                                    'reading': 'JacketDesign',
@@ -36,9 +36,7 @@ Irrelevant:
                                    'typ': 'jaDes',
                                    'value': 'Design_230',
                                    'values': ['Design_230', 'Design_400HP']},
-                  'JacketDesign = Design_230': {'cf': False,
-                                                'ct': True,
-                                                'environmental': False,
+                  'JacketDesign = Design_230': {'environmental': False,
                                                 'normal': False,
                                                 'reading': 'JacketDesign = Design_230',
                                                 'relevant': True,

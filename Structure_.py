@@ -34,6 +34,7 @@ class Status(IntFlag):
     UNIVERSAL   = 4
     ENV_CONSQ   = 8
     CONSEQUENCE = 16
+    EXPANDED    = 32
 
 class Assignment(object):
     def __init__(self, sentence, truth: Optional[bool], status: Status):
@@ -162,7 +163,7 @@ class Equality(object):
 #################
 
 def json_to_literals(idp, jsonstr):
-    assignments = {} # {Assignment : atomZ3} from the GUI (needed for propagate)
+    assignments = {} # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
         json_data = ast.literal_eval(jsonstr \
             .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
@@ -181,8 +182,9 @@ def json_to_literals(idp, jsonstr):
                 if json_atom["typ"] == "Bool":
                     if "value" in json_atom:
                         assignment = Assignment(atom, json_atom["value"], Status.GIVEN)
+                        assignments[atom] = assignment
                     else:
-                        assignment = None
+                        assignment = None  #TODO error ?
                 elif json_atom["value"]:
                     if json_atom["typ"] in ["Int", "Real"]:
                         value = eval(json_atom["value"])
@@ -190,10 +192,9 @@ def json_to_literals(idp, jsonstr):
                         value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
                     assignment = Assignment(Equality(atom, value), True, Status.GIVEN)
                     assignment.relevant = True
+                    assignments[atom] = assignment
                 else:
                     assignment = None #TODO error ?
-                if assignment is not None:
-                    assignments[assignment] = assignment.translate()
     return assignments
 
 
@@ -203,35 +204,46 @@ def json_to_literals(idp, jsonstr):
 #################
 
 def model_to_json(case, s, reify):
-    m = s.model()
+    model = s.model()
     out = Structure_(case)
-    for atom in case.GUILines.values():
-        # atom might not have an interpretation in model (if "don't care")
-        value = m.eval(reify[atom], model_completion=True)
-        if atom.type == 'bool':
-            if not (is_true(value) or is_false(value)):
-                #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
-                print("*** ", atom.reading, " is not defined, and assumed false")
-            out.addAtom(atom, is_true(value), Status.UNKNOWN)
-        else: #TODO check that value is numeric ?
-            out.addAtom(Equality(atom, value), True, Status.UNKNOWN)
+    out.fill(case)
+    
+    for symb, d1 in out.m.items():
+        if symb != ' Global':
+            for atom_code, d2 in d1.items():
+                if d2['status'] == 'UNKNOWN':
+                    d2['status'] = 'EXPANDED'
+
+                    atom = case.assignments[atom_code].sentence
+                    if atom in reify:
+                        atomZ3 = reify[atom]
+                    else:
+                        if type(atom) != Equality:
+                            print(atom)
+                        atomZ3 = atom.reified()
+                    value = model.eval(atomZ3, model_completion=True)
+
+                    # atom might not have an interpretation in model (if "don't care")
+                    if atom.type == 'bool':
+                        if not (is_true(value) or is_false(value)):
+                            #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
+                            print("*** ", atom.reading, " is not defined, and assumed false")
+                        d2['value']  = is_true(value)
+                    else: #TODO check that value is numeric ?
+                        try:
+                            d2['value'] = str(eval(str(value).replace('?', '')))
+                        except:
+                            d2['value'] = str(value)
     return out.m
 
 
 class Structure_(object):
-    def __init__(self, case, structure=[]):
-        self.m = {}
+    def __init__(self, case, structure={}):
+        self.m = {} # [symbol.name][atom.code][attribute name] -> attribute value
         self.case = case
 
         self.m[' Global'] = {}
         self.m[' Global']['env_dec'] = bool(case.idp.decision)
-
-        self.m[' Global']['env_done'] = True
-        if case.idp.decision:
-            for l in case.assignments.values():
-                if l.is_environmental and l.relevant and l.status == Status.UNKNOWN:
-                    self.m[' Global']['env_done'] = False
-                    break
 
         def initialise(atom):
             atomZ3 = atom.translate() #TODO
@@ -242,7 +254,7 @@ class Structure_(object):
                     s = self.m.setdefault(symb.name, {})
 
                     if typ == 'Bool':
-                        symbol = {"typ": typ, "ct": False, "cf": False}
+                        symbol = {"typ": typ}
                     elif 0 < len(symb.range):
                         symbol = { "typ": typ, "value": ""
                                 , "values": [str(v) for v in symb.range]}
@@ -266,8 +278,14 @@ class Structure_(object):
 
         for GuiLine in case.GUILines.values():
             initialise(GuiLine)
-        for ass in structure: # add numeric input for Explain
+        for ass in structure.values(): # add numeric input for Explain
             initialise(ass.sentence)
+
+    def fill(self, case):
+        for key, l in case.assignments.items():
+            if l.truth is not None and key in case.GUILines:
+                if case.GUILines[key].is_visible:
+                    self.addAtom(l.sentence, l.truth, l.status)
 
 
     def addAtom(self, atom, truth, status: Status):
@@ -292,8 +310,8 @@ class Structure_(object):
                 if key in s:
                     if truth is not None:
                         s[key]["value"] = truth
-                        s[key]["ct" if truth else "cf"] = True
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.reading
+                    #s[key]["status"] = status.name # for a click on Sides=3
 

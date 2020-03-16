@@ -32,7 +32,7 @@ class Case:
     def __init__(self, idp, jsonstr, expanded):
 
         self.idp = idp # Idp vocabulary and theory
-        self.given = json_to_literals(idp, jsonstr) # {Assignment : atomZ3} from the user interface
+        self.given = json_to_literals(idp, jsonstr) # {atom : assignment} from the user interface
         self.expanded_symbols = set(expanded)
 
         # initialisation
@@ -53,7 +53,7 @@ class Case:
 
         # initialize .assignments
         self.assignments = {s.code : Assignment(s, None, Status.UNKNOWN) for s in self.idp.theory.subtences.values()}
-        self.assignments.update({ l.sentence.code : l for l in self.given })
+        self.assignments.update({ atom.code : ass for atom, ass in self.given.items() })
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
