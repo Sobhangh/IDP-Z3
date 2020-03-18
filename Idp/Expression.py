@@ -253,7 +253,7 @@ class AQuantification(Expression):
         return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
     def annotate(self, symbol_decls, q_decls):
-        self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
+        self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
@@ -685,8 +685,8 @@ class AAggregate(Expression):
               )
         return out
 
-    def annotate(self, symbol_decls, q_decls):   
-        self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
+    def annotate(self, symbol_decls, q_decls):
+        self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
@@ -836,7 +836,7 @@ class Fresh_Variable(Expression):
 
     def translate(self):
         if self.translated is None:
-            self.translated = FreshConst(self.decl.translated)
+            self.translated = FreshConst(self.decl.out.decl.translated)
         return self.translated
 
 class NumberConstant(Expression):

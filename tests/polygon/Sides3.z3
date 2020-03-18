@@ -1,5 +1,5 @@
-ForAll(c!2,
-       Implies(Large(c!2), And(And(c!2 >= 1, c!2 <= 4))))
+ForAll(c!0,
+       Implies(Large(c!0), And(And(c!0 >= 1, c!0 <= 4))))
 -- theory
 Sides == 3
 
@@ -178,8 +178,8 @@ Surface = (-(1))
 
 -- case
 Type:        
-  ForAll(c!2,
-       Implies(Large(c!2), And(And(c!2 >= 1, c!2 <= 4))))
+  ForAll(c!0,
+       Implies(Large(c!0), And(And(c!0 >= 1, c!0 <= 4))))
 Definitions: 
   
 Universals:  

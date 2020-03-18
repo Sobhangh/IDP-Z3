@@ -1,6 +1,6 @@
-ForAll(c!123,
-       Implies(Large(c!123),
-               And(And(c!123 >= 1, c!123 <= 4))))
+ForAll(c!119,
+       Implies(Large(c!119),
+               And(And(c!119 >= 1, c!119 <= 4))))
 -- theory
 Sides == 3
 
@@ -49,9 +49,9 @@ Sides = 4
 
 -- case
 Type:        
-  ForAll(c!123,
-       Implies(Large(c!123),
-               And(And(c!123 >= 1, c!123 <= 4))))
+  ForAll(c!119,
+       Implies(Large(c!119),
+               And(And(c!119 >= 1, c!119 <= 4))))
 Definitions: 
   
 Universals:  

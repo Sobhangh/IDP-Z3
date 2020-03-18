@@ -1,8 +1,10 @@
-ForAll(c!202,
-       Implies(Large(c!202),
-               And(And(c!202 >= 1, c!202 <= 4))))
+ForAll(c!196,
+       Implies(Large(c!196),
+               And(And(c!196 >= 1, c!196 <= 4))))
 -- theory
 True
+
+Or(Not(Large(1)), Large(1))
 
 (Type == triangle) == (Sides == 3)
 
@@ -87,7 +89,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!205, Large(c!205) == False)
+ForAll(c!199, Large(c!199) == False)
 
 -- atoms
 Sides
@@ -130,9 +132,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case
 Type:        
-  ForAll(c!202,
-       Implies(Large(c!202),
-               And(And(c!202 >= 1, c!202 <= 4))))
+  ForAll(c!196,
+       Implies(Large(c!196),
+               And(And(c!196 >= 1, c!196 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)
@@ -147,6 +149,7 @@ Universals:
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Consequences:
+  ~Large(1)
   ~Type = triangle
   ~Sides = 3
   Type = quadrilateral
@@ -166,7 +169,6 @@ Consequences:
   Type = quadrilateral
   Subtype = irregular
   Perimeter = 10
-  ~Large(1)
   ~Large(2)
   ~Large(3)
   ~Large(4)
@@ -276,7 +278,7 @@ Irrelevant:
                                  'typ': 'Bool',
                                  'value': False}},
  'Large': {'Large(1)': {'environmental': False,
-                        'normal': True,
+                        'normal': False,
                         'reading': 'Large(1)',
                         'relevant': True,
                         'status': 'CONSEQUENCE',

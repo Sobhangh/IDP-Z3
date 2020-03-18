@@ -1,7 +1,10 @@
 To do:
     Relevance: definitions
+        - Definition.annotate: attach interpretation to defined symbol, with brackets
+        - interpret given too!
     Explanations: inject values in message
     Float ranges
+    avoid duplication of equalities in user interface (enumerated types)
 
 
     Support for constructor functions (p.6 of the IDP3 manual)

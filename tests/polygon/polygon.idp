@@ -33,6 +33,7 @@ vocabulary {
 theory {
     { !n[side]: Large(n) <- 10 < Length(n).}
     !n[side]: Length(n) < Length(n+1).
+    ~Large(1) | Large(1).
 
     [Definition of triangle]
     (Type=triangle      <=> Sides=3).

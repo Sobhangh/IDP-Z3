@@ -240,8 +240,9 @@ class SymbolDeclaration(object):
 
         self.type = None # a declaration object
         self.domain = None # all possible arguments
-        self.instances = None # {string: Variable or AppliedSymbol} not starting with '_'
         self.range = None # all possible values
+        self.arg_vars = None # [Fresh_Variable] one for each argument
+        self.instances = None # {string: Variable or AppliedSymbol} not starting with '_'
         self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
         self.environmental = False # true if in declared (environmental) vocabulary and there is a decision vocabulary
 
@@ -263,6 +264,9 @@ class SymbolDeclaration(object):
 
         self.type = self.out.decl
         self.range = self.type.range
+        self.arg_vars = []
+        for i, s in enumerate(self.sorts):
+            self.arg_vars.append(s.fresh(self.name + "$" + str(i), symbol_decls))
 
         self.instances = {}
         if vocabulary and not self.name.startswith('_'):
@@ -280,7 +284,7 @@ class SymbolDeclaration(object):
 
         if self.out.decl.name != 'bool' and self.range:
             for inst in self.instances.values():
-                domain = self.out.decl.check_bounds(inst)
+                domain = self.type.check_bounds(inst)
                 if domain is not None:
                     domain.if_symbol = self.name
                     domain.reading = "Possible values for " + str(inst)
@@ -290,7 +294,7 @@ class SymbolDeclaration(object):
     def check_bounds(self, vars):
         out = []
         for var in vars:
-            check = var.decl.check_bounds(var)
+            check = var.decl.type.check_bounds(var)
             if check is not None:
                 out.append(check)
         """ TODO
@@ -305,23 +309,21 @@ class SymbolDeclaration(object):
         """
         return out
 
-    def translate(self, idp):
+    def translate(self, idp=None):
         if self.translated is None:
             if len(self.sorts) == 0:
                 self.translated = Const(self.name, self.out.translate())
                 self.normal = True
             else:
-                argL = list(map( lambda t: Fresh_Variable(str(t[0]), t[1].decl)
-                               , enumerate(self.sorts)))
 
                 if self.out.name == 'bool':
                     types = [x.translate() for x in self.sorts]
                     rel_vars = [t.getRange() for t in self.sorts]
                     self.translated = Function(self.name, types + [BoolSort()])
 
-                    checks = self.check_bounds(argL)
+                    checks = self.check_bounds(self.arg_vars)
                     checks = list(c.translate() for c in checks)
-                    argL = list(c.translate() for c in argL)
+                    argL = list(c.translate() for c in self.arg_vars)
                     if checks:
                         idp.vocabulary.translated.append(
                             ForAll(argL, Implies( (self.translated)(*argL), And(checks))))
@@ -329,10 +331,10 @@ class SymbolDeclaration(object):
                     types = [x.translate() for x in self.sorts] + [self.out.translate()]
                     self.translated = Function(self.name, types)
 
+                    """
                     var = Fresh_Variable(str(len(self.sorts)), self.out.decl)
                     check = self.out.decl.check_bounds(var)
                     varZ3 = var.translate()
-                    """
                     if check is not None: # Z3 cannot solve the constraint if infinite range, issue #2
                         checks.append(check.translate())
                         idp.vocabulary.translated.append(
@@ -351,6 +353,11 @@ class Sort(object):
 
     def annotate(self, symbol_decls):
         self.decl = symbol_decls[self.name]
+
+    def fresh(self, name, symbol_decls):
+        decl = SymbolDeclaration(name=Symbol(name=name), sorts=[], out=self)
+        decl.annotate(symbol_decls, False)
+        return Fresh_Variable(name, decl)
 
     def translate(self):
         return self.decl.translated
@@ -409,7 +416,7 @@ class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
         self.partition = None # {Symbol: [Transformed Rule]}
-        self.q_decls = {} # {Symbol: {Variable: SymbolDeclaration}}
+        self.q_decls = {} # {Symbol: {Variable: SymbolDeclaration}} Fresh variables for arguments & result
         self.translated = None
 
     def __str__(self):
@@ -431,10 +438,10 @@ class Definition(object):
             if symbol not in self.q_decls:
                 name = "$"+symbol.name+"$"
                 q_v = { name+str(i):
-                    Fresh_Variable(name+str(i), symbol_decls[sort.name]) \
+                    sort.fresh(name+str(i), symbol_decls) \
                         for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
-                    q_v[name] = Fresh_Variable(name, symbol_decls[symbol.out.name])
+                    q_v[name] = symbol.out.fresh(name, symbol_decls)
                 self.q_decls[symbol] = q_v
             new_rule = r.rename_args(self.q_decls[symbol])
             self.partition.setdefault(symbol, []).append(new_rule)
@@ -513,7 +520,7 @@ class Rule(object):
                  f"⇔{str(self.body)}" )
 
     def annotate(self, symbol_decls, q_decls):
-        self.q_decls = {v:Fresh_Variable(v, symbol_decls[s.name]) \
+        self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
         self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
