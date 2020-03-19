@@ -117,9 +117,9 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!524,
-       Implies(Large(c!524),
-               And(And(c!524 >= 1, c!524 <= 4))))
+ForAll(c!638,
+       Implies(Large(c!638),
+               And(And(c!638 >= 1, c!638 <= 4))))
 -- theory -----------------------------------
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -277,9 +277,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!524,
-       Implies(Large(c!524),
-               And(And(c!524 >= 1, c!524 <= 4))))
+  ForAll(c!638,
+       Implies(Large(c!638),
+               And(And(c!638 >= 1, c!638 <= 4))))
 Definitions: 
   
 Universals:  

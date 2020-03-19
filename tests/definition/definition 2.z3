@@ -19,12 +19,12 @@ view expanded
 -- theory -----------------------------------
 codeOf(red) == b
 
-ForAll([c!127, c!128],
-       (codeOf(c!127) == c!128) ==
-       Or(And(c!127 == red, c!128 == a, red == c),
-          And(c!127 == blue, c!128 == a, blue == c),
-          And(c!127 == red, c!128 == b, Not(red == c)),
-          And(c!127 == blue, c!128 == b, Not(blue == c))))
+ForAll([c!239, c!240],
+       (codeOf(c!239) == c!240) ==
+       Or(And(c!239 == red, c!240 == a, red == c),
+          And(c!239 == blue, c!240 == a, blue == c),
+          And(c!239 == red, c!240 == b, Not(red == c)),
+          And(c!239 == blue, c!240 == b, Not(blue == c))))
 
 -- atoms ------------------------------------
 codeOf(red)

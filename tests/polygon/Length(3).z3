@@ -45,9 +45,9 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!289,
-       Implies(Large(c!289),
-               And(And(c!289 >= 1, c!289 <= 4))))
+ForAll(c!403,
+       Implies(Large(c!403),
+               And(And(c!403 >= 1, c!403 <= 4))))
 -- theory -----------------------------------
 Sides == 3
 
@@ -96,9 +96,9 @@ Sides = 4
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!289,
-       Implies(Large(c!289),
-               And(And(c!289 >= 1, c!289 <= 4))))
+  ForAll(c!403,
+       Implies(Large(c!403),
+               And(And(c!403 >= 1, c!403 <= 4))))
 Definitions: 
   
 Universals:  

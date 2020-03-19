@@ -122,9 +122,9 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!171,
-       Implies(Large(c!171),
-               And(And(c!171 >= 1, c!171 <= 4))))
+ForAll(c!283,
+       Implies(Large(c!283),
+               And(And(c!283 >= 1, c!283 <= 4))))
 -- theory -----------------------------------
 Sides == 3
 
@@ -303,9 +303,9 @@ Surface = (-(1))
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!171,
-       Implies(Large(c!171),
-               And(And(c!171 >= 1, c!171 <= 4))))
+  ForAll(c!283,
+       Implies(Large(c!283),
+               And(And(c!283 >= 1, c!283 <= 4))))
 Definitions: 
   
 Universals:  

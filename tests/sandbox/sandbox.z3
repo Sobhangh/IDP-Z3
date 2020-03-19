@@ -17,9 +17,9 @@ theory {
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-ForAll(c!633,
-       (LipLen == c!633) ==
-       Or(And(c!633 == Short, JacketDesign == Design_230)))
+ForAll(c!747,
+       (LipLen == c!747) ==
+       Or(And(c!747 == Short, JacketDesign == Design_230)))
 
 -- atoms ------------------------------------
 LipLen

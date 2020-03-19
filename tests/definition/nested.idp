@@ -1,0 +1,15 @@
+vocabulary {
+    type num constructed from { Piet, Jan}
+    same(num) : num
+    negated(num) : num
+} 
+
+theory {
+    { !x[num]: !y[num]: same(x) = y <- y=x. } //TODO { !x[num]: same(x) = x. }
+    { negated(Piet) = Jan. negated(Jan)=Piet.} //TODO { !x[num]: negated(x) = (0-x). }
+    same(Piet)= Piet.
+    same(same(Piet))= negated(negated(Piet)).
+
+}
+ 
+view expanded

@@ -122,9 +122,9 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!445,
-       Implies(Large(c!445),
-               And(And(c!445 >= 1, c!445 <= 4))))
+ForAll(c!559,
+       Implies(Large(c!559),
+               And(And(c!559 >= 1, c!559 <= 4))))
 -- theory -----------------------------------
 Subtype == regular_triangle
 
@@ -302,9 +302,9 @@ Surface = (-(1))
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!445,
-       Implies(Large(c!445),
-               And(And(c!445 >= 1, c!445 <= 4))))
+  ForAll(c!559,
+       Implies(Large(c!559),
+               And(And(c!559 >= 1, c!559 <= 4))))
 Definitions: 
   
 Universals:  

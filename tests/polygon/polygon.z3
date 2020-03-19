@@ -127,9 +127,9 @@ structure {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!366,
-       Implies(Large(c!366),
-               And(And(c!366 >= 1, c!366 <= 4))))
+ForAll(c!480,
+       Implies(Large(c!480),
+               And(And(c!480 >= 1, c!480 <= 4))))
 -- theory -----------------------------------
 True
 
@@ -218,7 +218,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
-ForAll(c!369, Large(c!369) == False)
+ForAll(c!483, Large(c!483) == False)
 
 -- atoms ------------------------------------
 Sides
@@ -261,9 +261,9 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!366,
-       Implies(Large(c!366),
-               And(And(c!366 >= 1, c!366 <= 4))))
+  ForAll(c!480,
+       Implies(Large(c!480),
+               And(And(c!480 >= 1, c!480 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Large(1) ⇔(false)
 Rule:∀[][[]]: Large(2) ⇔(false)

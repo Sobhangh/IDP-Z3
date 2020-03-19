@@ -23,11 +23,12 @@ view expanded
 -- theory -----------------------------------
 p == Or(Or(q, r))
 
-ForAll(c!34, (a == c!34) == Or(And(c!34 == red, p)))
+ForAll(c!146, (a == c!146) == Or(And(c!146 == red, p)))
 
-ForAll(c!35, (b == c!35) == Or(And(c!35 == red, a == red)))
+ForAll(c!147,
+       (b == c!147) == Or(And(c!147 == red, a == red)))
 
-ForAll(c!36, (c == c!36) == Or(c!36 == red))
+ForAll(c!148, (c == c!148) == Or(c!148 == red))
 
 -- atoms ------------------------------------
 p
