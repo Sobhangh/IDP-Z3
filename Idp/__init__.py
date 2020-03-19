@@ -281,33 +281,7 @@ class SymbolDeclaration(object):
                     expr.annotate(symbol_decls, {})
                     expr.normal = True
                     self.instances[expr.code] = expr
-
-        if self.out.decl.name != 'bool' and self.range:
-            for inst in self.instances.values():
-                domain = self.type.check_bounds(inst)
-                if domain is not None:
-                    domain.if_symbol = self.name
-                    domain.reading = "Possible values for " + str(inst)
-                    self.typeConstraints.append(domain)
         return self
-
-    def check_bounds(self, vars):
-        out = []
-        for var in vars:
-            check = var.decl.type.check_bounds(var)
-            if check is not None:
-                out.append(check)
-        """ TODO
-        if self.out.decl.name != 'bool' and self.range:
-            applied = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=vars))
-            applied.decl = self
-            applied.type = applied.decl.type.name
-            domain = self.out.decl.check_bounds(applied)
-            if domain is not None:
-                domain.reading = "Possible values for " + str(vars)
-                out.append(domain)
-        """
-        return out
 
     def translate(self, idp=None):
         if self.translated is None:
@@ -320,26 +294,9 @@ class SymbolDeclaration(object):
                     types = [x.translate() for x in self.sorts]
                     rel_vars = [t.getRange() for t in self.sorts]
                     self.translated = Function(self.name, types + [BoolSort()])
-
-                    checks = self.check_bounds(self.arg_vars)
-                    checks = list(c.translate() for c in checks)
-                    argL = list(c.translate() for c in self.arg_vars)
-                    if checks:
-                        idp.vocabulary.translated.append(
-                            ForAll(argL, Implies( (self.translated)(*argL), And(checks))))
                 else:
                     types = [x.translate() for x in self.sorts] + [self.out.translate()]
                     self.translated = Function(self.name, types)
-
-                    """
-                    var = Fresh_Variable(str(len(self.sorts)), self.out.decl)
-                    check = self.out.decl.check_bounds(var)
-                    varZ3 = var.translate()
-                    if check is not None: # Z3 cannot solve the constraint if infinite range, issue #2
-                        checks.append(check.translate())
-                        idp.vocabulary.translated.append(
-                            ForAll(argL + [varZ3], Implies( (self.translated)(*argL) == varZ3, And(checks))))
-                    """
         return self.translated
 
 

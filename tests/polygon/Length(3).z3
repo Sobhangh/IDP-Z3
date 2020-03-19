@@ -45,9 +45,7 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!403,
-       Implies(Large(c!403),
-               And(And(c!403 >= 1, c!403 <= 4))))
+
 -- theory -----------------------------------
 Sides == 3
 
@@ -60,10 +58,6 @@ And(Or(Length(1) == Length(1), Sides < 1),
     Or(Length(4) == Length(1), Sides < 4))
 
 (Subtype == rectangle) == (Sides == 4)
-
-And(Sides >= 3, Sides <= 4)
-
-And(Vertices >= 3, Vertices <= 4)
 
 -- atoms ------------------------------------
 Sides
@@ -96,9 +90,7 @@ Sides = 4
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!403,
-       Implies(Large(c!403),
-               And(And(c!403 >= 1, c!403 <= 4))))
+  
 Definitions: 
   
 Universals:  

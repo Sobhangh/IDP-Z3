@@ -122,9 +122,7 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!283,
-       Implies(Large(c!283),
-               And(And(c!283 >= 1, c!283 <= 4))))
+
 -- theory -----------------------------------
 Sides == 3
 
@@ -238,10 +236,6 @@ Or(And(Sides >= 1, Length(1) == Base),
    And(Sides >= 3, Length(3) == Base),
    And(Sides >= 4, Length(4) == Base))
 
-And(Sides >= 3, Sides <= 4)
-
-And(Vertices >= 3, Vertices <= 4)
-
 -- atoms ------------------------------------
 Sides
 Vertices
@@ -303,9 +297,7 @@ Surface = (-(1))
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!283,
-       Implies(Large(c!283),
-               And(And(c!283 >= 1, c!283 <= 4))))
+  
 Definitions: 
   
 Universals:  

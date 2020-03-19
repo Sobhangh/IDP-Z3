@@ -122,9 +122,7 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!559,
-       Implies(Large(c!559),
-               And(And(c!559 >= 1, c!559 <= 4))))
+
 -- theory -----------------------------------
 Subtype == regular_triangle
 
@@ -237,10 +235,6 @@ Or(And(Sides >= 1, Length(1) == Base),
    And(Sides >= 3, Length(3) == Base),
    And(Sides >= 4, Length(4) == Base))
 
-And(Sides >= 3, Sides <= 4)
-
-And(Vertices >= 3, Vertices <= 4)
-
 -- atoms ------------------------------------
 Sides
 Vertices
@@ -302,9 +296,7 @@ Surface = (-(1))
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!559,
-       Implies(Large(c!559),
-               And(And(c!559 >= 1, c!559 <= 4))))
+  
 Definitions: 
   
 Universals:  

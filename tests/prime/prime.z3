@@ -11,13 +11,11 @@ theory {
 
 
 -- vocabulary -------------------------------
-ForAll(c!764,
-       Implies(Prime(c!764),
-               And(And(c!764 >= 1, c!764 <= 4))))
+
 -- theory -----------------------------------
-ForAll(c!765,
-       Prime(c!765) ==
-       Or(c!765 == 1, c!765 == 2, c!765 == 3))
+ForAll(c!355,
+       Prime(c!355) ==
+       Or(c!355 == 1, c!355 == 2, c!355 == 3))
 
 -- atoms ------------------------------------
 Prime(1)
@@ -27,9 +25,7 @@ Prime(4)
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!764,
-       Implies(Prime(c!764),
-               And(And(c!764 >= 1, c!764 <= 4))))
+  
 Definitions: 
   Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
 Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)

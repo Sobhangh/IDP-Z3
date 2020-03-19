@@ -117,9 +117,7 @@ theory {
 
 view expanded
 -- vocabulary -------------------------------
-ForAll(c!638,
-       Implies(Large(c!638),
-               And(And(c!638 >= 1, c!638 <= 4))))
+
 -- theory -----------------------------------
 And(Or(Angle(1) == 90, Sides < 1),
     Or(Angle(2) == 90, Sides < 2),
@@ -218,10 +216,6 @@ And((Length(1) == 0) == (Sides < 1),
     (Length(3) == 0) == (Sides < 3),
     (Length(4) == 0) == (Sides < 4))
 
-And(Sides >= 3, Sides <= 4)
-
-And(Vertices >= 3, Vertices <= 4)
-
 -- atoms ------------------------------------
 Sides
 Vertices
@@ -277,9 +271,7 @@ Perimeter = (sum{n[side] : true : Length(n)})
 
 -- case -------------------------------------
 Type:        
-  ForAll(c!638,
-       Implies(Large(c!638),
-               And(And(c!638 >= 1, c!638 <= 4))))
+  
 Definitions: 
   
 Universals:  
