@@ -256,7 +256,7 @@ class Structure_(object):
                     if typ == 'Bool':
                         symbol = {"typ": typ}
                     elif 0 < len(symb.range):
-                        symbol = { "typ": typ, "value": ""
+                        symbol = { "typ": typ, "value": "" #TODO
                                 , "values": [str(v) for v in symb.range]}
                     elif typ in ["Real", "Int"]:
                         symbol = {"typ": typ, "value": ""} # default

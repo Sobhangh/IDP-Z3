@@ -1,15 +1,32 @@
 
--- theory
-ForAll(c!460,
-       (LipLen == c!460) ==
-       Or(And(c!460 == Short, JacketDesign == Design_230)))
+-- original ---------------------------------
+vocabulary {
+    type lipLen constructed from {Short, Standard}
+    type jaDes constructed from {Design_230, Design_400HP}
+    LipLen: lipLen
+    JacketDesign: jaDes
+}
 
--- atoms
+theory {
+    {        
+        LipLen = Short <- JacketDesign = Design_230.
+    }
+}
+
+
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
+ForAll(c!633,
+       (LipLen == c!633) ==
+       Or(And(c!633 == Short, JacketDesign == Design_230)))
+
+-- atoms ------------------------------------
 LipLen
 JacketDesign
 JacketDesign = Design_230
 
--- case
+-- case -------------------------------------
 Type:        
   
 Definitions: 
@@ -26,7 +43,7 @@ Irrelevant:
   
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': False},
  'JacketDesign': {'JacketDesign': {'environmental': False,
                                    'normal': True,

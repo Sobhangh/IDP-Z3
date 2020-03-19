@@ -1,15 +1,30 @@
 
--- theory
-ForAll([c!473, c!474],
-       (codeOf(c!473) == c!474) ==
-       Or(And(c!473 == red, c!474 == a),
-          And(c!473 == blue, c!474 == b)))
+-- original ---------------------------------
+vocabulary {
+    type color constructed from {red, blue}
+    type code constructed from {a,b}
+    codeOf(color): code
+} 
 
--- atoms
+theory {
+    { !cl[color]: ! cd[code]: codeOf(cl)=cd <- (cl=red & cd=a) | (cl=blue & cd=b). }
+}
+ 
+view expanded
+
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
+ForAll([c!0, c!1],
+       (codeOf(c!0) == c!1) ==
+       Or(And(c!0 == red, c!1 == a),
+          And(c!0 == blue, c!1 == b)))
+
+-- atoms ------------------------------------
 codeOf(red)
 codeOf(blue)
 
--- case
+-- case -------------------------------------
 Type:        
   
 Definitions: 
@@ -28,7 +43,7 @@ Irrelevant:
   
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': False},
  'codeOf': {'codeOf(blue)': {'environmental': False,
                              'normal': True,

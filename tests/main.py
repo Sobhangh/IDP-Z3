@@ -24,7 +24,9 @@ files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 #files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/isa/definition.idp"]
 for file in files:
     print(file)
-    idp = idpparser.model_from_file(file)  
+    f = open(file, "r")
+    theory = f.read()
+    idp = idpparser.model_from_str(theory)  
 
     expanded_symbols = {}
     for expr in idp.theory.subtences.values():
@@ -38,16 +40,19 @@ for file in files:
     if os.path.exists(z3):
         os.remove(z3)
     f = open(z3, "a")
+    f.write("\r\n-- original ---------------------------------\r\n")
+    f.write(theory)
+    f.write("\r\n-- vocabulary -------------------------------\r\n")
     f.write("\r\n\r\n".join(str(t) for t in case.idp.vocabulary.translated))
-    f.write("\r\n-- theory\r\n")
+    f.write("\r\n-- theory -----------------------------------\r\n")
     f.write("\r\n\r\n".join(str(t) for t in case.idp.theory.translated)     + "\r\n")
-    f.write("\r\n-- atoms\r\n")
+    f.write("\r\n-- atoms ------------------------------------\r\n")
     f.write("\r\n".join(str(t) for t in case.GUILines)     + "\r\n")
 
-    f.write("\r\n-- case\r\n")
+    f.write("\r\n-- case -------------------------------------\r\n")
     f.write(str(case)+ "\r\n")
     out = pprint.pformat(propagation(case), width = 120)
-    f.write("\r\n-- propagation\r\n")
+    f.write("\r\n-- propagation ------------------------------\r\n")
     f.write(out     + "\r\n")
 
     f.close()

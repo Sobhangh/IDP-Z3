@@ -1,5 +1,27 @@
 
--- theory
+-- original ---------------------------------
+vocabulary environment {
+    Depth : real
+}
+vocabulary decision {
+    type csid constructed from {b, c, d, e, f}
+    cSID : csid
+}
+
+theory {
+     cSID = b ⇔ 2.104 ≤ Depth ≤ 2.476.
+     cSID = c ⇔ 2.768 ≤ Depth ≤ 3.391.
+     cSID = d ⇔ 4.294 ≤ Depth ≤ 5.206.
+     cSID = e ⇔ 5.474 ≤ Depth ≤ 6.686.
+     cSID = f ⇔ 8.312 ≤ Depth ≤ 10.748.
+}
+
+view expanded
+
+
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
 (cSID == b) == And(Depth >= 263/125, Depth <= 619/250)
 
 (cSID == c) == And(Depth >= 346/125, Depth <= 3391/1000)
@@ -10,7 +32,7 @@
 
 (cSID == f) == And(Depth >= 1039/125, Depth <= 2687/250)
 
--- atoms
+-- atoms ------------------------------------
 Depth
 cSID
 cSID = b
@@ -24,7 +46,7 @@ cSID = e
 cSID = f
 8.312 ≤ Depth ≤ 10.748
 
--- case
+-- case -------------------------------------
 Type:        
   
 Definitions: 
@@ -43,7 +65,7 @@ Irrelevant:
   
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': True},
  'Depth': {'2.104 ≤ Depth ≤ 2.476': {'environmental': True,
                                      'normal': False,

@@ -17,7 +17,7 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 import re
-from z3 import BoolRef, BoolSort, StringSort, StringVal, Function, Const, Implies, And, simplify, substitute, Optimize
+from z3 import BoolRef, BoolSort, Const, Implies, And, substitute, Optimize
 
 from Structure_ import *
 from Solver import mk_solver, reifier, Solver, sat, unsat, is_not

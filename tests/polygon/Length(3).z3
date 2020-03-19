@@ -1,7 +1,54 @@
-ForAll(c!119,
-       Implies(Large(c!119),
-               And(And(c!119 >= 1, c!119 <= 4))))
--- theory
+
+-- original ---------------------------------
+vocabulary {
+    
+    type sides = {3..4}
+    Sides: sides
+    Vertices: sides
+
+
+    type type constructed from {triangle, quadrilateral}
+    Type : type
+
+    type side = {1..4}
+    Length(side):real
+    Angle(side):real
+
+    type subtype constructed from
+        { regular_triangle
+        , right_triangle
+        , rectangle
+        , square
+        , irregular}
+    Subtype : subtype
+
+    Convex
+    Equilateral
+    Perimeter:real
+
+    Large(side)
+    Base : real
+    Height: real
+    Surface:real
+}
+
+theory {
+    Sides=3. 
+
+    Subtype=rectangle => Length(3)=Length(1).
+
+    Equilateral <=> (∀n[side]: Length(n)=Length(1) | Sides < n).
+
+    Subtype=rectangle <=> Sides=4.
+
+}
+
+view expanded
+-- vocabulary -------------------------------
+ForAll(c!289,
+       Implies(Large(c!289),
+               And(And(c!289 >= 1, c!289 <= 4))))
+-- theory -----------------------------------
 Sides == 3
 
 Or(Not(Subtype == rectangle), Length(3) == Length(1))
@@ -18,7 +65,7 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
--- atoms
+-- atoms ------------------------------------
 Sides
 Vertices
 Type
@@ -47,11 +94,11 @@ Length(3) = Length(1)
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
 
--- case
+-- case -------------------------------------
 Type:        
-  ForAll(c!119,
-       Implies(Large(c!119),
-               And(And(c!119 >= 1, c!119 <= 4))))
+  ForAll(c!289,
+       Implies(Large(c!289),
+               And(And(c!289 >= 1, c!289 <= 4))))
 Definitions: 
   
 Universals:  
@@ -66,7 +113,7 @@ Irrelevant:
   Length(3) = Length(1)
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Angle': {'Angle(1)': {'environmental': False,
                         'normal': True,

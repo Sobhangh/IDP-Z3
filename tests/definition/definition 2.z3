@@ -1,21 +1,38 @@
 
--- theory
+-- original ---------------------------------
+vocabulary {
+    type color constructed from {red, blue}
+    type code constructed from {a,b}
+    codeOf(color): code
+    c:color
+} 
+
+theory {
+    { !cl[color]: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
+    codeOf(red)=b.
+}
+ 
+view expanded
+
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
 codeOf(red) == b
 
-ForAll([c!511, c!512],
-       (codeOf(c!511) == c!512) ==
-       Or(And(c!511 == red, c!512 == a, red == c),
-          And(c!511 == blue, c!512 == a, blue == c),
-          And(c!511 == red, c!512 == b, Not(red == c)),
-          And(c!511 == blue, c!512 == b, Not(blue == c))))
+ForAll([c!127, c!128],
+       (codeOf(c!127) == c!128) ==
+       Or(And(c!127 == red, c!128 == a, red == c),
+          And(c!127 == blue, c!128 == a, blue == c),
+          And(c!127 == red, c!128 == b, Not(red == c)),
+          And(c!127 == blue, c!128 == b, Not(blue == c))))
 
--- atoms
+-- atoms ------------------------------------
 codeOf(red)
 codeOf(blue)
 c
 codeOf(red) = b
 
--- case
+-- case -------------------------------------
 Type:        
   
 Definitions: 
@@ -35,7 +52,7 @@ Irrelevant:
   
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': False},
  'c': {'c': {'environmental': False,
              'normal': True,

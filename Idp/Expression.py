@@ -106,7 +106,7 @@ class Expression(object):
 
     def substitute(self, e0, e1):
         if self == e0: # based on repr !
-            if type(e0) == Fresh_Variable:
+            if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
                 return e1 # no need to have brackets
             # replace by new Brackets node, to keep annotations
             e1.is_subtence = self.is_subtence
@@ -833,6 +833,9 @@ class Fresh_Variable(Expression):
 
     def substitute(self, e0, e1):
         return e1 if self == e0 else self
+
+    def annotate(self, symbol_decls, q_decls):
+        return self
 
     def translate(self):
         if self.translated is None:

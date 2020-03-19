@@ -1,0 +1,18 @@
+vocabulary {
+    p
+    q
+    r
+    type color constructed from {red, blue}
+    a : color
+    b : color
+    c : color
+} 
+
+theory {
+    { p <- q | r. }
+    { a=red <- p. }
+    { b=red <- a=red. }
+    { c=red. }
+}
+ 
+view expanded

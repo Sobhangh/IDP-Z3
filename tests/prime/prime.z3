@@ -1,22 +1,35 @@
-ForAll(c!555,
-       Implies(Prime(c!555),
-               And(And(c!555 >= 1, c!555 <= 4))))
--- theory
-ForAll(c!556,
-       Prime(c!556) ==
-       Or(c!556 == 1, c!556 == 2, c!556 == 3))
 
--- atoms
+-- original ---------------------------------
+vocabulary {
+    type num = {1..4}
+    Prime(num)
+}
+
+theory {
+	{ !x[num] : Prime(x) <- !y[num] : 1<y & y<x => x % y ~=0.}
+}
+
+
+-- vocabulary -------------------------------
+ForAll(c!650,
+       Implies(Prime(c!650),
+               And(And(c!650 >= 1, c!650 <= 4))))
+-- theory -----------------------------------
+ForAll(c!651,
+       Prime(c!651) ==
+       Or(c!651 == 1, c!651 == 2, c!651 == 3))
+
+-- atoms ------------------------------------
 Prime(1)
 Prime(2)
 Prime(3)
 Prime(4)
 
--- case
+-- case -------------------------------------
 Type:        
-  ForAll(c!555,
-       Implies(Prime(c!555),
-               And(And(c!555 >= 1, c!555 <= 4))))
+  ForAll(c!650,
+       Implies(Prime(c!650),
+               And(And(c!650 >= 1, c!650 <= 4))))
 Definitions: 
   Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
 Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)
@@ -35,7 +48,7 @@ Irrelevant:
   
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Prime': {'Prime(1)': {'environmental': False,
                         'normal': True,

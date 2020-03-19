@@ -1,5 +1,37 @@
 
--- theory
+-- original ---------------------------------
+vocabulary {
+    type type constructed from {triangle, quadrilateral}
+    Type : type
+
+
+    type subtype constructed from
+        { regular_triangle
+        , right_triangle
+        , rectangle
+        , square}
+    Subtype : subtype
+
+    isa(subtype, type)
+    asi(type, subtype)
+    typeOf(subtype): type
+}
+
+theory {
+    !t[type] st[subtype]: isa(st,t) <=> asi(t, st).
+    !t[type] st[subtype]: typeOf(st) = t <=> isa(st, t).
+    !st[subtype]: isa(st, typeOf(st)).
+    Type = typeOf(Subtype).
+    isa(regular_triangle, triangle).
+}
+
+structure {
+    isa = {regular_triangle, triangle; right_triangle, triangle;
+           rectangle, quadrilateral; square, quadrilateral}
+}
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
 And(asi(triangle, regular_triangle),
     Not(asi(quadrilateral, regular_triangle)),
     asi(triangle, right_triangle),
@@ -27,7 +59,7 @@ Type == typeOf(Subtype)
 
 True
 
--- atoms
+-- atoms ------------------------------------
 Type
 Subtype
 asi(triangle,regular_triangle)
@@ -47,7 +79,7 @@ typeOf(square)
 ∀st[subtype] : isa(st,typeOf(st))
 Type = typeOf(Subtype)
 
--- case
+-- case -------------------------------------
 Type:        
   
 Definitions: 
@@ -76,7 +108,7 @@ Irrelevant:
   
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Subtype': {'Subtype': {'environmental': False,
                          'normal': True,

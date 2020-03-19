@@ -1,18 +1,33 @@
 
--- theory
+-- original ---------------------------------
+vocabulary {
+    
+     Base : real
+     p
+}
+
+theory {
+
+p => 16.0 = Base*Base.
+0 < Base.
+p.
+}
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
 Or(Not(p), Base*Base == 16)
 
 Base > 0
 
 p
 
--- atoms
+-- atoms ------------------------------------
 Base
 p
 16.0 = (Base * Base)
 0 < Base
 
--- case
+-- case -------------------------------------
 Type:        
   
 Definitions: 
@@ -29,7 +44,7 @@ Irrelevant:
   
 
 
--- propagation
+-- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Base': {'0 < Base': {'environmental': False,
                        'normal': False,

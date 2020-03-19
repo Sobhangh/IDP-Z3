@@ -23,8 +23,8 @@ import re
 import sys
 
 from textx import metamodel_from_file
-from z3 import IntSort, BoolSort, RealSort, Or, Not, And, Const, ForAll, Exists, Z3Exception, \
-    Sum, If, BoolVal, Function, FreshConst, Implies, EnumSort
+from z3 import IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists, Z3Exception, \
+    Sum, If, Function, FreshConst, Implies, EnumSort
 
 from utils import applyTo, log, itertools, in_list, nl, mergeDicts
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, operation, \
