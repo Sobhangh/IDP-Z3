@@ -370,25 +370,24 @@ class Theory(object):
 class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
-        self.partition = None # {Symbol: [Transformed Rule]}
+        self.clark = None # {Symbol: Transformed Rule}
         self.q_decls = {} # {Symbol: {Variable: SymbolDeclaration}} Fresh variables for arguments & result
         self.translated = None
 
     def __str__(self):
-        return "Definition(s) of " + ",".join([k.name for k in self.partition.keys()])
+        return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
 
     def __repr__(self):
         out = []
-        for symbol, rules in self.partition.items():
-            for rule in rules:
-                out.append(repr(rule))
+        for symbol, rule in self.clark.items():
+            out.append(repr(rule))
         return nl.join(out)
 
     def annotate(self, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
 
         # create common variables, and rename vars in rule
-        self.partition = {}
+        self.clark = {}
         for r in self.rules:
             symbol = symbol_decls[r.symbol.name]
             if symbol not in self.q_decls:
@@ -400,52 +399,35 @@ class Definition(object):
                     q_v[name] = symbol.out.fresh(name, symbol_decls)
                 self.q_decls[symbol] = q_v
             new_rule = r.rename_args(self.q_decls[symbol])
-            self.partition.setdefault(symbol, []).append(new_rule)
-            #TODO attach interpretation to symbols
+            self.clark.setdefault(symbol, []).append(new_rule)
+
+        # join the bodies of rules
+        for symbol, rules in self.clark.items():
+            exprs = sum(([rule.body] for rule in rules), [])
+            rules[0].body = operation('∨', exprs)
+            self.clark[symbol] = rules[0]
         return self
 
     def expand_quantifiers(self, theory):
-        for symbol, rules in self.partition.items():
-            self.partition[symbol] = sum((r.expand_quantifiers(theory) for r in rules), [])
+        for symbol, rule in self.clark.items():
+            self.clark[symbol] = rule.expand_quantifiers(theory)
         return self
 
     def interpret(self, theory):
-        for symbol, rules in self.partition.items():
-            self.partition[symbol] = sum((r.interpret(theory) for r in rules), [])
+        for symbol, rule in self.clark.items():
+            self.clark[symbol] = rule.interpret(theory)
         return self
 
     def unknown_symbols(self):
         out = {}
-        for symbol, rules in self.partition.items():
+        for symbol, rule in self.clark.items():
             out[symbol.name] = symbol
-            for r in rules: out.update(r.unknown_symbols())
+            out.update(rule.unknown_symbols())
         return out
 
     def translate(self, idp):
         if self.translated is None:
-            self.translated = []
-            for symbol, rules in self.partition.items():
-
-                # for all common variables: head = rule.translate
-                vars = [v.translate() for v in self.q_decls[symbol].values()]
-                exprs, outputVar = [], False
-                for i in rules:
-                    exprs.append(i.translate(vars))
-                    if i.out is not None:
-                        outputVar = True
-
-                ors = list(e for e in exprs if e is not False)
-                ors = exprs[0] if ors == [] else Or(ors)
-                if outputVar:
-                    expr = ForAll(vars,
-                                    (applyTo(symbol.translate(idp), vars[:-1]) == vars[-1]) == ors)
-                else:
-                    if len(vars) > 0:
-                        expr = ForAll(vars,
-                                        applyTo(symbol.translate(idp), vars) == ors)
-                    else:
-                        expr = symbol.translate(idp) == ors
-                self.translated.append(expr)
+            self.translated = [rule.translate() for rule in self.clark.values()]
         return self.translated
 
 
@@ -458,6 +440,7 @@ class Rule(object):
         self.args = kwargs.pop('args') # later augmented with self.out, if any
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
+        self.expanded = None # Expression
 
         assert len(self.sorts) == len(self.vars)
         self.q_decls = {}
@@ -478,6 +461,8 @@ class Rule(object):
         self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
+
+        self.symbol = self.symbol.annotate(symbol_decls, q_v)
         self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
         self.out = self.out.annotate(symbol_decls, q_v) if self.out else self.out
         self.body = self.body.annotate(symbol_decls, q_v)
@@ -495,23 +480,36 @@ class Rule(object):
         out = operation('∧', out)
         out.type = 'bool'
 
-        if len(self.vars) == 0:
+        if len(self.q_decls) == 0:
             self.body = out
         else:
-            self.body = AQuantification.make('∃', {**self.q_decls}, out)
+            self.body = AQuantification.make('∃', self.q_decls, out)
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
-        self.sorts = []
+        self.sorts = [] # ignored
         self.q_decls = new_vars
         return self
 
     def expand_quantifiers(self, theory):
         self.body = self.body.expand_quantifiers(theory)
-        return [self]
+
+        # compute self.expanded, by expanding:
+        # ∀ v: f(v)=out <=> body
+        # (after joining the rules of the same symbols)
+        if self.out:
+            expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+            expr = operation('=', [expr, self.args[-1]])
+        else:
+            expr = AppliedSymbol.make(self.symbol, self.args)
+        expr = operation('=', [expr, self.body])
+        expr = AQuantification.make('∀', {**self.q_decls}, expr)
+        self.expanded = expr.expand_quantifiers(theory)
+        return self
 
     def interpret(self, theory):
-        self.body = self.body.interpret(theory)
-        return [self]
+        self.body     = self.body    .interpret(theory)
+        self.expanded = self.expanded.interpret(theory)
+        return self
 
     def unknown_symbols(self):
         out = mergeDicts(arg.unknown_symbols() for arg in self.args) # in case they are expressions
@@ -520,11 +518,9 @@ class Rule(object):
         out.update(self.body.unknown_symbols())
         return out
 
-    def translate(self, new_vars):
+    def translate(self):
+        return self.expanded.translate()
 
-        log("translating rule " + str(self.body)[:20])
-        self.translated = self.body.translate()
-        return self.translated
 
 # Expressions : see Expression.py
 

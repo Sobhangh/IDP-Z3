@@ -16,7 +16,8 @@ theory {
 -- theory -----------------------------------
 t0 == Piet
 
-ForAll(c!34, (t == c!34) == Or(c!34 == t0, c!34 == t1))
+And((t == Jan) == Or(Jan == t0, Jan == t1),
+    (t == Piet) == Or(Piet == t0, Piet == t1))
 
 -- atoms ------------------------------------
 t
@@ -28,8 +29,7 @@ t0 = Piet
 Type:        
   
 Definitions: 
-  Rule:∀['$t$'][]: t($t$) ⇔($t$ = t0)
-Rule:∀['$t$'][]: t($t$) ⇔($t$ = t1)
+  Rule:∀['$t$'][]: t($t$) ⇔($t$ = t0) ∨ ($t$ = t1)
 Universals:  
   t0 = Piet
 Consequences:

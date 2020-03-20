@@ -13,9 +13,10 @@ theory {
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-ForAll(c!355,
-       Prime(c!355) ==
-       Or(Or(c!355 == 1, c!355 == 2, c!355 == 3, False)))
+And(Prime(1) == True,
+    Prime(2) == True,
+    Prime(3) == True,
+    Prime(4) == False)
 
 -- atoms ------------------------------------
 Prime(1)

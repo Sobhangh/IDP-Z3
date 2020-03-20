@@ -21,14 +21,13 @@ view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-p == Or(Or(q, r))
+p == Or(q, r)
 
-ForAll(c!146, (a == c!146) == Or(And(c!146 == red, p)))
+And((a == red) == p, (a == blue) == False)
 
-ForAll(c!147,
-       (b == c!147) == Or(And(c!147 == red, a == red)))
+And((b == red) == (a == red), (b == blue) == False)
 
-ForAll(c!148, (c == c!148) == Or(c!148 == red))
+And((c == red) == True, (c == blue) == False)
 
 -- atoms ------------------------------------
 p

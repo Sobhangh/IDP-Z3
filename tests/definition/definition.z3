@@ -15,10 +15,10 @@ view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-ForAll([c!0, c!1],
-       (codeOf(c!0) == c!1) ==
-       Or(Or(And(c!0 == red, c!1 == a),
-             And(c!0 == blue, c!1 == b))))
+And((codeOf(red) == a) == True,
+    (codeOf(blue) == a) == False,
+    (codeOf(red) == b) == False,
+    (codeOf(blue) == b) == True)
 
 -- atoms ------------------------------------
 codeOf(red)

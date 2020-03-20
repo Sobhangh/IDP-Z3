@@ -22,15 +22,15 @@ same(Piet) == Piet
 
 same(same(Piet)) == negated(negated(Piet))
 
-ForAll([c!47, c!48],
-       (same(c!47) == c!48) ==
-       Or(Or(And(c!47 == Piet, c!48 == Piet),
-             And(c!47 == Jan, c!48 == Jan))))
+And((same(Piet) == Piet) == True,
+    (same(Jan) == Piet) == False,
+    (same(Piet) == Jan) == False,
+    (same(Jan) == Jan) == True)
 
-ForAll([c!49, c!50],
-       (negated(c!49) == c!50) ==
-       Or(And(c!49 == Piet, c!50 == Jan, True),
-          And(c!49 == Jan, c!50 == Piet, True)))
+And((negated(Piet) == Piet) == False,
+    (negated(Jan) == Piet) == True,
+    (negated(Piet) == Jan) == True,
+    (negated(Jan) == Jan) == False)
 
 -- atoms ------------------------------------
 same(Piet)
@@ -45,8 +45,7 @@ Type:
   
 Definitions: 
   Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔((($same$0 = Piet) ∧ ($same$ = Piet)) ∨ (($same$0 = Jan) ∧ ($same$ = Jan)))
-  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔($negated$0 = Piet) ∧ ($negated$ = Jan) ∧ true
-Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔($negated$0 = Jan) ∧ ($negated$ = Piet) ∧ true
+  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔(($negated$0 = Piet) ∧ ($negated$ = Jan) ∧ true) ∨ (($negated$0 = Jan) ∧ ($negated$ = Piet) ∧ true)
 Universals:  
   same(Piet) = Piet
   same(same(Piet)) = negated(negated(Piet))

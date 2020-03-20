@@ -247,7 +247,7 @@ class AQuantification(Expression):
 
     @classmethod
     def make(cls, q, decls, f):
-        out = cls(q=q, vars=decls.keys(), sorts=[], f=f)
+        out = cls(q=q, vars=list(decls.values()), sorts=[], f=f)
         out.q_decls = decls
         return out
 
@@ -731,6 +731,16 @@ class AppliedSymbol(Expression):
         super().__init__()
 
         self.decl = None
+
+    @classmethod
+    def make(cls, s, args):
+        if 0 < len(args):
+            out = cls(s=Symbol(name=s.name), args=Arguments(sub_exprs=[]))
+            out.sub_exprs = args
+        else:
+            out = Variable(name=s.name)
+        out.decl = s.decl
+        return out
 
     def __str__(self):
         return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"

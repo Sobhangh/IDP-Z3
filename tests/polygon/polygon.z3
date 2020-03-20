@@ -212,7 +212,10 @@ And(Not(Sides < 1),
     Not(Sides < 3),
     Not(Sides < 4))
 
-ForAll(c!287, Large(c!287) == False)
+And(Large(1) == False,
+    Large(2) == False,
+    Large(3) == False,
+    Large(4) == False)
 
 -- atoms ------------------------------------
 Sides
