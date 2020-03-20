@@ -245,6 +245,13 @@ class AQuantification(Expression):
         self.type = 'bool'
         self.is_subtence = True
 
+    @classmethod
+    def make(cls, q, decls, f):
+        out = cls(q=q, vars=decls.keys(), sorts=[], f=f)
+        out.q_decls = decls
+        return out
+
+
     def __str__(self):
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {str(self.sub_exprs[0])}"

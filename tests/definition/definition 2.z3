@@ -21,10 +21,10 @@ codeOf(red) == b
 
 ForAll([c!239, c!240],
        (codeOf(c!239) == c!240) ==
-       Or(And(c!239 == red, c!240 == a, red == c),
-          And(c!239 == blue, c!240 == a, blue == c),
-          And(c!239 == red, c!240 == b, Not(red == c)),
-          And(c!239 == blue, c!240 == b, Not(blue == c))))
+       Or(Or(And(c!239 == red, c!240 == a, red == c),
+             And(c!239 == blue, c!240 == a, blue == c),
+             And(c!239 == red, c!240 == b, Not(red == c)),
+             And(c!239 == blue, c!240 == b, Not(blue == c)))))
 
 -- atoms ------------------------------------
 codeOf(red)
@@ -36,10 +36,7 @@ codeOf(red) = b
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: codeOf(red,a) ⇔($codeOf$0 = red) ∧ ($codeOf$ = a) ∧ (((red = c)))
-Rule:∀[][[]]: codeOf(blue,a) ⇔($codeOf$0 = blue) ∧ ($codeOf$ = a) ∧ (((blue = c)))
-Rule:∀[][[]]: codeOf(red,b) ⇔($codeOf$0 = red) ∧ ($codeOf$ = b) ∧ (((~(red = c))))
-Rule:∀[][[]]: codeOf(blue,b) ⇔($codeOf$0 = blue) ∧ ($codeOf$ = b) ∧ (((~(blue = c))))
+  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔((($codeOf$0 = red) ∧ ($codeOf$ = a) ∧ (((red = c)))) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = a) ∧ (((blue = c)))) ∨ (($codeOf$0 = red) ∧ ($codeOf$ = b) ∧ (((~(red = c))))) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = b) ∧ (((~(blue = c))))))
 Universals:  
   codeOf(red) = b
 Consequences:

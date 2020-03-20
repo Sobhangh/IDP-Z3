@@ -24,8 +24,8 @@ same(same(Piet)) == negated(negated(Piet))
 
 ForAll([c!47, c!48],
        (same(c!47) == c!48) ==
-       Or(And(c!47 == Piet, c!48 == Piet),
-          And(c!47 == Jan, c!48 == Jan)))
+       Or(Or(And(c!47 == Piet, c!48 == Piet),
+             And(c!47 == Jan, c!48 == Jan))))
 
 ForAll([c!49, c!50],
        (negated(c!49) == c!50) ==
@@ -44,12 +44,9 @@ same(same(Piet)) = negated(negated(Piet))
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: same(Piet,Piet) ⇔($same$0 = Piet) ∧ ($same$ = Piet)
-Rule:∀[][[]]: same(Jan,Piet) ⇔(false)
-Rule:∀[][[]]: same(Piet,Jan) ⇔(false)
-Rule:∀[][[]]: same(Jan,Jan) ⇔($same$0 = Jan) ∧ ($same$ = Jan)
-  Rule:∀[][[]]: negated(Piet,Jan) ⇔($negated$0 = Piet) ∧ ($negated$ = Jan) ∧ true
-Rule:∀[][[]]: negated(Jan,Piet) ⇔($negated$0 = Jan) ∧ ($negated$ = Piet) ∧ true
+  Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔((($same$0 = Piet) ∧ ($same$ = Piet)) ∨ (($same$0 = Jan) ∧ ($same$ = Jan)))
+  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔($negated$0 = Piet) ∧ ($negated$ = Jan) ∧ true
+Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔($negated$0 = Jan) ∧ ($negated$ = Piet) ∧ true
 Universals:  
   same(Piet) = Piet
   same(same(Piet)) = negated(negated(Piet))

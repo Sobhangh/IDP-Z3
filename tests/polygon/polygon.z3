@@ -257,10 +257,7 @@ Perimeter = (sum{n[side] : true : Length(n)})
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: Large(1) ⇔(false)
-Rule:∀[][[]]: Large(2) ⇔(false)
-Rule:∀[][[]]: Large(3) ⇔(false)
-Rule:∀[][[]]: Large(4) ⇔(false)
+  Rule:∀['$Large$0'][]: Large($Large$0) ⇔((false))
 Universals:  
   ~Subtype = rectangle
   Perimeter = (sum{n[side] : true : Length(n)})

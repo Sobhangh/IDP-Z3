@@ -28,8 +28,8 @@ t0 = Piet
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: t(t0) ⇔($t$ = t0)
-Rule:∀[][[]]: t(t1) ⇔($t$ = t1)
+  Rule:∀['$t$'][]: t($t$) ⇔($t$ = t0)
+Rule:∀['$t$'][]: t($t$) ⇔($t$ = t1)
 Universals:  
   t0 = Piet
 Consequences:

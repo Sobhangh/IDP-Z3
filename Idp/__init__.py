@@ -352,8 +352,6 @@ class Theory(object):
         self.definitions = [e.annotate(self.symbol_decls, {}) for e in self.definitions]
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
         self.definitions = [e.interpret         (self) for e in self.definitions]
-        for e in self.definitions:
-            self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
 
     def unknown_symbols(self):
         return mergeDicts(c.unknown_symbols()
@@ -389,6 +387,7 @@ class Definition(object):
     def annotate(self, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
 
+        # create common variables, and rename vars in rule
         self.partition = {}
         for r in self.rules:
             symbol = symbol_decls[r.symbol.name]
@@ -404,9 +403,6 @@ class Definition(object):
             self.partition.setdefault(symbol, []).append(new_rule)
             #TODO attach interpretation to symbols
         return self
-
-    def subtences(self):
-        return mergeDicts(r.subtences() for r in self.rules)
 
     def expand_quantifiers(self, theory):
         for symbol, rules in self.partition.items():
@@ -430,6 +426,7 @@ class Definition(object):
             self.translated = []
             for symbol, rules in self.partition.items():
 
+                # for all common variables: head = rule.translate
                 vars = [v.translate() for v in self.q_decls[symbol].values()]
                 exprs, outputVar = [], False
                 for i in rules:
@@ -472,11 +469,12 @@ class Rule(object):
         self.translated = None
 
     def __repr__(self):
-        return ( f"Rule:∀{self.vars}[{self.sorts}]: "
+        return ( f"Rule:∀{self.vars}{self.sorts}: "
                  f"{self.symbol}({','.join(str(e) for e in self.args)}) "
                  f"⇔{str(self.body)}" )
 
     def annotate(self, symbol_decls, q_decls):
+        # create head variables
         self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
@@ -486,38 +484,30 @@ class Rule(object):
         return self
 
     def rename_args(self, new_vars):
-        """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
+        """ input : '!v: f(args) <- body(args)'
+            output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
         out = []
         for new_var, arg in zip(new_vars.values(), self.args):
             eq = operation('=', [new_var, arg])
             eq.type = 'bool'
             out += [eq]
         out += [self.body]
-        self.body = operation('∧', out)
-        self.body.type = 'bool'
+        out = operation('∧', out)
+        out.type = 'bool'
 
+        if len(self.vars) == 0:
+            self.body = out
+        else:
+            self.body = AQuantification.make('∃', {**self.q_decls}, out)
+        self.args = list(new_vars.values())
+        self.vars = list(new_vars.keys())
+        self.sorts = []
+        self.q_decls = new_vars
         return self
 
-    def subtences(self):
-        return self.body.subtences() if not self.vars else {}
-
     def expand_quantifiers(self, theory):
-        forms = [(self.args, self.body.expand_quantifiers(theory))]
-        vars = []
-        for name, var in self.q_decls.items():
-            if var.decl.range:
-                forms = [([a.substitute(var, val) for a in args],
-                          f.substitute(var, val)
-                         ) for val in var.decl.range for (args, f) in forms]
-            else:
-                vars.append(var)
-        sorts = [] # not used anymore
-
-        out = [Rule(reading=self.reading, vars=vars, sorts=sorts, symbol=self.symbol,
-                     args=Arguments(sub_exprs=args[:-1] if self.out else args),
-                     out=args[-1] if self.out else None, body=f)
-                for (args, f) in forms]
-        return out
+        self.body = self.body.expand_quantifiers(theory)
+        return [self]
 
     def interpret(self, theory):
         self.body = self.body.interpret(theory)
@@ -531,16 +521,9 @@ class Rule(object):
         return out
 
     def translate(self, new_vars):
-        """ returns (?vars0,...: new_vars0=args0 & new_vars1=args1 .. & body(vars)) """
 
         log("translating rule " + str(self.body)[:20])
-        for v in self.q_decls.values():
-            v.translate()
-
-        if len(self.vars) == 0:
-            self.translated = self.body.translate()
-        else:
-            self.translated = Exists([v.translate() for v in self.vars], self.body.translate())
+        self.translated = self.body.translate()
         return self.translated
 
 # Expressions : see Expression.py

@@ -37,21 +37,19 @@ r
 a
 b
 c
-a = red
 
 -- case -------------------------------------
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: p() ⇔q ∨ r
-  Rule:∀[][[]]: a(red) ⇔($a$ = red) ∧ p
-  Rule:∀[][[]]: b(red) ⇔($b$ = red) ∧ (a = red)
-  Rule:∀[][[]]: c(red) ⇔($c$ = red)
+  Rule:∀[][]: p() ⇔q ∨ r
+  Rule:∀['$a$'][]: a($a$) ⇔($a$ = red) ∧ p
+  Rule:∀['$b$'][]: b($b$) ⇔($b$ = red) ∧ (a = red)
+  Rule:∀['$c$'][]: c($c$) ⇔($c$ = red)
 Universals:  
   
 Consequences:
   p
-  a = red
   a = red
   b = red
   c = red
@@ -70,14 +68,7 @@ Irrelevant:
              'status': 'CONSEQUENCE',
              'typ': 'color',
              'value': 'red',
-             'values': ['red', 'blue']},
-       'a = red': {'environmental': False,
-                   'normal': False,
-                   'reading': 'a = red',
-                   'relevant': True,
-                   'status': 'CONSEQUENCE',
-                   'typ': 'Bool',
-                   'value': True}},
+             'values': ['red', 'blue']}},
  'b': {'b': {'environmental': False,
              'normal': True,
              'reading': 'b',

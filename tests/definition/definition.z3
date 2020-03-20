@@ -17,8 +17,8 @@ view expanded
 -- theory -----------------------------------
 ForAll([c!0, c!1],
        (codeOf(c!0) == c!1) ==
-       Or(And(c!0 == red, c!1 == a),
-          And(c!0 == blue, c!1 == b)))
+       Or(Or(And(c!0 == red, c!1 == a),
+             And(c!0 == blue, c!1 == b))))
 
 -- atoms ------------------------------------
 codeOf(red)
@@ -28,10 +28,7 @@ codeOf(blue)
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: codeOf(red,a) ⇔($codeOf$0 = red) ∧ ($codeOf$ = a)
-Rule:∀[][[]]: codeOf(blue,a) ⇔(false)
-Rule:∀[][[]]: codeOf(red,b) ⇔(false)
-Rule:∀[][[]]: codeOf(blue,b) ⇔($codeOf$0 = blue) ∧ ($codeOf$ = b)
+  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔((($codeOf$0 = red) ∧ ($codeOf$ = a)) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = b)))
 Universals:  
   
 Consequences:

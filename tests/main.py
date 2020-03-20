@@ -21,7 +21,7 @@ files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 #files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/isa/isa.idp"]
 #files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/prime/prime.idp"]
 #files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/polygon/Length(3).idp"]
-#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/isa/definition.idp"]
+#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/definition/definition.idp"]
 for file in files:
     print(file)
     f = open(file, "r")

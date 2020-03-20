@@ -15,7 +15,7 @@ theory {
 -- theory -----------------------------------
 ForAll(c!355,
        Prime(c!355) ==
-       Or(c!355 == 1, c!355 == 2, c!355 == 3))
+       Or(Or(c!355 == 1, c!355 == 2, c!355 == 3, False)))
 
 -- atoms ------------------------------------
 Prime(1)
@@ -27,10 +27,7 @@ Prime(4)
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: Prime(1) ⇔($Prime$0 = 1)
-Rule:∀[][[]]: Prime(2) ⇔($Prime$0 = 2)
-Rule:∀[][[]]: Prime(3) ⇔($Prime$0 = 3)
-Rule:∀[][[]]: Prime(4) ⇔(false)
+  Rule:∀['$Prime$0'][]: Prime($Prime$0) ⇔(($Prime$0 = 1) ∨ ($Prime$0 = 2) ∨ ($Prime$0 = 3) ∨ (false))
 Universals:  
   
 Consequences:

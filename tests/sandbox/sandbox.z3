@@ -24,17 +24,15 @@ ForAll(c!342,
 -- atoms ------------------------------------
 LipLen
 JacketDesign
-JacketDesign = Design_230
 
 -- case -------------------------------------
 Type:        
   
 Definitions: 
-  Rule:∀[][[]]: LipLen(Short) ⇔($LipLen$ = Short) ∧ (JacketDesign = Design_230)
+  Rule:∀['$LipLen$'][]: LipLen($LipLen$) ⇔($LipLen$ = Short) ∧ (JacketDesign = Design_230)
 Universals:  
   
 Consequences:
-  JacketDesign = Design_230
   LipLen = Short
   JacketDesign = Design_230
 Simplified:  
@@ -52,14 +50,7 @@ Irrelevant:
                                    'status': 'CONSEQUENCE',
                                    'typ': 'jaDes',
                                    'value': 'Design_230',
-                                   'values': ['Design_230', 'Design_400HP']},
-                  'JacketDesign = Design_230': {'environmental': False,
-                                                'normal': False,
-                                                'reading': 'JacketDesign = Design_230',
-                                                'relevant': True,
-                                                'status': 'CONSEQUENCE',
-                                                'typ': 'Bool',
-                                                'value': True}},
+                                   'values': ['Design_230', 'Design_400HP']}},
  'LipLen': {'LipLen': {'environmental': False,
                        'normal': True,
                        'reading': 'LipLen',
