@@ -277,7 +277,7 @@ class AQuantification(Expression):
             else:
                 self.vars.append(var)
         op = '∧' if self.q == '∀' else '∨'
-        out = operation(op, forms)
+        out = BinaryOperator.make(op, forms)
         return out if not self.vars else [out]
 
     def translate(self):
@@ -338,6 +338,21 @@ class BinaryOperator(Expression):
 
         self.is_subtence = self.operator[0] in '=<>≤≥≠'
 
+    @classmethod
+    def make(cls, ops, operands):
+        if len(operands) == 1:
+            return operands[0]
+        if isinstance(ops, str):
+            ops = [ops] * (len(operands)-1)
+        operands1 = []
+        for o in operands:
+            if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
+                # add () around operands, to avoid ambiguity in str()
+                o = Brackets(f=o, reading='')
+            operands1.append(o)
+        out = (classes[ops[0]]) (sub_exprs=operands, operator=ops)
+        return out.simplify1()
+        
     def __str__(self):
         def parenthesis(x):
             # add () around operands, to avoid ambiguity in str()
@@ -424,9 +439,9 @@ class AEquivalence(BinaryOperator):
     def update_exprs(self, new_expr_generator): 
         exprs = list(new_expr_generator)
         if any(e == TRUE for e in exprs):
-            return operation('∧', exprs)
+            return BinaryOperator.make('∧', exprs)
         if any(e == FALSE for e in exprs):
-            return operation('∧', [NOT(e) for e in exprs])
+            return BinaryOperator.make('∧', [NOT(e) for e in exprs])
         return exprs
     
 class ARImplication(BinaryOperator):
@@ -588,19 +603,6 @@ classes = { '∧': AConjunction,
             '≠': AComparison,
             }
 
-def operation(ops, operands):
-    if len(operands) == 1:
-        return operands[0]
-    if isinstance(ops, str):
-        ops = [ops] * (len(operands)-1)
-    operands1 = []
-    for o in operands:
-        if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
-            # add () around operands, to avoid ambiguity in str()
-            o = Brackets(f=o, reading='')
-        operands1.append(o)
-    out = (classes[ops[0]]) (sub_exprs=operands, operator=ops)
-    return out.simplify1()
 
 class AUnary(Expression):
     MAP = {'-': lambda x: 0 - x,

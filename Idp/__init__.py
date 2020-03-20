@@ -27,7 +27,7 @@ from z3 import IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists, Z3Ex
     Sum, If, Function, FreshConst, Implies, EnumSort
 
 from utils import applyTo, log, itertools, in_list, nl, mergeDicts
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, operation, \
+from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
@@ -210,11 +210,11 @@ class RangeDeclaration(object):
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
-                e = operation('=', [x.fromI, var])
+                e = BinaryOperator.make('=', [x.fromI, var])
             else:
-                e = operation(['≤', '≤'], [x.fromI, var, x.toI])
+                e = BinaryOperator.make(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
-        return operation('∨', sub_exprs)
+        return BinaryOperator.make('∨', sub_exprs)
 
     def translate(self):
         if self.translated is None:
@@ -404,7 +404,7 @@ class Definition(object):
         # join the bodies of rules
         for symbol, rules in self.clark.items():
             exprs = sum(([rule.body] for rule in rules), [])
-            rules[0].body = operation('∨', exprs)
+            rules[0].body = BinaryOperator.make('∨', exprs)
             self.clark[symbol] = rules[0]
         return self
 
@@ -473,11 +473,11 @@ class Rule(object):
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
         out = []
         for new_var, arg in zip(new_vars.values(), self.args):
-            eq = operation('=', [new_var, arg])
+            eq = BinaryOperator.make('=', [new_var, arg])
             eq.type = 'bool'
             out += [eq]
         out += [self.body]
-        out = operation('∧', out)
+        out = BinaryOperator.make('∧', out)
         out.type = 'bool'
 
         if len(self.q_decls) == 0:
@@ -498,10 +498,10 @@ class Rule(object):
         # (after joining the rules of the same symbols)
         if self.out:
             expr = AppliedSymbol.make(self.symbol, self.args[:-1])
-            expr = operation('=', [expr, self.args[-1]])
+            expr = BinaryOperator.make('=', [expr, self.args[-1]])
         else:
             expr = AppliedSymbol.make(self.symbol, self.args)
-        expr = operation('=', [expr, self.body])
+        expr = BinaryOperator.make('=', [expr, self.body])
         expr = AQuantification.make('∀', {**self.q_decls}, expr)
         self.expanded = expr.expand_quantifiers(theory)
         return self
@@ -576,7 +576,7 @@ class Interpretation(object):
                             out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = IfExpr(if_f=operation('=', [args[rank],val]),
+                        out = IfExpr(if_f=BinaryOperator.make('=', [args[rank],val]),
                                         then_f=interpret(theory, rank+1, args, list(tuples2)),
                                         else_f=out)
                         out = out.simplify1()
