@@ -235,13 +235,11 @@ class SymbolDeclaration(object):
             self.out = Sort(name='bool')
 
         self.is_var = True # unless interpreted later
-        self.typeConstraints = []
         self.translated = None
 
         self.type = None # a declaration object
         self.domain = None # all possible arguments
         self.range = None # all possible values
-        self.arg_vars = None # [Fresh_Variable] one for each argument
         self.instances = None # {string: Variable or AppliedSymbol} not starting with '_'
         self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
         self.environmental = False # true if in declared (environmental) vocabulary and there is a decision vocabulary
@@ -264,9 +262,6 @@ class SymbolDeclaration(object):
 
         self.type = self.out.decl
         self.range = self.type.range
-        self.arg_vars = []
-        for i, s in enumerate(self.sorts):
-            self.arg_vars.append(s.fresh(self.name + "$" + str(i), symbol_decls))
 
         self.instances = {}
         if vocabulary and not self.name.startswith('_'):
@@ -339,15 +334,10 @@ class Theory(object):
 
         self.subtences = {}
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
-        #TODO check argument ranges
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
         for e in self.constraints:
             self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
-
-        for decl in self.symbol_decls.values():
-            if type(decl) == SymbolDeclaration:
-                self.constraints.extend(decl.typeConstraints)
 
         self.definitions = [e.annotate(self.symbol_decls, {}) for e in self.definitions]
         self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
