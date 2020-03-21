@@ -7,8 +7,8 @@ vocabulary {
 } 
 
 theory {
-    { !x[num]: !y[num]: same(x) = y <- y=x. } //TODO { !x[num]: same(x) = x. }
-    { negated(Piet) = Jan. negated(Jan)=Piet.} //TODO { !x[num]: negated(x) = (0-x). }
+    { !x[num]: same(x) = x. }
+    { !x[num]: negated(x) = (0-x). }
     same(Piet)= Piet.
     same(same(Piet))= negated(negated(Piet)).
 
@@ -27,10 +27,10 @@ And((same(Piet) == Piet) == True,
     (same(Piet) == Jan) == False,
     (same(Jan) == Jan) == True)
 
-And((negated(Piet) == Piet) == False,
-    (negated(Jan) == Piet) == True,
-    (negated(Piet) == Jan) == True,
-    (negated(Jan) == Jan) == False)
+And((negated(Piet) == Piet) == True,
+    (negated(Jan) == Piet) == False,
+    (negated(Piet) == Jan) == False,
+    (negated(Jan) == Jan) == True)
 
 -- atoms ------------------------------------
 same(Piet)
@@ -45,15 +45,15 @@ Type:
   
 Definitions: 
   Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔((($same$0 = Piet) ∧ ($same$ = Piet)) ∨ (($same$0 = Jan) ∧ ($same$ = Jan)))
-  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔(($negated$0 = Piet) ∧ ($negated$ = Jan) ∧ true) ∨ (($negated$0 = Jan) ∧ ($negated$ = Piet) ∧ true)
+  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔((($negated$0 = Piet) ∧ ($negated$ = Piet)) ∨ (($negated$0 = Jan) ∧ ($negated$ = Jan)))
 Universals:  
   same(Piet) = Piet
   same(same(Piet)) = negated(negated(Piet))
 Consequences:
   same(Piet) = Piet
   same(Jan) = Jan
-  negated(Piet) = Jan
-  negated(Jan) = Piet
+  negated(Piet) = Piet
+  negated(Jan) = Jan
 Simplified:  
   
 Irrelevant:  
@@ -68,7 +68,7 @@ Irrelevant:
                               'relevant': True,
                               'status': 'CONSEQUENCE',
                               'typ': 'num',
-                              'value': 'Piet',
+                              'value': 'Jan',
                               'values': ['Piet', 'Jan']},
              'negated(Piet)': {'environmental': False,
                                'normal': True,
@@ -76,7 +76,7 @@ Irrelevant:
                                'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'num',
-                               'value': 'Jan',
+                               'value': 'Piet',
                                'values': ['Piet', 'Jan']}},
  'same': {'same(Jan)': {'environmental': False,
                         'normal': True,

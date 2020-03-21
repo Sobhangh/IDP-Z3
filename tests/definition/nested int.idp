@@ -1,5 +1,5 @@
 vocabulary {
-    type num constructed from { Piet, Jan}
+    type num = {-1; 0; 1}
     same(num) : num
     negated(num) : num
 } 
@@ -7,8 +7,8 @@ vocabulary {
 theory {
     { !x[num]: same(x) = x. }
     { !x[num]: negated(x) = (0-x). }
-    same(Piet)= Piet.
-    same(same(Piet))= negated(negated(Piet)).
+    same(-1)= -1.
+    negated(negated(-1)) = same(-1).
 
 }
  
