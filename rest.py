@@ -28,10 +28,12 @@ from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 from textx import TextXError
 
-from Case import *
+from Case import make_case
 from Inferences import *
 from Structure_ import *
-from Idp import idpparser
+from Idp import Idp, idpparser
+
+from typing import Dict
 
 # library to generate call graph, for documentation purposes
 from pycallgraph2 import PyCallGraph
@@ -67,7 +69,7 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
-idps = {} #{code_string : idp}
+idps: Dict[str, Idp] = {} # {code_string : idp}
 
 def caseOf(code):
     global idps

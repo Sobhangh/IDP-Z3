@@ -23,13 +23,19 @@ from Solver import mk_solver
 from Structure_ import json_to_literals, Equality, Assignment, Term, Status
 from utils import *
 
+# Types
+from Idp import Idp, SymbolDeclaration
+from Idp.Expression import Expression
+from typing import Any, Dict, List, Union, Tuple, cast
+from z3.z3 import BoolRef
+
 class Case:
     """
     Contains a state of problem solving
     """
-    cache = {}
+    cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
 
-    def __init__(self, idp, jsonstr, expanded):
+    def __init__(self, idp: Idp, jsonstr: str, expanded: List[str]):
 
         self.idp = idp # Idp vocabulary and theory
         self.given = json_to_literals(idp, jsonstr) # {atom : assignment} from the user interface
@@ -41,9 +47,9 @@ class Case:
         self.GUILines = {**idp.vocabulary.terms, **idp.theory.subtences} # DEPRECATED use self.assignments instead # {atom_string: Expression}
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
-        self.simplified =  [] # [Expression]
+        self.simplified: List[Expression] = []
 
-        self.assignments = {} # {sentence.code: Assignment}, atoms + given, with simplified formula and truth value
+        self.assignments: Dict[str, Assignment] = {} # atoms + given, with simplified formula and truth value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -75,7 +81,7 @@ class Case:
 
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translated)}{nl}"
                 f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == Status.UNIVERSAL)}{nl}"
@@ -84,7 +90,7 @@ class Case:
                 f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if not c.relevant and type(c) != Term)}{nl}"
         )
         
-    def get_relevant_subtences(self, all_):
+    def get_relevant_subtences(self, all_: bool) -> Dict[str, Expression]:
         #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
         if self.definitions: #TODO definitions ?
             return {}
@@ -107,7 +113,7 @@ class Case:
         relevant_subtences.update(mergeDicts(s.instances for s in symbols.values()))
         return relevant_subtences
 
-    def full_propagate(self, all_):
+    def full_propagate(self, all_: bool) -> None:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
 
         # simplify all using given and universals
@@ -149,6 +155,7 @@ class Case:
 
                             if res2 == unsat:
                                 if type(l) == Term:
+                                    atom = cast(Equality, atom)
                                     # need to convert Term into Assignment
                                     if atom.variable.decl.out.code == 'bool':
                                         ass = Assignment(atom.variable, is_true(val1), CONSQ)
@@ -169,7 +176,7 @@ class Case:
             print(self.translate(all_))
             raise Exception("Not satisfiable !")
 
-    def propagate(self, to_propagate, all_):
+    def propagate(self, to_propagate: List[Assignment], all_: bool) -> None:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
         while to_propagate:
             ass = to_propagate.pop(0)
@@ -189,7 +196,7 @@ class Case:
                                 if (all_ or assignment.is_environmental):
                                     to_propagate.append(out)
                             elif assignment.truth != consequence.truth:
-                                l1.append(FALSE) # inconsistent !
+                                l1.append(cast(Expression, FALSE)) # inconsistent !
                     elif not new_constraint == TRUE:
                         l1.append(new_constraint)
 
@@ -201,6 +208,7 @@ class Case:
                         new_constraint = assignment.sentence.substitute(old, new)
                         if new_constraint != assignment.sentence: # changed !
                             if type(assignment) == Term:
+                                assignment = cast(Term, assignment)
                                 out = assignment.assign(new_constraint.value, self, CONSQ)
                                 to_propagate.append(out)
                             elif new_constraint in [TRUE, FALSE]:
@@ -209,14 +217,14 @@ class Case:
                                     to_propagate.append(out)
                                 elif (new_constraint==TRUE  and not assignment.truth) \
                                 or   (new_constraint==FALSE and     assignment.truth):
-                                    self.simplified = [FALSE] # inconsistent
+                                    self.simplified = cast(List[Expression], [FALSE]) # inconsistent
                                 else:
                                     pass # no change
                             else:
                                 assignment.update(new_constraint, None, None, self)
 
 
-    def expr_to_literal(self, expr, truth=True):
+    def expr_to_literal(self, expr: Expression, truth: bool = True) -> List[Assignment]:
         # returns an assignment for the matching atom in self.GUILines, or []
         if expr.code in self.GUILines: # found it !
             return [Assignment(expr, truth, Status.UNKNOWN)]
@@ -230,7 +238,7 @@ class Case:
             return [l for e in expr.sub_exprs for l in self.expr_to_literal(e, truth)]
         return []
 
-    def translate(self, all_=True):
+    def translate(self, all_: bool = True) -> BoolRef:
         self.translated = And(
             self.typeConstraints.translated
             + sum((d.translate(self.idp) for d in self.definitions), [])
@@ -241,7 +249,7 @@ class Case:
             )
         return self.translated
 
-def make_case(idp, jsonstr, expanded):
+def make_case(idp: Idp, jsonstr: str, expanded: List[str]) -> Case:
 
         if (idp, jsonstr, expanded) in Case.cache:
             return Case.cache[(idp, jsonstr, expanded)]

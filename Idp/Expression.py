@@ -24,7 +24,7 @@ import os
 import re
 import sys
 
-from z3 import FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
+from z3 import DataTypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
 from utils import mergeDicts
 
 
@@ -136,7 +136,7 @@ class Expression(object):
                 if self.if_symbol is None else {}
         return self._unknown_symbols
 
-    def reified(self):
+    def reified(self) -> DataTypeRef:
         if self._reified is None:
             if self.type == 'bool':
                 self._reified = Const('*'+str(Expression.COUNT), BoolSort())

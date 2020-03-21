@@ -20,11 +20,10 @@ import ast
 from copy import copy
 from enum import IntFlag
 import sys
-from typing import Optional
-from z3 import Constructor, Not, BoolVal, is_true, is_false, is_bool
+from typing import Union, Optional, Dict, Tuple, cast
+from z3 import Constructor, Not, BoolVal, BoolRef, is_true, is_false, is_bool, DataTypeRef
 
-import Idp
-from Idp.Expression import TRUE, FALSE, AComparison, NumberConstant
+from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant, Constructor, NumberConstant, AppliedSymbol, Variable, Fresh_Variable
 from utils import *
 
 
@@ -37,14 +36,14 @@ class Status(IntFlag):
     EXPANDED    = 32
 
 class Assignment(object):
-    def __init__(self, sentence, truth: Optional[bool], status: Status):
+    def __init__(self, sentence: Expression, truth: Optional[bool], status: Status):
         self.truth = truth
         self.sentence = sentence
         self.status = status
         self.relevant = False
         self.is_environmental = not sentence.has_environmental(False)
 
-    def update(self, sentence, truth, status, case):
+    def update(self, sentence: Optional[Expression], truth: Optional[bool], status: Optional[Status], case):
         """ make a copy, and save it in case.assignments """
         out = copy(self) # needed for explain of irrelevant symbols
         if sentence is not None: out.sentence = sentence
@@ -72,10 +71,10 @@ class Assignment(object):
                 else "Not ") \
              + self.sentence.reading
 
-    def as_substitution(self, case):
+    def as_substitution(self, case) -> Tuple[Optional[Expression], Optional[Expression]]:
         if self.truth is not None:
             old = self.sentence
-            new = TRUE if self.truth else FALSE
+            new = cast(Expression, TRUE if self.truth else FALSE)
             if self.truth:  # analyze equalities
                 if isinstance(old, Equality):
                     if is_number(old.value):
@@ -85,7 +84,7 @@ class Assignment(object):
                         new = case.idp.vocabulary.symbol_decls[str(old.value)]
                         old = old.variable
                 elif isinstance(old, AComparison) and len(old.operator) == 1 and old.operator[0] == '=':
-                    if type(old.sub_exprs[1]) in [Idp.Constructor, Idp.NumberConstant]:
+                    if type(old.sub_exprs[1]) in [Constructor, NumberConstant]:
                         new = old.sub_exprs[1]
                         old = old.sub_exprs[0]
                     elif isinstance(old.sub_exprs[0], Constructor):
@@ -94,9 +93,9 @@ class Assignment(object):
             return old, new
         return None, None
 
-    def to_json(self): return str(self)
+    def to_json(self) -> str: return str(self)
 
-    def translate(self):
+    def translate(self) -> BoolRef:
         if self.truth is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
@@ -109,15 +108,16 @@ class Term(Assignment):
     def as_substitution(self, case):
         return None, None
 
-    def assign(self, value, case, CONSQ):
+    def assign(self, value: DataTypeRef, case, CONSQ: Status):
+        self.sentence = cast (Equality, self.sentence)
         ass = Assignment(Equality(self.sentence.variable, value), True, CONSQ)
         ass.relevant = True
         case.assignments[self.sentence.code] = ass
         return ass
 
 
-class Equality(object):
-    def __init__(self, variable, value):
+class Equality(Expression):
+    def __init__(self, variable: Union[AppliedSymbol, Variable, Fresh_Variable], value):
         self.variable = variable # an Expression
         self.value = value # a Z3 value or None
         if value is not None:
@@ -136,16 +136,16 @@ class Equality(object):
     def unknown_symbols(self):
         return self.variable.unknown_symbols()
 
-    def has_environmental(self, truth):
+    def has_environmental(self, truth: bool):
         return self.variable.has_environmental(truth)
 
-    def translate(self):
+    def translate(self) -> DataTypeRef:
         if self.value is not None:
             return self.variable.translated == self.value
         else:
             return self.variable.translate()
 
-    def substitute(self, e0, e1):
+    def substitute(self, e0: Expression, e1: Expression) -> Equality:
         if self.variable == e0:
             return Equality(self.variable, e1.translate())
         return self
@@ -153,7 +153,7 @@ class Equality(object):
     def subtences(self):
         return {} #TODO ?
 
-    def reified(self):
+    def reified(self) -> DataTypeRef:
         return self.variable.reified()
 
 
@@ -162,8 +162,8 @@ class Equality(object):
 # see docs/REST.md
 #################
 
-def json_to_literals(idp, jsonstr):
-    assignments = {} # {atom : assignment} from the GUI (needed for propagate)
+def json_to_literals(idp, jsonstr: str):
+    assignments: Dict[Expression, Optional[Assignment]] = {} # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
         json_data = ast.literal_eval(jsonstr \
             .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
@@ -171,6 +171,7 @@ def json_to_literals(idp, jsonstr):
             .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
             .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
 
+        assignment: Optional[Assignment]
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]

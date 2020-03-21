@@ -7,12 +7,13 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
-from Case import *
+from Case import Case
 from Inferences import *
 from Solver import *
 from utils import log, start
-from Idp import *
+from Idp import idpparser, SymbolDeclaration
 
+from typing import Dict, Any
 
 dir = os.path.dirname(__file__)
 files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
@@ -28,11 +29,11 @@ for file in files:
     theory = f.read()
     idp = idpparser.model_from_str(theory)  
 
-    expanded_symbols = {}
+    expanded_symbols: Dict[str, SymbolDeclaration] = {}
     for expr in idp.theory.subtences.values():
         expanded_symbols.update(expr.unknown_symbols())
-    expanded_symbols = tuple(expanded_symbols.keys())
-    case = Case(idp, "", expanded_symbols)
+    expanded_symbols2 = list(expanded_symbols.keys())
+    case = Case(idp, "", expanded_symbols2)
 
     z3 = file.replace(".z3", ".z3z3")
     z3 = z3.replace(".idp", ".z3")
