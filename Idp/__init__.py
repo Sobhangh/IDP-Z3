@@ -210,11 +210,11 @@ class RangeDeclaration(object):
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
-                e = BinaryOperator.make('=', [x.fromI, var])
+                e = AComparison.make('=', [x.fromI, var])
             else:
-                e = BinaryOperator.make(['≤', '≤'], [x.fromI, var, x.toI])
+                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
-        return BinaryOperator.make('∨', sub_exprs)
+        return ADisjunction.make('∨', sub_exprs)
 
     def translate(self):
         if self.translated is None:
@@ -332,16 +332,15 @@ class Theory(object):
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
 
-        self.subtences = {}
+        self.definitions = [e.annotate(self, self.symbol_decls, {}) for e in self.definitions]
+
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
+        
+        self.subtences = {}
         for e in self.constraints:
             self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
-
-        self.definitions = [e.annotate(self.symbol_decls, {}) for e in self.definitions]
-        self.definitions = [e.expand_quantifiers(self) for e in self.definitions]
-        self.definitions = [e.interpret         (self) for e in self.definitions]
 
     def unknown_symbols(self):
         return mergeDicts(c.unknown_symbols()
@@ -373,7 +372,7 @@ class Definition(object):
             out.append(repr(rule))
         return nl.join(out)
 
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, theory, symbol_decls, q_decls):
         self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
 
         # create common variables, and rename vars in rule
@@ -394,18 +393,13 @@ class Definition(object):
         # join the bodies of rules
         for symbol, rules in self.clark.items():
             exprs = sum(([rule.body] for rule in rules), [])
-            rules[0].body = BinaryOperator.make('∨', exprs)
+            rules[0].body = ADisjunction.make('∨', exprs)
             self.clark[symbol] = rules[0]
-        return self
-
-    def expand_quantifiers(self, theory):
+            
+        # expand quantifiers and interpret symbols with structure
         for symbol, rule in self.clark.items():
-            self.clark[symbol] = rule.expand_quantifiers(theory)
-        return self
+            self.clark[symbol] = rule.compute(theory)
 
-    def interpret(self, theory):
-        for symbol, rule in self.clark.items():
-            self.clark[symbol] = rule.interpret(theory)
         return self
 
     def unknown_symbols(self):
@@ -463,11 +457,11 @@ class Rule(object):
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
         out = []
         for new_var, arg in zip(new_vars.values(), self.args):
-            eq = BinaryOperator.make('=', [new_var, arg])
+            eq = AComparison.make('=', [new_var, arg])
             eq.type = 'bool'
             out += [eq]
         out += [self.body]
-        out = BinaryOperator.make('∧', out)
+        out = AConjunction.make('∧', out)
         out.type = 'bool'
 
         if len(self.q_decls) == 0:
@@ -480,7 +474,7 @@ class Rule(object):
         self.q_decls = new_vars
         return self
 
-    def expand_quantifiers(self, theory):
+    def compute(self, theory):
         self.body = self.body.expand_quantifiers(theory)
 
         # compute self.expanded, by expanding:
@@ -488,15 +482,14 @@ class Rule(object):
         # (after joining the rules of the same symbols)
         if self.out:
             expr = AppliedSymbol.make(self.symbol, self.args[:-1])
-            expr = BinaryOperator.make('=', [expr, self.args[-1]])
+            expr = AComparison.make('=', [expr, self.args[-1]])
         else:
             expr = AppliedSymbol.make(self.symbol, self.args)
-        expr = BinaryOperator.make('=', [expr, self.body])
+        expr = AComparison.make('=', [expr, self.body])
         expr = AQuantification.make('∀', {**self.q_decls}, expr)
         self.expanded = expr.expand_quantifiers(theory)
-        return self
-
-    def interpret(self, theory):
+        
+        # interpret structures
         self.body     = self.body    .interpret(theory)
         self.expanded = self.expanded.interpret(theory)
         return self
@@ -566,7 +559,7 @@ class Interpretation(object):
                             out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = IfExpr(if_f=BinaryOperator.make('=', [args[rank],val]),
+                        out = IfExpr(if_f=AComparison.make('=', [args[rank],val]),
                                         then_f=interpret(theory, rank+1, args, list(tuples2)),
                                         else_f=out)
                         out = out.simplify1()

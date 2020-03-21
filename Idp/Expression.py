@@ -276,8 +276,10 @@ class AQuantification(Expression):
                 forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
                 self.vars.append(var)
-        op = '∧' if self.q == '∀' else '∨'
-        out = BinaryOperator.make(op, forms)
+        if self.q == '∀':
+            out = AConjunction.make('∧', forms)
+        else:
+            out = ADisjunction.make('∨', forms)
         return out if not self.vars else [out]
 
     def translate(self):
@@ -439,9 +441,9 @@ class AEquivalence(BinaryOperator):
     def update_exprs(self, new_expr_generator): 
         exprs = list(new_expr_generator)
         if any(e == TRUE for e in exprs):
-            return BinaryOperator.make('∧', exprs)
+            return AConjunction.make('∧', exprs)
         if any(e == FALSE for e in exprs):
-            return BinaryOperator.make('∧', [NOT(e) for e in exprs])
+            return AConjunction.make('∧', [NOT(e) for e in exprs])
         return exprs
     
 class ARImplication(BinaryOperator):
