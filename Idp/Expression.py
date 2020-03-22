@@ -24,7 +24,7 @@ import os
 import re
 import sys
 
-from z3 import DataTypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
+from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
 from utils import mergeDicts
 
 
@@ -136,7 +136,7 @@ class Expression(object):
                 if self.if_symbol is None else {}
         return self._unknown_symbols
 
-    def reified(self) -> DataTypeRef:
+    def reified(self) -> DatatypeRef:
         if self._reified is None:
             if self.type == 'bool':
                 self._reified = Const('*'+str(Expression.COUNT), BoolSort())
@@ -459,10 +459,13 @@ class ADisjunction(BinaryOperator):
     def update_exprs(self, new_expr_generator):
         exprs = []
         for expr in new_expr_generator:
-            if expr == TRUE:
-                return TRUE
-            if expr == FALSE:
-                pass
+            if expr == TRUE:  return TRUE
+            if expr == FALSE: pass
+            elif type(expr) == ADisjunction: # flatten
+                for e in expr.sub_exprs:
+                    if e == TRUE:    return TRUE
+                    elif e == FALSE: pass
+                    exprs.append(e)
             else:
                 exprs.append(expr)
         if len(exprs) == 0:
@@ -477,10 +480,13 @@ class AConjunction(BinaryOperator):
     def update_exprs(self, new_expr_generator):
         exprs = []
         for expr in new_expr_generator:
-            if expr == TRUE:
-                pass
-            elif expr == FALSE:
-                return FALSE
+            if expr == TRUE:    pass
+            elif expr == FALSE: return FALSE
+            elif type(expr) == AConjunction: # flatten
+                for e in expr.sub_exprs:
+                    if e == TRUE:    pass
+                    elif e == FALSE: return FALSE
+                    exprs.append(e)
             else:
                 exprs.append(expr)
         if len(exprs) == 0:

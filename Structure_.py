@@ -21,7 +21,7 @@ from copy import copy
 from enum import IntFlag
 import sys
 from typing import Union, Optional, Dict, Tuple, cast
-from z3 import Constructor, Not, BoolVal, BoolRef, is_true, is_false, is_bool, DataTypeRef
+from z3 import Constructor, Not, BoolVal, BoolRef, is_true, is_false, is_bool, DatatypeRef
 
 from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant, Constructor, NumberConstant, AppliedSymbol, Variable, Fresh_Variable
 from utils import *
@@ -108,7 +108,7 @@ class Term(Assignment):
     def as_substitution(self, case):
         return None, None
 
-    def assign(self, value: DataTypeRef, case, CONSQ: Status):
+    def assign(self, value: DatatypeRef, case, CONSQ: Status):
         self.sentence = cast (Equality, self.sentence)
         ass = Assignment(Equality(self.sentence.variable, value), True, CONSQ)
         ass.relevant = True
@@ -139,13 +139,13 @@ class Equality(Expression):
     def has_environmental(self, truth: bool):
         return self.variable.has_environmental(truth)
 
-    def translate(self) -> DataTypeRef:
+    def translate(self) -> DatatypeRef:
         if self.value is not None:
             return self.variable.translated == self.value
         else:
             return self.variable.translate()
 
-    def substitute(self, e0: Expression, e1: Expression) -> Equality:
+    def substitute(self, e0: Expression, e1: Expression) -> 'Equality':
         if self.variable == e0:
             return Equality(self.variable, e1.translate())
         return self
@@ -153,7 +153,7 @@ class Equality(Expression):
     def subtences(self):
         return {} #TODO ?
 
-    def reified(self) -> DataTypeRef:
+    def reified(self) -> DatatypeRef:
         return self.variable.reified()
 
 
