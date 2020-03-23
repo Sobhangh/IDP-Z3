@@ -549,11 +549,11 @@ def update_arith(self, family, new_expr_generator):
     # analyse results
     if family == '*' and acc == 0:
         return ZERO
-    elif (family == '+' and acc != 0) or (family == '*' and acc != 1):
-        exprs = [NumberConstant(number=str(acc))] + exprs
-    else:
+    elif 0 < len(exprs) and ((ops[0] == '+' and acc == 0) or (ops[0] == '*' and acc == 1)):
         del ops[0]
-    if len(exprs)==1: 
+    else:
+        exprs = [NumberConstant(number=str(acc))] + exprs
+    if len(exprs)==1:
         return exprs[0]
     return (exprs, ops)
 
