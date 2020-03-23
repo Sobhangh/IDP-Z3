@@ -455,19 +455,37 @@ class Rule(object):
     def rename_args(self, new_vars):
         """ input : '!v: f(args) <- body(args)'
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
-        out = []
-        for new_var, arg in zip(new_vars.values(), self.args):
-            eq = AComparison.make('=', [new_var, arg])
-            eq.type = 'bool'
-            out += [eq]
-        out += [self.body]
-        out = AConjunction.make('∧', out)
-        out.type = 'bool'
 
-        if len(self.q_decls) == 0:
-            self.body = out
-        else:
-            self.body = AQuantification.make('∃', self.q_decls, out)
+        subst = {}
+        for arg, nv in zip(self.args, new_vars.values()):
+            if type(arg) in [Variable, Fresh_Variable]:
+                if arg.name not in subst:
+                    if arg.name in self.vars:
+                        subst[arg.name] = nv
+                        self.body = self.body.substitute(arg, nv)
+                    else:
+                        eq = AComparison.make('=', [nv, arg])
+                        print(eq)
+                        self.body = AConjunction.make('∧', [eq, self.body])
+                else: # same(x)=x
+                    eq = AComparison.make('=', [nv, subst[arg.name]])
+                    print(eq)
+                    self.body = AConjunction.make('∧', [eq, self.body])
+            else: #same(f(x))
+                eq = AComparison.make('=', [nv, arg])
+                for v0, v1 in subst.items():
+                    eq = eq.substitute(Symbol(name=v0), v1)
+                print(eq)
+                self.body = AConjunction.make('∧', [eq, self.body])
+        
+        # Any leftover ?
+        for var in self.vars:
+            if str(var) in subst:
+                pass
+            else:
+                self.body = AQuantification.make('∃', {var: self.q_decls[var]}, self.body)
+                print(self.body)
+
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
         self.sorts = [] # ignored

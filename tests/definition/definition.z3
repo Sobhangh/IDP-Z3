@@ -28,7 +28,7 @@ codeOf(blue)
 Type:        
   
 Definitions: 
-  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔((($codeOf$0 = red) ∧ ($codeOf$ = a)) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = b)))
+  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔(($codeOf$0 = red) ∧ ($codeOf$ = a)) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = b))
 Universals:  
   
 Consequences:

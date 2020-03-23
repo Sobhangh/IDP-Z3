@@ -260,7 +260,7 @@ Perimeter = (sum{n[side] : true : Length(n)})
 Type:        
   
 Definitions: 
-  Rule:∀['$Large$0'][]: Large($Large$0) ⇔((false))
+  Rule:∀['$Large$0'][]: Large($Large$0) ⇔10 < ( if   $Large$0 = 4 then 4 else  if   $Large$0 = 3 then 3 else  if   $Large$0 = 2 then 2 else  if   $Large$0 = 1 then 1 else 5)
 Universals:  
   ~Subtype = rectangle
   Perimeter = (sum{n[side] : true : Length(n)})

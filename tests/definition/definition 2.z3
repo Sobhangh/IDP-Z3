@@ -34,7 +34,7 @@ codeOf(red) = b
 Type:        
   
 Definitions: 
-  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔((($codeOf$0 = red) ∧ ($codeOf$ = a) ∧ (((red = c)))) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = a) ∧ (((blue = c)))) ∨ (($codeOf$0 = red) ∧ ($codeOf$ = b) ∧ (((~(red = c))))) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = b) ∧ (((~(blue = c))))))
+  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔(($codeOf$0 = c) ∧ ($codeOf$ = a)) ∨ ((~($codeOf$0 = c)) ∧ ($codeOf$ = b))
 Universals:  
   codeOf(red) = b
 Consequences:

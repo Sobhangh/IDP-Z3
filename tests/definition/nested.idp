@@ -6,7 +6,7 @@ vocabulary {
 
 theory {
     { !x[num]: same(x) = x. }
-    { !x[num]: negated(x) = (0-x). }
+    { negated(Piet) = Jan.  negated(Jan) = Piet. }
     same(Piet)= Piet.
     same(same(Piet))= negated(negated(Piet)).
 
