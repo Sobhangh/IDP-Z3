@@ -354,7 +354,7 @@ Irrelevant:
   Length(2) = (0)
   Length(1) = Length(2)
   Surface = (Length(1) * Length(2))
-  Surface = (-(1))
+  Surface = (-1)
 
 
 -- propagation ------------------------------

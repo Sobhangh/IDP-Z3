@@ -8,6 +8,7 @@ vocabulary {
 
 theory {
     { !x[num]: same(x) = x. }
+    { !x[num]: same(x) = -(-x). }
     { !x[num]: negated(same(x)) = (0-x). }
     same(1)= 1.
     same(same(-1))= negated(negated(-1)).
@@ -21,6 +22,16 @@ view expanded
 same(1) == 1
 
 same(same(-1)) == negated(negated(-1))
+
+And((same(-1) == -1) == True,
+    (same(0) == -1) == False,
+    (same(1) == -1) == False,
+    (same(-1) == 0) == False,
+    (same(0) == 0) == True,
+    (same(1) == 0) == False,
+    (same(-1) == 1) == False,
+    (same(0) == 1) == False,
+    (same(1) == 1) == True)
 
 And((same(-1) == -1) == True,
     (same(0) == -1) == False,
@@ -57,6 +68,7 @@ Type:
   
 Definitions: 
   Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔($same$ = $same$0)
+  Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔($same$ = (-((-($same$0)))))
   Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔((($negated$ = ((1))) ∧ ($negated$0 = same(-1))) ∨ (($negated$ = ((0))) ∧ ($negated$0 = same(0))) ∨ (($negated$ = ((-1))) ∧ ($negated$0 = same(1))))
 Universals:  
   same(1) = 1

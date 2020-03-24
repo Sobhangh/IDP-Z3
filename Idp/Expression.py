@@ -107,12 +107,13 @@ class Expression(object):
         return list(new_expr_generator)
 
     def substitute(self, e0, e1):
+        """ recursively substitute e0 by e1 in self, and simplify """
         if self == e0: # based on repr !
             if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
                 return e1 # no need to have brackets
             # replace by new Brackets node, to keep annotations
             e1.is_subtence = self.is_subtence
-            out = Brackets(f=e1, reading=self.reading)
+            out = Brackets(f=e1, reading=self.reading) # e1 is not copied !
             # copy initial annotation
             out.code = self.code
             out.is_subtence = self.is_subtence
@@ -150,6 +151,12 @@ class Expression(object):
     def has_environmental(self, truth):
         # returns true if it contains a variable whose environmental property is 'truth
         return any(e.has_environmental(truth) for e in self.sub_exprs)
+    
+    def justifications(self):
+        out = sum((e.justifications() for e in self.sub_exprs), [])
+        if self.justification is not None:
+            out.append(self.justification)
+        return out
 
     def expr_to_literal(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', bool]]:
         # returns a literal for the matching atom in case.assignments, or []
@@ -659,6 +666,11 @@ class AUnary(Expression):
                 return FALSE
             if operand == FALSE:
                 return TRUE
+        else: # '-'
+            a = operand.as_ground()
+            if a is not None:
+                if type(a) in [int, float]:
+                    return NumberConstant(number=str(- a))
         return [operand]
 
     def translate(self):
@@ -757,6 +769,7 @@ class AppliedSymbol(Expression):
         super().__init__()
 
         self.decl = None
+        self.name = self.s.name
 
     @classmethod
     def make(cls, s, args):
@@ -783,10 +796,13 @@ class AppliedSymbol(Expression):
     @immutable
     def interpret(self, theory):
         sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
-        if self.decl.interpretation is not None:
+        if self.decl.interpretation is not None: # has a structure
             self.is_subtence = False
             out = (self.decl.interpretation)(theory, 0, sub_exprs)
             return out
+        elif self.name in theory.clark: # has a theory
+            self.justification = theory.clark[self.name].instantiate(self.sub_exprs, theory)
+            return self
         else:
             return self
 

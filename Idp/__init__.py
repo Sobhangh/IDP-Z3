@@ -17,6 +17,7 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from copy import copy
 import itertools as it
 import os
 import re
@@ -325,6 +326,7 @@ class Theory(object):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
+        self.clark = {} # {Symbol: Rule}
         self.symbol_decls = None # {string: decl}
         self.subtences = None # i.e., sub-sentences.  {string: Expression}
         self.translated = None
@@ -333,6 +335,15 @@ class Theory(object):
         self.symbol_decls = vocabulary.symbol_decls
 
         self.definitions = [e.annotate(self, self.symbol_decls, {}) for e in self.definitions]
+        # squash multiple definitions of same symbol
+        for d in self.definitions:
+            for symbol, rule in d.clark.items():
+                if symbol in self.clark:
+                    new_rule = copy(rule) # not elegant, but rare
+                    new_rule.body = AConjunction.make('∧', [self.clark[symbol.name].body, rule.body])
+                    self.clark[symbol.name] = new_rule
+                else:
+                    self.clark[symbol.name] = rule
 
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
@@ -351,6 +362,7 @@ class Theory(object):
         for i in self.constraints:
             log("translating " + str(i)[:20])
             self.translated.append(i.translate())
+            # optional : self.translated.extend(i.justifications())
         for d in self.definitions:
             self.translated += d.translate(idp)
 
@@ -465,17 +477,14 @@ class Rule(object):
                         self.body = self.body.substitute(arg, nv)
                     else:
                         eq = AComparison.make('=', [nv, arg])
-                        print(eq)
                         self.body = AConjunction.make('∧', [eq, self.body])
                 else: # same(x)=x
                     eq = AComparison.make('=', [nv, subst[arg.name]])
-                    print(eq)
                     self.body = AConjunction.make('∧', [eq, self.body])
             else: #same(f(x))
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
                     eq = eq.substitute(Symbol(name=v0), v1)
-                print(eq)
                 self.body = AConjunction.make('∧', [eq, self.body])
         
         # Any leftover ?
@@ -484,7 +493,6 @@ class Rule(object):
                 pass
             else:
                 self.body = AQuantification.make('∃', {var: self.q_decls[var]}, self.body)
-                print(self.body)
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
@@ -511,6 +519,15 @@ class Rule(object):
         self.body     = self.body    .interpret(theory)
         self.expanded = self.expanded.interpret(theory)
         return self
+
+    def instantiate(self, new_args, theory):
+        out = self.body
+        for old, new in zip(self.args, new_args):
+            out = out.substitute(old, new)
+        out = out.interpret(theory) # add justification recursively
+        if len(new_args) < len(self.args): # a function
+            out = out.substitute(self.args[-1], AppliedSymbol.make(self.symbol, new_args))
+        return out
 
     def unknown_symbols(self):
         out = mergeDicts(arg.unknown_symbols() for arg in self.args) # in case they are expressions
