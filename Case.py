@@ -63,10 +63,10 @@ class Case:
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
-            u = self.expr_to_literal(c)
+            u = self.expr_to_assign(c)
             if u:
-                for l in u:
-                    l.update(None, None, Status.UNIVERSAL, self)
+                for ass in u:
+                    ass.update(None, None, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
 
@@ -183,59 +183,63 @@ class Case:
             old, new = ass.as_substitution(self)
 
             if new is not None:
-                # simplify constraints
-                l1 = []
+                # simplify constraints and propagate consequences
+                new_simplified: List[Expression] = []
                 for constraint in self.simplified:
                     new_constraint = constraint.substitute(old, new)
-                    consequences = self.expr_to_literal(new_constraint)
+                    consequences = self.expr_to_assign(new_constraint)
                     if consequences:
                         for consequence in consequences:
-                            assignment = self.assignments[consequence.sentence.code]
-                            if assignment.truth is None:
-                                out = assignment.update(None, consequence.truth, CONSQ, self)
-                                if (all_ or assignment.is_environmental):
-                                    to_propagate.append(out)
-                            elif assignment.truth != consequence.truth:
-                                l1.append(cast(Expression, FALSE)) # inconsistent !
+                            old_ass = self.assignments[consequence.sentence.code]
+                            if old_ass.truth is None:
+                                if (all_ or old_ass.is_environmental):
+                                    new_ass = old_ass.update(None, consequence.truth, CONSQ, self)
+                                    to_propagate.append(new_ass)
+                            elif old_ass.truth != consequence.truth:
+                                # test: theory{ x=4. x=5. }
+                                self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
+                                return
                     elif not new_constraint == TRUE:
-                        l1.append(new_constraint)
+                        new_simplified.append(new_constraint)
 
-                self.simplified = l1
+                self.simplified = new_simplified
 
                 # simplify assignments
-                for assignment in self.assignments.values():
-                    if assignment.sentence != ass.sentence and (all_ or assignment.is_environmental):
-                        new_constraint = assignment.sentence.substitute(old, new)
-                        if new_constraint != assignment.sentence: # changed !
-                            if type(assignment) == Term:
-                                assignment = cast(Term, assignment)
-                                out = assignment.assign(new_constraint.value, self, CONSQ)
-                                to_propagate.append(out)
+                for old_ass in self.assignments.values():
+                    if old_ass.sentence != ass.sentence and (all_ or old_ass.is_environmental):
+                        new_constraint = old_ass.sentence.substitute(old, new)
+                        if new_constraint != old_ass.sentence: # changed !
+                            if type(old_ass) == Term: # value of term was not known
+                                old_ass = cast(Term, old_ass)
+                                new_ass = old_ass.assign(new_constraint.value, self, CONSQ)
+                                to_propagate.append(new_ass)
                             elif new_constraint in [TRUE, FALSE]:
-                                if assignment.truth is None:
-                                    out = assignment.update(new_constraint, (new_constraint == TRUE), CONSQ, self)
-                                    to_propagate.append(out)
-                                elif (new_constraint==TRUE  and not assignment.truth) \
-                                or   (new_constraint==FALSE and     assignment.truth):
+                                if old_ass.truth is None: # value of proposition was not known
+                                    new_ass = old_ass.update(new_constraint, (new_constraint == TRUE), CONSQ, self)
+                                    to_propagate.append(new_ass)
+                                elif (new_constraint==TRUE  and not old_ass.truth) \
+                                or   (new_constraint==FALSE and     old_ass.truth):
+                                    #TODO test case ?
                                     self.simplified = cast(List[Expression], [FALSE]) # inconsistent
+                                    return
                                 else:
                                     pass # no change
                             else:
-                                assignment.update(new_constraint, None, None, self)
+                                old_ass.update(new_constraint, None, None, self)
 
 
-    def expr_to_literal(self, expr: Expression, truth: bool = True) -> List[Assignment]:
-        # returns an assignment for the matching atom in self.GUILines, or []
-        if expr.code in self.GUILines: # found it !
+    def expr_to_assign(self, expr: Expression, truth: bool = True) -> List[Assignment]:
+        # returns an assignment for the matching atom in self.assignments, or []
+        if expr.code in self.assignments: # found it !
             return [Assignment(expr, truth, Status.UNKNOWN)]
         if isinstance(expr, Brackets):
-            return self.expr_to_literal(expr.sub_exprs[0], truth)
+            return self.expr_to_assign(expr.sub_exprs[0], truth)
         if isinstance(expr, AUnary) and expr.operator == '~':
-            return self.expr_to_literal(expr.sub_exprs[0], not truth )
+            return self.expr_to_assign(expr.sub_exprs[0], not truth )
         if truth and isinstance(expr, AConjunction):
-            return [l for e in expr.sub_exprs for l in self.expr_to_literal(e, truth)]
+            return [l for e in expr.sub_exprs for l in self.expr_to_assign(e, truth)]
         if not truth and isinstance(expr, ADisjunction):
-            return [l for e in expr.sub_exprs for l in self.expr_to_literal(e, truth)]
+            return [l for e in expr.sub_exprs for l in self.expr_to_assign(e, truth)]
         return []
 
     def translate(self, all_: bool = True) -> BoolRef:

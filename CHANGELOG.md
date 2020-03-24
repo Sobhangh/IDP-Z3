@@ -6,7 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [Unreleased]
-
+### API
+* fixed error in substraction (0-x incorrectly computed)
 
 ## [0.4.0] - 2020-03-16
 ### API
