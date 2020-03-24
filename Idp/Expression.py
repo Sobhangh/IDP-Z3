@@ -243,7 +243,7 @@ class IfExpr(Expression):
                 if else_ == FALSE:
                     return FALSE
                 elif else_ == TRUE:
-                    return NOT(if_)
+                    return AUnary.make('~', if_)
         return [if_, then_, else_]
 
     def translate(self):
@@ -365,6 +365,8 @@ class BinaryOperator(Expression):
 
     @classmethod
     def make(cls, ops, operands):
+        """ creates a BinaryOp
+            beware: cls must be specific for ops !"""
         if len(operands) == 1:
             return operands[0]
         if isinstance(ops, str):
@@ -375,7 +377,7 @@ class BinaryOperator(Expression):
                 # add () around operands, to avoid ambiguity in str()
                 o = Brackets(f=o, reading='')
             operands1.append(o)
-        out = (classes[ops[0]]) (sub_exprs=operands, operator=ops)
+        out = (cls)(sub_exprs=operands, operator=ops)
         return out.simplify1()
         
     def __str__(self):
@@ -455,7 +457,7 @@ class AImplication(BinaryOperator):
             if exprs[1] == TRUE: # (p => true) is true
                 return TRUE
             if exprs[1] == FALSE: # (p => false) is ~p
-                return NOT(exprs[0])
+                return AUnary.make('~', exprs[0])
         return exprs
         
 class AEquivalence(BinaryOperator):
@@ -466,7 +468,7 @@ class AEquivalence(BinaryOperator):
         if any(e == TRUE for e in exprs):
             return AConjunction.make('∧', exprs)
         if any(e == FALSE for e in exprs):
-            return AConjunction.make('∧', [NOT(e) for e in exprs])
+            return AConjunction.make('∧', [AUnary.make('~', e) for e in exprs])
         return exprs
     
 class ARImplication(BinaryOperator):
@@ -522,7 +524,7 @@ class AComparison(BinaryOperator):
     def annotate(self, symbol_decls, q_decls):
         # a≠b --> Not(a=b)
         if len(self.sub_exprs) == 2 and self.operator == ['≠']:
-            out = NOT(AComparison(sub_exprs=self.sub_exprs, operator='='))
+            out = AUnary.make('~', AComparison(sub_exprs=self.sub_exprs, operator='='))
             return out.annotate(symbol_decls, q_decls)
         return super().annotate(symbol_decls, q_decls)
 
@@ -615,26 +617,6 @@ class APower(BinaryOperator):
         else:
             return operands
 
-classes = { '∧': AConjunction,
-            '∨': ADisjunction,
-            '⇒': AImplication,
-            '⇐': ARImplication,
-            '⇔': AEquivalence,
-            '+': ASumMinus,
-            '-': ASumMinus,
-            '*': AMultDiv,
-            '/': AMultDiv,
-            '%': AMultDiv,
-            '^': APower,
-            '=': AComparison,
-            '<': AComparison,
-            '>': AComparison,
-            '≤': AComparison,
-            '≥': AComparison,
-            '≠': AComparison,
-            }
-
-
 class AUnary(Expression):
     MAP = {'-': lambda x: 0 - x,
            '~': lambda x: Not(x)
@@ -647,6 +629,12 @@ class AUnary(Expression):
         super().__init__()
 
         self.is_subtence = False
+
+    @classmethod
+    def make(cls, op, expr):
+        out = AUnary(operator=op, f=expr)
+        out.type = 'bool'
+        return out.simplify1()
 
     def __str__(self):
         return f"{self.operator}({str(self.sub_exprs[0])})"
@@ -679,11 +667,6 @@ class AUnary(Expression):
             function = AUnary.MAP[self.operator]
             self.translated = function(out)
         return self.translated
-
-def NOT(expr):
-    out = AUnary(operator='~', f=expr)
-    out.type = 'bool'
-    return out.simplify1()
 
 class AAggregate(Expression):
     CONDITION = 0
