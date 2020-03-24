@@ -8,7 +8,7 @@ vocabulary {
 
 theory {
     { !x[num]: same(x) = x. }
-    { !x[num]: negated(x) = (0-x). }
+    { !x[num]: negated(x) = -x. }
     same(-1)= -1.
     negated(negated(-1)) = same(-1).
 
@@ -58,7 +58,7 @@ Type:
   
 Definitions: 
   Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔($same$ = $same$0)
-  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔($negated$ = (0 - $negated$0))
+  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔($negated$ = (-($negated$0)))
 Universals:  
   same(-(1)) = (-(1))
   negated(negated(-(1))) = same(-(1))

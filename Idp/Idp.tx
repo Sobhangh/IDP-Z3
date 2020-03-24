@@ -29,7 +29,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
 
   Definition: '{' rules*=Rule '}';
   Rule: ('[' reading=/[^\]]*/ ']')? 
-        ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Base)? ('<-' body=Expression)? '.' ;
+        ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Unary)? ('<-' body=Expression)? '.' ;
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
@@ -59,7 +59,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
     ASumMinus:     sub_exprs=MultDiv     (operator=SumMinusOp     sub_exprs=MultDiv    )+;
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
-    AUnary:                        operator=UnaryOperator  f=Base;
+    AUnary:                        operator=UnaryOperator  f=Aggregate;
     AAggregate: aggtype=AggType '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
       AggType: '#' | 'card' | 'sum';
 
