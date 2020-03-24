@@ -815,11 +815,11 @@ class Arguments(object):
         self.sub_exprs = kwargs.pop('sub_exprs')
         super().__init__()
 
-class Variable(Expression):
+class Variable(AppliedSymbol):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
 
-        super().__init__()
+        Expression.__init__(self)
 
         self.sub_exprs = []
         self.decl = None
@@ -841,15 +841,8 @@ class Variable(Expression):
             self.normal = True # make sure it is visible in GUI
         return self
 
-    def unknown_symbols(self):
-        return {self.decl.name: self.decl} if self.decl.interpretation is None \
-            else {}
-
     def reified(self):
         return self.translate()
-
-    def has_environmental(self, truth):
-        return self.decl.environmental == truth
 
     def translate(self):
         if self.translated is None:
