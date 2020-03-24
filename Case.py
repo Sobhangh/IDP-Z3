@@ -63,9 +63,10 @@ class Case:
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
-            u = self.expr_to_assign(c)
+            u = c.expr_to_literal(self)
             if u:
-                for ass in u:
+                for sentence, truth in u:
+                    ass = Assignment(sentence, truth, Status.UNKNOWN)
                     ass.update(None, None, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
@@ -187,15 +188,15 @@ class Case:
                 new_simplified: List[Expression] = []
                 for constraint in self.simplified:
                     new_constraint = constraint.substitute(old, new)
-                    consequences = self.expr_to_assign(new_constraint)
+                    consequences = new_constraint.expr_to_literal(self)
                     if consequences:
-                        for consequence in consequences:
-                            old_ass = self.assignments[consequence.sentence.code]
+                        for sentence, truth in consequences:
+                            old_ass = self.assignments[sentence.code]
                             if old_ass.truth is None:
                                 if (all_ or old_ass.is_environmental):
-                                    new_ass = old_ass.update(None, consequence.truth, CONSQ, self)
+                                    new_ass = old_ass.update(None, truth, CONSQ, self)
                                     to_propagate.append(new_ass)
-                            elif old_ass.truth != consequence.truth:
+                            elif old_ass.truth != truth:
                                 # test: theory{ x=4. x=5. }
                                 self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                 return
@@ -226,21 +227,6 @@ class Case:
                                     pass # no change
                             else:
                                 old_ass.update(new_constraint, None, None, self)
-
-
-    def expr_to_assign(self, expr: Expression, truth: bool = True) -> List[Assignment]:
-        # returns an assignment for the matching atom in self.assignments, or []
-        if expr.code in self.assignments: # found it !
-            return [Assignment(expr, truth, Status.UNKNOWN)]
-        if isinstance(expr, Brackets):
-            return self.expr_to_assign(expr.sub_exprs[0], truth)
-        if isinstance(expr, AUnary) and expr.operator == '~':
-            return self.expr_to_assign(expr.sub_exprs[0], not truth )
-        if truth and isinstance(expr, AConjunction):
-            return [l for e in expr.sub_exprs for l in self.expr_to_assign(e, truth)]
-        if not truth and isinstance(expr, ADisjunction):
-            return [l for e in expr.sub_exprs for l in self.expr_to_assign(e, truth)]
-        return []
 
     def translate(self, all_: bool = True) -> BoolRef:
         self.translated = And(

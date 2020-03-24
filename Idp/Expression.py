@@ -27,6 +27,7 @@ import sys
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
 from utils import mergeDicts
 
+from typing import List, Tuple
 
 
 class DSLException(Exception):
@@ -42,9 +43,9 @@ def immutable(func):
             new_expr_generator = iter(new_expr_generator)
         value, ops = func(self, new_expr_generator), None
         if isinstance(value, tuple):
-            ops = value[1]
+            ops = value[1] # can't swap these 2 lines !
             value = value[0]
-        if isinstance(value, list):
+        if isinstance(value, list): # sub_exprs = value
             if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, value)): # not changed !
                 return self
             else: # create a modified copy
@@ -77,6 +78,7 @@ class Expression(object):
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self._subtences = None            # memoization of .subtences()
+        self.justification = None         # Expression
         # .normal : only set in .instances
 
     def __eq__(self, other):
@@ -148,6 +150,20 @@ class Expression(object):
     def has_environmental(self, truth):
         # returns true if it contains a variable whose environmental property is 'truth
         return any(e.has_environmental(truth) for e in self.sub_exprs)
+
+    def expr_to_literal(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', bool]]:
+        # returns a literal for the matching atom in case.assignments, or []
+        if self.code in case.assignments: # found it !
+            return [(self, truth)]
+        if isinstance(self, Brackets):
+            return self.sub_exprs[0].expr_to_literal(case, truth)
+        if isinstance(self, AUnary) and self.operator == '~':
+            return self.sub_exprs[0].expr_to_literal(case, not truth )
+        if truth and isinstance(self, AConjunction):
+            return [l for e in self.sub_exprs for l in e.expr_to_literal(case, truth)]
+        if not truth and isinstance(self, ADisjunction):
+            return [l for e in self.sub_exprs for l in e.expr_to_literal(case, truth)]
+        return []
 
 class Constructor(Expression):
     def __init__(self, **kwargs):
@@ -857,9 +873,6 @@ class Fresh_Variable(Expression):
 
     def __str__(self): return self.name
     def str_   (self): return self.name
-
-    def substitute(self, e0, e1):
-        return e1 if self == e0 else self
 
     def annotate(self, symbol_decls, q_decls):
         return self
