@@ -175,8 +175,8 @@ def json_to_literals(idp, jsonstr: str):
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
-                if atom in idp.theory.subtences:
-                    atom = idp.theory.subtences[atom]
+                if atom in idp.subtences:
+                    atom = idp.subtences[atom]
                 else:
                     symbol = idp.vocabulary.symbol_decls[sym]
                     atom = symbol.instances[atom]

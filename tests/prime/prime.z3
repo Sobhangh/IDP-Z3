@@ -9,13 +9,22 @@ theory {
 	{ !x[num] : Prime(x) <- !y[num] : 1<y & y<x => x % y ~=0.}
 }
 
-
+goal Prime
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
 And(Prime(1), Prime(2), Prime(3), Not(Prime(4)))
 
--- atoms ------------------------------------
+-- goal -----------------------------------
+And(Prime(1), Prime(2), Prime(3), Not(Prime(4)))
+
+-- subtences ------------------------------------
+Prime(1)
+Prime(2)
+Prime(3)
+Prime(4)
+
+-- GUILines ------------------------------------
 Prime(1)
 Prime(2)
 Prime(3)
@@ -25,7 +34,7 @@ Prime(4)
 Type:        
   
 Definitions: 
-  Rule:∀['$Prime$0'][]: Prime($Prime$0) ⇔(((2 < $Prime$0) ⇒ (~(($Prime$0 % 2) = 0))) ∧ ((3 < $Prime$0) ⇒ (~(($Prime$0 % 3) = 0))) ∧ ((4 < $Prime$0) ⇒ (~(($Prime$0 % 4) = 0))))
+  Rule:∀['$Prime!0$'][]: Prime($Prime!0$) ⇔(((2 < $Prime!0$) ⇒ (~(($Prime!0$ % 2) = 0))) ∧ ((3 < $Prime!0$) ⇒ (~(($Prime!0$ % 3) = 0))) ∧ ((4 < $Prime!0$) ⇒ (~(($Prime!0$ % 4) = 0))))
 Universals:  
   
 Consequences:
@@ -42,30 +51,26 @@ Irrelevant:
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Prime': {'Prime(1)': {'environmental': False,
-                        'normal': True,
+                        'normal': False,
                         'reading': 'Prime(1)',
                         'relevant': True,
                         'status': 'CONSEQUENCE',
-                        'typ': 'Bool',
-                        'value': True},
+                        'typ': 'Bool'},
            'Prime(2)': {'environmental': False,
-                        'normal': True,
+                        'normal': False,
                         'reading': 'Prime(2)',
                         'relevant': True,
                         'status': 'CONSEQUENCE',
-                        'typ': 'Bool',
-                        'value': True},
+                        'typ': 'Bool'},
            'Prime(3)': {'environmental': False,
-                        'normal': True,
+                        'normal': False,
                         'reading': 'Prime(3)',
                         'relevant': True,
                         'status': 'CONSEQUENCE',
-                        'typ': 'Bool',
-                        'value': True},
+                        'typ': 'Bool'},
            'Prime(4)': {'environmental': False,
-                        'normal': True,
+                        'normal': False,
                         'reading': 'Prime(4)',
                         'relevant': True,
                         'status': 'CONSEQUENCE',
-                        'typ': 'Bool',
-                        'value': False}}}
+                        'typ': 'Bool'}}}

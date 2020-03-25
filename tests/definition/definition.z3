@@ -20,7 +20,10 @@ And(codeOf(red) == a,
     Not(codeOf(red) == b),
     codeOf(blue) == b)
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+
+
+-- GUILines ------------------------------------
 codeOf(red)
 codeOf(blue)
 
@@ -28,7 +31,7 @@ codeOf(blue)
 Type:        
   
 Definitions: 
-  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔(($codeOf$0 = red) ∧ ($codeOf$ = a)) ∨ (($codeOf$0 = blue) ∧ ($codeOf$ = b))
+  Rule:∀['$codeOf!0$', '$codeOf$'][]: codeOf($codeOf!0$,$codeOf$) ⇔(($codeOf!0$ = red) ∧ ($codeOf$ = a)) ∨ (($codeOf!0$ = blue) ∧ ($codeOf$ = b))
 Universals:  
   
 Consequences:

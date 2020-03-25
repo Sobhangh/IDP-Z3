@@ -236,7 +236,46 @@ Or(And(Sides >= 1, Length(1) == Base),
    And(Sides >= 3, Length(3) == Base),
    And(Sides >= 4, Length(4) == Base))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+Sides = 3
+Type = triangle
+Type = quadrilateral
+Sides = 4
+Vertices = 3
+Vertices = 4
+Convex
+∀n[side] : Angle(n) < 180
+Equilateral
+∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+Subtype = right_triangle
+Subtype = regular_triangle
+Subtype = irregular
+∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+∃n[side] : Angle(n) = 90
+Subtype = square
+Subtype = rectangle
+∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+Length(1) = Length(3)
+Length(2) = Length(4)
+Length(1) = Length(2)
+Length(1) ≤ (Length(2) + Length(3))
+Length(2) ≤ (Length(3) + Length(1))
+Length(3) ≤ (Length(1) + Length(2))
+Perimeter = (sum{n[side] : true : Length(n)})
+(sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+∀x[side] : 0 ≤ Length(x)
+∀x[side] : 0 ≤ Angle(x)
+∀x[side] : Angle(x) ≠ 180
+∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
+∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+Surface = ((Base * Height) / 2)
+Surface = (Length(1) * Length(2))
+Surface = (-(1))
+0 ≤ Base
+0 ≤ Height
+∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
+
+-- GUILines ------------------------------------
 Sides
 Vertices
 Type

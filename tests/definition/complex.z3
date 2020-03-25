@@ -53,7 +53,11 @@ And((negated(-1) == -1) == (same(1) == -1),
     (negated(0) == 1) == (same(-1) == 0),
     (negated(1) == 1) == (same(-1) == 1))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+same(1) = 1
+same(same(-(1))) = negated(negated(-(1)))
+
+-- GUILines ------------------------------------
 same(-1)
 same(0)
 same(1)
@@ -67,9 +71,9 @@ same(same(-(1))) = negated(negated(-(1)))
 Type:        
   
 Definitions: 
-  Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔($same$ = $same$0)
-  Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔($same$ = (-((-($same$0)))))
-  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔((($negated$ = ((1))) ∧ ($negated$0 = same(-1))) ∨ (($negated$ = ((0))) ∧ ($negated$0 = same(0))) ∨ (($negated$ = ((-1))) ∧ ($negated$0 = same(1))))
+  Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔($same$ = $same!0$)
+  Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔($same$ = (-((-($same!0$)))))
+  Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔((($negated$ = ((1))) ∧ ($negated!0$ = same(-1))) ∨ (($negated$ = ((0))) ∧ ($negated!0$ = same(0))) ∨ (($negated$ = ((-1))) ∧ ($negated!0$ = same(1))))
 Universals:  
   same(1) = 1
   same(same(-(1))) = negated(negated(-(1)))

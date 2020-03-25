@@ -24,7 +24,10 @@ And((codeOf(red) == a) == (red == c),
     (codeOf(red) == b) == Not(red == c),
     (codeOf(blue) == b) == Not(blue == c))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+codeOf(red) = b
+
+-- GUILines ------------------------------------
 codeOf(red)
 codeOf(blue)
 c
@@ -34,7 +37,7 @@ codeOf(red) = b
 Type:        
   
 Definitions: 
-  Rule:∀['$codeOf$0', '$codeOf$'][]: codeOf($codeOf$0,$codeOf$) ⇔(($codeOf$0 = c) ∧ ($codeOf$ = a)) ∨ ((~($codeOf$0 = c)) ∧ ($codeOf$ = b))
+  Rule:∀['$codeOf!0$', '$codeOf$'][]: codeOf($codeOf!0$,$codeOf$) ⇔(($codeOf!0$ = c) ∧ ($codeOf$ = a)) ∨ ((~($codeOf!0$ = c)) ∧ ($codeOf$ = b))
 Universals:  
   codeOf(red) = b
 Consequences:

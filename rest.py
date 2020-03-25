@@ -118,7 +118,7 @@ class eval(Resource):
                         )
                         idpModel = idpparser.model_from_str(newTheory)
                         expanded = {}
-                        for expr in idpModel.theory.subtences.values():
+                        for expr in idpModel.subtences.values():
                             expanded.update(expr.unknown_symbols())
                         expanded = tuple(expanded.keys())
                         case = make_case(idpModel, "", expanded)

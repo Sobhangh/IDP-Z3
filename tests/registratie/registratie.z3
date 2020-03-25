@@ -342,7 +342,61 @@ Or(Not(Professional_Buyer),
           Not(Additional_Security_Required)),
        Resale == Three_Or_More))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+Tax = 1
+Registration_Type = Heritage
+Region = Flemish_Region
+Tax = 2
+Registration_Type = Social_Dwelling
+Tax = 4
+Registration_Type = Professional_Purchase
+Tax = 6
+Registration_Type = Energy_Efficient_Dwelling
+Registration_Type = Social_Purpose
+Registration_Type = Exchange_Unbuilt_Ground
+Tax = 7
+Registration_Type = Family_Dwelling
+Registration_Type = Dwelling_For_Social_Renting
+Tax = 10
+Registration_Type = Other
+Tax = 12
+Region = Brussels_Region
+Region = Walloon_Region
+Type_Of_Real_Estate = Residential
+Buyer = Natural_Person
+Domicile_Established
+Clean_Purchase
+First_Ownership
+Causal_Connection
+Energy_Renovation_Planned
+Term_Energy_Renovation = (Certification_Date + 5)
+Use = Social_Housing
+Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen
+Seller = ErkendeSocialeHuisvestingsMpy
+Mortgage_Loan_Allowance
+Use = Social_Renting
+Start_Dt_Dwelling_For_Social_Rent = (Certification_Date + 3)
+Duration_Of_Agreement = Less_Than_9_years
+Monument
+Use = As_Family_Dwelling
+Heritage_Investment
+Heritage_Plan
+Additional_Terms
+Professional_Buyer
+Transaction_Type = Public_Sale
+Use = For_Resale
+Certification_Date_Sale = (Certification_Date + 8)
+Seller = Mpy_Erkend_Door_VMSW
+Seller = Vlaams_Woningfonds
+Seller = Gelijksoortige_Rechtspersoon_EER
+Use = Community_Purpose
+Professional_Declaration_Filed
+Guarantee_Satisfied
+Additional_Security_Required
+Additional_Security_Satisfied
+Resale = Three_Or_More
+
+-- GUILines ------------------------------------
 Region
 Municipality
 Type_Of_Real_Estate

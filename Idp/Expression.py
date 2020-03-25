@@ -112,7 +112,11 @@ class Expression(object):
             if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
                 return e1 # no need to have brackets
             # replace by new Brackets node, to keep annotations
-            e1.is_subtence = self.is_subtence
+            if self.is_subtence is not None:
+                if e1.is_subtence is not None:
+                    e1.is_subtence |= self.is_subtence
+                else:
+                    e1.is_subtence = self.is_subtence
             out = Brackets(f=e1, reading=self.reading) # e1 is not copied !
             # copy initial annotation
             out.code = self.code
@@ -120,9 +124,13 @@ class Expression(object):
             out.is_visible = self.is_visible
             out.type = self.type
             # out.normal is not set, normally
-            return out
         else:
-            return self.update_exprs(e.substitute(e0, e1) for e in self.sub_exprs)
+            out = self.update_exprs(e.substitute(e0, e1) for e in self.sub_exprs)
+            if out.justification is not None:
+                out.justification = out.justification.substitute(e0, e1)
+            if type(e0) == Fresh_Variable:
+                out.code = out.code.replace(str(e0), str(e1))
+        return out
 
     def simplify1(self):
         return self.update_exprs(self.sub_exprs)
@@ -758,7 +766,7 @@ class AppliedSymbol(Expression):
     @classmethod
     def make(cls, s, args):
         if 0 < len(args):
-            out = cls(s=Symbol(name=s.name), args=Arguments(sub_exprs=[]))
+            out = cls(s=Symbol(name=s.name), args=Arguments(sub_exprs=args))
             out.sub_exprs = args
         else:
             out = Variable(name=s.name)

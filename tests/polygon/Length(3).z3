@@ -59,7 +59,15 @@ And(Or(Length(1) == Length(1), Sides < 1),
 
 (Subtype == rectangle) == (Sides == 4)
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+Sides = 3
+Subtype = rectangle
+Length(3) = Length(1)
+Equilateral
+∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+Sides = 4
+
+-- GUILines ------------------------------------
 Sides
 Vertices
 Type

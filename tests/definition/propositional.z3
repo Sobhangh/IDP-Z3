@@ -30,7 +30,14 @@ s == t
 -- goal -----------------------------------
 And(p == q, q == r, r == s, s == t)
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+p
+q
+r
+s
+t
+
+-- GUILines ------------------------------------
 p
 q
 r
@@ -58,25 +65,25 @@ Irrelevant:
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'p': {'p': {'environmental': False,
-             'normal': True,
+             'normal': False,
              'reading': 'p',
              'relevant': True,
              'status': 'UNKNOWN',
              'typ': 'Bool'}},
  'q': {'q': {'environmental': False,
-             'normal': True,
+             'normal': False,
              'reading': 'q',
              'relevant': True,
              'status': 'UNKNOWN',
              'typ': 'Bool'}},
  'r': {'r': {'environmental': False,
-             'normal': True,
+             'normal': False,
              'reading': 'r',
              'relevant': True,
              'status': 'UNKNOWN',
              'typ': 'Bool'}},
  's': {'s': {'environmental': False,
-             'normal': True,
+             'normal': False,
              'reading': 's',
              'relevant': True,
              'status': 'UNKNOWN',

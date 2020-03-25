@@ -44,7 +44,7 @@ class Case:
         # initialisation
 
         # Lines in the GUI
-        self.GUILines = {**idp.vocabulary.terms, **idp.theory.subtences} # DEPRECATED use self.assignments instead # {atom_string: Expression}
+        self.GUILines = {**idp.vocabulary.terms, **idp.subtences} # DEPRECATED use self.assignments instead # {atom_string: Expression}
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified: List[Expression] = []
@@ -58,7 +58,7 @@ class Case:
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .assignments
-        self.assignments = {s.code : Assignment(s, None, Status.UNKNOWN) for s in self.idp.theory.subtences.values()}
+        self.assignments = {s.code : Assignment(s, None, Status.UNKNOWN) for s in self.idp.subtences.values()}
         self.assignments.update({ atom.code : ass for atom, ass in self.given.items() })
 
         # find immediate universals

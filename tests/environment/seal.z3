@@ -32,7 +32,19 @@ view expanded
 
 (cSID == f) == And(Depth >= 1039/125, Depth <= 2687/250)
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+cSID = b
+2.104 ≤ Depth ≤ 2.476
+cSID = c
+2.768 ≤ Depth ≤ 3.391
+cSID = d
+4.294 ≤ Depth ≤ 5.206
+cSID = e
+5.474 ≤ Depth ≤ 6.686
+cSID = f
+8.312 ≤ Depth ≤ 10.748
+
+-- GUILines ------------------------------------
 Depth
 cSID
 cSID = b

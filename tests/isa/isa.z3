@@ -59,7 +59,13 @@ Type == typeOf(Subtype)
 
 True
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
+∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
+∀st[subtype] : isa(st,typeOf(st))
+Type = typeOf(Subtype)
+
+-- GUILines ------------------------------------
 Type
 Subtype
 asi(triangle,regular_triangle)

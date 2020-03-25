@@ -32,7 +32,11 @@ And(Not(negated(Piet) == Piet),
     negated(Piet) == Jan,
     Not(negated(Jan) == Jan))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+same(Piet) = Piet
+same(same(Piet)) = negated(negated(Piet))
+
+-- GUILines ------------------------------------
 same(Piet)
 same(Jan)
 negated(Piet)
@@ -44,8 +48,8 @@ same(same(Piet)) = negated(negated(Piet))
 Type:        
   
 Definitions: 
-  Rule:∀['$same$0', '$same$'][]: same($same$0,$same$) ⇔($same$ = $same$0)
-  Rule:∀['$negated$0', '$negated$'][]: negated($negated$0,$negated$) ⇔(($negated$ = Jan) ∧ ($negated$0 = Piet)) ∨ (($negated$ = Piet) ∧ ($negated$0 = Jan))
+  Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔($same$ = $same!0$)
+  Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔(($negated$ = Jan) ∧ ($negated!0$ = Piet)) ∨ (($negated$ = Piet) ∧ ($negated!0$ = Jan))
 Universals:  
   same(Piet) = Piet
   same(same(Piet)) = negated(negated(Piet))

@@ -20,7 +20,10 @@ theory {
 And((LipLen == Short) == (JacketDesign == Design_230),
     Not(LipLen == Standard))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+
+
+-- GUILines ------------------------------------
 LipLen
 JacketDesign
 

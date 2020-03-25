@@ -60,6 +60,7 @@ class Idp(object):
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
         self.goal.annotate(self)
+        self.subtences = {**self.theory.subtences, **self.goal.subtences()}
         log("annotated")
 
         """
@@ -392,9 +393,9 @@ class Definition(object):
         for r in self.rules:
             symbol = symbol_decls[r.symbol.name]
             if symbol not in self.q_decls:
-                name = "$"+symbol.name+"$"
-                q_v = { name+str(i):
-                    sort.fresh(name+str(i), symbol_decls) \
+                name = f"${symbol.name}$"
+                q_v = { f"${symbol.name}!{str(i)}$":
+                    sort.fresh(f"${symbol.name}!{str(i)}$", symbol_decls) \
                         for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
                     q_v[name] = symbol.out.fresh(name, symbol_decls)
@@ -520,15 +521,22 @@ class Rule(object):
         self.expanded = self.expanded.interpret(theory)
         return self
 
-    def instantiate(self, new_args, theory):
+    def instantiate(self, new_args, theory, value=None):
         out = self.body
         for old, new in zip(self.args, new_args):
             out = out.substitute(old, new)
         out = out.interpret(theory) # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
         if len(new_args) < len(self.args): # a function
-            out = out.substitute(self.args[-1], instance)
+            if value is not None:
+                head = AComparison.make("=", [instance, value])
+                head.is_subtence = True
+                out = out.substitute(self.args[-1], value)
+                out = AEquivalence.make('⇔', [head, out])
+            else:
+                out = out.substitute(self.args[-1], instance)
         else:
+            instance.is_subtence = True
             out = AEquivalence.make('⇔', [instance, out]) 
         return out
 
@@ -640,10 +648,22 @@ class Goal(object):
                 rule = idp.theory.clark[self.name]
                 just = []
                 for args in self.decl.domain:
-                    instance = rule.instantiate(args, idp.theory)
-                    just.append(instance)
-                    just.extend(instance.justifications())
+                    if self.decl.type.name == 'bool':
+                        instance = rule.instantiate(args, idp.theory)
+                        just.append(instance)
+                        just.extend(instance.justifications())
+                    else:
+                        just1 = []
+                        for out in self.decl.range:
+                            instance = rule.instantiate(args, idp.theory, out)
+                            just1.append(instance)
+                            just.extend(instance.justifications())
+                        just.append(ADisjunction.make('∨', just1))
                 self.justification = AConjunction.make('∧', just)
+
+    def subtences(self):
+        return {} if self.justification is None else \
+               self.justification.subtences()
 
     def translate(self):
         if self.justification is not None:

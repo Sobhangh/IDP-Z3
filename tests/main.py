@@ -30,7 +30,7 @@ for file in files:
     idp = idpparser.model_from_str(theory)  
 
     expanded_symbols: Dict[str, SymbolDeclaration] = {}
-    for expr in idp.theory.subtences.values():
+    for expr in idp.subtences.values():
         expanded_symbols.update(expr.unknown_symbols())
     expanded_symbols2 = list(expanded_symbols.keys())
     case = Case(idp, "", expanded_symbols2)
@@ -50,7 +50,9 @@ for file in files:
     if case.idp.goal.translate() is not None:
         f.write("\r\n-- goal -----------------------------------\r\n")
         f.write(str(case.idp.goal.translate())     + "\r\n")
-    f.write("\r\n-- atoms ------------------------------------\r\n")
+    f.write("\r\n-- subtences ------------------------------------\r\n")
+    f.write("\r\n".join(str(t) for t in case.idp.subtences)     + "\r\n")
+    f.write("\r\n-- GUILines ------------------------------------\r\n")
     f.write("\r\n".join(str(t) for t in case.GUILines)     + "\r\n")
 
     f.write("\r\n-- case -------------------------------------\r\n")

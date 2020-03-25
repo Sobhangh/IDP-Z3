@@ -217,7 +217,34 @@ And(Not(Large(1)),
     Not(Large(3)),
     Not(Large(4)))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+Large(1)
+Type = triangle
+Sides = 3
+Type = quadrilateral
+Sides = 4
+Vertices = 3
+Vertices = 4
+Convex
+∀n[side] : Angle(n) < 180
+Equilateral
+∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+Subtype = right_triangle
+Subtype = regular_triangle
+Subtype = irregular
+∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+∃n[side] : Angle(n) = 90
+Subtype = square
+Subtype = rectangle
+∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+Perimeter = (sum{n[side] : true : Length(n)})
+(sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+∀x[side] : 0 ≤ Angle(x)
+∀x[side] : Angle(x) ≠ 180
+∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
+∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+
+-- GUILines ------------------------------------
 Sides
 Vertices
 Type
@@ -260,7 +287,7 @@ Perimeter = (sum{n[side] : true : Length(n)})
 Type:        
   
 Definitions: 
-  Rule:∀['$Large$0'][]: Large($Large$0) ⇔10 < ( if   $Large$0 = 4 then 4 else  if   $Large$0 = 3 then 3 else  if   $Large$0 = 2 then 2 else  if   $Large$0 = 1 then 1 else 5)
+  Rule:∀['$Large!0$'][]: Large($Large!0$) ⇔10 < ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)
 Universals:  
   ~Subtype = rectangle
   Perimeter = (sum{n[side] : true : Length(n)})

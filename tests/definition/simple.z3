@@ -30,17 +30,28 @@ And((b == red) == (a == red), Not(b == blue))
 And(c == red, Not(c == blue))
 
 -- goal -----------------------------------
-And(And(b == red, a == red),
-    And(a == red, p),
-    p == Or(q, r))
+And(And(a == red, p),
+    p == Or(q, r),
+    Or((b == red) == (a == red), Not(b == blue)))
 
--- atoms ------------------------------------
+-- subtences ------------------------------------
+a = red
+p
+q
+r
+b = red
+b = blue
+
+-- GUILines ------------------------------------
 p
 q
 r
 a
 b
 c
+a = red
+b = red
+b = blue
 
 -- case -------------------------------------
 Type:        
@@ -53,7 +64,10 @@ Definitions:
 Universals:  
   
 Consequences:
+  a = red
   p
+  b = red
+  ~b = blue
   a = red
   b = red
   c = red
@@ -72,7 +86,14 @@ Irrelevant:
              'status': 'CONSEQUENCE',
              'typ': 'color',
              'value': 'red',
-             'values': ['red', 'blue']}},
+             'values': ['red', 'blue']},
+       'a = red': {'environmental': False,
+                   'normal': False,
+                   'reading': 'a = red',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': True}},
  'b': {'b': {'environmental': False,
              'normal': True,
              'reading': 'b',
@@ -80,7 +101,21 @@ Irrelevant:
              'status': 'CONSEQUENCE',
              'typ': 'color',
              'value': 'red',
-             'values': ['red', 'blue']}},
+             'values': ['red', 'blue']},
+       'b = blue': {'environmental': False,
+                    'normal': False,
+                    'reading': 'b = blue',
+                    'relevant': True,
+                    'status': 'CONSEQUENCE',
+                    'typ': 'Bool',
+                    'value': False},
+       'b = red': {'environmental': False,
+                   'normal': False,
+                   'reading': 'b = red',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': True}},
  'c': {'c': {'environmental': False,
              'normal': True,
              'reading': 'c',
@@ -90,12 +125,11 @@ Irrelevant:
              'value': 'red',
              'values': ['red', 'blue']}},
  'p': {'p': {'environmental': False,
-             'normal': True,
+             'normal': False,
              'reading': 'p',
              'relevant': True,
              'status': 'CONSEQUENCE',
-             'typ': 'Bool',
-             'value': True}},
+             'typ': 'Bool'}},
  'q': {'q': {'environmental': False,
              'normal': True,
              'reading': 'q',
