@@ -530,13 +530,11 @@ class Rule(object):
         if len(new_args) < len(self.args): # a function
             if value is not None:
                 head = AComparison.make("=", [instance, value])
-                head.is_subtence = True
                 out = out.substitute(self.args[-1], value)
                 out = AEquivalence.make('⇔', [head, out])
             else:
                 out = out.substitute(self.args[-1], instance)
         else:
-            instance.is_subtence = True
             out = AEquivalence.make('⇔', [instance, out]) 
         return out
 

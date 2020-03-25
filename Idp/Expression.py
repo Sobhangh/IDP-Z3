@@ -112,11 +112,6 @@ class Expression(object):
             if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
                 return e1 # no need to have brackets
             # replace by new Brackets node, to keep annotations
-            if self.is_subtence is not None:
-                if e1.is_subtence is not None:
-                    e1.is_subtence |= self.is_subtence
-                else:
-                    e1.is_subtence = self.is_subtence
             out = Brackets(f=e1, reading=self.reading) # e1 is not copied !
             # copy initial annotation
             out.code = self.code
@@ -279,6 +274,7 @@ class AQuantification(Expression):
 
     @classmethod
     def make(cls, q, decls, f):
+        "make and annotate a quantified formula"
         out = cls(q=q, vars=list(decls.values()), sorts=[], f=f)
         out.q_decls = decls
         return out
@@ -387,6 +383,10 @@ class BinaryOperator(Expression):
                 o = Brackets(f=o, reading='')
             operands1.append(o)
         out = (cls)(sub_exprs=operands1, operator=ops)
+        # annotate
+        if out.type is None:
+            out.type = 'real' if any(e.type == 'real' for e in out.sub_exprs) \
+               else 'int'
         return out.simplify1()
         
     def __str__(self):
@@ -642,7 +642,8 @@ class AUnary(Expression):
     @classmethod
     def make(cls, op, expr):
         out = AUnary(operator=op, f=expr)
-        out.type = 'bool'
+        # annotate
+        out.type = out.sub_exprs[0].type
         return out.simplify1()
 
     def __str__(self):
@@ -770,7 +771,10 @@ class AppliedSymbol(Expression):
             out.sub_exprs = args
         else:
             out = Variable(name=s.name)
+        # annotate
         out.decl = s.decl
+        out.type = out.decl.type.name
+        out.is_subtence = out.type == 'bool'
         return out
 
     def __str__(self):
