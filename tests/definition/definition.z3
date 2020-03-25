@@ -15,10 +15,10 @@ view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-And((codeOf(red) == a) == True,
-    (codeOf(blue) == a) == False,
-    (codeOf(red) == b) == False,
-    (codeOf(blue) == b) == True)
+And(codeOf(red) == a,
+    Not(codeOf(blue) == a),
+    Not(codeOf(red) == b),
+    codeOf(blue) == b)
 
 -- atoms ------------------------------------
 codeOf(red)

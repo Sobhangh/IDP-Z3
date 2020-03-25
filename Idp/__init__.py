@@ -59,7 +59,7 @@ class Idp(object):
 
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
-        self.goal.annotate(self.vocabulary)
+        self.goal.annotate(self)
         log("annotated")
 
         """
@@ -74,7 +74,7 @@ class Idp(object):
         log("vocabulary translated")
         self.theory.translate(self)
         log("theory translated")
-        #self.goal.translate()
+        self.goal.translate()
         self.view.translate()
 
         self.translated = self.vocabulary.translated + self.theory.translated
@@ -511,7 +511,7 @@ class Rule(object):
             expr = AComparison.make('=', [expr, self.args[-1]])
         else:
             expr = AppliedSymbol.make(self.symbol, self.args)
-        expr = AComparison.make('=', [expr, self.body])
+        expr = AEquivalence.make('⇔', [expr, self.body])
         expr = AQuantification.make('∀', {**self.q_decls}, expr)
         self.expanded = expr.expand_quantifiers(theory)
         
@@ -525,8 +525,11 @@ class Rule(object):
         for old, new in zip(self.args, new_args):
             out = out.substitute(old, new)
         out = out.interpret(theory) # add justification recursively
+        instance = AppliedSymbol.make(self.symbol, new_args)
         if len(new_args) < len(self.args): # a function
-            out = out.substitute(self.args[-1], AppliedSymbol.make(self.symbol, new_args))
+            out = out.substitute(self.args[-1], instance)
+        else:
+            out = AEquivalence.make('⇔', [instance, out]) 
         return out
 
     def unknown_symbols(self):
@@ -625,13 +628,27 @@ class Goal(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.decl = None
+        self.justification = None
 
     def __str__(self):
         return self.name
 
-    def annotate(self, vocabulary):
-        if self.name in vocabulary.symbol_decls:
-            self.decl = vocabulary.symbol_decls[self.name]
+    def annotate(self, idp):
+        if self.name in idp.vocabulary.symbol_decls:
+            self.decl = idp.vocabulary.symbol_decls[self.name]
+            if self.name in idp.theory.clark: # defined goal
+                rule = idp.theory.clark[self.name]
+                just = []
+                for args in self.decl.domain:
+                    instance = rule.instantiate(args, idp.theory)
+                    just.append(instance)
+                    just.extend(instance.justifications())
+                self.justification = AConjunction.make('∧', just)
+
+    def translate(self):
+        if self.justification is not None:
+            return self.justification.translate()
+        return None
 
 
 class View(object):

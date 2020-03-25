@@ -349,7 +349,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  ((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
+  (((Angle(1) = 90)) ∧ ((Angle(2) = 90)) ∧ ((Angle(3) = 90)))
   Length(1) = Length(3)
   Length(2) = (0)
   Length(1) = Length(2)

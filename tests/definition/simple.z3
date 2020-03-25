@@ -16,18 +16,23 @@ theory {
     { b=red <- a=red. }
     { c=red. }
 }
- 
+goal b
 view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
 p == Or(q, r)
 
-And((a == red) == p, (a == blue) == False)
+And((a == red) == p, Not(a == blue))
 
-And((b == red) == (a == red), (b == blue) == False)
+And((b == red) == (a == red), Not(b == blue))
 
-And((c == red) == True, (c == blue) == False)
+And(c == red, Not(c == blue))
+
+-- goal -----------------------------------
+And(And(b == red, a == red),
+    And(a == red, p),
+    p == Or(q, r))
 
 -- atoms ------------------------------------
 p

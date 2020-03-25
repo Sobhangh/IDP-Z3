@@ -18,7 +18,7 @@ theory {
 
 -- theory -----------------------------------
 And((LipLen == Short) == (JacketDesign == Design_230),
-    (LipLen == Standard) == False)
+    Not(LipLen == Standard))
 
 -- atoms ------------------------------------
 LipLen

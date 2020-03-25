@@ -47,6 +47,9 @@ for file in files:
     f.write("\r\n\r\n".join(str(t) for t in case.idp.vocabulary.translated))
     f.write("\r\n-- theory -----------------------------------\r\n")
     f.write("\r\n\r\n".join(str(t) for t in case.idp.theory.translated)     + "\r\n")
+    if case.idp.goal.translate() is not None:
+        f.write("\r\n-- goal -----------------------------------\r\n")
+        f.write(str(case.idp.goal.translate())     + "\r\n")
     f.write("\r\n-- atoms ------------------------------------\r\n")
     f.write("\r\n".join(str(t) for t in case.GUILines)     + "\r\n")
 

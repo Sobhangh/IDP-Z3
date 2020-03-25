@@ -22,15 +22,15 @@ same(Piet) == Piet
 
 same(same(Piet)) == negated(negated(Piet))
 
-And((same(Piet) == Piet) == True,
-    (same(Jan) == Piet) == False,
-    (same(Piet) == Jan) == False,
-    (same(Jan) == Jan) == True)
+And(same(Piet) == Piet,
+    Not(same(Jan) == Piet),
+    Not(same(Piet) == Jan),
+    same(Jan) == Jan)
 
-And((negated(Piet) == Piet) == False,
-    (negated(Jan) == Piet) == True,
-    (negated(Piet) == Jan) == True,
-    (negated(Jan) == Jan) == False)
+And(Not(negated(Piet) == Piet),
+    negated(Jan) == Piet,
+    negated(Piet) == Jan,
+    Not(negated(Jan) == Jan))
 
 -- atoms ------------------------------------
 same(Piet)

@@ -156,6 +156,7 @@ class Expression(object):
         out = sum((e.justifications() for e in self.sub_exprs), [])
         if self.justification is not None:
             out.append(self.justification)
+            out.extend(self.justification.justifications())
         return out
 
     def expr_to_literal(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', bool]]:
@@ -373,11 +374,11 @@ class BinaryOperator(Expression):
             ops = [ops] * (len(operands)-1)
         operands1 = []
         for o in operands:
-            if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
+            if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets, AComparison]:
                 # add () around operands, to avoid ambiguity in str()
                 o = Brackets(f=o, reading='')
             operands1.append(o)
-        out = (cls)(sub_exprs=operands, operator=ops)
+        out = (cls)(sub_exprs=operands1, operator=ops)
         return out.simplify1()
         
     def __str__(self):

@@ -13,10 +13,7 @@ theory {
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-And(Prime(1) == True,
-    Prime(2) == True,
-    Prime(3) == True,
-    Prime(4) == False)
+And(Prime(1), Prime(2), Prime(3), Not(Prime(4)))
 
 -- atoms ------------------------------------
 Prime(1)

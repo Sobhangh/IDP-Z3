@@ -309,8 +309,8 @@ Consequences:
   Angle(3) = 90
   Angle(4) = 90
 Simplified:  
-  (Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) ∧ (Length(4) = Length(1)))))
-  ((((Subtype = square) ∨ (Subtype = rectangle))))
+  (Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1))) ∧ ((Length(4) = Length(1))))))
+  (((((Subtype = square) ∨ (Subtype = rectangle)))))
   ((Subtype = rectangle) ⇒ (~(Length(1) = Length(2))))
   ((Subtype = square) ⇔ (Equilateral))
 Irrelevant:  

@@ -23,25 +23,25 @@ same(1) == 1
 
 same(same(-1)) == negated(negated(-1))
 
-And((same(-1) == -1) == True,
-    (same(0) == -1) == False,
-    (same(1) == -1) == False,
-    (same(-1) == 0) == False,
-    (same(0) == 0) == True,
-    (same(1) == 0) == False,
-    (same(-1) == 1) == False,
-    (same(0) == 1) == False,
-    (same(1) == 1) == True)
+And(same(-1) == -1,
+    Not(same(0) == -1),
+    Not(same(1) == -1),
+    Not(same(-1) == 0),
+    same(0) == 0,
+    Not(same(1) == 0),
+    Not(same(-1) == 1),
+    Not(same(0) == 1),
+    same(1) == 1)
 
-And((same(-1) == -1) == True,
-    (same(0) == -1) == False,
-    (same(1) == -1) == False,
-    (same(-1) == 0) == False,
-    (same(0) == 0) == True,
-    (same(1) == 0) == False,
-    (same(-1) == 1) == False,
-    (same(0) == 1) == False,
-    (same(1) == 1) == True)
+And(same(-1) == -1,
+    Not(same(0) == -1),
+    Not(same(1) == -1),
+    Not(same(-1) == 0),
+    same(0) == 0,
+    Not(same(1) == 0),
+    Not(same(-1) == 1),
+    Not(same(0) == 1),
+    same(1) == 1)
 
 And((negated(-1) == -1) == (same(1) == -1),
     (negated(0) == -1) == (same(1) == 0),

@@ -14,5 +14,5 @@ theory {
     { b=red <- a=red. }
     { c=red. }
 }
- 
+goal b
 view expanded

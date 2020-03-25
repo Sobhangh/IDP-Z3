@@ -335,13 +335,13 @@ Consequences:
   Length(4) = 0
   Angle(4) = 0
 Simplified:  
-  (Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))))
+  (Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1))))))
   (((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
   ((Subtype = regular_triangle) ⇔ (Equilateral))
-  ((Subtype = regular_triangle) ⇔ ((((Angle(1) = 60) ∧ (Angle(2) = 60) ∧ (Angle(3) = 60)))))
+  ((Subtype = regular_triangle) ⇔ (((((Angle(1) = 60)) ∧ ((Angle(2) = 60)) ∧ ((Angle(3) = 60))))))
   ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
 Irrelevant:  
-  ((Angle(1) = 90) ∧ (Angle(2) = 90) ∧ (Angle(3) = 90))
+  (((Angle(1) = 90)) ∧ ((Angle(2) = 90)) ∧ ((Angle(3) = 90)))
   Length(1) = Length(3)
   Length(2) = (0)
   Length(1) = Length(2)

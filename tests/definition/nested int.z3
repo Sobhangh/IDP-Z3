@@ -23,25 +23,25 @@ same(-1) == -1
 
 negated(negated(-1)) == same(-1)
 
-And((same(-1) == -1) == True,
-    (same(0) == -1) == False,
-    (same(1) == -1) == False,
-    (same(-1) == 0) == False,
-    (same(0) == 0) == True,
-    (same(1) == 0) == False,
-    (same(-1) == 1) == False,
-    (same(0) == 1) == False,
-    (same(1) == 1) == True)
+And(same(-1) == -1,
+    Not(same(0) == -1),
+    Not(same(1) == -1),
+    Not(same(-1) == 0),
+    same(0) == 0,
+    Not(same(1) == 0),
+    Not(same(-1) == 1),
+    Not(same(0) == 1),
+    same(1) == 1)
 
-And((negated(-1) == -1) == False,
-    (negated(0) == -1) == False,
-    (negated(1) == -1) == True,
-    (negated(-1) == 0) == False,
-    (negated(0) == 0) == True,
-    (negated(1) == 0) == False,
-    (negated(-1) == 1) == True,
-    (negated(0) == 1) == False,
-    (negated(1) == 1) == False)
+And(Not(negated(-1) == -1),
+    Not(negated(0) == -1),
+    negated(1) == -1,
+    Not(negated(-1) == 0),
+    negated(0) == 0,
+    Not(negated(1) == 0),
+    negated(-1) == 1,
+    Not(negated(0) == 1),
+    Not(negated(1) == 1))
 
 -- atoms ------------------------------------
 same(-1)
