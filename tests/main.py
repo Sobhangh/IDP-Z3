@@ -57,8 +57,8 @@ for file in files:
 
     f.write("\r\n-- case -------------------------------------\r\n")
     f.write(str(case)+ "\r\n")
-    out = pprint.pformat(propagation(case), width = 120)
     f.write("\r\n-- propagation ------------------------------\r\n")
+    out = pprint.pformat(propagation(case), width = 120)
     f.write(out     + "\r\n")
 
     f.close()

@@ -426,7 +426,7 @@ Irrelevant:
                                  'typ': 'Bool',
                                  'value': False}},
  'Large': {'Large(1)': {'environmental': False,
-                        'normal': False,
+                        'normal': True,
                         'reading': 'Large(1)',
                         'relevant': True,
                         'status': 'CONSEQUENCE',

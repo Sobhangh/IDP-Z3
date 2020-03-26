@@ -125,7 +125,7 @@ Irrelevant:
              'value': 'red',
              'values': ['red', 'blue']}},
  'p': {'p': {'environmental': False,
-             'normal': False,
+             'normal': True,
              'reading': 'p',
              'relevant': True,
              'status': 'CONSEQUENCE',

@@ -93,9 +93,8 @@ class Case:
         
     def get_relevant_subtences(self, all_: bool) -> Dict[str, Expression]:
         #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
-        if self.definitions: #TODO definitions ?
-            return {}
         constraints = ( self.simplified
+            + list(self.idp.goal.subtences().values())
             + [l.sentence for k, l in self.assignments.items() 
                     if l.truth is not None and (all_ or l.is_environmental) 
                     and not type(l) == Term])
@@ -104,10 +103,6 @@ class Case:
         symbols = mergeDicts( e.unknown_symbols() for e in constraints )
         if self.idp.goal.decl is not None:
             symbols.update({self.idp.goal.decl.name : self.idp.goal.decl})
-
-        # remove irrelevant domain conditions
-        self.simplified = list(filter(lambda e: e.if_symbol is None or e.if_symbol in symbols
-                                     , self.simplified))
 
         # determine relevant subtences
         relevant_subtences = mergeDicts( e.subtences() for e in constraints )
@@ -127,7 +122,7 @@ class Case:
             relevant_subtences = self.get_relevant_subtences(all_=True)
 
             for k, l in self.assignments.items():
-                if k in relevant_subtences or self.definitions: #TODO support for definitions
+                if k in relevant_subtences:
                     l.relevant = True
 
         solver, _, _ = mk_solver(self.translate(all_), {})
@@ -187,8 +182,9 @@ class Case:
                 # simplify constraints and propagate consequences
                 new_simplified: List[Expression] = []
                 for constraint in self.simplified:
-                    new_constraint = constraint.substitute(old, new)
-                    consequences = new_constraint.expr_to_literal(self)
+                    consequences = []
+                    new_constraint = constraint.substitute(old, new, consequences, self)
+                    consequences.extend(new_constraint.expr_to_literal(self))
                     if consequences:
                         for sentence, truth in consequences:
                             old_ass = self.assignments[sentence.code]

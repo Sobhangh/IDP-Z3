@@ -1,0 +1,14 @@
+vocabulary {
+    p
+    q
+    r
+    s
+} 
+
+theory {
+    { p <- q | r. }
+    p|s.
+    q.
+}
+goal b
+view expanded

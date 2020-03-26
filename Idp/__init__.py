@@ -531,6 +531,7 @@ class Rule(object):
             out = out.substitute(old, new)
         out = out.interpret(theory) # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
+        instance.normal = True
         if len(new_args)+1 == len(self.args): # a function
             if value is not None:
                 head = AComparison.make("=", [instance, value])

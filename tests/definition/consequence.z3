@@ -5,61 +5,50 @@ vocabulary {
     q
     r
     s
-    t
 } 
 
 theory {
-    {p <- q.}
-    {q <- r.}
-    {r <- s.}
-    {s <- t.}
+    { p <- q | r. }
+    p|s.
+    q.
 }
-goal p
+goal b
 view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-p == q
+Or(p, s)
 
-q == r
+q
 
-r == s
-
-s == t
-
--- goal -----------------------------------
-And(p == q, q == r, r == s, s == t)
+p == Or(q, r)
 
 -- subtences ------------------------------------
 p
 q
 r
 s
-t
 
 -- GUILines ------------------------------------
 p
 q
 r
 s
-t
 
 -- case -------------------------------------
 Type:        
   
 Definitions: 
-  Rule:∀[][]: p() ⇔q
-  Rule:∀[][]: q() ⇔r
-  Rule:∀[][]: r() ⇔s
-  Rule:∀[][]: s() ⇔t
+  Rule:∀[][]: p() ⇔q ∨ r
 Universals:  
-  
+  q
 Consequences:
-  
+  p
 Simplified:  
   
 Irrelevant:  
-  
+  r
+  s
 
 
 -- propagation ------------------------------
@@ -68,29 +57,25 @@ Irrelevant:
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}},
+             'status': 'CONSEQUENCE',
+             'typ': 'Bool',
+             'value': True}},
  'q': {'q': {'environmental': False,
              'normal': True,
              'reading': 'q',
              'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}},
+             'status': 'UNIVERSAL',
+             'typ': 'Bool',
+             'value': True}},
  'r': {'r': {'environmental': False,
              'normal': True,
              'reading': 'r',
-             'relevant': True,
+             'relevant': False,
              'status': 'UNKNOWN',
              'typ': 'Bool'}},
  's': {'s': {'environmental': False,
              'normal': True,
              'reading': 's',
-             'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}},
- 't': {'t': {'environmental': False,
-             'normal': True,
-             'reading': 't',
-             'relevant': True,
+             'relevant': False,
              'status': 'UNKNOWN',
              'typ': 'Bool'}}}

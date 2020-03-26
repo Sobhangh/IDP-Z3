@@ -50,7 +50,6 @@ class Expression(object):
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self.translated = None            # the Z3 equivalent
         self._reified = None
-        self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self._subtences = None            # memoization of .subtences()
         self.justification = None         # Expression
         # .normal : only set in .instances
@@ -72,6 +71,8 @@ class Expression(object):
                 self._subtences = {self.code: self} #TODO possibly go deeper
             else:
                 self._subtences = mergeDicts(e.subtences() for e in self.sub_exprs)
+            if self.justification is not None:
+                self._subtences.update(self.justification.subtences())
         return self._subtences
 
     def as_ground(self): return None
@@ -103,13 +104,17 @@ class Expression(object):
     def update_exprs(self, new_expr_generator):
         return self._change(sub_exprs=list(new_expr_generator))
 
-    def substitute(self, e0, e1):
+    def substitute(self, e0, e1, todo=None, case=None):
         """ recursively substitute e0 by e1 in self, and simplify """
         if self == e0: # based on repr !
             if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
                 return e1 # no need to have brackets
             # replace by new Brackets node, to keep annotations
             out = Brackets(f=e1, reading=self.reading) # e1 is not copied !
+            # alternative:
+            # out = copy.copy(e1)
+            # out.reading = self.reading
+
             # copy initial annotation
             out.code = self.code
             out.is_subtence = self.is_subtence
@@ -117,9 +122,12 @@ class Expression(object):
             out.type = self.type
             # out.normal is not set, normally
         else:
-            out = self.update_exprs(e.substitute(e0, e1) for e in self.sub_exprs)
+            out = self.update_exprs(e.substitute(e0, e1, todo, case) for e in self.sub_exprs)
             if out.justification is not None:
-                out.justification = out.justification.substitute(e0, e1)
+                out.justification = out.justification.substitute(e0, e1, todo, case)
+                if todo is not None:
+                    todo0 = out.justification.expr_to_literal(case)
+                    todo.extend(todo0)
             if type(e0) == Fresh_Variable:
                 out.code = out.code.replace(str(e0), str(e1))
         return out
@@ -135,8 +143,7 @@ class Expression(object):
 
     def unknown_symbols(self):
         if self._unknown_symbols is None:
-            self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs) \
-                if self.if_symbol is None else {}
+            self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs)
         return self._unknown_symbols
 
     def reified(self) -> DatatypeRef:
