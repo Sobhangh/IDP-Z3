@@ -151,6 +151,7 @@ class ConstructedTypeDeclaration(object):
             self.constructors[1].translated = bool(False)
         else:
             self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
+            assert len(self.constructors) == len(cstrs), "Internal error"
             for c, c3 in zip(self.constructors, cstrs):
                 c.translated = c3
                 c.index = ConstructedTypeDeclaration.COUNT
@@ -439,7 +440,7 @@ class Rule(object):
         self.body = kwargs.pop('body')
         self.expanded = None # Expression
 
-        assert len(self.sorts) == len(self.vars)
+        assert len(self.vars) == len(self.sorts), "Internal error"
         self.q_decls = {}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
@@ -455,6 +456,7 @@ class Rule(object):
 
     def annotate(self, symbol_decls, q_decls):
         # create head variables
+        assert len(self.vars) == len(self.sorts), "Internal error"
         self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
@@ -470,6 +472,7 @@ class Rule(object):
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
 
         subst = {}
+        assert len(self.args) == len(new_vars), "Internal error"
         for arg, nv in zip(self.args, new_vars.values()):
             if type(arg) in [Variable, Fresh_Variable]:
                 if arg.name not in subst:
@@ -523,11 +526,12 @@ class Rule(object):
 
     def instantiate(self, new_args, theory, value=None):
         out = self.body
+        assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
             out = out.substitute(old, new)
         out = out.interpret(theory) # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
-        if len(new_args) < len(self.args): # a function
+        if len(new_args)+1 == len(self.args): # a function
             if value is not None:
                 head = AComparison.make("=", [instance, value])
                 out = out.substitute(self.args[-1], value)

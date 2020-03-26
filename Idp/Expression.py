@@ -46,7 +46,7 @@ def immutable(func):
             ops = value[1] # can't swap these 2 lines !
             value = value[0]
         if isinstance(value, list): # sub_exprs = value
-            if all(id(e0) == id(e1) for (e0,e1) in zip(self.sub_exprs, value)): # not changed !
+            if self.sub_exprs == value: # not changed !
                 return self
             else: # create a modified copy
                 out = copy.copy(self)
@@ -281,13 +281,16 @@ class AQuantification(Expression):
 
 
     def __str__(self):
+        assert len(self.vars) == len(self.sorts), "Internal error"
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {str(self.sub_exprs[0])}"
     def str_(self):
+        # assert len(self.vars) == len(self.sorts), "Internal error"
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
     def annotate(self, symbol_decls, q_decls):
+        assert len(self.vars) == len(self.sorts), "Internal error"
         self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
@@ -383,11 +386,7 @@ class BinaryOperator(Expression):
                 o = Brackets(f=o, reading='')
             operands1.append(o)
         out = (cls)(sub_exprs=operands1, operator=ops)
-        # annotate
-        if out.type is None:
-            out.type = 'real' if any(e.type == 'real' for e in out.sub_exprs) \
-               else 'int'
-        return out.simplify1()
+        return out._derive().simplify1()
         
     def __str__(self):
         def parenthesis(x):
@@ -414,6 +413,9 @@ class BinaryOperator(Expression):
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
+        return self._derive()
+    
+    def _derive(self):
         if self.type is None:
             self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
@@ -543,6 +545,7 @@ class AComparison(BinaryOperator):
         operands1 = [e.as_ground() for e in operands]
         if all(e is not None for e in operands1):
             acc = operands1[0]
+            assert len(self.operator) == len(operands1[1:]), "Internal error"
             for op, expr in zip(self.operator, operands1[1:]):
                 if not (BinaryOperator.MAP[op]) (acc, expr):
                     return FALSE
@@ -577,7 +580,9 @@ def update_arith(self, family, new_expr_generator):
             ops.append(op)
             exprs.append(expr)
     add(family, next(new_expr_generator)) # this adds an operator
-    for op, expr in zip(self.operator, new_expr_generator):
+    operands = list(new_expr_generator)
+    assert len(self.operator) == len(operands), "Internal error"
+    for op, expr in zip(self.operator, operands):
         add(op, expr)
 
     # analyse results
@@ -642,9 +647,7 @@ class AUnary(Expression):
     @classmethod
     def make(cls, op, expr):
         out = AUnary(operator=op, f=expr)
-        # annotate
-        out.type = out.sub_exprs[0].type
-        return out.simplify1()
+        return out._derive().simplify1()
 
     def __str__(self):
         return f"{self.operator}({str(self.sub_exprs[0])})"
@@ -653,6 +656,10 @@ class AUnary(Expression):
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
+        self.type = self.sub_exprs[0].type
+        return self._derive()
+
+    def _derive(self):
         self.type = self.sub_exprs[0].type
         return self
 
@@ -702,6 +709,7 @@ class AAggregate(Expression):
 
     def __str__(self):
         if self.vars is not None:
+            assert len(self.vars) == len(self.sorts), "Internal error"
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
             output = f" : {str(self.sub_exprs[AAggregate.OUT])}" if self.out else ""
             out = ( f"{self.aggtype}{{{vars} : "
@@ -715,6 +723,7 @@ class AAggregate(Expression):
             )
         return out
     def str_(self):
+        assert len(self.vars) == len(self.sorts), "Internal error"
         vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
         out = ( f"{self.aggtype}{{{vars} : "
@@ -724,6 +733,7 @@ class AAggregate(Expression):
         return out
 
     def annotate(self, symbol_decls, q_decls):
+        assert len(self.vars) == len(self.sorts), "Internal error"
         self.q_decls = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_decls, **self.q_decls} # merge
@@ -773,9 +783,7 @@ class AppliedSymbol(Expression):
             out = Variable(name=s.name)
         # annotate
         out.decl = s.decl
-        out.type = out.decl.type.name
-        out.is_subtence = out.type == 'bool'
-        return out
+        return out._derive()
 
     def __str__(self):
         return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
@@ -785,6 +793,9 @@ class AppliedSymbol(Expression):
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.decl = q_decls[self.s.name] if self.s.name in q_decls else symbol_decls[self.s.name]
+        return self._derive()
+
+    def _derive(self):
         self.type = self.decl.type.name
         self.is_subtence = self.type == 'bool'
         return self

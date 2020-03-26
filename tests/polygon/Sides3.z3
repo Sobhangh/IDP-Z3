@@ -378,7 +378,7 @@ Simplified:
   (((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
   ((Subtype = regular_triangle) ⇔ (Equilateral))
   ((Subtype = regular_triangle) ⇔ (((((Angle(1) = 60)) ∧ ((Angle(2) = 60)) ∧ ((Angle(3) = 60))))))
-  ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90) ∨ (Angle(4) = 90)))))
+  ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90)))))
 Irrelevant:  
   (((Angle(1) = 90)) ∧ ((Angle(2) = 90)) ∧ ((Angle(3) = 90)))
   Length(1) = Length(3)
