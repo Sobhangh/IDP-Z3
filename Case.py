@@ -196,6 +196,8 @@ class Case:
                                 # test: theory{ x=4. x=5. }
                                 self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                 return
+                        if not any(new_constraint == e for (e,t) in consequences):
+                            new_simplified.append(new_constraint)
                     elif not new_constraint == TRUE:
                         new_simplified.append(new_constraint)
 

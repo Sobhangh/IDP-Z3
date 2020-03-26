@@ -476,11 +476,12 @@ Definitions:
 Universals:  
   ~Professional_Declaration_Filed
 Consequences:
+  ~Tax = 4
+  ~Registration_Type = Professional_Purchase
   ~Professional_Buyer
 Simplified:  
   ((Tax = 1) ⇒ ((Registration_Type = Heritage) ∧ (Region = Flemish_Region)))
   (Tax = 2) ⇒ ((Registration_Type = Social_Dwelling) ∧ (Region = Flemish_Region))
-  (Tax = 4) ⇒ ((Registration_Type = Professional_Purchase) ∧ (Region = Flemish_Region))
   ((Tax = 6) ⇒ (((Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground)) ∧ (Region = Flemish_Region)))
   (Tax = 7) ⇒ (((Registration_Type = Family_Dwelling) ∨ (Registration_Type = Dwelling_For_Social_Renting)) ∧ (Region = Flemish_Region))
   (Tax = 10) ⇒ ((Region = Flemish_Region) ∧ (Registration_Type = Other))
@@ -492,7 +493,7 @@ Simplified:
   ((Registration_Type = Heritage) ⇒ ((Type_Of_Real_Estate = Residential) ∧ Monument ∧ (Use = As_Family_Dwelling) ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms))
   ((Registration_Type = Social_Purpose) ⇒ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
   (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
-  (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Professional_Purchase)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
+  (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
 Irrelevant:  
   Guarantee_Satisfied
   Additional_Security_Required
@@ -824,8 +825,9 @@ Irrelevant:
                                                                      'reading': 'Registration_Type = '
                                                                                 'Professional_Purchase',
                                                                      'relevant': True,
-                                                                     'status': 'UNKNOWN',
-                                                                     'typ': 'Bool'},
+                                                                     'status': 'CONSEQUENCE',
+                                                                     'typ': 'Bool',
+                                                                     'value': False},
                        'Registration_Type = Social_Dwelling': {'environmental': False,
                                                                'normal': False,
                                                                'reading': 'Registration_Type = Social_Dwelling',
@@ -958,8 +960,9 @@ Irrelevant:
                      'normal': False,
                      'reading': 'Tax = 4',
                      'relevant': True,
-                     'status': 'UNKNOWN',
-                     'typ': 'Bool'},
+                     'status': 'CONSEQUENCE',
+                     'typ': 'Bool',
+                     'value': False},
          'Tax = 6': {'environmental': False,
                      'normal': False,
                      'reading': 'Tax = 6',
