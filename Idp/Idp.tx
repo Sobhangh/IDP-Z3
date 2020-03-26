@@ -15,7 +15,7 @@ Vocabulary: 'vocabulary' 'environment'? '{' (declarations=Declaration)* '}';
   Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
     ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
-      Constructor: name=ID;
+      Constructor: name=/[^\d\W]\w*\b|'(\.|[^'])*'/;
     RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
       RangeElement: fromI=NumberConstant ('..' toI=NumberConstant)?;
 
@@ -74,14 +74,13 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
     UnaryOperator:   '-' | '~';
     
 
-    Base:  AppliedSymbol | Variable | NumberConstant | StringConstant | Brackets;
+    Base:  AppliedSymbol | Variable | NumberConstant | Brackets;
 
       AppliedSymbol: s=Symbol args=Arguments;
         Arguments: '(' sub_exprs*=Expression[','] ')';
-      Variable: name=ID;
+      Variable: name=/[^\d\W]\w*\b|'(\.|[^'])*'/;
       NumberConstant: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
-      StringConstant: str=STRING;
       Brackets: ('[' reading=/[^\]]*/ ']')? '(' f=Expression ')';
 
 

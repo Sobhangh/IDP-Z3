@@ -25,7 +25,7 @@ import re
 import sys
 
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
-from utils import mergeDicts
+from utils import mergeDicts, unquote
 
 from typing import List, Tuple
 
@@ -836,7 +836,7 @@ class Arguments(object):
 
 class Variable(AppliedSymbol):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
+        self.name = unquote(kwargs.pop('name'))
 
         Expression.__init__(self)
 

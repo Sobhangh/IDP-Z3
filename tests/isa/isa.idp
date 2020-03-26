@@ -1,5 +1,5 @@
 vocabulary {
-    type type constructed from {triangle, quadrilateral}
+    type type constructed from {'1tri angle', 'quadrilateral'}
     Type : type
 
 
@@ -20,10 +20,10 @@ theory {
     !t[type] st[subtype]: typeOf(st) = t <=> isa(st, t).
     !st[subtype]: isa(st, typeOf(st)).
     Type = typeOf(Subtype).
-    isa(regular_triangle, triangle).
+    isa(regular_triangle, '1tri angle').
 }
 
 structure {
-    isa = {regular_triangle, triangle; right_triangle, triangle;
+    isa = {regular_triangle, '1tri angle'; right_triangle, '1tri angle';
            rectangle, quadrilateral; square, quadrilateral}
 }

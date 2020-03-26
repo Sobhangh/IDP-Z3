@@ -44,6 +44,11 @@ def log(action):
 nl = "\r\n"
 indented = "\r\n  "
 
+def unquote(s):
+    if s[0]=="'" and s[-1]=="'":
+        return s[1:-1]
+    return s
+
 def in_list(q, ls):
     if not ls: return True # e.g. for int, real
     if len(ls)==1: return q == ls[0]

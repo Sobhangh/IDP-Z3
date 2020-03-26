@@ -27,7 +27,7 @@ from textx import metamodel_from_file
 from z3 import IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists, Z3Exception, \
     Sum, If, Function, FreshConst, Implies, EnumSort
 
-from utils import applyTo, log, itertools, in_list, nl, mergeDicts
+from utils import applyTo, log, itertools, in_list, nl, mergeDicts, unquote
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
@@ -139,6 +139,8 @@ class ConstructedTypeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
+        for c in self.constructors:
+            c.name = unquote(c.name)
         self.is_var = False
         self.range = self.constructors # functional constructors are expanded
         self.translated = None
