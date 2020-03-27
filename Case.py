@@ -104,6 +104,10 @@ class Case:
         if self.idp.goal.decl is not None:
             symbols.update({self.idp.goal.decl.name : self.idp.goal.decl})
 
+        # remove irrelevant domain conditions
+        self.simplified = list(filter(lambda e: e.if_symbol is None or e.if_symbol in symbols
+                                     , self.simplified))
+
         # determine relevant subtences
         relevant_subtences = mergeDicts( e.subtences() for e in constraints )
         relevant_subtences.update(mergeDicts(s.instances for s in symbols.values()))

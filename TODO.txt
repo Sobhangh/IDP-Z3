@@ -1,5 +1,4 @@
 To do:
-    Relevance: definitions
     Explanations: inject values in message
     Float ranges
     avoid duplication of equalities in user interface (enumerated types)

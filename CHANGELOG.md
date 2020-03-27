@@ -7,7 +7,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### API
+* support of relevance for theories with definitions
 * fixed error in substraction (0-x incorrectly computed)
+* Issue #4: support for string literals as Constructors
+
+### GUI
+* fix handling of environmental consequences
+
 
 ## [0.4.0] - 2020-03-16
 ### API

@@ -50,6 +50,7 @@ class Expression(object):
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self.translated = None            # the Z3 equivalent
         self._reified = None
+        self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self._subtences = None            # memoization of .subtences()
         self.justification = None         # Expression
         # .normal : only set in .instances

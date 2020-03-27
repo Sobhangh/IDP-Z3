@@ -212,6 +212,10 @@ And(Not(Sides < 1),
     Not(Sides < 3),
     Not(Sides < 4))
 
+And(Sides >= 3, Sides <= 4)
+
+And(Vertices >= 3, Vertices <= 4)
+
 And(Not(Large(1)),
     Not(Large(2)),
     Not(Large(3)),
@@ -243,6 +247,8 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -282,6 +288,8 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -296,6 +304,8 @@ Universals:
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
 Consequences:
   ~Large(1)
   ~Type = triangle
@@ -468,7 +478,14 @@ Irrelevant:
                                                                  'status': 'UNIVERSAL',
                                                                  'typ': 'Bool',
                                                                  'value': True}},
- 'Sides': {'Sides': {'environmental': False,
+ 'Sides': {'3 ≤ Sides ≤ 4': {'environmental': False,
+                             'normal': False,
+                             'reading': 'Possible values for Sides',
+                             'relevant': True,
+                             'status': 'UNIVERSAL',
+                             'typ': 'Bool',
+                             'value': True},
+           'Sides': {'environmental': False,
                      'normal': True,
                      'reading': 'Sides',
                      'relevant': True,
@@ -569,7 +586,14 @@ Irrelevant:
                               'status': 'CONSEQUENCE',
                               'typ': 'Bool',
                               'value': False}},
- 'Vertices': {'Vertices': {'environmental': False,
+ 'Vertices': {'3 ≤ Vertices ≤ 4': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Possible values for Vertices',
+                                   'relevant': True,
+                                   'status': 'UNIVERSAL',
+                                   'typ': 'Bool',
+                                   'value': True},
+              'Vertices': {'environmental': False,
                            'normal': True,
                            'reading': 'Vertices',
                            'relevant': True,

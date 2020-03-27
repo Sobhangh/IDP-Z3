@@ -59,6 +59,10 @@ And(Or(Length(1) == Length(1), Sides < 1),
 
 (Subtype == rectangle) == (Sides == 4)
 
+And(Sides >= 3, Sides <= 4)
+
+And(Vertices >= 3, Vertices <= 4)
+
 -- subtences ------------------------------------
 Sides = 3
 Subtype = rectangle
@@ -66,6 +70,8 @@ Length(3) = Length(1)
 Equilateral
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -95,6 +101,8 @@ Subtype = rectangle
 Length(3) = Length(1)
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -103,6 +111,8 @@ Definitions:
   
 Universals:  
   Sides = 3
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
 Consequences:
   ~Subtype = rectangle
   ~Sides = 4
@@ -241,7 +251,14 @@ Irrelevant:
                              'status': 'UNKNOWN',
                              'typ': 'Real',
                              'value': ''}},
- 'Sides': {'Sides': {'environmental': False,
+ 'Sides': {'3 ≤ Sides ≤ 4': {'environmental': False,
+                             'normal': False,
+                             'reading': 'Possible values for Sides',
+                             'relevant': True,
+                             'status': 'UNIVERSAL',
+                             'typ': 'Bool',
+                             'value': True},
+           'Sides': {'environmental': False,
                      'normal': True,
                      'reading': 'Sides',
                      'relevant': True,
@@ -293,10 +310,17 @@ Irrelevant:
                    'typ': 'type',
                    'value': '',
                    'values': ['triangle', 'quadrilateral']}},
- 'Vertices': {'Vertices': {'environmental': False,
+ 'Vertices': {'3 ≤ Vertices ≤ 4': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Possible values for Vertices',
+                                   'relevant': True,
+                                   'status': 'UNIVERSAL',
+                                   'typ': 'Bool',
+                                   'value': True},
+              'Vertices': {'environmental': False,
                            'normal': True,
                            'reading': 'Vertices',
-                           'relevant': False,
+                           'relevant': True,
                            'status': 'UNKNOWN',
                            'typ': 'Int',
                            'value': '',

@@ -213,7 +213,7 @@ class RangeDeclaration(object):
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
-                e = AComparison.make('=', [x.fromI, var])
+                e = AComparison.make('=', [var, x.fromI])
             else:
                 e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
@@ -238,6 +238,7 @@ class SymbolDeclaration(object):
             self.out = Sort(name='bool')
 
         self.is_var = True # unless interpreted later
+        self.typeConstraints = []
         self.translated = None
 
         self.type = None # a declaration object
@@ -279,6 +280,14 @@ class SymbolDeclaration(object):
                     expr.annotate(symbol_decls, {})
                     expr.normal = True
                     self.instances[expr.code] = expr
+
+        if self.out.decl.name != 'bool' and self.range:
+            for inst in self.instances.values():
+                domain = self.type.check_bounds(inst)
+                if domain is not None:
+                    domain.if_symbol = self.name
+                    domain.reading = "Possible values for " + str(inst)
+                    self.typeConstraints.append(domain)
         return self
 
     def translate(self, idp=None):
@@ -351,6 +360,11 @@ class Theory(object):
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
         
+
+        for decl in self.symbol_decls.values():
+            if type(decl) == SymbolDeclaration:
+                self.constraints.extend(decl.typeConstraints)
+
         self.subtences = {}
         for e in self.constraints:
             self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
