@@ -150,7 +150,7 @@ def explain(case, symbol, value):
         
         if unsatcore:
             for a1 in case.given.values():
-                for a2 in s.unsat_core():
+                for a2 in unsatcore:
                     if type(ps[a2]) == Assignment and a1 == ps[a2]: #TODO we might miss some equality
                         out.addAtom(a1.sentence, a1.truth, a1.status)
             out.m["*laws*"] = []

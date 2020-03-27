@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### GUI
 * fix handling of environmental consequences
+* avoid duplicates in explain
 
 
 ## [0.4.0] - 2020-03-16
