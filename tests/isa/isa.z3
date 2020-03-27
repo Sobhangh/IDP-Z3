@@ -68,14 +68,14 @@ Type = typeOf(Subtype)
 -- GUILines ------------------------------------
 Type
 Subtype
-asi('1tri angle',regular_triangle)
-asi('1tri angle',right_triangle)
-asi('1tri angle',rectangle)
-asi('1tri angle',square)
-asi('quadrilateral',regular_triangle)
-asi('quadrilateral',right_triangle)
-asi('quadrilateral',rectangle)
-asi('quadrilateral',square)
+asi(1tri angle,regular_triangle)
+asi(1tri angle,right_triangle)
+asi(1tri angle,rectangle)
+asi(1tri angle,square)
+asi(quadrilateral,regular_triangle)
+asi(quadrilateral,right_triangle)
+asi(quadrilateral,rectangle)
+asi(quadrilateral,square)
 typeOf(regular_triangle)
 typeOf(right_triangle)
 typeOf(rectangle)
@@ -96,14 +96,14 @@ Universals:
   ∀st[subtype] : isa(st,typeOf(st))
   Type = typeOf(Subtype)
 Consequences:
-  asi('1tri angle',regular_triangle)
-  asi('1tri angle',right_triangle)
-  ~asi('1tri angle',rectangle)
-  ~asi('1tri angle',square)
-  ~asi('quadrilateral',regular_triangle)
-  ~asi('quadrilateral',right_triangle)
-  asi('quadrilateral',rectangle)
-  asi('quadrilateral',square)
+  asi(1tri angle,regular_triangle)
+  asi(1tri angle,right_triangle)
+  ~asi(1tri angle,rectangle)
+  ~asi(1tri angle,square)
+  ~asi(quadrilateral,regular_triangle)
+  ~asi(quadrilateral,right_triangle)
+  asi(quadrilateral,rectangle)
+  asi(quadrilateral,square)
   typeOf(regular_triangle) = 1tri angle
   typeOf(right_triangle) = 1tri angle
   typeOf(rectangle) = quadrilateral
@@ -139,62 +139,62 @@ Irrelevant:
                                      'status': 'UNIVERSAL',
                                      'typ': 'Bool',
                                      'value': True}},
- 'asi': {"asi('1tri angle',rectangle)": {'environmental': False,
-                                         'normal': True,
-                                         'reading': "asi('1tri angle',rectangle)",
-                                         'relevant': True,
-                                         'status': 'CONSEQUENCE',
-                                         'typ': 'Bool',
-                                         'value': False},
-         "asi('1tri angle',regular_triangle)": {'environmental': False,
-                                                'normal': True,
-                                                'reading': "asi('1tri angle',regular_triangle)",
-                                                'relevant': True,
-                                                'status': 'CONSEQUENCE',
-                                                'typ': 'Bool',
-                                                'value': True},
-         "asi('1tri angle',right_triangle)": {'environmental': False,
+ 'asi': {'asi(1tri angle,rectangle)': {'environmental': False,
+                                       'normal': True,
+                                       'reading': 'asi(1tri angle,rectangle)',
+                                       'relevant': True,
+                                       'status': 'CONSEQUENCE',
+                                       'typ': 'Bool',
+                                       'value': False},
+         'asi(1tri angle,regular_triangle)': {'environmental': False,
                                               'normal': True,
-                                              'reading': "asi('1tri angle',right_triangle)",
+                                              'reading': 'asi(1tri angle,regular_triangle)',
                                               'relevant': True,
                                               'status': 'CONSEQUENCE',
                                               'typ': 'Bool',
                                               'value': True},
-         "asi('1tri angle',square)": {'environmental': False,
-                                      'normal': True,
-                                      'reading': "asi('1tri angle',square)",
-                                      'relevant': True,
-                                      'status': 'CONSEQUENCE',
-                                      'typ': 'Bool',
-                                      'value': False},
-         "asi('quadrilateral',rectangle)": {'environmental': False,
+         'asi(1tri angle,right_triangle)': {'environmental': False,
                                             'normal': True,
-                                            'reading': "asi('quadrilateral',rectangle)",
+                                            'reading': 'asi(1tri angle,right_triangle)',
                                             'relevant': True,
                                             'status': 'CONSEQUENCE',
                                             'typ': 'Bool',
                                             'value': True},
-         "asi('quadrilateral',regular_triangle)": {'environmental': False,
-                                                   'normal': True,
-                                                   'reading': "asi('quadrilateral',regular_triangle)",
-                                                   'relevant': True,
-                                                   'status': 'CONSEQUENCE',
-                                                   'typ': 'Bool',
-                                                   'value': False},
-         "asi('quadrilateral',right_triangle)": {'environmental': False,
+         'asi(1tri angle,square)': {'environmental': False,
+                                    'normal': True,
+                                    'reading': 'asi(1tri angle,square)',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': False},
+         'asi(quadrilateral,rectangle)': {'environmental': False,
+                                          'normal': True,
+                                          'reading': 'asi(quadrilateral,rectangle)',
+                                          'relevant': True,
+                                          'status': 'CONSEQUENCE',
+                                          'typ': 'Bool',
+                                          'value': True},
+         'asi(quadrilateral,regular_triangle)': {'environmental': False,
                                                  'normal': True,
-                                                 'reading': "asi('quadrilateral',right_triangle)",
+                                                 'reading': 'asi(quadrilateral,regular_triangle)',
                                                  'relevant': True,
                                                  'status': 'CONSEQUENCE',
                                                  'typ': 'Bool',
                                                  'value': False},
-         "asi('quadrilateral',square)": {'environmental': False,
-                                         'normal': True,
-                                         'reading': "asi('quadrilateral',square)",
-                                         'relevant': True,
-                                         'status': 'CONSEQUENCE',
-                                         'typ': 'Bool',
-                                         'value': True},
+         'asi(quadrilateral,right_triangle)': {'environmental': False,
+                                               'normal': True,
+                                               'reading': 'asi(quadrilateral,right_triangle)',
+                                               'relevant': True,
+                                               'status': 'CONSEQUENCE',
+                                               'typ': 'Bool',
+                                               'value': False},
+         'asi(quadrilateral,square)': {'environmental': False,
+                                       'normal': True,
+                                       'reading': 'asi(quadrilateral,square)',
+                                       'relevant': True,
+                                       'status': 'CONSEQUENCE',
+                                       'typ': 'Bool',
+                                       'value': True},
          '∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)': {'environmental': False,
                                                          'normal': False,
                                                          'reading': '∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)',

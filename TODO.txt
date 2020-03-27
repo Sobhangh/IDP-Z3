@@ -1,7 +1,5 @@
 To do:
     Relevance: definitions
-        - Definition.annotate: attach interpretation to defined symbol, with brackets
-        - interpret given too!
     Explanations: inject values in message
     Float ranges
     avoid duplication of equalities in user interface (enumerated types)
@@ -58,9 +56,6 @@ other NTH (refactoring)
     - sort the operands of equality
     - AppliedSymbol is_subtence only if no Fresh_Variable !
     - Expr.sentence -> Expr.ranking ?
-    - avoid quantifiers in definitions
-    - do we need Expression.type, if we have Expression.decl ?
     - distinguish between x=1 entry and x=1 atom in output structure
-    - simplify Or, And with only one element
     - p(real) should be possible
 

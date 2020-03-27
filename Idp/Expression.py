@@ -100,7 +100,6 @@ class Expression(object):
 
         return out
 
-
     def update_exprs(self, new_expr_generator):
         return self._change(sub_exprs=list(new_expr_generator))
 
@@ -182,7 +181,7 @@ class Expression(object):
 
 class Constructor(Expression):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
+        self.name = unquote(kwargs.pop('name'))
         self.is_var = False
         self.sub_exprs = []
         self.index = None # int
