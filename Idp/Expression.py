@@ -79,7 +79,7 @@ class Expression(object):
     def as_ground(self): return None
 
 
-    def _change(self, by=None, sub_exprs=None, ops=None):
+    def _change(self, by=None, sub_exprs=None, ops=None, justification=None):
         " change expression, after copying it if really changed"
         if by is not None:
             return self.substitute(self, by)
@@ -87,11 +87,13 @@ class Expression(object):
         # return self if not changed
         changed = False
         if sub_exprs is not None:       changed |= self.sub_exprs != sub_exprs
+        if justification is not None:   changed |= self.justification != justification
         if not changed: return self
 
         out = copy.copy(self)
         if sub_exprs is not None :      out.sub_exprs = sub_exprs
         if ops       is not None :      out.operator  = ops
+        if justification is not None:   out.justification = justification
         
         # reset derived values
         out.str = sys.intern(str(out))
@@ -124,7 +126,7 @@ class Expression(object):
         else:
             out = self.update_exprs(e.substitute(e0, e1, todo, case) for e in self.sub_exprs)
             if out.justification is not None:
-                out.justification = out.justification.substitute(e0, e1, todo, case)
+                out = out._change(justification= out.justification.substitute(e0, e1, todo, case))
                 if todo is not None:
                     todo0 = out.justification.expr_to_literal(case)
                     todo.extend(todo0)
