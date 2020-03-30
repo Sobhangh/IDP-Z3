@@ -792,6 +792,7 @@ class AppliedSymbol(Expression):
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
         self.decl = q_decls[self.s.name] if self.s.name in q_decls else symbol_decls[self.s.name]
+        self.normal = True
         return self._derive()
 
     def _derive(self):

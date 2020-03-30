@@ -1,16 +1,18 @@
-Interactive_Consultant is an interactive consultant based on logic theory. It uses the Z3 SMT solver.  It is hosted at https://autoconfigparam.herokuapp.com/
+Interactive Consultant is an interactive consultant based on logic theory. It uses the Z3 SMT solver.  It is hosted at https://autoconfigparam.herokuapp.com/
 
 It is made available under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).  
 
-# Get started
 
-Installation
+# Installation
+* Install python3 on your machine, with pip3, making sure that python3 is in the PATH.
+* Use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
+* open a terminal (or command prompt) in that directory and run
 ~~~~
-sudo apt install python3-pip
 pip3 install -r requirements.txt
 ~~~~
 
-To launch the Interactive_Consultant web server, run
+# Get started
+To launch the Interactive Consultant web server, run
 ~~~~
 python3 rest.py
 ~~~~
