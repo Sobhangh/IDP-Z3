@@ -145,7 +145,8 @@ class Expression(object):
 
     def unknown_symbols(self):
         if self._unknown_symbols is None:
-            self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs)
+            self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs) \
+                if self.if_symbol is None else {}
         return self._unknown_symbols
 
     def reified(self) -> DatatypeRef:

@@ -414,10 +414,6 @@ Guarantee_Satisfied
 Additional_Security_Required
 Additional_Security_Satisfied
 Resale = Three_Or_More
-2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-2015 ≤ Certification_Date ≤ 2025
-2015 ≤ Term_Energy_Renovation ≤ 2025
-2015 ≤ Certification_Date_Sale ≤ 2025
 
 -- GUILines ------------------------------------
 Region
@@ -488,10 +484,6 @@ Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
 Use = Community_Purpose
 Resale = Three_Or_More
-2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-2015 ≤ Certification_Date ≤ 2025
-2015 ≤ Term_Energy_Renovation ≤ 2025
-2015 ≤ Certification_Date_Sale ≤ 2025
 
 -- case -------------------------------------
 Type:        
@@ -499,10 +491,7 @@ Type:
 Definitions: 
   
 Universals:  
-  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-  2015 ≤ Certification_Date ≤ 2025
-  2015 ≤ Term_Energy_Renovation ≤ 2025
-  2015 ≤ Certification_Date_Sale ≤ 2025
+  
 Consequences:
   
 Simplified:  
@@ -523,6 +512,10 @@ Simplified:
   (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
   (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Professional_Purchase)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
   Professional_Buyer ⇒ (Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More))
+  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+  2015 ≤ Certification_Date ≤ 2025
+  2015 ≤ Term_Energy_Renovation ≤ 2025
+  2015 ≤ Certification_Date_Sale ≤ 2025
   (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 4) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
 Irrelevant:  
   
@@ -568,14 +561,7 @@ Irrelevant:
                                              'relevant': True,
                                              'status': 'UNKNOWN',
                                              'typ': 'Bool'}},
- 'Certification_Date': {'2015 ≤ Certification_Date ≤ 2025': {'environmental': True,
-                                                             'normal': False,
-                                                             'reading': 'Possible values for Certification_Date',
-                                                             'relevant': True,
-                                                             'status': 'UNIVERSAL',
-                                                             'typ': 'Bool',
-                                                             'value': True},
-                        'Certification_Date': {'environmental': True,
+ 'Certification_Date': {'Certification_Date': {'environmental': True,
                                                'normal': True,
                                                'reading': 'Certification_Date',
                                                'relevant': True,
@@ -593,15 +579,7 @@ Irrelevant:
                                                           '2023',
                                                           '2024',
                                                           '2025']}},
- 'Certification_Date_Sale': {'2015 ≤ Certification_Date_Sale ≤ 2025': {'environmental': True,
-                                                                       'normal': False,
-                                                                       'reading': 'Possible values for '
-                                                                                  'Certification_Date_Sale',
-                                                                       'relevant': True,
-                                                                       'status': 'UNIVERSAL',
-                                                                       'typ': 'Bool',
-                                                                       'value': True},
-                             'Certification_Date_Sale': {'environmental': True,
+ 'Certification_Date_Sale': {'Certification_Date_Sale': {'environmental': True,
                                                          'normal': True,
                                                          'reading': 'Certification_Date_Sale',
                                                          'relevant': True,
@@ -932,16 +910,7 @@ Irrelevant:
                                                         'relevant': True,
                                                         'status': 'UNKNOWN',
                                                         'typ': 'Bool'}},
- 'Start_Dt_Dwelling_For_Social_Rent': {'2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025': {'environmental': True,
-                                                                                           'normal': False,
-                                                                                           'reading': 'Possible values '
-                                                                                                      'for '
-                                                                                                      'Start_Dt_Dwelling_For_Social_Rent',
-                                                                                           'relevant': True,
-                                                                                           'status': 'UNIVERSAL',
-                                                                                           'typ': 'Bool',
-                                                                                           'value': True},
-                                       'Start_Dt_Dwelling_For_Social_Rent': {'environmental': True,
+ 'Start_Dt_Dwelling_For_Social_Rent': {'Start_Dt_Dwelling_For_Social_Rent': {'environmental': True,
                                                                              'normal': True,
                                                                              'reading': 'Start_Dt_Dwelling_For_Social_Rent',
                                                                              'relevant': True,
@@ -1019,15 +988,7 @@ Irrelevant:
                      'relevant': True,
                      'status': 'UNKNOWN',
                      'typ': 'Bool'}},
- 'Term_Energy_Renovation': {'2015 ≤ Term_Energy_Renovation ≤ 2025': {'environmental': True,
-                                                                     'normal': False,
-                                                                     'reading': 'Possible values for '
-                                                                                'Term_Energy_Renovation',
-                                                                     'relevant': True,
-                                                                     'status': 'UNIVERSAL',
-                                                                     'typ': 'Bool',
-                                                                     'value': True},
-                            'Term_Energy_Renovation': {'environmental': True,
+ 'Term_Energy_Renovation': {'Term_Energy_Renovation': {'environmental': True,
                                                        'normal': True,
                                                        'reading': 'Term_Energy_Renovation',
                                                        'relevant': True,

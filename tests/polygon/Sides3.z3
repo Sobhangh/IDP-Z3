@@ -278,8 +278,6 @@ Surface = (-(1))
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
-3 ≤ Sides ≤ 4
-3 ≤ Vertices ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -339,8 +337,6 @@ Surface = (-(1))
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
-3 ≤ Sides ≤ 4
-3 ≤ Vertices ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -359,8 +355,6 @@ Universals:
   0 ≤ Base
   0 ≤ Height
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
 Consequences:
   Type = triangle
   ~Type = quadrilateral
@@ -652,14 +646,7 @@ Irrelevant:
                                                                  'status': 'UNIVERSAL',
                                                                  'typ': 'Bool',
                                                                  'value': True}},
- 'Sides': {'3 ≤ Sides ≤ 4': {'environmental': False,
-                             'normal': False,
-                             'reading': 'Possible values for Sides',
-                             'relevant': True,
-                             'status': 'UNIVERSAL',
-                             'typ': 'Bool',
-                             'value': True},
-           'Sides': {'environmental': False,
+ 'Sides': {'Sides': {'environmental': False,
                      'normal': True,
                      'reading': 'Sides',
                      'relevant': True,
@@ -777,14 +764,7 @@ Irrelevant:
                               'status': 'CONSEQUENCE',
                               'typ': 'Bool',
                               'value': True}},
- 'Vertices': {'3 ≤ Vertices ≤ 4': {'environmental': False,
-                                   'normal': False,
-                                   'reading': 'Possible values for Vertices',
-                                   'relevant': True,
-                                   'status': 'UNIVERSAL',
-                                   'typ': 'Bool',
-                                   'value': True},
-              'Vertices': {'environmental': False,
+ 'Vertices': {'Vertices': {'environmental': False,
                            'normal': True,
                            'reading': 'Vertices',
                            'relevant': True,
