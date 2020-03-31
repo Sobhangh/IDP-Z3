@@ -130,6 +130,7 @@ def explain(case, symbol, value):
             to_explain = Not(to_explain)
 
         s = Solver()
+        s.set(':core.minimize', True)
         (reify, unreify) = reifier(case.GUILines, s)
         def r1(a): return reify[a] if a in reify else a
         def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
