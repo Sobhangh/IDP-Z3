@@ -403,7 +403,7 @@ class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
         self.clark = None # {Symbol: Transformed Rule}
-        self.q_decls = {} # {Symbol: {String: Fresh_Variable}} Fresh variables for arguments & result
+        self.q_vars = {} # {Symbol: {String: Fresh_Variable}} Fresh variables for arguments & result
         self.translated = None
 
     def __str__(self):
@@ -415,22 +415,22 @@ class Definition(object):
             out.append(repr(rule))
         return nl.join(out)
 
-    def annotate(self, theory, symbol_decls, q_decls):
-        self.rules = [r.annotate(symbol_decls, q_decls) for r in self.rules]
+    def annotate(self, theory, symbol_decls, q_vars):
+        self.rules = [r.annotate(symbol_decls, q_vars) for r in self.rules]
 
         # create common variables, and rename vars in rule
         self.clark = {}
         for r in self.rules:
             symbol = symbol_decls[r.symbol.name]
-            if symbol not in self.q_decls:
+            if symbol not in self.q_vars:
                 name = f"${symbol.name}$"
                 q_v = { f"${symbol.name}!{str(i)}$":
                     sort.fresh(f"${symbol.name}!{str(i)}$", symbol_decls) \
                         for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
                     q_v[name] = symbol.out.fresh(name, symbol_decls)
-                self.q_decls[symbol] = q_v
-            new_rule = r.rename_args(self.q_decls[symbol])
+                self.q_vars[symbol] = q_v
+            new_rule = r.rename_args(self.q_vars[symbol])
             self.clark.setdefault(symbol, []).append(new_rule)
 
         # join the bodies of rules
@@ -472,7 +472,7 @@ class Rule(object):
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_decls = {} # {string: Fresh_Variable}
+        self.q_vars = {} # {string: Fresh_Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
             self.args.append(self.out)
@@ -485,12 +485,12 @@ class Rule(object):
                  f"{self.symbol}({','.join(str(e) for e in self.args)}) "
                  f"⇔{str(self.body)}" )
 
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, symbol_decls, q_vars):
         # create head variables
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_decls = {v:s.fresh(v, symbol_decls) \
+        self.q_vars = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
-        q_v = {**q_decls, **self.q_decls} # merge
+        q_v = {**q_vars, **self.q_vars} # merge
 
         self.symbol = self.symbol.annotate(symbol_decls, q_v)
         self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
@@ -527,12 +527,12 @@ class Rule(object):
             if str(var) in subst:
                 pass
             else:
-                self.body = AQuantification.make('∃', {var: self.q_decls[var]}, self.body)
+                self.body = AQuantification.make('∃', {var: self.q_vars[var]}, self.body)
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
         self.sorts = [] # ignored
-        self.q_decls = new_vars
+        self.q_vars = new_vars
         return self
 
     def compute(self, theory):
@@ -547,7 +547,7 @@ class Rule(object):
         else:
             expr = AppliedSymbol.make(self.symbol, self.args)
         expr = AEquivalence.make('⇔', [expr, self.body])
-        expr = AQuantification.make('∀', {**self.q_decls}, expr)
+        expr = AQuantification.make('∀', {**self.q_vars}, expr)
         self.expanded = expr.expand_quantifiers(theory)
         
         # interpret structures

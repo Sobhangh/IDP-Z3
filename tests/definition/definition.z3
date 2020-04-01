@@ -43,6 +43,9 @@ Irrelevant:
   
 
 
+-- meta -------------------------------------
+{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'codeOf', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}]}
+
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'codeOf': {'codeOf(blue)': {'environmental': False,

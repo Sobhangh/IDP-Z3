@@ -193,7 +193,7 @@ class Constructor(Expression):
     
     def __str__(self): return self.name
     def str_   (self): return self.name
-    def annotate(self, symbol_decls, q_decls): return self
+    def annotate(self, symbol_decls, q_vars): return self
     def as_ground(self): return self.index
     def translate(self): return self.translated
 
@@ -225,8 +225,8 @@ class IfExpr(Expression):
                  f" then {self.sub_exprs[IfExpr.THEN].str}"
                  f" else {self.sub_exprs[IfExpr.ELSE].str}" )
 
-    def annotate(self, symbol_decls, q_decls):
-        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
+    def annotate(self, symbol_decls, q_vars):
+        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
         #TODO verify consistency
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
@@ -273,7 +273,7 @@ class AQuantification(Expression):
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.q_decls = {} # dict[String, Fresh_Variable]
+        self.q_vars = {} # dict[String, Fresh_Variable]
         self.type = 'bool'
         self.is_subtence = True
 
@@ -281,7 +281,7 @@ class AQuantification(Expression):
     def make(cls, q, decls, f):
         "make and annotate a quantified formula"
         out = cls(q=q, vars=list(decls.values()), sorts=[], f=f)
-        out.q_decls = decls
+        out.q_vars = decls
         return out
 
 
@@ -294,11 +294,11 @@ class AQuantification(Expression):
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, symbol_decls, q_vars):
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_decls = {v:s.fresh(v, symbol_decls) \
+        self.q_vars = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
-        q_v = {**q_decls, **self.q_decls} # merge
+        q_v = {**q_vars, **self.q_vars} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         return self
 
@@ -306,7 +306,7 @@ class AQuantification(Expression):
         forms = [self.sub_exprs[0].expand_quantifiers(theory)]
         self.vars = []
         self.sorts = [] # not used
-        for name, var in self.q_decls.items():
+        for name, var in self.q_vars.items():
             if var.decl.range:
                 forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
@@ -321,7 +321,7 @@ class AQuantification(Expression):
 
     def translate(self):
         if self.translated is None:
-            for v in self.q_decls.values():
+            for v in self.q_vars.values():
                 v.translate()
             if not self.vars:
                 self.translated = self.sub_exprs[0].translate()
@@ -417,8 +417,8 @@ class BinaryOperator(Expression):
             temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
         return temp
 
-    def annotate(self, symbol_decls, q_decls):
-        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
+    def annotate(self, symbol_decls, q_vars):
+        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
         return self._derive()
     
     def _derive(self):
@@ -487,11 +487,11 @@ class AEquivalence(BinaryOperator):
         return self._change(sub_exprs=exprs)
     
 class ARImplication(BinaryOperator):
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, symbol_decls, q_vars):
         # reverse the implication
         self.sub_exprs.reverse()
         out = AImplication(sub_exprs=self.sub_exprs, operator=['⇒']*len(self.operator))
-        return out.annotate(symbol_decls, q_decls)
+        return out.annotate(symbol_decls, q_vars)
 
 class ADisjunction(BinaryOperator):
 
@@ -534,12 +534,12 @@ class AConjunction(BinaryOperator):
         return self._change(sub_exprs=exprs)
 
 class AComparison(BinaryOperator):
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, symbol_decls, q_vars):
         # a≠b --> Not(a=b)
         if len(self.sub_exprs) == 2 and self.operator == ['≠']:
             out = AUnary.make('~', AComparison(sub_exprs=self.sub_exprs, operator='='))
-            return out.annotate(symbol_decls, q_decls)
-        return super().annotate(symbol_decls, q_decls)
+            return out.annotate(symbol_decls, q_vars)
+        return super().annotate(symbol_decls, q_vars)
 
     def update_exprs(self, new_expr_generator):
         operands = list(new_expr_generator)
@@ -653,8 +653,8 @@ class AUnary(Expression):
     def str_(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
-    def annotate(self, symbol_decls, q_decls):
-        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
+    def annotate(self, symbol_decls, q_vars):
+        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
         self.type = self.sub_exprs[0].type
         return self._derive()
 
@@ -697,7 +697,7 @@ class AAggregate(Expression):
         self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
         super().__init__()
 
-        self.q_decls = {}
+        self.q_vars = {}
         self.is_subtence = False
 
         if self.aggtype == "sum" and self.out is None:
@@ -730,11 +730,11 @@ class AAggregate(Expression):
               )
         return out
 
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, symbol_decls, q_vars):
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_decls = {v:s.fresh(v, symbol_decls) \
+        self.q_vars = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
-        q_v = {**q_decls, **self.q_decls} # merge
+        q_v = {**q_vars, **self.q_vars} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         return self
@@ -744,7 +744,7 @@ class AAggregate(Expression):
                     , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                     , else_f=NumberConstant(number='0'))
         forms = [form.expand_quantifiers(theory)]
-        for name, var in self.q_decls.items():
+        for name, var in self.q_vars.items():
             if var.decl.range:
                 forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
             else:
@@ -754,7 +754,7 @@ class AAggregate(Expression):
 
     def translate(self):
         if self.translated is None:
-            for v in self.q_decls.values():
+            for v in self.q_vars.values():
                 v.translate()
             self.translated = Sum([f.translate() for f in self.sub_exprs])
         return self.translated
@@ -787,9 +787,9 @@ class AppliedSymbol(Expression):
     def str_(self):
         return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
 
-    def annotate(self, symbol_decls, q_decls):
-        self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
-        self.decl = q_decls[self.s.name].decl if self.s.name in q_decls else symbol_decls[self.s.name]
+    def annotate(self, symbol_decls, q_vars):
+        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
+        self.decl = q_vars[self.s.name].decl if self.s.name in q_vars else symbol_decls[self.s.name]
         self.normal = True
         return self._derive()
 
@@ -847,11 +847,11 @@ class Variable(AppliedSymbol):
     def __str__(self): return self.name
     def str_   (self): return self.name
 
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, symbol_decls, q_vars):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
             return symbol_decls[self.name]
-        if self.name in q_decls:
-            self.decl = q_decls[self.name].decl
+        if self.name in q_vars:
+            self.decl = q_vars[self.name].decl
             self.type = self.decl.type
             self.is_subtence = False
         else:
@@ -887,7 +887,7 @@ class Fresh_Variable(Expression):
     def __str__(self): return self.name
     def str_   (self): return self.name
 
-    def annotate(self, symbol_decls, q_decls):
+    def annotate(self, symbol_decls, q_vars):
         return self
 
     def translate(self):
@@ -915,7 +915,7 @@ class NumberConstant(Expression):
 
     def as_ground(self): return self.translated
 
-    def annotate(self, symbol_decls, q_decls): return self
+    def annotate(self, symbol_decls, q_vars): return self
 
     def translate(self):
         return self.translated
@@ -945,8 +945,8 @@ class Brackets(Expression):
     def as_ground(self): 
         return self.sub_exprs[0].as_ground()
 
-    def annotate(self, symbol_decls, q_decls):
-        self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_decls)]
+    def annotate(self, symbol_decls, q_vars):
+        self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_vars)]
         self.type = self.sub_exprs[0].type
         if self.annotations['reading']:
             self.sub_exprs[0].annotations = self.annotations

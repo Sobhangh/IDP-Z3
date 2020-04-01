@@ -48,6 +48,9 @@ Irrelevant:
   
 
 
+-- meta -------------------------------------
+{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'Prime', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}]}
+
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Prime': {'Prime(1)': {'environmental': False,

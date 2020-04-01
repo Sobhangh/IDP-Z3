@@ -50,6 +50,9 @@ Irrelevant:
   
 
 
+-- meta -------------------------------------
+{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'p', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'q', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 's', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'x', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}]}
+
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'p': {'p': {'environmental': False,

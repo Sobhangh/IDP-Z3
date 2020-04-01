@@ -45,6 +45,9 @@ Irrelevant:
   
 
 
+-- meta -------------------------------------
+{'title': 'Interactive Consultant', 'symbols': [{'idpname': 't', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 't0', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 't1', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}]}
+
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  't': {'t': {'environmental': False,

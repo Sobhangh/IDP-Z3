@@ -43,6 +43,9 @@ Irrelevant:
   
 
 
+-- meta -------------------------------------
+{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'LipLen', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'JacketDesign', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}]}
+
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'JacketDesign': {'JacketDesign': {'environmental': False,

@@ -33,10 +33,8 @@ def metaJSON(idp):
     "response to meta request"
     symbols = []
     for i in idp.unknown_symbols().values():
-        symbol_type = "function"
-        if type(i.translated) == BoolRef:
-            symbol_type = "proposition"
         typ = i.out.name
+        symbol_type = "proposition" if typ == 'bool' and i.sorts==[] else "function"
         symbols.append({
             "idpname": str(i.name),
             "type": symbol_type,

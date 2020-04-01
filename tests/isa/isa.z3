@@ -114,6 +114,9 @@ Irrelevant:
   
 
 
+-- meta -------------------------------------
+{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'Type', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'Subtype', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'asi', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'typeOf', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}]}
+
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Subtype': {'Subtype': {'environmental': False,
