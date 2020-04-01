@@ -1,4 +1,4 @@
-Interactive Consultant is an interactive consultant based on logic theory. It is hosted at https://interactiveconsultant.herokuapp.com/
+Interactive Consultant is an interactive consultant based on logic theory. It is hosted at https://autoconfigparam.herokuapp.com/
 Here is a [video tutorial](https://drive.google.com/open?id=1hZswGXjEK_mIyQVK5NeRhusmWkRFUo90).
 
 It uses the Z3 SMT solver.  It is made available under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).  
@@ -37,7 +37,7 @@ For development of autoconfig3,
 * verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
 * open your browser at http://localhost:4201
 
-To update interactiveconsultant.herokuapp.com: 
+To update autoconfigparam.herokuapp.com: 
 * `heroku login`
-* `heroku git:remote -a interactiveconsultant`
+* `heroku git:remote -a autoconfigparam`
 * `git push heroku master`
