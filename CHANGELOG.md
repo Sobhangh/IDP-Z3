@@ -6,10 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [Unreleased]
+
+### API
+
+### GUI
+
+
+## [0.4.1] - 2020-04-01
 ### API
 * support of relevance for theories with definitions
 * fixed error in substraction (0-x incorrectly computed)
 * Issue #4: support for string literals as Constructors
+* use minimal unsat-core for explain
+* now using python 3.8
 
 ### GUI
 * fix handling of environmental consequences
