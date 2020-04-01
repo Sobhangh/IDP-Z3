@@ -19,7 +19,7 @@ Vocabulary: 'vocabulary' 'environment'? '{' (declarations=Declaration)* '}';
     RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
       RangeElement: fromI=NumberConstant ('..' toI=NumberConstant)?;
 
-    SymbolDeclaration: name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
+    SymbolDeclaration: annotations=Annotations name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
       Sort: name=ID;
       Symbol: name=ID;
 

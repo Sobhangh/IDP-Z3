@@ -243,6 +243,9 @@ class RangeDeclaration(object):
 
 class SymbolDeclaration(object):
     def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
+        if self.annotations is not None:
+            self.annotations = self.annotations.annotations
         self.name = sys.intern(kwargs.pop('name').name) # a string, not a Symbol
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
@@ -331,7 +334,7 @@ class Sort(object):
         self.decl = symbol_decls[self.name]
 
     def fresh(self, name, symbol_decls):
-        decl = SymbolDeclaration(name=Symbol(name=name), sorts=[], out=self)
+        decl = SymbolDeclaration(annotations=Annotations(annotations=[]), name=Symbol(name=name), sorts=[], out=self)
         decl.annotate(symbol_decls, False)
         return Fresh_Variable(name, decl)
 
@@ -400,7 +403,7 @@ class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
         self.clark = None # {Symbol: Transformed Rule}
-        self.q_decls = {} # {Symbol: {Variable: SymbolDeclaration}} Fresh variables for arguments & result
+        self.q_decls = {} # {Symbol: {String: Fresh_Variable}} Fresh variables for arguments & result
         self.translated = None
 
     def __str__(self):
@@ -469,7 +472,7 @@ class Rule(object):
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_decls = {}
+        self.q_decls = {} # {string: Fresh_Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
             self.args.append(self.out)

@@ -273,7 +273,7 @@ class AQuantification(Expression):
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.q_decls = {}
+        self.q_decls = {} # dict[String, Fresh_Variable]
         self.type = 'bool'
         self.is_subtence = True
 
@@ -789,7 +789,7 @@ class AppliedSymbol(Expression):
 
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [e.annotate(symbol_decls, q_decls) for e in self.sub_exprs]
-        self.decl = q_decls[self.s.name] if self.s.name in q_decls else symbol_decls[self.s.name]
+        self.decl = q_decls[self.s.name].decl if self.s.name in q_decls else symbol_decls[self.s.name]
         self.normal = True
         return self._derive()
 
@@ -851,7 +851,7 @@ class Variable(AppliedSymbol):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
             return symbol_decls[self.name]
         if self.name in q_decls:
-            self.decl = q_decls[self.name]
+            self.decl = q_decls[self.name].decl
             self.type = self.decl.type
             self.is_subtence = False
         else:
