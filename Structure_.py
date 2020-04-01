@@ -69,7 +69,7 @@ class Assignment(object):
         return ("" if self.truth else \
                 "? " if self.truth is None \
                 else "Not ") \
-             + self.sentence.reading
+             + self.sentence.annotations['reading']
 
     def as_substitution(self, case) -> Tuple[Optional[Expression], Optional[Expression]]:
         if self.truth is not None:
@@ -129,7 +129,7 @@ class Equality(Expression):
             self.code = sys.intern(variable.code)
             self.translated = variable.translated
         self.str = self.code
-        self.reading = self.code #TODO find original code (parenthesis !)
+        self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
 
     def __str__(self): return self.code
 
@@ -228,7 +228,7 @@ def model_to_json(case, s, reify):
                     if atom.type == 'bool':
                         if not (is_true(value) or is_false(value)):
                             #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
-                            print("*** ", atom.reading, " is not defined, and assumed false")
+                            print("*** ", atom.annotations['reading'], " is not defined, and assumed false")
                         d2['value']  = is_true(value)
                     else: #TODO check that value is numeric ?
                         try:
@@ -271,7 +271,7 @@ class Structure_(object):
                         else:
                             symbol["status"] = "UNKNOWN" #TODO
                             symbol["relevant"] = True # unused symbol instance (Large(1))
-                        symbol['reading'] = atom.reading
+                        symbol['reading'] = atom.annotations['reading']
                         symbol['normal'] = hasattr(atom, 'normal')
                         symbol['environmental'] = atom.has_environmental(True)
                         s.setdefault(key, symbol)
@@ -313,6 +313,6 @@ class Structure_(object):
                         s[key]["value"] = truth
                     else:
                         s[key]["unknown"] = True
-                    s[key]['reading'] = atom.reading
+                    s[key]['reading'] = atom.annotations['reading']
                     #s[key]["status"] = status.name # for a click on Sides=3
 

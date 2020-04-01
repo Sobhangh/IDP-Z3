@@ -92,6 +92,18 @@ class Idp(object):
 
 ################################ Vocabulary  ###############################
 
+class Annotations(object):
+    def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
+
+        def pair(s):
+            p = s.split(':',1)
+            if len(p) == 2:
+                return (p[0], p[1])
+            else:
+                return ('reading', p[0])
+
+        self.annotations = dict((pair(t) for t in self.annotations))
 
 class Vocabulary(object):
     def __init__(self, **kwargs):
@@ -286,7 +298,7 @@ class SymbolDeclaration(object):
                 domain = self.type.check_bounds(inst)
                 if domain is not None:
                     domain.if_symbol = self.name
-                    domain.reading = "Possible values for " + str(inst)
+                    domain.annotations['reading'] = "Possible values for " + str(inst)
                     self.typeConstraints.append(domain)
         return self
 
@@ -445,7 +457,7 @@ class Definition(object):
 
 class Rule(object):
     def __init__(self, **kwargs):
-        self.reading = kwargs.pop('reading')
+        self.annotations = kwargs.pop('annotations')
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.symbol = kwargs.pop('symbol')
@@ -453,6 +465,8 @@ class Rule(object):
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
         self.expanded = None # Expression
+
+        self.annotations = self.annotations.annotations if self.annotations else {}
 
         assert len(self.vars) == len(self.sorts), "Internal error"
         self.q_decls = {}
@@ -700,7 +714,7 @@ class View(object):
 dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True, classes=
-        [ Idp,
+        [ Idp, Annotations,
           Vocabulary, Decision, ConstructedTypeDeclaration, Constructor, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
           Theory, Definition, Rule, IfExpr, AQuantification,
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,

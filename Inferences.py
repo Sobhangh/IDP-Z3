@@ -159,7 +159,7 @@ def explain(case, symbol, value):
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.translated) == str(ps[a2]):
-                        out.m["*laws*"].append(a1.reading)
+                        out.m["*laws*"].append(a1.annotations['reading'])
 
     return out.m
 

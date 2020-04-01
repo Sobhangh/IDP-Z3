@@ -43,7 +43,7 @@ class Expression(object):
     def __init__(self):
         self.code = sys.intern(self.str_())# normalized idp code, before transformations
         self.str = self.code              # memoization of str()
-        self.reading = self.code          # English reading
+        self.annotations = {'reading': self.code} # dict(String, String)
         self.is_subtence = None           # True if sub-sentence in original code
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
@@ -112,10 +112,7 @@ class Expression(object):
             if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
                 return e1 # no need to have brackets
             # replace by new Brackets node, to keep annotations
-            out = Brackets(f=e1, reading=self.reading) # e1 is not copied !
-            # alternative:
-            # out = copy.copy(e1)
-            # out.reading = self.reading
+            out = Brackets(f=e1, annotations=self.annotations) # e1 is not copied !
 
             # copy initial annotation
             out.code = self.code
@@ -392,7 +389,7 @@ class BinaryOperator(Expression):
         for o in operands:
             if type(o) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets, AComparison]:
                 # add () around operands, to avoid ambiguity in str()
-                o = Brackets(f=o, reading='')
+                o = Brackets(f=o, annotations={'reading': None})
             operands1.append(o)
         out = (cls)(sub_exprs=operands1, operator=ops)
         return out._derive().simplify1()
@@ -929,11 +926,16 @@ ONE  = NumberConstant(number='1')
 class Brackets(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        reading = kwargs.pop('reading')
+        annotations = kwargs.pop('annotations')
         self.sub_exprs = [self.f]
 
         super().__init__()
-        self.reading = reading
+        if type(annotations) == dict:
+            self.annotations = annotations
+        elif annotations is None:
+            self.annotations['reading'] = None
+        else: # Annotations instance
+            self.annotations = annotations.annotations
 
         self.is_subtence = False
 
@@ -946,8 +948,8 @@ class Brackets(Expression):
     def annotate(self, symbol_decls, q_decls):
         self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_decls)]
         self.type = self.sub_exprs[0].type
-        if self.reading:
-            self.sub_exprs[0].reading = self.reading
+        if self.annotations['reading']:
+            self.sub_exprs[0].annotations = self.annotations
         return self
 
     def update_exprs(self, new_expr_generator):
