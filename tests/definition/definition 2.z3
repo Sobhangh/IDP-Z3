@@ -51,7 +51,9 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'codeOf', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'c', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}]}
+{'symbols': [{'idpname': 'codeOf', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
+             {'idpname': 'c', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},

@@ -44,7 +44,13 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'LipLen', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'JacketDesign', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}]}
+{'symbols': [{'idpname': 'LipLen', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': 'JacketDesign',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},

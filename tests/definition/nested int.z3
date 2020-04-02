@@ -146,7 +146,9 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'same', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'negated', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}]}
+{'symbols': [{'idpname': 'same', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
+             {'idpname': 'negated', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},

@@ -51,7 +51,11 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'p', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'q', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 's', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'x', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}]}
+{'symbols': [{'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
+             {'idpname': 'q', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
+             {'idpname': 's', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
+             {'idpname': 'x', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},

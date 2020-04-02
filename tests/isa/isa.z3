@@ -13,6 +13,10 @@ vocabulary {
     Subtype : subtype
 
     isa(subtype, type)
+
+    [ASI]
+        [short:this is a short info]
+        [long:long, this is a long info]
     asi(type, subtype)
     typeOf(subtype): type
 }
@@ -115,7 +119,18 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'Type', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'Subtype', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'asi', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}, {'idpname': 'typeOf', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'normal'}]}
+{'symbols': [{'idpname': 'Type', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': 'Subtype', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'guiname': 'ASI',
+              'idpname': 'asi',
+              'longinfo': 'long, this is a long info',
+              'priority': 'core',
+              'shortinfo': 'this is a short info',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'idpname': 'typeOf', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},

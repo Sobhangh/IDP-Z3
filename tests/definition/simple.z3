@@ -78,7 +78,13 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'p', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'q', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'r', 'type': 'proposition', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'a', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'b', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'c', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}]}
+{'symbols': [{'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'},
+             {'idpname': 'q', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'},
+             {'idpname': 'r', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'},
+             {'idpname': 'a', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
+             {'idpname': 'b', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
+             {'idpname': 'c', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},

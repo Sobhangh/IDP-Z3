@@ -78,7 +78,9 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'title': 'Interactive Consultant', 'symbols': [{'idpname': 'Depth', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}, {'idpname': 'cSID', 'type': 'function', 'priority': 'core', 'showOptimize': True, 'view': 'expanded'}]}
+{'symbols': [{'idpname': 'Depth', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
+             {'idpname': 'cSID', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': True},

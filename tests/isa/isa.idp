@@ -11,6 +11,10 @@ vocabulary {
     Subtype : subtype
 
     isa(subtype, type)
+
+    [ASI]
+        [short:this is a short info]
+        [long:long, this is a long info]
     asi(type, subtype)
     typeOf(subtype): type
 }

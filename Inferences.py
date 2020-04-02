@@ -35,13 +35,18 @@ def metaJSON(idp):
     for i in idp.unknown_symbols().values():
         typ = i.out.name
         symbol_type = "proposition" if typ == 'bool' and i.sorts==[] else "function"
-        symbols.append({
+        d = {
             "idpname": str(i.name),
             "type": symbol_type,
             "priority": "core",
             "showOptimize": True, # GUI is smart enough to show buttons appropriately
             "view": "expanded" if i.name == str(idp.goal) else idp.view.viewType
-        })
+        }
+        if i.annotations is not None:
+            if 'reading' in i.annotations: d['guiname']   = i.annotations['reading']
+            if 'short'   in i.annotations: d['shortinfo'] = i.annotations['short']
+            if 'long'    in i.annotations: d['longinfo']  = i.annotations['long']
+        symbols.append(d)
     out = {"title": "Interactive Consultant", "symbols": symbols}
     return out
 

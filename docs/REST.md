@@ -15,6 +15,9 @@ POST result:
         - idpname : string
         - type : string
         - priority : string
+        - reading  : string // English reading
+        - shortinfo: string
+        - longinfo : string
         - showOptimize : Bool
         - view: "normal" | "expanded"
         } ]
