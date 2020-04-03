@@ -67,7 +67,10 @@ And((negated(-1) == -1) == (same(1) == -1),
 
 -- subtences ------------------------------------
 same(1) = 1
-same(same(-(1))) = negated(negated(-(1)))
+same(1) = (-((-(1))))
+(-1) = same(x)
+same(-1) = (-((-(-1))))
+same(0) = (-((-(0))))
 same(-1) = -1
 same(-1) = 0
 same(-1) = 1
@@ -94,7 +97,10 @@ negated(-1)
 negated(0)
 negated(1)
 same(1) = 1
-same(same(-(1))) = negated(negated(-(1)))
+same(1) = (-((-(1))))
+(-1) = same(x)
+same(-1) = (-((-(-1))))
+same(0) = (-((-(0))))
 same(-1) = -1
 same(-1) = 0
 same(-1) = 1
@@ -122,8 +128,11 @@ Definitions:
   Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔((($negated$ = ((1))) ∧ ($negated!0$ = same(-1))) ∨ (($negated$ = ((0))) ∧ ($negated!0$ = same(0))) ∨ (($negated$ = ((-1))) ∧ ($negated!0$ = same(1))))
 Universals:  
   same(1) = 1
-  same(same(-(1))) = negated(negated(-(1)))
 Consequences:
+  same(1) = (-((-(1))))
+  ~(-1) = same(x)
+  same(-1) = (-((-(-1))))
+  same(0) = (-((-(0))))
   same(-1) = -1
   ~same(-1) = 0
   ~same(-1) = 1
@@ -148,7 +157,7 @@ Consequences:
   negated(0) = 0
   negated(1) = -1
 Simplified:  
-  
+  same(same((-1))) = negated(negated((-1)))
 Irrelevant:  
   
 
@@ -247,7 +256,14 @@ Irrelevant:
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False}},
- 'same': {'same(-1)': {'environmental': False,
+ 'same': {'(-1) = same(x)': {'environmental': False,
+                             'normal': False,
+                             'reading': '$negated!0$ = same(x)',
+                             'relevant': True,
+                             'status': 'CONSEQUENCE',
+                             'typ': 'Bool',
+                             'value': False},
+          'same(-1)': {'environmental': False,
                        'normal': True,
                        'reading': 'same(-1)',
                        'relevant': True,
@@ -255,6 +271,13 @@ Irrelevant:
                        'typ': 'Int',
                        'value': '-1',
                        'values': ['-1', '0', '1']},
+          'same(-1) = (-((-(-1))))': {'environmental': False,
+                                      'normal': False,
+                                      'reading': '$same$ = (-((-(x))))',
+                                      'relevant': True,
+                                      'status': 'CONSEQUENCE',
+                                      'typ': 'Bool',
+                                      'value': True},
           'same(-1) = -1': {'environmental': False,
                             'normal': False,
                             'reading': 'same(-1) = -1',
@@ -284,6 +307,13 @@ Irrelevant:
                       'typ': 'Int',
                       'value': '0',
                       'values': ['-1', '0', '1']},
+          'same(0) = (-((-(0))))': {'environmental': False,
+                                    'normal': False,
+                                    'reading': '$same$ = (-((-(x))))',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': True},
           'same(0) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(0) = -1',
@@ -313,6 +343,13 @@ Irrelevant:
                       'typ': 'Int',
                       'value': '1',
                       'values': ['-1', '0', '1']},
+          'same(1) = (-((-(1))))': {'environmental': False,
+                                    'normal': False,
+                                    'reading': '$same$ = (-((-(x))))',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': True},
           'same(1) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(1) = -1',
@@ -333,11 +370,4 @@ Irrelevant:
                           'relevant': True,
                           'status': 'UNIVERSAL',
                           'typ': 'Bool',
-                          'value': True},
-          'same(same(-(1))) = negated(negated(-(1)))': {'environmental': False,
-                                                        'normal': False,
-                                                        'reading': 'same(same(-(1))) = negated(negated(-(1)))',
-                                                        'relevant': True,
-                                                        'status': 'UNIVERSAL',
-                                                        'typ': 'Bool',
-                                                        'value': True}}}
+                          'value': True}}}

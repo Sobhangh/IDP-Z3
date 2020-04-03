@@ -45,6 +45,7 @@ class Expression(object):
         self.str = self.code              # memoization of str()
         self.annotations = {'reading': self.code} # dict(String, String)
         self.is_subtence = None           # True if sub-sentence in original code
+        self.fresh_vars = None            # Set[String]
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
@@ -66,12 +67,20 @@ class Expression(object):
     def __hash__(self):
         return hash(self.code)
 
+    def mark_subtences(self):
+        self.fresh_vars = set()
+        for e in self.sub_exprs: 
+            e.mark_subtences()
+            self.fresh_vars = self.fresh_vars.union(e.fresh_vars)
+        self.is_subtence = False # by default
+        return self
+
     def subtences(self):
         if self._subtences is None:
+            self._subtences = {}
             if self.is_subtence:
-                self._subtences = {self.code: self} #TODO possibly go deeper
-            else:
-                self._subtences = mergeDicts(e.subtences() for e in self.sub_exprs)
+                self._subtences[self.code]= self
+            self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
             if self.justification is not None:
                 self._subtences.update(self.justification.subtences())
         return self._subtences
@@ -104,10 +113,12 @@ class Expression(object):
         return out
 
     def update_exprs(self, new_expr_generator):
+        """ change sub_exprs and simplify. """
+        #  default implementation 
         return self._change(sub_exprs=list(new_expr_generator))
 
     def substitute(self, e0, e1, todo=None, case=None):
-        """ recursively substitute e0 by e1 in self, and simplify """
+        """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
         if self == e0: # based on repr !
             if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
                 return e1 # no need to have brackets
@@ -117,6 +128,7 @@ class Expression(object):
             # copy initial annotation
             out.code = self.code
             out.is_subtence = self.is_subtence
+            out.fresh_vars = self.fresh_vars
             out.is_visible = self.is_visible
             out.type = self.type
             # out.normal is not set, normally
@@ -127,12 +139,21 @@ class Expression(object):
                 if todo is not None:
                     todo0 = out.justification.expr_to_literal(case)
                     todo.extend(todo0)
-            if type(e0) == Fresh_Variable:
-                out.code = out.code.replace(str(e0), str(e1))
         return out
 
+    def instantiate(self, e0, e1):
+        """ recursively substitute e0 by e1, without Bracket """
+        if self == e0: # based on repr !
+            return e1
+        else:
+            out = copy.copy(self)
+            out.sub_exprs = [e.instantiate(e0, e1) for e in out.sub_exprs]
+            out = out.simplify1()
+            out.code = out.code.replace(str(e0), str(e1))
+            return out
+
     def simplify1(self):
-        return self.update_exprs(self.sub_exprs)
+        return self.update_exprs(iter(self.sub_exprs))
 
     def expand_quantifiers(self, theory):
         return self.update_exprs(e.expand_quantifiers(theory) for e in self.sub_exprs)
@@ -144,6 +165,8 @@ class Expression(object):
         if self._unknown_symbols is None:
             self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs) \
                 if self.if_symbol is None else {}
+            if self.justification is not None:
+                self._unknown_symbols.update(self.justification.unknown_symbols())
         return self._unknown_symbols
 
     def reified(self) -> DatatypeRef:
@@ -188,8 +211,6 @@ class Constructor(Expression):
         self.index = None # int
 
         super().__init__()
-        
-        self.is_subtence = False
     
     def __str__(self): return self.name
     def str_   (self): return self.name
@@ -213,8 +234,6 @@ class IfExpr(Expression):
 
         self.sub_exprs = [self.if_f, self.then_f, self.else_f]
         super().__init__()
-
-        self.is_subtence = False
 
     def __str__(self):
         return ( f" if   {str(self.sub_exprs[IfExpr.IF  ])}"
@@ -275,13 +294,13 @@ class AQuantification(Expression):
 
         self.q_vars = {} # dict[String, Fresh_Variable]
         self.type = 'bool'
-        self.is_subtence = True
 
     @classmethod
-    def make(cls, q, decls, f):
+    def make(cls, q, decls, f, is_subtence=False):
         "make and annotate a quantified formula"
         out = cls(q=q, vars=list(decls.values()), sorts=[], f=f)
         out.q_vars = decls
+        out.is_subtence = is_subtence
         return out
 
 
@@ -300,6 +319,13 @@ class AQuantification(Expression):
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars} # merge
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
+        return self
+
+    def mark_subtences(self):
+        super().mark_subtences()
+        # remove q_vars
+        self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
+        self.is_subtence = (len(self.fresh_vars)==0)
         return self
 
     def expand_quantifiers(self, theory):
@@ -375,10 +401,8 @@ class BinaryOperator(Expression):
                else 'bool' if self.operator[0] in '=<>≤≥≠' \
                else None
 
-        self.is_subtence = self.operator[0] in '=<>≤≥≠'
-
     @classmethod
-    def make(cls, ops, operands):
+    def make(cls, ops, operands, is_subtence=False):
         """ creates a BinaryOp
             beware: cls must be specific for ops !"""
         if len(operands) == 1:
@@ -392,6 +416,7 @@ class BinaryOperator(Expression):
                 o = Brackets(f=o, annotations={'reading': None})
             operands1.append(o)
         out = (cls)(sub_exprs=operands1, operator=ops)
+        out.is_subtence = is_subtence
         return out._derive().simplify1()
         
     def __str__(self):
@@ -425,6 +450,13 @@ class BinaryOperator(Expression):
         if self.type is None:
             self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                else 'int'
+        return self
+
+    def mark_subtences(self):
+        super().mark_subtences()
+        if self.operator[0] in '=<>≤≥≠':
+            self.is_subtence = (len(self.fresh_vars)==0)
+            self.fresh_vars.discard('!*') # indicates AppliedSymbol with complex expressions
         return self
 
     def translate(self):
@@ -641,11 +673,10 @@ class AUnary(Expression):
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.is_subtence = False
-
     @classmethod
-    def make(cls, op, expr):
+    def make(cls, op, expr, is_subtence=False):
         out = AUnary(operator=op, f=expr)
+        out.is_subtence = is_subtence
         return out._derive().simplify1()
 
     def __str__(self):
@@ -698,7 +729,6 @@ class AAggregate(Expression):
         super().__init__()
 
         self.q_vars = {}
-        self.is_subtence = False
 
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
@@ -738,7 +768,13 @@ class AAggregate(Expression):
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         return self
-        
+
+    def mark_subtences(self):
+        super().mark_subtences()
+        # remove q_vars
+        self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
+        return self
+
     def expand_quantifiers(self, theory):
         form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
                     , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
@@ -772,7 +808,7 @@ class AppliedSymbol(Expression):
         self.name = self.s.name
 
     @classmethod
-    def make(cls, s, args):
+    def make(cls, s, args, is_subtence=False):
         if 0 < len(args):
             out = cls(s=Symbol(name=s.name), args=Arguments(sub_exprs=args))
             out.sub_exprs = args
@@ -780,6 +816,7 @@ class AppliedSymbol(Expression):
             out = Variable(name=s.name)
         # annotate
         out.decl = s.decl
+        out.is_subtence = is_subtence
         return out._derive()
 
     def __str__(self):
@@ -793,9 +830,20 @@ class AppliedSymbol(Expression):
         self.normal = True
         return self._derive()
 
+    def mark_subtences(self):
+        super().mark_subtences()
+        if any(type(e) in [Brackets, AppliedSymbol, AUnary, BinaryOperator] for e in self.sub_exprs):
+            self.is_subtence = False
+            if self.type == 'bool':
+                self.fresh_vars.discard('!*')
+            else:
+                self.fresh_vars.add('!*')
+        else:
+            self.is_subtence = self.type == 'bool' and len(self.fresh_vars)==0
+        return self
+
     def _derive(self):
         self.type = self.decl.type.name
-        self.is_subtence = self.type == 'bool'
         return self
 
     def interpret(self, theory):
@@ -851,14 +899,16 @@ class Variable(AppliedSymbol):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
             return symbol_decls[self.name]
         if self.name in q_vars:
-            self.decl = q_vars[self.name].decl
-            self.type = self.decl.type
-            self.is_subtence = False
-        else:
+            return q_vars[self.name]
+        else: # in symbol_decls
             self.decl = symbol_decls[self.name]
             self.type = self.decl.type.name
-            self.is_subtence = self.type == 'bool'
             self.normal = True # make sure it is visible in GUI
+        return self
+
+    def mark_subtences(self):
+        self.fresh_vars = set()
+        self.is_subtence = self.type == 'bool'
         return self
 
     def reified(self):
@@ -882,12 +932,15 @@ class Fresh_Variable(Expression):
         self.type = self.decl.name
         self._unknown_symbols = {}
         self.sub_exprs = []
-        self.is_subtence = False
 
     def __str__(self): return self.name
     def str_   (self): return self.name
 
     def annotate(self, symbol_decls, q_vars):
+        return self
+
+    def mark_subtences(self):
+        self.fresh_vars = set([self.name])
         return self
 
     def translate(self):
@@ -908,7 +961,6 @@ class NumberConstant(Expression):
         except ValueError:
             self.translated = float(eval(self.number))
             self.type = 'real'
-        self.is_subtence = False
     
     def __str__(self): return self.number
     def str_   (self): return self.number
@@ -936,8 +988,6 @@ class Brackets(Expression):
             self.annotations['reading'] = None
         else: # Annotations instance
             self.annotations = annotations.annotations
-
-        self.is_subtence = False
 
     def __str__(self): return f"({str(self.sub_exprs[0])})"
     def str_   (self): return f"({self.sub_exprs[0].str})"

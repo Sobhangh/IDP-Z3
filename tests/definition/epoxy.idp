@@ -1,0 +1,76 @@
+vocabulary {
+    type epoxy constructed from {e1, e2, e3}
+    type brand constructed from {Huntsman, Sadechaf, Jowat}
+    type family constructed from {_2c_Epoxy, _1c_Epoxy}
+    type cost = {0.539; 100}
+    type color constructed from {amber, black_fluorescent, blackish_grey}
+    type shelf_life = {0; 6; 12}
+    type lowest_storage_t = {0; 15; 16}
+    type highest_storage_t = {10; 25; 38}
+    type mixing_ratio constructed from {_1_1, _2_1, na}
+    type specific_gravity_resin = {1.05; 1.12; 1.17}
+    type specific_gravity_hardener = {0; 0.92; 1.28}    
+
+
+    
+    Epoxy: epoxy
+    Brand: brand
+    Family: family
+
+    Cost: cost
+    Min_Cost: real
+    Max_Cost: real
+    Known_Cost
+
+    Color: color
+
+    Shelf_Life: shelf_life
+    Min_Shelf_Life: real
+    Max_Shelf_Life: real
+    Known_Shelf_Life
+   
+}
+
+
+theory {
+    
+    { // Every epoxy has a known brand.
+        Brand = Huntsman <- Epoxy = e1.
+        Brand = Sadechaf <- Epoxy = e2.
+        Brand = Jowat <- Epoxy = e3.
+    }
+
+    { // Every epoxy has a known family.
+        Family = _2c_Epoxy <- Epoxy = e1 | Epoxy = e3.
+        Family = _1c_Epoxy <- Epoxy = e2.
+    }
+
+    
+    { // The default value for unknown costs is 100.
+        Cost = 0.539 <- Epoxy = e1.
+        Cost = 100 <- Epoxy = e2 | Epoxy = e3.
+    }
+
+    Known_Cost <=> Cost ~= 100.
+    Known_Cost => Min_Cost =< Cost.
+    Known_Cost => Max_Cost >= Cost.
+
+
+    { // Every epoxy has a known color.
+        Color = amber <- Epoxy = e1.
+        Color = black_fluorescent <- Epoxy = e2.
+        Color = blackish_grey <- Epoxy = e3.
+    }
+
+    
+    { // The dfqsdfq
+        Shelf_Life = 12 <- Epoxy = e1.
+        Shelf_Life = 6 <- Epoxy = e2.
+        Shelf_Life = 0 <- Epoxy = e3.
+    }
+}
+
+
+
+
+view expanded

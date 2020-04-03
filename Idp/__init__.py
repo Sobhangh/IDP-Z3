@@ -225,9 +225,9 @@ class RangeDeclaration(object):
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
-                e = AComparison.make('=', [var, x.fromI])
+                e = AComparison.make('=', [var, x.fromI], True)
             else:
-                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
+                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI], True)
             sub_exprs.append(e)
         return ADisjunction.make('∨', sub_exprs)
 
@@ -282,20 +282,24 @@ class SymbolDeclaration(object):
         self.type = self.out.decl
         self.range = self.type.range
 
+        # create instances
         self.instances = {}
         if vocabulary and not self.name.startswith('_'):
             if len(self.sorts) == 0:
                 expr = Variable(name=self.name)
                 expr.annotate(symbol_decls, {})
+                expr.mark_subtences()
                 expr.normal = True
                 self.instances[expr.code] = expr
             else:
                 for arg in list(self.domain):
                     expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                     expr.annotate(symbol_decls, {})
+                    expr.mark_subtences()
                     expr.normal = True
                     self.instances[expr.code] = expr
 
+        # determine typeConstraint
         if self.out.decl.name != 'bool' and self.range:
             for inst in self.instances.values():
                 domain = self.type.check_bounds(inst)
@@ -372,6 +376,7 @@ class Theory(object):
                     self.clark[symbol.name] = rule
 
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
+        self.constraints = [e.mark_subtences()         for e in self.constraints]
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
         
@@ -492,10 +497,10 @@ class Rule(object):
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars} # merge
 
-        self.symbol = self.symbol.annotate(symbol_decls, q_v)
-        self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
-        self.out = self.out.annotate(symbol_decls, q_v) if self.out else self.out
-        self.body = self.body.annotate(symbol_decls, q_v)
+        self.symbol = self.symbol.annotate(symbol_decls, q_v).mark_subtences()
+        self.args = [arg.annotate(symbol_decls, q_v).mark_subtences() for arg in self.args]
+        self.out = self.out.annotate(symbol_decls, q_v).mark_subtences() if self.out else self.out
+        self.body = self.body.annotate(symbol_decls, q_v).mark_subtences()
         return self
 
     def rename_args(self, new_vars):
@@ -509,7 +514,7 @@ class Rule(object):
                 if arg.name not in subst:
                     if arg.name in self.vars:
                         subst[arg.name] = nv
-                        self.body = self.body.substitute(arg, nv)
+                        self.body = self.body.instantiate(arg, nv)
                     else:
                         eq = AComparison.make('=', [nv, arg])
                         self.body = AConjunction.make('∧', [eq, self.body])
@@ -519,9 +524,9 @@ class Rule(object):
             else: #same(f(x))
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.substitute(Symbol(name=v0), v1)
+                    eq = eq.instantiate(Symbol(name=v0), v1)
                 self.body = AConjunction.make('∧', [eq, self.body])
-        
+
         # Any leftover ?
         for var in self.vars:
             if str(var) in subst:
@@ -559,19 +564,20 @@ class Rule(object):
         out = self.body
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
-            out = out.substitute(old, new)
+            out = out.instantiate(old, new)
         out = out.interpret(theory) # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
         instance.normal = True
         if len(new_args)+1 == len(self.args): # a function
             if value is not None:
                 head = AComparison.make("=", [instance, value])
-                out = out.substitute(self.args[-1], value)
+                out = out.instantiate(self.args[-1], value)
                 out = AEquivalence.make('⇔', [head, out])
             else:
-                out = out.substitute(self.args[-1], instance)
+                out = out.instantiate(self.args[-1], instance)
         else:
-            out = AEquivalence.make('⇔', [instance, out]) 
+            out = AEquivalence.make('⇔', [instance, out])
+        out.mark_subtences()
         return out
 
     def unknown_symbols(self):

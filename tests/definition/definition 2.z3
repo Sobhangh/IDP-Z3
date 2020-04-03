@@ -26,12 +26,16 @@ And((codeOf(red) == a) == (red == c),
 
 -- subtences ------------------------------------
 codeOf(red) = b
+red = c
+codeOf(red) = a
 
 -- GUILines ------------------------------------
 codeOf(red)
 codeOf(blue)
 c
 codeOf(red) = b
+red = c
+codeOf(red) = a
 
 -- case -------------------------------------
 Type:        
@@ -41,6 +45,8 @@ Definitions:
 Universals:  
   codeOf(red) = b
 Consequences:
+  ~red = c
+  ~codeOf(red) = a
   codeOf(red) = b
   codeOf(blue) = a
   c = blue
@@ -64,7 +70,14 @@ Irrelevant:
              'status': 'CONSEQUENCE',
              'typ': 'color',
              'value': 'blue',
-             'values': ['red', 'blue']}},
+             'values': ['red', 'blue']},
+       'red = c': {'environmental': False,
+                   'normal': False,
+                   'reading': 'cl = c',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': False}},
  'codeOf': {'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
@@ -81,6 +94,13 @@ Irrelevant:
                             'typ': 'code',
                             'value': 'b',
                             'values': ['a', 'b']},
+            'codeOf(red) = a': {'environmental': False,
+                                'normal': False,
+                                'reading': 'cd = a',
+                                'relevant': True,
+                                'status': 'CONSEQUENCE',
+                                'typ': 'Bool',
+                                'value': False},
             'codeOf(red) = b': {'environmental': False,
                                 'normal': False,
                                 'reading': 'codeOf(red) = b',

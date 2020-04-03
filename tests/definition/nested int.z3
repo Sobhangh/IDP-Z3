@@ -56,8 +56,6 @@ And(Not(negated(-1) == -1),
     Not(negated(1) == 1))
 
 -- subtences ------------------------------------
-same(-(1)) = (-(1))
-negated(negated(-(1))) = same(-(1))
 same(-1) = -1
 same(-1) = 0
 same(-1) = 1
@@ -84,8 +82,6 @@ same(1)
 negated(-1)
 negated(0)
 negated(1)
-same(-(1)) = (-(1))
-negated(negated(-(1))) = same(-(1))
 same(-1) = -1
 same(-1) = 0
 same(-1) = 1
@@ -112,8 +108,7 @@ Definitions:
   Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔($same$ = $same!0$)
   Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔($negated$ = (-($negated!0$)))
 Universals:  
-  same(-(1)) = (-(1))
-  negated(negated(-(1))) = same(-(1))
+  
 Consequences:
   same(-1) = -1
   ~same(-1) = 0
@@ -140,7 +135,8 @@ Consequences:
   negated(0) = 0
   negated(1) = -1
 Simplified:  
-  
+  same((-1)) = (-1)
+  negated(negated((-1))) = same((-1))
 Irrelevant:  
   
 
@@ -238,22 +234,8 @@ Irrelevant:
                                 'relevant': True,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
-                                'value': False},
-             'negated(negated(-(1))) = same(-(1))': {'environmental': False,
-                                                     'normal': False,
-                                                     'reading': 'negated(negated(-(1))) = same(-(1))',
-                                                     'relevant': True,
-                                                     'status': 'UNIVERSAL',
-                                                     'typ': 'Bool',
-                                                     'value': True}},
- 'same': {'same(-(1)) = (-(1))': {'environmental': False,
-                                  'normal': False,
-                                  'reading': 'same(-(1)) = (-(1))',
-                                  'relevant': True,
-                                  'status': 'UNIVERSAL',
-                                  'typ': 'Bool',
-                                  'value': True},
-          'same(-1)': {'environmental': False,
+                                'value': False}},
+ 'same': {'same(-1)': {'environmental': False,
                        'normal': True,
                        'reading': 'same(-1)',
                        'relevant': True,
