@@ -88,10 +88,10 @@ class Case:
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == Status.UNIVERSAL)}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(str(c.sentence) for c in self.assignments.values() if not c.relevant and type(c) != Term)}{nl}"
+                f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant and type(c) != Term)}{nl}"
         )
         
-    def get_relevant_subtences(self, all_: bool) -> Dict[str, Expression]:
+    def get_relevant_subtences(self, all_: bool) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
         #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
         constraints = ( self.simplified
             + list(self.idp.goal.subtences().values())
@@ -111,7 +111,7 @@ class Case:
         # determine relevant subtences
         relevant_subtences = mergeDicts( e.subtences() for e in constraints )
         relevant_subtences.update(mergeDicts(s.instances for s in symbols.values()))
-        return relevant_subtences
+        return (symbols, relevant_subtences)
 
     def full_propagate(self, all_: bool) -> None:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
@@ -121,12 +121,14 @@ class Case:
             if l.truth is not None and (all_ or l.is_environmental))
         self.propagate(to_propagate, all_)
 
-        # determine relevant symbols
+        # determine relevant assignemnts
         if all_:
-            relevant_subtences = self.get_relevant_subtences(all_=True)
+            relevant_symbols, relevant_subtences = self.get_relevant_subtences(all_=True)
 
             for k, l in self.assignments.items():
-                if k in relevant_subtences:
+                symbols = list(l.sentence.unknown_symbols().keys())
+                has_relevant_symbol = any(s in relevant_symbols for s in symbols)
+                if k in relevant_subtences and symbols and has_relevant_symbol:
                     l.relevant = True
 
         solver, _, _ = mk_solver(self.translate(all_), {})

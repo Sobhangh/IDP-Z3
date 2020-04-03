@@ -518,13 +518,13 @@ Simplified:
   2015 ≤ Term_Energy_Renovation ≤ 2025
   (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
 Irrelevant:  
-  Guarantee_Satisfied
-  Additional_Security_Required
-  Additional_Security_Satisfied
-  Resale = Three_Or_More
-  Transaction_Type = Public_Sale
-  Use = For_Resale
-  Certification_Date_Sale = (8 + Certification_Date)
+  ~Guarantee_Satisfied
+  ~Additional_Security_Required
+  ~Additional_Security_Satisfied
+  ~Resale = Three_Or_More
+  ~Transaction_Type = Public_Sale
+  ~Use = For_Resale
+  ~Certification_Date_Sale = (Certification_Date + 8)
 
 
 -- meta -------------------------------------

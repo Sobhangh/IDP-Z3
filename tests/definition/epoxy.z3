@@ -164,7 +164,9 @@ Simplified:
   Known_Cost ⇒ (Max_Cost ≥ Cost)
   (Cost = 0.539) ∨ (Cost = 100)
 Irrelevant:  
-  
+  ~Shelf_Life = 0
+  ~Shelf_Life = 6
+  ~Shelf_Life = 12
 
 
 -- meta -------------------------------------
@@ -322,18 +324,18 @@ Irrelevant:
                 'Shelf_Life = 0': {'environmental': False,
                                    'normal': False,
                                    'reading': 'Shelf_Life = 0',
-                                   'relevant': True,
+                                   'relevant': False,
                                    'status': 'UNKNOWN',
                                    'typ': 'Bool'},
                 'Shelf_Life = 12': {'environmental': False,
                                     'normal': False,
                                     'reading': 'Shelf_Life = 12',
-                                    'relevant': True,
+                                    'relevant': False,
                                     'status': 'UNKNOWN',
                                     'typ': 'Bool'},
                 'Shelf_Life = 6': {'environmental': False,
                                    'normal': False,
                                    'reading': 'Shelf_Life = 6',
-                                   'relevant': True,
+                                   'relevant': False,
                                    'status': 'UNKNOWN',
                                    'typ': 'Bool'}}}

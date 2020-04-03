@@ -384,12 +384,15 @@ Simplified:
   ((Subtype = regular_triangle) ⇔ (((((Angle(1) = 60)) ∧ ((Angle(2) = 60)) ∧ ((Angle(3) = 60))))))
   ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90)))))
 Irrelevant:  
-  (((Angle(1) = 90)) ∧ ((Angle(2) = 90)) ∧ ((Angle(3) = 90)))
-  Length(1) = Length(3)
-  Length(2) = (0)
-  Length(1) = Length(2)
-  Surface = (Length(1) * Length(2))
-  Surface = (-1)
+  ~Sides = 4
+  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+  ~Length(1) = Length(3)
+  ~Length(2) = Length(4)
+  ~Length(1) = Length(2)
+  ~Surface = (Length(1) * Length(2))
+  ~Surface = (-(1))
+  Length(4) = 0
+  Angle(4) = 0
 
 
 -- meta -------------------------------------
@@ -446,7 +449,7 @@ Irrelevant:
            'Angle(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(4)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '0'},
@@ -626,7 +629,7 @@ Irrelevant:
             'Length(4)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(4)',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Real',
                           'value': '0'},
@@ -683,7 +686,7 @@ Irrelevant:
            'Sides = 4': {'environmental': False,
                          'normal': False,
                          'reading': 'Sides = 4',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': False},

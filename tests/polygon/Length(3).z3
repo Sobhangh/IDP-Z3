@@ -114,7 +114,8 @@ Consequences:
 Simplified:  
   Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1)))))
 Irrelevant:  
-  Length(3) = Length(1)
+  ~Length(3) = Length(1)
+  ~Sides = 4
 
 
 -- meta -------------------------------------
@@ -274,7 +275,7 @@ Irrelevant:
            'Sides = 4': {'environmental': False,
                          'normal': False,
                          'reading': 'Sides = 4',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': False}},

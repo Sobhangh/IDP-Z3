@@ -327,7 +327,10 @@ Consequences:
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
-  
+  Perimeter = 10
+  ~Large(2)
+  ~Large(3)
+  ~Large(4)
 
 
 -- meta -------------------------------------
@@ -455,28 +458,28 @@ Irrelevant:
            'Large(2)': {'environmental': False,
                         'normal': True,
                         'reading': 'Large(2)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(3)': {'environmental': False,
                         'normal': True,
                         'reading': 'Large(3)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Large(4)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False}},
  'Perimeter': {'Perimeter': {'environmental': False,
                              'normal': True,
                              'reading': 'Perimeter',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'CONSEQUENCE',
                              'typ': 'Real',
                              'value': '10'},

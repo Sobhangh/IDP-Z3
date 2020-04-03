@@ -34,7 +34,8 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  
+  ~Start_Dt_Dwelling_For_Social_Rent = 2015
+  ~Start_Dt_Dwelling_For_Social_Rent = 2016
 
 
 -- meta -------------------------------------
@@ -54,13 +55,13 @@ Irrelevant:
                                                                                     'normal': False,
                                                                                     'reading': 'Start_Dt_Dwelling_For_Social_Rent '
                                                                                                '= 2015',
-                                                                                    'relevant': True,
+                                                                                    'relevant': False,
                                                                                     'status': 'UNKNOWN',
                                                                                     'typ': 'Bool'},
                                        'Start_Dt_Dwelling_For_Social_Rent = 2016': {'environmental': False,
                                                                                     'normal': False,
                                                                                     'reading': 'Start_Dt_Dwelling_For_Social_Rent '
                                                                                                '= 2016',
-                                                                                    'relevant': True,
+                                                                                    'relevant': False,
                                                                                     'status': 'UNKNOWN',
                                                                                     'typ': 'Bool'}}}

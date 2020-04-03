@@ -159,7 +159,10 @@ Consequences:
 Simplified:  
   same(same((-1))) = negated(negated((-1)))
 Irrelevant:  
-  
+  same(1) = (-((-(1))))
+  ~(-1) = same(x)
+  ~same(1) = -1
+  ~same(1) = 0
 
 
 -- meta -------------------------------------
@@ -259,7 +262,7 @@ Irrelevant:
  'same': {'(-1) = same(x)': {'environmental': False,
                              'normal': False,
                              'reading': '$negated!0$ = same(x)',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'CONSEQUENCE',
                              'typ': 'Bool',
                              'value': False},
@@ -346,21 +349,21 @@ Irrelevant:
           'same(1) = (-((-(1))))': {'environmental': False,
                                     'normal': False,
                                     'reading': '$same$ = (-((-(x))))',
-                                    'relevant': True,
+                                    'relevant': False,
                                     'status': 'CONSEQUENCE',
                                     'typ': 'Bool',
                                     'value': True},
           'same(1) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(1) = -1',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
           'same(1) = 0': {'environmental': False,
                           'normal': False,
                           'reading': 'same(1) = 0',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': False},

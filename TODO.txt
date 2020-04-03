@@ -1,4 +1,5 @@
 To do:
+    flatten nested applicaton f(f(x))
     Explanations: inject values in message
     Float ranges
     avoid duplication of equalities in user interface (enumerated types)

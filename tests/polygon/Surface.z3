@@ -351,7 +351,10 @@ Simplified:
   ((Subtype = rectangle) ⇒ (~(Length(1) = Length(2))))
   ((Subtype = square) ⇔ (Equilateral))
 Irrelevant:  
-  
+  Angle(1) = 90
+  Angle(2) = 90
+  Angle(3) = 90
+  Angle(4) = 90
 
 
 -- meta -------------------------------------
@@ -388,28 +391,28 @@ Irrelevant:
            'Angle(1)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(1)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '90'},
            'Angle(2)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(2)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '90'},
            'Angle(3)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(3)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '90'},
            'Angle(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(4)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '90'},

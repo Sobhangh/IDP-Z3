@@ -42,7 +42,8 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  
+  t = Piet
+  t1 = Piet
 
 
 -- meta -------------------------------------
@@ -56,7 +57,7 @@ Irrelevant:
  't': {'t': {'environmental': False,
              'normal': True,
              'reading': 't',
-             'relevant': True,
+             'relevant': False,
              'status': 'CONSEQUENCE',
              'typ': 'num',
              'value': 'Piet',
@@ -79,7 +80,7 @@ Irrelevant:
  't1': {'t1': {'environmental': False,
                'normal': True,
                'reading': 't1',
-               'relevant': True,
+               'relevant': False,
                'status': 'CONSEQUENCE',
                'typ': 'num',
                'value': 'Piet',

@@ -392,12 +392,22 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  (((Angle(1) = 90)) ∧ ((Angle(2) = 90)) ∧ ((Angle(3) = 90)))
+  ~Sides = 4
+  ~Subtype = right_triangle
+  ~Subtype = irregular
+  ~Subtype = square
+  ~Subtype = rectangle
+  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   Length(1) = Length(3)
-  Length(2) = (0)
+  ~Length(2) = Length(4)
   Length(1) = Length(2)
-  Surface = (Length(1) * Length(2))
-  Surface = (-1)
+  ~Surface = (Length(1) * Length(2))
+  ~Surface = (-(1))
+  Length(4) = 0
+  Angle(1) = 60
+  Angle(2) = 60
+  Angle(3) = 60
+  Angle(4) = 0
 
 
 -- meta -------------------------------------
@@ -433,28 +443,28 @@ Irrelevant:
            'Angle(1)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(1)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '60'},
            'Angle(2)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(2)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '60'},
            'Angle(3)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(3)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '60'},
            'Angle(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(4)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '0'},
@@ -639,7 +649,7 @@ Irrelevant:
             'Length(4)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(4)',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Real',
                           'value': '0'},
@@ -697,7 +707,7 @@ Irrelevant:
            'Sides = 4': {'environmental': False,
                          'normal': False,
                          'reading': 'Sides = 4',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': False},
@@ -719,14 +729,14 @@ Irrelevant:
              'Subtype = irregular': {'environmental': False,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
-                                     'relevant': True,
+                                     'relevant': False,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': False},
              'Subtype = rectangle': {'environmental': False,
                                      'normal': False,
                                      'reading': 'Subtype = rectangle',
-                                     'relevant': True,
+                                     'relevant': False,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': False},
@@ -740,14 +750,14 @@ Irrelevant:
              'Subtype = right_triangle': {'environmental': False,
                                           'normal': False,
                                           'reading': 'Subtype = right_triangle',
-                                          'relevant': True,
+                                          'relevant': False,
                                           'status': 'CONSEQUENCE',
                                           'typ': 'Bool',
                                           'value': False},
              'Subtype = square': {'environmental': False,
                                   'normal': False,
                                   'reading': 'Subtype = square',
-                                  'relevant': True,
+                                  'relevant': False,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False}},
