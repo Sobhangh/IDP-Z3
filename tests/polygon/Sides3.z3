@@ -391,8 +391,6 @@ Irrelevant:
   ~Length(1) = Length(2)
   ~Surface = (Length(1) * Length(2))
   ~Surface = (-(1))
-  Length(4) = 0
-  Angle(4) = 0
 
 
 -- meta -------------------------------------
@@ -449,7 +447,7 @@ Irrelevant:
            'Angle(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(4)',
-                        'relevant': False,
+                        'relevant': True,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '0'},
@@ -629,7 +627,7 @@ Irrelevant:
             'Length(4)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(4)',
-                          'relevant': False,
+                          'relevant': True,
                           'status': 'CONSEQUENCE',
                           'typ': 'Real',
                           'value': '0'},

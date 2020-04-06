@@ -40,8 +40,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  LipLen = Short
-  JacketDesign = Design_230
+  
 
 
 -- meta -------------------------------------
@@ -58,7 +57,7 @@ Irrelevant:
  'JacketDesign': {'JacketDesign': {'environmental': False,
                                    'normal': True,
                                    'reading': 'JacketDesign',
-                                   'relevant': False,
+                                   'relevant': True,
                                    'status': 'CONSEQUENCE',
                                    'typ': 'jaDes',
                                    'value': 'Design_230',
@@ -66,7 +65,7 @@ Irrelevant:
  'LipLen': {'LipLen': {'environmental': False,
                        'normal': True,
                        'reading': 'LipLen',
-                       'relevant': False,
+                       'relevant': True,
                        'status': 'CONSEQUENCE',
                        'typ': 'lipLen',
                        'value': 'Short',

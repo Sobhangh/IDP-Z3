@@ -403,11 +403,6 @@ Irrelevant:
   Length(1) = Length(2)
   ~Surface = (Length(1) * Length(2))
   ~Surface = (-(1))
-  Length(4) = 0
-  Angle(1) = 60
-  Angle(2) = 60
-  Angle(3) = 60
-  Angle(4) = 0
 
 
 -- meta -------------------------------------
@@ -443,28 +438,28 @@ Irrelevant:
            'Angle(1)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(1)',
-                        'relevant': False,
+                        'relevant': True,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '60'},
            'Angle(2)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(2)',
-                        'relevant': False,
+                        'relevant': True,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '60'},
            'Angle(3)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(3)',
-                        'relevant': False,
+                        'relevant': True,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '60'},
            'Angle(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(4)',
-                        'relevant': False,
+                        'relevant': True,
                         'status': 'CONSEQUENCE',
                         'typ': 'Real',
                         'value': '0'},
@@ -649,7 +644,7 @@ Irrelevant:
             'Length(4)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(4)',
-                          'relevant': False,
+                          'relevant': True,
                           'status': 'CONSEQUENCE',
                           'typ': 'Real',
                           'value': '0'},

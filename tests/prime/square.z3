@@ -46,7 +46,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  Base = 4
+  
 
 
 -- meta -------------------------------------
@@ -73,7 +73,7 @@ Irrelevant:
           'Base': {'environmental': False,
                    'normal': True,
                    'reading': 'Base',
-                   'relevant': False,
+                   'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Real',
                    'value': '4'}},

@@ -115,18 +115,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  asi(1tri angle,regular_triangle)
-  asi(1tri angle,right_triangle)
-  ~asi(1tri angle,rectangle)
-  ~asi(1tri angle,square)
-  ~asi(quadrilateral,regular_triangle)
-  ~asi(quadrilateral,right_triangle)
-  asi(quadrilateral,rectangle)
-  asi(quadrilateral,square)
-  typeOf(regular_triangle) = 1tri angle
-  typeOf(right_triangle) = 1tri angle
-  typeOf(rectangle) = quadrilateral
-  typeOf(square) = quadrilateral
+  
 
 
 -- meta -------------------------------------
@@ -171,56 +160,56 @@ Irrelevant:
  'asi': {'asi(1tri angle,rectangle)': {'environmental': False,
                                        'normal': True,
                                        'reading': 'asi(1tri angle,rectangle)',
-                                       'relevant': False,
+                                       'relevant': True,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'Bool',
                                        'value': False},
          'asi(1tri angle,regular_triangle)': {'environmental': False,
                                               'normal': True,
                                               'reading': 'asi(1tri angle,regular_triangle)',
-                                              'relevant': False,
+                                              'relevant': True,
                                               'status': 'CONSEQUENCE',
                                               'typ': 'Bool',
                                               'value': True},
          'asi(1tri angle,right_triangle)': {'environmental': False,
                                             'normal': True,
                                             'reading': 'asi(1tri angle,right_triangle)',
-                                            'relevant': False,
+                                            'relevant': True,
                                             'status': 'CONSEQUENCE',
                                             'typ': 'Bool',
                                             'value': True},
          'asi(1tri angle,square)': {'environmental': False,
                                     'normal': True,
                                     'reading': 'asi(1tri angle,square)',
-                                    'relevant': False,
+                                    'relevant': True,
                                     'status': 'CONSEQUENCE',
                                     'typ': 'Bool',
                                     'value': False},
          'asi(quadrilateral,rectangle)': {'environmental': False,
                                           'normal': True,
                                           'reading': 'asi(quadrilateral,rectangle)',
-                                          'relevant': False,
+                                          'relevant': True,
                                           'status': 'CONSEQUENCE',
                                           'typ': 'Bool',
                                           'value': True},
          'asi(quadrilateral,regular_triangle)': {'environmental': False,
                                                  'normal': True,
                                                  'reading': 'asi(quadrilateral,regular_triangle)',
-                                                 'relevant': False,
+                                                 'relevant': True,
                                                  'status': 'CONSEQUENCE',
                                                  'typ': 'Bool',
                                                  'value': False},
          'asi(quadrilateral,right_triangle)': {'environmental': False,
                                                'normal': True,
                                                'reading': 'asi(quadrilateral,right_triangle)',
-                                               'relevant': False,
+                                               'relevant': True,
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': False},
          'asi(quadrilateral,square)': {'environmental': False,
                                        'normal': True,
                                        'reading': 'asi(quadrilateral,square)',
-                                       'relevant': False,
+                                       'relevant': True,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'Bool',
                                        'value': True},
@@ -234,7 +223,7 @@ Irrelevant:
  'typeOf': {'typeOf(rectangle)': {'environmental': False,
                                   'normal': True,
                                   'reading': 'typeOf(rectangle)',
-                                  'relevant': False,
+                                  'relevant': True,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'type',
                                   'value': 'quadrilateral',
@@ -242,7 +231,7 @@ Irrelevant:
             'typeOf(regular_triangle)': {'environmental': False,
                                          'normal': True,
                                          'reading': 'typeOf(regular_triangle)',
-                                         'relevant': False,
+                                         'relevant': True,
                                          'status': 'CONSEQUENCE',
                                          'typ': 'type',
                                          'value': '1tri angle',
@@ -250,7 +239,7 @@ Irrelevant:
             'typeOf(right_triangle)': {'environmental': False,
                                        'normal': True,
                                        'reading': 'typeOf(right_triangle)',
-                                       'relevant': False,
+                                       'relevant': True,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'type',
                                        'value': '1tri angle',
@@ -258,7 +247,7 @@ Irrelevant:
             'typeOf(square)': {'environmental': False,
                                'normal': True,
                                'reading': 'typeOf(square)',
-                               'relevant': False,
+                               'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'type',
                                'value': 'quadrilateral',

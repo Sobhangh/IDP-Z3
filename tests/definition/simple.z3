@@ -74,7 +74,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  c = red
+  
 
 
 -- meta -------------------------------------
@@ -128,7 +128,7 @@ Irrelevant:
  'c': {'c': {'environmental': False,
              'normal': True,
              'reading': 'c',
-             'relevant': False,
+             'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
              'value': 'red',

@@ -65,8 +65,6 @@ Simplified:
   same((Piet)) = negated((Jan))
 Irrelevant:  
   ~negated(Piet) = Piet
-  same(Jan) = Jan
-  negated(Jan) = Piet
 
 
 -- meta -------------------------------------
@@ -79,7 +77,7 @@ Irrelevant:
  'negated': {'negated(Jan)': {'environmental': False,
                               'normal': True,
                               'reading': 'negated(Jan)',
-                              'relevant': False,
+                              'relevant': True,
                               'status': 'CONSEQUENCE',
                               'typ': 'num',
                               'value': 'Piet',
@@ -109,7 +107,7 @@ Irrelevant:
  'same': {'same(Jan)': {'environmental': False,
                         'normal': True,
                         'reading': 'same(Jan)',
-                        'relevant': False,
+                        'relevant': True,
                         'status': 'CONSEQUENCE',
                         'typ': 'num',
                         'value': 'Jan',
