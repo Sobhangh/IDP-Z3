@@ -61,7 +61,8 @@ class Expression(object):
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self._subtences = None            # memoization of .subtences()
-        self.justification = None         # Expression
+        self.just_branch = None           # Justification branch (Expression)
+        self.proof = {}                   # Dict[String, [String]]  proof of an atom
         # .normal : only set in .instances
 
     def __eq__(self, other):
@@ -89,21 +90,18 @@ class Expression(object):
             if self.is_subtence:
                 self._subtences[self.code]= self
             self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
-            if self.justification is not None:
-                self._subtences.update(self.justification.subtences())
+            if self.just_branch is not None:
+                self._subtences.update(self.just_branch.subtences())
         return self._subtences
 
     def as_ground(self): return None
-
-    def interpret(self, theory):
-        return self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
 
     def unknown_symbols(self):
         if self._unknown_symbols is None:
             self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs) \
                 if self.if_symbol is None else {}
-            if self.justification is not None:
-                self._unknown_symbols.update(self.justification.unknown_symbols())
+            if self.just_branch is not None:
+                self._unknown_symbols.update(self.just_branch.unknown_symbols())
         return self._unknown_symbols
 
     def reified(self) -> DatatypeRef:
@@ -121,9 +119,9 @@ class Expression(object):
     
     def justifications(self):
         out = sum((e.justifications() for e in self.sub_exprs), [])
-        if self.justification is not None:
-            out.append(self.justification)
-            out.extend(self.justification.justifications())
+        if self.just_branch is not None:
+            out.append(self.just_branch)
+            out.extend(self.just_branch.justifications())
         return out
 
     def expr_to_literal(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', bool]]:
@@ -580,18 +578,6 @@ class AppliedSymbol(Expression):
     def _derive(self):
         self.type = self.decl.type.name
         return self
-
-    def interpret(self, theory):
-        sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
-        if self.decl.interpretation is not None: # has a structure
-            self.is_subtence = False
-            out = (self.decl.interpretation)(theory, 0, sub_exprs)
-            return self._change(by=out)
-        elif self.name in theory.clark: # has a theory
-            self.justification = theory.clark[self.name].instantiate(self.sub_exprs, theory)
-            return self
-        else:
-            return self
 
     def unknown_symbols(self):
         out = super().unknown_symbols()
