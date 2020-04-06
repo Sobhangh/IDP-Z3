@@ -34,6 +34,8 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
                     Fresh_Variable, TRUE, FALSE
 
+import Idp.Substitute
+
 
 class Idp(object):
     def __init__(self, **kwargs):
