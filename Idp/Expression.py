@@ -33,7 +33,7 @@ import re
 import sys
 
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
-from utils import mergeDicts, unquote
+from utils import mergeDicts, unquote, Proof
 
 from typing import List, Tuple
 
@@ -62,7 +62,7 @@ class Expression(object):
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self._subtences = None            # memoization of .subtences()
         self.just_branch = None           # Justification branch (Expression)
-        self.proof = {}                   # Dict[String, [String]]  proof of an atom
+        self.proof = Proof()              # (partial) proof of an expression
         # .normal : only set in .instances
 
     def __eq__(self, other):
@@ -71,7 +71,13 @@ class Expression(object):
         if isinstance(other, Brackets):
             return self == other.sub_exprs[0]
         # beware: this does not ignore meaningless brackets deeper in the tree
-        return self.str == other.str
+        if self.str == other.str:
+            if type(self)!=type(other)\
+            and not(type(other).__name__=="Equality" and type(self)==AComparison)\
+            and not(type(self)==Fresh_Variable and type(other)== Symbol):
+                return False
+            return True
+        return False
     
     def __hash__(self):
         return hash(self.code)
@@ -124,18 +130,23 @@ class Expression(object):
             out.extend(self.just_branch.justifications())
         return out
 
-    def expr_to_literal(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', bool]]:
+    def expr_to_literal(self, case: 'Case', truth: bool = True, proof=None) -> List[Tuple['Expression', bool]]:
+        if proof is None:
+            proof = Proof(self)
         # returns a literal for the matching atom in case.assignments, or []
         if self.code in case.assignments: # found it !
-            return [(self, truth)]
+            return [(self, truth, proof)]
         if isinstance(self, Brackets):
-            return self.sub_exprs[0].expr_to_literal(case, truth)
+            return self.sub_exprs[0].expr_to_literal(case, truth, proof.update(self.proof))
         if isinstance(self, AUnary) and self.operator == '~':
-            return self.sub_exprs[0].expr_to_literal(case, not truth )
-        if truth and isinstance(self, AConjunction):
-            return [l for e in self.sub_exprs for l in e.expr_to_literal(case, truth)]
-        if not truth and isinstance(self, ADisjunction):
-            return [l for e in self.sub_exprs for l in e.expr_to_literal(case, truth)]
+            return self.sub_exprs[0].expr_to_literal(case, not truth, proof.update(self.proof))
+        if (truth     and isinstance(self, AConjunction)) \
+        or (not truth and isinstance(self, ADisjunction)):
+            out = []
+            for e in self.sub_exprs:
+                p = copy.copy(proof).update(e.proof)
+                out.extend(l for l in e.expr_to_literal(case, truth, p))
+            return out
         return []
 
 class Constructor(Expression):
@@ -375,9 +386,15 @@ class BinaryOperator(Expression):
                 else:
                     out = out[0]
             elif self.operator[0] == '∧':
-                out = And([e.translate() for e in self.sub_exprs])
+                if len(self.sub_exprs) == 1:
+                    out = self.sub_exprs[0].translate()
+                else:
+                    out = And([e.translate() for e in self.sub_exprs])
             elif self.operator[0] == '∨':
-                out = Or ([e.translate() for e in self.sub_exprs])
+                if len(self.sub_exprs) == 1:
+                    out = self.sub_exprs[0].translate()
+                else:
+                    out = Or ([e.translate() for e in self.sub_exprs])
             else:
                 out = self.sub_exprs[0].translate()
 

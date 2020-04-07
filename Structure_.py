@@ -37,18 +37,24 @@ class Status(IntFlag):
 
 class Assignment(object):
     def __init__(self, sentence: Expression, truth: Optional[bool], status: Status):
-        self.truth = truth
         self.sentence = sentence
+        self.truth = truth
+        self.proof = None
         self.status = status
         self.relevant = False
         self.is_environmental = not sentence.has_environmental(False)
 
-    def update(self, sentence: Optional[Expression], truth: Optional[bool], status: Optional[Status], case):
+    def update(self, sentence: Optional[Expression], 
+                     truth: Optional[bool], 
+                     proof,
+                     status: Optional[Status], 
+                     case):
         """ make a copy, and save it in case.assignments """
         out = copy(self) # needed for explain of irrelevant symbols
         if sentence is not None: out.sentence = sentence
         if truth    is not None: out.truth    = truth
         if status   is not None: out.status   = status
+        out.proof = proof
         case.assignments[self.sentence.code] = out
         return out
 
@@ -63,13 +69,13 @@ class Assignment(object):
 
     def __repr__(self):
         return ( f"{'' if self.truth else '~'}"
-                 f"{str(self.sentence.code)}" )
+                 f"{str(self.sentence.code)}" 
+                 f"{' <= '+str(self.proof) if self.proof else ''}")
 
     def __str__(self):
-        return ("" if self.truth else \
-                "? " if self.truth is None \
-                else "Not ") \
-             + self.sentence.annotations['reading']
+        return ( f"{'' if self.truth else '? ' if self.truth is None else 'Not '}"
+                 f"{self.sentence.annotations['reading']}")
+    
 
     def as_substitution(self, case) -> Tuple[Optional[Expression], Optional[Expression]]:
         if self.truth is not None:

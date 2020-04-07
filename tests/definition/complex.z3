@@ -125,14 +125,14 @@ Type:
 Definitions: 
   Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔($same$ = $same!0$)
   Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔($same$ = (-((-($same!0$)))))
-  Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔((($negated$ = ((1))) ∧ ($negated!0$ = same(-1))) ∨ (($negated$ = ((0))) ∧ ($negated!0$ = same(0))) ∨ (($negated$ = ((-1))) ∧ ($negated!0$ = same(1))))
+  Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔((($negated$ = ((1))) ∧ (($negated!0$ = same(-1)))) ∨ (($negated$ = ((0))) ∧ (($negated!0$ = same(0)))) ∨ (($negated$ = ((-1))) ∧ (($negated!0$ = same(1)))))
 Universals:  
   same(1) = 1
 Consequences:
   same(1) = (-((-(1))))
   ~(-1) = same(x)
-  same(-1) = (-((-(-1))))
-  same(0) = (-((-(0))))
+  same(-1) = (-((-(-1)))) <= {'(same(-1) = (-((-(x))))) ∧ true'}
+  same(0) = (-((-(0)))) <= {'(same(0) = (-((-(x))))) ∧ true'}
   same(-1) = -1
   ~same(-1) = 0
   ~same(-1) = 1

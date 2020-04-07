@@ -301,20 +301,20 @@ Universals:
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Consequences:
-  ~Large(1)
+  ~Large(1) <= {'Large(1) ⇔ (false)'}
   ~Type = triangle
-  ~Sides = 3
+  ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
   Type = quadrilateral
-  Sides = 4
-  ~Vertices = 3
-  Vertices = 4
-  ~Equilateral
+  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type = quadrilateral'}
+  ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
+  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 4'}
+  ~Equilateral <= {'(Equilateral ⇔ (∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)))'}
   ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
-  ~Subtype = right_triangle
-  ~Subtype = regular_triangle
+  ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
+  ~Subtype = regular_triangle <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Sides = 3'}
   Subtype = irregular
   ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
-  ~Subtype = square
+  ~Subtype = square <= {'((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))', 'Equilateral'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   Sides = 4
   Vertices = 4

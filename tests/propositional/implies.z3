@@ -34,9 +34,9 @@ Definitions:
 Universals:  
   p
 Consequences:
-  q
+  q <= {'p ⇒ (q ∧ (r ∨ s))', 'p'}
 Simplified:  
-  (((r ∨ s)))
+  ((r ∨ s))
 Irrelevant:  
   
 

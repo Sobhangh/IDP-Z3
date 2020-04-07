@@ -77,3 +77,47 @@ def applyTo(sym, arg):
 def mergeDicts(l):
     # merge a list of dicts (possibly a comprehension
     return dict(ChainMap(*reversed(list(l))))
+
+# Proof #########################################################
+
+import collections
+
+class Proof(collections.OrderedDict, collections.MutableSet):
+    def __init__(self, elem=None):
+        if elem is not None:
+            self[elem.code] = None
+
+    def update(self, other):
+        for e in other:
+            self[e] = None
+        return self
+
+    def add(self, elem):
+        for k, v in elem.proof.items():
+            self[k] = v
+        if elem.is_subtence:
+            self[elem.code] = None
+        return self
+
+    def __repr__(self):
+        return 'Proof([%s])' % (', '.join(map(repr, self.keys())))
+
+    def __str__(self):
+        return '{%s}' % (', '.join(map(repr, self.keys())))
+
+    """
+    difference = property(lambda self: self.__sub__)
+    difference_update = property(lambda self: self.__isub__)
+    intersection = property(lambda self: self.__and__)
+    intersection_update = property(lambda self: self.__iand__)
+    issubset = property(lambda self: self.__le__)
+    issuperset = property(lambda self: self.__ge__)
+    symmetric_difference = property(lambda self: self.__xor__)
+    symmetric_difference_update = property(lambda self: self.__ixor__)
+    def union(self, other):
+        return self or other
+    """
+
+class NoSet(object):
+    def add(self, elem):
+        return self

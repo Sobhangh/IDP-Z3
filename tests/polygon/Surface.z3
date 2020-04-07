@@ -322,15 +322,15 @@ Universals:
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Consequences:
   ~Type = triangle
-  ~Sides = 3
+  ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
   Type = quadrilateral
-  Sides = 4
-  ~Vertices = 3
-  Vertices = 4
+  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type = quadrilateral'}
+  ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
+  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 4'}
   Convex
   ∀n[side] : Angle(n) < 180
-  ~Subtype = right_triangle
-  ~Subtype = regular_triangle
+  ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
+  ~Subtype = regular_triangle <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Sides = 3'}
   ~Subtype = irregular
   ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
   ∃n[side] : Angle(n) = 90
@@ -347,8 +347,8 @@ Consequences:
   Angle(4) = 90
 Simplified:  
   (Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1))) ∧ ((Length(4) = Length(1))))))
-  (((((Subtype = square) ∨ (Subtype = rectangle)))))
-  ((Subtype = rectangle) ⇒ (~(Length(1) = Length(2))))
+  ((((Subtype = square) ∨ (Subtype = rectangle))))
+  ((Subtype = rectangle) ⇒ ((~(Length(1) = Length(2)))))
   ((Subtype = square) ⇔ (Equilateral))
 Irrelevant:  
   

@@ -41,7 +41,7 @@ Universals:
   p
   0 < Base
 Consequences:
-  16.0 = (Base * Base)
+  16.0 = (Base * Base) <= {'p ⇒ (16.0 = (Base * Base))', 'p'}
   Base = 4
 Simplified:  
   

@@ -43,7 +43,7 @@ Definitions:
 Universals:  
   q
 Consequences:
-  p
+  p <= {'p ⇔ (q ∨ r)'}
 Simplified:  
   
 Irrelevant:  

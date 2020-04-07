@@ -108,7 +108,7 @@ Definitions:
 Universals:  
   Sides = 3
 Consequences:
-  ~Subtype = rectangle
+  ~Subtype = rectangle <= {'(Subtype = rectangle) ⇔ (Sides = 4)', 'Sides = 4'}
   ~Sides = 4
   Sides = 3
 Simplified:  

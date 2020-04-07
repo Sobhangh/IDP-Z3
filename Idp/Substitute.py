@@ -31,7 +31,7 @@ import re
 import sys
 
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
-from utils import mergeDicts, unquote
+from utils import mergeDicts, unquote, Proof, NoSet
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
@@ -43,18 +43,34 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 
 # class Expression ############################################################
 
-def _replace_by(self, by):
-    return self.substitute(self, by)
+def _replace_by(self, by, proof=NoSet()):
+    " replace by new Brackets node, to keep annotations "
+    if type(self) == Fresh_Variable or type(by) == Fresh_Variable:
+        return by # no need to have brackets
+    out = Brackets(f=by, annotations=self.annotations) # by is not copied !
+
+    # copy initial annotation
+    out.code = self.code
+    out.is_subtence = self.is_subtence
+    out.fresh_vars = self.fresh_vars
+    out.is_visible = self.is_visible
+    out.type = self.type
+    # out.normal is not set, normally
+    if type(proof) == Proof and proof:
+        out.proof = copy.copy(self.proof).update(proof)
+    else:
+        out.proof = self.proof
+    return out
 Expression._replace_by = _replace_by
 
 
-def _change(self, sub_exprs=None, ops=None, just_branch=None, proof=None):
+def _change(self, sub_exprs=None, ops=None, just_branch=None):
     " change expression, after copying it if really changed"
 
     # return self if not changed
     changed = False
     if sub_exprs is not None:   changed |= self.sub_exprs != sub_exprs
-    if just_branch is not None: changed |= self.just_branch != just_branch
+    if just_branch is not None: changed = True
     if not changed: return self
 
     out = copy.copy(self)
@@ -72,9 +88,9 @@ def _change(self, sub_exprs=None, ops=None, just_branch=None, proof=None):
 Expression._change = _change
 
 
-def update_exprs(self, new_expr_generator):
+def update_exprs(self, new_expr_generator, with_proof=False):
     """ change sub_exprs and simplify. """
-    #  default implementation 
+    #  default implementation, without simplification
     return self._change(sub_exprs=list(new_expr_generator))
 Expression.update_exprs = update_exprs
 
@@ -82,20 +98,9 @@ Expression.update_exprs = update_exprs
 def substitute(self, e0, e1, todo=None, case=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
     if self == e0: # based on repr !
-        if type(e0) == Fresh_Variable or type(e1) == Fresh_Variable:
-            return e1 # no need to have brackets
-        # replace by new Brackets node, to keep annotations
-        out = Brackets(f=e1, annotations=self.annotations) # e1 is not copied !
-
-        # copy initial annotation
-        out.code = self.code
-        out.is_subtence = self.is_subtence
-        out.fresh_vars = self.fresh_vars
-        out.is_visible = self.is_visible
-        out.type = self.type
-        # out.normal is not set, normally
+        return self._replace_by(e1, Proof(e0 if e1 in [TRUE, FALSE] else None))
     else:
-        out = self.update_exprs(e.substitute(e0, e1, todo, case) for e in self.sub_exprs)
+        out = self.update_exprs((e.substitute(e0, e1, todo, case) for e in self.sub_exprs), True)
         if out.just_branch is not None:
             out = out._change(just_branch= out.just_branch.substitute(e0, e1, todo, case))
             if todo is not None:
@@ -129,6 +134,7 @@ Expression.expand_quantifiers = expand_quantifiers
 
 
 def interpret(self, theory):
+    " use information in structure and simplify "
     return self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
 Expression.interpret = interpret
 
@@ -136,28 +142,29 @@ Expression.interpret = interpret
 
 # Class IfExpr ################################################################
 
-def update_exprs(self, new_expr_generator):
+def update_exprs(self, new_expr_generator, with_proof=False):
+    proof = Proof() if with_proof else NoSet()
     if isinstance(new_expr_generator, list):
         new_expr_generator = iter(new_expr_generator)
     if_ = next(new_expr_generator)
     if if_ == TRUE:
-        return self._replace_by(next(new_expr_generator))
+        return self._replace_by(next(new_expr_generator), proof=proof.add(if_))
     elif if_ == FALSE:
         next(new_expr_generator)
-        return self._replace_by(next(new_expr_generator))
+        return self._replace_by(next(new_expr_generator), proof=proof.add(if_))
     else:
         then_ = next(new_expr_generator)
         else_ = next(new_expr_generator)
         if then_ == TRUE:
             if else_ == TRUE:
-                return self._replace_by(TRUE)
+                return self._replace_by(TRUE, proof=proof.add(then_).add(else_))
             elif else_ == FALSE:
-                return self._replace_by(if_)
+                return self._replace_by(if_, proof=proof.add(then_).add(else_))
         elif then_ == FALSE:
             if else_ == FALSE:
-                return self._replace_by(FALSE)
+                return self._replace_by(FALSE, proof=proof.add(then_).add(else_))
             elif else_ == TRUE:
-                return self._replace_by(AUnary.make('~', if_))
+                return self._replace_by(AUnary.make('~', if_), proof=proof.add(then_).add(else_))
     return self._change(sub_exprs=[if_, then_, else_])
 IfExpr.update_exprs = update_exprs
 
@@ -179,7 +186,7 @@ def expand_quantifiers(self, theory):
     else:
         out = ADisjunction.make('∨', forms)
     if not self.vars:
-        return self._replace_by(out)
+        return self._replace_by(out, proof=NoSet())
     return self._change(sub_exprs=[out])
 AQuantification.expand_quantifiers = expand_quantifiers
 
@@ -187,17 +194,18 @@ AQuantification.expand_quantifiers = expand_quantifiers
 
 # Class AImplication #######################################################
 
-def update_exprs(self, new_expr_generator): 
+def update_exprs(self, new_expr_generator, with_proof=False):
+    proof = Proof() if with_proof else NoSet()
     exprs = list(new_expr_generator)
     if len(exprs) == 2: #TODO deal with associativity
         if exprs[0] == FALSE: # (false => p) is true
-            return self._replace_by(TRUE)
+            return self._replace_by(TRUE, proof=proof.add(exprs[0]))
         if exprs[0] == TRUE: # (true => p) is p
-            return self._replace_by(exprs[1])
+            return self._replace_by(exprs[1], proof=proof.add(exprs[0]))
         if exprs[1] == TRUE: # (p => true) is true
-            return self._replace_by(TRUE)
+            return self._replace_by(TRUE, proof=proof.add(exprs[1]))
         if exprs[1] == FALSE: # (p => false) is ~p
-            return self._replace_by(AUnary.make('~', exprs[0]))
+            return self._replace_by(AUnary.make('~', exprs[0]), proof=proof.add(exprs[1]))
     return self._change(sub_exprs=exprs)
 AImplication.update_exprs = update_exprs
 
@@ -205,12 +213,16 @@ AImplication.update_exprs = update_exprs
 
 # Class AEquivalence #######################################################
 
-def update_exprs(self, new_expr_generator): 
+def update_exprs(self, new_expr_generator, with_proof=False):
+    proof = Proof() if with_proof else NoSet()
     exprs = list(new_expr_generator)
-    if any(e == TRUE for e in exprs):
-        return self._replace_by(AConjunction.make('∧', exprs))
-    if any(e == FALSE for e in exprs):
-        return self._replace_by(AConjunction.make('∧', [AUnary.make('~', e) for e in exprs]))
+    for e in exprs:
+        if e == TRUE:
+            return self._replace_by(AConjunction.make('∧', exprs, self.is_subtence), 
+                                    proof.add(e))
+        if e == FALSE:
+            return self._replace_by(AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence), 
+                                    proof.add(e))
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs
 
@@ -218,22 +230,32 @@ AEquivalence.update_exprs = update_exprs
 
 # Class ADisjunction #######################################################
 
-def update_exprs(self, new_expr_generator):
-    exprs = []
+def update_exprs(self, new_expr_generator, with_proof=False):
+    # self = sub_exprs | not(disjunct of self.proof)
+    
+    partial_proof = copy.copy(self.proof)
+    exprs, is_true = [], False
     for expr in new_expr_generator:
-        if expr == TRUE:  return self._replace_by(TRUE)
-        if expr == FALSE: pass
+        if expr == TRUE:
+            self.proof = Proof() if with_proof else NoSet()
+            return self._replace_by(TRUE, proof=self.proof.add(expr))
+        if expr == FALSE: partial_proof.add(expr)
         elif type(expr) == ADisjunction: # flatten
             for e in expr.sub_exprs:
-                if e == TRUE:    return self._replace_by(TRUE)
-                elif e == FALSE: pass
-                exprs.append(e)
+                if e == TRUE:
+                    self.proof = Proof() if with_proof else NoSet()
+                    return self._replace_by(TRUE, proof=self.proof.add(expr))
+                elif e == FALSE: partial_proof.add(expr)
+                else:
+                    exprs.append(e)
         else:
             exprs.append(expr)
+            
+    self.proof = partial_proof
     if len(exprs) == 0:
         return self._replace_by(FALSE)
     if len(exprs) == 1:
-        return self._replace_by(exprs[0])
+        return self._change(sub_exprs=[exprs[0]])
     return self._change(sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
 
@@ -241,22 +263,31 @@ ADisjunction.update_exprs = update_exprs
 
 # Class AConjunction #######################################################
 
-def update_exprs(self, new_expr_generator):
-    exprs = []
+def update_exprs(self, new_expr_generator, with_proof=False):
+    # self = sub_exprs & not(conjunct of self.proof)
+    partial_proof = copy.copy(self.proof)
+    exprs, is_false = [], False
     for expr in new_expr_generator:
-        if expr == TRUE:    pass
-        elif expr == FALSE: return self._replace_by(FALSE)
+        if expr == TRUE:    partial_proof.add(expr)
+        elif expr == FALSE: 
+            self.proof = Proof() if with_proof else NoSet()
+            return self._replace_by(FALSE, proof=self.proof.add(expr))
         elif type(expr) == AConjunction: # flatten
             for e in expr.sub_exprs:
-                if e == TRUE:    pass
-                elif e == FALSE: return self._replace_by(FALSE)
-                exprs.append(e)
+                if e == TRUE:    partial_proof.add(expr)
+                elif e == FALSE: 
+                    self.proof = Proof() if with_proof else NoSet()
+                    return self._replace_by(FALSE, proof=self.proof.add(expr))
+                else:
+                    exprs.append(e)
         else:
             exprs.append(expr)
+
+    self.proof = partial_proof
     if len(exprs) == 0:
         return self._replace_by(TRUE)
     if len(exprs) == 1:
-        return self._replace_by(exprs[0])
+        return self._change(sub_exprs=[exprs[0]])
     return self._change(sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
 
@@ -264,7 +295,7 @@ AConjunction.update_exprs = update_exprs
 
 # Class AComparison #######################################################
 
-def update_exprs(self, new_expr_generator):
+def update_exprs(self, new_expr_generator, with_proof=False):
     operands = list(new_expr_generator)
     operands1 = [e.as_ground() for e in operands]
     if all(e is not None for e in operands1):
@@ -282,7 +313,7 @@ AComparison.update_exprs = update_exprs
 
 #############################################################
 
-def update_arith(self, family, new_expr_generator):
+def update_arith(self, family, new_expr_generator, with_proof=False):
     new_expr_generator = iter(new_expr_generator)
     # accumulate numbers in acc
     if self.type == 'int':
@@ -329,15 +360,15 @@ def update_arith(self, family, new_expr_generator):
 
 # Class ASumMinus #######################################################
 
-def update_exprs(self, new_expr_generator):
-    return update_arith(self, '+', new_expr_generator)
+def update_exprs(self, new_expr_generator, with_proof=False):
+    return update_arith(self, '+', new_expr_generator, with_proof)
 ASumMinus.update_exprs = update_exprs
 
 
 
 # Class AMultDiv #######################################################
 
-def update_exprs(self, new_expr_generator):
+def update_exprs(self, new_expr_generator, with_proof=False):
     if any(op == '%' for op in self.operator): # special case !
         operands = list(new_expr_generator)
         operands1 = [e.as_ground() for e in operands]
@@ -354,7 +385,7 @@ AMultDiv.update_exprs = update_exprs
 
 # Class APower #######################################################
 
-def update_exprs(self, new_expr_generator):
+def update_exprs(self, new_expr_generator, with_proof=False):
     operands = list(new_expr_generator)
     operands1 = [e.as_ground() for e in operands]
     if len(operands) == 2 \
@@ -369,7 +400,7 @@ APower.update_exprs = update_exprs
 
 # Class AUnary #######################################################
 
-def update_exprs(self, new_expr_generator):
+def update_exprs(self, new_expr_generator, with_proof=False):
     operand = list(new_expr_generator)[0]
     if self.operator == '~':
         if operand == TRUE:
@@ -413,7 +444,9 @@ def interpret(self, theory):
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
         return self._replace_by(out)
     elif self.name in theory.clark: # has a theory
-        self.just_branch = theory.clark[self.name].instantiate(self.sub_exprs, theory)
+        # no copying !
+        self.sub_exprs = sub_exprs
+        self.just_branch = theory.clark[self.name].instantiate(sub_exprs, theory)
         return self
     else:
         return self
@@ -423,7 +456,7 @@ AppliedSymbol.interpret = interpret
      
 # Class Brackets #######################################################
 
-def update_exprs(self, new_expr_generator):
+def update_exprs(self, new_expr_generator, with_proof=False):
     expr = next(new_expr_generator)
     return self._change(sub_exprs=[expr])
 Brackets.update_exprs = update_exprs

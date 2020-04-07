@@ -65,9 +65,9 @@ class Case:
         for i, c in enumerate(self.idp.theory.constraints):
             u = c.expr_to_literal(self)
             if u:
-                for sentence, truth in u:
+                for sentence, truth, _proof in u:
                     ass = Assignment(sentence, truth, Status.UNKNOWN)
-                    ass.update(None, None, Status.UNIVERSAL, self)
+                    ass.update(None, None, Proof(), Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
 
@@ -166,7 +166,7 @@ class Case:
                                     ass.relevant = True
                                     self.assignments[key] = ass
                                 else:
-                                    ass = l.update(None, is_true(val1), CONSQ, self)
+                                    ass = l.update(None, is_true(val1), Proof(), CONSQ, self)
                                 self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
@@ -192,17 +192,17 @@ class Case:
                     new_constraint = constraint.substitute(old, new, consequences, self)
                     consequences.extend(new_constraint.expr_to_literal(self))
                     if consequences:
-                        for sentence, truth in consequences:
+                        for sentence, truth, proof in consequences:
                             old_ass = self.assignments[sentence.code]
                             if old_ass.truth is None:
                                 if (all_ or old_ass.is_environmental):
-                                    new_ass = old_ass.update(None, truth, CONSQ, self)
+                                    new_ass = old_ass.update(None, truth, proof, CONSQ, self)
                                     to_propagate.append(new_ass)
                             elif old_ass.truth != truth:
                                 # test: theory{ x=4. x=5. }
                                 self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                 return
-                        if not any(new_constraint == e for (e,t) in consequences):
+                        if not any(new_constraint == e for (e,t, p) in consequences):
                             new_simplified.append(new_constraint)
                     elif not new_constraint == TRUE:
                         new_simplified.append(new_constraint)
@@ -220,7 +220,8 @@ class Case:
                                 to_propagate.append(new_ass)
                             elif new_constraint in [TRUE, FALSE]:
                                 if old_ass.truth is None: # value of proposition was not known
-                                    new_ass = old_ass.update(new_constraint, (new_constraint == TRUE), CONSQ, self)
+                                    new_ass = old_ass.update(new_constraint, 
+                                        (new_constraint == TRUE), Proof(), CONSQ, self)
                                     to_propagate.append(new_ass)
                                 elif (new_constraint==TRUE  and not old_ass.truth) \
                                 or   (new_constraint==FALSE and     old_ass.truth):
@@ -230,7 +231,7 @@ class Case:
                                 else:
                                     pass # no change
                             else:
-                                old_ass.update(new_constraint, None, None, self)
+                                old_ass.update(new_constraint, None, Proof(), None, self)
 
     def translate(self, all_: bool = True) -> BoolRef:
         self.translated = And(
