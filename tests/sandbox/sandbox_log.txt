@@ -1,0 +1,85 @@
+
+|------------
+|(LipLen = $LipLen$) ⇔ (($LipLen$ = Short) ∧ (JacketDesign = Design_230))
+|+ $LipLen$ -> Short
+    |------------
+    |LipLen = $LipLen$
+    |+ $LipLen$ -> Short
+        |------------
+        |LipLen
+        |+ $LipLen$ -> Short
+        |== LipLen
+        |------------
+        |$LipLen$
+        |+ $LipLen$ -> Short
+        |== Short
+    |== LipLen = Short
+    |------------
+    |(($LipLen$ = Short) ∧ (JacketDesign = Design_230))
+    |+ $LipLen$ -> Short
+        |------------
+        |($LipLen$ = Short) ∧ (JacketDesign = Design_230)
+        |+ $LipLen$ -> Short
+            |------------
+            |$LipLen$ = Short
+            |+ $LipLen$ -> Short
+                |------------
+                |$LipLen$
+                |+ $LipLen$ -> Short
+                |== Short
+                |------------
+                |Short
+                |+ $LipLen$ -> Short
+                |== Short
+            |== (true)
+            |------------
+            |*JacketDesign = Design_230
+            |+ $LipLen$ -> Short
+                |------------
+                |JacketDesign
+                |+ $LipLen$ -> Short
+                |== JacketDesign
+                |------------
+                |Design_230
+                |+ $LipLen$ -> Short
+                |== Design_230
+            |== *JacketDesign = Design_230
+        |== (JacketDesign = Design_230)
+    |== ((JacketDesign = Design_230))
+|== (LipLen = Short) ⇔ ((JacketDesign = Design_230))
+|------------
+|(LipLen = $LipLen$) ⇔ (($LipLen$ = Short) ∧ (JacketDesign = Design_230))
+|+ $LipLen$ -> Standard
+    |------------
+    |LipLen = $LipLen$
+    |+ $LipLen$ -> Standard
+        |------------
+        |LipLen
+        |+ $LipLen$ -> Standard
+        |== LipLen
+        |------------
+        |$LipLen$
+        |+ $LipLen$ -> Standard
+        |== Standard
+    |== LipLen = Standard
+    |------------
+    |(($LipLen$ = Short) ∧ (JacketDesign = Design_230))
+    |+ $LipLen$ -> Standard
+        |------------
+        |($LipLen$ = Short) ∧ (JacketDesign = Design_230)
+        |+ $LipLen$ -> Standard
+            |------------
+            |$LipLen$ = Short
+            |+ $LipLen$ -> Standard
+                |------------
+                |$LipLen$
+                |+ $LipLen$ -> Standard
+                |== Standard
+                |------------
+                |Short
+                |+ $LipLen$ -> Standard
+                |== Short
+            |== (false)
+        |== (false)
+    |== ((false))
+|== ((~(LipLen = Standard)))

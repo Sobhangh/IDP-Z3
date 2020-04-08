@@ -10,21 +10,17 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 from Case import Case
 from Inferences import *
 from Solver import *
-from utils import log, start
+from utils import log, start, Log_file
 from Idp import idpparser, SymbolDeclaration
 
 from typing import Dict, Any
 
 dir = os.path.dirname(__file__)
-files = [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
-#files += ["/home/pcarbonn/Documents/repos/sealconstraints/OmniSeal/specification.z3"]
-#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/sandbox/sandbox.idp"]
-#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/isa/isa.idp"]
-#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/prime/prime.idp"]
-#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/polygon/Length(3).idp"]
-#files = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/definition/definition.idp"]
+files  = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/sandbox/sandbox.idp"]
+files += [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 for file in files:
     print(file)
+    Log_file(file)
     f = open(file, "r")
     theory = f.read()
     idp = idpparser.model_from_str(theory)  

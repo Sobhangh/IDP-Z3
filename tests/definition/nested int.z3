@@ -118,10 +118,10 @@ Consequences:
   ~same(0) = 1
   ~same(1) = -1
   ~same(1) = 0
-  same(1) = 1
+  same(1) = 1 <= {'(same(1) = -1) ∨ (same(1) = 0) ∨ (same(1) = 1)', 'same(1) = -1', 'same(1) = 0'}
   ~negated(-1) = -1
   ~negated(-1) = 0
-  negated(-1) = 1
+  negated(-1) = 1 <= {'(negated(-1) = -1) ∨ (negated(-1) = 0) ∨ (negated(-1) = 1)', 'negated(-1) = -1', 'negated(-1) = 0'}
   ~negated(0) = -1
   negated(0) = 0
   ~negated(0) = 1

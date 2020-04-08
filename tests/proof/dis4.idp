@@ -6,8 +6,8 @@ vocabulary {
     t
 } 
 theory {
-    {q <-r.}
-    {p <- ~q.}
-    p|~p. r.
+    p.
+    ~p|~q.
+    q|r.
 }
 view expanded

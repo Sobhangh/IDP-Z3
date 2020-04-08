@@ -8,26 +8,19 @@ vocabulary {
     t
 } 
 theory {
-    {q <-r.}
-    {p <- ~q.}
-    p|~p. r.
+    p.
+    (~(p)|(p)).
 }
 view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-Or(p, Not(p))
+p
 
-r
-
-q == r
-
-p == Not(q)
+Or(Not(p), p)
 
 -- subtences ------------------------------------
 p
-q
-r
 
 -- GUILines ------------------------------------
 p
@@ -40,13 +33,11 @@ t
 Type:        
   
 Definitions: 
-  Rule:∀[][]: q() ⇔r
-  Rule:∀[][]: p() ⇔~(q)
+  
 Universals:  
-  r
+  p
 Consequences:
-  ~p <= {'p ⇔ (~(q))', 'r'}
-  q <= {'q ⇔ r', 'r'}
+  
 Simplified:  
   
 Irrelevant:  
@@ -54,9 +45,7 @@ Irrelevant:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'},
-             {'idpname': 'q', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'},
-             {'idpname': 'r', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'}],
+{'symbols': [{'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
@@ -65,23 +54,21 @@ Irrelevant:
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'CONSEQUENCE',
-             'typ': 'Bool',
-             'value': False}},
- 'q': {'q': {'environmental': False,
-             'normal': True,
-             'reading': 'q',
-             'relevant': True,
-             'status': 'CONSEQUENCE',
-             'typ': 'Bool',
-             'value': True}},
- 'r': {'r': {'environmental': False,
-             'normal': True,
-             'reading': 'r',
-             'relevant': True,
              'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},
+ 'q': {'q': {'environmental': False,
+             'normal': True,
+             'reading': 'q',
+             'relevant': False,
+             'status': 'UNKNOWN',
+             'typ': 'Bool'}},
+ 'r': {'r': {'environmental': False,
+             'normal': True,
+             'reading': 'r',
+             'relevant': False,
+             'status': 'UNKNOWN',
+             'typ': 'Bool'}},
  's': {'s': {'environmental': False,
              'normal': True,
              'reading': 's',

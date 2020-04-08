@@ -18,6 +18,7 @@
 """
 from collections import ChainMap
 import itertools, time
+import os
 
 
 """ Module that monkey-patches json module when it's imported so
@@ -43,6 +44,27 @@ def log(action):
 
 nl = "\r\n"
 indented = "\r\n  "
+
+LOG_FILE = None
+def Log_file(path):
+    global LOG_FILE
+    if 'proof' in path or 'andbox' in path:
+        path, filename = os.path.split(path)
+        LOG_FILE = newpath = os.path.join(path, filename.replace('.idp', '_log.txt'))
+        indent = 0
+        if os.path.exists(LOG_FILE):
+            os.remove(LOG_FILE)
+    else:
+        LOG_FILE = None
+
+def Log(string, indent=0):
+    global LOG_FILE
+    if LOG_FILE:
+        f = open(LOG_FILE, "a")
+        f.write(string.replace(nl, nl+(' '*indent)))
+        f.close()
+
+
 
 def unquote(s):
     if s[0]=="'" and s[-1]=="'":
@@ -83,20 +105,22 @@ def mergeDicts(l):
 import collections
 
 class Proof(collections.OrderedDict, collections.MutableSet):
+    # Dict[code, is_subtence]
     def __init__(self, elem=None):
         if elem is not None:
-            self[elem.code] = None
+            self[elem.code] = elem.is_subtence
+            self.add(elem) # add proof of elem
 
     def update(self, other):
-        for e in other:
-            self[e] = None
+        if type(other) != NoSet:
+            for k, v in other.items():
+                self[k] = v
         return self
 
     def add(self, elem):
-        for k, v in elem.proof.items():
-            self[k] = v
+        self.update(elem.proof)
         if elem.is_subtence:
-            self[elem.code] = None
+            self[elem.code] = elem.is_subtence
         return self
 
     def __repr__(self):
@@ -120,4 +144,6 @@ class Proof(collections.OrderedDict, collections.MutableSet):
 
 class NoSet(object):
     def add(self, elem):
+        return self
+    def update(self, other):
         return self

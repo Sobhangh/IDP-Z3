@@ -136,6 +136,7 @@ class Equality(Expression):
             self.translated = variable.translated
         self.str = self.code
         self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
+        self.proof = None
 
     def __str__(self): return self.code
 
@@ -151,7 +152,7 @@ class Equality(Expression):
         else:
             return self.variable.translate()
 
-    def substitute(self, e0: Expression, e1: Expression) -> 'Equality':
+    def substitute(self, e0: Expression, e1: Expression, todo=None, case=None) -> 'Equality':
         if self.variable == e0:
             return Equality(self.variable, e1.translate())
         return self

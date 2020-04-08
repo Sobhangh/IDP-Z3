@@ -70,6 +70,10 @@ class Expression(object):
             return self.sub_exprs[0] == other
         if isinstance(other, Brackets):
             return self == other.sub_exprs[0]
+        if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
+            return self.sub_exprs[0] == other
+        if type(other) in [AConjunction, ADisjunction] and len(other.sub_exprs)==1:
+            return self == other.sub_exprs[0]
         # beware: this does not ignore meaningless brackets deeper in the tree
         if self.str == other.str:
             if type(self)!=type(other)\
@@ -78,6 +82,8 @@ class Expression(object):
                 return False
             return True
         return False
+
+    def __repr__(self): return str(self)
     
     def __hash__(self):
         return hash(self.code)
@@ -140,6 +146,8 @@ class Expression(object):
             return self.sub_exprs[0].expr_to_literal(case, truth, proof.update(self.proof))
         if isinstance(self, AUnary) and self.operator == '~':
             return self.sub_exprs[0].expr_to_literal(case, not truth, proof.update(self.proof))
+        if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
+            return self.sub_exprs[0].expr_to_literal(case, truth, proof)
         if (truth     and isinstance(self, AConjunction)) \
         or (not truth and isinstance(self, ADisjunction)):
             out = []

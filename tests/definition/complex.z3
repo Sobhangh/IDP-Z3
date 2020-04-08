@@ -131,8 +131,8 @@ Universals:
 Consequences:
   same(1) = (-((-(1))))
   ~(-1) = same(x)
-  same(-1) = (-((-(-1)))) <= {'(same(-1) = (-((-(x))))) ∧ true'}
-  same(0) = (-((-(0)))) <= {'(same(0) = (-((-(x))))) ∧ true'}
+  same(-1) = (-((-(-1))))
+  same(0) = (-((-(0))))
   same(-1) = -1
   ~same(-1) = 0
   ~same(-1) = 1
@@ -143,7 +143,7 @@ Consequences:
   ~same(1) = 0
   ~negated(-1) = -1
   ~negated(-1) = 0
-  negated(-1) = 1
+  negated(-1) = 1 <= {'(negated(-1) = -1) ∨ (negated(-1) = 0) ∨ (negated(-1) = 1)', 'negated(-1) = -1', 'negated(-1) = 0'}
   ~negated(0) = -1
   negated(0) = 0
   ~negated(0) = 1

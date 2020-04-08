@@ -8,21 +8,19 @@ vocabulary {
     t
 } 
 theory {
-    {q <-r.}
-    {p <- ~q.}
-    p|~p. r.
+    p.
+    ~p|~q.
+    q|r.
 }
 view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-Or(p, Not(p))
+p
 
-r
+Or(Not(p), Not(q))
 
-q == r
-
-p == Not(q)
+Or(q, r)
 
 -- subtences ------------------------------------
 p
@@ -40,13 +38,12 @@ t
 Type:        
   
 Definitions: 
-  Rule:∀[][]: q() ⇔r
-  Rule:∀[][]: p() ⇔~(q)
+  
 Universals:  
-  r
+  p
 Consequences:
-  ~p <= {'p ⇔ (~(q))', 'r'}
-  q <= {'q ⇔ r', 'r'}
+  ~q <= {'(~(p)) ∨ (~(q))', 'p'}
+  r <= {'q ∨ r', 'q'}
 Simplified:  
   
 Irrelevant:  
@@ -65,21 +62,21 @@ Irrelevant:
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Bool',
-             'value': False}},
+             'value': True}},
  'q': {'q': {'environmental': False,
              'normal': True,
              'reading': 'q',
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'Bool',
-             'value': True}},
+             'value': False}},
  'r': {'r': {'environmental': False,
              'normal': True,
              'reading': 'r',
              'relevant': True,
-             'status': 'UNIVERSAL',
+             'status': 'CONSEQUENCE',
              'typ': 'Bool',
              'value': True}},
  's': {'s': {'environmental': False,

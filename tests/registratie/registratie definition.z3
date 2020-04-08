@@ -496,8 +496,8 @@ Universals:
   ~Professional_Declaration_Filed
 Consequences:
   ~Tax = 4 <= {'(Tax = 4) ⇒ ((Registration_Type = Professional_Purchase) ∧ (Region = Flemish_Region))', 'Registration_Type = Professional_Purchase'}
-  ~Registration_Type = Professional_Purchase <= {'(Registration_Type = Professional_Purchase) ⇒ (Professional_Buyer ∧ (Transaction_Type ≠ Public_Sale) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (Certification_Date + 8)))', 'Professional_Buyer'}
-  ~Professional_Buyer <= {'Professional_Buyer ⇔ (Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More))'}
+  ~Registration_Type = Professional_Purchase <= {'(Registration_Type = Professional_Purchase) ⇒ (Professional_Buyer ∧ (Transaction_Type ≠ Public_Sale) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (Certification_Date + 8)))', 'Professional_Declaration_Filed', 'Professional_Buyer'}
+  ~Professional_Buyer <= {'Professional_Buyer ⇔ (Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More))', 'Professional_Declaration_Filed'}
 Simplified:  
   ((Tax = 1) ⇒ ((Registration_Type = Heritage) ∧ (Region = Flemish_Region)))
   (Tax = 2) ⇒ ((Registration_Type = Social_Dwelling) ∧ (Region = Flemish_Region))
