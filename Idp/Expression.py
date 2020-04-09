@@ -88,6 +88,12 @@ class Expression(object):
     def __hash__(self):
         return hash(self.code)
 
+    def annotate(self, symbol_decls, q_vars):
+        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
+        return self.annotate1()
+
+    def annotate1(self): return self
+
     def mark_subtences(self):
         self.fresh_vars = set()
         for e in self.sub_exprs: 
@@ -168,7 +174,6 @@ class Constructor(Expression):
     
     def __str__(self): return self.name
     def str_   (self): return self.name
-    def annotate(self, symbol_decls, q_vars): return self
     def as_ground(self): return self.index
     def translate(self): return self.translated
 
@@ -192,7 +197,7 @@ class IfExpr(Expression):
     @classmethod
     def make(cls, if_f, then_f, else_f):
         out = (cls)(if_f=if_f, then_f=then_f, else_f=else_f)
-        return out._derive().simplify1()
+        return out.annotate1().simplify1()
         
     def __str__(self):
         return ( f" if   {str(self.sub_exprs[IfExpr.IF  ])}"
@@ -203,12 +208,7 @@ class IfExpr(Expression):
                  f" then {self.sub_exprs[IfExpr.THEN].str}"
                  f" else {self.sub_exprs[IfExpr.ELSE].str}" )
 
-    def annotate(self, symbol_decls, q_vars):
-        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
-        #TODO verify consistency
-        return self._derive()
-
-    def _derive(self):
+    def annotate1(self):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
@@ -338,7 +338,7 @@ class BinaryOperator(Expression):
             operands1.append(o)
         out = (cls)(sub_exprs=operands1, operator=ops)
         out.is_subtence = is_subtence
-        return out._derive().simplify1()
+        return out.annotate1().simplify1()
         
     def __str__(self):
         def parenthesis(x):
@@ -362,12 +362,8 @@ class BinaryOperator(Expression):
         for i in range(1, len(self.sub_exprs)):
             temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
         return temp
-
-    def annotate(self, symbol_decls, q_vars):
-        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
-        return self._derive()
     
-    def _derive(self):
+    def annotate1(self):
         if self.type is None:
             self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                    else 'int'  if any(e.type == 'int'  for e in self.sub_exprs) \
@@ -452,15 +448,15 @@ class AComparison(BinaryOperator):
             out = AUnary.make('~', AComparison(sub_exprs=self.sub_exprs, operator='='))
             return out.annotate(symbol_decls, q_vars) # will annotate the AComparison too
         out = super().annotate(symbol_decls, q_vars)
-        return self._derive()
+        return self.annotate1()
 
-    def _derive(self):
+    def annotate1(self):
         # f(x)=y
         self.is_assignment = len(self.sub_exprs) == 2 and self.operator in [['='], ['≠']] \
             and type(self.sub_exprs[0]).__name__ in ["AppliedSymbol", "Variable"] \
             and all(e.as_ground() is not None for e in self.sub_exprs[0].sub_exprs) \
             and self.sub_exprs[1].as_ground() is not None
-        return super()._derive()
+        return super().annotate1()
 
 
 class ASumMinus(BinaryOperator):
@@ -485,19 +481,14 @@ class AUnary(Expression):
     def make(cls, op, expr, is_subtence=False):
         out = AUnary(operator=op, f=expr)
         out.is_subtence = is_subtence
-        return out._derive().simplify1()
+        return out.annotate1().simplify1()
 
     def __str__(self):
         return f"{self.operator}({str(self.sub_exprs[0])})"
     def str_(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
-    def annotate(self, symbol_decls, q_vars):
-        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
-        self.type = self.sub_exprs[0].type
-        return self._derive()
-
-    def _derive(self):
+    def annotate1(self):
         self.type = self.sub_exprs[0].type
         return self
 
@@ -598,7 +589,7 @@ class AppliedSymbol(Expression):
         # annotate
         out.decl = s.decl
         out.is_subtence = is_subtence
-        return out._derive()
+        return out.annotate1()
 
     def __str__(self):
         return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
@@ -609,7 +600,7 @@ class AppliedSymbol(Expression):
         self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
         self.decl = q_vars[self.s.name].decl if self.s.name in q_vars else symbol_decls[self.s.name]
         self.normal = True
-        return self._derive()
+        return self.annotate1()
 
     def mark_subtences(self):
         super().mark_subtences()
@@ -623,7 +614,7 @@ class AppliedSymbol(Expression):
             self.is_subtence = self.type == 'bool' and len(self.fresh_vars)==0
         return self
 
-    def _derive(self):
+    def annotate1(self):
         self.type = self.decl.type.name
         return self
 
@@ -705,9 +696,6 @@ class Fresh_Variable(Expression):
     def __str__(self): return self.name
     def str_   (self): return self.name
 
-    def annotate(self, symbol_decls, q_vars):
-        return self
-
     def mark_subtences(self):
         self.fresh_vars = set([self.name])
         return self
@@ -736,8 +724,6 @@ class NumberConstant(Expression):
 
     def as_ground(self): return self.translated
 
-    def annotate(self, symbol_decls, q_vars): return self
-
     def translate(self):
         return self.translated
 
@@ -764,8 +750,7 @@ class Brackets(Expression):
     def as_ground(self): 
         return self.sub_exprs[0].as_ground()
 
-    def annotate(self, symbol_decls, q_vars):
-        self.sub_exprs = [self.sub_exprs[0].annotate(symbol_decls, q_vars)]
+    def annotate1(self):
         self.type = self.sub_exprs[0].type
         if self.annotations['reading']:
             self.sub_exprs[0].annotations = self.annotations
