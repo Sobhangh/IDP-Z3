@@ -189,6 +189,11 @@ class IfExpr(Expression):
         self.sub_exprs = [self.if_f, self.then_f, self.else_f]
         super().__init__()
 
+    @classmethod
+    def make(cls, if_f, then_f, else_f):
+        out = (cls)(if_f=if_f, then_f=then_f, else_f=else_f)
+        return out._derive().simplify1()
+        
     def __str__(self):
         return ( f" if   {str(self.sub_exprs[IfExpr.IF  ])}"
                  f" then {str(self.sub_exprs[IfExpr.THEN])}"
@@ -201,6 +206,9 @@ class IfExpr(Expression):
     def annotate(self, symbol_decls, q_vars):
         self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
         #TODO verify consistency
+        return self._derive()
+
+    def _derive(self):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 

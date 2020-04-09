@@ -650,10 +650,9 @@ class Interpretation(object):
                             out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = IfExpr(if_f=AComparison.make('=', [args[rank],val]),
-                                        then_f=interpret(theory, rank+1, args, list(tuples2)),
-                                        else_f=out)
-                        out = out.simplify1()
+                        out = IfExpr.make(AComparison.make('=', [args[rank],val]),
+                                          interpret(theory, rank+1, args, list(tuples2)),
+                                          out)
                 return out
         self.decl.interpretation = interpret
         self.decl.is_var = False
