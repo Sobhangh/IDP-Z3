@@ -2,7 +2,6 @@ vocabulary {
     
     type sides = {3..4}
     Sides: sides
-    Vertices: sides
 
 
     type type constructed from {triangle, quadrilateral}
@@ -10,7 +9,6 @@ vocabulary {
 
     type side = {1..4}
     Length(side):real
-    Angle(side):real
 
     type subtype constructed from
         { regular_triangle
@@ -20,14 +18,7 @@ vocabulary {
         , irregular}
     Subtype : subtype
 
-    Convex
     Equilateral
-    Perimeter:real
-
-    Large(side)
-    Base : real
-    Height: real
-    Surface:real
 }
 
 theory {

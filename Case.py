@@ -165,9 +165,10 @@ class Case:
                                     else:
                                         ass = Assignment(Equality(atom.variable, val1), True, CONSQ)
                                     ass.relevant = True
+                                    ass.proof = ProofZ3()
                                     self.assignments[key] = ass
                                 else:
-                                    ass = l.update(None, is_true(val1), Proof(), CONSQ, self)
+                                    ass = l.update(None, is_true(val1), ProofZ3(), CONSQ, self)
                                 self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
@@ -215,14 +216,15 @@ class Case:
                     if old_ass.sentence != ass.sentence and (all_ or old_ass.is_environmental):
                         new_constraint = old_ass.sentence.substitute(old, new)
                         if new_constraint != old_ass.sentence: # changed !
+                            proof = Proof().update(new_constraint.proof)
                             if type(old_ass) == Term: # value of term was not known
                                 old_ass = cast(Term, old_ass)
-                                new_ass = old_ass.assign(new_constraint.value, self, CONSQ)
+                                new_ass = old_ass.assign(new_constraint.value, proof, self, CONSQ)
                                 to_propagate.append(new_ass)
                             elif new_constraint in [TRUE, FALSE]:
                                 if old_ass.truth is None: # value of proposition was not known
                                     new_ass = old_ass.update(new_constraint, 
-                                        (new_constraint == TRUE), Proof(), CONSQ, self)
+                                        (new_constraint == TRUE), proof, CONSQ, self)
                                     to_propagate.append(new_ass)
                                 elif (new_constraint==TRUE  and not old_ass.truth) \
                                 or   (new_constraint==FALSE and     old_ass.truth):

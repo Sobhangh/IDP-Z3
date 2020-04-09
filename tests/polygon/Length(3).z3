@@ -4,7 +4,6 @@ vocabulary {
     
     type sides = {3..4}
     Sides: sides
-    Vertices: sides
 
 
     type type constructed from {triangle, quadrilateral}
@@ -12,7 +11,6 @@ vocabulary {
 
     type side = {1..4}
     Length(side):real
-    Angle(side):real
 
     type subtype constructed from
         { regular_triangle
@@ -22,14 +20,7 @@ vocabulary {
         , irregular}
     Subtype : subtype
 
-    Convex
     Equilateral
-    Perimeter:real
-
-    Large(side)
-    Base : real
-    Height: real
-    Surface:real
 }
 
 theory {
@@ -61,8 +52,6 @@ And(Or(Length(1) == Length(1), Sides < 1),
 
 And(Sides >= 3, Sides <= 4)
 
-And(Vertices >= 3, Vertices <= 4)
-
 -- subtences ------------------------------------
 Sides = 3
 Subtype = rectangle
@@ -73,27 +62,13 @@ Sides = 4
 
 -- GUILines ------------------------------------
 Sides
-Vertices
 Type
 Length(1)
 Length(2)
 Length(3)
 Length(4)
-Angle(1)
-Angle(2)
-Angle(3)
-Angle(4)
 Subtype
-Convex
 Equilateral
-Perimeter
-Large(1)
-Large(2)
-Large(3)
-Large(4)
-Base
-Height
-Surface
 Sides = 3
 Subtype = rectangle
 Length(3) = Length(1)
@@ -109,13 +84,13 @@ Universals:
   Sides = 3
 Consequences:
   ~Subtype = rectangle <= {'(Subtype = rectangle) ⇔ (Sides = 4)', 'Sides', 'Sides = 4'}
-  ~Sides = 4
+  ~Sides = 4 <= {'Sides'}
   Sides = 3
 Simplified:  
   Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1)))))
 Irrelevant:  
   ~Length(3) = Length(1)
-  ~Sides = 4
+  ~Sides = 4 <= {'Sides'}
 
 
 -- meta -------------------------------------
@@ -131,84 +106,12 @@ Irrelevant:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'Angle': {'Angle(1)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Angle(1)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Real',
-                        'value': ''},
-           'Angle(2)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Angle(2)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Real',
-                        'value': ''},
-           'Angle(3)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Angle(3)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Real',
-                        'value': ''},
-           'Angle(4)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Angle(4)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Real',
-                        'value': ''}},
- 'Base': {'Base': {'environmental': False,
-                   'normal': True,
-                   'reading': 'Base',
-                   'relevant': False,
-                   'status': 'UNKNOWN',
-                   'typ': 'Real',
-                   'value': ''}},
- 'Convex': {'Convex': {'environmental': False,
-                       'normal': True,
-                       'reading': 'Convex',
-                       'relevant': False,
-                       'status': 'UNKNOWN',
-                       'typ': 'Bool'}},
  'Equilateral': {'Equilateral': {'environmental': False,
                                  'normal': True,
                                  'reading': 'Equilateral',
                                  'relevant': True,
                                  'status': 'UNKNOWN',
                                  'typ': 'Bool'}},
- 'Height': {'Height': {'environmental': False,
-                       'normal': True,
-                       'reading': 'Height',
-                       'relevant': False,
-                       'status': 'UNKNOWN',
-                       'typ': 'Real',
-                       'value': ''}},
- 'Large': {'Large(1)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Large(1)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Bool'},
-           'Large(2)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Large(2)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Bool'},
-           'Large(3)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Large(3)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Bool'},
-           'Large(4)': {'environmental': False,
-                        'normal': True,
-                        'reading': 'Large(4)',
-                        'relevant': False,
-                        'status': 'UNKNOWN',
-                        'typ': 'Bool'}},
  'Length': {'Length(1)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(1)',
@@ -250,13 +153,6 @@ Irrelevant:
                                                                  'relevant': True,
                                                                  'status': 'UNKNOWN',
                                                                  'typ': 'Bool'}},
- 'Perimeter': {'Perimeter': {'environmental': False,
-                             'normal': True,
-                             'reading': 'Perimeter',
-                             'relevant': False,
-                             'status': 'UNKNOWN',
-                             'typ': 'Real',
-                             'value': ''}},
  'Sides': {'Sides': {'environmental': False,
                      'normal': True,
                      'reading': 'Sides',
@@ -294,13 +190,6 @@ Irrelevant:
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': False}},
- 'Surface': {'Surface': {'environmental': False,
-                         'normal': True,
-                         'reading': 'Surface',
-                         'relevant': False,
-                         'status': 'UNKNOWN',
-                         'typ': 'Real',
-                         'value': ''}},
  'Type': {'Type': {'environmental': False,
                    'normal': True,
                    'reading': 'Type',
@@ -308,12 +197,4 @@ Irrelevant:
                    'status': 'UNKNOWN',
                    'typ': 'type',
                    'value': '',
-                   'values': ['triangle', 'quadrilateral']}},
- 'Vertices': {'Vertices': {'environmental': False,
-                           'normal': True,
-                           'reading': 'Vertices',
-                           'relevant': False,
-                           'status': 'UNKNOWN',
-                           'typ': 'Int',
-                           'value': '',
-                           'values': ['3', '4']}}}
+                   'values': ['triangle', 'quadrilateral']}}}

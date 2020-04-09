@@ -64,13 +64,13 @@ Definitions:
 Universals:  
   
 Consequences:
+  a = red <= Z3 proof
+  p <= Z3 proof
+  b = red <= Z3 proof
+  ~b = blue <= {'b'}
   a = red
-  p
   b = red
-  ~b = blue
-  a = red
-  b = red
-  c = red
+  c = red <= Z3 proof
 Simplified:  
   
 Irrelevant:  

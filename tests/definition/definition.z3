@@ -35,8 +35,8 @@ Definitions:
 Universals:  
   
 Consequences:
-  codeOf(red) = a
-  codeOf(blue) = b
+  codeOf(red) = a <= Z3 proof
+  codeOf(blue) = b <= Z3 proof
 Simplified:  
   
 Irrelevant:  

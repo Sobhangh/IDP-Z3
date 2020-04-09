@@ -45,15 +45,15 @@ Definitions:
 Universals:  
   codeOf(red) = b
 Consequences:
-  ~red = c
-  ~codeOf(red) = a
+  ~red = c <= Z3 proof
+  ~codeOf(red) = a <= {'codeOf(red)'}
   codeOf(red) = b
-  codeOf(blue) = a
-  c = blue
+  codeOf(blue) = a <= Z3 proof
+  c = blue <= Z3 proof
 Simplified:  
   
 Irrelevant:  
-  ~codeOf(red) = a
+  ~codeOf(red) = a <= {'codeOf(red)'}
 
 
 -- meta -------------------------------------

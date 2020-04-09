@@ -55,12 +55,12 @@ Definitions:
 Universals:  
   same(Piet) = Piet
 Consequences:
-  negated(Piet) = Jan
-  ~negated(Piet) = Piet
+  negated(Piet) = Jan <= Z3 proof
+  ~negated(Piet) = Piet <= {'negated(Piet)'}
   same(Piet) = Piet
-  same(Jan) = Jan
+  same(Jan) = Jan <= Z3 proof
   negated(Piet) = Jan
-  negated(Jan) = Piet
+  negated(Jan) = Piet <= Z3 proof
 Simplified:  
   same((Piet)) = negated((Jan))
 Irrelevant:  

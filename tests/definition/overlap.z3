@@ -36,9 +36,9 @@ Definitions:
 Universals:  
   t0 = Piet
 Consequences:
-  t = Piet
+  t = Piet <= Z3 proof
   t0 = Piet
-  t1 = Piet
+  t1 = Piet <= Z3 proof
 Simplified:  
   
 Irrelevant:  

@@ -321,30 +321,30 @@ Universals:
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Consequences:
-  ~Type = triangle
+  ~Type = triangle <= Z3 proof
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
-  Type = quadrilateral
+  Type = quadrilateral <= Z3 proof
   Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
   ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
-  Convex
+  Convex <= Z3 proof
   ∀n[side] : Angle(n) < 180
   ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
   ~Subtype = regular_triangle <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Sides = 3'}
-  ~Subtype = irregular
-  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
-  ∃n[side] : Angle(n) = 90
-  Length(1) = Length(3)
-  Length(2) = Length(4)
-  Length(1) ≤ (Length(2) + Length(3))
-  Length(3) ≤ (Length(1) + Length(2))
+  ~Subtype = irregular <= Z3 proof
+  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n) <= Z3 proof
+  ∃n[side] : Angle(n) = 90 <= Z3 proof
+  Length(1) = Length(3) <= Z3 proof
+  Length(2) = Length(4) <= Z3 proof
+  Length(1) ≤ (Length(2) + Length(3)) <= Z3 proof
+  Length(3) ≤ (Length(1) + Length(2)) <= Z3 proof
   Sides = 4
   Vertices = 4
   Type = quadrilateral
-  Angle(1) = 90
-  Angle(2) = 90
-  Angle(3) = 90
-  Angle(4) = 90
+  Angle(1) = 90 <= Z3 proof
+  Angle(2) = 90 <= Z3 proof
+  Angle(3) = 90 <= Z3 proof
+  Angle(4) = 90 <= Z3 proof
 Simplified:  
   (Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1))) ∧ ((Length(4) = Length(1))))))
   ((((Subtype = square) ∨ (Subtype = rectangle))))

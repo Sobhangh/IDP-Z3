@@ -157,3 +157,7 @@ class NoSet(object):
         return self
     def extend(self, elems):
         return self
+
+class ProofZ3(NoSet):
+    def __str__(self):
+        return 'Z3 proof'

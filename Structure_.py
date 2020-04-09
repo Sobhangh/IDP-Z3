@@ -114,10 +114,11 @@ class Term(Assignment):
     def as_substitution(self, case):
         return None, None
 
-    def assign(self, value: DatatypeRef, case, CONSQ: Status):
+    def assign(self, value: DatatypeRef, proof, case, CONSQ: Status):
         self.sentence = cast (Equality, self.sentence)
         ass = Assignment(Equality(self.sentence.variable, value), True, CONSQ)
         ass.relevant = True
+        ass.proof = proof
         case.assignments[self.sentence.code] = ass
         return ass
 
@@ -136,7 +137,8 @@ class Equality(Expression):
             self.translated = variable.translated
         self.str = self.code
         self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
-        self.proof = None
+        self.is_subtence = True
+        self.proof = NoSet()
 
     def __str__(self): return self.code
 
