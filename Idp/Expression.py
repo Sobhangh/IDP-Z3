@@ -55,7 +55,7 @@ class Expression(object):
         self.is_subtence = None           # True if sub-sentence in original code
         self.fresh_vars = None            # Set[String]
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
-        self._unknown_symbols = None      # list of uninterpreted symbols not starting with '_'
+        self._unknown_symbols = None      # Dict[name, Declaration] list of uninterpreted symbols not starting with '_'
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self.translated = None            # the Z3 equivalent
         self._reified = None

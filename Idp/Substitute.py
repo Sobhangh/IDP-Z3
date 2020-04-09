@@ -128,10 +128,12 @@ def substitute(self, e0, e1, todo=None, case=None):
             if new_branch == self: # justification is satisfied
                 if todo is not None:
                     todo.append((self, True, Proof(new_branch).update(new_branch.proof)))
+                    self.just_branch = None
                 return self._replace_by(TRUE, new_branch.proof)
             if new_branch == AUnary.make('~', self): # justification is satisfied
                 if todo is not None:
                     todo.append((self, False, Proof(new_branch).update(new_branch.proof)))
+                    self.just_branch = None
                 return self._replace_by(FALSE, new_branch.proof)
             out = out._change(just_branch= new_branch)
             # if todo is not None:
@@ -479,7 +481,7 @@ def interpret(self, theory):
     elif self.name in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs
-        self.just_branch = theory.clark[self.name].instantiate(sub_exprs, theory)
+        self.just_branch = theory.clark[self.name].instantiate_definition(sub_exprs, theory)
         return self
     else:
         return self

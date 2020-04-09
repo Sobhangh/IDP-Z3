@@ -444,6 +444,7 @@ class Definition(object):
         for symbol, rules in self.clark.items():
             exprs = sum(([rule.body] for rule in rules), [])
             rules[0].body = ADisjunction.make('∨', exprs)
+            rules[0].body.mark_subtences()
             self.clark[symbol] = rules[0]
             
         # expand quantifiers and interpret symbols with structure
@@ -506,7 +507,8 @@ class Rule(object):
         return self
 
     def rename_args(self, new_vars):
-        """ input : '!v: f(args) <- body(args)'
+        """ for Clark's completion
+            input : '!v: f(args) <- body(args)'
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
 
         subst = {}
@@ -543,6 +545,7 @@ class Rule(object):
         return self
 
     def compute(self, theory):
+        """ expand quantifiers and interpret """
         self.body = self.body.expand_quantifiers(theory)
 
         # compute self.expanded, by expanding:
@@ -562,7 +565,7 @@ class Rule(object):
         self.expanded = self.expanded.interpret(theory)
         return self
 
-    def instantiate(self, new_args, theory, value=None):
+    def instantiate_definition(self, new_args, theory, value=None):
         out = self.body
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
@@ -691,13 +694,13 @@ class Goal(object):
                 just = []
                 for args in self.decl.domain:
                     if self.decl.type.name == 'bool':
-                        instance = rule.instantiate(args, idp.theory)
+                        instance = rule.instantiate_definition(args, idp.theory)
                         just.append(instance)
                         just.extend(instance.justifications())
                     else:
                         just1 = []
                         for out in self.decl.range:
-                            instance = rule.instantiate(args, idp.theory, out)
+                            instance = rule.instantiate_definition(args, idp.theory, out)
                             just1.append(instance)
                             just.extend(instance.justifications())
                         just.append(ADisjunction.make('∨', just1))
