@@ -18,7 +18,7 @@
 """
 from z3 import And, Not, sat, unsat, unknown, is_true
 
-from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction
+from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from Solver import mk_solver
 from Structure_ import json_to_literals, Equality, Assignment, Term, Status
 from utils import *
@@ -55,6 +55,7 @@ class Case:
 
         for GuiLine in self.GUILines.values():
             GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
+                or (type(GuiLine)==AComparison and GuiLine.is_assignment) \
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .assignments

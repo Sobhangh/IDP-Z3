@@ -362,7 +362,8 @@ class BinaryOperator(Expression):
     def _derive(self):
         if self.type is None:
             self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
-               else 'int'
+                   else 'int'  if any(e.type == 'int'  for e in self.sub_exprs) \
+                   else self.sub_exprs[0].type # constructed type, without arithmetic
         return self
 
     def mark_subtences(self):
@@ -431,13 +432,27 @@ class ADisjunction(BinaryOperator):
 class AConjunction(BinaryOperator):
     pass
 
+
 class AComparison(BinaryOperator):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.is_assignment = None
+
     def annotate(self, symbol_decls, q_vars):
         # a≠b --> Not(a=b)
         if len(self.sub_exprs) == 2 and self.operator == ['≠']:
             out = AUnary.make('~', AComparison(sub_exprs=self.sub_exprs, operator='='))
-            return out.annotate(symbol_decls, q_vars)
-        return super().annotate(symbol_decls, q_vars)
+            return out.annotate(symbol_decls, q_vars) # will annotate the AComparison too
+        out = super().annotate(symbol_decls, q_vars)
+        return self._derive()
+
+    def _derive(self):
+        # f(x)=y
+        self.is_assignment = len(self.sub_exprs) == 2 and self.operator in [['='], ['≠']] \
+            and type(self.sub_exprs[0]).__name__ in ["AppliedSymbol", "Variable"] \
+            and all(e.as_ground() is not None for e in self.sub_exprs[0].sub_exprs) \
+            and self.sub_exprs[1].as_ground() is not None
+        return super()._derive()
 
 
 class ASumMinus(BinaryOperator):

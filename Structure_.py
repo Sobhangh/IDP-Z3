@@ -81,7 +81,7 @@ class Assignment(object):
         if self.truth is not None:
             old = self.sentence
             new = cast(Expression, TRUE if self.truth else FALSE)
-            if self.truth:  # analyze equalities
+            if self.truth:  # analyze true equalities
                 if isinstance(old, Equality):
                     if is_number(old.value):
                         new = NumberConstant(number=str(old.value))
@@ -89,11 +89,11 @@ class Assignment(object):
                     elif str(old.value) in case.idp.vocabulary.symbol_decls:
                         new = case.idp.vocabulary.symbol_decls[str(old.value)]
                         old = old.variable
-                elif isinstance(old, AComparison) and len(old.operator) == 1 and old.operator[0] == '=':
-                    if type(old.sub_exprs[1]) in [Constructor, NumberConstant]:
+                elif isinstance(old, AComparison) and old.operator == ['=']:
+                    if   type(old.sub_exprs[1]) in [Constructor, NumberConstant]:
                         new = old.sub_exprs[1]
                         old = old.sub_exprs[0]
-                    elif isinstance(old.sub_exprs[0], Constructor):
+                    elif type(old.sub_exprs[0]) in [Constructor, NumberConstant]:
                         new = old.sub_exprs[0]
                         old = old.sub_exprs[1]
             return old, new
