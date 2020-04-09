@@ -122,7 +122,8 @@ def substitute(self, e0, e1, todo=None, case=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
     if self == e0: # based on repr !
-        return self._replace_by(e1, Proof(e0 if e1 in [TRUE, FALSE] else None))
+        proof = Proof(e0 if e1 in [TRUE, FALSE] or type(e1) in [NumberConstant, Constructor] else None)
+        return self._replace_by(e1, proof)
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo, case) for e in self.sub_exprs), True)
         if out.just_branch is not None:
@@ -335,6 +336,7 @@ def update_exprs(self, new_expr_generator, with_proof=False):
     operands = list(new_expr_generator)
     operands1 = [e.as_ground() for e in operands]
     if all(e is not None for e in operands1):
+        self.proof.extend(operands)
         acc = operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr in zip(self.operator, operands1[1:]):
@@ -361,6 +363,7 @@ def update_arith(self, family, new_expr_generator, with_proof=False):
         nonlocal acc, ops, exprs
         expr1 = expr.as_ground()
         if expr1 is not None:
+            self.proof.add(expr)
             if op == '+':
                 acc += expr1
             elif op == '-':
@@ -410,6 +413,7 @@ def update_exprs(self, new_expr_generator, with_proof=False):
         operands1 = [e.as_ground() for e in operands]
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
+            self.proof.extend(operands)
             out = operands1[0] % operands1[1]
             return self._replace_by(NumberConstant(number=str(out)))
         else:
@@ -426,6 +430,7 @@ def update_exprs(self, new_expr_generator, with_proof=False):
     operands1 = [e.as_ground() for e in operands]
     if len(operands) == 2 \
     and all(e is not None for e in operands1):
+        self.proof.extend(operands)
         out = operands1[0] ** operands1[1]
         return self._replace_by(NumberConstant(number=str(out)))
     else:

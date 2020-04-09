@@ -1,0 +1,9 @@
+vocabulary {
+    x:int
+    y:int
+} 
+theory {
+    x=0.
+    ~(x=0)|(x=0).
+}
+view expanded

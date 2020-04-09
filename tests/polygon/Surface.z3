@@ -324,9 +324,9 @@ Consequences:
   ~Type = triangle
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
   Type = quadrilateral
-  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type = quadrilateral'}
+  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
   ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
-  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides = 4'}
+  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
   Convex
   ∀n[side] : Angle(n) < 180
   ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}

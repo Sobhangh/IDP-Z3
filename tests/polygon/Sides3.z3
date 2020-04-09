@@ -356,21 +356,21 @@ Universals:
   0 ≤ Height
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
 Consequences:
-  Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides = 3'}
-  ~Type = quadrilateral <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Sides = 4'}
+  Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
+  ~Type = quadrilateral <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Sides', 'Sides = 4'}
   ~Sides = 4
-  Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)))', 'Sides = 3'}
-  ~Vertices = 4 <= {'(((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 4'}
-  Convex <= {'((Sides = 3) ⇒ Convex)', 'Sides = 3'}
+  Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)))', 'Sides', 'Sides = 3'}
+  ~Vertices = 4 <= {'(((Vertices = 4) ⇔ (Sides = 4)))', 'Sides', 'Sides = 4'}
+  Convex <= {'((Sides = 3) ⇒ Convex)', 'Sides', 'Sides = 3'}
   ∀n[side] : Angle(n) < 180
-  ~Subtype = square <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides = 4'}
-  ~Subtype = rectangle <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides = 4'}
+  ~Subtype = square <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides', 'Sides = 4'}
+  ~Subtype = rectangle <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides', 'Sides = 4'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   ~Length(2) = Length(4)
-  Length(1) ≤ (Length(2) + Length(3)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type = triangle'}
-  Length(2) ≤ (Length(3) + Length(1)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type = triangle'}
-  Length(3) ≤ (Length(1) + Length(2)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type = triangle'}
-  Surface = ((Base * Height) / 2) <= {'(Type = triangle) ⇒ (Surface = ((Base * Height) / 2))', 'Type = triangle'}
+  Length(1) ≤ (Length(2) + Length(3)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
+  Length(2) ≤ (Length(3) + Length(1)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
+  Length(3) ≤ (Length(1) + Length(2)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
+  Surface = ((Base * Height) / 2) <= {'(Type = triangle) ⇒ (Surface = ((Base * Height) / 2))', 'Type', 'Type = triangle'}
   ~Surface = (-(1))
   Sides = 3
   Vertices = 3

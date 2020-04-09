@@ -1,0 +1,78 @@
+
+-- original ---------------------------------
+vocabulary {
+    x:int
+    y:int
+} 
+theory {
+    x=0.
+    ~(x+1=1)|(x+1=1).
+}
+view expanded
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
+x == 0
+
+Or(Not(1 + x == 1), 1 + x == 1)
+
+-- subtences ------------------------------------
+x = 0
+(x + 1) = 1
+
+-- GUILines ------------------------------------
+x
+y
+x = 0
+(x + 1) = 1
+
+-- case -------------------------------------
+Type:        
+  
+Definitions: 
+  
+Universals:  
+  x = 0
+Consequences:
+  (x + 1) = 1
+  x = 0
+Simplified:  
+  
+Irrelevant:  
+  (x + 1) = 1
+
+
+-- meta -------------------------------------
+{'symbols': [{'idpname': 'x', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
+ 'title': 'Interactive Consultant'}
+
+-- propagation ------------------------------
+{' Global': {'env_dec': False},
+ 'x': {'(x + 1) = 1': {'environmental': False,
+                       'normal': False,
+                       'reading': '(x + 1) = 1',
+                       'relevant': False,
+                       'status': 'CONSEQUENCE',
+                       'typ': 'Bool',
+                       'value': True},
+       'x': {'environmental': False,
+             'normal': True,
+             'reading': 'x',
+             'relevant': True,
+             'status': 'CONSEQUENCE',
+             'typ': 'Int',
+             'value': '0'},
+       'x = 0': {'environmental': False,
+                 'normal': False,
+                 'reading': 'x = 0',
+                 'relevant': True,
+                 'status': 'UNIVERSAL',
+                 'typ': 'Bool',
+                 'value': True}},
+ 'y': {'y': {'environmental': False,
+             'normal': True,
+             'reading': 'y',
+             'relevant': False,
+             'status': 'UNKNOWN',
+             'typ': 'Int',
+             'value': ''}}}

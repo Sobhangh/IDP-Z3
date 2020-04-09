@@ -112,15 +112,23 @@ class Proof(collections.OrderedDict, collections.MutableSet):
             self.add(elem) # add proof of elem
 
     def update(self, other):
-        if type(other) != NoSet:
+        " adds the other proof "
+        if type(other) != NoSet: # == Proof
             for k, v in other.items():
                 self[k] = v
         return self
 
     def add(self, elem):
+        " adds the proof of elem, and elem if it is a subtence "
         self.update(elem.proof)
         if elem.is_subtence:
             self[elem.code] = elem.is_subtence
+        return self
+
+    def extend(self, elems):
+        " adds a list of expressions and their proofs "
+        for elem in elems:
+            self.add(elem)
         return self
 
     def __repr__(self):
@@ -143,7 +151,9 @@ class Proof(collections.OrderedDict, collections.MutableSet):
     """
 
 class NoSet(object):
+    def update(self, other):
+        return self
     def add(self, elem):
         return self
-    def update(self, other):
+    def extend(self, elems):
         return self
