@@ -106,7 +106,7 @@ def log(function):
         Log( f"{nl}|------------"
              f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
           f"{f'{nl}|proof: {str(self.proof)}' if self.proof else ''}"
-             f"{nl}|+ {str(e0)} -> {str(e1)}"
+             f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
              , indent)
         indent +=4
         out = function(*args, *kwds)
@@ -121,7 +121,7 @@ def log(function):
 def substitute(self, e0, e1, todo=None, case=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
-    if self == e0: # based on repr !
+    if self == e0 or self.code == e0.code: # first == based on repr !
         proof = Proof(e0 if e1 in [TRUE, FALSE] or type(e1) in [NumberConstant, Constructor] else None)
         return self._replace_by(e1, proof)
     else:

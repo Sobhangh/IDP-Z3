@@ -35,8 +35,8 @@ Definitions:
 Universals:  
   
 Consequences:
-  LipLen = Short
-  JacketDesign = Design_230
+  LipLen = Short <= Z3 proof
+  JacketDesign = Design_230 <= Z3 proof
 Simplified:  
   
 Irrelevant:  

@@ -122,6 +122,7 @@ class Case:
             if l.truth is not None and (all_ or l.is_environmental))
         self.propagate(to_propagate, all_)
 
+        Log(f"{nl}Z3 propagation ********************************")
         # determine relevant assignemnts
         if all_:
             relevant_symbols, relevant_subtences = self.get_relevant_subtences(all_=True)

@@ -92,14 +92,14 @@
 |   proof: {'x'}
 |------------
 |*x = 0
-|+ (true) -> true
+|+ (x + 1) = 1 -> true  (or (true) -> true)
     |------------
     |x
-    |+ (true) -> true
+    |+ (x + 1) = 1 -> true  (or (true) -> true)
     |== x
     |------------
     |0
-    |+ (true) -> true
+    |+ (x + 1) = 1 -> true  (or (true) -> true)
     |== 0
 |== *x = 0
 |------------
@@ -112,3 +112,4 @@
     |== true
 |== *(true)
 |   proof: {'x'}
+Z3 propagation ********************************

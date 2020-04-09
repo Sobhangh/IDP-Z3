@@ -61,7 +61,8 @@ def Log(string, indent=0):
     global LOG_FILE
     if LOG_FILE:
         f = open(LOG_FILE, "a")
-        f.write(string.replace(nl, nl+(' '*indent)))
+        out = string.replace(nl, nl+(' '*indent))
+        f.write(out)
         f.close()
 
 

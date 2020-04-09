@@ -83,3 +83,4 @@
         |== (false)
     |== ((false))
 |== ((~(LipLen = Standard)))
+Z3 propagation ********************************
