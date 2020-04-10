@@ -343,7 +343,7 @@ def update_exprs(self, new_expr_generator):
         acc = operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr in zip(self.operator, operands1[1:]):
-            if not (BinaryOperator.MAP[op]) (acc, expr):
+            if not (BinaryOperator.MAP[op]) (acc.translate(), expr.translate()):
                 return self._replace_by(FALSE)
             acc = expr
         return self._replace_by(TRUE)
@@ -367,17 +367,18 @@ def update_arith(self, family, new_expr_generator):
         expr1 = expr.as_ground()
         if expr1 is not None:
             self.proof.add(expr)
+            self.proof.add(expr1)
             if op == '+':
-                acc += expr1
+                acc += expr1.translate()
             elif op == '-':
-                acc -= expr1
+                acc -= expr1.translate()
             elif op == '*':
-                acc *= expr1
+                acc *= expr1.translate()
             elif op == '/':
                 if isinstance(acc, int) and expr.type == 'int': # integer division
-                    acc //= expr1
+                    acc //= expr1.translate()
                 else:
-                    acc /= expr1
+                    acc /= expr1.translate()
         else:
             ops.append(op)
             exprs.append(expr)
@@ -417,7 +418,7 @@ def update_exprs(self, new_expr_generator):
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
             self.proof.extend(operands)
-            out = operands1[0] % operands1[1]
+            out = operands1[0].translate() % operands1[1].translate()
             return self._replace_by(NumberConstant(number=str(out)))
         else:
             return self._change(sub_exprs=operands)
@@ -434,7 +435,7 @@ def update_exprs(self, new_expr_generator):
     if len(operands) == 2 \
     and all(e is not None for e in operands1):
         self.proof.extend(operands)
-        out = operands1[0] ** operands1[1]
+        out = operands1[0].translate() ** operands1[1].translate()
         return self._replace_by(NumberConstant(number=str(out)))
     else:
         return self._change(sub_exprs=operands)
@@ -455,8 +456,8 @@ def update_exprs(self, new_expr_generator):
     else: # '-'
         a = operand.as_ground()
         if a is not None:
-            if type(a) in [int, float]:
-                return self._replace_by(NumberConstant(number=str(- a)))
+            if type(a) == NumberConstant:
+                return self._replace_by(NumberConstant(number=str(- a.translate())))
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
@@ -471,13 +472,36 @@ def expand_quantifiers(self, theory):
     forms = [form.expand_quantifiers(theory)]
     for name, var in self.q_vars.items():
         if var.decl.range:
-            forms = [f.substitute(var, val) for val in var.decl.range for f in forms]
+            out = []
+            for f in forms:
+                for val in var.decl.range:
+                    new_f = f.substitute(var, val)
+                    new_f.proof = Proof(AComparison.make('=', [var, val])).update(new_f.proof)
+                    out.append(new_f)
+            forms = out
         else:
             raise Exception('Can only quantify aggregates over finite domains')
     self.vars = None # flag to indicate changes
     return self._change(sub_exprs=forms)
 AAggregate.expand_quantifiers = expand_quantifiers
 
+def update_exprs(self, new_expr_generator):
+    operands = list(new_expr_generator)
+    operands1 = [e.as_ground() for e in operands]
+    if all(e is not None for e in operands1):
+        self.proof.extend(operands)
+        acc = 0
+        for expr, expr1 in zip(operands, operands1):
+            if expr1 is not None:
+                acc += expr1.translate() if self.aggtype == 'sum' else 1
+            else:
+                exprs.add(expr)
+        out = NumberConstant(number=str(acc))
+        out.proof = self.proof
+        return self._replace_by(out, proof=self.proof)
+
+    return self
+AAggregate.update_exprs = update_exprs
 
 
 # Class AppliedSymbol #######################################################
@@ -487,7 +511,8 @@ def interpret(self, theory):
     if self.decl.interpretation is not None: # has a structure
         self.is_subtence = False
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
-        return self._replace_by(out)
+        proof = Proof(AComparison.make('=', [self, out])).update(self.proof)
+        return self._replace_by(out, proof=proof)
     elif self.name in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs

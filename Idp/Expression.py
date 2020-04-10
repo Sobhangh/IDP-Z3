@@ -112,7 +112,9 @@ class Expression(object):
                 self._subtences.update(self.just_branch.subtences())
         return self._subtences
 
-    def as_ground(self): return None
+    def as_ground(self): 
+        " returns a NumberConstant or Constructor, or None "
+        return None
 
     def unknown_symbols(self):
         if self._unknown_symbols is None:
@@ -174,7 +176,7 @@ class Constructor(Expression):
     
     def __str__(self): return self.name
     def str_   (self): return self.name
-    def as_ground(self): return self.index
+    def as_ground(self): return self
     def translate(self): return self.translated
 
 TRUE  = Constructor(name='true')
@@ -722,7 +724,7 @@ class NumberConstant(Expression):
     def __str__(self): return self.number
     def str_   (self): return self.number
 
-    def as_ground(self): return self.translated
+    def as_ground(self): return self
 
     def translate(self):
         return self.translated

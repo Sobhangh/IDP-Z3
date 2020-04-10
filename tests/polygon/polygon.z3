@@ -301,11 +301,11 @@ Type:
 Definitions: 
   Rule:∀['$Large!0$'][]: Large($Large!0$) ⇔10 < ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)
 Universals:  
-  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'n = 2', 'n = 3', 'n = 4'}
-  ~Subtype = rectangle <= {'((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (Length(1) ≠ Length(2))))', 'Length(1) = Length(3)'}
+  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length((2)) = (((2)))', 'n = 2', 'Length(2) = 2', 'Length((3)) = ((3))', 'n = 3', 'Length(3) = 3', 'Length((4)) = (4)', 'n = 4', 'Length(4) = 4', 'Length((5)) = ((((5))))'}
+  ~Subtype = rectangle <= {'((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (Length(1) ≠ Length(2))))', 'Length(1) = 1', 'Length(3) = 3', 'Length(1) = Length(3)'}
   Perimeter = (sum{n[side] : true : Length(n)})
   (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
-  ∀x[side] : 0 ≤ Length(x) <= {'x = 1', 'x = 2', 'x = 3', 'x = 4'}
+  ∀x[side] : 0 ≤ Length(x) <= {'x = 1', 'Length(1) = 1', 'x = 2', 'Length(2) = 2', 'x = 3', 'Length(3) = 3', 'x = 4', 'Length(4) = 4'}
   ∀x[side] : 0 ≤ Angle(x)
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
@@ -313,15 +313,15 @@ Universals:
   3 ≤ Sides ≤ 4
   3 ≤ Vertices ≤ 4
 Consequences:
-  ~Large(1) <= {'Large(1) ⇔ (false)'}
+  ~Large(1) <= {'Large(1) ⇔ (false)', 'Length(1) = 1', 'Length(2) = 2', 'Length(3) = 3', 'Length(4) = 4', 'Length(n) = ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)'}
   ~Type = triangle <= Z3 proof
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
   Type = quadrilateral <= Z3 proof
   Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
   ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
-  ~Equilateral <= {'(Equilateral ⇔ (∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)))', 'n = 2', 'Sides'}
-  ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n) <= {'n = 2', 'Sides'}
+  ~Equilateral <= {'(Equilateral ⇔ (∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)))', 'Length(1) = 1', 'n = 2', 'Length(2) = 2', 'Sides'}
+  ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n) <= {'Length(1) = 1', 'n = 2', 'Length(2) = 2', 'Sides'}
   ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
   ~Subtype = regular_triangle <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Sides = 3'}
   Subtype = irregular <= Z3 proof
@@ -339,8 +339,8 @@ Consequences:
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
-  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'n = 2', 'n = 3', 'n = 4'}
-  ∀x[side] : 0 ≤ Length(x) <= {'x = 1', 'x = 2', 'x = 3', 'x = 4'}
+  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length((2)) = (((2)))', 'n = 2', 'Length(2) = 2', 'Length((3)) = ((3))', 'n = 3', 'Length(3) = 3', 'Length((4)) = (4)', 'n = 4', 'Length(4) = 4', 'Length((5)) = ((((5))))'}
+  ∀x[side] : 0 ≤ Length(x) <= {'x = 1', 'Length(1) = 1', 'x = 2', 'Length(2) = 2', 'x = 3', 'Length(3) = 3', 'x = 4', 'Length(4) = 4'}
   3 ≤ Sides ≤ 4
   3 ≤ Vertices ≤ 4
 
