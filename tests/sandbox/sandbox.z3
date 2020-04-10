@@ -5,7 +5,7 @@ vocabulary {
     p
 } 
 theory {
-    p <=> (∀c[color]: c=red).
+    p() <=> (∀c[color]: c=red).
 }
 view expanded
 -- vocabulary -------------------------------

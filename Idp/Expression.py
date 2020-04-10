@@ -594,9 +594,15 @@ class AppliedSymbol(Expression):
         return out.annotate1()
 
     def __str__(self):
-        return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
+        if len(self.sub_exprs) == 0:
+            return str(self.s)
+        else:
+            return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
     def str_(self):
-        return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
+        if len(self.sub_exprs) == 0:
+            return self.s.str
+        else:
+            return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
 
     def annotate(self, symbol_decls, q_vars):
         self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
@@ -632,8 +638,11 @@ class AppliedSymbol(Expression):
                 arg = self.sub_exprs[0].translate()
                 self.translated = If(arg >= 0, arg, -arg)
             else:
-                arg = [x.translate() for x in self.sub_exprs]
-                self.translated = (self.decl.translated)(arg)
+                if len(self.sub_exprs) == 0:
+                    self.translated = self.decl.translated
+                else:
+                    arg = [x.translate() for x in self.sub_exprs]
+                    self.translated = (self.decl.translated)(arg)
         return self.translated
 
     def has_environmental(self, truth):
