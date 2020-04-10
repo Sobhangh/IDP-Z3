@@ -2,11 +2,11 @@ TODO
 =
 - [ ] relevance and consequences [[20200403111308]]
 - [ ] Aanbesteding demo
-- [ ] AWS Lambda [[20200401113342]] 
+- [ ] [[AWS hosting]] [[20200401113342]] 
 
 - [ ] flatten nested applicaton f(f(x))
 - [ ] Explanations: inject values in message
-- [ ] consequence in dropdown [[20200408162211]] 
+- [ ] [[consequence in dropdown]] [[20200408162211]] 
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
 
@@ -66,3 +66,4 @@ TODO
 - [ ] distinguish between x=1 entry and x=1 atom in output structure
 - [ ] p(real) should be possible
 
+#general

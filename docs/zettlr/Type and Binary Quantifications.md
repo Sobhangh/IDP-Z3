@@ -16,4 +16,4 @@ Principles:
 * A formula is _over-approximatable_ if it uses computable types only.  This over-approximation is computed by an algebra.
 * A _Binary quantified formula_ is a formula of the form $\forall x [\phi(x)]: \psi(x).$  or $\exists x [\phi(x)]: \psi(x).$, where $\phi(x)$ is over-approximatable
 
-#IC
+#analysis #research

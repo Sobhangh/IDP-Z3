@@ -23,7 +23,7 @@ When are consequences relevant ?
 * consequences that are instance assignments
 
 what is a (partial) proof ?
-* a list of subtences that are known to be True or False, and of variable changes to ground
+* a list of [[subtences]] that are known to be True or False, and of variable changes to ground
     * more precise than a list of changes
 * that contribute to proving a subtence
 * not: expand_quantifiers (instantiate), fresh-variable substitutions (instantiate)
@@ -36,7 +36,7 @@ problem with p & q => s. p. q.
             * require identical types ? 
                 * not fool proof as you may have a mix of conjunct/disjunct ? no, because replace by value or bool
             * keep AST tree unchanged, but attach a value to each node ?
-            * substitute and update_exprs have their own equality condition ?
+            * [[substitute]] and update_exprs have their own equality condition ?
         * reify subtences with just_branch, to avoid nested comparisons ?
         * the implication does not know that p is part of the proof → propagate proofs to top: expensive ??
         * pass the subtence being changed; add it as a reason to the proof when an expression is impacted
@@ -49,12 +49,6 @@ equalities:
 * substitution of variables
 * 
 
-Possible performance improvement of substitute(), but is missing some substitutions !
-```py
-if todo is  not  None: \# not for expand_quantifiers, interpret
-    if  all(e not  in  self.\_unknown\_symbols for e in e0.unknown_symbols()):
-				        return  self
-```
 
 
-#ic #icanalysis
+#analysis

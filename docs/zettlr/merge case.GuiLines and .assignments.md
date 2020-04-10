@@ -3,7 +3,7 @@ Merge case.GuiLines and .assignments
 20200408193022
 
 Currently:
-* GuiLines: vocabulary.terms + subtences
+* GuiLines: vocabulary.terms + [[subtences]]
 * Assignments: subtences + given
 
 Problems:
@@ -13,3 +13,5 @@ Problems:
 
 TODO:
 * Assignment() create with visible
+
+#refactoring

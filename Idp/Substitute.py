@@ -21,7 +21,7 @@
 
 Adds substitute, expand_quantifiers and simplify to logic expression classes
 
-( see zettlr/Substitute.md )
+( see docs/zettlr/Substitute.md )
 
 """
 

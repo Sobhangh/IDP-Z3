@@ -1,4 +1,4 @@
-AWS Lambda
+AWS hosting
 =
 20200401113342
 
@@ -50,4 +50,4 @@ TODO
     * Use [Beanstalk](https://docs.aws.amazon.com/fr_fr/elasticbeanstalk/latest/dg/Welcome.html) ? [version des applications](https://docs.aws.amazon.com/fr_fr/elasticbeanstalk/latest/dg/applications-versions.html)
 * monitoring ?
 
-#IC #hosting
+#hosting

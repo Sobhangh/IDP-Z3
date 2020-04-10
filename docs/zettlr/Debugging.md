@@ -3,7 +3,7 @@ Debugging
 20200407220958
 
 Challenges:
-* highly recursive → **use conditional breakpoints**
+* highly recursive → **use conditional breakpoints** on Log statements
 * complex data structure → improve visualisation →use **repr**, **logs**
 * fix a problem results in a new one → seek to understand → **mermaid chart**, **logs**
 * too many changes to main.py
@@ -16,4 +16,4 @@ Phases:
         * test hypothesis : change the cause manually and see it if fixes it ?
 * 
 
-#ic
+#general

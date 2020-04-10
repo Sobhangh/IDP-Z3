@@ -24,4 +24,4 @@ Where to detect assignments ?
 * in update_regs ?
 
 
-#icanalysis
+#analysis #GUI

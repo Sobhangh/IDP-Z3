@@ -7,4 +7,4 @@ goal: allow predicates in English, e.g. 'x is a prime'
         * and it deals with ambiguity: the same sentence may have different encoding
         * [how to replace text with css](https://stackoverflow.com/questions/7896402/how-can-i-replace-text-with-css)
 
-#IC
+#GUI #research

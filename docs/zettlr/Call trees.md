@@ -1,3 +1,5 @@
+see [[Substitute]] 
+
 To generate the *.png files:
 
 * set "with_png = True" at top of rest.py
