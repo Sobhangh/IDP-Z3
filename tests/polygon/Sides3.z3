@@ -274,7 +274,7 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Surface = ((Base * Height) / 2)
 Surface = (Length(1) * Length(2))
-Surface = (-(1))
+Surface = -1
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
@@ -333,7 +333,7 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Surface = ((Base * Height) / 2)
 Surface = (Length(1) * Length(2))
-Surface = (-(1))
+Surface = -1
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
@@ -355,6 +355,7 @@ Universals:
   0 ≤ Base
   0 ≤ Height
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
+  Sides = 3
 Consequences:
   Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
   ~Type = quadrilateral <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Sides', 'Sides = 4'}
@@ -362,19 +363,18 @@ Consequences:
   Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)))', 'Sides', 'Sides = 3'}
   ~Vertices = 4 <= {'(((Vertices = 4) ⇔ (Sides = 4)))', 'Sides', 'Sides = 4'}
   Convex <= {'((Sides = 3) ⇒ Convex)', 'Sides', 'Sides = 3'}
-  ∀n[side] : Angle(n) < 180
+  ∀n[side] : Angle(n) < 180 <= {'(Convex ⇔ (∀n[side] : Angle(n) < 180))', 'Convex'}
   ~Subtype = square <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides', 'Sides = 4'}
   ~Subtype = rectangle <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides', 'Sides = 4'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= Z3 proof
-  ~Length(2) = Length(4)
+  ~Length(2) = Length(4) <= Z3 proof
   Length(1) ≤ (Length(2) + Length(3)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
   Length(2) ≤ (Length(3) + Length(1)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
   Length(3) ≤ (Length(1) + Length(2)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
   Surface = ((Base * Height) / 2) <= {'(Type = triangle) ⇒ (Surface = ((Base * Height) / 2))', 'Type', 'Type = triangle'}
-  ~Surface = (-(1)) <= Z3 proof
-  Sides = 3
-  Vertices = 3
-  Type = triangle
+  ~Surface = -1 <= Z3 proof
+  Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)))', 'Sides', 'Sides = 3'}
+  Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
   Length(4) = 0 <= Z3 proof
   Angle(4) = 0 <= Z3 proof
 Simplified:  
@@ -387,10 +387,10 @@ Irrelevant:
   ~Sides = 4 <= {'Sides'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= Z3 proof
   ~Length(1) = Length(3)
-  ~Length(2) = Length(4)
+  ~Length(2) = Length(4) <= Z3 proof
   ~Length(1) = Length(2)
   ~Surface = (Length(1) * Length(2))
-  ~Surface = (-(1)) <= Z3 proof
+  ~Surface = -1 <= Z3 proof
 
 
 -- meta -------------------------------------
@@ -670,9 +670,9 @@ Irrelevant:
                      'normal': True,
                      'reading': 'Sides',
                      'relevant': True,
-                     'status': 'CONSEQUENCE',
+                     'status': 'UNIVERSAL',
                      'typ': 'Int',
-                     'value': '3',
+                     'value': '',
                      'values': ['3', '4']},
            'Sides = 3': {'environmental': False,
                          'normal': False,
@@ -749,26 +749,26 @@ Irrelevant:
                                                  'status': 'CONSEQUENCE',
                                                  'typ': 'Bool',
                                                  'value': True},
-             'Surface = (-(1))': {'environmental': False,
-                                  'normal': False,
-                                  'reading': 'Surface = (-(1))',
-                                  'relevant': False,
-                                  'status': 'CONSEQUENCE',
-                                  'typ': 'Bool',
-                                  'value': False},
              'Surface = (Length(1) * Length(2))': {'environmental': False,
                                                    'normal': False,
                                                    'reading': 'Surface = (Length(1) * Length(2))',
                                                    'relevant': False,
                                                    'status': 'UNKNOWN',
-                                                   'typ': 'Bool'}},
+                                                   'typ': 'Bool'},
+             'Surface = -1': {'environmental': False,
+                              'normal': False,
+                              'reading': 'Surface = -1',
+                              'relevant': False,
+                              'status': 'CONSEQUENCE',
+                              'typ': 'Bool',
+                              'value': False}},
  'Type': {'Type': {'environmental': False,
                    'normal': True,
                    'reading': 'Type',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'type',
-                   'value': 'triangle',
+                   'value': '',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'environmental': False,
                                    'normal': False,
@@ -790,7 +790,7 @@ Irrelevant:
                            'relevant': True,
                            'status': 'CONSEQUENCE',
                            'typ': 'Int',
-                           'value': '3',
+                           'value': '',
                            'values': ['3', '4']},
               'Vertices = 3': {'environmental': False,
                                'normal': False,

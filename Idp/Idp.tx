@@ -60,7 +60,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
     ASumMinus:     sub_exprs=MultDiv     (operator=SumMinusOp     sub_exprs=MultDiv    )+;
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
-    AUnary:                        operator=UnaryOperator  f=Aggregate;
+    AUnary: !INT !IDPFLOAT               (operator=UnaryOperator  f=Aggregate);
     AAggregate: aggtype=AggType '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
       AggType: '#' | 'card' | 'sum';
 

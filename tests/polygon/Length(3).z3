@@ -82,10 +82,10 @@ Definitions:
   
 Universals:  
   Sides = 3
+  Sides = 3
 Consequences:
   ~Subtype = rectangle <= {'(Subtype = rectangle) ⇔ (Sides = 4)', 'Sides', 'Sides = 4'}
   ~Sides = 4 <= {'Sides'}
-  Sides = 3
 Simplified:  
   Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1)))))
 Irrelevant:  
@@ -157,9 +157,9 @@ Irrelevant:
                      'normal': True,
                      'reading': 'Sides',
                      'relevant': True,
-                     'status': 'CONSEQUENCE',
+                     'status': 'UNIVERSAL',
                      'typ': 'Int',
-                     'value': '3',
+                     'value': '',
                      'values': ['3', '4']},
            'Sides = 3': {'environmental': False,
                          'normal': False,

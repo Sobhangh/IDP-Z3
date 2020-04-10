@@ -138,7 +138,7 @@ class Equality(Expression):
         self.str = self.code
         self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
         self.is_subtence = True
-        self.proof = NoSet()
+        self.proof = Proof()
 
     def __str__(self): return self.code
 
@@ -155,6 +155,7 @@ class Equality(Expression):
             return self.variable.translate()
 
     def substitute(self, e0: Expression, e1: Expression, todo=None, case=None) -> 'Equality':
+        self.proof = Proof() if todo else NoSet()
         if self.variable == e0:
             return Equality(self.variable, e1.translate())
         return self

@@ -31,8 +31,9 @@ Definitions:
   
 Universals:  
   x = 0
-Consequences:
   x = 0
+Consequences:
+  
 Simplified:  
   
 Irrelevant:  
@@ -49,9 +50,9 @@ Irrelevant:
              'normal': True,
              'reading': 'x',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Int',
-             'value': '0'},
+             'value': ''},
        'x = 0': {'environmental': False,
                  'normal': False,
                  'reading': 'x = 0',

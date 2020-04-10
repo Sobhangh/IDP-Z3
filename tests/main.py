@@ -33,7 +33,6 @@ for file in files:
 
     z3 = file.replace(".z3", ".z3z3")
     z3 = z3.replace(".idp", ".z3")
-    print(z3)
     if os.path.exists(z3):
         os.remove(z3)
     f = open(z3, "a")
@@ -61,4 +60,5 @@ for file in files:
     f.write(out     + "\r\n")
 
     f.close()
+    print("----------------")
 print("*** Total: ", round(time.time()-start,3))

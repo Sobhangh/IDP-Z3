@@ -316,10 +316,10 @@ Consequences:
   ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n) <= Z3 proof
   ~Subtype = square <= {'((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))', 'Sides', 'Sides = 4', 'Equilateral'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Subtype = rectangle', 'Subtype = square'}
-  Sides = 4
-  Vertices = 4
-  Type = quadrilateral
-  Subtype = irregular
+  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
+  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
+  Type = quadrilateral <= Z3 proof
+  Subtype = irregular <= Z3 proof
   Perimeter = 10 <= Z3 proof
   ~Large(2) <= Z3 proof
   ~Large(3) <= Z3 proof
@@ -494,7 +494,7 @@ Irrelevant:
                      'relevant': True,
                      'status': 'CONSEQUENCE',
                      'typ': 'Int',
-                     'value': '4',
+                     'value': '',
                      'values': ['3', '4']},
            'Sides = 3': {'environmental': False,
                          'normal': False,
@@ -530,7 +530,7 @@ Irrelevant:
                          'relevant': True,
                          'status': 'CONSEQUENCE',
                          'typ': 'subtype',
-                         'value': 'irregular',
+                         'value': '',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype = irregular': {'environmental': False,
                                      'normal': False,
@@ -573,7 +573,7 @@ Irrelevant:
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'type',
-                   'value': 'quadrilateral',
+                   'value': '',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'environmental': False,
                                    'normal': False,
@@ -595,7 +595,7 @@ Irrelevant:
                            'relevant': True,
                            'status': 'CONSEQUENCE',
                            'typ': 'Int',
-                           'value': '4',
+                           'value': '',
                            'values': ['3', '4']},
               'Vertices = 3': {'environmental': False,
                                'normal': False,

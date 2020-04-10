@@ -398,7 +398,6 @@ class Theory(object):
     def translate(self, idp):
         self.translated = []
         for i in self.constraints:
-            log("translating " + str(i)[:20])
             self.translated.append(i.translate())
             # optional : self.translated.extend(i.justifications())
         for d in self.definitions:

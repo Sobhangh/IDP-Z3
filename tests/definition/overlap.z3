@@ -35,9 +35,9 @@ Definitions:
   Rule:∀['$t$'][]: t($t$) ⇔(($t$ = t0)) ∨ (($t$ = t1))
 Universals:  
   t0 = Piet
+  t0 = Piet
 Consequences:
   t = Piet <= Z3 proof
-  t0 = Piet
   t1 = Piet <= Z3 proof
 Simplified:  
   
@@ -65,9 +65,9 @@ Irrelevant:
                'normal': True,
                'reading': 't0',
                'relevant': True,
-               'status': 'CONSEQUENCE',
+               'status': 'UNIVERSAL',
                'typ': 'num',
-               'value': 'Piet',
+               'value': '',
                'values': ['Jan', 'Piet']},
         't0 = Piet': {'environmental': False,
                       'normal': False,

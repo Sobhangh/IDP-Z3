@@ -54,12 +54,12 @@ Definitions:
   Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔(($negated$ = Jan) ∧ (($negated!0$ = Piet))) ∨ (($negated$ = Piet) ∧ (($negated!0$ = Jan)))
 Universals:  
   same(Piet) = Piet
+  same(Piet) = Piet
 Consequences:
   negated(Piet) = Jan <= Z3 proof
   ~negated(Piet) = Piet <= {'negated(Piet)'}
-  same(Piet) = Piet
   same(Jan) = Jan <= Z3 proof
-  negated(Piet) = Jan
+  negated(Piet) = Jan <= Z3 proof
   negated(Jan) = Piet <= Z3 proof
 Simplified:  
   same((Piet)) = negated((Jan))
@@ -88,11 +88,11 @@ Irrelevant:
                                'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'num',
-                               'value': 'Jan',
+                               'value': '',
                                'values': ['Piet', 'Jan']},
              'negated(Piet) = Jan': {'environmental': False,
                                      'normal': False,
-                                     'reading': 'negated(Piet) = Jan',
+                                     'reading': '$negated$ = Jan',
                                      'relevant': True,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
@@ -116,9 +116,9 @@ Irrelevant:
                          'normal': True,
                          'reading': 'same(Piet)',
                          'relevant': True,
-                         'status': 'CONSEQUENCE',
+                         'status': 'UNIVERSAL',
                          'typ': 'num',
-                         'value': 'Piet',
+                         'value': '',
                          'values': ['Piet', 'Jan']},
           'same(Piet) = Piet': {'environmental': False,
                                 'normal': False,

@@ -114,7 +114,7 @@ class Proof(collections.OrderedDict, collections.MutableSet):
 
     def update(self, other):
         " adds the other proof "
-        if type(other) != NoSet: # == Proof
+        if type(other) == Proof:
             for k, v in other.items():
                 self[k] = v
         return self

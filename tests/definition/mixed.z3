@@ -42,8 +42,9 @@ Definitions:
   Rule:∀[][]: p() ⇔~(q)
 Universals:  
   x = 1
-Consequences:
   x = 1
+Consequences:
+  
 Simplified:  
   p ⇒ s
 Irrelevant:  
@@ -87,9 +88,9 @@ Irrelevant:
              'normal': True,
              'reading': 'x',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Int',
-             'value': '1'},
+             'value': ''},
        'x = 1': {'environmental': False,
                  'normal': False,
                  'reading': 'x = 1',

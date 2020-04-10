@@ -68,8 +68,8 @@ Consequences:
   p <= Z3 proof
   b = red <= Z3 proof
   ~b = blue <= {'b'}
-  a = red
-  b = red
+  a = red <= Z3 proof
+  b = red <= Z3 proof
   c = red <= Z3 proof
 Simplified:  
   
@@ -94,11 +94,11 @@ Irrelevant:
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
-             'value': 'red',
+             'value': '',
              'values': ['red', 'blue']},
        'a = red': {'environmental': False,
                    'normal': False,
-                   'reading': 'a = red',
+                   'reading': '$a$ = red',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
@@ -109,7 +109,7 @@ Irrelevant:
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
-             'value': 'red',
+             'value': '',
              'values': ['red', 'blue']},
        'b = blue': {'environmental': False,
                     'normal': False,

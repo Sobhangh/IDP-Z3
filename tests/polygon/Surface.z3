@@ -328,7 +328,7 @@ Consequences:
   ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
   Convex <= Z3 proof
-  ∀n[side] : Angle(n) < 180
+  ∀n[side] : Angle(n) < 180 <= {'(Convex ⇔ (∀n[side] : Angle(n) < 180))', 'Convex'}
   ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
   ~Subtype = regular_triangle <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Sides = 3'}
   ~Subtype = irregular <= Z3 proof
@@ -338,9 +338,9 @@ Consequences:
   Length(2) = Length(4) <= Z3 proof
   Length(1) ≤ (Length(2) + Length(3)) <= Z3 proof
   Length(3) ≤ (Length(1) + Length(2)) <= Z3 proof
-  Sides = 4
-  Vertices = 4
-  Type = quadrilateral
+  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
+  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
+  Type = quadrilateral <= Z3 proof
   Angle(1) = 90 <= Z3 proof
   Angle(2) = 90 <= Z3 proof
   Angle(3) = 90 <= Z3 proof
@@ -622,7 +622,7 @@ Irrelevant:
                      'relevant': True,
                      'status': 'CONSEQUENCE',
                      'typ': 'Int',
-                     'value': '4',
+                     'value': '',
                      'values': ['3', '4']},
            'Sides = 3': {'environmental': False,
                          'normal': False,
@@ -692,7 +692,7 @@ Irrelevant:
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'type',
-                   'value': 'quadrilateral',
+                   'value': '',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'environmental': False,
                                    'normal': False,
@@ -714,7 +714,7 @@ Irrelevant:
                            'relevant': True,
                            'status': 'CONSEQUENCE',
                            'typ': 'Int',
-                           'value': '4',
+                           'value': '',
                            'values': ['3', '4']},
               'Vertices = 3': {'environmental': False,
                                'normal': False,
