@@ -20,8 +20,8 @@ view expanded
 codeOf(red) == b
 
 And((codeOf(red) == a) == (red == c),
-    (codeOf(blue) == a) == (blue == c),
     (codeOf(red) == b) == Not(red == c),
+    (codeOf(blue) == a) == (blue == c),
     (codeOf(blue) == b) == Not(blue == c))
 
 -- subtences ------------------------------------

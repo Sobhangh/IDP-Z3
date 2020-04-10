@@ -252,6 +252,8 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -305,6 +307,8 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -320,6 +324,8 @@ Universals:
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
 Consequences:
   ~Type = triangle <= Z3 proof
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
@@ -351,7 +357,8 @@ Simplified:
   ((Subtype = rectangle) ⇒ ((~(Length(1) = Length(2)))))
   ((Subtype = square) ⇔ (Equilateral))
 Irrelevant:  
-  
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
 
 
 -- meta -------------------------------------

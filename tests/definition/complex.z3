@@ -36,33 +36,33 @@ Or(negated(0) == -1, negated(0) == 0, negated(0) == 1)
 Or(negated(1) == -1, negated(1) == 0, negated(1) == 1)
 
 And(same(-1) == -1,
-    Not(same(0) == -1),
-    Not(same(1) == -1),
     Not(same(-1) == 0),
-    same(0) == 0,
-    Not(same(1) == 0),
     Not(same(-1) == 1),
+    Not(same(0) == -1),
+    same(0) == 0,
     Not(same(0) == 1),
+    Not(same(1) == -1),
+    Not(same(1) == 0),
     same(1) == 1)
 
 And(same(-1) == -1,
-    Not(same(0) == -1),
-    Not(same(1) == -1),
     Not(same(-1) == 0),
-    same(0) == 0,
-    Not(same(1) == 0),
     Not(same(-1) == 1),
+    Not(same(0) == -1),
+    same(0) == 0,
     Not(same(0) == 1),
+    Not(same(1) == -1),
+    Not(same(1) == 0),
     same(1) == 1)
 
 And((negated(-1) == -1) == (same(1) == -1),
-    (negated(0) == -1) == (same(1) == 0),
-    (negated(1) == -1) == (same(1) == 1),
     (negated(-1) == 0) == (same(0) == -1),
-    (negated(0) == 0) == (same(0) == 0),
-    (negated(1) == 0) == (same(0) == 1),
     (negated(-1) == 1) == (same(-1) == -1),
+    (negated(0) == -1) == (same(1) == 0),
+    (negated(0) == 0) == (same(0) == 0),
     (negated(0) == 1) == (same(-1) == 0),
+    (negated(1) == -1) == (same(1) == 1),
+    (negated(1) == 0) == (same(0) == 1),
     (negated(1) == 1) == (same(-1) == 1))
 
 -- subtences ------------------------------------

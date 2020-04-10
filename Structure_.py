@@ -155,7 +155,7 @@ class Equality(Expression):
             return self.variable.translate()
 
     def substitute(self, e0: Expression, e1: Expression, todo=None, case=None) -> 'Equality':
-        self.proof = Proof() if todo else NoSet()
+        self.proof = Proof()
         if self.variable == e0:
             return Equality(self.variable, e1.translate())
         return self
@@ -259,33 +259,34 @@ class Structure_(object):
         def initialise(atom):
             atomZ3 = atom.translate() #TODO
             key = atom.code
-            typ = atomZ3.sort().name()
-            for symb in atom.unknown_symbols().values():
-                if not symb.name.startswith('_'):
-                    s = self.m.setdefault(symb.name, {})
+            if type(atomZ3) != bool:
+                typ = atomZ3.sort().name()
+                for symb in atom.unknown_symbols().values():
+                    if not symb.name.startswith('_'):
+                        s = self.m.setdefault(symb.name, {})
 
-                    if typ == 'Bool':
-                        symbol = {"typ": typ}
-                    elif 0 < len(symb.range):
-                        symbol = { "typ": typ, "value": "" #TODO
-                                , "values": [str(v) for v in symb.range]}
-                    elif typ in ["Real", "Int"]:
-                        symbol = {"typ": typ, "value": ""} # default
-                    else:
-                        symbol = None
-
-                    if symbol:
-                        if atom.code in case.assignments:
-                            symbol["status"] = case.assignments[atom.code].status.name
-                            symbol["relevant"] = case.assignments[atom.code].relevant
+                        if typ == 'Bool':
+                            symbol = {"typ": typ}
+                        elif 0 < len(symb.range):
+                            symbol = { "typ": typ, "value": "" #TODO
+                                    , "values": [str(v) for v in symb.range]}
+                        elif typ in ["Real", "Int"]:
+                            symbol = {"typ": typ, "value": ""} # default
                         else:
-                            symbol["status"] = "UNKNOWN" #TODO
-                            symbol["relevant"] = True # unused symbol instance (Large(1))
-                        symbol['reading'] = atom.annotations['reading']
-                        symbol['normal'] = hasattr(atom, 'normal')
-                        symbol['environmental'] = atom.has_environmental(True)
-                        s.setdefault(key, symbol)
-                        break
+                            symbol = None
+
+                        if symbol:
+                            if atom.code in case.assignments:
+                                symbol["status"] = case.assignments[atom.code].status.name
+                                symbol["relevant"] = case.assignments[atom.code].relevant
+                            else:
+                                symbol["status"] = "UNKNOWN" #TODO
+                                symbol["relevant"] = True # unused symbol instance (Large(1))
+                            symbol['reading'] = atom.annotations['reading']
+                            symbol['normal'] = hasattr(atom, 'normal')
+                            symbol['environmental'] = atom.has_environmental(True)
+                            s.setdefault(key, symbol)
+                            break
 
         for GuiLine in case.GUILines.values():
             initialise(GuiLine)

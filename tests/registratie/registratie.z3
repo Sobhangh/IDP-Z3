@@ -414,6 +414,10 @@ Guarantee_Satisfied
 Additional_Security_Required
 Additional_Security_Satisfied
 Resale = Three_Or_More
+2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+2015 ≤ Certification_Date ≤ 2025
+2015 ≤ Term_Energy_Renovation ≤ 2025
+2015 ≤ Certification_Date_Sale ≤ 2025
 
 -- GUILines ------------------------------------
 Region
@@ -484,6 +488,10 @@ Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
 Use = Community_Purpose
 Resale = Three_Or_More
+2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+2015 ≤ Certification_Date ≤ 2025
+2015 ≤ Term_Energy_Renovation ≤ 2025
+2015 ≤ Certification_Date_Sale ≤ 2025
 
 -- case -------------------------------------
 Type:        
@@ -491,7 +499,10 @@ Type:
 Definitions: 
   
 Universals:  
-  
+  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+  2015 ≤ Certification_Date ≤ 2025
+  2015 ≤ Term_Energy_Renovation ≤ 2025
+  2015 ≤ Certification_Date_Sale ≤ 2025
 Consequences:
   
 Simplified:  
@@ -512,13 +523,12 @@ Simplified:
   (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
   (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Professional_Purchase)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
   Professional_Buyer ⇒ (Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More))
+  (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 4) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
+Irrelevant:  
   2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
   2015 ≤ Certification_Date ≤ 2025
   2015 ≤ Term_Energy_Renovation ≤ 2025
   2015 ≤ Certification_Date_Sale ≤ 2025
-  (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 4) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
-Irrelevant:  
-  
 
 
 -- meta -------------------------------------

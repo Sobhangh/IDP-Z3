@@ -277,6 +277,8 @@ Surface = -1
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -336,6 +338,8 @@ Surface = -1
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
+3 ≤ Sides ≤ 4
+3 ≤ Vertices ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -354,6 +358,8 @@ Universals:
   0 ≤ Base
   0 ≤ Height
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
   Subtype = regular_triangle
 Consequences:
   Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
@@ -365,7 +371,7 @@ Consequences:
   Convex <= {'((Sides = 3) ⇒ Convex)', 'Sides', 'Sides = 3'}
   ∀n[side] : Angle(n) < 180 <= {'(Convex ⇔ (∀n[side] : Angle(n) < 180))', 'Convex'}
   Equilateral <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Subtype', 'Subtype = regular_triangle'}
-  ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n) <= {'(Equilateral ⇔ (∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)))', 'Equilateral', 'Sides'}
+  ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n) <= {'(Equilateral ⇔ (∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)))', 'Equilateral', 'n = 4', 'Sides'}
   ~Subtype = right_triangle <= {'Subtype'}
   ~Subtype = irregular <= {'Subtype'}
   ∀n[side] : (Angle(n) = 60) ∨ (Sides < n) <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ (∀n[side] : (Angle(n) = 60) ∨ (Sides < n))))', 'Subtype', 'Subtype = regular_triangle'}
@@ -403,6 +409,8 @@ Irrelevant:
   Length(1) = Length(2) <= Z3 proof
   ~Surface = (Length(1) * Length(2))
   ~Surface = -1 <= Z3 proof
+  3 ≤ Sides ≤ 4
+  3 ≤ Vertices ≤ 4
 
 
 -- meta -------------------------------------

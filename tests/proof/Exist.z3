@@ -5,13 +5,13 @@ vocabulary {
     p
 } 
 theory {
-    p <=> (∀c[color]: c=red).
+    p <=> (?c[color]: c~=red).
 }
 view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-Not(p)
+p
 
 -- subtences ------------------------------------
 p
@@ -25,7 +25,7 @@ Type:
 Definitions: 
   
 Universals:  
-  ~p <= {'p ⇔ (∀c[color] : c = red)', 'c = blue'}
+  p <= {'p ⇔ (∃c[color] : c ≠ red)', 'c = blue'}
 Consequences:
   
 Simplified:  
@@ -46,4 +46,4 @@ Irrelevant:
              'relevant': True,
              'status': 'UNIVERSAL',
              'typ': 'Bool',
-             'value': False}}}
+             'value': True}}}

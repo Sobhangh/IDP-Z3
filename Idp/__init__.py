@@ -389,7 +389,7 @@ class Theory(object):
 
         self.subtences = {}
         for e in self.constraints:
-            self.subtences.update({k: v for k, v in e.subtences().items() if v.unknown_symbols()})
+            self.subtences.update({k: v for k, v in e.subtences().items()})
 
     def unknown_symbols(self):
         return mergeDicts(c.unknown_symbols()

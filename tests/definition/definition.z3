@@ -16,8 +16,8 @@ view expanded
 
 -- theory -----------------------------------
 And(codeOf(red) == a,
-    Not(codeOf(blue) == a),
     Not(codeOf(red) == b),
+    Not(codeOf(blue) == a),
     codeOf(blue) == b)
 
 -- subtences ------------------------------------

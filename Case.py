@@ -66,9 +66,13 @@ class Case:
         for i, c in enumerate(self.idp.theory.constraints):
             u = c.expr_to_literal(self)
             if u:
-                for sentence, truth, _proof in u:
+                for sentence, truth, proof in u:
+                    proof.pop(sentence.code, None) # remove sentence if it exists
+                    proof.pop(f"({sentence.code})", None) # with bracket
+                    if not truth:
+                        proof.pop(f"~({sentence.code})", None)
                     ass = Assignment(sentence, truth, Status.UNKNOWN)
-                    ass.update(None, None, Proof(), Status.UNIVERSAL, self)
+                    ass.update(None, None, proof, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
 

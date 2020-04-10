@@ -59,6 +59,7 @@ Length(3) = Length(1)
 Equilateral
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
+3 ≤ Sides ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -74,6 +75,7 @@ Subtype = rectangle
 Length(3) = Length(1)
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
+3 ≤ Sides ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -82,6 +84,7 @@ Definitions:
   
 Universals:  
   Sides = 3
+  3 ≤ Sides ≤ 4
   Sides = 3
 Consequences:
   ~Subtype = rectangle <= {'(Subtype = rectangle) ⇔ (Sides = 4)', 'Sides', 'Sides = 4'}
@@ -91,6 +94,7 @@ Simplified:
 Irrelevant:  
   ~Length(3) = Length(1)
   ~Sides = 4 <= {'Sides'}
+  3 ≤ Sides ≤ 4
 
 
 -- meta -------------------------------------

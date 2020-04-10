@@ -151,14 +151,12 @@ class Proof(collections.OrderedDict, collections.MutableSet):
         return self or other
     """
 
-class NoSet(object):
+class ProofZ3(object):
     def update(self, other):
         return self
     def add(self, elem):
         return self
     def extend(self, elems):
         return self
-
-class ProofZ3(NoSet):
     def __str__(self):
         return 'Z3 proof'

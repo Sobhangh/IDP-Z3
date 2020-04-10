@@ -37,21 +37,21 @@ structure {
 
 -- theory -----------------------------------
 And(asi(1tri angle, regular_triangle),
-    Not(asi(quadrilateral, regular_triangle)),
     asi(1tri angle, right_triangle),
-    Not(asi(quadrilateral, right_triangle)),
     Not(asi(1tri angle, rectangle)),
-    asi(quadrilateral, rectangle),
     Not(asi(1tri angle, square)),
+    Not(asi(quadrilateral, regular_triangle)),
+    Not(asi(quadrilateral, right_triangle)),
+    asi(quadrilateral, rectangle),
     asi(quadrilateral, square))
 
 And(typeOf(regular_triangle) == 1tri angle,
-    Not(typeOf(regular_triangle) == quadrilateral),
     typeOf(right_triangle) == 1tri angle,
-    Not(typeOf(right_triangle) == quadrilateral),
     Not(typeOf(rectangle) == 1tri angle),
-    typeOf(rectangle) == quadrilateral,
     Not(typeOf(square) == 1tri angle),
+    Not(typeOf(regular_triangle) == quadrilateral),
+    Not(typeOf(right_triangle) == quadrilateral),
+    typeOf(rectangle) == quadrilateral,
     typeOf(square) == quadrilateral)
 
 And(typeOf(regular_triangle) == 1tri angle,

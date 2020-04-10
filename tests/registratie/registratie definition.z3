@@ -416,6 +416,10 @@ Seller = Mpy_Erkend_Door_VMSW
 Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
 Use = Community_Purpose
+2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+2015 ≤ Certification_Date ≤ 2025
+2015 ≤ Term_Energy_Renovation ≤ 2025
+2015 ≤ Certification_Date_Sale ≤ 2025
 
 -- GUILines ------------------------------------
 Region
@@ -486,6 +490,10 @@ Seller = Mpy_Erkend_Door_VMSW
 Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
 Use = Community_Purpose
+2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+2015 ≤ Certification_Date ≤ 2025
+2015 ≤ Term_Energy_Renovation ≤ 2025
+2015 ≤ Certification_Date_Sale ≤ 2025
 
 -- case -------------------------------------
 Type:        
@@ -494,6 +502,10 @@ Definitions:
   Rule:∀[][]: Professional_Buyer() ⇔Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More)
 Universals:  
   ~Professional_Declaration_Filed
+  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+  2015 ≤ Certification_Date ≤ 2025
+  2015 ≤ Term_Energy_Renovation ≤ 2025
+  2015 ≤ Certification_Date_Sale ≤ 2025
 Consequences:
   ~Tax = 4 <= {'(Tax = 4) ⇒ ((Registration_Type = Professional_Purchase) ∧ (Region = Flemish_Region))', 'Registration_Type = Professional_Purchase'}
   ~Registration_Type = Professional_Purchase <= {'(Registration_Type = Professional_Purchase) ⇒ (Professional_Buyer ∧ (Transaction_Type ≠ Public_Sale) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (Certification_Date + 8)))', 'Professional_Declaration_Filed', 'Professional_Buyer'}
@@ -513,9 +525,6 @@ Simplified:
   ((Registration_Type = Social_Purpose) ⇒ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
   (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
   (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
-  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-  2015 ≤ Certification_Date ≤ 2025
-  2015 ≤ Term_Energy_Renovation ≤ 2025
   (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
 Irrelevant:  
   ~Guarantee_Satisfied
@@ -525,6 +534,10 @@ Irrelevant:
   ~Transaction_Type = Public_Sale
   ~Use = For_Resale
   ~Certification_Date_Sale = (Certification_Date + 8)
+  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
+  2015 ≤ Certification_Date ≤ 2025
+  2015 ≤ Term_Energy_Renovation ≤ 2025
+  2015 ≤ Certification_Date_Sale ≤ 2025
 
 
 -- meta -------------------------------------

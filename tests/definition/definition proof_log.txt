@@ -193,6 +193,7 @@
 |== (codeOf(blue) = $codeOf$) ⇔ (((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b)))
 |------------
 |(codeOf(red) = $codeOf$) ⇔ (((red = c) ∧ ($codeOf$ = a)) ∨ ((~(red = c)) ∧ ($codeOf$ = b)))
+|proof: {'$codeOf!0$ = red'}
 |+ $codeOf$ -> a
     |------------
     |codeOf(red) = $codeOf$
@@ -287,104 +288,10 @@
         |== ((red = c))
     |== (((red = c)))
 |== (codeOf(red) = a) ⇔ (((red = c)))
-|------------
-|(codeOf(blue) = $codeOf$) ⇔ (((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b)))
-|+ $codeOf$ -> a
-    |------------
-    |codeOf(blue) = $codeOf$
-    |+ $codeOf$ -> a
-        |------------
-        |codeOf(blue)
-        |+ $codeOf$ -> a
-            |------------
-            |blue
-            |+ $codeOf$ -> a
-            |== blue
-        |== codeOf(blue)
-        |------------
-        |$codeOf$
-        |+ $codeOf$ -> a
-        |== a
-    |== codeOf(blue) = a
-    |------------
-    |(((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b)))
-    |+ $codeOf$ -> a
-        |------------
-        |((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b))
-        |+ $codeOf$ -> a
-            |------------
-            |((blue = c) ∧ ($codeOf$ = a))
-            |+ $codeOf$ -> a
-                |------------
-                |(blue = c) ∧ ($codeOf$ = a)
-                |+ $codeOf$ -> a
-                    |------------
-                    |blue = c
-                    |+ $codeOf$ -> a
-                        |------------
-                        |blue
-                        |+ $codeOf$ -> a
-                        |== blue
-                        |------------
-                        |c
-                        |+ $codeOf$ -> a
-                        |== c
-                    |== blue = c
-                    |------------
-                    |$codeOf$ = a
-                    |+ $codeOf$ -> a
-                        |------------
-                        |$codeOf$
-                        |+ $codeOf$ -> a
-                        |== a
-                        |------------
-                        |a
-                        |+ $codeOf$ -> a
-                        |== a
-                    |== (true)
-                |== (blue = c)
-            |== ((blue = c))
-            |------------
-            |((~(blue = c)) ∧ ($codeOf$ = b))
-            |+ $codeOf$ -> a
-                |------------
-                |(~(blue = c)) ∧ ($codeOf$ = b)
-                |+ $codeOf$ -> a
-                    |------------
-                    |~(blue = c)
-                    |+ $codeOf$ -> a
-                        |------------
-                        |blue = c
-                        |+ $codeOf$ -> a
-                            |------------
-                            |blue
-                            |+ $codeOf$ -> a
-                            |== blue
-                            |------------
-                            |c
-                            |+ $codeOf$ -> a
-                            |== c
-                        |== blue = c
-                    |== ~(blue = c)
-                    |------------
-                    |$codeOf$ = b
-                    |+ $codeOf$ -> a
-                        |------------
-                        |$codeOf$
-                        |+ $codeOf$ -> a
-                        |== a
-                        |------------
-                        |b
-                        |+ $codeOf$ -> a
-                        |== b
-                    |== (false)
-                |== (false)
-            |== ((false))
-        |== ((blue = c))
-    |== (((blue = c)))
-|== (codeOf(blue) = a) ⇔ (((blue = c)))
+|   proof: {'$codeOf!0$ = red'}
 |------------
 |(codeOf(red) = $codeOf$) ⇔ (((red = c) ∧ ($codeOf$ = a)) ∨ ((~(red = c)) ∧ ($codeOf$ = b)))
+|proof: {'$codeOf!0$ = red'}
 |+ $codeOf$ -> b
     |------------
     |codeOf(red) = $codeOf$
@@ -479,8 +386,108 @@
         |== ((~(red = c)))
     |== (((~(red = c))))
 |== (codeOf(red) = b) ⇔ (((~(red = c))))
+|   proof: {'$codeOf!0$ = red'}
 |------------
 |(codeOf(blue) = $codeOf$) ⇔ (((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b)))
+|proof: {'$codeOf!0$ = blue'}
+|+ $codeOf$ -> a
+    |------------
+    |codeOf(blue) = $codeOf$
+    |+ $codeOf$ -> a
+        |------------
+        |codeOf(blue)
+        |+ $codeOf$ -> a
+            |------------
+            |blue
+            |+ $codeOf$ -> a
+            |== blue
+        |== codeOf(blue)
+        |------------
+        |$codeOf$
+        |+ $codeOf$ -> a
+        |== a
+    |== codeOf(blue) = a
+    |------------
+    |(((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b)))
+    |+ $codeOf$ -> a
+        |------------
+        |((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b))
+        |+ $codeOf$ -> a
+            |------------
+            |((blue = c) ∧ ($codeOf$ = a))
+            |+ $codeOf$ -> a
+                |------------
+                |(blue = c) ∧ ($codeOf$ = a)
+                |+ $codeOf$ -> a
+                    |------------
+                    |blue = c
+                    |+ $codeOf$ -> a
+                        |------------
+                        |blue
+                        |+ $codeOf$ -> a
+                        |== blue
+                        |------------
+                        |c
+                        |+ $codeOf$ -> a
+                        |== c
+                    |== blue = c
+                    |------------
+                    |$codeOf$ = a
+                    |+ $codeOf$ -> a
+                        |------------
+                        |$codeOf$
+                        |+ $codeOf$ -> a
+                        |== a
+                        |------------
+                        |a
+                        |+ $codeOf$ -> a
+                        |== a
+                    |== (true)
+                |== (blue = c)
+            |== ((blue = c))
+            |------------
+            |((~(blue = c)) ∧ ($codeOf$ = b))
+            |+ $codeOf$ -> a
+                |------------
+                |(~(blue = c)) ∧ ($codeOf$ = b)
+                |+ $codeOf$ -> a
+                    |------------
+                    |~(blue = c)
+                    |+ $codeOf$ -> a
+                        |------------
+                        |blue = c
+                        |+ $codeOf$ -> a
+                            |------------
+                            |blue
+                            |+ $codeOf$ -> a
+                            |== blue
+                            |------------
+                            |c
+                            |+ $codeOf$ -> a
+                            |== c
+                        |== blue = c
+                    |== ~(blue = c)
+                    |------------
+                    |$codeOf$ = b
+                    |+ $codeOf$ -> a
+                        |------------
+                        |$codeOf$
+                        |+ $codeOf$ -> a
+                        |== a
+                        |------------
+                        |b
+                        |+ $codeOf$ -> a
+                        |== b
+                    |== (false)
+                |== (false)
+            |== ((false))
+        |== ((blue = c))
+    |== (((blue = c)))
+|== (codeOf(blue) = a) ⇔ (((blue = c)))
+|   proof: {'$codeOf!0$ = blue'}
+|------------
+|(codeOf(blue) = $codeOf$) ⇔ (((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b)))
+|proof: {'$codeOf!0$ = blue'}
 |+ $codeOf$ -> b
     |------------
     |codeOf(blue) = $codeOf$
@@ -575,6 +582,7 @@
         |== ((~(blue = c)))
     |== (((~(blue = c))))
 |== (codeOf(blue) = b) ⇔ (((~(blue = c))))
+|   proof: {'$codeOf!0$ = blue'}
 |------------
 |*red = c
 |+ codeOf(red) -> b

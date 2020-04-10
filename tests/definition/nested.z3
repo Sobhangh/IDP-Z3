@@ -23,13 +23,13 @@ same(Piet) == Piet
 same(same(Piet)) == negated(negated(Piet))
 
 And(same(Piet) == Piet,
-    Not(same(Jan) == Piet),
     Not(same(Piet) == Jan),
+    Not(same(Jan) == Piet),
     same(Jan) == Jan)
 
 And(Not(negated(Piet) == Piet),
-    negated(Jan) == Piet,
     negated(Piet) == Jan,
+    negated(Jan) == Piet,
     Not(negated(Jan) == Jan))
 
 -- subtences ------------------------------------
