@@ -96,6 +96,16 @@ class Assignment(object):
                     elif type(old.sub_exprs[0]) in [Constructor, NumberConstant]:
                         new = old.sub_exprs[0]
                         old = old.sub_exprs[1]
+                    else:
+                        operands1 = [e.as_ground() for e in old.sub_exprs]
+                        if   operands1[1] is not None:
+                            new = copy(operands1[1])
+                            new.code = old.sub_exprs[1].code
+                            old = old.sub_exprs[0]
+                        elif operands1[0] is not None:
+                            new = copy(operands1[0])
+                            new.code = old.sub_exprs[0].code
+                            old = old.sub_exprs[1]
             return old, new
         return None, None
 

@@ -332,7 +332,7 @@ Consequences:
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
   Type = quadrilateral <= Z3 proof
   Subtype = irregular <= Z3 proof
-  Perimeter = 10 <= Z3 proof
+  Perimeter = 10
   ~Large(2) <= Z3 proof
   ~Large(3) <= Z3 proof
   ~Large(4) <= Z3 proof
