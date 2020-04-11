@@ -65,5 +65,6 @@ TODO
 - [ ] Expr.sentence -> Expr.ranking ?
 - [ ] distinguish between x=1 entry and x=1 atom in output structure
 - [ ] p(real) should be possible
+- [ ] #refactoring
 
 #general

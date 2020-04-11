@@ -16,7 +16,7 @@ from Idp import idpparser, SymbolDeclaration
 from typing import Dict, Any
 
 dir = os.path.dirname(__file__)
-files  = ["/home/pcarbonn/Documents/repos/autoconfigz3/tests/sandbox/sandbox.idp"]
+files  = [os.path.join(dir, "sandbox/sandbox.idp")]
 files += [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
 for file in files:
     print(file)
