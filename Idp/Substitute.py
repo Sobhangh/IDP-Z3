@@ -117,7 +117,7 @@ def log(function):
         return out    
     return _wrapper
 
-@log
+# @log  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, todo=None, case=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
