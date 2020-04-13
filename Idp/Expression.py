@@ -366,6 +366,8 @@ class BinaryOperator(Expression):
         return temp
     
     def annotate1(self):
+        assert not (self.operator[0]=='⇒' and 2 < len(self.sub_exprs)), \
+                "Implication is not associative.  Please use parenthesis."
         if self.type is None:
             self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                    else 'int'  if any(e.type == 'int'  for e in self.sub_exprs) \
