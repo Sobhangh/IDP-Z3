@@ -2,17 +2,16 @@
 Notation: $\varphi_p$ is a formula $\varphi$ having a (tentative) proof p.  A proof is a list of atoms (not of literals).  The proof is final when $\varphi$ is $\top$ or $\bot$.
 $(original)$ is the formula before any substitutions
 
-Todo:
+Todo: 
 - [x] implications have arity 2 only
 - [x] check that replace_by arguments does not include self.proof
 - [x] if phi then a else a → a 
 - [x] don't add brackets in replace_by if not bool
 - [x] add typeConstraints
 - [ ] replace by True/false → add to consequences (stash: consequences)
-- [ ] proof when all conjuncts/disjuncts are False/True
-- [ ] proof for arithmetic, comparison
+- [x] proof for arithmetic, comparison
 - [ ] Expression.substitutions(), not Assignments.substitutions
-- [ ] simplify Case.propagate
+- [ ] simplify Case.propagate #refactoring
 
 - [ ] consequences, todo as dictionary → re-use previous results
 - [ ] batch substitutions together

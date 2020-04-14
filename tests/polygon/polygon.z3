@@ -315,7 +315,7 @@ Universals:
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Consequences:
-  ~Large(1) <= {'Large(1) ⇔ (false)', 'Length(1) = 1', 'Length(2) = 2', 'Length(3) = 3', 'Length(4) = 4', 'Length(n) = ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)'}
+  ~Large(1) <= {'Large(1) ⇔ (false)', 'Length(n) = ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)'}
   ~Type = triangle <= Z3 proof
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
   Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
