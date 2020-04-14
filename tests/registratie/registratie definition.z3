@@ -427,16 +427,53 @@ Or(Transaction_Type == Public_Sale,
 Or(Duration_Of_Agreement == Less_Than_9_years,
    Duration_Of_Agreement == More_than_9_Or_9_years)
 
-And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
-    Start_Dt_Dwelling_For_Social_Rent <= 2025)
+Or(Start_Dt_Dwelling_For_Social_Rent == 2015,
+   Start_Dt_Dwelling_For_Social_Rent == 2016,
+   Start_Dt_Dwelling_For_Social_Rent == 2017,
+   Start_Dt_Dwelling_For_Social_Rent == 2018,
+   Start_Dt_Dwelling_For_Social_Rent == 2019,
+   Start_Dt_Dwelling_For_Social_Rent == 2020,
+   Start_Dt_Dwelling_For_Social_Rent == 2021,
+   Start_Dt_Dwelling_For_Social_Rent == 2022,
+   Start_Dt_Dwelling_For_Social_Rent == 2023,
+   Start_Dt_Dwelling_For_Social_Rent == 2024,
+   Start_Dt_Dwelling_For_Social_Rent == 2025)
 
-And(Certification_Date >= 2015, Certification_Date <= 2025)
+Or(Certification_Date == 2015,
+   Certification_Date == 2016,
+   Certification_Date == 2017,
+   Certification_Date == 2018,
+   Certification_Date == 2019,
+   Certification_Date == 2020,
+   Certification_Date == 2021,
+   Certification_Date == 2022,
+   Certification_Date == 2023,
+   Certification_Date == 2024,
+   Certification_Date == 2025)
 
-And(Term_Energy_Renovation >= 2015,
-    Term_Energy_Renovation <= 2025)
+Or(Term_Energy_Renovation == 2015,
+   Term_Energy_Renovation == 2016,
+   Term_Energy_Renovation == 2017,
+   Term_Energy_Renovation == 2018,
+   Term_Energy_Renovation == 2019,
+   Term_Energy_Renovation == 2020,
+   Term_Energy_Renovation == 2021,
+   Term_Energy_Renovation == 2022,
+   Term_Energy_Renovation == 2023,
+   Term_Energy_Renovation == 2024,
+   Term_Energy_Renovation == 2025)
 
-And(Certification_Date_Sale >= 2015,
-    Certification_Date_Sale <= 2025)
+Or(Certification_Date_Sale == 2015,
+   Certification_Date_Sale == 2016,
+   Certification_Date_Sale == 2017,
+   Certification_Date_Sale == 2018,
+   Certification_Date_Sale == 2019,
+   Certification_Date_Sale == 2020,
+   Certification_Date_Sale == 2021,
+   Certification_Date_Sale == 2022,
+   Certification_Date_Sale == 2023,
+   Certification_Date_Sale == 2024,
+   Certification_Date_Sale == 2025)
 
 Or(Registration_Type == Family_Dwelling,
    Registration_Type == Social_Dwelling,
@@ -582,10 +619,50 @@ Resale = Less_Than_Three
 Transaction_Type = Out_Hand
 Transaction_Type = Public_Sale_Community
 Duration_Of_Agreement = More_than_9_Or_9_years
-2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-2015 ≤ Certification_Date ≤ 2025
-2015 ≤ Term_Energy_Renovation ≤ 2025
-2015 ≤ Certification_Date_Sale ≤ 2025
+Start_Dt_Dwelling_For_Social_Rent = 2015
+Start_Dt_Dwelling_For_Social_Rent = 2016
+Start_Dt_Dwelling_For_Social_Rent = 2017
+Start_Dt_Dwelling_For_Social_Rent = 2018
+Start_Dt_Dwelling_For_Social_Rent = 2019
+Start_Dt_Dwelling_For_Social_Rent = 2020
+Start_Dt_Dwelling_For_Social_Rent = 2021
+Start_Dt_Dwelling_For_Social_Rent = 2022
+Start_Dt_Dwelling_For_Social_Rent = 2023
+Start_Dt_Dwelling_For_Social_Rent = 2024
+Start_Dt_Dwelling_For_Social_Rent = 2025
+Certification_Date = 2015
+Certification_Date = 2016
+Certification_Date = 2017
+Certification_Date = 2018
+Certification_Date = 2019
+Certification_Date = 2020
+Certification_Date = 2021
+Certification_Date = 2022
+Certification_Date = 2023
+Certification_Date = 2024
+Certification_Date = 2025
+Term_Energy_Renovation = 2015
+Term_Energy_Renovation = 2016
+Term_Energy_Renovation = 2017
+Term_Energy_Renovation = 2018
+Term_Energy_Renovation = 2019
+Term_Energy_Renovation = 2020
+Term_Energy_Renovation = 2021
+Term_Energy_Renovation = 2022
+Term_Energy_Renovation = 2023
+Term_Energy_Renovation = 2024
+Term_Energy_Renovation = 2025
+Certification_Date_Sale = 2015
+Certification_Date_Sale = 2016
+Certification_Date_Sale = 2017
+Certification_Date_Sale = 2018
+Certification_Date_Sale = 2019
+Certification_Date_Sale = 2020
+Certification_Date_Sale = 2021
+Certification_Date_Sale = 2022
+Certification_Date_Sale = 2023
+Certification_Date_Sale = 2024
+Certification_Date_Sale = 2025
 
 -- GUILines ------------------------------------
 Region
@@ -721,10 +798,50 @@ Resale = Less_Than_Three
 Transaction_Type = Out_Hand
 Transaction_Type = Public_Sale_Community
 Duration_Of_Agreement = More_than_9_Or_9_years
-2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-2015 ≤ Certification_Date ≤ 2025
-2015 ≤ Term_Energy_Renovation ≤ 2025
-2015 ≤ Certification_Date_Sale ≤ 2025
+Start_Dt_Dwelling_For_Social_Rent = 2015
+Start_Dt_Dwelling_For_Social_Rent = 2016
+Start_Dt_Dwelling_For_Social_Rent = 2017
+Start_Dt_Dwelling_For_Social_Rent = 2018
+Start_Dt_Dwelling_For_Social_Rent = 2019
+Start_Dt_Dwelling_For_Social_Rent = 2020
+Start_Dt_Dwelling_For_Social_Rent = 2021
+Start_Dt_Dwelling_For_Social_Rent = 2022
+Start_Dt_Dwelling_For_Social_Rent = 2023
+Start_Dt_Dwelling_For_Social_Rent = 2024
+Start_Dt_Dwelling_For_Social_Rent = 2025
+Certification_Date = 2015
+Certification_Date = 2016
+Certification_Date = 2017
+Certification_Date = 2018
+Certification_Date = 2019
+Certification_Date = 2020
+Certification_Date = 2021
+Certification_Date = 2022
+Certification_Date = 2023
+Certification_Date = 2024
+Certification_Date = 2025
+Term_Energy_Renovation = 2015
+Term_Energy_Renovation = 2016
+Term_Energy_Renovation = 2017
+Term_Energy_Renovation = 2018
+Term_Energy_Renovation = 2019
+Term_Energy_Renovation = 2020
+Term_Energy_Renovation = 2021
+Term_Energy_Renovation = 2022
+Term_Energy_Renovation = 2023
+Term_Energy_Renovation = 2024
+Term_Energy_Renovation = 2025
+Certification_Date_Sale = 2015
+Certification_Date_Sale = 2016
+Certification_Date_Sale = 2017
+Certification_Date_Sale = 2018
+Certification_Date_Sale = 2019
+Certification_Date_Sale = 2020
+Certification_Date_Sale = 2021
+Certification_Date_Sale = 2022
+Certification_Date_Sale = 2023
+Certification_Date_Sale = 2024
+Certification_Date_Sale = 2025
 
 -- case -------------------------------------
 Type:        
@@ -733,10 +850,6 @@ Definitions:
   Rule:∀[][]: Professional_Buyer() ⇔Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More)
 Universals:  
   ~Professional_Declaration_Filed
-  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-  2015 ≤ Certification_Date ≤ 2025
-  2015 ≤ Term_Energy_Renovation ≤ 2025
-  2015 ≤ Certification_Date_Sale ≤ 2025
 Consequences:
   ~Tax = 4 <= {'(Tax = 4) ⇒ ((Registration_Type = Professional_Purchase) ∧ (Region = Flemish_Region))', 'Registration_Type = Professional_Purchase'}
   ~Registration_Type = Professional_Purchase <= {'(Registration_Type = Professional_Purchase) ⇒ (Professional_Buyer ∧ (Transaction_Type ≠ Public_Sale) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (Certification_Date + 8)))', 'Professional_Declaration_Filed', 'Professional_Buyer'}
@@ -762,6 +875,9 @@ Simplified:
   (Buyer = Natural_Person) ∨ (Buyer = Legal_Person) ∨ (Buyer = Mixed)
   (Use = As_Family_Dwelling) ∨ (Use = For_Resale) ∨ (Use = Community_Purpose) ∨ (Use = Social_Housing) ∨ (Use = Social_Renting) ∨ (Use = Other_House) ∨ (Use = No_House)
   (Duration_Of_Agreement = Less_Than_9_years) ∨ (Duration_Of_Agreement = More_than_9_Or_9_years)
+  (Start_Dt_Dwelling_For_Social_Rent = 2015) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2016) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2017) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2018) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2019) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2020) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2021) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2022) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2023) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2024) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2025)
+  (Certification_Date = 2015) ∨ (Certification_Date = 2016) ∨ (Certification_Date = 2017) ∨ (Certification_Date = 2018) ∨ (Certification_Date = 2019) ∨ (Certification_Date = 2020) ∨ (Certification_Date = 2021) ∨ (Certification_Date = 2022) ∨ (Certification_Date = 2023) ∨ (Certification_Date = 2024) ∨ (Certification_Date = 2025)
+  (Term_Energy_Renovation = 2015) ∨ (Term_Energy_Renovation = 2016) ∨ (Term_Energy_Renovation = 2017) ∨ (Term_Energy_Renovation = 2018) ∨ (Term_Energy_Renovation = 2019) ∨ (Term_Energy_Renovation = 2020) ∨ (Term_Energy_Renovation = 2021) ∨ (Term_Energy_Renovation = 2022) ∨ (Term_Energy_Renovation = 2023) ∨ (Term_Energy_Renovation = 2024) ∨ (Term_Energy_Renovation = 2025)
   (Registration_Type = Family_Dwelling) ∨ (Registration_Type = Social_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground) ∨ (Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Heritage) ∨ (Registration_Type = Dwelling_For_Social_Renting) ∨ (Registration_Type = Other)
   (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
 Irrelevant:  
@@ -829,10 +945,17 @@ Irrelevant:
   ~Resale = Less_Than_Three
   ~Transaction_Type = Out_Hand
   ~Transaction_Type = Public_Sale_Community
-  2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
-  2015 ≤ Certification_Date ≤ 2025
-  2015 ≤ Term_Energy_Renovation ≤ 2025
-  2015 ≤ Certification_Date_Sale ≤ 2025
+  ~Certification_Date_Sale = 2015
+  ~Certification_Date_Sale = 2016
+  ~Certification_Date_Sale = 2017
+  ~Certification_Date_Sale = 2018
+  ~Certification_Date_Sale = 2019
+  ~Certification_Date_Sale = 2020
+  ~Certification_Date_Sale = 2021
+  ~Certification_Date_Sale = 2022
+  ~Certification_Date_Sale = 2023
+  ~Certification_Date_Sale = 2024
+  ~Certification_Date_Sale = 2025
 
 
 -- meta -------------------------------------
@@ -1024,7 +1147,73 @@ Irrelevant:
                                                           '2022',
                                                           '2023',
                                                           '2024',
-                                                          '2025']}},
+                                                          '2025']},
+                        'Certification_Date = 2015': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2015',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2016': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2016',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2017': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2017',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2018': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2018',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2019': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2019',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2020': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2020',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2021': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2021',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2022': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2022',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2023': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2023',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2024': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2024',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                        'Certification_Date = 2025': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Certification_Date = 2025',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'}},
  'Certification_Date_Sale': {'Certification_Date_Sale': {'environmental': True,
                                                          'normal': True,
                                                          'reading': 'Certification_Date_Sale',
@@ -1050,7 +1239,73 @@ Irrelevant:
                                                                                                '+ 8)',
                                                                                     'relevant': False,
                                                                                     'status': 'UNKNOWN',
-                                                                                    'typ': 'Bool'}},
+                                                                                    'typ': 'Bool'},
+                             'Certification_Date_Sale = 2015': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2015',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2016': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2016',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2017': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2017',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2018': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2018',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2019': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2019',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2020': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2020',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2021': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2021',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2022': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2022',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2023': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2023',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2024': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2024',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = 2025': {'environmental': True,
+                                                                'normal': False,
+                                                                'reading': 'Certification_Date_Sale = 2025',
+                                                                'relevant': False,
+                                                                'status': 'UNKNOWN',
+                                                                'typ': 'Bool'}},
  'Clean_Purchase': {'Clean_Purchase': {'environmental': True,
                                        'normal': True,
                                        'reading': 'Clean_Purchase',
@@ -1729,7 +1984,84 @@ Irrelevant:
                                                                                                                    '3)',
                                                                                                         'relevant': True,
                                                                                                         'status': 'UNKNOWN',
-                                                                                                        'typ': 'Bool'}},
+                                                                                                        'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2015': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2015',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2016': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2016',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2017': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2017',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2018': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2018',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2019': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2019',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2020': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2020',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2021': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2021',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2022': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2022',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2023': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2023',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2024': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2024',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = 2025': {'environmental': True,
+                                                                                    'normal': False,
+                                                                                    'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                               '= 2025',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNKNOWN',
+                                                                                    'typ': 'Bool'}},
  'Tax': {'Tax': {'environmental': False,
                  'normal': True,
                  'reading': 'Tax',
@@ -1805,7 +2137,73 @@ Irrelevant:
                                                                                              '(Certification_Date + 5)',
                                                                                   'relevant': True,
                                                                                   'status': 'UNKNOWN',
-                                                                                  'typ': 'Bool'}},
+                                                                                  'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2015': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2015',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2016': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2016',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2017': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2017',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2018': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2018',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2019': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2019',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2020': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2020',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2021': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2021',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2022': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2022',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2023': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2023',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2024': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2024',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = 2025': {'environmental': True,
+                                                              'normal': False,
+                                                              'reading': 'Term_Energy_Renovation = 2025',
+                                                              'relevant': True,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'}},
  'Transaction_Type': {'Transaction_Type': {'environmental': True,
                                            'normal': True,
                                            'reading': 'Transaction_Type',

@@ -7,13 +7,12 @@ problem: consequences not shown in dropdown when atom does not occur in the theo
 * → need to identify Assignments from Comparison
 
 Options:
-* enumerate all possible assignments and add them to guilines as visible
-    * but propagate only looks at assignments → add them to assignments too [[20200408193022]] merge case.GuiLines and .assignments
-* use SymbolDeclaration.typeConstraints to add all possible assignments to GuiLines ? 
-    * Deprecated → add them to assignments ?
-    * also, won't work for range 0..10
+- [x] add SymbolDeclaration.typeConstraints to the theory 
+    * also for ranges with less than 20 elements
 - [x] detect Assignments in code, and make them visible
     * but won't work for year calculations in registration application
+- [ ] enumerate all possible assignments and add them to guilines as visible
+    * but propagate only looks at assignments → add them to assignments too [[20200408193022]] merge case.GuiLines and .assignments
 
 Performance issue ?
 

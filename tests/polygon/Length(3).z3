@@ -50,7 +50,7 @@ And(Or(Length(1) == Length(1), Sides < 1),
 
 (Subtype == rectangle) == (Sides == 4)
 
-And(Sides >= 3, Sides <= 4)
+Or(Sides == 3, Sides == 4)
 
 Or(Type == triangle, Type == quadrilateral)
 
@@ -67,7 +67,6 @@ Length(3) = Length(1)
 Equilateral
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
-3 ≤ Sides ≤ 4
 Type = triangle
 Type = quadrilateral
 Subtype = regular_triangle
@@ -89,7 +88,6 @@ Subtype = rectangle
 Length(3) = Length(1)
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
-3 ≤ Sides ≤ 4
 Type = triangle
 Type = quadrilateral
 Subtype = regular_triangle
@@ -104,7 +102,6 @@ Definitions:
   
 Universals:  
   Sides = 3
-  3 ≤ Sides ≤ 4
 Consequences:
   ~Subtype = rectangle <= {'(Subtype = rectangle) ⇔ (Sides = 4)', 'Sides', 'Sides = 4'}
   ~Sides = 4 <= {'Sides'}
@@ -115,7 +112,6 @@ Simplified:
 Irrelevant:  
   ~Length(3) = Length(1)
   ~Sides = 4 <= {'Sides'}
-  3 ≤ Sides ≤ 4
   ~Type = triangle
   ~Type = quadrilateral
 

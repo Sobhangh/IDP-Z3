@@ -216,9 +216,9 @@ And((Length(1) == 0) == (Sides < 1),
     (Length(3) == 0) == (Sides < 3),
     (Length(4) == 0) == (Sides < 4))
 
-And(Sides >= 3, Sides <= 4)
+Or(Sides == 3, Sides == 4)
 
-And(Vertices >= 3, Vertices <= 4)
+Or(Vertices == 3, Vertices == 4)
 
 Or(Type == triangle, Type == quadrilateral)
 
@@ -260,8 +260,6 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
-3 ≤ Sides ≤ 4
-3 ≤ Vertices ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -315,8 +313,6 @@ Perimeter = (sum{n[side] : true : Length(n)})
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
 ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
-3 ≤ Sides ≤ 4
-3 ≤ Vertices ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -332,15 +328,13 @@ Universals:
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
 Consequences:
   ~Type = triangle <= Z3 proof
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
   Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
-  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
+  Sides = 4 <= {'(Sides = 3) ∨ (Sides = 4)', 'Sides = 3'}
   ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
-  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
+  Vertices = 4 <= {'(Vertices = 3) ∨ (Vertices = 4)', 'Vertices = 3'}
   Convex <= Z3 proof
   ∀n[side] : Angle(n) < 180
   ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
@@ -366,8 +360,7 @@ Simplified:
   ((Subtype = square) ⇔ (Equilateral))
   (Subtype = rectangle) ∨ (Subtype = square)
 Irrelevant:  
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
+  
 
 
 -- meta -------------------------------------

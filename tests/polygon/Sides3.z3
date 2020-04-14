@@ -236,9 +236,9 @@ Or(And(Sides >= 1, Length(1) == Base),
    And(Sides >= 3, Length(3) == Base),
    And(Sides >= 4, Length(4) == Base))
 
-And(Sides >= 3, Sides <= 4)
+Or(Sides == 3, Sides == 4)
 
-And(Vertices >= 3, Vertices <= 4)
+Or(Vertices == 3, Vertices == 4)
 
 Or(Type == triangle, Type == quadrilateral)
 
@@ -286,8 +286,6 @@ Surface = -1
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
-3 ≤ Sides ≤ 4
-3 ≤ Vertices ≤ 4
 
 -- GUILines ------------------------------------
 Sides
@@ -347,8 +345,6 @@ Surface = -1
 0 ≤ Base
 0 ≤ Height
 ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
-3 ≤ Sides ≤ 4
-3 ≤ Vertices ≤ 4
 
 -- case -------------------------------------
 Type:        
@@ -367,8 +363,6 @@ Universals:
   0 ≤ Base
   0 ≤ Height
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
 Consequences:
   Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
   ~Type = quadrilateral <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Sides', 'Sides = 4'}
@@ -406,8 +400,6 @@ Irrelevant:
   ~Length(1) = Length(2)
   ~Surface = (Length(1) * Length(2))
   ~Surface = -1 <= Z3 proof
-  3 ≤ Sides ≤ 4
-  3 ≤ Vertices ≤ 4
 
 
 -- meta -------------------------------------

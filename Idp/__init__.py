@@ -206,9 +206,12 @@ class RangeDeclaration(object):
         for x in self.elements:
             if x.toI is None:
                 self.range.append(x.fromI)
-            else: #TODO test that it is an integer ?
+            elif x.fromI.type == 'int' and x.toI.type == 'int': 
                 for i in range(x.fromI.translated, x.toI.translated + 1):
                     self.range.append(NumberConstant(number=str(i)))
+            else:
+                self.range = []
+                break
 
         if self.name == 'int':
             self.translated = IntSort()
@@ -225,7 +228,12 @@ class RangeDeclaration(object):
         symbol_decls[self.name] = self
 
     def check_bounds(self, var):
-        if not self.elements: return None
+        if not self.elements: 
+            return None
+        if self.range and len(self.range) < 20:
+            es = [AComparison.make('=', [var, c], True) for c in self.range]
+            e = ADisjunction.make('∨', es)
+            return e
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
