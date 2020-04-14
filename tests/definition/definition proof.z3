@@ -58,7 +58,6 @@ Definitions:
   Rule:∀['$codeOf!0$', '$codeOf$'][]: codeOf($codeOf!0$,$codeOf$) ⇔(($codeOf!0$ = c) ∧ ($codeOf$ = a)) ∨ ((~($codeOf!0$ = c)) ∧ ($codeOf$ = b))
 Universals:  
   codeOf(red) = b
-  codeOf(red) = b
 Consequences:
   ~red = c <= Z3 proof
   ~codeOf(red) = a <= {'codeOf(red)'}
@@ -66,8 +65,9 @@ Consequences:
   ~codeOf(blue) = b <= {'codeOf(blue)'}
   ~c = red <= Z3 proof
   c = blue <= {'(c = red) ∨ (c = blue)', 'c = red'}
-  codeOf(blue) = a <= Z3 proof
-  c = blue <= {'(c = red) ∨ (c = blue)', 'c = red'}
+  codeOf(red) = b
+  codeOf(blue) = a
+  c = blue
 Simplified:  
   
 Irrelevant:  
@@ -87,7 +87,7 @@ Irrelevant:
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
-             'value': '',
+             'value': 'blue',
              'values': ['red', 'blue']},
        'c = blue': {'environmental': False,
                     'normal': False,
@@ -116,7 +116,7 @@ Irrelevant:
                              'relevant': True,
                              'status': 'CONSEQUENCE',
                              'typ': 'code',
-                             'value': '',
+                             'value': 'a',
                              'values': ['a', 'b']},
             'codeOf(blue) = a': {'environmental': False,
                                  'normal': False,
@@ -136,9 +136,9 @@ Irrelevant:
                             'normal': True,
                             'reading': 'codeOf(red)',
                             'relevant': True,
-                            'status': 'UNIVERSAL',
+                            'status': 'CONSEQUENCE',
                             'typ': 'code',
-                            'value': '',
+                            'value': 'b',
                             'values': ['a', 'b']},
             'codeOf(red) = a': {'environmental': False,
                                 'normal': False,

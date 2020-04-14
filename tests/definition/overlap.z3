@@ -51,15 +51,15 @@ Definitions:
   Rule:∀['$t$'][]: t($t$) ⇔(($t$ = t0)) ∨ (($t$ = t1))
 Universals:  
   t0 = Piet
-  t0 = Piet
 Consequences:
   ~t = Jan <= Z3 proof
   t = Piet <= Z3 proof
   ~t0 = Jan <= {'t0'}
   ~t1 = Jan <= Z3 proof
   t1 = Piet <= Z3 proof
-  t = Piet <= Z3 proof
-  t1 = Piet <= Z3 proof
+  t = Piet
+  t0 = Piet
+  t1 = Piet
 Simplified:  
   
 Irrelevant:  
@@ -67,8 +67,6 @@ Irrelevant:
   t = Piet <= Z3 proof
   ~t0 = Jan <= {'t0'}
   ~t1 = Jan <= Z3 proof
-  t1 = Piet <= Z3 proof
-  t = Piet <= Z3 proof
   t1 = Piet <= Z3 proof
 
 
@@ -83,10 +81,10 @@ Irrelevant:
  't': {'t': {'environmental': False,
              'normal': True,
              'reading': 't',
-             'relevant': False,
+             'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'num',
-             'value': '',
+             'value': 'Piet',
              'values': ['Jan', 'Piet']},
        't = Jan': {'environmental': False,
                    'normal': False,
@@ -106,9 +104,9 @@ Irrelevant:
                'normal': True,
                'reading': 't0',
                'relevant': True,
-               'status': 'UNIVERSAL',
+               'status': 'CONSEQUENCE',
                'typ': 'num',
-               'value': '',
+               'value': 'Piet',
                'values': ['Jan', 'Piet']},
         't0 = Jan': {'environmental': False,
                      'normal': False,
@@ -127,10 +125,10 @@ Irrelevant:
  't1': {'t1': {'environmental': False,
                'normal': True,
                'reading': 't1',
-               'relevant': False,
+               'relevant': True,
                'status': 'CONSEQUENCE',
                'typ': 'num',
-               'value': '',
+               'value': 'Piet',
                'values': ['Jan', 'Piet']},
         't1 = Jan': {'environmental': False,
                      'normal': False,

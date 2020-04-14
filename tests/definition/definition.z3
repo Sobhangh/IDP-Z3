@@ -50,16 +50,14 @@ Consequences:
   ~codeOf(red) = b <= {'codeOf(red)'}
   ~codeOf(blue) = a <= Z3 proof
   codeOf(blue) = b <= Z3 proof
-  codeOf(red) = a <= Z3 proof
-  codeOf(blue) = b <= Z3 proof
+  codeOf(red) = a
+  codeOf(blue) = b
 Simplified:  
   
 Irrelevant:  
   codeOf(red) = a <= Z3 proof
   ~codeOf(red) = b <= {'codeOf(red)'}
   ~codeOf(blue) = a <= Z3 proof
-  codeOf(blue) = b <= Z3 proof
-  codeOf(red) = a <= Z3 proof
   codeOf(blue) = b <= Z3 proof
 
 
@@ -72,10 +70,10 @@ Irrelevant:
  'codeOf': {'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
-                             'relevant': False,
+                             'relevant': True,
                              'status': 'CONSEQUENCE',
                              'typ': 'code',
-                             'value': '',
+                             'value': 'b',
                              'values': ['a', 'b']},
             'codeOf(blue) = a': {'environmental': False,
                                  'normal': False,
@@ -94,10 +92,10 @@ Irrelevant:
             'codeOf(red)': {'environmental': False,
                             'normal': True,
                             'reading': 'codeOf(red)',
-                            'relevant': False,
+                            'relevant': True,
                             'status': 'CONSEQUENCE',
                             'typ': 'code',
-                            'value': '',
+                            'value': 'a',
                             'values': ['a', 'b']},
             'codeOf(red) = a': {'environmental': False,
                                 'normal': False,

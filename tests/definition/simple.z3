@@ -83,15 +83,14 @@ Consequences:
   c = red <= Z3 proof
   ~c = blue <= {'c'}
   p <= Z3 proof
-  a = red <= Z3 proof
-  b = red <= Z3 proof
-  c = red <= Z3 proof
+  a = red
+  b = red
+  c = red
 Simplified:  
   
 Irrelevant:  
   c = red <= Z3 proof
   ~c = blue <= {'c'}
-  c = red <= Z3 proof
 
 
 -- meta -------------------------------------
@@ -111,7 +110,7 @@ Irrelevant:
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
-             'value': '',
+             'value': 'red',
              'values': ['red', 'blue']},
        'a = blue': {'environmental': False,
                     'normal': False,
@@ -122,7 +121,7 @@ Irrelevant:
                     'value': False},
        'a = red': {'environmental': False,
                    'normal': False,
-                   'reading': '$a$ = red',
+                   'reading': 'a = red',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
@@ -133,7 +132,7 @@ Irrelevant:
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
-             'value': '',
+             'value': 'red',
              'values': ['red', 'blue']},
        'b = blue': {'environmental': False,
                     'normal': False,
@@ -152,10 +151,10 @@ Irrelevant:
  'c': {'c': {'environmental': False,
              'normal': True,
              'reading': 'c',
-             'relevant': False,
+             'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
-             'value': '',
+             'value': 'red',
              'values': ['red', 'blue']},
        'c = blue': {'environmental': False,
                     'normal': False,

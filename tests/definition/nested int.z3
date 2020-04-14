@@ -111,7 +111,6 @@ Definitions:
   Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔($negated$ = (-($negated!0$)))
 Universals:  
   same(-1) = -1
-  same(-1) = -1
 Consequences:
   negated(-1) = (-(-1)) <= Z3 proof
   ~same(-1) = 0 <= {'same(-1)'}
@@ -131,11 +130,12 @@ Consequences:
   negated(1) = -1 <= Z3 proof
   ~negated(1) = 0 <= {'negated(1)'}
   ~negated(1) = 1 <= {'negated(1)'}
-  same(0) = 0 <= Z3 proof
-  same(1) = 1 <= {'(same(1) = -1) ∨ (same(1) = 0) ∨ (same(1) = 1)', 'same(1) = -1', 'same(1) = 0'}
-  negated(-1) = 1 <= {'negated(-1)'}
-  negated(0) = 0 <= Z3 proof
-  negated(1) = -1 <= Z3 proof
+  same(-1) = -1
+  same(0) = 0
+  same(1) = 1
+  negated(-1) = 1
+  negated(0) = 0
+  negated(1) = -1
 Simplified:  
   
 Irrelevant:  
@@ -156,7 +156,7 @@ Irrelevant:
                              'relevant': True,
                              'status': 'CONSEQUENCE',
                              'typ': 'Int',
-                             'value': '',
+                             'value': '1',
                              'values': ['-1', '0', '1']},
              'negated(-1) = (-(-1))': {'environmental': False,
                                        'normal': False,
@@ -192,7 +192,7 @@ Irrelevant:
                             'relevant': True,
                             'status': 'CONSEQUENCE',
                             'typ': 'Int',
-                            'value': '',
+                            'value': '0',
                             'values': ['-1', '0', '1']},
              'negated(0) = -1': {'environmental': False,
                                  'normal': False,
@@ -221,7 +221,7 @@ Irrelevant:
                             'relevant': True,
                             'status': 'CONSEQUENCE',
                             'typ': 'Int',
-                            'value': '',
+                            'value': '-1',
                             'values': ['-1', '0', '1']},
              'negated(1) = -1': {'environmental': False,
                                  'normal': False,
@@ -248,9 +248,9 @@ Irrelevant:
                        'normal': True,
                        'reading': 'same(-1)',
                        'relevant': True,
-                       'status': 'UNIVERSAL',
+                       'status': 'CONSEQUENCE',
                        'typ': 'Int',
-                       'value': '',
+                       'value': '-1',
                        'values': ['-1', '0', '1']},
           'same(-1) = -1': {'environmental': False,
                             'normal': False,
@@ -279,7 +279,7 @@ Irrelevant:
                       'relevant': True,
                       'status': 'CONSEQUENCE',
                       'typ': 'Int',
-                      'value': '',
+                      'value': '0',
                       'values': ['-1', '0', '1']},
           'same(0) = -1': {'environmental': False,
                            'normal': False,
@@ -308,7 +308,7 @@ Irrelevant:
                       'relevant': True,
                       'status': 'CONSEQUENCE',
                       'typ': 'Int',
-                      'value': '',
+                      'value': '1',
                       'values': ['-1', '0', '1']},
           'same(1) = -1': {'environmental': False,
                            'normal': False,

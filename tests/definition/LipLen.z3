@@ -49,8 +49,8 @@ Consequences:
   ~LipLen = Standard <= {'LipLen'}
   JacketDesign = Design_230 <= Z3 proof
   ~JacketDesign = Design_400HP <= {'JacketDesign'}
-  LipLen = Short <= Z3 proof
-  JacketDesign = Design_230 <= Z3 proof
+  LipLen = Short
+  JacketDesign = Design_230
 Simplified:  
   
 Irrelevant:  
@@ -58,8 +58,6 @@ Irrelevant:
   ~LipLen = Standard <= {'LipLen'}
   JacketDesign = Design_230 <= Z3 proof
   ~JacketDesign = Design_400HP <= {'JacketDesign'}
-  LipLen = Short <= Z3 proof
-  JacketDesign = Design_230 <= Z3 proof
 
 
 -- meta -------------------------------------
@@ -76,10 +74,10 @@ Irrelevant:
  'JacketDesign': {'JacketDesign': {'environmental': False,
                                    'normal': True,
                                    'reading': 'JacketDesign',
-                                   'relevant': False,
+                                   'relevant': True,
                                    'status': 'CONSEQUENCE',
                                    'typ': 'jaDes',
-                                   'value': '',
+                                   'value': 'Design_230',
                                    'values': ['Design_230', 'Design_400HP']},
                   'JacketDesign = Design_230': {'environmental': False,
                                                 'normal': False,
@@ -98,10 +96,10 @@ Irrelevant:
  'LipLen': {'LipLen': {'environmental': False,
                        'normal': True,
                        'reading': 'LipLen',
-                       'relevant': False,
+                       'relevant': True,
                        'status': 'CONSEQUENCE',
                        'typ': 'lipLen',
-                       'value': '',
+                       'value': 'Short',
                        'values': ['Short', 'Standard']},
             'LipLen = Short': {'environmental': False,
                                'normal': False,

@@ -163,10 +163,10 @@ Consequences:
   ~asi(quadrilateral,right_triangle) <= Z3 proof
   asi(quadrilateral,rectangle) <= Z3 proof
   asi(quadrilateral,square) <= Z3 proof
-  typeOf(regular_triangle) = 1tri angle <= Z3 proof
-  typeOf(right_triangle) = 1tri angle <= Z3 proof
-  typeOf(rectangle) = quadrilateral <= {'(typeOf(rectangle) = 1tri angle) ∨ (typeOf(rectangle) = quadrilateral)', 'typeOf(rectangle) = 1tri angle'}
-  typeOf(square) = quadrilateral <= {'(typeOf(square) = 1tri angle) ∨ (typeOf(square) = quadrilateral)', 'typeOf(square) = 1tri angle'}
+  typeOf(regular_triangle) = 1tri angle
+  typeOf(right_triangle) = 1tri angle
+  typeOf(rectangle) = quadrilateral
+  typeOf(square) = quadrilateral
 Simplified:  
   (Type = 1tri angle) ∨ (Type = quadrilateral)
   (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square)
@@ -318,7 +318,7 @@ Irrelevant:
                                   'relevant': True,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'type',
-                                  'value': '',
+                                  'value': 'quadrilateral',
                                   'values': ['1tri angle', 'quadrilateral']},
             'typeOf(rectangle) = 1tri angle': {'environmental': False,
                                                'normal': False,
@@ -340,7 +340,7 @@ Irrelevant:
                                          'relevant': True,
                                          'status': 'CONSEQUENCE',
                                          'typ': 'type',
-                                         'value': '',
+                                         'value': '1tri angle',
                                          'values': ['1tri angle', 'quadrilateral']},
             'typeOf(regular_triangle) = 1tri angle': {'environmental': False,
                                                       'normal': False,
@@ -362,7 +362,7 @@ Irrelevant:
                                        'relevant': True,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'type',
-                                       'value': '',
+                                       'value': '1tri angle',
                                        'values': ['1tri angle', 'quadrilateral']},
             'typeOf(right_triangle) = 1tri angle': {'environmental': False,
                                                     'normal': False,
@@ -384,7 +384,7 @@ Irrelevant:
                                'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'type',
-                               'value': '',
+                               'value': 'quadrilateral',
                                'values': ['1tri angle', 'quadrilateral']},
             'typeOf(square) = 1tri angle': {'environmental': False,
                                             'normal': False,

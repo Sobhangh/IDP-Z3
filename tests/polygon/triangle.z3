@@ -368,7 +368,6 @@ Universals:
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
   3 ≤ Sides ≤ 4
   3 ≤ Vertices ≤ 4
-  Subtype = regular_triangle
 Consequences:
   Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
   Sides = 3 <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Subtype', 'Subtype = regular_triangle'}
@@ -377,32 +376,33 @@ Consequences:
   Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides', 'Sides = 3'}
   ~Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides', 'Sides = 4'}
   Convex <= {'((Sides = 3) ⇒ Convex)', 'Sides', 'Sides = 3'}
-  ∀n[side] : Angle(n) < 180 <= {'(Convex ⇔ (∀n[side] : Angle(n) < 180))', 'Convex'}
+  ∀n[side] : Angle(n) < 180
   Equilateral <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Subtype', 'Subtype = regular_triangle'}
   ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n) <= {'(Equilateral ⇔ (∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)))', 'Equilateral', 'n = 4', 'Sides'}
   ~Subtype = right_triangle <= {'Subtype'}
   ~Subtype = irregular <= {'Subtype'}
-  ∀n[side] : (Angle(n) = 60) ∨ (Sides < n) <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ (∀n[side] : (Angle(n) = 60) ∨ (Sides < n))))', 'Subtype', 'Subtype = regular_triangle'}
-  ~∃n[side] : Angle(n) = 90 <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Subtype', 'Subtype = right_triangle'}
+  ∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+  ~∃n[side] : Angle(n) = 90
   ~Subtype = square <= {'Subtype'}
   ~Subtype = rectangle <= {'Subtype'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= Z3 proof
   Length(1) = Length(3) <= Z3 proof
-  ~Length(2) = Length(4) <= Z3 proof
+  ~Length(2) = Length(4)
   Length(1) = Length(2) <= Z3 proof
   Length(1) ≤ (Length(2) + Length(3)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
   Length(2) ≤ (Length(3) + Length(1)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
   Length(3) ≤ (Length(1) + Length(2)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
   Surface = ((Base * Height) / 2) <= {'(Type = triangle) ⇒ (Surface = ((Base * Height) / 2))', 'Type', 'Type = triangle'}
   ~Surface = -1 <= Z3 proof
-  Sides = 3 <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Subtype', 'Subtype = regular_triangle'}
-  Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides', 'Sides = 3'}
-  Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
+  Sides = 3
+  Vertices = 3
+  Type = triangle
   Length(4) = 0 <= Z3 proof
   Angle(1) = 60 <= Z3 proof
   Angle(2) = 60 <= Z3 proof
   Angle(3) = 60 <= Z3 proof
   Angle(4) = 0 <= Z3 proof
+  Subtype = regular_triangle
 Simplified:  
   
 Irrelevant:  
@@ -413,7 +413,7 @@ Irrelevant:
   ~Subtype = rectangle <= {'Subtype'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= Z3 proof
   Length(1) = Length(3) <= Z3 proof
-  ~Length(2) = Length(4) <= Z3 proof
+  ~Length(2) = Length(4)
   Length(1) = Length(2) <= Z3 proof
   ~Surface = (Length(1) * Length(2))
   ~Surface = -1 <= Z3 proof
@@ -706,7 +706,7 @@ Irrelevant:
                      'relevant': True,
                      'status': 'CONSEQUENCE',
                      'typ': 'Int',
-                     'value': '',
+                     'value': '3',
                      'values': ['3', '4']},
            'Sides = 3': {'environmental': False,
                          'normal': False,
@@ -733,9 +733,9 @@ Irrelevant:
                          'normal': True,
                          'reading': 'Subtype',
                          'relevant': True,
-                         'status': 'UNIVERSAL',
+                         'status': 'CONSEQUENCE',
                          'typ': 'subtype',
-                         'value': '',
+                         'value': 'regular_triangle',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype = irregular': {'environmental': False,
                                      'normal': False,
@@ -805,7 +805,7 @@ Irrelevant:
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'type',
-                   'value': '',
+                   'value': 'triangle',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'environmental': False,
                                    'normal': False,
@@ -827,7 +827,7 @@ Irrelevant:
                            'relevant': True,
                            'status': 'CONSEQUENCE',
                            'typ': 'Int',
-                           'value': '',
+                           'value': '3',
                            'values': ['3', '4']},
               'Vertices = 3': {'environmental': False,
                                'normal': False,

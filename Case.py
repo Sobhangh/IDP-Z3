@@ -222,10 +222,7 @@ class Case:
                         new_constraint = old_ass.sentence.substitute(old, new)
                         if new_constraint != old_ass.sentence: # changed !
                             proof = Proof().update(new_constraint.proof)
-                            if new_constraint.code in self.assignments \
-                            and self.assignments[new_constraint.code].truth is not None:
-                                self.assignments[old_ass.sentence.code] = self.assignments[new_constraint.code]
-                            elif type(old_ass) == Term: # value of term was not known
+                            if type(old_ass) == Term: # value of term was not known
                                 old_ass = cast(Term, old_ass)
                                 new_ass = old_ass.assign(new_constraint.value, proof, self, CONSQ)
                                 to_propagate.append(new_ass)

@@ -336,10 +336,10 @@ Consequences:
   ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n) <= Z3 proof
   ~Subtype = square <= {'((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))', 'Sides', 'Sides = 4', 'Equilateral'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Subtype = rectangle', 'Subtype = square'}
-  Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
-  Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
-  Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
-  Subtype = irregular <= {'(Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square) ∨ (Subtype = irregular)', 'Subtype = rectangle', 'Subtype = regular_triangle', 'Subtype = right_triangle', 'Subtype = square'}
+  Sides = 4
+  Vertices = 4
+  Type = quadrilateral
+  Subtype = irregular
   Perimeter = 10
   ~Large(2) <= Z3 proof
   ~Large(3) <= Z3 proof
@@ -517,7 +517,7 @@ Irrelevant:
                      'relevant': True,
                      'status': 'CONSEQUENCE',
                      'typ': 'Int',
-                     'value': '',
+                     'value': '4',
                      'values': ['3', '4']},
            'Sides = 3': {'environmental': False,
                          'normal': False,
@@ -553,7 +553,7 @@ Irrelevant:
                          'relevant': True,
                          'status': 'CONSEQUENCE',
                          'typ': 'subtype',
-                         'value': '',
+                         'value': 'irregular',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype = irregular': {'environmental': False,
                                      'normal': False,
@@ -596,7 +596,7 @@ Irrelevant:
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'type',
-                   'value': '',
+                   'value': 'quadrilateral',
                    'values': ['triangle', 'quadrilateral']},
           'Type = quadrilateral': {'environmental': False,
                                    'normal': False,
@@ -618,7 +618,7 @@ Irrelevant:
                            'relevant': True,
                            'status': 'CONSEQUENCE',
                            'typ': 'Int',
-                           'value': '',
+                           'value': '4',
                            'values': ['3', '4']},
               'Vertices = 3': {'environmental': False,
                                'normal': False,

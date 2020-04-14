@@ -105,10 +105,10 @@ Definitions:
 Universals:  
   Sides = 3
   3 ≤ Sides ≤ 4
-  Sides = 3
 Consequences:
   ~Subtype = rectangle <= {'(Subtype = rectangle) ⇔ (Sides = 4)', 'Sides', 'Sides = 4'}
   ~Sides = 4 <= {'Sides'}
+  Sides = 3
 Simplified:  
   Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1)))))
   (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = square) ∨ (Subtype = irregular)
@@ -184,9 +184,9 @@ Irrelevant:
                      'normal': True,
                      'reading': 'Sides',
                      'relevant': True,
-                     'status': 'UNIVERSAL',
+                     'status': 'CONSEQUENCE',
                      'typ': 'Int',
-                     'value': '',
+                     'value': '3',
                      'values': ['3', '4']},
            'Sides = 3': {'environmental': False,
                          'normal': False,
