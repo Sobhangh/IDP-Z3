@@ -239,6 +239,14 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
+Or(Type == triangle, Type == quadrilateral)
+
+Or(Subtype == regular_triangle,
+   Subtype == right_triangle,
+   Subtype == rectangle,
+   Subtype == square,
+   Subtype == irregular)
+
 -- subtences ------------------------------------
 Subtype = regular_triangle
 Type = triangle

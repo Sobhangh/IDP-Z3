@@ -22,6 +22,14 @@ same(Piet) == Piet
 
 same(same(Piet)) == negated(negated(Piet))
 
+Or(same(Piet) == Piet, same(Piet) == Jan)
+
+Or(same(Jan) == Piet, same(Jan) == Jan)
+
+Or(negated(Piet) == Piet, negated(Piet) == Jan)
+
+Or(negated(Jan) == Piet, negated(Jan) == Jan)
+
 And(same(Piet) == Piet,
     Not(same(Piet) == Jan),
     Not(same(Jan) == Piet),
@@ -36,6 +44,11 @@ And(Not(negated(Piet) == Piet),
 same(Piet) = Piet
 negated(Piet) = Jan
 negated(Piet) = Piet
+same(Piet) = Jan
+same(Jan) = Piet
+same(Jan) = Jan
+negated(Jan) = Piet
+negated(Jan) = Jan
 
 -- GUILines ------------------------------------
 same(Piet)
@@ -45,6 +58,11 @@ negated(Jan)
 same(Piet) = Piet
 negated(Piet) = Jan
 negated(Piet) = Piet
+same(Piet) = Jan
+same(Jan) = Piet
+same(Jan) = Jan
+negated(Jan) = Piet
+negated(Jan) = Jan
 
 -- case -------------------------------------
 Type:        
@@ -58,13 +76,18 @@ Universals:
 Consequences:
   negated(Piet) = Jan <= Z3 proof
   ~negated(Piet) = Piet <= {'negated(Piet)'}
-  same(Jan) = Jan <= Z3 proof
+  ~same(Piet) = Jan <= {'same(Piet)'}
+  ~same(Jan) = Piet <= Z3 proof
+  same(Jan) = Jan <= {'(same(Jan) = Piet) ∨ (same(Jan) = Jan)', 'same(Jan) = Piet'}
+  negated(Jan) = Piet <= Z3 proof
+  ~negated(Jan) = Jan <= {'negated(Jan)'}
+  same(Jan) = Jan <= {'(same(Jan) = Piet) ∨ (same(Jan) = Jan)', 'same(Jan) = Piet'}
   negated(Piet) = Jan <= Z3 proof
   negated(Jan) = Piet <= Z3 proof
 Simplified:  
   same(Piet) = Piet
 Irrelevant:  
-  
+  ~same(Piet) = Jan <= {'same(Piet)'}
 
 
 -- meta -------------------------------------
@@ -80,8 +103,22 @@ Irrelevant:
                               'relevant': True,
                               'status': 'CONSEQUENCE',
                               'typ': 'num',
-                              'value': 'Piet',
+                              'value': '',
                               'values': ['Piet', 'Jan']},
+             'negated(Jan) = Jan': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'negated(Jan) = Jan',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': False},
+             'negated(Jan) = Piet': {'environmental': False,
+                                     'normal': False,
+                                     'reading': 'negated(Jan) = Piet',
+                                     'relevant': True,
+                                     'status': 'CONSEQUENCE',
+                                     'typ': 'Bool',
+                                     'value': True},
              'negated(Piet)': {'environmental': False,
                                'normal': True,
                                'reading': 'negated(Piet)',
@@ -92,14 +129,14 @@ Irrelevant:
                                'values': ['Piet', 'Jan']},
              'negated(Piet) = Jan': {'environmental': False,
                                      'normal': False,
-                                     'reading': '$negated$ = Jan',
+                                     'reading': 'negated(Piet) = Jan',
                                      'relevant': True,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': True},
              'negated(Piet) = Piet': {'environmental': False,
                                       'normal': False,
-                                      'reading': '$negated!0$ = Piet',
+                                      'reading': 'negated(Piet) = Piet',
                                       'relevant': True,
                                       'status': 'CONSEQUENCE',
                                       'typ': 'Bool',
@@ -110,8 +147,22 @@ Irrelevant:
                         'relevant': True,
                         'status': 'CONSEQUENCE',
                         'typ': 'num',
-                        'value': 'Jan',
+                        'value': '',
                         'values': ['Piet', 'Jan']},
+          'same(Jan) = Jan': {'environmental': False,
+                              'normal': False,
+                              'reading': 'same(Jan) = Jan',
+                              'relevant': True,
+                              'status': 'CONSEQUENCE',
+                              'typ': 'Bool',
+                              'value': True},
+          'same(Jan) = Piet': {'environmental': False,
+                               'normal': False,
+                               'reading': 'same(Jan) = Piet',
+                               'relevant': True,
+                               'status': 'CONSEQUENCE',
+                               'typ': 'Bool',
+                               'value': False},
           'same(Piet)': {'environmental': False,
                          'normal': True,
                          'reading': 'same(Piet)',
@@ -120,6 +171,13 @@ Irrelevant:
                          'typ': 'num',
                          'value': '',
                          'values': ['Piet', 'Jan']},
+          'same(Piet) = Jan': {'environmental': False,
+                               'normal': False,
+                               'reading': 'same(Piet) = Jan',
+                               'relevant': False,
+                               'status': 'CONSEQUENCE',
+                               'typ': 'Bool',
+                               'value': False},
           'same(Piet) = Piet': {'environmental': False,
                                 'normal': False,
                                 'reading': 'same(Piet) = Piet',

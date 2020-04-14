@@ -220,6 +220,14 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
+Or(Type == triangle, Type == quadrilateral)
+
+Or(Subtype == regular_triangle,
+   Subtype == right_triangle,
+   Subtype == rectangle,
+   Subtype == square,
+   Subtype == irregular)
+
 -- subtences ------------------------------------
 ∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
 Type = triangle
@@ -329,7 +337,7 @@ Universals:
 Consequences:
   ~Type = triangle <= Z3 proof
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
-  Type = quadrilateral <= Z3 proof
+  Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
   Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
   ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
@@ -346,7 +354,7 @@ Consequences:
   Length(3) ≤ (Length(1) + Length(2)) <= Z3 proof
   Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
-  Type = quadrilateral <= Z3 proof
+  Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
   Angle(1) = 90 <= Z3 proof
   Angle(2) = 90 <= Z3 proof
   Angle(3) = 90 <= Z3 proof
@@ -356,6 +364,7 @@ Simplified:
   ((((Subtype = square) ∨ (Subtype = rectangle))))
   ((Subtype = rectangle) ⇒ ((~(Length(1) = Length(2)))))
   ((Subtype = square) ⇔ (Equilateral))
+  (Subtype = rectangle) ∨ (Subtype = square)
 Irrelevant:  
   3 ≤ Sides ≤ 4
   3 ≤ Vertices ≤ 4

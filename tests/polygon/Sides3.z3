@@ -240,6 +240,14 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
+Or(Type == triangle, Type == quadrilateral)
+
+Or(Subtype == regular_triangle,
+   Subtype == right_triangle,
+   Subtype == rectangle,
+   Subtype == square,
+   Subtype == irregular)
+
 -- subtences ------------------------------------
 Sides = 3
 Type = triangle
@@ -389,6 +397,7 @@ Simplified:
   ((Subtype = regular_triangle) ⇔ (Equilateral))
   ((Subtype = regular_triangle) ⇔ (((((Angle(1) = 60)) ∧ ((Angle(2) = 60)) ∧ ((Angle(3) = 60))))))
   ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90)))))
+  (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = irregular)
 Irrelevant:  
   ~Sides = 4 <= {'Sides'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= Z3 proof

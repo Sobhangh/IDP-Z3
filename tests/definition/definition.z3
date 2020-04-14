@@ -15,17 +15,28 @@ view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
+Or(codeOf(red) == a, codeOf(red) == b)
+
+Or(codeOf(blue) == a, codeOf(blue) == b)
+
 And(codeOf(red) == a,
     Not(codeOf(red) == b),
     Not(codeOf(blue) == a),
     codeOf(blue) == b)
 
 -- subtences ------------------------------------
-
+codeOf(red) = a
+codeOf(red) = b
+codeOf(blue) = a
+codeOf(blue) = b
 
 -- GUILines ------------------------------------
 codeOf(red)
 codeOf(blue)
+codeOf(red) = a
+codeOf(red) = b
+codeOf(blue) = a
+codeOf(blue) = b
 
 -- case -------------------------------------
 Type:        
@@ -36,11 +47,20 @@ Universals:
   
 Consequences:
   codeOf(red) = a <= Z3 proof
+  ~codeOf(red) = b <= {'codeOf(red)'}
+  ~codeOf(blue) = a <= Z3 proof
+  codeOf(blue) = b <= Z3 proof
+  codeOf(red) = a <= Z3 proof
   codeOf(blue) = b <= Z3 proof
 Simplified:  
   
 Irrelevant:  
-  
+  codeOf(red) = a <= Z3 proof
+  ~codeOf(red) = b <= {'codeOf(red)'}
+  ~codeOf(blue) = a <= Z3 proof
+  codeOf(blue) = b <= Z3 proof
+  codeOf(red) = a <= Z3 proof
+  codeOf(blue) = b <= Z3 proof
 
 
 -- meta -------------------------------------
@@ -52,16 +72,44 @@ Irrelevant:
  'codeOf': {'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'CONSEQUENCE',
                              'typ': 'code',
-                             'value': 'b',
+                             'value': '',
                              'values': ['a', 'b']},
+            'codeOf(blue) = a': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'codeOf(blue) = a',
+                                 'relevant': False,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': False},
+            'codeOf(blue) = b': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'codeOf(blue) = b',
+                                 'relevant': False,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': True},
             'codeOf(red)': {'environmental': False,
                             'normal': True,
                             'reading': 'codeOf(red)',
-                            'relevant': True,
+                            'relevant': False,
                             'status': 'CONSEQUENCE',
                             'typ': 'code',
-                            'value': 'a',
-                            'values': ['a', 'b']}}}
+                            'value': '',
+                            'values': ['a', 'b']},
+            'codeOf(red) = a': {'environmental': False,
+                                'normal': False,
+                                'reading': 'codeOf(red) = a',
+                                'relevant': False,
+                                'status': 'CONSEQUENCE',
+                                'typ': 'Bool',
+                                'value': True},
+            'codeOf(red) = b': {'environmental': False,
+                                'normal': False,
+                                'reading': 'codeOf(red) = b',
+                                'relevant': False,
+                                'status': 'CONSEQUENCE',
+                                'typ': 'Bool',
+                                'value': False}}}

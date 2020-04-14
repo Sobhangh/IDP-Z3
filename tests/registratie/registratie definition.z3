@@ -336,6 +336,97 @@ Or(Not(Registration_Type == Other),
 
 Not(Professional_Declaration_Filed)
 
+Or(Region == Flemish_Region,
+   Region == Walloon_Region,
+   Region == Brussels_Region)
+
+Or(Municipality == other_Municipal,
+   Municipality == Aalst,
+   Municipality == Antwerpen,
+   Municipality == Boom,
+   Municipality == Brugge,
+   Municipality == Dendermonde,
+   Municipality == Genk,
+   Municipality == Gent,
+   Municipality == Hasselt,
+   Municipality == Kortrijk,
+   Municipality == Leuven,
+   Municipality == Mechelen,
+   Municipality == Oostende,
+   Municipality == Roeselare,
+   Municipality == SintNiklaas,
+   Municipality == Turnhout,
+   Municipality == Vilvoorde,
+   Municipality == Affligem,
+   Municipality == Asse,
+   Municipality == Beersel,
+   Municipality == Bever,
+   Municipality == Dilbeek,
+   Municipality == Drogenbos,
+   Municipality == Galmaarden,
+   Municipality == Gooik,
+   Municipality == Grimbergen,
+   Municipality == Halle,
+   Municipality == Herne,
+   Municipality == Hoeilaart,
+   Municipality == Kampenhout,
+   Municipality == KapelleopdenBos,
+   Municipality == Kraainem,
+   Municipality == Lennik,
+   Municipality == Liedekerke,
+   Municipality == Linkebeek,
+   Municipality == Londerzeel,
+   Municipality == Machelen,
+   Municipality == Meise,
+   Municipality == Merchtem,
+   Municipality == Opwijk,
+   Municipality == Overijse,
+   Municipality == Pepingen,
+   Municipality == Roosdaal,
+   Municipality == SintGenesiusRode,
+   Municipality == SintPietersLeeuw,
+   Municipality == Steenokkerzeel,
+   Municipality == Ternat,
+   Municipality == Wemmel,
+   Municipality == WezembeekOppem,
+   Municipality == Zaventem,
+   Municipality == Zemst,
+   Municipality == Bertem,
+   Municipality == Huldenberg,
+   Municipality == Kortenberg,
+   Municipality == Tervuren)
+
+Or(Type_Of_Real_Estate == Residential,
+   Type_Of_Real_Estate == Residential_Building_Land,
+   Type_Of_Real_Estate == Other_Real_Estate)
+
+Or(Seller == Vlaams_Woningfonds,
+   Seller == Gelijksoortige_Rechtspersoon_EER,
+   Seller == Mpy_Erkend_Door_VMSW,
+   Seller == Vlaamse_Mpy_Voor_Sociaal_Wonen,
+   Seller == ErkendeSocialeHuisvestingsMpy)
+
+Or(Buyer == Natural_Person,
+   Buyer == Legal_Person,
+   Buyer == Mixed)
+
+Or(Use == As_Family_Dwelling,
+   Use == For_Resale,
+   Use == Community_Purpose,
+   Use == Social_Housing,
+   Use == Social_Renting,
+   Use == Other_House,
+   Use == No_House)
+
+Or(Resale == Less_Than_Three, Resale == Three_Or_More)
+
+Or(Transaction_Type == Public_Sale,
+   Transaction_Type == Out_Hand,
+   Transaction_Type == Public_Sale_Community)
+
+Or(Duration_Of_Agreement == Less_Than_9_years,
+   Duration_Of_Agreement == More_than_9_Or_9_years)
+
 And(Start_Dt_Dwelling_For_Social_Rent >= 2015,
     Start_Dt_Dwelling_For_Social_Rent <= 2025)
 
@@ -346,6 +437,16 @@ And(Term_Energy_Renovation >= 2015,
 
 And(Certification_Date_Sale >= 2015,
     Certification_Date_Sale <= 2025)
+
+Or(Registration_Type == Family_Dwelling,
+   Registration_Type == Social_Dwelling,
+   Registration_Type == Social_Purpose,
+   Registration_Type == Exchange_Unbuilt_Ground,
+   Registration_Type == Professional_Purchase,
+   Registration_Type == Energy_Efficient_Dwelling,
+   Registration_Type == Heritage,
+   Registration_Type == Dwelling_For_Social_Renting,
+   Registration_Type == Other)
 
 Or(Tax == 1,
    Tax == 2,
@@ -416,6 +517,71 @@ Seller = Mpy_Erkend_Door_VMSW
 Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
 Use = Community_Purpose
+Municipality = other_Municipal
+Municipality = Aalst
+Municipality = Antwerpen
+Municipality = Boom
+Municipality = Brugge
+Municipality = Dendermonde
+Municipality = Genk
+Municipality = Gent
+Municipality = Hasselt
+Municipality = Kortrijk
+Municipality = Leuven
+Municipality = Mechelen
+Municipality = Oostende
+Municipality = Roeselare
+Municipality = SintNiklaas
+Municipality = Turnhout
+Municipality = Vilvoorde
+Municipality = Affligem
+Municipality = Asse
+Municipality = Beersel
+Municipality = Bever
+Municipality = Dilbeek
+Municipality = Drogenbos
+Municipality = Galmaarden
+Municipality = Gooik
+Municipality = Grimbergen
+Municipality = Halle
+Municipality = Herne
+Municipality = Hoeilaart
+Municipality = Kampenhout
+Municipality = KapelleopdenBos
+Municipality = Kraainem
+Municipality = Lennik
+Municipality = Liedekerke
+Municipality = Linkebeek
+Municipality = Londerzeel
+Municipality = Machelen
+Municipality = Meise
+Municipality = Merchtem
+Municipality = Opwijk
+Municipality = Overijse
+Municipality = Pepingen
+Municipality = Roosdaal
+Municipality = SintGenesiusRode
+Municipality = SintPietersLeeuw
+Municipality = Steenokkerzeel
+Municipality = Ternat
+Municipality = Wemmel
+Municipality = WezembeekOppem
+Municipality = Zaventem
+Municipality = Zemst
+Municipality = Bertem
+Municipality = Huldenberg
+Municipality = Kortenberg
+Municipality = Tervuren
+Type_Of_Real_Estate = Residential_Building_Land
+Type_Of_Real_Estate = Other_Real_Estate
+Buyer = Legal_Person
+Buyer = Mixed
+Use = Other_House
+Use = No_House
+Resale = Less_Than_Three
+Transaction_Type = Out_Hand
+Transaction_Type = Public_Sale_Community
+Duration_Of_Agreement = More_than_9_Or_9_years
 2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
 2015 ≤ Certification_Date ≤ 2025
 2015 ≤ Term_Energy_Renovation ≤ 2025
@@ -490,6 +656,71 @@ Seller = Mpy_Erkend_Door_VMSW
 Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
 Use = Community_Purpose
+Municipality = other_Municipal
+Municipality = Aalst
+Municipality = Antwerpen
+Municipality = Boom
+Municipality = Brugge
+Municipality = Dendermonde
+Municipality = Genk
+Municipality = Gent
+Municipality = Hasselt
+Municipality = Kortrijk
+Municipality = Leuven
+Municipality = Mechelen
+Municipality = Oostende
+Municipality = Roeselare
+Municipality = SintNiklaas
+Municipality = Turnhout
+Municipality = Vilvoorde
+Municipality = Affligem
+Municipality = Asse
+Municipality = Beersel
+Municipality = Bever
+Municipality = Dilbeek
+Municipality = Drogenbos
+Municipality = Galmaarden
+Municipality = Gooik
+Municipality = Grimbergen
+Municipality = Halle
+Municipality = Herne
+Municipality = Hoeilaart
+Municipality = Kampenhout
+Municipality = KapelleopdenBos
+Municipality = Kraainem
+Municipality = Lennik
+Municipality = Liedekerke
+Municipality = Linkebeek
+Municipality = Londerzeel
+Municipality = Machelen
+Municipality = Meise
+Municipality = Merchtem
+Municipality = Opwijk
+Municipality = Overijse
+Municipality = Pepingen
+Municipality = Roosdaal
+Municipality = SintGenesiusRode
+Municipality = SintPietersLeeuw
+Municipality = Steenokkerzeel
+Municipality = Ternat
+Municipality = Wemmel
+Municipality = WezembeekOppem
+Municipality = Zaventem
+Municipality = Zemst
+Municipality = Bertem
+Municipality = Huldenberg
+Municipality = Kortenberg
+Municipality = Tervuren
+Type_Of_Real_Estate = Residential_Building_Land
+Type_Of_Real_Estate = Other_Real_Estate
+Buyer = Legal_Person
+Buyer = Mixed
+Use = Other_House
+Use = No_House
+Resale = Less_Than_Three
+Transaction_Type = Out_Hand
+Transaction_Type = Public_Sale_Community
+Duration_Of_Agreement = More_than_9_Or_9_years
 2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
 2015 ≤ Certification_Date ≤ 2025
 2015 ≤ Term_Energy_Renovation ≤ 2025
@@ -525,6 +756,13 @@ Simplified:
   ((Registration_Type = Social_Purpose) ⇒ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
   (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
   (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
+  (Region = Flemish_Region) ∨ (Region = Walloon_Region) ∨ (Region = Brussels_Region)
+  (Type_Of_Real_Estate = Residential) ∨ (Type_Of_Real_Estate = Residential_Building_Land) ∨ (Type_Of_Real_Estate = Other_Real_Estate)
+  (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER) ∨ (Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen) ∨ (Seller = ErkendeSocialeHuisvestingsMpy)
+  (Buyer = Natural_Person) ∨ (Buyer = Legal_Person) ∨ (Buyer = Mixed)
+  (Use = As_Family_Dwelling) ∨ (Use = For_Resale) ∨ (Use = Community_Purpose) ∨ (Use = Social_Housing) ∨ (Use = Social_Renting) ∨ (Use = Other_House) ∨ (Use = No_House)
+  (Duration_Of_Agreement = Less_Than_9_years) ∨ (Duration_Of_Agreement = More_than_9_Or_9_years)
+  (Registration_Type = Family_Dwelling) ∨ (Registration_Type = Social_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground) ∨ (Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Heritage) ∨ (Registration_Type = Dwelling_For_Social_Renting) ∨ (Registration_Type = Other)
   (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
 Irrelevant:  
   ~Guarantee_Satisfied
@@ -532,8 +770,65 @@ Irrelevant:
   ~Additional_Security_Satisfied
   ~Resale = Three_Or_More
   ~Transaction_Type = Public_Sale
-  ~Use = For_Resale
   ~Certification_Date_Sale = (Certification_Date + 8)
+  ~Municipality = other_Municipal
+  ~Municipality = Aalst
+  ~Municipality = Antwerpen
+  ~Municipality = Boom
+  ~Municipality = Brugge
+  ~Municipality = Dendermonde
+  ~Municipality = Genk
+  ~Municipality = Gent
+  ~Municipality = Hasselt
+  ~Municipality = Kortrijk
+  ~Municipality = Leuven
+  ~Municipality = Mechelen
+  ~Municipality = Oostende
+  ~Municipality = Roeselare
+  ~Municipality = SintNiklaas
+  ~Municipality = Turnhout
+  ~Municipality = Vilvoorde
+  ~Municipality = Affligem
+  ~Municipality = Asse
+  ~Municipality = Beersel
+  ~Municipality = Bever
+  ~Municipality = Dilbeek
+  ~Municipality = Drogenbos
+  ~Municipality = Galmaarden
+  ~Municipality = Gooik
+  ~Municipality = Grimbergen
+  ~Municipality = Halle
+  ~Municipality = Herne
+  ~Municipality = Hoeilaart
+  ~Municipality = Kampenhout
+  ~Municipality = KapelleopdenBos
+  ~Municipality = Kraainem
+  ~Municipality = Lennik
+  ~Municipality = Liedekerke
+  ~Municipality = Linkebeek
+  ~Municipality = Londerzeel
+  ~Municipality = Machelen
+  ~Municipality = Meise
+  ~Municipality = Merchtem
+  ~Municipality = Opwijk
+  ~Municipality = Overijse
+  ~Municipality = Pepingen
+  ~Municipality = Roosdaal
+  ~Municipality = SintGenesiusRode
+  ~Municipality = SintPietersLeeuw
+  ~Municipality = Steenokkerzeel
+  ~Municipality = Ternat
+  ~Municipality = Wemmel
+  ~Municipality = WezembeekOppem
+  ~Municipality = Zaventem
+  ~Municipality = Zemst
+  ~Municipality = Bertem
+  ~Municipality = Huldenberg
+  ~Municipality = Kortenberg
+  ~Municipality = Tervuren
+  ~Resale = Less_Than_Three
+  ~Transaction_Type = Out_Hand
+  ~Transaction_Type = Public_Sale_Community
   2015 ≤ Start_Dt_Dwelling_For_Social_Rent ≤ 2025
   2015 ≤ Certification_Date ≤ 2025
   2015 ≤ Term_Energy_Renovation ≤ 2025
@@ -688,6 +983,18 @@ Irrelevant:
                      'typ': 'buyerType',
                      'value': '',
                      'values': ['Natural_Person', 'Legal_Person', 'Mixed']},
+           'Buyer = Legal_Person': {'environmental': True,
+                                    'normal': False,
+                                    'reading': 'Buyer = Legal_Person',
+                                    'relevant': True,
+                                    'status': 'UNKNOWN',
+                                    'typ': 'Bool'},
+           'Buyer = Mixed': {'environmental': True,
+                             'normal': False,
+                             'reading': 'Buyer = Mixed',
+                             'relevant': True,
+                             'status': 'UNKNOWN',
+                             'typ': 'Bool'},
            'Buyer = Natural_Person': {'environmental': True,
                                       'normal': False,
                                       'reading': 'Buyer = Natural_Person',
@@ -776,7 +1083,14 @@ Irrelevant:
                                                                                     'Less_Than_9_years',
                                                                          'relevant': True,
                                                                          'status': 'UNKNOWN',
-                                                                         'typ': 'Bool'}},
+                                                                         'typ': 'Bool'},
+                           'Duration_Of_Agreement = More_than_9_Or_9_years': {'environmental': True,
+                                                                              'normal': False,
+                                                                              'reading': 'Duration_Of_Agreement = '
+                                                                                         'More_than_9_Or_9_years',
+                                                                              'relevant': True,
+                                                                              'status': 'UNKNOWN',
+                                                                              'typ': 'Bool'}},
  'Energy_Renovation_Planned': {'Energy_Renovation_Planned': {'environmental': True,
                                                              'normal': True,
                                                              'reading': 'Energy_Renovation_Planned',
@@ -880,7 +1194,337 @@ Irrelevant:
                                               'Bertem',
                                               'Huldenberg',
                                               'Kortenberg',
-                                              'Tervuren']}},
+                                              'Tervuren']},
+                  'Municipality = Aalst': {'environmental': True,
+                                           'normal': False,
+                                           'reading': 'Municipality = Aalst',
+                                           'relevant': False,
+                                           'status': 'UNKNOWN',
+                                           'typ': 'Bool'},
+                  'Municipality = Affligem': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Affligem',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Antwerpen': {'environmental': True,
+                                               'normal': False,
+                                               'reading': 'Municipality = Antwerpen',
+                                               'relevant': False,
+                                               'status': 'UNKNOWN',
+                                               'typ': 'Bool'},
+                  'Municipality = Asse': {'environmental': True,
+                                          'normal': False,
+                                          'reading': 'Municipality = Asse',
+                                          'relevant': False,
+                                          'status': 'UNKNOWN',
+                                          'typ': 'Bool'},
+                  'Municipality = Beersel': {'environmental': True,
+                                             'normal': False,
+                                             'reading': 'Municipality = Beersel',
+                                             'relevant': False,
+                                             'status': 'UNKNOWN',
+                                             'typ': 'Bool'},
+                  'Municipality = Bertem': {'environmental': True,
+                                            'normal': False,
+                                            'reading': 'Municipality = Bertem',
+                                            'relevant': False,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+                  'Municipality = Bever': {'environmental': True,
+                                           'normal': False,
+                                           'reading': 'Municipality = Bever',
+                                           'relevant': False,
+                                           'status': 'UNKNOWN',
+                                           'typ': 'Bool'},
+                  'Municipality = Boom': {'environmental': True,
+                                          'normal': False,
+                                          'reading': 'Municipality = Boom',
+                                          'relevant': False,
+                                          'status': 'UNKNOWN',
+                                          'typ': 'Bool'},
+                  'Municipality = Brugge': {'environmental': True,
+                                            'normal': False,
+                                            'reading': 'Municipality = Brugge',
+                                            'relevant': False,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+                  'Municipality = Dendermonde': {'environmental': True,
+                                                 'normal': False,
+                                                 'reading': 'Municipality = Dendermonde',
+                                                 'relevant': False,
+                                                 'status': 'UNKNOWN',
+                                                 'typ': 'Bool'},
+                  'Municipality = Dilbeek': {'environmental': True,
+                                             'normal': False,
+                                             'reading': 'Municipality = Dilbeek',
+                                             'relevant': False,
+                                             'status': 'UNKNOWN',
+                                             'typ': 'Bool'},
+                  'Municipality = Drogenbos': {'environmental': True,
+                                               'normal': False,
+                                               'reading': 'Municipality = Drogenbos',
+                                               'relevant': False,
+                                               'status': 'UNKNOWN',
+                                               'typ': 'Bool'},
+                  'Municipality = Galmaarden': {'environmental': True,
+                                                'normal': False,
+                                                'reading': 'Municipality = Galmaarden',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
+                  'Municipality = Genk': {'environmental': True,
+                                          'normal': False,
+                                          'reading': 'Municipality = Genk',
+                                          'relevant': False,
+                                          'status': 'UNKNOWN',
+                                          'typ': 'Bool'},
+                  'Municipality = Gent': {'environmental': True,
+                                          'normal': False,
+                                          'reading': 'Municipality = Gent',
+                                          'relevant': False,
+                                          'status': 'UNKNOWN',
+                                          'typ': 'Bool'},
+                  'Municipality = Gooik': {'environmental': True,
+                                           'normal': False,
+                                           'reading': 'Municipality = Gooik',
+                                           'relevant': False,
+                                           'status': 'UNKNOWN',
+                                           'typ': 'Bool'},
+                  'Municipality = Grimbergen': {'environmental': True,
+                                                'normal': False,
+                                                'reading': 'Municipality = Grimbergen',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
+                  'Municipality = Halle': {'environmental': True,
+                                           'normal': False,
+                                           'reading': 'Municipality = Halle',
+                                           'relevant': False,
+                                           'status': 'UNKNOWN',
+                                           'typ': 'Bool'},
+                  'Municipality = Hasselt': {'environmental': True,
+                                             'normal': False,
+                                             'reading': 'Municipality = Hasselt',
+                                             'relevant': False,
+                                             'status': 'UNKNOWN',
+                                             'typ': 'Bool'},
+                  'Municipality = Herne': {'environmental': True,
+                                           'normal': False,
+                                           'reading': 'Municipality = Herne',
+                                           'relevant': False,
+                                           'status': 'UNKNOWN',
+                                           'typ': 'Bool'},
+                  'Municipality = Hoeilaart': {'environmental': True,
+                                               'normal': False,
+                                               'reading': 'Municipality = Hoeilaart',
+                                               'relevant': False,
+                                               'status': 'UNKNOWN',
+                                               'typ': 'Bool'},
+                  'Municipality = Huldenberg': {'environmental': True,
+                                                'normal': False,
+                                                'reading': 'Municipality = Huldenberg',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
+                  'Municipality = Kampenhout': {'environmental': True,
+                                                'normal': False,
+                                                'reading': 'Municipality = Kampenhout',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
+                  'Municipality = KapelleopdenBos': {'environmental': True,
+                                                     'normal': False,
+                                                     'reading': 'Municipality = KapelleopdenBos',
+                                                     'relevant': False,
+                                                     'status': 'UNKNOWN',
+                                                     'typ': 'Bool'},
+                  'Municipality = Kortenberg': {'environmental': True,
+                                                'normal': False,
+                                                'reading': 'Municipality = Kortenberg',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
+                  'Municipality = Kortrijk': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Kortrijk',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Kraainem': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Kraainem',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Lennik': {'environmental': True,
+                                            'normal': False,
+                                            'reading': 'Municipality = Lennik',
+                                            'relevant': False,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+                  'Municipality = Leuven': {'environmental': True,
+                                            'normal': False,
+                                            'reading': 'Municipality = Leuven',
+                                            'relevant': False,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+                  'Municipality = Liedekerke': {'environmental': True,
+                                                'normal': False,
+                                                'reading': 'Municipality = Liedekerke',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
+                  'Municipality = Linkebeek': {'environmental': True,
+                                               'normal': False,
+                                               'reading': 'Municipality = Linkebeek',
+                                               'relevant': False,
+                                               'status': 'UNKNOWN',
+                                               'typ': 'Bool'},
+                  'Municipality = Londerzeel': {'environmental': True,
+                                                'normal': False,
+                                                'reading': 'Municipality = Londerzeel',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
+                  'Municipality = Machelen': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Machelen',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Mechelen': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Mechelen',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Meise': {'environmental': True,
+                                           'normal': False,
+                                           'reading': 'Municipality = Meise',
+                                           'relevant': False,
+                                           'status': 'UNKNOWN',
+                                           'typ': 'Bool'},
+                  'Municipality = Merchtem': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Merchtem',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Oostende': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Oostende',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Opwijk': {'environmental': True,
+                                            'normal': False,
+                                            'reading': 'Municipality = Opwijk',
+                                            'relevant': False,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+                  'Municipality = Overijse': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Overijse',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Pepingen': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Pepingen',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Roeselare': {'environmental': True,
+                                               'normal': False,
+                                               'reading': 'Municipality = Roeselare',
+                                               'relevant': False,
+                                               'status': 'UNKNOWN',
+                                               'typ': 'Bool'},
+                  'Municipality = Roosdaal': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Roosdaal',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = SintGenesiusRode': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Municipality = SintGenesiusRode',
+                                                      'relevant': False,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                  'Municipality = SintNiklaas': {'environmental': True,
+                                                 'normal': False,
+                                                 'reading': 'Municipality = SintNiklaas',
+                                                 'relevant': False,
+                                                 'status': 'UNKNOWN',
+                                                 'typ': 'Bool'},
+                  'Municipality = SintPietersLeeuw': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Municipality = SintPietersLeeuw',
+                                                      'relevant': False,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                  'Municipality = Steenokkerzeel': {'environmental': True,
+                                                    'normal': False,
+                                                    'reading': 'Municipality = Steenokkerzeel',
+                                                    'relevant': False,
+                                                    'status': 'UNKNOWN',
+                                                    'typ': 'Bool'},
+                  'Municipality = Ternat': {'environmental': True,
+                                            'normal': False,
+                                            'reading': 'Municipality = Ternat',
+                                            'relevant': False,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+                  'Municipality = Tervuren': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Tervuren',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Turnhout': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Turnhout',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Vilvoorde': {'environmental': True,
+                                               'normal': False,
+                                               'reading': 'Municipality = Vilvoorde',
+                                               'relevant': False,
+                                               'status': 'UNKNOWN',
+                                               'typ': 'Bool'},
+                  'Municipality = Wemmel': {'environmental': True,
+                                            'normal': False,
+                                            'reading': 'Municipality = Wemmel',
+                                            'relevant': False,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+                  'Municipality = WezembeekOppem': {'environmental': True,
+                                                    'normal': False,
+                                                    'reading': 'Municipality = WezembeekOppem',
+                                                    'relevant': False,
+                                                    'status': 'UNKNOWN',
+                                                    'typ': 'Bool'},
+                  'Municipality = Zaventem': {'environmental': True,
+                                              'normal': False,
+                                              'reading': 'Municipality = Zaventem',
+                                              'relevant': False,
+                                              'status': 'UNKNOWN',
+                                              'typ': 'Bool'},
+                  'Municipality = Zemst': {'environmental': True,
+                                           'normal': False,
+                                           'reading': 'Municipality = Zemst',
+                                           'relevant': False,
+                                           'status': 'UNKNOWN',
+                                           'typ': 'Bool'},
+                  'Municipality = other_Municipal': {'environmental': True,
+                                                     'normal': False,
+                                                     'reading': 'Municipality = other_Municipal',
+                                                     'relevant': False,
+                                                     'status': 'UNKNOWN',
+                                                     'typ': 'Bool'}},
  'Professional_Buyer': {'Professional_Buyer': {'environmental': True,
                                                'normal': True,
                                                'reading': 'Professional_Buyer',
@@ -1004,6 +1648,12 @@ Irrelevant:
                        'typ': 'resale',
                        'value': '',
                        'values': ['Less_Than_Three', 'Three_Or_More']},
+            'Resale = Less_Than_Three': {'environmental': True,
+                                         'normal': False,
+                                         'reading': 'Resale = Less_Than_Three',
+                                         'relevant': False,
+                                         'status': 'UNKNOWN',
+                                         'typ': 'Bool'},
             'Resale = Three_Or_More': {'environmental': True,
                                        'normal': False,
                                        'reading': 'Resale = Three_Or_More',
@@ -1164,12 +1814,25 @@ Irrelevant:
                                            'typ': 'transaction',
                                            'value': '',
                                            'values': ['Public_Sale', 'Out_Hand', 'Public_Sale_Community']},
+                      'Transaction_Type = Out_Hand': {'environmental': True,
+                                                      'normal': False,
+                                                      'reading': 'Transaction_Type = Out_Hand',
+                                                      'relevant': False,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
                       'Transaction_Type = Public_Sale': {'environmental': True,
                                                          'normal': False,
                                                          'reading': 'Transaction_Type = Public_Sale',
                                                          'relevant': False,
                                                          'status': 'UNKNOWN',
-                                                         'typ': 'Bool'}},
+                                                         'typ': 'Bool'},
+                      'Transaction_Type = Public_Sale_Community': {'environmental': True,
+                                                                   'normal': False,
+                                                                   'reading': 'Transaction_Type = '
+                                                                              'Public_Sale_Community',
+                                                                   'relevant': False,
+                                                                   'status': 'UNKNOWN',
+                                                                   'typ': 'Bool'}},
  'Type_Of_Real_Estate': {'Type_Of_Real_Estate': {'environmental': True,
                                                  'normal': True,
                                                  'reading': 'Type_Of_Real_Estate',
@@ -1180,12 +1843,26 @@ Irrelevant:
                                                  'values': ['Residential',
                                                             'Residential_Building_Land',
                                                             'Other_Real_Estate']},
+                         'Type_Of_Real_Estate = Other_Real_Estate': {'environmental': True,
+                                                                     'normal': False,
+                                                                     'reading': 'Type_Of_Real_Estate = '
+                                                                                'Other_Real_Estate',
+                                                                     'relevant': True,
+                                                                     'status': 'UNKNOWN',
+                                                                     'typ': 'Bool'},
                          'Type_Of_Real_Estate = Residential': {'environmental': True,
                                                                'normal': False,
                                                                'reading': 'Type_Of_Real_Estate = Residential',
                                                                'relevant': True,
                                                                'status': 'UNKNOWN',
-                                                               'typ': 'Bool'}},
+                                                               'typ': 'Bool'},
+                         'Type_Of_Real_Estate = Residential_Building_Land': {'environmental': True,
+                                                                             'normal': False,
+                                                                             'reading': 'Type_Of_Real_Estate = '
+                                                                                        'Residential_Building_Land',
+                                                                             'relevant': True,
+                                                                             'status': 'UNKNOWN',
+                                                                             'typ': 'Bool'}},
  'Use': {'Use': {'environmental': True,
                  'normal': True,
                  'reading': 'Use',
@@ -1215,9 +1892,21 @@ Irrelevant:
          'Use = For_Resale': {'environmental': True,
                               'normal': False,
                               'reading': 'Use = For_Resale',
-                              'relevant': False,
+                              'relevant': True,
                               'status': 'UNKNOWN',
                               'typ': 'Bool'},
+         'Use = No_House': {'environmental': True,
+                            'normal': False,
+                            'reading': 'Use = No_House',
+                            'relevant': True,
+                            'status': 'UNKNOWN',
+                            'typ': 'Bool'},
+         'Use = Other_House': {'environmental': True,
+                               'normal': False,
+                               'reading': 'Use = Other_House',
+                               'relevant': True,
+                               'status': 'UNKNOWN',
+                               'typ': 'Bool'},
          'Use = Social_Housing': {'environmental': True,
                                   'normal': False,
                                   'reading': 'Use = Social_Housing',

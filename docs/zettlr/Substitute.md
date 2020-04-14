@@ -7,7 +7,8 @@ Todo:
 - [x] check that replace_by arguments does not include self.proof
 - [x] if phi then a else a → a 
 - [x] don't add brackets in replace_by if not bool
-- [ ] replace by True/false → add to consequences
+- [x] add typeConstraints
+- [ ] replace by True/false → add to consequences (stash: consequences)
 - [ ] proof when all conjuncts/disjuncts are False/True
 - [ ] proof for arithmetic, comparison
 - [ ] Expression.substitutions(), not Assignments.substitutions

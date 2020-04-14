@@ -187,7 +187,9 @@ class ConstructedTypeDeclaration(object):
         self.range = self.constructors #TODO constructor functions
 
     def check_bounds(self, var):
-        return None
+        out = [AComparison.make('=', [var, c], True) for c in self.constructors]
+        out = ADisjunction.make('∨', out)
+        return out
 
     def translate(self):
         return self.translated

@@ -16,17 +16,33 @@ theory {
 -- theory -----------------------------------
 t0 == Piet
 
+Or(t == Jan, t == Piet)
+
+Or(t0 == Jan, t0 == Piet)
+
+Or(t1 == Jan, t1 == Piet)
+
 And((t == Jan) == Or(Jan == t0, Jan == t1),
     (t == Piet) == Or(Piet == t0, Piet == t1))
 
 -- subtences ------------------------------------
 t0 = Piet
+t = Jan
+t = Piet
+t0 = Jan
+t1 = Jan
+t1 = Piet
 
 -- GUILines ------------------------------------
 t
 t0
 t1
 t0 = Piet
+t = Jan
+t = Piet
+t0 = Jan
+t1 = Jan
+t1 = Piet
 
 -- case -------------------------------------
 Type:        
@@ -37,12 +53,23 @@ Universals:
   t0 = Piet
   t0 = Piet
 Consequences:
+  ~t = Jan <= Z3 proof
+  t = Piet <= Z3 proof
+  ~t0 = Jan <= {'t0'}
+  ~t1 = Jan <= Z3 proof
+  t1 = Piet <= Z3 proof
   t = Piet <= Z3 proof
   t1 = Piet <= Z3 proof
 Simplified:  
   
 Irrelevant:  
-  
+  ~t = Jan <= Z3 proof
+  t = Piet <= Z3 proof
+  ~t0 = Jan <= {'t0'}
+  ~t1 = Jan <= Z3 proof
+  t1 = Piet <= Z3 proof
+  t = Piet <= Z3 proof
+  t1 = Piet <= Z3 proof
 
 
 -- meta -------------------------------------
@@ -56,11 +83,25 @@ Irrelevant:
  't': {'t': {'environmental': False,
              'normal': True,
              'reading': 't',
-             'relevant': True,
+             'relevant': False,
              'status': 'CONSEQUENCE',
              'typ': 'num',
-             'value': 'Piet',
-             'values': ['Jan', 'Piet']}},
+             'value': '',
+             'values': ['Jan', 'Piet']},
+       't = Jan': {'environmental': False,
+                   'normal': False,
+                   'reading': 't = Jan',
+                   'relevant': False,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': False},
+       't = Piet': {'environmental': False,
+                    'normal': False,
+                    'reading': 't = Piet',
+                    'relevant': False,
+                    'status': 'CONSEQUENCE',
+                    'typ': 'Bool',
+                    'value': True}},
  't0': {'t0': {'environmental': False,
                'normal': True,
                'reading': 't0',
@@ -69,6 +110,13 @@ Irrelevant:
                'typ': 'num',
                'value': '',
                'values': ['Jan', 'Piet']},
+        't0 = Jan': {'environmental': False,
+                     'normal': False,
+                     'reading': 't0 = Jan',
+                     'relevant': False,
+                     'status': 'CONSEQUENCE',
+                     'typ': 'Bool',
+                     'value': False},
         't0 = Piet': {'environmental': False,
                       'normal': False,
                       'reading': 't0 = Piet',
@@ -79,8 +127,22 @@ Irrelevant:
  't1': {'t1': {'environmental': False,
                'normal': True,
                'reading': 't1',
-               'relevant': True,
+               'relevant': False,
                'status': 'CONSEQUENCE',
                'typ': 'num',
-               'value': 'Piet',
-               'values': ['Jan', 'Piet']}}}
+               'value': '',
+               'values': ['Jan', 'Piet']},
+        't1 = Jan': {'environmental': False,
+                     'normal': False,
+                     'reading': 't1 = Jan',
+                     'relevant': False,
+                     'status': 'CONSEQUENCE',
+                     'typ': 'Bool',
+                     'value': False},
+        't1 = Piet': {'environmental': False,
+                      'normal': False,
+                      'reading': 't1 = Piet',
+                      'relevant': False,
+                      'status': 'CONSEQUENCE',
+                      'typ': 'Bool',
+                      'value': True}}}

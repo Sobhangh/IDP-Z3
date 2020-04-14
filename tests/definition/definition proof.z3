@@ -19,6 +19,12 @@ view expanded
 -- theory -----------------------------------
 codeOf(red) == b
 
+Or(codeOf(red) == a, codeOf(red) == b)
+
+Or(codeOf(blue) == a, codeOf(blue) == b)
+
+Or(c == red, c == blue)
+
 And((codeOf(red) == a) == (red == c),
     (codeOf(red) == b) == Not(red == c),
     (codeOf(blue) == a) == (blue == c),
@@ -28,6 +34,10 @@ And((codeOf(red) == a) == (red == c),
 codeOf(red) = b
 red = c
 codeOf(red) = a
+codeOf(blue) = a
+codeOf(blue) = b
+c = red
+c = blue
 
 -- GUILines ------------------------------------
 codeOf(red)
@@ -36,6 +46,10 @@ c
 codeOf(red) = b
 red = c
 codeOf(red) = a
+codeOf(blue) = a
+codeOf(blue) = b
+c = red
+c = blue
 
 -- case -------------------------------------
 Type:        
@@ -49,7 +63,11 @@ Consequences:
   ~red = c <= Z3 proof
   ~codeOf(red) = a <= {'codeOf(red)'}
   codeOf(blue) = a <= Z3 proof
-  c = blue <= Z3 proof
+  ~codeOf(blue) = b <= {'codeOf(blue)'}
+  ~c = red <= Z3 proof
+  c = blue <= {'(c = red) ∨ (c = blue)', 'c = red'}
+  codeOf(blue) = a <= Z3 proof
+  c = blue <= {'(c = red) ∨ (c = blue)', 'c = red'}
 Simplified:  
   
 Irrelevant:  
@@ -69,8 +87,22 @@ Irrelevant:
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'color',
-             'value': 'blue',
+             'value': '',
              'values': ['red', 'blue']},
+       'c = blue': {'environmental': False,
+                    'normal': False,
+                    'reading': 'c = blue',
+                    'relevant': True,
+                    'status': 'CONSEQUENCE',
+                    'typ': 'Bool',
+                    'value': True},
+       'c = red': {'environmental': False,
+                   'normal': False,
+                   'reading': 'c = red',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': False},
        'red = c': {'environmental': False,
                    'normal': False,
                    'reading': 'cl = c',
@@ -84,8 +116,22 @@ Irrelevant:
                              'relevant': True,
                              'status': 'CONSEQUENCE',
                              'typ': 'code',
-                             'value': 'a',
+                             'value': '',
                              'values': ['a', 'b']},
+            'codeOf(blue) = a': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'codeOf(blue) = a',
+                                 'relevant': True,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': True},
+            'codeOf(blue) = b': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'codeOf(blue) = b',
+                                 'relevant': True,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': False},
             'codeOf(red)': {'environmental': False,
                             'normal': True,
                             'reading': 'codeOf(red)',
@@ -96,7 +142,7 @@ Irrelevant:
                             'values': ['a', 'b']},
             'codeOf(red) = a': {'environmental': False,
                                 'normal': False,
-                                'reading': 'cd = a',
+                                'reading': 'codeOf(red) = a',
                                 'relevant': False,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',

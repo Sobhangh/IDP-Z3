@@ -86,7 +86,17 @@ Or(Not(Known_Cost), Min_Cost <= Cost)
 
 Or(Not(Known_Cost), Max_Cost >= Cost)
 
+Or(Epoxy == e1, Epoxy == e2, Epoxy == e3)
+
+Or(Brand == Huntsman, Brand == Sadechaf, Brand == Jowat)
+
+Or(Family == _2c_Epoxy, Family == _1c_Epoxy)
+
 Or(Cost == 539/1000, Cost == 100)
+
+Or(Color == amber,
+   Color == black_fluorescent,
+   Color == blackish_grey)
 
 Or(Shelf_Life == 0, Shelf_Life == 6, Shelf_Life == 12)
 
@@ -117,6 +127,14 @@ Epoxy = e2
 Epoxy = e3
 Min_Cost ≤ Cost
 Max_Cost ≥ Cost
+Brand = Huntsman
+Brand = Sadechaf
+Brand = Jowat
+Family = _2c_Epoxy
+Family = _1c_Epoxy
+Color = amber
+Color = black_fluorescent
+Color = blackish_grey
 Shelf_Life = 0
 Shelf_Life = 6
 Shelf_Life = 12
@@ -141,6 +159,14 @@ Epoxy = e2
 Epoxy = e3
 Min_Cost ≤ Cost
 Max_Cost ≥ Cost
+Brand = Huntsman
+Brand = Sadechaf
+Brand = Jowat
+Family = _2c_Epoxy
+Family = _1c_Epoxy
+Color = amber
+Color = black_fluorescent
+Color = blackish_grey
 Shelf_Life = 0
 Shelf_Life = 6
 Shelf_Life = 12
@@ -162,8 +188,17 @@ Simplified:
   Known_Cost ⇔ (~(Cost = 100))
   Known_Cost ⇒ (Min_Cost ≤ Cost)
   Known_Cost ⇒ (Max_Cost ≥ Cost)
+  (Epoxy = e1) ∨ (Epoxy = e2) ∨ (Epoxy = e3)
   (Cost = 0.539) ∨ (Cost = 100)
 Irrelevant:  
+  ~Brand = Huntsman
+  ~Brand = Sadechaf
+  ~Brand = Jowat
+  ~Family = _2c_Epoxy
+  ~Family = _1c_Epoxy
+  ~Color = amber
+  ~Color = black_fluorescent
+  ~Color = blackish_grey
   ~Shelf_Life = 0
   ~Shelf_Life = 6
   ~Shelf_Life = 12
@@ -198,7 +233,25 @@ Irrelevant:
                      'status': 'UNKNOWN',
                      'typ': 'brand',
                      'value': '',
-                     'values': ['Huntsman', 'Sadechaf', 'Jowat']}},
+                     'values': ['Huntsman', 'Sadechaf', 'Jowat']},
+           'Brand = Huntsman': {'environmental': False,
+                                'normal': False,
+                                'reading': 'Brand = Huntsman',
+                                'relevant': False,
+                                'status': 'UNKNOWN',
+                                'typ': 'Bool'},
+           'Brand = Jowat': {'environmental': False,
+                             'normal': False,
+                             'reading': 'Brand = Jowat',
+                             'relevant': False,
+                             'status': 'UNKNOWN',
+                             'typ': 'Bool'},
+           'Brand = Sadechaf': {'environmental': False,
+                                'normal': False,
+                                'reading': 'Brand = Sadechaf',
+                                'relevant': False,
+                                'status': 'UNKNOWN',
+                                'typ': 'Bool'}},
  'Color': {'Color': {'environmental': False,
                      'normal': True,
                      'reading': 'Color',
@@ -206,7 +259,25 @@ Irrelevant:
                      'status': 'UNKNOWN',
                      'typ': 'color',
                      'value': '',
-                     'values': ['amber', 'black_fluorescent', 'blackish_grey']}},
+                     'values': ['amber', 'black_fluorescent', 'blackish_grey']},
+           'Color = amber': {'environmental': False,
+                             'normal': False,
+                             'reading': 'Color = amber',
+                             'relevant': False,
+                             'status': 'UNKNOWN',
+                             'typ': 'Bool'},
+           'Color = black_fluorescent': {'environmental': False,
+                                         'normal': False,
+                                         'reading': 'Color = black_fluorescent',
+                                         'relevant': False,
+                                         'status': 'UNKNOWN',
+                                         'typ': 'Bool'},
+           'Color = blackish_grey': {'environmental': False,
+                                     'normal': False,
+                                     'reading': 'Color = blackish_grey',
+                                     'relevant': False,
+                                     'status': 'UNKNOWN',
+                                     'typ': 'Bool'}},
  'Cost': {'Cost': {'environmental': False,
                    'normal': True,
                    'reading': 'Cost',
@@ -260,7 +331,19 @@ Irrelevant:
                        'status': 'UNKNOWN',
                        'typ': 'family',
                        'value': '',
-                       'values': ['_2c_Epoxy', '_1c_Epoxy']}},
+                       'values': ['_2c_Epoxy', '_1c_Epoxy']},
+            'Family = _1c_Epoxy': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Family = _1c_Epoxy',
+                                   'relevant': False,
+                                   'status': 'UNKNOWN',
+                                   'typ': 'Bool'},
+            'Family = _2c_Epoxy': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Family = _2c_Epoxy',
+                                   'relevant': False,
+                                   'status': 'UNKNOWN',
+                                   'typ': 'Bool'}},
  'Known_Cost': {'Known_Cost': {'environmental': False,
                                'normal': True,
                                'reading': 'Known_Cost',

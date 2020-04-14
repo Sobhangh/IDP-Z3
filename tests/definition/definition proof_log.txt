@@ -584,6 +584,103 @@
 |== (codeOf(blue) = b) ⇔ (((~(blue = c))))
 |   proof: {'$codeOf!0$ = blue'}
 |------------
+|(codeOf(red) = a) ∨ (codeOf(red) = b)
+|+ codeOf(red) -> b
+    |------------
+    |*codeOf(red) = a
+    |+ codeOf(red) -> b
+        |------------
+        |codeOf(red)
+        |+ codeOf(red) -> b
+        |== b
+        |   proof: {'codeOf(red)'}
+        |------------
+        |a
+        |+ codeOf(red) -> b
+        |== a
+    |== *(false)
+    |   proof: {'codeOf(red)'}
+    |------------
+    |*codeOf(red) = b
+    |+ codeOf(red) -> b
+        |------------
+        |codeOf(red)
+        |+ codeOf(red) -> b
+        |== b
+        |   proof: {'codeOf(red)'}
+        |------------
+        |b
+        |+ codeOf(red) -> b
+        |== b
+    |== *(true)
+    |   proof: {'codeOf(red)'}
+|== (true)
+|   proof: {'codeOf(red)', 'codeOf(red) = b'}
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b)
+|+ codeOf(red) -> b
+    |------------
+    |*codeOf(blue) = a
+    |+ codeOf(red) -> b
+        |------------
+        |codeOf(blue)
+        |+ codeOf(red) -> b
+            |------------
+            |blue
+            |+ codeOf(red) -> b
+            |== blue
+        |== codeOf(blue)
+        |------------
+        |a
+        |+ codeOf(red) -> b
+        |== a
+    |== *codeOf(blue) = a
+    |------------
+    |*codeOf(blue) = b
+    |+ codeOf(red) -> b
+        |------------
+        |codeOf(blue)
+        |+ codeOf(red) -> b
+            |------------
+            |blue
+            |+ codeOf(red) -> b
+            |== blue
+        |== codeOf(blue)
+        |------------
+        |b
+        |+ codeOf(red) -> b
+        |== b
+    |== *codeOf(blue) = b
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b)
+|------------
+|(c = red) ∨ (c = blue)
+|+ codeOf(red) -> b
+    |------------
+    |*c = red
+    |+ codeOf(red) -> b
+        |------------
+        |c
+        |+ codeOf(red) -> b
+        |== c
+        |------------
+        |red
+        |+ codeOf(red) -> b
+        |== red
+    |== *c = red
+    |------------
+    |*c = blue
+    |+ codeOf(red) -> b
+        |------------
+        |c
+        |+ codeOf(red) -> b
+        |== c
+        |------------
+        |blue
+        |+ codeOf(red) -> b
+        |== blue
+    |== *c = blue
+|== (c = red) ∨ (c = blue)
+|------------
 |*red = c
 |+ codeOf(red) -> b
     |------------
@@ -597,6 +694,7 @@
 |== *red = c
 |------------
 |*codeOf(red) = a
+|proof: {'codeOf(red)'}
 |+ codeOf(red) -> b
     |------------
     |codeOf(red)
@@ -610,6 +708,126 @@
 |== *(false)
 |   proof: {'codeOf(red)'}
 |------------
+|*codeOf(blue) = a
+|+ codeOf(red) -> b
+    |------------
+    |codeOf(blue)
+    |+ codeOf(red) -> b
+        |------------
+        |blue
+        |+ codeOf(red) -> b
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ codeOf(red) -> b
+    |== a
+|== *codeOf(blue) = a
+|------------
+|*codeOf(blue) = b
+|+ codeOf(red) -> b
+    |------------
+    |codeOf(blue)
+    |+ codeOf(red) -> b
+        |------------
+        |blue
+        |+ codeOf(red) -> b
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |b
+    |+ codeOf(red) -> b
+    |== b
+|== *codeOf(blue) = b
+|------------
+|*c = red
+|+ codeOf(red) -> b
+    |------------
+    |c
+    |+ codeOf(red) -> b
+    |== c
+    |------------
+    |red
+    |+ codeOf(red) -> b
+    |== red
+|== *c = red
+|------------
+|*c = blue
+|+ codeOf(red) -> b
+    |------------
+    |c
+    |+ codeOf(red) -> b
+    |== c
+    |------------
+    |blue
+    |+ codeOf(red) -> b
+    |== blue
+|== *c = blue
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b)
+|+ codeOf(red) = a -> false  (or (false) -> false)
+    |------------
+    |*codeOf(blue) = a
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+        |------------
+        |codeOf(blue)
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+            |------------
+            |blue
+            |+ codeOf(red) = a -> false  (or (false) -> false)
+            |== blue
+        |== codeOf(blue)
+        |------------
+        |a
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== a
+    |== *codeOf(blue) = a
+    |------------
+    |*codeOf(blue) = b
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+        |------------
+        |codeOf(blue)
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+            |------------
+            |blue
+            |+ codeOf(red) = a -> false  (or (false) -> false)
+            |== blue
+        |== codeOf(blue)
+        |------------
+        |b
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== b
+    |== *codeOf(blue) = b
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b)
+|------------
+|(c = red) ∨ (c = blue)
+|+ codeOf(red) = a -> false  (or (false) -> false)
+    |------------
+    |*c = red
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+        |------------
+        |c
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== c
+        |------------
+        |red
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== red
+    |== *c = red
+    |------------
+    |*c = blue
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+        |------------
+        |c
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== c
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== blue
+    |== *c = blue
+|== (c = red) ∨ (c = blue)
+|------------
 |*codeOf(red) = b
 |+ codeOf(red) = a -> false  (or (false) -> false)
     |------------
@@ -642,14 +860,13 @@
                     |== *red = c
                     |------------
                     |*codeOf(red) = a
-                    |proof: {'codeOf(red)'}
                     |+ codeOf(red) = a -> false  (or (false) -> false)
                     |== *(false)
-                    |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+                    |   proof: {'codeOf(red) = a', 'codeOf(red)'}
                 |== (false)
-                |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+                |   proof: {'codeOf(red) = a', 'codeOf(red)'}
             |== ((false))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |+ codeOf(red) = a -> false  (or (false) -> false)
@@ -691,7 +908,7 @@
                 |== (~(red = c)) ∧ (codeOf(red) = b)
             |== ((~(red = c)) ∧ (codeOf(red) = b))
         |== ((~(red = c)) ∧ (codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)'}
     |== codeOf(red)
     |------------
     |b
@@ -711,6 +928,62 @@
     |== c
 |== *red = c
 |------------
+|*codeOf(blue) = a
+|+ codeOf(red) = a -> false  (or (false) -> false)
+    |------------
+    |codeOf(blue)
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+    |== a
+|== *codeOf(blue) = a
+|------------
+|*codeOf(blue) = b
+|+ codeOf(red) = a -> false  (or (false) -> false)
+    |------------
+    |codeOf(blue)
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false  (or (false) -> false)
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |b
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+    |== b
+|== *codeOf(blue) = b
+|------------
+|*c = red
+|+ codeOf(red) = a -> false  (or (false) -> false)
+    |------------
+    |c
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+    |== c
+    |------------
+    |red
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+    |== red
+|== *c = red
+|------------
+|*c = blue
+|+ codeOf(red) = a -> false  (or (false) -> false)
+    |------------
+    |c
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+    |== c
+    |------------
+    |blue
+    |+ codeOf(red) = a -> false  (or (false) -> false)
+    |== blue
+|== *c = blue
+|------------
 |*codeOf(red) = b
 |+ codeOf(red) = a -> false  (or (false) -> false)
     |------------
@@ -722,15 +995,15 @@
         |== red
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |proof: {'codeOf(red)', 'codeOf(red) = a'}
+        |proof: {'codeOf(red) = a', 'codeOf(red)'}
         |+ codeOf(red) = a -> false  (or (false) -> false)
             |------------
             |((red = c) ∧ (codeOf(red) = a))
-            |proof: {'codeOf(red)', 'codeOf(red) = a'}
+            |proof: {'codeOf(red) = a', 'codeOf(red)'}
             |+ codeOf(red) = a -> false  (or (false) -> false)
                 |------------
                 |(red = c) ∧ (codeOf(red) = a)
-                |proof: {'codeOf(red)', 'codeOf(red) = a'}
+                |proof: {'codeOf(red) = a', 'codeOf(red)'}
                 |+ codeOf(red) = a -> false  (or (false) -> false)
                     |------------
                     |*red = c
@@ -746,14 +1019,13 @@
                     |== *red = c
                     |------------
                     |*codeOf(red) = a
-                    |proof: {'codeOf(red)'}
                     |+ codeOf(red) = a -> false  (or (false) -> false)
                     |== *(false)
-                    |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+                    |   proof: {'codeOf(red) = a', 'codeOf(red)'}
                 |== (false)
-                |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+                |   proof: {'codeOf(red) = a', 'codeOf(red)'}
             |== ((false))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |+ codeOf(red) = a -> false  (or (false) -> false)
@@ -795,7 +1067,7 @@
                 |== (~(red = c)) ∧ (codeOf(red) = b)
             |== ((~(red = c)) ∧ (codeOf(red) = b))
         |== ((~(red = c)) ∧ (codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)'}
     |== codeOf(red)
     |------------
     |b
@@ -804,6 +1076,70 @@
 |== *codeOf(red) = b
 Z3 propagation ********************************
 |------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b)
+|+ red = c -> false
+    |------------
+    |*codeOf(blue) = a
+    |+ red = c -> false
+        |------------
+        |codeOf(blue)
+        |+ red = c -> false
+            |------------
+            |blue
+            |+ red = c -> false
+            |== blue
+        |== codeOf(blue)
+        |------------
+        |a
+        |+ red = c -> false
+        |== a
+    |== *codeOf(blue) = a
+    |------------
+    |*codeOf(blue) = b
+    |+ red = c -> false
+        |------------
+        |codeOf(blue)
+        |+ red = c -> false
+            |------------
+            |blue
+            |+ red = c -> false
+            |== blue
+        |== codeOf(blue)
+        |------------
+        |b
+        |+ red = c -> false
+        |== b
+    |== *codeOf(blue) = b
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b)
+|------------
+|(c = red) ∨ (c = blue)
+|+ red = c -> false
+    |------------
+    |*c = red
+    |+ red = c -> false
+        |------------
+        |c
+        |+ red = c -> false
+        |== c
+        |------------
+        |red
+        |+ red = c -> false
+        |== red
+    |== *c = red
+    |------------
+    |*c = blue
+    |+ red = c -> false
+        |------------
+        |c
+        |+ red = c -> false
+        |== c
+        |------------
+        |blue
+        |+ red = c -> false
+        |== blue
+    |== *c = blue
+|== (c = red) ∨ (c = blue)
+|------------
 |*codeOf(red) = b
 |+ red = c -> false
     |------------
@@ -815,15 +1151,15 @@ Z3 propagation ********************************
         |== red
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |proof: {'codeOf(red)', 'codeOf(red) = a'}
+        |proof: {'codeOf(red) = a', 'codeOf(red)'}
         |+ red = c -> false
             |------------
             |((red = c) ∧ (codeOf(red) = a))
-            |proof: {'codeOf(red)', 'codeOf(red) = a'}
+            |proof: {'codeOf(red) = a', 'codeOf(red)'}
             |+ red = c -> false
                 |------------
                 |(red = c) ∧ (codeOf(red) = a)
-                |proof: {'codeOf(red)', 'codeOf(red) = a'}
+                |proof: {'codeOf(red) = a', 'codeOf(red)'}
                 |+ red = c -> false
                     |------------
                     |*red = c
@@ -833,7 +1169,7 @@ Z3 propagation ********************************
                 |== (false)
                 |   proof: {'red = c'}
             |== ((false))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |+ red = c -> false
@@ -871,7 +1207,7 @@ Z3 propagation ********************************
             |== ((codeOf(red) = b))
             |   proof: {'red = c'}
         |== ((codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
     |== codeOf(red)
     |------------
     |b
@@ -889,6 +1225,62 @@ Z3 propagation ********************************
 |== *(false)
 |   proof: {'codeOf(red)'}
 |------------
+|*codeOf(blue) = a
+|+ red = c -> false
+    |------------
+    |codeOf(blue)
+    |+ red = c -> false
+        |------------
+        |blue
+        |+ red = c -> false
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ red = c -> false
+    |== a
+|== *codeOf(blue) = a
+|------------
+|*codeOf(blue) = b
+|+ red = c -> false
+    |------------
+    |codeOf(blue)
+    |+ red = c -> false
+        |------------
+        |blue
+        |+ red = c -> false
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |b
+    |+ red = c -> false
+    |== b
+|== *codeOf(blue) = b
+|------------
+|*c = red
+|+ red = c -> false
+    |------------
+    |c
+    |+ red = c -> false
+    |== c
+    |------------
+    |red
+    |+ red = c -> false
+    |== red
+|== *c = red
+|------------
+|*c = blue
+|+ red = c -> false
+    |------------
+    |c
+    |+ red = c -> false
+    |== c
+    |------------
+    |blue
+    |+ red = c -> false
+    |== blue
+|== *c = blue
+|------------
 |*codeOf(red) = b
 |+ red = c -> false
     |------------
@@ -900,11 +1292,11 @@ Z3 propagation ********************************
         |== red
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
         |+ red = c -> false
             |------------
             |((red = c) ∧ (codeOf(red) = a))
-            |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |+ red = c -> false
                 |------------
                 |(red = c) ∧ (codeOf(red) = a)
@@ -918,7 +1310,7 @@ Z3 propagation ********************************
                 |== (false)
                 |   proof: {'red = c'}
             |== ((false))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |proof: {'red = c'}
@@ -958,13 +1350,60 @@ Z3 propagation ********************************
             |== ((codeOf(red) = b))
             |   proof: {'red = c'}
         |== ((codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
     |== codeOf(red)
     |------------
     |b
     |+ red = c -> false
     |== b
 |== *codeOf(red) = b
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b)
+|+ codeOf(blue) -> a
+    |------------
+    |*codeOf(blue) = a
+    |+ codeOf(blue) -> a
+        |------------
+        |codeOf(blue)
+        |+ codeOf(blue) -> a
+        |== a
+        |   proof: {'codeOf(blue)'}
+        |------------
+        |a
+        |+ codeOf(blue) -> a
+        |== a
+    |== *(true)
+    |   proof: {'codeOf(blue)'}
+|== (true)
+|   proof: {'codeOf(blue)', 'codeOf(blue) = a'}
+|------------
+|(c = red) ∨ (c = blue)
+|+ codeOf(blue) -> a
+    |------------
+    |*c = red
+    |+ codeOf(blue) -> a
+        |------------
+        |c
+        |+ codeOf(blue) -> a
+        |== c
+        |------------
+        |red
+        |+ codeOf(blue) -> a
+        |== red
+    |== *c = red
+    |------------
+    |*c = blue
+    |+ codeOf(blue) -> a
+        |------------
+        |c
+        |+ codeOf(blue) -> a
+        |== c
+        |------------
+        |blue
+        |+ codeOf(blue) -> a
+        |== blue
+    |== *c = blue
+|== (c = red) ∨ (c = blue)
 |------------
 |*codeOf(red) = b
 |+ codeOf(blue) -> a
@@ -977,11 +1416,11 @@ Z3 propagation ********************************
         |== red
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
         |+ codeOf(blue) -> a
             |------------
             |((red = c) ∧ (codeOf(red) = a))
-            |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |+ codeOf(blue) -> a
                 |------------
                 |(red = c) ∧ (codeOf(red) = a)
@@ -1001,7 +1440,6 @@ Z3 propagation ********************************
                     |== *red = c
                     |------------
                     |*codeOf(red) = a
-                    |proof: {'codeOf(red)'}
                     |+ codeOf(blue) -> a
                         |------------
                         |codeOf(red)
@@ -1016,11 +1454,10 @@ Z3 propagation ********************************
                         |+ codeOf(blue) -> a
                         |== a
                     |== *codeOf(red) = a
-                    |   proof: {'codeOf(red)'}
                 |== (red = c) ∧ (codeOf(red) = a)
                 |   proof: {'red = c'}
             |== ((red = c) ∧ (codeOf(red) = a))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |proof: {'red = c'}
@@ -1066,7 +1503,7 @@ Z3 propagation ********************************
             |== ((~(red = c)) ∧ (codeOf(red) = b))
             |   proof: {'red = c'}
         |== ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
     |== codeOf(red)
     |------------
     |b
@@ -1096,6 +1533,44 @@ Z3 propagation ********************************
 |== *(false)
 |   proof: {'codeOf(red)'}
 |------------
+|*codeOf(blue) = b
+|+ codeOf(blue) -> a
+    |------------
+    |codeOf(blue)
+    |+ codeOf(blue) -> a
+    |== a
+    |   proof: {'codeOf(blue)'}
+    |------------
+    |b
+    |+ codeOf(blue) -> a
+    |== b
+|== *(false)
+|   proof: {'codeOf(blue)'}
+|------------
+|*c = red
+|+ codeOf(blue) -> a
+    |------------
+    |c
+    |+ codeOf(blue) -> a
+    |== c
+    |------------
+    |red
+    |+ codeOf(blue) -> a
+    |== red
+|== *c = red
+|------------
+|*c = blue
+|+ codeOf(blue) -> a
+    |------------
+    |c
+    |+ codeOf(blue) -> a
+    |== c
+    |------------
+    |blue
+    |+ codeOf(blue) -> a
+    |== blue
+|== *c = blue
+|------------
 |*codeOf(red) = b
 |+ codeOf(blue) -> a
     |------------
@@ -1107,11 +1582,11 @@ Z3 propagation ********************************
         |== red
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
         |+ codeOf(blue) -> a
             |------------
             |((red = c) ∧ (codeOf(red) = a))
-            |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |+ codeOf(blue) -> a
                 |------------
                 |(red = c) ∧ (codeOf(red) = a)
@@ -1131,7 +1606,6 @@ Z3 propagation ********************************
                     |== *red = c
                     |------------
                     |*codeOf(red) = a
-                    |proof: {'codeOf(red)'}
                     |+ codeOf(blue) -> a
                         |------------
                         |codeOf(red)
@@ -1146,11 +1620,10 @@ Z3 propagation ********************************
                         |+ codeOf(blue) -> a
                         |== a
                     |== *codeOf(red) = a
-                    |   proof: {'codeOf(red)'}
                 |== (red = c) ∧ (codeOf(red) = a)
                 |   proof: {'red = c'}
             |== ((red = c) ∧ (codeOf(red) = a))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |proof: {'red = c'}
@@ -1196,13 +1669,639 @@ Z3 propagation ********************************
             |== ((~(red = c)) ∧ (codeOf(red) = b))
             |   proof: {'red = c'}
         |== ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
     |== codeOf(red)
     |------------
     |b
     |+ codeOf(blue) -> a
     |== b
 |== *codeOf(red) = b
+|------------
+|(c = red) ∨ (c = blue)
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |*c = red
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |------------
+        |c
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== c
+        |------------
+        |red
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== red
+    |== *c = red
+    |------------
+    |*c = blue
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |------------
+        |c
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== c
+        |------------
+        |blue
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== blue
+    |== *c = blue
+|== (c = red) ∨ (c = blue)
+|------------
+|*codeOf(red) = b
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |codeOf(red)
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |------------
+        |red
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== red
+        |------------
+        |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+            |------------
+            |((red = c) ∧ (codeOf(red) = a))
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                |------------
+                |(red = c) ∧ (codeOf(red) = a)
+                |proof: {'red = c'}
+                |+ codeOf(blue) = b -> false  (or (false) -> false)
+                    |------------
+                    |*red = c
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |red
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== red
+                        |------------
+                        |c
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== c
+                    |== *red = c
+                    |------------
+                    |*codeOf(red) = a
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |codeOf(red)
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |------------
+                            |red
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |a
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== a
+                    |== *codeOf(red) = a
+                |== (red = c) ∧ (codeOf(red) = a)
+                |   proof: {'red = c'}
+            |== ((red = c) ∧ (codeOf(red) = a))
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |------------
+            |((~(red = c)) ∧ (codeOf(red) = b))
+            |proof: {'red = c'}
+            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                |------------
+                |(~(red = c)) ∧ (codeOf(red) = b)
+                |proof: {'red = c'}
+                |+ codeOf(blue) = b -> false  (or (false) -> false)
+                    |------------
+                    |~(red = c)
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |*red = c
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |------------
+                            |red
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== red
+                            |------------
+                            |c
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== c
+                        |== *red = c
+                    |== ~(red = c)
+                    |------------
+                    |*codeOf(red) = b
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |codeOf(red)
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |------------
+                            |red
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |b
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== b
+                    |== *codeOf(red) = b
+                |== (~(red = c)) ∧ (codeOf(red) = b)
+                |   proof: {'red = c'}
+            |== ((~(red = c)) ∧ (codeOf(red) = b))
+            |   proof: {'red = c'}
+        |== ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+    |== codeOf(red)
+    |------------
+    |b
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== b
+|== *codeOf(red) = b
+|------------
+|*red = c
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |red
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== red
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== c
+|== *red = c
+|------------
+|*codeOf(blue) = a
+|proof: {'codeOf(blue)'}
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |codeOf(blue)
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |------------
+        |blue
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== a
+|== *codeOf(blue) = a
+|   proof: {'codeOf(blue)'}
+|------------
+|*c = red
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== c
+    |------------
+    |red
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== red
+|== *c = red
+|------------
+|*c = blue
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== c
+    |------------
+    |blue
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== blue
+|== *c = blue
+|------------
+|*codeOf(red) = b
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |codeOf(red)
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |------------
+        |red
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== red
+        |------------
+        |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+            |------------
+            |((red = c) ∧ (codeOf(red) = a))
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                |------------
+                |(red = c) ∧ (codeOf(red) = a)
+                |proof: {'red = c'}
+                |+ codeOf(blue) = b -> false  (or (false) -> false)
+                    |------------
+                    |*red = c
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |red
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== red
+                        |------------
+                        |c
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== c
+                    |== *red = c
+                    |------------
+                    |*codeOf(red) = a
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |codeOf(red)
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |------------
+                            |red
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |a
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== a
+                    |== *codeOf(red) = a
+                |== (red = c) ∧ (codeOf(red) = a)
+                |   proof: {'red = c'}
+            |== ((red = c) ∧ (codeOf(red) = a))
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |------------
+            |((~(red = c)) ∧ (codeOf(red) = b))
+            |proof: {'red = c'}
+            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                |------------
+                |(~(red = c)) ∧ (codeOf(red) = b)
+                |proof: {'red = c'}
+                |+ codeOf(blue) = b -> false  (or (false) -> false)
+                    |------------
+                    |~(red = c)
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |*red = c
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |------------
+                            |red
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== red
+                            |------------
+                            |c
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== c
+                        |== *red = c
+                    |== ~(red = c)
+                    |------------
+                    |*codeOf(red) = b
+                    |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |------------
+                        |codeOf(red)
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |------------
+                            |red
+                            |+ codeOf(blue) = b -> false  (or (false) -> false)
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |b
+                        |+ codeOf(blue) = b -> false  (or (false) -> false)
+                        |== b
+                    |== *codeOf(red) = b
+                |== (~(red = c)) ∧ (codeOf(red) = b)
+                |   proof: {'red = c'}
+            |== ((~(red = c)) ∧ (codeOf(red) = b))
+            |   proof: {'red = c'}
+        |== ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+    |== codeOf(red)
+    |------------
+    |b
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== b
+|== *codeOf(red) = b
+|------------
+|*codeOf(blue) = a
+|proof: {'codeOf(blue)'}
+|+ codeOf(blue) = b -> false  (or (false) -> false)
+    |------------
+    |codeOf(blue)
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |------------
+        |blue
+        |+ codeOf(blue) = b -> false  (or (false) -> false)
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ codeOf(blue) = b -> false  (or (false) -> false)
+    |== a
+|== *codeOf(blue) = a
+|   proof: {'codeOf(blue)'}
+|------------
+|(c = red) ∨ (c = blue)
+|+ c = red -> false
+    |------------
+    |*c = red
+    |+ c = red -> false
+    |== *(false)
+    |   proof: {'c = red'}
+    |------------
+    |*c = blue
+    |+ c = red -> false
+        |------------
+        |c
+        |+ c = red -> false
+        |== c
+        |------------
+        |blue
+        |+ c = red -> false
+        |== blue
+    |== *c = blue
+|== (c = blue)
+|   proof: {'c = red'}
+|------------
+|*codeOf(red) = b
+|+ c = red -> false
+    |------------
+    |codeOf(red)
+    |+ c = red -> false
+        |------------
+        |red
+        |+ c = red -> false
+        |== red
+        |------------
+        |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+        |+ c = red -> false
+            |------------
+            |((red = c) ∧ (codeOf(red) = a))
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |+ c = red -> false
+                |------------
+                |(red = c) ∧ (codeOf(red) = a)
+                |proof: {'red = c'}
+                |+ c = red -> false
+                    |------------
+                    |*red = c
+                    |+ c = red -> false
+                        |------------
+                        |red
+                        |+ c = red -> false
+                        |== red
+                        |------------
+                        |c
+                        |+ c = red -> false
+                        |== c
+                    |== *red = c
+                    |------------
+                    |*codeOf(red) = a
+                    |+ c = red -> false
+                        |------------
+                        |codeOf(red)
+                        |+ c = red -> false
+                            |------------
+                            |red
+                            |+ c = red -> false
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |a
+                        |+ c = red -> false
+                        |== a
+                    |== *codeOf(red) = a
+                |== (red = c) ∧ (codeOf(red) = a)
+                |   proof: {'red = c'}
+            |== ((red = c) ∧ (codeOf(red) = a))
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |------------
+            |((~(red = c)) ∧ (codeOf(red) = b))
+            |proof: {'red = c'}
+            |+ c = red -> false
+                |------------
+                |(~(red = c)) ∧ (codeOf(red) = b)
+                |proof: {'red = c'}
+                |+ c = red -> false
+                    |------------
+                    |~(red = c)
+                    |+ c = red -> false
+                        |------------
+                        |*red = c
+                        |+ c = red -> false
+                            |------------
+                            |red
+                            |+ c = red -> false
+                            |== red
+                            |------------
+                            |c
+                            |+ c = red -> false
+                            |== c
+                        |== *red = c
+                    |== ~(red = c)
+                    |------------
+                    |*codeOf(red) = b
+                    |+ c = red -> false
+                        |------------
+                        |codeOf(red)
+                        |+ c = red -> false
+                            |------------
+                            |red
+                            |+ c = red -> false
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |b
+                        |+ c = red -> false
+                        |== b
+                    |== *codeOf(red) = b
+                |== (~(red = c)) ∧ (codeOf(red) = b)
+                |   proof: {'red = c'}
+            |== ((~(red = c)) ∧ (codeOf(red) = b))
+            |   proof: {'red = c'}
+        |== ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+    |== codeOf(red)
+    |------------
+    |b
+    |+ c = red -> false
+    |== b
+|== *codeOf(red) = b
+|------------
+|*red = c
+|+ c = red -> false
+    |------------
+    |red
+    |+ c = red -> false
+    |== red
+    |------------
+    |c
+    |+ c = red -> false
+    |== c
+|== *red = c
+|------------
+|*(false)
+|proof: {'codeOf(red)'}
+|+ c = red -> false
+    |------------
+    |false
+    |+ c = red -> false
+    |== false
+|== *(false)
+|   proof: {'codeOf(red)'}
+|------------
+|*codeOf(blue) = a
+|proof: {'codeOf(blue)'}
+|+ c = red -> false
+    |------------
+    |codeOf(blue)
+    |+ c = red -> false
+        |------------
+        |blue
+        |+ c = red -> false
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ c = red -> false
+    |== a
+|== *codeOf(blue) = a
+|   proof: {'codeOf(blue)'}
+|------------
+|*(false)
+|proof: {'codeOf(blue)'}
+|+ c = red -> false
+    |------------
+    |false
+    |+ c = red -> false
+    |== false
+|== *(false)
+|   proof: {'codeOf(blue)'}
+|------------
+|*c = blue
+|+ c = red -> false
+    |------------
+    |c
+    |+ c = red -> false
+    |== c
+    |------------
+    |blue
+    |+ c = red -> false
+    |== blue
+|== *c = blue
+|------------
+|*codeOf(red) = b
+|+ c = red -> false
+    |------------
+    |codeOf(red)
+    |+ c = red -> false
+        |------------
+        |red
+        |+ c = red -> false
+        |== red
+        |------------
+        |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+        |+ c = red -> false
+            |------------
+            |((red = c) ∧ (codeOf(red) = a))
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |+ c = red -> false
+                |------------
+                |(red = c) ∧ (codeOf(red) = a)
+                |proof: {'red = c'}
+                |+ c = red -> false
+                    |------------
+                    |*red = c
+                    |+ c = red -> false
+                        |------------
+                        |red
+                        |+ c = red -> false
+                        |== red
+                        |------------
+                        |c
+                        |+ c = red -> false
+                        |== c
+                    |== *red = c
+                    |------------
+                    |*codeOf(red) = a
+                    |+ c = red -> false
+                        |------------
+                        |codeOf(red)
+                        |+ c = red -> false
+                            |------------
+                            |red
+                            |+ c = red -> false
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |a
+                        |+ c = red -> false
+                        |== a
+                    |== *codeOf(red) = a
+                |== (red = c) ∧ (codeOf(red) = a)
+                |   proof: {'red = c'}
+            |== ((red = c) ∧ (codeOf(red) = a))
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+            |------------
+            |((~(red = c)) ∧ (codeOf(red) = b))
+            |proof: {'red = c'}
+            |+ c = red -> false
+                |------------
+                |(~(red = c)) ∧ (codeOf(red) = b)
+                |proof: {'red = c'}
+                |+ c = red -> false
+                    |------------
+                    |~(red = c)
+                    |+ c = red -> false
+                        |------------
+                        |*red = c
+                        |+ c = red -> false
+                            |------------
+                            |red
+                            |+ c = red -> false
+                            |== red
+                            |------------
+                            |c
+                            |+ c = red -> false
+                            |== c
+                        |== *red = c
+                    |== ~(red = c)
+                    |------------
+                    |*codeOf(red) = b
+                    |+ c = red -> false
+                        |------------
+                        |codeOf(red)
+                        |+ c = red -> false
+                            |------------
+                            |red
+                            |+ c = red -> false
+                            |== red
+                        |== codeOf(red)
+                        |------------
+                        |b
+                        |+ c = red -> false
+                        |== b
+                    |== *codeOf(red) = b
+                |== (~(red = c)) ∧ (codeOf(red) = b)
+                |   proof: {'red = c'}
+            |== ((~(red = c)) ∧ (codeOf(red) = b))
+            |   proof: {'red = c'}
+        |== ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
+    |== codeOf(red)
+    |------------
+    |b
+    |+ c = red -> false
+    |== b
+|== *codeOf(red) = b
+|------------
+|*codeOf(blue) = a
+|proof: {'codeOf(blue)'}
+|+ c = red -> false
+    |------------
+    |codeOf(blue)
+    |+ c = red -> false
+        |------------
+        |blue
+        |+ c = red -> false
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ c = red -> false
+    |== a
+|== *codeOf(blue) = a
+|   proof: {'codeOf(blue)'}
 |------------
 |*codeOf(red) = b
 |+ c -> blue
@@ -1215,11 +2314,11 @@ Z3 propagation ********************************
         |== red
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
         |+ c -> blue
             |------------
             |((red = c) ∧ (codeOf(red) = a))
-            |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c'}
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c'}
             |+ c -> blue
                 |------------
                 |(red = c) ∧ (codeOf(red) = a)
@@ -1242,7 +2341,7 @@ Z3 propagation ********************************
                 |== (false)
                 |   proof: {'c', 'red = c'}
             |== ((false))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c', 'c'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c', 'c'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |proof: {'red = c'}
@@ -1291,7 +2390,7 @@ Z3 propagation ********************************
             |== ((codeOf(red) = b))
             |   proof: {'red = c', 'c'}
         |== ((codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c', 'c'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c', 'c'}
     |== codeOf(red)
     |------------
     |b
@@ -1324,6 +2423,48 @@ Z3 propagation ********************************
 |== *(false)
 |   proof: {'codeOf(red)'}
 |------------
+|*codeOf(blue) = a
+|proof: {'codeOf(blue)'}
+|+ c -> blue
+    |------------
+    |codeOf(blue)
+    |+ c -> blue
+        |------------
+        |blue
+        |+ c -> blue
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ c -> blue
+    |== a
+|== *codeOf(blue) = a
+|   proof: {'codeOf(blue)'}
+|------------
+|*(false)
+|proof: {'codeOf(blue)'}
+|+ c -> blue
+    |------------
+    |false
+    |+ c -> blue
+    |== false
+|== *(false)
+|   proof: {'codeOf(blue)'}
+|------------
+|*c = red
+|+ c -> blue
+    |------------
+    |c
+    |+ c -> blue
+    |== blue
+    |   proof: {'c'}
+    |------------
+    |red
+    |+ c -> blue
+    |== red
+|== *(false)
+|   proof: {'c'}
+|------------
 |*codeOf(red) = b
 |+ c -> blue
     |------------
@@ -1335,11 +2476,11 @@ Z3 propagation ********************************
         |== red
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
-        |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c', 'c'}
+        |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c', 'c'}
         |+ c -> blue
             |------------
             |((red = c) ∧ (codeOf(red) = a))
-            |proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c', 'c'}
+            |proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c', 'c'}
             |+ c -> blue
                 |------------
                 |(red = c) ∧ (codeOf(red) = a)
@@ -1363,7 +2504,7 @@ Z3 propagation ********************************
                 |== (false)
                 |   proof: {'c', 'red = c'}
             |== ((false))
-            |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c', 'c'}
+            |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c', 'c'}
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b))
             |proof: {'red = c', 'c'}
@@ -1413,10 +2554,28 @@ Z3 propagation ********************************
             |== ((codeOf(red) = b))
             |   proof: {'red = c', 'c'}
         |== ((codeOf(red) = b))
-        |   proof: {'codeOf(red)', 'codeOf(red) = a', 'red = c', 'c'}
+        |   proof: {'codeOf(red) = a', 'codeOf(red)', 'red = c', 'c'}
     |== codeOf(red)
     |------------
     |b
     |+ c -> blue
     |== b
 |== *codeOf(red) = b
+|------------
+|*codeOf(blue) = a
+|proof: {'codeOf(blue)'}
+|+ c -> blue
+    |------------
+    |codeOf(blue)
+    |+ c -> blue
+        |------------
+        |blue
+        |+ c -> blue
+        |== blue
+    |== codeOf(blue)
+    |------------
+    |a
+    |+ c -> blue
+    |== a
+|== *codeOf(blue) = a
+|   proof: {'codeOf(blue)'}

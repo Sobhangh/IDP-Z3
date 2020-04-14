@@ -63,11 +63,44 @@ Type == typeOf(Subtype)
 
 True
 
+Or(Type == 1tri angle, Type == quadrilateral)
+
+Or(Subtype == regular_triangle,
+   Subtype == right_triangle,
+   Subtype == rectangle,
+   Subtype == square)
+
+Or(typeOf(regular_triangle) == 1tri angle,
+   typeOf(regular_triangle) == quadrilateral)
+
+Or(typeOf(right_triangle) == 1tri angle,
+   typeOf(right_triangle) == quadrilateral)
+
+Or(typeOf(rectangle) == 1tri angle,
+   typeOf(rectangle) == quadrilateral)
+
+Or(typeOf(square) == 1tri angle,
+   typeOf(square) == quadrilateral)
+
 -- subtences ------------------------------------
 ∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
 ∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
 ∀st[subtype] : isa(st,typeOf(st))
 Type = typeOf(Subtype)
+Type = 1tri angle
+Type = quadrilateral
+Subtype = regular_triangle
+Subtype = right_triangle
+Subtype = rectangle
+Subtype = square
+typeOf(regular_triangle) = 1tri angle
+typeOf(regular_triangle) = quadrilateral
+typeOf(right_triangle) = 1tri angle
+typeOf(right_triangle) = quadrilateral
+typeOf(rectangle) = 1tri angle
+typeOf(rectangle) = quadrilateral
+typeOf(square) = 1tri angle
+typeOf(square) = quadrilateral
 
 -- GUILines ------------------------------------
 Type
@@ -88,6 +121,20 @@ typeOf(square)
 ∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
 ∀st[subtype] : isa(st,typeOf(st))
 Type = typeOf(Subtype)
+Type = 1tri angle
+Type = quadrilateral
+Subtype = regular_triangle
+Subtype = right_triangle
+Subtype = rectangle
+Subtype = square
+typeOf(regular_triangle) = 1tri angle
+typeOf(regular_triangle) = quadrilateral
+typeOf(right_triangle) = 1tri angle
+typeOf(right_triangle) = quadrilateral
+typeOf(rectangle) = 1tri angle
+typeOf(rectangle) = quadrilateral
+typeOf(square) = 1tri angle
+typeOf(square) = quadrilateral
 
 -- case -------------------------------------
 Type:        
@@ -100,6 +147,14 @@ Universals:
   ∀st[subtype] : isa(st,typeOf(st))
   Type = typeOf(Subtype)
 Consequences:
+  typeOf(regular_triangle) = 1tri angle <= Z3 proof
+  ~typeOf(regular_triangle) = quadrilateral <= {'typeOf(regular_triangle)'}
+  typeOf(right_triangle) = 1tri angle <= Z3 proof
+  ~typeOf(right_triangle) = quadrilateral <= {'typeOf(right_triangle)'}
+  ~typeOf(rectangle) = 1tri angle <= Z3 proof
+  typeOf(rectangle) = quadrilateral <= {'(typeOf(rectangle) = 1tri angle) ∨ (typeOf(rectangle) = quadrilateral)', 'typeOf(rectangle) = 1tri angle'}
+  ~typeOf(square) = 1tri angle <= Z3 proof
+  typeOf(square) = quadrilateral <= {'(typeOf(square) = 1tri angle) ∨ (typeOf(square) = quadrilateral)', 'typeOf(square) = 1tri angle'}
   asi(1tri angle,regular_triangle) <= Z3 proof
   asi(1tri angle,right_triangle) <= Z3 proof
   ~asi(1tri angle,rectangle) <= Z3 proof
@@ -110,10 +165,11 @@ Consequences:
   asi(quadrilateral,square) <= Z3 proof
   typeOf(regular_triangle) = 1tri angle <= Z3 proof
   typeOf(right_triangle) = 1tri angle <= Z3 proof
-  typeOf(rectangle) = quadrilateral <= Z3 proof
-  typeOf(square) = quadrilateral <= Z3 proof
+  typeOf(rectangle) = quadrilateral <= {'(typeOf(rectangle) = 1tri angle) ∨ (typeOf(rectangle) = quadrilateral)', 'typeOf(rectangle) = 1tri angle'}
+  typeOf(square) = quadrilateral <= {'(typeOf(square) = 1tri angle) ∨ (typeOf(square) = quadrilateral)', 'typeOf(square) = 1tri angle'}
 Simplified:  
-  
+  (Type = 1tri angle) ∨ (Type = quadrilateral)
+  (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square)
 Irrelevant:  
   
 
@@ -141,7 +197,31 @@ Irrelevant:
                          'status': 'UNKNOWN',
                          'typ': 'subtype',
                          'value': '',
-                         'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square']}},
+                         'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square']},
+             'Subtype = rectangle': {'environmental': False,
+                                     'normal': False,
+                                     'reading': 'Subtype = rectangle',
+                                     'relevant': True,
+                                     'status': 'UNKNOWN',
+                                     'typ': 'Bool'},
+             'Subtype = regular_triangle': {'environmental': False,
+                                            'normal': False,
+                                            'reading': 'Subtype = regular_triangle',
+                                            'relevant': True,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+             'Subtype = right_triangle': {'environmental': False,
+                                          'normal': False,
+                                          'reading': 'Subtype = right_triangle',
+                                          'relevant': True,
+                                          'status': 'UNKNOWN',
+                                          'typ': 'Bool'},
+             'Subtype = square': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Subtype = square',
+                                  'relevant': True,
+                                  'status': 'UNKNOWN',
+                                  'typ': 'Bool'}},
  'Type': {'Type': {'environmental': False,
                    'normal': True,
                    'reading': 'Type',
@@ -150,6 +230,18 @@ Irrelevant:
                    'typ': 'type',
                    'value': '',
                    'values': ['1tri angle', 'quadrilateral']},
+          'Type = 1tri angle': {'environmental': False,
+                                'normal': False,
+                                'reading': 'Type = 1tri angle',
+                                'relevant': True,
+                                'status': 'UNKNOWN',
+                                'typ': 'Bool'},
+          'Type = quadrilateral': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Type = quadrilateral',
+                                   'relevant': True,
+                                   'status': 'UNKNOWN',
+                                   'typ': 'Bool'},
           'Type = typeOf(Subtype)': {'environmental': False,
                                      'normal': False,
                                      'reading': 'Type = typeOf(Subtype)',
@@ -226,32 +318,88 @@ Irrelevant:
                                   'relevant': True,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'type',
-                                  'value': 'quadrilateral',
+                                  'value': '',
                                   'values': ['1tri angle', 'quadrilateral']},
+            'typeOf(rectangle) = 1tri angle': {'environmental': False,
+                                               'normal': False,
+                                               'reading': 'typeOf(rectangle) = 1tri angle',
+                                               'relevant': True,
+                                               'status': 'CONSEQUENCE',
+                                               'typ': 'Bool',
+                                               'value': False},
+            'typeOf(rectangle) = quadrilateral': {'environmental': False,
+                                                  'normal': False,
+                                                  'reading': 'typeOf(rectangle) = quadrilateral',
+                                                  'relevant': True,
+                                                  'status': 'CONSEQUENCE',
+                                                  'typ': 'Bool',
+                                                  'value': True},
             'typeOf(regular_triangle)': {'environmental': False,
                                          'normal': True,
                                          'reading': 'typeOf(regular_triangle)',
                                          'relevant': True,
                                          'status': 'CONSEQUENCE',
                                          'typ': 'type',
-                                         'value': '1tri angle',
+                                         'value': '',
                                          'values': ['1tri angle', 'quadrilateral']},
+            'typeOf(regular_triangle) = 1tri angle': {'environmental': False,
+                                                      'normal': False,
+                                                      'reading': 'typeOf(regular_triangle) = 1tri angle',
+                                                      'relevant': True,
+                                                      'status': 'CONSEQUENCE',
+                                                      'typ': 'Bool',
+                                                      'value': True},
+            'typeOf(regular_triangle) = quadrilateral': {'environmental': False,
+                                                         'normal': False,
+                                                         'reading': 'typeOf(regular_triangle) = quadrilateral',
+                                                         'relevant': True,
+                                                         'status': 'CONSEQUENCE',
+                                                         'typ': 'Bool',
+                                                         'value': False},
             'typeOf(right_triangle)': {'environmental': False,
                                        'normal': True,
                                        'reading': 'typeOf(right_triangle)',
                                        'relevant': True,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'type',
-                                       'value': '1tri angle',
+                                       'value': '',
                                        'values': ['1tri angle', 'quadrilateral']},
+            'typeOf(right_triangle) = 1tri angle': {'environmental': False,
+                                                    'normal': False,
+                                                    'reading': 'typeOf(right_triangle) = 1tri angle',
+                                                    'relevant': True,
+                                                    'status': 'CONSEQUENCE',
+                                                    'typ': 'Bool',
+                                                    'value': True},
+            'typeOf(right_triangle) = quadrilateral': {'environmental': False,
+                                                       'normal': False,
+                                                       'reading': 'typeOf(right_triangle) = quadrilateral',
+                                                       'relevant': True,
+                                                       'status': 'CONSEQUENCE',
+                                                       'typ': 'Bool',
+                                                       'value': False},
             'typeOf(square)': {'environmental': False,
                                'normal': True,
                                'reading': 'typeOf(square)',
                                'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'type',
-                               'value': 'quadrilateral',
+                               'value': '',
                                'values': ['1tri angle', 'quadrilateral']},
+            'typeOf(square) = 1tri angle': {'environmental': False,
+                                            'normal': False,
+                                            'reading': 'typeOf(square) = 1tri angle',
+                                            'relevant': True,
+                                            'status': 'CONSEQUENCE',
+                                            'typ': 'Bool',
+                                            'value': False},
+            'typeOf(square) = quadrilateral': {'environmental': False,
+                                               'normal': False,
+                                               'reading': 'typeOf(square) = quadrilateral',
+                                               'relevant': True,
+                                               'status': 'CONSEQUENCE',
+                                               'typ': 'Bool',
+                                               'value': True},
             '∀st[subtype] : isa(st,typeOf(st))': {'environmental': False,
                                                   'normal': False,
                                                   'reading': '∀st[subtype] : isa(st,typeOf(st))',

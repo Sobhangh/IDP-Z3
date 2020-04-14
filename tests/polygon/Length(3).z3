@@ -52,6 +52,14 @@ And(Or(Length(1) == Length(1), Sides < 1),
 
 And(Sides >= 3, Sides <= 4)
 
+Or(Type == triangle, Type == quadrilateral)
+
+Or(Subtype == regular_triangle,
+   Subtype == right_triangle,
+   Subtype == rectangle,
+   Subtype == square,
+   Subtype == irregular)
+
 -- subtences ------------------------------------
 Sides = 3
 Subtype = rectangle
@@ -60,6 +68,12 @@ Equilateral
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
 3 ≤ Sides ≤ 4
+Type = triangle
+Type = quadrilateral
+Subtype = regular_triangle
+Subtype = right_triangle
+Subtype = square
+Subtype = irregular
 
 -- GUILines ------------------------------------
 Sides
@@ -76,6 +90,12 @@ Length(3) = Length(1)
 ∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
 Sides = 4
 3 ≤ Sides ≤ 4
+Type = triangle
+Type = quadrilateral
+Subtype = regular_triangle
+Subtype = right_triangle
+Subtype = square
+Subtype = irregular
 
 -- case -------------------------------------
 Type:        
@@ -91,10 +111,13 @@ Consequences:
   ~Sides = 4 <= {'Sides'}
 Simplified:  
   Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1)))))
+  (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = square) ∨ (Subtype = irregular)
 Irrelevant:  
   ~Length(3) = Length(1)
   ~Sides = 4 <= {'Sides'}
   3 ≤ Sides ≤ 4
+  ~Type = triangle
+  ~Type = quadrilateral
 
 
 -- meta -------------------------------------
@@ -187,13 +210,37 @@ Irrelevant:
                          'typ': 'subtype',
                          'value': '',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
+             'Subtype = irregular': {'environmental': False,
+                                     'normal': False,
+                                     'reading': 'Subtype = irregular',
+                                     'relevant': True,
+                                     'status': 'UNKNOWN',
+                                     'typ': 'Bool'},
              'Subtype = rectangle': {'environmental': False,
                                      'normal': False,
                                      'reading': 'Subtype = rectangle',
                                      'relevant': True,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
-                                     'value': False}},
+                                     'value': False},
+             'Subtype = regular_triangle': {'environmental': False,
+                                            'normal': False,
+                                            'reading': 'Subtype = regular_triangle',
+                                            'relevant': True,
+                                            'status': 'UNKNOWN',
+                                            'typ': 'Bool'},
+             'Subtype = right_triangle': {'environmental': False,
+                                          'normal': False,
+                                          'reading': 'Subtype = right_triangle',
+                                          'relevant': True,
+                                          'status': 'UNKNOWN',
+                                          'typ': 'Bool'},
+             'Subtype = square': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Subtype = square',
+                                  'relevant': True,
+                                  'status': 'UNKNOWN',
+                                  'typ': 'Bool'}},
  'Type': {'Type': {'environmental': False,
                    'normal': True,
                    'reading': 'Type',
@@ -201,4 +248,16 @@ Irrelevant:
                    'status': 'UNKNOWN',
                    'typ': 'type',
                    'value': '',
-                   'values': ['triangle', 'quadrilateral']}}}
+                   'values': ['triangle', 'quadrilateral']},
+          'Type = quadrilateral': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Type = quadrilateral',
+                                   'relevant': False,
+                                   'status': 'UNKNOWN',
+                                   'typ': 'Bool'},
+          'Type = triangle': {'environmental': False,
+                              'normal': False,
+                              'reading': 'Type = triangle',
+                              'relevant': False,
+                              'status': 'UNKNOWN',
+                              'typ': 'Bool'}}}

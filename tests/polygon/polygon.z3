@@ -216,6 +216,14 @@ And(Sides >= 3, Sides <= 4)
 
 And(Vertices >= 3, Vertices <= 4)
 
+Or(Type == triangle, Type == quadrilateral)
+
+Or(Subtype == regular_triangle,
+   Subtype == right_triangle,
+   Subtype == rectangle,
+   Subtype == square,
+   Subtype == irregular)
+
 And(Not(Large(1)),
     Not(Large(2)),
     Not(Large(3)),
@@ -316,7 +324,7 @@ Consequences:
   ~Large(1) <= {'Large(1) ⇔ (false)', 'Length(1) = 1', 'Length(2) = 2', 'Length(3) = 3', 'Length(4) = 4', 'Length(n) = ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)'}
   ~Type = triangle <= Z3 proof
   ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
-  Type = quadrilateral <= Z3 proof
+  Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
   Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
   ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
@@ -324,14 +332,14 @@ Consequences:
   ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n) <= {'Length(1) = 1', 'n = 2', 'Length(2) = 2', 'Sides'}
   ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
   ~Subtype = regular_triangle <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Sides = 3'}
-  Subtype = irregular <= Z3 proof
+  Subtype = irregular <= {'(Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square) ∨ (Subtype = irregular)', 'Subtype = rectangle', 'Subtype = regular_triangle', 'Subtype = right_triangle', 'Subtype = square'}
   ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n) <= Z3 proof
   ~Subtype = square <= {'((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))', 'Sides', 'Sides = 4', 'Equilateral'}
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Subtype = rectangle', 'Subtype = square'}
   Sides = 4 <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Type', 'Type = quadrilateral'}
   Vertices = 4 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3', 'Vertices = 3', 'Sides', 'Sides = 4'}
-  Type = quadrilateral <= Z3 proof
-  Subtype = irregular <= Z3 proof
+  Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
+  Subtype = irregular <= {'(Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square) ∨ (Subtype = irregular)', 'Subtype = rectangle', 'Subtype = regular_triangle', 'Subtype = right_triangle', 'Subtype = square'}
   Perimeter = 10
   ~Large(2) <= Z3 proof
   ~Large(3) <= Z3 proof
