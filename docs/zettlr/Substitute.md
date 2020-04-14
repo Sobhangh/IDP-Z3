@@ -1,17 +1,19 @@
 
 Notation: $\varphi_p$ is a formula $\varphi$ having a (tentative) proof p.  A proof is a list of atoms (not of literals).  The proof is final when $\varphi$ is $\top$ or $\bot$.
+$(original)$ is the formula before any substitutions
 
 Todo:
 - [x] implications have arity 2 only
 - [x] check that replace_by arguments does not include self.proof
 - [x] if phi then a else a → a 
-- [ ] don't add brackets in replace_by if not subtence
-- [ ] replace by True/false → add to todo
+- [x] don't add brackets in replace_by if not bool
+- [ ] replace by True/false → add to consequences
 - [ ] proof when all conjuncts/disjuncts are False/True
 - [ ] proof for arithmetic, comparison
 - [ ] Expression.substitutions(), not Assignments.substitutions
+- [ ] simplify Case.propagate
 
-- [ ] todo as a dictionary → re-use previous results
+- [ ] consequences, todo as dictionary → re-use previous results
 - [ ] batch substitutions together
 - [ ] theory = And(constraints) to avoid loops. But beware of Environmental
 
@@ -30,13 +32,13 @@ $$
 (t=u)_{p} [x \rarr a] & \rightarrowtail (t[x \rarr a]=u[x \rarr a])_p \\
 x[x \rarr a] & \rightarrowtail a_{x=a} \\
 % t=a
-%(t_{p^1}=a_{p^2}) & \rightarrowtail (t_{p^1}=a_{p^2}) ~~~~ todo: [(t=a) \rarr \top, t \rarr  a] \\
+%(t_{p^1}=a_{p^2}) & \rightarrowtail (t_{p^1}=a_{p^2}) ~~~~ consequences: [(t=a) \rarr \top, t \rarr  a] \\
 % a=u
-%(a_{p^1}=u_{p^2}) & \rightarrowtail (a_{p^1}=u_{p^2}) ~~~~ todo: [(u=a) \rarr \top, u \rarr a] \\
+%(a_{p^1}=u_{p^2}) & \rightarrowtail (a_{p^1}=u_{p^2}) ~~~~ consequences: [(u=a) \rarr \top, u \rarr a] \\
 % a=a
-(a_{p^1}=a_{p^2}) & \rightarrowtail (\top)_{p^1+p^2}  ~~~~ todo: [() \rarr \top]\\
+(a_{p^1}=a_{p^2}) & \rightarrowtail (\top)_{p^1+p^2}  ~~~~ consequences: [(original) \rarr \top]\\
 % a=b
-(a_{p^1}=b_{p^2}) & \rightarrowtail (\bot)_{p^1+p^2}  ~~~~ todo: [() \rarr \bot]
+(a_{p^1}=b_{p^2}) & \rightarrowtail (\bot)_{p^1+p^2}  ~~~~ consequences: [(original) \rarr \bot]
 \end{cases}
 $$
 where a, b are ground terms. 
@@ -45,8 +47,8 @@ where a, b are ground terms.
 $$
 (2) \begin{cases}
 (\psi_p) [\varphi \rarr truth]   & \rightarrowtail (\psi_p[\varphi \rarr truth]) \\
-(\top_p) & \rightarrowtail (\top_p)_p  ~~~~ todo: [() \rarr \top] \\
-(\bot_p) & \rightarrowtail (\bot_p)_p  ~~~~ todo: [() \rarr \bot]
+(\top_p) & \rightarrowtail (\top_p)_p  ~~~~ consequences: [(original) \rarr \top] \\
+(\bot_p) & \rightarrowtail (\bot_p)_p  ~~~~ consequences: [(original) \rarr \bot]
 \end{cases} 
 $$
 
@@ -54,8 +56,8 @@ $$
 $$
 (3) \begin{cases}
 (\lnot \psi_{p}) [\varphi \rarr truth]    & \rightarrowtail \lnot (\psi_{p} [\varphi \rarr truth]) \\
-\lnot \top_p & \rightarrowtail (\bot)_p   ~~~~ todo: [() \rarr \bot]\\
-\lnot \bot_p & \rightarrowtail (\top)_p  ~~~~ todo: [() \rarr \top]
+\lnot \top_p & \rightarrowtail (\bot)_p   ~~~~ consequences: [(original) \rarr \bot]\\
+\lnot \bot_p & \rightarrowtail (\top)_p  ~~~~ consequences: [(original) \rarr \top]
 \end{cases}
 $$
 
@@ -73,11 +75,11 @@ $$
 (\top_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail 
 (\psi^1_{p^1} \land…\land \psi^{i}_{p^i})_{p+p^0} \\
 % T
-(\top_{p^0})_p    & \rightarrowtail (\top_{p^0})_{p+p^0}  ~~~~ todo: [() \rarr \top] \\ 
+(\top_{p^0})_p    & \rightarrowtail (\top_{p^0})_{p+p^0}  ~~~~ consequences: [(original) \rarr \top] \\ 
 %+ S(\psi^0, \top) +truth+S(\psi^i, \top) \\
 % F &
 (\bot_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail 
-(\bot)_{p^0} ~~~~ todo: [() \rarr \bot]
+(\bot)_{p^0} ~~~~ consequences: [(original) \rarr \bot]
 \end{cases}
 $$
 
@@ -93,13 +95,13 @@ $$
 (\psi^0_{p^0}[\phi \rarr truth] \lor…\lor \psi^i_{p^i}[\phi \rarr truth])_p \\
 % T |
 (\top_{p^0} \lor \psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_p    & \rightarrowtail  
-\top_{p^0}  ~~~~ todo: [() \rarr \top]\\
+\top_{p^0}  ~~~~ consequences: [(original) \rarr \top]\\
 % F |
 (\bot_{p^0} \lor \psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_p    & \rightarrowtail
 (\psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_{p+p^0} \\
 % F
 (\bot_{p^0})_p    & \rightarrowtail
-(\bot_{p^0})_{p+p^0} ~~~~ todo: [() \rarr \bot] \\
+(\bot_{p^0})_{p+p^0} ~~~~ consequences: [(original) \rarr \bot] \\
 % + S(\psi^0, \bot) +...+S(\psi^i, \bot)
 \end{cases}
 $$
@@ -115,10 +117,10 @@ $$
 (\psi^0_{p^0}[\phi \rarr truth] \Rarr \psi^1_{p^1}[\phi \rarr truth]) \\
 % F =>
 (\bot_{p^0} \Rarr \psi^1_{p^1})    & \rightarrowtail  
-(\top)_{p^0}  ~~~~ todo: [() \rarr \top]\\
+(\top)_{p^0}  ~~~~ consequences: [(original) \rarr \top]\\
 % => T
 (\psi^0_{p^0} \Rarr \top_{p^1})    & \rightarrowtail
-(\top)_{p^1}  ~~~~ todo: [() \rarr \top]\\
+(\top)_{p^1}  ~~~~ consequences: [(original) \rarr \top]\\
 % T =>
 (\top_{p^0} \Rarr \psi^1_{p^1})    & \rightarrowtail  
 (\psi^1_{p^0+p^1}) \\
@@ -174,6 +176,31 @@ $$
 \end{cases}
 $$
 
+#### Defined symbols
+Notation: $\psi_{[\phi]}$ means that $\psi$ is subject to definition $\phi$.
+
+$$
+(6) \begin{cases}
+% down
+(\psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})[\phi \rarr truth]    & \rightarrowtail 
+(if~ \psi^0_{p^0}[\phi \rarr truth]) ~then~ (\psi^1_{p^1}[\phi \rarr truth]) ~else~ (\psi^{2}_{p^2}[\phi \rarr truth])) \\
+% if T
+(if~ \top_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail  
+(\psi^{1}_{p^1})_{p^0}\\
+% if T
+(if~ \bot_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail
+(\psi^{2}_{p^2})_{p^0}\\
+% then a else a
+(if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~ \psi^{1}_{p^2})    & \rightarrowtail  
+(\psi^1_{p^1})_{p^1+p^2} \\
+% if psi then T else F
+(if~ \psi^0_{p^0} ~then~ \top_{p^1} ~else~ \bot_{p^2})    & \rightarrowtail
+(\psi^0_{p^0})_{p^1+p^2} \\
+% if psi then F else T
+(if~ \psi^0_{p^0} ~then~ \bot_{p^1} ~else~ \top_{p^2})    & \rightarrowtail
+(\lnot \psi^0_{p^0})_{p^1+p^2}
+\end{cases}
+$$
 ## Substitutions
 $S(\varphi, \top)$ is the list of substitutions we can infer from assuming $\varphi$ is $\top$.
 
@@ -195,8 +222,9 @@ $$
 todo = S(theory, True)
 while todo:
     todo1 = []
-    theory = substitute(theory, todo, *todo1)
-    todo = todo1 + S(theory,True)
+    theory = substitute(theory, consequences, *todo1)
+    add consequences to Case.assignments
+    todo = S(theory,True)
     add todo to Case.assignments
 ```
 

@@ -49,15 +49,19 @@ def _replace_by(self, by, proof=Proof()):
     " replace expression by a new Brackets node, to keep annotations "
     if type(self) == Fresh_Variable or type(by) == Fresh_Variable:
         return by # no need to have brackets
-    out = Brackets(f=by, annotations=self.annotations) # by is not copied !
+    if self.type == 'bool':
+        out = Brackets(f=by, annotations=self.annotations) # by is not copied !
 
-    # copy initial annotation
-    out.code = self.code
-    out.is_subtence = self.is_subtence
-    out.fresh_vars = self.fresh_vars
-    out.is_visible = self.is_visible
-    out.type = self.type
-    # out.normal is not set, normally
+        # copy initial annotation
+        out.code = self.code
+        out.is_subtence = self.is_subtence
+        out.fresh_vars = self.fresh_vars
+        out.is_visible = self.is_visible
+        out.type = self.type
+        # out.normal is not set, normally
+    else:
+        out = copy.copy(by)
+        out.code = self.code
     if type(proof) == Proof and proof:
         out.proof = copy.copy(self.proof).update(proof)
     else:
@@ -118,16 +122,16 @@ def log(function):
     return _wrapper
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, todo=None, case=None):
+def substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
     if self == e0 or self.code == e0.code: # first == based on repr !
         proof = Proof(e0 if e1 in [TRUE, FALSE] or type(e1) in [NumberConstant, Constructor] else None)
         return self._replace_by(e1, proof)
     else:
-        out = self.update_exprs((e.substitute(e0, e1, todo, case) for e in self.sub_exprs))
+        out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
         if out.just_branch is not None:
-            new_branch = out.just_branch.substitute(e0, e1, todo, case)
+            new_branch = out.just_branch.substitute(e0, e1, todo)
             if new_branch == self: # justification is satisfied
                 if todo is not None:
                     todo.append((self, True, Proof(new_branch).update(new_branch.proof)))
@@ -139,9 +143,6 @@ def substitute(self, e0, e1, todo=None, case=None):
                     self.just_branch = None
                 return self._replace_by(FALSE, new_branch.proof)
             out = out._change(just_branch= new_branch)
-            # if todo is not None:
-            #     todo0 = out.just_branch.expr_to_literal(case)
-            #     todo.extend(todo0)
     return out
 Expression.substitute = substitute
 

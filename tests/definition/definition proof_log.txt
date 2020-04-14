@@ -601,7 +601,7 @@
     |------------
     |codeOf(red)
     |+ codeOf(red) -> b
-    |== (b)
+    |== b
     |   proof: {'codeOf(red)'}
     |------------
     |a
@@ -1235,7 +1235,7 @@ Z3 propagation ********************************
                         |------------
                         |c
                         |+ c -> blue
-                        |== (blue)
+                        |== blue
                         |   proof: {'c'}
                     |== *(false)
                     |   proof: {'c'}
@@ -1264,7 +1264,7 @@ Z3 propagation ********************************
                             |------------
                             |c
                             |+ c -> blue
-                            |== (blue)
+                            |== blue
                             |   proof: {'c'}
                         |== *(false)
                         |   proof: {'c'}
@@ -1309,7 +1309,7 @@ Z3 propagation ********************************
     |------------
     |c
     |+ c -> blue
-    |== (blue)
+    |== blue
     |   proof: {'c'}
 |== *(false)
 |   proof: {'c'}
@@ -1356,7 +1356,7 @@ Z3 propagation ********************************
                         |------------
                         |c
                         |+ c -> blue
-                        |== (blue)
+                        |== blue
                         |   proof: {'c'}
                     |== *(false)
                     |   proof: {'c'}
@@ -1386,7 +1386,7 @@ Z3 propagation ********************************
                             |------------
                             |c
                             |+ c -> blue
-                            |== (blue)
+                            |== blue
                             |   proof: {'c'}
                         |== *(false)
                         |   proof: {'c'}

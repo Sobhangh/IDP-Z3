@@ -196,7 +196,7 @@ class Case:
                 new_simplified: List[Expression] = []
                 for constraint in self.simplified:
                     consequences = []
-                    new_constraint = constraint.substitute(old, new, consequences, self)
+                    new_constraint = constraint.substitute(old, new, consequences)
                     consequences.extend(new_constraint.expr_to_literal(self))
                     if consequences:
                         for sentence, truth, proof in consequences:

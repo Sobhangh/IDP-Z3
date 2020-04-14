@@ -137,7 +137,7 @@ Consequences:
   negated(0) = 0 <= Z3 proof
   negated(1) = -1 <= Z3 proof
 Simplified:  
-  negated((1)) = (-1)
+  
 Irrelevant:  
   ~same(-1) = 0 <= {'same(-1)'}
   ~same(-1) = 1 <= {'same(-1)'}

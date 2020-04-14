@@ -301,7 +301,7 @@ Type:
 Definitions: 
   Rule:∀['$Large!0$'][]: Large($Large!0$) ⇔10 < ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)
 Universals:  
-  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length((2)) = (((2)))', 'n = 2', 'Length(2) = 2', 'Length((3)) = ((3))', 'n = 3', 'Length(3) = 3', 'Length((4)) = (4)', 'n = 4', 'Length(4) = 4', 'Length((5)) = ((((5))))'}
+  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length(2) = 2', 'n = 2', 'Length(3) = 3', 'n = 3', 'Length(4) = 4', 'n = 4', 'Length(5) = 5'}
   ~Subtype = rectangle <= {'((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (Length(1) ≠ Length(2))))', 'Length(1) = 1', 'Length(3) = 3', 'Length(1) = Length(3)'}
   Perimeter = (sum{n[side] : true : Length(n)})
   (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
@@ -339,7 +339,7 @@ Consequences:
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
-  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length((2)) = (((2)))', 'n = 2', 'Length(2) = 2', 'Length((3)) = ((3))', 'n = 3', 'Length(3) = 3', 'Length((4)) = (4)', 'n = 4', 'Length(4) = 4', 'Length((5)) = ((((5))))'}
+  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length(2) = 2', 'n = 2', 'Length(3) = 3', 'n = 3', 'Length(4) = 4', 'n = 4', 'Length(5) = 5'}
   ∀x[side] : 0 ≤ Length(x) <= {'x = 1', 'Length(1) = 1', 'x = 2', 'Length(2) = 2', 'x = 3', 'Length(3) = 3', 'x = 4', 'Length(4) = 4'}
   3 ≤ Sides ≤ 4
   3 ≤ Vertices ≤ 4

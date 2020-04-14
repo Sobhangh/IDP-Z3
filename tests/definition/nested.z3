@@ -62,7 +62,7 @@ Consequences:
   negated(Piet) = Jan <= Z3 proof
   negated(Jan) = Piet <= Z3 proof
 Simplified:  
-  same((Piet)) = negated((Jan))
+  same(Piet) = Piet
 Irrelevant:  
   
 
