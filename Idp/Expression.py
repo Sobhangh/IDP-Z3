@@ -144,24 +144,24 @@ class Expression(object):
             out.extend(self.just_branch.justifications())
         return out
 
-    def expr_to_literal(self, case: 'Case', truth: bool = True, proof=None) -> List[Tuple['Expression', bool]]:
+    def as_substitutions(self, case: 'Case', truth: bool = True, proof=None) -> List[Tuple['Expression', 'Expression']]:
         if proof is None:
             proof = Proof(self)
         # returns a literal for the matching atom in case.assignments, or []
         if self.code in case.assignments: # found it !
-            return [(self, truth, proof)]
+            return [(self, TRUE if truth else FALSE, proof)]
         if isinstance(self, Brackets):
-            return self.sub_exprs[0].expr_to_literal(case, truth, proof.update(self.proof))
+            return self.sub_exprs[0].as_substitutions(case, truth, proof.update(self.proof))
         if isinstance(self, AUnary) and self.operator == '~':
-            return self.sub_exprs[0].expr_to_literal(case, not truth, proof.update(self.proof))
+            return self.sub_exprs[0].as_substitutions(case, not truth, proof.update(self.proof))
         if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
-            return self.sub_exprs[0].expr_to_literal(case, truth, proof)
+            return self.sub_exprs[0].as_substitutions(case, truth, proof)
         if (truth     and isinstance(self, AConjunction)) \
         or (not truth and isinstance(self, ADisjunction)):
             out = []
             for e in self.sub_exprs:
                 p = copy.copy(proof).update(e.proof)
-                out.extend(l for l in e.expr_to_literal(case, truth, p))
+                out.extend(l for l in e.as_substitutions(case, truth, p))
             return out
         return []
 

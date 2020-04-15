@@ -134,12 +134,12 @@ def substitute(self, e0, e1, todo=None):
             new_branch = out.just_branch.substitute(e0, e1, todo)
             if new_branch == self: # justification is satisfied
                 if todo is not None:
-                    todo.append((self, True, Proof(new_branch).update(new_branch.proof)))
+                    todo.append((self, TRUE, Proof(new_branch).update(new_branch.proof)))
                     self.just_branch = None
                 return self._replace_by(TRUE, new_branch.proof)
             if new_branch == AUnary.make('~', self): # justification is satisfied
                 if todo is not None:
-                    todo.append((self, False, Proof(new_branch).update(new_branch.proof)))
+                    todo.append((self, FALSE, Proof(new_branch).update(new_branch.proof)))
                     self.just_branch = None
                 return self._replace_by(FALSE, new_branch.proof)
             out = out._change(just_branch= new_branch)

@@ -64,14 +64,14 @@ class Case:
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
-            u = c.expr_to_literal(self)
+            u = c.as_substitutions(self)
             if u:
                 for sentence, truth, proof in u:
                     proof.pop(sentence.code, None) # remove sentence if it exists
                     proof.pop(f"({sentence.code})", None) # with bracket
-                    if not truth:
+                    if truth == FALSE:
                         proof.pop(f"~({sentence.code})", None)
-                    ass = Assignment(sentence, truth, Status.UNKNOWN)
+                    ass = Assignment(sentence, truth==TRUE, Status.UNKNOWN)
                     ass.update(None, None, proof, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
@@ -197,15 +197,15 @@ class Case:
                 for constraint in self.simplified:
                     consequences = []
                     new_constraint = constraint.substitute(old, new, consequences)
-                    consequences.extend(new_constraint.expr_to_literal(self))
+                    consequences.extend(new_constraint.as_substitutions(self))
                     if consequences:
                         for sentence, truth, proof in consequences:
                             old_ass = self.assignments[sentence.code]
                             if old_ass.truth is None:
                                 if (all_ or old_ass.is_environmental):
-                                    new_ass = old_ass.update(None, truth, proof, CONSQ, self)
+                                    new_ass = old_ass.update(None, truth==TRUE, proof, CONSQ, self)
                                     to_propagate.append(new_ass)
-                            elif old_ass.truth != truth:
+                            elif old_ass.truth != (truth==TRUE):
                                 # test: theory{ x=4. x=5. }
                                 self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                 return

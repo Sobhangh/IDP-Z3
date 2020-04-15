@@ -11,12 +11,12 @@ The relevant atoms are those remaining in the simplified expressions **+ the jus
 This can also be used to explain consequences !
 
 TODO:
-* replace justification by just_branch
-* add Expression.proof = OrderedSet[Expression] the proof of an atom = assignments + constraint
-* \_change:(proof, …) : add proof → no Brackets anymore → Expression.eq
-* getsubtences: add subtences of a proof
-* Case: get relevant after propagation, no need to compute relevant_symbols
-* Explain
+- [x] replace justification by just_branch
+- [x] add Expression.proof = OrderedSet[Expression] the proof of an atom = assignments + constraint
+- [ ] _change:(proof, …) : add proof → no Brackets anymore → Expression.eq
+- [ ] getsubtences: add subtences of a proof
+- [ ] Case: get relevant after propagation, no need to compute relevant_symbols
+- [ ] Explain
 
 When are consequences relevant ?
 * consequences obtained by syntactic simplification (including definitions )

@@ -1,5 +1,5 @@
 
-Notation: $\varphi_p$ is a formula $\varphi$ having a (tentative) proof p.  A proof is a list of atoms (not of literals).  The proof is final when $\varphi$ is $\top$ or $\bot$.
+Notation: $\varphi_p$ is a formula $\varphi$ having a (tentative) proof p.  A proof is an expression.  A proof of $\varphi$ is final when $\varphi$ is $\top$ or $\bot$.
 $(original)$ is the formula before any substitutions
 
 Todo: 
@@ -8,6 +8,7 @@ Todo:
 - [x] if phi then a else a → a 
 - [x] don't add brackets in replace_by if not bool
 - [x] add typeConstraints
+- [ ] proof should be an expression, not a list of atoms → simpler !
 - [ ] replace by True/false → add to consequences (stash: consequences)
 - [x] proof for arithmetic, comparison
 - [ ] Expression.substitutions(), not Assignments.substitutions
@@ -36,9 +37,9 @@ x[x \rarr a] & \rightarrowtail a_{x=a} \\
 % a=u
 %(a_{p^1}=u_{p^2}) & \rightarrowtail (a_{p^1}=u_{p^2}) ~~~~ consequences: [(u=a) \rarr \top, u \rarr a] \\
 % a=a
-(a_{p^1}=a_{p^2}) & \rightarrowtail (\top)_{p^1+p^2}  ~~~~ consequences: [(original) \rarr \top]\\
+(a_{p^1}=a_{p^2}) & \rightarrowtail (\top)_{p^1 \land p^2}  ~~~~ consequences: [(original) \rarr \top]\\
 % a=b
-(a_{p^1}=b_{p^2}) & \rightarrowtail (\bot)_{p^1+p^2}  ~~~~ consequences: [(original) \rarr \bot]
+(a_{p^1}=b_{p^2}) & \rightarrowtail (\bot)_{p^1 \land p^2}  ~~~~ consequences: [(original) \rarr \bot]
 \end{cases}
 $$
 where a, b are ground terms. 
@@ -73,9 +74,9 @@ $$
 (\psi^0_{p^0}[\phi \rarr truth] \land…\land \psi^i_{p^i}[\phi \rarr truth])_p \\
 % T &
 (\top_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail 
-(\psi^1_{p^1} \land…\land \psi^{i}_{p^i})_{p+p^0} \\
+(\psi^1_{p^1} \land…\land \psi^{i}_{p^i})_{p \land p^0} \\
 % T
-(\top_{p^0})_p    & \rightarrowtail (\top_{p^0})_{p+p^0}  ~~~~ consequences: [(original) \rarr \top] \\ 
+(\top_{p^0})_p    & \rightarrowtail (\top_{p^0})_{p \land p^0}  ~~~~ consequences: [(original) \rarr \top] \\ 
 %+ S(\psi^0, \top) +truth+S(\psi^i, \top) \\
 % F &
 (\bot_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail 
@@ -98,10 +99,10 @@ $$
 \top_{p^0}  ~~~~ consequences: [(original) \rarr \top]\\
 % F |
 (\bot_{p^0} \lor \psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_p    & \rightarrowtail
-(\psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_{p+p^0} \\
+(\psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_{p \land p^0} \\
 % F
 (\bot_{p^0})_p    & \rightarrowtail
-(\bot_{p^0})_{p+p^0} ~~~~ consequences: [(original) \rarr \bot] \\
+(\bot_{p^0})_{p \land p^0} ~~~~ consequences: [(original) \rarr \bot] \\
 % + S(\psi^0, \bot) +...+S(\psi^i, \bot)
 \end{cases}
 $$
@@ -123,10 +124,10 @@ $$
 (\top)_{p^1}  ~~~~ consequences: [(original) \rarr \top]\\
 % T =>
 (\top_{p^0} \Rarr \psi^1_{p^1})    & \rightarrowtail  
-(\psi^1_{p^0+p^1}) \\
+(\psi^1_{p^0 \land p^1}) \\
 % => F
 (\psi^0_{p^0} \Rarr \bot_{p^1})    & \rightarrowtail
-\lnot (\psi^0_{p^0+p^1}) \\
+\lnot (\psi^0_{p^0 \land p^1}) \\
 \end{cases}
 $$
 
@@ -166,13 +167,13 @@ $$
 (\psi^{2}_{p^2})_{p^0}\\
 % then a else a
 (if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~ \psi^{1}_{p^2})    & \rightarrowtail  
-(\psi^1_{p^1})_{p^1+p^2} \\
+(\psi^1_{p^1})_{p^1 \land p^2} \\
 % if psi then T else F
 (if~ \psi^0_{p^0} ~then~ \top_{p^1} ~else~ \bot_{p^2})    & \rightarrowtail
-(\psi^0_{p^0})_{p^1+p^2} \\
+(\psi^0_{p^0})_{p^1 \land p^2} \\
 % if psi then F else T
 (if~ \psi^0_{p^0} ~then~ \bot_{p^1} ~else~ \top_{p^2})    & \rightarrowtail
-(\lnot \psi^0_{p^0})_{p^1+p^2}
+(\lnot \psi^0_{p^0})_{p^1 \land p^2}
 \end{cases}
 $$
 
@@ -192,13 +193,13 @@ $$
 (\psi^{2}_{p^2})_{p^0}\\
 % then a else a
 (if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~ \psi^{1}_{p^2})    & \rightarrowtail  
-(\psi^1_{p^1})_{p^1+p^2} \\
+(\psi^1_{p^1})_{p^1 \land p^2} \\
 % if psi then T else F
 (if~ \psi^0_{p^0} ~then~ \top_{p^1} ~else~ \bot_{p^2})    & \rightarrowtail
-(\psi^0_{p^0})_{p^1+p^2} \\
+(\psi^0_{p^0})_{p^1 \land p^2} \\
 % if psi then F else T
 (if~ \psi^0_{p^0} ~then~ \bot_{p^1} ~else~ \top_{p^2})    & \rightarrowtail
-(\lnot \psi^0_{p^0})_{p^1+p^2}
+(\lnot \psi^0_{p^0})_{p^1 \land p^2}
 \end{cases}
 $$
 ## Substitutions

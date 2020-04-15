@@ -4,14 +4,16 @@ Merge case.GuiLines and .assignments
 
 Currently:
 * GuiLines: vocabulary.terms + [[subtences]]
-* Assignments: subtences + given
+* Assignments: vocabulary.terms + subtences + given
 
 Problems:
 * is_visible must be determine up-front
-    * propage creates new Assignment → visible info is lost, unless it  is copied
+    * propage creates new Assignment → visible info is lost, unless it is copied
 * GuiLines used in inferences
 
 TODO:
-* Assignment() create with visible
+- [ ] Assignments are (expr → value) where value can be of any type (not just boolean)
+- [ ] do not create new Assignments in propagate, update them !
+- [ ] Assignment() create with visible
 
 #refactoring
