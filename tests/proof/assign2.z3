@@ -34,12 +34,12 @@ Definitions:
 Universals:  
   x = 0
 Consequences:
-  (x + 1) = 1 <= {'x'}
+  (x + 1) = 1
   x = 0
 Simplified:  
   
 Irrelevant:  
-  (x + 1) = 1 <= {'x'}
+  (x + 1) = 1
 
 
 -- meta -------------------------------------

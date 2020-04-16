@@ -147,22 +147,22 @@ Universals:
   ∀st[subtype] : isa(st,typeOf(st))
   Type = typeOf(Subtype)
 Consequences:
-  typeOf(regular_triangle) = 1tri angle <= Z3 proof
-  ~typeOf(regular_triangle) = quadrilateral <= {'typeOf(regular_triangle)'}
-  typeOf(right_triangle) = 1tri angle <= Z3 proof
-  ~typeOf(right_triangle) = quadrilateral <= {'typeOf(right_triangle)'}
-  ~typeOf(rectangle) = 1tri angle <= Z3 proof
-  typeOf(rectangle) = quadrilateral <= {'(typeOf(rectangle) = 1tri angle) ∨ (typeOf(rectangle) = quadrilateral)', 'typeOf(rectangle) = 1tri angle'}
-  ~typeOf(square) = 1tri angle <= Z3 proof
-  typeOf(square) = quadrilateral <= {'(typeOf(square) = 1tri angle) ∨ (typeOf(square) = quadrilateral)', 'typeOf(square) = 1tri angle'}
-  asi(1tri angle,regular_triangle) <= Z3 proof
-  asi(1tri angle,right_triangle) <= Z3 proof
-  ~asi(1tri angle,rectangle) <= Z3 proof
-  ~asi(1tri angle,square) <= Z3 proof
-  ~asi(quadrilateral,regular_triangle) <= Z3 proof
-  ~asi(quadrilateral,right_triangle) <= Z3 proof
-  asi(quadrilateral,rectangle) <= Z3 proof
-  asi(quadrilateral,square) <= Z3 proof
+  typeOf(regular_triangle) = 1tri angle
+  ~typeOf(regular_triangle) = quadrilateral
+  typeOf(right_triangle) = 1tri angle
+  ~typeOf(right_triangle) = quadrilateral
+  ~typeOf(rectangle) = 1tri angle
+  typeOf(rectangle) = quadrilateral
+  ~typeOf(square) = 1tri angle
+  typeOf(square) = quadrilateral
+  asi(1tri angle,regular_triangle)
+  asi(1tri angle,right_triangle)
+  ~asi(1tri angle,rectangle)
+  ~asi(1tri angle,square)
+  ~asi(quadrilateral,regular_triangle)
+  ~asi(quadrilateral,right_triangle)
+  asi(quadrilateral,rectangle)
+  asi(quadrilateral,square)
   typeOf(regular_triangle) = 1tri angle
   typeOf(right_triangle) = 1tri angle
   typeOf(rectangle) = quadrilateral

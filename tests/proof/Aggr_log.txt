@@ -5,14 +5,10 @@
 |== 1
 |------------
 |1
-|proof: {'c = red'}
 |+ c -> blue
 |== 1
-|   proof: {'c = red'}
 |------------
 |1
-|proof: {'c = blue', 'c = red'}
 |+ c -> green
 |== 1
-|   proof: {'c = blue', 'c = red'}
 Z3 propagation ********************************

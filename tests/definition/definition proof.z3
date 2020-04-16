@@ -59,19 +59,19 @@ Definitions:
 Universals:  
   codeOf(red) = b
 Consequences:
-  ~red = c <= Z3 proof
-  ~codeOf(red) = a <= {'codeOf(red)'}
-  codeOf(blue) = a <= Z3 proof
-  ~codeOf(blue) = b <= {'codeOf(blue)'}
-  ~c = red <= Z3 proof
-  c = blue <= {'(c = red) ∨ (c = blue)', 'c = red'}
+  ~red = c
+  ~codeOf(red) = a
+  codeOf(blue) = a
+  ~codeOf(blue) = b
+  ~c = red
+  c = blue
   codeOf(red) = b
   codeOf(blue) = a
   c = blue
 Simplified:  
   
 Irrelevant:  
-  ~codeOf(red) = a <= {'codeOf(red)'}
+  ~codeOf(red) = a
 
 
 -- meta -------------------------------------

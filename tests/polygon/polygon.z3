@@ -305,44 +305,44 @@ Type:
 Definitions: 
   Rule:∀['$Large!0$'][]: Large($Large!0$) ⇔10 < ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)
 Universals:  
-  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length(2) = 2', 'n = 2', 'Length(3) = 3', 'n = 3', 'Length(4) = 4', 'n = 4', 'Length(5) = 5'}
-  ~Subtype = rectangle <= {'((Subtype = rectangle) ⇒ ((Length(1) = Length(3)) ∧ (Length(2) = Length(4)) ∧ (Length(1) ≠ Length(2))))', 'Length(1) = 1', 'Length(3) = 3', 'Length(1) = Length(3)'}
+  ∀n[side] : Length(n) < Length(n + 1)
+  ~Subtype = rectangle
   Perimeter = (sum{n[side] : true : Length(n)})
   (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
-  ∀x[side] : 0 ≤ Length(x) <= {'x = 1', 'Length(1) = 1', 'x = 2', 'Length(2) = 2', 'x = 3', 'Length(3) = 3', 'x = 4', 'Length(4) = 4'}
+  ∀x[side] : 0 ≤ Length(x)
   ∀x[side] : 0 ≤ Angle(x)
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
 Consequences:
-  ~Large(1) <= {'Large(1) ⇔ (false)', 'Length(n) = ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)'}
-  ~Type = triangle <= Z3 proof
-  ~Sides = 3 <= {'((Type = triangle) ⇔ (Sides = 3))', 'Type = triangle'}
-  Type = quadrilateral <= {'(Type = triangle) ∨ (Type = quadrilateral)', 'Type = triangle'}
-  Sides = 4 <= {'(Sides = 3) ∨ (Sides = 4)', 'Sides = 3'}
-  ~Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)) ∧ ((Vertices = 4) ⇔ (Sides = 4)))', 'Sides = 3'}
-  Vertices = 4 <= {'(Vertices = 3) ∨ (Vertices = 4)', 'Vertices = 3'}
-  ~Equilateral <= {'(Equilateral ⇔ (∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)))', 'Length(1) = 1', 'n = 2', 'Length(2) = 2', 'Sides'}
-  ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n) <= {'Length(1) = 1', 'n = 2', 'Length(2) = 2', 'Sides'}
-  ~Subtype = right_triangle <= {'((Subtype = right_triangle) ⇔ ((Sides = 3) ∧ (∃n[side] : Angle(n) = 90)))', 'Sides = 3'}
-  ~Subtype = regular_triangle <= {'((Subtype = regular_triangle) ⇔ ((Sides = 3) ∧ Equilateral))', 'Sides = 3'}
-  Subtype = irregular <= {'(Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square) ∨ (Subtype = irregular)', 'Subtype = rectangle', 'Subtype = regular_triangle', 'Subtype = right_triangle', 'Subtype = square'}
-  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n) <= Z3 proof
-  ~Subtype = square <= {'((Subtype = square) ⇔ ((Sides = 4) ∧ Equilateral))', 'Sides', 'Sides = 4', 'Equilateral'}
-  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Subtype = rectangle', 'Subtype = square'}
+  ~Large(1)
+  ~Type = triangle
+  ~Sides = 3
+  Type = quadrilateral
+  Sides = 4
+  ~Vertices = 3
+  Vertices = 4
+  ~Equilateral
+  ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+  ~Subtype = right_triangle
+  ~Subtype = regular_triangle
+  Subtype = irregular
+  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+  ~Subtype = square
+  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   Sides = 4
   Vertices = 4
   Type = quadrilateral
   Subtype = irregular
   Perimeter = 10
-  ~Large(2) <= Z3 proof
-  ~Large(3) <= Z3 proof
-  ~Large(4) <= Z3 proof
+  ~Large(2)
+  ~Large(3)
+  ~Large(4)
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
-  ∀n[side] : Length(n) < Length(n + 1) <= {'n = 1', 'Length(1) = 1', 'Length(2) = 2', 'n = 2', 'Length(3) = 3', 'n = 3', 'Length(4) = 4', 'n = 4', 'Length(5) = 5'}
-  ∀x[side] : 0 ≤ Length(x) <= {'x = 1', 'Length(1) = 1', 'x = 2', 'Length(2) = 2', 'x = 3', 'Length(3) = 3', 'x = 4', 'Length(4) = 4'}
+  ∀n[side] : Length(n) < Length(n + 1)
+  ∀x[side] : 0 ≤ Length(x)
 
 
 -- meta -------------------------------------

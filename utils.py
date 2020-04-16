@@ -48,7 +48,7 @@ indented = "\r\n  "
 LOG_FILE = None
 def Log_file(path):
     global LOG_FILE
-    if 'proof' in path or 'andbox' in path:
+    if 'roof' in path or 'andbox' in path:
         path, filename = os.path.split(path)
         LOG_FILE = newpath = os.path.join(path, filename.replace('.idp', '_log.txt'))
         indent = 0
@@ -101,62 +101,3 @@ def mergeDicts(l):
     # merge a list of dicts (possibly a comprehension
     return dict(ChainMap(*reversed(list(l))))
 
-# Proof #########################################################
-
-import collections
-
-class Proof(collections.OrderedDict, collections.MutableSet):
-    # Dict[code, is_subtence]
-    def __init__(self, elem=None):
-        if elem is not None:
-            self[elem.code] = elem.is_subtence
-            self.add(elem) # add proof of elem
-
-    def update(self, other):
-        " adds the other proof "
-        if type(other) == Proof:
-            for k, v in other.items():
-                self[k] = v
-        return self
-
-    def add(self, elem):
-        " adds the proof of elem, and elem if it is a subtence "
-        self.update(elem.proof)
-        if elem.is_subtence:
-            self[elem.code] = elem.is_subtence
-        return self
-
-    def extend(self, elems):
-        " adds a list of expressions and their proofs "
-        for elem in elems:
-            self.add(elem)
-        return self
-
-    def __repr__(self):
-        return 'Proof([%s])' % (', '.join(map(repr, self.keys())))
-
-    def __str__(self):
-        return '{%s}' % (', '.join(map(repr, self.keys())))
-
-    """
-    difference = property(lambda self: self.__sub__)
-    difference_update = property(lambda self: self.__isub__)
-    intersection = property(lambda self: self.__and__)
-    intersection_update = property(lambda self: self.__iand__)
-    issubset = property(lambda self: self.__le__)
-    issuperset = property(lambda self: self.__ge__)
-    symmetric_difference = property(lambda self: self.__xor__)
-    symmetric_difference_update = property(lambda self: self.__ixor__)
-    def union(self, other):
-        return self or other
-    """
-
-class ProofZ3(object):
-    def update(self, other):
-        return self
-    def add(self, elem):
-        return self
-    def extend(self, elems):
-        return self
-    def __str__(self):
-        return 'Z3 proof'

@@ -73,13 +73,13 @@ Definitions:
 Universals:  
   same(Piet) = Piet
 Consequences:
-  negated(Piet) = Jan <= Z3 proof
-  ~negated(Piet) = Piet <= {'negated(Piet)'}
-  ~same(Piet) = Jan <= {'same(Piet)'}
-  ~same(Jan) = Piet <= Z3 proof
-  same(Jan) = Jan <= {'(same(Jan) = Piet) ∨ (same(Jan) = Jan)', 'same(Jan) = Piet'}
-  negated(Jan) = Piet <= Z3 proof
-  ~negated(Jan) = Jan <= {'negated(Jan)'}
+  negated(Piet) = Jan
+  ~negated(Piet) = Piet
+  ~same(Piet) = Jan
+  ~same(Jan) = Piet
+  same(Jan) = Jan
+  negated(Jan) = Piet
+  ~negated(Jan) = Jan
   same(Piet) = Piet
   same(Jan) = Jan
   negated(Piet) = Jan
@@ -87,7 +87,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  ~same(Piet) = Jan <= {'same(Piet)'}
+  ~same(Piet) = Jan
 
 
 -- meta -------------------------------------

@@ -112,24 +112,24 @@ Definitions:
 Universals:  
   same(-1) = -1
 Consequences:
-  negated(-1) = (-(-1)) <= Z3 proof
-  ~same(-1) = 0 <= {'same(-1)'}
-  ~same(-1) = 1 <= {'same(-1)'}
-  ~same(0) = -1 <= Z3 proof
-  same(0) = 0 <= Z3 proof
-  ~same(0) = 1 <= {'same(0)'}
-  ~same(1) = -1 <= Z3 proof
-  ~same(1) = 0 <= Z3 proof
-  same(1) = 1 <= {'(same(1) = -1) ∨ (same(1) = 0) ∨ (same(1) = 1)', 'same(1) = -1', 'same(1) = 0'}
-  ~negated(-1) = -1 <= {'negated(-1)'}
-  ~negated(-1) = 0 <= {'negated(-1)'}
-  negated(-1) = 1 <= {'negated(-1)'}
-  ~negated(0) = -1 <= Z3 proof
-  negated(0) = 0 <= Z3 proof
-  ~negated(0) = 1 <= {'negated(0)'}
-  negated(1) = -1 <= Z3 proof
-  ~negated(1) = 0 <= {'negated(1)'}
-  ~negated(1) = 1 <= {'negated(1)'}
+  negated(-1) = (-(-1))
+  ~same(-1) = 0
+  ~same(-1) = 1
+  ~same(0) = -1
+  same(0) = 0
+  ~same(0) = 1
+  ~same(1) = -1
+  ~same(1) = 0
+  same(1) = 1
+  ~negated(-1) = -1
+  ~negated(-1) = 0
+  negated(-1) = 1
+  ~negated(0) = -1
+  negated(0) = 0
+  ~negated(0) = 1
+  negated(1) = -1
+  ~negated(1) = 0
+  ~negated(1) = 1
   same(-1) = -1
   same(0) = 0
   same(1) = 1
@@ -139,8 +139,8 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  ~same(-1) = 0 <= {'same(-1)'}
-  ~same(-1) = 1 <= {'same(-1)'}
+  ~same(-1) = 0
+  ~same(-1) = 1
 
 
 -- meta -------------------------------------

@@ -33,7 +33,7 @@ import re
 import sys
 
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
-from utils import mergeDicts, unquote, Proof, Log, nl
+from utils import mergeDicts, unquote, Log, nl
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
@@ -45,7 +45,7 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 
 # class Expression ############################################################
 
-def _replace_by(self, by, proof=Proof()):
+def _replace_by(self, by):
     " replace expression by a new Brackets node, to keep annotations "
     if type(self) == Fresh_Variable or type(by) == Fresh_Variable:
         return by # no need to have brackets
@@ -62,10 +62,6 @@ def _replace_by(self, by, proof=Proof()):
     else:
         out = copy.copy(by)
         out.code = self.code
-    if type(proof) == Proof and proof:
-        out.proof = copy.copy(self.proof).update(proof)
-    else:
-        out.proof = self.proof
     return out
 Expression._replace_by = _replace_by
 
@@ -109,14 +105,12 @@ def log(function):
         e1   = args[2]
         Log( f"{nl}|------------"
              f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
-          f"{f'{nl}|proof: {str(self.proof)}' if self.proof else ''}"
              f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
              , indent)
         indent +=4
         out = function(*args, *kwds)
         indent -=4
         Log( f"{nl}|== {'*' if out.is_subtence else ''}{str(out)}"
-          f"{f'{nl}|   proof: {str(out.proof)}' if out.proof else ''}"
           , indent )
         return out    
     return _wrapper
@@ -126,22 +120,21 @@ def substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
     if self == e0 or self.code == e0.code: # first == based on repr !
-        proof = Proof(e0 if e1 in [TRUE, FALSE] or type(e1) in [NumberConstant, Constructor] else None)
-        return self._replace_by(e1, proof)
+        return self._replace_by(e1)
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
         if out.just_branch is not None:
             new_branch = out.just_branch.substitute(e0, e1, todo)
             if new_branch == self: # justification is satisfied
                 if todo is not None:
-                    todo.append((self, TRUE, Proof(new_branch).update(new_branch.proof)))
+                    todo.append((self, TRUE))
                     self.just_branch = None
-                return self._replace_by(TRUE, new_branch.proof)
+                return self._replace_by(TRUE)
             if new_branch == AUnary.make('~', self): # justification is satisfied
                 if todo is not None:
-                    todo.append((self, FALSE, Proof(new_branch).update(new_branch.proof)))
+                    todo.append((self, FALSE))
                     self.just_branch = None
-                return self._replace_by(FALSE, new_branch.proof)
+                return self._replace_by(FALSE)
             out = out._change(just_branch= new_branch)
     return out
 Expression.substitute = substitute
@@ -180,24 +173,23 @@ Expression.interpret = interpret
 # Class IfExpr ################################################################
 
 def update_exprs(self, new_expr_generator):
-    proof = Proof()
     if isinstance(new_expr_generator, list):
         new_expr_generator = iter(new_expr_generator)
     if_ = next(new_expr_generator)
     if if_ == TRUE:
-        return self._replace_by(next(new_expr_generator), proof.add(if_))
+        return self._replace_by(next(new_expr_generator))
     elif if_ == FALSE:
         next(new_expr_generator)
-        return self._replace_by(next(new_expr_generator), proof.add(if_))
+        return self._replace_by(next(new_expr_generator))
     else:
         then_ = next(new_expr_generator)
         else_ = next(new_expr_generator)
         if then_ == else_:
-            return self._replace_by(then_, proof.add(then_).add(else_))
+            return self._replace_by(then_)
         elif then_ == TRUE and else_ == FALSE:
-                return self._replace_by(if_, proof.add(then_).add(else_))
+                return self._replace_by(if_)
         elif then_ == FALSE and else_ == TRUE:
-                return self._replace_by(AUnary.make('~', if_), proof.add(then_).add(else_))
+                return self._replace_by(AUnary.make('~', if_))
     return self._change(sub_exprs=[if_, then_, else_])
 IfExpr.update_exprs = update_exprs
 
@@ -215,7 +207,6 @@ def expand_quantifiers(self, theory):
             for f in forms:
                 for val in var.decl.range:
                     new_f = f.substitute(var, val)
-                    new_f.proof = Proof(AComparison.make('=', [var, val])).update(new_f.proof)
                     out.append(new_f)
             forms = out
         else:
@@ -225,7 +216,7 @@ def expand_quantifiers(self, theory):
     else:
         out = ADisjunction.make('∨', forms)
     if not self.vars:
-        return self._replace_by(out, out.proof)
+        return self._replace_by(out)
     return self._change(sub_exprs=[out])
 AQuantification.expand_quantifiers = expand_quantifiers
 
@@ -234,16 +225,15 @@ AQuantification.expand_quantifiers = expand_quantifiers
 # Class AImplication #######################################################
 
 def update_exprs(self, new_expr_generator):
-    proof = Proof()
     exprs = list(new_expr_generator)
     if exprs[0] == FALSE: # (false => p) is true
-        return self._replace_by(TRUE, proof.add(exprs[0]))
+        return self._replace_by(TRUE)
     if exprs[0] == TRUE: # (true => p) is p
-        return self._replace_by(exprs[1], proof.add(exprs[0]))
+        return self._replace_by(exprs[1])
     if exprs[1] == TRUE: # (p => true) is true
-        return self._replace_by(TRUE, proof.add(exprs[1]))
+        return self._replace_by(TRUE)
     if exprs[1] == FALSE: # (p => false) is ~p
-        return self._replace_by(AUnary.make('~', exprs[0]), proof.add(exprs[1]))
+        return self._replace_by(AUnary.make('~', exprs[0]))
     return self._change(sub_exprs=exprs)
 AImplication.update_exprs = update_exprs
 
@@ -252,15 +242,12 @@ AImplication.update_exprs = update_exprs
 # Class AEquivalence #######################################################
 
 def update_exprs(self, new_expr_generator):
-    proof = Proof()
     exprs = list(new_expr_generator)
     for e in exprs:
         if e == TRUE:
-            return self._replace_by(AConjunction.make('∧', exprs, self.is_subtence), 
-                                    proof.add(e))
+            return self._replace_by(AConjunction.make('∧', exprs, self.is_subtence))
         if e == FALSE:
-            return self._replace_by(AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence), 
-                                    proof.add(e))
+            return self._replace_by(AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence))
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs
 
@@ -269,20 +256,18 @@ AEquivalence.update_exprs = update_exprs
 # Class ADisjunction #######################################################
 
 def update_exprs(self, new_expr_generator):
-    # self = sub_exprs | not(disjunct of self.proof)
     
     exprs, is_true = [], False
     for expr in new_expr_generator:
         if expr == TRUE:
-            # reset proof
-            self.proof = Proof()
-            return self._replace_by(TRUE, self.proof.add(expr))
-        if expr == FALSE: self.proof.add(expr)
+            return self._replace_by(TRUE)
+        if expr == FALSE:
+            pass
         else:
             exprs.append(expr)
             
     if len(exprs) == 0: # all disjuncts are False
-        return self._replace_by(FALSE, self.proof)
+        return self._replace_by(FALSE)
     return self._change(sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
 
@@ -292,21 +277,18 @@ ADisjunction.update_exprs = update_exprs
 
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_expr_generator):
-    # self = sub_exprs & not(conjunct of self.proof)
     
     exprs, is_false = [], False
     for expr in new_expr_generator:
         if expr == TRUE:
-            self.proof.add(expr)
+            pass
         elif expr == FALSE: 
-            # reset proof
-            self.proof = Proof()
-            return self._replace_by(FALSE, self.proof.add(expr))
+            return self._replace_by(FALSE)
         else:
             exprs.append(expr)
 
     if len(exprs) == 0:  # all conjuncts are True
-        return self._replace_by(TRUE, self.proof)
+        return self._replace_by(TRUE)
     return self._change(sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
 
@@ -322,10 +304,9 @@ def update_exprs(self, new_expr_generator):
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr in zip(self.operator, operands1[1:]):
             if not (BinaryOperator.MAP[op]) (acc.translate(), expr.translate()):
-                self.proof = Proof() # reset proof
-                return self._replace_by(FALSE, self.proof.add(acc).add(expr))
+                return self._replace_by(FALSE)
             acc = expr
-        return self._replace_by(TRUE, self.proof.extend(operands))
+        return self._replace_by(TRUE)
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
@@ -345,8 +326,6 @@ def update_arith(self, family, new_expr_generator):
         nonlocal acc, ops, exprs
         expr1 = expr.as_ground()
         if expr1 is not None:
-            self.proof.add(expr)
-            self.proof.add(expr1)
             if op == '+':
                 acc += expr1.translate()
             elif op == '-':
@@ -366,8 +345,7 @@ def update_arith(self, family, new_expr_generator):
     assert len([family] + self.operator) == len(operands), "Internal error"
     for op, expr in zip([family] + self.operator, operands):
         if family == '*' and acc == 0:
-            self.proof = Proof() # reset proof
-            return self._change(ZERO, self.proof.add(expr))
+            return self._change(ZERO)
         add(op, expr)
 
     # analyse results
@@ -398,7 +376,7 @@ def update_exprs(self, new_expr_generator):
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
             out = operands1[0].translate() % operands1[1].translate()
-            return self._replace_by(NumberConstant(number=str(out)), self.proof.extend(operands))
+            return self._replace_by(NumberConstant(number=str(out)))
         else:
             return self._change(sub_exprs=operands)
     return update_arith(self, '*', new_expr_generator)
@@ -414,7 +392,7 @@ def update_exprs(self, new_expr_generator):
     if len(operands) == 2 \
     and all(e is not None for e in operands1):
         out = operands1[0].translate() ** operands1[1].translate()
-        return self._replace_by(NumberConstant(number=str(out)), self.proof.extend(operands))
+        return self._replace_by(NumberConstant(number=str(out)))
     else:
         return self._change(sub_exprs=operands)
 APower.update_exprs = update_exprs
@@ -427,9 +405,9 @@ def update_exprs(self, new_expr_generator):
     operand = list(new_expr_generator)[0]
     if self.operator == '~':
         if operand == TRUE:
-            return self._replace_by(FALSE, operand.proof)
+            return self._replace_by(FALSE)
         if operand == FALSE:
-            return self._replace_by(TRUE, operand.proof)
+            return self._replace_by(TRUE)
     else: # '-'
         a = operand.as_ground()
         if a is not None:
@@ -453,7 +431,6 @@ def expand_quantifiers(self, theory):
             for f in forms:
                 for val in var.decl.range:
                     new_f = f.substitute(var, val)
-                    new_f.proof = Proof(AComparison.make('=', [var, val])).update(new_f.proof)
                     out.append(new_f)
             forms = out
         else:
@@ -473,7 +450,7 @@ def update_exprs(self, new_expr_generator):
             else:
                 exprs.add(expr)
         out = NumberConstant(number=str(acc))
-        return self._replace_by(out, self.proof.extend(operands))
+        return self._replace_by(out)
 
     return self
 AAggregate.update_exprs = update_exprs
@@ -486,8 +463,7 @@ def interpret(self, theory):
     if self.decl.interpretation is not None: # has a structure
         self.is_subtence = False
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
-        proof = Proof(AComparison.make('=', [self, out])).update(self.proof)
-        return self._replace_by(out, proof)
+        return self._replace_by(out)
     elif self.name in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs
@@ -503,6 +479,5 @@ AppliedSymbol.interpret = interpret
 
 def update_exprs(self, new_expr_generator):
     expr = next(new_expr_generator)
-    self.proof = self.proof.update(expr.proof)
     return self._change(sub_exprs=[expr])
 Brackets.update_exprs = update_exprs

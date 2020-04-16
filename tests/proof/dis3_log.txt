@@ -9,15 +9,12 @@
         |*p
         |+ p -> true
         |== *(true)
-        |   proof: {'p'}
     |== (false)
-    |   proof: {'p'}
     |------------
     |*q
     |+ p -> true
     |== *q
 |== q
-|   proof: {'p'}
 |------------
 |(~(q)) ∨ r
 |+ p -> true
@@ -52,15 +49,12 @@
         |*q
         |+ q -> true
         |== *(true)
-        |   proof: {'q'}
     |== (false)
-    |   proof: {'q'}
     |------------
     |*r
     |+ q -> true
     |== *r
 |== r
-|   proof: {'q'}
 |------------
 |*p
 |+ q -> true

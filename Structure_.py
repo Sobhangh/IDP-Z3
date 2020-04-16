@@ -39,14 +39,12 @@ class Assignment(object):
     def __init__(self, sentence: Expression, truth: Optional[bool], status: Status):
         self.sentence = sentence
         self.truth = truth
-        self.proof = None
         self.status = status
         self.relevant = False
         self.is_environmental = not sentence.has_environmental(False)
 
     def update(self, sentence: Optional[Expression], 
                      truth: Optional[bool], 
-                     proof,
                      status: Optional[Status], 
                      case):
         """ make a copy, and save it in case.assignments """
@@ -54,7 +52,6 @@ class Assignment(object):
         if sentence is not None: out.sentence = sentence
         if truth    is not None: out.truth    = truth
         if status   is not None: out.status   = status
-        out.proof = proof
         case.assignments[self.sentence.code] = out
         return out
 
@@ -69,8 +66,7 @@ class Assignment(object):
 
     def __repr__(self):
         return ( f"{'' if self.truth else '~'}"
-                 f"{str(self.sentence.code)}" 
-                 f"{' <= '+str(self.proof) if self.proof else ''}")
+                 f"{str(self.sentence.code)}")
 
     def __str__(self):
         return ( f"{'' if self.truth else '? ' if self.truth is None else 'Not '}"
@@ -124,11 +120,10 @@ class Term(Assignment):
     def as_substitution(self, case):
         return None, None
 
-    def assign(self, value: DatatypeRef, proof, case, CONSQ: Status):
+    def assign(self, value: DatatypeRef, case, CONSQ: Status):
         self.sentence = cast (Equality, self.sentence)
         ass = Assignment(Equality(self.sentence.variable, value), True, CONSQ)
         ass.relevant = True
-        ass.proof = proof
         case.assignments[self.sentence.code] = ass
         return ass
 
@@ -148,7 +143,6 @@ class Equality(Expression):
         self.str = self.code
         self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
         self.is_subtence = True
-        self.proof = Proof()
 
     def __str__(self): return self.code
 
@@ -165,7 +159,6 @@ class Equality(Expression):
             return self.variable.translate()
 
     def substitute(self, e0: Expression, e1: Expression, todo=None, case=None) -> 'Equality':
-        self.proof = Proof()
         if self.variable == e0:
             return Equality(self.variable, e1.translate())
         return self

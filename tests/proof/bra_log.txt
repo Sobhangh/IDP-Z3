@@ -12,16 +12,11 @@
             |(p)
             |+ p -> true
             |== (true)
-            |   proof: {'p'}
         |== (false)
-        |   proof: {'p'}
         |------------
         |(p)
         |+ p -> true
         |== (true)
-        |   proof: {'p'}
     |== (true)
-    |   proof: {'p'}
 |== ((true))
-|   proof: {'p'}
 Z3 propagation ********************************

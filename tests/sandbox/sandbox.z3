@@ -25,7 +25,7 @@ Type:
 Definitions: 
   
 Universals:  
-  ~p <= {'p ⇔ (∀c[color] : c = red)', 'c = blue'}
+  ~p
 Consequences:
   
 Simplified:  

@@ -45,8 +45,8 @@ Definitions:
 Universals:  
   r
 Consequences:
-  ~p <= {'p ⇔ (~(q))', 'r'}
-  q <= {'q ⇔ r', 'r'}
+  ~p
+  q
 Simplified:  
   
 Irrelevant:  

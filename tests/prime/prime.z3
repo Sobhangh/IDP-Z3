@@ -38,10 +38,10 @@ Definitions:
 Universals:  
   
 Consequences:
-  Prime(1) <= Z3 proof
-  Prime(2) <= Z3 proof
-  Prime(3) <= Z3 proof
-  ~Prime(4) <= Z3 proof
+  Prime(1)
+  Prime(2)
+  Prime(3)
+  ~Prime(4)
 Simplified:  
   
 Irrelevant:  

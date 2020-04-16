@@ -9,15 +9,12 @@
         |*p
         |+ p -> true
         |== *(true)
-        |   proof: {'p'}
     |== (false)
-    |   proof: {'p'}
     |------------
     |*q
     |+ p -> true
     |== *q
 |== q
-|   proof: {'p'}
 |------------
 |*q
 |+ p -> true

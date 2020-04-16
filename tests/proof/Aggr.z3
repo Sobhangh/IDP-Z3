@@ -25,7 +25,7 @@ Type:
 Definitions: 
   
 Universals:  
-  p <= {'p ⇔ ((sum{c[color] : true : 1}) = 3)', 'c = green', 'c = blue', 'c = red', '(sum{c[color] : true : 1}) = 3'}
+  p
 Consequences:
   
 Simplified:  

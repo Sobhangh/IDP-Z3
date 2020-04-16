@@ -52,22 +52,22 @@ Definitions:
 Universals:  
   t0 = Piet
 Consequences:
-  ~t = Jan <= Z3 proof
-  t = Piet <= Z3 proof
-  ~t0 = Jan <= {'t0'}
-  ~t1 = Jan <= Z3 proof
-  t1 = Piet <= Z3 proof
+  ~t = Jan
+  t = Piet
+  ~t0 = Jan
+  ~t1 = Jan
+  t1 = Piet
   t = Piet
   t0 = Piet
   t1 = Piet
 Simplified:  
   
 Irrelevant:  
-  ~t = Jan <= Z3 proof
-  t = Piet <= Z3 proof
-  ~t0 = Jan <= {'t0'}
-  ~t1 = Jan <= Z3 proof
-  t1 = Piet <= Z3 proof
+  ~t = Jan
+  t = Piet
+  ~t0 = Jan
+  ~t1 = Jan
+  t1 = Piet
 
 
 -- meta -------------------------------------

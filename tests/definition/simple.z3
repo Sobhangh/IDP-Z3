@@ -76,21 +76,21 @@ Definitions:
 Universals:  
   
 Consequences:
-  a = red <= Z3 proof
-  ~a = blue <= {'a'}
-  b = red <= Z3 proof
-  ~b = blue <= {'b'}
-  c = red <= Z3 proof
-  ~c = blue <= {'c'}
-  p <= Z3 proof
+  a = red
+  ~a = blue
+  b = red
+  ~b = blue
+  c = red
+  ~c = blue
+  p
   a = red
   b = red
   c = red
 Simplified:  
   
 Irrelevant:  
-  c = red <= Z3 proof
-  ~c = blue <= {'c'}
+  c = red
+  ~c = blue
 
 
 -- meta -------------------------------------

@@ -46,19 +46,19 @@ Definitions:
 Universals:  
   
 Consequences:
-  codeOf(red) = a <= Z3 proof
-  ~codeOf(red) = b <= {'codeOf(red)'}
-  ~codeOf(blue) = a <= Z3 proof
-  codeOf(blue) = b <= Z3 proof
+  codeOf(red) = a
+  ~codeOf(red) = b
+  ~codeOf(blue) = a
+  codeOf(blue) = b
   codeOf(red) = a
   codeOf(blue) = b
 Simplified:  
   
 Irrelevant:  
-  codeOf(red) = a <= Z3 proof
-  ~codeOf(red) = b <= {'codeOf(red)'}
-  ~codeOf(blue) = a <= Z3 proof
-  codeOf(blue) = b <= Z3 proof
+  codeOf(red) = a
+  ~codeOf(red) = b
+  ~codeOf(blue) = a
+  codeOf(blue) = b
 
 
 -- meta -------------------------------------

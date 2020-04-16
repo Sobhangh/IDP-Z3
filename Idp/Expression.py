@@ -33,7 +33,7 @@ import re
 import sys
 
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
-from utils import mergeDicts, unquote, Proof
+from utils import mergeDicts, unquote
 
 from typing import List, Tuple
 
@@ -62,7 +62,6 @@ class Expression(object):
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self._subtences = None            # memoization of .subtences()
         self.just_branch = None           # Justification branch (Expression)
-        self.proof = Proof()              # (partial) proof of an expression
         # .normal : only set in .instances
 
     def __eq__(self, other):
@@ -144,24 +143,21 @@ class Expression(object):
             out.extend(self.just_branch.justifications())
         return out
 
-    def as_substitutions(self, case: 'Case', truth: bool = True, proof=None) -> List[Tuple['Expression', 'Expression']]:
-        if proof is None:
-            proof = Proof(self)
+    def as_substitutions(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', 'Expression']]:
         # returns a literal for the matching atom in case.assignments, or []
         if self.code in case.assignments: # found it !
-            return [(self, TRUE if truth else FALSE, proof)]
+            return [(self, TRUE if truth else FALSE)]
         if isinstance(self, Brackets):
-            return self.sub_exprs[0].as_substitutions(case, truth, proof.update(self.proof))
+            return self.sub_exprs[0].as_substitutions(case, truth)
         if isinstance(self, AUnary) and self.operator == '~':
-            return self.sub_exprs[0].as_substitutions(case, not truth, proof.update(self.proof))
+            return self.sub_exprs[0].as_substitutions(case, not truth)
         if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
-            return self.sub_exprs[0].as_substitutions(case, truth, proof)
+            return self.sub_exprs[0].as_substitutions(case, truth)
         if (truth     and isinstance(self, AConjunction)) \
         or (not truth and isinstance(self, ADisjunction)):
             out = []
             for e in self.sub_exprs:
-                p = copy.copy(proof).update(e.proof)
-                out.extend(l for l in e.as_substitutions(case, truth, p))
+                out.extend(l for l in e.as_substitutions(case, truth))
             return out
         return []
 

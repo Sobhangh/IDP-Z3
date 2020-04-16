@@ -364,27 +364,27 @@ Universals:
   0 ≤ Height
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
 Consequences:
-  Type = triangle <= {'((Type = triangle) ⇔ (Sides = 3))', 'Sides', 'Sides = 3'}
-  ~Type = quadrilateral <= {'((Type = quadrilateral) ⇔ (Sides = 4))', 'Sides', 'Sides = 4'}
-  ~Sides = 4 <= {'Sides'}
-  Vertices = 3 <= {'(((Vertices = 3) ⇔ (Sides = 3)))', 'Sides', 'Sides = 3'}
-  ~Vertices = 4 <= {'(((Vertices = 4) ⇔ (Sides = 4)))', 'Sides', 'Sides = 4'}
-  Convex <= {'((Sides = 3) ⇒ Convex)', 'Sides', 'Sides = 3'}
+  Type = triangle
+  ~Type = quadrilateral
+  ~Sides = 4
+  Vertices = 3
+  ~Vertices = 4
+  Convex
   ∀n[side] : Angle(n) < 180
-  ~Subtype = square <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides', 'Sides = 4'}
-  ~Subtype = rectangle <= {'(((Subtype = square) ∨ (Subtype = rectangle)) ⇔ ((Sides = 4) ∧ (∀n[side] : (Angle(n) = 90) ∨ (Sides < n))))', 'Sides', 'Sides = 4'}
-  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= Z3 proof
+  ~Subtype = square
+  ~Subtype = rectangle
+  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   ~Length(2) = Length(4)
-  Length(1) ≤ (Length(2) + Length(3)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
-  Length(2) ≤ (Length(3) + Length(1)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
-  Length(3) ≤ (Length(1) + Length(2)) <= {'((Type = triangle) ⇒ ((Length(1) ≤ (Length(2) + Length(3))) ∧ (Length(2) ≤ (Length(3) + Length(1))) ∧ (Length(3) ≤ (Length(1) + Length(2)))))', 'Type', 'Type = triangle'}
-  Surface = ((Base * Height) / 2) <= {'(Type = triangle) ⇒ (Surface = ((Base * Height) / 2))', 'Type', 'Type = triangle'}
-  ~Surface = -1 <= Z3 proof
+  Length(1) ≤ (Length(2) + Length(3))
+  Length(2) ≤ (Length(3) + Length(1))
+  Length(3) ≤ (Length(1) + Length(2))
+  Surface = ((Base * Height) / 2)
+  ~Surface = -1
   Sides = 3
   Vertices = 3
   Type = triangle
-  Length(4) = 0 <= Z3 proof
-  Angle(4) = 0 <= Z3 proof
+  Length(4) = 0
+  Angle(4) = 0
 Simplified:  
   (Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1))))))
   (((Subtype = right_triangle) ∨ (Subtype = regular_triangle) ∨ (Subtype = irregular)))
@@ -393,13 +393,13 @@ Simplified:
   ((Subtype = right_triangle) ⇔ ((((Angle(1) = 90) ∨ (Angle(2) = 90) ∨ (Angle(3) = 90)))))
   (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = irregular)
 Irrelevant:  
-  ~Sides = 4 <= {'Sides'}
-  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n) <= Z3 proof
+  ~Sides = 4
+  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   ~Length(1) = Length(3)
   ~Length(2) = Length(4)
   ~Length(1) = Length(2)
   ~Surface = (Length(1) * Length(2))
-  ~Surface = -1 <= Z3 proof
+  ~Surface = -1
 
 
 -- meta -------------------------------------

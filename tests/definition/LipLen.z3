@@ -45,19 +45,19 @@ Definitions:
 Universals:  
   
 Consequences:
-  LipLen = Short <= Z3 proof
-  ~LipLen = Standard <= {'LipLen'}
-  JacketDesign = Design_230 <= Z3 proof
-  ~JacketDesign = Design_400HP <= {'JacketDesign'}
+  LipLen = Short
+  ~LipLen = Standard
+  JacketDesign = Design_230
+  ~JacketDesign = Design_400HP
   LipLen = Short
   JacketDesign = Design_230
 Simplified:  
   
 Irrelevant:  
-  LipLen = Short <= Z3 proof
-  ~LipLen = Standard <= {'LipLen'}
-  JacketDesign = Design_230 <= Z3 proof
-  ~JacketDesign = Design_400HP <= {'JacketDesign'}
+  LipLen = Short
+  ~LipLen = Standard
+  JacketDesign = Design_230
+  ~JacketDesign = Design_400HP
 
 
 -- meta -------------------------------------
