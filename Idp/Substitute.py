@@ -67,7 +67,7 @@ Expression._replace_by = _replace_by
 
 
 def _change(self, sub_exprs=None, ops=None, just_branch=None):
-    " change attributes of an expression, after copying it if really changed "
+    " change attributes of an expression, and erase derive attributes "
 
     # return self if not changed
     changed = False
@@ -75,18 +75,17 @@ def _change(self, sub_exprs=None, ops=None, just_branch=None):
     if just_branch is not None: changed = True
     if not changed: return self
 
-    out = copy.copy(self)
-    if sub_exprs is not None :  out.sub_exprs = sub_exprs
-    if ops       is not None :  out.operator  = ops
-    if just_branch is not None: out.just_branch = just_branch
+    if sub_exprs is not None :  self.sub_exprs = sub_exprs
+    if ops       is not None :  self.operator  = ops
+    if just_branch is not None: self.just_branch = just_branch
     
-    # reset derived values
-    out.str = sys.intern(str(out))
-    out._unknown_symbols = None
-    out._subtences = None
-    out.translated = None
+    # reset derived attributes
+    self.str = sys.intern(str(self))
+    self._unknown_symbols = None
+    self._subtences = None
+    self.translated = None
 
-    return out
+    return self
 Expression._change = _change
 
 
@@ -206,7 +205,7 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.decl.range:
-                    new_f = f.substitute(var, val)
+                    new_f = f.copy().substitute(var, val)
                     out.append(new_f)
             forms = out
         else:
@@ -430,7 +429,7 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.decl.range:
-                    new_f = f.substitute(var, val)
+                    new_f = f.copy().substitute(var, val)
                     out.append(new_f)
             forms = out
         else:

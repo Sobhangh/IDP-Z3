@@ -69,6 +69,14 @@ class Expression(object):
         # .normal : only set in .instances
 
 
+    def copy(self):
+        " create a deep copy (except for Constructor and NumberConstant) "
+        out = copy.copy(self)
+        out.sub_exprs = [e.copy() for e in out.sub_exprs]
+        out._subtences  = None if out._subtences  is None else out._subtences .copy()
+        out.just_branch = None if out.just_branch is None else out.just_branch.copy()
+        return out
+
     def __eq__(self, other):
         if isinstance(self, Brackets):
             return self.sub_exprs[0] == other

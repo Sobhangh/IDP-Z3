@@ -21,7 +21,7 @@ TODO for relevance: in branch Pierre
 	and consequences {code: expression}
     - [ ] compute .value in update_exprs
     - [ ] test equal to True/False/ground-value using .value
-    - [ ] Expression.copy()
+    - [x] Expression.copy()
     - [ ] eliminate replace_by(), \_change()
     - [ ] cut unnecessary branches from the justification tree by removing them in sub_exprs → get_subtences will work unchanged
         - or replacing them with bare TRUE/FALSE, e.g. for if-then-else

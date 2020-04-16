@@ -59,11 +59,12 @@ class Case:
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .assignments
-        self.assignments = {s.code : Assignment(s, None, Status.UNKNOWN) for s in self.idp.subtences.values()}
-        self.assignments.update({ atom.code : ass for atom, ass in self.given.items() })
+        self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.idp.subtences.values()}
+        self.assignments.update({ atom.code : ass.copy() for atom, ass in self.given.items() })
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
+            c = c.copy()
             u = c.as_substitutions(self)
             if u:
                 for sentence, truth in u:
@@ -72,7 +73,7 @@ class Case:
             else:
                 self.simplified.append(c)
 
-        self.assignments.update({ k : Term(Equality(t, None), None, Status.UNKNOWN) 
+        self.assignments.update({ k : Term(Equality(t.copy(), None), None, Status.UNKNOWN) 
             for k, t in idp.vocabulary.terms.items()
             if k not in self.assignments })
 
