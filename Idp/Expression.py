@@ -47,22 +47,27 @@ class DSLException(Exception):
 
 class Expression(object):
     COUNT = 0
-    # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     def __init__(self):
         self.code = sys.intern(self.str_())# normalized idp code, before transformations
-        self.str = self.code              # memoization of str()
+        # .sub_exprs : list of Expression, to be translated to Z3
         self.annotations = {'reading': self.code} # dict(String, String)
         self.is_subtence = None           # True if sub-sentence in original code
+        self.simpler = None               # a simplified version of the expression, or None
+        self.value = None                 # a python value (bool, int, float) or None
+        self.status = None                # explains how the value was found
+        self.translated = None            # the Z3 equivalent
+
+        self.str = self.code              # memoization of str()
         self.fresh_vars = None            # Set[String]
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self._unknown_symbols = None      # Dict[name, Declaration] list of uninterpreted symbols not starting with '_'
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
-        self.translated = None            # the Z3 equivalent
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self._subtences = None            # memoization of .subtences()
         self.just_branch = None           # Justification branch (Expression)
         # .normal : only set in .instances
+
 
     def __eq__(self, other):
         if isinstance(self, Brackets):

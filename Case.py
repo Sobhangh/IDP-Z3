@@ -218,7 +218,7 @@ class Case:
                         if new_constraint != old_ass.sentence: # changed !
                             if type(old_ass) == Term: # value of term was not known
                                 old_ass = cast(Term, old_ass)
-                                new_ass = old_ass.assign(new_constraint.value, self, CONSQ)
+                                new_ass = old_ass.assign(new_constraint.valueZ3, self, CONSQ)
                                 to_propagate.append(new_ass)
                             elif new_constraint in [TRUE, FALSE]:
                                 if old_ass.truth is None: # value of proposition was not known

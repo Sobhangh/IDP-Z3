@@ -79,11 +79,11 @@ class Assignment(object):
             new = cast(Expression, TRUE if self.truth else FALSE)
             if self.truth:  # analyze true equalities
                 if isinstance(old, Equality):
-                    if is_number(old.value):
-                        new = NumberConstant(number=str(old.value))
+                    if is_number(old.valueZ3):
+                        new = NumberConstant(number=str(old.valueZ3))
                         old = old.variable
-                    elif str(old.value) in case.idp.vocabulary.symbol_decls:
-                        new = case.idp.vocabulary.symbol_decls[str(old.value)]
+                    elif str(old.valueZ3) in case.idp.vocabulary.symbol_decls:
+                        new = case.idp.vocabulary.symbol_decls[str(old.valueZ3)]
                         old = old.variable
                 elif isinstance(old, AComparison) and old.operator == ['=']:
                     if   type(old.sub_exprs[1]) in [Constructor, NumberConstant]:
@@ -131,7 +131,10 @@ class Term(Assignment):
 class Equality(Expression):
     def __init__(self, variable: Union[AppliedSymbol, Variable, Fresh_Variable], value):
         self.variable = variable # an Expression
-        self.value = value # a Z3 value or None
+        self.valueZ3 = value # a Z3 value or None
+        self.value = None
+        self.status = None
+        self.simpler = None
         if value is not None:
             self.type = 'bool'
             self.code = sys.intern(f"{variable.code} = {str(value)}")
@@ -153,8 +156,8 @@ class Equality(Expression):
         return self.variable.has_environmental(truth)
 
     def translate(self) -> DatatypeRef:
-        if self.value is not None:
-            return self.variable.translated == self.value
+        if self.valueZ3 is not None:
+            return self.variable.translated == self.valueZ3
         else:
             return self.variable.translate()
 
@@ -313,9 +316,9 @@ class Structure_(object):
                     s = self.m.setdefault(name, {})
                     if key in s:
                         if typ in ["Real", "Int"]:
-                            s[key]["value"] = str(eval(str(atom.value).replace('?', ''))) # compute fraction
+                            s[key]["value"] = str(eval(str(atom.valueZ3).replace('?', ''))) # compute fraction
                         elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
-                            s[key]["value"] = str(atom.value)
+                            s[key]["value"] = str(atom.valueZ3)
                         s[key]["status"] = status.name
         if atom.type != 'bool': return
         key = atom.code
