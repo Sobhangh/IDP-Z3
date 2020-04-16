@@ -12,13 +12,14 @@ from Inferences import *
 from Solver import *
 from utils import log, start, Log_file
 from Idp import idpparser, SymbolDeclaration
-from Idp.Expression import Expression
+from Idp.Expression import Expression, AppliedSymbol
 from Idp.Substitute import log
 
 from typing import Dict, Any
 
 # patch Log on Idp.Substitute
 Expression.substitute = log(Expression.substitute)
+AppliedSymbol.substitute = log(AppliedSymbol.substitute)
 
 dir = os.path.dirname(__file__)
 files  = [os.path.join(dir, "sandbox/sandbox.idp")]

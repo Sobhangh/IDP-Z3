@@ -1,18 +1,18 @@
 
 |------------
-|(~(p)) ∨ p
+|(~(p)) ∨ p with ~(p),p
 |+ p -> true
     |------------
-    |~(p)
+    |~(p) with p
     |+ p -> true
         |------------
         |*p
         |+ p -> true
-        |== *(true)
-    |== (false)
+        |== *!True
+    |== (false) with false
     |------------
     |*p
     |+ p -> true
-    |== *(true)
-|== (true)
+    |== *!True
+|== (true) with true
 Z3 propagation ********************************

@@ -1,50 +1,50 @@
 
 |------------
-|~(c = red)
+|~(c = red) with c = red
 |+ c -> red
     |------------
-    |c = red
+    |c = red with c,red
     |+ c -> red
         |------------
         |c
         |+ c -> red
-        |== red
+        |== !red
         |------------
         |red
         |+ c -> red
-        |== red
-    |== (true)
-|== (false)
+        |== !red
+    |== (true) with true
+|== (false) with false
 |------------
-|~(c = red)
+|~(c = red) with c = red
 |+ c -> blue
     |------------
-    |c = red
+    |c = red with c,red
     |+ c -> blue
         |------------
         |c
         |+ c -> blue
-        |== blue
+        |== !blue
         |------------
         |red
         |+ c -> blue
-        |== red
-    |== (false)
-|== (true)
+        |== !red
+    |== (false) with false
+|== (true) with true
 |------------
-|~(c = red)
+|~(c = red) with c = red
 |+ c -> green
     |------------
-    |c = red
+    |c = red with c,red
     |+ c -> green
         |------------
         |c
         |+ c -> green
-        |== green
+        |== !green
         |------------
         |red
         |+ c -> green
-        |== red
-    |== (false)
-|== (true)
+        |== !red
+    |== (false) with false
+|== (true) with true
 Z3 propagation ********************************

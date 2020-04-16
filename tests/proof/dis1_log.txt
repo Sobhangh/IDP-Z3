@@ -1,12 +1,12 @@
 
 |------------
-|p ∨ q
+|p ∨ q with p,q
 |+ p -> true
     |------------
     |*p
     |+ p -> true
-    |== *(true)
-|== (true)
+    |== *!True
+|== (true) with true
 |------------
 |*q
 |+ p -> true

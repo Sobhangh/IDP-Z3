@@ -66,18 +66,19 @@ def _replace_by(self, by):
 Expression._replace_by = _replace_by
 
 
-def _change(self, sub_exprs=None, ops=None, just_branch=None):
+def _change(self, sub_exprs=None, ops=None, value=None, just_branch=None):
     " change attributes of an expression, and erase derive attributes "
 
     # return self if not changed
-    changed = False
-    if sub_exprs is not None:   changed |= self.sub_exprs != sub_exprs
-    if just_branch is not None: changed = True
-    if not changed: return self
+    if all((self.sub_exprs == sub_exprs, 
+            just_branch is None, 
+            value       is None)):
+        return self
 
-    if sub_exprs is not None :  self.sub_exprs = sub_exprs
-    if ops       is not None :  self.operator  = ops
+    if sub_exprs   is not None: self.sub_exprs = sub_exprs
+    if ops         is not None: self.operator  = ops
     if just_branch is not None: self.just_branch = just_branch
+    if value       is not None: self.value = value
     
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -104,39 +105,33 @@ def log(function):
         e1   = args[2]
         Log( f"{nl}|------------"
              f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
+             f"{' with '+','.join(str(e) for e in self.sub_exprs) if self.sub_exprs else ''}"
              f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
              , indent)
         indent +=4
         out = function(*args, *kwds)
         indent -=4
-        Log( f"{nl}|== {'*' if out.is_subtence else ''}{str(out)}"
+        Log( f"{nl}|== {'*' if out.is_subtence else ''}"
+             f"{'!'+str(out.value) if out.value is not None else str(out)}"
+             f"{' with '+','.join(str(e) for e in out.sub_exprs) if out.sub_exprs else ''}"
           , indent )
         return out    
     return _wrapper
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, todo=None):
+def Expression_substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
-    if self == e0 or self.code == e0.code: # first == based on repr !
+    if self.value is not None:
+        return self
+    elif self == e0 or self.code == e0.code: # first == based on repr !
         return self._replace_by(e1)
+    elif self.simpler is not None:
+        return self.simpler.substitute(e0, e1, todo)
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
-        if out.just_branch is not None:
-            new_branch = out.just_branch.substitute(e0, e1, todo)
-            if new_branch == self: # justification is satisfied
-                if todo is not None:
-                    todo.append((self, TRUE))
-                    self.just_branch = None
-                return self._replace_by(TRUE)
-            if new_branch == AUnary.make('~', self): # justification is satisfied
-                if todo is not None:
-                    todo.append((self, FALSE))
-                    self.just_branch = None
-                return self._replace_by(FALSE)
-            out = out._change(just_branch= new_branch)
     return out
-Expression.substitute = substitute
+Expression.substitute = Expression_substitute
 
 
 def instantiate(self, e0, e1):
@@ -472,6 +467,37 @@ def interpret(self, theory):
         return self
 AppliedSymbol.interpret = interpret
 
+# @log  # decorator patched in by tests/main.py
+def substitute(self, e0, e1, todo=None):
+    """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
+    global Expression_substitute
+
+    if self.value is not None:
+        return self
+    elif self == e0 or self.code == e0.code: # first == based on repr !
+        if isinstance(e1.value, bool):
+            return self._change(value=e1.value)
+        else:
+            return self._replace_by(e1)
+    elif self.simpler is not None:
+        return self.simpler.substitute(e0, e1, todo)
+    else:
+        out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
+        if out.just_branch is not None:
+            new_branch = out.just_branch.substitute(e0, e1, todo)
+            if new_branch == self: # justification is satisfied
+                if todo is not None:
+                    todo.append((self, TRUE))
+                    self.just_branch = None
+                return self._replace_by(TRUE)
+            if new_branch == AUnary.make('~', self): # justification is satisfied
+                if todo is not None:
+                    todo.append((self, FALSE))
+                    self.just_branch = None
+                return self._replace_by(FALSE)
+            out = out._change(just_branch= new_branch)
+    return out
+AppliedSymbol.substitute = substitute
 
      
 # Class Brackets #######################################################

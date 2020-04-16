@@ -1,22 +1,22 @@
 
 |------------
-|((~((p))) ∨ (p))
+|((~((p))) ∨ (p)) with (~((p))) ∨ (p)
 |+ p -> true
     |------------
-    |(~((p))) ∨ (p)
+    |(~((p))) ∨ (p) with ~((p)),(p)
     |+ p -> true
         |------------
-        |~((p))
+        |~((p)) with (p)
         |+ p -> true
             |------------
-            |(p)
+            |(p) with p
             |+ p -> true
-            |== (true)
-        |== (false)
+            |== (true) with true
+        |== (false) with false
         |------------
-        |(p)
+        |(p) with p
         |+ p -> true
-        |== (true)
-    |== (true)
-|== ((true))
+        |== (true) with true
+    |== (true) with true
+|== ((true)) with (true)
 Z3 propagation ********************************

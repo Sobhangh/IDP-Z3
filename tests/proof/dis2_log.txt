@@ -1,20 +1,20 @@
 
 |------------
-|(~(p)) ∨ q
+|(~(p)) ∨ q with ~(p),q
 |+ p -> true
     |------------
-    |~(p)
+    |~(p) with p
     |+ p -> true
         |------------
         |*p
         |+ p -> true
-        |== *(true)
-    |== (false)
+        |== *!True
+    |== (false) with false
     |------------
     |*q
     |+ p -> true
     |== *q
-|== q
+|== q with q
 |------------
 |*q
 |+ p -> true

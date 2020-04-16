@@ -1,36 +1,36 @@
 
 |------------
-|(~(p)) ∨ q
+|(~(p)) ∨ q with ~(p),q
 |+ p -> true
     |------------
-    |~(p)
+    |~(p) with p
     |+ p -> true
         |------------
         |*p
         |+ p -> true
-        |== *(true)
-    |== (false)
+        |== *!True
+    |== (false) with false
     |------------
     |*q
     |+ p -> true
     |== *q
-|== q
+|== q with q
 |------------
-|(~(q)) ∨ r
+|(~(q)) ∨ r with ~(q),r
 |+ p -> true
     |------------
-    |~(q)
+    |~(q) with q
     |+ p -> true
         |------------
         |*q
         |+ p -> true
         |== *q
-    |== ~(q)
+    |== ~(q) with q
     |------------
     |*r
     |+ p -> true
     |== *r
-|== (~(q)) ∨ r
+|== (~(q)) ∨ r with ~(q),r
 |------------
 |*q
 |+ p -> true
@@ -40,21 +40,21 @@
 |+ p -> true
 |== *r
 |------------
-|(~(q)) ∨ r
+|(~(q)) ∨ r with ~(q),r
 |+ q -> true
     |------------
-    |~(q)
+    |~(q) with q
     |+ q -> true
         |------------
         |*q
         |+ q -> true
-        |== *(true)
-    |== (false)
+        |== *!True
+    |== (false) with false
     |------------
     |*r
     |+ q -> true
     |== *r
-|== r
+|== r with r
 |------------
 |*p
 |+ q -> true

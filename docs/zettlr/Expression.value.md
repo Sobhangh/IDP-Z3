@@ -19,9 +19,11 @@ TODO for relevance: in branch Pierre
 - [x] remove proof
 - [ ] substitute(self, exprs, \*consequences) where exprs is a list of expr that contain a value and status
 	and consequences {code: expression}
-    - [ ] compute .value in update_exprs
-    - [ ] test equal to True/False/ground-value using .value
     - [x] Expression.copy()
+    - [x] substitute proposition in place, test equal using boolean .value
+    - [ ] substitute boolean nodes in place
+    - [ ] substitute variables in place, test equal using .value
+    - [ ] substitute arithmetic nodes in place
     - [ ] eliminate replace_by(), \_change()
     - [ ] cut unnecessary branches from the justification tree by removing them in sub_exprs → get_subtences will work unchanged
         - or replacing them with bare TRUE/FALSE, e.g. for if-then-else

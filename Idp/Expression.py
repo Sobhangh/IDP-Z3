@@ -53,7 +53,7 @@ class Expression(object):
         self.annotations = {'reading': self.code} # dict(String, String)
         self.is_subtence = None           # True if sub-sentence in original code
         self.simpler = None               # a simplified version of the expression, or None
-        self.value = None                 # a python value (bool, int, float) or None
+        self.value = None                 # a python value (bool, int, float, string) or None
         self.status = None                # explains how the value was found
         self.translated = None            # the Z3 equivalent
 
@@ -78,6 +78,11 @@ class Expression(object):
         return out
 
     def __eq__(self, other):
+        if self.value is not None and self.value == other.value:
+            return True
+        # hack
+        self = TRUE if self.value == True else FALSE if self.value == False else self
+        other = TRUE if other.value == True else FALSE if other.value == False else other
         if isinstance(self, Brackets):
             return self.sub_exprs[0] == other
         if isinstance(other, Brackets):
@@ -182,6 +187,10 @@ class Constructor(Expression):
         self.index = None # int
 
         super().__init__()
+        
+        self.value = True  if self.name == 'true'  \
+                else False if self.name == 'false' \
+                else self.name
     
     def __str__(self): return self.name
     def str_   (self): return self.name
@@ -740,6 +749,7 @@ class NumberConstant(Expression):
         except ValueError:
             self.translated = float(eval(self.number))
             self.type = 'real'
+        self.value = self.translated
     
     def __str__(self): return self.number
     def str_   (self): return self.number
