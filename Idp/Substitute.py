@@ -515,7 +515,9 @@ def substitute(self, e0, e1, todo=None):
             #TODO get implicants of just_branch
             out = out._change(just_branch= new_branch)
     return out
-AppliedSymbol.substitute = substitute
+AppliedSymbol .substitute = substitute
+Variable      .substitute = substitute
+Fresh_Variable.substitute = substitute
 
      
 # Class Brackets #######################################################

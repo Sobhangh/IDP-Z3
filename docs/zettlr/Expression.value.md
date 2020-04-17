@@ -26,7 +26,7 @@ TODO for relevance: in branch Pierre
     - [x] substitute variables in place, test equal using .value
     - [x] substitute arithmetic nodes in place
     - [ ] substitute for nested function application
-    - [ ] all angles are 90° → not convex ?
+    - [x] all angles are 90° → not convex ?
     - [ ] eliminate replace_by(), \_change()
     - [ ] cut unnecessary branches from the justification tree by removing them in sub_exprs → get_subtences will work unchanged
         - or replacing them with bare TRUE/FALSE, e.g. for if-then-else
