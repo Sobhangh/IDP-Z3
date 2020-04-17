@@ -47,8 +47,6 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 
 def _replace_by(self, by):
     " replace expression by a new Brackets node, to keep annotations "
-    if type(self) == Fresh_Variable or type(by) == Fresh_Variable:
-        return by # no need to have brackets
     if self.type == 'bool':
         out = Brackets(f=by, annotations=self.annotations) # by is not copied !
 
@@ -460,7 +458,7 @@ def update_exprs(self, new_expr_generator):
 AAggregate.update_exprs = update_exprs
 
 
-# Class AppliedSymbol #######################################################
+# Class AppliedSymbol, Variable #######################################################
 
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
@@ -476,6 +474,7 @@ def interpret(self, theory):
     else:
         return self
 AppliedSymbol.interpret = interpret
+Variable     .interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, todo=None):
@@ -485,8 +484,6 @@ def substitute(self, e0, e1, todo=None):
     if self.value is not None:
         return self
     elif self == e0: # first == based on repr !
-        if isinstance(self, Fresh_Variable):
-            return self._replace_by(e1)
         if type(e1) in [Constructor, NumberConstant]:
             return self._change(value=e1)
         else:
@@ -517,6 +514,17 @@ def substitute(self, e0, e1, todo=None):
     return out
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
+
+
+# Class Fresh_Variable #######################################################
+
+def interpret(self, theory):
+    return self
+Fresh_Variable.interpret = interpret
+
+# @log  # decorator patched in by tests/main.py
+def substitute(self, e0, e1, todo=None):
+    return e1 if self == e0 else self
 Fresh_Variable.substitute = substitute
 
      

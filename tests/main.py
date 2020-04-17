@@ -18,10 +18,10 @@ from Idp.Substitute import log
 from typing import Dict, Any
 
 # patch Log on Idp.Substitute
-Expression.substitute = log(Expression.substitute)
-AppliedSymbol.substitute = log(AppliedSymbol.substitute)
-Variable.substitute = AppliedSymbol.substitute
-Fresh_Variable.substitute = AppliedSymbol.substitute
+Expression    .substitute = log(Expression.substitute)
+AppliedSymbol .substitute = log(AppliedSymbol.substitute)
+Variable      .substitute = log(Variable.substitute)
+Fresh_Variable.substitute = log(Fresh_Variable.substitute)
 
 dir = os.path.dirname(__file__)
 files  = [os.path.join(dir, "sandbox/sandbox.idp")]
