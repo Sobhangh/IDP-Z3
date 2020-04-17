@@ -76,8 +76,10 @@ GET response :
             - normal : Bool     // false if to be shown in expanded view only
             }
         }
+    - '*laws*' : [
+        law : string            // laws used to obtain the value to be explained
+    ]
 ```
-
 
 
 
