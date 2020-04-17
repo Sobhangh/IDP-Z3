@@ -24,15 +24,21 @@ TODO for relevance: in branch Pierre
     - [x] substitute boolean nodes in place
     - [x] use .value for as_ground()
     - [x] substitute variables in place, test equal using .value
-    - [x] substitute arithmetic nodes in place
+    - [ ] substitute arithmetic nodes in place
     - [ ] substitute for nested function application
     - [x] all angles are 90° → not convex ?
     - [ ] eliminate replace_by(), \_change()
+        - [ ] Expression.substitute by non constructor
+        - [ ] IfExpr, AQuantification: ok because at expand, interpret stages
+        - [ ] AImplication
+        - [ ] AEquivalence
+        - [ ] arithmetic, AMultDiv, APower, AUnary
+        - [ ] definition handling
     - [ ] cut unnecessary branches from the justification tree by removing them in sub_exprs → get_subtences will work unchanged
         - or replacing them with bare TRUE/FALSE, e.g. for if-then-else
     - [ ] catch satisfied definitions in substitute, before they may disappear; generate 2 substitutions for equality
 - [ ] implicants(self)
-    - [ ] compute implicants by traversing the tree, searching for subtences, AppliedSymbols without values
+    - [x] compute implicants by traversing the tree, searching for subtences, AppliedSymbols without values
     - [ ] generate 2 substitutions for equality (x→a, and (x=a) → true)  (only 1 if the equality is false)
     - [ ] rewrite Case.propagate
 - [ ] other
@@ -44,6 +50,9 @@ Todo for explain
     - [ ] generate explanation at each node
 
 Issues:
+* how to handle nested function definitions: e.g. same(same(1))
+    * replace, as for arithmetic ? No, because lose relevant consequences
+    * update value
 * how to bypass nodes that are not subtences ?
     * get_subtences: easy
     * pretty printing ? Explain ? to be done

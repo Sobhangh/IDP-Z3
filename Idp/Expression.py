@@ -21,7 +21,7 @@
 
 Classes to represent logic expressions.
 
-(They are monkey patched by Substitute.py)
+(They are monkey patched by Substitute.py and Implicant.py)
 
 """
 
@@ -160,26 +160,6 @@ class Expression(object):
             out.append(self.just_branch)
             out.extend(self.just_branch.justifications())
         return out
-
-    def as_substitutions(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', 'Expression']]:
-        # returns a literal for the matching atom in case.assignments, or []
-        if self.value is not None:
-            return []
-        if self.code in case.assignments: # found it !
-            return [(self, TRUE if truth else FALSE)]
-        if isinstance(self, Brackets):
-            return self.sub_exprs[0].as_substitutions(case, truth)
-        if isinstance(self, AUnary) and self.operator == '~':
-            return self.sub_exprs[0].as_substitutions(case, not truth)
-        if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
-            return self.sub_exprs[0].as_substitutions(case, truth)
-        if (truth     and isinstance(self, AConjunction)) \
-        or (not truth and isinstance(self, ADisjunction)):
-            out = []
-            for e in self.sub_exprs:
-                out.extend(l for l in e.as_substitutions(case, truth))
-            return out
-        return []
 
 class Constructor(Expression):
     def __init__(self, **kwargs):

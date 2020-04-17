@@ -952,12 +952,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ red = c -> false
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
     |+ red = c -> false
         |------------
         |red
         |+ red = c -> false
         |== red
+ definition:
         |------------
         |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b)) with ((red = c) ∧ (codeOf(red) = a)),((~(red = c)) ∧ (codeOf(red) = b))
         |+ red = c -> false
@@ -1006,7 +1007,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ red = c -> false
@@ -1140,12 +1141,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ codeOf(red) = a -> false
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((codeOf(red) = b))
     |+ codeOf(red) = a -> false
         |------------
         |red
         |+ codeOf(red) = a -> false
         |== red
+ definition:
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ codeOf(red) = a -> false
@@ -1174,7 +1176,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ codeOf(red) = a -> false
@@ -1296,12 +1298,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ codeOf(blue) -> a
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((codeOf(red) = b))
     |+ codeOf(blue) -> a
         |------------
         |red
         |+ codeOf(blue) -> a
         |== red
+ definition:
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ codeOf(blue) -> a
@@ -1330,7 +1333,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ codeOf(blue) -> a
@@ -1420,12 +1423,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ codeOf(blue) -> a
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((codeOf(red) = b))
     |+ codeOf(blue) -> a
         |------------
         |red
         |+ codeOf(blue) -> a
         |== red
+ definition:
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ codeOf(blue) -> a
@@ -1454,7 +1458,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ codeOf(blue) -> a
@@ -1536,12 +1540,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ codeOf(blue) = b -> false
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((codeOf(red) = b))
     |+ codeOf(blue) = b -> false
         |------------
         |red
         |+ codeOf(blue) = b -> false
         |== red
+ definition:
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ codeOf(blue) = b -> false
@@ -1570,7 +1575,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ codeOf(blue) = b -> false
@@ -1652,12 +1657,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ c = red -> false
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((codeOf(red) = b))
     |+ c = red -> false
         |------------
         |red
         |+ c = red -> false
         |== red
+ definition:
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ c = red -> false
@@ -1686,7 +1692,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ c = red -> false
@@ -1744,12 +1750,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ c -> blue
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((codeOf(red) = b))
     |+ c -> blue
         |------------
         |red
         |+ c -> blue
         |== red
+ definition:
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ c -> blue
@@ -1778,7 +1785,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ c -> blue
@@ -1836,12 +1843,13 @@ Z3 propagation ********************************
 |*codeOf(red) = b with codeOf(red),b
 |+ c -> blue
     |------------
-    |codeOf(red) with red
+    |codeOf(red) with red just ((codeOf(red) = b))
     |+ c -> blue
         |------------
         |red
         |+ c -> blue
         |== red
+ definition:
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ c -> blue
@@ -1870,7 +1878,7 @@ Z3 propagation ********************************
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
         |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
+    |== codeOf(red) with red just ((codeOf(red) = b))
     |------------
     |b
     |+ c -> blue

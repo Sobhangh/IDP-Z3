@@ -26,14 +26,9 @@ Adds substitute, expand_quantifiers and simplify to logic expression classes
 """
 
 import copy
-import functools
-import itertools as it
-import os
-import re
 import sys
 
-from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
-from utils import mergeDicts, unquote, Log, nl
+from utils import Log, nl
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
@@ -105,6 +100,7 @@ def log(function):
         Log( f"{nl}|------------"
              f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
              f"{' with '+','.join(str(e) for e in self.sub_exprs) if self.sub_exprs else ''}"
+             f"{f' just {str(self.just_branch)}' if self.just_branch else ''}"
              f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
              , indent)
         indent +=4
@@ -113,6 +109,7 @@ def log(function):
         Log( f"{nl}|== {'*' if out.is_subtence else ''}"
              f"{'!'+str(out.value) if out.value is not None else str(out)}"
              f"{' with '+','.join(str(e) for e in out.sub_exprs) if out.sub_exprs else ''}"
+             f"{f' just {str(out.just_branch)}' if out.just_branch else ''}"
           , indent )
         return out    
     return _wrapper
@@ -498,6 +495,7 @@ def substitute(self, e0, e1, todo=None):
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
         if out.just_branch is not None:
+            Log(f"{nl} definition:")
             new_branch = out.just_branch.substitute(e0, e1, todo)
             if new_branch == self: # justification is satisfied
                 if todo is not None:

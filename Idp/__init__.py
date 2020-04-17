@@ -35,6 +35,7 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
                     Fresh_Variable, TRUE, FALSE
 
 import Idp.Substitute
+import Idp.Implicant
 
 
 class Idp(object):

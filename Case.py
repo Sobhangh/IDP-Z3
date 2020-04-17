@@ -65,11 +65,13 @@ class Case:
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):
             c = c.copy()
-            u = c.as_substitutions(self)
+            u = c.implicants()
             if u:
-                for sentence, truth in u:
-                    ass = Assignment(sentence, truth==TRUE, Status.UNKNOWN)
-                    ass.update(None, None, Status.UNIVERSAL, self)
+                # consider the top expression only
+                #    otherwise some immediate consequences could be universal too
+                sentence, truth = u[0] 
+                ass = Assignment(sentence, truth==TRUE, Status.UNKNOWN)
+                ass.update(None, None, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
 
@@ -193,7 +195,7 @@ class Case:
                 for constraint in self.simplified:
                     consequences = []
                     new_constraint = constraint.substitute(old, new, consequences)
-                    consequences.extend(new_constraint.as_substitutions(self))
+                    consequences.extend(new_constraint.implicants())
                     if consequences:
                         for sentence, truth in consequences:
                             old_ass = self.assignments[sentence.code]
