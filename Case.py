@@ -60,7 +60,7 @@ class Case:
 
         # initialize .assignments
         self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.idp.subtences.values()}
-        self.assignments.update({ atom.code : ass.copy() for atom, ass in self.given.items() })
+        self.assignments.update({ atom.code : ass for atom, ass in self.given.items() })
 
         # find immediate universals
         for i, c in enumerate(self.idp.theory.constraints):

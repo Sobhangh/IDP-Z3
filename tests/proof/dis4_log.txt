@@ -8,8 +8,8 @@
         |------------
         |*p
         |+ p -> true
-        |== *!True
-    |== (false) with false
+        |== *!true
+    |== !false with p
     |------------
     |~(q) with q
     |+ p -> true
@@ -48,16 +48,16 @@
         |------------
         |*q
         |+ q -> false
-        |== *!False
-    |== (true) with true
-|== (true) with true
+        |== *!false
+    |== !true with q
+|== !true with ~(q)
 |------------
 |q ∨ r with q,r
 |+ q -> false
     |------------
     |*q
     |+ q -> false
-    |== *!False
+    |== *!false
     |------------
     |*r
     |+ q -> false

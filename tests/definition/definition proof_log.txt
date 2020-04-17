@@ -11,7 +11,7 @@
             |------------
             |$codeOf!0$
             |+ $codeOf!0$ -> red
-            |== !red
+            |== red
         |== codeOf(red) with red
         |------------
         |$codeOf$
@@ -36,7 +36,7 @@
                         |------------
                         |$codeOf!0$
                         |+ $codeOf!0$ -> red
-                        |== !red
+                        |== red
                         |------------
                         |c
                         |+ $codeOf!0$ -> red
@@ -52,7 +52,7 @@
                         |------------
                         |a
                         |+ $codeOf!0$ -> red
-                        |== !a
+                        |== a
                     |== $codeOf$ = a with $codeOf$,a
                 |== (red = c) ∧ ($codeOf$ = a) with red = c,$codeOf$ = a
             |== ((red = c) ∧ ($codeOf$ = a)) with (red = c) ∧ ($codeOf$ = a)
@@ -71,7 +71,7 @@
                             |------------
                             |$codeOf!0$
                             |+ $codeOf!0$ -> red
-                            |== !red
+                            |== red
                             |------------
                             |c
                             |+ $codeOf!0$ -> red
@@ -88,7 +88,7 @@
                         |------------
                         |b
                         |+ $codeOf!0$ -> red
-                        |== !b
+                        |== b
                     |== $codeOf$ = b with $codeOf$,b
                 |== (~(red = c)) ∧ ($codeOf$ = b) with ~(red = c),$codeOf$ = b
             |== ((~(red = c)) ∧ ($codeOf$ = b)) with (~(red = c)) ∧ ($codeOf$ = b)
@@ -107,7 +107,7 @@
             |------------
             |$codeOf!0$
             |+ $codeOf!0$ -> blue
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |$codeOf$
@@ -132,7 +132,7 @@
                         |------------
                         |$codeOf!0$
                         |+ $codeOf!0$ -> blue
-                        |== !blue
+                        |== blue
                         |------------
                         |c
                         |+ $codeOf!0$ -> blue
@@ -148,7 +148,7 @@
                         |------------
                         |a
                         |+ $codeOf!0$ -> blue
-                        |== !a
+                        |== a
                     |== $codeOf$ = a with $codeOf$,a
                 |== (blue = c) ∧ ($codeOf$ = a) with blue = c,$codeOf$ = a
             |== ((blue = c) ∧ ($codeOf$ = a)) with (blue = c) ∧ ($codeOf$ = a)
@@ -167,7 +167,7 @@
                             |------------
                             |$codeOf!0$
                             |+ $codeOf!0$ -> blue
-                            |== !blue
+                            |== blue
                             |------------
                             |c
                             |+ $codeOf!0$ -> blue
@@ -184,7 +184,7 @@
                         |------------
                         |b
                         |+ $codeOf!0$ -> blue
-                        |== !b
+                        |== b
                     |== $codeOf$ = b with $codeOf$,b
                 |== (~(blue = c)) ∧ ($codeOf$ = b) with ~(blue = c),$codeOf$ = b
             |== ((~(blue = c)) ∧ ($codeOf$ = b)) with (~(blue = c)) ∧ ($codeOf$ = b)
@@ -203,12 +203,12 @@
             |------------
             |red
             |+ $codeOf$ -> a
-            |== !red
+            |== red
         |== codeOf(red) with red
         |------------
         |$codeOf$
         |+ $codeOf$ -> a
-        |== !a
+        |== a
     |== codeOf(red) = a with codeOf(red),a
     |------------
     |(((red = c) ∧ ($codeOf$ = a)) ∨ ((~(red = c)) ∧ ($codeOf$ = b))) with ((red = c) ∧ ($codeOf$ = a)) ∨ ((~(red = c)) ∧ ($codeOf$ = b))
@@ -228,7 +228,7 @@
                         |------------
                         |red
                         |+ $codeOf$ -> a
-                        |== !red
+                        |== red
                         |------------
                         |c
                         |+ $codeOf$ -> a
@@ -240,12 +240,12 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> a
-                        |== !a
+                        |== a
                         |------------
                         |a
                         |+ $codeOf$ -> a
-                        |== !a
-                    |== (true) with true
+                        |== a
+                    |== !true with $codeOf$,a
                 |== (red = c) with red = c
             |== ((red = c)) with (red = c)
             |------------
@@ -263,7 +263,7 @@
                             |------------
                             |red
                             |+ $codeOf$ -> a
-                            |== !red
+                            |== red
                             |------------
                             |c
                             |+ $codeOf$ -> a
@@ -276,14 +276,14 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> a
-                        |== !a
+                        |== a
                         |------------
                         |b
                         |+ $codeOf$ -> a
-                        |== !b
-                    |== (false) with false
-                |== (false) with false
-            |== ((false)) with (false)
+                        |== b
+                    |== !false with $codeOf$,b
+                |== !false with $codeOf$ = b
+            |== !false with ($codeOf$ = b)
         |== ((red = c)) with ((red = c))
     |== (((red = c))) with ((red = c))
 |== (codeOf(red) = a) ⇔ (((red = c))) with codeOf(red) = a,(((red = c)))
@@ -299,12 +299,12 @@
             |------------
             |red
             |+ $codeOf$ -> b
-            |== !red
+            |== red
         |== codeOf(red) with red
         |------------
         |$codeOf$
         |+ $codeOf$ -> b
-        |== !b
+        |== b
     |== codeOf(red) = b with codeOf(red),b
     |------------
     |(((red = c) ∧ ($codeOf$ = a)) ∨ ((~(red = c)) ∧ ($codeOf$ = b))) with ((red = c) ∧ ($codeOf$ = a)) ∨ ((~(red = c)) ∧ ($codeOf$ = b))
@@ -324,7 +324,7 @@
                         |------------
                         |red
                         |+ $codeOf$ -> b
-                        |== !red
+                        |== red
                         |------------
                         |c
                         |+ $codeOf$ -> b
@@ -336,14 +336,14 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> b
-                        |== !b
+                        |== b
                         |------------
                         |a
                         |+ $codeOf$ -> b
-                        |== !a
-                    |== (false) with false
-                |== (false) with false
-            |== ((false)) with (false)
+                        |== a
+                    |== !false with $codeOf$,a
+                |== !false with $codeOf$ = a
+            |== !false with ($codeOf$ = a)
             |------------
             |((~(red = c)) ∧ ($codeOf$ = b)) with (~(red = c)) ∧ ($codeOf$ = b)
             |+ $codeOf$ -> b
@@ -359,7 +359,7 @@
                             |------------
                             |red
                             |+ $codeOf$ -> b
-                            |== !red
+                            |== red
                             |------------
                             |c
                             |+ $codeOf$ -> b
@@ -372,12 +372,12 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> b
-                        |== !b
+                        |== b
                         |------------
                         |b
                         |+ $codeOf$ -> b
-                        |== !b
-                    |== (true) with true
+                        |== b
+                    |== !true with $codeOf$,b
                 |== (~(red = c)) with ~(red = c)
             |== ((~(red = c))) with (~(red = c))
         |== ((~(red = c))) with ((~(red = c)))
@@ -395,12 +395,12 @@
             |------------
             |blue
             |+ $codeOf$ -> a
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |$codeOf$
         |+ $codeOf$ -> a
-        |== !a
+        |== a
     |== codeOf(blue) = a with codeOf(blue),a
     |------------
     |(((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b))) with ((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b))
@@ -420,7 +420,7 @@
                         |------------
                         |blue
                         |+ $codeOf$ -> a
-                        |== !blue
+                        |== blue
                         |------------
                         |c
                         |+ $codeOf$ -> a
@@ -432,12 +432,12 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> a
-                        |== !a
+                        |== a
                         |------------
                         |a
                         |+ $codeOf$ -> a
-                        |== !a
-                    |== (true) with true
+                        |== a
+                    |== !true with $codeOf$,a
                 |== (blue = c) with blue = c
             |== ((blue = c)) with (blue = c)
             |------------
@@ -455,7 +455,7 @@
                             |------------
                             |blue
                             |+ $codeOf$ -> a
-                            |== !blue
+                            |== blue
                             |------------
                             |c
                             |+ $codeOf$ -> a
@@ -468,14 +468,14 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> a
-                        |== !a
+                        |== a
                         |------------
                         |b
                         |+ $codeOf$ -> a
-                        |== !b
-                    |== (false) with false
-                |== (false) with false
-            |== ((false)) with (false)
+                        |== b
+                    |== !false with $codeOf$,b
+                |== !false with $codeOf$ = b
+            |== !false with ($codeOf$ = b)
         |== ((blue = c)) with ((blue = c))
     |== (((blue = c))) with ((blue = c))
 |== (codeOf(blue) = a) ⇔ (((blue = c))) with codeOf(blue) = a,(((blue = c)))
@@ -491,12 +491,12 @@
             |------------
             |blue
             |+ $codeOf$ -> b
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |$codeOf$
         |+ $codeOf$ -> b
-        |== !b
+        |== b
     |== codeOf(blue) = b with codeOf(blue),b
     |------------
     |(((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b))) with ((blue = c) ∧ ($codeOf$ = a)) ∨ ((~(blue = c)) ∧ ($codeOf$ = b))
@@ -516,7 +516,7 @@
                         |------------
                         |blue
                         |+ $codeOf$ -> b
-                        |== !blue
+                        |== blue
                         |------------
                         |c
                         |+ $codeOf$ -> b
@@ -528,14 +528,14 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> b
-                        |== !b
+                        |== b
                         |------------
                         |a
                         |+ $codeOf$ -> b
-                        |== !a
-                    |== (false) with false
-                |== (false) with false
-            |== ((false)) with (false)
+                        |== a
+                    |== !false with $codeOf$,a
+                |== !false with $codeOf$ = a
+            |== !false with ($codeOf$ = a)
             |------------
             |((~(blue = c)) ∧ ($codeOf$ = b)) with (~(blue = c)) ∧ ($codeOf$ = b)
             |+ $codeOf$ -> b
@@ -551,7 +551,7 @@
                             |------------
                             |blue
                             |+ $codeOf$ -> b
-                            |== !blue
+                            |== blue
                             |------------
                             |c
                             |+ $codeOf$ -> b
@@ -564,12 +564,12 @@
                         |------------
                         |$codeOf$
                         |+ $codeOf$ -> b
-                        |== !b
+                        |== b
                         |------------
                         |b
                         |+ $codeOf$ -> b
-                        |== !b
-                    |== (true) with true
+                        |== b
+                    |== !true with $codeOf$,b
                 |== (~(blue = c)) with ~(blue = c)
             |== ((~(blue = c))) with (~(blue = c))
         |== ((~(blue = c))) with ((~(blue = c)))
@@ -584,25 +584,25 @@
         |------------
         |codeOf(red) with red
         |+ codeOf(red) -> b
-        |== !b
+        |== !b with red
         |------------
         |a
         |+ codeOf(red) -> b
-        |== !a
-    |== *(false) with false
+        |== a
+    |== *!false with codeOf(red),a
     |------------
     |*codeOf(red) = b with codeOf(red),b
     |+ codeOf(red) -> b
         |------------
         |codeOf(red) with red
         |+ codeOf(red) -> b
-        |== !b
+        |== !b with red
         |------------
         |b
         |+ codeOf(red) -> b
-        |== !b
-    |== *(true) with true
-|== (true) with true
+        |== b
+    |== *!true with codeOf(red),b
+|== !true with codeOf(red) = b
 |------------
 |(codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
 |+ codeOf(red) -> b
@@ -615,12 +615,12 @@
             |------------
             |blue
             |+ codeOf(red) -> b
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |a
         |+ codeOf(red) -> b
-        |== !a
+        |== a
     |== *codeOf(blue) = a with codeOf(blue),a
     |------------
     |*codeOf(blue) = b with codeOf(blue),b
@@ -631,12 +631,12 @@
             |------------
             |blue
             |+ codeOf(red) -> b
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |b
         |+ codeOf(red) -> b
-        |== !b
+        |== b
     |== *codeOf(blue) = b with codeOf(blue),b
 |== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
 |------------
@@ -652,7 +652,7 @@
         |------------
         |red
         |+ codeOf(red) -> b
-        |== !red
+        |== red
     |== *c = red with c,red
     |------------
     |*c = blue with c,blue
@@ -664,7 +664,7 @@
         |------------
         |blue
         |+ codeOf(red) -> b
-        |== !blue
+        |== blue
     |== *c = blue with c,blue
 |== (c = red) ∨ (c = blue) with c = red,c = blue
 |------------
@@ -673,7 +673,7 @@
     |------------
     |red
     |+ codeOf(red) -> b
-    |== !red
+    |== red
     |------------
     |c
     |+ codeOf(red) -> b
@@ -685,12 +685,12 @@
     |------------
     |codeOf(red) with red
     |+ codeOf(red) -> b
-    |== !b
+    |== !b with red
     |------------
     |a
     |+ codeOf(red) -> b
-    |== !a
-|== *(false) with false
+    |== a
+|== *!false with codeOf(red),a
 |------------
 |*codeOf(blue) = a with codeOf(blue),a
 |+ codeOf(red) -> b
@@ -700,12 +700,12 @@
         |------------
         |blue
         |+ codeOf(red) -> b
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |a
     |+ codeOf(red) -> b
-    |== !a
+    |== a
 |== *codeOf(blue) = a with codeOf(blue),a
 |------------
 |*codeOf(blue) = b with codeOf(blue),b
@@ -716,12 +716,12 @@
         |------------
         |blue
         |+ codeOf(red) -> b
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |b
     |+ codeOf(red) -> b
-    |== !b
+    |== b
 |== *codeOf(blue) = b with codeOf(blue),b
 |------------
 |*c = red with c,red
@@ -733,7 +733,7 @@
     |------------
     |red
     |+ codeOf(red) -> b
-    |== !red
+    |== red
 |== *c = red with c,red
 |------------
 |*c = blue with c,blue
@@ -745,223 +745,7 @@
     |------------
     |blue
     |+ codeOf(red) -> b
-    |== !blue
-|== *c = blue with c,blue
-|------------
-|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |*codeOf(blue) = a with codeOf(blue),a
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-        |------------
-        |codeOf(blue) with blue
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-            |------------
-            |blue
-            |+ codeOf(red) = a -> false  (or (false) -> false)
-            |== !blue
-        |== codeOf(blue) with blue
-        |------------
-        |a
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== !a
-    |== *codeOf(blue) = a with codeOf(blue),a
-    |------------
-    |*codeOf(blue) = b with codeOf(blue),b
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-        |------------
-        |codeOf(blue) with blue
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-            |------------
-            |blue
-            |+ codeOf(red) = a -> false  (or (false) -> false)
-            |== !blue
-        |== codeOf(blue) with blue
-        |------------
-        |b
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== !b
-    |== *codeOf(blue) = b with codeOf(blue),b
-|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
-|------------
-|(c = red) ∨ (c = blue) with c = red,c = blue
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |*c = red with c,red
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-        |------------
-        |c
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== c
-        |------------
-        |red
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== !red
-    |== *c = red with c,red
-    |------------
-    |*c = blue with c,blue
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-        |------------
-        |c
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== c
-        |------------
-        |blue
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== !blue
-    |== *c = blue with c,blue
-|== (c = red) ∨ (c = blue) with c = red,c = blue
-|------------
-|*codeOf(red) = b with codeOf(red),b
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |codeOf(red) with red
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-        |------------
-        |red
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== !red
-        |------------
-        |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b)) with ((red = c) ∧ (codeOf(red) = a)),((~(red = c)) ∧ (codeOf(red) = b))
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-            |------------
-            |((red = c) ∧ (codeOf(red) = a)) with (red = c) ∧ (codeOf(red) = a)
-            |+ codeOf(red) = a -> false  (or (false) -> false)
-                |------------
-                |(red = c) ∧ (codeOf(red) = a) with red = c,codeOf(red) = a
-                |+ codeOf(red) = a -> false  (or (false) -> false)
-                    |------------
-                    |*red = c with red,c
-                    |+ codeOf(red) = a -> false  (or (false) -> false)
-                        |------------
-                        |red
-                        |+ codeOf(red) = a -> false  (or (false) -> false)
-                        |== !red
-                        |------------
-                        |c
-                        |+ codeOf(red) = a -> false  (or (false) -> false)
-                        |== c
-                    |== *red = c with red,c
-                    |------------
-                    |*codeOf(red) = a with codeOf(red),a
-                    |+ codeOf(red) = a -> false  (or (false) -> false)
-                    |== *(false) with false
-                |== (false) with false
-            |== ((false)) with (false)
-            |------------
-            |((~(red = c)) ∧ (codeOf(red) = b)) with (~(red = c)) ∧ (codeOf(red) = b)
-            |+ codeOf(red) = a -> false  (or (false) -> false)
-                |------------
-                |(~(red = c)) ∧ (codeOf(red) = b) with ~(red = c),codeOf(red) = b
-                |+ codeOf(red) = a -> false  (or (false) -> false)
-                    |------------
-                    |~(red = c) with red = c
-                    |+ codeOf(red) = a -> false  (or (false) -> false)
-                        |------------
-                        |*red = c with red,c
-                        |+ codeOf(red) = a -> false  (or (false) -> false)
-                            |------------
-                            |red
-                            |+ codeOf(red) = a -> false  (or (false) -> false)
-                            |== !red
-                            |------------
-                            |c
-                            |+ codeOf(red) = a -> false  (or (false) -> false)
-                            |== c
-                        |== *red = c with red,c
-                    |== ~(red = c) with red = c
-                    |------------
-                    |*codeOf(red) = b with codeOf(red),b
-                    |+ codeOf(red) = a -> false  (or (false) -> false)
-                        |------------
-                        |codeOf(red) with red
-                        |+ codeOf(red) = a -> false  (or (false) -> false)
-                            |------------
-                            |red
-                            |+ codeOf(red) = a -> false  (or (false) -> false)
-                            |== !red
-                        |== codeOf(red) with red
-                        |------------
-                        |b
-                        |+ codeOf(red) = a -> false  (or (false) -> false)
-                        |== !b
-                    |== *codeOf(red) = b with codeOf(red),b
-                |== (~(red = c)) ∧ (codeOf(red) = b) with ~(red = c),codeOf(red) = b
-            |== ((~(red = c)) ∧ (codeOf(red) = b)) with (~(red = c)) ∧ (codeOf(red) = b)
-        |== ((~(red = c)) ∧ (codeOf(red) = b)) with ((~(red = c)) ∧ (codeOf(red) = b))
-    |== codeOf(red) with red
-    |------------
-    |b
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== !b
-|== *codeOf(red) = b with codeOf(red),b
-|------------
-|*red = c with red,c
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |red
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== !red
-    |------------
-    |c
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== c
-|== *red = c with red,c
-|------------
-|*codeOf(blue) = a with codeOf(blue),a
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |codeOf(blue) with blue
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-        |------------
-        |blue
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== !blue
-    |== codeOf(blue) with blue
-    |------------
-    |a
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== !a
-|== *codeOf(blue) = a with codeOf(blue),a
-|------------
-|*codeOf(blue) = b with codeOf(blue),b
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |codeOf(blue) with blue
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-        |------------
-        |blue
-        |+ codeOf(red) = a -> false  (or (false) -> false)
-        |== !blue
-    |== codeOf(blue) with blue
-    |------------
-    |b
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== !b
-|== *codeOf(blue) = b with codeOf(blue),b
-|------------
-|*c = red with c,red
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |c
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== c
-    |------------
-    |red
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== !red
-|== *c = red with c,red
-|------------
-|*c = blue with c,blue
-|+ codeOf(red) = a -> false  (or (false) -> false)
-    |------------
-    |c
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== c
-    |------------
-    |blue
-    |+ codeOf(red) = a -> false  (or (false) -> false)
-    |== !blue
+    |== blue
 |== *c = blue with c,blue
 |------------
 |(codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
@@ -975,12 +759,12 @@
             |------------
             |blue
             |+ codeOf(red) -> b
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |a
         |+ codeOf(red) -> b
-        |== !a
+        |== a
     |== *codeOf(blue) = a with codeOf(blue),a
     |------------
     |*codeOf(blue) = b with codeOf(blue),b
@@ -991,12 +775,12 @@
             |------------
             |blue
             |+ codeOf(red) -> b
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |b
         |+ codeOf(red) -> b
-        |== !b
+        |== b
     |== *codeOf(blue) = b with codeOf(blue),b
 |== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
 |------------
@@ -1012,7 +796,7 @@
         |------------
         |red
         |+ codeOf(red) -> b
-        |== !red
+        |== red
     |== *c = red with c,red
     |------------
     |*c = blue with c,blue
@@ -1024,7 +808,7 @@
         |------------
         |blue
         |+ codeOf(red) -> b
-        |== !blue
+        |== blue
     |== *c = blue with c,blue
 |== (c = red) ∨ (c = blue) with c = red,c = blue
 |------------
@@ -1033,20 +817,16 @@
     |------------
     |red
     |+ codeOf(red) -> b
-    |== !red
+    |== red
     |------------
     |c
     |+ codeOf(red) -> b
     |== c
 |== *red = c with red,c
 |------------
-|*(false) with false
+|*codeOf(red) = a with codeOf(red),a
 |+ codeOf(red) -> b
-    |------------
-    |false
-    |+ codeOf(red) -> b
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(red),a
 |------------
 |*codeOf(blue) = a with codeOf(blue),a
 |+ codeOf(red) -> b
@@ -1056,12 +836,12 @@
         |------------
         |blue
         |+ codeOf(red) -> b
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |a
     |+ codeOf(red) -> b
-    |== !a
+    |== a
 |== *codeOf(blue) = a with codeOf(blue),a
 |------------
 |*codeOf(blue) = b with codeOf(blue),b
@@ -1072,12 +852,12 @@
         |------------
         |blue
         |+ codeOf(red) -> b
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |b
     |+ codeOf(red) -> b
-    |== !b
+    |== b
 |== *codeOf(blue) = b with codeOf(blue),b
 |------------
 |*c = red with c,red
@@ -1089,7 +869,7 @@
     |------------
     |red
     |+ codeOf(red) -> b
-    |== !red
+    |== red
 |== *c = red with c,red
 |------------
 |*c = blue with c,blue
@@ -1101,7 +881,7 @@
     |------------
     |blue
     |+ codeOf(red) -> b
-    |== !blue
+    |== blue
 |== *c = blue with c,blue
 Z3 propagation ********************************
 |------------
@@ -1116,12 +896,12 @@ Z3 propagation ********************************
             |------------
             |blue
             |+ red = c -> false
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |a
         |+ red = c -> false
-        |== !a
+        |== a
     |== *codeOf(blue) = a with codeOf(blue),a
     |------------
     |*codeOf(blue) = b with codeOf(blue),b
@@ -1132,12 +912,12 @@ Z3 propagation ********************************
             |------------
             |blue
             |+ red = c -> false
-            |== !blue
+            |== blue
         |== codeOf(blue) with blue
         |------------
         |b
         |+ red = c -> false
-        |== !b
+        |== b
     |== *codeOf(blue) = b with codeOf(blue),b
 |== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
 |------------
@@ -1153,7 +933,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ red = c -> false
-        |== !red
+        |== red
     |== *c = red with c,red
     |------------
     |*c = blue with c,blue
@@ -1165,7 +945,7 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ red = c -> false
-        |== !blue
+        |== blue
     |== *c = blue with c,blue
 |== (c = red) ∨ (c = blue) with c = red,c = blue
 |------------
@@ -1177,10 +957,22 @@ Z3 propagation ********************************
         |------------
         |red
         |+ red = c -> false
-        |== !red
+        |== red
         |------------
-        |((~(red = c)) ∧ (codeOf(red) = b)) with ((~(red = c)) ∧ (codeOf(red) = b))
+        |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b)) with ((red = c) ∧ (codeOf(red) = a)),((~(red = c)) ∧ (codeOf(red) = b))
         |+ red = c -> false
+            |------------
+            |((red = c) ∧ (codeOf(red) = a)) with (red = c) ∧ (codeOf(red) = a)
+            |+ red = c -> false
+                |------------
+                |(red = c) ∧ (codeOf(red) = a) with red = c,codeOf(red) = a
+                |+ red = c -> false
+                    |------------
+                    |*red = c with red,c
+                    |+ red = c -> false
+                    |== *!false with red,c
+                |== !false with red = c
+            |== !false with (red = c)
             |------------
             |((~(red = c)) ∧ (codeOf(red) = b)) with (~(red = c)) ∧ (codeOf(red) = b)
             |+ red = c -> false
@@ -1193,8 +985,8 @@ Z3 propagation ********************************
                         |------------
                         |*red = c with red,c
                         |+ red = c -> false
-                        |== *(false) with false
-                    |== (true) with true
+                        |== *!false with red,c
+                    |== !true with red = c
                     |------------
                     |*codeOf(red) = b with codeOf(red),b
                     |+ red = c -> false
@@ -1204,12 +996,12 @@ Z3 propagation ********************************
                             |------------
                             |red
                             |+ red = c -> false
-                            |== !red
+                            |== red
                         |== codeOf(red) with red
                         |------------
                         |b
                         |+ red = c -> false
-                        |== !b
+                        |== b
                     |== *codeOf(red) = b with codeOf(red),b
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
@@ -1218,16 +1010,12 @@ Z3 propagation ********************************
     |------------
     |b
     |+ red = c -> false
-    |== !b
+    |== b
 |== *codeOf(red) = b with codeOf(red),b
 |------------
-|*(false) with false
+|*codeOf(red) = a with codeOf(red),a
 |+ red = c -> false
-    |------------
-    |false
-    |+ red = c -> false
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(red),a
 |------------
 |*codeOf(blue) = a with codeOf(blue),a
 |+ red = c -> false
@@ -1237,12 +1025,12 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ red = c -> false
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |a
     |+ red = c -> false
-    |== !a
+    |== a
 |== *codeOf(blue) = a with codeOf(blue),a
 |------------
 |*codeOf(blue) = b with codeOf(blue),b
@@ -1253,12 +1041,12 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ red = c -> false
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |b
     |+ red = c -> false
-    |== !b
+    |== b
 |== *codeOf(blue) = b with codeOf(blue),b
 |------------
 |*c = red with c,red
@@ -1270,7 +1058,7 @@ Z3 propagation ********************************
     |------------
     |red
     |+ red = c -> false
-    |== !red
+    |== red
 |== *c = red with c,red
 |------------
 |*c = blue with c,blue
@@ -1282,7 +1070,183 @@ Z3 propagation ********************************
     |------------
     |blue
     |+ red = c -> false
-    |== !blue
+    |== blue
+|== *c = blue with c,blue
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
+|+ codeOf(red) = a -> false
+    |------------
+    |*codeOf(blue) = a with codeOf(blue),a
+    |+ codeOf(red) = a -> false
+        |------------
+        |codeOf(blue) with blue
+        |+ codeOf(red) = a -> false
+            |------------
+            |blue
+            |+ codeOf(red) = a -> false
+            |== blue
+        |== codeOf(blue) with blue
+        |------------
+        |a
+        |+ codeOf(red) = a -> false
+        |== a
+    |== *codeOf(blue) = a with codeOf(blue),a
+    |------------
+    |*codeOf(blue) = b with codeOf(blue),b
+    |+ codeOf(red) = a -> false
+        |------------
+        |codeOf(blue) with blue
+        |+ codeOf(red) = a -> false
+            |------------
+            |blue
+            |+ codeOf(red) = a -> false
+            |== blue
+        |== codeOf(blue) with blue
+        |------------
+        |b
+        |+ codeOf(red) = a -> false
+        |== b
+    |== *codeOf(blue) = b with codeOf(blue),b
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
+|------------
+|(c = red) ∨ (c = blue) with c = red,c = blue
+|+ codeOf(red) = a -> false
+    |------------
+    |*c = red with c,red
+    |+ codeOf(red) = a -> false
+        |------------
+        |c
+        |+ codeOf(red) = a -> false
+        |== c
+        |------------
+        |red
+        |+ codeOf(red) = a -> false
+        |== red
+    |== *c = red with c,red
+    |------------
+    |*c = blue with c,blue
+    |+ codeOf(red) = a -> false
+        |------------
+        |c
+        |+ codeOf(red) = a -> false
+        |== c
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false
+        |== blue
+    |== *c = blue with c,blue
+|== (c = red) ∨ (c = blue) with c = red,c = blue
+|------------
+|*codeOf(red) = b with codeOf(red),b
+|+ codeOf(red) = a -> false
+    |------------
+    |codeOf(red) with red
+    |+ codeOf(red) = a -> false
+        |------------
+        |red
+        |+ codeOf(red) = a -> false
+        |== red
+        |------------
+        |((codeOf(red) = b)) with ((codeOf(red) = b))
+        |+ codeOf(red) = a -> false
+            |------------
+            |((codeOf(red) = b)) with (codeOf(red) = b)
+            |+ codeOf(red) = a -> false
+                |------------
+                |(codeOf(red) = b) with codeOf(red) = b
+                |+ codeOf(red) = a -> false
+                    |------------
+                    |*codeOf(red) = b with codeOf(red),b
+                    |+ codeOf(red) = a -> false
+                        |------------
+                        |codeOf(red) with red
+                        |+ codeOf(red) = a -> false
+                            |------------
+                            |red
+                            |+ codeOf(red) = a -> false
+                            |== red
+                        |== codeOf(red) with red
+                        |------------
+                        |b
+                        |+ codeOf(red) = a -> false
+                        |== b
+                    |== *codeOf(red) = b with codeOf(red),b
+                |== (codeOf(red) = b) with codeOf(red) = b
+            |== ((codeOf(red) = b)) with (codeOf(red) = b)
+        |== ((codeOf(red) = b)) with ((codeOf(red) = b))
+    |== codeOf(red) with red
+    |------------
+    |b
+    |+ codeOf(red) = a -> false
+    |== b
+|== *codeOf(red) = b with codeOf(red),b
+|------------
+|*red = c with red,c
+|+ codeOf(red) = a -> false
+    |------------
+    |red
+    |+ codeOf(red) = a -> false
+    |== red
+    |------------
+    |c
+    |+ codeOf(red) = a -> false
+    |== c
+|== *red = c with red,c
+|------------
+|*codeOf(blue) = a with codeOf(blue),a
+|+ codeOf(red) = a -> false
+    |------------
+    |codeOf(blue) with blue
+    |+ codeOf(red) = a -> false
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false
+        |== blue
+    |== codeOf(blue) with blue
+    |------------
+    |a
+    |+ codeOf(red) = a -> false
+    |== a
+|== *codeOf(blue) = a with codeOf(blue),a
+|------------
+|*codeOf(blue) = b with codeOf(blue),b
+|+ codeOf(red) = a -> false
+    |------------
+    |codeOf(blue) with blue
+    |+ codeOf(red) = a -> false
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false
+        |== blue
+    |== codeOf(blue) with blue
+    |------------
+    |b
+    |+ codeOf(red) = a -> false
+    |== b
+|== *codeOf(blue) = b with codeOf(blue),b
+|------------
+|*c = red with c,red
+|+ codeOf(red) = a -> false
+    |------------
+    |c
+    |+ codeOf(red) = a -> false
+    |== c
+    |------------
+    |red
+    |+ codeOf(red) = a -> false
+    |== red
+|== *c = red with c,red
+|------------
+|*c = blue with c,blue
+|+ codeOf(red) = a -> false
+    |------------
+    |c
+    |+ codeOf(red) = a -> false
+    |== c
+    |------------
+    |blue
+    |+ codeOf(red) = a -> false
+    |== blue
 |== *c = blue with c,blue
 |------------
 |(codeOf(blue) = a) ∨ (codeOf(blue) = b) with codeOf(blue) = a,codeOf(blue) = b
@@ -1293,13 +1257,13 @@ Z3 propagation ********************************
         |------------
         |codeOf(blue) with blue
         |+ codeOf(blue) -> a
-        |== !a
+        |== !a with blue
         |------------
         |a
         |+ codeOf(blue) -> a
-        |== !a
-    |== *(true) with true
-|== (true) with true
+        |== a
+    |== *!true with codeOf(blue),a
+|== !true with codeOf(blue) = a
 |------------
 |(c = red) ∨ (c = blue) with c = red,c = blue
 |+ codeOf(blue) -> a
@@ -1313,7 +1277,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ codeOf(blue) -> a
-        |== !red
+        |== red
     |== *c = red with c,red
     |------------
     |*c = blue with c,blue
@@ -1325,7 +1289,7 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ codeOf(blue) -> a
-        |== !blue
+        |== blue
     |== *c = blue with c,blue
 |== (c = red) ∨ (c = blue) with c = red,c = blue
 |------------
@@ -1337,7 +1301,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ codeOf(blue) -> a
-        |== !red
+        |== red
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ codeOf(blue) -> a
@@ -1356,12 +1320,12 @@ Z3 propagation ********************************
                             |------------
                             |red
                             |+ codeOf(blue) -> a
-                            |== !red
+                            |== red
                         |== codeOf(red) with red
                         |------------
                         |b
                         |+ codeOf(blue) -> a
-                        |== !b
+                        |== b
                     |== *codeOf(red) = b with codeOf(red),b
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
@@ -1370,7 +1334,7 @@ Z3 propagation ********************************
     |------------
     |b
     |+ codeOf(blue) -> a
-    |== !b
+    |== b
 |== *codeOf(red) = b with codeOf(red),b
 |------------
 |*red = c with red,c
@@ -1378,32 +1342,28 @@ Z3 propagation ********************************
     |------------
     |red
     |+ codeOf(blue) -> a
-    |== !red
+    |== red
     |------------
     |c
     |+ codeOf(blue) -> a
     |== c
 |== *red = c with red,c
 |------------
-|*(false) with false
+|*codeOf(red) = a with codeOf(red),a
 |+ codeOf(blue) -> a
-    |------------
-    |false
-    |+ codeOf(blue) -> a
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(red),a
 |------------
 |*codeOf(blue) = b with codeOf(blue),b
 |+ codeOf(blue) -> a
     |------------
     |codeOf(blue) with blue
     |+ codeOf(blue) -> a
-    |== !a
+    |== !a with blue
     |------------
     |b
     |+ codeOf(blue) -> a
-    |== !b
-|== *(false) with false
+    |== b
+|== *!false with codeOf(blue),b
 |------------
 |*c = red with c,red
 |+ codeOf(blue) -> a
@@ -1414,7 +1374,7 @@ Z3 propagation ********************************
     |------------
     |red
     |+ codeOf(blue) -> a
-    |== !red
+    |== red
 |== *c = red with c,red
 |------------
 |*c = blue with c,blue
@@ -1426,131 +1386,7 @@ Z3 propagation ********************************
     |------------
     |blue
     |+ codeOf(blue) -> a
-    |== !blue
-|== *c = blue with c,blue
-|------------
-|(c = red) ∨ (c = blue) with c = red,c = blue
-|+ codeOf(blue) = b -> false  (or (false) -> false)
-    |------------
-    |*c = red with c,red
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |------------
-        |c
-        |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |== c
-        |------------
-        |red
-        |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |== !red
-    |== *c = red with c,red
-    |------------
-    |*c = blue with c,blue
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |------------
-        |c
-        |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |== c
-        |------------
-        |blue
-        |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |== !blue
-    |== *c = blue with c,blue
-|== (c = red) ∨ (c = blue) with c = red,c = blue
-|------------
-|*codeOf(red) = b with codeOf(red),b
-|+ codeOf(blue) = b -> false  (or (false) -> false)
-    |------------
-    |codeOf(red) with red
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |------------
-        |red
-        |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |== !red
-        |------------
-        |((codeOf(red) = b)) with ((codeOf(red) = b))
-        |+ codeOf(blue) = b -> false  (or (false) -> false)
-            |------------
-            |((codeOf(red) = b)) with (codeOf(red) = b)
-            |+ codeOf(blue) = b -> false  (or (false) -> false)
-                |------------
-                |(codeOf(red) = b) with codeOf(red) = b
-                |+ codeOf(blue) = b -> false  (or (false) -> false)
-                    |------------
-                    |*codeOf(red) = b with codeOf(red),b
-                    |+ codeOf(blue) = b -> false  (or (false) -> false)
-                        |------------
-                        |codeOf(red) with red
-                        |+ codeOf(blue) = b -> false  (or (false) -> false)
-                            |------------
-                            |red
-                            |+ codeOf(blue) = b -> false  (or (false) -> false)
-                            |== !red
-                        |== codeOf(red) with red
-                        |------------
-                        |b
-                        |+ codeOf(blue) = b -> false  (or (false) -> false)
-                        |== !b
-                    |== *codeOf(red) = b with codeOf(red),b
-                |== (codeOf(red) = b) with codeOf(red) = b
-            |== ((codeOf(red) = b)) with (codeOf(red) = b)
-        |== ((codeOf(red) = b)) with ((codeOf(red) = b))
-    |== codeOf(red) with red
-    |------------
-    |b
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== !b
-|== *codeOf(red) = b with codeOf(red),b
-|------------
-|*red = c with red,c
-|+ codeOf(blue) = b -> false  (or (false) -> false)
-    |------------
-    |red
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== !red
-    |------------
-    |c
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== c
-|== *red = c with red,c
-|------------
-|*codeOf(blue) = a with codeOf(blue),a
-|+ codeOf(blue) = b -> false  (or (false) -> false)
-    |------------
-    |codeOf(blue) with blue
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |------------
-        |blue
-        |+ codeOf(blue) = b -> false  (or (false) -> false)
-        |== !blue
-    |== codeOf(blue) with blue
-    |------------
-    |a
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== !a
-|== *codeOf(blue) = a with codeOf(blue),a
-|------------
-|*c = red with c,red
-|+ codeOf(blue) = b -> false  (or (false) -> false)
-    |------------
-    |c
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== c
-    |------------
-    |red
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== !red
-|== *c = red with c,red
-|------------
-|*c = blue with c,blue
-|+ codeOf(blue) = b -> false  (or (false) -> false)
-    |------------
-    |c
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== c
-    |------------
-    |blue
-    |+ codeOf(blue) = b -> false  (or (false) -> false)
-    |== !blue
+    |== blue
 |== *c = blue with c,blue
 |------------
 |(c = red) ∨ (c = blue) with c = red,c = blue
@@ -1565,7 +1401,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ codeOf(blue) -> a
-        |== !red
+        |== red
     |== *c = red with c,red
     |------------
     |*c = blue with c,blue
@@ -1577,7 +1413,7 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ codeOf(blue) -> a
-        |== !blue
+        |== blue
     |== *c = blue with c,blue
 |== (c = red) ∨ (c = blue) with c = red,c = blue
 |------------
@@ -1589,7 +1425,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ codeOf(blue) -> a
-        |== !red
+        |== red
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ codeOf(blue) -> a
@@ -1608,12 +1444,12 @@ Z3 propagation ********************************
                             |------------
                             |red
                             |+ codeOf(blue) -> a
-                            |== !red
+                            |== red
                         |== codeOf(red) with red
                         |------------
                         |b
                         |+ codeOf(blue) -> a
-                        |== !b
+                        |== b
                     |== *codeOf(red) = b with codeOf(red),b
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
@@ -1622,7 +1458,7 @@ Z3 propagation ********************************
     |------------
     |b
     |+ codeOf(blue) -> a
-    |== !b
+    |== b
 |== *codeOf(red) = b with codeOf(red),b
 |------------
 |*red = c with red,c
@@ -1630,28 +1466,20 @@ Z3 propagation ********************************
     |------------
     |red
     |+ codeOf(blue) -> a
-    |== !red
+    |== red
     |------------
     |c
     |+ codeOf(blue) -> a
     |== c
 |== *red = c with red,c
 |------------
-|*(false) with false
+|*codeOf(red) = a with codeOf(red),a
 |+ codeOf(blue) -> a
-    |------------
-    |false
-    |+ codeOf(blue) -> a
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(red),a
 |------------
-|*(false) with false
+|*codeOf(blue) = b with codeOf(blue),b
 |+ codeOf(blue) -> a
-    |------------
-    |false
-    |+ codeOf(blue) -> a
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(blue),b
 |------------
 |*c = red with c,red
 |+ codeOf(blue) -> a
@@ -1662,7 +1490,7 @@ Z3 propagation ********************************
     |------------
     |red
     |+ codeOf(blue) -> a
-    |== !red
+    |== red
 |== *c = red with c,red
 |------------
 |*c = blue with c,blue
@@ -1674,7 +1502,131 @@ Z3 propagation ********************************
     |------------
     |blue
     |+ codeOf(blue) -> a
-    |== !blue
+    |== blue
+|== *c = blue with c,blue
+|------------
+|(c = red) ∨ (c = blue) with c = red,c = blue
+|+ codeOf(blue) = b -> false
+    |------------
+    |*c = red with c,red
+    |+ codeOf(blue) = b -> false
+        |------------
+        |c
+        |+ codeOf(blue) = b -> false
+        |== c
+        |------------
+        |red
+        |+ codeOf(blue) = b -> false
+        |== red
+    |== *c = red with c,red
+    |------------
+    |*c = blue with c,blue
+    |+ codeOf(blue) = b -> false
+        |------------
+        |c
+        |+ codeOf(blue) = b -> false
+        |== c
+        |------------
+        |blue
+        |+ codeOf(blue) = b -> false
+        |== blue
+    |== *c = blue with c,blue
+|== (c = red) ∨ (c = blue) with c = red,c = blue
+|------------
+|*codeOf(red) = b with codeOf(red),b
+|+ codeOf(blue) = b -> false
+    |------------
+    |codeOf(red) with red
+    |+ codeOf(blue) = b -> false
+        |------------
+        |red
+        |+ codeOf(blue) = b -> false
+        |== red
+        |------------
+        |((codeOf(red) = b)) with ((codeOf(red) = b))
+        |+ codeOf(blue) = b -> false
+            |------------
+            |((codeOf(red) = b)) with (codeOf(red) = b)
+            |+ codeOf(blue) = b -> false
+                |------------
+                |(codeOf(red) = b) with codeOf(red) = b
+                |+ codeOf(blue) = b -> false
+                    |------------
+                    |*codeOf(red) = b with codeOf(red),b
+                    |+ codeOf(blue) = b -> false
+                        |------------
+                        |codeOf(red) with red
+                        |+ codeOf(blue) = b -> false
+                            |------------
+                            |red
+                            |+ codeOf(blue) = b -> false
+                            |== red
+                        |== codeOf(red) with red
+                        |------------
+                        |b
+                        |+ codeOf(blue) = b -> false
+                        |== b
+                    |== *codeOf(red) = b with codeOf(red),b
+                |== (codeOf(red) = b) with codeOf(red) = b
+            |== ((codeOf(red) = b)) with (codeOf(red) = b)
+        |== ((codeOf(red) = b)) with ((codeOf(red) = b))
+    |== codeOf(red) with red
+    |------------
+    |b
+    |+ codeOf(blue) = b -> false
+    |== b
+|== *codeOf(red) = b with codeOf(red),b
+|------------
+|*red = c with red,c
+|+ codeOf(blue) = b -> false
+    |------------
+    |red
+    |+ codeOf(blue) = b -> false
+    |== red
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false
+    |== c
+|== *red = c with red,c
+|------------
+|*codeOf(blue) = a with codeOf(blue),a
+|+ codeOf(blue) = b -> false
+    |------------
+    |codeOf(blue) with blue
+    |+ codeOf(blue) = b -> false
+        |------------
+        |blue
+        |+ codeOf(blue) = b -> false
+        |== blue
+    |== codeOf(blue) with blue
+    |------------
+    |a
+    |+ codeOf(blue) = b -> false
+    |== a
+|== *codeOf(blue) = a with codeOf(blue),a
+|------------
+|*c = red with c,red
+|+ codeOf(blue) = b -> false
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false
+    |== c
+    |------------
+    |red
+    |+ codeOf(blue) = b -> false
+    |== red
+|== *c = red with c,red
+|------------
+|*c = blue with c,blue
+|+ codeOf(blue) = b -> false
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false
+    |== c
+    |------------
+    |blue
+    |+ codeOf(blue) = b -> false
+    |== blue
 |== *c = blue with c,blue
 |------------
 |(c = red) ∨ (c = blue) with c = red,c = blue
@@ -1682,7 +1634,7 @@ Z3 propagation ********************************
     |------------
     |*c = red with c,red
     |+ c = red -> false
-    |== *(false) with false
+    |== *!false with c,red
     |------------
     |*c = blue with c,blue
     |+ c = red -> false
@@ -1693,7 +1645,7 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ c = red -> false
-        |== !blue
+        |== blue
     |== *c = blue with c,blue
 |== (c = blue) with c = blue
 |------------
@@ -1705,7 +1657,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ c = red -> false
-        |== !red
+        |== red
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ c = red -> false
@@ -1724,12 +1676,12 @@ Z3 propagation ********************************
                             |------------
                             |red
                             |+ c = red -> false
-                            |== !red
+                            |== red
                         |== codeOf(red) with red
                         |------------
                         |b
                         |+ c = red -> false
-                        |== !b
+                        |== b
                     |== *codeOf(red) = b with codeOf(red),b
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
@@ -1738,7 +1690,7 @@ Z3 propagation ********************************
     |------------
     |b
     |+ c = red -> false
-    |== !b
+    |== b
 |== *codeOf(red) = b with codeOf(red),b
 |------------
 |*red = c with red,c
@@ -1746,20 +1698,16 @@ Z3 propagation ********************************
     |------------
     |red
     |+ c = red -> false
-    |== !red
+    |== red
     |------------
     |c
     |+ c = red -> false
     |== c
 |== *red = c with red,c
 |------------
-|*(false) with false
+|*codeOf(red) = a with codeOf(red),a
 |+ c = red -> false
-    |------------
-    |false
-    |+ c = red -> false
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(red),a
 |------------
 |*codeOf(blue) = a with codeOf(blue),a
 |+ c = red -> false
@@ -1769,21 +1717,17 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ c = red -> false
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |a
     |+ c = red -> false
-    |== !a
+    |== a
 |== *codeOf(blue) = a with codeOf(blue),a
 |------------
-|*(false) with false
+|*codeOf(blue) = b with codeOf(blue),b
 |+ c = red -> false
-    |------------
-    |false
-    |+ c = red -> false
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(blue),b
 |------------
 |*c = blue with c,blue
 |+ c = red -> false
@@ -1794,7 +1738,7 @@ Z3 propagation ********************************
     |------------
     |blue
     |+ c = red -> false
-    |== !blue
+    |== blue
 |== *c = blue with c,blue
 |------------
 |*codeOf(red) = b with codeOf(red),b
@@ -1805,7 +1749,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ c -> blue
-        |== !red
+        |== red
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ c -> blue
@@ -1824,12 +1768,12 @@ Z3 propagation ********************************
                             |------------
                             |red
                             |+ c -> blue
-                            |== !red
+                            |== red
                         |== codeOf(red) with red
                         |------------
                         |b
                         |+ c -> blue
-                        |== !b
+                        |== b
                     |== *codeOf(red) = b with codeOf(red),b
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
@@ -1838,7 +1782,7 @@ Z3 propagation ********************************
     |------------
     |b
     |+ c -> blue
-    |== !b
+    |== b
 |== *codeOf(red) = b with codeOf(red),b
 |------------
 |*red = c with red,c
@@ -1846,20 +1790,16 @@ Z3 propagation ********************************
     |------------
     |red
     |+ c -> blue
-    |== !red
+    |== red
     |------------
     |c
     |+ c -> blue
     |== !blue
-|== *(false) with false
+|== *!false with red,c
 |------------
-|*(false) with false
+|*codeOf(red) = a with codeOf(red),a
 |+ c -> blue
-    |------------
-    |false
-    |+ c -> blue
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(red),a
 |------------
 |*codeOf(blue) = a with codeOf(blue),a
 |+ c -> blue
@@ -1869,21 +1809,17 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ c -> blue
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |a
     |+ c -> blue
-    |== !a
+    |== a
 |== *codeOf(blue) = a with codeOf(blue),a
 |------------
-|*(false) with false
+|*codeOf(blue) = b with codeOf(blue),b
 |+ c -> blue
-    |------------
-    |false
-    |+ c -> blue
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(blue),b
 |------------
 |*c = red with c,red
 |+ c -> blue
@@ -1894,8 +1830,8 @@ Z3 propagation ********************************
     |------------
     |red
     |+ c -> blue
-    |== !red
-|== *(false) with false
+    |== red
+|== *!false with c,red
 |------------
 |*codeOf(red) = b with codeOf(red),b
 |+ c -> blue
@@ -1905,7 +1841,7 @@ Z3 propagation ********************************
         |------------
         |red
         |+ c -> blue
-        |== !red
+        |== red
         |------------
         |((codeOf(red) = b)) with ((codeOf(red) = b))
         |+ c -> blue
@@ -1924,12 +1860,12 @@ Z3 propagation ********************************
                             |------------
                             |red
                             |+ c -> blue
-                            |== !red
+                            |== red
                         |== codeOf(red) with red
                         |------------
                         |b
                         |+ c -> blue
-                        |== !b
+                        |== b
                     |== *codeOf(red) = b with codeOf(red),b
                 |== (codeOf(red) = b) with codeOf(red) = b
             |== ((codeOf(red) = b)) with (codeOf(red) = b)
@@ -1938,28 +1874,16 @@ Z3 propagation ********************************
     |------------
     |b
     |+ c -> blue
-    |== !b
+    |== b
 |== *codeOf(red) = b with codeOf(red),b
 |------------
 |*red = c with red,c
 |+ c -> blue
-    |------------
-    |red
-    |+ c -> blue
-    |== !red
-    |------------
-    |c
-    |+ c -> blue
-    |== !blue
-|== *(false) with false
+|== *!false with red,c
 |------------
-|*(false) with false
+|*codeOf(red) = a with codeOf(red),a
 |+ c -> blue
-    |------------
-    |false
-    |+ c -> blue
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(red),a
 |------------
 |*codeOf(blue) = a with codeOf(blue),a
 |+ c -> blue
@@ -1969,30 +1893,18 @@ Z3 propagation ********************************
         |------------
         |blue
         |+ c -> blue
-        |== !blue
+        |== blue
     |== codeOf(blue) with blue
     |------------
     |a
     |+ c -> blue
-    |== !a
+    |== a
 |== *codeOf(blue) = a with codeOf(blue),a
 |------------
-|*(false) with false
+|*codeOf(blue) = b with codeOf(blue),b
 |+ c -> blue
-    |------------
-    |false
-    |+ c -> blue
-    |== !False
-|== *(false) with false
+|== *!false with codeOf(blue),b
 |------------
 |*c = red with c,red
 |+ c -> blue
-    |------------
-    |c
-    |+ c -> blue
-    |== !blue
-    |------------
-    |red
-    |+ c -> blue
-    |== !red
-|== *(false) with false
+|== *!false with c,red

@@ -78,11 +78,11 @@ class Expression(object):
         return out
 
     def __eq__(self, other):
-        if self.value is not None and self.value == other.value:
-            return True
+        if self.value is not None and other.value is not None:
+            return str(self.value) == str(other.value)
         # hack
-        self = TRUE if self.value == True else FALSE if self.value == False else self
-        other = TRUE if other.value == True else FALSE if other.value == False else other
+        self  = self if self.value is None else self.value
+        other = other if other.value is None else other.value
         if isinstance(self, Brackets):
             return self.sub_exprs[0] == other
         if isinstance(other, Brackets):
@@ -131,7 +131,7 @@ class Expression(object):
 
     def as_ground(self): 
         " returns a NumberConstant or Constructor, or None "
-        return None
+        return self.value
 
     def unknown_symbols(self):
         if self._unknown_symbols is None:
@@ -163,6 +163,8 @@ class Expression(object):
 
     def as_substitutions(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', 'Expression']]:
         # returns a literal for the matching atom in case.assignments, or []
+        if self.value is not None:
+            return []
         if self.code in case.assignments: # found it !
             return [(self, TRUE if truth else FALSE)]
         if isinstance(self, Brackets):
@@ -187,10 +189,6 @@ class Constructor(Expression):
         self.index = None # int
 
         super().__init__()
-        
-        self.value = True  if self.name == 'true'  \
-                else False if self.name == 'false' \
-                else self.name
     
     def __str__(self): return self.name
     def str_   (self): return self.name
@@ -290,7 +288,9 @@ class AQuantification(Expression):
         if self.translated is None:
             for v in self.q_vars.values():
                 v.translate()
-            if not self.vars:
+            if self.value is not None:
+                self.translated = self.value.translate()
+            elif not self.vars:
                 self.translated = self.sub_exprs[0].translate()
             else:
                 finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
@@ -402,6 +402,8 @@ class BinaryOperator(Expression):
     def translate(self):
         if self.translated is None:
             # chained comparisons -> And()
+            if self.value is not None:
+                out = self.value.translate()
             if self.operator[0] =='≠' and len(self.sub_exprs)==2:
                 x = self.sub_exprs[0].translate()
                 y = self.sub_exprs[1].translate()
@@ -516,9 +518,12 @@ class AUnary(Expression):
 
     def translate(self):
         if self.translated is None:
-            out = self.sub_exprs[0].translate()
-            function = AUnary.MAP[self.operator]
-            self.translated = function(out)
+            if self.value is not None:
+                self.translated = self.value.translate()
+            else:
+                out = self.sub_exprs[0].translate()
+                function = AUnary.MAP[self.operator]
+                self.translated = function(out)
         return self.translated
 
 class AAggregate(Expression):
@@ -654,7 +659,9 @@ class AppliedSymbol(Expression):
         
     def translate(self):
         if self.translated is None:
-            if self.s.name == 'abs':
+            if self.value is not None:
+                self.translated = self.value.translate()
+            elif self.s.name == 'abs':
                 arg = self.sub_exprs[0].translate()
                 self.translated = If(arg >= 0, arg, -arg)
             else:
@@ -749,7 +756,6 @@ class NumberConstant(Expression):
         except ValueError:
             self.translated = float(eval(self.number))
             self.type = 'real'
-        self.value = self.translated
     
     def __str__(self): return self.number
     def str_   (self): return self.number
@@ -789,6 +795,8 @@ class Brackets(Expression):
         return self
 
     def translate(self):
+        if self.value is not None:
+            return self.value.translate()
         self.translated = self.sub_exprs[0].translate()
         return self.translated
 

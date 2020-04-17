@@ -85,7 +85,7 @@ Consequences:
   negated(Piet) = Jan
   negated(Jan) = Piet
 Simplified:  
-  
+  same(same(Piet)) = negated(negated(Piet))
 Irrelevant:  
   ~same(Piet) = Jan
 

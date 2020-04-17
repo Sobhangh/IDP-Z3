@@ -5,8 +5,8 @@
     |------------
     |*p
     |+ p -> true
-    |== *!True
-|== (true) with true
+    |== *!true
+|== !true with p
 |------------
 |*q
 |+ p -> true

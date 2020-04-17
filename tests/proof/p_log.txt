@@ -8,11 +8,11 @@
         |------------
         |*p
         |+ p -> true
-        |== *!True
-    |== (false) with false
+        |== *!true
+    |== !false with p
     |------------
     |*p
     |+ p -> true
-    |== *!True
-|== (true) with true
+    |== *!true
+|== !true with p
 Z3 propagation ********************************

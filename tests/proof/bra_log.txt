@@ -11,12 +11,12 @@
             |------------
             |(p) with p
             |+ p -> true
-            |== (true) with true
-        |== (false) with false
+            |== !true with p
+        |== !false with (p)
         |------------
         |(p) with p
         |+ p -> true
-        |== (true) with true
-    |== (true) with true
-|== ((true)) with (true)
+        |== !true with p
+    |== !true with (p)
+|== !true with (p)
 Z3 propagation ********************************

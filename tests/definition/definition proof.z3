@@ -71,7 +71,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  ~codeOf(red) = a
+  
 
 
 -- meta -------------------------------------
@@ -143,7 +143,7 @@ Irrelevant:
             'codeOf(red) = a': {'environmental': False,
                                 'normal': False,
                                 'reading': 'codeOf(red) = a',
-                                'relevant': False,
+                                'relevant': True,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},

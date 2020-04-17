@@ -18,10 +18,10 @@
                 |------------
                 |0
                 |+ x -> 0
-                |== !0
-            |== *(true) with true
-        |== ((true)) with (true)
-    |== (false) with false
+                |== 0
+            |== *!true with x,0
+        |== !true with x = 0
+    |== !false with (x = 0)
     |------------
     |(x = 0) with x = 0
     |+ x -> 0
@@ -35,8 +35,8 @@
             |------------
             |0
             |+ x -> 0
-            |== !0
-        |== *(true) with true
-    |== ((true)) with (true)
-|== (true) with true
+            |== 0
+        |== *!true with x,0
+    |== !true with x = 0
+|== !true with (x = 0)
 Z3 propagation ********************************

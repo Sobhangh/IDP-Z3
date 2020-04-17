@@ -8,8 +8,8 @@
         |------------
         |*p
         |+ p -> true
-        |== *!True
-    |== (false) with false
+        |== *!true
+    |== !false with p
     |------------
     |*q
     |+ p -> true

@@ -5,7 +5,7 @@
     |------------
     |*p
     |+ p -> true
-    |== *!True
+    |== *!true
     |------------
     |*q
     |+ p -> true
@@ -45,7 +45,7 @@
     |------------
     |*q
     |+ q -> true
-    |== *!True
+    |== *!true
     |------------
     |(~(r)) with ~(r)
     |+ q -> true
@@ -79,10 +79,10 @@
             |------------
             |*r
             |+ r -> false
-            |== *!False
-        |== (true) with true
-    |== ((true)) with (true)
-|== (((true))) with ((true))
+            |== *!false
+        |== !true with r
+    |== !true with ~(r)
+|== !true with (~(r))
 |------------
 |*p
 |+ r -> false

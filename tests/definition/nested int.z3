@@ -137,7 +137,7 @@ Consequences:
   negated(0) = 0
   negated(1) = -1
 Simplified:  
-  
+  negated(negated(-1)) = same(-1)
 Irrelevant:  
   ~same(-1) = 0
   ~same(-1) = 1

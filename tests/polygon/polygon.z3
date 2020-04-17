@@ -305,11 +305,9 @@ Type:
 Definitions: 
   Rule:∀['$Large!0$'][]: Large($Large!0$) ⇔10 < ( if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5)
 Universals:  
-  ∀n[side] : Length(n) < Length(n + 1)
   ~Subtype = rectangle
   Perimeter = (sum{n[side] : true : Length(n)})
   (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
-  ∀x[side] : 0 ≤ Length(x)
   ∀x[side] : 0 ≤ Angle(x)
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
@@ -341,8 +339,8 @@ Consequences:
 Simplified:  
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
-  ∀n[side] : Length(n) < Length(n + 1)
-  ∀x[side] : 0 ≤ Length(x)
+  ~∀n[side] : Length(n) < Length(n + 1)
+  ~∀x[side] : 0 ≤ Length(x)
 
 
 -- meta -------------------------------------

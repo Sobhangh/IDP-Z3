@@ -5,34 +5,34 @@
     |------------
     |c
     |+ c -> red
-    |== !red
+    |== red
     |------------
     |red
     |+ c -> red
-    |== !red
-|== (true) with true
+    |== red
+|== !true with c,red
 |------------
 |c = red with c,red
 |+ c -> blue
     |------------
     |c
     |+ c -> blue
-    |== !blue
+    |== blue
     |------------
     |red
     |+ c -> blue
-    |== !red
-|== (false) with false
+    |== red
+|== !false with c,red
 |------------
 |c = red with c,red
 |+ c -> green
     |------------
     |c
     |+ c -> green
-    |== !green
+    |== green
     |------------
     |red
     |+ c -> green
-    |== !red
-|== (false) with false
+    |== red
+|== !false with c,red
 Z3 propagation ********************************

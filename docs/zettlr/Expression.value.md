@@ -21,9 +21,12 @@ TODO for relevance: in branch Pierre
 	and consequences {code: expression}
     - [x] Expression.copy()
     - [x] substitute proposition in place, test equal using boolean .value
-    - [ ] substitute boolean nodes in place
-    - [ ] substitute variables in place, test equal using .value
-    - [ ] substitute arithmetic nodes in place
+    - [x] substitute boolean nodes in place
+    - [x] use .value for as_ground()
+    - [x] substitute variables in place, test equal using .value
+    - [x] substitute arithmetic nodes in place
+    - [ ] substitute for nested function application
+    - [ ] all angles are 90° → not convex ?
     - [ ] eliminate replace_by(), \_change()
     - [ ] cut unnecessary branches from the justification tree by removing them in sub_exprs → get_subtences will work unchanged
         - or replacing them with bare TRUE/FALSE, e.g. for if-then-else
