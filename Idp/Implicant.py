@@ -56,13 +56,13 @@ def implicants(self, truth=TRUE):
         return []
     out = _if_subtence(self, truth)
     if self.sub_exprs[0] == TRUE:
-        return out + [(self.sub_exprs[1], truth)]
+        return out + self.sub_exprs[1].implicants(truth)
     elif self.sub_exprs[0] == FALSE:
-        return out + [(self.sub_exprs[2], truth)]
+        return out + self.sub_exprs[2].implicants(truth)
     elif self.sub_exprs[1] == TRUE and self.sub_exprs[2] == FALSE:
-        return out + [(self.sub_exprs[0], truth)]
+        return out + self.sub_exprs[0].implicants(truth)
     elif self.sub_exprs[1] == FALSE and self.sub_exprs[2] == TRUE:
-        return out + [(self.sub_exprs[0], truth)]
+        return out + self.sub_exprs[0].implicants(truth)
     return out
 IfExpr.implicants = implicants
 
@@ -74,9 +74,9 @@ def implicants(self, truth=TRUE):
         return []
     out = _if_subtence(self, truth)
     if self.sub_exprs[0] == TRUE:
-        return out + [(self.sub_exprs[1], truth)]
+        return out + self.sub_exprs[1].implicants(truth)
     elif self.sub_exprs[1] == FALSE:
-        return out + [(self.sub_exprs[0], _not(truth))]
+        return out + self.sub_exprs[0].implicants(_not(truth))
     return out
 AImplication.implicants = implicants
 
@@ -97,11 +97,11 @@ def implicants(self, truth=TRUE):
 
     out = _if_subtence(self, truth)
     if len(out) == 1:
-        return out + [out[0].implicants(truth)]
+        return out + out[0].implicants(truth)
     if 0 < trues:
-        return out + [e.implicants(truth) for e in self.sub_exprs]
+        return out + sum( (e.implicants(truth) for e in self.sub_exprs), [])
     if 0 < falses:
-        return out + [e.implicants(_not(truth)) for e in self.sub_exprs]
+        return out + sum( (e.implicants(truth) for e in self.sub_exprs), [])
     return out
 AEquivalence.implicants = implicants
 
