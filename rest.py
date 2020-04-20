@@ -94,10 +94,10 @@ class eval(Resource):
 
                 idp = caseOf(args['code'])
                 method = args['method']
-                struct_json = args['active']
+                given_json = args['active']
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                case = make_case(idp, struct_json, expanded)
+                case = make_case(idp, given_json, expanded)
 
                 out = {}
                 if method == "propagate":
@@ -105,7 +105,7 @@ class eval(Resource):
                 if method == "modelexpand":
                     out = expand(case)
                 if method == "explain":
-                    out = explain(case, args['symbol'], args['value'])
+                    out = explain(case, args['symbol'], args['value'], given_json)
                 if method == "minimize":
                     out = optimize(case, args['symbol'], args['minimize'])
                 if method == "abstract":
@@ -122,7 +122,7 @@ class eval(Resource):
                             expanded.update(expr.unknown_symbols())
                         expanded = tuple(expanded.keys())
                         case = make_case(idpModel, "", expanded)
-                    out = abstract(case)
+                    out = abstract(case, given_json)
                 log("end /eval " + method)
                 return out
             except Exception as exc:

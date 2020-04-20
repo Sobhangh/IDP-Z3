@@ -110,7 +110,7 @@ def optimize(case, symbol, minimize):
             break    
     return model_to_json(case, solver, reify)
 
-def explain(case, symbol, value):
+def explain(case, symbol, value, given_json):
     out = Structure_(case, case.given)  
 
     negated = value.startswith('~')
@@ -138,12 +138,14 @@ def explain(case, symbol, value):
         def r1(a): return reify[a] if a in reify else a
         def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
         ps = {} # {reified: constraint}
-        for i, ass in enumerate(case.given.values()):
+        
+        given = json_to_literals(case.idp, given_json) # use non-simplified given data
+        for i, ass in enumerate(given.values()):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
             s.add(Implies(p, ass.translate()))
         for i, constraint in enumerate(case.idp.translate()):
-            p = Const("wsdraqsesdf"+str(i+len(case.given)), BoolSort())
+            p = Const("wsdraqsesdf"+str(i+len(given)), BoolSort())
             ps[p] = constraint
             s.add(Implies(p, constraint))
         s.push()  
@@ -166,7 +168,7 @@ def explain(case, symbol, value):
 
     return out.m
 
-def abstract(case):
+def abstract(case, given_json):
     out = {} # {category : [Assignment]}
 
     # extract fixed atoms from constraints
@@ -179,7 +181,6 @@ def abstract(case):
     # create keys for models using first symbol of atoms
     models, count = {}, 0
     for GuiLine in case.GUILines.values():
-        atomZ3 = GuiLine.translate() #TODO
         for symb in GuiLine.unknown_symbols().keys():
             models[symb] = [] # models[symb][row] = [relevant atoms]
             break
@@ -187,7 +188,8 @@ def abstract(case):
     done = set(out["universal"] + out["given"] + out["fixed"])
     theory = And(case.idp.translate())
     solver, reify, unreify = mk_solver(theory, case.GUILines)
-    solver.add([ass.translate() for ass in case.given.values()])
+    given = json_to_literals(case.idp, given_json) # use non-simplified given data
+    solver.add([ass.translate() for ass in given.values()])
     while solver.check() == sat and count < 50: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
