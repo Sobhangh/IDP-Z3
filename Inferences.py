@@ -82,9 +82,9 @@ def optimize(case, symbol, minimize):
     args = parse_func_with_params(symbol)
     s = case.idp.unknown_symbols()[args[0]]
     if len(args) == 1:
-        s = s.instances[args[0]].translated
+        s = s.instances[args[0]].translate()
     else:
-        s = (s.instances[ f"{args[0]}({','.join(args[1:])})" ]).translated
+        s = (s.instances[ f"{args[0]}({','.join(args[1:])})" ]).translate()
 
     solver = Optimize()
     solver.add(case.translate())
@@ -120,7 +120,7 @@ def explain(case, symbol, value):
         .replace("\\u2228", "∨").replace("\\u2227", "∧")
     value = value[1:] if negated else value
     if value in case.GUILines:
-        to_explain = case.GUILines[value].translated #TODO value is an atom string
+        to_explain = case.GUILines[value].translate() #TODO value is an atom string
 
         # rules used in justification
         if not to_explain.sort()==BoolSort(): # calculate numeric value
@@ -142,7 +142,7 @@ def explain(case, symbol, value):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
             s.add(Implies(p, ass.translate()))
-        for i, constraint in enumerate(case.idp.translated):
+        for i, constraint in enumerate(case.idp.translate()):
             p = Const("wsdraqsesdf"+str(i+len(case.given)), BoolSort())
             ps[p] = constraint
             s.add(Implies(p, constraint))
@@ -161,7 +161,7 @@ def explain(case, symbol, value):
             for a1 in case.idp.theory.definitions + case.idp.theory.constraints: 
                 #TODO find the rule
                 for a2 in unsatcore:
-                    if str(a1.translated) == str(ps[a2]):
+                    if str(a1.translate()) == str(ps[a2]):
                         out.m["*laws*"].append(a1.annotations['reading'])
 
     return out.m
@@ -179,19 +179,19 @@ def abstract(case):
     # create keys for models using first symbol of atoms
     models, count = {}, 0
     for GuiLine in case.GUILines.values():
-        atomZ3 = GuiLine.translated #TODO
+        atomZ3 = GuiLine.translate() #TODO
         for symb in GuiLine.unknown_symbols().keys():
             models[symb] = [] # models[symb][row] = [relevant atoms]
             break
     
     done = set(out["universal"] + out["given"] + out["fixed"])
-    theory = And(case.idp.translated)
+    theory = And(case.idp.translate())
     solver, reify, unreify = mk_solver(theory, case.GUILines)
     solver.add([ass.translate() for ass in case.given.values()])
     while solver.check() == sat and count < 50: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
-        theory2 = And(theory, And(case.idp.vocabulary.translated)) # is this a way to copy theory ??
+        theory2 = And(theory, And(case.idp.vocabulary.translate())) # is this a way to copy theory ??
 
         atoms = [] # [Assignment]
         for atom_string, atom in case.GUILines.items():
@@ -229,14 +229,14 @@ def abstract(case):
                 solver2.pop()
                 if result == sat:
                     theory2 = And(theory2, 
-                                substitute(theory2, [(assignment.sentence.translated, BoolVal(True))]),
-                                substitute(theory2, [(assignment.sentence.translated, BoolVal(False))]))
+                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(True))]),
+                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(False))]))
                     solver2.add(theory2)
                     atoms[i] = Assignment(assignment.sentence, True, Status.UNKNOWN)
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
-        solver2.add(case.idp.vocabulary.translated) # without theory !
+        solver2.add(case.idp.vocabulary.translate()) # without theory !
         (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.truth is not None:

@@ -36,5 +36,5 @@ def reifier(atoms, solver):
         reify[atom] = atom.reified()
         unreify[atom.reified()] = atom
         if atom.type == 'bool':
-            solver.add(atom.reified() == atom.translated)
+            solver.add(atom.reified() == atom.translate())
     return (reify, unreify)

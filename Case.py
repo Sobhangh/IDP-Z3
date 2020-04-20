@@ -87,7 +87,7 @@ class Case:
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self) -> str:
-        return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translated)}{nl}"
+        return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translate(self.idp))}{nl}"
                 f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == Status.UNIVERSAL)}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
@@ -240,7 +240,7 @@ class Case:
 
     def translate(self, all_: bool = True) -> BoolRef:
         self.translated = And(
-            self.typeConstraints.translated
+            self.typeConstraints.translate(self.idp)
             + sum((d.translate(self.idp) for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
                     if l.truth is not None and (all_ or l.is_environmental) 

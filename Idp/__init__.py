@@ -76,12 +76,9 @@ class Idp(object):
 
         self.vocabulary.translate(self)
         log("vocabulary translated")
-        self.theory.translate(self)
         log("theory translated")
         self.goal.translate()
         self.view.translate()
-
-        self.translated = self.vocabulary.translated + self.theory.translated
 
     def unknown_symbols(self):
         todo = self.theory.unknown_symbols()
@@ -91,6 +88,9 @@ class Idp(object):
             if symb in todo:
                 out[symb] = todo[symb]
         return out
+
+    def translate(self):
+        return self.theory.translate(self)
 
 
 ################################ Vocabulary  ###############################
@@ -145,6 +145,7 @@ class Vocabulary(object):
         for v in self.symbol_decls.values():
             if v.is_var:
                 self.terms.update(v.instances)
+        return []
 
 class Decision(Vocabulary):
     pass
@@ -407,13 +408,13 @@ class Theory(object):
             for c in self.constraints + self.definitions)
 
     def translate(self, idp):
-        self.translated = []
+        out = []
         for i in self.constraints:
-            self.translated.append(i.translate())
+            out.append(i.translate())
             # optional : self.translated.extend(i.justifications())
         for d in self.definitions:
-            self.translated += d.translate(idp)
-
+            out += d.translate(idp)
+        return out
 
 
 class Definition(object):
@@ -471,9 +472,7 @@ class Definition(object):
         return out
 
     def translate(self, idp):
-        if self.translated is None:
-            self.translated = [rule.translate() for rule in self.clark.values()]
-        return self.translated
+        return [rule.translate() for rule in self.clark.values()]
 
 
 class Rule(object):

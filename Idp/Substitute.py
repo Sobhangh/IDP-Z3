@@ -78,7 +78,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, just_branch=None):
     self.str = sys.intern(str(self) if self.value is None else str(self.value))
     self._unknown_symbols = None
     self._subtences = None
-    self.translated = None
 
     return self
 Expression._change = _change

@@ -138,7 +138,7 @@ Consequences:
   ~negated(-1) = (0 - x)
   ~-1 = same(x)
   same(0) = (-((-(0))))
-  ~negated(-1) = same(x)
+  negated(-1) = same(x)
   same(-1) = -1
   ~same(-1) = 0
   ~same(-1) = 1
@@ -152,10 +152,10 @@ Consequences:
   negated(-1) = 1
   ~negated(0) = -1
   negated(0) = 0
-  negated(0) = 1
+  ~negated(0) = 1
   negated(1) = -1
-  negated(1) = 0
-  negated(1) = 1
+  ~negated(1) = 0
+  ~negated(1) = 1
   same(-1) = -1
   same(0) = 0
   same(1) = 1
@@ -218,7 +218,7 @@ Irrelevant:
                                        'relevant': True,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'Bool',
-                                       'value': False},
+                                       'value': True},
              'negated(0)': {'environmental': False,
                             'normal': True,
                             'reading': 'negated(0)',
@@ -247,7 +247,7 @@ Irrelevant:
                                 'relevant': True,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
-                                'value': True},
+                                'value': False},
              'negated(1)': {'environmental': False,
                             'normal': True,
                             'reading': 'negated(1)',
@@ -269,14 +269,14 @@ Irrelevant:
                                 'relevant': True,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
-                                'value': True},
+                                'value': False},
              'negated(1) = 1': {'environmental': False,
                                 'normal': False,
                                 'reading': 'negated(1) = 1',
                                 'relevant': True,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
-                                'value': True}},
+                                'value': False}},
  'same': {'-1 = same(x)': {'environmental': False,
                            'normal': False,
                            'reading': '$negated!0$ = same(x)',

@@ -211,11 +211,9 @@ class IfExpr(Expression):
         return self
 
     def translate(self):
-        if self.translated is None:
-            self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate()
-                                , self.sub_exprs[IfExpr.THEN].translate()
-                                , self.sub_exprs[IfExpr.ELSE].translate())
-        return self.translated
+        return If(self.sub_exprs[IfExpr.IF  ].translate()
+                , self.sub_exprs[IfExpr.THEN].translate()
+                , self.sub_exprs[IfExpr.ELSE].translate())
 
 class AQuantification(Expression):
     def __init__(self, **kwargs):
@@ -265,26 +263,24 @@ class AQuantification(Expression):
         return self
 
     def translate(self):
-        if self.translated is None:
-            for v in self.q_vars.values():
-                v.translate()
-            if self.value is not None:
-                self.translated = self.value.translate()
-            elif not self.vars:
-                self.translated = self.sub_exprs[0].translate()
-            else:
-                finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
+        if self.value is not None:
+            return self.value.translate()
+        for v in self.q_vars.values():
+            v.translate()
+        if not self.vars:
+            return self.sub_exprs[0].translate()
+        else:
+            finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
 
-                if self.q == '∀':
-                    forms = And(forms) if 1<len(forms) else forms[0]
-                    if len(finalvars) > 0: # not fully expanded !
-                        forms = ForAll(finalvars, forms)
-                else:
-                    forms = Or(forms) if 1<len(forms) else forms[0]
-                    if len(finalvars) > 0: # not fully expanded !
-                        forms = Exists(finalvars, forms)
-                self.translated = forms
-        return self.translated
+            if self.q == '∀':
+                forms = And(forms) if 1<len(forms) else forms[0]
+                if len(finalvars) > 0: # not fully expanded !
+                    forms = ForAll(finalvars, forms)
+            else:
+                forms = Or(forms) if 1<len(forms) else forms[0]
+                if len(finalvars) > 0: # not fully expanded !
+                    forms = Exists(finalvars, forms)
+            return forms
 
 class BinaryOperator(Expression):
     MAP = { '∧': lambda x, y: And(x, y),
@@ -380,47 +376,45 @@ class BinaryOperator(Expression):
         return self
 
     def translate(self):
-        if self.translated is None:
+        if self.value is not None:
+            out = self.value.translate()
+        if self.operator[0] =='≠' and len(self.sub_exprs)==2:
+            x = self.sub_exprs[0].translate()
+            y = self.sub_exprs[1].translate()
+            out = Not(x==y)
+        elif self.operator[0] in '=<>≤≥≠':
             # chained comparisons -> And()
-            if self.value is not None:
-                out = self.value.translate()
-            if self.operator[0] =='≠' and len(self.sub_exprs)==2:
-                x = self.sub_exprs[0].translate()
-                y = self.sub_exprs[1].translate()
-                out = Not(x==y)
-            elif self.operator[0] in '=<>≤≥≠':
-                out = []
-                for i in range(1, len(self.sub_exprs)):
-                    x = self.sub_exprs[i-1].translate()
-                    function = BinaryOperator.MAP[self.operator[i - 1]]
-                    y = self.sub_exprs[i].translate()
-                    try:
-                        out = out + [function(x, y)]
-                    except Z3Exception as E:
-                        raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
-                if 1 < len(out):
-                    out = And(out)
-                else:
-                    out = out[0]
-            elif self.operator[0] == '∧':
-                if len(self.sub_exprs) == 1:
-                    out = self.sub_exprs[0].translate()
-                else:
-                    out = And([e.translate() for e in self.sub_exprs])
-            elif self.operator[0] == '∨':
-                if len(self.sub_exprs) == 1:
-                    out = self.sub_exprs[0].translate()
-                else:
-                    out = Or ([e.translate() for e in self.sub_exprs])
+            out = []
+            for i in range(1, len(self.sub_exprs)):
+                x = self.sub_exprs[i-1].translate()
+                function = BinaryOperator.MAP[self.operator[i - 1]]
+                y = self.sub_exprs[i].translate()
+                try:
+                    out = out + [function(x, y)]
+                except Z3Exception as E:
+                    raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
+            if 1 < len(out):
+                return And(out)
             else:
+                return out[0]
+        elif self.operator[0] == '∧':
+            if len(self.sub_exprs) == 1:
                 out = self.sub_exprs[0].translate()
+            else:
+                out = And([e.translate() for e in self.sub_exprs])
+        elif self.operator[0] == '∨':
+            if len(self.sub_exprs) == 1:
+                out = self.sub_exprs[0].translate()
+            else:
+                out = Or ([e.translate() for e in self.sub_exprs])
+        else:
+            out = self.sub_exprs[0].translate()
 
-                for i in range(1, len(self.sub_exprs)):
-                    function = BinaryOperator.MAP[self.operator[i - 1]]
-                    out = function(out, self.sub_exprs[i].translate())
-            self.translated = out
-        return self.translated
-
+            for i in range(1, len(self.sub_exprs)):
+                function = BinaryOperator.MAP[self.operator[i - 1]]
+                out = function(out, self.sub_exprs[i].translate())
+        return out
+        
 class AImplication(BinaryOperator):
     pass
 class AEquivalence(BinaryOperator):
@@ -497,14 +491,12 @@ class AUnary(Expression):
         return self
 
     def translate(self):
-        if self.translated is None:
-            if self.value is not None:
-                self.translated = self.value.translate()
-            else:
-                out = self.sub_exprs[0].translate()
-                function = AUnary.MAP[self.operator]
-                self.translated = function(out)
-        return self.translated
+        if self.value is not None:
+            return self.value.translate()
+        else:
+            out = self.sub_exprs[0].translate()
+            function = AUnary.MAP[self.operator]
+            return function(out)
 
 class AAggregate(Expression):
     CONDITION = 0
@@ -568,11 +560,9 @@ class AAggregate(Expression):
         return self
 
     def translate(self):
-        if self.translated is None:
-            for v in self.q_vars.values():
-                v.translate()
-            self.translated = Sum([f.translate() for f in self.sub_exprs])
-        return self.translated
+        for v in self.q_vars.values():
+            v.translate()
+        return Sum([f.translate() for f in self.sub_exprs])
 
 
 class AppliedSymbol(Expression):
@@ -638,19 +628,17 @@ class AppliedSymbol(Expression):
         return out
         
     def translate(self):
-        if self.translated is None:
-            if self.value is not None:
-                self.translated = self.value.translate()
-            elif self.s.name == 'abs':
-                arg = self.sub_exprs[0].translate()
-                self.translated = If(arg >= 0, arg, -arg)
+        if self.value is not None:
+            return self.value.translate()
+        if self.s.name == 'abs':
+            arg = self.sub_exprs[0].translate()
+            return If(arg >= 0, arg, -arg)
+        else:
+            if len(self.sub_exprs) == 0:
+                return self.decl.translated
             else:
-                if len(self.sub_exprs) == 0:
-                    self.translated = self.decl.translated
-                else:
-                    arg = [x.translate() for x in self.sub_exprs]
-                    self.translated = (self.decl.translated)(arg)
-        return self.translated
+                arg = [x.translate() for x in self.sub_exprs]
+                return (self.decl.translated)(arg)
 
     def has_environmental(self, truth):
         return self.decl.environmental == truth \

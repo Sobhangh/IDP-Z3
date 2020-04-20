@@ -142,7 +142,7 @@ class Equality(Expression):
         else:
             self.type = 'int'
             self.code = sys.intern(variable.code)
-            self.translated = variable.translated
+            self.translated = variable.translate()
         self.str = self.code
         self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
         self.is_subtence = True
@@ -157,7 +157,7 @@ class Equality(Expression):
 
     def translate(self) -> DatatypeRef:
         if self.valueZ3 is not None:
-            return self.variable.translated == self.valueZ3
+            return self.variable.translate() == self.valueZ3
         else:
             return self.variable.translate()
 
@@ -308,7 +308,7 @@ class Structure_(object):
 
     def addAtom(self, atom, truth, status: Status):
         if truth and type(atom) == Equality:
-            symbol = atom.variable.translated
+            symbol = atom.variable.translate()
             key = atom.variable.code
             typ = symbol.sort().name()
             for name, symb in atom.unknown_symbols().items():
