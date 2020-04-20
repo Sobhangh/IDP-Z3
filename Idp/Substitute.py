@@ -98,7 +98,7 @@ def log(function):
         e1   = args[2]
         Log( f"{nl}|------------"
              f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
-             f"{' with '+','.join(str(e) for e in self.sub_exprs) if self.sub_exprs else ''}"
+             f"{' with '+','.join(e.__class__.__name__ for e in self.sub_exprs) if self.sub_exprs else ''}"
              f"{f' just {str(self.just_branch)}' if self.just_branch else ''}"
              f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
              , indent)
@@ -107,7 +107,7 @@ def log(function):
         indent -=4
         Log( f"{nl}|== {'*' if out.is_subtence else ''}"
              f"{'!'+str(out.value) if out.value is not None else str(out)}"
-             f"{' with '+','.join(str(e) for e in out.sub_exprs) if out.sub_exprs else ''}"
+             f"{' with '+','.join(e.__class__.__name__ for e in out.sub_exprs) if out.sub_exprs else ''}"
              f"{f' just {str(out.just_branch)}' if out.just_branch else ''}"
           , indent )
         return out    
@@ -146,7 +146,7 @@ def instantiate(self, e0, e1):
         out = copy.copy(self)
         out.sub_exprs = [e.instantiate(e0, e1) for e in out.sub_exprs]
         out = out.simplify1()
-        out.code = out.code.replace(str(e0), str(e1))
+        out.code = sys.intern(str(out))
         return out
 Expression.instantiate = instantiate
 
@@ -204,11 +204,12 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.decl.range:
-                    new_f = f.copy().substitute(var, val)
+                    new_f = f.copy().instantiate(var, val)
                     out.append(new_f)
             forms = out
         else:
             self.vars.append(var)
+            self.sorts.append(var.decl)
     if self.q == '∀':
         out = AConjunction.make('∧', forms)
     else:

@@ -1,6 +1,6 @@
 
 |------------
-|p ⇒ q with p,q
+|p ⇒ q with Variable,Variable
 |+ p -> true
     |------------
     |*p
@@ -10,27 +10,27 @@
     |*q
     |+ p -> true
     |== *q
-|== (q) with q
+|== (q) with Variable
 |------------
-|q ⇒ (~(r)) with q,(~(r))
+|q ⇒ (~(r)) with Variable,Brackets
 |+ p -> true
     |------------
     |*q
     |+ p -> true
     |== *q
     |------------
-    |(~(r)) with ~(r)
+    |(~(r)) with AUnary
     |+ p -> true
         |------------
-        |~(r) with r
+        |~(r) with Variable
         |+ p -> true
             |------------
             |*r
             |+ p -> true
             |== *r
-        |== ~(r) with r
-    |== (~(r)) with ~(r)
-|== q ⇒ (~(r)) with q,(~(r))
+        |== ~(r) with Variable
+    |== (~(r)) with AUnary
+|== q ⇒ (~(r)) with Variable,Brackets
 |------------
 |*q
 |+ p -> true
@@ -40,25 +40,25 @@
 |+ p -> true
 |== *r
 |------------
-|q ⇒ (~(r)) with q,(~(r))
+|q ⇒ (~(r)) with Variable,Brackets
 |+ q -> true
     |------------
     |*q
     |+ q -> true
     |== *!true
     |------------
-    |(~(r)) with ~(r)
+    |(~(r)) with AUnary
     |+ q -> true
         |------------
-        |~(r) with r
+        |~(r) with Variable
         |+ q -> true
             |------------
             |*r
             |+ q -> true
             |== *r
-        |== ~(r) with r
-    |== (~(r)) with ~(r)
-|== ((~(r))) with (~(r))
+        |== ~(r) with Variable
+    |== (~(r)) with AUnary
+|== ((~(r))) with Brackets
 |------------
 |*p
 |+ q -> true
@@ -68,21 +68,21 @@
 |+ q -> true
 |== *r
 |------------
-|((~(r))) with (~(r))
+|((~(r))) with Brackets
 |+ r -> false
     |------------
-    |(~(r)) with ~(r)
+    |(~(r)) with AUnary
     |+ r -> false
         |------------
-        |~(r) with r
+        |~(r) with Variable
         |+ r -> false
             |------------
             |*r
             |+ r -> false
             |== *!false
-        |== !true with r
-    |== !true with ~(r)
-|== !true with (~(r))
+        |== !true with Variable
+    |== !true with AUnary
+|== !true with Brackets
 |------------
 |*p
 |+ r -> false

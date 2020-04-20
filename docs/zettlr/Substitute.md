@@ -20,7 +20,7 @@ graph TD
     propagate --> substitute;
     substitute --> update_exprs;
     
-    expand_quantifiers --> substitute;
+    expand_quantifiers --> instantiate;
     expand_quantifiers --> replace_by;
     interpret --> update_exprs;
     expand_quantifiers --> update_exprs;

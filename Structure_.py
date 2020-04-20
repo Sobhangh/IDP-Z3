@@ -140,7 +140,7 @@ class Equality(Expression):
             self.code = sys.intern(f"{variable.code} = {str(value)}")
             self.translated = (variable.translate() == value)
         else:
-            self.type = 'int'
+            self.type = 'int' #TODO float ?
             self.code = sys.intern(variable.code)
             self.translated = variable.translate()
         self.str = self.code
@@ -192,10 +192,10 @@ def json_to_literals(idp, jsonstr: str):
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
                 if atom in idp.subtences:
-                    atom = idp.subtences[atom]
+                    atom = idp.subtences[atom].copy()
                 else:
                     symbol = idp.vocabulary.symbol_decls[sym]
-                    atom = symbol.instances[atom]
+                    atom = symbol.instances[atom].copy()
                 if json_atom["typ"] == "Bool":
                     if "value" in json_atom:
                         assignment = Assignment(atom, json_atom["value"], Status.GIVEN)

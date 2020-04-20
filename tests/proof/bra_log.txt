@@ -1,22 +1,22 @@
 
 |------------
-|((~((p))) ∨ (p)) with (~((p))) ∨ (p)
+|((~((p))) ∨ (p)) with ADisjunction
 |+ p -> true
     |------------
-    |(~((p))) ∨ (p) with ~((p)),(p)
+    |(~((p))) ∨ (p) with AUnary,Brackets
     |+ p -> true
         |------------
-        |~((p)) with (p)
+        |~((p)) with Brackets
         |+ p -> true
             |------------
-            |(p) with p
+            |(p) with Variable
             |+ p -> true
-            |== !true with p
-        |== !false with (p)
+            |== !true with Variable
+        |== !false with Brackets
         |------------
-        |(p) with p
+        |(p) with Variable
         |+ p -> true
-        |== !true with p
-    |== !true with (p)
-|== !true with (p)
+        |== !true with Variable
+    |== !true with Brackets
+|== !true with ADisjunction
 Z3 propagation ********************************

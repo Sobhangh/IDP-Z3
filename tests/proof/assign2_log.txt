@@ -1,18 +1,18 @@
 
 |------------
-|(~(((1 + x) = 1))) ∨ ((1 + x) = 1) with ~(((1 + x) = 1)),((1 + x) = 1)
+|(~(((1 + x) = 1))) ∨ ((1 + x) = 1) with AUnary,Brackets
 |+ x -> 0
     |------------
-    |~(((1 + x) = 1)) with ((1 + x) = 1)
+    |~(((1 + x) = 1)) with Brackets
     |+ x -> 0
         |------------
-        |((1 + x) = 1) with (1 + x) = 1
+        |((1 + x) = 1) with AComparison
         |+ x -> 0
             |------------
-            |*(1 + x) = 1 with 1 + x,1
+            |*(1 + x) = 1 with ASumMinus,NumberConstant
             |+ x -> 0
                 |------------
-                |1 + x with 1,x
+                |1 + x with NumberConstant,Variable
                 |+ x -> 0
                     |------------
                     |1
@@ -27,17 +27,17 @@
                 |1
                 |+ x -> 0
                 |== 1
-            |== *!true with 1 + x,1
-        |== !true with (1 + x) = 1
-    |== !false with ((1 + x) = 1)
+            |== *!true with ASumMinus,NumberConstant
+        |== !true with AComparison
+    |== !false with Brackets
     |------------
-    |((1 + x) = 1) with (1 + x) = 1
+    |((1 + x) = 1) with AComparison
     |+ x -> 0
         |------------
-        |*(1 + x) = 1 with 1 + x,1
+        |*(1 + x) = 1 with ASumMinus,NumberConstant
         |+ x -> 0
             |------------
-            |1 + x with 1,x
+            |1 + x with NumberConstant,Variable
             |+ x -> 0
                 |------------
                 |1
@@ -52,14 +52,14 @@
             |1
             |+ x -> 0
             |== 1
-        |== *!true with 1 + x,1
-    |== !true with (1 + x) = 1
-|== !true with ((1 + x) = 1)
+        |== *!true with ASumMinus,NumberConstant
+    |== !true with AComparison
+|== !true with Brackets
 |------------
-|*(1 + x) = 1 with 1 + x,1
+|*(1 + x) = 1 with ASumMinus,NumberConstant
 |+ x -> 0
     |------------
-    |1 + x with 1,x
+    |1 + x with NumberConstant,Variable
     |+ x -> 0
         |------------
         |1
@@ -74,21 +74,21 @@
     |1
     |+ x -> 0
     |== 1
-|== *!true with 1 + x,1
+|== *!true with ASumMinus,NumberConstant
 |------------
-|*(1 + x) = 1 with 1 + x,1
+|*true with ASumMinus,NumberConstant
 |+ x -> 0
-|== *!true with 1 + x,1
+|== *!true with ASumMinus,NumberConstant
 Z3 propagation ********************************
 |------------
-|*x = 0 with x,0
-|+ x + 1 -> 1  (or 1 + x -> 1)
+|*x = 0 with Variable,NumberConstant
+|+ x + 1 -> 1  (or 1 + 0 -> 1)
     |------------
     |x
-    |+ x + 1 -> 1  (or 1 + x -> 1)
+    |+ x + 1 -> 1  (or 1 + 0 -> 1)
     |== x
     |------------
     |0
-    |+ x + 1 -> 1  (or 1 + x -> 1)
+    |+ x + 1 -> 1  (or 1 + 0 -> 1)
     |== 0
-|== *x = 0 with x,0
+|== *x = 0 with Variable,NumberConstant

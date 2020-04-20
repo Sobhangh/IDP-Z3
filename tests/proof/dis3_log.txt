@@ -1,36 +1,36 @@
 
 |------------
-|(~(p)) ∨ q with ~(p),q
+|(~(p)) ∨ q with AUnary,Variable
 |+ p -> true
     |------------
-    |~(p) with p
+    |~(p) with Variable
     |+ p -> true
         |------------
         |*p
         |+ p -> true
         |== *!true
-    |== !false with p
+    |== !false with Variable
     |------------
     |*q
     |+ p -> true
     |== *q
-|== q with q
+|== q with Variable
 |------------
-|(~(q)) ∨ r with ~(q),r
+|(~(q)) ∨ r with AUnary,Variable
 |+ p -> true
     |------------
-    |~(q) with q
+    |~(q) with Variable
     |+ p -> true
         |------------
         |*q
         |+ p -> true
         |== *q
-    |== ~(q) with q
+    |== ~(q) with Variable
     |------------
     |*r
     |+ p -> true
     |== *r
-|== (~(q)) ∨ r with ~(q),r
+|== (~(q)) ∨ r with AUnary,Variable
 |------------
 |*q
 |+ p -> true
@@ -40,21 +40,21 @@
 |+ p -> true
 |== *r
 |------------
-|(~(q)) ∨ r with ~(q),r
+|(~(q)) ∨ r with AUnary,Variable
 |+ q -> true
     |------------
-    |~(q) with q
+    |~(q) with Variable
     |+ q -> true
         |------------
         |*q
         |+ q -> true
         |== *!true
-    |== !false with q
+    |== !false with Variable
     |------------
     |*r
     |+ q -> true
     |== *r
-|== r with r
+|== r with Variable
 |------------
 |*p
 |+ q -> true

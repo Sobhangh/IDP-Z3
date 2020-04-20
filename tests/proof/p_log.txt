@@ -1,18 +1,18 @@
 
 |------------
-|(~(p)) ∨ p with ~(p),p
+|(~(p)) ∨ p with AUnary,Variable
 |+ p -> true
     |------------
-    |~(p) with p
+    |~(p) with Variable
     |+ p -> true
         |------------
         |*p
         |+ p -> true
         |== *!true
-    |== !false with p
+    |== !false with Variable
     |------------
     |*p
     |+ p -> true
     |== *!true
-|== !true with p
+|== !true with Variable
 Z3 propagation ********************************
