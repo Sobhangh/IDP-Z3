@@ -45,11 +45,19 @@ class DSLException(Exception):
         return self.message
 
 def use_value(function):
-    " decorator for str() "
+    " decorator for str(), mark_subtences(), translate() "
     def _wrapper(*args, **kwds):
         self = args[0]
-        if self.value  is not None : return (self.value.__class__.__dict__[function.__name__])(self.value)
-        if self.simpler is not None: return (self.value.__class__.__dict__[function.__name__])(self.simpler)
+        if self.value   is not None: 
+            return (self.value  .__class__.__dict__[function.__name__])(self.value)
+        if self.simpler is not None: 
+            for cls in self.simpler.__class__.__mro__:
+                try:
+                    out = (cls.__dict__[function.__name__])(self.simpler)
+                    return out
+                except:
+                    pass
+            assert False
         return function(self)
     return _wrapper
 
@@ -121,6 +129,7 @@ class Expression(object):
 
     def annotate1(self): return self
 
+    @use_value
     def mark_subtences(self):
         self.fresh_vars = set()
         for e in self.sub_exprs: 
@@ -134,7 +143,11 @@ class Expression(object):
             self._subtences = {}
             if self.is_subtence:
                 self._subtences[self.code]= self
-            self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
+            if self.value is None:
+                if self.simpler is None:
+                    self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
+                else:
+                    self._subtences.update(self.simpler.subtences())
             if self.just_branch is not None:
                 self._subtences.update(self.just_branch.subtences())
         return self._subtences
@@ -260,6 +273,7 @@ class AQuantification(Expression):
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         return self
 
+    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         # remove q_vars
@@ -362,6 +376,7 @@ class BinaryOperator(Expression):
                    else self.sub_exprs[0].type # constructed type, without arithmetic
         return self
 
+    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         if self.operator[0] in '=<>≤≥≠':
@@ -535,6 +550,7 @@ class AAggregate(Expression):
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         return self
 
+    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         # remove q_vars
@@ -582,6 +598,7 @@ class AppliedSymbol(Expression):
         self.normal = True
         return self.annotate1()
 
+    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         if any(type(e) in [Brackets, AppliedSymbol, AUnary, BinaryOperator] for e in self.sub_exprs):
@@ -649,6 +666,7 @@ class Variable(AppliedSymbol):
             self.normal = True # make sure it is visible in GUI
         return self
 
+    @use_value
     def mark_subtences(self):
         self.fresh_vars = set()
         self.is_subtence = self.type == 'bool'
@@ -679,6 +697,7 @@ class Fresh_Variable(Expression):
     @use_value
     def __str__(self): return self.name
 
+    @use_value
     def mark_subtences(self):
         self.fresh_vars = set([self.name])
         return self
@@ -704,6 +723,9 @@ class NumberConstant(Expression):
     
     def __str__(self): return self.number
 
+    def mark_subtences(self):
+        self.fresh_vars = set()
+        return self
     def as_ground(self): return self
 
     def translate(self):
