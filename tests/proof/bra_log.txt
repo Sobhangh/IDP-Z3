@@ -11,11 +11,19 @@
             |------------
             |(p) with Variable
             |+ p -> true
+                |------------
+                |*p
+                |+ p -> true
+                |== *!true
             |== !true with Variable
         |== !false with Brackets
         |------------
         |(p) with Variable
         |+ p -> true
+            |------------
+            |*p
+            |+ p -> true
+            |== *!true
         |== !true with Variable
     |== !true with Brackets
 |== !true with ADisjunction

@@ -61,10 +61,12 @@ class Expression(object):
         self.simpler = None               # a simplified version of the expression, or None
         self.value = None                 # a python value (bool, int, float, string) or None
         self.status = None                # explains how the value was found
+
+        # .code uniquely identifies an expression, irrespective of its value
         self.code = sys.intern(str(self)) # normalized idp code, before transformations
         self.annotations = {'reading': self.code} # dict(String, String)
 
-        self.str = self.code              # memoization of str()
+        self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self._unknown_symbols = None      # Dict[name, Declaration] list of uninterpreted symbols not starting with '_'
@@ -80,7 +82,8 @@ class Expression(object):
         " create a deep copy (except for Constructor and NumberConstant) "
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
-        out._subtences  = None if out._subtences  is None else out._subtences .copy()
+        out.value       = None if out.value       is None else out.value      .copy()
+        out.simpler     = None if out.simpler     is None else out.simpler    .copy()
         out.just_branch = None if out.just_branch is None else out.just_branch.copy()
         return out
 
@@ -215,6 +218,7 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
+    @use_value
     def translate(self):
         return If(self.sub_exprs[IfExpr.IF  ].translate()
                 , self.sub_exprs[IfExpr.THEN].translate()
@@ -263,9 +267,8 @@ class AQuantification(Expression):
         self.is_subtence = (len(self.fresh_vars)==0)
         return self
 
+    @use_value
     def translate(self):
-        if self.value is not None:
-            return self.value.translate()
         for v in self.q_vars.values():
             v.translate()
         if not self.vars:
@@ -366,9 +369,8 @@ class BinaryOperator(Expression):
             self.fresh_vars.discard('!*') # indicates AppliedSymbol with complex expressions
         return self
 
+    @use_value
     def translate(self):
-        if self.value is not None:
-            out = self.value.translate()
         if self.operator[0] =='≠' and len(self.sub_exprs)==2:
             x = self.sub_exprs[0].translate()
             y = self.sub_exprs[1].translate()
@@ -480,13 +482,11 @@ class AUnary(Expression):
         self.type = self.sub_exprs[0].type
         return self
 
+    @use_value
     def translate(self):
-        if self.value is not None:
-            return self.value.translate()
-        else:
-            out = self.sub_exprs[0].translate()
-            function = AUnary.MAP[self.operator]
-            return function(out)
+        out = self.sub_exprs[0].translate()
+        function = AUnary.MAP[self.operator]
+        return function(out)
 
 class AAggregate(Expression):
     CONDITION = 0
@@ -541,9 +541,8 @@ class AAggregate(Expression):
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
         return self
 
+    @use_value
     def translate(self):
-        for v in self.q_vars.values():
-            v.translate()
         return Sum([f.translate() for f in self.sub_exprs])
 
 
@@ -604,10 +603,9 @@ class AppliedSymbol(Expression):
         if self.decl.interpretation is None:
             out[self.decl.name] = self.decl
         return out
-        
+
+    @use_value
     def translate(self):
-        if self.value is not None:
-            return self.value.translate()
         if self.s.name == 'abs':
             arg = self.sub_exprs[0].translate()
             return If(arg >= 0, arg, -arg)
@@ -659,10 +657,9 @@ class Variable(AppliedSymbol):
     def reified(self):
         return self.translate()
 
+    @use_value
     def translate(self):
-        if self.translated is None:
-            self.translated = self.decl.translated
-        return self.translated
+        return self.decl.translated
     
 class Symbol(Variable): pass
     
@@ -741,9 +738,7 @@ class Brackets(Expression):
             self.sub_exprs[0].annotations = self.annotations
         return self
 
+    @use_value
     def translate(self):
-        if self.value is not None:
-            return self.value.translate()
-        self.translated = self.sub_exprs[0].translate()
-        return self.translated
+        return self.sub_exprs[0].translate()
 

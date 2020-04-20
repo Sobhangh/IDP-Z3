@@ -191,7 +191,7 @@ def abstract(case):
     while solver.check() == sat and count < 50: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
-        theory2 = And(theory, And(case.idp.vocabulary.translate())) # is this a way to copy theory ??
+        theory2 = And(theory, And(case.idp.vocabulary.translate(case.idp))) # is this a way to copy theory ??
 
         atoms = [] # [Assignment]
         for atom_string, atom in case.GUILines.items():
@@ -236,7 +236,7 @@ def abstract(case):
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
-        solver2.add(case.idp.vocabulary.translate()) # without theory !
+        solver2.add(case.idp.vocabulary.translate(case.idp)) # without theory !
         (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.truth is not None:

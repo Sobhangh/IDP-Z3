@@ -183,6 +183,8 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
+  ~negated(-1) = (-1)
+  ~-1 = same(1)
   ~same(1) = -1
   ~same(1) = 0
 
@@ -205,7 +207,7 @@ Irrelevant:
              'negated(-1) = (-1)': {'environmental': False,
                                     'normal': False,
                                     'reading': '$negated$ = (0 - x)',
-                                    'relevant': True,
+                                    'relevant': False,
                                     'status': 'CONSEQUENCE',
                                     'typ': 'Bool',
                                     'value': False},
@@ -340,7 +342,7 @@ Irrelevant:
           '-1 = same(1)': {'environmental': False,
                            'normal': False,
                            'reading': '$negated!0$ = same(x)',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},

@@ -62,12 +62,6 @@ Expression._replace_by = _replace_by
 def _change(self, sub_exprs=None, ops=None, value=None, just_branch=None):
     " change attributes of an expression, and erase derive attributes "
 
-    # return self if not changed
-    if all((self.sub_exprs == sub_exprs, 
-            just_branch is None, 
-            value       is None)):
-        return self
-
     if sub_exprs   is not None: self.sub_exprs = sub_exprs
     if ops         is not None: self.operator  = ops
     if just_branch is not None: self.just_branch = just_branch
@@ -75,7 +69,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, just_branch=None):
     assert value is None or type(value) in [Constructor, NumberConstant]
     
     # reset derived attributes
-    self.str = sys.intern(str(self) if self.value is None else str(self.value))
+    self.str = sys.intern(str(self))
     self._unknown_symbols = None
     self._subtences = None
 
@@ -120,12 +114,9 @@ def Expression_substitute(self, e0, e1, todo=None):
     # similar code in AppliedSymbol !
     if self.value is not None:
         return self
-    elif self == e0: # first == based on repr !
+    elif self.code == e0.code:
         if type(e1) in [Constructor, NumberConstant]:
             return self._change(value=e1)
-        else:
-            return self._replace_by(e1)
-    elif self.code == e0.code:
         if e1.value is not None:
             return self._change(value=e1)
         else:
@@ -140,7 +131,7 @@ Expression.substitute = Expression_substitute
 
 def instantiate(self, e0, e1):
     """ recursively substitute e0 by e1, without Bracket """
-    if self == e0: # based on repr !
+    if self.code == e0.code:
         return e1
     else:
         out = copy.copy(self)
@@ -522,7 +513,7 @@ Fresh_Variable.interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, todo=None):
-    return e1 if self == e0 else self
+    return e1 if self.code == e0.code else self
 Fresh_Variable.substitute = substitute
 
      
