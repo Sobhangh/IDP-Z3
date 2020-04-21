@@ -357,7 +357,7 @@ class Sort(object):
         return Fresh_Variable(name, decl)
 
     def translate(self):
-        return self.decl.translated
+        return self.decl.translate()
 
     def getRange(self):
         return [e.translated for e in self.decl.range]

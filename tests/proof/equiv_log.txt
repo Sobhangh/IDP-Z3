@@ -10,7 +10,7 @@
     |*q
     |+ p -> true
     |== *q
-|== (q) with AConjunction
+|== !!q with Variable,Variable
 |------------
 |q ⇔ (~(r)) with Variable,Brackets
 |+ p -> true
@@ -29,7 +29,7 @@
             |+ p -> true
             |== *r
         |== ~(r) with Variable
-    |== (~(r)) with AUnary
+    |== !!~(r) with AUnary
 |== q ⇔ (~(r)) with Variable,Brackets
 |------------
 |*q
@@ -57,8 +57,8 @@
             |+ q -> true
             |== *r
         |== ~(r) with Variable
-    |== (~(r)) with AUnary
-|== ((~(r))) with AConjunction
+    |== !!~(r) with AUnary
+|== !!(~(r)) with Variable,Brackets
 |------------
 |*p
 |+ q -> true
@@ -68,25 +68,25 @@
 |+ q -> true
 |== *r
 |------------
-|((~(r))) with AConjunction
+|(~(r)) with Variable,Brackets
 |+ r -> false
     |------------
-    |(~(r)) with Brackets
+    |*true
+    |+ r -> false
+    |== *!true
+    |------------
+    |(~(r)) with AUnary
     |+ r -> false
         |------------
-        |(~(r)) with AUnary
+        |~(r) with Variable
         |+ r -> false
             |------------
-            |~(r) with Variable
+            |*r
             |+ r -> false
-                |------------
-                |*r
-                |+ r -> false
-                |== *!false
-            |== !true with Variable
-        |== !true with AUnary
-    |== !true
-|== !true with AConjunction
+            |== *!false
+        |== !true with Variable
+    |== !true with AUnary
+|== !true with Variable,Brackets
 |------------
 |*p
 |+ r -> false

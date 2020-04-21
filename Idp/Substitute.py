@@ -165,21 +165,21 @@ def update_exprs(self, new_expr_generator):
     if isinstance(new_expr_generator, list):
         new_expr_generator = iter(new_expr_generator)
     if_ = next(new_expr_generator)
+    then_ = next(new_expr_generator)
+    else_ = next(new_expr_generator)
+    sub_exprs = [if_, then_, else_]
     if if_ == TRUE:
-        return self._replace_by(next(new_expr_generator))
+            return self._change(simpler=then_, sub_exprs=sub_exprs)
     elif if_ == FALSE:
-        next(new_expr_generator)
-        return self._replace_by(next(new_expr_generator))
+            return self._change(simpler=else_, sub_exprs=sub_exprs)
     else:
-        then_ = next(new_expr_generator)
-        else_ = next(new_expr_generator)
         if then_ == else_:
-            return self._replace_by(then_)
+            return self._change(simpler=then_, sub_exprs=sub_exprs)
         elif then_ == TRUE and else_ == FALSE:
-                return self._replace_by(if_)
+            return self._change(simpler=if_  , sub_exprs=sub_exprs)
         elif then_ == FALSE and else_ == TRUE:
-                return self._replace_by(AUnary.make('~', if_))
-    return self._change(sub_exprs=[if_, then_, else_])
+            return self._change(simpler=AUnary.make('~', if_), sub_exprs=sub_exprs)
+    return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
 
 
@@ -234,11 +234,14 @@ AImplication.update_exprs = update_exprs
 
 def update_exprs(self, new_expr_generator):
     exprs = list(new_expr_generator)
+    if len(exprs)==1:
+        return self._change(simpler=exprs[1], sub_exprs=exprs)
     for e in exprs:
-        if e == TRUE:
-            return self._replace_by(AConjunction.make('∧', exprs, self.is_subtence))
-        if e == FALSE:
-            return self._replace_by(AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence))
+        if e == TRUE: # they must all be true
+            return self._change(simpler=AConjunction.make('∧', exprs, self.is_subtence), sub_exprs=exprs)
+        if e == FALSE: # they must all be false
+            return self._change(simpler=AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence),
+                              sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs
 
@@ -400,9 +403,9 @@ def update_exprs(self, new_expr_generator):
     operand = list(new_expr_generator)[0]
     if self.operator == '~':
         if operand == TRUE:
-            return self._change(value=FALSE)
+            return self._change(value=FALSE, sub_exprs=[operand])
         if operand == FALSE:
-            return self._change(value=TRUE)
+            return self._change(value=TRUE, sub_exprs=[operand])
     else: # '-'
         a = operand.as_ground()
         if a is not None:
@@ -458,7 +461,7 @@ def interpret(self, theory):
     if self.decl.interpretation is not None: # has a structure
         self.is_subtence = False
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
-        return self._replace_by(out)
+        return self._change(simpler=out, sub_exprs=sub_exprs)
     elif self.name in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs
@@ -486,16 +489,8 @@ def substitute(self, e0, e1, todo=None):
         if self.just_branch is not None:
             Log(f"{nl} definition:")
             new_branch = self.just_branch.substitute(e0, e1, todo)
-            if new_branch == self: # justification is satisfied
-                new_branch = None
-                value = TRUE
-                if todo is not None:
-                    todo.append((self, TRUE))
-            elif new_branch == AUnary.make('~', self): # justification is satisfied
-                new_branch = None
-                value = FALSE
-                if todo is not None:
-                    todo.append((self, FALSE))
+            if todo is not None:
+                todo.extend(new_branch.implicants())
             #TODO get implicants of just_branch
         return self._change(sub_exprs=new_exprs, value=value, just_branch=new_branch)
 AppliedSymbol .substitute = substitute
@@ -518,5 +513,5 @@ Fresh_Variable.substitute = substitute
 
 def update_exprs(self, new_expr_generator):
     expr = next(new_expr_generator)
-    return self._change(sub_exprs=[expr], value=expr.value)
+    return self._change(sub_exprs=[expr], simpler=expr, value=expr.value)
 Brackets.update_exprs = update_exprs

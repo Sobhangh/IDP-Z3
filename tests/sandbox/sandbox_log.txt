@@ -54,7 +54,7 @@
                             |== 1
                         |== !false with Variable,NumberConstant
                     |== !!Length(1) = Length(1) with AComparison
-                |== (Length(1) = Length(1)) with ADisjunction
+                |== !!Length(1) = Length(1) with ADisjunction
                 |------------
                 |((Length(2) = Length(1)) ∨ (Sides < 2)) with ADisjunction
                 |+ Sides -> 3
@@ -94,7 +94,7 @@
                             |== 2
                         |== !false with Variable,NumberConstant
                     |== !!Length(2) = Length(1) with AComparison
-                |== (Length(2) = Length(1)) with ADisjunction
+                |== !!Length(2) = Length(1) with ADisjunction
                 |------------
                 |((Length(3) = Length(1)) ∨ (Sides < 3)) with ADisjunction
                 |+ Sides -> 3
@@ -134,7 +134,7 @@
                             |== 3
                         |== !false with Variable,NumberConstant
                     |== !!Length(3) = Length(1) with AComparison
-                |== (Length(3) = Length(1)) with ADisjunction
+                |== !!Length(3) = Length(1) with ADisjunction
                 |------------
                 |((Length(4) = Length(1)) ∨ (Sides < 4)) with ADisjunction
                 |+ Sides -> 3
@@ -176,8 +176,8 @@
                     |== !true with AComparison
                 |== !true with ADisjunction
             |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
-        |== *((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
-    |== (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Brackets
+        |== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
+    |== !!((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Brackets
 |== Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
 |------------
 |(Sides = 3) ∨ (Sides = 4) with AComparison,AComparison
@@ -336,7 +336,7 @@
                     |== 1
                 |== !false with Variable,NumberConstant
             |== !!Length(1) = Length(1) with AComparison
-        |== (Length(1) = Length(1)) with ADisjunction
+        |== !!Length(1) = Length(1) with ADisjunction
         |------------
         |((Length(2) = Length(1)) ∨ (Sides < 2)) with ADisjunction
         |+ Sides -> 3
@@ -376,7 +376,7 @@
                     |== 2
                 |== !false with Variable,NumberConstant
             |== !!Length(2) = Length(1) with AComparison
-        |== (Length(2) = Length(1)) with ADisjunction
+        |== !!Length(2) = Length(1) with ADisjunction
         |------------
         |((Length(3) = Length(1)) ∨ (Sides < 3)) with ADisjunction
         |+ Sides -> 3
@@ -416,7 +416,7 @@
                     |== 3
                 |== !false with Variable,NumberConstant
             |== !!Length(3) = Length(1) with AComparison
-        |== (Length(3) = Length(1)) with ADisjunction
+        |== !!Length(3) = Length(1) with ADisjunction
         |------------
         |((Length(4) = Length(1)) ∨ (Sides < 4)) with ADisjunction
         |+ Sides -> 3
@@ -458,7 +458,7 @@
             |== !true with AComparison
         |== !true with ADisjunction
     |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
-|== *((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
+|== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
 |------------
 |*Sides = 4 with Variable,NumberConstant
 |+ Sides -> 3
@@ -598,7 +598,7 @@
                             |== Length(1) with NumberConstant
                         |== Length(1) = Length(1) with AppliedSymbol,AppliedSymbol
                     |== !!Length(1) = Length(1) with AComparison
-                |== (Length(1) = Length(1)) with ADisjunction
+                |== !!Length(1) = Length(1) with ADisjunction
                 |------------
                 |(Length(2) = Length(1)) with ADisjunction
                 |+ Sides -> 3
@@ -626,7 +626,7 @@
                             |== Length(1) with NumberConstant
                         |== Length(2) = Length(1) with AppliedSymbol,AppliedSymbol
                     |== !!Length(2) = Length(1) with AComparison
-                |== (Length(2) = Length(1)) with ADisjunction
+                |== !!Length(2) = Length(1) with ADisjunction
                 |------------
                 |(Length(3) = Length(1)) with ADisjunction
                 |+ Sides -> 3
@@ -654,10 +654,10 @@
                             |== Length(1) with NumberConstant
                         |== Length(3) = Length(1) with AppliedSymbol,AppliedSymbol
                     |== !!Length(3) = Length(1) with AComparison
-                |== (Length(3) = Length(1)) with ADisjunction
+                |== !!Length(3) = Length(1) with ADisjunction
             |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
-        |== *((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
-    |== (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Brackets
+        |== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
+    |== !!((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Brackets
 |== Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
 |------------
 |(Type = triangle) ∨ (Type = quadrilateral) with AComparison,AComparison
@@ -788,7 +788,7 @@
                     |== Length(1) with NumberConstant
                 |== Length(1) = Length(1) with AppliedSymbol,AppliedSymbol
             |== !!Length(1) = Length(1) with AComparison
-        |== (Length(1) = Length(1)) with ADisjunction
+        |== !!Length(1) = Length(1) with ADisjunction
         |------------
         |(Length(2) = Length(1)) with ADisjunction
         |+ Sides -> 3
@@ -816,7 +816,7 @@
                     |== Length(1) with NumberConstant
                 |== Length(2) = Length(1) with AppliedSymbol,AppliedSymbol
             |== !!Length(2) = Length(1) with AComparison
-        |== (Length(2) = Length(1)) with ADisjunction
+        |== !!Length(2) = Length(1) with ADisjunction
         |------------
         |(Length(3) = Length(1)) with ADisjunction
         |+ Sides -> 3
@@ -844,9 +844,9 @@
                     |== Length(1) with NumberConstant
                 |== Length(3) = Length(1) with AppliedSymbol,AppliedSymbol
             |== !!Length(3) = Length(1) with AComparison
-        |== (Length(3) = Length(1)) with ADisjunction
+        |== !!Length(3) = Length(1) with ADisjunction
     |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
-|== *((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
+|== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
 |------------
 |*false with Variable,NumberConstant
 |+ Sides -> 3
@@ -979,7 +979,7 @@ Z3 propagation ********************************
                             |== Length(1) with NumberConstant
                         |== Length(1) = Length(1) with AppliedSymbol,AppliedSymbol
                     |== !!Length(1) = Length(1) with AComparison
-                |== (Length(1) = Length(1)) with ADisjunction
+                |== !!Length(1) = Length(1) with ADisjunction
                 |------------
                 |(Length(2) = Length(1)) with ADisjunction
                 |+ Sides = 4 -> false  (or false -> false)
@@ -1007,7 +1007,7 @@ Z3 propagation ********************************
                             |== Length(1) with NumberConstant
                         |== Length(2) = Length(1) with AppliedSymbol,AppliedSymbol
                     |== !!Length(2) = Length(1) with AComparison
-                |== (Length(2) = Length(1)) with ADisjunction
+                |== !!Length(2) = Length(1) with ADisjunction
                 |------------
                 |(Length(3) = Length(1)) with ADisjunction
                 |+ Sides = 4 -> false  (or false -> false)
@@ -1035,10 +1035,10 @@ Z3 propagation ********************************
                             |== Length(1) with NumberConstant
                         |== Length(3) = Length(1) with AppliedSymbol,AppliedSymbol
                     |== !!Length(3) = Length(1) with AComparison
-                |== (Length(3) = Length(1)) with ADisjunction
+                |== !!Length(3) = Length(1) with ADisjunction
             |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
-        |== *((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
-    |== (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Brackets
+        |== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
+    |== !!((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Brackets
 |== Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
 |------------
 |*Sides = 3 with Variable,NumberConstant
@@ -1089,7 +1089,7 @@ Z3 propagation ********************************
                     |== Length(1) with NumberConstant
                 |== Length(1) = Length(1) with AppliedSymbol,AppliedSymbol
             |== !!Length(1) = Length(1) with AComparison
-        |== (Length(1) = Length(1)) with ADisjunction
+        |== !!Length(1) = Length(1) with ADisjunction
         |------------
         |(Length(2) = Length(1)) with ADisjunction
         |+ Sides = 4 -> false  (or false -> false)
@@ -1117,7 +1117,7 @@ Z3 propagation ********************************
                     |== Length(1) with NumberConstant
                 |== Length(2) = Length(1) with AppliedSymbol,AppliedSymbol
             |== !!Length(2) = Length(1) with AComparison
-        |== (Length(2) = Length(1)) with ADisjunction
+        |== !!Length(2) = Length(1) with ADisjunction
         |------------
         |(Length(3) = Length(1)) with ADisjunction
         |+ Sides = 4 -> false  (or false -> false)
@@ -1145,9 +1145,9 @@ Z3 propagation ********************************
                     |== Length(1) with NumberConstant
                 |== Length(3) = Length(1) with AppliedSymbol,AppliedSymbol
             |== !!Length(3) = Length(1) with AComparison
-        |== (Length(3) = Length(1)) with ADisjunction
+        |== !!Length(3) = Length(1) with ADisjunction
     |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
-|== *((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
+|== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
 |------------
 |*Type = triangle with Variable,Constructor
 |+ Sides = 4 -> false  (or false -> false)

@@ -141,6 +141,9 @@ Simplified:
 Irrelevant:  
   ~same(-1) = 0
   ~same(-1) = 1
+  ~negated(-1) = -1
+  ~negated(-1) = 0
+  negated(-1) = 1
 
 
 -- meta -------------------------------------
@@ -168,21 +171,21 @@ Irrelevant:
              'negated(-1) = -1': {'environmental': False,
                                   'normal': False,
                                   'reading': 'negated(-1) = -1',
-                                  'relevant': True,
+                                  'relevant': False,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
              'negated(-1) = 0': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(-1) = 0',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': False},
              'negated(-1) = 1': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(-1) = 1',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': True},

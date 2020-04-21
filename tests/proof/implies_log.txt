@@ -29,7 +29,7 @@
             |+ p -> true
             |== *r
         |== ~(r) with Variable
-    |== (~(r)) with AUnary
+    |== !!~(r) with AUnary
 |== q ⇒ (~(r)) with Variable,Brackets
 |------------
 |*q
@@ -57,7 +57,7 @@
             |+ q -> true
             |== *r
         |== ~(r) with Variable
-    |== (~(r)) with AUnary
+    |== !!~(r) with AUnary
 |== !!(~(r)) with Variable,Brackets
 |------------
 |*p

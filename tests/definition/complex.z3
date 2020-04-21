@@ -183,10 +183,25 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
+  -1 = same(-1)
+  ~negated(-1) = (0)
+  ~-1 = same(0)
   ~negated(-1) = (-1)
   ~-1 = same(1)
+  ~negated(-1) = same(-1)
+  ~negated(-1) = same(0)
+  negated(-1) = same(1)
+  same(-1) = -1
+  ~same(-1) = 0
+  ~same(-1) = 1
+  ~same(0) = -1
+  same(0) = 0
+  ~same(0) = 1
   ~same(1) = -1
   ~same(1) = 0
+  ~negated(-1) = -1
+  ~negated(-1) = 0
+  negated(-1) = 1
 
 
 -- meta -------------------------------------
@@ -214,7 +229,7 @@ Irrelevant:
              'negated(-1) = (0)': {'environmental': False,
                                    'normal': False,
                                    'reading': '$negated$ = (0 - x)',
-                                   'relevant': True,
+                                   'relevant': False,
                                    'status': 'CONSEQUENCE',
                                    'typ': 'Bool',
                                    'value': False},
@@ -228,42 +243,42 @@ Irrelevant:
              'negated(-1) = -1': {'environmental': False,
                                   'normal': False,
                                   'reading': 'negated(-1) = -1',
-                                  'relevant': True,
+                                  'relevant': False,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
              'negated(-1) = 0': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(-1) = 0',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': False},
              'negated(-1) = 1': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(-1) = 1',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': True},
              'negated(-1) = same(-1)': {'environmental': False,
                                         'normal': False,
                                         'reading': '$negated!0$ = same(x)',
-                                        'relevant': True,
+                                        'relevant': False,
                                         'status': 'CONSEQUENCE',
                                         'typ': 'Bool',
                                         'value': False},
              'negated(-1) = same(0)': {'environmental': False,
                                        'normal': False,
                                        'reading': '$negated!0$ = same(x)',
-                                       'relevant': True,
+                                       'relevant': False,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'Bool',
                                        'value': False},
              'negated(-1) = same(1)': {'environmental': False,
                                        'normal': False,
                                        'reading': '$negated!0$ = same(x)',
-                                       'relevant': True,
+                                       'relevant': False,
                                        'status': 'CONSEQUENCE',
                                        'typ': 'Bool',
                                        'value': True},
@@ -328,14 +343,14 @@ Irrelevant:
  'same': {'-1 = same(-1)': {'environmental': False,
                             'normal': False,
                             'reading': '$negated!0$ = same(x)',
-                            'relevant': True,
+                            'relevant': False,
                             'status': 'CONSEQUENCE',
                             'typ': 'Bool',
                             'value': True},
           '-1 = same(0)': {'environmental': False,
                            'normal': False,
                            'reading': '$negated!0$ = same(x)',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
@@ -364,21 +379,21 @@ Irrelevant:
           'same(-1) = -1': {'environmental': False,
                             'normal': False,
                             'reading': 'same(-1) = -1',
-                            'relevant': True,
+                            'relevant': False,
                             'status': 'CONSEQUENCE',
                             'typ': 'Bool',
                             'value': True},
           'same(-1) = 0': {'environmental': False,
                            'normal': False,
                            'reading': 'same(-1) = 0',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
           'same(-1) = 1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(-1) = 1',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
@@ -400,21 +415,21 @@ Irrelevant:
           'same(0) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(0) = -1',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
           'same(0) = 0': {'environmental': False,
                           'normal': False,
                           'reading': 'same(0) = 0',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': True},
           'same(0) = 1': {'environmental': False,
                           'normal': False,
                           'reading': 'same(0) = 1',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': False},

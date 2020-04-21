@@ -96,16 +96,11 @@ class Expression(object):
         return out
 
     def __eq__(self, other):
-        self  = self.value   if self.value   is not None \
-           else self.simpler if self.simpler is not None \
-           else self
-        other = other.value   if other.value   is not None \
-           else other.simpler if other.simpler is not None \
-           else other
-        if isinstance(self, Brackets):
-            return self.sub_exprs[0] == other
-        if isinstance(other, Brackets):
-            return self == other.sub_exprs[0]
+        if self.value   is not None: return self.value == other
+        if self.simpler is not None: return self.simpler == other
+        if other.value   is not None: return self == other.value
+        if other.simpler is not None: return self == other.simpler
+
         # beware: this does not ignore meaningless brackets deeper in the tree
         if self.str == other.str:
             if type(self)==type(other)\
@@ -138,7 +133,12 @@ class Expression(object):
             self._subtences = {}
             if self.is_subtence:
                 self._subtences[self.code]= self
-            self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
+            if self.value is not None:
+                pass
+            elif self.simpler is not None:
+                self._subtences.update(self.simpler.subtences())
+            else:
+                self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
             if self.just_branch is not None:
                 self._subtences.update(self.just_branch.subtences())
         return self._subtences
@@ -738,8 +738,9 @@ class Brackets(Expression):
         else: # Annotations instance
             self.annotations = annotations.annotations
         self.fresh_vars = set()
+        self.simpler = self.sub_exprs[0]
 
-    @use_value
+    # don't @use_value, to have parenthesis
     def __str__(self): return f"({str(self.sub_exprs[0])})"
 
     def as_ground(self): 

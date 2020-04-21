@@ -1,14 +1,14 @@
 
 |------------
-|1
+|1 with Constructor,NumberConstant,NumberConstant
 |+ c -> red
-|== 1
+|== !1 with Constructor,NumberConstant,NumberConstant
 |------------
-|1
+|1 with Constructor,NumberConstant,NumberConstant
 |+ c -> blue
-|== 1
+|== !1 with Constructor,NumberConstant,NumberConstant
 |------------
-|1
+|1 with Constructor,NumberConstant,NumberConstant
 |+ c -> green
-|== 1
+|== !1 with Constructor,NumberConstant,NumberConstant
 Z3 propagation ********************************

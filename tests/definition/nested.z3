@@ -87,6 +87,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
+  ~negated(Piet) = Piet
   ~same(Piet) = Jan
 
 
@@ -137,7 +138,7 @@ Irrelevant:
              'negated(Piet) = Piet': {'environmental': False,
                                       'normal': False,
                                       'reading': 'negated(Piet) = Piet',
-                                      'relevant': True,
+                                      'relevant': False,
                                       'status': 'CONSEQUENCE',
                                       'typ': 'Bool',
                                       'value': False}},
