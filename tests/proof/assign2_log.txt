@@ -22,12 +22,12 @@
                     |x
                     |+ x -> 0
                     |== !0
-                |== 1
+                |== !1 with NumberConstant
                 |------------
                 |1
                 |+ x -> 0
                 |== 1
-            |== *!true with NumberConstant,NumberConstant
+            |== *!true with ASumMinus,NumberConstant
         |== !true with AComparison
     |== !false with Brackets
     |------------
@@ -47,12 +47,12 @@
                 |x
                 |+ x -> 0
                 |== !0
-            |== 1
+            |== !1 with NumberConstant
             |------------
             |1
             |+ x -> 0
             |== 1
-        |== *!true with NumberConstant,NumberConstant
+        |== *!true with ASumMinus,NumberConstant
     |== !true with AComparison
 |== !true with Brackets
 |------------
@@ -69,16 +69,16 @@
         |x
         |+ x -> 0
         |== !0
-    |== 1
+    |== !1 with NumberConstant
     |------------
     |1
     |+ x -> 0
     |== 1
-|== *!true with NumberConstant,NumberConstant
+|== *!true with ASumMinus,NumberConstant
 |------------
-|*true with NumberConstant,NumberConstant
+|*true with ASumMinus,NumberConstant
 |+ x -> 0
-|== *!true with NumberConstant,NumberConstant
+|== *!true with ASumMinus,NumberConstant
 Z3 propagation ********************************
 |------------
 |*x = 0 with Variable,NumberConstant

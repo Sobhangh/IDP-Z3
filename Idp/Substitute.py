@@ -352,7 +352,7 @@ def update_arith(self, family, new_expr_generator):
     else:
         exprs = [NumberConstant(number=str(acc))] + exprs
     if len(exprs)==1:
-        return self._replace_by(exprs[0])
+        return self._change(simpler=exprs[0], sub_exprs=exprs, ops=ops)
     return self._change(sub_exprs=exprs, ops=ops)
 
 
@@ -374,7 +374,7 @@ def update_exprs(self, new_expr_generator):
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
             out = operands1[0].translate() % operands1[1].translate()
-            return self._replace_by(NumberConstant(number=str(out)))
+            return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
         else:
             return self._change(sub_exprs=operands)
     return update_arith(self, '*', new_expr_generator)
@@ -390,7 +390,7 @@ def update_exprs(self, new_expr_generator):
     if len(operands) == 2 \
     and all(e is not None for e in operands1):
         out = operands1[0].translate() ** operands1[1].translate()
-        return self._replace_by(NumberConstant(number=str(out)))
+        return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
     else:
         return self._change(sub_exprs=operands)
 APower.update_exprs = update_exprs

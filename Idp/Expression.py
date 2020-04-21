@@ -371,7 +371,7 @@ class BinaryOperator(Expression):
 
     def mark_subtences(self):
         super().mark_subtences()
-        if self.operator[0] in '=<>≤≥≠':
+        if 0 < len(self.operator) and self.operator[0] in '=<>≤≥≠':
             self.is_subtence = (len(self.fresh_vars)==0)
             self.fresh_vars.discard('!*') # indicates AppliedSymbol with complex expressions
         return self
