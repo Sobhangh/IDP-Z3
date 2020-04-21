@@ -107,8 +107,8 @@ negated(1) = 1
 Type:        
   
 Definitions: 
-  Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔($same$ = $same!0$)
-  Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔($negated$ = (-($negated!0$)))
+  Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔$same$ = $same!0$
+  Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔$negated$ = (-($negated!0$))
 Universals:  
   same(-1) = -1
 Consequences:

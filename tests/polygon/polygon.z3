@@ -250,8 +250,10 @@ Subtype = irregular
 Subtype = square
 Subtype = rectangle
 ∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+Length(1) = Length(3)
 Perimeter = (sum{n[side] : true : Length(n)})
 (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+∀x[side] : 0 ≤ Length(x)
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
@@ -290,8 +292,10 @@ Subtype = irregular
 Subtype = square
 Subtype = rectangle
 ∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+Length(1) = Length(3)
 Perimeter = (sum{n[side] : true : Length(n)})
 (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+∀x[side] : 0 ≤ Length(x)
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
@@ -338,6 +342,8 @@ Simplified:
   (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
 Irrelevant:  
   ~∀n[side] : Length(n) < Length(n + 1)
+  ~Length(1) = Length(3)
+  ~∀x[side] : 0 ≤ Length(x)
 
 
 -- meta -------------------------------------

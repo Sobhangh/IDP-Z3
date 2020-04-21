@@ -18,7 +18,7 @@
         |+ p -> true
         |== *q
     |== ~(q) with Variable
-|== (~(q)) with AUnary
+|== !!~(q) with AUnary
 |------------
 |q ∨ r with Variable,Variable
 |+ p -> true
@@ -40,7 +40,7 @@
 |+ p -> true
 |== *r
 |------------
-|(~(q)) with AUnary
+|~(q) with AUnary
 |+ q -> false
     |------------
     |~(q) with Variable
@@ -62,7 +62,7 @@
     |*r
     |+ q -> false
     |== *r
-|== r with Variable
+|== !!r with Variable
 |------------
 |*p
 |+ q -> false

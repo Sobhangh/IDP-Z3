@@ -10,7 +10,7 @@
     |*q
     |+ p -> true
     |== *q
-|== (q) with Variable
+|== !!q with Variable,Variable
 |------------
 |q ⇒ (~(r)) with Variable,Brackets
 |+ p -> true
@@ -58,7 +58,7 @@
             |== *r
         |== ~(r) with Variable
     |== (~(r)) with AUnary
-|== ((~(r))) with Brackets
+|== !!(~(r)) with Variable,Brackets
 |------------
 |*p
 |+ q -> true
@@ -68,8 +68,12 @@
 |+ q -> true
 |== *r
 |------------
-|((~(r))) with Brackets
+|(~(r)) with Variable,Brackets
 |+ r -> false
+    |------------
+    |*true
+    |+ r -> false
+    |== *!true
     |------------
     |(~(r)) with AUnary
     |+ r -> false
@@ -82,7 +86,7 @@
             |== *!false
         |== !true with Variable
     |== !true with AUnary
-|== !true with Brackets
+|== !true with Variable,Brackets
 |------------
 |*p
 |+ r -> false

@@ -48,7 +48,7 @@ t1 = Piet
 Type:        
   
 Definitions: 
-  Rule:∀['$t$'][]: t($t$) ⇔(($t$ = t0)) ∨ (($t$ = t1))
+  Rule:∀['$t$'][]: t($t$) ⇔($t$ = t0) ∨ ($t$ = t1)
 Universals:  
   t0 = Piet
 Consequences:

@@ -428,10 +428,10 @@ Z3 propagation ********************************
                         |+ red = c -> false
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ red = c -> false
@@ -565,7 +565,7 @@ Z3 propagation ********************************
 |*codeOf(red) = b with AppliedSymbol,Constructor
 |+ codeOf(red) = a -> false  (or false -> false)
     |------------
-    |codeOf(red) with Constructor just ((codeOf(red) = b))
+    |codeOf(red) with Constructor just (codeOf(red) = b)
     |+ codeOf(red) = a -> false  (or false -> false)
         |------------
         |red
@@ -573,13 +573,13 @@ Z3 propagation ********************************
         |== red
  definition:
         |------------
-        |((codeOf(red) = b)) with Brackets
+        |(codeOf(red) = b) with Brackets
         |+ codeOf(red) = a -> false  (or false -> false)
             |------------
-            |((codeOf(red) = b)) with AConjunction
+            |(codeOf(red) = b) with AConjunction
             |+ codeOf(red) = a -> false  (or false -> false)
                 |------------
-                |(codeOf(red) = b) with AComparison
+                |codeOf(red) = b with AComparison
                 |+ codeOf(red) = a -> false  (or false -> false)
                     |------------
                     |*codeOf(red) = b with AppliedSymbol,Constructor
@@ -597,10 +597,10 @@ Z3 propagation ********************************
                         |+ codeOf(red) = a -> false  (or false -> false)
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ codeOf(red) = a -> false  (or false -> false)
@@ -722,7 +722,7 @@ Z3 propagation ********************************
 |*codeOf(red) = b with AppliedSymbol,Constructor
 |+ codeOf(blue) -> a
     |------------
-    |codeOf(red) with Constructor just ((codeOf(red) = b))
+    |codeOf(red) with Constructor just (codeOf(red) = b)
     |+ codeOf(blue) -> a
         |------------
         |red
@@ -730,13 +730,13 @@ Z3 propagation ********************************
         |== red
  definition:
         |------------
-        |((codeOf(red) = b)) with Brackets
+        |(codeOf(red) = b) with Brackets
         |+ codeOf(blue) -> a
             |------------
-            |((codeOf(red) = b)) with AConjunction
+            |(codeOf(red) = b) with AConjunction
             |+ codeOf(blue) -> a
                 |------------
-                |(codeOf(red) = b) with AComparison
+                |codeOf(red) = b with AComparison
                 |+ codeOf(blue) -> a
                     |------------
                     |*codeOf(red) = b with AppliedSymbol,Constructor
@@ -754,10 +754,10 @@ Z3 propagation ********************************
                         |+ codeOf(blue) -> a
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ codeOf(blue) -> a
@@ -847,7 +847,7 @@ Z3 propagation ********************************
 |*codeOf(red) = b with AppliedSymbol,Constructor
 |+ codeOf(blue) -> a
     |------------
-    |codeOf(red) with Constructor just ((codeOf(red) = b))
+    |codeOf(red) with Constructor just (codeOf(red) = b)
     |+ codeOf(blue) -> a
         |------------
         |red
@@ -855,13 +855,13 @@ Z3 propagation ********************************
         |== red
  definition:
         |------------
-        |((codeOf(red) = b)) with Brackets
+        |(codeOf(red) = b) with Brackets
         |+ codeOf(blue) -> a
             |------------
-            |((codeOf(red) = b)) with AConjunction
+            |(codeOf(red) = b) with AConjunction
             |+ codeOf(blue) -> a
                 |------------
-                |(codeOf(red) = b) with AComparison
+                |codeOf(red) = b with AComparison
                 |+ codeOf(blue) -> a
                     |------------
                     |*codeOf(red) = b with AppliedSymbol,Constructor
@@ -879,10 +879,10 @@ Z3 propagation ********************************
                         |+ codeOf(blue) -> a
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ codeOf(blue) -> a
@@ -964,7 +964,7 @@ Z3 propagation ********************************
 |*codeOf(red) = b with AppliedSymbol,Constructor
 |+ codeOf(blue) = b -> false  (or false -> false)
     |------------
-    |codeOf(red) with Constructor just ((codeOf(red) = b))
+    |codeOf(red) with Constructor just (codeOf(red) = b)
     |+ codeOf(blue) = b -> false  (or false -> false)
         |------------
         |red
@@ -972,13 +972,13 @@ Z3 propagation ********************************
         |== red
  definition:
         |------------
-        |((codeOf(red) = b)) with Brackets
+        |(codeOf(red) = b) with Brackets
         |+ codeOf(blue) = b -> false  (or false -> false)
             |------------
-            |((codeOf(red) = b)) with AConjunction
+            |(codeOf(red) = b) with AConjunction
             |+ codeOf(blue) = b -> false  (or false -> false)
                 |------------
-                |(codeOf(red) = b) with AComparison
+                |codeOf(red) = b with AComparison
                 |+ codeOf(blue) = b -> false  (or false -> false)
                     |------------
                     |*codeOf(red) = b with AppliedSymbol,Constructor
@@ -996,10 +996,10 @@ Z3 propagation ********************************
                         |+ codeOf(blue) = b -> false  (or false -> false)
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ codeOf(blue) = b -> false  (or false -> false)
@@ -1076,12 +1076,12 @@ Z3 propagation ********************************
         |+ c = red -> false
         |== blue
     |== *c = blue with Variable,Constructor
-|== (c = blue) with AComparison
+|== !!c = blue with AComparison
 |------------
 |*codeOf(red) = b with AppliedSymbol,Constructor
 |+ c = red -> false
     |------------
-    |codeOf(red) with Constructor just ((codeOf(red) = b))
+    |codeOf(red) with Constructor just (codeOf(red) = b)
     |+ c = red -> false
         |------------
         |red
@@ -1089,13 +1089,13 @@ Z3 propagation ********************************
         |== red
  definition:
         |------------
-        |((codeOf(red) = b)) with Brackets
+        |(codeOf(red) = b) with Brackets
         |+ c = red -> false
             |------------
-            |((codeOf(red) = b)) with AConjunction
+            |(codeOf(red) = b) with AConjunction
             |+ c = red -> false
                 |------------
-                |(codeOf(red) = b) with AComparison
+                |codeOf(red) = b with AComparison
                 |+ c = red -> false
                     |------------
                     |*codeOf(red) = b with AppliedSymbol,Constructor
@@ -1113,10 +1113,10 @@ Z3 propagation ********************************
                         |+ c = red -> false
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ c = red -> false
@@ -1174,7 +1174,7 @@ Z3 propagation ********************************
 |*codeOf(red) = b with AppliedSymbol,Constructor
 |+ c -> blue
     |------------
-    |codeOf(red) with Constructor just ((codeOf(red) = b))
+    |codeOf(red) with Constructor just (codeOf(red) = b)
     |+ c -> blue
         |------------
         |red
@@ -1182,13 +1182,13 @@ Z3 propagation ********************************
         |== red
  definition:
         |------------
-        |((codeOf(red) = b)) with Brackets
+        |(codeOf(red) = b) with Brackets
         |+ c -> blue
             |------------
-            |((codeOf(red) = b)) with AConjunction
+            |(codeOf(red) = b) with AConjunction
             |+ c -> blue
                 |------------
-                |(codeOf(red) = b) with AComparison
+                |codeOf(red) = b with AComparison
                 |+ c -> blue
                     |------------
                     |*codeOf(red) = b with AppliedSymbol,Constructor
@@ -1206,10 +1206,10 @@ Z3 propagation ********************************
                         |+ c -> blue
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ c -> blue
@@ -1267,7 +1267,7 @@ Z3 propagation ********************************
 |*codeOf(red) = b with AppliedSymbol,Constructor
 |+ c -> blue
     |------------
-    |codeOf(red) with Constructor just ((codeOf(red) = b))
+    |codeOf(red) with Constructor just (codeOf(red) = b)
     |+ c -> blue
         |------------
         |red
@@ -1275,13 +1275,13 @@ Z3 propagation ********************************
         |== red
  definition:
         |------------
-        |((codeOf(red) = b)) with Brackets
+        |(codeOf(red) = b) with Brackets
         |+ c -> blue
             |------------
-            |((codeOf(red) = b)) with AConjunction
+            |(codeOf(red) = b) with AConjunction
             |+ c -> blue
                 |------------
-                |(codeOf(red) = b) with AComparison
+                |codeOf(red) = b with AComparison
                 |+ c -> blue
                     |------------
                     |*codeOf(red) = b with AppliedSymbol,Constructor
@@ -1299,10 +1299,10 @@ Z3 propagation ********************************
                         |+ c -> blue
                         |== b
                     |== *codeOf(red) = b with AppliedSymbol,Constructor
-                |== (codeOf(red) = b) with AComparison
-            |== ((codeOf(red) = b)) with AConjunction
-        |== ((codeOf(red) = b)) with Brackets
-    |== codeOf(red) with Constructor just ((codeOf(red) = b))
+                |== !!codeOf(red) = b with AComparison
+            |== (codeOf(red) = b) with AConjunction
+        |== !!(codeOf(red) = b) with Brackets
+    |== codeOf(red) with Constructor just (codeOf(red) = b)
     |------------
     |b
     |+ c -> blue

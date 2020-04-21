@@ -45,7 +45,7 @@ class DSLException(Exception):
         return self.message
 
 def use_value(function):
-    " decorator for str(), mark_subtences(), translate() "
+    " decorator for str(), translate() "
     def _wrapper(*args, **kwds):
         self = args[0]
         if self.value   is not None: 
@@ -96,26 +96,22 @@ class Expression(object):
         return out
 
     def __eq__(self, other):
-        if self.value is not None and other.value is not None:
-            return str(self.value) == str(other.value)
-        # hack
-        self  = self if self.value is None else self.value
-        other = other if other.value is None else other.value
+        self  = self.value   if self.value   is not None \
+           else self.simpler if self.simpler is not None \
+           else self
+        other = other.value   if other.value   is not None \
+           else other.simpler if other.simpler is not None \
+           else other
         if isinstance(self, Brackets):
             return self.sub_exprs[0] == other
         if isinstance(other, Brackets):
             return self == other.sub_exprs[0]
-        if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
-            return self.sub_exprs[0] == other
-        if type(other) in [AConjunction, ADisjunction] and len(other.sub_exprs)==1:
-            return self == other.sub_exprs[0]
         # beware: this does not ignore meaningless brackets deeper in the tree
         if self.str == other.str:
-            if type(self)!=type(other)\
-            and not(type(other).__name__=="Equality" and type(self)==AComparison)\
-            and not(type(self)==Fresh_Variable and type(other)== Symbol):
-                return False
-            return True
+            if type(self)==type(other)\
+            or (type(other).__name__=="Equality" and type(self)==AComparison):
+                return True
+            return False
         return False
 
     def __repr__(self): return str(self)
@@ -129,7 +125,6 @@ class Expression(object):
 
     def annotate1(self): return self
 
-    @use_value
     def mark_subtences(self):
         self.fresh_vars = set()
         for e in self.sub_exprs: 
@@ -143,11 +138,7 @@ class Expression(object):
             self._subtences = {}
             if self.is_subtence:
                 self._subtences[self.code]= self
-            if self.value is None:
-                if self.simpler is None:
-                    self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
-                else:
-                    self._subtences.update(self.simpler.subtences())
+            self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
             if self.just_branch is not None:
                 self._subtences.update(self.just_branch.subtences())
         return self._subtences
@@ -219,6 +210,7 @@ class IfExpr(Expression):
     @classmethod
     def make(cls, if_f, then_f, else_f):
         out = (cls)(if_f=if_f, then_f=then_f, else_f=else_f)
+        out.fresh_vars = set()
         return out.annotate1().simplify1()
         
     @use_value
@@ -257,6 +249,7 @@ class AQuantification(Expression):
         out = cls(q=q, vars=list(decls.values()), sorts=list(v.decl for v in decls.values()), f=f)
         out.q_vars = decls
         out.is_subtence = is_subtence
+        out.fresh_vars = set()
         return out
 
     @use_value
@@ -273,7 +266,6 @@ class AQuantification(Expression):
         self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
         return self
 
-    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         # remove q_vars
@@ -351,6 +343,7 @@ class BinaryOperator(Expression):
                 o = Brackets(f=o, annotations={'reading': None})
             operands1.append(o)
         out = (cls)(sub_exprs=operands1, operator=ops)
+        out.fresh_vars = set()
         out.is_subtence = is_subtence
         return out.annotate1().simplify1()
         
@@ -376,7 +369,6 @@ class BinaryOperator(Expression):
                    else self.sub_exprs[0].type # constructed type, without arithmetic
         return self
 
-    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         if self.operator[0] in '=<>≤≥≠':
@@ -486,6 +478,7 @@ class AUnary(Expression):
     @classmethod
     def make(cls, op, expr, is_subtence=False):
         out = AUnary(operator=op, f=expr)
+        out.fresh_vars = set()
         out.is_subtence = is_subtence
         return out.annotate1().simplify1()
 
@@ -550,7 +543,6 @@ class AAggregate(Expression):
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         return self
 
-    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         # remove q_vars
@@ -582,6 +574,7 @@ class AppliedSymbol(Expression):
             out = Variable(name=s.name)
         # annotate
         out.decl = s.decl
+        out.fresh_vars = set()
         out.is_subtence = is_subtence
         return out.annotate1()
 
@@ -598,7 +591,6 @@ class AppliedSymbol(Expression):
         self.normal = True
         return self.annotate1()
 
-    @use_value
     def mark_subtences(self):
         super().mark_subtences()
         if any(type(e) in [Brackets, AppliedSymbol, AUnary, BinaryOperator] for e in self.sub_exprs):
@@ -666,7 +658,6 @@ class Variable(AppliedSymbol):
             self.normal = True # make sure it is visible in GUI
         return self
 
-    @use_value
     def mark_subtences(self):
         self.fresh_vars = set()
         self.is_subtence = self.type == 'bool'
@@ -697,7 +688,6 @@ class Fresh_Variable(Expression):
     @use_value
     def __str__(self): return self.name
 
-    @use_value
     def mark_subtences(self):
         self.fresh_vars = set([self.name])
         return self
@@ -747,6 +737,7 @@ class Brackets(Expression):
             self.annotations['reading'] = None
         else: # Annotations instance
             self.annotations = annotations.annotations
+        self.fresh_vars = set()
 
     @use_value
     def __str__(self): return f"({str(self.sub_exprs[0])})"

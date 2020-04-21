@@ -36,7 +36,7 @@ Universals:
 Consequences:
   q
 Simplified:  
-  ((r ∨ s))
+  (r ∨ s)
 Irrelevant:  
   
 

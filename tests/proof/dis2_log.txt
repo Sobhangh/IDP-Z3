@@ -14,7 +14,7 @@
     |*q
     |+ p -> true
     |== *q
-|== q with Variable
+|== !!q with Variable
 |------------
 |*q
 |+ p -> true

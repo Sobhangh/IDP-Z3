@@ -59,13 +59,20 @@ def _replace_by(self, by):
 Expression._replace_by = _replace_by
 
 
-def _change(self, sub_exprs=None, ops=None, value=None, just_branch=None):
+def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branch=None):
     " change attributes of an expression, and erase derive attributes "
 
     if sub_exprs   is not None: self.sub_exprs = sub_exprs
     if ops         is not None: self.operator  = ops
     if just_branch is not None: self.just_branch = just_branch
-    if value       is not None: self.value = value
+    if value       is not None: self.value     = value
+    elif simpler   is not None: 
+        if type(simpler) in [Constructor, NumberConstant]:
+            self.value   = simpler
+        elif simpler.value is not None: # example: prime.idp
+            self.value   = simpler.value
+        else:
+            self.simpler = simpler
     assert value is None or type(value) in [Constructor, NumberConstant]
     
     # reset derived attributes
@@ -100,7 +107,7 @@ def log(function):
         out = function(*args, *kwds)
         indent -=4
         Log( f"{nl}|== {'*' if out.is_subtence else ''}"
-             f"{'!'+str(out.value) if out.value is not None else str(out)}"
+             f"{'!'+str(out.value) if out.value is not None else '!!'+str(out.simpler) if out.simpler is not None else str(out)}"
              f"{' with '+','.join(e.__class__.__name__ for e in out.sub_exprs) if out.sub_exprs else ''}"
              f"{f' just {str(out.just_branch)}' if out.just_branch else ''}"
           , indent )
@@ -115,14 +122,7 @@ def Expression_substitute(self, e0, e1, todo=None):
     if self.value is not None:
         return self
     elif self.code == e0.code:
-        if type(e1) in [Constructor, NumberConstant]:
-            return self._change(value=e1)
-        if e1.value is not None:
-            return self._change(value=e1)
-        else:
-            return self._replace_by(e1)
-    elif self.simpler is not None:
-        return self.simpler.substitute(e0, e1, todo)
+        return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
     return out
@@ -216,15 +216,16 @@ AQuantification.expand_quantifiers = expand_quantifiers
 
 def update_exprs(self, new_expr_generator):
     exprs = list(new_expr_generator)
+    value, simpler = None, None
     if exprs[0] == FALSE: # (false => p) is true
-        return self._replace_by(TRUE)
+        value = TRUE
     if exprs[0] == TRUE: # (true => p) is p
-        return self._replace_by(exprs[1])
+        simpler = exprs[1]
     if exprs[1] == TRUE: # (p => true) is true
-        return self._replace_by(TRUE)
+        value = TRUE
     if exprs[1] == FALSE: # (p => false) is ~p
-        return self._replace_by(AUnary.make('~', exprs[0]))
-    return self._change(sub_exprs=exprs)
+        simpler = AUnary.make('~', exprs[0])
+    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AImplication.update_exprs = update_exprs
 
 
@@ -246,7 +247,6 @@ AEquivalence.update_exprs = update_exprs
 # Class ADisjunction #######################################################
 
 def update_exprs(self, new_expr_generator):
-    
     exprs, is_true = [], False
     for expr in new_expr_generator:
         if expr == TRUE:
@@ -255,10 +255,13 @@ def update_exprs(self, new_expr_generator):
             pass
         else:
             exprs.append(expr)
-            
+
+    value, simpler = None, None
     if len(exprs) == 0: # all disjuncts are False
-        return self._change(value=FALSE)
-    return self._change(sub_exprs=exprs)
+        value = FALSE
+    if len(exprs) == 1:
+         simpler=exprs[0]
+    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
 
 
@@ -267,7 +270,6 @@ ADisjunction.update_exprs = update_exprs
 
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_expr_generator):
-    
     exprs, is_false = [], False
     for expr in new_expr_generator:
         if expr == TRUE:
@@ -277,9 +279,12 @@ def update_exprs(self, new_expr_generator):
         else:
             exprs.append(expr)
 
+    value, simpler = None, None
     if len(exprs) == 0:  # all conjuncts are True
-        return self._change(value=TRUE)
-    return self._change(sub_exprs=exprs)
+        value = TRUE
+    if len(exprs) == 1:
+        simpler = exprs[0]
+    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
 
 
@@ -290,13 +295,13 @@ def update_exprs(self, new_expr_generator):
     operands = list(new_expr_generator)
     operands1 = [e.as_ground() for e in operands]
     if all(e is not None for e in operands1):
-        acc = operands1[0]
+        acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
-        for op, expr in zip(self.operator, operands1[1:]):
-            if not (BinaryOperator.MAP[op]) (acc.translate(), expr.translate()):
-                return self._change(value=FALSE)
-            acc = expr
-        return self._change(value=TRUE)
+        for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
+            if not (BinaryOperator.MAP[op]) (acc1.translate(), expr1.translate()):
+                return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+            acc, acc1 = expr, expr1
+        return self._change(value=TRUE, sub_exprs=operands)
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
@@ -469,38 +474,30 @@ def substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
     global Expression_substitute
 
+    if type(e1) == Fresh_Variable:
+        return self._replace_by(e1)
     if self.value is not None:
         return self
     elif self == e0: # first == based on repr !
-        if type(e1) in [Constructor, NumberConstant]:
-            return self._change(value=e1)
-        else:
-            return self._replace_by(e1)
-    elif self.code == e0.code:
-        if type(e1) in [Constructor, NumberConstant, AppliedSymbol]:
-            return self._change(value=e1)
-        else:
-            return self._replace_by(e1)
-    elif self.simpler is not None:
-        return self.simpler.substitute(e0, e1, todo)
+        return self._change(value=e1)
     else:
-        out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
-        if out.just_branch is not None:
+        new_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs]
+        value, new_branch = None, None
+        if self.just_branch is not None:
             Log(f"{nl} definition:")
-            new_branch = out.just_branch.substitute(e0, e1, todo)
+            new_branch = self.just_branch.substitute(e0, e1, todo)
             if new_branch == self: # justification is satisfied
+                new_branch = None
+                value = TRUE
                 if todo is not None:
                     todo.append((self, TRUE))
-                    self.just_branch = None
-                return self._replace_by(TRUE)
-            if new_branch == AUnary.make('~', self): # justification is satisfied
+            elif new_branch == AUnary.make('~', self): # justification is satisfied
+                new_branch = None
+                value = FALSE
                 if todo is not None:
                     todo.append((self, FALSE))
-                    self.just_branch = None
-                return self._replace_by(FALSE)
             #TODO get implicants of just_branch
-            out = out._change(just_branch= new_branch)
-    return out
+        return self._change(sub_exprs=new_exprs, value=value, just_branch=new_branch)
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 

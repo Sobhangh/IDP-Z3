@@ -85,7 +85,7 @@
                 |== *!false
             |== !true with Variable
         |== !true with AUnary
-    |== !true with Brackets
+    |== !true
 |== !true with AConjunction
 |------------
 |*p

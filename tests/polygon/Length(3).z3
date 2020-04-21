@@ -107,7 +107,7 @@ Consequences:
   ~Sides = 4
   Sides = 3
 Simplified:  
-  Equilateral ⇔ ((((Length(1) = Length(1))) ∧ ((Length(2) = Length(1))) ∧ ((Length(3) = Length(1)))))
+  Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
   (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = square) ∨ (Subtype = irregular)
 Irrelevant:  
   ~Length(3) = Length(1)
