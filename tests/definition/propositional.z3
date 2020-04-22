@@ -40,8 +40,8 @@ t
 Type:        
   
 Definitions: 
-  Rule:∀[][]: q() ⇔r
-  Rule:∀[][]: p() ⇔~(q)
+  Rule:∀: q() ⇔r
+  Rule:∀: p() ⇔~(q)
 Universals:  
   r
 Consequences:

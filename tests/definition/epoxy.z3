@@ -175,11 +175,11 @@ Shelf_Life = 12
 Type:        
   
 Definitions: 
-  Rule:∀['$Brand$'][]: Brand($Brand$) ⇔(($Brand$ = Huntsman) ∧ (Epoxy = e1)) ∨ (($Brand$ = Sadechaf) ∧ (Epoxy = e2)) ∨ (($Brand$ = Jowat) ∧ (Epoxy = e3))
-  Rule:∀['$Family$'][]: Family($Family$) ⇔(($Family$ = _2c_Epoxy) ∧ ((Epoxy = e1) ∨ (Epoxy = e3))) ∨ (($Family$ = _1c_Epoxy) ∧ (Epoxy = e2))
-  Rule:∀['$Cost$'][]: Cost($Cost$) ⇔(($Cost$ = 0.539) ∧ (Epoxy = e1)) ∨ (($Cost$ = 100) ∧ ((Epoxy = e2) ∨ (Epoxy = e3)))
-  Rule:∀['$Color$'][]: Color($Color$) ⇔(($Color$ = amber) ∧ (Epoxy = e1)) ∨ (($Color$ = black_fluorescent) ∧ (Epoxy = e2)) ∨ (($Color$ = blackish_grey) ∧ (Epoxy = e3))
-  Rule:∀['$Shelf_Life$'][]: Shelf_Life($Shelf_Life$) ⇔(($Shelf_Life$ = 12) ∧ (Epoxy = e1)) ∨ (($Shelf_Life$ = 6) ∧ (Epoxy = e2)) ∨ (($Shelf_Life$ = 0) ∧ (Epoxy = e3))
+  Rule:∀$Brand$[brand]: Brand($Brand$) ⇔(($Brand$ = Huntsman) ∧ (Epoxy = e1)) ∨ (($Brand$ = Sadechaf) ∧ (Epoxy = e2)) ∨ (($Brand$ = Jowat) ∧ (Epoxy = e3))
+  Rule:∀$Family$[family]: Family($Family$) ⇔(($Family$ = _2c_Epoxy) ∧ ((Epoxy = e1) ∨ (Epoxy = e3))) ∨ (($Family$ = _1c_Epoxy) ∧ (Epoxy = e2))
+  Rule:∀$Cost$[cost]: Cost($Cost$) ⇔(($Cost$ = 0.539) ∧ (Epoxy = e1)) ∨ (($Cost$ = 100) ∧ ((Epoxy = e2) ∨ (Epoxy = e3)))
+  Rule:∀$Color$[color]: Color($Color$) ⇔(($Color$ = amber) ∧ (Epoxy = e1)) ∨ (($Color$ = black_fluorescent) ∧ (Epoxy = e2)) ∨ (($Color$ = blackish_grey) ∧ (Epoxy = e3))
+  Rule:∀$Shelf_Life$[shelf_life]: Shelf_Life($Shelf_Life$) ⇔(($Shelf_Life$ = 12) ∧ (Epoxy = e1)) ∨ (($Shelf_Life$ = 6) ∧ (Epoxy = e2)) ∨ (($Shelf_Life$ = 0) ∧ (Epoxy = e3))
 Universals:  
   
 Consequences:

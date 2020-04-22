@@ -41,7 +41,7 @@ JacketDesign = Design_400HP
 Type:        
   
 Definitions: 
-  Rule:∀['$LipLen$'][]: LipLen($LipLen$) ⇔($LipLen$ = Short) ∧ (JacketDesign = Design_230)
+  Rule:∀$LipLen$[lipLen]: LipLen($LipLen$) ⇔($LipLen$ = Short) ∧ (JacketDesign = Design_230)
 Universals:  
   
 Consequences:

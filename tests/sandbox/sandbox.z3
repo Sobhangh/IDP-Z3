@@ -94,7 +94,7 @@ Consequences:
   ~Sides = 4
   Sides = 3
 Simplified:  
-  Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))))
+  Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))
 Irrelevant:  
   ~Sides = 4
   ~Type = triangle

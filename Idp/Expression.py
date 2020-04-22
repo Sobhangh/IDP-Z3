@@ -52,12 +52,10 @@ def use_value(function):
             return (self.value  .__class__.__dict__[function.__name__])(self.value)
         if self.simpler is not None: 
             for cls in self.simpler.__class__.__mro__:
-                try:
+                if function.__name__ in cls.__dict__:
                     out = (cls.__dict__[function.__name__])(self.simpler)
                     return out
-                except:
-                    pass
-            assert False
+            assert False, "Internal error in Expression.use_value"
         return function(self)
     return _wrapper
 
@@ -688,13 +686,16 @@ class Fresh_Variable(Expression):
     @use_value
     def __str__(self): return self.name
 
+    def annotate(self, symbol_decls, q_vars):
+        self = super().annotate(symbol_decls, q_vars)
+        self.translated = FreshConst(self.decl.out.decl.translate())
+        return self
+
     def mark_subtences(self):
         self.fresh_vars = set([self.name])
         return self
 
     def translate(self):
-        if self.translated is None:
-            self.translated = FreshConst(self.decl.out.decl.translated)
         return self.translated
 
 class NumberConstant(Expression):

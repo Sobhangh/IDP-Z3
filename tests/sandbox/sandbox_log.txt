@@ -1,16 +1,16 @@
 
 |------------
-|Equilateral ⇔ ((((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)))) with Variable,Brackets
+|Equilateral ⇔ (((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4))) with Variable,Brackets
 |+ Sides -> 3
     |------------
     |*Equilateral
     |+ Sides -> 3
     |== *Equilateral
     |------------
-    |((((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)))) with Brackets
+    |(((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4))) with AQuantification
     |+ Sides -> 3
         |------------
-        |*(((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4))) with AConjunction
+        |*((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)) with AConjunction
         |+ Sides -> 3
             |------------
             |((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)) with Brackets,Brackets,Brackets,Brackets
@@ -177,8 +177,8 @@
                 |== !true with ADisjunction
             |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
         |== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
-    |== !!((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Brackets
-|== Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
+    |== !!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AQuantification
+|== Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Variable,Brackets
 |------------
 |(Sides = 3) ∨ (Sides = 4) with AComparison,AComparison
 |+ Sides -> 3
@@ -292,7 +292,7 @@
 |+ Sides -> 3
 |== *Equilateral
 |------------
-|*(((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4))) with AConjunction
+|*((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)) with AConjunction
 |+ Sides -> 3
     |------------
     |((Length(1) = Length(1)) ∨ (Sides < 1)) ∧ ((Length(2) = Length(1)) ∨ (Sides < 2)) ∧ ((Length(3) = Length(1)) ∨ (Sides < 3)) ∧ ((Length(4) = Length(1)) ∨ (Sides < 4)) with Brackets,Brackets,Brackets,Brackets
@@ -556,17 +556,17 @@
     |== irregular
 |== *Subtype = irregular with Variable,Constructor
 |------------
-|Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
+|Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Variable,Brackets
 |+ Sides -> 3
     |------------
     |*Equilateral
     |+ Sides -> 3
     |== *Equilateral
     |------------
-    |(((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Brackets
+    |((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AQuantification
     |+ Sides -> 3
         |------------
-        |*((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
+        |*(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
         |+ Sides -> 3
             |------------
             |(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
@@ -657,8 +657,8 @@
                 |== !!Length(3) = Length(1) with ADisjunction
             |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
         |== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
-    |== !!((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Brackets
-|== Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
+    |== !!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AQuantification
+|== Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Variable,Brackets
 |------------
 |(Type = triangle) ∨ (Type = quadrilateral) with AComparison,AComparison
 |+ Sides -> 3
@@ -756,7 +756,7 @@
 |+ Sides -> 3
 |== *Equilateral
 |------------
-|*((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
+|*(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
 |+ Sides -> 3
     |------------
     |(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
@@ -937,17 +937,17 @@
 |== *Subtype = irregular with Variable,Constructor
 Z3 propagation ********************************
 |------------
-|Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
+|Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Variable,Brackets
 |+ Sides = 4 -> false  (or false -> false)
     |------------
     |*Equilateral
     |+ Sides = 4 -> false  (or false -> false)
     |== *Equilateral
     |------------
-    |(((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Brackets
+    |((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AQuantification
     |+ Sides = 4 -> false  (or false -> false)
         |------------
-        |*((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
+        |*(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
         |+ Sides = 4 -> false  (or false -> false)
             |------------
             |(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
@@ -1038,8 +1038,8 @@ Z3 propagation ********************************
                 |== !!Length(3) = Length(1) with ADisjunction
             |== (Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets
         |== *!!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
-    |== !!((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Brackets
-|== Equilateral ⇔ (((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))) with Variable,Brackets
+    |== !!(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AQuantification
+|== Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with Variable,Brackets
 |------------
 |*Sides = 3 with Variable,NumberConstant
 |+ Sides = 4 -> false  (or false -> false)
@@ -1057,7 +1057,7 @@ Z3 propagation ********************************
 |+ Sides = 4 -> false  (or false -> false)
 |== *Equilateral
 |------------
-|*((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1))) with AConjunction
+|*(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with AConjunction
 |+ Sides = 4 -> false  (or false -> false)
     |------------
     |(Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) with Brackets,Brackets,Brackets

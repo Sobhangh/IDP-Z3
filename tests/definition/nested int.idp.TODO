@@ -6,7 +6,7 @@ vocabulary {
 
 theory {
     { !x[num]: same(x) = x. }
-    { !x[num]: negated(x) = -x. }
+    { !x[num]y[num]: negated(x) = y <- y=-x. }
     same(-1)= -1.
     negated(negated(-1)) = same(-1).
 

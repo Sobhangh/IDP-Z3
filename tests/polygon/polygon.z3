@@ -301,7 +301,7 @@ Perimeter = (sum{n[side] : true : Length(n)})
 Type:        
   
 Definitions: 
-  Rule:∀['$Large!0$'][]: Large($Large!0$) ⇔10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
+  Rule:∀$Large!0$[side]: Large($Large!0$) ⇔10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Universals:  
   ~Subtype = rectangle
   Perimeter = (sum{n[side] : true : Length(n)})
@@ -335,7 +335,7 @@ Consequences:
   ~Large(3)
   ~Large(4)
 Simplified:  
-  (Convex ⇔ (((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180))))
+  (Convex ⇔ ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180)))
 Irrelevant:  
   ~∀n[side] : Length(n) < Length(n + 1)
 

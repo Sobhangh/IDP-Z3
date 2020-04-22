@@ -68,8 +68,8 @@ negated(Jan) = Jan
 Type:        
   
 Definitions: 
-  Rule:∀['$same!0$', '$same$'][]: same($same!0$,$same$) ⇔$same$ = $same!0$
-  Rule:∀['$negated!0$', '$negated$'][]: negated($negated!0$,$negated$) ⇔(($negated$ = Jan) ∧ ($negated!0$ = Piet)) ∨ (($negated$ = Piet) ∧ ($negated!0$ = Jan))
+  Rule:∀$same!0$[num],$same$[num]: same($same!0$,$same$) ⇔$same$ = $same!0$
+  Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔(($negated$ = Jan) ∧ ($negated!0$ = Piet)) ∨ (($negated$ = Piet) ∧ ($negated!0$ = Jan))
 Universals:  
   same(Piet) = Piet
 Consequences:

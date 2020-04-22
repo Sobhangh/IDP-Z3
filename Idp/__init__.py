@@ -498,7 +498,7 @@ class Rule(object):
         self.translated = None
 
     def __repr__(self):
-        return ( f"Rule:∀{self.vars}{self.sorts}: "
+        return ( f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
                  f"{self.symbol}({','.join(str(e) for e in self.args)}) "
                  f"⇔{str(self.body)}" )
 
@@ -524,21 +524,27 @@ class Rule(object):
         assert len(self.args) == len(new_vars), "Internal error"
         for arg, nv in zip(self.args, new_vars.values()):
             if type(arg) in [Variable, Fresh_Variable]:
-                if arg.name not in subst:
-                    if arg.name in self.vars:
+                if arg.name not in subst: # if new arg variable
+                    if arg.name in self.vars: # re-use var name
                         subst[arg.name] = nv
                         self.body = self.body.instantiate(arg, nv)
                     else:
                         eq = AComparison.make('=', [nv, arg])
                         self.body = AConjunction.make('∧', [eq, self.body])
-                else: # same(x)=x
+                else: # repeated arg var, e.g., same(x)=x
                     eq = AComparison.make('=', [nv, subst[arg.name]])
                     self.body = AConjunction.make('∧', [eq, self.body])
-            else: #same(f(x))
+            elif type(arg) in [NumberConstant, Constructor]:
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Symbol(name=v0), v1)
+                    eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
                 self.body = AConjunction.make('∧', [eq, self.body])
+            else: #same(f(x))
+                assert False, f"Please use variables only in the head of definitions. {nl}{str(self)}"
+                # eq = AComparison.make('=', [nv, arg])
+                # for v0, v1 in subst.items():
+                #     eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
+                # self.body = AConjunction.make('∧', [eq, self.body])
 
         # Any leftover ?
         for var in self.vars:
@@ -549,7 +555,7 @@ class Rule(object):
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
-        self.sorts = [] # ignored
+        self.sorts = [v.decl.out for v in new_vars.values()]
         self.q_vars = new_vars
         return self
 

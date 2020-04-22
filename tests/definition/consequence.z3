@@ -39,7 +39,7 @@ s
 Type:        
   
 Definitions: 
-  Rule:∀[][]: p() ⇔q ∨ r
+  Rule:∀: p() ⇔q ∨ r
 Universals:  
   q
 Consequences:

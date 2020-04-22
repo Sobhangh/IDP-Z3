@@ -847,7 +847,7 @@ Certification_Date_Sale = 2025
 Type:        
   
 Definitions: 
-  Rule:∀[][]: Professional_Buyer() ⇔Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More)
+  Rule:∀: Professional_Buyer() ⇔Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More)
 Universals:  
   ~Professional_Declaration_Filed
 Consequences:

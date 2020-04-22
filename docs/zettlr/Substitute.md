@@ -37,11 +37,12 @@ graph TD
     expand_quantifiers --> _change;
 
     instantiate_definition --> instantiate;
+    instantiate --> _change;
 		    rename_args --> instantiate;
     instantiate_definition --> interpret;
-    instantiate_definition --> make;
     Annotate --> make;
-    instantiate --> simplify1;
+    instantiate_definition --> make;
+    instantiate --> update_exprs;
     simplify1 --> update_exprs;
 
 ```

@@ -135,9 +135,13 @@ def instantiate(self, e0, e1):
         return e1
     else:
         out = copy.copy(self)
-        out.sub_exprs = [e.instantiate(e0, e1) for e in out.sub_exprs]
-        out = out.simplify1()
-        out.code = sys.intern(str(out))
+        if out.value is not None:
+            pass
+        else:
+            out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
+            out.code = out.str
+            if out.just_branch is not None:
+                out._change(just_branch=out.just_branch.instantiate(e0, e1))
         return out
 Expression.instantiate = instantiate
 
@@ -162,12 +166,8 @@ Expression.interpret = interpret
 # Class IfExpr ################################################################
 
 def update_exprs(self, new_expr_generator):
-    if isinstance(new_expr_generator, list):
-        new_expr_generator = iter(new_expr_generator)
-    if_ = next(new_expr_generator)
-    then_ = next(new_expr_generator)
-    else_ = next(new_expr_generator)
-    sub_exprs = [if_, then_, else_]
+    sub_exprs = list(new_expr_generator)
+    if_, then_, else_   = sub_exprs[0], sub_exprs[1], sub_exprs[2]
     if if_ == TRUE:
             return self._change(simpler=then_, sub_exprs=sub_exprs)
     elif if_ == FALSE:
@@ -195,7 +195,7 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.decl.range:
-                    new_f = f.copy().instantiate(var, val)
+                    new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = out
         else:
@@ -206,10 +206,15 @@ def expand_quantifiers(self, theory):
     else:
         out = ADisjunction.make('∨', forms)
     if not self.vars:
-        return self._replace_by(out)
-    return self._change(sub_exprs=[out])
+        return self._change(simpler=out, sub_exprs=[out])
+    return self._change(sub_exprs=[forms])
 AQuantification.expand_quantifiers = expand_quantifiers
 
+def update_exprs(self, new_expr_generator):
+    exprs = list(new_expr_generator)
+    simpler = exprs[0] if not self.vars else None
+    return self._change(simpler=simpler, sub_exprs=exprs)
+AQuantification.update_exprs = update_exprs
 
 
 # Class AImplication #######################################################

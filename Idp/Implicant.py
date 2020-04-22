@@ -49,13 +49,12 @@ def use_value(function):
         out = _if_subtence(self, truth)
         if self.simpler is not None: 
             for cls in self.simpler.__class__.__mro__:
-                try:
+                if function.__name__ in cls.__dict__:
                     out = out + (cls.__dict__[function.__name__])(self.simpler, truth)
                     return out
-                except:
-                    pass
-            assert False
-        return out + function(self, truth)
+            assert False, "Internal error in Implicant.use_value"
+        out = out + function(self, truth)
+        return out
     return _wrapper
 
 # class Expression ############################################################

@@ -39,7 +39,7 @@ x = 1
 Type:        
   
 Definitions: 
-  Rule:∀[][]: p() ⇔~(q)
+  Rule:∀: p() ⇔~(q)
 Universals:  
   x = 1
 Consequences:
