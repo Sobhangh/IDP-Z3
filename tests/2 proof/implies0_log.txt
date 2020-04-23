@@ -1,0 +1,90 @@
+
+|------------
+|p ⇒ (q ∧ (r ∨ s)) with Variable,AConjunction
+|+ p -> true
+    |------------
+    |*p
+    |+ p -> true
+    |== *!true
+    |------------
+    |q ∧ (r ∨ s) with Variable,Brackets
+    |+ p -> true
+        |------------
+        |*q
+        |+ p -> true
+        |== *q
+        |------------
+        |(r ∨ s) with ADisjunction
+        |+ p -> true
+            |------------
+            |r ∨ s with Variable,Variable
+            |+ p -> true
+                |------------
+                |*r
+                |+ p -> true
+                |== *r
+                |------------
+                |*s
+                |+ p -> true
+                |== *s
+            |== r ∨ s with Variable,Variable
+        |== !!r ∨ s with ADisjunction
+    |== q ∧ (r ∨ s) with Variable,Brackets
+|== !!q ∧ (r ∨ s) with Variable,AConjunction
+|------------
+|*q
+|+ p -> true
+|== *q
+|------------
+|*r
+|+ p -> true
+|== *r
+|------------
+|*s
+|+ p -> true
+|== *s
+|------------
+|q ∧ (r ∨ s) with Variable,AConjunction
+|+ q -> true
+    |------------
+    |*true
+    |+ q -> true
+    |== *!true
+    |------------
+    |q ∧ (r ∨ s) with Variable,Brackets
+    |+ q -> true
+        |------------
+        |*q
+        |+ q -> true
+        |== *!true
+        |------------
+        |(r ∨ s) with ADisjunction
+        |+ q -> true
+            |------------
+            |r ∨ s with Variable,Variable
+            |+ q -> true
+                |------------
+                |*r
+                |+ q -> true
+                |== *r
+                |------------
+                |*s
+                |+ q -> true
+                |== *s
+            |== r ∨ s with Variable,Variable
+        |== !!r ∨ s with ADisjunction
+    |== !!(r ∨ s) with Brackets
+|== !!(r ∨ s) with Variable,AConjunction
+|------------
+|*p
+|+ q -> true
+|== *p
+|------------
+|*r
+|+ q -> true
+|== *r
+|------------
+|*s
+|+ q -> true
+|== *s
+Z3 propagation ********************************
