@@ -191,17 +191,17 @@ Simplified:
   (Epoxy = e1) ∨ (Epoxy = e2) ∨ (Epoxy = e3)
   (Cost = 0.539) ∨ (Cost = 100)
 Irrelevant:  
-  ~Brand = Huntsman
-  ~Brand = Sadechaf
-  ~Brand = Jowat
-  ~Family = _2c_Epoxy
-  ~Family = _1c_Epoxy
-  ~Color = amber
-  ~Color = black_fluorescent
-  ~Color = blackish_grey
-  ~Shelf_Life = 0
-  ~Shelf_Life = 6
-  ~Shelf_Life = 12
+  ? Brand = Huntsman
+  ? Brand = Sadechaf
+  ? Brand = Jowat
+  ? Family = _2c_Epoxy
+  ? Family = _1c_Epoxy
+  ? Color = amber
+  ? Color = black_fluorescent
+  ? Color = blackish_grey
+  ? Shelf_Life = 0
+  ? Shelf_Life = 6
+  ? Shelf_Life = 12
 
 
 -- meta -------------------------------------

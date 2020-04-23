@@ -337,7 +337,7 @@ Consequences:
 Simplified:  
   (Convex ⇔ ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180)))
 Irrelevant:  
-  ~∀n[side] : Length(n) < Length(n + 1)
+  ? ∀n[side] : Length(n) < Length(n + 1)
 
 
 -- meta -------------------------------------

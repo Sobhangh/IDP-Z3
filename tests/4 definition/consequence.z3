@@ -47,8 +47,8 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  ~r
-  ~s
+  ? r
+  ? s
 
 
 -- meta -------------------------------------

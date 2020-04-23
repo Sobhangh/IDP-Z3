@@ -97,13 +97,13 @@ Simplified:
   Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))
 Irrelevant:  
   ~Sides = 4
-  ~Type = triangle
-  ~Type = quadrilateral
-  ~Subtype = regular_triangle
-  ~Subtype = right_triangle
-  ~Subtype = rectangle
-  ~Subtype = square
-  ~Subtype = irregular
+  ? Type = triangle
+  ? Type = quadrilateral
+  ? Subtype = regular_triangle
+  ? Subtype = right_triangle
+  ? Subtype = rectangle
+  ? Subtype = square
+  ? Subtype = irregular
 
 
 -- meta -------------------------------------

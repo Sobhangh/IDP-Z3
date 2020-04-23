@@ -203,9 +203,9 @@ def abstract(case, given_json):
                 and assignment.relevant and atom.type == 'bool':
                     truth = solver.model().eval(reify[atom])
                     if truth == True:
-                        atoms += [ Assignment(atom, True , Status.UNKNOWN) ]
+                        atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
                     elif truth == False:
-                        atoms += [ Assignment(atom, False, Status.UNKNOWN) ]
+                        atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
                     else: #unknown
                         theory2 = And(theory2,
                                         substitute(theory2, [(atomZ3, BoolVal(True))]),  # don't simplify !
@@ -234,7 +234,7 @@ def abstract(case, given_json):
                                 substitute(theory2, [(assignment.sentence.translate(), BoolVal(True))]),
                                 substitute(theory2, [(assignment.sentence.translate(), BoolVal(False))]))
                     solver2.add(theory2)
-                    atoms[i] = Assignment(assignment.sentence, True, Status.UNKNOWN)
+                    atoms[i] = Assignment(assignment.sentence, TRUE, Status.UNKNOWN)
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
@@ -250,7 +250,7 @@ def abstract(case, given_json):
                     reify2[assignment.sentence]
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
-                    atoms[i] = Assignment(TRUE, True, Status.UNKNOWN)
+                    atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
                     # ??? theory2 = substitute(theory2, [(assignment.sentence, BoolVal(assignment.truth & 1))])
                 solver2.pop()
 

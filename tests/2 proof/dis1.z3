@@ -42,7 +42,7 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  ~q
+  ? q
 
 
 -- meta -------------------------------------

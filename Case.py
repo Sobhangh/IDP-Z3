@@ -20,7 +20,7 @@ from z3 import And, Not, sat, unsat, unknown, is_true
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from Solver import mk_solver
-from Structure_ import json_to_literals, Equality, Assignment, Term, Status
+from Structure_ import json_to_literals, Equality, Assignment, Term, Status, str_to_IDP
 from utils import *
 
 # Types
@@ -68,7 +68,7 @@ class Case:
             u = c.implicants()
             if u:
                 for sentence, truth in u:
-                    ass = Assignment(sentence, truth==TRUE, Status.UNKNOWN)
+                    ass = Assignment(sentence, truth, Status.UNKNOWN)
                     ass.update(None, None, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
@@ -153,6 +153,10 @@ class Case:
                     if res1 == sat:
                         val1 = solver.model().eval(atom.reified())
                         if str(val1) != str(atom.reified()): # if not irrelevant
+                        
+                            val = str_to_IDP(self.idp, str(val1))
+                            assert val.translate() == val1
+
                             solver.push()
                             solver.add(Not(atom.reified()==val1))
                             res2 = solver.check()
@@ -163,13 +167,13 @@ class Case:
                                     atom = cast(Equality, atom)
                                     # need to convert Term into Assignment
                                     if atom.variable.decl.out.code == 'bool':
-                                        ass = Assignment(atom.variable, is_true(val1), CONSQ)
+                                        ass = Assignment(atom.variable, val, CONSQ)
                                     else:
-                                        ass = Assignment(Equality(atom.variable, val1), True, CONSQ)
+                                        ass = Assignment(Equality(atom.variable, val1), TRUE, CONSQ)
                                     ass.relevant = True
                                     self.assignments[key] = ass
                                 else:
-                                    ass = l.update(None, is_true(val1), CONSQ, self)
+                                    ass = l.update(None, val, CONSQ, self)
                                 self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
@@ -199,9 +203,9 @@ class Case:
                             old_ass = self.assignments[sentence.code]
                             if old_ass.truth is None:
                                 if (all_ or old_ass.is_environmental):
-                                    new_ass = old_ass.update(None, truth==TRUE, CONSQ, self)
+                                    new_ass = old_ass.update(None, truth, CONSQ, self)
                                     to_propagate.append(new_ass)
-                            elif old_ass.truth != (truth==TRUE):
+                            elif old_ass.truth != truth:
                                 # test: theory{ x=4. x=5. }
                                 self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                 return
@@ -224,7 +228,7 @@ class Case:
                             elif new_constraint in [TRUE, FALSE]:
                                 if old_ass.truth is None: # value of proposition was not known
                                     new_ass = old_ass.update(new_constraint, 
-                                        (new_constraint == TRUE), CONSQ, self)
+                                        new_constraint, CONSQ, self)
                                     to_propagate.append(new_ass)
                                 elif (new_constraint==TRUE  and not old_ass.truth) \
                                 or   (new_constraint==FALSE and     old_ass.truth):

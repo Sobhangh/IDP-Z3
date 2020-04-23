@@ -36,7 +36,7 @@ class Status(IntFlag):
     EXPANDED    = 32
 
 class Assignment(object):
-    def __init__(self, sentence: Expression, truth: Optional[bool], status: Status):
+    def __init__(self, sentence: Expression, truth: Optional[Expression], status: Status):
         self.sentence = sentence
         self.truth = truth
         self.status = status
@@ -44,7 +44,7 @@ class Assignment(object):
         self.is_environmental = not sentence.has_environmental(False)
 
     def update(self, sentence: Optional[Expression], 
-                     truth: Optional[bool], 
+                     truth: Optional[Expression], 
                      status: Optional[Status], 
                      case):
         """ make a copy, and save it in case.assignments """
@@ -56,7 +56,7 @@ class Assignment(object):
         return out
 
     def __hash__(self):
-        return hash((str(self.sentence), self.truth))
+        return hash((str(self.sentence), str(self.truth)))
 
     def __eq__(self, other):
         # ignores the modality of truth !
@@ -65,19 +65,33 @@ class Assignment(object):
             and str(self.sentence) == str(other.sentence)
 
     def __repr__(self):
-        return ( f"{'' if self.truth else '~'}"
-                 f"{str(self.sentence.code)}")
+        out = str(self.sentence.code)
+        if self.truth is None:
+            return f"? {out}"
+        if self.truth == TRUE:
+            return out
+        if self.truth == FALSE:
+            return f"~{out}"
+        return f"{out} -> {str(truth)}"
 
     def __str__(self):
-        return ( f"{'' if self.truth else '? ' if self.truth is None else 'Not '}"
-                 f"{self.sentence.annotations['reading']}")
+        out = str(self.sentence.code)
+        if self.truth is None:
+            out = f"? {out}"
+        elif self.truth == TRUE:
+            pass
+        elif self.truth == FALSE:
+            out = f"Not {out}"
+        else:
+            out = f"{out} -> {str(truth)}"
+        return f"{out}{self.sentence.annotations['reading']}"
     
 
     def as_substitution(self, case) -> Tuple[Optional[Expression], Optional[Expression]]:
         if self.truth is not None:
             old = self.sentence
-            new = cast(Expression, TRUE if self.truth else FALSE)
-            if self.truth:  # analyze true equalities
+            new = self.truth
+            if self.truth == TRUE:  # analyze true equalities
                 if isinstance(old, Equality):
                     if is_number(old.valueZ3):
                         new = NumberConstant(number=str(old.valueZ3))
@@ -109,7 +123,7 @@ class Assignment(object):
         if self.truth is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
-            return self.sentence.translate() if self.truth else Not(self.sentence.translate())
+            return self.sentence.translate() if self.truth==TRUE else Not(self.sentence.translate())
         return self.sentence.translate()
 
 class Term(Assignment):
@@ -120,7 +134,7 @@ class Term(Assignment):
 
     def assign(self, value: DatatypeRef, case, CONSQ: Status):
         self.sentence = cast (Equality, self.sentence)
-        ass = Assignment(Equality(self.sentence.variable, value), True, CONSQ)
+        ass = Assignment(Equality(self.sentence.variable, value), TRUE, CONSQ)
         ass.relevant = True
         case.assignments[self.sentence.code] = ass
         return ass
@@ -176,6 +190,13 @@ class Equality(Expression):
 # see docs/REST.md
 #################
 
+def str_to_IDP(idp, val1):
+    if is_number(val1):
+        return NumberConstant(number=val1)
+    val1 = 'true' if str(val1) == 'True' else 'false' if str(val1) == 'False' else val1
+    val = idp.vocabulary.symbol_decls[val1]
+    return val
+
 def json_to_literals(idp, jsonstr: str):
     assignments: Dict[Expression, Optional[Assignment]] = {} # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
@@ -196,7 +217,7 @@ def json_to_literals(idp, jsonstr: str):
                     atom = symbol.instances[atom].copy()
                 if json_atom["typ"] == "Bool":
                     if "value" in json_atom:
-                        assignment = Assignment(atom, json_atom["value"], Status.GIVEN)
+                        assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                         assignments[atom] = assignment
                     else:
                         assignment = None  #TODO error ?
@@ -205,7 +226,7 @@ def json_to_literals(idp, jsonstr: str):
                         value = eval(json_atom["value"])
                     else:
                         value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
-                    assignment = Assignment(Equality(atom, value), True, Status.GIVEN)
+                    assignment = Assignment(Equality(atom, value), TRUE, Status.GIVEN)
                     assignment.relevant = True
                     assignments[atom] = assignment
                 else:
@@ -240,10 +261,10 @@ def model_to_json(case, s, reify):
 
                     # atom might not have an interpretation in model (if "don't care")
                     if atom.type == 'bool':
-                        if not (is_true(value) or is_false(value)):
+                        if value not in [TRUE, FALSE]: 
                             #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                             print("*** ", atom.annotations['reading'], " is not defined, and assumed false")
-                        d2['value']  = is_true(value)
+                        d2['value']  = (value == TRUE)
                     else: #TODO check that value is numeric ?
                         try:
                             d2['value'] = str(eval(str(value).replace('?', '')))
@@ -325,7 +346,7 @@ class Structure_(object):
                 s = self.m.setdefault(symb, {})
                 if key in s:
                     if truth is not None:
-                        s[key]["value"] = truth
+                        s[key]["value"] = True if truth==TRUE else False if truth==FALSE else truth
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']
