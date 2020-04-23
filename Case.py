@@ -67,11 +67,9 @@ class Case:
             c = c.copy()
             u = c.implicants()
             if u:
-                # consider the top expression only
-                #    otherwise some immediate consequences could be universal too
-                sentence, truth = u[0] 
-                ass = Assignment(sentence, truth==TRUE, Status.UNKNOWN)
-                ass.update(None, None, Status.UNIVERSAL, self)
+                for sentence, truth in u:
+                    ass = Assignment(sentence, truth==TRUE, Status.UNKNOWN)
+                    ass.update(None, None, Status.UNIVERSAL, self)
             else:
                 self.simplified.append(c)
 

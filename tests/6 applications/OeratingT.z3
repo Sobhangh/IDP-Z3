@@ -120,19 +120,23 @@ Universals:
   ∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
   _MinT(M) ≤ T ≤ _MaxT(M)
   _O(e1)
+  OMinT(e1) = 0
+  OMaxT(e1) = 20
   _O(e2)
+  OMinT(e2) = 0
+  OMaxT(e2) = 100
   ~_O(e3)
 Consequences:
-  
+  OMinT(e1) = 0
+  OMinT(e2) = 0
+  OMaxT(e1) = 20
+  OMaxT(e2) = 100
 Simplified:  
   (Guaranteed ⇔ _O(M))
   (M = e1) ∨ (M = e2) ∨ (M = e3)
   (M = e1) ∨ (M = e2) ∨ (M = e3)
 Irrelevant:  
-  ~OMinT(e1) = 0
-  ~OMaxT(e1) = 20
-  ~OMinT(e2) = 0
-  ~OMaxT(e2) = 100
+  
 
 
 -- meta -------------------------------------
@@ -201,28 +205,30 @@ Irrelevant:
                          'normal': True,
                          'reading': 'OMaxT(e1)',
                          'relevant': True,
-                         'status': 'UNKNOWN',
+                         'status': 'CONSEQUENCE',
                          'typ': 'Int',
-                         'value': ''},
+                         'value': '20'},
            'OMaxT(e1) = 20': {'environmental': False,
                               'normal': False,
                               'reading': 'OMaxT(e1) = 20',
-                              'relevant': False,
-                              'status': 'UNKNOWN',
-                              'typ': 'Bool'},
+                              'relevant': True,
+                              'status': 'UNIVERSAL',
+                              'typ': 'Bool',
+                              'value': True},
            'OMaxT(e2)': {'environmental': False,
                          'normal': True,
                          'reading': 'OMaxT(e2)',
                          'relevant': True,
-                         'status': 'UNKNOWN',
+                         'status': 'CONSEQUENCE',
                          'typ': 'Int',
-                         'value': ''},
+                         'value': '100'},
            'OMaxT(e2) = 100': {'environmental': False,
                                'normal': False,
                                'reading': 'OMaxT(e2) = 100',
-                               'relevant': False,
-                               'status': 'UNKNOWN',
-                               'typ': 'Bool'},
+                               'relevant': True,
+                               'status': 'UNIVERSAL',
+                               'typ': 'Bool',
+                               'value': True},
            'OMaxT(e3)': {'environmental': False,
                          'normal': True,
                          'reading': 'OMaxT(e3)',
@@ -241,28 +247,30 @@ Irrelevant:
                          'normal': True,
                          'reading': 'OMinT(e1)',
                          'relevant': True,
-                         'status': 'UNKNOWN',
+                         'status': 'CONSEQUENCE',
                          'typ': 'Int',
-                         'value': ''},
+                         'value': '0'},
            'OMinT(e1) = 0': {'environmental': False,
                              'normal': False,
                              'reading': 'OMinT(e1) = 0',
-                             'relevant': False,
-                             'status': 'UNKNOWN',
-                             'typ': 'Bool'},
+                             'relevant': True,
+                             'status': 'UNIVERSAL',
+                             'typ': 'Bool',
+                             'value': True},
            'OMinT(e2)': {'environmental': False,
                          'normal': True,
                          'reading': 'OMinT(e2)',
                          'relevant': True,
-                         'status': 'UNKNOWN',
+                         'status': 'CONSEQUENCE',
                          'typ': 'Int',
-                         'value': ''},
+                         'value': '0'},
            'OMinT(e2) = 0': {'environmental': False,
                              'normal': False,
                              'reading': 'OMinT(e2) = 0',
-                             'relevant': False,
-                             'status': 'UNKNOWN',
-                             'typ': 'Bool'},
+                             'relevant': True,
+                             'status': 'UNIVERSAL',
+                             'typ': 'Bool',
+                             'value': True},
            'OMinT(e3)': {'environmental': False,
                          'normal': True,
                          'reading': 'OMinT(e3)',
