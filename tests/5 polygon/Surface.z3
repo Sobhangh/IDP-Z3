@@ -346,13 +346,13 @@ Consequences:
   Length(2) = Length(4)
   Length(1) ≤ (Length(2) + Length(3))
   Length(3) ≤ (Length(1) + Length(2))
-  Sides = 4
-  Vertices = 4
-  Type = quadrilateral
-  Angle(1) = 90
-  Angle(2) = 90
-  Angle(3) = 90
-  Angle(4) = 90
+  Sides -> 4
+  Vertices -> 4
+  Type -> quadrilateral
+  Angle(1) -> 90
+  Angle(2) -> 90
+  Angle(3) -> 90
+  Angle(4) -> 90
 Simplified:  
   (Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) ∧ (Length(4) = Length(1))))
   (((Subtype = square) ∨ (Subtype = rectangle)))
@@ -360,7 +360,13 @@ Simplified:
   ((Subtype = square) ⇔ (Equilateral))
   (Subtype = rectangle) ∨ (Subtype = square)
 Irrelevant:  
-  
+  ? Large(1)
+  ? Large(2)
+  ? Large(3)
+  ? Large(4)
+  ? Base
+  ? Height
+  ? Surface
 
 
 -- meta -------------------------------------

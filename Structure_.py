@@ -55,9 +55,6 @@ class Assignment(object):
         case.assignments[self.sentence.code] = out
         return out
 
-    def __hash__(self):
-        return hash((str(self.sentence), str(self.truth)))
-
     def __eq__(self, other):
         # ignores the modality of truth !
         return self.truth == other.truth \
@@ -72,48 +69,25 @@ class Assignment(object):
             return out
         if self.truth == FALSE:
             return f"~{out}"
-        return f"{out} -> {str(truth)}"
+        return f"{out} -> {str(self.truth)}"
 
     def __str__(self):
-        out = str(self.sentence.code)
+        pre, post = '', ''
         if self.truth is None:
-            out = f"? {out}"
+            pre = f"? "
         elif self.truth == TRUE:
-            pass
+            pre = ""
         elif self.truth == FALSE:
-            out = f"Not {out}"
+            pre = f"Not "
         else:
-            out = f"{out} -> {str(truth)}"
-        return f"{out}{self.sentence.annotations['reading']}"
+            post = f" -> {str(self.truth)}"
+        return f"{pre}{self.sentence.annotations['reading']}{post}"
     
 
     def as_substitution(self, case) -> Tuple[Optional[Expression], Optional[Expression]]:
         if self.truth is not None:
             old = self.sentence
             new = self.truth
-            if self.truth == TRUE:  # analyze true equalities
-                if isinstance(old, Equality):
-                    if is_number(old.valueZ3):
-                        new = NumberConstant(number=str(old.valueZ3))
-                        old = old.variable
-                    elif str(old.valueZ3) in case.idp.vocabulary.symbol_decls:
-                        new = case.idp.vocabulary.symbol_decls[str(old.valueZ3)]
-                        old = old.variable
-                elif isinstance(old, AComparison) and old.operator == ['=']:
-                    if   type(old.sub_exprs[1]) in [Constructor, NumberConstant]:
-                        new = old.sub_exprs[1]
-                        old = old.sub_exprs[0]
-                    elif type(old.sub_exprs[0]) in [Constructor, NumberConstant]:
-                        new = old.sub_exprs[0]
-                        old = old.sub_exprs[1]
-                    else:
-                        operands1 = [e.as_ground() for e in old.sub_exprs]
-                        if   operands1[1] is not None:
-                            new = operands1[1]
-                            old = old.sub_exprs[0]
-                        elif operands1[0] is not None:
-                            new = operands1[0]
-                            old = old.sub_exprs[1]
             return old, new
         return None, None
 
@@ -123,66 +97,10 @@ class Assignment(object):
         if self.truth is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
-            return self.sentence.translate() if self.truth==TRUE else Not(self.sentence.translate())
-        return self.sentence.translate()
-
-class Term(Assignment):
-    """ represents an applied symbol of unknown values """
-
-    def as_substitution(self, case):
-        return None, None
-
-    def assign(self, value: DatatypeRef, case, CONSQ: Status):
-        self.sentence = cast (Equality, self.sentence)
-        ass = Assignment(Equality(self.sentence.variable, value), TRUE, CONSQ)
-        ass.relevant = True
-        case.assignments[self.sentence.code] = ass
-        return ass
-
-
-class Equality(Expression):
-    def __init__(self, variable: Union[AppliedSymbol, Variable, Fresh_Variable], value):
-        self.variable = variable # an Expression
-        self.valueZ3 = value # a Z3 value or None
-        self.value = None
-        self.status = None
-        self.simpler = None
-        if value is not None:
-            self.type = 'bool'
-            self.code = sys.intern(f"{variable.code} = {str(value)}")
-            self.translated = (variable.translate() == value)
+            out = self.sentence.original.translate() if self.truth==TRUE else Not(self.sentence.original.translate())
         else:
-            self.type = 'int' #TODO float ?
-            self.code = sys.intern(variable.code)
-            self.translated = variable.translate()
-        self.str = self.code
-        self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
-        self.is_subtence = True
-
-    def __str__(self): return self.code
-
-    def unknown_symbols(self):
-        return self.variable.unknown_symbols()
-
-    def has_environmental(self, truth: bool):
-        return self.variable.has_environmental(truth)
-
-    def translate(self) -> DatatypeRef:
-        if self.valueZ3 is not None:
-            return self.variable.translate() == self.valueZ3
-        else:
-            return self.variable.translate()
-
-    def substitute(self, e0: Expression, e1: Expression, todo=None, case=None) -> 'Equality':
-        if self.variable == e0:
-            return Equality(self.variable, e1.translate())
-        return self
-
-    def subtences(self):
-        return {} #TODO ?
-
-    def reified(self) -> DatatypeRef:
-        return self.variable.reified()
+            out = self.sentence.original.translate() == self.truth.translate()
+        return out
 
 
 #################
@@ -226,7 +144,7 @@ def json_to_literals(idp, jsonstr: str):
                         value = eval(json_atom["value"])
                     else:
                         value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
-                    assignment = Assignment(Equality(atom, value), TRUE, Status.GIVEN)
+                    assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                     assignment.relevant = True
                     assignments[atom] = assignment
                 else:
@@ -258,6 +176,7 @@ def model_to_json(case, s, reify):
                             print(atom)
                         atomZ3 = atom.reified()
                     value = model.eval(atomZ3, model_completion=True)
+                    value = str_to_IDP(str(value))
 
                     # atom might not have an interpretation in model (if "don't care")
                     if atom.type == 'bool':
@@ -326,27 +245,13 @@ class Structure_(object):
 
 
     def addAtom(self, atom, truth, status: Status):
-        if truth and type(atom) == Equality:
-            symbol = atom.variable.translate()
-            key = atom.variable.code
-            typ = symbol.sort().name()
-            for name, symb in atom.unknown_symbols().items():
-                if not symb.name.startswith('_'):
-                    s = self.m.setdefault(name, {})
-                    if key in s:
-                        if typ in ["Real", "Int"]:
-                            s[key]["value"] = str(eval(str(atom.valueZ3).replace('?', ''))) # compute fraction
-                        elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
-                            s[key]["value"] = str(atom.valueZ3)
-                        s[key]["status"] = status.name
-        if atom.type != 'bool': return
         key = atom.code
         if key in self.case.GUILines:
             for symb in self.case.GUILines[key].unknown_symbols().keys():
                 s = self.m.setdefault(symb, {})
                 if key in s:
                     if truth is not None:
-                        s[key]["value"] = True if truth==TRUE else False if truth==FALSE else truth
+                        s[key]["value"] = True if truth==TRUE else False if truth==FALSE else str(truth)
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']

@@ -126,11 +126,12 @@ Universals:
   OMinT(e2) = 0
   OMaxT(e2) = 100
   ~_O(e3)
+  OMinT(e1) -> 0
+  OMaxT(e1) -> 20
+  OMinT(e2) -> 0
+  OMaxT(e2) -> 100
 Consequences:
-  OMinT(e1) = 0
-  OMinT(e2) = 0
-  OMaxT(e1) = 20
-  OMaxT(e2) = 100
+  
 Simplified:  
   (Guaranteed ⇔ _O(M))
   (M = e1) ∨ (M = e2) ∨ (M = e3)
@@ -205,7 +206,7 @@ Irrelevant:
                          'normal': True,
                          'reading': 'OMaxT(e1)',
                          'relevant': True,
-                         'status': 'CONSEQUENCE',
+                         'status': 'UNIVERSAL',
                          'typ': 'Int',
                          'value': '20'},
            'OMaxT(e1) = 20': {'environmental': False,
@@ -219,7 +220,7 @@ Irrelevant:
                          'normal': True,
                          'reading': 'OMaxT(e2)',
                          'relevant': True,
-                         'status': 'CONSEQUENCE',
+                         'status': 'UNIVERSAL',
                          'typ': 'Int',
                          'value': '100'},
            'OMaxT(e2) = 100': {'environmental': False,
@@ -247,7 +248,7 @@ Irrelevant:
                          'normal': True,
                          'reading': 'OMinT(e1)',
                          'relevant': True,
-                         'status': 'CONSEQUENCE',
+                         'status': 'UNIVERSAL',
                          'typ': 'Int',
                          'value': '0'},
            'OMinT(e1) = 0': {'environmental': False,
@@ -261,7 +262,7 @@ Irrelevant:
                          'normal': True,
                          'reading': 'OMinT(e2)',
                          'relevant': True,
-                         'status': 'CONSEQUENCE',
+                         'status': 'UNIVERSAL',
                          'typ': 'Int',
                          'value': '0'},
            'OMinT(e2) = 0': {'environmental': False,

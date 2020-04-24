@@ -27,4 +27,20 @@
         |== !true with Variable
     |== !true with Brackets
 |== !true with ADisjunction
+|------------
+|*q
+|+ p -> true
+|== *q
+|------------
+|*r
+|+ p -> true
+|== *r
+|------------
+|*s
+|+ p -> true
+|== *s
+|------------
+|*t
+|+ p -> true
+|== *t
 Z3 propagation ********************************

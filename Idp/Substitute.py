@@ -158,7 +158,9 @@ Expression.expand_quantifiers = expand_quantifiers
 
 def interpret(self, theory):
     " use information in structure and simplify "
-    return self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
+    out = self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
+    out.original = out
+    return out
 Expression.interpret = interpret
 
 
@@ -466,14 +468,16 @@ def interpret(self, theory):
     if self.decl.interpretation is not None: # has a structure
         self.is_subtence = False
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
-        return self._change(simpler=out, sub_exprs=sub_exprs)
+        out = self._change(simpler=out, sub_exprs=sub_exprs)
     elif self.name in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs
         self.just_branch = theory.clark[self.name].instantiate_definition(sub_exprs, theory)
-        return self
+        out = self
     else:
-        return self
+        out = self
+    out.original = self
+    return out
 AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret
 
@@ -486,7 +490,7 @@ def substitute(self, e0, e1, todo=None):
         return self._replace_by(e1)
     if self.value is not None:
         return self
-    elif self == e0: # first == based on repr !
+    if self.code == e0.code:
         return self._change(value=e1)
     else:
         new_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs]

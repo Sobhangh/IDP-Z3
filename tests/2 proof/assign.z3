@@ -31,12 +31,13 @@ Definitions:
   
 Universals:  
   x = 0
+  x -> 0
 Consequences:
-  x = 0
+  
 Simplified:  
   
 Irrelevant:  
-  
+  ? y
 
 
 -- meta -------------------------------------
@@ -49,7 +50,7 @@ Irrelevant:
              'normal': True,
              'reading': 'x',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Int',
              'value': '0'},
        'x = 0': {'environmental': False,

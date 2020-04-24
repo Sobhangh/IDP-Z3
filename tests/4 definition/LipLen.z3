@@ -10,9 +10,9 @@ vocabulary {
 theory {
     {        
         LipLen = Short <- JacketDesign = Design_230.
+        LipLen = Standard <- JacketDesign = Design_400HP.
     }
 }
-
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
@@ -21,7 +21,7 @@ Or(LipLen == Short, LipLen == Standard)
 Or(JacketDesign == Design_230, JacketDesign == Design_400HP)
 
 And((LipLen == Short) == (JacketDesign == Design_230),
-    Not(LipLen == Standard))
+    (LipLen == Standard) == (JacketDesign == Design_400HP))
 
 -- subtences ------------------------------------
 LipLen = Short
@@ -41,23 +41,20 @@ JacketDesign = Design_400HP
 Type:        
   
 Definitions: 
-  Rule:∀$LipLen$[lipLen]: LipLen($LipLen$) ⇔($LipLen$ = Short) ∧ (JacketDesign = Design_230)
+  Rule:∀$LipLen$[lipLen]: LipLen($LipLen$) ⇔(($LipLen$ = Short) ∧ (JacketDesign = Design_230)) ∨ (($LipLen$ = Standard) ∧ (JacketDesign = Design_400HP))
 Universals:  
   
 Consequences:
-  LipLen = Short
-  ~LipLen = Standard
-  JacketDesign = Design_230
-  ~JacketDesign = Design_400HP
-  LipLen = Short
-  JacketDesign = Design_230
+  
 Simplified:  
   
 Irrelevant:  
-  LipLen = Short
-  ~LipLen = Standard
-  JacketDesign = Design_230
-  ~JacketDesign = Design_400HP
+  ? LipLen = Short
+  ? LipLen = Standard
+  ? JacketDesign = Design_230
+  ? JacketDesign = Design_400HP
+  ? LipLen
+  ? JacketDesign
 
 
 -- meta -------------------------------------
@@ -74,44 +71,40 @@ Irrelevant:
  'JacketDesign': {'JacketDesign': {'environmental': False,
                                    'normal': True,
                                    'reading': 'JacketDesign',
-                                   'relevant': True,
-                                   'status': 'CONSEQUENCE',
+                                   'relevant': False,
+                                   'status': 'UNKNOWN',
                                    'typ': 'jaDes',
-                                   'value': 'Design_230',
+                                   'value': '',
                                    'values': ['Design_230', 'Design_400HP']},
                   'JacketDesign = Design_230': {'environmental': False,
                                                 'normal': False,
                                                 'reading': 'JacketDesign = Design_230',
                                                 'relevant': False,
-                                                'status': 'CONSEQUENCE',
-                                                'typ': 'Bool',
-                                                'value': True},
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'},
                   'JacketDesign = Design_400HP': {'environmental': False,
                                                   'normal': False,
                                                   'reading': 'JacketDesign = Design_400HP',
                                                   'relevant': False,
-                                                  'status': 'CONSEQUENCE',
-                                                  'typ': 'Bool',
-                                                  'value': False}},
+                                                  'status': 'UNKNOWN',
+                                                  'typ': 'Bool'}},
  'LipLen': {'LipLen': {'environmental': False,
                        'normal': True,
                        'reading': 'LipLen',
-                       'relevant': True,
-                       'status': 'CONSEQUENCE',
+                       'relevant': False,
+                       'status': 'UNKNOWN',
                        'typ': 'lipLen',
-                       'value': 'Short',
+                       'value': '',
                        'values': ['Short', 'Standard']},
             'LipLen = Short': {'environmental': False,
                                'normal': False,
                                'reading': 'LipLen = Short',
                                'relevant': False,
-                               'status': 'CONSEQUENCE',
-                               'typ': 'Bool',
-                               'value': True},
+                               'status': 'UNKNOWN',
+                               'typ': 'Bool'},
             'LipLen = Standard': {'environmental': False,
                                   'normal': False,
                                   'reading': 'LipLen = Standard',
                                   'relevant': False,
-                                  'status': 'CONSEQUENCE',
-                                  'typ': 'Bool',
-                                  'value': False}}}
+                                  'status': 'UNKNOWN',
+                                  'typ': 'Bool'}}}

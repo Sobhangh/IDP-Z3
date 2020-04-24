@@ -50,7 +50,8 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  
+  ? s
+  ? t
 
 
 -- meta -------------------------------------

@@ -41,7 +41,10 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
-  
+  ? q
+  ? r
+  ? s
+  ? t
 
 
 -- meta -------------------------------------

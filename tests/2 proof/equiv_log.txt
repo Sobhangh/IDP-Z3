@@ -12,6 +12,18 @@
     |== *q
 |== !!q with Variable,Variable
 |------------
+|q with Variable,Variable
+|+ q -> true
+    |------------
+    |*true
+    |+ q -> true
+    |== *!true
+    |------------
+    |*q
+    |+ q -> true
+    |== *!true
+|== !true with Variable,Variable
+|------------
 |q ⇔ (~(r)) with Variable,Brackets
 |+ p -> true
     |------------
@@ -32,41 +44,41 @@
     |== !!~(r) with AUnary
 |== q ⇔ (~(r)) with Variable,Brackets
 |------------
-|*q
+|*true
 |+ p -> true
-|== *q
+|== *!true
 |------------
 |*r
 |+ p -> true
 |== *r
 |------------
+|*s
+|+ p -> true
+|== *s
+|------------
+|*t
+|+ p -> true
+|== *t
+|------------
 |q ⇔ (~(r)) with Variable,Brackets
-|+ q -> true
+|+ q -> true  (or true -> true)
     |------------
     |*q
-    |+ q -> true
+    |+ q -> true  (or true -> true)
     |== *!true
     |------------
     |(~(r)) with AUnary
-    |+ q -> true
+    |+ q -> true  (or true -> true)
         |------------
         |~(r) with Variable
-        |+ q -> true
+        |+ q -> true  (or true -> true)
             |------------
             |*r
-            |+ q -> true
+            |+ q -> true  (or true -> true)
             |== *r
         |== ~(r) with Variable
     |== !!~(r) with AUnary
 |== !!(~(r)) with Variable,Brackets
-|------------
-|*p
-|+ q -> true
-|== *p
-|------------
-|*r
-|+ q -> true
-|== *r
 |------------
 |(~(r)) with Variable,Brackets
 |+ r -> false
@@ -89,10 +101,34 @@
 |== !true with Variable,Brackets
 |------------
 |*p
-|+ r -> false
+|+ q -> true  (or true -> true)
 |== *p
 |------------
-|*q
-|+ r -> false
-|== *q
+|*false
+|+ q -> true  (or true -> true)
+|== *!false
+|------------
+|*s
+|+ q -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ q -> true  (or true -> true)
+|== *t
+|------------
+|*p
+|+ r -> false  (or false -> false)
+|== *p
+|------------
+|*true
+|+ r -> false  (or false -> false)
+|== *!true
+|------------
+|*s
+|+ r -> false  (or false -> false)
+|== *s
+|------------
+|*t
+|+ r -> false  (or false -> false)
+|== *t
 Z3 propagation ********************************

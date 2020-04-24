@@ -32,18 +32,6 @@
     |== q ∧ (r ∨ s) with Variable,Brackets
 |== !!q ∧ (r ∨ s) with Variable,AConjunction
 |------------
-|*q
-|+ p -> true
-|== *q
-|------------
-|*r
-|+ p -> true
-|== *r
-|------------
-|*s
-|+ p -> true
-|== *s
-|------------
 |q ∧ (r ∨ s) with Variable,AConjunction
 |+ q -> true
     |------------
@@ -59,17 +47,57 @@
         |== *!true
         |------------
         |(r ∨ s) with ADisjunction
-        |+ q -> true
+        |+ q -> true  (or true -> true)
             |------------
             |r ∨ s with Variable,Variable
-            |+ q -> true
+            |+ q -> true  (or true -> true)
                 |------------
                 |*r
-                |+ q -> true
+                |+ q -> true  (or true -> true)
                 |== *r
                 |------------
                 |*s
-                |+ q -> true
+                |+ q -> true  (or true -> true)
+                |== *s
+            |== r ∨ s with Variable,Variable
+        |== !!r ∨ s with ADisjunction
+    |== !!(r ∨ s) with Brackets
+|== !!(r ∨ s) with Variable,AConjunction
+|------------
+|*true
+|+ p -> true
+|== *!true
+|------------
+|*r
+|+ p -> true
+|== *r
+|------------
+|*s
+|+ p -> true
+|== *s
+|------------
+|(r ∨ s) with Variable,AConjunction
+|+ q -> true  (or true -> true)
+    |------------
+    |*true
+    |+ q -> true  (or true -> true)
+    |== *!true
+    |------------
+    |(r ∨ s) with Brackets
+    |+ q -> true  (or true -> true)
+        |------------
+        |(r ∨ s) with ADisjunction
+        |+ q -> true  (or true -> true)
+            |------------
+            |r ∨ s with Variable,Variable
+            |+ q -> true  (or true -> true)
+                |------------
+                |*r
+                |+ q -> true  (or true -> true)
+                |== *r
+                |------------
+                |*s
+                |+ q -> true  (or true -> true)
                 |== *s
             |== r ∨ s with Variable,Variable
         |== !!r ∨ s with ADisjunction
@@ -77,14 +105,14 @@
 |== !!(r ∨ s) with Variable,AConjunction
 |------------
 |*p
-|+ q -> true
+|+ q -> true  (or true -> true)
 |== *p
 |------------
 |*r
-|+ q -> true
+|+ q -> true  (or true -> true)
 |== *r
 |------------
 |*s
-|+ q -> true
+|+ q -> true  (or true -> true)
 |== *s
 Z3 propagation ********************************

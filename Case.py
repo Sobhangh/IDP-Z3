@@ -20,7 +20,7 @@ from z3 import And, Not, sat, unsat, unknown, is_true
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from Solver import mk_solver
-from Structure_ import json_to_literals, Equality, Assignment, Term, Status, str_to_IDP
+from Structure_ import json_to_literals, Assignment, Status, str_to_IDP
 from utils import *
 
 # Types
@@ -73,7 +73,7 @@ class Case:
             else:
                 self.simplified.append(c)
 
-        self.assignments.update({ k : Term(Equality(t.copy(), None), None, Status.UNKNOWN) 
+        self.assignments.update({ k : Assignment(t.copy(), None, Status.UNKNOWN) 
             for k, t in idp.vocabulary.terms.items()
             if k not in self.assignments })
 
@@ -90,7 +90,7 @@ class Case:
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == Status.UNIVERSAL)}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant and type(c) != Term)}{nl}"
+                f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{nl}"
         )
         
     def get_relevant_subtences(self, all_: bool) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
@@ -98,8 +98,7 @@ class Case:
         constraints = ( self.simplified
             + list(self.idp.goal.subtences().values())
             + [l.sentence for k, l in self.assignments.items() 
-                    if l.truth is not None and (all_ or l.is_environmental) 
-                    and not type(l) == Term])
+                    if l.truth is not None and (all_ or l.is_environmental)])
 
         # determine relevant symbols (including defined ones)
         symbols = mergeDicts( e.unknown_symbols() for e in constraints )
@@ -134,7 +133,8 @@ class Case:
                 if k in relevant_subtences and symbols and has_relevant_symbol:
                     l.relevant = True
 
-        solver, _, _ = mk_solver(self.translate(all_), {})
+        theory = self.translate(all_)
+        solver, _, _ = mk_solver(theory, {})
         result = solver.check()
         if result == sat:
             todo = self.assignments.keys()
@@ -155,7 +155,7 @@ class Case:
                         if str(val1) != str(atom.reified()): # if not irrelevant
                         
                             val = str_to_IDP(self.idp, str(val1))
-                            assert val.translate() == val1
+                            assert val.translate() == val1, str(val) + " is not the same as " + str(val1)
 
                             solver.push()
                             solver.add(Not(atom.reified()==val1))
@@ -163,17 +163,8 @@ class Case:
                             solver.pop()
 
                             if res2 == unsat:
-                                if type(l) == Term:
-                                    atom = cast(Equality, atom)
-                                    # need to convert Term into Assignment
-                                    if atom.variable.decl.out.code == 'bool':
-                                        ass = Assignment(atom.variable, val, CONSQ)
-                                    else:
-                                        ass = Assignment(Equality(atom.variable, val1), TRUE, CONSQ)
-                                    ass.relevant = True
-                                    self.assignments[key] = ass
-                                else:
-                                    ass = l.update(None, val, CONSQ, self)
+                                ass = l.update(atom, val, CONSQ, self)
+                                #TODO ass.relevant = True
                                 self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
@@ -200,18 +191,20 @@ class Case:
                     consequences.extend(new_constraint.implicants())
                     if consequences:
                         for sentence, truth in consequences:
-                            old_ass = self.assignments[sentence.code]
-                            if old_ass.truth is None:
-                                if (all_ or old_ass.is_environmental):
-                                    new_ass = old_ass.update(None, truth, CONSQ, self)
-                                    to_propagate.append(new_ass)
-                            elif old_ass.truth != truth:
-                                # test: theory{ x=4. x=5. }
-                                self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
-                                return
-                        if not any(new_constraint == e for (e,t) in consequences):
-                            new_simplified.append(new_constraint)
-                    elif not new_constraint == TRUE:
+                            if sentence.code in self.assignments:
+                                old_ass = self.assignments[sentence.code]
+                                if old_ass.truth is None:
+                                    if (all_ or old_ass.is_environmental):
+                                        new_ass = old_ass.update(sentence, truth, CONSQ, self)
+                                        to_propagate.append(new_ass)
+                                        new_constraint = new_constraint.substitute(sentence, truth)
+                                elif old_ass.truth != truth:
+                                    # test: theory{ x=4. x=5. }
+                                    self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
+                                    return
+                            else:
+                                print("not found", str(sentence))
+                    if not new_constraint == TRUE:
                         new_simplified.append(new_constraint)
 
                 self.simplified = new_simplified
@@ -220,33 +213,26 @@ class Case:
                 for old_ass in self.assignments.values():
                     if old_ass.sentence != ass.sentence and (all_ or old_ass.is_environmental):
                         new_constraint = old_ass.sentence.substitute(old, new)
-                        if new_constraint != old_ass.sentence: # changed !
-                            if type(old_ass) == Term: # value of term was not known
-                                old_ass = cast(Term, old_ass)
-                                new_ass = old_ass.assign(new_constraint.valueZ3, self, CONSQ)
-                                to_propagate.append(new_ass)
-                            elif new_constraint in [TRUE, FALSE]:
-                                if old_ass.truth is None: # value of proposition was not known
-                                    new_ass = old_ass.update(new_constraint, 
-                                        new_constraint, CONSQ, self)
-                                    to_propagate.append(new_ass)
-                                elif (new_constraint==TRUE  and not old_ass.truth) \
-                                or   (new_constraint==FALSE and     old_ass.truth):
-                                    #TODO test case ?
-                                    self.simplified = cast(List[Expression], [FALSE]) # inconsistent
-                                    return
-                                else:
-                                    pass # no change
-                            else:
-                                old_ass.update(new_constraint, None, None, self)
+                        if new_constraint.value is None: # not reduced to ground
+                            old_ass.update(new_constraint, None, None, self)
+                        elif old_ass.truth is not None: # has a value already
+                            if not old_ass.truth == new_constraint.value: # different !
+                                self.simplified = cast(List[Expression], [FALSE]) # inconsistent
+                                return
+                            else: # no change
+                                pass
+                        else: # accept new value
+                            new_ass = old_ass.update(new_constraint, 
+                                new_constraint.value, CONSQ, self)
+                            to_propagate.append(new_ass)
+                            
 
     def translate(self, all_: bool = True) -> BoolRef:
         self.translated = And(
             self.typeConstraints.translate(self.idp)
             + sum((d.translate(self.idp) for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
-                    if l.truth is not None and (all_ or l.is_environmental) 
-                    and not type(l) == Term]
+                    if l.truth is not None and (all_ or l.is_environmental)]
             + [c.translate() for c in self.simplified]
             )
         return self.translated

@@ -58,6 +58,7 @@ Definitions:
   Rule:∀$codeOf!0$[color],$codeOf$[code]: codeOf($codeOf!0$,$codeOf$) ⇔(($codeOf!0$ = c) ∧ ($codeOf$ = a)) ∨ ((~($codeOf!0$ = c)) ∧ ($codeOf$ = b))
 Universals:  
   codeOf(red) = b
+  codeOf(red) -> b
 Consequences:
   ~red = c
   ~codeOf(red) = a
@@ -65,9 +66,8 @@ Consequences:
   ~codeOf(blue) = b
   ~c = red
   c = blue
-  codeOf(red) = b
-  codeOf(blue) = a
-  c = blue
+  codeOf(blue) -> a
+  c -> blue
 Simplified:  
   
 Irrelevant:  
@@ -136,7 +136,7 @@ Irrelevant:
                             'normal': True,
                             'reading': 'codeOf(red)',
                             'relevant': True,
-                            'status': 'CONSEQUENCE',
+                            'status': 'UNIVERSAL',
                             'typ': 'code',
                             'value': 'b',
                             'values': ['a', 'b']},

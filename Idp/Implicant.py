@@ -97,3 +97,17 @@ def implicants(self, truth=TRUE):
     return self.sub_exprs[0].implicants(_not(truth)) if self.operator == '~' \
       else []
 AUnary.implicants = implicants
+
+
+# class AComparison ############################################################
+
+@use_value
+def implicants(self, truth=TRUE):
+    if truth == TRUE and len(self.sub_exprs) == 2 and self.operator == ['=']:
+        operands1 = [e.as_ground() for e in self.sub_exprs]
+        if   operands1[1] is not None:
+            return [(self.sub_exprs[0], operands1[1])]
+        elif operands1[0] is not None:
+            return [(self.sub_exprs[1], operands1[0])]
+    return []
+AComparison.implicants = implicants

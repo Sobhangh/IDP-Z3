@@ -90,13 +90,12 @@ Definitions:
   
 Universals:  
   Sides = 3
+  Sides -> 3
 Consequences:
   ~Sides = 4
-  Sides = 3
 Simplified:  
   Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)))
 Irrelevant:  
-  ~Sides = 4
   ? Type = triangle
   ? Type = quadrilateral
   ? Subtype = regular_triangle
@@ -104,6 +103,8 @@ Irrelevant:
   ? Subtype = rectangle
   ? Subtype = square
   ? Subtype = irregular
+  ? Type
+  ? Subtype
 
 
 -- meta -------------------------------------
@@ -163,7 +164,7 @@ Irrelevant:
                      'normal': True,
                      'reading': 'Sides',
                      'relevant': True,
-                     'status': 'CONSEQUENCE',
+                     'status': 'UNIVERSAL',
                      'typ': 'Int',
                      'value': '3',
                      'values': ['3', '4']},
@@ -177,7 +178,7 @@ Irrelevant:
            'Sides = 4': {'environmental': False,
                          'normal': False,
                          'reading': 'Sides = 4',
-                         'relevant': False,
+                         'relevant': True,
                          'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': False}},

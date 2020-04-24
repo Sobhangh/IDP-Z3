@@ -362,6 +362,7 @@ Universals:
   0 ≤ Base
   0 ≤ Height
   ∃n[side] : (n ≤ Sides) ∧ (Length(n) = Base)
+  Subtype -> regular_triangle
 Consequences:
   Type = triangle
   Sides = 3
@@ -388,29 +389,27 @@ Consequences:
   Length(3) ≤ (Length(1) + Length(2))
   Surface = ((Base * Height) / 2)
   ~Surface = -1
-  Sides = 3
-  Vertices = 3
-  Type = triangle
-  Length(4) = 0
-  Angle(1) = 60
-  Angle(2) = 60
-  Angle(3) = 60
-  Angle(4) = 0
-  Subtype = regular_triangle
+  Sides -> 3
+  Vertices -> 3
+  Type -> triangle
+  Length(4) -> 0
+  Angle(1) -> 60
+  Angle(2) -> 60
+  Angle(3) -> 60
+  Angle(4) -> 0
 Simplified:  
   
 Irrelevant:  
-  ~Sides = 4
-  ~Subtype = right_triangle
-  ~Subtype = irregular
-  ~Subtype = square
-  ~Subtype = rectangle
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   Length(1) = Length(3)
   ~Length(2) = Length(4)
   Length(1) = Length(2)
   ? Surface = (Length(1) * Length(2))
   ~Surface = -1
+  ? Large(1)
+  ? Large(2)
+  ? Large(3)
+  ? Large(4)
 
 
 -- meta -------------------------------------
@@ -710,7 +709,7 @@ Irrelevant:
            'Sides = 4': {'environmental': False,
                          'normal': False,
                          'reading': 'Sides = 4',
-                         'relevant': False,
+                         'relevant': True,
                          'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': False},
@@ -725,21 +724,21 @@ Irrelevant:
                          'normal': True,
                          'reading': 'Subtype',
                          'relevant': True,
-                         'status': 'CONSEQUENCE',
+                         'status': 'UNIVERSAL',
                          'typ': 'subtype',
                          'value': 'regular_triangle',
                          'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype = irregular': {'environmental': False,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
-                                     'relevant': False,
+                                     'relevant': True,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': False},
              'Subtype = rectangle': {'environmental': False,
                                      'normal': False,
                                      'reading': 'Subtype = rectangle',
-                                     'relevant': False,
+                                     'relevant': True,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': False},
@@ -753,14 +752,14 @@ Irrelevant:
              'Subtype = right_triangle': {'environmental': False,
                                           'normal': False,
                                           'reading': 'Subtype = right_triangle',
-                                          'relevant': False,
+                                          'relevant': True,
                                           'status': 'CONSEQUENCE',
                                           'typ': 'Bool',
                                           'value': False},
              'Subtype = square': {'environmental': False,
                                   'normal': False,
                                   'reading': 'Subtype = square',
-                                  'relevant': False,
+                                  'relevant': True,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False}},

@@ -154,6 +154,10 @@ Universals:
   ~asi(quadrilateral,right_triangle)
   asi(quadrilateral,rectangle)
   asi(quadrilateral,square)
+  typeOf(regular_triangle) -> 1tri angle
+  typeOf(right_triangle) -> 1tri angle
+  typeOf(rectangle) -> quadrilateral
+  typeOf(square) -> quadrilateral
   isa(regular_triangle,typeOf(regular_triangle))
   isa(right_triangle,typeOf(right_triangle))
   isa(rectangle,typeOf(rectangle))
@@ -167,14 +171,11 @@ Consequences:
   typeOf(rectangle) = quadrilateral
   ~typeOf(square) = 1tri angle
   typeOf(square) = quadrilateral
-  typeOf(regular_triangle) = 1tri angle
-  typeOf(right_triangle) = 1tri angle
-  typeOf(rectangle) = quadrilateral
-  typeOf(square) = quadrilateral
 Simplified:  
   (Type = 1tri angle) ∨ (Type = quadrilateral)
   (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square)
 Irrelevant:  
+  ∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
   isa(regular_triangle,typeOf(regular_triangle))
   isa(right_triangle,typeOf(right_triangle))
   isa(rectangle,typeOf(rectangle))
@@ -321,9 +322,9 @@ Irrelevant:
                                                          'value': True}},
  'typeOf': {'typeOf(rectangle)': {'environmental': False,
                                   'normal': True,
-                                  'reading': 'typeOf(rectangle)',
+                                  'reading': 'typeOf(st)',
                                   'relevant': True,
-                                  'status': 'CONSEQUENCE',
+                                  'status': 'UNIVERSAL',
                                   'typ': 'type',
                                   'value': 'quadrilateral',
                                   'values': ['1tri angle', 'quadrilateral']},
@@ -343,9 +344,9 @@ Irrelevant:
                                                   'value': True},
             'typeOf(regular_triangle)': {'environmental': False,
                                          'normal': True,
-                                         'reading': 'typeOf(regular_triangle)',
+                                         'reading': 'typeOf(st)',
                                          'relevant': True,
-                                         'status': 'CONSEQUENCE',
+                                         'status': 'UNIVERSAL',
                                          'typ': 'type',
                                          'value': '1tri angle',
                                          'values': ['1tri angle', 'quadrilateral']},
@@ -365,9 +366,9 @@ Irrelevant:
                                                          'value': False},
             'typeOf(right_triangle)': {'environmental': False,
                                        'normal': True,
-                                       'reading': 'typeOf(right_triangle)',
+                                       'reading': 'typeOf(st)',
                                        'relevant': True,
-                                       'status': 'CONSEQUENCE',
+                                       'status': 'UNIVERSAL',
                                        'typ': 'type',
                                        'value': '1tri angle',
                                        'values': ['1tri angle', 'quadrilateral']},
@@ -387,9 +388,9 @@ Irrelevant:
                                                        'value': False},
             'typeOf(square)': {'environmental': False,
                                'normal': True,
-                               'reading': 'typeOf(square)',
+                               'reading': 'typeOf(st)',
                                'relevant': True,
-                               'status': 'CONSEQUENCE',
+                               'status': 'UNIVERSAL',
                                'typ': 'type',
                                'value': 'quadrilateral',
                                'values': ['1tri angle', 'quadrilateral']},
@@ -418,7 +419,7 @@ Irrelevant:
                                                                    'normal': False,
                                                                    'reading': '∀t[type]st[subtype] : (typeOf(st) = t) '
                                                                               '⇔ isa(st,t)',
-                                                                   'relevant': True,
+                                                                   'relevant': False,
                                                                    'status': 'UNIVERSAL',
                                                                    'typ': 'Bool',
                                                                    'value': True}}}

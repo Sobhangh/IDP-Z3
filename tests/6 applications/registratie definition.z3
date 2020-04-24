@@ -956,6 +956,11 @@ Irrelevant:
   ? Certification_Date_Sale = 2023
   ? Certification_Date_Sale = 2024
   ? Certification_Date_Sale = 2025
+  ? Municipality
+  ? Resale
+  ? Transaction_Type
+  ? Core_City
+  ? Certification_Date_Sale
 
 
 -- meta -------------------------------------

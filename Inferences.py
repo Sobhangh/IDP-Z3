@@ -213,41 +213,41 @@ def abstract(case, given_json):
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
-        atoms.sort(key=lambda l: (l.truth, str(l.sentence)))
+        atoms.sort(key=lambda l: (l.truth==TRUE, str(l.sentence)))
 
         # remove atoms that are irrelevant in AMF
         solver2 = Solver()
         solver2.add(theory2)
         solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
-        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
+        (reify2, _) = reifier({str(l.sentence.original) : l.sentence.original for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.truth is not None:
                 solver2.push()
-                a = Not(reify2[assignment.sentence]) if assignment.truth else \
-                    reify2[assignment.sentence]
+                a = Not(reify2[assignment.sentence.original]) if assignment.truth else \
+                    reify2[assignment.sentence.original]
                 solver2.add(a)
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
                 result = solver2.check()
                 solver2.pop()
                 if result == sat:
                     theory2 = And(theory2, 
-                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(True))]),
-                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(False))]))
+                                substitute(theory2, [(assignment.sentence.original.translate(), BoolVal(True))]),
+                                substitute(theory2, [(assignment.sentence.original.translate(), BoolVal(False))]))
                     solver2.add(theory2)
-                    atoms[i] = Assignment(assignment.sentence, TRUE, Status.UNKNOWN)
+                    atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
         solver2.add(case.idp.vocabulary.translate(case.idp)) # without theory !
-        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
+        (reify2, _) = reifier({str(l.sentence.original) : l.sentence.original for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.truth is not None:
                 solver2.push()
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(assignment)
-                a = Not(reify2[assignment.sentence]) if assignment.truth else \
-                    reify2[assignment.sentence]
+                a = Not(reify2[assignment.sentence.original]) if assignment.truth else \
+                    reify2[assignment.sentence.original]
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
@@ -263,7 +263,7 @@ def abstract(case, given_json):
         model = {}
         for l in atoms:
             if l.sentence != TRUE:
-                for symb in l.sentence.unknown_symbols().keys():
+                for symb in l.sentence.original.unknown_symbols().keys():
                     model.setdefault(symb, []).append([ l ])
                     break
         # add to models

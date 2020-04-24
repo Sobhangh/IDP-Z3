@@ -50,8 +50,8 @@ Consequences:
   ~codeOf(red) = b
   ~codeOf(blue) = a
   codeOf(blue) = b
-  codeOf(red) = a
-  codeOf(blue) = b
+  codeOf(red) -> a
+  codeOf(blue) -> b
 Simplified:  
   
 Irrelevant:  
@@ -59,6 +59,8 @@ Irrelevant:
   ~codeOf(red) = b
   ~codeOf(blue) = a
   codeOf(blue) = b
+  codeOf(red) -> a
+  codeOf(blue) -> b
 
 
 -- meta -------------------------------------
@@ -70,7 +72,7 @@ Irrelevant:
  'codeOf': {'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'CONSEQUENCE',
                              'typ': 'code',
                              'value': 'b',
@@ -92,7 +94,7 @@ Irrelevant:
             'codeOf(red)': {'environmental': False,
                             'normal': True,
                             'reading': 'codeOf(red)',
-                            'relevant': True,
+                            'relevant': False,
                             'status': 'CONSEQUENCE',
                             'typ': 'code',
                             'value': 'a',

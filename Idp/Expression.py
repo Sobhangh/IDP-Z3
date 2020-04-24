@@ -32,7 +32,7 @@ import os
 import re
 import sys
 
-from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
+from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort, Q
 from utils import mergeDicts, unquote
 
 from typing import List, Tuple
@@ -71,6 +71,7 @@ class Expression(object):
         # .code uniquely identifies an expression, irrespective of its value
         self.code = sys.intern(str(self)) # normalized idp code, before transformations
         self.annotations = {'reading': self.code} # dict(String, String)
+        self.original = self              # untouched version of the expression, from IDP code or Expr.make()
 
         self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]
@@ -101,8 +102,7 @@ class Expression(object):
 
         # beware: this does not ignore meaningless brackets deeper in the tree
         if self.str == other.str:
-            if type(self)==type(other)\
-            or (type(other).__name__=="Equality" and type(self)==AComparison):
+            if type(self)==type(other):
                 return True
             return False
         return False
@@ -376,41 +376,11 @@ class BinaryOperator(Expression):
 
     @use_value
     def translate(self):
-        if self.operator[0] =='≠' and len(self.sub_exprs)==2:
-            x = self.sub_exprs[0].translate()
-            y = self.sub_exprs[1].translate()
-            out = Not(x==y)
-        elif self.operator[0] in '=<>≤≥≠':
-            # chained comparisons -> And()
-            out = []
-            for i in range(1, len(self.sub_exprs)):
-                x = self.sub_exprs[i-1].translate()
-                function = BinaryOperator.MAP[self.operator[i - 1]]
-                y = self.sub_exprs[i].translate()
-                try:
-                    out = out + [function(x, y)]
-                except Z3Exception as E:
-                    raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
-            if 1 < len(out):
-                return And(out)
-            else:
-                return out[0]
-        elif self.operator[0] == '∧':
-            if len(self.sub_exprs) == 1:
-                out = self.sub_exprs[0].translate()
-            else:
-                out = And([e.translate() for e in self.sub_exprs])
-        elif self.operator[0] == '∨':
-            if len(self.sub_exprs) == 1:
-                out = self.sub_exprs[0].translate()
-            else:
-                out = Or ([e.translate() for e in self.sub_exprs])
-        else:
-            out = self.sub_exprs[0].translate()
+        out = self.sub_exprs[0].translate()
 
-            for i in range(1, len(self.sub_exprs)):
-                function = BinaryOperator.MAP[self.operator[i - 1]]
-                out = function(out, self.sub_exprs[i].translate())
+        for i in range(1, len(self.sub_exprs)):
+            function = BinaryOperator.MAP[self.operator[i - 1]]
+            out = function(out, self.sub_exprs[i].translate())
         return out
         
 class AImplication(BinaryOperator):
@@ -426,11 +396,23 @@ class ARImplication(BinaryOperator):
         return out.annotate(symbol_decls, q_vars)
 
 class ADisjunction(BinaryOperator):
-    pass
+    @use_value
+    def translate(self):
+        if len(self.sub_exprs) == 1:
+            out = self.sub_exprs[0].translate()
+        else:
+            out = Or ([e.translate() for e in self.sub_exprs])
+        return out
 
 
 class AConjunction(BinaryOperator):
-    pass
+    @use_value
+    def translate(self):
+        if len(self.sub_exprs) == 1:
+            out = self.sub_exprs[0].translate()
+        else:
+            out = And([e.translate() for e in self.sub_exprs])
+        return out
 
 
 class AComparison(BinaryOperator):
@@ -453,6 +435,24 @@ class AComparison(BinaryOperator):
             and all(e.as_ground() is not None for e in self.sub_exprs[0].sub_exprs) \
             and self.sub_exprs[1].as_ground() is not None
         return super().annotate1()
+
+    @use_value
+    def translate(self):
+        assert not self.operator == ['≠']
+        # chained comparisons -> And()
+        out = []
+        for i in range(1, len(self.sub_exprs)):
+            x = self.sub_exprs[i-1].translate()
+            function = BinaryOperator.MAP[self.operator[i - 1]]
+            y = self.sub_exprs[i].translate()
+            try:
+                out = out + [function(x, y)]
+            except Z3Exception as E:
+                raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
+        if 1 < len(out):
+            return And(out)
+        else:
+            return out[0]
 
 
 class ASumMinus(BinaryOperator):
@@ -621,7 +621,7 @@ class AppliedSymbol(Expression):
                 return self.decl.translated
             else:
                 arg = [x.translate() for x in self.sub_exprs]
-                return (self.decl.translated)(arg)
+                return (self.decl.translate())(arg)
 
     def has_environmental(self, truth):
         return self.decl.environmental == truth \
@@ -705,12 +705,17 @@ class NumberConstant(Expression):
         super().__init__()
 
         self.sub_exprs = []
-        try:
-            self.translated = int(self.number)
-            self.type = 'int'
-        except ValueError:
+
+        ops = self.number.split("/")
+        if len(ops) == 2: # possible with str_to_IDP on Z3 value
+            self.translated = Q(int(ops[0]), int(ops[1]))
+            self.type = 'real'
+        elif '.' in self.number:
             self.translated = float(eval(self.number))
             self.type = 'real'
+        else:
+            self.translated = int(self.number)
+            self.type = 'int'
     
     def __str__(self): return self.number
 

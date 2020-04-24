@@ -310,7 +310,9 @@ Universals:
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+  Perimeter -> 10
 Consequences:
+  ∀n[side] : Length(n) < Length(n + 1)
   ~Large(1)
   ~Type = triangle
   ~Sides = 3
@@ -326,18 +328,17 @@ Consequences:
   ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
   ~Subtype = square
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
-  Sides = 4
-  Vertices = 4
-  Type = quadrilateral
-  Subtype = irregular
-  Perimeter = 10
+  Sides -> 4
+  Vertices -> 4
+  Type -> quadrilateral
+  Subtype -> irregular
   ~Large(2)
   ~Large(3)
   ~Large(4)
 Simplified:  
   (Convex ⇔ ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180)))
 Irrelevant:  
-  ? ∀n[side] : Length(n) < Length(n + 1)
+  ∀n[side] : Length(n) < Length(n + 1)
 
 
 -- meta -------------------------------------
@@ -487,7 +488,7 @@ Irrelevant:
                              'normal': True,
                              'reading': 'Perimeter',
                              'relevant': True,
-                             'status': 'CONSEQUENCE',
+                             'status': 'UNIVERSAL',
                              'typ': 'Real',
                              'value': '10'},
                'Perimeter = (sum{n[side] : true : Length(n)})': {'environmental': False,

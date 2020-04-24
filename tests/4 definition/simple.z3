@@ -83,14 +83,15 @@ Consequences:
   c = red
   ~c = blue
   p
-  a = red
-  b = red
-  c = red
+  a -> red
+  b -> red
+  c -> red
 Simplified:  
   
 Irrelevant:  
   c = red
   ~c = blue
+  c -> red
 
 
 -- meta -------------------------------------
@@ -121,7 +122,7 @@ Irrelevant:
                     'value': False},
        'a = red': {'environmental': False,
                    'normal': False,
-                   'reading': 'a = red',
+                   'reading': '$a$ = red',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
@@ -151,7 +152,7 @@ Irrelevant:
  'c': {'c': {'environmental': False,
              'normal': True,
              'reading': 'c',
-             'relevant': True,
+             'relevant': False,
              'status': 'CONSEQUENCE',
              'typ': 'color',
              'value': 'red',

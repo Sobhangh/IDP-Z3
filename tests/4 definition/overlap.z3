@@ -51,23 +51,24 @@ Definitions:
   Rule:∀$t$[num]: t($t$) ⇔($t$ = t0) ∨ ($t$ = t1)
 Universals:  
   t0 = Piet
+  t0 -> Piet
 Consequences:
   ~t = Jan
   t = Piet
   ~t0 = Jan
   ~t1 = Jan
   t1 = Piet
-  t = Piet
-  t0 = Piet
-  t1 = Piet
+  t -> Piet
+  t1 -> Piet
 Simplified:  
   
 Irrelevant:  
   ~t = Jan
   t = Piet
-  ~t0 = Jan
   ~t1 = Jan
   t1 = Piet
+  t -> Piet
+  t1 -> Piet
 
 
 -- meta -------------------------------------
@@ -81,7 +82,7 @@ Irrelevant:
  't': {'t': {'environmental': False,
              'normal': True,
              'reading': 't',
-             'relevant': True,
+             'relevant': False,
              'status': 'CONSEQUENCE',
              'typ': 'num',
              'value': 'Piet',
@@ -104,14 +105,14 @@ Irrelevant:
                'normal': True,
                'reading': 't0',
                'relevant': True,
-               'status': 'CONSEQUENCE',
+               'status': 'UNIVERSAL',
                'typ': 'num',
                'value': 'Piet',
                'values': ['Jan', 'Piet']},
         't0 = Jan': {'environmental': False,
                      'normal': False,
                      'reading': 't0 = Jan',
-                     'relevant': False,
+                     'relevant': True,
                      'status': 'CONSEQUENCE',
                      'typ': 'Bool',
                      'value': False},
@@ -125,7 +126,7 @@ Irrelevant:
  't1': {'t1': {'environmental': False,
                'normal': True,
                'reading': 't1',
-               'relevant': True,
+               'relevant': False,
                'status': 'CONSEQUENCE',
                'typ': 'num',
                'value': 'Piet',

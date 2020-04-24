@@ -33,13 +33,14 @@ Definitions:
   
 Universals:  
   x = 0
+  x -> 0
 Consequences:
   (x + 1) = 1
-  x = 0
 Simplified:  
   
 Irrelevant:  
   (x + 1) = 1
+  ? y
 
 
 -- meta -------------------------------------
@@ -59,7 +60,7 @@ Irrelevant:
              'normal': True,
              'reading': 'x',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Int',
              'value': '0'},
        'x = 0': {'environmental': False,

@@ -16,6 +16,14 @@
     |== *q
 |== !!q with Variable
 |------------
+|q with Variable
+|+ q -> true
+    |------------
+    |*q
+    |+ q -> true
+    |== *!true
+|== !true with Variable
+|------------
 |(~(q)) ∨ r with AUnary,Variable
 |+ p -> true
     |------------
@@ -32,43 +40,67 @@
     |== *r
 |== (~(q)) ∨ r with AUnary,Variable
 |------------
-|*q
+|*true
 |+ p -> true
-|== *q
+|== *!true
 |------------
 |*r
 |+ p -> true
 |== *r
 |------------
+|*s
+|+ p -> true
+|== *s
+|------------
+|*t
+|+ p -> true
+|== *t
+|------------
 |(~(q)) ∨ r with AUnary,Variable
-|+ q -> true
+|+ q -> true  (or true -> true)
     |------------
     |~(q) with Variable
-    |+ q -> true
+    |+ q -> true  (or true -> true)
         |------------
         |*q
-        |+ q -> true
+        |+ q -> true  (or true -> true)
         |== *!true
     |== !false with Variable
     |------------
     |*r
-    |+ q -> true
+    |+ q -> true  (or true -> true)
     |== *r
 |== !!r with Variable
 |------------
+|r with Variable
+|+ r -> true
+    |------------
+    |*r
+    |+ r -> true
+    |== *!true
+|== !true with Variable
+|------------
 |*p
-|+ q -> true
+|+ q -> true  (or true -> true)
 |== *p
 |------------
-|*r
-|+ q -> true
-|== *r
+|*s
+|+ q -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ q -> true  (or true -> true)
+|== *t
 |------------
 |*p
-|+ r -> true
+|+ r -> true  (or true -> true)
 |== *p
 |------------
-|*q
-|+ r -> true
-|== *q
+|*s
+|+ r -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ r -> true  (or true -> true)
+|== *t
 Z3 propagation ********************************

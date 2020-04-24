@@ -16,11 +16,43 @@
     |== *q
 |== !!q with Variable
 |------------
-|*q
+|q with Variable
+|+ q -> true
+    |------------
+    |*q
+    |+ q -> true
+    |== *!true
+|== !true with Variable
+|------------
+|*true
 |+ p -> true
-|== *q
+|== *!true
+|------------
+|*r
+|+ p -> true
+|== *r
+|------------
+|*s
+|+ p -> true
+|== *s
+|------------
+|*t
+|+ p -> true
+|== *t
 |------------
 |*p
-|+ q -> true
+|+ q -> true  (or true -> true)
 |== *p
+|------------
+|*r
+|+ q -> true  (or true -> true)
+|== *r
+|------------
+|*s
+|+ q -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ q -> true  (or true -> true)
+|== *t
 Z3 propagation ********************************

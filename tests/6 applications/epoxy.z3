@@ -202,6 +202,13 @@ Irrelevant:
   ? Shelf_Life = 0
   ? Shelf_Life = 6
   ? Shelf_Life = 12
+  ? Brand
+  ? Family
+  ? Color
+  ? Shelf_Life
+  ? Min_Shelf_Life
+  ? Max_Shelf_Life
+  ? Known_Shelf_Life
 
 
 -- meta -------------------------------------
