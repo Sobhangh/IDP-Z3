@@ -90,30 +90,6 @@ def update_exprs(self, new_expr_generator):
     return self._change(sub_exprs=list(new_expr_generator))
 Expression.update_exprs = update_exprs
 
-indent = 0
-def log(function):
-    def _wrapper(*args, **kwds):
-        global indent
-        self = args[0]
-        e0   = args[1]
-        e1   = args[2]
-        Log( f"{nl}|------------"
-             f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
-             f"{' with '+','.join(e.__class__.__name__ for e in self.sub_exprs) if self.sub_exprs else ''}"
-             f"{f' just {str(self.just_branch)}' if self.just_branch else ''}"
-             f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
-             , indent)
-        indent +=4
-        out = function(*args, *kwds)
-        indent -=4
-        Log( f"{nl}|== {'*' if out.is_subtence else ''}"
-             f"{'!'+str(out.value) if out.value is not None else '!!'+str(out.simpler) if out.simpler is not None else str(out)}"
-             f"{' with '+','.join(e.__class__.__name__ for e in out.sub_exprs) if out.sub_exprs else ''}"
-             f"{f' just {str(out.just_branch)}' if out.just_branch else ''}"
-          , indent )
-        return out    
-    return _wrapper
-
 # @log  # decorator patched in by tests/main.py
 def Expression_substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
