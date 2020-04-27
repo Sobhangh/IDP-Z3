@@ -24,15 +24,17 @@ import re
 import sys
 
 from textx import metamodel_from_file
-from z3 import IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists, Z3Exception, \
-    Sum, If, Function, FreshConst, Implies, EnumSort
+from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
+                Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort)
 
 from utils import applyTo, log, itertools, in_list, nl, mergeDicts
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
-                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
-                    Fresh_Variable, TRUE, FALSE
+from Idp.Expression import (Constructor, Expression, IfExpr, AQuantification,
+                            BinaryOperator, ARImplication, AEquivalence,
+                            AImplication, ADisjunction, AConjunction,
+                            AComparison, ASumMinus, AMultDiv, APower, AUnary,
+                            AAggregate, AppliedSymbol, Variable, Symbol,
+                            NumberConstant, Brackets, Arguments,
+                            Fresh_Variable, TRUE, FALSE)
 
 import Idp.Substitute
 
@@ -52,14 +54,15 @@ class Idp(object):
         if self.view is None:
             self.view = View(viewType='normal')
 
-        self.translated = None # [Z3Expr]
+        self.translated = None  # [Z3Expr]
 
         if self.decision is not None:
             for decl in self.vocabulary.symbol_decls.values():
                 decl.environmental = True
             self.vocabulary.update(self.decision)
 
-        if self.interpretations: self.interpretations.annotate(self.vocabulary)
+        if self.interpretations:
+            self.interpretations.annotate(self.vocabulary)
         self.theory.annotate(self.vocabulary)
         self.goal.annotate(self)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
@@ -99,6 +102,7 @@ class Annotations(object):
         self.annotations = kwargs.pop('annotations')
 
         def pair(s):
+            print("Anno:", s)
             p = s.split(':',1)
             if len(p) == 2:
                 return (p[0], p[1])
@@ -257,8 +261,10 @@ class SymbolDeclaration(object):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
         if self.annotations is not None:
-            self.annotations = self.annotations.annotations
+            print("SelfAnna:")
+            print(self.annotations)
         self.name = sys.intern(kwargs.pop('name').name) # a string, not a Symbol
+        print("Symb:", self.name)
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
@@ -731,17 +737,29 @@ class View(object):
     def translate(self):
         return
 
+
+"""
 ################################ Main ###############################
+"""
 
 dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 
-idpparser = metamodel_from_file(dslFile, memoization=True, classes=
-        [ Idp, Annotations,
-          Vocabulary, Decision, ConstructedTypeDeclaration, Constructor, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
-          Theory, Definition, Rule, IfExpr, AQuantification,
-                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,
-                    AppliedSymbol, Variable, NumberConstant, Brackets, Arguments,
-          Interpretations, Interpretation, Tuple,
-          Goal, View
-        ])
+idpparser = metamodel_from_file(dslFile, memoization=True,
+                                classes=[Idp, Annotations,
+
+                                         Vocabulary, Decision,
+                                         ConstructedTypeDeclaration,
+                                         Constructor, RangeDeclaration,
+                                         SymbolDeclaration, Symbol, Sort,
+
+                                         Theory, Definition, Rule, IfExpr,
+                                         AQuantification, ARImplication,
+                                         AEquivalence, AImplication,
+                                         ADisjunction, AConjunction,
+                                         AComparison, ASumMinus, AMultDiv,
+                                         APower, AUnary, AAggregate,
+                                         AppliedSymbol, Variable,
+                                         NumberConstant, Brackets, Arguments,
+
+                                         Interpretations, Interpretation,
+                                         Tuple, Goal, View])
