@@ -44,20 +44,24 @@
     |== *r
 |== q ∨ r with Variable,Variable
 |------------
-|*false
+|*p
 |+ p -> true
+|== *!true
+|------------
+|*false
+|+ p -> true  (or true -> true)
 |== *!false
 |------------
 |*r
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *r
 |------------
 |*s
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *s
 |------------
 |*t
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *t
 |------------
 |q ∨ r with Variable,Variable
@@ -80,9 +84,13 @@
     |== *!true
 |== !true with Variable
 |------------
-|*p
+|*true
 |+ q -> false  (or false -> false)
-|== *p
+|== *!true
+|------------
+|*false
+|+ q -> false  (or false -> false)
+|== *!false
 |------------
 |*true
 |+ q -> false  (or false -> false)
@@ -96,13 +104,17 @@
 |+ q -> false  (or false -> false)
 |== *t
 |------------
-|*p
+|*true
 |+ r -> true  (or true -> true)
-|== *p
+|== *!true
 |------------
 |*false
 |+ r -> true  (or true -> true)
 |== *!false
+|------------
+|*true
+|+ r -> true  (or true -> true)
+|== *!true
 |------------
 |*s
 |+ r -> true  (or true -> true)

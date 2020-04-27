@@ -11,4 +11,8 @@
 |1 with Constructor,NumberConstant,NumberConstant
 |+ c -> green
 |== !1 with Constructor,NumberConstant,NumberConstant
+|------------
+|*p
+|+ p -> true
+|== *!true
 Z3 propagation ********************************

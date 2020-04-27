@@ -24,25 +24,33 @@
     |== *!true
 |== !true with Variable
 |------------
-|*true
+|*p
 |+ p -> true
 |== *!true
 |------------
+|*true
+|+ p -> true  (or true -> true)
+|== *!true
+|------------
 |*r
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *r
 |------------
 |*s
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *s
 |------------
 |*t
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *t
 |------------
-|*p
+|*true
 |+ q -> true  (or true -> true)
-|== *p
+|== *!true
+|------------
+|*true
+|+ q -> true  (or true -> true)
+|== *!true
 |------------
 |*r
 |+ q -> true  (or true -> true)

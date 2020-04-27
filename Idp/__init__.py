@@ -158,6 +158,7 @@ class ConstructedTypeDeclaration(object):
         self.is_var = False
         self.range = self.constructors # functional constructors are expanded
         self.translated = None
+        self.type = self
 
         if self.name == 'bool':
             self.translated = BoolSort()
@@ -204,22 +205,24 @@ class RangeDeclaration(object):
         self.is_var = False
         self.translated = None
 
+        self.type = 'int'
         self.range = []
         for x in self.elements:
             if x.toI is None:
                 self.range.append(x.fromI)
+                if type(x.fromI.translated) != int:
+                    self.type = 'real'
             elif x.fromI.type == 'int' and x.toI.type == 'int': 
                 for i in range(x.fromI.translated, x.toI.translated + 1):
                     self.range.append(NumberConstant(number=str(i)))
             else:
-                self.range = []
-                break
+                assert False, "Can't have a range over reals: "+ self.name
 
         if self.name == 'int':
             self.translated = IntSort()
         elif self.name == 'real':
             self.translated = RealSort()
-        self.type = None
+            self.type = 'real'
 
     def __str__(self):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
@@ -247,8 +250,7 @@ class RangeDeclaration(object):
 
     def translate(self):
         if self.translated is None:
-            els = [e.translated for e in self.range]
-            if all(map(lambda x: type(x) == int, els)):
+            if self.type == 'int':
                 self.translated = IntSort()
             else:
                 self.translated = RealSort()

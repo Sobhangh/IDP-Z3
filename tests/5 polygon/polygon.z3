@@ -312,7 +312,6 @@ Universals:
   ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
   Perimeter -> 10
 Consequences:
-  ∀n[side] : Length(n) < Length(n + 1)
   ~Large(1)
   ~Type = triangle
   ~Sides = 3
@@ -338,7 +337,7 @@ Consequences:
 Simplified:  
   (Convex ⇔ ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180)))
 Irrelevant:  
-  ∀n[side] : Length(n) < Length(n + 1)
+  ? ∀n[side] : Length(n) < Length(n + 1)
 
 
 -- meta -------------------------------------

@@ -175,7 +175,6 @@ Simplified:
   (Type = 1tri angle) ∨ (Type = quadrilateral)
   (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square)
 Irrelevant:  
-  ∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
   isa(regular_triangle,typeOf(regular_triangle))
   isa(right_triangle,typeOf(right_triangle))
   isa(rectangle,typeOf(rectangle))
@@ -419,7 +418,7 @@ Irrelevant:
                                                                    'normal': False,
                                                                    'reading': '∀t[type]st[subtype] : (typeOf(st) = t) '
                                                                               '⇔ isa(st,t)',
-                                                                   'relevant': False,
+                                                                   'relevant': True,
                                                                    'status': 'UNIVERSAL',
                                                                    'typ': 'Bool',
                                                                    'value': True}}}

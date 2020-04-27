@@ -67,9 +67,10 @@ GET response :
             - values : []       // list of possible values for the atom/term (from its type)
             - status : string   // UNKNOWN     : unknown value
                                 // GIVEN       : given by the user
+                                // ENV_UNIV    : immediate consequence of the environmental theory
                                 // UNIVERSAL   : immediate consequence of the theory
-                                // ENV_CONSQ   : value propagated from environmental inputs and theory, exclusive of any decision variables
-                                // CONSEQUENCE : value obtained by propagation
+                                // ENV_CONSQ   : value propagated from inputs and environmental theory
+                                // CONSEQUENCE : value obtained by propagation of inputs
                                 // EXPANDED    : value obtained by model expansion
             - relevant: Bool
             - reading : string  // English reading of the atom/term

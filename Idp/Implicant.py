@@ -40,7 +40,7 @@ def _not(truth):
     return FALSE if truth == TRUE else TRUE
 
 def use_value(function):
-    " decorator for str(), translate() "
+    " decorator for implicants() "
     def _wrapper(*args, **kwds):
         self = args[0]
         truth = args[1] if len(args) == 2 else TRUE
@@ -48,6 +48,7 @@ def use_value(function):
             return []
         out = _if_subtence(self, truth)
         if self.simpler is not None: 
+            # call the (possibly inherited) 'function' method of simpler's class
             for cls in self.simpler.__class__.__mro__:
                 if function.__name__ in cls.__dict__:
                     out = out + (cls.__dict__[function.__name__])(self.simpler, truth)

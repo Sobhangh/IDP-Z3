@@ -24,25 +24,25 @@
     |== !true with AComparison
 |== !true with Brackets
 |------------
-|x
+|*x = 0 with Variable,NumberConstant
 |+ x = 0 -> true
+|== *!true with Variable,NumberConstant
+|------------
+|x
+|+ x = 0 -> true  (or true -> true)
 |== x
 |------------
 |y
-|+ x = 0 -> true
+|+ x = 0 -> true  (or true -> true)
 |== y
 |------------
-|*x = 0 with Variable,NumberConstant
+|*true with Variable,NumberConstant
 |+ x -> 0
-    |------------
-    |x
-    |+ x -> 0
-    |== !0
-    |------------
-    |0
-    |+ x -> 0  (or 0 -> 0)
-    |== 0
 |== *!true with Variable,NumberConstant
+|------------
+|x
+|+ x -> 0
+|== !0
 |------------
 |y
 |+ x -> 0  (or 0 -> 0)

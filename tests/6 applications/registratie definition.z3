@@ -1796,7 +1796,7 @@ Irrelevant:
                                                                        'normal': True,
                                                                        'reading': 'Professional_Declaration_Filed',
                                                                        'relevant': True,
-                                                                       'status': 'UNIVERSAL',
+                                                                       'status': 'ENV_UNIV',
                                                                        'typ': 'Bool',
                                                                        'value': False}},
  'Region': {'Region': {'environmental': True,

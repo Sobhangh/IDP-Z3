@@ -8,19 +8,23 @@
     |== *!true
 |== !true with Variable
 |------------
-|*q
+|*p
 |+ p -> true
+|== *!true
+|------------
+|*q
+|+ p -> true  (or true -> true)
 |== *q
 |------------
 |*r
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *r
 |------------
 |*s
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *s
 |------------
 |*t
-|+ p -> true
+|+ p -> true  (or true -> true)
 |== *t
 Z3 propagation ********************************
