@@ -1,0 +1,7 @@
+vocabulary {
+    p q
+}
+theory {
+  { p.}
+  ~p|q.
+}

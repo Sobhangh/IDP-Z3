@@ -35,6 +35,7 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
                     Fresh_Variable, TRUE, FALSE
 
 import Idp.Substitute
+import Idp.Implicant
 
 
 class Idp(object):
@@ -60,8 +61,8 @@ class Idp(object):
             self.vocabulary.update(self.decision)
 
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
-        self.theory.annotate(self.vocabulary)
         self.goal.annotate(self)
+        self.theory.annotate(self.vocabulary)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
         log("annotated")
 
@@ -75,12 +76,9 @@ class Idp(object):
 
         self.vocabulary.translate(self)
         log("vocabulary translated")
-        self.theory.translate(self)
         log("theory translated")
         self.goal.translate()
         self.view.translate()
-
-        self.translated = self.vocabulary.translated + self.theory.translated
 
     def unknown_symbols(self):
         todo = self.theory.unknown_symbols()
@@ -90,6 +88,9 @@ class Idp(object):
             if symb in todo:
                 out[symb] = todo[symb]
         return out
+
+    def translate(self):
+        return self.theory.translate(self)
 
 
 ################################ Vocabulary  ###############################
@@ -144,6 +145,7 @@ class Vocabulary(object):
         for v in self.symbol_decls.values():
             if v.is_var:
                 self.terms.update(v.instances)
+        return []
 
 class Decision(Vocabulary):
     pass
@@ -156,6 +158,7 @@ class ConstructedTypeDeclaration(object):
         self.is_var = False
         self.range = self.constructors # functional constructors are expanded
         self.translated = None
+        self.type = self
 
         if self.name == 'bool':
             self.translated = BoolSort()
@@ -187,7 +190,10 @@ class ConstructedTypeDeclaration(object):
         self.range = self.constructors #TODO constructor functions
 
     def check_bounds(self, var):
-        out = [AComparison.make('=', [var, c], True) for c in self.constructors]
+        if self.name == 'bool':
+            out = [var, AUnary.make('~', var)]
+        else:
+            out = [AComparison.make('=', [var, c], True) for c in self.constructors]
         out = ADisjunction.make('∨', out)
         return out
 
@@ -202,22 +208,24 @@ class RangeDeclaration(object):
         self.is_var = False
         self.translated = None
 
+        self.type = 'int'
         self.range = []
         for x in self.elements:
             if x.toI is None:
                 self.range.append(x.fromI)
+                if type(x.fromI.translated) != int:
+                    self.type = 'real'
             elif x.fromI.type == 'int' and x.toI.type == 'int': 
                 for i in range(x.fromI.translated, x.toI.translated + 1):
                     self.range.append(NumberConstant(number=str(i)))
             else:
-                self.range = []
-                break
+                assert False, "Can't have a range over reals: "+ self.name
 
         if self.name == 'int':
             self.translated = IntSort()
         elif self.name == 'real':
             self.translated = RealSort()
-        self.type = None
+            self.type = 'real'
 
     def __str__(self):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
@@ -245,8 +253,7 @@ class RangeDeclaration(object):
 
     def translate(self):
         if self.translated is None:
-            els = [e.translated for e in self.range]
-            if all(map(lambda x: type(x) == int, els)):
+            if self.type == 'int':
                 self.translated = IntSort()
             else:
                 self.translated = RealSort()
@@ -311,15 +318,20 @@ class SymbolDeclaration(object):
                     expr.normal = True
                     self.instances[expr.code] = expr
 
-        # determine typeConstraint
+        # determine typeConstraints
         if self.out.decl.name != 'bool' and self.range:
-            for inst in self.instances.values():
-                domain = self.type.check_bounds(inst)
-                if domain is not None:
-                    domain.if_symbol = self.name
-                    domain.annotations['reading'] = "Possible values for " + str(inst)
-                    self.typeConstraints.append(domain)
+            self.typeConstraints.extend(self.typeConstraint())
         return self
+
+    def typeConstraint(self, if_symbol=True):
+        out = []
+        for inst in self.instances.values():
+            domain = self.type.check_bounds(inst)
+            if domain is not None:
+                domain.if_symbol = self.name if if_symbol else None
+                domain.annotations['reading'] = "Possible values for " + str(inst)
+                out.append(domain)
+        return out
 
     def translate(self, idp=None):
         if self.translated is None:
@@ -355,7 +367,7 @@ class Sort(object):
         return Fresh_Variable(name, decl)
 
     def translate(self):
-        return self.decl.translated
+        return self.decl.translate()
 
     def getRange(self):
         return [e.translated for e in self.decl.range]
@@ -406,13 +418,13 @@ class Theory(object):
             for c in self.constraints + self.definitions)
 
     def translate(self, idp):
-        self.translated = []
+        out = []
         for i in self.constraints:
-            self.translated.append(i.translate())
+            out.append(i.translate())
             # optional : self.translated.extend(i.justifications())
         for d in self.definitions:
-            self.translated += d.translate(idp)
-
+            out += d.translate(idp)
+        return out
 
 
 class Definition(object):
@@ -470,9 +482,7 @@ class Definition(object):
         return out
 
     def translate(self, idp):
-        if self.translated is None:
-            self.translated = [rule.translate() for rule in self.clark.values()]
-        return self.translated
+        return [rule.translate() for rule in self.clark.values()]
 
 
 class Rule(object):
@@ -498,7 +508,7 @@ class Rule(object):
         self.translated = None
 
     def __repr__(self):
-        return ( f"Rule:∀{self.vars}{self.sorts}: "
+        return ( f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
                  f"{self.symbol}({','.join(str(e) for e in self.args)}) "
                  f"⇔{str(self.body)}" )
 
@@ -524,21 +534,27 @@ class Rule(object):
         assert len(self.args) == len(new_vars), "Internal error"
         for arg, nv in zip(self.args, new_vars.values()):
             if type(arg) in [Variable, Fresh_Variable]:
-                if arg.name not in subst:
-                    if arg.name in self.vars:
+                if arg.name not in subst: # if new arg variable
+                    if arg.name in self.vars: # re-use var name
                         subst[arg.name] = nv
                         self.body = self.body.instantiate(arg, nv)
                     else:
                         eq = AComparison.make('=', [nv, arg])
                         self.body = AConjunction.make('∧', [eq, self.body])
-                else: # same(x)=x
+                else: # repeated arg var, e.g., same(x)=x
                     eq = AComparison.make('=', [nv, subst[arg.name]])
                     self.body = AConjunction.make('∧', [eq, self.body])
-            else: #same(f(x))
+            elif type(arg) in [NumberConstant, Constructor]:
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Symbol(name=v0), v1)
+                    eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
                 self.body = AConjunction.make('∧', [eq, self.body])
+            else: #same(f(x))
+                assert False, f"Please use variables only in the head of definitions. {nl}{str(self)}"
+                # eq = AComparison.make('=', [nv, arg])
+                # for v0, v1 in subst.items():
+                #     eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
+                # self.body = AConjunction.make('∧', [eq, self.body])
 
         # Any leftover ?
         for var in self.vars:
@@ -549,7 +565,7 @@ class Rule(object):
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
-        self.sorts = [] # ignored
+        self.sorts = [v.decl.out for v in new_vars.values()]
         self.q_vars = new_vars
         return self
 
@@ -690,6 +706,7 @@ class Goal(object):
         self.name = kwargs.pop('name')
         self.decl = None
         self.justification = None
+        self.constraint = None
 
     def __str__(self):
         return self.name
@@ -697,30 +714,13 @@ class Goal(object):
     def annotate(self, idp):
         if self.name in idp.vocabulary.symbol_decls:
             self.decl = idp.vocabulary.symbol_decls[self.name]
-            if self.name in idp.theory.clark: # defined goal
-                rule = idp.theory.clark[self.name]
-                just = []
-                for args in self.decl.domain:
-                    if self.decl.type.name == 'bool':
-                        instance = rule.instantiate_definition(args, idp.theory)
-                        just.append(instance)
-                        just.extend(instance.justifications())
-                    else:
-                        just1 = []
-                        for out in self.decl.range:
-                            instance = rule.instantiate_definition(args, idp.theory, out)
-                            just1.append(instance)
-                            just.extend(instance.justifications())
-                        just.append(ADisjunction.make('∨', just1))
-                self.justification = AConjunction.make('∧', just)
+            constraint = AConjunction.make('∧', self.decl.typeConstraint(if_symbol=False))
+            idp.theory.constraints.append(constraint)
 
     def subtences(self):
-        return {} if self.justification is None else \
-               self.justification.subtences()
+        return {} 
 
     def translate(self):
-        if self.justification is not None:
-            return self.justification.translate()
         return None
 
 

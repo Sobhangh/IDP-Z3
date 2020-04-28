@@ -20,7 +20,7 @@ graph TD
     propagate --> substitute;
     substitute --> update_exprs;
     
-    expand_quantifiers --> substitute;
+    expand_quantifiers --> instantiate;
     expand_quantifiers --> replace_by;
     interpret --> update_exprs;
     expand_quantifiers --> update_exprs;
@@ -37,11 +37,12 @@ graph TD
     expand_quantifiers --> _change;
 
     instantiate_definition --> instantiate;
+    instantiate --> _change;
 		    rename_args --> instantiate;
     instantiate_definition --> interpret;
-    instantiate_definition --> make;
     Annotate --> make;
-    instantiate --> simplify1;
+    instantiate_definition --> make;
+    instantiate --> update_exprs;
     simplify1 --> update_exprs;
 
 ```

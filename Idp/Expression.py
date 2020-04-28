@@ -21,7 +21,7 @@
 
 Classes to represent logic expressions.
 
-(They are monkey patched by Substitute.py)
+(They are monkey patched by Substitute.py and Implicant.py)
 
 """
 
@@ -32,7 +32,7 @@ import os
 import re
 import sys
 
-from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
+from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort, Q
 from utils import mergeDicts, unquote
 
 from typing import List, Tuple
@@ -44,42 +44,66 @@ class DSLException(Exception):
     def __str__(self):
         return self.message
 
+def use_value(function):
+    " decorator for str(), translate() "
+    def _wrapper(*args, **kwds):
+        self = args[0]
+        if self.value   is not None: 
+            return (self.value  .__class__.__dict__[function.__name__])(self.value)
+        if self.simpler is not None: 
+            # call the (possibly inherited) 'function' method of simpler's class
+            for cls in self.simpler.__class__.__mro__:
+                if function.__name__ in cls.__dict__:
+                    out = (cls.__dict__[function.__name__])(self.simpler)
+                    return out
+            assert False, "Internal error in Expression.use_value"
+        return function(self)
+    return _wrapper
 
 class Expression(object):
     COUNT = 0
-    # .sub_exprs : list of (transformed) Expression, to be translated to Z3
     def __init__(self):
-        self.code = sys.intern(self.str_())# normalized idp code, before transformations
-        self.str = self.code              # memoization of str()
-        self.annotations = {'reading': self.code} # dict(String, String)
+        # .sub_exprs : list of Expression, to be translated to Z3
         self.is_subtence = None           # True if sub-sentence in original code
+        self.simpler = None               # a simplified version of the expression, or None
+        self.value = None                 # a python value (bool, int, float, string) or None
+        self.status = None                # explains how the value was found
+
+        # .code uniquely identifies an expression, irrespective of its value
+        self.code = sys.intern(str(self)) # normalized idp code, before transformations
+        self.annotations = {'reading': self.code} # dict(String, String)
+        self.original = self              # untouched version of the expression, from IDP code or Expr.make()
+
+        self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
-        self._unknown_symbols = None      # Dict[name, Declaration] list of uninterpreted symbols not starting with '_'
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
-        self.translated = None            # the Z3 equivalent
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
-        self._subtences = None            # memoization of .subtences()
         self.just_branch = None           # Justification branch (Expression)
         # .normal : only set in .instances
 
+
+    def copy(self):
+        " create a deep copy (except for Constructor and NumberConstant) "
+        out = copy.copy(self)
+        out.sub_exprs = [e.copy() for e in out.sub_exprs]
+        out.value       = None if out.value       is None else out.value      .copy()
+        out.simpler     = None if out.simpler     is None else out.simpler    .copy()
+        out.just_branch = None if out.just_branch is None else out.just_branch.copy()
+        return out
+
     def __eq__(self, other):
-        if isinstance(self, Brackets):
-            return self.sub_exprs[0] == other
-        if isinstance(other, Brackets):
-            return self == other.sub_exprs[0]
-        if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
-            return self.sub_exprs[0] == other
-        if type(other) in [AConjunction, ADisjunction] and len(other.sub_exprs)==1:
-            return self == other.sub_exprs[0]
+        if self.value   is not None: return self.value == other
+        if self.simpler is not None: return self.simpler == other
+        if other.value   is not None: return self == other.value
+        if other.simpler is not None: return self == other.simpler
+
         # beware: this does not ignore meaningless brackets deeper in the tree
         if self.str == other.str:
-            if type(self)!=type(other)\
-            and not(type(other).__name__=="Equality" and type(self)==AComparison)\
-            and not(type(self)==Fresh_Variable and type(other)== Symbol):
-                return False
-            return True
+            if type(self)==type(other):
+                return True
+            return False
         return False
 
     def __repr__(self): return str(self)
@@ -102,26 +126,26 @@ class Expression(object):
         return self
 
     def subtences(self):
-        if self._subtences is None:
-            self._subtences = {}
-            if self.is_subtence:
-                self._subtences[self.code]= self
-            self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
-            if self.just_branch is not None:
-                self._subtences.update(self.just_branch.subtences())
-        return self._subtences
+        out = {}
+        if self.is_subtence:
+            out[self.code]= self
+        out.update(mergeDicts(e.subtences() for e in self.sub_exprs))
+        if self.just_branch is not None:
+            out.update(self.just_branch.subtences())
+        return out
 
     def as_ground(self): 
         " returns a NumberConstant or Constructor, or None "
-        return None
+        return self.value
 
     def unknown_symbols(self):
-        if self._unknown_symbols is None:
-            self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs) \
-                if self.if_symbol is None else {}
-            if self.just_branch is not None:
-                self._unknown_symbols.update(self.just_branch.unknown_symbols())
-        return self._unknown_symbols
+        " returns Dict[name, Declaration] "
+        if self.if_symbol is not None: # ignore type constraints
+            return {}
+        out = mergeDicts(e.unknown_symbols() for e in self.sub_exprs)
+        if self.just_branch is not None:
+            out.update(self.just_branch.unknown_symbols())
+        return out
 
     def reified(self) -> DatatypeRef:
         if self._reified is None:
@@ -143,24 +167,6 @@ class Expression(object):
             out.extend(self.just_branch.justifications())
         return out
 
-    def as_substitutions(self, case: 'Case', truth: bool = True) -> List[Tuple['Expression', 'Expression']]:
-        # returns a literal for the matching atom in case.assignments, or []
-        if self.code in case.assignments: # found it !
-            return [(self, TRUE if truth else FALSE)]
-        if isinstance(self, Brackets):
-            return self.sub_exprs[0].as_substitutions(case, truth)
-        if isinstance(self, AUnary) and self.operator == '~':
-            return self.sub_exprs[0].as_substitutions(case, not truth)
-        if type(self)  in [AConjunction, ADisjunction] and len(self .sub_exprs)==1:
-            return self.sub_exprs[0].as_substitutions(case, truth)
-        if (truth     and isinstance(self, AConjunction)) \
-        or (not truth and isinstance(self, ADisjunction)):
-            out = []
-            for e in self.sub_exprs:
-                out.extend(l for l in e.as_substitutions(case, truth))
-            return out
-        return []
-
 class Constructor(Expression):
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
@@ -170,8 +176,9 @@ class Constructor(Expression):
 
         super().__init__()
     
+    @use_value
     def __str__(self): return self.name
-    def str_   (self): return self.name
+
     def as_ground(self): return self
     def translate(self): return self.translated
 
@@ -195,27 +202,24 @@ class IfExpr(Expression):
     @classmethod
     def make(cls, if_f, then_f, else_f):
         out = (cls)(if_f=if_f, then_f=then_f, else_f=else_f)
+        out.fresh_vars = set()
         return out.annotate1().simplify1()
         
+    @use_value
     def __str__(self):
         return ( f" if   {str(self.sub_exprs[IfExpr.IF  ])}"
                  f" then {str(self.sub_exprs[IfExpr.THEN])}"
                  f" else {str(self.sub_exprs[IfExpr.ELSE])}" )
-    def str_(self):
-        return ( f" if   {self.sub_exprs[IfExpr.IF  ].str}"
-                 f" then {self.sub_exprs[IfExpr.THEN].str}"
-                 f" else {self.sub_exprs[IfExpr.ELSE].str}" )
 
     def annotate1(self):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
+    @use_value
     def translate(self):
-        if self.translated is None:
-            self.translated =  If(self.sub_exprs[IfExpr.IF  ].translate()
-                                , self.sub_exprs[IfExpr.THEN].translate()
-                                , self.sub_exprs[IfExpr.ELSE].translate())
-        return self.translated
+        return If(self.sub_exprs[IfExpr.IF  ].translate()
+                , self.sub_exprs[IfExpr.THEN].translate()
+                , self.sub_exprs[IfExpr.ELSE].translate())
 
 class AQuantification(Expression):
     def __init__(self, **kwargs):
@@ -234,20 +238,17 @@ class AQuantification(Expression):
     @classmethod
     def make(cls, q, decls, f, is_subtence=False):
         "make and annotate a quantified formula"
-        out = cls(q=q, vars=list(decls.values()), sorts=[], f=f)
+        out = cls(q=q, vars=list(decls.values()), sorts=list(v.decl for v in decls.values()), f=f)
         out.q_vars = decls
         out.is_subtence = is_subtence
+        out.fresh_vars = set()
         return out
 
-
+    @use_value
     def __str__(self):
         assert len(self.vars) == len(self.sorts), "Internal error"
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {str(self.sub_exprs[0])}"
-    def str_(self):
-        # assert len(self.vars) == len(self.sorts), "Internal error"
-        vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-        return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
     def annotate(self, symbol_decls, q_vars):
         assert len(self.vars) == len(self.sorts), "Internal error"
@@ -264,25 +265,24 @@ class AQuantification(Expression):
         self.is_subtence = (len(self.fresh_vars)==0)
         return self
 
+    @use_value
     def translate(self):
-        if self.translated is None:
-            for v in self.q_vars.values():
-                v.translate()
-            if not self.vars:
-                self.translated = self.sub_exprs[0].translate()
-            else:
-                finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
+        for v in self.q_vars.values():
+            v.translate()
+        if not self.vars:
+            return self.sub_exprs[0].translate()
+        else:
+            finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
 
-                if self.q == '∀':
-                    forms = And(forms) if 1<len(forms) else forms[0]
-                    if len(finalvars) > 0: # not fully expanded !
-                        forms = ForAll(finalvars, forms)
-                else:
-                    forms = Or(forms) if 1<len(forms) else forms[0]
-                    if len(finalvars) > 0: # not fully expanded !
-                        forms = Exists(finalvars, forms)
-                self.translated = forms
-        return self.translated
+            if self.q == '∀':
+                forms = And(forms) if 1<len(forms) else forms[0]
+                if len(finalvars) > 0: # not fully expanded !
+                    forms = ForAll(finalvars, forms)
+            else:
+                forms = Or(forms) if 1<len(forms) else forms[0]
+                if len(finalvars) > 0: # not fully expanded !
+                    forms = Exists(finalvars, forms)
+            return forms
 
 class BinaryOperator(Expression):
     MAP = { '∧': lambda x, y: And(x, y),
@@ -335,9 +335,11 @@ class BinaryOperator(Expression):
                 o = Brackets(f=o, annotations={'reading': None})
             operands1.append(o)
         out = (cls)(sub_exprs=operands1, operator=ops)
+        out.fresh_vars = set()
         out.is_subtence = is_subtence
         return out.annotate1().simplify1()
         
+    @use_value
     def __str__(self):
         def parenthesis(x):
             # add () around operands, to avoid ambiguity in str()
@@ -345,17 +347,6 @@ class BinaryOperator(Expression):
                 return f"({str(x)})"
             else:
                 return f"{str(x)}"
-        temp = parenthesis(self.sub_exprs[0])
-        for i in range(1, len(self.sub_exprs)):
-            temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
-        return temp
-    def str_(self):
-        def parenthesis(x):
-            # add () around operands, to avoid ambiguity in str()
-            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
-                return f"({x.str})"
-            else:
-                return f"{x.str}"
         temp = parenthesis(self.sub_exprs[0])
         for i in range(1, len(self.sub_exprs)):
             temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
@@ -372,51 +363,20 @@ class BinaryOperator(Expression):
 
     def mark_subtences(self):
         super().mark_subtences()
-        if self.operator[0] in '=<>≤≥≠':
+        if 0 < len(self.operator) and self.operator[0] in '=<>≤≥≠':
             self.is_subtence = (len(self.fresh_vars)==0)
             self.fresh_vars.discard('!*') # indicates AppliedSymbol with complex expressions
         return self
 
+    @use_value
     def translate(self):
-        if self.translated is None:
-            # chained comparisons -> And()
-            if self.operator[0] =='≠' and len(self.sub_exprs)==2:
-                x = self.sub_exprs[0].translate()
-                y = self.sub_exprs[1].translate()
-                out = Not(x==y)
-            elif self.operator[0] in '=<>≤≥≠':
-                out = []
-                for i in range(1, len(self.sub_exprs)):
-                    x = self.sub_exprs[i-1].translate()
-                    function = BinaryOperator.MAP[self.operator[i - 1]]
-                    y = self.sub_exprs[i].translate()
-                    try:
-                        out = out + [function(x, y)]
-                    except Z3Exception as E:
-                        raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
-                if 1 < len(out):
-                    out = And(out)
-                else:
-                    out = out[0]
-            elif self.operator[0] == '∧':
-                if len(self.sub_exprs) == 1:
-                    out = self.sub_exprs[0].translate()
-                else:
-                    out = And([e.translate() for e in self.sub_exprs])
-            elif self.operator[0] == '∨':
-                if len(self.sub_exprs) == 1:
-                    out = self.sub_exprs[0].translate()
-                else:
-                    out = Or ([e.translate() for e in self.sub_exprs])
-            else:
-                out = self.sub_exprs[0].translate()
+        out = self.sub_exprs[0].translate()
 
-                for i in range(1, len(self.sub_exprs)):
-                    function = BinaryOperator.MAP[self.operator[i - 1]]
-                    out = function(out, self.sub_exprs[i].translate())
-            self.translated = out
-        return self.translated
-
+        for i in range(1, len(self.sub_exprs)):
+            function = BinaryOperator.MAP[self.operator[i - 1]]
+            out = function(out, self.sub_exprs[i].translate())
+        return out
+        
 class AImplication(BinaryOperator):
     pass
 class AEquivalence(BinaryOperator):
@@ -430,11 +390,23 @@ class ARImplication(BinaryOperator):
         return out.annotate(symbol_decls, q_vars)
 
 class ADisjunction(BinaryOperator):
-    pass
+    @use_value
+    def translate(self):
+        if len(self.sub_exprs) == 1:
+            out = self.sub_exprs[0].translate()
+        else:
+            out = Or ([e.translate() for e in self.sub_exprs])
+        return out
 
 
 class AConjunction(BinaryOperator):
-    pass
+    @use_value
+    def translate(self):
+        if len(self.sub_exprs) == 1:
+            out = self.sub_exprs[0].translate()
+        else:
+            out = And([e.translate() for e in self.sub_exprs])
+        return out
 
 
 class AComparison(BinaryOperator):
@@ -458,6 +430,24 @@ class AComparison(BinaryOperator):
             and self.sub_exprs[1].as_ground() is not None
         return super().annotate1()
 
+    @use_value
+    def translate(self):
+        assert not self.operator == ['≠']
+        # chained comparisons -> And()
+        out = []
+        for i in range(1, len(self.sub_exprs)):
+            x = self.sub_exprs[i-1].translate()
+            function = BinaryOperator.MAP[self.operator[i - 1]]
+            y = self.sub_exprs[i].translate()
+            try:
+                out = out + [function(x, y)]
+            except Z3Exception as E:
+                raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
+        if 1 < len(out):
+            return And(out)
+        else:
+            return out[0]
+
 
 class ASumMinus(BinaryOperator):
     pass
@@ -480,24 +470,23 @@ class AUnary(Expression):
     @classmethod
     def make(cls, op, expr, is_subtence=False):
         out = AUnary(operator=op, f=expr)
+        out.fresh_vars = set()
         out.is_subtence = is_subtence
         return out.annotate1().simplify1()
 
+    @use_value
     def __str__(self):
         return f"{self.operator}({str(self.sub_exprs[0])})"
-    def str_(self):
-        return f"{self.operator}({self.sub_exprs[0].str})"
 
     def annotate1(self):
         self.type = self.sub_exprs[0].type
         return self
 
+    @use_value
     def translate(self):
-        if self.translated is None:
-            out = self.sub_exprs[0].translate()
-            function = AUnary.MAP[self.operator]
-            self.translated = function(out)
-        return self.translated
+        out = self.sub_exprs[0].translate()
+        function = AUnary.MAP[self.operator]
+        return function(out)
 
 class AAggregate(Expression):
     CONDITION = 0
@@ -520,6 +509,7 @@ class AAggregate(Expression):
         if self.aggtype != "sum" and self.out is not None:
             raise Exception("Can't have output variable for #")
 
+    @use_value
     def __str__(self):
         if self.vars is not None:
             assert len(self.vars) == len(self.sorts), "Internal error"
@@ -534,15 +524,6 @@ class AAggregate(Expression):
                     f"{','.join(str(e) for e in self.sub_exprs)}"
                     f"}}"
             )
-        return out
-    def str_(self):
-        assert len(self.vars) == len(self.sorts), "Internal error"
-        vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-        output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
-        out = ( f"{self.aggtype}{{{vars} : "
-                f"{self.sub_exprs[AAggregate.CONDITION].str}"
-                f"{output}}}"
-              )
         return out
 
     def annotate(self, symbol_decls, q_vars):
@@ -560,12 +541,9 @@ class AAggregate(Expression):
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
         return self
 
+    @use_value
     def translate(self):
-        if self.translated is None:
-            for v in self.q_vars.values():
-                v.translate()
-            self.translated = Sum([f.translate() for f in self.sub_exprs])
-        return self.translated
+        return Sum([f.translate() for f in self.sub_exprs])
 
 
 class AppliedSymbol(Expression):
@@ -588,19 +566,16 @@ class AppliedSymbol(Expression):
             out = Variable(name=s.name)
         # annotate
         out.decl = s.decl
+        out.fresh_vars = set()
         out.is_subtence = is_subtence
         return out.annotate1()
 
+    @use_value
     def __str__(self):
         if len(self.sub_exprs) == 0:
             return str(self.s)
         else:
             return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
-    def str_(self):
-        if len(self.sub_exprs) == 0:
-            return self.s.str
-        else:
-            return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
 
     def annotate(self, symbol_decls, q_vars):
         self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
@@ -629,19 +604,18 @@ class AppliedSymbol(Expression):
         if self.decl.interpretation is None:
             out[self.decl.name] = self.decl
         return out
-        
+
+    @use_value
     def translate(self):
-        if self.translated is None:
-            if self.s.name == 'abs':
-                arg = self.sub_exprs[0].translate()
-                self.translated = If(arg >= 0, arg, -arg)
+        if self.s.name == 'abs':
+            arg = self.sub_exprs[0].translate()
+            return If(arg >= 0, arg, -arg)
+        else:
+            if len(self.sub_exprs) == 0:
+                return self.decl.translated
             else:
-                if len(self.sub_exprs) == 0:
-                    self.translated = self.decl.translated
-                else:
-                    arg = [x.translate() for x in self.sub_exprs]
-                    self.translated = (self.decl.translated)(arg)
-        return self.translated
+                arg = [x.translate() for x in self.sub_exprs]
+                return (self.decl.translate())(arg)
 
     def has_environmental(self, truth):
         return self.decl.environmental == truth \
@@ -660,9 +634,10 @@ class Variable(AppliedSymbol):
 
         self.sub_exprs = []
         self.decl = None
+        self.translated = None
 
+    @use_value
     def __str__(self): return self.name
-    def str_   (self): return self.name
 
     def annotate(self, symbol_decls, q_vars):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
@@ -683,10 +658,9 @@ class Variable(AppliedSymbol):
     def reified(self):
         return self.translate()
 
+    @use_value
     def translate(self):
-        if self.translated is None:
-            self.translated = self.decl.translated
-        return self.translated
+        return self.decl.translated
     
 class Symbol(Variable): pass
     
@@ -701,17 +675,21 @@ class Fresh_Variable(Expression):
         self.type = self.decl.name
         self._unknown_symbols = {}
         self.sub_exprs = []
+        self.translated = None
 
+    @use_value
     def __str__(self): return self.name
-    def str_   (self): return self.name
+
+    def annotate(self, symbol_decls, q_vars):
+        self = super().annotate(symbol_decls, q_vars)
+        self.translated = FreshConst(self.decl.out.decl.translate())
+        return self
 
     def mark_subtences(self):
         self.fresh_vars = set([self.name])
         return self
 
     def translate(self):
-        if self.translated is None:
-            self.translated = FreshConst(self.decl.out.decl.translated)
         return self.translated
 
 class NumberConstant(Expression):
@@ -721,16 +699,23 @@ class NumberConstant(Expression):
         super().__init__()
 
         self.sub_exprs = []
-        try:
-            self.translated = int(self.number)
-            self.type = 'int'
-        except ValueError:
+
+        ops = self.number.split("/")
+        if len(ops) == 2: # possible with str_to_IDP on Z3 value
+            self.translated = Q(int(ops[0]), int(ops[1]))
+            self.type = 'real'
+        elif '.' in self.number:
             self.translated = float(eval(self.number))
             self.type = 'real'
+        else:
+            self.translated = int(self.number)
+            self.type = 'int'
     
     def __str__(self): return self.number
-    def str_   (self): return self.number
 
+    def mark_subtences(self):
+        self.fresh_vars = set()
+        return self
     def as_ground(self): return self
 
     def translate(self):
@@ -752,9 +737,11 @@ class Brackets(Expression):
             self.annotations['reading'] = None
         else: # Annotations instance
             self.annotations = annotations.annotations
+        self.fresh_vars = set()
+        self.simpler = self.sub_exprs[0]
 
+    # don't @use_value, to have parenthesis
     def __str__(self): return f"({str(self.sub_exprs[0])})"
-    def str_   (self): return f"({self.sub_exprs[0].str})"
 
     def as_ground(self): 
         return self.sub_exprs[0].as_ground()
@@ -765,7 +752,7 @@ class Brackets(Expression):
             self.sub_exprs[0].annotations = self.annotations
         return self
 
+    @use_value
     def translate(self):
-        self.translated = self.sub_exprs[0].translate()
-        return self.translated
+        return self.sub_exprs[0].translate()
 

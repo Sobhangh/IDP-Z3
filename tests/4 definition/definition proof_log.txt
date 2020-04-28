@@ -1,0 +1,1408 @@
+
+|------------
+|*codeOf(red) = b with AppliedSymbol,Constructor
+|+ codeOf(red) = b -> true
+|== *!true with AppliedSymbol,Constructor
+|------------
+|(codeOf(red) = a) ∨ (codeOf(red) = b) with AComparison,AComparison
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |*codeOf(red) = a with AppliedSymbol,Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |codeOf(red) with Constructor
+        |+ codeOf(red) = b -> true  (or true -> true)
+            |------------
+            |red
+            |+ codeOf(red) = b -> true  (or true -> true)
+            |== red
+        |== codeOf(red) with Constructor
+        |------------
+        |a
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== a
+    |== *codeOf(red) = a with AppliedSymbol,Constructor
+    |------------
+    |*codeOf(red) = b with AppliedSymbol,Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== *!true with AppliedSymbol,Constructor
+|== !true with AComparison
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |*codeOf(blue) = a with AppliedSymbol,Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |codeOf(blue) with Constructor
+        |+ codeOf(red) = b -> true  (or true -> true)
+            |------------
+            |blue
+            |+ codeOf(red) = b -> true  (or true -> true)
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |a
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== a
+    |== *codeOf(blue) = a with AppliedSymbol,Constructor
+    |------------
+    |*codeOf(blue) = b with AppliedSymbol,Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |codeOf(blue) with Constructor
+        |+ codeOf(red) = b -> true  (or true -> true)
+            |------------
+            |blue
+            |+ codeOf(red) = b -> true  (or true -> true)
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |b
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== b
+    |== *codeOf(blue) = b with AppliedSymbol,Constructor
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|------------
+|(c = red) ∨ (c = blue) with AComparison,AComparison
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |*c = red with Variable,Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |c
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== c
+        |------------
+        |red
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== red
+    |== *c = red with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |c
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== c
+        |------------
+        |blue
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== blue
+    |== *c = blue with Variable,Constructor
+|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(red) = b -> true  (or true -> true)
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*red = c with Constructor,Variable
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |red
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== red
+    |------------
+    |c
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== c
+|== *red = c with Constructor,Variable
+|------------
+|*codeOf(red) = a with AppliedSymbol,Constructor
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |codeOf(red) with Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |red
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== red
+    |== codeOf(red) with Constructor
+    |------------
+    |a
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== a
+|== *codeOf(red) = a with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = a with AppliedSymbol,Constructor
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |blue
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |a
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== a
+|== *codeOf(blue) = a with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = b with AppliedSymbol,Constructor
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |blue
+        |+ codeOf(red) = b -> true  (or true -> true)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |b
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== b
+|== *codeOf(blue) = b with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |c
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== c
+    |------------
+    |red
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== red
+|== *c = red with Variable,Constructor
+|------------
+|*c = blue with Variable,Constructor
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |c
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== c
+    |------------
+    |blue
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== blue
+|== *c = blue with Variable,Constructor
+|------------
+|codeOf(red) with Constructor just ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+|+ codeOf(red) = b -> true  (or true -> true)
+ definition:
+    |------------
+    |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b)) with Brackets,Brackets
+    |+ codeOf(red) = b -> true  (or true -> true)
+        |------------
+        |((red = c) ∧ (codeOf(red) = a)) with AConjunction
+        |+ codeOf(red) = b -> true  (or true -> true)
+            |------------
+            |(red = c) ∧ (codeOf(red) = a) with AComparison,AComparison
+            |+ codeOf(red) = b -> true  (or true -> true)
+                |------------
+                |*red = c with Constructor,Variable
+                |+ codeOf(red) = b -> true  (or true -> true)
+                    |------------
+                    |red
+                    |+ codeOf(red) = b -> true  (or true -> true)
+                    |== red
+                    |------------
+                    |c
+                    |+ codeOf(red) = b -> true  (or true -> true)
+                    |== c
+                |== *red = c with Constructor,Variable
+                |------------
+                |*codeOf(red) = a with AppliedSymbol,Constructor
+                |+ codeOf(red) = b -> true  (or true -> true)
+                    |------------
+                    |codeOf(red) with Constructor
+                    |+ codeOf(red) = b -> true  (or true -> true)
+                        |------------
+                        |red
+                        |+ codeOf(red) = b -> true  (or true -> true)
+                        |== red
+                    |== codeOf(red) with Constructor
+                    |------------
+                    |a
+                    |+ codeOf(red) = b -> true  (or true -> true)
+                    |== a
+                |== *codeOf(red) = a with AppliedSymbol,Constructor
+            |== (red = c) ∧ (codeOf(red) = a) with AComparison,AComparison
+        |== !!(red = c) ∧ (codeOf(red) = a) with AConjunction
+        |------------
+        |((~(red = c)) ∧ (codeOf(red) = b)) with AConjunction
+        |+ codeOf(red) = b -> true  (or true -> true)
+            |------------
+            |(~(red = c)) ∧ (codeOf(red) = b) with AUnary,AComparison
+            |+ codeOf(red) = b -> true  (or true -> true)
+                |------------
+                |~(red = c) with AComparison
+                |+ codeOf(red) = b -> true  (or true -> true)
+                    |------------
+                    |*red = c with Constructor,Variable
+                    |+ codeOf(red) = b -> true  (or true -> true)
+                        |------------
+                        |red
+                        |+ codeOf(red) = b -> true  (or true -> true)
+                        |== red
+                        |------------
+                        |c
+                        |+ codeOf(red) = b -> true  (or true -> true)
+                        |== c
+                    |== *red = c with Constructor,Variable
+                |== ~(red = c) with AComparison
+                |------------
+                |*codeOf(red) = b with AppliedSymbol,Constructor
+                |+ codeOf(red) = b -> true  (or true -> true)
+                |== *!true with AppliedSymbol,Constructor
+            |== !!~(red = c) with AUnary,AComparison
+        |== !!~(red = c) with AConjunction
+    |== ((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c)) with Brackets,Brackets
+    |------------
+    |red
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== red
+|== codeOf(red) with Constructor just ((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c))
+|------------
+|codeOf(blue) with Constructor
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |blue
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ codeOf(red) = b -> true  (or true -> true)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(red) -> b
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ codeOf(red) -> b
+|== !true with AComparison
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|+ codeOf(red) -> b
+    |------------
+    |*codeOf(blue) = a with AppliedSymbol,Constructor
+    |+ codeOf(red) -> b
+        |------------
+        |codeOf(blue) with Constructor
+        |+ codeOf(red) -> b
+            |------------
+            |blue
+            |+ codeOf(red) -> b
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |a
+        |+ codeOf(red) -> b
+        |== a
+    |== *codeOf(blue) = a with AppliedSymbol,Constructor
+    |------------
+    |*codeOf(blue) = b with AppliedSymbol,Constructor
+    |+ codeOf(red) -> b
+        |------------
+        |codeOf(blue) with Constructor
+        |+ codeOf(red) -> b
+            |------------
+            |blue
+            |+ codeOf(red) -> b
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |b
+        |+ codeOf(red) -> b
+        |== b
+    |== *codeOf(blue) = b with AppliedSymbol,Constructor
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|------------
+|(c = red) ∨ (c = blue) with AComparison,AComparison
+|+ codeOf(red) -> b
+    |------------
+    |*c = red with Variable,Constructor
+    |+ codeOf(red) -> b
+        |------------
+        |c
+        |+ codeOf(red) -> b
+        |== c
+        |------------
+        |red
+        |+ codeOf(red) -> b
+        |== red
+    |== *c = red with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ codeOf(red) -> b
+        |------------
+        |c
+        |+ codeOf(red) -> b
+        |== c
+        |------------
+        |blue
+        |+ codeOf(red) -> b
+        |== blue
+    |== *c = blue with Variable,Constructor
+|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(red) -> b
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*red = c with Constructor,Variable
+|+ codeOf(red) -> b
+    |------------
+    |red
+    |+ codeOf(red) -> b
+    |== red
+    |------------
+    |c
+    |+ codeOf(red) -> b
+    |== c
+|== *red = c with Constructor,Variable
+|------------
+|*codeOf(red) = a with AppliedSymbol,Constructor
+|+ codeOf(red) -> b
+    |------------
+    |codeOf(red) with Constructor
+    |+ codeOf(red) -> b
+    |== !b with Constructor
+    |------------
+    |a
+    |+ codeOf(red) -> b
+    |== a
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = a with AppliedSymbol,Constructor
+|+ codeOf(red) -> b
+    |------------
+    |codeOf(blue) with Constructor
+    |+ codeOf(red) -> b
+        |------------
+        |blue
+        |+ codeOf(red) -> b
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |a
+    |+ codeOf(red) -> b
+    |== a
+|== *codeOf(blue) = a with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = b with AppliedSymbol,Constructor
+|+ codeOf(red) -> b
+    |------------
+    |codeOf(blue) with Constructor
+    |+ codeOf(red) -> b
+        |------------
+        |blue
+        |+ codeOf(red) -> b
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |b
+    |+ codeOf(red) -> b
+    |== b
+|== *codeOf(blue) = b with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ codeOf(red) -> b
+    |------------
+    |c
+    |+ codeOf(red) -> b
+    |== c
+    |------------
+    |red
+    |+ codeOf(red) -> b
+    |== red
+|== *c = red with Variable,Constructor
+|------------
+|*c = blue with Variable,Constructor
+|+ codeOf(red) -> b
+    |------------
+    |c
+    |+ codeOf(red) -> b
+    |== c
+    |------------
+    |blue
+    |+ codeOf(red) -> b
+    |== blue
+|== *c = blue with Variable,Constructor
+|------------
+|codeOf(red) with Constructor just ((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c))
+|+ codeOf(red) -> b
+ definition:
+    |------------
+    |((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c)) with Brackets,Brackets
+    |+ codeOf(red) -> b
+        |------------
+        |((red = c) ∧ (codeOf(red) = a)) with AConjunction
+        |+ codeOf(red) -> b
+            |------------
+            |(red = c) ∧ (codeOf(red) = a) with AComparison,AComparison
+            |+ codeOf(red) -> b
+                |------------
+                |*red = c with Constructor,Variable
+                |+ codeOf(red) -> b
+                    |------------
+                    |red
+                    |+ codeOf(red) -> b
+                    |== red
+                    |------------
+                    |c
+                    |+ codeOf(red) -> b
+                    |== c
+                |== *red = c with Constructor,Variable
+                |------------
+                |*codeOf(red) = a with AppliedSymbol,Constructor
+                |+ codeOf(red) -> b
+                    |------------
+                    |codeOf(red) with Constructor
+                    |+ codeOf(red) -> b
+                    |== !b with Constructor
+                    |------------
+                    |a
+                    |+ codeOf(red) -> b
+                    |== a
+                |== *!false with AppliedSymbol,Constructor
+            |== !false with AComparison
+        |== !false with AConjunction
+        |------------
+        |(~(red = c)) with AConjunction
+        |+ codeOf(red) -> b
+            |------------
+            |~(red = c) with AUnary,AComparison
+            |+ codeOf(red) -> b
+                |------------
+                |~(red = c) with AComparison
+                |+ codeOf(red) -> b
+                    |------------
+                    |*red = c with Constructor,Variable
+                    |+ codeOf(red) -> b
+                        |------------
+                        |red
+                        |+ codeOf(red) -> b
+                        |== red
+                        |------------
+                        |c
+                        |+ codeOf(red) -> b
+                        |== c
+                    |== *red = c with Constructor,Variable
+                |== ~(red = c) with AComparison
+                |------------
+                |*true with AppliedSymbol,Constructor
+                |+ codeOf(red) -> b
+                |== *!true with AppliedSymbol,Constructor
+            |== !!~(red = c) with AUnary,AComparison
+        |== !!~(red = c) with AConjunction
+    |== !!(~(red = c)) with Brackets,Brackets
+|== !b with Constructor just (~(red = c))
+|------------
+|codeOf(blue) with Constructor
+|+ codeOf(red) -> b  (or b -> b)
+    |------------
+    |blue
+    |+ codeOf(red) -> b  (or b -> b)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ codeOf(red) -> b  (or b -> b)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ codeOf(red) = a -> false  (or false -> false)
+|== !true with AComparison
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |*codeOf(blue) = a with AppliedSymbol,Constructor
+    |+ codeOf(red) = a -> false  (or false -> false)
+        |------------
+        |codeOf(blue) with Constructor
+        |+ codeOf(red) = a -> false  (or false -> false)
+            |------------
+            |blue
+            |+ codeOf(red) = a -> false  (or false -> false)
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |a
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== a
+    |== *codeOf(blue) = a with AppliedSymbol,Constructor
+    |------------
+    |*codeOf(blue) = b with AppliedSymbol,Constructor
+    |+ codeOf(red) = a -> false  (or false -> false)
+        |------------
+        |codeOf(blue) with Constructor
+        |+ codeOf(red) = a -> false  (or false -> false)
+            |------------
+            |blue
+            |+ codeOf(red) = a -> false  (or false -> false)
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |b
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== b
+    |== *codeOf(blue) = b with AppliedSymbol,Constructor
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|------------
+|(c = red) ∨ (c = blue) with AComparison,AComparison
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |*c = red with Variable,Constructor
+    |+ codeOf(red) = a -> false  (or false -> false)
+        |------------
+        |c
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== c
+        |------------
+        |red
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== red
+    |== *c = red with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ codeOf(red) = a -> false  (or false -> false)
+        |------------
+        |c
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== c
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== blue
+    |== *c = blue with Variable,Constructor
+|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*red = c with Constructor,Variable
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |red
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== red
+    |------------
+    |c
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== c
+|== *red = c with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = a with AppliedSymbol,Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ codeOf(red) = a -> false  (or false -> false)
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |a
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== a
+|== *codeOf(blue) = a with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = b with AppliedSymbol,Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ codeOf(red) = a -> false  (or false -> false)
+        |------------
+        |blue
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |b
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== b
+|== *codeOf(blue) = b with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |c
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== c
+    |------------
+    |red
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== red
+|== *c = red with Variable,Constructor
+|------------
+|*c = blue with Variable,Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |c
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== c
+    |------------
+    |blue
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== blue
+|== *c = blue with Variable,Constructor
+|------------
+|b with Constructor just (~(red = c))
+|+ codeOf(red) = a -> false  (or false -> false)
+ definition:
+    |------------
+    |(~(red = c)) with Brackets,Brackets
+    |+ codeOf(red) = a -> false  (or false -> false)
+        |------------
+        |(false) with AConjunction
+        |+ codeOf(red) = a -> false  (or false -> false)
+        |== !false with AConjunction
+        |------------
+        |(~(red = c)) with AConjunction
+        |+ codeOf(red) = a -> false  (or false -> false)
+            |------------
+            |~(red = c) with AUnary,AComparison
+            |+ codeOf(red) = a -> false  (or false -> false)
+                |------------
+                |~(red = c) with AComparison
+                |+ codeOf(red) = a -> false  (or false -> false)
+                    |------------
+                    |*red = c with Constructor,Variable
+                    |+ codeOf(red) = a -> false  (or false -> false)
+                        |------------
+                        |red
+                        |+ codeOf(red) = a -> false  (or false -> false)
+                        |== red
+                        |------------
+                        |c
+                        |+ codeOf(red) = a -> false  (or false -> false)
+                        |== c
+                    |== *red = c with Constructor,Variable
+                |== ~(red = c) with AComparison
+                |------------
+                |*true with AppliedSymbol,Constructor
+                |+ codeOf(red) = a -> false  (or false -> false)
+                |== *!true with AppliedSymbol,Constructor
+            |== !!~(red = c) with AUnary,AComparison
+        |== !!~(red = c) with AConjunction
+    |== !!(~(red = c)) with Brackets,Brackets
+|== !b with Constructor just (~(red = c))
+|------------
+|codeOf(blue) with Constructor
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |blue
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ codeOf(red) = a -> false  (or false -> false)
+|== c
+Z3 propagation ********************************
+|------------
+|*true with AppliedSymbol,Constructor
+|+ red = c -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ red = c -> false
+|== !true with AComparison
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|+ red = c -> false
+    |------------
+    |*codeOf(blue) = a with AppliedSymbol,Constructor
+    |+ red = c -> false
+        |------------
+        |codeOf(blue) with Constructor
+        |+ red = c -> false
+            |------------
+            |blue
+            |+ red = c -> false
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |a
+        |+ red = c -> false
+        |== a
+    |== *codeOf(blue) = a with AppliedSymbol,Constructor
+    |------------
+    |*codeOf(blue) = b with AppliedSymbol,Constructor
+    |+ red = c -> false
+        |------------
+        |codeOf(blue) with Constructor
+        |+ red = c -> false
+            |------------
+            |blue
+            |+ red = c -> false
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |b
+        |+ red = c -> false
+        |== b
+    |== *codeOf(blue) = b with AppliedSymbol,Constructor
+|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|------------
+|(c = red) ∨ (c = blue) with AComparison,AComparison
+|+ red = c -> false
+    |------------
+    |*c = red with Variable,Constructor
+    |+ red = c -> false
+        |------------
+        |c
+        |+ red = c -> false
+        |== c
+        |------------
+        |red
+        |+ red = c -> false
+        |== red
+    |== *c = red with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ red = c -> false
+        |------------
+        |c
+        |+ red = c -> false
+        |== c
+        |------------
+        |blue
+        |+ red = c -> false
+        |== blue
+    |== *c = blue with Variable,Constructor
+|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ red = c -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*red = c with Constructor,Variable
+|+ red = c -> false
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = a with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ red = c -> false  (or false -> false)
+        |------------
+        |blue
+        |+ red = c -> false  (or false -> false)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |a
+    |+ red = c -> false  (or false -> false)
+    |== a
+|== *codeOf(blue) = a with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = b with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ red = c -> false  (or false -> false)
+        |------------
+        |blue
+        |+ red = c -> false  (or false -> false)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |b
+    |+ red = c -> false  (or false -> false)
+    |== b
+|== *codeOf(blue) = b with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |c
+    |+ red = c -> false  (or false -> false)
+    |== c
+    |------------
+    |red
+    |+ red = c -> false  (or false -> false)
+    |== red
+|== *c = red with Variable,Constructor
+|------------
+|*c = blue with Variable,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |c
+    |+ red = c -> false  (or false -> false)
+    |== c
+    |------------
+    |blue
+    |+ red = c -> false  (or false -> false)
+    |== blue
+|== *c = blue with Variable,Constructor
+|------------
+|b with Constructor just (~(red = c))
+|+ red = c -> false  (or false -> false)
+ definition:
+    |------------
+    |(~(red = c)) with Brackets,Brackets
+    |+ red = c -> false  (or false -> false)
+        |------------
+        |(false) with AConjunction
+        |+ red = c -> false  (or false -> false)
+        |== !false with AConjunction
+        |------------
+        |(~(red = c)) with AConjunction
+        |+ red = c -> false  (or false -> false)
+            |------------
+            |~(red = c) with AUnary,AComparison
+            |+ red = c -> false  (or false -> false)
+                |------------
+                |~(red = c) with AComparison
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |*red = c with Constructor,Variable
+                    |+ red = c -> false  (or false -> false)
+                    |== *!false with Constructor,Variable
+                |== !true with AComparison
+                |------------
+                |*true with AppliedSymbol,Constructor
+                |+ red = c -> false  (or false -> false)
+                |== *!true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |blue
+    |+ red = c -> false  (or false -> false)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ red = c -> false  (or false -> false)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) = a -> true
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ codeOf(blue) = a -> true
+|== !true with AComparison
+|------------
+|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|+ codeOf(blue) = a -> true
+    |------------
+    |*codeOf(blue) = a with AppliedSymbol,Constructor
+    |+ codeOf(blue) = a -> true
+    |== *!true with AppliedSymbol,Constructor
+|== !true with AComparison
+|------------
+|(c = red) ∨ (c = blue) with AComparison,AComparison
+|+ codeOf(blue) = a -> true
+    |------------
+    |*c = red with Variable,Constructor
+    |+ codeOf(blue) = a -> true
+        |------------
+        |c
+        |+ codeOf(blue) = a -> true
+        |== c
+        |------------
+        |red
+        |+ codeOf(blue) = a -> true
+        |== red
+    |== *c = red with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ codeOf(blue) = a -> true
+        |------------
+        |c
+        |+ codeOf(blue) = a -> true
+        |== c
+        |------------
+        |blue
+        |+ codeOf(blue) = a -> true
+        |== blue
+    |== *c = blue with Variable,Constructor
+|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) = a -> true
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(blue) = a -> true
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ codeOf(blue) = a -> true
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = a with AppliedSymbol,Constructor
+|+ codeOf(blue) = a -> true
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = b with AppliedSymbol,Constructor
+|+ codeOf(blue) = a -> true  (or true -> true)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ codeOf(blue) = a -> true  (or true -> true)
+        |------------
+        |blue
+        |+ codeOf(blue) = a -> true  (or true -> true)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |b
+    |+ codeOf(blue) = a -> true  (or true -> true)
+    |== b
+|== *codeOf(blue) = b with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ codeOf(blue) = a -> true  (or true -> true)
+    |------------
+    |c
+    |+ codeOf(blue) = a -> true  (or true -> true)
+    |== c
+    |------------
+    |red
+    |+ codeOf(blue) = a -> true  (or true -> true)
+    |== red
+|== *c = red with Variable,Constructor
+|------------
+|*c = blue with Variable,Constructor
+|+ codeOf(blue) = a -> true  (or true -> true)
+    |------------
+    |c
+    |+ codeOf(blue) = a -> true  (or true -> true)
+    |== c
+    |------------
+    |blue
+    |+ codeOf(blue) = a -> true  (or true -> true)
+    |== blue
+|== *c = blue with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ codeOf(blue) = a -> true  (or true -> true)
+ definition:
+    |------------
+    |true with Brackets
+    |+ codeOf(blue) = a -> true  (or true -> true)
+    |== !true with Brackets
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ codeOf(blue) = a -> true  (or true -> true)
+    |------------
+    |blue
+    |+ codeOf(blue) = a -> true  (or true -> true)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ codeOf(blue) = a -> true  (or true -> true)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) = b -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ codeOf(blue) = b -> false
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ codeOf(blue) = b -> false
+|== !true with AComparison
+|------------
+|(c = red) ∨ (c = blue) with AComparison,AComparison
+|+ codeOf(blue) = b -> false
+    |------------
+    |*c = red with Variable,Constructor
+    |+ codeOf(blue) = b -> false
+        |------------
+        |c
+        |+ codeOf(blue) = b -> false
+        |== c
+        |------------
+        |red
+        |+ codeOf(blue) = b -> false
+        |== red
+    |== *c = red with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ codeOf(blue) = b -> false
+        |------------
+        |c
+        |+ codeOf(blue) = b -> false
+        |== c
+        |------------
+        |blue
+        |+ codeOf(blue) = b -> false
+        |== blue
+    |== *c = blue with Variable,Constructor
+|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) = b -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(blue) = b -> false
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ codeOf(blue) = b -> false
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) = b -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = b with AppliedSymbol,Constructor
+|+ codeOf(blue) = b -> false
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ codeOf(blue) = b -> false  (or false -> false)
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false  (or false -> false)
+    |== c
+    |------------
+    |red
+    |+ codeOf(blue) = b -> false  (or false -> false)
+    |== red
+|== *c = red with Variable,Constructor
+|------------
+|*c = blue with Variable,Constructor
+|+ codeOf(blue) = b -> false  (or false -> false)
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false  (or false -> false)
+    |== c
+    |------------
+    |blue
+    |+ codeOf(blue) = b -> false  (or false -> false)
+    |== blue
+|== *c = blue with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ codeOf(blue) = b -> false  (or false -> false)
+ definition:
+    |------------
+    |true with Brackets
+    |+ codeOf(blue) = b -> false  (or false -> false)
+    |== !true with Brackets
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ codeOf(blue) = b -> false  (or false -> false)
+    |------------
+    |blue
+    |+ codeOf(blue) = b -> false  (or false -> false)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ codeOf(blue) = b -> false  (or false -> false)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = red -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ c = red -> false
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ c = red -> false
+|== !true with AComparison
+|------------
+|(c = red) ∨ (c = blue) with AComparison,AComparison
+|+ c = red -> false
+    |------------
+    |*c = red with Variable,Constructor
+    |+ c = red -> false
+    |== *!false with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ c = red -> false
+        |------------
+        |c
+        |+ c = red -> false
+        |== c
+        |------------
+        |blue
+        |+ c = red -> false
+        |== blue
+    |== *c = blue with Variable,Constructor
+|== !!c = blue with AComparison,AComparison
+|------------
+|c = blue with AComparison,AComparison
+|+ c = blue -> true
+    |------------
+    |*false with Variable,Constructor
+    |+ c = blue -> true
+    |== *!false with Variable,Constructor
+    |------------
+    |*c = blue with Variable,Constructor
+    |+ c = blue -> true
+    |== *!true with Variable,Constructor
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ c -> blue
+|== !true with AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = red -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ c = red -> false
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c = red -> false
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = red -> false
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c = red -> false
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ c = red -> false
+|== *!false with Variable,Constructor
+|------------
+|*true with Variable,Constructor
+|+ c = red -> false  (or false -> false)
+|== *!true with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ c = red -> false  (or false -> false)
+ definition:
+    |------------
+    |true with Brackets
+    |+ c = red -> false  (or false -> false)
+    |== !true with Brackets
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ c = red -> false  (or false -> false)
+    |------------
+    |blue
+    |+ c = red -> false  (or false -> false)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ c = red -> false  (or false -> false)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ c = blue -> true  (or true -> true)
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ c = blue -> true  (or true -> true)
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ c = blue -> true  (or true -> true)
+|== !true with AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ c = blue -> true  (or true -> true)
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*false with Variable,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!false with Variable,Constructor
+|------------
+|*true with Variable,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!true with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ c = blue -> true  (or true -> true)
+ definition:
+    |------------
+    |true with Brackets
+    |+ c = blue -> true  (or true -> true)
+    |== !true with Brackets
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |blue
+    |+ c = blue -> true  (or true -> true)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ c = blue -> true  (or true -> true)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c -> blue
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ c -> blue
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ c -> blue
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ c -> blue
+|== !true with AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c -> blue
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ c -> blue
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c -> blue
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c -> blue
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c -> blue
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*false with Variable,Constructor
+|+ c -> blue
+|== *!false with Variable,Constructor
+|------------
+|*true with Variable,Constructor
+|+ c -> blue
+|== *!true with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ c -> blue
+ definition:
+    |------------
+    |true with Brackets
+    |+ c -> blue
+    |== !true with Brackets
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ c -> blue
+    |------------
+    |blue
+    |+ c -> blue
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ c -> blue
+|== !blue
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) -> a
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ codeOf(blue) -> a
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ codeOf(blue) -> a
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ codeOf(blue) -> a
+|== !true with AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) -> a
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(blue) -> a
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ codeOf(blue) -> a
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ codeOf(blue) -> a
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with AppliedSymbol,Constructor
+|+ codeOf(blue) -> a
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*false with Variable,Constructor
+|+ codeOf(blue) -> a
+|== *!false with Variable,Constructor
+|------------
+|*true with Variable,Constructor
+|+ codeOf(blue) -> a
+|== *!true with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ codeOf(blue) -> a
+ definition:
+    |------------
+    |true with Brackets
+    |+ codeOf(blue) -> a
+    |== !true with Brackets
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ codeOf(blue) -> a
+|== !a with Constructor
+|------------
+|blue
+|+ codeOf(blue) -> a  (or a -> a)
+|== !blue

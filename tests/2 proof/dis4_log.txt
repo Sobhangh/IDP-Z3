@@ -1,0 +1,158 @@
+
+|------------
+|*p
+|+ p -> true
+|== *!true
+|------------
+|(~(p)) ∨ (~(q)) with AUnary,AUnary
+|+ p -> true  (or true -> true)
+    |------------
+    |~(p) with Variable
+    |+ p -> true  (or true -> true)
+        |------------
+        |*p
+        |+ p -> true  (or true -> true)
+        |== *!true
+    |== !false with Variable
+    |------------
+    |~(q) with Variable
+    |+ p -> true  (or true -> true)
+        |------------
+        |*q
+        |+ p -> true  (or true -> true)
+        |== *q
+    |== ~(q) with Variable
+|== !!~(q) with AUnary,AUnary
+|------------
+|~(q) with AUnary,AUnary
+|+ q -> false
+    |------------
+    |false with Variable
+    |+ q -> false
+    |== !false with Variable
+    |------------
+    |~(q) with Variable
+    |+ q -> false
+        |------------
+        |*q
+        |+ q -> false
+        |== *!false
+    |== !true with Variable
+|== !true with AUnary
+|------------
+|q ∨ r with Variable,Variable
+|+ p -> true  (or true -> true)
+    |------------
+    |*q
+    |+ p -> true  (or true -> true)
+    |== *q
+    |------------
+    |*r
+    |+ p -> true  (or true -> true)
+    |== *r
+|== q ∨ r with Variable,Variable
+|------------
+|*true
+|+ p -> true  (or true -> true)
+|== *!true
+|------------
+|*false
+|+ p -> true  (or true -> true)
+|== *!false
+|------------
+|*r
+|+ p -> true  (or true -> true)
+|== *r
+|------------
+|*s
+|+ p -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ p -> true  (or true -> true)
+|== *t
+|------------
+|*true
+|+ q -> false  (or false -> false)
+|== *!true
+|------------
+|true with AUnary
+|+ q -> false  (or false -> false)
+|== !true with AUnary
+|------------
+|q ∨ r with Variable,Variable
+|+ q -> false  (or false -> false)
+    |------------
+    |*q
+    |+ q -> false  (or false -> false)
+    |== *!false
+    |------------
+    |*r
+    |+ q -> false  (or false -> false)
+    |== *r
+|== !!r with Variable,Variable
+|------------
+|r with Variable,Variable
+|+ r -> true
+    |------------
+    |*false
+    |+ r -> true
+    |== *!false
+    |------------
+    |*r
+    |+ r -> true
+    |== *!true
+|== !true with Variable
+|------------
+|*true
+|+ q -> false  (or false -> false)
+|== *!true
+|------------
+|*false
+|+ q -> false  (or false -> false)
+|== *!false
+|------------
+|*true
+|+ q -> false  (or false -> false)
+|== *!true
+|------------
+|*s
+|+ q -> false  (or false -> false)
+|== *s
+|------------
+|*t
+|+ q -> false  (or false -> false)
+|== *t
+|------------
+|*true
+|+ r -> true  (or true -> true)
+|== *!true
+|------------
+|true with AUnary
+|+ r -> true  (or true -> true)
+|== !true with AUnary
+|------------
+|true with Variable
+|+ r -> true  (or true -> true)
+|== !true with Variable
+|------------
+|*true
+|+ r -> true  (or true -> true)
+|== *!true
+|------------
+|*false
+|+ r -> true  (or true -> true)
+|== *!false
+|------------
+|*true
+|+ r -> true  (or true -> true)
+|== *!true
+|------------
+|*s
+|+ r -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ r -> true  (or true -> true)
+|== *t
+Z3 propagation ********************************
