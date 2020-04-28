@@ -71,8 +71,7 @@ class Case:
                     ass = Assignment(sentence, truth, Status.UNKNOWN)
                     status = Status.ENV_UNIV if not ass.sentence.has_environmental(False) else Status.UNIVERSAL
                     ass.update(None, None, status, self)
-            else:
-                self.simplified.append(c)
+            self.simplified.append(c)
 
         self.assignments.update({ k : Assignment(t.copy(), None, Status.UNKNOWN) 
             for k, t in idp.vocabulary.terms.items()
@@ -83,6 +82,14 @@ class Case:
             self.full_propagate(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
 
+        # determine relevant assignemnts
+        relevant_symbols, relevant_subtences = self.get_relevant_subtences(all_=True)
+
+        for k, l in self.assignments.items():
+            symbols = list(l.sentence.unknown_symbols().keys())
+            has_relevant_symbol = any(s in relevant_symbols for s in symbols)
+            if k in relevant_subtences and symbols and has_relevant_symbol:
+                l.relevant = True
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self) -> str:
@@ -97,9 +104,7 @@ class Case:
     def get_relevant_subtences(self, all_: bool) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
         #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
         constraints = ( self.simplified
-            + list(self.idp.goal.subtences().values())
-            + [l.sentence for k, l in self.assignments.items() 
-                    if l.truth is not None and (all_ or not l.sentence.has_environmental(False))])
+            + list(self.idp.goal.subtences().values()))
 
         # determine relevant symbols (including defined ones)
         symbols = mergeDicts( e.unknown_symbols() for e in constraints )
@@ -124,15 +129,6 @@ class Case:
         self.propagate(to_propagate, all_)
 
         Log(f"{nl}Z3 propagation ********************************")
-        # determine relevant assignemnts
-        if all_:
-            relevant_symbols, relevant_subtences = self.get_relevant_subtences(all_=True)
-
-            for k, l in self.assignments.items():
-                symbols = list(l.sentence.unknown_symbols().keys())
-                has_relevant_symbol = any(s in relevant_symbols for s in symbols)
-                if k in relevant_subtences and symbols and has_relevant_symbol:
-                    l.relevant = True
 
         theory = self.translate(all_)
         solver, _, _ = mk_solver(theory, {})
@@ -205,8 +201,7 @@ class Case:
                                     return
                             else:
                                 print("not found", str(sentence))
-                    if not new_constraint == TRUE:
-                        new_simplified.append(new_constraint)
+                    new_simplified.append(new_constraint)
 
                 self.simplified = new_simplified
 

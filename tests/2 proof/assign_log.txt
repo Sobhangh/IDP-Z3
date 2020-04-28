@@ -1,31 +1,35 @@
 
 |------------
-|(~((x = 0))) ∨ (x = 0) with AUnary,Brackets
+|*x = 0 with Variable,NumberConstant
 |+ x = 0 -> true
+|== *!true with Variable,NumberConstant
+|------------
+|(~((x = 0))) ∨ (x = 0) with AUnary,Brackets
+|+ x = 0 -> true  (or true -> true)
     |------------
     |~((x = 0)) with Brackets
-    |+ x = 0 -> true
+    |+ x = 0 -> true  (or true -> true)
         |------------
         |(x = 0) with AComparison
-        |+ x = 0 -> true
+        |+ x = 0 -> true  (or true -> true)
             |------------
             |*x = 0 with Variable,NumberConstant
-            |+ x = 0 -> true
+            |+ x = 0 -> true  (or true -> true)
             |== *!true with Variable,NumberConstant
         |== !true with AComparison
     |== !false with Brackets
     |------------
     |(x = 0) with AComparison
-    |+ x = 0 -> true
+    |+ x = 0 -> true  (or true -> true)
         |------------
         |*x = 0 with Variable,NumberConstant
-        |+ x = 0 -> true
+        |+ x = 0 -> true  (or true -> true)
         |== *!true with Variable,NumberConstant
     |== !true with AComparison
 |== !true with Brackets
 |------------
-|*x = 0 with Variable,NumberConstant
-|+ x = 0 -> true
+|*true with Variable,NumberConstant
+|+ x = 0 -> true  (or true -> true)
 |== *!true with Variable,NumberConstant
 |------------
 |x
@@ -35,6 +39,14 @@
 |y
 |+ x = 0 -> true  (or true -> true)
 |== y
+|------------
+|*true with Variable,NumberConstant
+|+ x -> 0
+|== *!true with Variable,NumberConstant
+|------------
+|true with Brackets
+|+ x -> 0
+|== !true with Brackets
 |------------
 |*true with Variable,NumberConstant
 |+ x -> 0

@@ -95,11 +95,9 @@ class Expression(object):
         self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
-        self._unknown_symbols = None      # Dict[name, Declaration] list of uninterpreted symbols not starting with '_'
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
-        self._subtences = None            # memoization of .subtences()
         self.just_branch = None           # Justification branch (Expression)
         # .normal : only set in .instances
 
@@ -146,31 +144,26 @@ class Expression(object):
         return self
 
     def subtences(self):
-        if self._subtences is None:
-            self._subtences = {}
-            if self.is_subtence:
-                self._subtences[self.code]= self
-            if self.value is not None:
-                pass
-            elif self.simpler is not None:
-                self._subtences.update(self.simpler.subtences())
-            else:
-                self._subtences.update(mergeDicts(e.subtences() for e in self.sub_exprs))
-            if self.just_branch is not None:
-                self._subtences.update(self.just_branch.subtences())
-        return self._subtences
+        out = {}
+        if self.is_subtence:
+            out[self.code]= self
+        out.update(mergeDicts(e.subtences() for e in self.sub_exprs))
+        if self.just_branch is not None:
+            out.update(self.just_branch.subtences())
+        return out
 
     def as_ground(self): 
         " returns a NumberConstant or Constructor, or None "
         return self.value
 
     def unknown_symbols(self):
-        if self._unknown_symbols is None:
-            self._unknown_symbols = mergeDicts(e.unknown_symbols() for e in self.sub_exprs) \
-                if self.if_symbol is None else {}
-            if self.just_branch is not None:
-                self._unknown_symbols.update(self.just_branch.unknown_symbols())
-        return self._unknown_symbols
+        " returns Dict[name, Declaration] "
+        if self.if_symbol is not None: # ignore type constraints
+            return {}
+        out = mergeDicts(e.unknown_symbols() for e in self.sub_exprs)
+        if self.just_branch is not None:
+            out.update(self.just_branch.unknown_symbols())
+        return out
 
     def reified(self) -> DatatypeRef:
         if self._reified is None:

@@ -69,9 +69,14 @@ Consequences:
   codeOf(blue) -> a
   c -> blue
 Simplified:  
-  
+  true
+  true
+  true
+  true
 Irrelevant:  
-  
+  ~codeOf(red) = a
+  ~codeOf(blue) = b
+  ~c = red
 
 
 -- meta -------------------------------------
@@ -99,7 +104,7 @@ Irrelevant:
        'c = red': {'environmental': False,
                    'normal': False,
                    'reading': 'c = red',
-                   'relevant': True,
+                   'relevant': False,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
                    'value': False},
@@ -128,7 +133,7 @@ Irrelevant:
             'codeOf(blue) = b': {'environmental': False,
                                  'normal': False,
                                  'reading': 'codeOf(blue) = b',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': False},
@@ -143,7 +148,7 @@ Irrelevant:
             'codeOf(red) = a': {'environmental': False,
                                 'normal': False,
                                 'reading': 'codeOf(red) = a',
-                                'relevant': True,
+                                'relevant': False,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},

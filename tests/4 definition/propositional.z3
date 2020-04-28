@@ -48,7 +48,8 @@ Consequences:
   ~p
   q
 Simplified:  
-  
+  true
+  true
 Irrelevant:  
   ? s
   ? t

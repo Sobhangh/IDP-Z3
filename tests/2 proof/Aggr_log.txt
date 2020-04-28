@@ -12,7 +12,23 @@
 |+ c -> green
 |== !1 with Constructor,NumberConstant,NumberConstant
 |------------
+|p with Variable,AComparison
+|+ p -> true
+    |------------
+    |*p
+    |+ p -> true
+    |== *!true
+    |------------
+    |*true with NumberConstant,NumberConstant
+    |+ p -> true
+    |== *!true with NumberConstant,NumberConstant
+|== !true with Variable,AComparison
+|------------
 |*p
 |+ p -> true
 |== *!true
+|------------
+|*true with NumberConstant,NumberConstant
+|+ p -> true  (or true -> true)
+|== *!true with NumberConstant,NumberConstant
 Z3 propagation ********************************

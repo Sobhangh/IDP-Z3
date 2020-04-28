@@ -37,6 +37,7 @@ Consequences:
   q
 Simplified:  
   (r ∨ s)
+  true
 Irrelevant:  
   
 

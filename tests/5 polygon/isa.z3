@@ -172,9 +172,22 @@ Consequences:
   ~typeOf(square) = 1tri angle
   typeOf(square) = quadrilateral
 Simplified:  
+  true
+  true
+  true
+  true
+  true
   (Type = 1tri angle) ∨ (Type = quadrilateral)
   (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square)
+  true
+  true
+  true
+  true
 Irrelevant:  
+  ~typeOf(regular_triangle) = quadrilateral
+  ~typeOf(right_triangle) = quadrilateral
+  ~typeOf(rectangle) = 1tri angle
+  ~typeOf(square) = 1tri angle
   isa(regular_triangle,typeOf(regular_triangle))
   isa(right_triangle,typeOf(right_triangle))
   isa(rectangle,typeOf(rectangle))
@@ -330,7 +343,7 @@ Irrelevant:
             'typeOf(rectangle) = 1tri angle': {'environmental': False,
                                                'normal': False,
                                                'reading': 'typeOf(rectangle) = 1tri angle',
-                                               'relevant': True,
+                                               'relevant': False,
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': False},
@@ -359,7 +372,7 @@ Irrelevant:
             'typeOf(regular_triangle) = quadrilateral': {'environmental': False,
                                                          'normal': False,
                                                          'reading': 'typeOf(regular_triangle) = quadrilateral',
-                                                         'relevant': True,
+                                                         'relevant': False,
                                                          'status': 'CONSEQUENCE',
                                                          'typ': 'Bool',
                                                          'value': False},
@@ -381,7 +394,7 @@ Irrelevant:
             'typeOf(right_triangle) = quadrilateral': {'environmental': False,
                                                        'normal': False,
                                                        'reading': 'typeOf(right_triangle) = quadrilateral',
-                                                       'relevant': True,
+                                                       'relevant': False,
                                                        'status': 'CONSEQUENCE',
                                                        'typ': 'Bool',
                                                        'value': False},
@@ -396,7 +409,7 @@ Irrelevant:
             'typeOf(square) = 1tri angle': {'environmental': False,
                                             'normal': False,
                                             'reading': 'typeOf(square) = 1tri angle',
-                                            'relevant': True,
+                                            'relevant': False,
                                             'status': 'CONSEQUENCE',
                                             'typ': 'Bool',
                                             'value': False},

@@ -398,7 +398,38 @@ Consequences:
   Angle(3) -> 60
   Angle(4) -> 0
 Simplified:  
-  
+  true
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  true
+  true
+  true
+  true
+  true
+  true
+  true
+  true
+  true
+  true
 Irrelevant:  
   ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
   Length(1) = Length(3)

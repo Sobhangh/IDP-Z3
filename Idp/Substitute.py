@@ -78,7 +78,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branc
     # reset derived attributes
     self.str = sys.intern(str(self))
     self._unknown_symbols = None
-    self._subtences = None
 
     return self
 Expression._change = _change
@@ -202,10 +201,13 @@ def update_exprs(self, new_expr_generator):
     value, simpler = None, None
     if exprs[0] == FALSE: # (false => p) is true
         value = TRUE
+        # exprs[0] may be false because exprs[1] is false
+        exprs = [exprs[0], exprs[1] if exprs[1] == FALSE else FALSE]
     if exprs[0] == TRUE: # (true => p) is p
         simpler = exprs[1]
     if exprs[1] == TRUE: # (p => true) is true
         value = TRUE
+        exprs = [exprs[0] if exprs[0] == TRUE else TRUE, exprs[1]]
     if exprs[1] == FALSE: # (p => false) is ~p
         simpler = AUnary.make('~', exprs[0])
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
@@ -233,20 +235,19 @@ AEquivalence.update_exprs = update_exprs
 # Class ADisjunction #######################################################
 
 def update_exprs(self, new_expr_generator):
-    exprs, is_true = [], False
+    exprs, other = [], []
     for expr in new_expr_generator:
         if expr == TRUE:
             return self._change(value=TRUE, sub_exprs=[expr])
-        if expr == FALSE:
-            pass
-        else:
-            exprs.append(expr)
+        exprs.append(expr)
+        if expr != FALSE:
+            other.append(expr)
 
     value, simpler = None, None
-    if len(exprs) == 0: # all disjuncts are False
+    if len(other) == 0: # all disjuncts are False
         value = FALSE
-    if len(exprs) == 1:
-         simpler=exprs[0]
+    if len(other) == 1:
+         simpler=other[0]
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
 
@@ -256,20 +257,19 @@ ADisjunction.update_exprs = update_exprs
 
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_expr_generator):
-    exprs, is_false = [], False
+    exprs, other = [], []
     for expr in new_expr_generator:
-        if expr == TRUE:
-            pass
-        elif expr == FALSE: 
+        if expr == FALSE: 
             return self._change(value=FALSE, sub_exprs=[expr])
-        else:
-            exprs.append(expr)
+        exprs.append(expr)
+        if expr != TRUE:
+            other.append(expr)
 
     value, simpler = None, None
-    if len(exprs) == 0:  # all conjuncts are True
+    if len(other) == 0:  # all conjuncts are True
         value = TRUE
-    if len(exprs) == 1:
-        simpler = exprs[0]
+    if len(other) == 1:
+        simpler = other[0]
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
 
@@ -464,19 +464,21 @@ def substitute(self, e0, e1, todo=None):
 
     if type(e1) == Fresh_Variable:
         return self._replace_by(e1)
+
+    new_branch = None
+    if self.just_branch is not None:
+        Log(f"{nl} definition:")
+        new_branch = self.just_branch.substitute(e0, e1, todo)
+        if todo is not None:
+            todo.extend(new_branch.implicants())
+            
     if self.value is not None:
-        return self
+        return self._change(just_branch=new_branch)
     if self.code == e0.code:
-        return self._change(value=e1)
+        return self._change(value=e1, just_branch=new_branch)
     else:
         new_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs]
         value, new_branch = None, None
-        if self.just_branch is not None:
-            Log(f"{nl} definition:")
-            new_branch = self.just_branch.substitute(e0, e1, todo)
-            if todo is not None:
-                todo.extend(new_branch.implicants())
-            #TODO get implicants of just_branch
         return self._change(sub_exprs=new_exprs, value=value, just_branch=new_branch)
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute

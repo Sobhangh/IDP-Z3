@@ -354,12 +354,38 @@ Consequences:
   Angle(3) -> 90
   Angle(4) -> 90
 Simplified:  
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
   (Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) ∧ (Length(4) = Length(1))))
+  (true)
+  (true)
+  (true)
+  (true)
   (((Subtype = square) ∨ (Subtype = rectangle)))
   ((Subtype = rectangle) ⇒ (~(Length(1) = Length(2))))
   ((Subtype = square) ⇔ (Equilateral))
-  (Subtype = rectangle) ∨ (Subtype = square)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  true
+  true
+  true
+  (false) ∨ (false) ∨ (Subtype = rectangle) ∨ (Subtype = square) ∨ (false)
 Irrelevant:  
+  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+  ∃n[side] : Angle(n) = 90
+  Length(1) ≤ (Length(2) + Length(3))
+  ? Length(2) ≤ (Length(3) + Length(1))
+  Length(3) ≤ (Length(1) + Length(2))
   ? Large(1)
   ? Large(2)
   ? Large(3)
@@ -438,7 +464,7 @@ Irrelevant:
            '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'environmental': False,
                                                         'normal': False,
                                                         'reading': 'All angles are 60°',
-                                                        'relevant': True,
+                                                        'relevant': False,
                                                         'status': 'CONSEQUENCE',
                                                         'typ': 'Bool',
                                                         'value': False},
@@ -473,7 +499,7 @@ Irrelevant:
            '∃n[side] : Angle(n) = 90': {'environmental': False,
                                         'normal': False,
                                         'reading': 'One angle is 90°',
-                                        'relevant': True,
+                                        'relevant': False,
                                         'status': 'CONSEQUENCE',
                                         'typ': 'Bool',
                                         'value': True}},
@@ -551,7 +577,7 @@ Irrelevant:
             'Length(1) ≤ (Length(2) + Length(3))': {'environmental': False,
                                                     'normal': False,
                                                     'reading': 'Length(1) ≤ (Length(2) + Length(3))',
-                                                    'relevant': True,
+                                                    'relevant': False,
                                                     'status': 'CONSEQUENCE',
                                                     'typ': 'Bool',
                                                     'value': True},
@@ -572,7 +598,7 @@ Irrelevant:
             'Length(2) ≤ (Length(3) + Length(1))': {'environmental': False,
                                                     'normal': False,
                                                     'reading': 'Length(2) ≤ (Length(3) + Length(1))',
-                                                    'relevant': True,
+                                                    'relevant': False,
                                                     'status': 'UNKNOWN',
                                                     'typ': 'Bool'},
             'Length(3)': {'environmental': False,
@@ -585,7 +611,7 @@ Irrelevant:
             'Length(3) ≤ (Length(1) + Length(2))': {'environmental': False,
                                                     'normal': False,
                                                     'reading': 'Length(3) ≤ (Length(1) + Length(2))',
-                                                    'relevant': True,
+                                                    'relevant': False,
                                                     'status': 'CONSEQUENCE',
                                                     'typ': 'Bool',
                                                     'value': True},

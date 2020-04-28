@@ -61,10 +61,12 @@ Consequences:
   t -> Piet
   t1 -> Piet
 Simplified:  
-  
+  true
+  true
 Irrelevant:  
   ~t = Jan
   t = Piet
+  ~t0 = Jan
   ~t1 = Jan
   t1 = Piet
   t -> Piet
@@ -112,7 +114,7 @@ Irrelevant:
         't0 = Jan': {'environmental': False,
                      'normal': False,
                      'reading': 't0 = Jan',
-                     'relevant': True,
+                     'relevant': False,
                      'status': 'CONSEQUENCE',
                      'typ': 'Bool',
                      'value': False},

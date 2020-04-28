@@ -35,7 +35,8 @@ Universals:
 Consequences:
   
 Simplified:  
-  
+  true
+  true
 Irrelevant:  
   ? y
 

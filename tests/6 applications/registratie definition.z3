@@ -857,6 +857,7 @@ Consequences:
 Simplified:  
   ((Tax = 1) ⇒ ((Registration_Type = Heritage) ∧ (Region = Flemish_Region)))
   (Tax = 2) ⇒ ((Registration_Type = Social_Dwelling) ∧ (Region = Flemish_Region))
+  true
   ((Tax = 6) ⇒ (((Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground)) ∧ (Region = Flemish_Region)))
   (Tax = 7) ⇒ (((Registration_Type = Family_Dwelling) ∨ (Registration_Type = Dwelling_For_Social_Renting)) ∧ (Region = Flemish_Region))
   (Tax = 10) ⇒ ((Region = Flemish_Region) ∧ (Registration_Type = Other))
@@ -866,9 +867,11 @@ Simplified:
   (Registration_Type = Energy_Efficient_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ (Term_Energy_Renovation = (5 + Certification_Date)))
   (Registration_Type = Dwelling_For_Social_Renting) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Use = Social_Renting) ∧ (Start_Dt_Dwelling_For_Social_Rent = (3 + Certification_Date)) ∧ (Duration_Of_Agreement = Less_Than_9_years))
   ((Registration_Type = Heritage) ⇒ ((Type_Of_Real_Estate = Residential) ∧ Monument ∧ (Use = As_Family_Dwelling) ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms))
+  true
   ((Registration_Type = Social_Purpose) ⇒ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
   (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
-  (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
+  (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (true) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
+  true
   (Region = Flemish_Region) ∨ (Region = Walloon_Region) ∨ (Region = Brussels_Region)
   (Type_Of_Real_Estate = Residential) ∨ (Type_Of_Real_Estate = Residential_Building_Land) ∨ (Type_Of_Real_Estate = Other_Real_Estate)
   (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER) ∨ (Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen) ∨ (Seller = ErkendeSocialeHuisvestingsMpy)
@@ -878,8 +881,8 @@ Simplified:
   (Start_Dt_Dwelling_For_Social_Rent = 2015) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2016) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2017) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2018) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2019) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2020) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2021) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2022) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2023) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2024) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2025)
   (Certification_Date = 2015) ∨ (Certification_Date = 2016) ∨ (Certification_Date = 2017) ∨ (Certification_Date = 2018) ∨ (Certification_Date = 2019) ∨ (Certification_Date = 2020) ∨ (Certification_Date = 2021) ∨ (Certification_Date = 2022) ∨ (Certification_Date = 2023) ∨ (Certification_Date = 2024) ∨ (Certification_Date = 2025)
   (Term_Energy_Renovation = 2015) ∨ (Term_Energy_Renovation = 2016) ∨ (Term_Energy_Renovation = 2017) ∨ (Term_Energy_Renovation = 2018) ∨ (Term_Energy_Renovation = 2019) ∨ (Term_Energy_Renovation = 2020) ∨ (Term_Energy_Renovation = 2021) ∨ (Term_Energy_Renovation = 2022) ∨ (Term_Energy_Renovation = 2023) ∨ (Term_Energy_Renovation = 2024) ∨ (Term_Energy_Renovation = 2025)
-  (Registration_Type = Family_Dwelling) ∨ (Registration_Type = Social_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground) ∨ (Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Heritage) ∨ (Registration_Type = Dwelling_For_Social_Renting) ∨ (Registration_Type = Other)
-  (Tax = 1) ∨ (Tax = 2) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
+  (Registration_Type = Family_Dwelling) ∨ (Registration_Type = Social_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground) ∨ (false) ∨ (Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Heritage) ∨ (Registration_Type = Dwelling_For_Social_Renting) ∨ (Registration_Type = Other)
+  (Tax = 1) ∨ (Tax = 2) ∨ (false) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
 Irrelevant:  
   ? Guarantee_Satisfied
   ? Additional_Security_Required

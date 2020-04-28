@@ -44,7 +44,9 @@ Consequences:
   16.0 = (Base * Base)
   Base -> 4
 Simplified:  
-  
+  true
+  true
+  true
 Irrelevant:  
   
 

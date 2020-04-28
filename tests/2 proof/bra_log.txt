@@ -1,35 +1,39 @@
 
 |------------
-|((~((p))) ∨ (p)) with ADisjunction
+|*p
 |+ p -> true
+|== *!true
+|------------
+|((~((p))) ∨ (p)) with ADisjunction
+|+ p -> true  (or true -> true)
     |------------
     |(~((p))) ∨ (p) with AUnary,Brackets
-    |+ p -> true
+    |+ p -> true  (or true -> true)
         |------------
         |~((p)) with Brackets
-        |+ p -> true
+        |+ p -> true  (or true -> true)
             |------------
             |(p) with Variable
-            |+ p -> true
+            |+ p -> true  (or true -> true)
                 |------------
                 |*p
-                |+ p -> true
+                |+ p -> true  (or true -> true)
                 |== *!true
             |== !true with Variable
         |== !false with Brackets
         |------------
         |(p) with Variable
-        |+ p -> true
+        |+ p -> true  (or true -> true)
             |------------
             |*p
-            |+ p -> true
+            |+ p -> true  (or true -> true)
             |== *!true
         |== !true with Variable
     |== !true with Brackets
 |== !true with ADisjunction
 |------------
-|*p
-|+ p -> true
+|*true
+|+ p -> true  (or true -> true)
 |== *!true
 |------------
 |*q

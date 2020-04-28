@@ -133,7 +133,13 @@ Universals:
 Consequences:
   
 Simplified:  
+  (true)
+  (true)
+  (true)
   (Guaranteed ⇔ _O(M))
+  (true)
+  (true)
+  (true)
   (M = e1) ∨ (M = e2) ∨ (M = e3)
   (M = e1) ∨ (M = e2) ∨ (M = e3)
 Irrelevant:  

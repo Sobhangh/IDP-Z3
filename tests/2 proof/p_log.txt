@@ -1,23 +1,27 @@
 
 |------------
-|(~(p)) ∨ p with AUnary,Variable
+|*p
 |+ p -> true
+|== *!true
+|------------
+|(~(p)) ∨ p with AUnary,Variable
+|+ p -> true  (or true -> true)
     |------------
     |~(p) with Variable
-    |+ p -> true
+    |+ p -> true  (or true -> true)
         |------------
         |*p
-        |+ p -> true
+        |+ p -> true  (or true -> true)
         |== *!true
     |== !false with Variable
     |------------
     |*p
-    |+ p -> true
+    |+ p -> true  (or true -> true)
     |== *!true
 |== !true with Variable
 |------------
-|*p
-|+ p -> true
+|*true
+|+ p -> true  (or true -> true)
 |== *!true
 |------------
 |*q

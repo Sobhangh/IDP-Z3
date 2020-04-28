@@ -1,63 +1,67 @@
 
 |------------
-|(~(((1 + x) = 1))) ∨ ((1 + x) = 1) with AUnary,Brackets
+|*x = 0 with Variable,NumberConstant
 |+ x = 0 -> true
+|== *!true with Variable,NumberConstant
+|------------
+|(~(((1 + x) = 1))) ∨ ((1 + x) = 1) with AUnary,Brackets
+|+ x = 0 -> true  (or true -> true)
     |------------
     |~(((1 + x) = 1)) with Brackets
-    |+ x = 0 -> true
+    |+ x = 0 -> true  (or true -> true)
         |------------
         |((1 + x) = 1) with AComparison
-        |+ x = 0 -> true
+        |+ x = 0 -> true  (or true -> true)
             |------------
             |*(1 + x) = 1 with ASumMinus,NumberConstant
-            |+ x = 0 -> true
+            |+ x = 0 -> true  (or true -> true)
                 |------------
                 |1 + x with NumberConstant,Variable
-                |+ x = 0 -> true
+                |+ x = 0 -> true  (or true -> true)
                     |------------
                     |1
-                    |+ x = 0 -> true
+                    |+ x = 0 -> true  (or true -> true)
                     |== 1
                     |------------
                     |x
-                    |+ x = 0 -> true
+                    |+ x = 0 -> true  (or true -> true)
                     |== x
                 |== 1 + x with NumberConstant,Variable
                 |------------
                 |1
-                |+ x = 0 -> true
+                |+ x = 0 -> true  (or true -> true)
                 |== 1
             |== *(1 + x) = 1 with ASumMinus,NumberConstant
         |== !!(1 + x) = 1 with AComparison
     |== ~(((1 + x) = 1)) with Brackets
     |------------
     |((1 + x) = 1) with AComparison
-    |+ x = 0 -> true
+    |+ x = 0 -> true  (or true -> true)
         |------------
         |*(1 + x) = 1 with ASumMinus,NumberConstant
-        |+ x = 0 -> true
+        |+ x = 0 -> true  (or true -> true)
             |------------
             |1 + x with NumberConstant,Variable
-            |+ x = 0 -> true
+            |+ x = 0 -> true  (or true -> true)
                 |------------
                 |1
-                |+ x = 0 -> true
+                |+ x = 0 -> true  (or true -> true)
                 |== 1
                 |------------
                 |x
-                |+ x = 0 -> true
+                |+ x = 0 -> true  (or true -> true)
                 |== x
             |== 1 + x with NumberConstant,Variable
             |------------
             |1
-            |+ x = 0 -> true
+            |+ x = 0 -> true  (or true -> true)
             |== 1
         |== *(1 + x) = 1 with ASumMinus,NumberConstant
     |== !!(1 + x) = 1 with AComparison
 |== (~(((1 + x) = 1))) ∨ ((1 + x) = 1) with AUnary,Brackets
 |------------
-|*x = 0 with Variable,NumberConstant
-|+ x = 0 -> true
+|*true with Variable,NumberConstant
+|+ x = 0 -> true  (or true -> true)
 |== *!true with Variable,NumberConstant
 |------------
 |*(1 + x) = 1 with ASumMinus,NumberConstant
@@ -87,6 +91,10 @@
 |y
 |+ x = 0 -> true  (or true -> true)
 |== y
+|------------
+|*true with Variable,NumberConstant
+|+ x -> 0
+|== *!true with Variable,NumberConstant
 |------------
 |(~(((1 + x) = 1))) ∨ ((1 + x) = 1) with AUnary,Brackets
 |+ x -> 0
@@ -175,6 +183,14 @@
 |y
 |+ x -> 0  (or 0 -> 0)
 |== y
+|------------
+|*true with Variable,NumberConstant
+|+ (x + 1) = 1 -> true  (or true -> true)
+|== *!true with Variable,NumberConstant
+|------------
+|true with Brackets
+|+ (x + 1) = 1 -> true  (or true -> true)
+|== !true with Brackets
 |------------
 |*true with Variable,NumberConstant
 |+ (x + 1) = 1 -> true  (or true -> true)

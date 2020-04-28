@@ -45,7 +45,8 @@ Universals:
 Consequences:
   p
 Simplified:  
-  
+  true
+  true
 Irrelevant:  
   ? r
   ? s

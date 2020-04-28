@@ -148,7 +148,7 @@ And(Angle(1) < 180,
     Angle(3) < 180,
     Angle(4) < 180)
 
-Equilateral == And(Sides < 2, Sides < 3, Sides < 4)
+Equilateral == And(True, Sides < 2, Sides < 3, Sides < 4)
 
 Or(Not(Sides == 3),
    Or(Subtype == right_triangle,
@@ -232,6 +232,7 @@ And(Not(Large(1)),
 -- subtences ------------------------------------
 ∀n[side] : Length(n) < Length(n + 1)
 Large(1)
+10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Type = triangle
 Sides = 3
 Type = quadrilateral
@@ -250,8 +251,13 @@ Subtype = irregular
 Subtype = square
 Subtype = rectangle
 ∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+Length(1) = Length(3)
+Length(1) ≤ (Length(2) + Length(3))
+Length(2) ≤ (Length(3) + Length(1))
+Length(3) ≤ (Length(1) + Length(2))
 Perimeter = (sum{n[side] : true : Length(n)})
 (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+∀x[side] : 0 ≤ Length(x)
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
@@ -274,6 +280,7 @@ Large(2)
 Large(3)
 Large(4)
 ∀n[side] : Length(n) < Length(n + 1)
+10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Type = triangle
 Sides = 3
 Type = quadrilateral
@@ -290,8 +297,13 @@ Subtype = irregular
 Subtype = square
 Subtype = rectangle
 ∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+Length(1) = Length(3)
+Length(1) ≤ (Length(2) + Length(3))
+Length(2) ≤ (Length(3) + Length(1))
+Length(3) ≤ (Length(1) + Length(2))
 Perimeter = (sum{n[side] : true : Length(n)})
 (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+∀x[side] : 0 ≤ Length(x)
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
 ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
@@ -335,9 +347,43 @@ Consequences:
   ~Large(3)
   ~Large(4)
 Simplified:  
+  true
+  true
+  (true)
+  (true)
+  (true)
+  (true)
   (Convex ⇔ ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180)))
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  (true)
+  true
+  true
+  true
+  true
 Irrelevant:  
   ? ∀n[side] : Length(n) < Length(n + 1)
+  ? 10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
+  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+  ? ∃n[side] : Angle(n) = 90
+  ? Length(1) = Length(3)
+  ? Length(1) ≤ (Length(2) + Length(3))
+  ? Length(2) ≤ (Length(3) + Length(1))
+  ? Length(3) ≤ (Length(1) + Length(2))
+  ? ∀x[side] : 0 ≤ Length(x)
 
 
 -- meta -------------------------------------
@@ -405,7 +451,7 @@ Irrelevant:
            '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'environmental': False,
                                                         'normal': False,
                                                         'reading': 'All angles are 60°',
-                                                        'relevant': True,
+                                                        'relevant': False,
                                                         'status': 'CONSEQUENCE',
                                                         'typ': 'Bool',
                                                         'value': False},
@@ -439,7 +485,7 @@ Irrelevant:
            '∃n[side] : Angle(n) = 90': {'environmental': False,
                                         'normal': False,
                                         'reading': 'One angle is 90°',
-                                        'relevant': True,
+                                        'relevant': False,
                                         'status': 'UNKNOWN',
                                         'typ': 'Bool'}},
  'Convex': {'Convex': {'environmental': False,

@@ -50,6 +50,8 @@ c = blue
 p
 q
 r
+true
+false
 
 -- GUILines ------------------------------------
 p
@@ -64,6 +66,8 @@ b = red
 b = blue
 c = red
 c = blue
+true
+false
 
 -- case -------------------------------------
 Type:        
@@ -87,10 +91,14 @@ Consequences:
   b -> red
   c -> red
 Simplified:  
-  
+  true
+  true
 Irrelevant:  
+  ~a = blue
   c = red
   ~c = blue
+  ? true
+  ? false
   c -> red
 
 
@@ -116,7 +124,7 @@ Irrelevant:
        'a = blue': {'environmental': False,
                     'normal': False,
                     'reading': 'a = blue',
-                    'relevant': True,
+                    'relevant': False,
                     'status': 'CONSEQUENCE',
                     'typ': 'Bool',
                     'value': False},

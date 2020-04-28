@@ -37,7 +37,8 @@ Universals:
 Consequences:
   (x + 1) = 1
 Simplified:  
-  
+  true
+  true
 Irrelevant:  
   (x + 1) = 1
   ? y

@@ -1,29 +1,7 @@
 vocabulary {
-    
-    type sides = {3..4}
-    Sides: sides
-
-
-    type type constructed from {triangle, quadrilateral}
-    Type : type
-
-    type side = {1..4}
-    Length(side):real
-
-    type subtype constructed from
-        { regular_triangle
-        , right_triangle
-        , rectangle
-        , square
-        , irregular}
-    Subtype : subtype
-
-    Equilateral
+    p q
 }
-
 theory {
-    Sides=3. 
-
-    Equilateral <=> (∀n[side]: Length(n)=Length(1) | Sides < n).
-
+  { p.}
+  ~p|q.
 }

@@ -1,6 +1,22 @@
 
 |------------
+|p with Variable,Brackets
+|+ p -> true
+    |------------
+    |*p
+    |+ p -> true
+    |== *!true
+    |------------
+    |(true) with AQuantification
+    |+ p -> true
+    |== !true with AQuantification
+|== !true with Variable,Brackets
+|------------
 |*p
 |+ p -> true
 |== *!true
+|------------
+|*true with ADisjunction
+|+ p -> true  (or true -> true)
+|== *!true with ADisjunction
 Z3 propagation ********************************

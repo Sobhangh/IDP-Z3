@@ -45,7 +45,9 @@ Consequences:
   q
   r
 Simplified:  
-  
+  true
+  true
+  true
 Irrelevant:  
   ? s
   ? t

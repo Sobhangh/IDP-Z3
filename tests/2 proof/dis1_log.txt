@@ -1,15 +1,19 @@
 
 |------------
-|p ∨ q with Variable,Variable
+|*p
 |+ p -> true
+|== *!true
+|------------
+|p ∨ q with Variable,Variable
+|+ p -> true  (or true -> true)
     |------------
     |*p
-    |+ p -> true
+    |+ p -> true  (or true -> true)
     |== *!true
 |== !true with Variable
 |------------
-|*p
-|+ p -> true
+|*true
+|+ p -> true  (or true -> true)
 |== *!true
 |------------
 |*q

@@ -40,7 +40,8 @@ Universals:
 Consequences:
   q
 Simplified:  
-  
+  true
+  true
 Irrelevant:  
   ? r
   ? s

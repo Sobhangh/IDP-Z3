@@ -15,9 +15,11 @@ Not(p)
 
 -- subtences ------------------------------------
 p
+∀c[color] : c = red
 
 -- GUILines ------------------------------------
 p
+∀c[color] : c = red
 
 -- case -------------------------------------
 Type:        
@@ -29,9 +31,9 @@ Universals:
 Consequences:
   
 Simplified:  
-  
+  true
 Irrelevant:  
-  
+  ? ∀c[color] : c = red
 
 
 -- meta -------------------------------------

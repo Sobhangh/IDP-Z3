@@ -1,6 +1,22 @@
 
 |------------
+|(~(p)) with Variable,Brackets
+|+ p -> false
+    |------------
+    |*p
+    |+ p -> false
+    |== *!false
+    |------------
+    |(false) with AQuantification
+    |+ p -> false
+    |== !false with AQuantification
+|== !true with Variable,Brackets
+|------------
 |*p
 |+ p -> false
 |== *!false
+|------------
+|*false with AConjunction
+|+ p -> false  (or false -> false)
+|== *!false with AConjunction
 Z3 propagation ********************************

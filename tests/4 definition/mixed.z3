@@ -47,6 +47,7 @@ Consequences:
   
 Simplified:  
   p ⇒ s
+  true
 Irrelevant:  
   ? r
 
