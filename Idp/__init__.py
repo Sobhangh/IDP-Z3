@@ -102,10 +102,24 @@ class Annotations(object):
         self.annotations = kwargs.pop('annotations')
 
         def pair(s):
-            print("Anno:", s)
             p = s.split(':',1)
             if len(p) == 2:
-                return (p[0], p[1])
+                if ':' not in p[1]:
+                    return (p[0], p[1])
+                else:  # In this case we have a Slider.
+                    print(p[1])
+                    pat = r"\(((.*?), (.*?))\)"
+                    arg = re.findall(pat, p[1])
+                    l_symb = arg[0][1]
+                    u_symb = arg[0][2]
+                    l_bound = arg[1][1]
+                    u_bound = arg[1][2]
+                    print("MATCH:", l_symb, u_symb, l_bound, u_bound)
+                    slider_arg = {'lower_symbol': l_symb,
+                                  'upper_symbol': u_symb,
+                                  'lower_bound': l_bound,
+                                  'upper_bound': u_bound}
+                    return(p[0], slider_arg)
             else:
                 return ('reading', p[0])
 

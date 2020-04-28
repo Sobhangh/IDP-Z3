@@ -16,10 +16,10 @@ vocabulary {
 
 
     ECost(t_epoxy): t_cost
-    Cost: t_cost
     Min_Cost: real
     Max_Cost: real
-    [Slider Cost: (Min_Cost, Max_Cost): (0.5, 1)]
+    [Slider: (Min_Cost, Max_Cost): (0.5, 1)]
+    Cost: t_cost
 
     EShelf_Life(t_epoxy): t_shelf_life
     Shelf_Life: t_shelf_life

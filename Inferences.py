@@ -24,13 +24,21 @@ from Solver import mk_solver, reifier, Solver, sat, unsat, is_not
 from utils import *
 
 
-
+"""
 #################
 # INFERENCES
 #################
+"""
+
 
 def metaJSON(idp):
-    "response to meta request"
+    """
+    Format a response to meta request.
+
+    :arg idp: the response
+    :returns out: a meta request
+
+    """
     symbols = []
     for i in idp.unknown_symbols().values():
         typ = i.out.name
@@ -39,13 +47,20 @@ def metaJSON(idp):
             "idpname": str(i.name),
             "type": symbol_type,
             "priority": "core",
-            "showOptimize": True, # GUI is smart enough to show buttons appropriately
+            "showOptimize": True,  # GUI is smart enough to show buttons appropriately
             "view": "expanded" if i.name == str(idp.goal) else idp.view.viewType
         }
         if i.annotations is not None:
-            if 'reading' in i.annotations: d['guiname']   = i.annotations['reading']
-            if 'short'   in i.annotations: d['shortinfo'] = i.annotations['short']
-            if 'long'    in i.annotations: d['longinfo']  = i.annotations['long']
+            print(i.annotations.annotations)
+            if 'reading' in i.annotations.annotations:
+                d['guiname'] = i.annotations['reading']
+            if 'short' in i.annotations.annotations:
+                d['shortinfo'] = i.annotations['short']
+            if 'long' in i.annotations.annotations:
+                d['longinfo'] = i.annotations['long']
+            if 'Slider' in i.annotations.annotations:
+                d['slider'] = i.annotations.annotations['Slider']
+
         symbols.append(d)
     out = {"title": "Interactive Consultant", "symbols": symbols}
     return out
