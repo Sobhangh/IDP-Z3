@@ -14,3 +14,4 @@ Root cause:
 Options:
 * workaround: do Clark completion manually, not automatically
 * don't create a variable if the function has no argument
+* do not quantify over value of a defined function

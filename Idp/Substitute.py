@@ -40,25 +40,6 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 
 # class Expression ############################################################
 
-def _replace_by(self, by):
-    " replace expression by a new Brackets node, to keep annotations "
-    if self.type == 'bool':
-        out = Brackets(f=by, annotations=self.annotations) # by is not copied !
-
-        # copy initial annotation
-        out.code = self.code
-        out.is_subtence = self.is_subtence
-        out.fresh_vars = self.fresh_vars
-        out.is_visible = self.is_visible
-        out.type = self.type
-        # out.normal is not set, normally
-    else:
-        out = copy.copy(by)
-        out.code = self.code
-    return out
-Expression._replace_by = _replace_by
-
-
 def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branch=None):
     " change attributes of an expression, and erase derive attributes "
 
@@ -326,7 +307,7 @@ def update_arith(self, family, new_expr_generator):
     assert len([family] + self.operator) == len(operands), "Internal error"
     for op, expr in zip([family] + self.operator, operands):
         if family == '*' and acc == 0:
-            return self._change(ZERO)
+            return self._change(value=ZERO, sub_exprs=[expr])
         add(op, expr)
 
     # analyse results
@@ -393,7 +374,7 @@ def update_exprs(self, new_expr_generator):
         a = operand.as_ground()
         if a is not None:
             if type(a) == NumberConstant:
-                return self._replace_by(NumberConstant(number=str(- a.translate())))
+                return self._change(value=NumberConstant(number=str(- a.translate())), sub_exprs=[operand])
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
@@ -431,7 +412,7 @@ def update_exprs(self, new_expr_generator):
             else:
                 exprs.add(expr)
         out = NumberConstant(number=str(acc))
-        return self._replace_by(out)
+        return self._change(value=out, sub_exprs=operands)
 
     return self
 AAggregate.update_exprs = update_exprs
@@ -463,7 +444,9 @@ def substitute(self, e0, e1, todo=None):
     global Expression_substitute
 
     if type(e1) == Fresh_Variable:
-        return self._replace_by(e1)
+        out = copy.copy(e1)
+        out.code = self.code
+        return out
 
     new_branch = None
     if self.just_branch is not None:

@@ -19,16 +19,16 @@
     |+ p -> true
     |== *!true
     |------------
-    |*true with NumberConstant,NumberConstant
+    |*true with AAggregate,NumberConstant
     |+ p -> true
-    |== *!true with NumberConstant,NumberConstant
+    |== *!true with AAggregate,NumberConstant
 |== !true with Variable,AComparison
 |------------
 |*p
 |+ p -> true
 |== *!true
 |------------
-|*true with NumberConstant,NumberConstant
+|*true with AAggregate,NumberConstant
 |+ p -> true  (or true -> true)
-|== *!true with NumberConstant,NumberConstant
+|== *!true with AAggregate,NumberConstant
 Z3 propagation ********************************
