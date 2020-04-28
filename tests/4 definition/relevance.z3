@@ -15,14 +15,13 @@ goal p
 -- theory -----------------------------------
 q1
 
+Or(p, Not(p))
+
 s == r
 
 p == Or(q1, q2)
 
 q1 == r
-
--- goal -----------------------------------
-And(p == Or(q1, q2), q1 == r)
 
 -- subtences ------------------------------------
 q1
@@ -52,7 +51,9 @@ Consequences:
   s
 Simplified:  
   true
+  true
 Irrelevant:  
+  ? q2
   s
 
 
@@ -83,7 +84,7 @@ Irrelevant:
  'q2': {'q2': {'environmental': False,
                'normal': True,
                'reading': 'q2',
-               'relevant': True,
+               'relevant': False,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
  'r': {'r': {'environmental': False,

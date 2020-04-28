@@ -13,9 +13,11 @@ goal Prime
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-And(Prime(1), Prime(2), Prime(3), Not(Prime(4)))
+And(Or(Prime(1), Not(Prime(1))),
+    Or(Prime(2), Not(Prime(2))),
+    Or(Prime(3), Not(Prime(3))),
+    Or(Prime(4), Not(Prime(4))))
 
--- goal -----------------------------------
 And(Prime(1), Prime(2), Prime(3), Not(Prime(4)))
 
 -- subtences ------------------------------------
@@ -47,7 +49,7 @@ Consequences:
   Prime(3)
   ~Prime(4)
 Simplified:  
-  
+  true
 Irrelevant:  
   ? true
   ? false

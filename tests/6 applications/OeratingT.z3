@@ -68,6 +68,8 @@ Or(M == e1, M == e2, M == e3)
 
 Or(M == e1, M == e2, M == e3)
 
+Or(M == e1, M == e2, M == e3)
+
 -- subtences ------------------------------------
 ∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))
 ∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
@@ -140,6 +142,7 @@ Simplified:
   (true)
   (true)
   (true)
+  (M = e1) ∨ (M = e2) ∨ (M = e3)
   (M = e1) ∨ (M = e2) ∨ (M = e3)
   (M = e1) ∨ (M = e2) ∨ (M = e3)
 Irrelevant:  

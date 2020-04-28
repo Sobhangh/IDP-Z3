@@ -61,8 +61,8 @@ class Idp(object):
             self.vocabulary.update(self.decision)
 
         if self.interpretations: self.interpretations.annotate(self.vocabulary)
-        self.theory.annotate(self.vocabulary)
         self.goal.annotate(self)
+        self.theory.annotate(self.vocabulary)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
         log("annotated")
 
@@ -190,7 +190,10 @@ class ConstructedTypeDeclaration(object):
         self.range = self.constructors #TODO constructor functions
 
     def check_bounds(self, var):
-        out = [AComparison.make('=', [var, c], True) for c in self.constructors]
+        if self.name == 'bool':
+            out = [var, AUnary.make('~', var)]
+        else:
+            out = [AComparison.make('=', [var, c], True) for c in self.constructors]
         out = ADisjunction.make('∨', out)
         return out
 
@@ -315,15 +318,20 @@ class SymbolDeclaration(object):
                     expr.normal = True
                     self.instances[expr.code] = expr
 
-        # determine typeConstraint
+        # determine typeConstraints
         if self.out.decl.name != 'bool' and self.range:
-            for inst in self.instances.values():
-                domain = self.type.check_bounds(inst)
-                if domain is not None:
-                    domain.if_symbol = self.name
-                    domain.annotations['reading'] = "Possible values for " + str(inst)
-                    self.typeConstraints.append(domain)
+            self.typeConstraints.extend(self.typeConstraint())
         return self
+
+    def typeConstraint(self, if_symbol=True):
+        out = []
+        for inst in self.instances.values():
+            domain = self.type.check_bounds(inst)
+            if domain is not None:
+                domain.if_symbol = self.name if if_symbol else None
+                domain.annotations['reading'] = "Possible values for " + str(inst)
+                out.append(domain)
+        return out
 
     def translate(self, idp=None):
         if self.translated is None:
@@ -698,6 +706,7 @@ class Goal(object):
         self.name = kwargs.pop('name')
         self.decl = None
         self.justification = None
+        self.constraint = None
 
     def __str__(self):
         return self.name
@@ -705,30 +714,13 @@ class Goal(object):
     def annotate(self, idp):
         if self.name in idp.vocabulary.symbol_decls:
             self.decl = idp.vocabulary.symbol_decls[self.name]
-            if self.name in idp.theory.clark: # defined goal
-                rule = idp.theory.clark[self.name]
-                just = []
-                for args in self.decl.domain:
-                    if self.decl.type.name == 'bool':
-                        instance = rule.instantiate_definition(args, idp.theory)
-                        just.append(instance)
-                        just.extend(instance.justifications())
-                    else:
-                        just1 = []
-                        for out in self.decl.range:
-                            instance = rule.instantiate_definition(args, idp.theory, out)
-                            just1.append(instance)
-                            just.extend(instance.justifications())
-                        just.append(ADisjunction.make('∨', just1))
-                self.justification = AConjunction.make('∧', just)
+            constraint = AConjunction.make('∧', self.decl.typeConstraint(if_symbol=False))
+            idp.theory.constraints.append(constraint)
 
     def subtences(self):
-        return {} if self.justification is None else \
-               self.justification.subtences()
+        return {} 
 
     def translate(self):
-        if self.justification is not None:
-            return self.justification.translate()
         return None
 
 

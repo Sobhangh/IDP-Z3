@@ -21,6 +21,8 @@ view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
+Or(b == red, b == blue)
+
 Or(a == red, a == blue)
 
 Or(b == red, b == blue)
@@ -35,23 +37,16 @@ And((b == red) == (a == red), Not(b == blue))
 
 And(c == red, Not(c == blue))
 
--- goal -----------------------------------
-And(And(a == red, p),
-    p == Or(q, r),
-    Or((b == red) == (a == red), Not(b == blue)))
-
 -- subtences ------------------------------------
-a = red
-a = blue
 b = red
-b = blue
-c = red
-c = blue
+a = red
 p
 q
 r
-true
-false
+b = blue
+a = blue
+c = red
+c = blue
 
 -- GUILines ------------------------------------
 p
@@ -60,14 +55,12 @@ r
 a
 b
 c
-a = red
-a = blue
 b = red
+a = red
 b = blue
+a = blue
 c = red
 c = blue
-true
-false
 
 -- case -------------------------------------
 Type:        
@@ -80,25 +73,25 @@ Definitions:
 Universals:  
   
 Consequences:
-  a = red
-  ~a = blue
   b = red
+  a = red
+  p
   ~b = blue
+  ~a = blue
   c = red
   ~c = blue
-  p
   a -> red
   b -> red
   c -> red
 Simplified:  
   true
   true
+  true
 Irrelevant:  
+  ~b = blue
   ~a = blue
   c = red
   ~c = blue
-  ? true
-  ? false
   c -> red
 
 
@@ -146,13 +139,13 @@ Irrelevant:
        'b = blue': {'environmental': False,
                     'normal': False,
                     'reading': 'b = blue',
-                    'relevant': True,
+                    'relevant': False,
                     'status': 'CONSEQUENCE',
                     'typ': 'Bool',
                     'value': False},
        'b = red': {'environmental': False,
                    'normal': False,
-                   'reading': 'b = red',
+                   'reading': '$b$ = red',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
