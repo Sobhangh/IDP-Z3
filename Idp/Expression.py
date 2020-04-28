@@ -60,24 +60,6 @@ def use_value(function):
         return function(self)
     return _wrapper
 
-def use_value1(function):
-    " decorator for has_environmental(truth) "
-    def _wrapper(*args, **kwds):
-        self = args[0]
-        truth = args[1] if len(args) == 2 else TRUE
-        if self.value   is not None: 
-            return []
-        if self.simpler is not None: 
-            # call the (possibly inherited) 'function' method of simpler's class
-            for cls in self.simpler.__class__.__mro__:
-                if function.__name__ in cls.__dict__:
-                    out = (cls.__dict__[function.__name__])(self.simpler, truth)
-                    return out
-            assert False, "Internal error in Expression.use_value1"
-        out = function(self, truth)
-        return out
-    return _wrapper
-
 class Expression(object):
     COUNT = 0
     def __init__(self):
@@ -174,7 +156,6 @@ class Expression(object):
                 self._reified = self.translate()
         return self._reified
 
-    @use_value1
     def has_environmental(self, truth):
         # returns true if it contains a variable whose environmental property is 'truth
         return any(e.has_environmental(truth) for e in self.sub_exprs)
@@ -636,7 +617,6 @@ class AppliedSymbol(Expression):
                 arg = [x.translate() for x in self.sub_exprs]
                 return (self.decl.translate())(arg)
 
-    @use_value1
     def has_environmental(self, truth):
         return self.decl.environmental == truth \
             or any(e.has_environmental(truth) for e in self.sub_exprs)

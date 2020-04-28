@@ -191,7 +191,7 @@ class Case:
                             if sentence.code in self.assignments:
                                 old_ass = self.assignments[sentence.code]
                                 if old_ass.truth is None:
-                                    if (all_ or not old_ass.sentence.has_environmental(False)):
+                                    if (all_ or not constraint.has_environmental(False)):
                                         new_ass = old_ass.update(sentence, truth, CONSQ, self)
                                         to_propagate.append(new_ass)
                                         new_constraint = new_constraint.substitute(sentence, truth)
@@ -235,7 +235,8 @@ class Case:
             + sum((d.translate(self.idp) for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
                     if l.truth is not None and (all_ or not l.sentence.has_environmental(False))]
-            + [c.translate() for c in self.simplified]
+            + [c.translate() for c in self.simplified
+                    if all_ or not c.has_environmental(False)]
             )
         return self.translated
 
