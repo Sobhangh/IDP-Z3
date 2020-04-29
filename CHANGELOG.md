@@ -11,8 +11,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * add ENV_UNIV for universal environmental atoms
 * add English annotations to symbols in vocabulary
 * fix bug with Fresh_Variable
+* not possible anymore to chain implications
 
 ### GUI
+* improve determination of relevance for theories with definitions
 
 
 ## [0.4.1] - 2020-04-01
