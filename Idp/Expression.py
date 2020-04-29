@@ -531,6 +531,8 @@ class AAggregate(Expression):
         return out
 
     def annotate(self, symbol_decls, q_vars):
+        for v in self.vars:
+            assert v not in symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
         assert len(self.vars) == len(self.sorts), "Internal error"
         self.q_vars = {v:s.fresh(v, symbol_decls) \
                         for v, s in zip(self.vars, self.sorts)}
