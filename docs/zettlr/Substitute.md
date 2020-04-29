@@ -9,7 +9,6 @@ tags: #documentation
 
 ```mermaid
 graph TD
-    expand_quantifiers --> make;
     Annotate --> expand_quantifiers;
     Annotate --> interpret;
     Annotate --> instantiate_definition;
@@ -20,30 +19,28 @@ graph TD
     propagate --> substitute;
     substitute --> update_exprs;
     
+    instantiate_definition --> instantiate;
     expand_quantifiers --> instantiate;
-    expand_quantifiers --> replace_by;
     interpret --> update_exprs;
     expand_quantifiers --> update_exprs;
-    substitute --> replace_by;
-    interpret --> replace_by;
-
-    update_exprs --> replace_by;
+    
+    
+    instantiate_definition --> make;
     update_exprs --> _change;
     update_exprs -.-> make;
+    expand_quantifiers --> make;
     make --> simplify1;
     Annotate --> annotate1;
     make --> annotate1;
     
     expand_quantifiers --> _change;
 
-    instantiate_definition --> instantiate;
     instantiate --> _change;
 		    rename_args --> instantiate;
     instantiate_definition --> interpret;
     Annotate --> make;
-    instantiate_definition --> make;
-    instantiate --> update_exprs;
     simplify1 --> update_exprs;
+    instantiate --> update_exprs;
 
 ```
 

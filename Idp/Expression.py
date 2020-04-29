@@ -437,8 +437,10 @@ class AComparison(BinaryOperator):
         out = []
         for i in range(1, len(self.sub_exprs)):
             x = self.sub_exprs[i-1].translate()
+            assert x is not None
             function = BinaryOperator.MAP[self.operator[i - 1]]
             y = self.sub_exprs[i].translate()
+            assert y is not None
             try:
                 out = out + [function(x, y)]
             except Z3Exception as E:

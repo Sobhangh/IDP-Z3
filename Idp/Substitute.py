@@ -96,6 +96,7 @@ def instantiate(self, e0, e1):
         else:
             out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
             out.code = out.str
+            out.original = out
             if out.just_branch is not None:
                 out._change(just_branch=out.just_branch.instantiate(e0, e1))
         return out
