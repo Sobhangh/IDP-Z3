@@ -13,7 +13,6 @@ vocabulary decision {
     T: int
     M: material
     Guaranteed
-    TempOK
 }
 
 theory {
@@ -23,7 +22,7 @@ theory {
     ).
 
     [T must be within acceptable range]
-    (_MinT(M) =< T =< _MaxT(M) <=> TempOK).
+    (_MinT(M) =< T =< _MaxT(M)).
 
     [A guarantee requires an observation for M]
     (Guaranteed <=> _O(M)).
@@ -34,10 +33,9 @@ theory {
     [Observation for e2]
     (_O(e2) &  OMinT(e2)= 0 &   OMaxT(e2) = 100).
 
-    [Observation for e3]
+    [No observation for e3]
     (~_O(e3)).
     
-    TempOK.
     M=e1 | M=e2 | M=e3.
 }
 
