@@ -43,6 +43,8 @@ And(Not(negated(Piet) == Piet),
 -- subtences ------------------------------------
 same(Piet) = Piet
 negated(Piet) = Jan
+true
+false
 negated(Piet) = Piet
 same(Piet) = Jan
 same(Jan) = Piet
@@ -57,6 +59,8 @@ negated(Piet)
 negated(Jan)
 same(Piet) = Piet
 negated(Piet) = Jan
+true
+false
 negated(Piet) = Piet
 same(Piet) = Jan
 same(Jan) = Piet
@@ -85,9 +89,18 @@ Consequences:
   negated(Piet) -> Jan
   negated(Jan) -> Piet
 Simplified:  
+  true
   same(Piet) = negated(Jan)
+  true
+  true
+  true
+  true
 Irrelevant:  
-  
+  ? true
+  ? false
+  ~same(Piet) = Jan
+  ~same(Jan) = Piet
+  ~negated(Jan) = Jan
 
 
 -- meta -------------------------------------
@@ -108,7 +121,7 @@ Irrelevant:
              'negated(Jan) = Jan': {'environmental': False,
                                     'normal': False,
                                     'reading': 'negated(Jan) = Jan',
-                                    'relevant': True,
+                                    'relevant': False,
                                     'status': 'CONSEQUENCE',
                                     'typ': 'Bool',
                                     'value': False},
@@ -159,7 +172,7 @@ Irrelevant:
           'same(Jan) = Piet': {'environmental': False,
                                'normal': False,
                                'reading': 'same(Jan) = Piet',
-                               'relevant': True,
+                               'relevant': False,
                                'status': 'CONSEQUENCE',
                                'typ': 'Bool',
                                'value': False},
@@ -174,7 +187,7 @@ Irrelevant:
           'same(Piet) = Jan': {'environmental': False,
                                'normal': False,
                                'reading': 'same(Piet) = Jan',
-                               'relevant': True,
+                               'relevant': False,
                                'status': 'CONSEQUENCE',
                                'typ': 'Bool',
                                'value': False},

@@ -550,11 +550,10 @@ class Rule(object):
                     eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
                 self.body = AConjunction.make('∧', [eq, self.body])
             else: #same(f(x))
-                assert False, f"Please use variables only in the head of definitions. {nl}{str(self)}"
-                # eq = AComparison.make('=', [nv, arg])
-                # for v0, v1 in subst.items():
-                #     eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
-                # self.body = AConjunction.make('∧', [eq, self.body])
+                eq = AComparison.make('=', [nv, arg])
+                for v0, v1 in subst.items():
+                    eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
+                self.body = AConjunction.make('∧', [eq, self.body])
 
         # Any leftover ?
         for var in self.vars:

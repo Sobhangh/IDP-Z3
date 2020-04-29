@@ -57,7 +57,7 @@ And(Not(negated(-1) == -1),
 
 -- subtences ------------------------------------
 same(-1) = -1
-negated(-1) = 1
+negated(-1) = (1)
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -68,6 +68,7 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
+negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -83,7 +84,7 @@ negated(-1)
 negated(0)
 negated(1)
 same(-1) = -1
-negated(-1) = 1
+negated(-1) = (1)
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -94,6 +95,7 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
+negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -109,8 +111,9 @@ Definitions:
   Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔$negated$ = (-($negated!0$))
 Universals:  
   same(-1) = -1
+  same(-1) -> -1
 Consequences:
-  negated(-1) = 1
+  negated(-1) = (1)
   ~same(-1) = 0
   ~same(-1) = 1
   ~same(0) = -1
@@ -121,25 +124,40 @@ Consequences:
   same(1) = 1
   ~negated(-1) = -1
   ~negated(-1) = 0
+  negated(-1) = 1
   ~negated(0) = -1
   negated(0) = 0
   ~negated(0) = 1
   negated(1) = -1
   ~negated(1) = 0
   ~negated(1) = 1
-  same(-1) = -1
-  same(0) = 0
-  same(1) = 1
-  negated(-1) = 1
-  negated(0) = 0
-  negated(1) = -1
+  same(0) -> 0
+  same(1) -> 1
+  negated(-1) -> 1
+  negated(0) -> 0
+  negated(1) -> -1
 Simplified:  
-  
+  true
+  negated(1) = -1
+  true
+  true
+  true
+  true
+  true
+  true
 Irrelevant:  
   ~same(-1) = 0
   ~same(-1) = 1
+  ~same(0) = -1
+  ~same(0) = 1
+  ~same(1) = -1
+  ~same(1) = 0
   ~negated(-1) = -1
   ~negated(-1) = 0
+  ~negated(0) = -1
+  ~negated(0) = 1
+  ~negated(1) = 0
+  ~negated(1) = 1
 
 
 -- meta -------------------------------------
@@ -157,6 +175,13 @@ Irrelevant:
                              'typ': 'Int',
                              'value': '1',
                              'values': ['-1', '0', '1']},
+             'negated(-1) = (1)': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'y = (-(x))',
+                                   'relevant': True,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': True},
              'negated(-1) = -1': {'environmental': False,
                                   'normal': False,
                                   'reading': 'negated(-1) = -1',
@@ -189,7 +214,7 @@ Irrelevant:
              'negated(0) = -1': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(0) = -1',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': False},
@@ -203,7 +228,7 @@ Irrelevant:
              'negated(0) = 1': {'environmental': False,
                                 'normal': False,
                                 'reading': 'negated(0) = 1',
-                                'relevant': True,
+                                'relevant': False,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},
@@ -225,14 +250,14 @@ Irrelevant:
              'negated(1) = 0': {'environmental': False,
                                 'normal': False,
                                 'reading': 'negated(1) = 0',
-                                'relevant': True,
+                                'relevant': False,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},
              'negated(1) = 1': {'environmental': False,
                                 'normal': False,
                                 'reading': 'negated(1) = 1',
-                                'relevant': True,
+                                'relevant': False,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False}},
@@ -240,7 +265,7 @@ Irrelevant:
                        'normal': True,
                        'reading': 'same(-1)',
                        'relevant': True,
-                       'status': 'CONSEQUENCE',
+                       'status': 'UNIVERSAL',
                        'typ': 'Int',
                        'value': '-1',
                        'values': ['-1', '0', '1']},
@@ -276,7 +301,7 @@ Irrelevant:
           'same(0) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(0) = -1',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
@@ -290,7 +315,7 @@ Irrelevant:
           'same(0) = 1': {'environmental': False,
                           'normal': False,
                           'reading': 'same(0) = 1',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': False},
@@ -305,14 +330,14 @@ Irrelevant:
           'same(1) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(1) = -1',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
           'same(1) = 0': {'environmental': False,
                           'normal': False,
                           'reading': 'same(1) = 0',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': False},
