@@ -21,7 +21,10 @@ vocabulary {
     [Slider: (Min_Cost, Max_Cost): (0.5, 1)]
     Cost: t_cost
 
+    Min_Shelf_Life: real
+    Max_Shelf_Life: real
     EShelf_Life(t_epoxy): t_shelf_life
+    [Slider: (Min_Shelf_Life, Max_Shelf_Life): (0, 15)]
     Shelf_Life: t_shelf_life
 
     ELowest_Storage_T(t_epoxy): t_lowest_storage_t
@@ -29,8 +32,6 @@ vocabulary {
     Lowest_Storage_T: t_lowest_storage_t
     Highest_Storage_T: t_highest_storage_t 
     
-    Min_Shelf_Life: real
-    Max_Shelf_Life: real
     Min_Storage_T: real
     Max_Storage_T: real
     Min_Specific_Gravity_Resin: real
@@ -70,4 +71,3 @@ structure {
 }
 
 
-view expanded
