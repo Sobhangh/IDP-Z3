@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
 
-## [Unreleased]
+
+## [0.5.0] - 2020-04-29
 
 ### API
 * add ENV_UNIV for universal environmental atoms
