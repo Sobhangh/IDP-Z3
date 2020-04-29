@@ -415,7 +415,7 @@ def update_exprs(self, new_expr_generator):
         out = NumberConstant(number=str(acc))
         return self._change(value=out, sub_exprs=operands)
 
-    return self
+    return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
 
 
@@ -433,7 +433,7 @@ def interpret(self, theory):
         self.just_branch = theory.clark[self.name].instantiate_definition(sub_exprs, theory)
         out = self
     else:
-        out = self
+        out = self._change(sub_exprs=sub_exprs)
     out.original = self
     return out
 AppliedSymbol.interpret = interpret

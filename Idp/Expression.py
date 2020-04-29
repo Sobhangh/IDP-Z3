@@ -617,6 +617,7 @@ class AppliedSymbol(Expression):
                 return self.decl.translated
             else:
                 arg = [x.translate() for x in self.sub_exprs]
+                #assert  all(a != None for a in arg)
                 return (self.decl.translate())(arg)
 
     def has_environmental(self, truth):

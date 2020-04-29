@@ -15,7 +15,6 @@ vocabulary decision {
     T: int
     M: material
     Guaranteed
-    TempOK
 }
 
 theory {
@@ -25,7 +24,7 @@ theory {
     ).
 
     [T must be within acceptable range]
-    (_MinT(M) =< T =< _MaxT(M) <=> TempOK).
+    (_MinT(M) =< T =< _MaxT(M)).
 
     [A guarantee requires an observation for M]
     (Guaranteed <=> _O(M)).
@@ -36,10 +35,9 @@ theory {
     [Observation for e2]
     (_O(e2) &  OMinT(e2)= 0 &   OMaxT(e2) = 100).
 
-    [Observation for e3]
+    [No observation for e3]
     (~_O(e3)).
     
-    TempOK.
     M=e1 | M=e2 | M=e3.
 }
 
@@ -55,7 +53,7 @@ And(And(Or(Not(_O(e1)), OMinT(e1) == _MinT(e1)),
         Or(Not(_O(e2)), OMaxT(e2) == _MaxT(e2)),
         Or(Not(_O(e3)), OMaxT(e3) == _MaxT(e3))))
 
-And(_MinT(M) <= T, T <= _MaxT(M)) == TempOK
+And(_MinT(M) <= T, T <= _MaxT(M))
 
 Guaranteed == _O(M)
 
@@ -64,8 +62,6 @@ And(_O(e1), OMinT(e1) == 0, OMaxT(e1) == 20)
 And(_O(e2), OMinT(e2) == 0, OMaxT(e2) == 100)
 
 Not(_O(e3))
-
-TempOK
 
 Or(M == e1, M == e2, M == e3)
 
@@ -77,7 +73,6 @@ Or(M == e1, M == e2, M == e3)
 ∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))
 ∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
 _MinT(M) ≤ T ≤ _MaxT(M)
-TempOK
 Guaranteed
 _O(M)
 _O(e1)
@@ -101,7 +96,6 @@ OMaxT(e3)
 T
 M
 Guaranteed
-TempOK
 ∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))
 ∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
 _MinT(M) ≤ T ≤ _MaxT(M)
@@ -125,7 +119,7 @@ Definitions:
 Universals:  
   ∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))
   ∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
-  TempOK
+  _MinT(M) ≤ T ≤ _MaxT(M)
   _O(e1)
   OMinT(e1) = 0
   OMaxT(e1) = 20
@@ -138,7 +132,7 @@ Universals:
   OMinT(e2) -> 0
   OMaxT(e2) -> 100
 Consequences:
-  _MinT(M) ≤ T ≤ _MaxT(M)
+  
 Simplified:  
   (true)
   (true)
@@ -146,7 +140,6 @@ Simplified:
   (true)
   (true)
   (true)
-  true
   (M = e1) ∨ (M = e2) ∨ (M = e3)
   (M = e1) ∨ (M = e2) ∨ (M = e3)
   (M = e1) ∨ (M = e2) ∨ (M = e3)
@@ -163,11 +156,6 @@ Irrelevant:
              {'idpname': 'T', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
              {'idpname': 'M', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
              {'idpname': 'Guaranteed',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'proposition',
-              'view': 'expanded'},
-             {'idpname': 'TempOK',
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
@@ -210,9 +198,9 @@ Irrelevant:
                   'typ': 'Bool'},
        '_MinT(M) ≤ T ≤ _MaxT(M)': {'environmental': True,
                                    'normal': False,
-                                   'reading': '_MinT(M) ≤ T ≤ _MaxT(M)',
+                                   'reading': 'T must be within acceptable range',
                                    'relevant': True,
-                                   'status': 'CONSEQUENCE',
+                                   'status': 'UNIVERSAL',
                                    'typ': 'Bool',
                                    'value': True},
        '_O(M)': {'environmental': True,
@@ -312,13 +300,6 @@ Irrelevant:
              'status': 'UNKNOWN',
              'typ': 'Int',
              'value': ''}},
- 'TempOK': {'TempOK': {'environmental': False,
-                       'normal': True,
-                       'reading': 'TempOK',
-                       'relevant': True,
-                       'status': 'UNIVERSAL',
-                       'typ': 'Bool',
-                       'value': True}},
  '_MaxT': {},
  '_MinT': {},
  '_O': {}}
