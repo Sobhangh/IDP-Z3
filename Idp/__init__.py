@@ -106,15 +106,16 @@ class Annotations(object):
             if len(p) == 2:
                 if ':' not in p[1]:
                     return (p[0], p[1])
-                else:  # In this case we have a Slider.
-                    print(p[1])
+                else:
+                    # In this case we have a Slider.
+                    # The format of p[1] is as follows:
+                    # (lower_sym, upper_sym): (lower_bound, upper_bound)
                     pat = r"\(((.*?), (.*?))\)"
                     arg = re.findall(pat, p[1])
-                    l_symb = arg[0][1]
-                    u_symb = arg[0][2]
+                    l_symb = arg[0][1].lstrip("_")
+                    u_symb = arg[0][2].lstrip("_")
                     l_bound = arg[1][1]
                     u_bound = arg[1][2]
-                    print("MATCH:", l_symb, u_symb, l_bound, u_bound)
                     slider_arg = {'lower_symbol': l_symb,
                                   'upper_symbol': u_symb,
                                   'lower_bound': l_bound,
