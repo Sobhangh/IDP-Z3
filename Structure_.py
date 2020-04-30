@@ -264,8 +264,9 @@ class Structure_(object):
             key = atom.code
             if type(atomZ3) != bool:
                 typ = atomZ3.sort().name()
+                print("AAAAAAAAAAAAAAAAAAA", atom.unknown_symbols())
                 for symb in atom.unknown_symbols().values():
-                    if not symb.name.startswith('_'):
+                    if not symb.name.startswith('_') or True:
                         s = self.m.setdefault(symb.name, {})
 
                         if typ == 'Bool':
@@ -309,7 +310,8 @@ class Structure_(object):
             key = atom.variable.code
             typ = symbol.sort().name()
             for name, symb in atom.unknown_symbols().items():
-                if not symb.name.startswith('_'):
+                if not symb.name.startswith('_') or True:
+                    print(symb)
                     s = self.m.setdefault(name, {})
                     if key in s:
                         if typ in ["Real", "Int"]:

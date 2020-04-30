@@ -112,14 +112,15 @@ class Annotations(object):
                     # (lower_sym, upper_sym): (lower_bound, upper_bound)
                     pat = r"\(((.*?), (.*?))\)"
                     arg = re.findall(pat, p[1])
-                    l_symb = arg[0][1].lstrip("_")
-                    u_symb = arg[0][2].lstrip("_")
+                    l_symb = arg[0][1]
+                    u_symb = arg[0][2]
                     l_bound = arg[1][1]
                     u_bound = arg[1][2]
                     slider_arg = {'lower_symbol': l_symb,
                                   'upper_symbol': u_symb,
                                   'lower_bound': l_bound,
                                   'upper_bound': u_bound}
+                    print("AAA", l_symb)
                     return(p[0], slider_arg)
             else:
                 return ('reading', p[0])
@@ -317,7 +318,7 @@ class SymbolDeclaration(object):
 
         # create instances
         self.instances = {}
-        if vocabulary and not self.name.startswith('_'):
+        if vocabulary:   # and not self.name.startswith('_'):
             if len(self.sorts) == 0:
                 expr = Variable(name=self.name)
                 expr.annotate(symbol_decls, {})
