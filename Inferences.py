@@ -51,7 +51,6 @@ def metaJSON(idp):
             "view": "expanded" if i.name == str(idp.goal) else idp.view.viewType
         }
         if i.annotations is not None:
-            print(i.annotations.annotations)
             if 'reading' in i.annotations.annotations:
                 d['guiname'] = i.annotations['reading']
             if 'short' in i.annotations.annotations:
@@ -67,7 +66,6 @@ def metaJSON(idp):
 
 
 def propagation(case):
-     
     out = Structure_(case)
     out.fill(case)
 

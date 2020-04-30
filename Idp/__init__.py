@@ -120,7 +120,6 @@ class Annotations(object):
                                   'upper_symbol': u_symb,
                                   'lower_bound': l_bound,
                                   'upper_bound': u_bound}
-                    print("AAA", l_symb)
                     return(p[0], slider_arg)
             else:
                 return ('reading', p[0])
@@ -276,9 +275,6 @@ class RangeDeclaration(object):
 class SymbolDeclaration(object):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
-        if self.annotations is not None:
-            print("SelfAnna:")
-            print(self.annotations)
         self.name = sys.intern(kwargs.pop('name').name) # a string, not a Symbol
         print("Symb:", self.name)
         self.sorts = kwargs.pop('sorts')

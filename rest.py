@@ -82,12 +82,10 @@ def caseOf(code):
     :returns Idp: the Idp object.
     """
     global idps
-    print("IDPS", idps)
     if code in idps:
         return idps[code]
     else:
         idp = idpparser.model_from_str(code)
-        print("IDP", idp)
         if 20 < len(idps):
             # remove oldest entry, to prevent memory overflow
             idps = {k: v for k, v in list(idps.items())[1:]}
