@@ -1,5 +1,8 @@
-TODO
-=
+–-
+title: TODO
+tags: 
+   ID: TODO
+–-
 - [ ] Aanbesteding demo
 - [ ] [[AWS hosting]] [[20200401113342]] 
 
@@ -50,6 +53,13 @@ TODO
         - show goal to the right of abstract models
         - join 2 disjuncts that differ only by the sign of one atom
 
+#### Performance
+- [ ] batch substitute in Case.init
+- [ ] replace function decorator by Expression methods
+- [ ] Expr.symbols for each constraint → do not substitute if no symbols
+- [ ] use sets to avoid duplicates (e.g. constraints)
+- [ ] use weakref to share justifications
+- [ ] #Perf
 
 #### other NTH (refactoring)
 - [ ] remove Assignment.__hash__, .__eq__
@@ -58,7 +68,6 @@ TODO
 - [ ] simplify the generation of Structure_
 
 - [ ] move consequences into case.simplified ?
-- [ ] batch substitute in Case.init
 - [ ] sort the operands of equality
 - [ ] AppliedSymbol is_subtence only if no Fresh_Variable !
 - [ ] Expr.sentence -> Expr.ranking ?

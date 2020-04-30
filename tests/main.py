@@ -26,18 +26,18 @@ def log(function):
         e0   = args[1]
         e1   = args[2]
         Log( f"{nl}|------------"
-             f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
+             f"{nl}|{'*' if self.is_subtence else ''}{self.str}"
              f"{' with '+','.join(e.__class__.__name__ for e in self.sub_exprs) if self.sub_exprs else ''}"
-             f"{f' just {str(self.just_branch)}' if self.just_branch else ''}"
-             f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
+             f"{f' just {self.just_branch.str}' if self.just_branch else ''}"
+             f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {e0.str} -> {e1.str})' if e0.code!=e0.str or e1.code!=e1.str else ''}"
              , indent)
         indent +=4
         out = function(*args, *kwds)
         indent -=4
         Log( f"{nl}|== {'*' if out.is_subtence else ''}"
-             f"{'!'+str(out.value) if out.value is not None else '!!'+str(out.simpler) if out.simpler is not None else str(out)}"
+             f"{'!'+out.value.str if out.value is not None else '!!'+out.simpler.str if out.simpler is not None else out.str}"
              f"{' with '+','.join(e.__class__.__name__ for e in out.sub_exprs) if out.sub_exprs else ''}"
-             f"{f' just {str(out.just_branch)}' if out.just_branch else ''}"
+             f"{f' just {out.just_branch.str}' if out.just_branch else ''}"
           , indent )
         return out    
     return _wrapper
@@ -96,4 +96,9 @@ for file in files:
 
     f.close()
     print("----------------")
-print("*** Total: ", round(time.time()-start,3))
+
+total = round(time.process_time()-start,3)
+print("*** Total: ", total)
+f = open(os.path.join(dir, "duration.txt"), "w")
+f.write(str(total))
+f.close()

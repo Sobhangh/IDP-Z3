@@ -99,12 +99,7 @@ class Expression(object):
         if other.value   is not None: return self == other.value
         if other.simpler is not None: return self == other.simpler
 
-        # beware: this does not ignore meaningless brackets deeper in the tree
-        if self.str == other.str:
-            if type(self)==type(other):
-                return True
-            return False
-        return False
+        return self.str == other.str and type(self)==type(other)
 
     def __repr__(self): return str(self)
     
@@ -207,9 +202,9 @@ class IfExpr(Expression):
         
     @use_value
     def __str__(self):
-        return ( f" if   {str(self.sub_exprs[IfExpr.IF  ])}"
-                 f" then {str(self.sub_exprs[IfExpr.THEN])}"
-                 f" else {str(self.sub_exprs[IfExpr.ELSE])}" )
+        return ( f" if   {self.sub_exprs[IfExpr.IF  ].str}"
+                 f" then {self.sub_exprs[IfExpr.THEN].str}"
+                 f" else {self.sub_exprs[IfExpr.ELSE].str}" )
 
     def annotate1(self):
         self.type = self.sub_exprs[IfExpr.THEN].type
@@ -248,7 +243,7 @@ class AQuantification(Expression):
     def __str__(self):
         assert len(self.vars) == len(self.sorts), "Internal error"
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-        return f"{self.q}{vars} : {str(self.sub_exprs[0])}"
+        return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
     def annotate(self, symbol_decls, q_vars):
         for v in self.vars:
@@ -346,9 +341,9 @@ class BinaryOperator(Expression):
         def parenthesis(x):
             # add () around operands, to avoid ambiguity in str()
             if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
-                return f"({str(x)})"
+                return f"({x.str})"
             else:
-                return f"{str(x)}"
+                return f"{x.str}"
         temp = parenthesis(self.sub_exprs[0])
         for i in range(1, len(self.sub_exprs)):
             temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
@@ -480,7 +475,7 @@ class AUnary(Expression):
 
     @use_value
     def __str__(self):
-        return f"{self.operator}({str(self.sub_exprs[0])})"
+        return f"{self.operator}({self.sub_exprs[0].str})"
 
     def annotate1(self):
         self.type = self.sub_exprs[0].type
@@ -518,14 +513,14 @@ class AAggregate(Expression):
         if self.vars is not None:
             assert len(self.vars) == len(self.sorts), "Internal error"
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-            output = f" : {str(self.sub_exprs[AAggregate.OUT])}" if self.out else ""
+            output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = ( f"{self.aggtype}{{{vars} : "
-                    f"{str(self.sub_exprs[AAggregate.CONDITION])}"
+                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
                     f"{output}}}"
                 )
         else:
             out = ( f"{self.aggtype}{{"
-                    f"{','.join(str(e) for e in self.sub_exprs)}"
+                    f"{','.join(e.str for e in self.sub_exprs)}"
                     f"}}"
             )
         return out
@@ -579,9 +574,9 @@ class AppliedSymbol(Expression):
     @use_value
     def __str__(self):
         if len(self.sub_exprs) == 0:
-            return str(self.s)
+            return self.s.str
         else:
-            return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
+            return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
 
     def annotate(self, symbol_decls, q_vars):
         self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
@@ -748,7 +743,7 @@ class Brackets(Expression):
         self.simpler = self.sub_exprs[0]
 
     # don't @use_value, to have parenthesis
-    def __str__(self): return f"({str(self.sub_exprs[0])})"
+    def __str__(self): return f"({self.sub_exprs[0].str})"
 
     def as_ground(self): 
         return self.sub_exprs[0].as_ground()
