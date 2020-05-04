@@ -275,7 +275,7 @@ Or(Not(Registration_Type == Family_Dwelling),
        Or(First_Ownership, Causal_Connection),
        Or(Not(Energy_Renovation_Planned),
           Not(Term_Energy_Renovation ==
-              5 + Certification_Date))))
+              Certification_Date + 5))))
 
 Or(Not(Registration_Type == Social_Dwelling),
    And(Buyer == Natural_Person,
@@ -292,13 +292,13 @@ Or(Not(Registration_Type == Energy_Efficient_Dwelling),
        Clean_Purchase,
        Or(First_Ownership, Causal_Connection),
        Energy_Renovation_Planned,
-       Term_Energy_Renovation == 5 + Certification_Date))
+       Term_Energy_Renovation == Certification_Date + 5))
 
 Or(Not(Registration_Type == Dwelling_For_Social_Renting),
    And(Type_Of_Real_Estate == Residential,
        Use == Social_Renting,
        Start_Dt_Dwelling_For_Social_Rent ==
-       3 + Certification_Date,
+       Certification_Date + 3,
        Duration_Of_Agreement == Less_Than_9_years))
 
 Or(Not(Registration_Type == Heritage),
@@ -313,7 +313,7 @@ Or(Not(Registration_Type == Professional_Purchase),
    And(Professional_Buyer,
        Not(Transaction_Type == Public_Sale),
        Use == For_Resale,
-       Certification_Date_Sale == 8 + Certification_Date))
+       Certification_Date_Sale == Certification_Date + 8))
 
 Or(Not(Registration_Type == Social_Purpose),
    And(Or(Seller == Mpy_Erkend_Door_VMSW,
@@ -866,12 +866,12 @@ Simplified:
   (Tax = 7) ⇒ (((Registration_Type = Family_Dwelling) ∨ (Registration_Type = Dwelling_For_Social_Renting)) ∧ (Region = Flemish_Region))
   (Tax = 10) ⇒ ((Region = Flemish_Region) ∧ (Registration_Type = Other))
   ((Tax = 12) ⇒ ((Region = Brussels_Region) ∨ (Region = Walloon_Region)))
-  (Registration_Type = Family_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ ((~(Energy_Renovation_Planned)) ∨ (~(Term_Energy_Renovation = (5 + Certification_Date)))))
+  (Registration_Type = Family_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ ((~(Energy_Renovation_Planned)) ∨ (~(Term_Energy_Renovation = (Certification_Date + 5)))))
   (Registration_Type = Social_Dwelling) ⇒ ((Buyer = Natural_Person) ∧ (Type_Of_Real_Estate = Residential) ∧ (Use = Social_Housing) ∧ ((Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen) ∨ (Seller = ErkendeSocialeHuisvestingsMpy)) ∧ Mortgage_Loan_Allowance)
-  (Registration_Type = Energy_Efficient_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ (Term_Energy_Renovation = (5 + Certification_Date)))
-  (Registration_Type = Dwelling_For_Social_Renting) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Use = Social_Renting) ∧ (Start_Dt_Dwelling_For_Social_Rent = (3 + Certification_Date)) ∧ (Duration_Of_Agreement = Less_Than_9_years))
+  (Registration_Type = Energy_Efficient_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ (Term_Energy_Renovation = (Certification_Date + 5)))
+  (Registration_Type = Dwelling_For_Social_Renting) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Use = Social_Renting) ∧ (Start_Dt_Dwelling_For_Social_Rent = (Certification_Date + 3)) ∧ (Duration_Of_Agreement = Less_Than_9_years))
   ((Registration_Type = Heritage) ⇒ ((Type_Of_Real_Estate = Residential) ∧ Monument ∧ (Use = As_Family_Dwelling) ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms))
-  (Registration_Type = Professional_Purchase) ⇒ (Professional_Buyer ∧ (~(Transaction_Type = Public_Sale)) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (8 + Certification_Date)))
+  (Registration_Type = Professional_Purchase) ⇒ (Professional_Buyer ∧ (~(Transaction_Type = Public_Sale)) ∧ (Use = For_Resale) ∧ (Certification_Date_Sale = (Certification_Date + 8)))
   ((Registration_Type = Social_Purpose) ⇒ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
   (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
   (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (~(Registration_Type = Professional_Purchase)) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))

@@ -2,14 +2,50 @@
 |------------
 |1 with Constructor,NumberConstant,NumberConstant
 |+ c -> red
+    |------------
+    |true
+    |+ c -> red
+    |== true
+    |------------
+    |1
+    |+ c -> red
+    |== 1
+    |------------
+    |0
+    |+ c -> red
+    |== 0
 |== !1 with Constructor,NumberConstant,NumberConstant
 |------------
 |1 with Constructor,NumberConstant,NumberConstant
 |+ c -> blue
+    |------------
+    |true
+    |+ c -> blue
+    |== true
+    |------------
+    |1
+    |+ c -> blue
+    |== 1
+    |------------
+    |0
+    |+ c -> blue
+    |== 0
 |== !1 with Constructor,NumberConstant,NumberConstant
 |------------
 |1 with Constructor,NumberConstant,NumberConstant
 |+ c -> green
+    |------------
+    |true
+    |+ c -> green
+    |== true
+    |------------
+    |1
+    |+ c -> green
+    |== 1
+    |------------
+    |0
+    |+ c -> green
+    |== 0
 |== !1 with Constructor,NumberConstant,NumberConstant
 |------------
 |p with Variable,AComparison
@@ -21,6 +57,62 @@
     |------------
     |*true with AAggregate,NumberConstant
     |+ p -> true
+        |------------
+        |3 with IfExpr,IfExpr,IfExpr
+        |+ p -> true
+            |------------
+            |1 with Constructor,NumberConstant,NumberConstant
+            |+ p -> true
+                |------------
+                |true
+                |+ p -> true
+                |== true
+                |------------
+                |1
+                |+ p -> true
+                |== 1
+                |------------
+                |0
+                |+ p -> true
+                |== 0
+            |== !1 with Constructor,NumberConstant,NumberConstant
+            |------------
+            |1 with Constructor,NumberConstant,NumberConstant
+            |+ p -> true
+                |------------
+                |true
+                |+ p -> true
+                |== true
+                |------------
+                |1
+                |+ p -> true
+                |== 1
+                |------------
+                |0
+                |+ p -> true
+                |== 0
+            |== !1 with Constructor,NumberConstant,NumberConstant
+            |------------
+            |1 with Constructor,NumberConstant,NumberConstant
+            |+ p -> true
+                |------------
+                |true
+                |+ p -> true
+                |== true
+                |------------
+                |1
+                |+ p -> true
+                |== 1
+                |------------
+                |0
+                |+ p -> true
+                |== 0
+            |== !1 with Constructor,NumberConstant,NumberConstant
+        |== !3 with IfExpr,IfExpr,IfExpr
+        |------------
+        |3
+        |+ p -> true
+        |== 3
     |== *!true with AAggregate,NumberConstant
 |== !true with Variable,AComparison
 |------------
@@ -30,5 +122,61 @@
 |------------
 |*true with AAggregate,NumberConstant
 |+ p -> true  (or true -> true)
+    |------------
+    |3 with IfExpr,IfExpr,IfExpr
+    |+ p -> true  (or true -> true)
+        |------------
+        |1 with Constructor,NumberConstant,NumberConstant
+        |+ p -> true  (or true -> true)
+            |------------
+            |true
+            |+ p -> true  (or true -> true)
+            |== true
+            |------------
+            |1
+            |+ p -> true  (or true -> true)
+            |== 1
+            |------------
+            |0
+            |+ p -> true  (or true -> true)
+            |== 0
+        |== !1 with Constructor,NumberConstant,NumberConstant
+        |------------
+        |1 with Constructor,NumberConstant,NumberConstant
+        |+ p -> true  (or true -> true)
+            |------------
+            |true
+            |+ p -> true  (or true -> true)
+            |== true
+            |------------
+            |1
+            |+ p -> true  (or true -> true)
+            |== 1
+            |------------
+            |0
+            |+ p -> true  (or true -> true)
+            |== 0
+        |== !1 with Constructor,NumberConstant,NumberConstant
+        |------------
+        |1 with Constructor,NumberConstant,NumberConstant
+        |+ p -> true  (or true -> true)
+            |------------
+            |true
+            |+ p -> true  (or true -> true)
+            |== true
+            |------------
+            |1
+            |+ p -> true  (or true -> true)
+            |== 1
+            |------------
+            |0
+            |+ p -> true  (or true -> true)
+            |== 0
+        |== !1 with Constructor,NumberConstant,NumberConstant
+    |== !3 with IfExpr,IfExpr,IfExpr
+    |------------
+    |3
+    |+ p -> true  (or true -> true)
+    |== 3
 |== *!true with AAggregate,NumberConstant
 Z3 propagation ********************************

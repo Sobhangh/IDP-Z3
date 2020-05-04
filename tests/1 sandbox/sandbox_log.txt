@@ -35,6 +35,23 @@ Z3 propagation ********************************
     |------------
     |false with Variable
     |+ q -> true
+        |------------
+        |*true just true
+        |+ q -> true
+ definition:
+            |------------
+            |true with Variable,Constructor
+            |+ q -> true
+                |------------
+                |*true
+                |+ q -> true
+                |== *!true
+                |------------
+                |true
+                |+ q -> true
+                |== true
+            |== !true with Variable,Constructor
+        |== *!true just true
     |== !false with Variable
     |------------
     |*q
@@ -52,6 +69,31 @@ Z3 propagation ********************************
 |------------
 |true with AUnary,Variable
 |+ q -> true  (or true -> true)
+    |------------
+    |false with Variable
+    |+ q -> true  (or true -> true)
+        |------------
+        |*true just true
+        |+ q -> true  (or true -> true)
+ definition:
+            |------------
+            |true with Variable,Constructor
+            |+ q -> true  (or true -> true)
+                |------------
+                |*true
+                |+ q -> true  (or true -> true)
+                |== *!true
+                |------------
+                |true
+                |+ q -> true  (or true -> true)
+                |== true
+            |== !true with Variable,Constructor
+        |== *!true just true
+    |== !false with Variable
+    |------------
+    |*true
+    |+ q -> true  (or true -> true)
+    |== *!true
 |== !true with AUnary,Variable
 |------------
 |*true

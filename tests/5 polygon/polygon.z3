@@ -188,7 +188,7 @@ True
 Perimeter == 10
 
 Angle(1) + Angle(2) + Angle(3) + Angle(4) ==
-ToReal(180*(-2 + Sides))
+ToReal((Sides - 2)*180)
 
 True
 

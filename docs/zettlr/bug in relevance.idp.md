@@ -36,12 +36,13 @@ goal p
 
 Root cause:
 * after p is set to True, Expression.substitute stops because (p∨~p) has value True 
+* update_arith replaces Base * Base by Number(16) → no Base symbols anymore
 
 It works if the last constraint is `l. p.` instead.
 
 Option:
-- [ ] remove `if self.value is not None: return self` in Expr.substitute (and AppliedSymbol.substitute)
-    - but square.z3 says `16=Base\*Base` becomes irrelevant (because of simplification of Implication)
+- [x] remove `if self.value is not None: return self` in Expr.substitute (and AppliedSymbol.substitute)
+    - but square.z3 says `16=Base\*Base` becomes irrelevant (arithmetic is simplified)
     - performance hit: + 25 % 
 X only substitute the ground (non-defined) facts ?  (here, substitute l, not p)  Hard to do ! Not always equivalent
 X  substitute in all tree, then simplify in second step ?  Only for performance purposes.  Batch substitute is preferred.

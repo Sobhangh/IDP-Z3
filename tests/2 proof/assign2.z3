@@ -14,7 +14,7 @@ view expanded
 -- theory -----------------------------------
 x == 0
 
-Or(Not(1 + x == 1), 1 + x == 1)
+Or(Not(x + 1 == 1), x + 1 == 1)
 
 -- subtences ------------------------------------
 x = 0
@@ -40,7 +40,6 @@ Simplified:
   true
   true
 Irrelevant:  
-  (x + 1) = 1
   ? y
 
 
@@ -53,7 +52,7 @@ Irrelevant:
  'x': {'(x + 1) = 1': {'environmental': False,
                        'normal': False,
                        'reading': '(x + 1) = 1',
-                       'relevant': False,
+                       'relevant': True,
                        'status': 'CONSEQUENCE',
                        'typ': 'Bool',
                        'value': True},

@@ -42,18 +42,70 @@
 |------------
 |*true with Variable,NumberConstant
 |+ x -> 0
+    |------------
+    |x
+    |+ x -> 0
+    |== !0
+    |------------
+    |0
+    |+ x -> 0  (or 0 -> 0)
+    |== 0
 |== *!true with Variable,NumberConstant
 |------------
 |true with AUnary,Brackets
-|+ x -> 0
+|+ x -> 0  (or 0 -> 0)
+    |------------
+    |false with Brackets
+    |+ x -> 0  (or 0 -> 0)
+        |------------
+        |(true) with AComparison
+        |+ x -> 0  (or 0 -> 0)
+            |------------
+            |*true with Variable,NumberConstant
+            |+ x -> 0  (or 0 -> 0)
+                |------------
+                |x
+                |+ x -> 0  (or 0 -> 0)
+                |== !0
+                |------------
+                |0
+                |+ x -> 0  (or 0 -> 0)
+                |== 0
+            |== *!true with Variable,NumberConstant
+        |== !true with AComparison
+    |== !false with Brackets
+    |------------
+    |(true) with AComparison
+    |+ x -> 0  (or 0 -> 0)
+        |------------
+        |*true with Variable,NumberConstant
+        |+ x -> 0  (or 0 -> 0)
+            |------------
+            |x
+            |+ x -> 0  (or 0 -> 0)
+            |== !0
+            |------------
+            |0
+            |+ x -> 0  (or 0 -> 0)
+            |== 0
+        |== *!true with Variable,NumberConstant
+    |== !true with AComparison
 |== !true with AUnary,Brackets
 |------------
 |*true with Variable,NumberConstant
-|+ x -> 0
+|+ x -> 0  (or 0 -> 0)
+    |------------
+    |0
+    |+ x -> 0  (or 0 -> 0)
+    |== !0
+    |------------
+    |0
+    |+ x -> 0  (or 0 -> 0)
+    |== 0
 |== *!true with Variable,NumberConstant
 |------------
-|x
-|+ x -> 0
+|0
+|+ x -> 0  (or 0 -> 0)
 |== !0
 |------------
 |y

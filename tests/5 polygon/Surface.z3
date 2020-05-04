@@ -189,7 +189,7 @@ Or(Not(Type == triangle),
 Perimeter == Length(1) + Length(2) + Length(3) + Length(4)
 
 Angle(1) + Angle(2) + Angle(3) + Angle(4) ==
-ToReal(180*(-2 + Sides))
+ToReal((Sides - 2)*180)
 
 And(Length(1) >= 0,
     Length(2) >= 0,

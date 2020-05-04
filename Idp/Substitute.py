@@ -75,9 +75,7 @@ def Expression_substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
     # similar code in AppliedSymbol !
-    if self.value is not None:
-        return self
-    elif self.code == e0.code:
+    if self.code == e0.code:
         return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
@@ -282,47 +280,21 @@ AComparison.update_exprs = update_exprs
 #############################################################
 
 def update_arith(self, family, new_expr_generator):
-    new_expr_generator = iter(new_expr_generator)
-    # accumulate numbers in acc
-    if self.type == 'int':
-        acc = 0 if family == '+' else 1
-    else:
-        acc = 0.0 if family == '+' else 1.0
-    ops, exprs = [], []
-    def add(op, expr):
-        nonlocal acc, ops, exprs
-        expr1 = expr.as_ground()
-        if expr1 is not None:
-            if op == '+':
-                acc += expr1.translate()
-            elif op == '-':
-                acc -= expr1.translate()
-            elif op == '*':
-                acc *= expr1.translate()
-            elif op == '/':
-                if isinstance(acc, int) and expr.type == 'int': # integer division
-                    acc //= expr1.translate()
-                else:
-                    acc /= expr1.translate()
-        else:
-            ops.append(op)
-            exprs.append(expr)
-
     operands = list(new_expr_generator)
-    assert len([family] + self.operator) == len(operands), "Internal error"
-    for op, expr in zip([family] + self.operator, operands):
-        if family == '*' and acc == 0:
-            return self._change(value=ZERO, sub_exprs=[expr])
-        add(op, expr)
+    operands1 = [e.as_ground() for e in operands]
+    if all(e is not None for e in operands1):
+        out = operands1[0].translate()
 
-    # analyse results
-    if 0 < len(exprs) and ((ops[0] == '+' and acc == 0) or (ops[0] == '*' and acc == 1)):
-        del ops[0]
-    else:
-        exprs = [NumberConstant(number=str(acc))] + exprs
-    if len(exprs)==1:
-        return self._change(simpler=exprs[0], sub_exprs=exprs, ops=ops)
-    return self._change(sub_exprs=exprs, ops=ops)
+        for e, op in zip(operands1[1:], self.operator):
+            function = BinaryOperator.MAP[op]
+            
+            if op=='/' and self.type == 'int': # integer division
+                out //= e.translate()
+            else:
+                out = function(out, e.translate())
+        value = NumberConstant(number=str(out))
+        return self._change(value=value, sub_exprs=operands)
+    return self._change(sub_exprs=operands)
 
 
 
@@ -460,8 +432,6 @@ def substitute(self, e0, e1, todo=None):
         if todo is not None:
             todo.extend(new_branch.implicants())
             
-    if self.value is not None:
-        return self._change(just_branch=new_branch)
     if self.code == e0.code:
         return self._change(value=e1, just_branch=new_branch)
     else:
