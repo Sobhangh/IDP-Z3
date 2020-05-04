@@ -70,8 +70,8 @@ Or(M == e1, M == e2, M == e3)
 Or(M == e1, M == e2, M == e3)
 
 -- subtences ------------------------------------
-∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))
-∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
+∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)
+∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)
 _MinT(M) ≤ T ≤ _MaxT(M)
 Guaranteed
 _O(M)
@@ -96,8 +96,8 @@ OMaxT(e3)
 T
 M
 Guaranteed
-∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))
-∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
+∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)
+∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)
 _MinT(M) ≤ T ≤ _MaxT(M)
 _O(M)
 _O(e1)
@@ -117,8 +117,8 @@ Type:
 Definitions: 
   
 Universals:  
-  ∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))
-  ∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))
+  ∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)
+  ∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)
   _MinT(M) ≤ T ≤ _MaxT(M)
   _O(e1)
   OMinT(e1) = 0
@@ -140,9 +140,9 @@ Simplified:
   (true)
   (true)
   (true)
-  (M = e1) ∨ (M = e2) ∨ (M = e3)
-  (M = e1) ∨ (M = e2) ∨ (M = e3)
-  (M = e1) ∨ (M = e2) ∨ (M = e3)
+  M = e1 ∨ M = e2 ∨ M = e3
+  M = e1 ∨ M = e2 ∨ M = e3
+  M = e1 ∨ M = e2 ∨ M = e3
 Irrelevant:  
   
 
@@ -244,13 +244,13 @@ Irrelevant:
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''},
-           '∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))': {'environmental': True,
-                                                            'normal': False,
-                                                            'reading': '∀m[material] : _O(m) ⇒ (OMaxT(m) = _MaxT(m))',
-                                                            'relevant': True,
-                                                            'status': 'ENV_UNIV',
-                                                            'typ': 'Bool',
-                                                            'value': True}},
+           '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)': {'environmental': True,
+                                                          'normal': False,
+                                                          'reading': '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)',
+                                                          'relevant': True,
+                                                          'status': 'ENV_UNIV',
+                                                          'typ': 'Bool',
+                                                          'value': True}},
  'OMinT': {'OMinT(e1)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMinT(e1)',
@@ -286,13 +286,13 @@ Irrelevant:
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''},
-           '∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))': {'environmental': True,
-                                                            'normal': False,
-                                                            'reading': '∀m[material] : _O(m) ⇒ (OMinT(m) = _MinT(m))',
-                                                            'relevant': True,
-                                                            'status': 'ENV_UNIV',
-                                                            'typ': 'Bool',
-                                                            'value': True}},
+           '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)': {'environmental': True,
+                                                          'normal': False,
+                                                          'reading': '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)',
+                                                          'relevant': True,
+                                                          'status': 'ENV_UNIV',
+                                                          'typ': 'Bool',
+                                                          'value': True}},
  'T': {'T': {'environmental': False,
              'normal': True,
              'reading': 'T',

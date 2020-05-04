@@ -99,12 +99,7 @@ class Expression(object):
         if other.value   is not None: return self == other.value
         if other.simpler is not None: return self == other.simpler
 
-        # beware: this does not ignore meaningless brackets deeper in the tree
-        if self.str == other.str:
-            if type(self)==type(other):
-                return True
-            return False
-        return False
+        return self.str == other.str and type(self)==type(other)
 
     def __repr__(self): return str(self)
     
@@ -168,6 +163,7 @@ class Expression(object):
         return out
 
 class Constructor(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
         self.is_var = False
@@ -187,6 +183,7 @@ FALSE = Constructor(name='false')
 
 
 class IfExpr(Expression):
+    PRECEDENCE = 10
     IF = 0
     THEN = 1
     ELSE = 2
@@ -207,9 +204,9 @@ class IfExpr(Expression):
         
     @use_value
     def __str__(self):
-        return ( f" if   {str(self.sub_exprs[IfExpr.IF  ])}"
-                 f" then {str(self.sub_exprs[IfExpr.THEN])}"
-                 f" else {str(self.sub_exprs[IfExpr.ELSE])}" )
+        return ( f" if   {self.sub_exprs[IfExpr.IF  ].str}"
+                 f" then {self.sub_exprs[IfExpr.THEN].str}"
+                 f" else {self.sub_exprs[IfExpr.ELSE].str}" )
 
     def annotate1(self):
         self.type = self.sub_exprs[IfExpr.THEN].type
@@ -222,6 +219,7 @@ class IfExpr(Expression):
                 , self.sub_exprs[IfExpr.ELSE].translate())
 
 class AQuantification(Expression):
+    PRECEDENCE = 20
     def __init__(self, **kwargs):
         self.q = kwargs.pop('q')
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
@@ -248,7 +246,7 @@ class AQuantification(Expression):
     def __str__(self):
         assert len(self.vars) == len(self.sorts), "Internal error"
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-        return f"{self.q}{vars} : {str(self.sub_exprs[0])}"
+        return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
     def annotate(self, symbol_decls, q_vars):
         for v in self.vars:
@@ -343,15 +341,12 @@ class BinaryOperator(Expression):
         
     @use_value
     def __str__(self):
-        def parenthesis(x):
-            # add () around operands, to avoid ambiguity in str()
-            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
-                return f"({str(x)})"
-            else:
-                return f"{str(x)}"
-        temp = parenthesis(self.sub_exprs[0])
+        def parenthesis(precedence, x):
+            return f"({x.str})" if type(x).PRECEDENCE <= precedence else f"{x.str}"
+        precedence = type(self).PRECEDENCE
+        temp = parenthesis(precedence, self.sub_exprs[0])
         for i in range(1, len(self.sub_exprs)):
-            temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
+            temp += f" {self.operator[i-1]} {parenthesis(precedence, self.sub_exprs[i])}"
         return temp
     
     def annotate1(self):
@@ -380,11 +375,13 @@ class BinaryOperator(Expression):
         return out
         
 class AImplication(BinaryOperator):
-    pass
+    PRECEDENCE = 50
+    
 class AEquivalence(BinaryOperator):
-    pass
+    PRECEDENCE = 40
 
 class ARImplication(BinaryOperator):
+    PRECEDENCE = 30
     def annotate(self, symbol_decls, q_vars):
         # reverse the implication
         self.sub_exprs.reverse()
@@ -392,6 +389,7 @@ class ARImplication(BinaryOperator):
         return out.annotate(symbol_decls, q_vars)
 
 class ADisjunction(BinaryOperator):
+    PRECEDENCE = 60
     @use_value
     def translate(self):
         if len(self.sub_exprs) == 1:
@@ -402,6 +400,7 @@ class ADisjunction(BinaryOperator):
 
 
 class AConjunction(BinaryOperator):
+    PRECEDENCE = 70
     @use_value
     def translate(self):
         if len(self.sub_exprs) == 1:
@@ -412,6 +411,7 @@ class AConjunction(BinaryOperator):
 
 
 class AComparison(BinaryOperator):
+    PRECEDENCE = 80
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_assignment = None
@@ -454,13 +454,16 @@ class AComparison(BinaryOperator):
 
 
 class ASumMinus(BinaryOperator):
-    pass
+    PRECEDENCE = 90
+    
 class AMultDiv(BinaryOperator):
-    pass
+    PRECEDENCE = 100
+
 class APower(BinaryOperator):
-    pass
+    PRECEDENCE = 110
     
 class AUnary(Expression):
+    PRECEDENCE = 120
     MAP = {'-': lambda x: 0 - x,
            '~': lambda x: Not(x)
           }
@@ -480,7 +483,7 @@ class AUnary(Expression):
 
     @use_value
     def __str__(self):
-        return f"{self.operator}({str(self.sub_exprs[0])})"
+        return f"{self.operator}({self.sub_exprs[0].str})"
 
     def annotate1(self):
         self.type = self.sub_exprs[0].type
@@ -493,6 +496,7 @@ class AUnary(Expression):
         return function(out)
 
 class AAggregate(Expression):
+    PRECEDENCE = 130
     CONDITION = 0
     OUT = 1
 
@@ -518,14 +522,14 @@ class AAggregate(Expression):
         if self.vars is not None:
             assert len(self.vars) == len(self.sorts), "Internal error"
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-            output = f" : {str(self.sub_exprs[AAggregate.OUT])}" if self.out else ""
+            output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = ( f"{self.aggtype}{{{vars} : "
-                    f"{str(self.sub_exprs[AAggregate.CONDITION])}"
+                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
                     f"{output}}}"
                 )
         else:
             out = ( f"{self.aggtype}{{"
-                    f"{','.join(str(e) for e in self.sub_exprs)}"
+                    f"{','.join(e.str for e in self.sub_exprs)}"
                     f"}}"
             )
         return out
@@ -553,6 +557,7 @@ class AAggregate(Expression):
 
 
 class AppliedSymbol(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
@@ -579,9 +584,9 @@ class AppliedSymbol(Expression):
     @use_value
     def __str__(self):
         if len(self.sub_exprs) == 0:
-            return str(self.s)
+            return self.s.str
         else:
-            return f"{str(self.s)}({','.join([str(x) for x in self.sub_exprs])})"
+            return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
 
     def annotate(self, symbol_decls, q_vars):
         self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
@@ -634,6 +639,7 @@ class Arguments(object):
         super().__init__()
 
 class Variable(AppliedSymbol):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
 
@@ -669,10 +675,12 @@ class Variable(AppliedSymbol):
     def translate(self):
         return self.decl.translated
     
-class Symbol(Variable): pass
+class Symbol(Variable): 
+    PRECEDENCE = 200
     
 
 class Fresh_Variable(Expression):
+    PRECEDENCE = 200
     def __init__(self, name, decl):
         self.name = name
         self.decl = decl
@@ -700,6 +708,7 @@ class Fresh_Variable(Expression):
         return self.translated
 
 class NumberConstant(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
 
@@ -732,6 +741,7 @@ ZERO = NumberConstant(number='0')
 ONE  = NumberConstant(number='1')
 
 class Brackets(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         annotations = kwargs.pop('annotations')
@@ -748,7 +758,7 @@ class Brackets(Expression):
         self.simpler = self.sub_exprs[0]
 
     # don't @use_value, to have parenthesis
-    def __str__(self): return f"({str(self.sub_exprs[0])})"
+    def __str__(self): return f"({self.sub_exprs[0].str})"
 
     def as_ground(self): 
         return self.sub_exprs[0].as_ground()

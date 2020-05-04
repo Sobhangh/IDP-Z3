@@ -73,7 +73,7 @@ Type:
   
 Definitions: 
   Rule:∀$same!0$[num],$same$[num]: same($same!0$,$same$) ⇔$same$ = $same!0$
-  Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔(($negated$ = Jan) ∧ ($negated!0$ = Piet)) ∨ (($negated$ = Piet) ∧ ($negated!0$ = Jan))
+  Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔($negated$ = Jan ∧ ($negated!0$ = Piet)) ∨ ($negated$ = Piet ∧ ($negated!0$ = Jan))
 Universals:  
   same(Piet) = Piet
   same(Piet) -> Piet
@@ -99,7 +99,6 @@ Irrelevant:
   ? true
   ? false
   ~same(Piet) = Jan
-  ~same(Jan) = Piet
   ~negated(Jan) = Jan
 
 
@@ -172,7 +171,7 @@ Irrelevant:
           'same(Jan) = Piet': {'environmental': False,
                                'normal': False,
                                'reading': 'same(Jan) = Piet',
-                               'relevant': False,
+                               'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'Bool',
                                'value': False},

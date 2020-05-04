@@ -75,9 +75,7 @@ def Expression_substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
     # similar code in AppliedSymbol !
-    if self.value is not None:
-        return self
-    elif self.code == e0.code:
+    if self.code == e0.code:
         return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
@@ -183,13 +181,13 @@ def update_exprs(self, new_expr_generator):
     value, simpler = None, None
     if exprs[0] == FALSE: # (false => p) is true
         value = TRUE
-        # exprs[0] may be false because exprs[1] is false
-        exprs = [exprs[0], exprs[1] if exprs[1] == FALSE else FALSE]
+        # exprs[0] may be false because exprs[1] was false
+        exprs = [exprs[0], exprs[1] if self.sub_exprs[1]==FALSE else FALSE]
     if exprs[0] == TRUE: # (true => p) is p
         simpler = exprs[1]
     if exprs[1] == TRUE: # (p => true) is true
         value = TRUE
-        exprs = [exprs[0] if exprs[0] == TRUE else TRUE, exprs[1]]
+        exprs = [exprs[0] if self.sub_exprs[0]==TRUE else TRUE, exprs[1]]
     if exprs[1] == FALSE: # (p => false) is ~p
         simpler = AUnary.make('~', exprs[0])
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
@@ -218,9 +216,11 @@ AEquivalence.update_exprs = update_exprs
 
 def update_exprs(self, new_expr_generator):
     exprs, other = [], []
-    for expr in new_expr_generator:
+    for i, expr in enumerate(new_expr_generator):
         if expr == TRUE:
-            return self._change(value=TRUE, sub_exprs=[expr])
+            # simplify only if one other sub_exprs was unknown
+            simplify = any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs))
+            return self._change(value=TRUE, sub_exprs=[expr] if simplify else None)
         exprs.append(expr)
         if expr != FALSE:
             other.append(expr)
@@ -240,9 +240,11 @@ ADisjunction.update_exprs = update_exprs
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_expr_generator):
     exprs, other = [], []
-    for expr in new_expr_generator:
+    for i, expr in enumerate(new_expr_generator):
         if expr == FALSE: 
-            return self._change(value=FALSE, sub_exprs=[expr])
+            # simplify only if one other sub_exprs was unknown
+            simplify = any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs))
+            return self._change(value=FALSE, sub_exprs=[expr] if simplify else None)
         exprs.append(expr)
         if expr != TRUE:
             other.append(expr)
@@ -278,47 +280,21 @@ AComparison.update_exprs = update_exprs
 #############################################################
 
 def update_arith(self, family, new_expr_generator):
-    new_expr_generator = iter(new_expr_generator)
-    # accumulate numbers in acc
-    if self.type == 'int':
-        acc = 0 if family == '+' else 1
-    else:
-        acc = 0.0 if family == '+' else 1.0
-    ops, exprs = [], []
-    def add(op, expr):
-        nonlocal acc, ops, exprs
-        expr1 = expr.as_ground()
-        if expr1 is not None:
-            if op == '+':
-                acc += expr1.translate()
-            elif op == '-':
-                acc -= expr1.translate()
-            elif op == '*':
-                acc *= expr1.translate()
-            elif op == '/':
-                if isinstance(acc, int) and expr.type == 'int': # integer division
-                    acc //= expr1.translate()
-                else:
-                    acc /= expr1.translate()
-        else:
-            ops.append(op)
-            exprs.append(expr)
-
     operands = list(new_expr_generator)
-    assert len([family] + self.operator) == len(operands), "Internal error"
-    for op, expr in zip([family] + self.operator, operands):
-        if family == '*' and acc == 0:
-            return self._change(value=ZERO, sub_exprs=[expr])
-        add(op, expr)
+    operands1 = [e.as_ground() for e in operands]
+    if all(e is not None for e in operands1):
+        out = operands1[0].translate()
 
-    # analyse results
-    if 0 < len(exprs) and ((ops[0] == '+' and acc == 0) or (ops[0] == '*' and acc == 1)):
-        del ops[0]
-    else:
-        exprs = [NumberConstant(number=str(acc))] + exprs
-    if len(exprs)==1:
-        return self._change(simpler=exprs[0], sub_exprs=exprs, ops=ops)
-    return self._change(sub_exprs=exprs, ops=ops)
+        for e, op in zip(operands1[1:], self.operator):
+            function = BinaryOperator.MAP[op]
+            
+            if op=='/' and self.type == 'int': # integer division
+                out //= e.translate()
+            else:
+                out = function(out, e.translate())
+        value = NumberConstant(number=str(out))
+        return self._change(value=value, sub_exprs=operands)
+    return self._change(sub_exprs=operands)
 
 
 
@@ -456,8 +432,6 @@ def substitute(self, e0, e1, todo=None):
         if todo is not None:
             todo.extend(new_branch.implicants())
             
-    if self.value is not None:
-        return self._change(just_branch=new_branch)
     if self.code == e0.code:
         return self._change(value=e1, just_branch=new_branch)
     else:

@@ -15,11 +15,11 @@ p
 
 -- subtences ------------------------------------
 p
-(sum{c[color] : true : 1}) = 3
+sum{c[color] : true : 1} = 3
 
 -- GUILines ------------------------------------
 p
-(sum{c[color] : true : 1}) = 3
+sum{c[color] : true : 1} = 3
 
 -- case -------------------------------------
 Type:        
@@ -33,7 +33,7 @@ Consequences:
 Simplified:  
   true
 Irrelevant:  
-  ? (sum{c[color] : true : 1}) = 3
+  ? sum{c[color] : true : 1} = 3
 
 
 -- meta -------------------------------------

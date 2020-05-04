@@ -4,10 +4,10 @@
 |+ p -> true
 |== *!true
 |------------
-|((~((p))) ∨ (p)) with ADisjunction
+|(~((p)) ∨ (p)) with ADisjunction
 |+ p -> true  (or true -> true)
     |------------
-    |(~((p))) ∨ (p) with AUnary,Brackets
+    |~((p)) ∨ (p) with AUnary,Brackets
     |+ p -> true  (or true -> true)
         |------------
         |~((p)) with Brackets
@@ -29,7 +29,7 @@
             |+ p -> true  (or true -> true)
             |== *!true
         |== !true with Variable
-    |== !true with Brackets
+    |== !true with AUnary,Brackets
 |== !true with ADisjunction
 |------------
 |*true

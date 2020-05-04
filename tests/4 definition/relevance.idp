@@ -1,10 +1,10 @@
 vocabulary {
-    p q1 q2 r s
+    p l r rd i
 }
 theory {
-  { s <- r.}
-  { p <- q1 | q2.}
-  { q1 <- r.} 
-  q1.
+  { i <- rd.}
+  { p <- l | r.}
+  { r <- rd.} 
+  r.
 }
 goal p

@@ -57,7 +57,7 @@ And(Not(negated(-1) == -1),
 
 -- subtences ------------------------------------
 same(-1) = -1
-negated(-1) = (1)
+negated(-1) = 1
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -68,7 +68,6 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
-negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -84,7 +83,7 @@ negated(-1)
 negated(0)
 negated(1)
 same(-1) = -1
-negated(-1) = (1)
+negated(-1) = 1
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -95,7 +94,6 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
-negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -108,12 +106,12 @@ Type:
   
 Definitions: 
   Rule:∀$same!0$[num],$same$[num]: same($same!0$,$same$) ⇔$same$ = $same!0$
-  Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔$negated$ = (-($negated!0$))
+  Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔$negated$ = -($negated!0$)
 Universals:  
   same(-1) = -1
   same(-1) -> -1
 Consequences:
-  negated(-1) = (1)
+  negated(-1) = 1
   ~same(-1) = 0
   ~same(-1) = 1
   ~same(0) = -1
@@ -124,7 +122,6 @@ Consequences:
   same(1) = 1
   ~negated(-1) = -1
   ~negated(-1) = 0
-  negated(-1) = 1
   ~negated(0) = -1
   negated(0) = 0
   ~negated(0) = 1
@@ -150,8 +147,6 @@ Irrelevant:
   ~same(-1) = 1
   ~same(0) = -1
   ~same(0) = 1
-  ~same(1) = -1
-  ~same(1) = 0
   ~negated(-1) = -1
   ~negated(-1) = 0
   ~negated(0) = -1
@@ -175,13 +170,6 @@ Irrelevant:
                              'typ': 'Int',
                              'value': '1',
                              'values': ['-1', '0', '1']},
-             'negated(-1) = (1)': {'environmental': False,
-                                   'normal': False,
-                                   'reading': 'y = (-(x))',
-                                   'relevant': True,
-                                   'status': 'CONSEQUENCE',
-                                   'typ': 'Bool',
-                                   'value': True},
              'negated(-1) = -1': {'environmental': False,
                                   'normal': False,
                                   'reading': 'negated(-1) = -1',
@@ -198,7 +186,7 @@ Irrelevant:
                                  'value': False},
              'negated(-1) = 1': {'environmental': False,
                                  'normal': False,
-                                 'reading': 'negated(-1) = 1',
+                                 'reading': 'y = -(x)',
                                  'relevant': True,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
@@ -330,14 +318,14 @@ Irrelevant:
           'same(1) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(1) = -1',
-                           'relevant': False,
+                           'relevant': True,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
           'same(1) = 0': {'environmental': False,
                           'normal': False,
                           'reading': 'same(1) = 0',
-                          'relevant': False,
+                          'relevant': True,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': False},

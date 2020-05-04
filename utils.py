@@ -35,11 +35,11 @@ JSONEncoder.default = _default # Replace it.
 
 DEBUG = True
 
-start = time.time()
+start = time.process_time()
 def log(action):
     global start
-    print("*** ", action, round(time.time()-start,3))
-    start = time.time()
+    print("*** ", action, round(time.process_time()-start,3))
+    start = time.process_time()
 
 
 nl = "\r\n"

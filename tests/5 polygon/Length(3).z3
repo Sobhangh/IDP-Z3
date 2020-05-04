@@ -65,7 +65,7 @@ Sides = 3
 Subtype = rectangle
 Length(3) = Length(1)
 Equilateral
-∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+∀n[side] : Length(n) = Length(1) ∨ Sides < n
 Sides = 4
 Type = triangle
 Type = quadrilateral
@@ -86,7 +86,7 @@ Equilateral
 Sides = 3
 Subtype = rectangle
 Length(3) = Length(1)
-∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+∀n[side] : Length(n) = Length(1) ∨ Sides < n
 Sides = 4
 Type = triangle
 Type = quadrilateral
@@ -112,7 +112,7 @@ Simplified:
   Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) ∧ (true))
   true
   true
-  (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (false) ∨ (Subtype = square) ∨ (Subtype = irregular)
+  Subtype = regular_triangle ∨ Subtype = right_triangle ∨ false ∨ Subtype = square ∨ Subtype = irregular
 Irrelevant:  
   ? Length(3) = Length(1)
   ? Type = triangle
@@ -173,13 +173,12 @@ Irrelevant:
                           'status': 'UNKNOWN',
                           'typ': 'Real',
                           'value': ''},
-            '∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)': {'environmental': False,
-                                                                 'normal': False,
-                                                                 'reading': '∀n[side] : (Length(n) = Length(1)) ∨ '
-                                                                            '(Sides < n)',
-                                                                 'relevant': True,
-                                                                 'status': 'UNKNOWN',
-                                                                 'typ': 'Bool'}},
+            '∀n[side] : Length(n) = Length(1) ∨ Sides < n': {'environmental': False,
+                                                             'normal': False,
+                                                             'reading': '∀n[side] : Length(n) = Length(1) ∨ Sides < n',
+                                                             'relevant': True,
+                                                             'status': 'UNKNOWN',
+                                                             'typ': 'Bool'}},
  'Sides': {'Sides': {'environmental': False,
                      'normal': True,
                      'reading': 'Sides',

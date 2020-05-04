@@ -1,7 +1,7 @@
 
 Z3 propagation ********************************
 |------------
-|(~(p)) ∨ q with AUnary,Variable
+|~(p) ∨ q with AUnary,Variable
 |+ p -> true
     |------------
     |~(p) with Variable
@@ -35,12 +35,29 @@ Z3 propagation ********************************
     |------------
     |false with Variable
     |+ q -> true
+        |------------
+        |*true just true
+        |+ q -> true
+ definition:
+            |------------
+            |true with Variable,Constructor
+            |+ q -> true
+                |------------
+                |*true
+                |+ q -> true
+                |== *!true
+                |------------
+                |true
+                |+ q -> true
+                |== true
+            |== !true with Variable,Constructor
+        |== *!true just true
     |== !false with Variable
     |------------
     |*q
     |+ q -> true
     |== *!true
-|== !true with Variable
+|== !true with AUnary,Variable
 |------------
 |*p
 |+ p -> true
@@ -50,9 +67,34 @@ Z3 propagation ********************************
 |+ p -> true  (or true -> true)
 |== *!true
 |------------
-|true with Variable
+|true with AUnary,Variable
 |+ q -> true  (or true -> true)
-|== !true with Variable
+    |------------
+    |false with Variable
+    |+ q -> true  (or true -> true)
+        |------------
+        |*true just true
+        |+ q -> true  (or true -> true)
+ definition:
+            |------------
+            |true with Variable,Constructor
+            |+ q -> true  (or true -> true)
+                |------------
+                |*true
+                |+ q -> true  (or true -> true)
+                |== *!true
+                |------------
+                |true
+                |+ q -> true  (or true -> true)
+                |== true
+            |== !true with Variable,Constructor
+        |== *!true just true
+    |== !false with Variable
+    |------------
+    |*true
+    |+ q -> true  (or true -> true)
+    |== *!true
+|== !true with AUnary,Variable
 |------------
 |*true
 |+ q -> true  (or true -> true)

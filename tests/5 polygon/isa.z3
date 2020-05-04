@@ -84,7 +84,7 @@ Or(typeOf(square) == 1tri angle,
 
 -- subtences ------------------------------------
 ∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
-∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
+∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)
 ∀st[subtype] : isa(st,typeOf(st))
 Type = typeOf(Subtype)
 Type = 1tri angle
@@ -118,7 +118,7 @@ typeOf(right_triangle)
 typeOf(rectangle)
 typeOf(square)
 ∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
-∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
+∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)
 ∀st[subtype] : isa(st,typeOf(st))
 Type = typeOf(Subtype)
 Type = 1tri angle
@@ -143,7 +143,7 @@ Definitions:
   
 Universals:  
   ∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
-  ∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)
+  ∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)
   ∀st[subtype] : isa(st,typeOf(st))
   Type = typeOf(Subtype)
   asi(1tri angle,regular_triangle)
@@ -177,8 +177,8 @@ Simplified:
   true
   true
   true
-  (Type = 1tri angle) ∨ (Type = quadrilateral)
-  (Subtype = regular_triangle) ∨ (Subtype = right_triangle) ∨ (Subtype = rectangle) ∨ (Subtype = square)
+  Type = 1tri angle ∨ Type = quadrilateral
+  Subtype = regular_triangle ∨ Subtype = right_triangle ∨ Subtype = rectangle ∨ Subtype = square
   true
   true
   true
@@ -186,8 +186,6 @@ Simplified:
 Irrelevant:  
   ~typeOf(regular_triangle) = quadrilateral
   ~typeOf(right_triangle) = quadrilateral
-  ~typeOf(rectangle) = 1tri angle
-  ~typeOf(square) = 1tri angle
   isa(regular_triangle,typeOf(regular_triangle))
   isa(right_triangle,typeOf(right_triangle))
   isa(rectangle,typeOf(rectangle))
@@ -343,7 +341,7 @@ Irrelevant:
             'typeOf(rectangle) = 1tri angle': {'environmental': False,
                                                'normal': False,
                                                'reading': 'typeOf(rectangle) = 1tri angle',
-                                               'relevant': False,
+                                               'relevant': True,
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': False},
@@ -409,7 +407,7 @@ Irrelevant:
             'typeOf(square) = 1tri angle': {'environmental': False,
                                             'normal': False,
                                             'reading': 'typeOf(square) = 1tri angle',
-                                            'relevant': False,
+                                            'relevant': True,
                                             'status': 'CONSEQUENCE',
                                             'typ': 'Bool',
                                             'value': False},
@@ -427,11 +425,11 @@ Irrelevant:
                                                   'status': 'UNIVERSAL',
                                                   'typ': 'Bool',
                                                   'value': True},
-            '∀t[type]st[subtype] : (typeOf(st) = t) ⇔ isa(st,t)': {'environmental': False,
-                                                                   'normal': False,
-                                                                   'reading': '∀t[type]st[subtype] : (typeOf(st) = t) '
-                                                                              '⇔ isa(st,t)',
-                                                                   'relevant': True,
-                                                                   'status': 'UNIVERSAL',
-                                                                   'typ': 'Bool',
-                                                                   'value': True}}}
+            '∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)': {'environmental': False,
+                                                                 'normal': False,
+                                                                 'reading': '∀t[type]st[subtype] : typeOf(st) = t ⇔ '
+                                                                            'isa(st,t)',
+                                                                 'relevant': True,
+                                                                 'status': 'UNIVERSAL',
+                                                                 'typ': 'Bool',
+                                                                 'value': True}}}

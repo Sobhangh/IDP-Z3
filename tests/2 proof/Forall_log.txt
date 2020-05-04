@@ -9,6 +9,38 @@
     |------------
     |(false) with AQuantification
     |+ p -> false
+        |------------
+        |*false with AConjunction
+        |+ p -> false
+            |------------
+            |false with AComparison,AComparison,AComparison
+            |+ p -> false
+                |------------
+                |true with Constructor,Constructor
+                |+ p -> false
+                    |------------
+                    |red
+                    |+ p -> false
+                    |== red
+                    |------------
+                    |red
+                    |+ p -> false
+                    |== red
+                |== !true with Constructor,Constructor
+                |------------
+                |false with Constructor,Constructor
+                |+ p -> false
+                    |------------
+                    |blue
+                    |+ p -> false
+                    |== blue
+                    |------------
+                    |red
+                    |+ p -> false
+                    |== red
+                |== !false with Constructor,Constructor
+            |== !false with AComparison,AComparison,AComparison
+        |== *!false with AConjunction
     |== !false with AQuantification
 |== !true with Variable,Brackets
 |------------
@@ -18,5 +50,33 @@
 |------------
 |*false with AConjunction
 |+ p -> false  (or false -> false)
+    |------------
+    |false with AComparison,AComparison,AComparison
+    |+ p -> false  (or false -> false)
+        |------------
+        |true with Constructor,Constructor
+        |+ p -> false  (or false -> false)
+            |------------
+            |red
+            |+ p -> false  (or false -> false)
+            |== red
+            |------------
+            |red
+            |+ p -> false  (or false -> false)
+            |== red
+        |== !true with Constructor,Constructor
+        |------------
+        |false with Constructor,Constructor
+        |+ p -> false  (or false -> false)
+            |------------
+            |blue
+            |+ p -> false  (or false -> false)
+            |== blue
+            |------------
+            |red
+            |+ p -> false  (or false -> false)
+            |== red
+        |== !false with Constructor,Constructor
+    |== !false with AComparison,AComparison,AComparison
 |== *!false with AConjunction
 Z3 propagation ********************************

@@ -67,8 +67,8 @@ Type:
   
 Definitions: 
   Rule:∀: p() ⇔q ∨ r
-  Rule:∀$a$[color]: a($a$) ⇔($a$ = red) ∧ p
-  Rule:∀$b$[color]: b($b$) ⇔($b$ = red) ∧ (a = red)
+  Rule:∀$a$[color]: a($a$) ⇔$a$ = red ∧ p
+  Rule:∀$b$[color]: b($b$) ⇔$b$ = red ∧ a = red
   Rule:∀$c$[color]: c($c$) ⇔$c$ = red
 Universals:  
   

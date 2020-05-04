@@ -275,7 +275,7 @@ Or(Not(Registration_Type == Family_Dwelling),
        Or(First_Ownership, Causal_Connection),
        Or(Not(Energy_Renovation_Planned),
           Not(Term_Energy_Renovation ==
-              5 + Certification_Date))))
+              Certification_Date + 5))))
 
 Or(Not(Registration_Type == Social_Dwelling),
    And(Buyer == Natural_Person,
@@ -292,13 +292,13 @@ Or(Not(Registration_Type == Energy_Efficient_Dwelling),
        Clean_Purchase,
        Or(First_Ownership, Causal_Connection),
        Energy_Renovation_Planned,
-       Term_Energy_Renovation == 5 + Certification_Date))
+       Term_Energy_Renovation == Certification_Date + 5))
 
 Or(Not(Registration_Type == Dwelling_For_Social_Renting),
    And(Type_Of_Real_Estate == Residential,
        Use == Social_Renting,
        Start_Dt_Dwelling_For_Social_Rent ==
-       3 + Certification_Date,
+       Certification_Date + 3,
        Duration_Of_Agreement == Less_Than_9_years))
 
 Or(Not(Registration_Type == Heritage),
@@ -313,7 +313,7 @@ Or(Not(Registration_Type == Professional_Purchase),
    And(Professional_Buyer,
        Not(Transaction_Type == Public_Sale),
        Use == For_Resale,
-       Certification_Date_Sale == 8 + Certification_Date))
+       Certification_Date_Sale == Certification_Date + 8))
 
 Or(Not(Registration_Type == Social_Purpose),
    And(Or(Seller == Mpy_Erkend_Door_VMSW,
@@ -536,13 +536,13 @@ Clean_Purchase
 First_Ownership
 Causal_Connection
 Energy_Renovation_Planned
-Term_Energy_Renovation = (Certification_Date + 5)
+Term_Energy_Renovation = Certification_Date + 5
 Use = Social_Housing
 Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen
 Seller = ErkendeSocialeHuisvestingsMpy
 Mortgage_Loan_Allowance
 Use = Social_Renting
-Start_Dt_Dwelling_For_Social_Rent = (Certification_Date + 3)
+Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3
 Duration_Of_Agreement = Less_Than_9_years
 Monument
 Use = As_Family_Dwelling
@@ -557,7 +557,7 @@ Additional_Security_Satisfied
 Resale = Three_Or_More
 Transaction_Type = Public_Sale
 Use = For_Resale
-Certification_Date_Sale = (Certification_Date + 8)
+Certification_Date_Sale = Certification_Date + 8
 Seller = Mpy_Erkend_Door_VMSW
 Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
@@ -725,18 +725,18 @@ Region = Brussels_Region
 Region = Walloon_Region
 Type_Of_Real_Estate = Residential
 Buyer = Natural_Person
-Term_Energy_Renovation = (Certification_Date + 5)
+Term_Energy_Renovation = Certification_Date + 5
 Use = Social_Housing
 Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen
 Seller = ErkendeSocialeHuisvestingsMpy
 Use = Social_Renting
-Start_Dt_Dwelling_For_Social_Rent = (Certification_Date + 3)
+Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3
 Duration_Of_Agreement = Less_Than_9_years
 Use = As_Family_Dwelling
 Resale = Three_Or_More
 Transaction_Type = Public_Sale
 Use = For_Resale
-Certification_Date_Sale = (Certification_Date + 8)
+Certification_Date_Sale = Certification_Date + 8
 Seller = Mpy_Erkend_Door_VMSW
 Seller = Vlaams_Woningfonds
 Seller = Gelijksoortige_Rechtspersoon_EER
@@ -855,7 +855,7 @@ Certification_Date_Sale = 2025
 Type:        
   
 Definitions: 
-  Rule:∀: Professional_Buyer() ⇔Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ ((Additional_Security_Required ∧ Additional_Security_Satisfied) ∨ (~(Additional_Security_Required))) ∧ (Resale = Three_Or_More)
+  Rule:∀: Professional_Buyer() ⇔Professional_Declaration_Filed ∧ Guarantee_Satisfied ∧ (Additional_Security_Required ∧ Additional_Security_Satisfied ∨ ~(Additional_Security_Required)) ∧ Resale = Three_Or_More
 Universals:  
   ~Professional_Declaration_Filed
 Consequences:
@@ -863,42 +863,42 @@ Consequences:
   ~Registration_Type = Professional_Purchase
   ~Professional_Buyer
 Simplified:  
-  ((Tax = 1) ⇒ ((Registration_Type = Heritage) ∧ (Region = Flemish_Region)))
-  (Tax = 2) ⇒ ((Registration_Type = Social_Dwelling) ∧ (Region = Flemish_Region))
+  (Tax = 1 ⇒ Registration_Type = Heritage ∧ Region = Flemish_Region)
+  Tax = 2 ⇒ Registration_Type = Social_Dwelling ∧ Region = Flemish_Region
   true
-  ((Tax = 6) ⇒ (((Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground)) ∧ (Region = Flemish_Region)))
-  (Tax = 7) ⇒ (((Registration_Type = Family_Dwelling) ∨ (Registration_Type = Dwelling_For_Social_Renting)) ∧ (Region = Flemish_Region))
-  (Tax = 10) ⇒ ((Region = Flemish_Region) ∧ (Registration_Type = Other))
-  ((Tax = 12) ⇒ ((Region = Brussels_Region) ∨ (Region = Walloon_Region)))
-  (Registration_Type = Family_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ ((~(Energy_Renovation_Planned)) ∨ (~(Term_Energy_Renovation = (5 + Certification_Date)))))
-  (Registration_Type = Social_Dwelling) ⇒ ((Buyer = Natural_Person) ∧ (Type_Of_Real_Estate = Residential) ∧ (Use = Social_Housing) ∧ ((Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen) ∨ (Seller = ErkendeSocialeHuisvestingsMpy)) ∧ Mortgage_Loan_Allowance)
-  (Registration_Type = Energy_Efficient_Dwelling) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Buyer = Natural_Person) ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ (Term_Energy_Renovation = (5 + Certification_Date)))
-  (Registration_Type = Dwelling_For_Social_Renting) ⇒ ((Type_Of_Real_Estate = Residential) ∧ (Use = Social_Renting) ∧ (Start_Dt_Dwelling_For_Social_Rent = (3 + Certification_Date)) ∧ (Duration_Of_Agreement = Less_Than_9_years))
-  ((Registration_Type = Heritage) ⇒ ((Type_Of_Real_Estate = Residential) ∧ Monument ∧ (Use = As_Family_Dwelling) ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms))
+  (Tax = 6 ⇒ (Registration_Type = Energy_Efficient_Dwelling ∨ Registration_Type = Social_Purpose ∨ Registration_Type = Exchange_Unbuilt_Ground) ∧ Region = Flemish_Region)
+  Tax = 7 ⇒ (Registration_Type = Family_Dwelling ∨ Registration_Type = Dwelling_For_Social_Renting) ∧ Region = Flemish_Region
+  Tax = 10 ⇒ Region = Flemish_Region ∧ Registration_Type = Other
+  (Tax = 12 ⇒ Region = Brussels_Region ∨ Region = Walloon_Region)
+  Registration_Type = Family_Dwelling ⇒ Type_Of_Real_Estate = Residential ∧ Buyer = Natural_Person ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ (~(Energy_Renovation_Planned) ∨ ~(Term_Energy_Renovation = Certification_Date + 5))
+  Registration_Type = Social_Dwelling ⇒ Buyer = Natural_Person ∧ Type_Of_Real_Estate = Residential ∧ Use = Social_Housing ∧ (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ Seller = ErkendeSocialeHuisvestingsMpy) ∧ Mortgage_Loan_Allowance
+  Registration_Type = Energy_Efficient_Dwelling ⇒ Type_Of_Real_Estate = Residential ∧ Buyer = Natural_Person ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ Term_Energy_Renovation = Certification_Date + 5
+  Registration_Type = Dwelling_For_Social_Renting ⇒ Type_Of_Real_Estate = Residential ∧ Use = Social_Renting ∧ Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3 ∧ Duration_Of_Agreement = Less_Than_9_years
+  (Registration_Type = Heritage ⇒ Type_Of_Real_Estate = Residential ∧ Monument ∧ Use = As_Family_Dwelling ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms)
   true
-  ((Registration_Type = Social_Purpose) ⇒ (((Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER)) ∧ (Use = Community_Purpose)))
-  (Registration_Type = Exchange_Unbuilt_Ground) ⇒ (Additional_Terms ∧ (~(Monument)))
-  (Registration_Type = Other) ⇒ ((~(Registration_Type = Family_Dwelling)) ∧ (~(Registration_Type = Social_Dwelling)) ∧ (~(Registration_Type = Energy_Efficient_Dwelling)) ∧ (~(Registration_Type = Dwelling_For_Social_Renting)) ∧ (~(Registration_Type = Heritage)) ∧ (true) ∧ (~(Registration_Type = Social_Purpose)) ∧ (~(Registration_Type = Exchange_Unbuilt_Ground)))
+  (Registration_Type = Social_Purpose ⇒ (Seller = Mpy_Erkend_Door_VMSW ∨ Seller = Vlaams_Woningfonds ∨ Seller = Gelijksoortige_Rechtspersoon_EER) ∧ Use = Community_Purpose)
+  Registration_Type = Exchange_Unbuilt_Ground ⇒ Additional_Terms ∧ ~(Monument)
+  Registration_Type = Other ⇒ ~(Registration_Type = Family_Dwelling) ∧ ~(Registration_Type = Social_Dwelling) ∧ ~(Registration_Type = Energy_Efficient_Dwelling) ∧ ~(Registration_Type = Dwelling_For_Social_Renting) ∧ ~(Registration_Type = Heritage) ∧ true ∧ ~(Registration_Type = Social_Purpose) ∧ ~(Registration_Type = Exchange_Unbuilt_Ground)
   true
-  (Tax = 1) ∨ (Tax = 2) ∨ (false) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
-  (Region = Flemish_Region) ∨ (Region = Walloon_Region) ∨ (Region = Brussels_Region)
-  (Type_Of_Real_Estate = Residential) ∨ (Type_Of_Real_Estate = Residential_Building_Land) ∨ (Type_Of_Real_Estate = Other_Real_Estate)
-  (Seller = Vlaams_Woningfonds) ∨ (Seller = Gelijksoortige_Rechtspersoon_EER) ∨ (Seller = Mpy_Erkend_Door_VMSW) ∨ (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen) ∨ (Seller = ErkendeSocialeHuisvestingsMpy)
-  (Buyer = Natural_Person) ∨ (Buyer = Legal_Person) ∨ (Buyer = Mixed)
-  (Use = As_Family_Dwelling) ∨ (Use = For_Resale) ∨ (Use = Community_Purpose) ∨ (Use = Social_Housing) ∨ (Use = Social_Renting) ∨ (Use = Other_House) ∨ (Use = No_House)
-  (Duration_Of_Agreement = Less_Than_9_years) ∨ (Duration_Of_Agreement = More_than_9_Or_9_years)
-  (Start_Dt_Dwelling_For_Social_Rent = 2015) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2016) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2017) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2018) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2019) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2020) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2021) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2022) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2023) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2024) ∨ (Start_Dt_Dwelling_For_Social_Rent = 2025)
-  (Certification_Date = 2015) ∨ (Certification_Date = 2016) ∨ (Certification_Date = 2017) ∨ (Certification_Date = 2018) ∨ (Certification_Date = 2019) ∨ (Certification_Date = 2020) ∨ (Certification_Date = 2021) ∨ (Certification_Date = 2022) ∨ (Certification_Date = 2023) ∨ (Certification_Date = 2024) ∨ (Certification_Date = 2025)
-  (Term_Energy_Renovation = 2015) ∨ (Term_Energy_Renovation = 2016) ∨ (Term_Energy_Renovation = 2017) ∨ (Term_Energy_Renovation = 2018) ∨ (Term_Energy_Renovation = 2019) ∨ (Term_Energy_Renovation = 2020) ∨ (Term_Energy_Renovation = 2021) ∨ (Term_Energy_Renovation = 2022) ∨ (Term_Energy_Renovation = 2023) ∨ (Term_Energy_Renovation = 2024) ∨ (Term_Energy_Renovation = 2025)
-  (Registration_Type = Family_Dwelling) ∨ (Registration_Type = Social_Dwelling) ∨ (Registration_Type = Social_Purpose) ∨ (Registration_Type = Exchange_Unbuilt_Ground) ∨ (false) ∨ (Registration_Type = Energy_Efficient_Dwelling) ∨ (Registration_Type = Heritage) ∨ (Registration_Type = Dwelling_For_Social_Renting) ∨ (Registration_Type = Other)
-  (Tax = 1) ∨ (Tax = 2) ∨ (false) ∨ (Tax = 7) ∨ (Tax = 6) ∨ (Tax = 10) ∨ (Tax = 12)
+  Tax = 1 ∨ Tax = 2 ∨ false ∨ Tax = 7 ∨ Tax = 6 ∨ Tax = 10 ∨ Tax = 12
+  Region = Flemish_Region ∨ Region = Walloon_Region ∨ Region = Brussels_Region
+  Type_Of_Real_Estate = Residential ∨ Type_Of_Real_Estate = Residential_Building_Land ∨ Type_Of_Real_Estate = Other_Real_Estate
+  Seller = Vlaams_Woningfonds ∨ Seller = Gelijksoortige_Rechtspersoon_EER ∨ Seller = Mpy_Erkend_Door_VMSW ∨ Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ Seller = ErkendeSocialeHuisvestingsMpy
+  Buyer = Natural_Person ∨ Buyer = Legal_Person ∨ Buyer = Mixed
+  Use = As_Family_Dwelling ∨ Use = For_Resale ∨ Use = Community_Purpose ∨ Use = Social_Housing ∨ Use = Social_Renting ∨ Use = Other_House ∨ Use = No_House
+  Duration_Of_Agreement = Less_Than_9_years ∨ Duration_Of_Agreement = More_than_9_Or_9_years
+  Start_Dt_Dwelling_For_Social_Rent = 2015 ∨ Start_Dt_Dwelling_For_Social_Rent = 2016 ∨ Start_Dt_Dwelling_For_Social_Rent = 2017 ∨ Start_Dt_Dwelling_For_Social_Rent = 2018 ∨ Start_Dt_Dwelling_For_Social_Rent = 2019 ∨ Start_Dt_Dwelling_For_Social_Rent = 2020 ∨ Start_Dt_Dwelling_For_Social_Rent = 2021 ∨ Start_Dt_Dwelling_For_Social_Rent = 2022 ∨ Start_Dt_Dwelling_For_Social_Rent = 2023 ∨ Start_Dt_Dwelling_For_Social_Rent = 2024 ∨ Start_Dt_Dwelling_For_Social_Rent = 2025
+  Certification_Date = 2015 ∨ Certification_Date = 2016 ∨ Certification_Date = 2017 ∨ Certification_Date = 2018 ∨ Certification_Date = 2019 ∨ Certification_Date = 2020 ∨ Certification_Date = 2021 ∨ Certification_Date = 2022 ∨ Certification_Date = 2023 ∨ Certification_Date = 2024 ∨ Certification_Date = 2025
+  Term_Energy_Renovation = 2015 ∨ Term_Energy_Renovation = 2016 ∨ Term_Energy_Renovation = 2017 ∨ Term_Energy_Renovation = 2018 ∨ Term_Energy_Renovation = 2019 ∨ Term_Energy_Renovation = 2020 ∨ Term_Energy_Renovation = 2021 ∨ Term_Energy_Renovation = 2022 ∨ Term_Energy_Renovation = 2023 ∨ Term_Energy_Renovation = 2024 ∨ Term_Energy_Renovation = 2025
+  Registration_Type = Family_Dwelling ∨ Registration_Type = Social_Dwelling ∨ Registration_Type = Social_Purpose ∨ Registration_Type = Exchange_Unbuilt_Ground ∨ false ∨ Registration_Type = Energy_Efficient_Dwelling ∨ Registration_Type = Heritage ∨ Registration_Type = Dwelling_For_Social_Renting ∨ Registration_Type = Other
+  Tax = 1 ∨ Tax = 2 ∨ false ∨ Tax = 7 ∨ Tax = 6 ∨ Tax = 10 ∨ Tax = 12
 Irrelevant:  
   ? Guarantee_Satisfied
   ? Additional_Security_Required
   ? Additional_Security_Satisfied
   ? Resale = Three_Or_More
   ? Transaction_Type = Public_Sale
-  ? Certification_Date_Sale = (Certification_Date + 8)
+  ? Certification_Date_Sale = Certification_Date + 8
   ? Municipality = other_Municipal
   ? Municipality = Aalst
   ? Municipality = Antwerpen
@@ -1249,14 +1249,6 @@ Irrelevant:
                                                                     '2023',
                                                                     '2024',
                                                                     '2025']},
-                             'Certification_Date_Sale = (Certification_Date + 8)': {'environmental': True,
-                                                                                    'normal': False,
-                                                                                    'reading': 'Certification_Date_Sale '
-                                                                                               '= (Certification_Date '
-                                                                                               '+ 8)',
-                                                                                    'relevant': False,
-                                                                                    'status': 'UNKNOWN',
-                                                                                    'typ': 'Bool'},
                              'Certification_Date_Sale = 2015': {'environmental': True,
                                                                 'normal': False,
                                                                 'reading': 'Certification_Date_Sale = 2015',
@@ -1322,7 +1314,14 @@ Irrelevant:
                                                                 'reading': 'Certification_Date_Sale = 2025',
                                                                 'relevant': False,
                                                                 'status': 'UNKNOWN',
-                                                                'typ': 'Bool'}},
+                                                                'typ': 'Bool'},
+                             'Certification_Date_Sale = Certification_Date + 8': {'environmental': True,
+                                                                                  'normal': False,
+                                                                                  'reading': 'Certification_Date_Sale '
+                                                                                             '= Certification_Date + 8',
+                                                                                  'relevant': False,
+                                                                                  'status': 'UNKNOWN',
+                                                                                  'typ': 'Bool'}},
  'Clean_Purchase': {'Clean_Purchase': {'environmental': True,
                                        'normal': True,
                                        'reading': 'Clean_Purchase',
@@ -1992,16 +1991,6 @@ Irrelevant:
                                                                                         '2023',
                                                                                         '2024',
                                                                                         '2025']},
-                                       'Start_Dt_Dwelling_For_Social_Rent = (Certification_Date + 3)': {'environmental': True,
-                                                                                                        'normal': False,
-                                                                                                        'reading': 'Start_Dt_Dwelling_For_Social_Rent '
-                                                                                                                   '= '
-                                                                                                                   '(Certification_Date '
-                                                                                                                   '+ '
-                                                                                                                   '3)',
-                                                                                                        'relevant': True,
-                                                                                                        'status': 'UNKNOWN',
-                                                                                                        'typ': 'Bool'},
                                        'Start_Dt_Dwelling_For_Social_Rent = 2015': {'environmental': True,
                                                                                     'normal': False,
                                                                                     'reading': 'Start_Dt_Dwelling_For_Social_Rent '
@@ -2078,7 +2067,16 @@ Irrelevant:
                                                                                                '= 2025',
                                                                                     'relevant': True,
                                                                                     'status': 'UNKNOWN',
-                                                                                    'typ': 'Bool'}},
+                                                                                    'typ': 'Bool'},
+                                       'Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3': {'environmental': True,
+                                                                                                      'normal': False,
+                                                                                                      'reading': 'Start_Dt_Dwelling_For_Social_Rent '
+                                                                                                                 '= '
+                                                                                                                 'Certification_Date '
+                                                                                                                 '+ 3',
+                                                                                                      'relevant': True,
+                                                                                                      'status': 'UNKNOWN',
+                                                                                                      'typ': 'Bool'}},
  'Tax': {'Tax': {'environmental': False,
                  'normal': True,
                  'reading': 'Tax',
@@ -2148,13 +2146,6 @@ Irrelevant:
                                                                   '2023',
                                                                   '2024',
                                                                   '2025']},
-                            'Term_Energy_Renovation = (Certification_Date + 5)': {'environmental': True,
-                                                                                  'normal': False,
-                                                                                  'reading': 'Term_Energy_Renovation = '
-                                                                                             '(Certification_Date + 5)',
-                                                                                  'relevant': True,
-                                                                                  'status': 'UNKNOWN',
-                                                                                  'typ': 'Bool'},
                             'Term_Energy_Renovation = 2015': {'environmental': True,
                                                               'normal': False,
                                                               'reading': 'Term_Energy_Renovation = 2015',
@@ -2220,7 +2211,14 @@ Irrelevant:
                                                               'reading': 'Term_Energy_Renovation = 2025',
                                                               'relevant': True,
                                                               'status': 'UNKNOWN',
-                                                              'typ': 'Bool'}},
+                                                              'typ': 'Bool'},
+                            'Term_Energy_Renovation = Certification_Date + 5': {'environmental': True,
+                                                                                'normal': False,
+                                                                                'reading': 'Term_Energy_Renovation = '
+                                                                                           'Certification_Date + 5',
+                                                                                'relevant': True,
+                                                                                'status': 'UNKNOWN',
+                                                                                'typ': 'Bool'}},
  'Transaction_Type': {'Transaction_Type': {'environmental': True,
                                            'normal': True,
                                            'reading': 'Transaction_Type',

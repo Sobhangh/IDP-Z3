@@ -23,13 +23,13 @@ p
 
 -- subtences ------------------------------------
 p
-16.0 = (Base * Base)
+16.0 = Base * Base
 0 < Base
 
 -- GUILines ------------------------------------
 Base
 p
-16.0 = (Base * Base)
+16.0 = Base * Base
 0 < Base
 
 -- case -------------------------------------
@@ -41,7 +41,7 @@ Universals:
   p
   0 < Base
 Consequences:
-  16.0 = (Base * Base)
+  16.0 = Base * Base
   Base -> 4
 Simplified:  
   true
@@ -65,13 +65,13 @@ Irrelevant:
                        'status': 'UNIVERSAL',
                        'typ': 'Bool',
                        'value': True},
-          '16.0 = (Base * Base)': {'environmental': False,
-                                   'normal': False,
-                                   'reading': '16.0 = (Base * Base)',
-                                   'relevant': True,
-                                   'status': 'CONSEQUENCE',
-                                   'typ': 'Bool',
-                                   'value': True},
+          '16.0 = Base * Base': {'environmental': False,
+                                 'normal': False,
+                                 'reading': '16.0 = Base * Base',
+                                 'relevant': True,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': True},
           'Base': {'environmental': False,
                    'normal': True,
                    'reading': 'Base',

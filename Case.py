@@ -60,10 +60,10 @@ class Case:
 
         # initialize .assignments
         self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.idp.subtences.values()}
-        self.assignments.update({ atom.code : ass for atom, ass in self.given.items() })
+        self.assignments.update({ atom.code : ass for atom, ass in self.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
 
         # find immediate universals
-        for i, c in enumerate(self.idp.theory.constraints):
+        for c in self.idp.theory.constraints:
             c = c.copy()
             u = c.implicants()
             if u:
@@ -103,13 +103,10 @@ class Case:
         
     def get_relevant_subtences(self, all_: bool) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
         #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
-        constraints = ( self.simplified
-            + list(self.idp.goal.subtences().values()))
+        constraints = ( self.simplified )
 
         # determine relevant symbols (including defined ones)
         symbols = mergeDicts( e.unknown_symbols() for e in constraints )
-        if self.idp.goal.decl is not None:
-            symbols.update({self.idp.goal.decl.name : self.idp.goal.decl})
 
         # remove irrelevant domain conditions
         self.simplified = list(filter(lambda e: e.if_symbol is None or e.if_symbol in symbols
@@ -207,6 +204,7 @@ class Case:
 
                 # simplify assignments
                 # e.g. 'Sides=4' becomes false when Sides becomes 3
+                #TODO simplification of quantified expressions may lead to new implicants too
                 for old_ass in self.assignments.values():
                     before = str(old_ass.sentence)
                     new_constraint = old_ass.sentence.substitute(old, new)
