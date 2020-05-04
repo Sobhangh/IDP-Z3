@@ -1,73 +1,123 @@
 vocabulary {
-    type t_epoxy constructed from {e1, e2, e3}
-    type t_cost = {0.539; 100}
-    type t_color constructed from {amber, black_fluorescent, blackish_grey, None}
-    type t_shelf_life = {0; 6; 12}
-    type t_lowest_storage_t = {0; 15; 16}
-    type t_highest_storage_t = {10; 25; 38}
-    
-    type params constructed from {cost, shelf_life, highest_storage_T, lowest_storage_T}
-    Known_Param(params)
-    
-    Epoxy: t_epoxy
-    
-    // All predicates which signify if a value is known.
-    Number_Unknown: int
+
+    type sides = {3..4}
+    Sides: sides
+    Vertices: sides
 
 
-    ECost(t_epoxy): t_cost
-    Min_Cost: real
-    Max_Cost: real
-    [Slider: (Min_Cost, Max_Cost): (0.5, 1)]
-    Cost: t_cost
+    type type constructed from {triangle, quadrilateral}
+    Type : type
 
-    Min_Shelf_Life: real
-    Max_Shelf_Life: real
-    EShelf_Life(t_epoxy): t_shelf_life
-    [Slider: (Min_Shelf_Life, Max_Shelf_Life): (0, 15)]
-    Shelf_Life: t_shelf_life
+    type side = {1..4}
+    Length(side):real
+    Angle(side):real
 
-    ELowest_Storage_T(t_epoxy): t_lowest_storage_t
-    EHighest_Storage_T(t_epoxy): t_highest_storage_t
-    Lowest_Storage_T: t_lowest_storage_t
-    Highest_Storage_T: t_highest_storage_t 
-    
-    Min_Storage_T: real
-    Max_Storage_T: real
-    Min_Specific_Gravity_Resin: real
+    type subtype constructed from
+        { regular_triangle
+        , right_triangle
+        , rectangle
+        , square
+        , irregular}
+    Subtype : subtype
 
+    Convex
+    Equilateral
+    Perimeter:real
+
+    // Base : real
+    // Height: real
+    // Surface:real
 }
-
 
 theory {
-   
-    
-    Number_Unknown = #{p[params]: ~Known_Param(p)}.
-    
-    Known_Param(cost) <=> ECost(Epoxy) ~= 100. // Default t_cost is 100.
-    Known_Param(cost) => Min_Cost =< ECost(Epoxy) =< Max_Cost.
-    Cost = ECost(Epoxy).  
+    [Definition of triangle]
+    (Type=triangle      <=> Sides=3).
 
-    Known_Param(shelf_life) <=> EShelf_Life(Epoxy) ~= 0.
-    Known_Param(shelf_life) => Min_Shelf_Life =< EShelf_Life(Epoxy) =< Max_Shelf_Life.
-    Shelf_Life = EShelf_Life(Epoxy).
+    [Definition of rectangle]
+    (Type=quadrilateral <=> Sides=4).
 
-    
-    Known_Param(lowest_storage_T) <=> ELowest_Storage_T(Epoxy) ~= 0.
-    Known_Param(highest_storage_T) <=> EHighest_Storage_T(Epoxy) ~= 0.
-    [annotiatioooooooon]
-    (ELowest_Storage_T(Epoxy) =< Min_Storage_T =< EHighest_Storage_T(Epoxy)).
-    EHighest_Storage_T(Epoxy) >= Max_Storage_T >= ELowest_Storage_T(Epoxy).
-    Lowest_Storage_T = ELowest_Storage_T(Epoxy).
-    Highest_Storage_T = EHighest_Storage_T(Epoxy).
+    [There are as many vertices as there are sides]
+    ( (Vertices=3 <=> Sides=3) &
+      (Vertices=4 <=> Sides=4)).
+
+    [All triangles are convex]
+    (Sides=3 => Convex).
+
+    [Definition of Convex]
+    (Convex <=> [All angles are below 180°]
+                (∀n[side]: Angle(n)<180)).
+
+    [Definition of Equilateral]
+    (Equilateral <=> [All sides have the same length]
+                     (∀n[side]: Length(n)=Length(1) | Length(n)=0)).
+
+    [A triangle is regular, right, or irregular]
+    ( Subtype=right_triangle | Subtype=regular_triangle | Subtype=irregular <= Sides=3).
+
+    [A quadrilateral is a square, a rectangle, or irregular]
+    (Subtype=square | Subtype=rectangle | Subtype=irregular <= Sides=4).
+
+    [Squares and rectangles are quadrilaterals]
+    (Subtype=square | Subtype=rectangle => Sides=4).
+
+    [A regular triangle is an equilateral triangle]
+    (Subtype=regular_triangle <=> Sides=3 & Equilateral).
+
+    [A regular triangle is a triangle where all angles are 60°]
+    (Subtype=regular_triangle <=> Sides=3 & [All angles are 60°]
+                                            (!n[side]: Angle(n)=60 | Angle(n)=0)).
+
+    [A right triangle is a triangle with a 90° angle]
+    (Subtype=right_triangle   <=> Sides=3 & [One angle is 90°]
+                                           (?n[side]: Angle(n)=90)).
+
+    [All angles are 90° in squares and rectangles]
+    (Sides=4 & Subtype~=irregular <=> [All angles are 90°]
+                                            (!n[side]: Angle(n)=90| Angle(n)=0)).
+
+    [In a rectangle, opposite side have the same length, and adjacent sides have different lengths]
+    (Subtype=rectangle => Length(3)=Length(1) & Length(2)=Length(4) & Length(2)~=Length(1)).
+
+    [A square is an equilateral quadrilateral]
+    (Subtype=square    <=> Sides=4 & Equilateral).
+
+    [In a triangle, no side is longer than the sum of the 2 other sides]
+    ( Type=triangle => ( Length(1) =< Length(2) + Length(3))
+                    &  ( Length(2) =< Length(3) + Length(1))
+                    &  ( Length(3) =< Length(1) + Length(2))).
+
+    // General constraints
+
+    [The perimeter is the sum of the lengths of the sides]
+    (Perimeter = sum{n[side] : true : Length(n)}).
+
+    [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
+    (sum{n[side] : true : Angle(n)} = (Sides-2)*180).
+
+    [Lengths are positive numbers]
+    (!x[side]: 0 =< Length(x)).
+
+    [Angles are positive numbers]
+    (!x[side]: 0 =< Angle(x)).
+
+    [Angles cannot be 180°]
+    (!x[side]: Angle(x) ~= 180).
+
+    [A polygon with N vertices has N angles]
+    (!n[side]: Angle(n)=0 <=> Vertices<n ).
+
+    [A polygon with N sides has N lengths]
+    (!n[side]: Length(n)=0 <=> Sides<n).
+
+
+
+    // TODO : surface
+    //Type=triangle => Surface = (Base * Height)/2.0.
+    //Subtype=square | Subtype=rectangle => Surface = Length(1)*Length(2).
+    //Subtype=irregular & Sides = 4 => Surface = -1.
+    //0 =< Base.
+    //0 =< Height.
+    //?n[side]: n=<Sides & Length(n)=Base.
 }
 
-structure {
-    ECost = {e1, 0.539} else 100
-    EShelf_Life = {e1, 12; e2, 6;} else 0
-    ELowest_Storage_T = {e1, 16; e2, 0; e3, 15} else 0
-    EHighest_Storage_T = {e1, 38; e2, 10; e3, 25} else 0
-
-}
-
-
+view expanded
