@@ -26,14 +26,9 @@ Adds substitute, expand_quantifiers and simplify to logic expression classes
 """
 
 import copy
-import functools
-import itertools as it
-import os
-import re
 import sys
 
-from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort
-from utils import mergeDicts, unquote, Log, nl
+from utils import Log, nl
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
@@ -45,48 +40,27 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 
 # class Expression ############################################################
 
-def _replace_by(self, by):
-    " replace expression by a new Brackets node, to keep annotations "
-    if type(self) == Fresh_Variable or type(by) == Fresh_Variable:
-        return by # no need to have brackets
-    if self.type == 'bool':
-        out = Brackets(f=by, annotations=self.annotations) # by is not copied !
+def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branch=None):
+    " change attributes of an expression, and erase derive attributes "
 
-        # copy initial annotation
-        out.code = self.code
-        out.is_subtence = self.is_subtence
-        out.fresh_vars = self.fresh_vars
-        out.is_visible = self.is_visible
-        out.type = self.type
-        # out.normal is not set, normally
-    else:
-        out = copy.copy(by)
-        out.code = self.code
-    return out
-Expression._replace_by = _replace_by
-
-
-def _change(self, sub_exprs=None, ops=None, just_branch=None):
-    " change attributes of an expression, after copying it if really changed "
-
-    # return self if not changed
-    changed = False
-    if sub_exprs is not None:   changed |= self.sub_exprs != sub_exprs
-    if just_branch is not None: changed = True
-    if not changed: return self
-
-    out = copy.copy(self)
-    if sub_exprs is not None :  out.sub_exprs = sub_exprs
-    if ops       is not None :  out.operator  = ops
-    if just_branch is not None: out.just_branch = just_branch
+    if sub_exprs   is not None: self.sub_exprs = sub_exprs
+    if ops         is not None: self.operator  = ops
+    if just_branch is not None: self.just_branch = just_branch
+    if value       is not None: self.value     = value
+    elif simpler   is not None: 
+        if type(simpler) in [Constructor, NumberConstant]:
+            self.value   = simpler
+        elif simpler.value is not None: # example: prime.idp
+            self.value   = simpler.value
+        else:
+            self.simpler = simpler
+    assert value is None or type(value) in [Constructor, NumberConstant]
     
-    # reset derived values
-    out.str = sys.intern(str(out))
-    out._unknown_symbols = None
-    out._subtences = None
-    out.translated = None
+    # reset derived attributes
+    self.str = sys.intern(str(self))
+    self._unknown_symbols = None
 
-    return out
+    return self
 Expression._change = _change
 
 
@@ -96,59 +70,35 @@ def update_exprs(self, new_expr_generator):
     return self._change(sub_exprs=list(new_expr_generator))
 Expression.update_exprs = update_exprs
 
-indent = 0
-def log(function):
-    def _wrapper(*args, **kwds):
-        global indent
-        self = args[0]
-        e0   = args[1]
-        e1   = args[2]
-        Log( f"{nl}|------------"
-             f"{nl}|{'*' if self.is_subtence else ''}{str(self)}"
-             f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {str(e0)} -> {str(e1)})' if e0.code!=str(e0) or e1.code!=str(e1) else ''}"
-             , indent)
-        indent +=4
-        out = function(*args, *kwds)
-        indent -=4
-        Log( f"{nl}|== {'*' if out.is_subtence else ''}{str(out)}"
-          , indent )
-        return out    
-    return _wrapper
-
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, todo=None):
+def Expression_substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
 
-    if self == e0 or self.code == e0.code: # first == based on repr !
-        return self._replace_by(e1)
+    # similar code in AppliedSymbol !
+    if self.value is not None:
+        return self
+    elif self.code == e0.code:
+        return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
-        if out.just_branch is not None:
-            new_branch = out.just_branch.substitute(e0, e1, todo)
-            if new_branch == self: # justification is satisfied
-                if todo is not None:
-                    todo.append((self, TRUE))
-                    self.just_branch = None
-                return self._replace_by(TRUE)
-            if new_branch == AUnary.make('~', self): # justification is satisfied
-                if todo is not None:
-                    todo.append((self, FALSE))
-                    self.just_branch = None
-                return self._replace_by(FALSE)
-            out = out._change(just_branch= new_branch)
     return out
-Expression.substitute = substitute
+Expression.substitute = Expression_substitute
 
 
 def instantiate(self, e0, e1):
     """ recursively substitute e0 by e1, without Bracket """
-    if self == e0: # based on repr !
+    if self.code == e0.code:
         return e1
     else:
         out = copy.copy(self)
-        out.sub_exprs = [e.instantiate(e0, e1) for e in out.sub_exprs]
-        out = out.simplify1()
-        out.code = out.code.replace(str(e0), str(e1))
+        if out.value is not None:
+            pass
+        else:
+            out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
+            out.code = out.str
+            out.original = out
+            if out.just_branch is not None:
+                out._change(just_branch=out.just_branch.instantiate(e0, e1))
         return out
 Expression.instantiate = instantiate
 
@@ -165,7 +115,9 @@ Expression.expand_quantifiers = expand_quantifiers
 
 def interpret(self, theory):
     " use information in structure and simplify "
-    return self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
+    out = self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
+    out.original = out
+    return out
 Expression.interpret = interpret
 
 
@@ -173,24 +125,20 @@ Expression.interpret = interpret
 # Class IfExpr ################################################################
 
 def update_exprs(self, new_expr_generator):
-    if isinstance(new_expr_generator, list):
-        new_expr_generator = iter(new_expr_generator)
-    if_ = next(new_expr_generator)
+    sub_exprs = list(new_expr_generator)
+    if_, then_, else_   = sub_exprs[0], sub_exprs[1], sub_exprs[2]
     if if_ == TRUE:
-        return self._replace_by(next(new_expr_generator))
+            return self._change(simpler=then_, sub_exprs=sub_exprs)
     elif if_ == FALSE:
-        next(new_expr_generator)
-        return self._replace_by(next(new_expr_generator))
+            return self._change(simpler=else_, sub_exprs=sub_exprs)
     else:
-        then_ = next(new_expr_generator)
-        else_ = next(new_expr_generator)
         if then_ == else_:
-            return self._replace_by(then_)
+            return self._change(simpler=then_, sub_exprs=sub_exprs)
         elif then_ == TRUE and else_ == FALSE:
-                return self._replace_by(if_)
+            return self._change(simpler=if_  , sub_exprs=sub_exprs)
         elif then_ == FALSE and else_ == TRUE:
-                return self._replace_by(AUnary.make('~', if_))
-    return self._change(sub_exprs=[if_, then_, else_])
+            return self._change(simpler=AUnary.make('~', if_), sub_exprs=sub_exprs)
+    return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
 
 
@@ -206,35 +154,45 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.decl.range:
-                    new_f = f.substitute(var, val)
+                    new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = out
         else:
             self.vars.append(var)
+            self.sorts.append(var.decl)
     if self.q == '∀':
         out = AConjunction.make('∧', forms)
     else:
         out = ADisjunction.make('∨', forms)
     if not self.vars:
-        return self._replace_by(out)
-    return self._change(sub_exprs=[out])
+        return self._change(simpler=out, sub_exprs=[out])
+    return self._change(sub_exprs=[forms])
 AQuantification.expand_quantifiers = expand_quantifiers
 
+def update_exprs(self, new_expr_generator):
+    exprs = list(new_expr_generator)
+    simpler = exprs[0] if not self.vars else None
+    return self._change(simpler=simpler, sub_exprs=exprs)
+AQuantification.update_exprs = update_exprs
 
 
 # Class AImplication #######################################################
 
 def update_exprs(self, new_expr_generator):
     exprs = list(new_expr_generator)
+    value, simpler = None, None
     if exprs[0] == FALSE: # (false => p) is true
-        return self._replace_by(TRUE)
+        value = TRUE
+        # exprs[0] may be false because exprs[1] is false
+        exprs = [exprs[0], exprs[1] if exprs[1] == FALSE else FALSE]
     if exprs[0] == TRUE: # (true => p) is p
-        return self._replace_by(exprs[1])
+        simpler = exprs[1]
     if exprs[1] == TRUE: # (p => true) is true
-        return self._replace_by(TRUE)
+        value = TRUE
+        exprs = [exprs[0] if exprs[0] == TRUE else TRUE, exprs[1]]
     if exprs[1] == FALSE: # (p => false) is ~p
-        return self._replace_by(AUnary.make('~', exprs[0]))
-    return self._change(sub_exprs=exprs)
+        simpler = AUnary.make('~', exprs[0])
+    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AImplication.update_exprs = update_exprs
 
 
@@ -243,11 +201,14 @@ AImplication.update_exprs = update_exprs
 
 def update_exprs(self, new_expr_generator):
     exprs = list(new_expr_generator)
+    if len(exprs)==1:
+        return self._change(simpler=exprs[1], sub_exprs=exprs)
     for e in exprs:
-        if e == TRUE:
-            return self._replace_by(AConjunction.make('∧', exprs, self.is_subtence))
-        if e == FALSE:
-            return self._replace_by(AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence))
+        if e == TRUE: # they must all be true
+            return self._change(simpler=AConjunction.make('∧', exprs, self.is_subtence), sub_exprs=exprs)
+        if e == FALSE: # they must all be false
+            return self._change(simpler=AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence),
+                              sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs
 
@@ -256,19 +217,20 @@ AEquivalence.update_exprs = update_exprs
 # Class ADisjunction #######################################################
 
 def update_exprs(self, new_expr_generator):
-    
-    exprs, is_true = [], False
+    exprs, other = [], []
     for expr in new_expr_generator:
         if expr == TRUE:
-            return self._replace_by(TRUE)
-        if expr == FALSE:
-            pass
-        else:
-            exprs.append(expr)
-            
-    if len(exprs) == 0: # all disjuncts are False
-        return self._replace_by(FALSE)
-    return self._change(sub_exprs=exprs)
+            return self._change(value=TRUE, sub_exprs=[expr])
+        exprs.append(expr)
+        if expr != FALSE:
+            other.append(expr)
+
+    value, simpler = None, None
+    if len(other) == 0: # all disjuncts are False
+        value = FALSE
+    if len(other) == 1:
+         simpler=other[0]
+    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
 
 
@@ -277,19 +239,20 @@ ADisjunction.update_exprs = update_exprs
 
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_expr_generator):
-    
-    exprs, is_false = [], False
+    exprs, other = [], []
     for expr in new_expr_generator:
-        if expr == TRUE:
-            pass
-        elif expr == FALSE: 
-            return self._replace_by(FALSE)
-        else:
-            exprs.append(expr)
+        if expr == FALSE: 
+            return self._change(value=FALSE, sub_exprs=[expr])
+        exprs.append(expr)
+        if expr != TRUE:
+            other.append(expr)
 
-    if len(exprs) == 0:  # all conjuncts are True
-        return self._replace_by(TRUE)
-    return self._change(sub_exprs=exprs)
+    value, simpler = None, None
+    if len(other) == 0:  # all conjuncts are True
+        value = TRUE
+    if len(other) == 1:
+        simpler = other[0]
+    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
 
 
@@ -300,13 +263,13 @@ def update_exprs(self, new_expr_generator):
     operands = list(new_expr_generator)
     operands1 = [e.as_ground() for e in operands]
     if all(e is not None for e in operands1):
-        acc = operands1[0]
+        acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
-        for op, expr in zip(self.operator, operands1[1:]):
-            if not (BinaryOperator.MAP[op]) (acc.translate(), expr.translate()):
-                return self._replace_by(FALSE)
-            acc = expr
-        return self._replace_by(TRUE)
+        for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
+            if not (BinaryOperator.MAP[op]) (acc1.translate(), expr1.translate()):
+                return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+            acc, acc1 = expr, expr1
+        return self._change(value=TRUE, sub_exprs=operands)
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
@@ -345,7 +308,7 @@ def update_arith(self, family, new_expr_generator):
     assert len([family] + self.operator) == len(operands), "Internal error"
     for op, expr in zip([family] + self.operator, operands):
         if family == '*' and acc == 0:
-            return self._change(ZERO)
+            return self._change(value=ZERO, sub_exprs=[expr])
         add(op, expr)
 
     # analyse results
@@ -354,7 +317,7 @@ def update_arith(self, family, new_expr_generator):
     else:
         exprs = [NumberConstant(number=str(acc))] + exprs
     if len(exprs)==1:
-        return self._replace_by(exprs[0])
+        return self._change(simpler=exprs[0], sub_exprs=exprs, ops=ops)
     return self._change(sub_exprs=exprs, ops=ops)
 
 
@@ -376,7 +339,7 @@ def update_exprs(self, new_expr_generator):
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
             out = operands1[0].translate() % operands1[1].translate()
-            return self._replace_by(NumberConstant(number=str(out)))
+            return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
         else:
             return self._change(sub_exprs=operands)
     return update_arith(self, '*', new_expr_generator)
@@ -392,7 +355,7 @@ def update_exprs(self, new_expr_generator):
     if len(operands) == 2 \
     and all(e is not None for e in operands1):
         out = operands1[0].translate() ** operands1[1].translate()
-        return self._replace_by(NumberConstant(number=str(out)))
+        return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
     else:
         return self._change(sub_exprs=operands)
 APower.update_exprs = update_exprs
@@ -405,14 +368,14 @@ def update_exprs(self, new_expr_generator):
     operand = list(new_expr_generator)[0]
     if self.operator == '~':
         if operand == TRUE:
-            return self._replace_by(FALSE)
+            return self._change(value=FALSE, sub_exprs=[operand])
         if operand == FALSE:
-            return self._replace_by(TRUE)
+            return self._change(value=TRUE, sub_exprs=[operand])
     else: # '-'
         a = operand.as_ground()
         if a is not None:
             if type(a) == NumberConstant:
-                return self._replace_by(NumberConstant(number=str(- a.translate())))
+                return self._change(value=NumberConstant(number=str(- a.translate())), sub_exprs=[operand])
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
@@ -430,7 +393,7 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.decl.range:
-                    new_f = f.substitute(var, val)
+                    new_f = f.copy().substitute(var, val)
                     out.append(new_f)
             forms = out
         else:
@@ -450,34 +413,76 @@ def update_exprs(self, new_expr_generator):
             else:
                 exprs.add(expr)
         out = NumberConstant(number=str(acc))
-        return self._replace_by(out)
+        return self._change(value=out, sub_exprs=operands)
 
-    return self
+    return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
 
 
-# Class AppliedSymbol #######################################################
+# Class AppliedSymbol, Variable #######################################################
 
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
     if self.decl.interpretation is not None: # has a structure
         self.is_subtence = False
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
-        return self._replace_by(out)
+        out = self._change(simpler=out, sub_exprs=sub_exprs)
     elif self.name in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs
         self.just_branch = theory.clark[self.name].instantiate_definition(sub_exprs, theory)
-        return self
+        out = self
     else:
-        return self
+        out = self._change(sub_exprs=sub_exprs)
+    out.original = self
+    return out
 AppliedSymbol.interpret = interpret
+Variable     .interpret = interpret
 
+# @log  # decorator patched in by tests/main.py
+def substitute(self, e0, e1, todo=None):
+    """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
+    global Expression_substitute
+
+    if type(e1) == Fresh_Variable:
+        out = copy.copy(e1)
+        out.code = self.code
+        return out
+
+    new_branch = None
+    if self.just_branch is not None:
+        Log(f"{nl} definition:")
+        new_branch = self.just_branch.substitute(e0, e1, todo)
+        if todo is not None:
+            todo.extend(new_branch.implicants())
+            
+    if self.value is not None:
+        return self._change(just_branch=new_branch)
+    if self.code == e0.code:
+        return self._change(value=e1, just_branch=new_branch)
+    else:
+        new_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs]
+        value, new_branch = None, None
+        return self._change(sub_exprs=new_exprs, value=value, just_branch=new_branch)
+AppliedSymbol .substitute = substitute
+Variable      .substitute = substitute
+
+
+# Class Fresh_Variable #######################################################
+
+def interpret(self, theory):
+    return self
+Fresh_Variable.interpret = interpret
+
+# @log  # decorator patched in by tests/main.py
+def substitute(self, e0, e1, todo=None):
+    return e1 if self.code == e0.code else self
+Fresh_Variable.substitute = substitute
 
      
 # Class Brackets #######################################################
 
 def update_exprs(self, new_expr_generator):
     expr = next(new_expr_generator)
-    return self._change(sub_exprs=[expr])
+    return self._change(sub_exprs=[expr], simpler=expr, value=expr.value)
 Brackets.update_exprs = update_exprs

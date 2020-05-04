@@ -1,0 +1,170 @@
+
+|------------
+|*p
+|+ p -> true
+|== *!true
+|------------
+|p ⇔ q with Variable,Variable
+|+ p -> true  (or true -> true)
+    |------------
+    |*p
+    |+ p -> true  (or true -> true)
+    |== *!true
+    |------------
+    |*q
+    |+ p -> true  (or true -> true)
+    |== *q
+|== !!q with Variable,Variable
+|------------
+|q with Variable,Variable
+|+ q -> true
+    |------------
+    |*true
+    |+ q -> true
+    |== *!true
+    |------------
+    |*q
+    |+ q -> true
+    |== *!true
+|== !true with Variable,Variable
+|------------
+|q ⇔ (~(r)) with Variable,Brackets
+|+ p -> true  (or true -> true)
+    |------------
+    |*q
+    |+ p -> true  (or true -> true)
+    |== *q
+    |------------
+    |(~(r)) with AUnary
+    |+ p -> true  (or true -> true)
+        |------------
+        |~(r) with Variable
+        |+ p -> true  (or true -> true)
+            |------------
+            |*r
+            |+ p -> true  (or true -> true)
+            |== *r
+        |== ~(r) with Variable
+    |== !!~(r) with AUnary
+|== q ⇔ (~(r)) with Variable,Brackets
+|------------
+|*true
+|+ p -> true  (or true -> true)
+|== *!true
+|------------
+|*true
+|+ p -> true  (or true -> true)
+|== *!true
+|------------
+|*r
+|+ p -> true  (or true -> true)
+|== *r
+|------------
+|*s
+|+ p -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ p -> true  (or true -> true)
+|== *t
+|------------
+|*true
+|+ q -> true  (or true -> true)
+|== *!true
+|------------
+|true with Variable,Variable
+|+ q -> true  (or true -> true)
+|== !true with Variable,Variable
+|------------
+|q ⇔ (~(r)) with Variable,Brackets
+|+ q -> true  (or true -> true)
+    |------------
+    |*q
+    |+ q -> true  (or true -> true)
+    |== *!true
+    |------------
+    |(~(r)) with AUnary
+    |+ q -> true  (or true -> true)
+        |------------
+        |~(r) with Variable
+        |+ q -> true  (or true -> true)
+            |------------
+            |*r
+            |+ q -> true  (or true -> true)
+            |== *r
+        |== ~(r) with Variable
+    |== !!~(r) with AUnary
+|== !!(~(r)) with Variable,Brackets
+|------------
+|(~(r)) with Variable,Brackets
+|+ r -> false
+    |------------
+    |*true
+    |+ r -> false
+    |== *!true
+    |------------
+    |(~(r)) with AUnary
+    |+ r -> false
+        |------------
+        |~(r) with Variable
+        |+ r -> false
+            |------------
+            |*r
+            |+ r -> false
+            |== *!false
+        |== !true with Variable
+    |== !true with AUnary
+|== !true with Variable,Brackets
+|------------
+|*true
+|+ q -> true  (or true -> true)
+|== *!true
+|------------
+|*true
+|+ q -> true  (or true -> true)
+|== *!true
+|------------
+|*false
+|+ q -> true  (or true -> true)
+|== *!false
+|------------
+|*s
+|+ q -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ q -> true  (or true -> true)
+|== *t
+|------------
+|*true
+|+ r -> false  (or false -> false)
+|== *!true
+|------------
+|true with Variable,Variable
+|+ r -> false  (or false -> false)
+|== !true with Variable,Variable
+|------------
+|true with Variable,Brackets
+|+ r -> false  (or false -> false)
+|== !true with Variable,Brackets
+|------------
+|*true
+|+ r -> false  (or false -> false)
+|== *!true
+|------------
+|*true
+|+ r -> false  (or false -> false)
+|== *!true
+|------------
+|*false
+|+ r -> false  (or false -> false)
+|== *!false
+|------------
+|*s
+|+ r -> false  (or false -> false)
+|== *s
+|------------
+|*t
+|+ r -> false  (or false -> false)
+|== *t
+Z3 propagation ********************************

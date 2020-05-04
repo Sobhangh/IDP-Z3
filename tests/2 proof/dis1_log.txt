@@ -1,0 +1,34 @@
+
+|------------
+|*p
+|+ p -> true
+|== *!true
+|------------
+|p ∨ q with Variable,Variable
+|+ p -> true  (or true -> true)
+    |------------
+    |*p
+    |+ p -> true  (or true -> true)
+    |== *!true
+|== !true with Variable
+|------------
+|*true
+|+ p -> true  (or true -> true)
+|== *!true
+|------------
+|*q
+|+ p -> true  (or true -> true)
+|== *q
+|------------
+|*r
+|+ p -> true  (or true -> true)
+|== *r
+|------------
+|*s
+|+ p -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ p -> true  (or true -> true)
+|== *t
+Z3 propagation ********************************

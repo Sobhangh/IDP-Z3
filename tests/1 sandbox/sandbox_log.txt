@@ -1,0 +1,63 @@
+
+Z3 propagation ********************************
+|------------
+|(~(p)) ∨ q with AUnary,Variable
+|+ p -> true
+    |------------
+    |~(p) with Variable
+    |+ p -> true
+        |------------
+        |*p just p
+        |+ p -> true
+ definition:
+            |------------
+            |p with Variable,Constructor
+            |+ p -> true
+                |------------
+                |*p
+                |+ p -> true
+                |== *!true
+                |------------
+                |true
+                |+ p -> true
+                |== true
+            |== !true with Variable,Constructor
+        |== *!true just true
+    |== !false with Variable
+    |------------
+    |*q
+    |+ p -> true
+    |== *q
+|== !!q with AUnary,Variable
+|------------
+|q with AUnary,Variable
+|+ q -> true
+    |------------
+    |false with Variable
+    |+ q -> true
+    |== !false with Variable
+    |------------
+    |*q
+    |+ q -> true
+    |== *!true
+|== !true with Variable
+|------------
+|*p
+|+ p -> true
+|== *!true
+|------------
+|*true
+|+ p -> true  (or true -> true)
+|== *!true
+|------------
+|true with Variable
+|+ q -> true  (or true -> true)
+|== !true with Variable
+|------------
+|*true
+|+ q -> true  (or true -> true)
+|== *!true
+|------------
+|*true
+|+ q -> true  (or true -> true)
+|== *!true

@@ -1,0 +1,54 @@
+
+|------------
+|*p
+|+ p -> true
+|== *!true
+|------------
+|((~((p))) ∨ (p)) with ADisjunction
+|+ p -> true  (or true -> true)
+    |------------
+    |(~((p))) ∨ (p) with AUnary,Brackets
+    |+ p -> true  (or true -> true)
+        |------------
+        |~((p)) with Brackets
+        |+ p -> true  (or true -> true)
+            |------------
+            |(p) with Variable
+            |+ p -> true  (or true -> true)
+                |------------
+                |*p
+                |+ p -> true  (or true -> true)
+                |== *!true
+            |== !true with Variable
+        |== !false with Brackets
+        |------------
+        |(p) with Variable
+        |+ p -> true  (or true -> true)
+            |------------
+            |*p
+            |+ p -> true  (or true -> true)
+            |== *!true
+        |== !true with Variable
+    |== !true with Brackets
+|== !true with ADisjunction
+|------------
+|*true
+|+ p -> true  (or true -> true)
+|== *!true
+|------------
+|*q
+|+ p -> true  (or true -> true)
+|== *q
+|------------
+|*r
+|+ p -> true  (or true -> true)
+|== *r
+|------------
+|*s
+|+ p -> true  (or true -> true)
+|== *s
+|------------
+|*t
+|+ p -> true  (or true -> true)
+|== *t
+Z3 propagation ********************************

@@ -1,0 +1,34 @@
+
+|------------
+|1 with Constructor,NumberConstant,NumberConstant
+|+ c -> red
+|== !1 with Constructor,NumberConstant,NumberConstant
+|------------
+|1 with Constructor,NumberConstant,NumberConstant
+|+ c -> blue
+|== !1 with Constructor,NumberConstant,NumberConstant
+|------------
+|1 with Constructor,NumberConstant,NumberConstant
+|+ c -> green
+|== !1 with Constructor,NumberConstant,NumberConstant
+|------------
+|p with Variable,AComparison
+|+ p -> true
+    |------------
+    |*p
+    |+ p -> true
+    |== *!true
+    |------------
+    |*true with AAggregate,NumberConstant
+    |+ p -> true
+    |== *!true with AAggregate,NumberConstant
+|== !true with Variable,AComparison
+|------------
+|*p
+|+ p -> true
+|== *!true
+|------------
+|*true with AAggregate,NumberConstant
+|+ p -> true  (or true -> true)
+|== *!true with AAggregate,NumberConstant
+Z3 propagation ********************************

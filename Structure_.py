@@ -30,21 +30,21 @@ from utils import *
 class Status(IntFlag):
     UNKNOWN     = 1
     GIVEN       = 2
-    UNIVERSAL   = 4
-    ENV_CONSQ   = 8
-    CONSEQUENCE = 16
-    EXPANDED    = 32
+    ENV_UNIV    = 4
+    UNIVERSAL   = 8
+    ENV_CONSQ   = 16
+    CONSEQUENCE = 32
+    EXPANDED    = 64
 
 class Assignment(object):
-    def __init__(self, sentence: Expression, truth: Optional[bool], status: Status):
+    def __init__(self, sentence: Expression, truth: Optional[Expression], status: Status):
         self.sentence = sentence
         self.truth = truth
         self.status = status
         self.relevant = False
-        self.is_environmental = not sentence.has_environmental(False)
 
     def update(self, sentence: Optional[Expression], 
-                     truth: Optional[bool], 
+                     truth: Optional[Expression], 
                      status: Optional[Status], 
                      case):
         """ make a copy, and save it in case.assignments """
@@ -55,53 +55,42 @@ class Assignment(object):
         case.assignments[self.sentence.code] = out
         return out
 
-    def __hash__(self):
-        return hash((str(self.sentence), self.truth))
-
     def __eq__(self, other):
         # ignores the modality of truth !
         return self.truth == other.truth \
             and type(self.sentence) == type (other.sentence) \
             and str(self.sentence) == str(other.sentence)
 
+    def __hash__(self): #TODO remove. Used for sets in abstract
+        return hash((str(self.sentence), str(self.truth)))
+
     def __repr__(self):
-        return ( f"{'' if self.truth else '~'}"
-                 f"{str(self.sentence.code)}")
+        out = str(self.sentence.code)
+        if self.truth is None:
+            return f"? {out}"
+        if self.truth == TRUE:
+            return out
+        if self.truth == FALSE:
+            return f"~{out}"
+        return f"{out} -> {str(self.truth)}"
 
     def __str__(self):
-        return ( f"{'' if self.truth else '? ' if self.truth is None else 'Not '}"
-                 f"{self.sentence.annotations['reading']}")
+        pre, post = '', ''
+        if self.truth is None:
+            pre = f"? "
+        elif self.truth == TRUE:
+            pre = ""
+        elif self.truth == FALSE:
+            pre = f"Not "
+        else:
+            post = f" -> {str(self.truth)}"
+        return f"{pre}{self.sentence.annotations['reading']}{post}"
     
 
     def as_substitution(self, case) -> Tuple[Optional[Expression], Optional[Expression]]:
         if self.truth is not None:
             old = self.sentence
-            new = cast(Expression, TRUE if self.truth else FALSE)
-            if self.truth:  # analyze true equalities
-                if isinstance(old, Equality):
-                    if is_number(old.value):
-                        new = NumberConstant(number=str(old.value))
-                        old = old.variable
-                    elif str(old.value) in case.idp.vocabulary.symbol_decls:
-                        new = case.idp.vocabulary.symbol_decls[str(old.value)]
-                        old = old.variable
-                elif isinstance(old, AComparison) and old.operator == ['=']:
-                    if   type(old.sub_exprs[1]) in [Constructor, NumberConstant]:
-                        new = old.sub_exprs[1]
-                        old = old.sub_exprs[0]
-                    elif type(old.sub_exprs[0]) in [Constructor, NumberConstant]:
-                        new = old.sub_exprs[0]
-                        old = old.sub_exprs[1]
-                    else:
-                        operands1 = [e.as_ground() for e in old.sub_exprs]
-                        if   operands1[1] is not None:
-                            new = copy(operands1[1])
-                            new.code = old.sub_exprs[1].code
-                            old = old.sub_exprs[0]
-                        elif operands1[0] is not None:
-                            new = copy(operands1[0])
-                            new.code = old.sub_exprs[0].code
-                            old = old.sub_exprs[1]
+            new = self.truth
             return old, new
         return None, None
 
@@ -111,69 +100,23 @@ class Assignment(object):
         if self.truth is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
-            return self.sentence.translate() if self.truth else Not(self.sentence.translate())
-        return self.sentence.translate()
-
-class Term(Assignment):
-    """ represents an applied symbol of unknown values """
-
-    def as_substitution(self, case):
-        return None, None
-
-    def assign(self, value: DatatypeRef, case, CONSQ: Status):
-        self.sentence = cast (Equality, self.sentence)
-        ass = Assignment(Equality(self.sentence.variable, value), True, CONSQ)
-        ass.relevant = True
-        case.assignments[self.sentence.code] = ass
-        return ass
-
-
-class Equality(Expression):
-    def __init__(self, variable: Union[AppliedSymbol, Variable, Fresh_Variable], value):
-        self.variable = variable # an Expression
-        self.value = value # a Z3 value or None
-        if value is not None:
-            self.type = 'bool'
-            self.code = sys.intern(f"{variable.code} = {str(value)}")
-            self.translated = (variable.translate() == value)
+            out = self.sentence.original.translate() if self.truth==TRUE else Not(self.sentence.original.translate())
         else:
-            self.type = 'int'
-            self.code = sys.intern(variable.code)
-            self.translated = variable.translated
-        self.str = self.code
-        self.annotations = {'reading': self.code} #TODO find original code (parenthesis !)
-        self.is_subtence = True
-
-    def __str__(self): return self.code
-
-    def unknown_symbols(self):
-        return self.variable.unknown_symbols()
-
-    def has_environmental(self, truth: bool):
-        return self.variable.has_environmental(truth)
-
-    def translate(self) -> DatatypeRef:
-        if self.value is not None:
-            return self.variable.translated == self.value
-        else:
-            return self.variable.translate()
-
-    def substitute(self, e0: Expression, e1: Expression, todo=None, case=None) -> 'Equality':
-        if self.variable == e0:
-            return Equality(self.variable, e1.translate())
-        return self
-
-    def subtences(self):
-        return {} #TODO ?
-
-    def reified(self) -> DatatypeRef:
-        return self.variable.reified()
+            out = self.sentence.original.translate() == self.truth.translate()
+        return out
 
 
 #################
 # load user's choices
 # see docs/REST.md
 #################
+
+def str_to_IDP(idp, val1):
+    if is_number(val1):
+        return NumberConstant(number=val1)
+    val1 = 'true' if str(val1) == 'True' else 'false' if str(val1) == 'False' else val1
+    val = idp.vocabulary.symbol_decls[val1]
+    return val
 
 def json_to_literals(idp, jsonstr: str):
     assignments: Dict[Expression, Optional[Assignment]] = {} # {atom : assignment} from the GUI (needed for propagate)
@@ -189,13 +132,13 @@ def json_to_literals(idp, jsonstr: str):
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
                 if atom in idp.subtences:
-                    atom = idp.subtences[atom]
+                    atom = idp.subtences[atom].copy()
                 else:
                     symbol = idp.vocabulary.symbol_decls[sym]
-                    atom = symbol.instances[atom]
+                    atom = symbol.instances[atom].copy()
                 if json_atom["typ"] == "Bool":
                     if "value" in json_atom:
-                        assignment = Assignment(atom, json_atom["value"], Status.GIVEN)
+                        assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                         assignments[atom] = assignment
                     else:
                         assignment = None  #TODO error ?
@@ -204,7 +147,7 @@ def json_to_literals(idp, jsonstr: str):
                         value = eval(json_atom["value"])
                     else:
                         value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
-                    assignment = Assignment(Equality(atom, value), True, Status.GIVEN)
+                    assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                     assignment.relevant = True
                     assignments[atom] = assignment
                 else:
@@ -232,17 +175,16 @@ def model_to_json(case, s, reify):
                     if atom in reify:
                         atomZ3 = reify[atom]
                     else:
-                        if type(atom) != Equality:
-                            print(atom)
                         atomZ3 = atom.reified()
                     value = model.eval(atomZ3, model_completion=True)
+                    value = str_to_IDP(case.idp, str(value))
 
                     # atom might not have an interpretation in model (if "don't care")
                     if atom.type == 'bool':
-                        if not (is_true(value) or is_false(value)):
+                        if value not in [TRUE, FALSE]: 
                             #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                             print("*** ", atom.annotations['reading'], " is not defined, and assumed false")
-                        d2['value']  = is_true(value)
+                        d2['value']  = (value == TRUE)
                     else: #TODO check that value is numeric ?
                         try:
                             d2['value'] = str(eval(str(value).replace('?', '')))
@@ -260,36 +202,34 @@ class Structure_(object):
         self.m[' Global']['env_dec'] = bool(case.idp.decision)
 
         def initialise(atom):
-            atomZ3 = atom.translate() #TODO
+            typ = atom.type
             key = atom.code
-            if type(atomZ3) != bool:
-                typ = atomZ3.sort().name()
-                for symb in atom.unknown_symbols().values():
-                    if not symb.name.startswith('_') or True:
-                        s = self.m.setdefault(symb.name, {})
+            for symb in atom.unknown_symbols().values():
+                s = self.m.setdefault(symb.name, {})
 
-                        if typ == 'Bool':
-                            symbol = {"typ": typ}
-                        elif 0 < len(symb.range):
-                            symbol = { "typ": typ, "value": "" #TODO
-                                    , "values": [str(v) for v in symb.range]}
-                        elif typ in ["Real", "Int"]:
-                            symbol = {"typ": typ, "value": ""} # default
-                        else:
-                            symbol = None
+                if typ == 'bool':
+                    symbol = {"typ": 'Bool'}
+                elif 0 < len(symb.range):
+                    typ = symb.out.decl.type.capitalize() if symb.out.decl.type in ['int', 'real'] else typ
+                    symbol = {"typ": typ, "value": ""  #TODO
+                              , "values": [str(v) for v in symb.range]}
+                elif typ in ["real", "int"]:
+                    symbol = {"typ": typ.capitalize(), "value": ""} # default
+                else:
+                    symbol = None
 
-                        if symbol:
-                            if atom.code in case.assignments:
-                                symbol["status"] = case.assignments[atom.code].status.name
-                                symbol["relevant"] = case.assignments[atom.code].relevant
-                            else:
-                                symbol["status"] = "UNKNOWN" #TODO
-                                symbol["relevant"] = True # unused symbol instance (Large(1))
-                            symbol['reading'] = atom.annotations['reading']
-                            symbol['normal'] = hasattr(atom, 'normal')
-                            symbol['environmental'] = atom.has_environmental(True)
-                            s.setdefault(key, symbol)
-                            break
+                if symbol:
+                    if atom.code in case.assignments:
+                        symbol["status"] = case.assignments[atom.code].status.name
+                        symbol["relevant"] = case.assignments[atom.code].relevant
+                    else:
+                        symbol["status"] = "UNKNOWN" #TODO
+                        symbol["relevant"] = True # unused symbol instance (Large(1))
+                    symbol['reading'] = atom.annotations['reading']
+                    symbol['normal'] = hasattr(atom, 'normal')
+                    symbol['environmental'] = atom.has_environmental(True)
+                    s.setdefault(key, symbol)
+                    break
 
         for GuiLine in case.GUILines.values():
             initialise(GuiLine)
@@ -304,27 +244,13 @@ class Structure_(object):
 
 
     def addAtom(self, atom, truth, status: Status):
-        if truth and type(atom) == Equality:
-            symbol = atom.variable.translated
-            key = atom.variable.code
-            typ = symbol.sort().name()
-            for name, symb in atom.unknown_symbols().items():
-                if not symb.name.startswith('_') or True:
-                    s = self.m.setdefault(name, {})
-                    if key in s:
-                        if typ in ["Real", "Int"]:
-                            s[key]["value"] = str(eval(str(atom.value).replace('?', ''))) # compute fraction
-                        elif 0 < len(symb.range): #TODO and type(atom) != IfExpr:
-                            s[key]["value"] = str(atom.value)
-                        s[key]["status"] = status.name
-        if atom.type != 'bool': return
         key = atom.code
         if key in self.case.GUILines:
             for symb in self.case.GUILines[key].unknown_symbols().keys():
                 s = self.m.setdefault(symb, {})
                 if key in s:
                     if truth is not None:
-                        s[key]["value"] = truth
+                        s[key]["value"] = True if truth==TRUE else False if truth==FALSE else str(truth)
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']

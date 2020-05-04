@@ -1,8 +1,5 @@
 TODO
 =
-- [ ] relevance and consequences [[20200403111308]]
-    - [ ] add type constraints
-    - [ ] expression.substitutions instead of todo, as_substitutions
 - [ ] Aanbesteding demo
 - [ ] [[AWS hosting]] [[20200401113342]] 
 

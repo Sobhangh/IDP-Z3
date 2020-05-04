@@ -1,0 +1,10 @@
+vocabulary {
+    p q1 q2 r s
+}
+theory {
+  { s <- r.}
+  { p <- q1 | q2.}
+  { q1 <- r.} 
+  q1.
+}
+goal p
