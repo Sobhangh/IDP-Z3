@@ -18,13 +18,13 @@ Or(Not(x + 1 == 1), x + 1 == 1)
 
 -- subtences ------------------------------------
 x = 0
-(x + 1) = 1
+x + 1 = 1
 
 -- GUILines ------------------------------------
 x
 y
 x = 0
-(x + 1) = 1
+x + 1 = 1
 
 -- case -------------------------------------
 Type:        
@@ -35,7 +35,7 @@ Universals:
   x = 0
   x -> 0
 Consequences:
-  (x + 1) = 1
+  x + 1 = 1
 Simplified:  
   true
   true
@@ -49,20 +49,20 @@ Irrelevant:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'x': {'(x + 1) = 1': {'environmental': False,
-                       'normal': False,
-                       'reading': '(x + 1) = 1',
-                       'relevant': True,
-                       'status': 'CONSEQUENCE',
-                       'typ': 'Bool',
-                       'value': True},
-       'x': {'environmental': False,
+ 'x': {'x': {'environmental': False,
              'normal': True,
              'reading': 'x',
              'relevant': True,
              'status': 'UNIVERSAL',
              'typ': 'Int',
              'value': '0'},
+       'x + 1 = 1': {'environmental': False,
+                     'normal': False,
+                     'reading': 'x + 1 = 1',
+                     'relevant': True,
+                     'status': 'CONSEQUENCE',
+                     'typ': 'Bool',
+                     'value': True},
        'x = 0': {'environmental': False,
                  'normal': False,
                  'reading': 'x = 0',

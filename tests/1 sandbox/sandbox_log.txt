@@ -1,7 +1,7 @@
 
 Z3 propagation ********************************
 |------------
-|(~(p)) ∨ q with AUnary,Variable
+|~(p) ∨ q with AUnary,Variable
 |+ p -> true
     |------------
     |~(p) with Variable

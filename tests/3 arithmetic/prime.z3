@@ -40,7 +40,7 @@ true
 Type:        
   
 Definitions: 
-  Rule:∀$Prime!0$[num]: Prime($Prime!0$) ⇔((true) ∧ ((2 < $Prime!0$) ⇒ (~(($Prime!0$ % 2) = 0))) ∧ ((3 < $Prime!0$) ⇒ (~(($Prime!0$ % 3) = 0))) ∧ ((4 < $Prime!0$) ⇒ (~(($Prime!0$ % 4) = 0)))) ∧ ((true) ∧ ((2 < $Prime!0$) ⇒ (~(($Prime!0$ % 2) = 0))) ∧ ((3 < $Prime!0$) ⇒ (~(($Prime!0$ % 3) = 0))) ∧ ((4 < $Prime!0$) ⇒ (~(($Prime!0$ % 4) = 0)))) ∧ ((true) ∧ ((2 < $Prime!0$) ⇒ (~(($Prime!0$ % 2) = 0))) ∧ ((3 < $Prime!0$) ⇒ (~(($Prime!0$ % 3) = 0))) ∧ ((4 < $Prime!0$) ⇒ (~(($Prime!0$ % 4) = 0)))) ∧ ((true) ∧ ((2 < $Prime!0$) ⇒ (~(($Prime!0$ % 2) = 0))) ∧ ((3 < $Prime!0$) ⇒ (~(($Prime!0$ % 3) = 0))) ∧ ((4 < $Prime!0$) ⇒ (~(($Prime!0$ % 4) = 0))))
+  Rule:∀$Prime!0$[num]: Prime($Prime!0$) ⇔((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0))) ∧ ((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0))) ∧ ((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0))) ∧ ((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0)))
 Universals:  
   
 Consequences:

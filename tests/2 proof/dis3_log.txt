@@ -4,7 +4,7 @@
 |+ p -> true
 |== *!true
 |------------
-|(~(p)) ∨ q with AUnary,Variable
+|~(p) ∨ q with AUnary,Variable
 |+ p -> true  (or true -> true)
     |------------
     |~(p) with Variable
@@ -36,7 +36,7 @@
     |== *!true
 |== !true with AUnary,Variable
 |------------
-|(~(q)) ∨ r with AUnary,Variable
+|~(q) ∨ r with AUnary,Variable
 |+ p -> true  (or true -> true)
     |------------
     |~(q) with Variable
@@ -50,7 +50,7 @@
     |*r
     |+ p -> true  (or true -> true)
     |== *r
-|== (~(q)) ∨ r with AUnary,Variable
+|== ~(q) ∨ r with AUnary,Variable
 |------------
 |*true
 |+ p -> true  (or true -> true)
@@ -92,7 +92,7 @@
     |== *!true
 |== !true with AUnary,Variable
 |------------
-|(~(q)) ∨ r with AUnary,Variable
+|~(q) ∨ r with AUnary,Variable
 |+ q -> true  (or true -> true)
     |------------
     |~(q) with Variable

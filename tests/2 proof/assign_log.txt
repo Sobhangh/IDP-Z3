@@ -4,7 +4,7 @@
 |+ x = 0 -> true
 |== *!true with Variable,NumberConstant
 |------------
-|(~((x = 0))) ∨ (x = 0) with AUnary,Brackets
+|~((x = 0)) ∨ (x = 0) with AUnary,Brackets
 |+ x = 0 -> true  (or true -> true)
     |------------
     |~((x = 0)) with Brackets

@@ -70,12 +70,12 @@ Universals:
 Consequences:
   
 Simplified:  
-  (cSID = b) ⇔ (2.104 ≤ Depth ≤ 2.476)
-  (cSID = c) ⇔ (2.768 ≤ Depth ≤ 3.391)
-  (cSID = d) ⇔ (4.294 ≤ Depth ≤ 5.206)
-  (cSID = e) ⇔ (5.474 ≤ Depth ≤ 6.686)
-  (cSID = f) ⇔ (8.312 ≤ Depth ≤ 10.748)
-  (cSID = b) ∨ (cSID = c) ∨ (cSID = d) ∨ (cSID = e) ∨ (cSID = f)
+  cSID = b ⇔ 2.104 ≤ Depth ≤ 2.476
+  cSID = c ⇔ 2.768 ≤ Depth ≤ 3.391
+  cSID = d ⇔ 4.294 ≤ Depth ≤ 5.206
+  cSID = e ⇔ 5.474 ≤ Depth ≤ 6.686
+  cSID = f ⇔ 8.312 ≤ Depth ≤ 10.748
+  cSID = b ∨ cSID = c ∨ cSID = d ∨ cSID = e ∨ cSID = f
 Irrelevant:  
   
 

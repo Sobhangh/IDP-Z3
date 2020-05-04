@@ -55,7 +55,7 @@ c = blue
 Type:        
   
 Definitions: 
-  Rule:∀$codeOf!0$[color],$codeOf$[code]: codeOf($codeOf!0$,$codeOf$) ⇔(($codeOf!0$ = c) ∧ ($codeOf$ = a)) ∨ ((~($codeOf!0$ = c)) ∧ ($codeOf$ = b))
+  Rule:∀$codeOf!0$[color],$codeOf$[code]: codeOf($codeOf!0$,$codeOf$) ⇔($codeOf!0$ = c ∧ $codeOf$ = a) ∨ (~($codeOf!0$ = c) ∧ $codeOf$ = b)
 Universals:  
   codeOf(red) = b
   codeOf(red) -> b

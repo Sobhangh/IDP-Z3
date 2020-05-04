@@ -4,7 +4,7 @@
 |+ p -> true
 |== *!true
 |------------
-|(~(p)) ∨ q with AUnary,Variable
+|~(p) ∨ q with AUnary,Variable
 |+ p -> true  (or true -> true)
     |------------
     |~(p) with Variable

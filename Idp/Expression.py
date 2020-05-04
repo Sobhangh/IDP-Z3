@@ -163,6 +163,7 @@ class Expression(object):
         return out
 
 class Constructor(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
         self.is_var = False
@@ -182,6 +183,7 @@ FALSE = Constructor(name='false')
 
 
 class IfExpr(Expression):
+    PRECEDENCE = 10
     IF = 0
     THEN = 1
     ELSE = 2
@@ -217,6 +219,7 @@ class IfExpr(Expression):
                 , self.sub_exprs[IfExpr.ELSE].translate())
 
 class AQuantification(Expression):
+    PRECEDENCE = 20
     def __init__(self, **kwargs):
         self.q = kwargs.pop('q')
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
@@ -338,15 +341,12 @@ class BinaryOperator(Expression):
         
     @use_value
     def __str__(self):
-        def parenthesis(x):
-            # add () around operands, to avoid ambiguity in str()
-            if type(x) not in [Constructor, AppliedSymbol, Variable, Symbol, Fresh_Variable, NumberConstant, Brackets]:
-                return f"({x.str})"
-            else:
-                return f"{x.str}"
-        temp = parenthesis(self.sub_exprs[0])
+        def parenthesis(precedence, x):
+            return f"({x.str})" if type(x).PRECEDENCE <= precedence else f"{x.str}"
+        precedence = type(self).PRECEDENCE
+        temp = parenthesis(precedence, self.sub_exprs[0])
         for i in range(1, len(self.sub_exprs)):
-            temp += f" {self.operator[i-1]} {parenthesis(self.sub_exprs[i])}"
+            temp += f" {self.operator[i-1]} {parenthesis(precedence, self.sub_exprs[i])}"
         return temp
     
     def annotate1(self):
@@ -375,11 +375,13 @@ class BinaryOperator(Expression):
         return out
         
 class AImplication(BinaryOperator):
-    pass
+    PRECEDENCE = 50
+    
 class AEquivalence(BinaryOperator):
-    pass
+    PRECEDENCE = 40
 
 class ARImplication(BinaryOperator):
+    PRECEDENCE = 30
     def annotate(self, symbol_decls, q_vars):
         # reverse the implication
         self.sub_exprs.reverse()
@@ -387,6 +389,7 @@ class ARImplication(BinaryOperator):
         return out.annotate(symbol_decls, q_vars)
 
 class ADisjunction(BinaryOperator):
+    PRECEDENCE = 60
     @use_value
     def translate(self):
         if len(self.sub_exprs) == 1:
@@ -397,6 +400,7 @@ class ADisjunction(BinaryOperator):
 
 
 class AConjunction(BinaryOperator):
+    PRECEDENCE = 70
     @use_value
     def translate(self):
         if len(self.sub_exprs) == 1:
@@ -407,6 +411,7 @@ class AConjunction(BinaryOperator):
 
 
 class AComparison(BinaryOperator):
+    PRECEDENCE = 80
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_assignment = None
@@ -449,13 +454,16 @@ class AComparison(BinaryOperator):
 
 
 class ASumMinus(BinaryOperator):
-    pass
+    PRECEDENCE = 90
+    
 class AMultDiv(BinaryOperator):
-    pass
+    PRECEDENCE = 100
+
 class APower(BinaryOperator):
-    pass
+    PRECEDENCE = 110
     
 class AUnary(Expression):
+    PRECEDENCE = 120
     MAP = {'-': lambda x: 0 - x,
            '~': lambda x: Not(x)
           }
@@ -488,6 +496,7 @@ class AUnary(Expression):
         return function(out)
 
 class AAggregate(Expression):
+    PRECEDENCE = 130
     CONDITION = 0
     OUT = 1
 
@@ -548,6 +557,7 @@ class AAggregate(Expression):
 
 
 class AppliedSymbol(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
@@ -629,6 +639,7 @@ class Arguments(object):
         super().__init__()
 
 class Variable(AppliedSymbol):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
 
@@ -664,10 +675,12 @@ class Variable(AppliedSymbol):
     def translate(self):
         return self.decl.translated
     
-class Symbol(Variable): pass
+class Symbol(Variable): 
+    PRECEDENCE = 200
     
 
 class Fresh_Variable(Expression):
+    PRECEDENCE = 200
     def __init__(self, name, decl):
         self.name = name
         self.decl = decl
@@ -695,6 +708,7 @@ class Fresh_Variable(Expression):
         return self.translated
 
 class NumberConstant(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
 
@@ -727,6 +741,7 @@ ZERO = NumberConstant(number='0')
 ONE  = NumberConstant(number='1')
 
 class Brackets(Expression):
+    PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         annotations = kwargs.pop('annotations')

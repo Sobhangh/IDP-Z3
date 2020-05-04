@@ -66,3 +66,5 @@ theory {
   p(t).
 }
 ```
+Root cause: get_relevant_subtences considers all instances of relevant symbols
+because subtences() only returns subtences, not questions

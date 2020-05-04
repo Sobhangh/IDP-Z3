@@ -242,26 +242,26 @@ Vertices = 4
 Convex
 ∀n[side] : Angle(n) < 180
 Equilateral
-∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+∀n[side] : Length(n) = Length(1) ∨ Sides < n
 Subtype = right_triangle
 Subtype = regular_triangle
 Subtype = irregular
-∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+∀n[side] : Angle(n) = 60 ∨ Sides < n
 ∃n[side] : Angle(n) = 90
 Subtype = square
 Subtype = rectangle
-∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+∀n[side] : Angle(n) = 90 ∨ Sides < n
 Length(1) = Length(3)
-Length(1) ≤ (Length(2) + Length(3))
-Length(2) ≤ (Length(3) + Length(1))
-Length(3) ≤ (Length(1) + Length(2))
-Perimeter = (sum{n[side] : true : Length(n)})
-(sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+Length(1) ≤ Length(2) + Length(3)
+Length(2) ≤ Length(3) + Length(1)
+Length(3) ≤ Length(1) + Length(2)
+Perimeter = sum{n[side] : true : Length(n)}
+sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
 ∀x[side] : 0 ≤ Length(x)
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
-∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
-∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+∀n[side] : Angle(n) = 0 ⇔ Vertices < n
+∀n[side] : Length(n) = 0 ⇔ Sides < n
 
 -- GUILines ------------------------------------
 Sides
@@ -288,26 +288,26 @@ Sides = 4
 Vertices = 3
 Vertices = 4
 ∀n[side] : Angle(n) < 180
-∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+∀n[side] : Length(n) = Length(1) ∨ Sides < n
 Subtype = right_triangle
 Subtype = regular_triangle
 Subtype = irregular
-∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+∀n[side] : Angle(n) = 60 ∨ Sides < n
 ∃n[side] : Angle(n) = 90
 Subtype = square
 Subtype = rectangle
-∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+∀n[side] : Angle(n) = 90 ∨ Sides < n
 Length(1) = Length(3)
-Length(1) ≤ (Length(2) + Length(3))
-Length(2) ≤ (Length(3) + Length(1))
-Length(3) ≤ (Length(1) + Length(2))
-Perimeter = (sum{n[side] : true : Length(n)})
-(sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+Length(1) ≤ Length(2) + Length(3)
+Length(2) ≤ Length(3) + Length(1)
+Length(3) ≤ Length(1) + Length(2)
+Perimeter = sum{n[side] : true : Length(n)}
+sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
 ∀x[side] : 0 ≤ Length(x)
 ∀x[side] : 0 ≤ Angle(x)
 ∀x[side] : Angle(x) ≠ 180
-∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
-∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+∀n[side] : Angle(n) = 0 ⇔ Vertices < n
+∀n[side] : Length(n) = 0 ⇔ Sides < n
 
 -- case -------------------------------------
 Type:        
@@ -316,12 +316,12 @@ Definitions:
   Rule:∀$Large!0$[side]: Large($Large!0$) ⇔10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Universals:  
   ~Subtype = rectangle
-  Perimeter = (sum{n[side] : true : Length(n)})
-  (sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)
+  Perimeter = sum{n[side] : true : Length(n)}
+  sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
   ∀x[side] : 0 ≤ Angle(x)
   ∀x[side] : Angle(x) ≠ 180
-  ∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)
-  ∀n[side] : (Length(n) = 0) ⇔ (Sides < n)
+  ∀n[side] : Angle(n) = 0 ⇔ Vertices < n
+  ∀n[side] : Length(n) = 0 ⇔ Sides < n
   Perimeter -> 10
 Consequences:
   ~Large(1)
@@ -332,13 +332,13 @@ Consequences:
   ~Vertices = 3
   Vertices = 4
   ~Equilateral
-  ~∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)
+  ~∀n[side] : Length(n) = Length(1) ∨ Sides < n
   ~Subtype = right_triangle
   ~Subtype = regular_triangle
   Subtype = irregular
-  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+  ~∀n[side] : Angle(n) = 60 ∨ Sides < n
   ~Subtype = square
-  ~∀n[side] : (Angle(n) = 90) ∨ (Sides < n)
+  ~∀n[side] : Angle(n) = 90 ∨ Sides < n
   Sides -> 4
   Vertices -> 4
   Type -> quadrilateral
@@ -353,7 +353,7 @@ Simplified:
   (true)
   (true)
   (true)
-  (Convex ⇔ ((Angle(1) < 180) ∧ (Angle(2) < 180) ∧ (Angle(3) < 180) ∧ (Angle(4) < 180)))
+  (Convex ⇔ (Angle(1) < 180 ∧ Angle(2) < 180 ∧ Angle(3) < 180 ∧ Angle(4) < 180))
   (true)
   (true)
   (true)
@@ -377,12 +377,12 @@ Simplified:
 Irrelevant:  
   ? ∀n[side] : Length(n) < Length(n + 1)
   ? 10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
-  ~∀n[side] : (Angle(n) = 60) ∨ (Sides < n)
+  ~∀n[side] : Angle(n) = 60 ∨ Sides < n
   ? ∃n[side] : Angle(n) = 90
   ? Length(1) = Length(3)
-  ? Length(1) ≤ (Length(2) + Length(3))
-  ? Length(2) ≤ (Length(3) + Length(1))
-  ? Length(3) ≤ (Length(1) + Length(2))
+  ? Length(1) ≤ Length(2) + Length(3)
+  ? Length(2) ≤ Length(3) + Length(1)
+  ? Length(3) ≤ Length(1) + Length(2)
   ? ∀x[side] : 0 ≤ Length(x)
 
 
@@ -404,16 +404,7 @@ Irrelevant:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'Angle': {'(sum{n[side] : true : Angle(n)}) = ((Sides - 2) * 180)': {'environmental': False,
-                                                                      'normal': False,
-                                                                      'reading': 'The sum of the angles is 180° for a '
-                                                                                 'triangle, and 360° for a '
-                                                                                 'quadrilateral',
-                                                                      'relevant': True,
-                                                                      'status': 'UNIVERSAL',
-                                                                      'typ': 'Bool',
-                                                                      'value': True},
-           'Angle(1)': {'environmental': False,
+ 'Angle': {'Angle(1)': {'environmental': False,
                         'normal': True,
                         'reading': 'Angle(1)',
                         'relevant': True,
@@ -441,33 +432,41 @@ Irrelevant:
                         'status': 'UNKNOWN',
                         'typ': 'Real',
                         'value': ''},
-           '∀n[side] : (Angle(n) = 0) ⇔ (Vertices < n)': {'environmental': False,
-                                                          'normal': False,
-                                                          'reading': 'A polygon with N vertices has N angles',
-                                                          'relevant': True,
-                                                          'status': 'UNIVERSAL',
-                                                          'typ': 'Bool',
-                                                          'value': True},
-           '∀n[side] : (Angle(n) = 60) ∨ (Sides < n)': {'environmental': False,
-                                                        'normal': False,
-                                                        'reading': 'All angles are 60°',
-                                                        'relevant': False,
-                                                        'status': 'CONSEQUENCE',
-                                                        'typ': 'Bool',
-                                                        'value': False},
-           '∀n[side] : (Angle(n) = 90) ∨ (Sides < n)': {'environmental': False,
-                                                        'normal': False,
-                                                        'reading': 'All angles are 90°',
-                                                        'relevant': True,
-                                                        'status': 'CONSEQUENCE',
-                                                        'typ': 'Bool',
-                                                        'value': False},
+           'sum{n[side] : true : Angle(n)} = (Sides - 2) * 180': {'environmental': False,
+                                                                  'normal': False,
+                                                                  'reading': 'The sum of the angles is 180° for a '
+                                                                             'triangle, and 360° for a quadrilateral',
+                                                                  'relevant': True,
+                                                                  'status': 'UNIVERSAL',
+                                                                  'typ': 'Bool',
+                                                                  'value': True},
            '∀n[side] : Angle(n) < 180': {'environmental': False,
                                          'normal': False,
                                          'reading': 'All angles are below 180°',
                                          'relevant': True,
                                          'status': 'UNKNOWN',
                                          'typ': 'Bool'},
+           '∀n[side] : Angle(n) = 0 ⇔ Vertices < n': {'environmental': False,
+                                                      'normal': False,
+                                                      'reading': 'A polygon with N vertices has N angles',
+                                                      'relevant': True,
+                                                      'status': 'UNIVERSAL',
+                                                      'typ': 'Bool',
+                                                      'value': True},
+           '∀n[side] : Angle(n) = 60 ∨ Sides < n': {'environmental': False,
+                                                    'normal': False,
+                                                    'reading': 'All angles are 60°',
+                                                    'relevant': False,
+                                                    'status': 'CONSEQUENCE',
+                                                    'typ': 'Bool',
+                                                    'value': False},
+           '∀n[side] : Angle(n) = 90 ∨ Sides < n': {'environmental': False,
+                                                    'normal': False,
+                                                    'reading': 'All angles are 90°',
+                                                    'relevant': True,
+                                                    'status': 'CONSEQUENCE',
+                                                    'typ': 'Bool',
+                                                    'value': False},
            '∀x[side] : 0 ≤ Angle(x)': {'environmental': False,
                                        'normal': False,
                                        'reading': 'Angles are positive numbers',
@@ -536,14 +535,14 @@ Irrelevant:
                              'status': 'UNIVERSAL',
                              'typ': 'Real',
                              'value': '10'},
-               'Perimeter = (sum{n[side] : true : Length(n)})': {'environmental': False,
-                                                                 'normal': False,
-                                                                 'reading': 'The perimeter is the sum of the lengths '
-                                                                            'of the sides',
-                                                                 'relevant': True,
-                                                                 'status': 'UNIVERSAL',
-                                                                 'typ': 'Bool',
-                                                                 'value': True}},
+               'Perimeter = sum{n[side] : true : Length(n)}': {'environmental': False,
+                                                               'normal': False,
+                                                               'reading': 'The perimeter is the sum of the lengths of '
+                                                                          'the sides',
+                                                               'relevant': True,
+                                                               'status': 'UNIVERSAL',
+                                                               'typ': 'Bool',
+                                                               'value': True}},
  'Sides': {'Sides': {'environmental': False,
                      'normal': True,
                      'reading': 'Sides',
@@ -566,20 +565,20 @@ Irrelevant:
                          'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': True},
-           '∀n[side] : (Length(n) = 0) ⇔ (Sides < n)': {'environmental': False,
-                                                        'normal': False,
-                                                        'reading': 'A polygon with N sides has N lengths',
-                                                        'relevant': True,
-                                                        'status': 'UNIVERSAL',
-                                                        'typ': 'Bool',
-                                                        'value': True},
-           '∀n[side] : (Length(n) = Length(1)) ∨ (Sides < n)': {'environmental': False,
-                                                                'normal': False,
-                                                                'reading': 'All sides have the same length',
-                                                                'relevant': True,
-                                                                'status': 'CONSEQUENCE',
-                                                                'typ': 'Bool',
-                                                                'value': False}},
+           '∀n[side] : Length(n) = 0 ⇔ Sides < n': {'environmental': False,
+                                                    'normal': False,
+                                                    'reading': 'A polygon with N sides has N lengths',
+                                                    'relevant': True,
+                                                    'status': 'UNIVERSAL',
+                                                    'typ': 'Bool',
+                                                    'value': True},
+           '∀n[side] : Length(n) = Length(1) ∨ Sides < n': {'environmental': False,
+                                                            'normal': False,
+                                                            'reading': 'All sides have the same length',
+                                                            'relevant': True,
+                                                            'status': 'CONSEQUENCE',
+                                                            'typ': 'Bool',
+                                                            'value': False}},
  'Subtype': {'Subtype': {'environmental': False,
                          'normal': True,
                          'reading': 'Subtype',

@@ -4,7 +4,7 @@
 |+ codeOf(red) = b -> true
 |== *!true with AppliedSymbol,Constructor
 |------------
-|(codeOf(red) = a) ∨ (codeOf(red) = b) with AComparison,AComparison
+|codeOf(red) = a ∨ codeOf(red) = b with AComparison,AComparison
 |+ codeOf(red) = b -> true  (or true -> true)
     |------------
     |*codeOf(red) = a with AppliedSymbol,Constructor
@@ -28,7 +28,7 @@
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |+ codeOf(red) = b -> true  (or true -> true)
     |------------
     |*codeOf(blue) = a with AppliedSymbol,Constructor
@@ -62,9 +62,9 @@
         |+ codeOf(red) = b -> true  (or true -> true)
         |== b
     |== *codeOf(blue) = b with AppliedSymbol,Constructor
-|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|== codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |------------
-|(c = red) ∨ (c = blue) with AComparison,AComparison
+|c = red ∨ c = blue with AComparison,AComparison
 |+ codeOf(red) = b -> true  (or true -> true)
     |------------
     |*c = red with Variable,Constructor
@@ -90,7 +90,7 @@
         |+ codeOf(red) = b -> true  (or true -> true)
         |== blue
     |== *c = blue with Variable,Constructor
-|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|== c = red ∨ c = blue with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(red) = b -> true  (or true -> true)
@@ -180,17 +180,17 @@
     |== blue
 |== *c = blue with Variable,Constructor
 |------------
-|codeOf(red) with Constructor just ((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b))
+|codeOf(red) with Constructor just (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
 |+ codeOf(red) = b -> true  (or true -> true)
  definition:
     |------------
-    |((red = c) ∧ (codeOf(red) = a)) ∨ ((~(red = c)) ∧ (codeOf(red) = b)) with Brackets,Brackets
+    |(red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b) with Brackets,Brackets
     |+ codeOf(red) = b -> true  (or true -> true)
         |------------
-        |((red = c) ∧ (codeOf(red) = a)) with AConjunction
+        |(red = c ∧ codeOf(red) = a) with AConjunction
         |+ codeOf(red) = b -> true  (or true -> true)
             |------------
-            |(red = c) ∧ (codeOf(red) = a) with AComparison,AComparison
+            |red = c ∧ codeOf(red) = a with AComparison,AComparison
             |+ codeOf(red) = b -> true  (or true -> true)
                 |------------
                 |*red = c with Constructor,Variable
@@ -220,13 +220,13 @@
                     |+ codeOf(red) = b -> true  (or true -> true)
                     |== a
                 |== *codeOf(red) = a with AppliedSymbol,Constructor
-            |== (red = c) ∧ (codeOf(red) = a) with AComparison,AComparison
-        |== !!(red = c) ∧ (codeOf(red) = a) with AConjunction
+            |== red = c ∧ codeOf(red) = a with AComparison,AComparison
+        |== !!red = c ∧ codeOf(red) = a with AConjunction
         |------------
-        |((~(red = c)) ∧ (codeOf(red) = b)) with AConjunction
+        |(~(red = c) ∧ codeOf(red) = b) with AConjunction
         |+ codeOf(red) = b -> true  (or true -> true)
             |------------
-            |(~(red = c)) ∧ (codeOf(red) = b) with AUnary,AComparison
+            |~(red = c) ∧ codeOf(red) = b with AUnary,AComparison
             |+ codeOf(red) = b -> true  (or true -> true)
                 |------------
                 |~(red = c) with AComparison
@@ -250,12 +250,12 @@
                 |== *!true with AppliedSymbol,Constructor
             |== !!~(red = c) with AUnary,AComparison
         |== !!~(red = c) with AConjunction
-    |== ((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c)) with Brackets,Brackets
+    |== (red = c ∧ codeOf(red) = a) ∨ (~(red = c)) with Brackets,Brackets
     |------------
     |red
     |+ codeOf(red) = b -> true  (or true -> true)
     |== red
-|== codeOf(red) with Constructor just ((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c))
+|== codeOf(red) with Constructor just (red = c ∧ codeOf(red) = a) ∨ (~(red = c))
 |------------
 |codeOf(blue) with Constructor
 |+ codeOf(red) = b -> true  (or true -> true)
@@ -272,17 +272,17 @@
 |*true with AppliedSymbol,Constructor
 |+ codeOf(red) -> b
     |------------
-    |codeOf(red) with Constructor just ((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c))
+    |codeOf(red) with Constructor just (red = c ∧ codeOf(red) = a) ∨ (~(red = c))
     |+ codeOf(red) -> b
  definition:
         |------------
-        |((red = c) ∧ (codeOf(red) = a)) ∨ (~(red = c)) with Brackets,Brackets
+        |(red = c ∧ codeOf(red) = a) ∨ (~(red = c)) with Brackets,Brackets
         |+ codeOf(red) -> b
             |------------
-            |((red = c) ∧ (codeOf(red) = a)) with AConjunction
+            |(red = c ∧ codeOf(red) = a) with AConjunction
             |+ codeOf(red) -> b
                 |------------
-                |(red = c) ∧ (codeOf(red) = a) with AComparison,AComparison
+                |red = c ∧ codeOf(red) = a with AComparison,AComparison
                 |+ codeOf(red) -> b
                     |------------
                     |*red = c with Constructor,Variable
@@ -447,7 +447,7 @@
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |+ codeOf(red) -> b  (or b -> b)
     |------------
     |*codeOf(blue) = a with AppliedSymbol,Constructor
@@ -481,9 +481,9 @@
         |+ codeOf(red) -> b  (or b -> b)
         |== b
     |== *codeOf(blue) = b with AppliedSymbol,Constructor
-|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|== codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |------------
-|(c = red) ∨ (c = blue) with AComparison,AComparison
+|c = red ∨ c = blue with AComparison,AComparison
 |+ codeOf(red) -> b  (or b -> b)
     |------------
     |*c = red with Variable,Constructor
@@ -509,7 +509,7 @@
         |+ codeOf(red) -> b  (or b -> b)
         |== blue
     |== *c = blue with Variable,Constructor
-|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|== c = red ∨ c = blue with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(red) -> b  (or b -> b)
@@ -838,7 +838,7 @@
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |+ red = c -> false  (or false -> false)
     |------------
     |*codeOf(blue) = a with AppliedSymbol,Constructor
@@ -872,9 +872,9 @@
         |+ red = c -> false  (or false -> false)
         |== b
     |== *codeOf(blue) = b with AppliedSymbol,Constructor
-|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|== codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |------------
-|(c = red) ∨ (c = blue) with AComparison,AComparison
+|c = red ∨ c = blue with AComparison,AComparison
 |+ red = c -> false  (or false -> false)
     |------------
     |*c = red with Variable,Constructor
@@ -900,7 +900,7 @@
         |+ red = c -> false  (or false -> false)
         |== blue
     |== *c = blue with Variable,Constructor
-|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|== c = red ∨ c = blue with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ red = c -> false  (or false -> false)
@@ -1229,7 +1229,7 @@
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |+ codeOf(red) = a -> false  (or false -> false)
     |------------
     |*codeOf(blue) = a with AppliedSymbol,Constructor
@@ -1263,9 +1263,9 @@
         |+ codeOf(red) = a -> false  (or false -> false)
         |== b
     |== *codeOf(blue) = b with AppliedSymbol,Constructor
-|== (codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|== codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |------------
-|(c = red) ∨ (c = blue) with AComparison,AComparison
+|c = red ∨ c = blue with AComparison,AComparison
 |+ codeOf(red) = a -> false  (or false -> false)
     |------------
     |*c = red with Variable,Constructor
@@ -1291,7 +1291,7 @@
         |+ codeOf(red) = a -> false  (or false -> false)
         |== blue
     |== *c = blue with Variable,Constructor
-|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|== c = red ∨ c = blue with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(red) = a -> false  (or false -> false)
@@ -1621,7 +1621,7 @@ Z3 propagation ********************************
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(codeOf(blue) = a) ∨ (codeOf(blue) = b) with AComparison,AComparison
+|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |+ codeOf(blue) = a -> true
     |------------
     |*codeOf(blue) = a with AppliedSymbol,Constructor
@@ -1629,7 +1629,7 @@ Z3 propagation ********************************
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(c = red) ∨ (c = blue) with AComparison,AComparison
+|c = red ∨ c = blue with AComparison,AComparison
 |+ codeOf(blue) = a -> true
     |------------
     |*c = red with Variable,Constructor
@@ -1655,7 +1655,7 @@ Z3 propagation ********************************
         |+ codeOf(blue) = a -> true
         |== blue
     |== *c = blue with Variable,Constructor
-|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|== c = red ∨ c = blue with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(blue) = a -> true
@@ -2028,7 +2028,7 @@ Z3 propagation ********************************
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(c = red) ∨ (c = blue) with AComparison,AComparison
+|c = red ∨ c = blue with AComparison,AComparison
 |+ codeOf(blue) = b -> false
     |------------
     |*c = red with Variable,Constructor
@@ -2054,7 +2054,7 @@ Z3 propagation ********************************
         |+ codeOf(blue) = b -> false
         |== blue
     |== *c = blue with Variable,Constructor
-|== (c = red) ∨ (c = blue) with AComparison,AComparison
+|== c = red ∨ c = blue with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(blue) = b -> false
@@ -2427,7 +2427,7 @@ Z3 propagation ********************************
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|(c = red) ∨ (c = blue) with AComparison,AComparison
+|c = red ∨ c = blue with AComparison,AComparison
 |+ c = red -> false
     |------------
     |*c = red with Variable,Constructor
