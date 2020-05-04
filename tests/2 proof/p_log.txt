@@ -18,7 +18,7 @@
     |*p
     |+ p -> true  (or true -> true)
     |== *!true
-|== !true with Variable
+|== !true with AUnary,Variable
 |------------
 |*true
 |+ p -> true  (or true -> true)

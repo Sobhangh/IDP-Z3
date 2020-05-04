@@ -183,13 +183,13 @@ def update_exprs(self, new_expr_generator):
     value, simpler = None, None
     if exprs[0] == FALSE: # (false => p) is true
         value = TRUE
-        # exprs[0] may be false because exprs[1] is false
-        exprs = [exprs[0], exprs[1] if exprs[1] == FALSE else FALSE]
+        # exprs[0] may be false because exprs[1] was false
+        exprs = [exprs[0], exprs[1] if self.sub_exprs[1]==FALSE else FALSE]
     if exprs[0] == TRUE: # (true => p) is p
         simpler = exprs[1]
     if exprs[1] == TRUE: # (p => true) is true
         value = TRUE
-        exprs = [exprs[0] if exprs[0] == TRUE else TRUE, exprs[1]]
+        exprs = [exprs[0] if self.sub_exprs[0]==TRUE else TRUE, exprs[1]]
     if exprs[1] == FALSE: # (p => false) is ~p
         simpler = AUnary.make('~', exprs[0])
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
@@ -218,9 +218,11 @@ AEquivalence.update_exprs = update_exprs
 
 def update_exprs(self, new_expr_generator):
     exprs, other = [], []
-    for expr in new_expr_generator:
+    for i, expr in enumerate(new_expr_generator):
         if expr == TRUE:
-            return self._change(value=TRUE, sub_exprs=[expr])
+            # simplify only if one other sub_exprs was unknown
+            simplify = any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs))
+            return self._change(value=TRUE, sub_exprs=[expr] if simplify else None)
         exprs.append(expr)
         if expr != FALSE:
             other.append(expr)
@@ -240,9 +242,11 @@ ADisjunction.update_exprs = update_exprs
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_expr_generator):
     exprs, other = [], []
-    for expr in new_expr_generator:
+    for i, expr in enumerate(new_expr_generator):
         if expr == FALSE: 
-            return self._change(value=FALSE, sub_exprs=[expr])
+            # simplify only if one other sub_exprs was unknown
+            simplify = any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs))
+            return self._change(value=FALSE, sub_exprs=[expr] if simplify else None)
         exprs.append(expr)
         if expr != TRUE:
             other.append(expr)

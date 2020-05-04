@@ -15,13 +15,11 @@ theory {
 }
 ```
 Option
-- [ ] do not reduce sub_exprs to expr if expr is a consequence of self !? (but set simpler anyway)
-    - [ ] check that another sub_exprs was unknown before
-    - [ ] check that it is different from simpler (in change() ?)
-    - [ ] check that it is not the last unknown sub_exprs (but beware of (p ∨ ~p)) 
+- [x] do not reduce sub_exprs to expr if expr is a consequence of self !? (but set simpler anyway)
+    - [x] check that another sub_exprs was unknown before
     - [ ] or keep track of the expression that created the substitution ?  Also useful for explain !
     but what about Z3 consequences, such as `Base=4`: they do not come from one constraint → always simplified away ?
-- [ ] + fix conjunction, implication, …
+- [x] + fix conjunction, implication, …
 
 ## Problem 2
 r is relevant with this code, but shouldn't.
@@ -47,6 +45,13 @@ Option:
     - performance hit: + 25 % 
 X only substitute the ground (non-defined) facts ?  (here, substitute l, not p)  Hard to do ! Not always equivalent
 X  substitute in all tree, then simplify in second step ?  Only for performance purposes.  Batch substitute is preferred.
+
+## Problem 3
+some subtences should be relevant in isa.py
+
+root cause: 
+* quantified comparisons not considered subtences
+* mark_subtences is run before expansion to avoid too many lines in GUI, but it impacts relevance !
 
 
 ## other problem

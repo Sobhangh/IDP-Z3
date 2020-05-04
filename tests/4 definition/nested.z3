@@ -99,7 +99,6 @@ Irrelevant:
   ? true
   ? false
   ~same(Piet) = Jan
-  ~same(Jan) = Piet
   ~negated(Jan) = Jan
 
 
@@ -172,7 +171,7 @@ Irrelevant:
           'same(Jan) = Piet': {'environmental': False,
                                'normal': False,
                                'reading': 'same(Jan) = Piet',
-                               'relevant': False,
+                               'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'Bool',
                                'value': False},

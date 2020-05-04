@@ -186,8 +186,6 @@ Simplified:
 Irrelevant:  
   ~typeOf(regular_triangle) = quadrilateral
   ~typeOf(right_triangle) = quadrilateral
-  ~typeOf(rectangle) = 1tri angle
-  ~typeOf(square) = 1tri angle
   isa(regular_triangle,typeOf(regular_triangle))
   isa(right_triangle,typeOf(right_triangle))
   isa(rectangle,typeOf(rectangle))
@@ -343,7 +341,7 @@ Irrelevant:
             'typeOf(rectangle) = 1tri angle': {'environmental': False,
                                                'normal': False,
                                                'reading': 'typeOf(rectangle) = 1tri angle',
-                                               'relevant': False,
+                                               'relevant': True,
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': False},
@@ -409,7 +407,7 @@ Irrelevant:
             'typeOf(square) = 1tri angle': {'environmental': False,
                                             'normal': False,
                                             'reading': 'typeOf(square) = 1tri angle',
-                                            'relevant': False,
+                                            'relevant': True,
                                             'status': 'CONSEQUENCE',
                                             'typ': 'Bool',
                                             'value': False},

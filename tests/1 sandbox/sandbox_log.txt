@@ -40,7 +40,7 @@ Z3 propagation ********************************
     |*q
     |+ q -> true
     |== *!true
-|== !true with Variable
+|== !true with AUnary,Variable
 |------------
 |*p
 |+ p -> true
@@ -50,9 +50,9 @@ Z3 propagation ********************************
 |+ p -> true  (or true -> true)
 |== *!true
 |------------
-|true with Variable
+|true with AUnary,Variable
 |+ q -> true  (or true -> true)
-|== !true with Variable
+|== !true with AUnary,Variable
 |------------
 |*true
 |+ q -> true  (or true -> true)

@@ -35,7 +35,7 @@ Consequences:
 Simplified:  
   true
 Irrelevant:  
-  p
+  
 
 
 -- meta -------------------------------------
@@ -48,7 +48,7 @@ Irrelevant:
  'p': {'p': {'environmental': False,
              'normal': True,
              'reading': 'p',
-             'relevant': False,
+             'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'Bool',
              'value': True}},

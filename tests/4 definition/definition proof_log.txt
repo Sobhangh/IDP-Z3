@@ -878,7 +878,7 @@ Z3 propagation ********************************
                 |== *!true with AppliedSymbol,Constructor
             |== !true with AUnary,AComparison
         |== !true with AConjunction
-    |== !true with Brackets
+    |== !true with Brackets,Brackets
 |== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
@@ -997,9 +997,9 @@ Z3 propagation ********************************
 |+ codeOf(blue) = a -> true  (or true -> true)
  definition:
     |------------
-    |true with Brackets
+    |true with Brackets,Brackets
     |+ codeOf(blue) = a -> true  (or true -> true)
-    |== !true with Brackets
+    |== !true with Brackets,Brackets
 |== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
@@ -1102,9 +1102,9 @@ Z3 propagation ********************************
 |+ codeOf(blue) = b -> false  (or false -> false)
  definition:
     |------------
-    |true with Brackets
+    |true with Brackets,Brackets
     |+ codeOf(blue) = b -> false  (or false -> false)
-    |== !true with Brackets
+    |== !true with Brackets,Brackets
 |== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
@@ -1161,11 +1161,11 @@ Z3 propagation ********************************
     |*c = blue with Variable,Constructor
     |+ c = blue -> true
     |== *!true with Variable,Constructor
-|== !true with AComparison
+|== !true with AComparison,AComparison
 |------------
-|true with AComparison
+|true with AComparison,AComparison
 |+ c -> blue
-|== !true with AComparison
+|== !true with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ c = red -> false
@@ -1199,9 +1199,9 @@ Z3 propagation ********************************
 |+ c = red -> false  (or false -> false)
  definition:
     |------------
-    |true with Brackets
+    |true with Brackets,Brackets
     |+ c = red -> false  (or false -> false)
-    |== !true with Brackets
+    |== !true with Brackets,Brackets
 |== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
@@ -1228,9 +1228,9 @@ Z3 propagation ********************************
 |+ c = blue -> true  (or true -> true)
 |== !true with AComparison
 |------------
-|true with AComparison
+|true with AComparison,AComparison
 |+ c = blue -> true  (or true -> true)
-|== !true with AComparison
+|== !true with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ c = blue -> true  (or true -> true)
@@ -1264,9 +1264,9 @@ Z3 propagation ********************************
 |+ c = blue -> true  (or true -> true)
  definition:
     |------------
-    |true with Brackets
+    |true with Brackets,Brackets
     |+ c = blue -> true  (or true -> true)
-    |== !true with Brackets
+    |== !true with Brackets,Brackets
 |== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
@@ -1293,9 +1293,9 @@ Z3 propagation ********************************
 |+ c -> blue
 |== !true with AComparison
 |------------
-|true with AComparison
+|true with AComparison,AComparison
 |+ c -> blue
-|== !true with AComparison
+|== !true with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ c -> blue
@@ -1329,9 +1329,9 @@ Z3 propagation ********************************
 |+ c -> blue
  definition:
     |------------
-    |true with Brackets
+    |true with Brackets,Brackets
     |+ c -> blue
-    |== !true with Brackets
+    |== !true with Brackets,Brackets
 |== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
@@ -1358,9 +1358,9 @@ Z3 propagation ********************************
 |+ codeOf(blue) -> a
 |== !true with AComparison
 |------------
-|true with AComparison
+|true with AComparison,AComparison
 |+ codeOf(blue) -> a
-|== !true with AComparison
+|== !true with AComparison,AComparison
 |------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(blue) -> a
@@ -1394,9 +1394,9 @@ Z3 propagation ********************************
 |+ codeOf(blue) -> a
  definition:
     |------------
-    |true with Brackets
+    |true with Brackets,Brackets
     |+ codeOf(blue) -> a
-    |== !true with Brackets
+    |== !true with Brackets,Brackets
 |== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor

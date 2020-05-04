@@ -142,6 +142,7 @@ def json_to_literals(idp, jsonstr: str):
                     for sentence, truth in u:
                         assignment = Assignment(sentence, truth, Status.GIVEN)
                 else:
+                    #TODO add (x=0)->True assignment
                     assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                     assignment.relevant = True
                 assignments[atom] = assignment

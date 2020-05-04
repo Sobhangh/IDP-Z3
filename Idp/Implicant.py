@@ -44,7 +44,7 @@ def use_value(function):
     def _wrapper(*args, **kwds):
         self = args[0]
         truth = args[1] if len(args) == 2 else TRUE
-        if self.value   is not None: 
+        if self.value is not None: 
             return []
         out = _if_subtence(self, truth)
         if self.simpler is not None: 
@@ -105,6 +105,8 @@ AUnary.implicants = implicants
 @use_value
 def implicants(self, truth=TRUE):
     if truth == TRUE and len(self.sub_exprs) == 2 and self.operator == ['=']:
+        # generates both (x->0) and (x=0->True)
+        # generating only one from universals would make the second one a consequence, not a universal
         operands1 = [e.as_ground() for e in self.sub_exprs]
         if   operands1[1] is not None:
             return [(self.sub_exprs[0], operands1[1])]

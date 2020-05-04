@@ -74,9 +74,7 @@ Simplified:
   true
   true
 Irrelevant:  
-  ~codeOf(red) = a
   ~codeOf(blue) = b
-  ~c = red
 
 
 -- meta -------------------------------------
@@ -104,7 +102,7 @@ Irrelevant:
        'c = red': {'environmental': False,
                    'normal': False,
                    'reading': 'c = red',
-                   'relevant': False,
+                   'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
                    'value': False},
@@ -148,7 +146,7 @@ Irrelevant:
             'codeOf(red) = a': {'environmental': False,
                                 'normal': False,
                                 'reading': 'codeOf(red) = a',
-                                'relevant': False,
+                                'relevant': True,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},

@@ -26,7 +26,7 @@
         |+ x = 0 -> true  (or true -> true)
         |== *!true with Variable,NumberConstant
     |== !true with AComparison
-|== !true with Brackets
+|== !true with AUnary,Brackets
 |------------
 |*true with Variable,NumberConstant
 |+ x = 0 -> true  (or true -> true)
@@ -44,9 +44,9 @@
 |+ x -> 0
 |== *!true with Variable,NumberConstant
 |------------
-|true with Brackets
+|true with AUnary,Brackets
 |+ x -> 0
-|== !true with Brackets
+|== !true with AUnary,Brackets
 |------------
 |*true with Variable,NumberConstant
 |+ x -> 0

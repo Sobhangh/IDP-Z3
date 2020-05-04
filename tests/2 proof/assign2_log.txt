@@ -150,7 +150,7 @@
             |== 1
         |== *!true with ASumMinus,NumberConstant
     |== !true with AComparison
-|== !true with Brackets
+|== !true with AUnary,Brackets
 |------------
 |*true with Variable,NumberConstant
 |+ x -> 0
@@ -188,9 +188,9 @@
 |+ (x + 1) = 1 -> true  (or true -> true)
 |== *!true with Variable,NumberConstant
 |------------
-|true with Brackets
+|true with AUnary,Brackets
 |+ (x + 1) = 1 -> true  (or true -> true)
-|== !true with Brackets
+|== !true with AUnary,Brackets
 |------------
 |*true with Variable,NumberConstant
 |+ (x + 1) = 1 -> true  (or true -> true)

@@ -150,10 +150,6 @@ Irrelevant:
   ~same(-1) = 1
   ~same(0) = -1
   ~same(0) = 1
-  ~same(1) = -1
-  ~same(1) = 0
-  ~negated(-1) = -1
-  ~negated(-1) = 0
   ~negated(0) = -1
   ~negated(0) = 1
   ~negated(1) = 0
@@ -185,14 +181,14 @@ Irrelevant:
              'negated(-1) = -1': {'environmental': False,
                                   'normal': False,
                                   'reading': 'negated(-1) = -1',
-                                  'relevant': False,
+                                  'relevant': True,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
              'negated(-1) = 0': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(-1) = 0',
-                                 'relevant': False,
+                                 'relevant': True,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': False},
@@ -330,14 +326,14 @@ Irrelevant:
           'same(1) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(1) = -1',
-                           'relevant': False,
+                           'relevant': True,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
           'same(1) = 0': {'environmental': False,
                           'normal': False,
                           'reading': 'same(1) = 0',
-                          'relevant': False,
+                          'relevant': True,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': False},
