@@ -29,7 +29,7 @@ tags:
 - [ ] Support for partial functions
 - [ ] Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
 - [ ] Support for non-linear equations [[20200328122541]]
-- [ ] predicates in English [[20200327095115]] 
+- [ ] Parse English [[20200327095115]] 
 - [ ] use pySMT [[20200328102421]] 
 
 
@@ -54,19 +54,26 @@ tags:
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
-- [ ] batch substitute in Case.init
+- [ ] reduce number of substitution
+    - [ ] implicant: do not generate (x=0) → true (only generate x→0)
+    - [ ] do not generate x~=1 from (x=0)
+    - [ ] Expr.symbols for each constraint → do not substitute if no symbols
+    - [ ] batch substitute in Case.init
+- [ ] why is Prime so slow ?
 - [ ] replace function decorator by Expression methods
-- [ ] Expr.symbols for each constraint → do not substitute if no symbols
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share justifications
+- [ ] subtences() → exp is_in expr
 - [ ] #Perf
 
 #### other NTH (refactoring)
+- [ ] get rid of brackets ?  Need to keep multiple annotations
 - [ ] remove Assignment.__hash__, .__eq__
 - [ ] merge Case.assignments and Case.GUILines to be like Structure
 - [ ] remove reifier, Solver.py --> expr.reified(solver)
 - [ ] simplify the generation of Structure_
 
+- [ ] use EXIST, … instead of AQuantifier.make(), for readability
 - [ ] move consequences into case.simplified ?
 - [ ] sort the operands of equality
 - [ ] AppliedSymbol is_subtence only if no Fresh_Variable !

@@ -131,27 +131,20 @@ def json_to_literals(idp, jsonstr: str):
         for sym in json_data:
             for atom in json_data[sym]:
                 json_atom = json_data[sym][atom]
+                assert "value" in json_atom
                 if atom in idp.subtences:
                     atom = idp.subtences[atom].copy()
                 else:
                     symbol = idp.vocabulary.symbol_decls[sym]
                     atom = symbol.instances[atom].copy()
                 if json_atom["typ"] == "Bool":
-                    if "value" in json_atom:
-                        assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
-                        assignments[atom] = assignment
-                    else:
-                        assignment = None  #TODO error ?
-                elif json_atom["value"]:
-                    if json_atom["typ"] in ["Int", "Real"]:
-                        value = eval(json_atom["value"])
-                    else:
-                        value = idp.vocabulary.symbol_decls[json_atom["value"]].translated
+                    u = atom.implicants(TRUE if json_atom["value"] else FALSE)
+                    for sentence, truth in u:
+                        assignment = Assignment(sentence, truth, Status.GIVEN)
+                else:
                     assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                     assignment.relevant = True
-                    assignments[atom] = assignment
-                else:
-                    assignment = None #TODO error ?
+                assignments[atom] = assignment
     return assignments
 
 

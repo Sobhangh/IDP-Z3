@@ -1,72 +1,85 @@
 
 -- original ---------------------------------
 vocabulary {
-    p q1 q2 r s
+    p l r rd i
 }
 theory {
-  { s <- r.}
-  { p <- q1 | q2.}
-  { q1 <- r.} 
-  q1.
+  { i <- rd.}
+  { p <- l | r.}
+  { r <- rd.} 
+  r.
 }
 goal p
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-q1
+r
 
 Or(p, Not(p))
 
-s == r
+i == rd
 
-p == Or(q1, q2)
+p == Or(l, r)
 
-q1 == r
+r == rd
 
 -- subtences ------------------------------------
-q1
 r
+rd
 p
-q2
+l
 
 -- GUILines ------------------------------------
 p
-q1
-q2
+l
 r
-s
+rd
+i
 
 -- case -------------------------------------
 Type:        
   
 Definitions: 
-  Rule:∀: s() ⇔r
-  Rule:∀: p() ⇔q1 ∨ q2
-  Rule:∀: q1() ⇔r
+  Rule:∀: i() ⇔rd
+  Rule:∀: p() ⇔l ∨ r
+  Rule:∀: r() ⇔rd
 Universals:  
-  q1
-Consequences:
   r
+Consequences:
+  rd
   p
-  s
+  i
 Simplified:  
   true
   true
 Irrelevant:  
-  ? q2
-  s
+  ? l
+  i
 
 
 -- meta -------------------------------------
 {'symbols': [{'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'},
-             {'idpname': 'q1', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
-             {'idpname': 'q2', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
+             {'idpname': 'l', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
              {'idpname': 'r', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
-             {'idpname': 's', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'}],
+             {'idpname': 'rd', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'},
+             {'idpname': 'i', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
+ 'i': {'i': {'environmental': False,
+             'normal': True,
+             'reading': 'i',
+             'relevant': False,
+             'status': 'CONSEQUENCE',
+             'typ': 'Bool',
+             'value': True}},
+ 'l': {'l': {'environmental': False,
+             'normal': True,
+             'reading': 'l',
+             'relevant': False,
+             'status': 'UNKNOWN',
+             'typ': 'Bool'}},
  'p': {'p': {'environmental': False,
              'normal': True,
              'reading': 'p',
@@ -74,30 +87,17 @@ Irrelevant:
              'status': 'CONSEQUENCE',
              'typ': 'Bool',
              'value': True}},
- 'q1': {'q1': {'environmental': False,
-               'normal': True,
-               'reading': 'q1',
-               'relevant': True,
-               'status': 'UNIVERSAL',
-               'typ': 'Bool',
-               'value': True}},
- 'q2': {'q2': {'environmental': False,
-               'normal': True,
-               'reading': 'q2',
-               'relevant': False,
-               'status': 'UNKNOWN',
-               'typ': 'Bool'}},
  'r': {'r': {'environmental': False,
              'normal': True,
              'reading': 'r',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},
- 's': {'s': {'environmental': False,
-             'normal': True,
-             'reading': 's',
-             'relevant': False,
-             'status': 'CONSEQUENCE',
-             'typ': 'Bool',
-             'value': True}}}
+ 'rd': {'rd': {'environmental': False,
+               'normal': True,
+               'reading': 'rd',
+               'relevant': True,
+               'status': 'CONSEQUENCE',
+               'typ': 'Bool',
+               'value': True}}}

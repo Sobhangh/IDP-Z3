@@ -9,7 +9,7 @@ Problem: atom `a = red` has a `'reading': '\$a\$ = red'` in the json result of t
 
 Other problem: select epoxy=e1 
 * → unsatisfiable: fixed
-* shows \$Cost\$ = 0.539
+* but shows \$Cost\$ = 0.539
 
 
 Root cause:
