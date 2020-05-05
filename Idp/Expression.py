@@ -562,9 +562,7 @@ class Fresh_Variable(Expression):
     def __str1__(self): return self.name
 
     def mark_subtences(self):
-        self.fresh_vars = set([self.name])
         return self
-
 class NumberConstant(Expression):
     PRECEDENCE = 200
     def __init__(self, **kwargs):

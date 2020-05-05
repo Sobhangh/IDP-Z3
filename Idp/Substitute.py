@@ -87,16 +87,18 @@ def instantiate(self, e0, e1):
     """ recursively substitute e0 by e1 """
     if self.code == e0.code:
         return e1
-    else:
-        out = copy.copy(self)
-        if out.value is None:
-            out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
-            out.code = out.str
-            out.original = out
-            if out.just_branch is not None:
-                out._change(just_branch=out.just_branch.instantiate(e0, e1))
 
-        return out
+    out = copy.copy(self)
+    if isinstance(e0, Fresh_Variable):
+        out.fresh_vars.discard(e0.name)
+
+    if out.value is None:
+        out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
+        out.code = out.str
+        out.original = out
+        if out.just_branch is not None:
+            out._change(just_branch=out.just_branch.instantiate(e0, e1))
+    return out
 Expression.instantiate = instantiate
 
 
