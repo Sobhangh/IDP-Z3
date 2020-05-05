@@ -32,7 +32,7 @@ import os
 import re
 import sys
 
-from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort, Q
+from z3 import DatatypeRef, Q, Const, BoolSort
 from utils import mergeDicts, unquote
 
 from typing import List, Tuple
@@ -212,12 +212,6 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return self
 
-    @use_value
-    def translate(self):
-        return If(self.sub_exprs[IfExpr.IF  ].translate()
-                , self.sub_exprs[IfExpr.THEN].translate()
-                , self.sub_exprs[IfExpr.ELSE].translate())
-
 class AQuantification(Expression):
     PRECEDENCE = 20
     def __init__(self, **kwargs):
@@ -265,44 +259,8 @@ class AQuantification(Expression):
         self.is_subtence = (len(self.fresh_vars)==0)
         return self
 
-    @use_value
-    def translate(self):
-        for v in self.q_vars.values():
-            v.translate()
-        if not self.vars:
-            return self.sub_exprs[0].translate()
-        else:
-            finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
-
-            if self.q == '∀':
-                forms = And(forms) if 1<len(forms) else forms[0]
-                if len(finalvars) > 0: # not fully expanded !
-                    forms = ForAll(finalvars, forms)
-            else:
-                forms = Or(forms) if 1<len(forms) else forms[0]
-                if len(finalvars) > 0: # not fully expanded !
-                    forms = Exists(finalvars, forms)
-            return forms
 
 class BinaryOperator(Expression):
-    MAP = { '∧': lambda x, y: And(x, y),
-            '∨': lambda x, y: Or(x, y),
-            '⇒': lambda x, y: Or(Not(x), y),
-            '⇐': lambda x, y: Or(x, Not(y)),
-            '⇔': lambda x, y: x == y,
-            '+': lambda x, y: x + y,
-            '-': lambda x, y: x - y,
-            '*': lambda x, y: x * y,
-            '/': lambda x, y: x / y,
-            '%': lambda x, y: x % y,
-            '^': lambda x, y: x ** y,
-            '=': lambda x, y: x == y,
-            '<': lambda x, y: x < y,
-            '>': lambda x, y: x > y,
-            '≤': lambda x, y: x <= y,
-            '≥': lambda x, y: x >= y,
-            '≠': lambda x, y: x != y
-            }
 
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
@@ -364,15 +322,6 @@ class BinaryOperator(Expression):
             self.is_subtence = (len(self.fresh_vars)==0)
             self.fresh_vars.discard('!*') # indicates AppliedSymbol with complex expressions
         return self
-
-    @use_value
-    def translate(self):
-        out = self.sub_exprs[0].translate()
-
-        for i in range(1, len(self.sub_exprs)):
-            function = BinaryOperator.MAP[self.operator[i - 1]]
-            out = function(out, self.sub_exprs[i].translate())
-        return out
         
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
@@ -390,24 +339,10 @@ class ARImplication(BinaryOperator):
 
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
-    @use_value
-    def translate(self):
-        if len(self.sub_exprs) == 1:
-            out = self.sub_exprs[0].translate()
-        else:
-            out = Or ([e.translate() for e in self.sub_exprs])
-        return out
 
 
 class AConjunction(BinaryOperator):
     PRECEDENCE = 70
-    @use_value
-    def translate(self):
-        if len(self.sub_exprs) == 1:
-            out = self.sub_exprs[0].translate()
-        else:
-            out = And([e.translate() for e in self.sub_exprs])
-        return out
 
 
 class AComparison(BinaryOperator):
@@ -432,26 +367,6 @@ class AComparison(BinaryOperator):
             and self.sub_exprs[1].as_ground() is not None
         return super().annotate1()
 
-    @use_value
-    def translate(self):
-        assert not self.operator == ['≠']
-        # chained comparisons -> And()
-        out = []
-        for i in range(1, len(self.sub_exprs)):
-            x = self.sub_exprs[i-1].translate()
-            assert x is not None
-            function = BinaryOperator.MAP[self.operator[i - 1]]
-            y = self.sub_exprs[i].translate()
-            assert y is not None
-            try:
-                out = out + [function(x, y)]
-            except Z3Exception as E:
-                raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
-        if 1 < len(out):
-            return And(out)
-        else:
-            return out[0]
-
 
 class ASumMinus(BinaryOperator):
     PRECEDENCE = 90
@@ -464,9 +379,7 @@ class APower(BinaryOperator):
     
 class AUnary(Expression):
     PRECEDENCE = 120
-    MAP = {'-': lambda x: 0 - x,
-           '~': lambda x: Not(x)
-          }
+
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.operator = kwargs.pop('operator')
@@ -488,12 +401,6 @@ class AUnary(Expression):
     def annotate1(self):
         self.type = self.sub_exprs[0].type
         return self
-
-    @use_value
-    def translate(self):
-        out = self.sub_exprs[0].translate()
-        function = AUnary.MAP[self.operator]
-        return function(out)
 
 class AAggregate(Expression):
     PRECEDENCE = 130
@@ -550,10 +457,6 @@ class AAggregate(Expression):
         # remove q_vars
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
         return self
-
-    @use_value
-    def translate(self):
-        return Sum([f.translate() for f in self.sub_exprs])
 
 
 class AppliedSymbol(Expression):
@@ -616,19 +519,6 @@ class AppliedSymbol(Expression):
             out[self.decl.name] = self.decl
         return out
 
-    @use_value
-    def translate(self):
-        if self.s.name == 'abs':
-            arg = self.sub_exprs[0].translate()
-            return If(arg >= 0, arg, -arg)
-        else:
-            if len(self.sub_exprs) == 0:
-                return self.decl.translated
-            else:
-                arg = [x.translate() for x in self.sub_exprs]
-                #assert  all(a != None for a in arg)
-                return (self.decl.translate())(arg)
-
     def has_environmental(self, truth):
         return self.decl.environmental == truth \
             or any(e.has_environmental(truth) for e in self.sub_exprs)
@@ -670,10 +560,6 @@ class Variable(AppliedSymbol):
 
     def reified(self):
         return self.translate()
-
-    @use_value
-    def translate(self):
-        return self.decl.translated
     
 class Symbol(Variable): 
     PRECEDENCE = 200
@@ -704,9 +590,6 @@ class Fresh_Variable(Expression):
         self.fresh_vars = set([self.name])
         return self
 
-    def translate(self):
-        return self.translated
-
 class NumberConstant(Expression):
     PRECEDENCE = 200
     def __init__(self, **kwargs):
@@ -733,9 +616,6 @@ class NumberConstant(Expression):
         self.fresh_vars = set()
         return self
     def as_ground(self): return self
-
-    def translate(self):
-        return self.translated
 
 ZERO = NumberConstant(number='0')
 ONE  = NumberConstant(number='1')
@@ -768,8 +648,4 @@ class Brackets(Expression):
         if self.annotations['reading']:
             self.sub_exprs[0].annotations = self.annotations
         return self
-
-    @use_value
-    def translate(self):
-        return self.sub_exprs[0].translate()
 
