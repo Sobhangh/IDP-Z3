@@ -37,72 +37,62 @@ class Status(IntFlag):
     EXPANDED    = 64
 
 class Assignment(object):
-    def __init__(self, sentence: Expression, truth: Optional[Expression], status: Status):
+    def __init__(self, sentence: Expression, value: Optional[Expression], status: Status):
         self.sentence = sentence
-        self.truth = truth
+        self.value = value
         self.status = status
         self.relevant = False
 
     def update(self, sentence: Optional[Expression], 
-                     truth: Optional[Expression], 
+                     value: Optional[Expression], 
                      status: Optional[Status], 
                      case):
         """ make a copy, and save it in case.assignments """
         out = copy(self) # needed for explain of irrelevant symbols
         if sentence is not None: out.sentence = sentence
-        if truth    is not None: out.truth    = truth
+        if value    is not None: out.value    = value
         if status   is not None: out.status   = status
         case.assignments[self.sentence.code] = out
         return out
 
     def __eq__(self, other):
-        # ignores the modality of truth !
-        return self.truth == other.truth \
-            and type(self.sentence) == type (other.sentence) \
-            and str(self.sentence) == str(other.sentence)
-
+        # ignores value !
+        return self.sentence == other.sentence
+        
     def __hash__(self): #TODO remove. Used for sets in abstract
-        return hash((str(self.sentence), str(self.truth)))
+        return hash(self.sentence.str)
 
     def __repr__(self):
         out = str(self.sentence.code)
-        if self.truth is None:
+        if self.value is None:
             return f"? {out}"
-        if self.truth == TRUE:
+        if self.value == TRUE:
             return out
-        if self.truth == FALSE:
+        if self.value == FALSE:
             return f"~{out}"
-        return f"{out} -> {str(self.truth)}"
+        return f"{out} -> {str(self.value)}"
 
     def __str__(self):
         pre, post = '', ''
-        if self.truth is None:
+        if self.value is None:
             pre = f"? "
-        elif self.truth == TRUE:
+        elif self.value == TRUE:
             pre = ""
-        elif self.truth == FALSE:
+        elif self.value == FALSE:
             pre = f"Not "
         else:
-            post = f" -> {str(self.truth)}"
+            post = f" -> {str(self.value)}"
         return f"{pre}{self.sentence.annotations['reading']}{post}"
-    
-
-    def as_substitution(self, case) -> Tuple[Optional[Expression], Optional[Expression]]:
-        if self.truth is not None:
-            old = self.sentence
-            new = self.truth
-            return old, new
-        return None, None
 
     def to_json(self) -> str: return str(self)
 
     def translate(self) -> BoolRef:
-        if self.truth is None:
+        if self.value is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
-            out = self.sentence.original.translate() if self.truth==TRUE else Not(self.sentence.original.translate())
+            out = self.sentence.original.translate() if self.value==TRUE else Not(self.sentence.original.translate())
         else:
-            out = self.sentence.original.translate() == self.truth.translate()
+            out = self.sentence.original.translate() == self.value.translate()
         return out
 
 
@@ -230,19 +220,19 @@ class Structure_(object):
 
     def fill(self, case):
         for key, l in case.assignments.items():
-            if l.truth is not None and key in case.GUILines:
+            if l.value is not None and key in case.GUILines:
                 if case.GUILines[key].is_visible:
-                    self.addAtom(l.sentence, l.truth, l.status)
+                    self.addAtom(l.sentence, l.value, l.status)
 
 
-    def addAtom(self, atom, truth, status: Status):
+    def addAtom(self, atom, value, status: Status):
         key = atom.code
         if key in self.case.GUILines:
             for symb in self.case.GUILines[key].unknown_symbols().keys():
                 s = self.m.setdefault(symb, {})
                 if key in s:
-                    if truth is not None:
-                        s[key]["value"] = True if truth==TRUE else False if truth==FALSE else str(truth)
+                    if value is not None:
+                        s[key]["value"] = True if value==TRUE else False if value==FALSE else str(value)
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']

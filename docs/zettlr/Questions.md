@@ -19,7 +19,8 @@ Principles:
         * all ground instances from vocabulary + quantified expressions + applied symbols and comparisons before expansion without quantified variables
     * shown ≤ showable
         * based on normal view vs expanded view → is_visible
-    * questions = shown + applied symbols and comparison after expansion
+    * questions (= Assignments)
+        * shown + applied symbols and comparison after expansion
 * Expr.questions: computed for each top expression in simplified + questions; reduced by 1 after each substitute
 * we need to determine propagated value and relevance for all Case.questions
 

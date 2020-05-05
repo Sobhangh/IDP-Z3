@@ -49,7 +49,7 @@ class Case:
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified: List[Expression] = []
 
-        self.assignments: Dict[str, Assignment] = {} # atoms + given, with simplified formula and truth value
+        self.assignments: Dict[str, Assignment] = {} # atoms + given, with simplified formula and value value
 
         if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -67,8 +67,8 @@ class Case:
             c = c.copy()
             u = c.implicants()
             if u:
-                for sentence, truth in u:
-                    ass = Assignment(sentence, truth, Status.UNKNOWN)
+                for sentence, value in u:
+                    ass = Assignment(sentence, value, Status.UNKNOWN)
                     status = Status.ENV_UNIV if not ass.sentence.has_environmental(False) else Status.UNIVERSAL
                     ass.update(None, None, status, self)
             self.simplified.append(c)
@@ -122,7 +122,7 @@ class Case:
 
         # simplify all using given and universals
         to_propagate = list(l for l in self.assignments.values() 
-            if l.truth is not None)
+            if l.value is not None)
         self.propagate(to_propagate, all_)
 
         Log(f"{nl}Z3 propagation ********************************")
@@ -136,7 +136,7 @@ class Case:
             # determine consequences on expanded symbols only (for speed)
             for key in todo:
                 l = self.assignments[key]
-                if ( l.truth is None
+                if ( l.value is None
                 and (all_ or not l.sentence.has_environmental(False))
                 # and key in self.get_relevant_subtences(all_) 
                 and self.GUILines[key].is_visible):
@@ -174,9 +174,9 @@ class Case:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
         while to_propagate:
             ass = to_propagate.pop(0)
-            old, new = ass.as_substitution(self)
 
-            if new is not None:
+            if ass.value is not None:
+                old, new = ass.sentence, ass.value
                 # simplify constraints and propagate consequences
                 new_simplified: List[Expression] = []
                 for constraint in self.simplified:
@@ -184,15 +184,15 @@ class Case:
                     new_constraint = constraint.substitute(old, new, consequences)
                     consequences.extend(new_constraint.implicants())
                     if consequences:
-                        for sentence, truth in consequences:
+                        for sentence, value in consequences:
                             if sentence.code in self.assignments:
                                 old_ass = self.assignments[sentence.code]
-                                if old_ass.truth is None:
+                                if old_ass.value is None:
                                     if (all_ or not constraint.has_environmental(False)):
-                                        new_ass = old_ass.update(sentence, truth, CONSQ, self)
+                                        new_ass = old_ass.update(sentence, value, CONSQ, self)
                                         to_propagate.append(new_ass)
-                                        new_constraint = new_constraint.substitute(sentence, truth)
-                                elif old_ass.truth != truth:
+                                        new_constraint = new_constraint.substitute(sentence, value)
+                                elif old_ass.value != value:
                                     # test: theory{ x=4. x=5. }
                                     self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                     return
@@ -211,12 +211,12 @@ class Case:
                     if before != str(new_constraint) \
                     and (all_ or not new_constraint.has_environmental(False)): # is purely environmental
                         if new_constraint.code in self.assignments \
-                        and self.assignments[new_constraint.code].truth is not None: # e.g. O(M) becomes O(e2)
+                        and self.assignments[new_constraint.code].value is not None: # e.g. O(M) becomes O(e2)
                             new_constraint = self.assignments[new_constraint.code].sentence
                         if new_constraint.value is None: # not reduced to ground
                             old_ass.update(new_constraint, None, None, self)
-                        elif old_ass.truth is not None: # has a value already
-                            if not old_ass.truth == new_constraint.value: # different !
+                        elif old_ass.value is not None: # has a value already
+                            if not old_ass.value == new_constraint.value: # different !
                                 self.simplified = cast(List[Expression], [FALSE]) # inconsistent
                                 return
                             else: # no change
@@ -232,7 +232,7 @@ class Case:
             self.typeConstraints.translate(self.idp)
             + sum((d.translate(self.idp) for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
-                    if l.truth is not None and (all_ or not l.sentence.has_environmental(False))]
+                    if l.value is not None and (all_ or not l.sentence.has_environmental(False))]
             + [c.translate() for c in self.simplified
                     if all_ or not c.has_environmental(False)]
             )

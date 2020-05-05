@@ -171,7 +171,7 @@ def explain(case, symbol, value, given_json):
             for a1 in case.given.values():
                 for a2 in unsatcore:
                     if type(ps[a2]) == Assignment and a1.sentence.code == ps[a2].sentence.code: #TODO we might miss some equality
-                        out.addAtom(a1.sentence, a1.truth, a1.status)
+                        out.addAtom(a1.sentence, a1.value, a1.status)
             out.m["*laws*"] = []
             for a1 in case.idp.theory.definitions + case.idp.theory.constraints: 
                 #TODO find the rule
@@ -212,12 +212,12 @@ def abstract(case, given_json):
         for atom_string, atom in case.GUILines.items():
             if atom_string in case.assignments:
                 assignment = case.assignments[atom_string]
-                if assignment.truth is None \
+                if assignment.value is None \
                 and assignment.relevant and atom.type == 'bool':
-                    truth = solver.model().eval(reify[atom])
-                    if truth == True:
+                    value = solver.model().eval(reify[atom])
+                    if value == True:
                         atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
-                    elif truth == False:
+                    elif value == False:
                         atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
                     else: #unknown
                         theory2 = And(theory2,
@@ -226,7 +226,7 @@ def abstract(case, given_json):
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
-        atoms.sort(key=lambda l: (l.truth==TRUE, str(l.sentence)))
+        atoms.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
 
         # remove atoms that are irrelevant in AMF
         solver2 = Solver()
@@ -234,9 +234,9 @@ def abstract(case, given_json):
         solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
         (reify2, _) = reifier({str(l.sentence.original) : l.sentence.original for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
-            if assignment.truth is not None:
+            if assignment.value is not None:
                 solver2.push()
-                a = Not(reify2[assignment.sentence.original]) if assignment.truth else \
+                a = Not(reify2[assignment.sentence.original]) if assignment.value else \
                     reify2[assignment.sentence.original]
                 solver2.add(a)
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
@@ -254,17 +254,17 @@ def abstract(case, given_json):
         solver2.add(case.idp.vocabulary.translate(case.idp)) # without theory !
         (reify2, _) = reifier({str(l.sentence.original) : l.sentence.original for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
-            if assignment.truth is not None:
+            if assignment.value is not None:
                 solver2.push()
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(assignment)
-                a = Not(reify2[assignment.sentence.original]) if assignment.truth else \
+                a = Not(reify2[assignment.sentence.original]) if assignment.value else \
                     reify2[assignment.sentence.original]
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-                    # ??? theory2 = substitute(theory2, [(assignment.sentence, BoolVal(assignment.truth & 1))])
+                    # ??? theory2 = substitute(theory2, [(assignment.sentence, BoolVal(assignment.value & 1))])
                 solver2.pop()
 
         # add constraint to eliminate this model
