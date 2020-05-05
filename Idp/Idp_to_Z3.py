@@ -29,12 +29,23 @@ from utils import Log, nl
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort, Q
 
 from typing import List, Tuple
-from Idp.Expression import use_value, Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
+from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
                     Fresh_Variable, TRUE, FALSE, ZERO
 
+
+
+# class Expression ############################################################
+
+def translate(self): 
+    if self.value   is not None: 
+        return self.value.translate()
+    if self.simpler is not None: 
+        return self.simpler.translate()
+    return self.translate1()
+Expression.translate = translate
 
 # class Constructor ############################################################
 
@@ -47,19 +58,17 @@ Constructor.translate = translate
 
 # Class IfExpr ################################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     return If(self.sub_exprs[IfExpr.IF  ].translate()
             , self.sub_exprs[IfExpr.THEN].translate()
             , self.sub_exprs[IfExpr.ELSE].translate())
-IfExpr.translate = translate
+IfExpr.translate1 = translate1
 
 
 
 # Class AQuantification #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     for v in self.q_vars.values():
         v.translate()
     if not self.vars:
@@ -76,7 +85,7 @@ def translate(self):
             if len(finalvars) > 0: # not fully expanded !
                 forms = Exists(finalvars, forms)
         return forms
-AQuantification.translate = translate
+AQuantification.translate1 = translate1
 
 
 
@@ -101,47 +110,43 @@ BinaryOperator.MAP = { '∧': lambda x, y: And(x, y),
             '≠': lambda x, y: x != y
             }
 
-@use_value
-def translate(self):
+def translate1(self):
     out = self.sub_exprs[0].translate()
 
     for i in range(1, len(self.sub_exprs)):
         function = BinaryOperator.MAP[self.operator[i - 1]]
         out = function(out, self.sub_exprs[i].translate())
     return out
-BinaryOperator.translate = translate
+BinaryOperator.translate1 = translate1
 
 
 
 # Class ADisjunction #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate()
     else:
         out = Or ([e.translate() for e in self.sub_exprs])
     return out
-ADisjunction.translate = translate
+ADisjunction.translate1 = translate1
 
 
 
 # Class AConjunction #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate()
     else:
         out = And([e.translate() for e in self.sub_exprs])
     return out
-AConjunction.translate = translate
+AConjunction.translate1 = translate1
 
 
 # Class AComparison #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     assert not self.operator == ['≠']
     # chained comparisons -> And()
     out = []
@@ -159,7 +164,7 @@ def translate(self):
         return And(out)
     else:
         return out[0]
-AComparison.translate = translate
+AComparison.translate1 = translate1
 
 
 
@@ -168,28 +173,25 @@ AComparison.translate = translate
 AUnary.MAP = {'-': lambda x: 0 - x,
            '~': lambda x: Not(x)
           }
-          
-@use_value
-def translate(self):
+
+def translate1(self):
     out = self.sub_exprs[0].translate()
     function = AUnary.MAP[self.operator]
     return function(out)
-AUnary.translate = translate
+AUnary.translate1 = translate1
 
 
 # Class AAggregate #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     return Sum([f.translate() for f in self.sub_exprs])
-AAggregate.translate = translate
+AAggregate.translate1 = translate1
 
 
 
 # Class AppliedSymbol, Variable #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     if self.s.name == 'abs':
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
@@ -200,16 +202,15 @@ def translate(self):
             arg = [x.translate() for x in self.sub_exprs]
             #assert  all(a != None for a in arg)
             return (self.decl.translate())(arg)
-AppliedSymbol.translate = translate
+AppliedSymbol.translate1 = translate1
 
 
 
 # Class AppliedSymbol, Variable #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     return self.decl.translated
-Variable.translate = translate
+Variable.translate1 = translate1
 
 
 
@@ -231,7 +232,6 @@ NumberConstant.translate = translate
 
 # Class Brackets #######################################################
 
-@use_value
-def translate(self):
+def translate1(self):
     return self.sub_exprs[0].translate()
-Brackets.translate = translate
+Brackets.translate1 = translate1

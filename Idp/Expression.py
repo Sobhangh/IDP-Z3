@@ -44,22 +44,6 @@ class DSLException(Exception):
     def __str__(self):
         return self.message
 
-def use_value(function):
-    " decorator for str(), translate() "
-    def _wrapper(*args, **kwds):
-        self = args[0]
-        if self.value   is not None: 
-            return (self.value  .__class__.__dict__[function.__name__])(self.value)
-        if self.simpler is not None: 
-            # call the (possibly inherited) 'function' method of simpler's class
-            for cls in self.simpler.__class__.__mro__:
-                if function.__name__ in cls.__dict__:
-                    out = (cls.__dict__[function.__name__])(self.simpler)
-                    return out
-            assert False, "Internal error in Expression.use_value"
-        return function(self)
-    return _wrapper
-
 class Expression(object):
     COUNT = 0
     def __init__(self):
@@ -102,6 +86,13 @@ class Expression(object):
         return self.str == other.str and type(self)==type(other)
 
     def __repr__(self): return str(self)
+
+    def __str__(self):
+        if self.value   is not None: 
+            return str(self.value)
+        if self.simpler is not None: 
+            return str(self.simpler)
+        return self.__str1__()
     
     def __hash__(self):
         return hash(self.code)
@@ -172,11 +163,9 @@ class Constructor(Expression):
 
         super().__init__()
     
-    @use_value
-    def __str__(self): return self.name
+    def __str1__(self): return self.name
 
     def as_ground(self): return self
-    def translate(self): return self.translated
 
 TRUE  = Constructor(name='true')
 FALSE = Constructor(name='false')
@@ -202,8 +191,7 @@ class IfExpr(Expression):
         out.fresh_vars = set()
         return out.annotate1().simplify1()
         
-    @use_value
-    def __str__(self):
+    def __str1__(self):
         return ( f" if   {self.sub_exprs[IfExpr.IF  ].str}"
                  f" then {self.sub_exprs[IfExpr.THEN].str}"
                  f" else {self.sub_exprs[IfExpr.ELSE].str}" )
@@ -236,8 +224,7 @@ class AQuantification(Expression):
         out.fresh_vars = set()
         return out
 
-    @use_value
-    def __str__(self):
+    def __str1__(self):
         assert len(self.vars) == len(self.sorts), "Internal error"
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {self.sub_exprs[0].str}"
@@ -297,8 +284,7 @@ class BinaryOperator(Expression):
         out.is_subtence = is_subtence
         return out.annotate1().simplify1()
         
-    @use_value
-    def __str__(self):
+    def __str1__(self):
         def parenthesis(precedence, x):
             return f"({x.str})" if type(x).PRECEDENCE <= precedence else f"{x.str}"
         precedence = type(self).PRECEDENCE
@@ -394,8 +380,7 @@ class AUnary(Expression):
         out.is_subtence = is_subtence
         return out.annotate1().simplify1()
 
-    @use_value
-    def __str__(self):
+    def __str1__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
     def annotate1(self):
@@ -424,8 +409,7 @@ class AAggregate(Expression):
         if self.aggtype != "sum" and self.out is not None:
             raise Exception("Can't have output variable for #")
 
-    @use_value
-    def __str__(self):
+    def __str1__(self):
         if self.vars is not None:
             assert len(self.vars) == len(self.sorts), "Internal error"
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
@@ -484,8 +468,7 @@ class AppliedSymbol(Expression):
         out.is_subtence = is_subtence
         return out.annotate1()
 
-    @use_value
-    def __str__(self):
+    def __str1__(self):
         if len(self.sub_exprs) == 0:
             return self.s.str
         else:
@@ -539,8 +522,7 @@ class Variable(AppliedSymbol):
         self.decl = None
         self.translated = None
 
-    @use_value
-    def __str__(self): return self.name
+    def __str1__(self): return self.name
 
     def annotate(self, symbol_decls, q_vars):
         if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
@@ -578,8 +560,7 @@ class Fresh_Variable(Expression):
         self.sub_exprs = []
         self.translated = None
 
-    @use_value
-    def __str__(self): return self.name
+    def __str1__(self): return self.name
 
     def annotate(self, symbol_decls, q_vars):
         self = super().annotate(symbol_decls, q_vars)

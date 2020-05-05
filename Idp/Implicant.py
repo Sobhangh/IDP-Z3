@@ -39,71 +39,54 @@ def _if_subtence(self, truth):
 def _not(truth):
     return FALSE if truth == TRUE else TRUE
 
-def use_value(function):
-    " decorator for implicants() "
-    def _wrapper(*args, **kwds):
-        self = args[0]
-        truth = args[1] if len(args) == 2 else TRUE
-        if self.value is not None: 
-            return []
-        out = _if_subtence(self, truth)
-        if self.simpler is not None: 
-            # call the (possibly inherited) 'function' method of simpler's class
-            for cls in self.simpler.__class__.__mro__:
-                if function.__name__ in cls.__dict__:
-                    out = out + (cls.__dict__[function.__name__])(self.simpler, truth)
-                    return out
-            assert False, "Internal error in Implicant.use_value"
-        out = out + function(self, truth)
-        return out
-    return _wrapper
-
 # class Expression ############################################################
 
-@use_value
-def implicants(self, truth):
+def implicants(self, truth=TRUE):
+    if self.value is not None: 
+        return []
+    out = _if_subtence(self, truth)
+    if self.simpler is not None: 
+        out = out + self.simpler.implicants(truth)
+        return out
+    out = out + self.implicants1(truth)
+    return out
+Expression.implicants = implicants
+
+def implicants1(self, truth):
     " returns the list of implicants of self (default implementation) "
     return []
-Expression.implicants = implicants
-IfExpr.implicants = implicants
-AEquivalence.implicants = implicants
-AImplication.implicants = implicants
-Brackets.implicants = implicants
+Expression.implicants1 = implicants1
 
 
 # class ADisjunction ############################################################
 
-@use_value
-def implicants(self, truth=TRUE):
+def implicants1(self, truth=TRUE):
     if truth == FALSE:
         return sum( (e.implicants(truth) for e in self.sub_exprs), [])
     return []
-ADisjunction.implicants = implicants
+ADisjunction.implicants1 = implicants1
 
 
 # class AConjunction ############################################################
 
-@use_value
-def implicants(self, truth=TRUE):
+def implicants1(self, truth=TRUE):
     if truth == TRUE:
         return sum( (e.implicants(truth) for e in self.sub_exprs), [])
     return []
-AConjunction.implicants = implicants
+AConjunction.implicants1 = implicants1
 
 
 # class AUnary ############################################################
 
-@use_value
-def implicants(self, truth=TRUE):
+def implicants1(self, truth=TRUE):
     return self.sub_exprs[0].implicants(_not(truth)) if self.operator == '~' \
       else []
-AUnary.implicants = implicants
+AUnary.implicants1 = implicants1
 
 
 # class AComparison ############################################################
 
-@use_value
-def implicants(self, truth=TRUE):
+def implicants1(self, truth=TRUE):
     if truth == TRUE and len(self.sub_exprs) == 2 and self.operator == ['=']:
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one a consequence, not a universal
@@ -113,4 +96,4 @@ def implicants(self, truth=TRUE):
         elif operands1[0] is not None:
             return [(self.sub_exprs[1], operands1[0])]
     return []
-AComparison.implicants = implicants
+AComparison.implicants1 = implicants1
