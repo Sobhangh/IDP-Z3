@@ -72,14 +72,23 @@ z3lock = threading.Lock()
 idps: Dict[str, Idp] = {} # {code_string : idp}
 
 def caseOf(code):
+    """
+    Function to retrieve an Idp object for IDP code.
+    If the object doesn't exist yet, we create it.
+    `idps` is a dict which contains an Idp object for each IDP code.
+    This way, easy caching can be achieved.
+
+    :arg code: the IDP code.
+    :returns Idp: the Idp object.
+    """
     global idps
     if code in idps:
         return idps[code]
     else:
         idp = idpparser.model_from_str(code)
-        if 20<len(idps):
+        if 20 < len(idps):
             # remove oldest entry, to prevent memory overflow
-            idps = {k:v for k,v in list(idps.items())[1:]}
+            idps = {k: v for k, v in list(idps.items())[1:]}
         idps[code] = idp
         return idp
 
@@ -140,7 +149,18 @@ class evalWithGraph(eval): # subcclass that generates call graphs
             return super().post()
 
 class meta(Resource):
+    """
+    Class which handles the meta.
+    <<Explanation of what the meta is here.>>
+
+    :arg Resource: <<explanation of resource>>
+    """
     def post(self):
+        """
+        Method to export the metaJSON from the resource.
+
+        :returns metaJSON: a json string containing the meta.
+        """
         global cases
         log("start /meta")
         with z3lock:

@@ -23,6 +23,8 @@ Vocabulary: 'vocabulary' 'environment'? '{' (declarations=Declaration)* '}';
       Sort: name=ID;
       Symbol: name=ID;
 
+  Annotations: ('[' annotations*=/[^\]]*/ ']')*;
+
 Decision: 'vocabulary' 'decision' '{' (declarations=Declaration)* '}';
 
 Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';

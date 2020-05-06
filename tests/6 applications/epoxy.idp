@@ -1,76 +1,56 @@
 vocabulary {
-    type epoxy constructed from {e1, e2, e3}
-    type brand constructed from {Huntsman, Sadechaf, Jowat}
-    type family constructed from {_2c_Epoxy, _1c_Epoxy}
-    type cost = {0.539; 100}
-    type color constructed from {amber, black_fluorescent, blackish_grey}
-    type shelf_life = {0; 6; 12}
-    type lowest_storage_t = {0; 15; 16}
-    type highest_storage_t = {10; 25; 38}
-    type mixing_ratio constructed from {_1_1, _2_1, na}
-    type specific_gravity_resin = {1.05; 1.12; 1.17}
-    type specific_gravity_hardener = {0; 0.92; 1.28}    
-
-
+    type t_epoxy constructed from {e1, e2, e3}
+    type t_cost = {0.539; -1}
+    type t_safe_low_storage_t = {0; 15; 16}
+    type t_safe_high_storage_t = {10; 25; 38}
     
-    Epoxy: epoxy
-    Brand: brand
-    Family: family
 
-    Cost: cost
-    Min_Cost: real
-    Max_Cost: real
-    Known_Cost
+    KnownCost
+    KnownHighStorageT
+    KnownLowStorageT
+    
+    Epoxy: t_epoxy
+    
+    
+    ECost(t_epoxy): t_cost
+    _Min_Cost: real
+    _Max_Cost: real
+    [Slider: (_Min_Cost, _Max_Cost): (0.2, 1)]
+    Cost: t_cost
 
-    Color: color
+    _Min_Storage_T: real
+    _Max_Storage_T: real
 
-    Shelf_Life: shelf_life
-    Min_Shelf_Life: real
-    Max_Shelf_Life: real
-    Known_Shelf_Life
-   
+    ELowest_Storage_T(t_epoxy): t_safe_low_storage_t
+    EHighest_Storage_T(t_epoxy): t_safe_high_storage_t 
+    [Slider: (_Min_Storage_T, ): (-25, 25)]
+    Safe_Low_Storage_T: t_safe_low_storage_t
+    [Slider: ( , _Max_Storage_T): (-25, 25)]
+    Safe_High_Storage_T: t_safe_high_storage_t 
+    
+
+
 }
 
 
 theory {
-    
-    { // Every epoxy has a known brand.
-        Brand = Huntsman <- Epoxy = e1.
-        Brand = Sadechaf <- Epoxy = e2.
-        Brand = Jowat <- Epoxy = e3.
-    }
+    KnownCost <=> ECost(Epoxy) ~= -1. // Default t_cost is -1.
+    KnownCost => _Min_Cost =< ECost(Epoxy) =< _Max_Cost.
+    Cost = ECost(Epoxy).  
 
-    { // Every epoxy has a known family.
-        Family = _2c_Epoxy <- Epoxy = e1 | Epoxy = e3.
-        Family = _1c_Epoxy <- Epoxy = e2.
-    }
+    KnownLowStorageT <=> ELowest_Storage_T(Epoxy) ~= -900. 
+    KnownHighStorageT <=> EHighest_Storage_T(Epoxy) ~= -900.
 
-    
-    { // The default value for unknown costs is 100.
-        Cost = 0.539 <- Epoxy = e1.
-        Cost = 100 <- Epoxy = e2 | Epoxy = e3.
-    }
-
-    Known_Cost <=> Cost ~= 100.
-    Known_Cost => Min_Cost =< Cost.
-    Known_Cost => Max_Cost >= Cost.
-
-
-    { // Every epoxy has a known color.
-        Color = amber <- Epoxy = e1.
-        Color = black_fluorescent <- Epoxy = e2.
-        Color = blackish_grey <- Epoxy = e3.
-    }
-
-    
-    { // The dfqsdfq
-        Shelf_Life = 12 <- Epoxy = e1.
-        Shelf_Life = 6 <- Epoxy = e2.
-        Shelf_Life = 0 <- Epoxy = e3.
-    }
+    ELowest_Storage_T(Epoxy) =< _Min_Storage_T =< EHighest_Storage_T(Epoxy).
+    EHighest_Storage_T(Epoxy) >= _Max_Storage_T >= ELowest_Storage_T(Epoxy).
+    Safe_Low_Storage_T = ELowest_Storage_T(Epoxy).
+    Safe_High_Storage_T = EHighest_Storage_T(Epoxy).
 }
 
+structure {
+    ECost = {e1, 0.539} else -1
+    ELowest_Storage_T = {e1, 16; e2, 0; e3, 15} else -900
+    EHighest_Storage_T = {e1, 38; e2, 10; e3, 25} else -900
 
-
-
-view expanded
+}
+ 

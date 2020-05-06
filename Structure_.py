@@ -197,32 +197,31 @@ class Structure_(object):
             typ = atom.type
             key = atom.code
             for symb in atom.unknown_symbols().values():
-                if not symb.name.startswith('_'):
-                    s = self.m.setdefault(symb.name, {})
+                s = self.m.setdefault(symb.name, {})
 
-                    if typ == 'bool':
-                        symbol = {"typ": 'Bool'}
-                    elif 0 < len(symb.range):
-                        typ = symb.out.decl.type.capitalize() if symb.out.decl.type in ['int', 'real'] else typ
-                        symbol = { "typ": typ, "value": "" #TODO
-                                , "values": [str(v) for v in symb.range]}
-                    elif typ in ["real", "int"]:
-                        symbol = {"typ": typ.capitalize(), "value": ""} # default
+                if typ == 'bool':
+                    symbol = {"typ": 'Bool'}
+                elif 0 < len(symb.range):
+                    typ = symb.out.decl.type.capitalize() if symb.out.decl.type in ['int', 'real'] else typ
+                    symbol = {"typ": typ, "value": ""  #TODO
+                              , "values": [str(v) for v in symb.range]}
+                elif typ in ["real", "int"]:
+                    symbol = {"typ": typ.capitalize(), "value": ""} # default
+                else:
+                    symbol = None
+
+                if symbol:
+                    if atom.code in case.assignments:
+                        symbol["status"] = case.assignments[atom.code].status.name
+                        symbol["relevant"] = case.assignments[atom.code].relevant
                     else:
-                        symbol = None
-
-                    if symbol:
-                        if atom.code in case.assignments:
-                            symbol["status"] = case.assignments[atom.code].status.name
-                            symbol["relevant"] = case.assignments[atom.code].relevant
-                        else:
-                            symbol["status"] = "UNKNOWN" #TODO
-                            symbol["relevant"] = True # unused symbol instance (Large(1))
-                        symbol['reading'] = atom.annotations['reading']
-                        symbol['normal'] = hasattr(atom, 'normal')
-                        symbol['environmental'] = atom.has_environmental(True)
-                        s.setdefault(key, symbol)
-                        break
+                        symbol["status"] = "UNKNOWN" #TODO
+                        symbol["relevant"] = True # unused symbol instance (Large(1))
+                    symbol['reading'] = atom.annotations['reading']
+                    symbol['normal'] = hasattr(atom, 'normal')
+                    symbol['environmental'] = atom.has_environmental(True)
+                    s.setdefault(key, symbol)
+                    break
 
         for GuiLine in case.GUILines.values():
             initialise(GuiLine)

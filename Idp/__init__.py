@@ -24,15 +24,17 @@ import re
 import sys
 
 from textx import metamodel_from_file
-from z3 import IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists, Z3Exception, \
-    Sum, If, Function, FreshConst, Implies, EnumSort
+from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
+                Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort)
 
 from utils import applyTo, log, itertools, in_list, nl, mergeDicts
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
-                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
-                    Fresh_Variable, TRUE, FALSE
+from Idp.Expression import (Constructor, Expression, IfExpr, AQuantification,
+                            BinaryOperator, ARImplication, AEquivalence,
+                            AImplication, ADisjunction, AConjunction,
+                            AComparison, ASumMinus, AMultDiv, APower, AUnary,
+                            AAggregate, AppliedSymbol, Variable, Symbol,
+                            NumberConstant, Brackets, Arguments,
+                            Fresh_Variable, TRUE, FALSE)
 
 import Idp.Substitute
 import Idp.Implicant
@@ -54,14 +56,15 @@ class Idp(object):
         if self.view is None:
             self.view = View(viewType='normal')
 
-        self.translated = None # [Z3Expr]
+        self.translated = None  # [Z3Expr]
 
         if self.decision is not None:
             for decl in self.vocabulary.symbol_decls.values():
                 decl.environmental = True
             self.vocabulary.update(self.decision)
 
-        if self.interpretations: self.interpretations.annotate(self.vocabulary)
+        if self.interpretations:
+            self.interpretations.annotate(self.vocabulary)
         self.goal.annotate(self)
         self.theory.annotate(self.vocabulary)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
@@ -84,7 +87,7 @@ class Idp(object):
     def unknown_symbols(self):
         todo = self.theory.unknown_symbols()
 
-        out = {} # reorder per vocabulary order
+        out = {}  # reorder per vocabulary order
         for symb in self.vocabulary.symbol_decls:
             if symb in todo:
                 out[symb] = todo[symb]
@@ -96,39 +99,57 @@ class Idp(object):
 
 ################################ Vocabulary  ###############################
 
+
 class Annotations(object):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
 
         def pair(s):
-            p = s.split(':',1)
+            p = s.split(':', 1)
             if len(p) == 2:
-                return (p[0], p[1])
+                if ':' not in p[1]:
+                    return (p[0], p[1])
+                else:
+                    # In this case we have a Slider.
+                    # The format of p[1] is as follows:
+                    # (lower_sym, upper_sym): (lower_bound, upper_bound)
+                    pat = r"\(((.*?), (.*?))\)"
+                    arg = re.findall(pat, p[1])
+                    l_symb = arg[0][1]
+                    u_symb = arg[0][2]
+                    l_bound = arg[1][1]
+                    u_bound = arg[1][2]
+                    slider_arg = {'lower_symbol': l_symb,
+                                  'upper_symbol': u_symb,
+                                  'lower_bound': l_bound,
+                                  'upper_bound': u_bound}
+                    return(p[0], slider_arg)
             else:
                 return ('reading', p[0])
 
         self.annotations = dict((pair(t) for t in self.annotations))
 
+
 class Vocabulary(object):
     def __init__(self, **kwargs):
         self.declarations = kwargs.pop('declarations')
-        self.terms = {} # {string: Variable or AppliedSymbol} not starting with '_'
+        self.terms = {}  # {string: Variable or AppliedSymbol}
         self.translated = []
 
-        self.symbol_decls = {'int' : RangeDeclaration(name='int', elements=[]),
-                             'real': RangeDeclaration(name='real', elements=[]),
+        self.symbol_decls = {'int': RangeDeclaration(name='int', elements=[]),
+                             'real': RangeDeclaration(name='real',
+                                                      elements=[]),
                              'bool': ConstructedTypeDeclaration(name='bool',
                                         constructors=[TRUE, FALSE]),
-                             'true' : TRUE,
+                             'true': TRUE,
                              'false': FALSE}
         for s in self.declarations:
             s.annotate(self.symbol_decls)
 
     def __str__(self):
-        return ( f"vocabulary {{{nl}"
-                 f"{nl.join(str(i) for i in self.declarations)}"
-                 f"{nl}}}{nl}"
-               )
+        return (f"vocabulary {{{nl}"
+                f"{nl.join(str(i) for i in self.declarations)}"
+                f"{nl}}}{nl}")
 
     def update(self, other):
         self.declarations.extend(other.declarations)
@@ -148,16 +169,19 @@ class Vocabulary(object):
                 self.terms.update(v.instances)
         return []
 
+
 class Decision(Vocabulary):
     pass
 
+
 class ConstructedTypeDeclaration(object):
     COUNT = -1
+
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
         self.is_var = False
-        self.range = self.constructors # functional constructors are expanded
+        self.range = self.constructors  # functional constructors are expanded
         self.translated = None
         self.type = self
 
@@ -168,7 +192,8 @@ class ConstructedTypeDeclaration(object):
             self.constructors[0].translated = bool(True)
             self.constructors[1].translated = bool(False)
         else:
-            self.translated, cstrs = EnumSort(self.name, [c.name for c in self.constructors])
+            self.translated, cstrs = EnumSort(self.name, [c.name for c in
+                                                          self.constructors])
             assert len(self.constructors) == len(cstrs), "Internal error"
             for c, c3 in zip(self.constructors, cstrs):
                 c.translated = c3
@@ -178,9 +203,8 @@ class ConstructedTypeDeclaration(object):
         self.type = None
 
     def __str__(self):
-        return ( f"type {self.name} constructed from "
-                 f"{{{','.join(map(str, self.constructors))}}}"
-               )
+        return (f"type {self.name} constructed from "
+                f"{{{','.join(map(str, self.constructors))}}}")
 
     def annotate(self, symbol_decls):
         assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
@@ -188,7 +212,7 @@ class ConstructedTypeDeclaration(object):
         for c in self.constructors:
             c.type = self
             symbol_decls[c.name] = c
-        self.range = self.constructors #TODO constructor functions
+        self.range = self.constructors  # TODO constructor functions
 
     def check_bounds(self, var):
         if self.name == 'bool':
@@ -204,7 +228,7 @@ class ConstructedTypeDeclaration(object):
 
 class RangeDeclaration(object):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name') # maybe 'int', 'real'
+        self.name = kwargs.pop('name')  # maybe 'int', 'real'
         self.elements = kwargs.pop('elements')
         self.is_var = False
         self.translated = None
@@ -216,11 +240,11 @@ class RangeDeclaration(object):
                 self.range.append(x.fromI)
                 if type(x.fromI.translated) != int:
                     self.type = 'real'
-            elif x.fromI.type == 'int' and x.toI.type == 'int': 
+            elif x.fromI.type == 'int' and x.toI.type == 'int':
                 for i in range(x.fromI.translated, x.toI.translated + 1):
                     self.range.append(NumberConstant(number=str(i)))
             else:
-                assert False, "Can't have a range over reals: "+ self.name
+                assert False, "Can't have a range over reals: " + self.name
 
         if self.name == 'int':
             self.translated = IntSort()
@@ -229,7 +253,7 @@ class RangeDeclaration(object):
             self.type = 'real'
 
     def __str__(self):
-        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".."+ str(x.toI)) for x in self.elements])
+        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." + str(x.toI)) for x in self.elements])
         return f"type {self.name} = {{{elements}}}"
 
     def annotate(self, symbol_decls):
@@ -264,31 +288,28 @@ class RangeDeclaration(object):
 class SymbolDeclaration(object):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
-        if self.annotations is not None:
-            self.annotations = self.annotations.annotations
-        self.name = sys.intern(kwargs.pop('name').name) # a string, not a Symbol
+        self.name = sys.intern(kwargs.pop('name').name)  # a string, not a Symbol
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
             self.out = Sort(name='bool')
 
-        self.is_var = True # unless interpreted later
+        self.is_var = True  # unless interpreted later
         self.typeConstraints = []
         self.translated = None
 
-        self.type = None # a declaration object
-        self.domain = None # all possible arguments
-        self.range = None # all possible values
-        self.instances = None # {string: Variable or AppliedSymbol} not starting with '_'
-        self.interpretation = None # f:tuple -> Expression (only if it is given in a structure)
-        self.environmental = False # true if in declared (environmental) vocabulary and there is a decision vocabulary
+        self.type = None  # a declaration object
+        self.domain = None  # all possible arguments
+        self.range = None  # all possible values
+        self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
+        self.interpretation = None  # f:tuple -> Expression (only if it is given in a structure)
+        self.environmental = False  # true if in declared (environmental) vocabulary and there is a decision vocabulary
 
     def __str__(self):
-        args = ','.join(map(str, self.sorts)) if 0<len(self.sorts) else ''
-        return ( f"{self.name}"
-                 f"{ '('+args+')' if args else ''}"
-                 f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}"
-        )
+        args = ','.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
+        return (f"{self.name}"
+                f"{ '('+args+')' if args else ''}"
+                f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}")
 
     def annotate(self, symbol_decls, vocabulary=True):
         if vocabulary:
@@ -304,7 +325,7 @@ class SymbolDeclaration(object):
 
         # create instances
         self.instances = {}
-        if vocabulary and not self.name.startswith('_'):
+        if vocabulary:   # and not self.name.startswith('_'):
             if len(self.sorts) == 0:
                 expr = Variable(name=self.name)
                 expr.annotate(symbol_decls, {})
@@ -363,7 +384,8 @@ class Sort(object):
         self.decl = symbol_decls[self.name]
 
     def fresh(self, name, symbol_decls):
-        decl = SymbolDeclaration(annotations=Annotations(annotations=[]), name=Symbol(name=name), sorts=[], out=self)
+        decl = SymbolDeclaration(annotations=Annotations(annotations=[]),
+                                 name=Symbol(name=name), sorts=[], out=self)
         decl.annotate(symbol_decls, False)
         return Fresh_Variable(name, decl)
 
@@ -381,9 +403,9 @@ class Theory(object):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
-        self.clark = {} # {Symbol: Rule}
-        self.symbol_decls = None # {string: decl}
-        self.subtences = None # i.e., sub-sentences.  {string: Expression}
+        self.clark = {}  # {Symbol: Rule}
+        self.symbol_decls = None  # {string: decl}
+        self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.translated = None
 
     def annotate(self, vocabulary):
@@ -394,7 +416,7 @@ class Theory(object):
         for d in self.definitions:
             for symbol, rule in d.clark.items():
                 if symbol in self.clark:
-                    new_rule = copy(rule) # not elegant, but rare
+                    new_rule = copy(rule)  # not elegant, but rare
                     new_rule.body = AConjunction.make('∧', [self.clark[symbol.name].body, rule.body])
                     self.clark[symbol.name] = new_rule
                 else:
@@ -404,7 +426,6 @@ class Theory(object):
         self.constraints = [e.mark_subtences()         for e in self.constraints]
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
-        
 
         for decl in self.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
@@ -416,7 +437,7 @@ class Theory(object):
 
     def unknown_symbols(self):
         return mergeDicts(c.unknown_symbols()
-            for c in self.constraints + self.definitions)
+                          for c in self.constraints + self.definitions)
 
     def translate(self, idp):
         out = []
@@ -431,8 +452,8 @@ class Theory(object):
 class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
-        self.clark = None # {Symbol: Transformed Rule}
-        self.q_vars = {} # {Symbol: {String: Fresh_Variable}} Fresh variables for arguments & result
+        self.clark = None  # {Symbol: Transformed Rule}
+        self.q_vars = {}  # {Symbol: {String: Fresh_Variable}} Fresh variables for arguments & result
         self.translated = None
 
     def __str__(self):
@@ -453,9 +474,9 @@ class Definition(object):
             symbol = symbol_decls[r.symbol.name]
             if symbol not in self.q_vars:
                 name = f"${symbol.name}$"
-                q_v = { f"${symbol.name}!{str(i)}$":
-                    sort.fresh(f"${symbol.name}!{str(i)}$", symbol_decls) \
-                        for i, sort in enumerate(symbol.sorts)}
+                q_v = {f"${symbol.name}!{str(i)}$":
+                       sort.fresh(f"${symbol.name}!{str(i)}$", symbol_decls)
+                       for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
                     q_v[name] = symbol.out.fresh(name, symbol_decls)
                 self.q_vars[symbol] = q_v
@@ -468,7 +489,7 @@ class Definition(object):
             rules[0].body = ADisjunction.make('∨', exprs)
             rules[0].body.mark_subtences()
             self.clark[symbol] = rules[0]
-            
+
         # expand quantifiers and interpret symbols with structure
         for symbol, rule in self.clark.items():
             self.clark[symbol] = rule.compute(theory)
@@ -492,15 +513,15 @@ class Rule(object):
         self.vars = kwargs.pop('vars')
         self.sorts = kwargs.pop('sorts')
         self.symbol = kwargs.pop('symbol')
-        self.args = kwargs.pop('args') # later augmented with self.out, if any
+        self.args = kwargs.pop('args')  # later augmented with self.out, if any
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
-        self.expanded = None # Expression
+        self.expanded = None  # Expression
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {} # {string: Fresh_Variable}
+        self.q_vars = {}  # {string: Fresh_Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
             self.args.append(self.out)
@@ -509,16 +530,16 @@ class Rule(object):
         self.translated = None
 
     def __repr__(self):
-        return ( f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
-                 f"{self.symbol}({','.join(str(e) for e in self.args)}) "
-                 f"⇔{str(self.body)}" )
+        return (f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
+                f"{self.symbol}({','.join(str(e) for e in self.args)}) "
+                f"⇔{str(self.body)}")
 
     def annotate(self, symbol_decls, q_vars):
         # create head variables
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {v:s.fresh(v, symbol_decls) \
-                        for v, s in zip(self.vars, self.sorts)}
-        q_v = {**q_vars, **self.q_vars} # merge
+        self.q_vars = {v: s.fresh(v, symbol_decls)
+                       for v, s in zip(self.vars, self.sorts)}
+        q_v = {**q_vars, **self.q_vars}  # merge
 
         self.symbol = self.symbol.annotate(symbol_decls, q_v).mark_subtences()
         self.args = [arg.annotate(symbol_decls, q_v).mark_subtences() for arg in self.args]
@@ -535,25 +556,25 @@ class Rule(object):
         assert len(self.args) == len(new_vars), "Internal error"
         for arg, nv in zip(self.args, new_vars.values()):
             if type(arg) in [Variable, Fresh_Variable]:
-                if arg.name not in subst: # if new arg variable
-                    if arg.name in self.vars: # re-use var name
+                if arg.name not in subst:  # if new arg variable
+                    if arg.name in self.vars:  # re-use var name
                         subst[arg.name] = nv
                         self.body = self.body.instantiate(arg, nv)
                     else:
                         eq = AComparison.make('=', [nv, arg])
                         self.body = AConjunction.make('∧', [eq, self.body])
-                else: # repeated arg var, e.g., same(x)=x
+                else:  # repeated arg var, e.g., same(x)=x
                     eq = AComparison.make('=', [nv, subst[arg.name]])
                     self.body = AConjunction.make('∧', [eq, self.body])
             elif type(arg) in [NumberConstant, Constructor]:
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
+                    eq = eq.instantiate(Symbol(name=v0), v1)  # fresh variable?
                 self.body = AConjunction.make('∧', [eq, self.body])
-            else: #same(f(x))
+            else:  # same(f(x))
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Symbol(name=v0), v1) # fresh variable ?
+                    eq = eq.instantiate(Symbol(name=v0), v1)  # fresh variable?
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         # Any leftover ?
@@ -561,7 +582,8 @@ class Rule(object):
             if str(var) in subst:
                 pass
             else:
-                self.body = AQuantification.make('∃', {var: self.q_vars[var]}, self.body)
+                self.body = AQuantification.make('∃', {var: self.q_vars[var]},
+                                                 self.body)
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
@@ -584,7 +606,7 @@ class Rule(object):
         expr = AEquivalence.make('⇔', [expr, self.body])
         expr = AQuantification.make('∀', {**self.q_vars}, expr)
         self.expanded = expr.expand_quantifiers(theory)
-        
+
         # interpret structures
         self.body     = self.body    .interpret(theory)
         self.expanded = self.expanded.interpret(theory)
@@ -595,10 +617,10 @@ class Rule(object):
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new)
-        out = out.interpret(theory) # add justification recursively
+        out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
         instance.normal = True
-        if len(new_args)+1 == len(self.args): # a function
+        if len(new_args)+1 == len(self.args):  # a function
             if value is not None:
                 head = AComparison.make("=", [instance, value])
                 out = out.instantiate(self.args[-1], value)
@@ -611,7 +633,7 @@ class Rule(object):
         return out
 
     def unknown_symbols(self):
-        out = mergeDicts(arg.unknown_symbols() for arg in self.args) # in case they are expressions
+        out = mergeDicts(arg.unknown_symbols() for arg in self.args)  # in case they are expressions
         if self.out is not None:
             out.update(self.out.unknown_symbols())
         out.update(self.body.unknown_symbols())
@@ -633,22 +655,23 @@ class Interpretations(object):
         for i in self.interpretations:
             i.annotate(vocabulary.symbol_decls)
 
+
 class Interpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.tuples = kwargs.pop('tuples')
-        self.default = kwargs.pop('default') # later set to false for predicates
+        self.default = kwargs.pop('default')  # later set to false for predicates
 
-        self.function = None # -1 if function else 0
+        self.function = None  # -1 if function else 0
         self.arity = None
-        self.decl = None # symbol declaration
+        self.decl = None  # symbol declaration
 
     def annotate(self, symbol_decls):
         self.decl = symbol_decls[self.name]
         for t in self.tuples:
             t.annotate(symbol_decls)
         self.function = 0 if self.decl.out.name == 'bool' else -1
-        self.arity = len(self.tuples[0].args) # there must be at least one tuple !
+        self.arity = len(self.tuples[0].args)  # there must be at least one tuple !
         if self.function and 1 < self.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
         self.default = self.default if self.function else Symbol(name='false')
@@ -656,26 +679,26 @@ class Interpretation(object):
 
         def interpret(theory, rank, args, tuples=None):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
-            if rank == self.arity + self.function: # valid tuple -> return a value
+            if rank == self.arity + self.function:  # valid tuple -> return a value
                 if not self.function:
                     return TRUE
                 else:
                     if 1 < len(tuples):
-                        #raise Exception("Duplicate values in structure for " + str(symbol))
+                        # raise Exception("Duplicate values in structure for " + str(symbol))
                         print("Duplicate values in structure for " + str(self.name) + str(tuples[0]) )
                     return tuples[0].args[rank]
-            else: # constructs If-then-else recursively
+            else:  # constructs If-then-else recursively
                 out = self.default
                 tuples.sort(key=lambda t: str(t.args[rank]))
                 groups = it.groupby(tuples, key=lambda t: t.args[rank])
 
                 if type(args[rank]) in [Constructor, NumberConstant]:
-                    for val, tuples2 in groups: # try to resolve
+                    for val, tuples2 in groups:  # try to resolve
                         if args[rank] == val:
                             out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = IfExpr.make(AComparison.make('=', [args[rank],val]),
+                        out = IfExpr.make(AComparison.make('=', [args[rank], val]),
                                           interpret(theory, rank+1, args, list(tuples2)),
                                           out)
                 return out
@@ -693,7 +716,7 @@ class Tuple(object):
     def annotate(self, symbol_decls):
         self.args = [arg.annotate(symbol_decls, {}) for arg in self.args]
 
-    def interpret(self, theory): return self #TODO ?
+    def interpret(self, theory): return self  # TODO ?
 
     def translate(self):
         return [arg.translate() for arg in self.args]
@@ -718,7 +741,7 @@ class Goal(object):
             idp.theory.constraints.append(constraint)
 
     def subtences(self):
-        return {} 
+        return {}
 
     def translate(self):
         return None
@@ -731,17 +754,29 @@ class View(object):
     def translate(self):
         return
 
+
+"""
 ################################ Main ###############################
+"""
 
 dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 
-idpparser = metamodel_from_file(dslFile, memoization=True, classes=
-        [ Idp, Annotations,
-          Vocabulary, Decision, ConstructedTypeDeclaration, Constructor, RangeDeclaration, SymbolDeclaration, Symbol, Sort,
-          Theory, Definition, Rule, IfExpr, AQuantification,
-                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate,
-                    AppliedSymbol, Variable, NumberConstant, Brackets, Arguments,
-          Interpretations, Interpretation, Tuple,
-          Goal, View
-        ])
+idpparser = metamodel_from_file(dslFile, memoization=True,
+                                classes=[Idp, Annotations,
+
+                                         Vocabulary, Decision,
+                                         ConstructedTypeDeclaration,
+                                         Constructor, RangeDeclaration,
+                                         SymbolDeclaration, Symbol, Sort,
+
+                                         Theory, Definition, Rule, IfExpr,
+                                         AQuantification, ARImplication,
+                                         AEquivalence, AImplication,
+                                         ADisjunction, AConjunction,
+                                         AComparison, ASumMinus, AMultDiv,
+                                         APower, AUnary, AAggregate,
+                                         AppliedSymbol, Variable,
+                                         NumberConstant, Brackets, Arguments,
+
+                                         Interpretations, Interpretation,
+                                         Tuple, Goal, View])
