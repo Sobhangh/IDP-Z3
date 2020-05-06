@@ -89,8 +89,6 @@ def instantiate(self, e0, e1):
         return e1
 
     out = copy.copy(self)
-    if isinstance(e0, Fresh_Variable):
-        out.fresh_vars.discard(e0.name)
 
     if out.value is None:
         out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
