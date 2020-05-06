@@ -164,7 +164,7 @@ def expand_quantifiers(self, theory):
         out = ADisjunction.make('∨', forms)
     if not self.vars:
         return self._change(simpler=out, sub_exprs=[out])
-    return self._change(sub_exprs=[forms])
+    return self._change(sub_exprs=forms)
 AQuantification.expand_quantifiers = expand_quantifiers
 
 def update_exprs(self, new_expr_generator):

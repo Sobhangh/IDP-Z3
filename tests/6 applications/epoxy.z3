@@ -1,290 +1,359 @@
 
 -- original ---------------------------------
 vocabulary {
-    type epoxy constructed from {e1, e2, e3}
-    type brand constructed from {Huntsman, Sadechaf, Jowat}
-    type family constructed from {_2c_Epoxy, _1c_Epoxy}
-    type cost = {0.539; 100}
-    type color constructed from {amber, black_fluorescent, blackish_grey}
-    type shelf_life = {0; 6; 12}
-    type lowest_storage_t = {0; 15; 16}
-    type highest_storage_t = {10; 25; 38}
-    type mixing_ratio constructed from {_1_1, _2_1, na}
-    type specific_gravity_resin = {1.05; 1.12; 1.17}
-    type specific_gravity_hardener = {0; 0.92; 1.28}    
-
-
+    type t_epoxy constructed from {e1, e2, e3}
+    type t_cost = {0.539; -1}
+    type t_safe_low_storage_t = {0; 15; 16}
+    type t_safe_high_storage_t = {10; 25; 38}
     
-    Epoxy: epoxy
-    Brand: brand
-    Family: family
 
-    Cost: cost
-    Min_Cost: real
-    Max_Cost: real
-    Known_Cost
+    KnownCost
+    KnownHighStorageT
+    KnownLowStorageT
+    
+    Epoxy: t_epoxy
+    
+    
+    ECost(t_epoxy): t_cost
+    _Min_Cost: real
+    _Max_Cost: real
+    [Slider: (_Min_Cost, _Max_Cost): (0.2, 1)]
+    Cost: t_cost
 
-    Color: color
+    _Min_Storage_T: real
+    _Max_Storage_T: real
 
-    Shelf_Life: shelf_life
-    Min_Shelf_Life: real
-    Max_Shelf_Life: real
-    Known_Shelf_Life
-   
+    ELowest_Storage_T(t_epoxy): t_safe_low_storage_t
+    EHighest_Storage_T(t_epoxy): t_safe_high_storage_t 
+    [Slider: (_Min_Storage_T, ): (-25, 25)]
+    Safe_Low_Storage_T: t_safe_low_storage_t
+    [Slider: ( , _Max_Storage_T): (-25, 25)]
+    Safe_High_Storage_T: t_safe_high_storage_t 
+    
+
+
 }
 
 
 theory {
-    
-    { // Every epoxy has a known brand.
-        Brand = Huntsman <- Epoxy = e1.
-        Brand = Sadechaf <- Epoxy = e2.
-        Brand = Jowat <- Epoxy = e3.
-    }
+    KnownCost <=> ECost(Epoxy) ~= -1. // Default t_cost is -1.
+    KnownCost => _Min_Cost =< ECost(Epoxy) =< _Max_Cost.
+    Cost = ECost(Epoxy).  
 
-    { // Every epoxy has a known family.
-        Family = _2c_Epoxy <- Epoxy = e1 | Epoxy = e3.
-        Family = _1c_Epoxy <- Epoxy = e2.
-    }
+    KnownLowStorageT <=> ELowest_Storage_T(Epoxy) ~= -900. 
+    KnownHighStorageT <=> EHighest_Storage_T(Epoxy) ~= -900.
 
-    
-    { // The default value for unknown costs is 100.
-        Cost = 0.539 <- Epoxy = e1.
-        Cost = 100 <- Epoxy = e2 | Epoxy = e3.
-    }
-
-    Known_Cost <=> Cost ~= 100.
-    Known_Cost => Min_Cost =< Cost.
-    Known_Cost => Max_Cost >= Cost.
-
-
-    { // Every epoxy has a known color.
-        Color = amber <- Epoxy = e1.
-        Color = black_fluorescent <- Epoxy = e2.
-        Color = blackish_grey <- Epoxy = e3.
-    }
-
-    
-    { // The dfqsdfq
-        Shelf_Life = 12 <- Epoxy = e1.
-        Shelf_Life = 6 <- Epoxy = e2.
-        Shelf_Life = 0 <- Epoxy = e3.
-    }
+    ELowest_Storage_T(Epoxy) =< _Min_Storage_T =< EHighest_Storage_T(Epoxy).
+    EHighest_Storage_T(Epoxy) >= _Max_Storage_T >= ELowest_Storage_T(Epoxy).
+    Safe_Low_Storage_T = ELowest_Storage_T(Epoxy).
+    Safe_High_Storage_T = EHighest_Storage_T(Epoxy).
 }
 
+structure {
+    ECost = {e1, 0.539} else -1
+    ELowest_Storage_T = {e1, 16; e2, 0; e3, 15} else -900
+    EHighest_Storage_T = {e1, 38; e2, 10; e3, 25} else -900
 
-
-
-view expanded
+}
+ 
 
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-Known_Cost == Not(Cost == 100)
+KnownCost ==
+Not(If(Epoxy == e1, 539/1000, ToReal(-1)) == -1)
 
-Or(Not(Known_Cost), Min_Cost <= Cost)
+Or(Not(KnownCost),
+   And(_Min_Cost <= If(Epoxy == e1, 539/1000, ToReal(-1)),
+       If(Epoxy == e1, 539/1000, ToReal(-1)) <= _Max_Cost))
 
-Or(Not(Known_Cost), Max_Cost >= Cost)
+Cost == If(Epoxy == e1, 539/1000, ToReal(-1))
+
+KnownLowStorageT ==
+Not(If(Epoxy == e3,
+       15,
+       If(Epoxy == e2, 0, If(Epoxy == e1, 16, -900))) ==
+    -900)
+
+KnownHighStorageT ==
+Not(If(Epoxy == e3,
+       25,
+       If(Epoxy == e2, 10, If(Epoxy == e1, 38, -900))) ==
+    -900)
+
+And(ToReal(If(Epoxy == e3,
+              15,
+              If(Epoxy == e2, 0, If(Epoxy == e1, 16, -900)))) <=
+    _Min_Storage_T,
+    _Min_Storage_T <=
+    ToReal(If(Epoxy == e3,
+              25,
+              If(Epoxy == e2, 10, If(Epoxy == e1, 38, -900)))))
+
+And(ToReal(If(Epoxy == e3,
+              25,
+              If(Epoxy == e2, 10, If(Epoxy == e1, 38, -900)))) >=
+    _Max_Storage_T,
+    _Max_Storage_T >=
+    ToReal(If(Epoxy == e3,
+              15,
+              If(Epoxy == e2, 0, If(Epoxy == e1, 16, -900)))))
+
+Safe_Low_Storage_T ==
+If(Epoxy == e3,
+   15,
+   If(Epoxy == e2, 0, If(Epoxy == e1, 16, -900)))
+
+Safe_High_Storage_T ==
+If(Epoxy == e3,
+   25,
+   If(Epoxy == e2, 10, If(Epoxy == e1, 38, -900)))
 
 Or(Epoxy == e1, Epoxy == e2, Epoxy == e3)
 
-Or(Brand == Huntsman, Brand == Sadechaf, Brand == Jowat)
+Or(ECost(e1) == 539/1000, ECost(e1) == -1)
 
-Or(Family == _2c_Epoxy, Family == _1c_Epoxy)
+Or(ECost(e2) == 539/1000, ECost(e2) == -1)
 
-Or(Cost == 539/1000, Cost == 100)
+Or(ECost(e3) == 539/1000, ECost(e3) == -1)
 
-Or(Color == amber,
-   Color == black_fluorescent,
-   Color == blackish_grey)
+Or(Cost == 539/1000, Cost == -1)
 
-Or(Shelf_Life == 0, Shelf_Life == 6, Shelf_Life == 12)
+Or(ELowest_Storage_T(e1) == 0,
+   ELowest_Storage_T(e1) == 15,
+   ELowest_Storage_T(e1) == 16)
 
-And((Brand == Huntsman) == (Epoxy == e1),
-    (Brand == Sadechaf) == (Epoxy == e2),
-    (Brand == Jowat) == (Epoxy == e3))
+Or(ELowest_Storage_T(e2) == 0,
+   ELowest_Storage_T(e2) == 15,
+   ELowest_Storage_T(e2) == 16)
 
-And((Family == _2c_Epoxy) == Or(Epoxy == e1, Epoxy == e3),
-    (Family == _1c_Epoxy) == (Epoxy == e2))
+Or(ELowest_Storage_T(e3) == 0,
+   ELowest_Storage_T(e3) == 15,
+   ELowest_Storage_T(e3) == 16)
 
-And((Cost == 539/1000) == (Epoxy == e1),
-    (Cost == 100) == Or(Epoxy == e2, Epoxy == e3))
+Or(EHighest_Storage_T(e1) == 10,
+   EHighest_Storage_T(e1) == 25,
+   EHighest_Storage_T(e1) == 38)
 
-And((Color == amber) == (Epoxy == e1),
-    (Color == black_fluorescent) == (Epoxy == e2),
-    (Color == blackish_grey) == (Epoxy == e3))
+Or(EHighest_Storage_T(e2) == 10,
+   EHighest_Storage_T(e2) == 25,
+   EHighest_Storage_T(e2) == 38)
 
-And((Shelf_Life == 0) == (Epoxy == e3),
-    (Shelf_Life == 6) == (Epoxy == e2),
-    (Shelf_Life == 12) == (Epoxy == e1))
+Or(EHighest_Storage_T(e3) == 10,
+   EHighest_Storage_T(e3) == 25,
+   EHighest_Storage_T(e3) == 38)
+
+Or(Safe_Low_Storage_T == 0,
+   Safe_Low_Storage_T == 15,
+   Safe_Low_Storage_T == 16)
+
+Or(Safe_High_Storage_T == 10,
+   Safe_High_Storage_T == 25,
+   Safe_High_Storage_T == 38)
 
 -- subtences ------------------------------------
-Known_Cost
-Cost = 100
-Cost = 0.539
+KnownCost
+ECost(Epoxy) = -1
+_Min_Cost ≤ ECost(Epoxy) ≤ _Max_Cost
+Cost = ECost(Epoxy)
+KnownLowStorageT
+ELowest_Storage_T(Epoxy) = -900
+KnownHighStorageT
+EHighest_Storage_T(Epoxy) = -900
+ELowest_Storage_T(Epoxy) ≤ _Min_Storage_T ≤ EHighest_Storage_T(Epoxy)
+EHighest_Storage_T(Epoxy) ≥ _Max_Storage_T ≥ ELowest_Storage_T(Epoxy)
+Safe_Low_Storage_T = ELowest_Storage_T(Epoxy)
+Safe_High_Storage_T = EHighest_Storage_T(Epoxy)
 Epoxy = e1
 Epoxy = e2
 Epoxy = e3
-Min_Cost ≤ Cost
-Max_Cost ≥ Cost
-Brand = Huntsman
-Brand = Sadechaf
-Brand = Jowat
-Family = _2c_Epoxy
-Family = _1c_Epoxy
-Color = amber
-Color = black_fluorescent
-Color = blackish_grey
-Shelf_Life = 0
-Shelf_Life = 6
-Shelf_Life = 12
+ECost(e1) = 0.539
+ECost(e1) = -1
+ECost(e2) = 0.539
+ECost(e2) = -1
+ECost(e3) = 0.539
+ECost(e3) = -1
+Cost = 0.539
+Cost = -1
+ELowest_Storage_T(e1) = 0
+ELowest_Storage_T(e1) = 15
+ELowest_Storage_T(e1) = 16
+ELowest_Storage_T(e2) = 0
+ELowest_Storage_T(e2) = 15
+ELowest_Storage_T(e2) = 16
+ELowest_Storage_T(e3) = 0
+ELowest_Storage_T(e3) = 15
+ELowest_Storage_T(e3) = 16
+EHighest_Storage_T(e1) = 10
+EHighest_Storage_T(e1) = 25
+EHighest_Storage_T(e1) = 38
+EHighest_Storage_T(e2) = 10
+EHighest_Storage_T(e2) = 25
+EHighest_Storage_T(e2) = 38
+EHighest_Storage_T(e3) = 10
+EHighest_Storage_T(e3) = 25
+EHighest_Storage_T(e3) = 38
+Safe_Low_Storage_T = 0
+Safe_Low_Storage_T = 15
+Safe_Low_Storage_T = 16
+Safe_High_Storage_T = 10
+Safe_High_Storage_T = 25
+Safe_High_Storage_T = 38
 
 -- GUILines ------------------------------------
+KnownCost
+KnownHighStorageT
+KnownLowStorageT
 Epoxy
-Brand
-Family
 Cost
-Min_Cost
-Max_Cost
-Known_Cost
-Color
-Shelf_Life
-Min_Shelf_Life
-Max_Shelf_Life
-Known_Shelf_Life
-Cost = 100
-Cost = 0.539
+Safe_Low_Storage_T
+Safe_High_Storage_T
+ECost(Epoxy) = -1
+_Min_Cost ≤ ECost(Epoxy) ≤ _Max_Cost
+Cost = ECost(Epoxy)
+ELowest_Storage_T(Epoxy) = -900
+EHighest_Storage_T(Epoxy) = -900
+ELowest_Storage_T(Epoxy) ≤ _Min_Storage_T ≤ EHighest_Storage_T(Epoxy)
+EHighest_Storage_T(Epoxy) ≥ _Max_Storage_T ≥ ELowest_Storage_T(Epoxy)
+Safe_Low_Storage_T = ELowest_Storage_T(Epoxy)
+Safe_High_Storage_T = EHighest_Storage_T(Epoxy)
 Epoxy = e1
 Epoxy = e2
 Epoxy = e3
-Min_Cost ≤ Cost
-Max_Cost ≥ Cost
-Brand = Huntsman
-Brand = Sadechaf
-Brand = Jowat
-Family = _2c_Epoxy
-Family = _1c_Epoxy
-Color = amber
-Color = black_fluorescent
-Color = blackish_grey
-Shelf_Life = 0
-Shelf_Life = 6
-Shelf_Life = 12
+ECost(e1) = 0.539
+ECost(e1) = -1
+ECost(e2) = 0.539
+ECost(e2) = -1
+ECost(e3) = 0.539
+ECost(e3) = -1
+Cost = 0.539
+Cost = -1
+ELowest_Storage_T(e1) = 0
+ELowest_Storage_T(e1) = 15
+ELowest_Storage_T(e1) = 16
+ELowest_Storage_T(e2) = 0
+ELowest_Storage_T(e2) = 15
+ELowest_Storage_T(e2) = 16
+ELowest_Storage_T(e3) = 0
+ELowest_Storage_T(e3) = 15
+ELowest_Storage_T(e3) = 16
+EHighest_Storage_T(e1) = 10
+EHighest_Storage_T(e1) = 25
+EHighest_Storage_T(e1) = 38
+EHighest_Storage_T(e2) = 10
+EHighest_Storage_T(e2) = 25
+EHighest_Storage_T(e2) = 38
+EHighest_Storage_T(e3) = 10
+EHighest_Storage_T(e3) = 25
+EHighest_Storage_T(e3) = 38
+Safe_Low_Storage_T = 0
+Safe_Low_Storage_T = 15
+Safe_Low_Storage_T = 16
+Safe_High_Storage_T = 10
+Safe_High_Storage_T = 25
+Safe_High_Storage_T = 38
 
 -- case -------------------------------------
 Type:        
   
 Definitions: 
-  Rule:∀$Brand$[brand]: Brand($Brand$) ⇔($Brand$ = Huntsman ∧ Epoxy = e1) ∨ ($Brand$ = Sadechaf ∧ Epoxy = e2) ∨ ($Brand$ = Jowat ∧ Epoxy = e3)
-  Rule:∀$Family$[family]: Family($Family$) ⇔($Family$ = _2c_Epoxy ∧ (Epoxy = e1 ∨ Epoxy = e3)) ∨ ($Family$ = _1c_Epoxy ∧ Epoxy = e2)
-  Rule:∀$Cost$[cost]: Cost($Cost$) ⇔($Cost$ = 0.539 ∧ Epoxy = e1) ∨ ($Cost$ = 100 ∧ (Epoxy = e2 ∨ Epoxy = e3))
-  Rule:∀$Color$[color]: Color($Color$) ⇔($Color$ = amber ∧ Epoxy = e1) ∨ ($Color$ = black_fluorescent ∧ Epoxy = e2) ∨ ($Color$ = blackish_grey ∧ Epoxy = e3)
-  Rule:∀$Shelf_Life$[shelf_life]: Shelf_Life($Shelf_Life$) ⇔($Shelf_Life$ = 12 ∧ Epoxy = e1) ∨ ($Shelf_Life$ = 6 ∧ Epoxy = e2) ∨ ($Shelf_Life$ = 0 ∧ Epoxy = e3)
+  
 Universals:  
-  
+  Cost = ECost(Epoxy)
+  ELowest_Storage_T(Epoxy) ≤ _Min_Storage_T ≤ EHighest_Storage_T(Epoxy)
+  EHighest_Storage_T(Epoxy) ≥ _Max_Storage_T ≥ ELowest_Storage_T(Epoxy)
+  Safe_Low_Storage_T = ELowest_Storage_T(Epoxy)
+  Safe_High_Storage_T = EHighest_Storage_T(Epoxy)
 Consequences:
-  
+  KnownLowStorageT
+  ~ELowest_Storage_T(Epoxy) = -900
+  KnownHighStorageT
+  ~EHighest_Storage_T(Epoxy) = -900
 Simplified:  
-  Known_Cost ⇔ ~(Cost = 100)
-  Known_Cost ⇒ Min_Cost ≤ Cost
-  Known_Cost ⇒ Max_Cost ≥ Cost
+  KnownCost ⇔ ~( if   Epoxy = e1 then 0.539 else -1 = -1)
+  KnownCost ⇒ _Min_Cost ≤  if   Epoxy = e1 then 0.539 else -1 ≤ _Max_Cost
+  true
+  true
+  true
+  true
+  true
+  true
+  true
   Epoxy = e1 ∨ Epoxy = e2 ∨ Epoxy = e3
-  Cost = 0.539 ∨ Cost = 100
+  Cost = 0.539 ∨ Cost = -1
+  Safe_Low_Storage_T = 0 ∨ Safe_Low_Storage_T = 15 ∨ Safe_Low_Storage_T = 16
+  Safe_High_Storage_T = 10 ∨ Safe_High_Storage_T = 25 ∨ Safe_High_Storage_T = 38
 Irrelevant:  
-  ? Brand = Huntsman
-  ? Brand = Sadechaf
-  ? Brand = Jowat
-  ? Family = _2c_Epoxy
-  ? Family = _1c_Epoxy
-  ? Color = amber
-  ? Color = black_fluorescent
-  ? Color = blackish_grey
-  ? Shelf_Life = 0
-  ? Shelf_Life = 6
-  ? Shelf_Life = 12
-  ? Brand
-  ? Family
-  ? Color
-  ? Shelf_Life
-  ? Min_Shelf_Life
-  ? Max_Shelf_Life
-  ? Known_Shelf_Life
+  ? ECost(e1) = 0.539
+  ? ECost(e1) = -1
+  ? ECost(e2) = 0.539
+  ? ECost(e2) = -1
+  ? ECost(e3) = 0.539
+  ? ECost(e3) = -1
+  ? ELowest_Storage_T(e1) = 0
+  ? ELowest_Storage_T(e1) = 15
+  ? ELowest_Storage_T(e1) = 16
+  ? ELowest_Storage_T(e2) = 0
+  ? ELowest_Storage_T(e2) = 15
+  ? ELowest_Storage_T(e2) = 16
+  ? ELowest_Storage_T(e3) = 0
+  ? ELowest_Storage_T(e3) = 15
+  ? ELowest_Storage_T(e3) = 16
+  ? EHighest_Storage_T(e1) = 10
+  ? EHighest_Storage_T(e1) = 25
+  ? EHighest_Storage_T(e1) = 38
+  ? EHighest_Storage_T(e2) = 10
+  ? EHighest_Storage_T(e2) = 25
+  ? EHighest_Storage_T(e2) = 38
+  ? EHighest_Storage_T(e3) = 10
+  ? EHighest_Storage_T(e3) = 25
+  ? EHighest_Storage_T(e3) = 38
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'Epoxy', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'Brand', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'Family', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'Cost', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'Min_Cost', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'Max_Cost', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'Known_Cost',
+{'symbols': [{'idpname': 'KnownCost',
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
-              'view': 'expanded'},
-             {'idpname': 'Color', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'Shelf_Life',
+              'view': 'normal'},
+             {'idpname': 'KnownHighStorageT',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
+              'view': 'normal'},
+             {'idpname': 'KnownLowStorageT',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
+              'view': 'normal'},
+             {'idpname': 'Epoxy', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': '_Min_Cost', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': '_Max_Cost', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': 'Cost', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': '_Min_Storage_T',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
-              'view': 'expanded'}],
+              'view': 'normal'},
+             {'idpname': '_Max_Storage_T',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'idpname': 'Safe_Low_Storage_T',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'idpname': 'Safe_High_Storage_T',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'Brand': {'Brand': {'environmental': False,
-                     'normal': True,
-                     'reading': 'Brand',
-                     'relevant': False,
-                     'status': 'UNKNOWN',
-                     'typ': 'brand',
-                     'value': '',
-                     'values': ['Huntsman', 'Sadechaf', 'Jowat']},
-           'Brand = Huntsman': {'environmental': False,
-                                'normal': False,
-                                'reading': 'Brand = Huntsman',
-                                'relevant': False,
-                                'status': 'UNKNOWN',
-                                'typ': 'Bool'},
-           'Brand = Jowat': {'environmental': False,
-                             'normal': False,
-                             'reading': 'Brand = Jowat',
-                             'relevant': False,
-                             'status': 'UNKNOWN',
-                             'typ': 'Bool'},
-           'Brand = Sadechaf': {'environmental': False,
-                                'normal': False,
-                                'reading': 'Brand = Sadechaf',
-                                'relevant': False,
-                                'status': 'UNKNOWN',
-                                'typ': 'Bool'}},
- 'Color': {'Color': {'environmental': False,
-                     'normal': True,
-                     'reading': 'Color',
-                     'relevant': False,
-                     'status': 'UNKNOWN',
-                     'typ': 'color',
-                     'value': '',
-                     'values': ['amber', 'black_fluorescent', 'blackish_grey']},
-           'Color = amber': {'environmental': False,
-                             'normal': False,
-                             'reading': 'Color = amber',
-                             'relevant': False,
-                             'status': 'UNKNOWN',
-                             'typ': 'Bool'},
-           'Color = black_fluorescent': {'environmental': False,
-                                         'normal': False,
-                                         'reading': 'Color = black_fluorescent',
-                                         'relevant': False,
-                                         'status': 'UNKNOWN',
-                                         'typ': 'Bool'},
-           'Color = blackish_grey': {'environmental': False,
-                                     'normal': False,
-                                     'reading': 'Color = blackish_grey',
-                                     'relevant': False,
-                                     'status': 'UNKNOWN',
-                                     'typ': 'Bool'}},
  'Cost': {'Cost': {'environmental': False,
                    'normal': True,
                    'reading': 'Cost',
@@ -292,25 +361,70 @@ Irrelevant:
                    'status': 'UNKNOWN',
                    'typ': 'Real',
                    'value': '',
-                   'values': ['0.539', '100']},
+                   'values': ['0.539', '-1']},
+          'Cost = -1': {'environmental': False,
+                        'normal': False,
+                        'reading': 'Cost = -1',
+                        'relevant': True,
+                        'status': 'UNKNOWN',
+                        'typ': 'Bool'},
           'Cost = 0.539': {'environmental': False,
                            'normal': False,
                            'reading': 'Cost = 0.539',
                            'relevant': True,
                            'status': 'UNKNOWN',
                            'typ': 'Bool'},
-          'Cost = 100': {'environmental': False,
-                         'normal': False,
-                         'reading': 'Cost = 100',
-                         'relevant': True,
-                         'status': 'UNKNOWN',
-                         'typ': 'Bool'}},
- 'Epoxy': {'Epoxy': {'environmental': False,
+          'Cost = ECost(Epoxy)': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Cost = ECost(Epoxy)',
+                                  'relevant': True,
+                                  'status': 'UNIVERSAL',
+                                  'typ': 'Bool',
+                                  'value': True}},
+ 'Epoxy': {'ECost(Epoxy) = -1': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'ECost(Epoxy) = -1',
+                                 'relevant': True,
+                                 'status': 'UNKNOWN',
+                                 'typ': 'Bool'},
+           'EHighest_Storage_T(Epoxy) = -900': {'environmental': False,
+                                                'normal': False,
+                                                'reading': 'EHighest_Storage_T(Epoxy) = -900',
+                                                'relevant': True,
+                                                'status': 'CONSEQUENCE',
+                                                'typ': 'Bool',
+                                                'value': False},
+           'EHighest_Storage_T(Epoxy) ≥ _Max_Storage_T ≥ ELowest_Storage_T(Epoxy)': {'environmental': False,
+                                                                                     'normal': False,
+                                                                                     'reading': 'EHighest_Storage_T(Epoxy) '
+                                                                                                '≥ _Max_Storage_T ≥ '
+                                                                                                'ELowest_Storage_T(Epoxy)',
+                                                                                     'relevant': True,
+                                                                                     'status': 'UNIVERSAL',
+                                                                                     'typ': 'Bool',
+                                                                                     'value': True},
+           'ELowest_Storage_T(Epoxy) = -900': {'environmental': False,
+                                               'normal': False,
+                                               'reading': 'ELowest_Storage_T(Epoxy) = -900',
+                                               'relevant': True,
+                                               'status': 'CONSEQUENCE',
+                                               'typ': 'Bool',
+                                               'value': False},
+           'ELowest_Storage_T(Epoxy) ≤ _Min_Storage_T ≤ EHighest_Storage_T(Epoxy)': {'environmental': False,
+                                                                                     'normal': False,
+                                                                                     'reading': 'ELowest_Storage_T(Epoxy) '
+                                                                                                '≤ _Min_Storage_T ≤ '
+                                                                                                'EHighest_Storage_T(Epoxy)',
+                                                                                     'relevant': True,
+                                                                                     'status': 'UNIVERSAL',
+                                                                                     'typ': 'Bool',
+                                                                                     'value': True},
+           'Epoxy': {'environmental': False,
                      'normal': True,
                      'reading': 'Epoxy',
                      'relevant': True,
                      'status': 'UNKNOWN',
-                     'typ': 'epoxy',
+                     'typ': 't_epoxy',
                      'value': '',
                      'values': ['e1', 'e2', 'e3']},
            'Epoxy = e1': {'environmental': False,
@@ -330,102 +444,100 @@ Irrelevant:
                           'reading': 'Epoxy = e3',
                           'relevant': True,
                           'status': 'UNKNOWN',
-                          'typ': 'Bool'}},
- 'Family': {'Family': {'environmental': False,
-                       'normal': True,
-                       'reading': 'Family',
-                       'relevant': False,
-                       'status': 'UNKNOWN',
-                       'typ': 'family',
-                       'value': '',
-                       'values': ['_2c_Epoxy', '_1c_Epoxy']},
-            'Family = _1c_Epoxy': {'environmental': False,
-                                   'normal': False,
-                                   'reading': 'Family = _1c_Epoxy',
-                                   'relevant': False,
-                                   'status': 'UNKNOWN',
-                                   'typ': 'Bool'},
-            'Family = _2c_Epoxy': {'environmental': False,
-                                   'normal': False,
-                                   'reading': 'Family = _2c_Epoxy',
-                                   'relevant': False,
-                                   'status': 'UNKNOWN',
-                                   'typ': 'Bool'}},
- 'Known_Cost': {'Known_Cost': {'environmental': False,
-                               'normal': True,
-                               'reading': 'Known_Cost',
-                               'relevant': True,
-                               'status': 'UNKNOWN',
-                               'typ': 'Bool'}},
- 'Known_Shelf_Life': {'Known_Shelf_Life': {'environmental': False,
+                          'typ': 'Bool'},
+           '_Min_Cost ≤ ECost(Epoxy) ≤ _Max_Cost': {'environmental': False,
+                                                    'normal': False,
+                                                    'reading': '_Min_Cost ≤ ECost(Epoxy) ≤ _Max_Cost',
+                                                    'relevant': True,
+                                                    'status': 'UNKNOWN',
+                                                    'typ': 'Bool'}},
+ 'KnownCost': {'KnownCost': {'environmental': False,
+                             'normal': True,
+                             'reading': 'KnownCost',
+                             'relevant': True,
+                             'status': 'UNKNOWN',
+                             'typ': 'Bool'}},
+ 'KnownHighStorageT': {'KnownHighStorageT': {'environmental': False,
+                                             'normal': True,
+                                             'reading': 'KnownHighStorageT',
+                                             'relevant': True,
+                                             'status': 'CONSEQUENCE',
+                                             'typ': 'Bool',
+                                             'value': True}},
+ 'KnownLowStorageT': {'KnownLowStorageT': {'environmental': False,
                                            'normal': True,
-                                           'reading': 'Known_Shelf_Life',
-                                           'relevant': False,
-                                           'status': 'UNKNOWN',
-                                           'typ': 'Bool'}},
- 'Max_Cost': {'Max_Cost': {'environmental': False,
-                           'normal': True,
-                           'reading': 'Max_Cost',
-                           'relevant': True,
-                           'status': 'UNKNOWN',
-                           'typ': 'Real',
-                           'value': ''},
-              'Max_Cost ≥ Cost': {'environmental': False,
-                                  'normal': False,
-                                  'reading': 'Max_Cost ≥ Cost',
-                                  'relevant': True,
-                                  'status': 'UNKNOWN',
-                                  'typ': 'Bool'}},
- 'Max_Shelf_Life': {'Max_Shelf_Life': {'environmental': False,
-                                       'normal': True,
-                                       'reading': 'Max_Shelf_Life',
-                                       'relevant': False,
-                                       'status': 'UNKNOWN',
-                                       'typ': 'Real',
-                                       'value': ''}},
- 'Min_Cost': {'Min_Cost': {'environmental': False,
-                           'normal': True,
-                           'reading': 'Min_Cost',
-                           'relevant': True,
-                           'status': 'UNKNOWN',
-                           'typ': 'Real',
-                           'value': ''},
-              'Min_Cost ≤ Cost': {'environmental': False,
-                                  'normal': False,
-                                  'reading': 'Min_Cost ≤ Cost',
-                                  'relevant': True,
-                                  'status': 'UNKNOWN',
-                                  'typ': 'Bool'}},
- 'Min_Shelf_Life': {'Min_Shelf_Life': {'environmental': False,
-                                       'normal': True,
-                                       'reading': 'Min_Shelf_Life',
-                                       'relevant': False,
-                                       'status': 'UNKNOWN',
-                                       'typ': 'Real',
-                                       'value': ''}},
- 'Shelf_Life': {'Shelf_Life': {'environmental': False,
-                               'normal': True,
-                               'reading': 'Shelf_Life',
-                               'relevant': False,
-                               'status': 'UNKNOWN',
-                               'typ': 'Int',
-                               'value': '',
-                               'values': ['0', '6', '12']},
-                'Shelf_Life = 0': {'environmental': False,
-                                   'normal': False,
-                                   'reading': 'Shelf_Life = 0',
-                                   'relevant': False,
-                                   'status': 'UNKNOWN',
-                                   'typ': 'Bool'},
-                'Shelf_Life = 12': {'environmental': False,
-                                    'normal': False,
-                                    'reading': 'Shelf_Life = 12',
-                                    'relevant': False,
-                                    'status': 'UNKNOWN',
-                                    'typ': 'Bool'},
-                'Shelf_Life = 6': {'environmental': False,
-                                   'normal': False,
-                                   'reading': 'Shelf_Life = 6',
-                                   'relevant': False,
-                                   'status': 'UNKNOWN',
-                                   'typ': 'Bool'}}}
+                                           'reading': 'KnownLowStorageT',
+                                           'relevant': True,
+                                           'status': 'CONSEQUENCE',
+                                           'typ': 'Bool',
+                                           'value': True}},
+ 'Safe_High_Storage_T': {'Safe_High_Storage_T': {'environmental': False,
+                                                 'normal': True,
+                                                 'reading': 'Safe_High_Storage_T',
+                                                 'relevant': True,
+                                                 'status': 'UNKNOWN',
+                                                 'typ': 'Int',
+                                                 'value': '',
+                                                 'values': ['10', '25', '38']},
+                         'Safe_High_Storage_T = 10': {'environmental': False,
+                                                      'normal': False,
+                                                      'reading': 'Safe_High_Storage_T = 10',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                         'Safe_High_Storage_T = 25': {'environmental': False,
+                                                      'normal': False,
+                                                      'reading': 'Safe_High_Storage_T = 25',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                         'Safe_High_Storage_T = 38': {'environmental': False,
+                                                      'normal': False,
+                                                      'reading': 'Safe_High_Storage_T = 38',
+                                                      'relevant': True,
+                                                      'status': 'UNKNOWN',
+                                                      'typ': 'Bool'},
+                         'Safe_High_Storage_T = EHighest_Storage_T(Epoxy)': {'environmental': False,
+                                                                             'normal': False,
+                                                                             'reading': 'Safe_High_Storage_T = '
+                                                                                        'EHighest_Storage_T(Epoxy)',
+                                                                             'relevant': True,
+                                                                             'status': 'UNIVERSAL',
+                                                                             'typ': 'Bool',
+                                                                             'value': True}},
+ 'Safe_Low_Storage_T': {'Safe_Low_Storage_T': {'environmental': False,
+                                               'normal': True,
+                                               'reading': 'Safe_Low_Storage_T',
+                                               'relevant': True,
+                                               'status': 'UNKNOWN',
+                                               'typ': 'Int',
+                                               'value': '',
+                                               'values': ['0', '15', '16']},
+                        'Safe_Low_Storage_T = 0': {'environmental': False,
+                                                   'normal': False,
+                                                   'reading': 'Safe_Low_Storage_T = 0',
+                                                   'relevant': True,
+                                                   'status': 'UNKNOWN',
+                                                   'typ': 'Bool'},
+                        'Safe_Low_Storage_T = 15': {'environmental': False,
+                                                    'normal': False,
+                                                    'reading': 'Safe_Low_Storage_T = 15',
+                                                    'relevant': True,
+                                                    'status': 'UNKNOWN',
+                                                    'typ': 'Bool'},
+                        'Safe_Low_Storage_T = 16': {'environmental': False,
+                                                    'normal': False,
+                                                    'reading': 'Safe_Low_Storage_T = 16',
+                                                    'relevant': True,
+                                                    'status': 'UNKNOWN',
+                                                    'typ': 'Bool'},
+                        'Safe_Low_Storage_T = ELowest_Storage_T(Epoxy)': {'environmental': False,
+                                                                          'normal': False,
+                                                                          'reading': 'Safe_Low_Storage_T = '
+                                                                                     'ELowest_Storage_T(Epoxy)',
+                                                                          'relevant': True,
+                                                                          'status': 'UNIVERSAL',
+                                                                          'typ': 'Bool',
+                                                                          'value': True}},
+ '_Max_Storage_T': {},
+ '_Min_Storage_T': {}}
