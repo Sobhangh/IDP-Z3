@@ -79,7 +79,7 @@ def translate1(self):
         if self.q == '∀':
             forms = And(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !
-                forms = ForAll(finalvars, forms)
+                forms = ForAll([v.translate() for v in finalvars], forms)
         else:
             forms = Or(forms) if 1<len(forms) else forms[0]
             if len(finalvars) > 0: # not fully expanded !

@@ -32,7 +32,7 @@ import os
 import re
 import sys
 
-from z3 import DatatypeRef, Q, Const, BoolSort
+from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
 from utils import mergeDicts, unquote
 
 from typing import List, Tuple
@@ -558,13 +558,13 @@ class Fresh_Variable(Expression):
         self.type = self.decl.name
         self._unknown_symbols = {}
         self.sub_exprs = []
-        self.translated = None
+        self.translated = FreshConst(self.decl.out.decl.translate())
+        self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name
 
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, symbol_decls, q_vars): # dead code
         self = super().annotate(symbol_decls, q_vars)
-        self.translated = FreshConst(self.decl.out.decl.translate())
         return self
 
     def mark_subtences(self):
