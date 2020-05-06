@@ -176,7 +176,7 @@ def explain(case, symbol, value, given_json):
             for a1 in case.idp.theory.definitions + case.idp.theory.constraints: 
                 #TODO find the rule
                 for a2 in unsatcore:
-                    if str(a1.translate(case.idp)) == str(ps[a2]):
+                    if str(a1.translate()) == str(ps[a2]):
                         out.m["*laws*"].append(a1.annotations['reading'])
 
     return out.m

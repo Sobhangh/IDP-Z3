@@ -11,6 +11,7 @@ tags:
 - [ ] [[consequence in dropdown]] [[20200408162211]] 
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
+- [ ] min, max aggregates
 
 - [ ] Support for constructor functions (p.6 of the IDP3 manual)
     - grammar
@@ -55,15 +56,13 @@ tags:
 
 #### Performance
 - [ ] reduce number of substitution
-    - [ ] implicant: do not generate (x=0) → true (only generate x→0)
     - [ ] do not generate x~=1 from (x=0)
-    - [ ] Expr.symbols for each constraint → do not substitute if no symbols
-    - [ ] batch substitute in Case.init
+    - [ ] Expr.questions for each constraint → do not substitute if no matching question
 - [ ] why is Prime so slow ?
-- [ ] replace function decorator by Expression methods
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share justifications
 - [ ] subtences() → exp is_in expr
+- [ ] avoid mergeDicts.  Use accumulator instead
 - [ ] #Perf
 
 #### other NTH (refactoring)
