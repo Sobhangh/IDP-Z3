@@ -42,13 +42,12 @@ And(Not(negated(Piet) == Piet),
 
 -- subtences ------------------------------------
 same(Piet) = Piet
-negated(Piet) = Jan
-true
-false
-negated(Piet) = Piet
+same(same(Piet)) = negated(negated(Piet))
 same(Piet) = Jan
 same(Jan) = Piet
 same(Jan) = Jan
+negated(Piet) = Piet
+negated(Piet) = Jan
 negated(Jan) = Piet
 negated(Jan) = Jan
 
@@ -58,13 +57,12 @@ same(Jan)
 negated(Piet)
 negated(Jan)
 same(Piet) = Piet
-negated(Piet) = Jan
-true
-false
-negated(Piet) = Piet
+same(same(Piet)) = negated(negated(Piet))
 same(Piet) = Jan
 same(Jan) = Piet
 same(Jan) = Jan
+negated(Piet) = Piet
+negated(Piet) = Jan
 negated(Jan) = Piet
 negated(Jan) = Jan
 
@@ -73,16 +71,17 @@ Type:
   
 Definitions: 
   Rule:∀$same!0$[num],$same$[num]: same($same!0$,$same$) ⇔$same$ = $same!0$
-  Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔($negated$ = Jan ∧ ($negated!0$ = Piet)) ∨ ($negated$ = Piet ∧ ($negated!0$ = Jan))
+  Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔$negated$ = Jan ∧ ($negated!0$ = Piet) ∨ $negated$ = Piet ∧ ($negated!0$ = Jan)
 Universals:  
   same(Piet) = Piet
+  same(same(Piet)) = negated(negated(Piet))
   same(Piet) -> Piet
 Consequences:
-  negated(Piet) = Jan
-  ~negated(Piet) = Piet
   ~same(Piet) = Jan
   ~same(Jan) = Piet
   same(Jan) = Jan
+  ~negated(Piet) = Piet
+  negated(Piet) = Jan
   negated(Jan) = Piet
   ~negated(Jan) = Jan
   same(Jan) -> Jan
@@ -90,14 +89,12 @@ Consequences:
   negated(Jan) -> Piet
 Simplified:  
   true
-  same(Piet) = negated(Jan)
+  true
   true
   true
   true
   true
 Irrelevant:  
-  ? true
-  ? false
   ~same(Piet) = Jan
   ~negated(Jan) = Jan
 
@@ -141,7 +138,7 @@ Irrelevant:
                                'values': ['Piet', 'Jan']},
              'negated(Piet) = Jan': {'environmental': False,
                                      'normal': False,
-                                     'reading': '$negated$ = Jan',
+                                     'reading': 'negated(Piet) = Jan',
                                      'relevant': True,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
@@ -196,4 +193,11 @@ Irrelevant:
                                 'relevant': True,
                                 'status': 'UNIVERSAL',
                                 'typ': 'Bool',
-                                'value': True}}}
+                                'value': True},
+          'same(same(Piet)) = negated(negated(Piet))': {'environmental': False,
+                                                        'normal': False,
+                                                        'reading': 'same(same(Piet)) = negated(negated(Piet))',
+                                                        'relevant': True,
+                                                        'status': 'UNIVERSAL',
+                                                        'typ': 'Bool',
+                                                        'value': True}}}

@@ -32,7 +32,6 @@ And((codeOf(red) == a) == (red == c),
 
 -- subtences ------------------------------------
 codeOf(red) = b
-red = c
 codeOf(red) = a
 codeOf(blue) = a
 codeOf(blue) = b
@@ -44,7 +43,6 @@ codeOf(red)
 codeOf(blue)
 c
 codeOf(red) = b
-red = c
 codeOf(red) = a
 codeOf(blue) = a
 codeOf(blue) = b
@@ -60,7 +58,6 @@ Universals:
   codeOf(red) = b
   codeOf(red) -> b
 Consequences:
-  ~red = c
   ~codeOf(red) = a
   codeOf(blue) = a
   ~codeOf(blue) = b
@@ -74,6 +71,7 @@ Simplified:
   true
   true
 Irrelevant:  
+  ~codeOf(red) = a
   ~codeOf(blue) = b
 
 
@@ -102,13 +100,6 @@ Irrelevant:
        'c = red': {'environmental': False,
                    'normal': False,
                    'reading': 'c = red',
-                   'relevant': True,
-                   'status': 'CONSEQUENCE',
-                   'typ': 'Bool',
-                   'value': False},
-       'red = c': {'environmental': False,
-                   'normal': False,
-                   'reading': 'cl = c',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
@@ -146,7 +137,7 @@ Irrelevant:
             'codeOf(red) = a': {'environmental': False,
                                 'normal': False,
                                 'reading': 'codeOf(red) = a',
-                                'relevant': True,
+                                'relevant': False,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},

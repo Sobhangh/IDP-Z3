@@ -41,7 +41,7 @@ JacketDesign = Design_400HP
 Type:        
   
 Definitions: 
-  Rule:∀$LipLen$[lipLen]: LipLen($LipLen$) ⇔($LipLen$ = Short ∧ JacketDesign = Design_230) ∨ ($LipLen$ = Standard ∧ JacketDesign = Design_400HP)
+  Rule:∀$LipLen$[lipLen]: LipLen($LipLen$) ⇔$LipLen$ = Short ∧ JacketDesign = Design_230 ∨ $LipLen$ = Standard ∧ JacketDesign = Design_400HP
 Universals:  
   
 Consequences:

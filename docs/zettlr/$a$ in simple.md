@@ -1,6 +1,6 @@
 –-
 title: \$a\$ in simple.z3
-tags: #bug
+tags: #fixed
    ID: 20200427091038
 –-
 

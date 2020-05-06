@@ -1,6 +1,6 @@
 
 |------------
-|(~(p)) with Variable,Brackets
+|~(p) with Variable,Brackets
 |+ p -> false
     |------------
     |*p

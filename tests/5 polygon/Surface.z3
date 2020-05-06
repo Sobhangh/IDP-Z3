@@ -365,7 +365,7 @@ Simplified:
   (true)
   (true)
   (true)
-  ((Subtype = square ∨ Subtype = rectangle))
+  (Subtype = square ∨ Subtype = rectangle)
   (Subtype = rectangle ⇒ ~(Length(1) = Length(2)))
   (Subtype = square ⇔ Equilateral)
   (true)

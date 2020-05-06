@@ -72,7 +72,7 @@ Expression.update_exprs = update_exprs
 
 # @log  # decorator patched in by tests/main.py
 def Expression_substitute(self, e0, e1, todo=None):
-    """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
+    """ recursively substitute e0 by e1 in self """
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
@@ -84,19 +84,18 @@ Expression.substitute = Expression_substitute
 
 
 def instantiate(self, e0, e1):
-    """ recursively substitute e0 by e1, without Bracket """
+    """ recursively substitute e0 by e1 """
     if self.code == e0.code:
         return e1
     else:
         out = copy.copy(self)
-        if out.value is not None:
-            pass
-        else:
+        if out.value is None:
             out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
             out.code = out.str
             out.original = out
             if out.just_branch is not None:
                 out._change(just_branch=out.just_branch.instantiate(e0, e1))
+
         return out
 Expression.instantiate = instantiate
 

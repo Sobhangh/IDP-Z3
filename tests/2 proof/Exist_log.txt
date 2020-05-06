@@ -13,29 +13,41 @@
         |*true with ADisjunction
         |+ p -> true
             |------------
-            |true with Brackets
+            |true with AUnary,AUnary,AUnary
             |+ p -> true
                 |------------
-                |(true) with AUnary
+                |false with AComparison
                 |+ p -> true
                     |------------
-                    |true with AComparison
+                    |true with Constructor,Constructor
                     |+ p -> true
                         |------------
-                        |false with Constructor,Constructor
+                        |red
                         |+ p -> true
-                            |------------
-                            |blue
-                            |+ p -> true
-                            |== blue
-                            |------------
-                            |red
-                            |+ p -> true
-                            |== red
-                        |== !false with Constructor,Constructor
-                    |== !true with AComparison
-                |== !true with AUnary
-            |== !true with Brackets
+                        |== red
+                        |------------
+                        |red
+                        |+ p -> true
+                        |== red
+                    |== !true with Constructor,Constructor
+                |== !false with AComparison
+                |------------
+                |true with AComparison
+                |+ p -> true
+                    |------------
+                    |false with Constructor,Constructor
+                    |+ p -> true
+                        |------------
+                        |blue
+                        |+ p -> true
+                        |== blue
+                        |------------
+                        |red
+                        |+ p -> true
+                        |== red
+                    |== !false with Constructor,Constructor
+                |== !true with AComparison
+            |== !true with AUnary,AUnary,AUnary
         |== *!true with ADisjunction
     |== !true with AQuantification
 |== !true with Variable,Brackets
@@ -47,28 +59,40 @@
 |*true with ADisjunction
 |+ p -> true  (or true -> true)
     |------------
-    |true with Brackets
+    |true with AUnary,AUnary,AUnary
     |+ p -> true  (or true -> true)
         |------------
-        |(true) with AUnary
+        |false with AComparison
         |+ p -> true  (or true -> true)
             |------------
-            |true with AComparison
+            |true with Constructor,Constructor
             |+ p -> true  (or true -> true)
                 |------------
-                |false with Constructor,Constructor
+                |red
                 |+ p -> true  (or true -> true)
-                    |------------
-                    |blue
-                    |+ p -> true  (or true -> true)
-                    |== blue
-                    |------------
-                    |red
-                    |+ p -> true  (or true -> true)
-                    |== red
-                |== !false with Constructor,Constructor
-            |== !true with AComparison
-        |== !true with AUnary
-    |== !true with Brackets
+                |== red
+                |------------
+                |red
+                |+ p -> true  (or true -> true)
+                |== red
+            |== !true with Constructor,Constructor
+        |== !false with AComparison
+        |------------
+        |true with AComparison
+        |+ p -> true  (or true -> true)
+            |------------
+            |false with Constructor,Constructor
+            |+ p -> true  (or true -> true)
+                |------------
+                |blue
+                |+ p -> true  (or true -> true)
+                |== blue
+                |------------
+                |red
+                |+ p -> true  (or true -> true)
+                |== red
+            |== !false with Constructor,Constructor
+        |== !true with AComparison
+    |== !true with AUnary,AUnary,AUnary
 |== *!true with ADisjunction
 Z3 propagation ********************************
