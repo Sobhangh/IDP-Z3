@@ -51,14 +51,14 @@ def metaJSON(idp):
             "view": "expanded" if i.name == str(idp.goal) else idp.view.viewType
         }
         if i.annotations is not None:
-            if 'reading' in i.annotations.annotations:
+            if 'reading' in i.annotations:
                 d['guiname'] = i.annotations['reading']
-            if 'short' in i.annotations.annotations:
+            if 'short' in i.annotations:
                 d['shortinfo'] = i.annotations['short']
-            if 'long' in i.annotations.annotations:
+            if 'long' in i.annotations:
                 d['longinfo'] = i.annotations['long']
-            if 'Slider' in i.annotations.annotations:
-                d['slider'] = i.annotations.annotations['Slider']
+            if 'Slider' in i.annotations:
+                d['slider'] = i.annotations['Slider']
 
         symbols.append(d)
     out = {"title": "Interactive Consultant", "symbols": symbols}

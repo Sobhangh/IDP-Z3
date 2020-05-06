@@ -87,6 +87,15 @@ M = e2
 M = e3
 
 -- GUILines ------------------------------------
+_MinT(e1)
+_MinT(e2)
+_MinT(e3)
+_MaxT(e1)
+_MaxT(e2)
+_MaxT(e3)
+_O(e1)
+_O(e2)
+_O(e3)
 OMinT(e1)
 OMinT(e2)
 OMinT(e3)
@@ -100,13 +109,10 @@ Guaranteed
 ∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)
 _MinT(M) ≤ T ≤ _MaxT(M)
 _O(M)
-_O(e1)
 OMinT(e1) = 0
 OMaxT(e1) = 20
-_O(e2)
 OMinT(e2) = 0
 OMaxT(e2) = 100
-_O(e3)
 M = e1
 M = e2
 M = e3
@@ -132,7 +138,10 @@ Universals:
   OMinT(e2) -> 0
   OMaxT(e2) -> 100
 Consequences:
-  
+  _MinT(e1) -> 0
+  _MinT(e2) -> 0
+  _MaxT(e1) -> 20
+  _MaxT(e2) -> 100
 Simplified:  
   (true)
   (true)
@@ -243,14 +252,7 @@ Irrelevant:
                          'relevant': True,
                          'status': 'UNKNOWN',
                          'typ': 'Int',
-                         'value': ''},
-           '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)': {'environmental': True,
-                                                          'normal': False,
-                                                          'reading': '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)',
-                                                          'relevant': True,
-                                                          'status': 'ENV_UNIV',
-                                                          'typ': 'Bool',
-                                                          'value': True}},
+                         'value': ''}},
  'OMinT': {'OMinT(e1)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMinT(e1)',
@@ -285,14 +287,7 @@ Irrelevant:
                          'relevant': True,
                          'status': 'UNKNOWN',
                          'typ': 'Int',
-                         'value': ''},
-           '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)': {'environmental': True,
-                                                          'normal': False,
-                                                          'reading': '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)',
-                                                          'relevant': True,
-                                                          'status': 'ENV_UNIV',
-                                                          'typ': 'Bool',
-                                                          'value': True}},
+                         'value': ''}},
  'T': {'T': {'environmental': False,
              'normal': True,
              'reading': 'T',
@@ -300,6 +295,80 @@ Irrelevant:
              'status': 'UNKNOWN',
              'typ': 'Int',
              'value': ''}},
- '_MaxT': {},
- '_MinT': {},
- '_O': {}}
+ '_MaxT': {'_MaxT(e1)': {'environmental': True,
+                         'normal': True,
+                         'reading': '_MaxT(e1)',
+                         'relevant': True,
+                         'status': 'ENV_CONSQ',
+                         'typ': 'Int',
+                         'value': '20'},
+           '_MaxT(e2)': {'environmental': True,
+                         'normal': True,
+                         'reading': '_MaxT(e2)',
+                         'relevant': True,
+                         'status': 'ENV_CONSQ',
+                         'typ': 'Int',
+                         'value': '100'},
+           '_MaxT(e3)': {'environmental': True,
+                         'normal': True,
+                         'reading': '_MaxT(e3)',
+                         'relevant': True,
+                         'status': 'UNKNOWN',
+                         'typ': 'Int',
+                         'value': ''}},
+ '_MinT': {'_MinT(e1)': {'environmental': True,
+                         'normal': True,
+                         'reading': '_MinT(e1)',
+                         'relevant': True,
+                         'status': 'ENV_CONSQ',
+                         'typ': 'Int',
+                         'value': '0'},
+           '_MinT(e2)': {'environmental': True,
+                         'normal': True,
+                         'reading': '_MinT(e2)',
+                         'relevant': True,
+                         'status': 'ENV_CONSQ',
+                         'typ': 'Int',
+                         'value': '0'},
+           '_MinT(e3)': {'environmental': True,
+                         'normal': True,
+                         'reading': '_MinT(e3)',
+                         'relevant': True,
+                         'status': 'UNKNOWN',
+                         'typ': 'Int',
+                         'value': ''}},
+ '_O': {'_O(e1)': {'environmental': True,
+                   'normal': True,
+                   'reading': '_O(e1)',
+                   'relevant': True,
+                   'status': 'ENV_UNIV',
+                   'typ': 'Bool',
+                   'value': True},
+        '_O(e2)': {'environmental': True,
+                   'normal': True,
+                   'reading': '_O(e2)',
+                   'relevant': True,
+                   'status': 'ENV_UNIV',
+                   'typ': 'Bool',
+                   'value': True},
+        '_O(e3)': {'environmental': True,
+                   'normal': True,
+                   'reading': '_O(e3)',
+                   'relevant': True,
+                   'status': 'ENV_UNIV',
+                   'typ': 'Bool',
+                   'value': False},
+        '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)': {'environmental': True,
+                                                       'normal': False,
+                                                       'reading': '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)',
+                                                       'relevant': True,
+                                                       'status': 'ENV_UNIV',
+                                                       'typ': 'Bool',
+                                                       'value': True},
+        '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)': {'environmental': True,
+                                                       'normal': False,
+                                                       'reading': '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)',
+                                                       'relevant': True,
+                                                       'status': 'ENV_UNIV',
+                                                       'typ': 'Bool',
+                                                       'value': True}}}

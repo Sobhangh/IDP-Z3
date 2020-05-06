@@ -294,6 +294,8 @@ class SymbolDeclaration(object):
         if self.out is None:
             self.out = Sort(name='bool')
 
+        self.annotations = self.annotations.annotations if self.annotations else {}
+        
         self.is_var = True  # unless interpreted later
         self.typeConstraints = []
         self.translated = None
