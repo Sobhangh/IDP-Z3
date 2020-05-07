@@ -120,6 +120,10 @@ class Expression(object):
         self.is_subtence = False # by default
         return self
 
+    def collect(self, questions, all_=True):
+        for e in self.sub_exprs:
+            e.collect(questions, all_)
+
     def subtences(self):
         out = {}
         if self.is_subtence:
@@ -258,6 +262,13 @@ class AQuantification(Expression):
         self.is_subtence = (len(self.fresh_vars)==0)
         return self
 
+    def collect(self, questions, all_=True):
+        if len(self.fresh_vars)==0:
+            questions.add(self)
+        if all_:
+            for e in self.sub_exprs:
+                e.collect(questions, all_)
+
 
 class BinaryOperator(Expression):
 
@@ -312,6 +323,12 @@ class BinaryOperator(Expression):
         if 0 < len(self.operator) and self.operator[0] in '=<>≤≥≠':
             self.is_subtence = (len(self.fresh_vars)==0)
         return self
+
+    def collect(self, questions, all_=True):
+        if len(self.fresh_vars)==0 and self.operator[0] in '=<>≤≥≠':
+            questions.add(self)
+        for e in self.sub_exprs:
+            e.collect(questions, all_)
         
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
@@ -446,6 +463,13 @@ class AAggregate(Expression):
         super().mark_subtences()
         return self
 
+    def collect(self, questions, all_=True):
+        if len(self.fresh_vars)==0:
+            questions.add(self)
+        if all_:
+            for e in self.sub_exprs:
+                e.collect(questions, all_)
+
 
 class AppliedSymbol(Expression):
     PRECEDENCE = 200
@@ -490,6 +514,13 @@ class AppliedSymbol(Expression):
         else:
             self.is_subtence = self.type == 'bool' and len(self.fresh_vars)==0
         return self
+
+    def collect(self, questions, all_=True):
+        if len(self.fresh_vars)==0:
+            if all_ or all(e.as_ground() is not None for e in self.sub_exprs):
+                questions.add(self)
+        for e in self.sub_exprs:
+            e.collect(questions, all_)
 
     def annotate1(self):
         self.type = self.decl.type.name
@@ -537,6 +568,9 @@ class Variable(AppliedSymbol):
     def mark_subtences(self):
         self.is_subtence = self.type == 'bool'
         return self
+
+    def collect(self, questions, all_=True):
+        questions.add(self)
 
     def reified(self):
         return self.translate()

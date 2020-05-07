@@ -16,7 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
-from collections import ChainMap
+from collections import ChainMap, Iterable
 import itertools, time
 import os
 
@@ -101,3 +101,12 @@ def mergeDicts(l):
     # merge a list of dicts (possibly a comprehension
     return dict(ChainMap(*reversed(list(l))))
 
+# OrderedSet #############################################
+
+class OrderedSet(dict):
+    def __init__(self, els=[]):
+        assert isinstance(els, Iterable)
+        super(OrderedSet, self).__init__(zip(els, els))
+
+    def add(self, el):
+        self[el] = el

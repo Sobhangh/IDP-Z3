@@ -56,13 +56,15 @@ tags:
 
 #### Performance
 - [ ] reduce number of substitution
-    - [ ] do not generate x~=1 from (x=0)
+    - [ ] do not propagate `x=a -> true` if x is known already
     - [ ] Expr.questions for each constraint → do not substitute if no matching question
 - [ ] why is Prime so slow ?
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share justifications
 - [ ] subtences() → exp is_in expr
 - [ ] avoid mergeDicts.  Use accumulator instead
+- [ ] use `__slots__`
+- [ ] cython, pypy
 - [ ] #Perf
 
 #### other NTH (refactoring)

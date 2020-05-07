@@ -1,31 +1,37 @@
 –-
 title: Questions
-tags: 
+tags: #analysis
    ID: 20200504142301
 –-
-A question can be answered by assigning it a value: it's a sub-formula or term, without quantified variables.
+A question can be answered by giving it a value: it's a sub-formula or term, without quantified variables.
 
-There are different types of questions:
-* sub-formulas: before or after quantifier expansion
+There are different types of assignments:
+* quantified formula: before or after quantifier expansion
+* free vs bound expressions (i.e. with quantified variable)
 * terms : ground terms vs nested terms (e.g. f(X), where X is a constant) 
 * shown to user or not (depending on view, with or without underscore in front of name)
 * relevant or not
 * made by the program (.make()) or not, e.g. for definitions
 * copy of an expression (by .copy())
 
+What do we need ?
+* for display : all applied symbols from vocabulary + comparisons + quantified expressions
+* for propagate: don't care (Z3 will do what's needed)
+* for relevance: same as for display (Z3 consequences will reduce the other expressions anyway)
+* for explain: all free comparisons and predicates, to be as explicit as possible over the steps
+
 Principles:
-* Case.shown < Idp.showable < Case.questions
-    * showable (= GUIlines)
-        * all ground instances from vocabulary + quantified expressions + applied symbols and comparisons before expansion without quantified variables
+* Case.viewed < Idp.viewable < Case.assignments
+    * viewable (= GUIlines)
+        * all ground instances from vocabulary + quantified expressions + free applied symbols and free comparisons before expansion
     * shown ≤ showable
         * based on normal view vs expanded view → is_visible
-    * questions (= Assignments)
-        * shown + applied symbols and comparison after expansion
+    * all (→ Assignments)
+        * shown + questionables after expansion
 * Expr.questions: computed for each top expression in simplified + questions; reduced by 1 after each substitute
-* we need to determine propagated value and relevance for all Case.questions
+* we need to determine propagated value and relevance for all Case.assignments
 
 Todo:
 - [ ] compute Expr.questions for each constraints
-- [ ] add Questions to Assignments, and compute their expr.questions
 - [ ] reduce Expr.questions after each substitute
 - [ ] rename GUILines as showable, and reduce it per view

@@ -157,11 +157,11 @@ def expand_quantifiers(self, theory):
         else:
             self.vars.append(var)
             self.sorts.append(var.decl)
-    if self.q == '∀':
-        out = AConjunction.make('∧', forms)
-    else:
-        out = ADisjunction.make('∨', forms)
     if not self.vars:
+        if self.q == '∀':
+            out = AConjunction.make('∧', forms)
+        else:
+            out = ADisjunction.make('∨', forms)
         return self._change(simpler=out, sub_exprs=[out])
     return self._change(sub_exprs=forms)
 AQuantification.expand_quantifiers = expand_quantifiers
