@@ -4,62 +4,6 @@
 |+ x = 0 -> true
 |== *!true with Variable,NumberConstant
 |------------
-|~((x + 1 = 1)) ∨ (x + 1 = 1) with AUnary,Brackets
-|+ x = 0 -> true  (or true -> true)
-    |------------
-    |~((x + 1 = 1)) with Brackets
-    |+ x = 0 -> true  (or true -> true)
-        |------------
-        |(x + 1 = 1) with AComparison
-        |+ x = 0 -> true  (or true -> true)
-            |------------
-            |*x + 1 = 1 with ASumMinus,NumberConstant
-            |+ x = 0 -> true  (or true -> true)
-                |------------
-                |x + 1 with Variable,NumberConstant
-                |+ x = 0 -> true  (or true -> true)
-                    |------------
-                    |x
-                    |+ x = 0 -> true  (or true -> true)
-                    |== x
-                    |------------
-                    |1
-                    |+ x = 0 -> true  (or true -> true)
-                    |== 1
-                |== x + 1 with Variable,NumberConstant
-                |------------
-                |1
-                |+ x = 0 -> true  (or true -> true)
-                |== 1
-            |== *x + 1 = 1 with ASumMinus,NumberConstant
-        |== !!x + 1 = 1 with AComparison
-    |== ~((x + 1 = 1)) with Brackets
-    |------------
-    |(x + 1 = 1) with AComparison
-    |+ x = 0 -> true  (or true -> true)
-        |------------
-        |*x + 1 = 1 with ASumMinus,NumberConstant
-        |+ x = 0 -> true  (or true -> true)
-            |------------
-            |x + 1 with Variable,NumberConstant
-            |+ x = 0 -> true  (or true -> true)
-                |------------
-                |x
-                |+ x = 0 -> true  (or true -> true)
-                |== x
-                |------------
-                |1
-                |+ x = 0 -> true  (or true -> true)
-                |== 1
-            |== x + 1 with Variable,NumberConstant
-            |------------
-            |1
-            |+ x = 0 -> true  (or true -> true)
-            |== 1
-        |== *x + 1 = 1 with ASumMinus,NumberConstant
-    |== !!x + 1 = 1 with AComparison
-|== ~((x + 1 = 1)) ∨ (x + 1 = 1) with AUnary,Brackets
-|------------
 |*true with Variable,NumberConstant
 |+ x = 0 -> true  (or true -> true)
 |== *!true with Variable,NumberConstant
@@ -199,18 +143,6 @@
 |y
 |+ x -> 0  (or 0 -> 0)
 |== y
-|------------
-|*true with Variable,NumberConstant
-|+ x + 1 = 1 -> true  (or true -> true)
-    |------------
-    |0
-    |+ x + 1 = 1 -> true  (or true -> true)
-    |== !0
-    |------------
-    |0
-    |+ x + 1 = 1 -> true  (or true -> true)
-    |== 0
-|== *!true with Variable,NumberConstant
 |------------
 |true with AUnary,Brackets
 |+ x + 1 = 1 -> true  (or true -> true)

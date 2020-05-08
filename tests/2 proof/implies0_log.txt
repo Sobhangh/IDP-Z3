@@ -124,10 +124,6 @@
 |+ q -> true  (or true -> true)
 |== *!true
 |------------
-|*true
-|+ q -> true  (or true -> true)
-|== *!true
-|------------
 |*r
 |+ q -> true  (or true -> true)
 |== *r

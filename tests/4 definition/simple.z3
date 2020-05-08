@@ -39,11 +39,11 @@ And(c == red, Not(c == blue))
 
 -- subtences ------------------------------------
 b = red
-a = red
 p
 q
 r
 b = blue
+a = red
 a = blue
 c = red
 c = blue
@@ -56,8 +56,8 @@ a
 b
 c
 b = red
-a = red
 b = blue
+a = red
 a = blue
 c = red
 c = blue
@@ -74,9 +74,9 @@ Universals:
   
 Consequences:
   b = red
-  a = red
   p
   ~b = blue
+  a = red
   ~a = blue
   c = red
   ~c = blue

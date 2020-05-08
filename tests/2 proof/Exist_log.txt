@@ -47,6 +47,22 @@
                         |== red
                     |== !false with Constructor,Constructor
                 |== !true with AComparison
+                |------------
+                |true with AComparison
+                |+ p -> true
+                    |------------
+                    |false with Constructor,Constructor
+                    |+ p -> true
+                        |------------
+                        |green
+                        |+ p -> true
+                        |== green
+                        |------------
+                        |red
+                        |+ p -> true
+                        |== red
+                    |== !false with Constructor,Constructor
+                |== !true with AComparison
             |== !true with AUnary,AUnary,AUnary
         |== *!true with ADisjunction
     |== !true with AQuantification
@@ -87,6 +103,22 @@
                 |blue
                 |+ p -> true  (or true -> true)
                 |== blue
+                |------------
+                |red
+                |+ p -> true  (or true -> true)
+                |== red
+            |== !false with Constructor,Constructor
+        |== !true with AComparison
+        |------------
+        |true with AComparison
+        |+ p -> true  (or true -> true)
+            |------------
+            |false with Constructor,Constructor
+            |+ p -> true  (or true -> true)
+                |------------
+                |green
+                |+ p -> true  (or true -> true)
+                |== green
                 |------------
                 |red
                 |+ p -> true  (or true -> true)

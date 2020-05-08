@@ -58,6 +58,13 @@ def implicants1(self, truth):
 Expression.implicants1 = implicants1
 
 
+# class Constructor ############################################################
+
+def implicants(self, truth=TRUE): # dead code
+    return [] # true or false
+Constructor.implicants = implicants
+
+
 # class ADisjunction ############################################################
 
 def implicants1(self, truth=TRUE):

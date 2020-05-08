@@ -58,6 +58,8 @@ And(Not(negated(-1) == -1),
 -- subtences ------------------------------------
 same(-1) = -1
 negated(negated(-1)) = same(-1)
+negated(-1) = 1
+negated(negated(-1)) = -(negated(-1))
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -68,7 +70,6 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
-negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -85,6 +86,8 @@ negated(0)
 negated(1)
 same(-1) = -1
 negated(negated(-1)) = same(-1)
+negated(-1) = 1
+negated(negated(-1)) = -(negated(-1))
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -95,7 +98,6 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
-negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -114,6 +116,8 @@ Universals:
   negated(negated(-1)) = same(-1)
   same(-1) -> -1
 Consequences:
+  negated(-1) = 1
+  negated(negated(-1)) = -(negated(-1))
   ~same(-1) = 0
   ~same(-1) = 1
   ~same(0) = -1
@@ -124,7 +128,6 @@ Consequences:
   same(1) = 1
   ~negated(-1) = -1
   ~negated(-1) = 0
-  negated(-1) = 1
   ~negated(0) = -1
   negated(0) = 0
   ~negated(0) = 1
@@ -187,7 +190,7 @@ Irrelevant:
                                  'value': False},
              'negated(-1) = 1': {'environmental': False,
                                  'normal': False,
-                                 'reading': 'negated(-1) = 1',
+                                 'reading': 'y = -(x)',
                                  'relevant': True,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
@@ -250,6 +253,13 @@ Irrelevant:
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},
+             'negated(negated(-1)) = -(negated(-1))': {'environmental': False,
+                                                       'normal': False,
+                                                       'reading': 'y = -(x)',
+                                                       'relevant': True,
+                                                       'status': 'CONSEQUENCE',
+                                                       'typ': 'Bool',
+                                                       'value': True},
              'negated(negated(-1)) = same(-1)': {'environmental': False,
                                                  'normal': False,
                                                  'reading': 'negated(negated(-1)) = same(-1)',

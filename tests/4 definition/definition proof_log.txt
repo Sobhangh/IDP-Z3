@@ -28,73 +28,21 @@
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
-|+ codeOf(red) = b -> true  (or true -> true)
-    |------------
-    |*codeOf(blue) = a with AppliedSymbol,Constructor
-    |+ codeOf(red) = b -> true  (or true -> true)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ codeOf(red) = b -> true  (or true -> true)
-            |------------
-            |blue
-            |+ codeOf(red) = b -> true  (or true -> true)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |a
-        |+ codeOf(red) = b -> true  (or true -> true)
-        |== a
-    |== *codeOf(blue) = a with AppliedSymbol,Constructor
-    |------------
-    |*codeOf(blue) = b with AppliedSymbol,Constructor
-    |+ codeOf(red) = b -> true  (or true -> true)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ codeOf(red) = b -> true  (or true -> true)
-            |------------
-            |blue
-            |+ codeOf(red) = b -> true  (or true -> true)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |b
-        |+ codeOf(red) = b -> true  (or true -> true)
-        |== b
-    |== *codeOf(blue) = b with AppliedSymbol,Constructor
-|== codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
-|------------
-|c = red ∨ c = blue with AComparison,AComparison
-|+ codeOf(red) = b -> true  (or true -> true)
-    |------------
-    |*c = red with Variable,Constructor
-    |+ codeOf(red) = b -> true  (or true -> true)
-        |------------
-        |c
-        |+ codeOf(red) = b -> true  (or true -> true)
-        |== c
-        |------------
-        |red
-        |+ codeOf(red) = b -> true  (or true -> true)
-        |== red
-    |== *c = red with Variable,Constructor
-    |------------
-    |*c = blue with Variable,Constructor
-    |+ codeOf(red) = b -> true  (or true -> true)
-        |------------
-        |c
-        |+ codeOf(red) = b -> true  (or true -> true)
-        |== c
-        |------------
-        |blue
-        |+ codeOf(red) = b -> true  (or true -> true)
-        |== blue
-    |== *c = blue with Variable,Constructor
-|== c = red ∨ c = blue with AComparison,AComparison
-|------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(red) = b -> true  (or true -> true)
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*red = c with Constructor,Variable
+|+ codeOf(red) = b -> true  (or true -> true)
+    |------------
+    |red
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== red
+    |------------
+    |c
+    |+ codeOf(red) = b -> true  (or true -> true)
+    |== c
+|== *red = c with Constructor,Variable
 |------------
 |*codeOf(red) = a with AppliedSymbol,Constructor
 |+ codeOf(red) = b -> true  (or true -> true)
@@ -181,7 +129,7 @@
             |red = c ∧ codeOf(red) = a with AComparison,AComparison
             |+ codeOf(red) = b -> true  (or true -> true)
                 |------------
-                |red = c with Constructor,Variable
+                |*red = c with Constructor,Variable
                 |+ codeOf(red) = b -> true  (or true -> true)
                     |------------
                     |red
@@ -191,9 +139,9 @@
                     |c
                     |+ codeOf(red) = b -> true  (or true -> true)
                     |== c
-                |== red = c with Constructor,Variable
+                |== *red = c with Constructor,Variable
                 |------------
-                |codeOf(red) = a with AppliedSymbol,Constructor
+                |*codeOf(red) = a with AppliedSymbol,Constructor
                 |+ codeOf(red) = b -> true  (or true -> true)
                     |------------
                     |codeOf(red) with Constructor
@@ -207,7 +155,7 @@
                     |a
                     |+ codeOf(red) = b -> true  (or true -> true)
                     |== a
-                |== codeOf(red) = a with AppliedSymbol,Constructor
+                |== *codeOf(red) = a with AppliedSymbol,Constructor
             |== red = c ∧ codeOf(red) = a with AComparison,AComparison
         |== !!red = c ∧ codeOf(red) = a with AConjunction
         |------------
@@ -220,7 +168,7 @@
                 |~(red = c) with AComparison
                 |+ codeOf(red) = b -> true  (or true -> true)
                     |------------
-                    |red = c with Constructor,Variable
+                    |*red = c with Constructor,Variable
                     |+ codeOf(red) = b -> true  (or true -> true)
                         |------------
                         |red
@@ -230,12 +178,12 @@
                         |c
                         |+ codeOf(red) = b -> true  (or true -> true)
                         |== c
-                    |== red = c with Constructor,Variable
+                    |== *red = c with Constructor,Variable
                 |== ~(red = c) with AComparison
                 |------------
-                |codeOf(red) = b with AppliedSymbol,Constructor
+                |*codeOf(red) = b with AppliedSymbol,Constructor
                 |+ codeOf(red) = b -> true  (or true -> true)
-                |== !true with AppliedSymbol,Constructor
+                |== *!true with AppliedSymbol,Constructor
             |== !!~(red = c) with AUnary,AComparison
         |== !!~(red = c) with AConjunction
     |== (red = c ∧ codeOf(red) = a) ∨ (~(red = c)) with Brackets,Brackets
@@ -273,7 +221,7 @@
                 |red = c ∧ codeOf(red) = a with AComparison,AComparison
                 |+ codeOf(red) -> b
                     |------------
-                    |red = c with Constructor,Variable
+                    |*red = c with Constructor,Variable
                     |+ codeOf(red) -> b
                         |------------
                         |red
@@ -283,9 +231,9 @@
                         |c
                         |+ codeOf(red) -> b
                         |== c
-                    |== red = c with Constructor,Variable
+                    |== *red = c with Constructor,Variable
                     |------------
-                    |codeOf(red) = a with AppliedSymbol,Constructor
+                    |*codeOf(red) = a with AppliedSymbol,Constructor
                     |+ codeOf(red) -> b
                         |------------
                         |codeOf(red) with Constructor
@@ -295,7 +243,7 @@
                         |a
                         |+ codeOf(red) -> b
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
@@ -308,7 +256,7 @@
                     |~(red = c) with AComparison
                     |+ codeOf(red) -> b
                         |------------
-                        |red = c with Constructor,Variable
+                        |*red = c with Constructor,Variable
                         |+ codeOf(red) -> b
                             |------------
                             |red
@@ -318,10 +266,10 @@
                             |c
                             |+ codeOf(red) -> b
                             |== c
-                        |== red = c with Constructor,Variable
+                        |== *red = c with Constructor,Variable
                     |== ~(red = c) with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ codeOf(red) -> b
                         |------------
                         |codeOf(red) with Constructor
@@ -331,7 +279,7 @@
                         |b
                         |+ codeOf(red) -> b
                         |== b
-                    |== !true with AppliedSymbol,Constructor
+                    |== *!true with AppliedSymbol,Constructor
                 |== !!~(red = c) with AUnary,AComparison
             |== !!~(red = c) with AConjunction
         |== !!(~(red = c)) with Brackets,Brackets
@@ -339,6 +287,83 @@
     |------------
     |b
     |+ codeOf(red) -> b  (or b -> b)
+    |== b
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ red = c -> false
+    |------------
+    |b with Constructor just (~(red = c))
+    |+ red = c -> false
+ definition:
+        |------------
+        |(~(red = c)) with Brackets,Brackets
+        |+ red = c -> false
+            |------------
+            |(false) with AConjunction
+            |+ red = c -> false
+                |------------
+                |false with AComparison
+                |+ red = c -> false
+                    |------------
+                    |*false with AppliedSymbol,Constructor
+                    |+ red = c -> false
+                        |------------
+                        |b with Constructor
+                        |+ red = c -> false
+                            |------------
+                            |red
+                            |+ red = c -> false
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |a
+                        |+ red = c -> false
+                        |== a
+                    |== *!false with AppliedSymbol,Constructor
+                |== !false with AComparison
+            |== !false with AConjunction
+            |------------
+            |(~(red = c)) with AConjunction
+            |+ red = c -> false
+                |------------
+                |~(red = c) with AUnary,AComparison
+                |+ red = c -> false
+                    |------------
+                    |~(red = c) with AComparison
+                    |+ red = c -> false
+                        |------------
+                        |*red = c with Constructor,Variable
+                        |+ red = c -> false
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
+                    |------------
+                    |*true with AppliedSymbol,Constructor
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |b with Constructor
+                        |+ red = c -> false  (or false -> false)
+                            |------------
+                            |red
+                            |+ red = c -> false  (or false -> false)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |b
+                        |+ red = c -> false  (or false -> false)
+                        |== b
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
+        |------------
+        |red
+        |+ red = c -> false  (or false -> false)
+        |== red
+    |== !b with Constructor just true
+    |------------
+    |b
+    |+ red = c -> false  (or false -> false)
     |== b
 |== *!true with AppliedSymbol,Constructor
 |------------
@@ -358,78 +383,14 @@
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
-|+ codeOf(red) -> b  (or b -> b)
-    |------------
-    |*codeOf(blue) = a with AppliedSymbol,Constructor
-    |+ codeOf(red) -> b  (or b -> b)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ codeOf(red) -> b  (or b -> b)
-            |------------
-            |blue
-            |+ codeOf(red) -> b  (or b -> b)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |a
-        |+ codeOf(red) -> b  (or b -> b)
-        |== a
-    |== *codeOf(blue) = a with AppliedSymbol,Constructor
-    |------------
-    |*codeOf(blue) = b with AppliedSymbol,Constructor
-    |+ codeOf(red) -> b  (or b -> b)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ codeOf(red) -> b  (or b -> b)
-            |------------
-            |blue
-            |+ codeOf(red) -> b  (or b -> b)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |b
-        |+ codeOf(red) -> b  (or b -> b)
-        |== b
-    |== *codeOf(blue) = b with AppliedSymbol,Constructor
-|== codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
-|------------
-|c = red ∨ c = blue with AComparison,AComparison
-|+ codeOf(red) -> b  (or b -> b)
-    |------------
-    |*c = red with Variable,Constructor
-    |+ codeOf(red) -> b  (or b -> b)
-        |------------
-        |c
-        |+ codeOf(red) -> b  (or b -> b)
-        |== c
-        |------------
-        |red
-        |+ codeOf(red) -> b  (or b -> b)
-        |== red
-    |== *c = red with Variable,Constructor
-    |------------
-    |*c = blue with Variable,Constructor
-    |+ codeOf(red) -> b  (or b -> b)
-        |------------
-        |c
-        |+ codeOf(red) -> b  (or b -> b)
-        |== c
-        |------------
-        |blue
-        |+ codeOf(red) -> b  (or b -> b)
-        |== blue
-    |== *c = blue with Variable,Constructor
-|== c = red ∨ c = blue with AComparison,AComparison
-|------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(red) -> b  (or b -> b)
     |------------
-    |b with Constructor just (~(red = c))
+    |b with Constructor just true
     |+ codeOf(red) -> b  (or b -> b)
  definition:
         |------------
-        |(~(red = c)) with Brackets,Brackets
+        |true with Brackets,Brackets
         |+ codeOf(red) -> b  (or b -> b)
             |------------
             |(false) with AConjunction
@@ -438,7 +399,7 @@
                 |false with AComparison
                 |+ codeOf(red) -> b  (or b -> b)
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ codeOf(red) -> b  (or b -> b)
                         |------------
                         |b with Constructor
@@ -448,20 +409,20 @@
                         |a
                         |+ codeOf(red) -> b  (or b -> b)
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
-            |(~(red = c)) with AConjunction
+            |(true) with AConjunction
             |+ codeOf(red) -> b  (or b -> b)
                 |------------
-                |~(red = c) with AUnary,AComparison
+                |true with AUnary,AComparison
                 |+ codeOf(red) -> b  (or b -> b)
                     |------------
-                    |~(red = c) with AComparison
+                    |true with AComparison
                     |+ codeOf(red) -> b  (or b -> b)
                         |------------
-                        |red = c with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ codeOf(red) -> b  (or b -> b)
                             |------------
                             |red
@@ -471,10 +432,10 @@
                             |c
                             |+ codeOf(red) -> b  (or b -> b)
                             |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ codeOf(red) -> b  (or b -> b)
                         |------------
                         |b with Constructor
@@ -484,16 +445,28 @@
                         |b
                         |+ codeOf(red) -> b  (or b -> b)
                         |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
-    |== !b with Constructor just (~(red = c))
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
+    |== !b with Constructor just true
     |------------
     |b
     |+ codeOf(red) -> b  (or b -> b)
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(red) -> b  (or b -> b)
+    |------------
+    |red
+    |+ codeOf(red) -> b  (or b -> b)
+    |== red
+    |------------
+    |c
+    |+ codeOf(red) -> b  (or b -> b)
+    |== c
+|== *!false with Constructor,Variable
 |------------
 |*codeOf(red) = a with AppliedSymbol,Constructor
 |+ codeOf(red) -> b  (or b -> b)
@@ -563,11 +536,11 @@
     |== blue
 |== *c = blue with Variable,Constructor
 |------------
-|b with Constructor just (~(red = c))
+|b with Constructor just true
 |+ codeOf(red) -> b  (or b -> b)
  definition:
     |------------
-    |(~(red = c)) with Brackets,Brackets
+    |true with Brackets,Brackets
     |+ codeOf(red) -> b  (or b -> b)
         |------------
         |(false) with AConjunction
@@ -576,7 +549,7 @@
             |false with AComparison
             |+ codeOf(red) -> b  (or b -> b)
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ codeOf(red) -> b  (or b -> b)
                     |------------
                     |b with Constructor
@@ -586,20 +559,20 @@
                     |a
                     |+ codeOf(red) -> b  (or b -> b)
                     |== a
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
-        |(~(red = c)) with AConjunction
+        |(true) with AConjunction
         |+ codeOf(red) -> b  (or b -> b)
             |------------
-            |~(red = c) with AUnary,AComparison
+            |true with AUnary,AComparison
             |+ codeOf(red) -> b  (or b -> b)
                 |------------
-                |~(red = c) with AComparison
+                |true with AComparison
                 |+ codeOf(red) -> b  (or b -> b)
                     |------------
-                    |red = c with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ codeOf(red) -> b  (or b -> b)
                         |------------
                         |red
@@ -609,10 +582,10 @@
                         |c
                         |+ codeOf(red) -> b  (or b -> b)
                         |== c
-                    |== red = c with Constructor,Variable
-                |== ~(red = c) with AComparison
+                    |== *!false with Constructor,Variable
+                |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ codeOf(red) -> b  (or b -> b)
                     |------------
                     |b with Constructor
@@ -622,11 +595,11 @@
                     |b
                     |+ codeOf(red) -> b  (or b -> b)
                     |== b
-                |== !true with AppliedSymbol,Constructor
-            |== !!~(red = c) with AUnary,AComparison
-        |== !!~(red = c) with AConjunction
-    |== !!(~(red = c)) with Brackets,Brackets
-|== !b with Constructor just (~(red = c))
+                |== *!true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets,Brackets
+|== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
 |+ codeOf(red) -> b  (or b -> b)
@@ -641,13 +614,324 @@
 |== c
 |------------
 |*true with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |b with Constructor just true
+    |+ red = c -> false  (or false -> false)
+ definition:
+        |------------
+        |true with Brackets,Brackets
+        |+ red = c -> false  (or false -> false)
+            |------------
+            |(false) with AConjunction
+            |+ red = c -> false  (or false -> false)
+                |------------
+                |false with AComparison
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |*false with AppliedSymbol,Constructor
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |b with Constructor
+                        |+ red = c -> false  (or false -> false)
+                            |------------
+                            |red
+                            |+ red = c -> false  (or false -> false)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |a
+                        |+ red = c -> false  (or false -> false)
+                        |== a
+                    |== *!false with AppliedSymbol,Constructor
+                |== !false with AComparison
+            |== !false with AConjunction
+            |------------
+            |(true) with AConjunction
+            |+ red = c -> false  (or false -> false)
+                |------------
+                |true with AUnary,AComparison
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |true with AComparison
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |*false with Constructor,Variable
+                        |+ red = c -> false  (or false -> false)
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
+                    |------------
+                    |*true with AppliedSymbol,Constructor
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |b with Constructor
+                        |+ red = c -> false  (or false -> false)
+                            |------------
+                            |red
+                            |+ red = c -> false  (or false -> false)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |b
+                        |+ red = c -> false  (or false -> false)
+                        |== b
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
+        |------------
+        |red
+        |+ red = c -> false  (or false -> false)
+        |== red
+    |== !b with Constructor just true
+    |------------
+    |b
+    |+ red = c -> false  (or false -> false)
+    |== b
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |b with Constructor just true
+    |+ red = c -> false  (or false -> false)
+ definition:
+        |------------
+        |true with Brackets,Brackets
+        |+ red = c -> false  (or false -> false)
+            |------------
+            |(false) with AConjunction
+            |+ red = c -> false  (or false -> false)
+                |------------
+                |false with AComparison
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |*false with AppliedSymbol,Constructor
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |b with Constructor
+                        |+ red = c -> false  (or false -> false)
+                            |------------
+                            |red
+                            |+ red = c -> false  (or false -> false)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |a
+                        |+ red = c -> false  (or false -> false)
+                        |== a
+                    |== *!false with AppliedSymbol,Constructor
+                |== !false with AComparison
+            |== !false with AConjunction
+            |------------
+            |(true) with AConjunction
+            |+ red = c -> false  (or false -> false)
+                |------------
+                |true with AUnary,AComparison
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |true with AComparison
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |*false with Constructor,Variable
+                        |+ red = c -> false  (or false -> false)
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
+                    |------------
+                    |*true with AppliedSymbol,Constructor
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |b with Constructor
+                        |+ red = c -> false  (or false -> false)
+                            |------------
+                            |red
+                            |+ red = c -> false  (or false -> false)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |b
+                        |+ red = c -> false  (or false -> false)
+                        |== b
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
+        |------------
+        |red
+        |+ red = c -> false  (or false -> false)
+        |== red
+    |== !b with Constructor just true
+    |------------
+    |b
+    |+ red = c -> false  (or false -> false)
+    |== b
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ red = c -> false  (or false -> false)
+|== *!false with Constructor,Variable
+|------------
+|*false with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |b with Constructor
+    |+ red = c -> false  (or false -> false)
+        |------------
+        |red
+        |+ red = c -> false  (or false -> false)
+        |== red
+    |== !b with Constructor
+    |------------
+    |a
+    |+ red = c -> false  (or false -> false)
+    |== a
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = a with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ red = c -> false  (or false -> false)
+        |------------
+        |blue
+        |+ red = c -> false  (or false -> false)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |a
+    |+ red = c -> false  (or false -> false)
+    |== a
+|== *codeOf(blue) = a with AppliedSymbol,Constructor
+|------------
+|*codeOf(blue) = b with AppliedSymbol,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ red = c -> false  (or false -> false)
+        |------------
+        |blue
+        |+ red = c -> false  (or false -> false)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |b
+    |+ red = c -> false  (or false -> false)
+    |== b
+|== *codeOf(blue) = b with AppliedSymbol,Constructor
+|------------
+|*c = red with Variable,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |c
+    |+ red = c -> false  (or false -> false)
+    |== c
+    |------------
+    |red
+    |+ red = c -> false  (or false -> false)
+    |== red
+|== *c = red with Variable,Constructor
+|------------
+|*c = blue with Variable,Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |c
+    |+ red = c -> false  (or false -> false)
+    |== c
+    |------------
+    |blue
+    |+ red = c -> false  (or false -> false)
+    |== blue
+|== *c = blue with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ red = c -> false  (or false -> false)
+ definition:
+    |------------
+    |true with Brackets,Brackets
+    |+ red = c -> false  (or false -> false)
+        |------------
+        |(false) with AConjunction
+        |+ red = c -> false  (or false -> false)
+            |------------
+            |false with AComparison
+            |+ red = c -> false  (or false -> false)
+                |------------
+                |*false with AppliedSymbol,Constructor
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |b with Constructor
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |red
+                        |+ red = c -> false  (or false -> false)
+                        |== red
+                    |== !b with Constructor
+                    |------------
+                    |a
+                    |+ red = c -> false  (or false -> false)
+                    |== a
+                |== *!false with AppliedSymbol,Constructor
+            |== !false with AComparison
+        |== !false with AConjunction
+        |------------
+        |(true) with AConjunction
+        |+ red = c -> false  (or false -> false)
+            |------------
+            |true with AUnary,AComparison
+            |+ red = c -> false  (or false -> false)
+                |------------
+                |true with AComparison
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |*false with Constructor,Variable
+                    |+ red = c -> false  (or false -> false)
+                    |== *!false with Constructor,Variable
+                |== !true with AComparison
+                |------------
+                |*true with AppliedSymbol,Constructor
+                |+ red = c -> false  (or false -> false)
+                    |------------
+                    |b with Constructor
+                    |+ red = c -> false  (or false -> false)
+                        |------------
+                        |red
+                        |+ red = c -> false  (or false -> false)
+                        |== red
+                    |== !b with Constructor
+                    |------------
+                    |b
+                    |+ red = c -> false  (or false -> false)
+                    |== b
+                |== *!true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets,Brackets
+    |------------
+    |red
+    |+ red = c -> false  (or false -> false)
+    |== red
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ red = c -> false  (or false -> false)
+    |------------
+    |blue
+    |+ red = c -> false  (or false -> false)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|c
+|+ red = c -> false  (or false -> false)
+|== c
+|------------
+|*true with AppliedSymbol,Constructor
 |+ codeOf(red) = a -> false  (or false -> false)
     |------------
-    |b with Constructor just (~(red = c))
+    |b with Constructor just true
     |+ codeOf(red) = a -> false  (or false -> false)
  definition:
         |------------
-        |(~(red = c)) with Brackets,Brackets
+        |true with Brackets,Brackets
         |+ codeOf(red) = a -> false  (or false -> false)
             |------------
             |(false) with AConjunction
@@ -656,22 +940,22 @@
                 |false with AComparison
                 |+ codeOf(red) = a -> false  (or false -> false)
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ codeOf(red) = a -> false  (or false -> false)
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
-            |(~(red = c)) with AConjunction
+            |(true) with AConjunction
             |+ codeOf(red) = a -> false  (or false -> false)
                 |------------
-                |~(red = c) with AUnary,AComparison
+                |true with AUnary,AComparison
                 |+ codeOf(red) = a -> false  (or false -> false)
                     |------------
-                    |~(red = c) with AComparison
+                    |true with AComparison
                     |+ codeOf(red) = a -> false  (or false -> false)
                         |------------
-                        |red = c with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ codeOf(red) = a -> false  (or false -> false)
                             |------------
                             |red
@@ -681,10 +965,10 @@
                             |c
                             |+ codeOf(red) = a -> false  (or false -> false)
                             |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ codeOf(red) = a -> false  (or false -> false)
                         |------------
                         |b with Constructor
@@ -698,15 +982,15 @@
                         |b
                         |+ codeOf(red) = a -> false  (or false -> false)
                         |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
         |------------
         |red
         |+ codeOf(red) = a -> false  (or false -> false)
         |== red
-    |== !b with Constructor just (~(red = c))
+    |== !b with Constructor just true
     |------------
     |b
     |+ codeOf(red) = a -> false  (or false -> false)
@@ -733,78 +1017,14 @@
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
-|+ codeOf(red) = a -> false  (or false -> false)
-    |------------
-    |*codeOf(blue) = a with AppliedSymbol,Constructor
-    |+ codeOf(red) = a -> false  (or false -> false)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ codeOf(red) = a -> false  (or false -> false)
-            |------------
-            |blue
-            |+ codeOf(red) = a -> false  (or false -> false)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |a
-        |+ codeOf(red) = a -> false  (or false -> false)
-        |== a
-    |== *codeOf(blue) = a with AppliedSymbol,Constructor
-    |------------
-    |*codeOf(blue) = b with AppliedSymbol,Constructor
-    |+ codeOf(red) = a -> false  (or false -> false)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ codeOf(red) = a -> false  (or false -> false)
-            |------------
-            |blue
-            |+ codeOf(red) = a -> false  (or false -> false)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |b
-        |+ codeOf(red) = a -> false  (or false -> false)
-        |== b
-    |== *codeOf(blue) = b with AppliedSymbol,Constructor
-|== codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
-|------------
-|c = red ∨ c = blue with AComparison,AComparison
-|+ codeOf(red) = a -> false  (or false -> false)
-    |------------
-    |*c = red with Variable,Constructor
-    |+ codeOf(red) = a -> false  (or false -> false)
-        |------------
-        |c
-        |+ codeOf(red) = a -> false  (or false -> false)
-        |== c
-        |------------
-        |red
-        |+ codeOf(red) = a -> false  (or false -> false)
-        |== red
-    |== *c = red with Variable,Constructor
-    |------------
-    |*c = blue with Variable,Constructor
-    |+ codeOf(red) = a -> false  (or false -> false)
-        |------------
-        |c
-        |+ codeOf(red) = a -> false  (or false -> false)
-        |== c
-        |------------
-        |blue
-        |+ codeOf(red) = a -> false  (or false -> false)
-        |== blue
-    |== *c = blue with Variable,Constructor
-|== c = red ∨ c = blue with AComparison,AComparison
-|------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(red) = a -> false  (or false -> false)
     |------------
-    |b with Constructor just (~(red = c))
+    |b with Constructor just true
     |+ codeOf(red) = a -> false  (or false -> false)
  definition:
         |------------
-        |(~(red = c)) with Brackets,Brackets
+        |true with Brackets,Brackets
         |+ codeOf(red) = a -> false  (or false -> false)
             |------------
             |(false) with AConjunction
@@ -813,22 +1033,22 @@
                 |false with AComparison
                 |+ codeOf(red) = a -> false  (or false -> false)
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ codeOf(red) = a -> false  (or false -> false)
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
-            |(~(red = c)) with AConjunction
+            |(true) with AConjunction
             |+ codeOf(red) = a -> false  (or false -> false)
                 |------------
-                |~(red = c) with AUnary,AComparison
+                |true with AUnary,AComparison
                 |+ codeOf(red) = a -> false  (or false -> false)
                     |------------
-                    |~(red = c) with AComparison
+                    |true with AComparison
                     |+ codeOf(red) = a -> false  (or false -> false)
                         |------------
-                        |red = c with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ codeOf(red) = a -> false  (or false -> false)
                             |------------
                             |red
@@ -838,10 +1058,10 @@
                             |c
                             |+ codeOf(red) = a -> false  (or false -> false)
                             |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ codeOf(red) = a -> false  (or false -> false)
                         |------------
                         |b with Constructor
@@ -855,20 +1075,32 @@
                         |b
                         |+ codeOf(red) = a -> false  (or false -> false)
                         |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
         |------------
         |red
         |+ codeOf(red) = a -> false  (or false -> false)
         |== red
-    |== !b with Constructor just (~(red = c))
+    |== !b with Constructor just true
     |------------
     |b
     |+ codeOf(red) = a -> false  (or false -> false)
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(red) = a -> false  (or false -> false)
+    |------------
+    |red
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== red
+    |------------
+    |c
+    |+ codeOf(red) = a -> false  (or false -> false)
+    |== c
+|== *!false with Constructor,Variable
 |------------
 |*false with AppliedSymbol,Constructor
 |+ codeOf(red) = a -> false  (or false -> false)
@@ -930,11 +1162,11 @@
     |== blue
 |== *c = blue with Variable,Constructor
 |------------
-|b with Constructor just (~(red = c))
+|b with Constructor just true
 |+ codeOf(red) = a -> false  (or false -> false)
  definition:
     |------------
-    |(~(red = c)) with Brackets,Brackets
+    |true with Brackets,Brackets
     |+ codeOf(red) = a -> false  (or false -> false)
         |------------
         |(false) with AConjunction
@@ -943,22 +1175,22 @@
             |false with AComparison
             |+ codeOf(red) = a -> false  (or false -> false)
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ codeOf(red) = a -> false  (or false -> false)
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
-        |(~(red = c)) with AConjunction
+        |(true) with AConjunction
         |+ codeOf(red) = a -> false  (or false -> false)
             |------------
-            |~(red = c) with AUnary,AComparison
+            |true with AUnary,AComparison
             |+ codeOf(red) = a -> false  (or false -> false)
                 |------------
-                |~(red = c) with AComparison
+                |true with AComparison
                 |+ codeOf(red) = a -> false  (or false -> false)
                     |------------
-                    |red = c with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ codeOf(red) = a -> false  (or false -> false)
                         |------------
                         |red
@@ -968,10 +1200,10 @@
                         |c
                         |+ codeOf(red) = a -> false  (or false -> false)
                         |== c
-                    |== red = c with Constructor,Variable
-                |== ~(red = c) with AComparison
+                    |== *!false with Constructor,Variable
+                |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ codeOf(red) = a -> false  (or false -> false)
                     |------------
                     |b with Constructor
@@ -985,15 +1217,15 @@
                     |b
                     |+ codeOf(red) = a -> false  (or false -> false)
                     |== b
-                |== !true with AppliedSymbol,Constructor
-            |== !!~(red = c) with AUnary,AComparison
-        |== !!~(red = c) with AConjunction
-    |== !!(~(red = c)) with Brackets,Brackets
+                |== *!true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets,Brackets
     |------------
     |red
     |+ codeOf(red) = a -> false  (or false -> false)
     |== red
-|== !b with Constructor just (~(red = c))
+|== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
 |+ codeOf(red) = a -> false  (or false -> false)
@@ -1008,111 +1240,6 @@
 |== c
 Z3 propagation ********************************
 |------------
-|*true with AppliedSymbol,Constructor
-|+ codeOf(blue) = a -> true
-    |------------
-    |b with Constructor just (~(red = c))
-    |+ codeOf(blue) = a -> true
- definition:
-        |------------
-        |(~(red = c)) with Brackets,Brackets
-        |+ codeOf(blue) = a -> true
-            |------------
-            |(false) with AConjunction
-            |+ codeOf(blue) = a -> true
-                |------------
-                |false with AComparison
-                |+ codeOf(blue) = a -> true
-                    |------------
-                    |false with AppliedSymbol,Constructor
-                    |+ codeOf(blue) = a -> true
-                        |------------
-                        |b with Constructor
-                        |+ codeOf(blue) = a -> true
-                            |------------
-                            |red
-                            |+ codeOf(blue) = a -> true
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |a
-                        |+ codeOf(blue) = a -> true
-                        |== a
-                    |== !false with AppliedSymbol,Constructor
-                |== !false with AComparison
-            |== !false with AConjunction
-            |------------
-            |(~(red = c)) with AConjunction
-            |+ codeOf(blue) = a -> true
-                |------------
-                |~(red = c) with AUnary,AComparison
-                |+ codeOf(blue) = a -> true
-                    |------------
-                    |~(red = c) with AComparison
-                    |+ codeOf(blue) = a -> true
-                        |------------
-                        |red = c with Constructor,Variable
-                        |+ codeOf(blue) = a -> true
-                            |------------
-                            |red
-                            |+ codeOf(blue) = a -> true
-                            |== red
-                            |------------
-                            |c
-                            |+ codeOf(blue) = a -> true
-                            |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
-                    |------------
-                    |true with AppliedSymbol,Constructor
-                    |+ codeOf(blue) = a -> true
-                        |------------
-                        |b with Constructor
-                        |+ codeOf(blue) = a -> true
-                            |------------
-                            |red
-                            |+ codeOf(blue) = a -> true
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |b
-                        |+ codeOf(blue) = a -> true
-                        |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
-        |------------
-        |red
-        |+ codeOf(blue) = a -> true
-        |== red
-    |== !b with Constructor just (~(red = c))
-    |------------
-    |b
-    |+ codeOf(blue) = a -> true
-    |== b
-|== *!true with AppliedSymbol,Constructor
-|------------
-|true with AComparison
-|+ codeOf(blue) = a -> true
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ codeOf(blue) = a -> true
-        |------------
-        |b with Constructor
-        |+ codeOf(blue) = a -> true
-            |------------
-            |red
-            |+ codeOf(blue) = a -> true
-            |== red
-        |== !b with Constructor
-        |------------
-        |b
-        |+ codeOf(blue) = a -> true
-        |== b
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
-|------------
 |codeOf(blue) = a ∨ codeOf(blue) = b with AComparison,AComparison
 |+ codeOf(blue) = a -> true
     |------------
@@ -1121,42 +1248,14 @@ Z3 propagation ********************************
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|c = red ∨ c = blue with AComparison,AComparison
-|+ codeOf(blue) = a -> true
-    |------------
-    |*c = red with Variable,Constructor
-    |+ codeOf(blue) = a -> true
-        |------------
-        |c
-        |+ codeOf(blue) = a -> true
-        |== c
-        |------------
-        |red
-        |+ codeOf(blue) = a -> true
-        |== red
-    |== *c = red with Variable,Constructor
-    |------------
-    |*c = blue with Variable,Constructor
-    |+ codeOf(blue) = a -> true
-        |------------
-        |c
-        |+ codeOf(blue) = a -> true
-        |== c
-        |------------
-        |blue
-        |+ codeOf(blue) = a -> true
-        |== blue
-    |== *c = blue with Variable,Constructor
-|== c = red ∨ c = blue with AComparison,AComparison
-|------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(blue) = a -> true
     |------------
-    |b with Constructor just (~(red = c))
+    |b with Constructor just true
     |+ codeOf(blue) = a -> true
  definition:
         |------------
-        |(~(red = c)) with Brackets,Brackets
+        |true with Brackets,Brackets
         |+ codeOf(blue) = a -> true
             |------------
             |(false) with AConjunction
@@ -1165,7 +1264,7 @@ Z3 propagation ********************************
                 |false with AComparison
                 |+ codeOf(blue) = a -> true
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ codeOf(blue) = a -> true
                         |------------
                         |b with Constructor
@@ -1179,20 +1278,20 @@ Z3 propagation ********************************
                         |a
                         |+ codeOf(blue) = a -> true
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
-            |(~(red = c)) with AConjunction
+            |(true) with AConjunction
             |+ codeOf(blue) = a -> true
                 |------------
-                |~(red = c) with AUnary,AComparison
+                |true with AUnary,AComparison
                 |+ codeOf(blue) = a -> true
                     |------------
-                    |~(red = c) with AComparison
+                    |true with AComparison
                     |+ codeOf(blue) = a -> true
                         |------------
-                        |red = c with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ codeOf(blue) = a -> true
                             |------------
                             |red
@@ -1202,10 +1301,10 @@ Z3 propagation ********************************
                             |c
                             |+ codeOf(blue) = a -> true
                             |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ codeOf(blue) = a -> true
                         |------------
                         |b with Constructor
@@ -1219,20 +1318,32 @@ Z3 propagation ********************************
                         |b
                         |+ codeOf(blue) = a -> true
                         |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
         |------------
         |red
         |+ codeOf(blue) = a -> true
         |== red
-    |== !b with Constructor just (~(red = c))
+    |== !b with Constructor just true
     |------------
     |b
     |+ codeOf(blue) = a -> true
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(blue) = a -> true
+    |------------
+    |red
+    |+ codeOf(blue) = a -> true
+    |== red
+    |------------
+    |c
+    |+ codeOf(blue) = a -> true
+    |== c
+|== *!false with Constructor,Variable
 |------------
 |*false with AppliedSymbol,Constructor
 |+ codeOf(blue) = a -> true
@@ -1294,11 +1405,11 @@ Z3 propagation ********************************
     |== blue
 |== *c = blue with Variable,Constructor
 |------------
-|b with Constructor just (~(red = c))
+|b with Constructor just true
 |+ codeOf(blue) = a -> true  (or true -> true)
  definition:
     |------------
-    |(~(red = c)) with Brackets,Brackets
+    |true with Brackets,Brackets
     |+ codeOf(blue) = a -> true  (or true -> true)
         |------------
         |(false) with AConjunction
@@ -1307,7 +1418,7 @@ Z3 propagation ********************************
             |false with AComparison
             |+ codeOf(blue) = a -> true  (or true -> true)
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ codeOf(blue) = a -> true  (or true -> true)
                     |------------
                     |b with Constructor
@@ -1321,20 +1432,20 @@ Z3 propagation ********************************
                     |a
                     |+ codeOf(blue) = a -> true  (or true -> true)
                     |== a
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
-        |(~(red = c)) with AConjunction
+        |(true) with AConjunction
         |+ codeOf(blue) = a -> true  (or true -> true)
             |------------
-            |~(red = c) with AUnary,AComparison
+            |true with AUnary,AComparison
             |+ codeOf(blue) = a -> true  (or true -> true)
                 |------------
-                |~(red = c) with AComparison
+                |true with AComparison
                 |+ codeOf(blue) = a -> true  (or true -> true)
                     |------------
-                    |red = c with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ codeOf(blue) = a -> true  (or true -> true)
                         |------------
                         |red
@@ -1344,10 +1455,10 @@ Z3 propagation ********************************
                         |c
                         |+ codeOf(blue) = a -> true  (or true -> true)
                         |== c
-                    |== red = c with Constructor,Variable
-                |== ~(red = c) with AComparison
+                    |== *!false with Constructor,Variable
+                |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ codeOf(blue) = a -> true  (or true -> true)
                     |------------
                     |b with Constructor
@@ -1361,15 +1472,15 @@ Z3 propagation ********************************
                     |b
                     |+ codeOf(blue) = a -> true  (or true -> true)
                     |== b
-                |== !true with AppliedSymbol,Constructor
-            |== !!~(red = c) with AUnary,AComparison
-        |== !!~(red = c) with AConjunction
-    |== !!(~(red = c)) with Brackets,Brackets
+                |== *!true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets,Brackets
     |------------
     |red
     |+ codeOf(blue) = a -> true  (or true -> true)
     |== red
-|== !b with Constructor just (~(red = c))
+|== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
 |+ codeOf(blue) = a -> true  (or true -> true)
@@ -1382,111 +1493,6 @@ Z3 propagation ********************************
 |c
 |+ codeOf(blue) = a -> true  (or true -> true)
 |== c
-|------------
-|*true with AppliedSymbol,Constructor
-|+ codeOf(blue) = b -> false
-    |------------
-    |b with Constructor just (~(red = c))
-    |+ codeOf(blue) = b -> false
- definition:
-        |------------
-        |(~(red = c)) with Brackets,Brackets
-        |+ codeOf(blue) = b -> false
-            |------------
-            |(false) with AConjunction
-            |+ codeOf(blue) = b -> false
-                |------------
-                |false with AComparison
-                |+ codeOf(blue) = b -> false
-                    |------------
-                    |false with AppliedSymbol,Constructor
-                    |+ codeOf(blue) = b -> false
-                        |------------
-                        |b with Constructor
-                        |+ codeOf(blue) = b -> false
-                            |------------
-                            |red
-                            |+ codeOf(blue) = b -> false
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |a
-                        |+ codeOf(blue) = b -> false
-                        |== a
-                    |== !false with AppliedSymbol,Constructor
-                |== !false with AComparison
-            |== !false with AConjunction
-            |------------
-            |(~(red = c)) with AConjunction
-            |+ codeOf(blue) = b -> false
-                |------------
-                |~(red = c) with AUnary,AComparison
-                |+ codeOf(blue) = b -> false
-                    |------------
-                    |~(red = c) with AComparison
-                    |+ codeOf(blue) = b -> false
-                        |------------
-                        |red = c with Constructor,Variable
-                        |+ codeOf(blue) = b -> false
-                            |------------
-                            |red
-                            |+ codeOf(blue) = b -> false
-                            |== red
-                            |------------
-                            |c
-                            |+ codeOf(blue) = b -> false
-                            |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
-                    |------------
-                    |true with AppliedSymbol,Constructor
-                    |+ codeOf(blue) = b -> false
-                        |------------
-                        |b with Constructor
-                        |+ codeOf(blue) = b -> false
-                            |------------
-                            |red
-                            |+ codeOf(blue) = b -> false
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |b
-                        |+ codeOf(blue) = b -> false
-                        |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
-        |------------
-        |red
-        |+ codeOf(blue) = b -> false
-        |== red
-    |== !b with Constructor just (~(red = c))
-    |------------
-    |b
-    |+ codeOf(blue) = b -> false
-    |== b
-|== *!true with AppliedSymbol,Constructor
-|------------
-|true with AComparison
-|+ codeOf(blue) = b -> false
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ codeOf(blue) = b -> false
-        |------------
-        |b with Constructor
-        |+ codeOf(blue) = b -> false
-            |------------
-            |red
-            |+ codeOf(blue) = b -> false
-            |== red
-        |== !b with Constructor
-        |------------
-        |b
-        |+ codeOf(blue) = b -> false
-        |== b
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
 |------------
 |true with AComparison
 |+ codeOf(blue) = b -> false
@@ -1508,42 +1514,14 @@ Z3 propagation ********************************
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|c = red ∨ c = blue with AComparison,AComparison
-|+ codeOf(blue) = b -> false
-    |------------
-    |*c = red with Variable,Constructor
-    |+ codeOf(blue) = b -> false
-        |------------
-        |c
-        |+ codeOf(blue) = b -> false
-        |== c
-        |------------
-        |red
-        |+ codeOf(blue) = b -> false
-        |== red
-    |== *c = red with Variable,Constructor
-    |------------
-    |*c = blue with Variable,Constructor
-    |+ codeOf(blue) = b -> false
-        |------------
-        |c
-        |+ codeOf(blue) = b -> false
-        |== c
-        |------------
-        |blue
-        |+ codeOf(blue) = b -> false
-        |== blue
-    |== *c = blue with Variable,Constructor
-|== c = red ∨ c = blue with AComparison,AComparison
-|------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(blue) = b -> false
     |------------
-    |b with Constructor just (~(red = c))
+    |b with Constructor just true
     |+ codeOf(blue) = b -> false
  definition:
         |------------
-        |(~(red = c)) with Brackets,Brackets
+        |true with Brackets,Brackets
         |+ codeOf(blue) = b -> false
             |------------
             |(false) with AConjunction
@@ -1552,7 +1530,7 @@ Z3 propagation ********************************
                 |false with AComparison
                 |+ codeOf(blue) = b -> false
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ codeOf(blue) = b -> false
                         |------------
                         |b with Constructor
@@ -1566,20 +1544,20 @@ Z3 propagation ********************************
                         |a
                         |+ codeOf(blue) = b -> false
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
-            |(~(red = c)) with AConjunction
+            |(true) with AConjunction
             |+ codeOf(blue) = b -> false
                 |------------
-                |~(red = c) with AUnary,AComparison
+                |true with AUnary,AComparison
                 |+ codeOf(blue) = b -> false
                     |------------
-                    |~(red = c) with AComparison
+                    |true with AComparison
                     |+ codeOf(blue) = b -> false
                         |------------
-                        |red = c with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ codeOf(blue) = b -> false
                             |------------
                             |red
@@ -1589,10 +1567,10 @@ Z3 propagation ********************************
                             |c
                             |+ codeOf(blue) = b -> false
                             |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ codeOf(blue) = b -> false
                         |------------
                         |b with Constructor
@@ -1606,20 +1584,32 @@ Z3 propagation ********************************
                         |b
                         |+ codeOf(blue) = b -> false
                         |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
         |------------
         |red
         |+ codeOf(blue) = b -> false
         |== red
-    |== !b with Constructor just (~(red = c))
+    |== !b with Constructor just true
     |------------
     |b
     |+ codeOf(blue) = b -> false
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(blue) = b -> false
+    |------------
+    |red
+    |+ codeOf(blue) = b -> false
+    |== red
+    |------------
+    |c
+    |+ codeOf(blue) = b -> false
+    |== c
+|== *!false with Constructor,Variable
 |------------
 |*false with AppliedSymbol,Constructor
 |+ codeOf(blue) = b -> false
@@ -1681,11 +1671,11 @@ Z3 propagation ********************************
     |== blue
 |== *c = blue with Variable,Constructor
 |------------
-|b with Constructor just (~(red = c))
+|b with Constructor just true
 |+ codeOf(blue) = b -> false  (or false -> false)
  definition:
     |------------
-    |(~(red = c)) with Brackets,Brackets
+    |true with Brackets,Brackets
     |+ codeOf(blue) = b -> false  (or false -> false)
         |------------
         |(false) with AConjunction
@@ -1694,7 +1684,7 @@ Z3 propagation ********************************
             |false with AComparison
             |+ codeOf(blue) = b -> false  (or false -> false)
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ codeOf(blue) = b -> false  (or false -> false)
                     |------------
                     |b with Constructor
@@ -1708,20 +1698,20 @@ Z3 propagation ********************************
                     |a
                     |+ codeOf(blue) = b -> false  (or false -> false)
                     |== a
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
-        |(~(red = c)) with AConjunction
+        |(true) with AConjunction
         |+ codeOf(blue) = b -> false  (or false -> false)
             |------------
-            |~(red = c) with AUnary,AComparison
+            |true with AUnary,AComparison
             |+ codeOf(blue) = b -> false  (or false -> false)
                 |------------
-                |~(red = c) with AComparison
+                |true with AComparison
                 |+ codeOf(blue) = b -> false  (or false -> false)
                     |------------
-                    |red = c with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ codeOf(blue) = b -> false  (or false -> false)
                         |------------
                         |red
@@ -1731,10 +1721,10 @@ Z3 propagation ********************************
                         |c
                         |+ codeOf(blue) = b -> false  (or false -> false)
                         |== c
-                    |== red = c with Constructor,Variable
-                |== ~(red = c) with AComparison
+                    |== *!false with Constructor,Variable
+                |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ codeOf(blue) = b -> false  (or false -> false)
                     |------------
                     |b with Constructor
@@ -1748,15 +1738,15 @@ Z3 propagation ********************************
                     |b
                     |+ codeOf(blue) = b -> false  (or false -> false)
                     |== b
-                |== !true with AppliedSymbol,Constructor
-            |== !!~(red = c) with AUnary,AComparison
-        |== !!~(red = c) with AConjunction
-    |== !!(~(red = c)) with Brackets,Brackets
+                |== *!true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets,Brackets
     |------------
     |red
     |+ codeOf(blue) = b -> false  (or false -> false)
     |== red
-|== !b with Constructor just (~(red = c))
+|== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
 |+ codeOf(blue) = b -> false  (or false -> false)
@@ -1769,131 +1759,6 @@ Z3 propagation ********************************
 |c
 |+ codeOf(blue) = b -> false  (or false -> false)
 |== c
-|------------
-|*true with AppliedSymbol,Constructor
-|+ c = red -> false
-    |------------
-    |b with Constructor just (~(red = c))
-    |+ c = red -> false
- definition:
-        |------------
-        |(~(red = c)) with Brackets,Brackets
-        |+ c = red -> false
-            |------------
-            |(false) with AConjunction
-            |+ c = red -> false
-                |------------
-                |false with AComparison
-                |+ c = red -> false
-                    |------------
-                    |false with AppliedSymbol,Constructor
-                    |+ c = red -> false
-                        |------------
-                        |b with Constructor
-                        |+ c = red -> false
-                            |------------
-                            |red
-                            |+ c = red -> false
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |a
-                        |+ c = red -> false
-                        |== a
-                    |== !false with AppliedSymbol,Constructor
-                |== !false with AComparison
-            |== !false with AConjunction
-            |------------
-            |(~(red = c)) with AConjunction
-            |+ c = red -> false
-                |------------
-                |~(red = c) with AUnary,AComparison
-                |+ c = red -> false
-                    |------------
-                    |~(red = c) with AComparison
-                    |+ c = red -> false
-                        |------------
-                        |red = c with Constructor,Variable
-                        |+ c = red -> false
-                            |------------
-                            |red
-                            |+ c = red -> false
-                            |== red
-                            |------------
-                            |c
-                            |+ c = red -> false
-                            |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
-                    |------------
-                    |true with AppliedSymbol,Constructor
-                    |+ c = red -> false
-                        |------------
-                        |b with Constructor
-                        |+ c = red -> false
-                            |------------
-                            |red
-                            |+ c = red -> false
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |b
-                        |+ c = red -> false
-                        |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
-        |------------
-        |red
-        |+ c = red -> false
-        |== red
-    |== !b with Constructor just (~(red = c))
-    |------------
-    |b
-    |+ c = red -> false
-    |== b
-|== *!true with AppliedSymbol,Constructor
-|------------
-|true with AComparison
-|+ c = red -> false
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c = red -> false
-        |------------
-        |b with Constructor
-        |+ c = red -> false
-            |------------
-            |red
-            |+ c = red -> false
-            |== red
-        |== !b with Constructor
-        |------------
-        |b
-        |+ c = red -> false
-        |== b
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
-|------------
-|true with AComparison
-|+ c = red -> false
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c = red -> false
-        |------------
-        |codeOf(blue) with Constructor
-        |+ c = red -> false
-            |------------
-            |blue
-            |+ c = red -> false
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |a
-        |+ c = red -> false
-        |== a
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
 |------------
 |c = red ∨ c = blue with AComparison,AComparison
 |+ c = red -> false
@@ -1966,11 +1831,11 @@ Z3 propagation ********************************
 |*true with AppliedSymbol,Constructor
 |+ c = red -> false
     |------------
-    |b with Constructor just (~(red = c))
+    |b with Constructor just true
     |+ c = red -> false
  definition:
         |------------
-        |(~(red = c)) with Brackets,Brackets
+        |true with Brackets,Brackets
         |+ c = red -> false
             |------------
             |(false) with AConjunction
@@ -1979,7 +1844,7 @@ Z3 propagation ********************************
                 |false with AComparison
                 |+ c = red -> false
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ c = red -> false
                         |------------
                         |b with Constructor
@@ -1993,20 +1858,20 @@ Z3 propagation ********************************
                         |a
                         |+ c = red -> false
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
-            |(~(red = c)) with AConjunction
+            |(true) with AConjunction
             |+ c = red -> false
                 |------------
-                |~(red = c) with AUnary,AComparison
+                |true with AUnary,AComparison
                 |+ c = red -> false
                     |------------
-                    |~(red = c) with AComparison
+                    |true with AComparison
                     |+ c = red -> false
                         |------------
-                        |red = c with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ c = red -> false
                             |------------
                             |red
@@ -2016,10 +1881,10 @@ Z3 propagation ********************************
                             |c
                             |+ c = red -> false
                             |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
+                        |== *!false with Constructor,Variable
+                    |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ c = red -> false
                         |------------
                         |b with Constructor
@@ -2033,20 +1898,32 @@ Z3 propagation ********************************
                         |b
                         |+ c = red -> false
                         |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
+                    |== *!true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
         |------------
         |red
         |+ c = red -> false
         |== red
-    |== !b with Constructor just (~(red = c))
+    |== !b with Constructor just true
     |------------
     |b
     |+ c = red -> false
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ c = red -> false
+    |------------
+    |red
+    |+ c = red -> false
+    |== red
+    |------------
+    |c
+    |+ c = red -> false
+    |== c
+|== *!false with Constructor,Variable
 |------------
 |*false with AppliedSymbol,Constructor
 |+ c = red -> false
@@ -2112,11 +1989,11 @@ Z3 propagation ********************************
     |== blue
 |== *!true with Variable,Constructor
 |------------
-|b with Constructor just (~(red = c))
+|b with Constructor just true
 |+ c = red -> false  (or false -> false)
  definition:
     |------------
-    |(~(red = c)) with Brackets,Brackets
+    |true with Brackets,Brackets
     |+ c = red -> false  (or false -> false)
         |------------
         |(false) with AConjunction
@@ -2125,7 +2002,7 @@ Z3 propagation ********************************
             |false with AComparison
             |+ c = red -> false  (or false -> false)
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ c = red -> false  (or false -> false)
                     |------------
                     |b with Constructor
@@ -2139,20 +2016,20 @@ Z3 propagation ********************************
                     |a
                     |+ c = red -> false  (or false -> false)
                     |== a
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
-        |(~(red = c)) with AConjunction
+        |(true) with AConjunction
         |+ c = red -> false  (or false -> false)
             |------------
-            |~(red = c) with AUnary,AComparison
+            |true with AUnary,AComparison
             |+ c = red -> false  (or false -> false)
                 |------------
-                |~(red = c) with AComparison
+                |true with AComparison
                 |+ c = red -> false  (or false -> false)
                     |------------
-                    |red = c with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ c = red -> false  (or false -> false)
                         |------------
                         |red
@@ -2162,10 +2039,10 @@ Z3 propagation ********************************
                         |c
                         |+ c = red -> false  (or false -> false)
                         |== c
-                    |== red = c with Constructor,Variable
-                |== ~(red = c) with AComparison
+                    |== *!false with Constructor,Variable
+                |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ c = red -> false  (or false -> false)
                     |------------
                     |b with Constructor
@@ -2179,15 +2056,15 @@ Z3 propagation ********************************
                     |b
                     |+ c = red -> false  (or false -> false)
                     |== b
-                |== !true with AppliedSymbol,Constructor
-            |== !!~(red = c) with AUnary,AComparison
-        |== !!~(red = c) with AConjunction
-    |== !!(~(red = c)) with Brackets,Brackets
+                |== *!true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets,Brackets
     |------------
     |red
     |+ c = red -> false  (or false -> false)
     |== red
-|== !b with Constructor just (~(red = c))
+|== !b with Constructor just true
 |------------
 |codeOf(blue) with Constructor
 |+ c = red -> false  (or false -> false)
@@ -2204,11 +2081,11 @@ Z3 propagation ********************************
 |*true with AppliedSymbol,Constructor
 |+ c -> blue  (or blue -> blue)
     |------------
-    |b with Constructor just (~(red = c))
+    |b with Constructor just true
     |+ c -> blue  (or blue -> blue)
  definition:
         |------------
-        |(~(red = c)) with Brackets,Brackets
+        |true with Brackets,Brackets
         |+ c -> blue  (or blue -> blue)
             |------------
             |(false) with AConjunction
@@ -2217,7 +2094,7 @@ Z3 propagation ********************************
                 |false with AComparison
                 |+ c -> blue  (or blue -> blue)
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ c -> blue  (or blue -> blue)
                         |------------
                         |b with Constructor
@@ -2231,20 +2108,20 @@ Z3 propagation ********************************
                         |a
                         |+ c -> blue  (or blue -> blue)
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
-            |(~(red = c)) with AConjunction
+            |(true) with AConjunction
             |+ c -> blue  (or blue -> blue)
                 |------------
-                |~(red = c) with AUnary,AComparison
+                |true with AUnary,AComparison
                 |+ c -> blue  (or blue -> blue)
                     |------------
-                    |~(red = c) with AComparison
+                    |true with AComparison
                     |+ c -> blue  (or blue -> blue)
                         |------------
-                        |red = c with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ c -> blue  (or blue -> blue)
                             |------------
                             |red
@@ -2254,10 +2131,10 @@ Z3 propagation ********************************
                             |c
                             |+ c -> blue  (or blue -> blue)
                             |== !blue
-                        |== !false with Constructor,Variable
+                        |== *!false with Constructor,Variable
                     |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ c -> blue  (or blue -> blue)
                         |------------
                         |b with Constructor
@@ -2271,7 +2148,7 @@ Z3 propagation ********************************
                         |b
                         |+ c -> blue  (or blue -> blue)
                         |== b
-                    |== !true with AppliedSymbol,Constructor
+                    |== *!true with AppliedSymbol,Constructor
                 |== !true with AUnary,AComparison
             |== !true with AConjunction
         |== !true with Brackets,Brackets
@@ -2285,46 +2162,6 @@ Z3 propagation ********************************
     |+ c -> blue  (or blue -> blue)
     |== b
 |== *!true with AppliedSymbol,Constructor
-|------------
-|true with AComparison
-|+ c -> blue  (or blue -> blue)
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c -> blue  (or blue -> blue)
-        |------------
-        |b with Constructor
-        |+ c -> blue  (or blue -> blue)
-            |------------
-            |red
-            |+ c -> blue  (or blue -> blue)
-            |== red
-        |== !b with Constructor
-        |------------
-        |b
-        |+ c -> blue  (or blue -> blue)
-        |== b
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
-|------------
-|true with AComparison
-|+ c -> blue  (or blue -> blue)
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c -> blue  (or blue -> blue)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ c -> blue  (or blue -> blue)
-            |------------
-            |blue
-            |+ c -> blue  (or blue -> blue)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |a
-        |+ c -> blue  (or blue -> blue)
-        |== a
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
 |------------
 |true with AComparison,AComparison
 |+ c -> blue  (or blue -> blue)
@@ -2370,7 +2207,7 @@ Z3 propagation ********************************
                 |false with AComparison
                 |+ c -> blue  (or blue -> blue)
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ c -> blue  (or blue -> blue)
                         |------------
                         |b with Constructor
@@ -2384,7 +2221,7 @@ Z3 propagation ********************************
                         |a
                         |+ c -> blue  (or blue -> blue)
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
@@ -2397,7 +2234,7 @@ Z3 propagation ********************************
                     |true with AComparison
                     |+ c -> blue  (or blue -> blue)
                         |------------
-                        |false with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ c -> blue  (or blue -> blue)
                             |------------
                             |red
@@ -2407,10 +2244,10 @@ Z3 propagation ********************************
                             |blue
                             |+ c -> blue  (or blue -> blue)
                             |== !blue
-                        |== !false with Constructor,Variable
+                        |== *!false with Constructor,Variable
                     |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ c -> blue  (or blue -> blue)
                         |------------
                         |b with Constructor
@@ -2424,7 +2261,7 @@ Z3 propagation ********************************
                         |b
                         |+ c -> blue  (or blue -> blue)
                         |== b
-                    |== !true with AppliedSymbol,Constructor
+                    |== *!true with AppliedSymbol,Constructor
                 |== !true with AUnary,AComparison
             |== !true with AConjunction
         |== !true with Brackets,Brackets
@@ -2438,6 +2275,18 @@ Z3 propagation ********************************
     |+ c -> blue  (or blue -> blue)
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ c -> blue  (or blue -> blue)
+    |------------
+    |red
+    |+ c -> blue  (or blue -> blue)
+    |== red
+    |------------
+    |blue
+    |+ c -> blue  (or blue -> blue)
+    |== !blue
+|== *!false with Constructor,Variable
 |------------
 |*false with AppliedSymbol,Constructor
 |+ c -> blue  (or blue -> blue)
@@ -2524,7 +2373,7 @@ Z3 propagation ********************************
             |false with AComparison
             |+ c -> blue  (or blue -> blue)
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ c -> blue  (or blue -> blue)
                     |------------
                     |b with Constructor
@@ -2538,7 +2387,7 @@ Z3 propagation ********************************
                     |a
                     |+ c -> blue  (or blue -> blue)
                     |== a
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
@@ -2551,7 +2400,7 @@ Z3 propagation ********************************
                 |true with AComparison
                 |+ c -> blue  (or blue -> blue)
                     |------------
-                    |false with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ c -> blue  (or blue -> blue)
                         |------------
                         |red
@@ -2561,10 +2410,10 @@ Z3 propagation ********************************
                         |blue
                         |+ c -> blue  (or blue -> blue)
                         |== !blue
-                    |== !false with Constructor,Variable
+                    |== *!false with Constructor,Variable
                 |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ c -> blue  (or blue -> blue)
                     |------------
                     |b with Constructor
@@ -2578,7 +2427,7 @@ Z3 propagation ********************************
                     |b
                     |+ c -> blue  (or blue -> blue)
                     |== b
-                |== !true with AppliedSymbol,Constructor
+                |== *!true with AppliedSymbol,Constructor
             |== !true with AUnary,AComparison
         |== !true with AConjunction
     |== !true with Brackets,Brackets
@@ -2599,131 +2448,6 @@ Z3 propagation ********************************
 |blue
 |+ c -> blue  (or blue -> blue)
 |== !blue
-|------------
-|*true with AppliedSymbol,Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |b with Constructor just true
-    |+ c = blue -> true  (or true -> true)
- definition:
-        |------------
-        |true with Brackets,Brackets
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |(false) with AConjunction
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |false with AComparison
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |false with AppliedSymbol,Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |b with Constructor
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |a
-                        |+ c = blue -> true  (or true -> true)
-                        |== a
-                    |== !false with AppliedSymbol,Constructor
-                |== !false with AComparison
-            |== !false with AConjunction
-            |------------
-            |(true) with AConjunction
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |true with AUnary,AComparison
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |true with AComparison
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |false with Constructor,Variable
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                            |------------
-                            |blue
-                            |+ c = blue -> true  (or true -> true)
-                            |== !blue
-                        |== !false with Constructor,Variable
-                    |== !true with AComparison
-                    |------------
-                    |true with AppliedSymbol,Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |b with Constructor
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |b
-                        |+ c = blue -> true  (or true -> true)
-                        |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !true with AUnary,AComparison
-            |== !true with AConjunction
-        |== !true with Brackets,Brackets
-        |------------
-        |red
-        |+ c = blue -> true  (or true -> true)
-        |== red
-    |== !b with Constructor just true
-    |------------
-    |b
-    |+ c = blue -> true  (or true -> true)
-    |== b
-|== *!true with AppliedSymbol,Constructor
-|------------
-|true with AComparison
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |b with Constructor
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |red
-            |+ c = blue -> true  (or true -> true)
-            |== red
-        |== !b with Constructor
-        |------------
-        |b
-        |+ c = blue -> true  (or true -> true)
-        |== b
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
-|------------
-|true with AComparison
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |blue
-            |+ c = blue -> true  (or true -> true)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |a
-        |+ c = blue -> true  (or true -> true)
-        |== a
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
 |------------
 |true with AComparison,AComparison
 |+ c = blue -> true  (or true -> true)
@@ -2761,7 +2485,7 @@ Z3 propagation ********************************
                 |false with AComparison
                 |+ c = blue -> true  (or true -> true)
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ c = blue -> true  (or true -> true)
                         |------------
                         |b with Constructor
@@ -2775,7 +2499,7 @@ Z3 propagation ********************************
                         |a
                         |+ c = blue -> true  (or true -> true)
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
@@ -2788,7 +2512,7 @@ Z3 propagation ********************************
                     |true with AComparison
                     |+ c = blue -> true  (or true -> true)
                         |------------
-                        |false with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ c = blue -> true  (or true -> true)
                             |------------
                             |red
@@ -2798,10 +2522,10 @@ Z3 propagation ********************************
                             |blue
                             |+ c = blue -> true  (or true -> true)
                             |== !blue
-                        |== !false with Constructor,Variable
+                        |== *!false with Constructor,Variable
                     |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ c = blue -> true  (or true -> true)
                         |------------
                         |b with Constructor
@@ -2815,7 +2539,7 @@ Z3 propagation ********************************
                         |b
                         |+ c = blue -> true  (or true -> true)
                         |== b
-                    |== !true with AppliedSymbol,Constructor
+                    |== *!true with AppliedSymbol,Constructor
                 |== !true with AUnary,AComparison
             |== !true with AConjunction
         |== !true with Brackets,Brackets
@@ -2829,6 +2553,18 @@ Z3 propagation ********************************
     |+ c = blue -> true  (or true -> true)
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |red
+    |+ c = blue -> true  (or true -> true)
+    |== red
+    |------------
+    |blue
+    |+ c = blue -> true  (or true -> true)
+    |== !blue
+|== *!false with Constructor,Variable
 |------------
 |*false with AppliedSymbol,Constructor
 |+ c = blue -> true  (or true -> true)
@@ -2907,7 +2643,7 @@ Z3 propagation ********************************
             |false with AComparison
             |+ c = blue -> true  (or true -> true)
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ c = blue -> true  (or true -> true)
                     |------------
                     |b with Constructor
@@ -2921,7 +2657,7 @@ Z3 propagation ********************************
                     |a
                     |+ c = blue -> true  (or true -> true)
                     |== a
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
@@ -2934,7 +2670,7 @@ Z3 propagation ********************************
                 |true with AComparison
                 |+ c = blue -> true  (or true -> true)
                     |------------
-                    |false with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ c = blue -> true  (or true -> true)
                         |------------
                         |red
@@ -2944,10 +2680,10 @@ Z3 propagation ********************************
                         |blue
                         |+ c = blue -> true  (or true -> true)
                         |== !blue
-                    |== !false with Constructor,Variable
+                    |== *!false with Constructor,Variable
                 |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ c = blue -> true  (or true -> true)
                     |------------
                     |b with Constructor
@@ -2961,7 +2697,7 @@ Z3 propagation ********************************
                     |b
                     |+ c = blue -> true  (or true -> true)
                     |== b
-                |== !true with AppliedSymbol,Constructor
+                |== *!true with AppliedSymbol,Constructor
             |== !true with AUnary,AComparison
         |== !true with AConjunction
     |== !true with Brackets,Brackets
@@ -2982,111 +2718,6 @@ Z3 propagation ********************************
 |blue
 |+ c = blue -> true  (or true -> true)
 |== !blue
-|------------
-|*true with AppliedSymbol,Constructor
-|+ codeOf(blue) -> a
-    |------------
-    |b with Constructor just true
-    |+ codeOf(blue) -> a
- definition:
-        |------------
-        |true with Brackets,Brackets
-        |+ codeOf(blue) -> a
-            |------------
-            |(false) with AConjunction
-            |+ codeOf(blue) -> a
-                |------------
-                |false with AComparison
-                |+ codeOf(blue) -> a
-                    |------------
-                    |false with AppliedSymbol,Constructor
-                    |+ codeOf(blue) -> a
-                        |------------
-                        |b with Constructor
-                        |+ codeOf(blue) -> a
-                            |------------
-                            |red
-                            |+ codeOf(blue) -> a
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |a
-                        |+ codeOf(blue) -> a
-                        |== a
-                    |== !false with AppliedSymbol,Constructor
-                |== !false with AComparison
-            |== !false with AConjunction
-            |------------
-            |(true) with AConjunction
-            |+ codeOf(blue) -> a
-                |------------
-                |true with AUnary,AComparison
-                |+ codeOf(blue) -> a
-                    |------------
-                    |true with AComparison
-                    |+ codeOf(blue) -> a
-                        |------------
-                        |false with Constructor,Variable
-                        |+ codeOf(blue) -> a
-                            |------------
-                            |red
-                            |+ codeOf(blue) -> a
-                            |== red
-                            |------------
-                            |blue
-                            |+ codeOf(blue) -> a
-                            |== !blue
-                        |== !false with Constructor,Variable
-                    |== !true with AComparison
-                    |------------
-                    |true with AppliedSymbol,Constructor
-                    |+ codeOf(blue) -> a
-                        |------------
-                        |b with Constructor
-                        |+ codeOf(blue) -> a
-                            |------------
-                            |red
-                            |+ codeOf(blue) -> a
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |b
-                        |+ codeOf(blue) -> a
-                        |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !true with AUnary,AComparison
-            |== !true with AConjunction
-        |== !true with Brackets,Brackets
-        |------------
-        |red
-        |+ codeOf(blue) -> a
-        |== red
-    |== !b with Constructor just true
-    |------------
-    |b
-    |+ codeOf(blue) -> a
-    |== b
-|== *!true with AppliedSymbol,Constructor
-|------------
-|true with AComparison
-|+ codeOf(blue) -> a
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ codeOf(blue) -> a
-        |------------
-        |b with Constructor
-        |+ codeOf(blue) -> a
-            |------------
-            |red
-            |+ codeOf(blue) -> a
-            |== red
-        |== !b with Constructor
-        |------------
-        |b
-        |+ codeOf(blue) -> a
-        |== b
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
 |------------
 |true with AComparison
 |+ codeOf(blue) -> a
@@ -3104,34 +2735,6 @@ Z3 propagation ********************************
     |== *!true with AppliedSymbol,Constructor
 |== !true with AComparison
 |------------
-|true with AComparison,AComparison
-|+ codeOf(blue) -> a
-    |------------
-    |*false with Variable,Constructor
-    |+ codeOf(blue) -> a
-        |------------
-        |blue
-        |+ codeOf(blue) -> a
-        |== !blue
-        |------------
-        |red
-        |+ codeOf(blue) -> a
-        |== red
-    |== *!false with Variable,Constructor
-    |------------
-    |*true with Variable,Constructor
-    |+ codeOf(blue) -> a
-        |------------
-        |blue
-        |+ codeOf(blue) -> a
-        |== !blue
-        |------------
-        |blue
-        |+ codeOf(blue) -> a
-        |== blue
-    |== *!true with Variable,Constructor
-|== !true with AComparison,AComparison
-|------------
 |*true with AppliedSymbol,Constructor
 |+ codeOf(blue) -> a
     |------------
@@ -3148,7 +2751,7 @@ Z3 propagation ********************************
                 |false with AComparison
                 |+ codeOf(blue) -> a
                     |------------
-                    |false with AppliedSymbol,Constructor
+                    |*false with AppliedSymbol,Constructor
                     |+ codeOf(blue) -> a
                         |------------
                         |b with Constructor
@@ -3162,7 +2765,7 @@ Z3 propagation ********************************
                         |a
                         |+ codeOf(blue) -> a
                         |== a
-                    |== !false with AppliedSymbol,Constructor
+                    |== *!false with AppliedSymbol,Constructor
                 |== !false with AComparison
             |== !false with AConjunction
             |------------
@@ -3175,7 +2778,7 @@ Z3 propagation ********************************
                     |true with AComparison
                     |+ codeOf(blue) -> a
                         |------------
-                        |false with Constructor,Variable
+                        |*false with Constructor,Variable
                         |+ codeOf(blue) -> a
                             |------------
                             |red
@@ -3185,10 +2788,10 @@ Z3 propagation ********************************
                             |blue
                             |+ codeOf(blue) -> a
                             |== !blue
-                        |== !false with Constructor,Variable
+                        |== *!false with Constructor,Variable
                     |== !true with AComparison
                     |------------
-                    |true with AppliedSymbol,Constructor
+                    |*true with AppliedSymbol,Constructor
                     |+ codeOf(blue) -> a
                         |------------
                         |b with Constructor
@@ -3202,7 +2805,7 @@ Z3 propagation ********************************
                         |b
                         |+ codeOf(blue) -> a
                         |== b
-                    |== !true with AppliedSymbol,Constructor
+                    |== *!true with AppliedSymbol,Constructor
                 |== !true with AUnary,AComparison
             |== !true with AConjunction
         |== !true with Brackets,Brackets
@@ -3216,6 +2819,18 @@ Z3 propagation ********************************
     |+ codeOf(blue) -> a
     |== b
 |== *!true with AppliedSymbol,Constructor
+|------------
+|*false with Constructor,Variable
+|+ codeOf(blue) -> a
+    |------------
+    |red
+    |+ codeOf(blue) -> a
+    |== red
+    |------------
+    |blue
+    |+ codeOf(blue) -> a
+    |== !blue
+|== *!false with Constructor,Variable
 |------------
 |*false with AppliedSymbol,Constructor
 |+ codeOf(blue) -> a
@@ -3294,7 +2909,7 @@ Z3 propagation ********************************
             |false with AComparison
             |+ codeOf(blue) -> a
                 |------------
-                |false with AppliedSymbol,Constructor
+                |*false with AppliedSymbol,Constructor
                 |+ codeOf(blue) -> a
                     |------------
                     |b with Constructor
@@ -3308,7 +2923,7 @@ Z3 propagation ********************************
                     |a
                     |+ codeOf(blue) -> a
                     |== a
-                |== !false with AppliedSymbol,Constructor
+                |== *!false with AppliedSymbol,Constructor
             |== !false with AComparison
         |== !false with AConjunction
         |------------
@@ -3321,7 +2936,7 @@ Z3 propagation ********************************
                 |true with AComparison
                 |+ codeOf(blue) -> a
                     |------------
-                    |false with Constructor,Variable
+                    |*false with Constructor,Variable
                     |+ codeOf(blue) -> a
                         |------------
                         |red
@@ -3331,10 +2946,10 @@ Z3 propagation ********************************
                         |blue
                         |+ codeOf(blue) -> a
                         |== !blue
-                    |== !false with Constructor,Variable
+                    |== *!false with Constructor,Variable
                 |== !true with AComparison
                 |------------
-                |true with AppliedSymbol,Constructor
+                |*true with AppliedSymbol,Constructor
                 |+ codeOf(blue) -> a
                     |------------
                     |b with Constructor
@@ -3348,7 +2963,7 @@ Z3 propagation ********************************
                     |b
                     |+ codeOf(blue) -> a
                     |== b
-                |== !true with AppliedSymbol,Constructor
+                |== *!true with AppliedSymbol,Constructor
             |== !true with AUnary,AComparison
         |== !true with AConjunction
     |== !true with Brackets,Brackets

@@ -43,11 +43,16 @@ And(Not(negated(Piet) == Piet),
 -- subtences ------------------------------------
 same(Piet) = Piet
 same(same(Piet)) = negated(negated(Piet))
+same(same(Piet)) = same(Piet)
+negated(Piet) = Jan
+true
+false
+negated(negated(Piet)) = Jan
+negated(Piet) = Piet
+negated(negated(Piet)) = Piet
 same(Piet) = Jan
 same(Jan) = Piet
 same(Jan) = Jan
-negated(Piet) = Piet
-negated(Piet) = Jan
 negated(Jan) = Piet
 negated(Jan) = Jan
 
@@ -58,11 +63,16 @@ negated(Piet)
 negated(Jan)
 same(Piet) = Piet
 same(same(Piet)) = negated(negated(Piet))
+same(same(Piet)) = same(Piet)
+negated(Piet) = Jan
+true
+false
+negated(negated(Piet)) = Jan
+negated(Piet) = Piet
+negated(negated(Piet)) = Piet
 same(Piet) = Jan
 same(Jan) = Piet
 same(Jan) = Jan
-negated(Piet) = Piet
-negated(Piet) = Jan
 negated(Jan) = Piet
 negated(Jan) = Jan
 
@@ -77,11 +87,14 @@ Universals:
   same(same(Piet)) = negated(negated(Piet))
   same(Piet) -> Piet
 Consequences:
+  same(same(Piet)) = same(Piet)
+  negated(Piet) = Jan
+  ~negated(negated(Piet)) = Jan
+  ~negated(Piet) = Piet
+  negated(negated(Piet)) = Piet
   ~same(Piet) = Jan
   ~same(Jan) = Piet
   same(Jan) = Jan
-  ~negated(Piet) = Piet
-  negated(Piet) = Jan
   negated(Jan) = Piet
   ~negated(Jan) = Jan
   same(Jan) -> Jan
@@ -95,6 +108,9 @@ Simplified:
   true
   true
 Irrelevant:  
+  ? true
+  ? false
+  ~negated(negated(Piet)) = Jan
   ~same(Piet) = Jan
   ~negated(Jan) = Jan
 
@@ -138,7 +154,7 @@ Irrelevant:
                                'values': ['Piet', 'Jan']},
              'negated(Piet) = Jan': {'environmental': False,
                                      'normal': False,
-                                     'reading': 'negated(Piet) = Jan',
+                                     'reading': '$negated$ = Jan',
                                      'relevant': True,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
@@ -149,7 +165,21 @@ Irrelevant:
                                       'relevant': True,
                                       'status': 'CONSEQUENCE',
                                       'typ': 'Bool',
-                                      'value': False}},
+                                      'value': False},
+             'negated(negated(Piet)) = Jan': {'environmental': False,
+                                              'normal': False,
+                                              'reading': '$negated$ = Jan',
+                                              'relevant': False,
+                                              'status': 'CONSEQUENCE',
+                                              'typ': 'Bool',
+                                              'value': False},
+             'negated(negated(Piet)) = Piet': {'environmental': False,
+                                               'normal': False,
+                                               'reading': '$negated$ = Piet',
+                                               'relevant': True,
+                                               'status': 'CONSEQUENCE',
+                                               'typ': 'Bool',
+                                               'value': True}},
  'same': {'same(Jan)': {'environmental': False,
                         'normal': True,
                         'reading': 'same(Jan)',
@@ -200,4 +230,11 @@ Irrelevant:
                                                         'relevant': True,
                                                         'status': 'UNIVERSAL',
                                                         'typ': 'Bool',
-                                                        'value': True}}}
+                                                        'value': True},
+          'same(same(Piet)) = same(Piet)': {'environmental': False,
+                                            'normal': False,
+                                            'reading': '$same$ = $same!0$',
+                                            'relevant': True,
+                                            'status': 'CONSEQUENCE',
+                                            'typ': 'Bool',
+                                            'value': True}}}

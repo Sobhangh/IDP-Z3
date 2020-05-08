@@ -28,26 +28,6 @@
     |== *!true
 |== !true with Variable,Variable
 |------------
-|q ⇔ (~(r)) with Variable,Brackets
-|+ p -> true  (or true -> true)
-    |------------
-    |*q
-    |+ p -> true  (or true -> true)
-    |== *q
-    |------------
-    |(~(r)) with AUnary
-    |+ p -> true  (or true -> true)
-        |------------
-        |~(r) with Variable
-        |+ p -> true  (or true -> true)
-            |------------
-            |*r
-            |+ p -> true  (or true -> true)
-            |== *r
-        |== ~(r) with Variable
-    |== !!~(r) with AUnary
-|== q ⇔ (~(r)) with Variable,Brackets
-|------------
 |*true
 |+ p -> true  (or true -> true)
 |== *!true
@@ -67,10 +47,6 @@
 |*t
 |+ p -> true  (or true -> true)
 |== *t
-|------------
-|*true
-|+ q -> true  (or true -> true)
-|== *!true
 |------------
 |true with Variable,Variable
 |+ q -> true  (or true -> true)
@@ -143,22 +119,6 @@
 |*t
 |+ q -> true  (or true -> true)
 |== *t
-|------------
-|*true
-|+ r -> false  (or false -> false)
-|== *!true
-|------------
-|true with Variable,Variable
-|+ r -> false  (or false -> false)
-    |------------
-    |*true
-    |+ r -> false  (or false -> false)
-    |== *!true
-    |------------
-    |*true
-    |+ r -> false  (or false -> false)
-    |== *!true
-|== !true with Variable,Variable
 |------------
 |true with Variable,Brackets
 |+ r -> false  (or false -> false)

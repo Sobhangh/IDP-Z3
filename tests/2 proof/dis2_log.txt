@@ -56,10 +56,6 @@
 |+ p -> true  (or true -> true)
 |== *t
 |------------
-|*true
-|+ q -> true  (or true -> true)
-|== *!true
-|------------
 |true with AUnary,Variable
 |+ q -> true  (or true -> true)
     |------------

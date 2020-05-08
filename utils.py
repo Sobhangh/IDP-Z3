@@ -106,7 +106,7 @@ def mergeDicts(l):
 class OrderedSet(dict):
     def __init__(self, els=[]):
         assert isinstance(els, Iterable)
-        super(OrderedSet, self).__init__(zip(els, els))
+        super(OrderedSet, self).__init__(zip((e.code for e in els), els))
 
     def add(self, el):
-        self[el] = el
+        self[el.code] = el

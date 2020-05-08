@@ -77,6 +77,12 @@ class Case:
             for k, t in idp.vocabulary.terms.items()
             if k not in self.assignments })
 
+        # annotate self.simplified with questions
+        for e in self.simplified:
+            questions = OrderedSet()
+            e.collect(questions, all_=True)
+            e.questions = questions
+
         if idp.decision: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
@@ -181,24 +187,29 @@ class Case:
                 new_simplified: List[Expression] = []
                 for constraint in self.simplified:
                     consequences = []
-                    new_constraint = constraint.substitute(old, new, consequences)
-                    consequences.extend(new_constraint.implicants())
-                    if consequences:
-                        for sentence, value in consequences:
-                            if sentence.code in self.assignments:
-                                old_ass = self.assignments[sentence.code]
-                                if old_ass.value is None:
-                                    if (all_ or not constraint.has_environmental(False)):
-                                        new_ass = old_ass.update(sentence, value, CONSQ, self)
-                                        to_propagate.append(new_ass)
-                                        new_constraint = new_constraint.substitute(sentence, value)
-                                elif old_ass.value != value:
-                                    # test: theory{ x=4. x=5. }
-                                    self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
-                                    return
-                            else:
-                                print("not found", str(sentence))
-                    new_simplified.append(new_constraint)
+                    if old.code in constraint.questions:
+                        new_constraint = constraint.substitute(old, new, consequences)
+                        del constraint.questions[old.code]
+                        new_constraint.questions = constraint.questions
+                        consequences.extend(new_constraint.implicants())
+                        if consequences:
+                            for sentence, value in consequences:
+                                if sentence.code in self.assignments:
+                                    old_ass = self.assignments[sentence.code]
+                                    if old_ass.value is None:
+                                        if (all_ or not constraint.has_environmental(False)):
+                                            new_ass = old_ass.update(sentence, value, CONSQ, self)
+                                            to_propagate.append(new_ass)
+                                            new_constraint = new_constraint.substitute(sentence, value)
+                                    elif old_ass.value != value:
+                                        # test: theory{ x=4. x=5. }
+                                        self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
+                                        return
+                                else:
+                                    print("not found", str(sentence))
+                        new_simplified.append(new_constraint)
+                    else:
+                        new_simplified.append(constraint)
 
                 self.simplified = new_simplified
 

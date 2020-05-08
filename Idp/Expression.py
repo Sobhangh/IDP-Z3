@@ -33,7 +33,7 @@ import re
 import sys
 
 from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
-from utils import mergeDicts, unquote
+from utils import mergeDicts, unquote, OrderedSet
 
 from typing import List, Tuple
 
@@ -121,13 +121,28 @@ class Expression(object):
         return self
 
     def collect(self, questions, all_=True):
+        """collects the questions in self.  
+
+        'questions is an OrderedSet of Expression
+        Questions are the terms and the simplest sub-formula that can be evaluated.
+        'collect uses the simplified version of the expression.
+
+        all_=False : ignore non-ground applied symbols, 
+                     and formulas under quantifiers (even if expanded)
+        """
+
         for e in self.sub_exprs:
             e.collect(questions, all_)
+
+    def questions(self): # for debugging
+        questions = OrderedSet()
+        self.collect(questions)
+        return questions
 
     def subtences(self):
         out = {}
         if self.is_subtence:
-            out[self.code]= self
+            out[self.code] = self
         out.update(mergeDicts(e.subtences() for e in self.sub_exprs))
         if self.just_branch is not None:
             out.update(self.just_branch.subtences())
@@ -521,6 +536,8 @@ class AppliedSymbol(Expression):
                 questions.add(self)
         for e in self.sub_exprs:
             e.collect(questions, all_)
+        if self.just_branch is not None:
+            self.just_branch.collect(questions, all_)
 
     def annotate1(self):
         self.type = self.decl.type.name
@@ -571,6 +588,8 @@ class Variable(AppliedSymbol):
 
     def collect(self, questions, all_=True):
         questions.add(self)
+        if self.just_branch is not None:
+            self.just_branch.collect(questions, all_)
 
     def reified(self):
         return self.translate()

@@ -72,8 +72,9 @@ Expression.update_exprs = update_exprs
 
 # @log  # decorator patched in by tests/main.py
 def Expression_substitute(self, e0, e1, todo=None):
-    """ recursively substitute e0 by e1 in self """
+    """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable) """
 
+    assert not isinstance(e0, Fresh_Variable)
     # similar code in AppliedSymbol !
     if self.code == e0.code:
         return self._change(value=e1) # e1 is Constructor or NumberConstant
@@ -84,7 +85,9 @@ Expression.substitute = Expression_substitute
 
 
 def instantiate(self, e0, e1):
-    """ recursively substitute e0 by e1 """
+    """ recursively substitute Fresh_Variable e0 by e1 """
+    
+    assert isinstance(e0, Fresh_Variable)
     if self.code == e0.code:
         return e1
 
@@ -92,10 +95,14 @@ def instantiate(self, e0, e1):
 
     if out.value is None:
         out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
-        out.code = out.str
         out.original = out
         if out.just_branch is not None:
             out._change(just_branch=out.just_branch.instantiate(e0, e1))
+
+    out.fresh_vars.discard(e0.name)
+    if isinstance(e1, Fresh_Variable) or isinstance(e1, Variable):
+        out.fresh_vars.add(e1.name)
+    out.code = str(out)
     return out
 Expression.instantiate = instantiate
 
@@ -215,16 +222,17 @@ AEquivalence.update_exprs = update_exprs
 
 def update_exprs(self, new_expr_generator):
     exprs, other = [], []
+    value, simpler = None, None
     for i, expr in enumerate(new_expr_generator):
         if expr == TRUE:
             # simplify only if one other sub_exprs was unknown
-            simplify = any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs))
-            return self._change(value=TRUE, sub_exprs=[expr] if simplify else None)
+            if any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs)):
+                return self._change(value=TRUE, sub_exprs=[expr])
+            value = TRUE
         exprs.append(expr)
         if expr != FALSE:
             other.append(expr)
 
-    value, simpler = None, None
     if len(other) == 0: # all disjuncts are False
         value = FALSE
     if len(other) == 1:
@@ -239,16 +247,17 @@ ADisjunction.update_exprs = update_exprs
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_expr_generator):
     exprs, other = [], []
+    value, simpler = None, None
     for i, expr in enumerate(new_expr_generator):
         if expr == FALSE: 
             # simplify only if one other sub_exprs was unknown
-            simplify = any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs))
-            return self._change(value=FALSE, sub_exprs=[expr] if simplify else None)
+            if any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs)):
+                return self._change(value=FALSE, sub_exprs=[expr])
+            value = FALSE
         exprs.append(expr)
         if expr != TRUE:
             other.append(expr)
 
-    value, simpler = None, None
     if len(other) == 0:  # all conjuncts are True
         value = TRUE
     if len(other) == 1:
@@ -359,7 +368,7 @@ AUnary.update_exprs = update_exprs
 # Class AAggregate #######################################################
 
 def expand_quantifiers(self, theory):
-    form = IfExpr(if_f=self.sub_exprs[AAggregate.CONDITION]
+    form = IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION]
                 , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                 , else_f=NumberConstant(number='0'))
     forms = [form.expand_quantifiers(theory)]
@@ -368,7 +377,7 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.decl.range:
-                    new_f = f.copy().substitute(var, val)
+                    new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = out
         else:
@@ -419,6 +428,7 @@ def substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
     global Expression_substitute
 
+    assert not isinstance(e0, Fresh_Variable)
     if type(e1) == Fresh_Variable:
         out = copy.copy(e1)
         out.code = self.code

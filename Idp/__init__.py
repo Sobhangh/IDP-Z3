@@ -571,12 +571,12 @@ class Rule(object):
             elif type(arg) in [NumberConstant, Constructor]:
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Symbol(name=v0), v1)  # fresh variable?
+                    eq = eq.instantiate(Fresh_variable(name=v0), v1)
                 self.body = AConjunction.make('∧', [eq, self.body])
             else:  # same(f(x))
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Symbol(name=v0), v1)  # fresh variable?
+                    eq = eq.instantiate(Fresh_variable(name=v0), v1)
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         # Any leftover ?
@@ -611,7 +611,7 @@ class Rule(object):
 
         # interpret structures
         self.body     = self.body    .interpret(theory)
-        self.expanded = self.expanded.interpret(theory)
+        self.expanded = self.expanded.interpret(theory) # definition constraint, expanded
         return self
 
     def instantiate_definition(self, new_args, theory, value=None):
