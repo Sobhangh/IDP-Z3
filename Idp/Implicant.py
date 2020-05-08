@@ -46,9 +46,9 @@ def implicants(self, truth=TRUE):
         return []
     out = _if_subtence(self, truth)
     if self.simpler is not None: 
-        out = out + self.simpler.implicants(truth)
+        out = self.simpler.implicants(truth) + out
         return out
-    out = out + self.implicants1(truth)
+    out = self.implicants1(truth) + out
     return out
 Expression.implicants = implicants
 

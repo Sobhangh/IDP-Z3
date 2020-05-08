@@ -1916,26 +1916,6 @@ Z3 propagation ********************************
 |== !!c = blue with AComparison,AComparison
 |------------
 |c = blue with AComparison,AComparison
-|+ c = blue -> true
-    |------------
-    |*false with Variable,Constructor
-    |+ c = blue -> true
-        |------------
-        |c
-        |+ c = blue -> true
-        |== c
-        |------------
-        |red
-        |+ c = blue -> true
-        |== red
-    |== *!false with Variable,Constructor
-    |------------
-    |*c = blue with Variable,Constructor
-    |+ c = blue -> true
-    |== *!true with Variable,Constructor
-|== !true with AComparison,AComparison
-|------------
-|true with AComparison,AComparison
 |+ c -> blue
     |------------
     |*false with Variable,Constructor
@@ -1950,7 +1930,7 @@ Z3 propagation ********************************
         |== red
     |== *!false with Variable,Constructor
     |------------
-    |*true with Variable,Constructor
+    |*c = blue with Variable,Constructor
     |+ c -> blue
         |------------
         |c
@@ -1960,6 +1940,26 @@ Z3 propagation ********************************
         |blue
         |+ c -> blue  (or blue -> blue)
         |== blue
+    |== *!true with Variable,Constructor
+|== !true with AComparison,AComparison
+|------------
+|true with AComparison,AComparison
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |*false with Variable,Constructor
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |blue
+        |+ c = blue -> true  (or true -> true)
+        |== !blue
+        |------------
+        |red
+        |+ c = blue -> true  (or true -> true)
+        |== red
+    |== *!false with Variable,Constructor
+    |------------
+    |*true with Variable,Constructor
+    |+ c = blue -> true  (or true -> true)
     |== *!true with Variable,Constructor
 |== !true with AComparison,AComparison
 |------------
@@ -2199,389 +2199,6 @@ Z3 propagation ********************************
 |------------
 |blue
 |+ c = red -> false  (or false -> false)
-|== !blue
-|------------
-|*true with AppliedSymbol,Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |b with Constructor just (~(red = c))
-    |+ c = blue -> true  (or true -> true)
- definition:
-        |------------
-        |(~(red = c)) with Brackets,Brackets
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |(false) with AConjunction
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |false with AComparison
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |false with AppliedSymbol,Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |b with Constructor
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |a
-                        |+ c = blue -> true  (or true -> true)
-                        |== a
-                    |== !false with AppliedSymbol,Constructor
-                |== !false with AComparison
-            |== !false with AConjunction
-            |------------
-            |(~(red = c)) with AConjunction
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |~(red = c) with AUnary,AComparison
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |~(red = c) with AComparison
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |red = c with Constructor,Variable
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                            |------------
-                            |c
-                            |+ c = blue -> true  (or true -> true)
-                            |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
-                    |------------
-                    |true with AppliedSymbol,Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |b with Constructor
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |b
-                        |+ c = blue -> true  (or true -> true)
-                        |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
-        |------------
-        |red
-        |+ c = blue -> true  (or true -> true)
-        |== red
-    |== !b with Constructor just (~(red = c))
-    |------------
-    |b
-    |+ c = blue -> true  (or true -> true)
-    |== b
-|== *!true with AppliedSymbol,Constructor
-|------------
-|true with AComparison
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |b with Constructor
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |red
-            |+ c = blue -> true  (or true -> true)
-            |== red
-        |== !b with Constructor
-        |------------
-        |b
-        |+ c = blue -> true  (or true -> true)
-        |== b
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
-|------------
-|true with AComparison
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |*true with AppliedSymbol,Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |codeOf(blue) with Constructor
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |blue
-            |+ c = blue -> true  (or true -> true)
-            |== blue
-        |== codeOf(blue) with Constructor
-        |------------
-        |a
-        |+ c = blue -> true  (or true -> true)
-        |== a
-    |== *!true with AppliedSymbol,Constructor
-|== !true with AComparison
-|------------
-|true with AComparison,AComparison
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |*false with Variable,Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |blue
-        |+ c = blue -> true  (or true -> true)
-        |== !blue
-        |------------
-        |red
-        |+ c = blue -> true  (or true -> true)
-        |== red
-    |== *!false with Variable,Constructor
-    |------------
-    |*true with Variable,Constructor
-    |+ c = blue -> true  (or true -> true)
-    |== *!true with Variable,Constructor
-|== !true with AComparison,AComparison
-|------------
-|*true with AppliedSymbol,Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |b with Constructor just (~(red = c))
-    |+ c = blue -> true  (or true -> true)
- definition:
-        |------------
-        |(~(red = c)) with Brackets,Brackets
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |(false) with AConjunction
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |false with AComparison
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |false with AppliedSymbol,Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |b with Constructor
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |a
-                        |+ c = blue -> true  (or true -> true)
-                        |== a
-                    |== !false with AppliedSymbol,Constructor
-                |== !false with AComparison
-            |== !false with AConjunction
-            |------------
-            |(~(red = c)) with AConjunction
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |~(red = c) with AUnary,AComparison
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |~(red = c) with AComparison
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |red = c with Constructor,Variable
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                            |------------
-                            |c
-                            |+ c = blue -> true  (or true -> true)
-                            |== c
-                        |== red = c with Constructor,Variable
-                    |== ~(red = c) with AComparison
-                    |------------
-                    |true with AppliedSymbol,Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |b with Constructor
-                        |+ c = blue -> true  (or true -> true)
-                            |------------
-                            |red
-                            |+ c = blue -> true  (or true -> true)
-                            |== red
-                        |== !b with Constructor
-                        |------------
-                        |b
-                        |+ c = blue -> true  (or true -> true)
-                        |== b
-                    |== !true with AppliedSymbol,Constructor
-                |== !!~(red = c) with AUnary,AComparison
-            |== !!~(red = c) with AConjunction
-        |== !!(~(red = c)) with Brackets,Brackets
-        |------------
-        |red
-        |+ c = blue -> true  (or true -> true)
-        |== red
-    |== !b with Constructor just (~(red = c))
-    |------------
-    |b
-    |+ c = blue -> true  (or true -> true)
-    |== b
-|== *!true with AppliedSymbol,Constructor
-|------------
-|*false with AppliedSymbol,Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |b with Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |red
-        |+ c = blue -> true  (or true -> true)
-        |== red
-    |== !b with Constructor
-    |------------
-    |a
-    |+ c = blue -> true  (or true -> true)
-    |== a
-|== *!false with AppliedSymbol,Constructor
-|------------
-|*true with AppliedSymbol,Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |codeOf(blue) with Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |blue
-        |+ c = blue -> true  (or true -> true)
-        |== blue
-    |== codeOf(blue) with Constructor
-    |------------
-    |a
-    |+ c = blue -> true  (or true -> true)
-    |== a
-|== *!true with AppliedSymbol,Constructor
-|------------
-|*false with AppliedSymbol,Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |codeOf(blue) with Constructor
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |blue
-        |+ c = blue -> true  (or true -> true)
-        |== blue
-    |== codeOf(blue) with Constructor
-    |------------
-    |b
-    |+ c = blue -> true  (or true -> true)
-    |== b
-|== *!false with AppliedSymbol,Constructor
-|------------
-|*false with Variable,Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |c
-    |+ c = blue -> true  (or true -> true)
-    |== c
-    |------------
-    |red
-    |+ c = blue -> true  (or true -> true)
-    |== red
-|== *!false with Variable,Constructor
-|------------
-|*true with Variable,Constructor
-|+ c = blue -> true  (or true -> true)
-|== *!true with Variable,Constructor
-|------------
-|b with Constructor just (~(red = c))
-|+ c = blue -> true  (or true -> true)
- definition:
-    |------------
-    |(~(red = c)) with Brackets,Brackets
-    |+ c = blue -> true  (or true -> true)
-        |------------
-        |(false) with AConjunction
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |false with AComparison
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |false with AppliedSymbol,Constructor
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |b with Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |red
-                        |+ c = blue -> true  (or true -> true)
-                        |== red
-                    |== !b with Constructor
-                    |------------
-                    |a
-                    |+ c = blue -> true  (or true -> true)
-                    |== a
-                |== !false with AppliedSymbol,Constructor
-            |== !false with AComparison
-        |== !false with AConjunction
-        |------------
-        |(~(red = c)) with AConjunction
-        |+ c = blue -> true  (or true -> true)
-            |------------
-            |~(red = c) with AUnary,AComparison
-            |+ c = blue -> true  (or true -> true)
-                |------------
-                |~(red = c) with AComparison
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |red = c with Constructor,Variable
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |red
-                        |+ c = blue -> true  (or true -> true)
-                        |== red
-                        |------------
-                        |c
-                        |+ c = blue -> true  (or true -> true)
-                        |== c
-                    |== red = c with Constructor,Variable
-                |== ~(red = c) with AComparison
-                |------------
-                |true with AppliedSymbol,Constructor
-                |+ c = blue -> true  (or true -> true)
-                    |------------
-                    |b with Constructor
-                    |+ c = blue -> true  (or true -> true)
-                        |------------
-                        |red
-                        |+ c = blue -> true  (or true -> true)
-                        |== red
-                    |== !b with Constructor
-                    |------------
-                    |b
-                    |+ c = blue -> true  (or true -> true)
-                    |== b
-                |== !true with AppliedSymbol,Constructor
-            |== !!~(red = c) with AUnary,AComparison
-        |== !!~(red = c) with AConjunction
-    |== !!(~(red = c)) with Brackets,Brackets
-    |------------
-    |red
-    |+ c = blue -> true  (or true -> true)
-    |== red
-|== !b with Constructor just (~(red = c))
-|------------
-|codeOf(blue) with Constructor
-|+ c = blue -> true  (or true -> true)
-    |------------
-    |blue
-    |+ c = blue -> true  (or true -> true)
-    |== blue
-|== codeOf(blue) with Constructor
-|------------
-|blue
-|+ c = blue -> true  (or true -> true)
 |== !blue
 |------------
 |*true with AppliedSymbol,Constructor
@@ -2981,6 +2598,389 @@ Z3 propagation ********************************
 |------------
 |blue
 |+ c -> blue  (or blue -> blue)
+|== !blue
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |b with Constructor just true
+    |+ c = blue -> true  (or true -> true)
+ definition:
+        |------------
+        |true with Brackets,Brackets
+        |+ c = blue -> true  (or true -> true)
+            |------------
+            |(false) with AConjunction
+            |+ c = blue -> true  (or true -> true)
+                |------------
+                |false with AComparison
+                |+ c = blue -> true  (or true -> true)
+                    |------------
+                    |false with AppliedSymbol,Constructor
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |b with Constructor
+                        |+ c = blue -> true  (or true -> true)
+                            |------------
+                            |red
+                            |+ c = blue -> true  (or true -> true)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |a
+                        |+ c = blue -> true  (or true -> true)
+                        |== a
+                    |== !false with AppliedSymbol,Constructor
+                |== !false with AComparison
+            |== !false with AConjunction
+            |------------
+            |(true) with AConjunction
+            |+ c = blue -> true  (or true -> true)
+                |------------
+                |true with AUnary,AComparison
+                |+ c = blue -> true  (or true -> true)
+                    |------------
+                    |true with AComparison
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |false with Constructor,Variable
+                        |+ c = blue -> true  (or true -> true)
+                            |------------
+                            |red
+                            |+ c = blue -> true  (or true -> true)
+                            |== red
+                            |------------
+                            |blue
+                            |+ c = blue -> true  (or true -> true)
+                            |== !blue
+                        |== !false with Constructor,Variable
+                    |== !true with AComparison
+                    |------------
+                    |true with AppliedSymbol,Constructor
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |b with Constructor
+                        |+ c = blue -> true  (or true -> true)
+                            |------------
+                            |red
+                            |+ c = blue -> true  (or true -> true)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |b
+                        |+ c = blue -> true  (or true -> true)
+                        |== b
+                    |== !true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
+        |------------
+        |red
+        |+ c = blue -> true  (or true -> true)
+        |== red
+    |== !b with Constructor just true
+    |------------
+    |b
+    |+ c = blue -> true  (or true -> true)
+    |== b
+|== *!true with AppliedSymbol,Constructor
+|------------
+|true with AComparison
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |*true with AppliedSymbol,Constructor
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |b with Constructor
+        |+ c = blue -> true  (or true -> true)
+            |------------
+            |red
+            |+ c = blue -> true  (or true -> true)
+            |== red
+        |== !b with Constructor
+        |------------
+        |b
+        |+ c = blue -> true  (or true -> true)
+        |== b
+    |== *!true with AppliedSymbol,Constructor
+|== !true with AComparison
+|------------
+|true with AComparison
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |*true with AppliedSymbol,Constructor
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |codeOf(blue) with Constructor
+        |+ c = blue -> true  (or true -> true)
+            |------------
+            |blue
+            |+ c = blue -> true  (or true -> true)
+            |== blue
+        |== codeOf(blue) with Constructor
+        |------------
+        |a
+        |+ c = blue -> true  (or true -> true)
+        |== a
+    |== *!true with AppliedSymbol,Constructor
+|== !true with AComparison
+|------------
+|true with AComparison,AComparison
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |*false with Variable,Constructor
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |blue
+        |+ c = blue -> true  (or true -> true)
+        |== !blue
+        |------------
+        |red
+        |+ c = blue -> true  (or true -> true)
+        |== red
+    |== *!false with Variable,Constructor
+    |------------
+    |*true with Variable,Constructor
+    |+ c = blue -> true  (or true -> true)
+    |== *!true with Variable,Constructor
+|== !true with AComparison,AComparison
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |b with Constructor just true
+    |+ c = blue -> true  (or true -> true)
+ definition:
+        |------------
+        |true with Brackets,Brackets
+        |+ c = blue -> true  (or true -> true)
+            |------------
+            |(false) with AConjunction
+            |+ c = blue -> true  (or true -> true)
+                |------------
+                |false with AComparison
+                |+ c = blue -> true  (or true -> true)
+                    |------------
+                    |false with AppliedSymbol,Constructor
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |b with Constructor
+                        |+ c = blue -> true  (or true -> true)
+                            |------------
+                            |red
+                            |+ c = blue -> true  (or true -> true)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |a
+                        |+ c = blue -> true  (or true -> true)
+                        |== a
+                    |== !false with AppliedSymbol,Constructor
+                |== !false with AComparison
+            |== !false with AConjunction
+            |------------
+            |(true) with AConjunction
+            |+ c = blue -> true  (or true -> true)
+                |------------
+                |true with AUnary,AComparison
+                |+ c = blue -> true  (or true -> true)
+                    |------------
+                    |true with AComparison
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |false with Constructor,Variable
+                        |+ c = blue -> true  (or true -> true)
+                            |------------
+                            |red
+                            |+ c = blue -> true  (or true -> true)
+                            |== red
+                            |------------
+                            |blue
+                            |+ c = blue -> true  (or true -> true)
+                            |== !blue
+                        |== !false with Constructor,Variable
+                    |== !true with AComparison
+                    |------------
+                    |true with AppliedSymbol,Constructor
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |b with Constructor
+                        |+ c = blue -> true  (or true -> true)
+                            |------------
+                            |red
+                            |+ c = blue -> true  (or true -> true)
+                            |== red
+                        |== !b with Constructor
+                        |------------
+                        |b
+                        |+ c = blue -> true  (or true -> true)
+                        |== b
+                    |== !true with AppliedSymbol,Constructor
+                |== !true with AUnary,AComparison
+            |== !true with AConjunction
+        |== !true with Brackets,Brackets
+        |------------
+        |red
+        |+ c = blue -> true  (or true -> true)
+        |== red
+    |== !b with Constructor just true
+    |------------
+    |b
+    |+ c = blue -> true  (or true -> true)
+    |== b
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |b with Constructor
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |red
+        |+ c = blue -> true  (or true -> true)
+        |== red
+    |== !b with Constructor
+    |------------
+    |a
+    |+ c = blue -> true  (or true -> true)
+    |== a
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*true with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |blue
+        |+ c = blue -> true  (or true -> true)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |a
+    |+ c = blue -> true  (or true -> true)
+    |== a
+|== *!true with AppliedSymbol,Constructor
+|------------
+|*false with AppliedSymbol,Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |codeOf(blue) with Constructor
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |blue
+        |+ c = blue -> true  (or true -> true)
+        |== blue
+    |== codeOf(blue) with Constructor
+    |------------
+    |b
+    |+ c = blue -> true  (or true -> true)
+    |== b
+|== *!false with AppliedSymbol,Constructor
+|------------
+|*false with Variable,Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |blue
+    |+ c = blue -> true  (or true -> true)
+    |== !blue
+    |------------
+    |red
+    |+ c = blue -> true  (or true -> true)
+    |== red
+|== *!false with Variable,Constructor
+|------------
+|*true with Variable,Constructor
+|+ c = blue -> true  (or true -> true)
+|== *!true with Variable,Constructor
+|------------
+|b with Constructor just true
+|+ c = blue -> true  (or true -> true)
+ definition:
+    |------------
+    |true with Brackets,Brackets
+    |+ c = blue -> true  (or true -> true)
+        |------------
+        |(false) with AConjunction
+        |+ c = blue -> true  (or true -> true)
+            |------------
+            |false with AComparison
+            |+ c = blue -> true  (or true -> true)
+                |------------
+                |false with AppliedSymbol,Constructor
+                |+ c = blue -> true  (or true -> true)
+                    |------------
+                    |b with Constructor
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |red
+                        |+ c = blue -> true  (or true -> true)
+                        |== red
+                    |== !b with Constructor
+                    |------------
+                    |a
+                    |+ c = blue -> true  (or true -> true)
+                    |== a
+                |== !false with AppliedSymbol,Constructor
+            |== !false with AComparison
+        |== !false with AConjunction
+        |------------
+        |(true) with AConjunction
+        |+ c = blue -> true  (or true -> true)
+            |------------
+            |true with AUnary,AComparison
+            |+ c = blue -> true  (or true -> true)
+                |------------
+                |true with AComparison
+                |+ c = blue -> true  (or true -> true)
+                    |------------
+                    |false with Constructor,Variable
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |red
+                        |+ c = blue -> true  (or true -> true)
+                        |== red
+                        |------------
+                        |blue
+                        |+ c = blue -> true  (or true -> true)
+                        |== !blue
+                    |== !false with Constructor,Variable
+                |== !true with AComparison
+                |------------
+                |true with AppliedSymbol,Constructor
+                |+ c = blue -> true  (or true -> true)
+                    |------------
+                    |b with Constructor
+                    |+ c = blue -> true  (or true -> true)
+                        |------------
+                        |red
+                        |+ c = blue -> true  (or true -> true)
+                        |== red
+                    |== !b with Constructor
+                    |------------
+                    |b
+                    |+ c = blue -> true  (or true -> true)
+                    |== b
+                |== !true with AppliedSymbol,Constructor
+            |== !true with AUnary,AComparison
+        |== !true with AConjunction
+    |== !true with Brackets,Brackets
+    |------------
+    |red
+    |+ c = blue -> true  (or true -> true)
+    |== red
+|== !b with Constructor just true
+|------------
+|codeOf(blue) with Constructor
+|+ c = blue -> true  (or true -> true)
+    |------------
+    |blue
+    |+ c = blue -> true  (or true -> true)
+    |== blue
+|== codeOf(blue) with Constructor
+|------------
+|blue
+|+ c = blue -> true  (or true -> true)
 |== !blue
 |------------
 |*true with AppliedSymbol,Constructor

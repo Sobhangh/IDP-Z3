@@ -56,7 +56,6 @@ tags:
 
 #### Performance
 - [ ] reduce number of substitution
-    - [ ] do not propagate `x=a -> true` if x is known already
     - [ ] Expr.questions for each constraint → do not substitute if no matching question
 - [ ] why is Prime so slow ?
 - [ ] use sets to avoid duplicates (e.g. constraints)
@@ -68,6 +67,7 @@ tags:
 - [ ] #Perf
 
 #### other NTH (refactoring)
+- [ ] reorganize project folders
 - [ ] get rid of brackets ?  Need to keep multiple annotations
 - [ ] remove Assignment.__hash__, .__eq__
 - [ ] merge Case.assignments and Case.GUILines to be like Structure
