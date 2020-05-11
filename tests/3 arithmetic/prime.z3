@@ -22,8 +22,6 @@ And(Prime(1), Prime(2), Prime(3), Not(Prime(4)))
 
 -- subtences ------------------------------------
 Prime(1)
-true
-false
 Prime(2)
 Prime(3)
 Prime(4)
@@ -33,8 +31,6 @@ Prime(1)
 Prime(2)
 Prime(3)
 Prime(4)
-true
-false
 
 -- case -------------------------------------
 Type:        
@@ -51,8 +47,7 @@ Consequences:
 Simplified:  
   true
 Irrelevant:  
-  ? true
-  ? false
+  
 
 
 -- meta -------------------------------------

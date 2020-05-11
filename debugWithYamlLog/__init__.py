@@ -60,4 +60,5 @@ def log_calls(function):
             Log({'output': out})
             Log(f"returning from {function.__name__}")
         return out    
-    return _wrapper        
+    return _wrapper
+

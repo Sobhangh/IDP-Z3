@@ -147,7 +147,7 @@ class Expression(object):
 
     def subtences(self):
         out = {}
-        if self.is_subtence:
+        if self.is_subtence and self.code not in ['true', 'false']:
             out[self.code] = self
         out.update(mergeDicts(e.subtences() for e in self.sub_exprs))
         if self.just_branch is not None:

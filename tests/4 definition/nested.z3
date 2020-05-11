@@ -45,8 +45,6 @@ same(Piet) = Piet
 same(same(Piet)) = negated(negated(Piet))
 same(same(Piet)) = same(Piet)
 negated(Piet) = Jan
-true
-false
 negated(negated(Piet)) = Jan
 negated(Piet) = Piet
 negated(negated(Piet)) = Piet
@@ -65,8 +63,6 @@ same(Piet) = Piet
 same(same(Piet)) = negated(negated(Piet))
 same(same(Piet)) = same(Piet)
 negated(Piet) = Jan
-true
-false
 negated(negated(Piet)) = Jan
 negated(Piet) = Piet
 negated(negated(Piet)) = Piet
@@ -108,8 +104,6 @@ Simplified:
   true
   true
 Irrelevant:  
-  ? true
-  ? false
   ~negated(negated(Piet)) = Jan
   ~same(Piet) = Jan
   ~negated(Jan) = Jan
