@@ -215,8 +215,7 @@ class Case:
                 self.simplified = new_simplified
 
                 # simplify assignments
-                # e.g. 'Sides=4' becomes false when Sides becomes 3
-                #TODO simplification of quantified expressions may lead to new implicants too
+                # e.g. 'Sides=4' becomes false when Sides becomes 3. Nothing to propagate.
                 for old_ass in self.assignments.values():
                     before = str(old_ass.sentence)
                     new_constraint = old_ass.sentence.substitute(old, new)
@@ -236,7 +235,6 @@ class Case:
                         else: # accept new value
                             new_ass = old_ass.update(new_constraint, 
                                 new_constraint.value, CONSQ, self)
-                            to_propagate.append(new_ass)
                             
 
     def translate(self, all_: bool = True) -> BoolRef:
