@@ -9,8 +9,8 @@ def log(action):
     start = time.process_time()
 
 
-nl = "\r\n"
-indented = "\r\n  "
+nl = "\n"
+indented = "\n  "
 
 LOG_FILE = None
 def Log_file(path):
