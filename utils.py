@@ -18,6 +18,7 @@
 """
 from collections import ChainMap, Iterable
 import itertools
+import time
 
 
 """ Module that monkey-patches json module when it's imported so
@@ -32,6 +33,13 @@ def _default(self, obj):
 _default.default = JSONEncoder.default  # Save unmodified default.
 JSONEncoder.default = _default # Replace it.
 
+
+
+start = time.process_time()
+def log(action):
+    global start
+    print("*** ", action, round(time.process_time()-start,3))
+    start = time.process_time()
 
 
 def unquote(s):

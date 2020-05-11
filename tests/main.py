@@ -1,5 +1,5 @@
 
-import os,sys,inspect,time, pprint
+import inspect, os,sys,time, pprint
 
 # add parent folder to import path
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -10,7 +10,8 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 from Case import Case
 from Inferences import *
 from Solver import *
-from debugWithYamlLog import log, Log, start, Log_file, nl
+from debugWithYamlLog import Log, Log_file, nl, log_calls
+from utils import log, start
 from Idp import idpparser, SymbolDeclaration
 from Idp.Expression import Expression, AppliedSymbol, Variable, Fresh_Variable
 
@@ -18,34 +19,11 @@ from typing import Dict, Any
 
 # patch Log on Idp.Substitute ##############################################################
 
-indent = 0
-def log(function):
-    def _wrapper(*args, **kwds):
-        global indent
-        self = args[0]
-        e0   = args[1]
-        e1   = args[2]
-        Log( f"{nl}|------------"
-             f"{nl}|{'*' if self.is_subtence else ''}{self.str}"
-             f"{' with '+','.join(e.__class__.__name__ for e in self.sub_exprs) if self.sub_exprs else ''}"
-             f"{f' just {self.just_branch.str}' if self.just_branch else ''}"
-             f"{nl}|+ {e0.code} -> {e1.code}{f'  (or {e0.str} -> {e1.str})' if e0.code!=e0.str or e1.code!=e1.str else ''}"
-             , indent)
-        indent +=4
-        out = function(*args, *kwds)
-        indent -=4
-        Log( f"{nl}|== {'*' if out.is_subtence else ''}"
-             f"{'!'+out.value.str if out.value is not None else '!!'+out.simpler.str if out.simpler is not None else out.str}"
-             f"{' with '+','.join(e.__class__.__name__ for e in out.sub_exprs) if out.sub_exprs else ''}"
-             f"{f' just {out.just_branch.str}' if out.just_branch else ''}"
-          , indent )
-        return out    
-    return _wrapper
+Expression    .substitute = log_calls(Expression.substitute)
+AppliedSymbol .substitute = log_calls(AppliedSymbol.substitute)
+Variable      .substitute = log_calls(Variable.substitute)
+Fresh_Variable.substitute = log_calls(Fresh_Variable.substitute)
 
-Expression    .substitute = log(Expression.substitute)
-AppliedSymbol .substitute = log(AppliedSymbol.substitute)
-Variable      .substitute = log(Variable.substitute)
-Fresh_Variable.substitute = log(Fresh_Variable.substitute)
 
 ###########################################################################################
 

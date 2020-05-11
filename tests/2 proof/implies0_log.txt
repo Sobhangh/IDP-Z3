@@ -1,134 +1,681 @@
 
-|------------
-|p ⇒ q ∧ (r ∨ s) with Variable,AConjunction
-|+ p -> true
-    |------------
-    |*p
-    |+ p -> true
-    |== *!true
-    |------------
-    |q ∧ (r ∨ s) with Variable,Brackets
-    |+ p -> true
-        |------------
-        |*q
-        |+ p -> true
-        |== *q
-        |------------
-        |(r ∨ s) with ADisjunction
-        |+ p -> true
-            |------------
-            |r ∨ s with Variable,Variable
-            |+ p -> true
-                |------------
-                |*r
-                |+ p -> true
-                |== *r
-                |------------
-                |*s
-                |+ p -> true
-                |== *s
-            |== r ∨ s with Variable,Variable
-        |== !!r ∨ s with ADisjunction
-    |== q ∧ (r ∨ s) with Variable,Brackets
-|== !!q ∧ (r ∨ s) with Variable,AConjunction
-|------------
-|q ∧ (r ∨ s) with Variable,AConjunction
-|+ q -> true
-    |------------
-    |*true
-    |+ q -> true
-    |== *!true
-    |------------
-    |q ∧ (r ∨ s) with Variable,Brackets
-    |+ q -> true
-        |------------
-        |*q
-        |+ q -> true
-        |== *!true
-        |------------
-        |(r ∨ s) with ADisjunction
-        |+ q -> true  (or true -> true)
-            |------------
-            |r ∨ s with Variable,Variable
-            |+ q -> true  (or true -> true)
-                |------------
-                |*r
-                |+ q -> true  (or true -> true)
-                |== *r
-                |------------
-                |*s
-                |+ q -> true  (or true -> true)
-                |== *s
-            |== r ∨ s with Variable,Variable
-        |== !!r ∨ s with ADisjunction
-    |== !!(r ∨ s) with Variable,Brackets
-|== !!(r ∨ s) with Variable,AConjunction
-|------------
-|*p
-|+ p -> true
-|== *!true
-|------------
-|*true
-|+ p -> true  (or true -> true)
-|== *!true
-|------------
-|*true
-|+ p -> true  (or true -> true)
-|== *!true
-|------------
-|*r
-|+ p -> true  (or true -> true)
-|== *r
-|------------
-|*s
-|+ p -> true  (or true -> true)
-|== *s
-|------------
-|(r ∨ s) with Variable,AConjunction
-|+ q -> true  (or true -> true)
-    |------------
-    |*true
-    |+ q -> true  (or true -> true)
-    |== *!true
-    |------------
-    |(r ∨ s) with Variable,Brackets
-    |+ q -> true  (or true -> true)
-        |------------
-        |*true
-        |+ q -> true  (or true -> true)
-        |== *!true
-        |------------
-        |(r ∨ s) with ADisjunction
-        |+ q -> true  (or true -> true)
-            |------------
-            |r ∨ s with Variable,Variable
-            |+ q -> true  (or true -> true)
-                |------------
-                |*r
-                |+ q -> true  (or true -> true)
-                |== *r
-                |------------
-                |*s
-                |+ q -> true  (or true -> true)
-                |== *s
-            |== r ∨ s with Variable,Variable
-        |== !!r ∨ s with ADisjunction
-    |== !!(r ∨ s) with Variable,Brackets
-|== !!(r ∨ s) with Variable,AConjunction
-|------------
-|*true
-|+ q -> true  (or true -> true)
-|== *!true
-|------------
-|*true
-|+ q -> true  (or true -> true)
-|== *!true
-|------------
-|*r
-|+ q -> true  (or true -> true)
-|== *r
-|------------
-|*s
-|+ q -> true  (or true -> true)
-|== *s
-Z3 propagation ********************************
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AImplication
+      code: p ⇒ q ∧ (r ∨ s)
+      str: p ⇒ q ∧ (r ∨ s)
+    e0:
+      class: Variable
+      code: p
+      str: p
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: p
+        str: p
+      e0:
+        class: Variable
+        code: p
+        str: p
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+  - output:
+      class: Variable
+      code: p
+      str: 'true'
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: q ∧ (r ∨ s)
+        str: q ∧ (r ∨ s)
+      e0:
+        class: Variable
+        code: p
+        str: p
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: q
+          str: q
+        e0:
+          class: Variable
+          code: p
+          str: p
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Variable
+        code: q
+        str: q
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Brackets
+          code: (r ∨ s)
+          str: (r ∨ s)
+        e0:
+          class: Variable
+          code: p
+          str: p
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: ADisjunction
+            code: r ∨ s
+            str: r ∨ s
+          e0:
+            class: Variable
+            code: p
+            str: p
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling substitute
+        - with_arguments:
+            self:
+              class: Variable
+              code: r
+              str: r
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: Variable
+            code: r
+            str: r
+        - returning from substitute
+        - calling substitute
+        - with_arguments:
+            self:
+              class: Variable
+              code: s
+              str: s
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: Variable
+            code: s
+            str: s
+        - returning from substitute
+      - output:
+          class: ADisjunction
+          code: r ∨ s
+          str: r ∨ s
+      - returning from Expression_substitute
+    - output:
+        class: Brackets
+        code: (r ∨ s)
+        str: (r ∨ s)
+    - returning from Expression_substitute
+  - output:
+      class: AConjunction
+      code: q ∧ (r ∨ s)
+      str: q ∧ (r ∨ s)
+  - returning from Expression_substitute
+- output:
+    class: AImplication
+    code: p ⇒ q ∧ (r ∨ s)
+    str: q ∧ (r ∨ s)
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AImplication
+      code: p ⇒ q ∧ (r ∨ s)
+      str: q ∧ (r ∨ s)
+    e0:
+      class: Variable
+      code: q
+      str: q
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: p
+        str: 'true'
+      e0:
+        class: Variable
+        code: q
+        str: q
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+  - output:
+      class: Variable
+      code: p
+      str: 'true'
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: q ∧ (r ∨ s)
+        str: q ∧ (r ∨ s)
+      e0:
+        class: Variable
+        code: q
+        str: q
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: q
+          str: q
+        e0:
+          class: Variable
+          code: q
+          str: q
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+    - processing
+    - output:
+        class: Variable
+        code: q
+        str: 'true'
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Brackets
+          code: (r ∨ s)
+          str: (r ∨ s)
+        e0:
+          class: Variable
+          code: q
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: ADisjunction
+            code: r ∨ s
+            str: r ∨ s
+          e0:
+            class: Variable
+            code: q
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+        - calling substitute
+        - with_arguments:
+            self:
+              class: Variable
+              code: r
+              str: r
+            e0:
+              class: Variable
+              code: q
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+        - processing
+        - output:
+            class: Variable
+            code: r
+            str: r
+        - returning from substitute
+        - calling substitute
+        - with_arguments:
+            self:
+              class: Variable
+              code: s
+              str: s
+            e0:
+              class: Variable
+              code: q
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+        - processing
+        - output:
+            class: Variable
+            code: s
+            str: s
+        - returning from substitute
+      - output:
+          class: ADisjunction
+          code: r ∨ s
+          str: r ∨ s
+      - returning from Expression_substitute
+    - output:
+        class: Brackets
+        code: (r ∨ s)
+        str: (r ∨ s)
+    - returning from Expression_substitute
+  - output:
+      class: AConjunction
+      code: q ∧ (r ∨ s)
+      str: (r ∨ s)
+  - returning from Expression_substitute
+- output:
+    class: AImplication
+    code: p ⇒ q ∧ (r ∨ s)
+    str: (r ∨ s)
+- returning from Expression_substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: p
+      str: p
+    e0:
+      class: Variable
+      code: p
+      str: p
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+- output:
+    class: Variable
+    code: p
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: p
+      str: 'true'
+    e0:
+      class: Variable
+      code: p
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: p
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: q
+      str: 'true'
+    e0:
+      class: Variable
+      code: p
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: q
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: r
+      str: r
+    e0:
+      class: Variable
+      code: p
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: r
+    str: r
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: s
+      str: s
+    e0:
+      class: Variable
+      code: p
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: s
+    str: s
+- returning from substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AImplication
+      code: p ⇒ q ∧ (r ∨ s)
+      str: (r ∨ s)
+    e0:
+      class: Variable
+      code: q
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: p
+        str: 'true'
+      e0:
+        class: Variable
+        code: q
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+  - output:
+      class: Variable
+      code: p
+      str: 'true'
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: q ∧ (r ∨ s)
+        str: (r ∨ s)
+      e0:
+        class: Variable
+        code: q
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: q
+          str: 'true'
+        e0:
+          class: Variable
+          code: q
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Variable
+        code: q
+        str: 'true'
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Brackets
+          code: (r ∨ s)
+          str: (r ∨ s)
+        e0:
+          class: Variable
+          code: q
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: ADisjunction
+            code: r ∨ s
+            str: r ∨ s
+          e0:
+            class: Variable
+            code: q
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling substitute
+        - with_arguments:
+            self:
+              class: Variable
+              code: r
+              str: r
+            e0:
+              class: Variable
+              code: q
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: Variable
+            code: r
+            str: r
+        - returning from substitute
+        - calling substitute
+        - with_arguments:
+            self:
+              class: Variable
+              code: s
+              str: s
+            e0:
+              class: Variable
+              code: q
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: Variable
+            code: s
+            str: s
+        - returning from substitute
+      - output:
+          class: ADisjunction
+          code: r ∨ s
+          str: r ∨ s
+      - returning from Expression_substitute
+    - output:
+        class: Brackets
+        code: (r ∨ s)
+        str: (r ∨ s)
+    - returning from Expression_substitute
+  - output:
+      class: AConjunction
+      code: q ∧ (r ∨ s)
+      str: (r ∨ s)
+  - returning from Expression_substitute
+- output:
+    class: AImplication
+    code: p ⇒ q ∧ (r ∨ s)
+    str: (r ∨ s)
+- returning from Expression_substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: p
+      str: 'true'
+    e0:
+      class: Variable
+      code: q
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: p
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: q
+      str: 'true'
+    e0:
+      class: Variable
+      code: q
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: q
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: r
+      str: r
+    e0:
+      class: Variable
+      code: q
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: r
+    str: r
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: s
+      str: s
+    e0:
+      class: Variable
+      code: q
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: s
+    str: s
+- returning from substitute
+- '
+
+  Z3 propagation ********************************'

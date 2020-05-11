@@ -424,7 +424,7 @@ def interpret(self, theory):
 AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret
 
-# @log  # decorator patched in by tests/main.py
+# @log_calls  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
     global Expression_substitute

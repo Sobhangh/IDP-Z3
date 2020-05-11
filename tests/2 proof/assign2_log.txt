@@ -1,194 +1,988 @@
 
-|------------
-|*x = 0 with Variable,NumberConstant
-|+ x = 0 -> true
-|== *!true with Variable,NumberConstant
-|------------
-|*true with Variable,NumberConstant
-|+ x = 0 -> true  (or true -> true)
-|== *!true with Variable,NumberConstant
-|------------
-|*x + 1 = 1 with ASumMinus,NumberConstant
-|+ x = 0 -> true  (or true -> true)
-    |------------
-    |x + 1 with Variable,NumberConstant
-    |+ x = 0 -> true  (or true -> true)
-        |------------
-        |x
-        |+ x = 0 -> true  (or true -> true)
-        |== x
-        |------------
-        |1
-        |+ x = 0 -> true  (or true -> true)
-        |== 1
-    |== x + 1 with Variable,NumberConstant
-    |------------
-    |1
-    |+ x = 0 -> true  (or true -> true)
-    |== 1
-|== *x + 1 = 1 with ASumMinus,NumberConstant
-|------------
-|x
-|+ x = 0 -> true  (or true -> true)
-|== x
-|------------
-|y
-|+ x = 0 -> true  (or true -> true)
-|== y
-|------------
-|*true with Variable,NumberConstant
-|+ x -> 0
-    |------------
-    |x
-    |+ x -> 0
-    |== !0
-    |------------
-    |0
-    |+ x -> 0  (or 0 -> 0)
-    |== 0
-|== *!true with Variable,NumberConstant
-|------------
-|~((x + 1 = 1)) ∨ (x + 1 = 1) with AUnary,Brackets
-|+ x -> 0  (or 0 -> 0)
-    |------------
-    |~((x + 1 = 1)) with Brackets
-    |+ x -> 0  (or 0 -> 0)
-        |------------
-        |(x + 1 = 1) with AComparison
-        |+ x -> 0  (or 0 -> 0)
-            |------------
-            |*x + 1 = 1 with ASumMinus,NumberConstant
-            |+ x -> 0  (or 0 -> 0)
-                |------------
-                |x + 1 with Variable,NumberConstant
-                |+ x -> 0  (or 0 -> 0)
-                    |------------
-                    |x
-                    |+ x -> 0  (or 0 -> 0)
-                    |== !0
-                    |------------
-                    |1
-                    |+ x -> 0  (or 0 -> 0)
-                    |== 1
-                |== !1 with Variable,NumberConstant
-                |------------
-                |1
-                |+ x -> 0  (or 0 -> 0)
-                |== 1
-            |== *!true with ASumMinus,NumberConstant
-        |== !true with AComparison
-    |== !false with Brackets
-    |------------
-    |(x + 1 = 1) with AComparison
-    |+ x -> 0  (or 0 -> 0)
-        |------------
-        |*x + 1 = 1 with ASumMinus,NumberConstant
-        |+ x -> 0  (or 0 -> 0)
-            |------------
-            |x + 1 with Variable,NumberConstant
-            |+ x -> 0  (or 0 -> 0)
-                |------------
-                |x
-                |+ x -> 0  (or 0 -> 0)
-                |== !0
-                |------------
-                |1
-                |+ x -> 0  (or 0 -> 0)
-                |== 1
-            |== !1 with Variable,NumberConstant
-            |------------
-            |1
-            |+ x -> 0  (or 0 -> 0)
-            |== 1
-        |== *!true with ASumMinus,NumberConstant
-    |== !true with AComparison
-|== !true with AUnary,Brackets
-|------------
-|*true with Variable,NumberConstant
-|+ x -> 0  (or 0 -> 0)
-    |------------
-    |0
-    |+ x -> 0  (or 0 -> 0)
-    |== !0
-    |------------
-    |0
-    |+ x -> 0  (or 0 -> 0)
-    |== 0
-|== *!true with Variable,NumberConstant
-|------------
-|*x + 1 = 1 with ASumMinus,NumberConstant
-|+ x -> 0  (or 0 -> 0)
-    |------------
-    |x + 1 with Variable,NumberConstant
-    |+ x -> 0  (or 0 -> 0)
-        |------------
-        |x
-        |+ x -> 0  (or 0 -> 0)
-        |== !0
-        |------------
-        |1
-        |+ x -> 0  (or 0 -> 0)
-        |== 1
-    |== !1 with Variable,NumberConstant
-    |------------
-    |1
-    |+ x -> 0  (or 0 -> 0)
-    |== 1
-|== *!true with ASumMinus,NumberConstant
-|------------
-|0
-|+ x -> 0  (or 0 -> 0)
-|== !0
-|------------
-|y
-|+ x -> 0  (or 0 -> 0)
-|== y
-|------------
-|true with AUnary,Brackets
-|+ x + 1 = 1 -> true  (or true -> true)
-    |------------
-    |false with Brackets
-    |+ x + 1 = 1 -> true  (or true -> true)
-        |------------
-        |(true) with AComparison
-        |+ x + 1 = 1 -> true  (or true -> true)
-            |------------
-            |*true with ASumMinus,NumberConstant
-            |+ x + 1 = 1 -> true  (or true -> true)
-            |== *!true with ASumMinus,NumberConstant
-        |== !true with AComparison
-    |== !false with Brackets
-    |------------
-    |(true) with AComparison
-    |+ x + 1 = 1 -> true  (or true -> true)
-        |------------
-        |*true with ASumMinus,NumberConstant
-        |+ x + 1 = 1 -> true  (or true -> true)
-        |== *!true with ASumMinus,NumberConstant
-    |== !true with AComparison
-|== !true with AUnary,Brackets
-|------------
-|*true with Variable,NumberConstant
-|+ x + 1 = 1 -> true  (or true -> true)
-    |------------
-    |0
-    |+ x + 1 = 1 -> true  (or true -> true)
-    |== !0
-    |------------
-    |0
-    |+ x + 1 = 1 -> true  (or true -> true)
-    |== 0
-|== *!true with Variable,NumberConstant
-|------------
-|*true with ASumMinus,NumberConstant
-|+ x + 1 = 1 -> true  (or true -> true)
-|== *!true with ASumMinus,NumberConstant
-|------------
-|0
-|+ x + 1 = 1 -> true  (or true -> true)
-|== !0
-|------------
-|y
-|+ x + 1 = 1 -> true  (or true -> true)
-|== y
-Z3 propagation ********************************
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x = 0
+      str: x = 0
+    e0:
+      class: AComparison
+      code: x = 0
+      str: x = 0
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+- output:
+    class: AComparison
+    code: x = 0
+    str: 'true'
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e0:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: AComparison
+    code: x = 0
+    str: 'true'
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x + 1 = 1
+      str: x + 1 = 1
+    e0:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: ASumMinus
+        code: x + 1
+        str: x + 1
+      e0:
+        class: AComparison
+        code: x = 0
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: x
+          str: x
+        e0:
+          class: AComparison
+          code: x = 0
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+    - processing
+    - output:
+        class: Variable
+        code: x
+        str: x
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: NumberConstant
+          code: '1'
+          str: '1'
+        e0:
+          class: AComparison
+          code: x = 0
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+    - processing
+    - output:
+        class: NumberConstant
+        code: '1'
+        str: '1'
+    - returning from Expression_substitute
+  - output:
+      class: ASumMinus
+      code: x + 1
+      str: x + 1
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: NumberConstant
+        code: '1'
+        str: '1'
+      e0:
+        class: AComparison
+        code: x = 0
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+  - output:
+      class: NumberConstant
+      code: '1'
+      str: '1'
+  - returning from Expression_substitute
+- output:
+    class: AComparison
+    code: x + 1 = 1
+    str: x + 1 = 1
+- returning from Expression_substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: x
+      str: x
+    e0:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: x
+    str: x
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: y
+      str: y
+    e0:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: y
+    str: y
+- returning from substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e0:
+      class: Variable
+      code: x
+      str: x
+    e1:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: x
+        str: x
+      e0:
+        class: Variable
+        code: x
+        str: x
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+      todo: '[]'
+  - processing
+  - output:
+      class: Variable
+      code: x
+      str: '0'
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+      e0:
+        class: Variable
+        code: x
+        str: '0'
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+      todo: '[]'
+  - processing
+  - output:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+  - returning from Expression_substitute
+- output:
+    class: AComparison
+    code: x = 0
+    str: 'true'
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: ADisjunction
+      code: ~((x + 1 = 1)) ∨ (x + 1 = 1)
+      str: ~((x + 1 = 1)) ∨ (x + 1 = 1)
+    e0:
+      class: Variable
+      code: x
+      str: '0'
+    e1:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+    todo: '[]'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AUnary
+        code: ~((x + 1 = 1))
+        str: ~((x + 1 = 1))
+      e0:
+        class: Variable
+        code: x
+        str: '0'
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+      todo: '[]'
+  - processing
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Brackets
+          code: (x + 1 = 1)
+          str: (x + 1 = 1)
+        e0:
+          class: Variable
+          code: x
+          str: '0'
+        e1:
+          class: NumberConstant
+          code: '0'
+          str: '0'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: AComparison
+            code: x + 1 = 1
+            str: x + 1 = 1
+          e0:
+            class: Variable
+            code: x
+            str: '0'
+          e1:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+          todo: '[]'
+      - processing
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: ASumMinus
+              code: x + 1
+              str: x + 1
+            e0:
+              class: Variable
+              code: x
+              str: '0'
+            e1:
+              class: NumberConstant
+              code: '0'
+              str: '0'
+            todo: '[]'
+        - processing
+          - calling substitute
+          - with_arguments:
+              self:
+                class: Variable
+                code: x
+                str: x
+              e0:
+                class: Variable
+                code: x
+                str: '0'
+              e1:
+                class: NumberConstant
+                code: '0'
+                str: '0'
+              todo: '[]'
+          - processing
+          - output:
+              class: Variable
+              code: x
+              str: '0'
+          - returning from substitute
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: NumberConstant
+                code: '1'
+                str: '1'
+              e0:
+                class: Variable
+                code: x
+                str: '0'
+              e1:
+                class: NumberConstant
+                code: '0'
+                str: '0'
+              todo: '[]'
+          - processing
+          - output:
+              class: NumberConstant
+              code: '1'
+              str: '1'
+          - returning from Expression_substitute
+        - output:
+            class: ASumMinus
+            code: x + 1
+            str: '1'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '1'
+              str: '1'
+            e0:
+              class: Variable
+              code: x
+              str: '0'
+            e1:
+              class: NumberConstant
+              code: '0'
+              str: '0'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+        - returning from Expression_substitute
+      - output:
+          class: AComparison
+          code: x + 1 = 1
+          str: 'true'
+      - returning from Expression_substitute
+    - output:
+        class: Brackets
+        code: (x + 1 = 1)
+        str: (true)
+    - returning from Expression_substitute
+  - output:
+      class: AUnary
+      code: ~((x + 1 = 1))
+      str: 'false'
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: Brackets
+        code: (x + 1 = 1)
+        str: (x + 1 = 1)
+      e0:
+        class: Variable
+        code: x
+        str: '0'
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+      todo: '[]'
+  - processing
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: AComparison
+          code: x + 1 = 1
+          str: x + 1 = 1
+        e0:
+          class: Variable
+          code: x
+          str: '0'
+        e1:
+          class: NumberConstant
+          code: '0'
+          str: '0'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: ASumMinus
+            code: x + 1
+            str: x + 1
+          e0:
+            class: Variable
+            code: x
+            str: '0'
+          e1:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+          todo: '[]'
+      - processing
+        - calling substitute
+        - with_arguments:
+            self:
+              class: Variable
+              code: x
+              str: x
+            e0:
+              class: Variable
+              code: x
+              str: '0'
+            e1:
+              class: NumberConstant
+              code: '0'
+              str: '0'
+            todo: '[]'
+        - processing
+        - output:
+            class: Variable
+            code: x
+            str: '0'
+        - returning from substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '1'
+              str: '1'
+            e0:
+              class: Variable
+              code: x
+              str: '0'
+            e1:
+              class: NumberConstant
+              code: '0'
+              str: '0'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+        - returning from Expression_substitute
+      - output:
+          class: ASumMinus
+          code: x + 1
+          str: '1'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+          e0:
+            class: Variable
+            code: x
+            str: '0'
+          e1:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+          todo: '[]'
+      - processing
+      - output:
+          class: NumberConstant
+          code: '1'
+          str: '1'
+      - returning from Expression_substitute
+    - output:
+        class: AComparison
+        code: x + 1 = 1
+        str: 'true'
+    - returning from Expression_substitute
+  - output:
+      class: Brackets
+      code: (x + 1 = 1)
+      str: (true)
+  - returning from Expression_substitute
+- output:
+    class: ADisjunction
+    code: ~((x + 1 = 1)) ∨ (x + 1 = 1)
+    str: 'true'
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e0:
+      class: Variable
+      code: x
+      str: '0'
+    e1:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: x
+        str: '0'
+      e0:
+        class: Variable
+        code: x
+        str: '0'
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+  - processing
+  - output:
+      class: Variable
+      code: x
+      str: '0'
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+      e0:
+        class: Variable
+        code: x
+        str: '0'
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+  - processing
+  - output:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+  - returning from Expression_substitute
+- output:
+    class: AComparison
+    code: x = 0
+    str: 'true'
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x + 1 = 1
+      str: x + 1 = 1
+    e0:
+      class: Variable
+      code: x
+      str: '0'
+    e1:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: ASumMinus
+        code: x + 1
+        str: x + 1
+      e0:
+        class: Variable
+        code: x
+        str: '0'
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: x
+          str: x
+        e0:
+          class: Variable
+          code: x
+          str: '0'
+        e1:
+          class: NumberConstant
+          code: '0'
+          str: '0'
+    - processing
+    - output:
+        class: Variable
+        code: x
+        str: '0'
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: NumberConstant
+          code: '1'
+          str: '1'
+        e0:
+          class: Variable
+          code: x
+          str: '0'
+        e1:
+          class: NumberConstant
+          code: '0'
+          str: '0'
+    - processing
+    - output:
+        class: NumberConstant
+        code: '1'
+        str: '1'
+    - returning from Expression_substitute
+  - output:
+      class: ASumMinus
+      code: x + 1
+      str: '1'
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: NumberConstant
+        code: '1'
+        str: '1'
+      e0:
+        class: Variable
+        code: x
+        str: '0'
+      e1:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+  - processing
+  - output:
+      class: NumberConstant
+      code: '1'
+      str: '1'
+  - returning from Expression_substitute
+- output:
+    class: AComparison
+    code: x + 1 = 1
+    str: 'true'
+- returning from Expression_substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: x
+      str: '0'
+    e0:
+      class: Variable
+      code: x
+      str: '0'
+    e1:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+- processing
+- output:
+    class: Variable
+    code: x
+    str: '0'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: y
+      str: y
+    e0:
+      class: Variable
+      code: x
+      str: '0'
+    e1:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+- processing
+- output:
+    class: Variable
+    code: y
+    str: y
+- returning from substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: ADisjunction
+      code: ~((x + 1 = 1)) ∨ (x + 1 = 1)
+      str: 'true'
+    e0:
+      class: AComparison
+      code: x + 1 = 1
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AUnary
+        code: ~((x + 1 = 1))
+        str: 'false'
+      e0:
+        class: AComparison
+        code: x + 1 = 1
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Brackets
+          code: (x + 1 = 1)
+          str: (true)
+        e0:
+          class: AComparison
+          code: x + 1 = 1
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: AComparison
+            code: x + 1 = 1
+            str: 'true'
+          e0:
+            class: AComparison
+            code: x + 1 = 1
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+      - output:
+          class: AComparison
+          code: x + 1 = 1
+          str: 'true'
+      - returning from Expression_substitute
+    - output:
+        class: Brackets
+        code: (x + 1 = 1)
+        str: (true)
+    - returning from Expression_substitute
+  - output:
+      class: AUnary
+      code: ~((x + 1 = 1))
+      str: 'false'
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: Brackets
+        code: (x + 1 = 1)
+        str: (true)
+      e0:
+        class: AComparison
+        code: x + 1 = 1
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: AComparison
+          code: x + 1 = 1
+          str: 'true'
+        e0:
+          class: AComparison
+          code: x + 1 = 1
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: AComparison
+        code: x + 1 = 1
+        str: 'true'
+    - returning from Expression_substitute
+  - output:
+      class: Brackets
+      code: (x + 1 = 1)
+      str: (true)
+  - returning from Expression_substitute
+- output:
+    class: ADisjunction
+    code: ~((x + 1 = 1)) ∨ (x + 1 = 1)
+    str: 'true'
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x = 0
+      str: 'true'
+    e0:
+      class: AComparison
+      code: x + 1 = 1
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: x
+        str: '0'
+      e0:
+        class: AComparison
+        code: x + 1 = 1
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+  - output:
+      class: Variable
+      code: x
+      str: '0'
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: NumberConstant
+        code: '0'
+        str: '0'
+      e0:
+        class: AComparison
+        code: x + 1 = 1
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+  - output:
+      class: NumberConstant
+      code: '0'
+      str: '0'
+  - returning from Expression_substitute
+- output:
+    class: AComparison
+    code: x = 0
+    str: 'true'
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: x + 1 = 1
+      str: 'true'
+    e0:
+      class: AComparison
+      code: x + 1 = 1
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: AComparison
+    code: x + 1 = 1
+    str: 'true'
+- returning from Expression_substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: x
+      str: '0'
+    e0:
+      class: AComparison
+      code: x + 1 = 1
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: x
+    str: '0'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: y
+      str: y
+    e0:
+      class: AComparison
+      code: x + 1 = 1
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: y
+    str: y
+- returning from substitute
+- '
+
+  Z3 propagation ********************************'

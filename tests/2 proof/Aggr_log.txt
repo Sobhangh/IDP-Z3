@@ -1,134 +1,681 @@
 
-|------------
-|p with Variable,AComparison
-|+ p -> true
-    |------------
-    |*p
-    |+ p -> true
-    |== *!true
-    |------------
-    |*true with AAggregate,NumberConstant
-    |+ p -> true
-        |------------
-        |3 with IfExpr,IfExpr,IfExpr
-        |+ p -> true
-            |------------
-            |1 with Constructor,NumberConstant,NumberConstant
-            |+ p -> true
-                |------------
-                |true
-                |+ p -> true
-                |== true
-                |------------
-                |1
-                |+ p -> true
-                |== 1
-                |------------
-                |0
-                |+ p -> true
-                |== 0
-            |== !1 with Constructor,NumberConstant,NumberConstant
-            |------------
-            |1 with Constructor,NumberConstant,NumberConstant
-            |+ p -> true
-                |------------
-                |true
-                |+ p -> true
-                |== true
-                |------------
-                |1
-                |+ p -> true
-                |== 1
-                |------------
-                |0
-                |+ p -> true
-                |== 0
-            |== !1 with Constructor,NumberConstant,NumberConstant
-            |------------
-            |1 with Constructor,NumberConstant,NumberConstant
-            |+ p -> true
-                |------------
-                |true
-                |+ p -> true
-                |== true
-                |------------
-                |1
-                |+ p -> true
-                |== 1
-                |------------
-                |0
-                |+ p -> true
-                |== 0
-            |== !1 with Constructor,NumberConstant,NumberConstant
-        |== !3 with IfExpr,IfExpr,IfExpr
-        |------------
-        |3
-        |+ p -> true
-        |== 3
-    |== *!true with AAggregate,NumberConstant
-|== !true with Variable,AComparison
-|------------
-|*p
-|+ p -> true
-|== *!true
-|------------
-|*true with AAggregate,NumberConstant
-|+ p -> true  (or true -> true)
-    |------------
-    |3 with IfExpr,IfExpr,IfExpr
-    |+ p -> true  (or true -> true)
-        |------------
-        |1 with Constructor,NumberConstant,NumberConstant
-        |+ p -> true  (or true -> true)
-            |------------
-            |true
-            |+ p -> true  (or true -> true)
-            |== true
-            |------------
-            |1
-            |+ p -> true  (or true -> true)
-            |== 1
-            |------------
-            |0
-            |+ p -> true  (or true -> true)
-            |== 0
-        |== !1 with Constructor,NumberConstant,NumberConstant
-        |------------
-        |1 with Constructor,NumberConstant,NumberConstant
-        |+ p -> true  (or true -> true)
-            |------------
-            |true
-            |+ p -> true  (or true -> true)
-            |== true
-            |------------
-            |1
-            |+ p -> true  (or true -> true)
-            |== 1
-            |------------
-            |0
-            |+ p -> true  (or true -> true)
-            |== 0
-        |== !1 with Constructor,NumberConstant,NumberConstant
-        |------------
-        |1 with Constructor,NumberConstant,NumberConstant
-        |+ p -> true  (or true -> true)
-            |------------
-            |true
-            |+ p -> true  (or true -> true)
-            |== true
-            |------------
-            |1
-            |+ p -> true  (or true -> true)
-            |== 1
-            |------------
-            |0
-            |+ p -> true  (or true -> true)
-            |== 0
-        |== !1 with Constructor,NumberConstant,NumberConstant
-    |== !3 with IfExpr,IfExpr,IfExpr
-    |------------
-    |3
-    |+ p -> true  (or true -> true)
-    |== 3
-|== *!true with AAggregate,NumberConstant
-Z3 propagation ********************************
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AEquivalence
+      code: 'p ⇔ sum{c[color] : true : 1} = 3'
+      str: p
+    e0:
+      class: Variable
+      code: p
+      str: p
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: p
+        str: p
+      e0:
+        class: Variable
+        code: p
+        str: p
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+  - output:
+      class: Variable
+      code: p
+      str: 'true'
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AComparison
+        code: 'sum{c[color] : true : 1} = 3'
+        str: 'true'
+      e0:
+        class: Variable
+        code: p
+        str: p
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: AAggregate
+          code: 'sum{c[color] : true : 1}'
+          str: '3'
+        e0:
+          class: Variable
+          code: p
+          str: p
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: IfExpr
+            code: '1'
+            str: '1'
+          e0:
+            class: Variable
+            code: p
+            str: p
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '1'
+              str: '1'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '0'
+              str: '0'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+        - returning from Expression_substitute
+      - output:
+          class: IfExpr
+          code: '1'
+          str: '1'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: IfExpr
+            code: '1'
+            str: '1'
+          e0:
+            class: Variable
+            code: p
+            str: p
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '1'
+              str: '1'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '0'
+              str: '0'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+        - returning from Expression_substitute
+      - output:
+          class: IfExpr
+          code: '1'
+          str: '1'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: IfExpr
+            code: '1'
+            str: '1'
+          e0:
+            class: Variable
+            code: p
+            str: p
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '1'
+              str: '1'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: NumberConstant
+              code: '0'
+              str: '0'
+            e0:
+              class: Variable
+              code: p
+              str: p
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+        - returning from Expression_substitute
+      - output:
+          class: IfExpr
+          code: '1'
+          str: '1'
+      - returning from Expression_substitute
+    - output:
+        class: AAggregate
+        code: 'sum{c[color] : true : 1}'
+        str: '3'
+    - returning from Expression_substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: NumberConstant
+          code: '3'
+          str: '3'
+        e0:
+          class: Variable
+          code: p
+          str: p
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: NumberConstant
+        code: '3'
+        str: '3'
+    - returning from Expression_substitute
+  - output:
+      class: AComparison
+      code: 'sum{c[color] : true : 1} = 3'
+      str: 'true'
+  - returning from Expression_substitute
+- output:
+    class: AEquivalence
+    code: 'p ⇔ sum{c[color] : true : 1} = 3'
+    str: 'true'
+- returning from Expression_substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: p
+      str: p
+    e0:
+      class: Variable
+      code: p
+      str: p
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+- output:
+    class: Variable
+    code: p
+    str: 'true'
+- returning from substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: 'sum{c[color] : true : 1} = 3'
+      str: 'true'
+    e0:
+      class: Variable
+      code: p
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AAggregate
+        code: 'sum{c[color] : true : 1}'
+        str: '3'
+      e0:
+        class: Variable
+        code: p
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: IfExpr
+          code: '1'
+          str: '1'
+        e0:
+          class: Variable
+          code: p
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: NumberConstant
+          code: '1'
+          str: '1'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: NumberConstant
+          code: '0'
+          str: '0'
+      - returning from Expression_substitute
+    - output:
+        class: IfExpr
+        code: '1'
+        str: '1'
+    - returning from Expression_substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: IfExpr
+          code: '1'
+          str: '1'
+        e0:
+          class: Variable
+          code: p
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: NumberConstant
+          code: '1'
+          str: '1'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: NumberConstant
+          code: '0'
+          str: '0'
+      - returning from Expression_substitute
+    - output:
+        class: IfExpr
+        code: '1'
+        str: '1'
+    - returning from Expression_substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: IfExpr
+          code: '1'
+          str: '1'
+        e0:
+          class: Variable
+          code: p
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: NumberConstant
+            code: '1'
+            str: '1'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: NumberConstant
+          code: '1'
+          str: '1'
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: NumberConstant
+            code: '0'
+            str: '0'
+          e0:
+            class: Variable
+            code: p
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+      - processing
+      - output:
+          class: NumberConstant
+          code: '0'
+          str: '0'
+      - returning from Expression_substitute
+    - output:
+        class: IfExpr
+        code: '1'
+        str: '1'
+    - returning from Expression_substitute
+  - output:
+      class: AAggregate
+      code: 'sum{c[color] : true : 1}'
+      str: '3'
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: NumberConstant
+        code: '3'
+        str: '3'
+      e0:
+        class: Variable
+        code: p
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+  - processing
+  - output:
+      class: NumberConstant
+      code: '3'
+      str: '3'
+  - returning from Expression_substitute
+- output:
+    class: AComparison
+    code: 'sum{c[color] : true : 1} = 3'
+    str: 'true'
+- returning from Expression_substitute
+- '
+
+  Z3 propagation ********************************'

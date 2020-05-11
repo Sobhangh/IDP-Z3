@@ -23,8 +23,9 @@ import os
 import re
 import sys
 
-from debugWithYamlLog import log, nl
+from debugWithYamlLog import nl
 from textx import metamodel_from_file
+from utils import log
 from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
                 Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort)
 

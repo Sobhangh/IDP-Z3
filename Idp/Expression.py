@@ -94,6 +94,12 @@ class Expression(object):
             return str(self.simpler)
         return self.__str1__()
     
+    def __log__(self):
+        return { 'class': type(self).__name__
+            , 'code': self.code
+            , 'str': self.str
+            , 'just_branch': self.just_branch }
+
     def __hash__(self):
         return hash(self.code)
 
