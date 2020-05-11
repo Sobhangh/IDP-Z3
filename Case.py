@@ -17,6 +17,7 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 from z3 import And, Not, sat, unsat, unknown, is_true
+from debugWithYamlLog import DEBUG, Log, nl, indented
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from Solver import mk_solver

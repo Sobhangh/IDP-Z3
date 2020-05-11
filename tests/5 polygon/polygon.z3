@@ -232,6 +232,7 @@ And(Not(Large(1)),
 -- subtences ------------------------------------
 ∀n[side] : Length(n) < Length(n + 1)
 Large(1)
+10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Type = triangle
 Sides = 3
 Type = quadrilateral
@@ -279,6 +280,7 @@ Large(2)
 Large(3)
 Large(4)
 ∀n[side] : Length(n) < Length(n + 1)
+10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Type = triangle
 Sides = 3
 Type = quadrilateral
@@ -374,6 +376,7 @@ Simplified:
   true
 Irrelevant:  
   ? ∀n[side] : Length(n) < Length(n + 1)
+  ? 10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
   ~∀n[side] : Angle(n) = 60 ∨ Sides < n
   ? ∃n[side] : Angle(n) = 90
   ? Length(1) = Length(3)

@@ -10,7 +10,7 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 from Case import Case
 from Inferences import *
 from Solver import *
-from utils import log, start, Log_file
+from debugWithYamlLog import log, Log, start, Log_file, nl
 from Idp import idpparser, SymbolDeclaration
 from Idp.Expression import Expression, AppliedSymbol, Variable, Fresh_Variable
 

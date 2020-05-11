@@ -28,7 +28,7 @@ Adds substitute, expand_quantifiers and simplify to logic expression classes
 import copy
 import sys
 
-from utils import Log, nl
+from debugWithYamlLog import Log, nl
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
@@ -101,6 +101,7 @@ def instantiate(self, e0, e1):
 
     out.fresh_vars.discard(e0.name)
     if isinstance(e1, Fresh_Variable) or isinstance(e1, Variable):
+        # e1 is Variable when instantiating some definitions
         out.fresh_vars.add(e1.name)
     out.code = str(out)
     return out

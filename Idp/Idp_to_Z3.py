@@ -25,7 +25,7 @@ TODO: vocabulary
 """
 
 
-from utils import Log, nl
+from debugWithYamlLog import Log, nl
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort, Q
 
 from typing import List, Tuple

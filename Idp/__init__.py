@@ -23,11 +23,12 @@ import os
 import re
 import sys
 
+from debugWithYamlLog import log, nl
 from textx import metamodel_from_file
 from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
                 Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort)
 
-from utils import applyTo, log, itertools, in_list, nl, mergeDicts
+from utils import applyTo, itertools, in_list, mergeDicts
 from Idp.Expression import (Constructor, Expression, IfExpr, AQuantification,
                             BinaryOperator, ARImplication, AEquivalence,
                             AImplication, ADisjunction, AConjunction,
