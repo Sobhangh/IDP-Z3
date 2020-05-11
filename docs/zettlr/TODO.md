@@ -58,7 +58,6 @@ tags:
 - [ ] reduce number of substitution
     - [ ] Expr.questions for each constraint → do not substitute if no matching question
 - [ ] rewrite in Nim !
-- [ ] why is Prime so slow ?
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share justifications
 - [ ] subtences() → exp is_in expr

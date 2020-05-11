@@ -42,12 +42,12 @@ Type:
 Definitions: 
   Rule:∀$Prime!0$[num]: Prime($Prime!0$) ⇔((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0))) ∧ ((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0))) ∧ ((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0))) ∧ ((true) ∧ (2 < $Prime!0$ ⇒ ~($Prime!0$ % 2 = 0)) ∧ (3 < $Prime!0$ ⇒ ~($Prime!0$ % 3 = 0)) ∧ (4 < $Prime!0$ ⇒ ~($Prime!0$ % 4 = 0)))
 Universals:  
-  
-Consequences:
   Prime(1)
   Prime(2)
   Prime(3)
   ~Prime(4)
+Consequences:
+  
 Simplified:  
   true
 Irrelevant:  
@@ -65,27 +65,27 @@ Irrelevant:
                         'normal': True,
                         'reading': 'Prime(1)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': True},
            'Prime(2)': {'environmental': False,
                         'normal': True,
                         'reading': 'Prime(2)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': True},
            'Prime(3)': {'environmental': False,
                         'normal': True,
                         'reading': 'Prime(3)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': True},
            'Prime(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Prime(4)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': False}}}

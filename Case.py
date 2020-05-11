@@ -66,9 +66,11 @@ class Case:
         # find immediate universals
         for c in self.idp.theory.constraints:
             c = c.copy()
-            u = c.implicants()
-            if u:
-                for sentence, value in u:
+            consequences = []
+            new_constraint = c.substitute(TRUE, TRUE, consequences) # to simplify just_branch
+            consequences.extend(new_constraint.implicants())
+            if consequences:
+                for sentence, value in consequences:
                     ass = Assignment(sentence, value, Status.UNKNOWN)
                     status = Status.ENV_UNIV if not ass.sentence.has_environmental(False) else Status.UNIVERSAL
                     ass.update(None, None, status, self)
@@ -187,8 +189,8 @@ class Case:
                 # simplify constraints and propagate consequences
                 new_simplified: List[Expression] = []
                 for constraint in self.simplified:
-                    consequences = []
                     if old.code in constraint.questions:
+                        consequences = []
                         new_constraint = constraint.substitute(old, new, consequences)
                         del constraint.questions[old.code]
                         new_constraint.questions = constraint.questions

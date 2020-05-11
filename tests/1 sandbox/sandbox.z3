@@ -28,9 +28,8 @@ Type:
 Definitions: 
   Rule:∀: p() ⇔true
 Universals:  
-  
-Consequences:
   p
+Consequences:
   q
 Simplified:  
   true
@@ -49,7 +48,7 @@ Irrelevant:
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},
  'q': {'q': {'environmental': False,

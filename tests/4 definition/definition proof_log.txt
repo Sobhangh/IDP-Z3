@@ -6,6 +6,1044 @@
       code: codeOf(red) = b
       str: codeOf(red) = b
     e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: AppliedSymbol
+        code: codeOf(red)
+        str: codeOf(red)
+        just_branch:
+          class: ADisjunction
+          code: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+          str: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - "\n definition:"
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: ADisjunction
+          code: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+          str: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Brackets
+            code: (red = c ∧ codeOf(red) = a)
+            str: (red = c ∧ codeOf(red) = a)
+          e0:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: AConjunction
+              code: red = c ∧ codeOf(red) = a
+              str: red = c ∧ codeOf(red) = a
+            e0:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: AComparison
+                code: red = c
+                str: red = c
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+            - calling Expression_substitute
+            - with_arguments:
+                self:
+                  class: Constructor
+                  code: red
+                  str: red
+                e0:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                e1:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                todo: '[]'
+            - processing
+            - output:
+                class: Constructor
+                code: red
+                str: red
+            - returning from Expression_substitute
+            - calling substitute
+            - with_arguments:
+                self:
+                  class: Variable
+                  code: c
+                  str: c
+                e0:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                e1:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                todo: '[]'
+            - processing
+            - output:
+                class: Variable
+                code: c
+                str: c
+            - returning from substitute
+          - output:
+              class: AComparison
+              code: red = c
+              str: red = c
+          - returning from Expression_substitute
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: AComparison
+                code: codeOf(red) = a
+                str: codeOf(red) = a
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+            - calling substitute
+            - with_arguments:
+                self:
+                  class: AppliedSymbol
+                  code: codeOf(red)
+                  str: codeOf(red)
+                e0:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                e1:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                todo: '[]'
+            - processing
+              - calling Expression_substitute
+              - with_arguments:
+                  self:
+                    class: Constructor
+                    code: red
+                    str: red
+                  e0:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  e1:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  todo: '[]'
+              - processing
+              - output:
+                  class: Constructor
+                  code: red
+                  str: red
+              - returning from Expression_substitute
+            - output:
+                class: AppliedSymbol
+                code: codeOf(red)
+                str: codeOf(red)
+            - returning from substitute
+            - calling Expression_substitute
+            - with_arguments:
+                self:
+                  class: Constructor
+                  code: a
+                  str: a
+                e0:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                e1:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                todo: '[]'
+            - processing
+            - output:
+                class: Constructor
+                code: a
+                str: a
+            - returning from Expression_substitute
+          - output:
+              class: AComparison
+              code: codeOf(red) = a
+              str: codeOf(red) = a
+          - returning from Expression_substitute
+        - output:
+            class: AConjunction
+            code: red = c ∧ codeOf(red) = a
+            str: red = c ∧ codeOf(red) = a
+        - returning from Expression_substitute
+      - output:
+          class: Brackets
+          code: (red = c ∧ codeOf(red) = a)
+          str: (red = c ∧ codeOf(red) = a)
+      - returning from Expression_substitute
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Brackets
+            code: (~(red = c) ∧ codeOf(red) = b)
+            str: (~(red = c) ∧ codeOf(red) = b)
+          e0:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: AConjunction
+              code: ~(red = c) ∧ codeOf(red) = b
+              str: ~(red = c) ∧ codeOf(red) = b
+            e0:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: AUnary
+                code: ~(red = c)
+                str: ~(red = c)
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+            - calling Expression_substitute
+            - with_arguments:
+                self:
+                  class: AComparison
+                  code: red = c
+                  str: red = c
+                e0:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                e1:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                todo: '[]'
+            - processing
+              - calling Expression_substitute
+              - with_arguments:
+                  self:
+                    class: Constructor
+                    code: red
+                    str: red
+                  e0:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  e1:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  todo: '[]'
+              - processing
+              - output:
+                  class: Constructor
+                  code: red
+                  str: red
+              - returning from Expression_substitute
+              - calling substitute
+              - with_arguments:
+                  self:
+                    class: Variable
+                    code: c
+                    str: c
+                  e0:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  e1:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  todo: '[]'
+              - processing
+              - output:
+                  class: Variable
+                  code: c
+                  str: c
+              - returning from substitute
+            - output:
+                class: AComparison
+                code: red = c
+                str: red = c
+            - returning from Expression_substitute
+          - output:
+              class: AUnary
+              code: ~(red = c)
+              str: ~(red = c)
+          - returning from Expression_substitute
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: AComparison
+                code: codeOf(red) = b
+                str: codeOf(red) = b
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+            - calling substitute
+            - with_arguments:
+                self:
+                  class: AppliedSymbol
+                  code: codeOf(red)
+                  str: codeOf(red)
+                e0:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                e1:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                todo: '[]'
+            - processing
+              - calling Expression_substitute
+              - with_arguments:
+                  self:
+                    class: Constructor
+                    code: red
+                    str: red
+                  e0:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  e1:
+                    class: Constructor
+                    code: 'true'
+                    str: 'true'
+                  todo: '[]'
+              - processing
+              - output:
+                  class: Constructor
+                  code: red
+                  str: red
+              - returning from Expression_substitute
+            - output:
+                class: AppliedSymbol
+                code: codeOf(red)
+                str: codeOf(red)
+            - returning from substitute
+            - calling Expression_substitute
+            - with_arguments:
+                self:
+                  class: Constructor
+                  code: b
+                  str: b
+                e0:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                e1:
+                  class: Constructor
+                  code: 'true'
+                  str: 'true'
+                todo: '[]'
+            - processing
+            - output:
+                class: Constructor
+                code: b
+                str: b
+            - returning from Expression_substitute
+          - output:
+              class: AComparison
+              code: codeOf(red) = b
+              str: codeOf(red) = b
+          - returning from Expression_substitute
+        - output:
+            class: AConjunction
+            code: ~(red = c) ∧ codeOf(red) = b
+            str: ~(red = c) ∧ codeOf(red) = b
+        - returning from Expression_substitute
+      - output:
+          class: Brackets
+          code: (~(red = c) ∧ codeOf(red) = b)
+          str: (~(red = c) ∧ codeOf(red) = b)
+      - returning from Expression_substitute
+    - output:
+        class: ADisjunction
+        code: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+        str: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+    - returning from Expression_substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: red
+          str: red
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Constructor
+        code: red
+        str: red
+    - returning from Expression_substitute
+  - output:
+      class: AppliedSymbol
+      code: codeOf(red)
+      str: codeOf(red)
+      just_branch:
+        class: ADisjunction
+        code: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+        str: (red = c ∧ codeOf(red) = a) ∨ (~(red = c) ∧ codeOf(red) = b)
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: Constructor
+        code: b
+        str: b
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+  - output:
+      class: Constructor
+      code: b
+      str: b
+  - returning from Expression_substitute
+- output:
+    class: AComparison
+    code: codeOf(red) = b
+    str: codeOf(red) = b
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: ADisjunction
+      code: codeOf(red) = a ∨ codeOf(red) = b
+      str: codeOf(red) = a ∨ codeOf(red) = b
+    e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AComparison
+        code: codeOf(red) = a
+        str: codeOf(red) = a
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: codeOf(red)
+          str: codeOf(red)
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: red
+            str: red
+          e0:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+      - output:
+          class: Constructor
+          code: red
+          str: red
+      - returning from Expression_substitute
+    - output:
+        class: AppliedSymbol
+        code: codeOf(red)
+        str: codeOf(red)
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: a
+          str: a
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Constructor
+        code: a
+        str: a
+    - returning from Expression_substitute
+  - output:
+      class: AComparison
+      code: codeOf(red) = a
+      str: codeOf(red) = a
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AComparison
+        code: codeOf(red) = b
+        str: codeOf(red) = b
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: codeOf(red)
+          str: codeOf(red)
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: red
+            str: red
+          e0:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+      - output:
+          class: Constructor
+          code: red
+          str: red
+      - returning from Expression_substitute
+    - output:
+        class: AppliedSymbol
+        code: codeOf(red)
+        str: codeOf(red)
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: b
+          str: b
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Constructor
+        code: b
+        str: b
+    - returning from Expression_substitute
+  - output:
+      class: AComparison
+      code: codeOf(red) = b
+      str: codeOf(red) = b
+  - returning from Expression_substitute
+- output:
+    class: ADisjunction
+    code: codeOf(red) = a ∨ codeOf(red) = b
+    str: codeOf(red) = a ∨ codeOf(red) = b
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: ADisjunction
+      code: codeOf(blue) = a ∨ codeOf(blue) = b
+      str: codeOf(blue) = a ∨ codeOf(blue) = b
+    e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AComparison
+        code: codeOf(blue) = a
+        str: codeOf(blue) = a
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: codeOf(blue)
+          str: codeOf(blue)
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: blue
+            str: blue
+          e0:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+      - output:
+          class: Constructor
+          code: blue
+          str: blue
+      - returning from Expression_substitute
+    - output:
+        class: AppliedSymbol
+        code: codeOf(blue)
+        str: codeOf(blue)
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: a
+          str: a
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Constructor
+        code: a
+        str: a
+    - returning from Expression_substitute
+  - output:
+      class: AComparison
+      code: codeOf(blue) = a
+      str: codeOf(blue) = a
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AComparison
+        code: codeOf(blue) = b
+        str: codeOf(blue) = b
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: codeOf(blue)
+          str: codeOf(blue)
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: blue
+            str: blue
+          e0:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+      - output:
+          class: Constructor
+          code: blue
+          str: blue
+      - returning from Expression_substitute
+    - output:
+        class: AppliedSymbol
+        code: codeOf(blue)
+        str: codeOf(blue)
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: b
+          str: b
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Constructor
+        code: b
+        str: b
+    - returning from Expression_substitute
+  - output:
+      class: AComparison
+      code: codeOf(blue) = b
+      str: codeOf(blue) = b
+  - returning from Expression_substitute
+- output:
+    class: ADisjunction
+    code: codeOf(blue) = a ∨ codeOf(blue) = b
+    str: codeOf(blue) = a ∨ codeOf(blue) = b
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: ADisjunction
+      code: c = red ∨ c = blue
+      str: c = red ∨ c = blue
+    e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AComparison
+        code: c = red
+        str: c = red
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: c
+          str: c
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Variable
+        code: c
+        str: c
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: red
+          str: red
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Constructor
+        code: red
+        str: red
+    - returning from Expression_substitute
+  - output:
+      class: AComparison
+      code: c = red
+      str: c = red
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AComparison
+        code: c = blue
+        str: c = blue
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: c
+          str: c
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Variable
+        code: c
+        str: c
+    - returning from substitute
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: blue
+          str: blue
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Constructor
+        code: blue
+        str: blue
+    - returning from Expression_substitute
+  - output:
+      class: AComparison
+      code: c = blue
+      str: c = blue
+  - returning from Expression_substitute
+- output:
+    class: ADisjunction
+    code: c = red ∨ c = blue
+    str: c = red ∨ c = blue
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AComparison
+      code: codeOf(red) = b
+      str: codeOf(red) = b
+    e0:
       class: AComparison
       code: codeOf(red) = b
       str: codeOf(red) = b

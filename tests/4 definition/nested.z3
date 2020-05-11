@@ -85,10 +85,11 @@ Definitions:
 Universals:  
   same(Piet) = Piet
   same(same(Piet)) = negated(negated(Piet))
-  same(Piet) -> Piet
-Consequences:
   same(same(Piet)) = same(Piet)
   negated(Piet) = Jan
+  same(Piet) -> Piet
+  negated(Piet) -> Jan
+Consequences:
   ~negated(negated(Piet)) = Jan
   ~negated(Piet) = Piet
   negated(negated(Piet)) = Piet
@@ -98,7 +99,6 @@ Consequences:
   negated(Jan) = Piet
   ~negated(Jan) = Jan
   same(Jan) -> Jan
-  negated(Piet) -> Jan
   negated(Jan) -> Piet
 Simplified:  
   true
@@ -148,7 +148,7 @@ Irrelevant:
                                'normal': True,
                                'reading': 'negated(Piet)',
                                'relevant': True,
-                               'status': 'CONSEQUENCE',
+                               'status': 'UNIVERSAL',
                                'typ': 'num',
                                'value': 'Jan',
                                'values': ['Piet', 'Jan']},
@@ -156,7 +156,7 @@ Irrelevant:
                                      'normal': False,
                                      'reading': '$negated$ = Jan',
                                      'relevant': True,
-                                     'status': 'CONSEQUENCE',
+                                     'status': 'UNIVERSAL',
                                      'typ': 'Bool',
                                      'value': True},
              'negated(Piet) = Piet': {'environmental': False,
@@ -219,7 +219,7 @@ Irrelevant:
                                'value': False},
           'same(Piet) = Piet': {'environmental': False,
                                 'normal': False,
-                                'reading': 'same(Piet) = Piet',
+                                'reading': '$same$ = $same!0$',
                                 'relevant': True,
                                 'status': 'UNIVERSAL',
                                 'typ': 'Bool',
@@ -235,6 +235,6 @@ Irrelevant:
                                             'normal': False,
                                             'reading': '$same$ = $same!0$',
                                             'relevant': True,
-                                            'status': 'CONSEQUENCE',
+                                            'status': 'UNIVERSAL',
                                             'typ': 'Bool',
                                             'value': True}}}

@@ -6,6 +6,195 @@
       code: p
       str: p
     e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+- output:
+    class: Variable
+    code: p
+    str: p
+- returning from substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: ADisjunction
+      code: ~(p) ∨ ~(q)
+      str: ~(p) ∨ ~(q)
+    e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AUnary
+        code: ~(p)
+        str: ~(p)
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: p
+          str: p
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Variable
+        code: p
+        str: p
+    - returning from substitute
+  - output:
+      class: AUnary
+      code: ~(p)
+      str: ~(p)
+  - returning from Expression_substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: AUnary
+        code: ~(q)
+        str: ~(q)
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Variable
+          code: q
+          str: q
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+    - output:
+        class: Variable
+        code: q
+        str: q
+    - returning from substitute
+  - output:
+      class: AUnary
+      code: ~(q)
+      str: ~(q)
+  - returning from Expression_substitute
+- output:
+    class: ADisjunction
+    code: ~(p) ∨ ~(q)
+    str: ~(p) ∨ ~(q)
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: ADisjunction
+      code: q ∨ r
+      str: q ∨ r
+    e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: q
+        str: q
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+  - output:
+      class: Variable
+      code: q
+      str: q
+  - returning from substitute
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: r
+        str: r
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+  - output:
+      class: Variable
+      code: r
+      str: r
+  - returning from substitute
+- output:
+    class: ADisjunction
+    code: q ∨ r
+    str: q ∨ r
+- returning from Expression_substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: p
+      str: p
+    e0:
       class: Variable
       code: p
       str: p

@@ -114,10 +114,11 @@ Definitions:
 Universals:  
   same(-1) = -1
   negated(negated(-1)) = same(-1)
-  same(-1) -> -1
-Consequences:
   negated(-1) = 1
   negated(negated(-1)) = -(negated(-1))
+  same(-1) -> -1
+  negated(-1) -> 1
+Consequences:
   ~same(-1) = 0
   ~same(-1) = 1
   ~same(0) = -1
@@ -136,7 +137,6 @@ Consequences:
   ~negated(1) = 1
   same(0) -> 0
   same(1) -> 1
-  negated(-1) -> 1
   negated(0) -> 0
   negated(1) -> -1
 Simplified:  
@@ -153,6 +153,8 @@ Irrelevant:
   ~same(-1) = 1
   ~same(0) = -1
   ~same(0) = 1
+  ~negated(-1) = -1
+  ~negated(-1) = 0
   ~negated(0) = -1
   ~negated(0) = 1
   ~negated(1) = 0
@@ -170,21 +172,21 @@ Irrelevant:
                              'normal': True,
                              'reading': 'negated(-1)',
                              'relevant': True,
-                             'status': 'CONSEQUENCE',
+                             'status': 'UNIVERSAL',
                              'typ': 'Int',
                              'value': '1',
                              'values': ['-1', '0', '1']},
              'negated(-1) = -1': {'environmental': False,
                                   'normal': False,
                                   'reading': 'negated(-1) = -1',
-                                  'relevant': True,
+                                  'relevant': False,
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
              'negated(-1) = 0': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(-1) = 0',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': False},
@@ -192,7 +194,7 @@ Irrelevant:
                                  'normal': False,
                                  'reading': 'y = -(x)',
                                  'relevant': True,
-                                 'status': 'CONSEQUENCE',
+                                 'status': 'UNIVERSAL',
                                  'typ': 'Bool',
                                  'value': True},
              'negated(0)': {'environmental': False,
@@ -257,7 +259,7 @@ Irrelevant:
                                                        'normal': False,
                                                        'reading': 'y = -(x)',
                                                        'relevant': True,
-                                                       'status': 'CONSEQUENCE',
+                                                       'status': 'UNIVERSAL',
                                                        'typ': 'Bool',
                                                        'value': True},
              'negated(negated(-1)) = same(-1)': {'environmental': False,
@@ -277,7 +279,7 @@ Irrelevant:
                        'values': ['-1', '0', '1']},
           'same(-1) = -1': {'environmental': False,
                             'normal': False,
-                            'reading': 'same(-1) = -1',
+                            'reading': '$same$ = $same!0$',
                             'relevant': True,
                             'status': 'UNIVERSAL',
                             'typ': 'Bool',

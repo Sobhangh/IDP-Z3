@@ -26,6 +26,8 @@ i.e., the sub-expressions that must be true for the expression to be true
 """
 
 from typing import List, Tuple
+from debugWithYamlLog import log_calls
+
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \

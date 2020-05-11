@@ -315,6 +315,7 @@ Type:
 Definitions: 
   Rule:∀$Large!0$[side]: Large($Large!0$) ⇔10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Universals:  
+  ~Large(1)
   ~Subtype = rectangle
   Perimeter = sum{n[side] : true : Length(n)}
   sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
@@ -324,7 +325,6 @@ Universals:
   ∀n[side] : Length(n) = 0 ⇔ Sides < n
   Perimeter -> 10
 Consequences:
-  ~Large(1)
   ~Type = triangle
   ~Sides = 3
   Type = quadrilateral
@@ -504,7 +504,7 @@ Irrelevant:
                         'normal': True,
                         'reading': 'Large(1)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': False},
            'Large(2)': {'environmental': False,

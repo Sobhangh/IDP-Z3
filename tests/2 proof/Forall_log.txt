@@ -6,6 +6,258 @@
       code: 'p ⇔ (∀c[color] : c = red)'
       str: ~(p)
     e0:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Variable
+        code: p
+        str: p
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+  - output:
+      class: Variable
+      code: p
+      str: p
+  - returning from substitute
+  - calling Expression_substitute
+  - with_arguments:
+      self:
+        class: Brackets
+        code: '(∀c[color] : c = red)'
+        str: (false)
+      e0:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      todo: '[]'
+  - processing
+    - calling Expression_substitute
+    - with_arguments:
+        self:
+          class: AQuantification
+          code: '∀c[color] : c = red'
+          str: 'false'
+        e0:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        todo: '[]'
+    - processing
+      - calling Expression_substitute
+      - with_arguments:
+          self:
+            class: AConjunction
+            code: true ∧ false ∧ false
+            str: 'false'
+          e0:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          todo: '[]'
+      - processing
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: AComparison
+              code: 'true'
+              str: 'true'
+            e0:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+        - output:
+            class: AComparison
+            code: 'true'
+            str: 'true'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: AComparison
+              code: 'false'
+              str: 'false'
+            e0:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: Constructor
+                code: blue
+                str: blue
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+          - output:
+              class: Constructor
+              code: blue
+              str: blue
+          - returning from Expression_substitute
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: Constructor
+                code: red
+                str: red
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+          - output:
+              class: Constructor
+              code: red
+              str: red
+          - returning from Expression_substitute
+        - output:
+            class: AComparison
+            code: 'false'
+            str: 'false'
+        - returning from Expression_substitute
+        - calling Expression_substitute
+        - with_arguments:
+            self:
+              class: AComparison
+              code: 'false'
+              str: 'false'
+            e0:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            e1:
+              class: Constructor
+              code: 'true'
+              str: 'true'
+            todo: '[]'
+        - processing
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: Constructor
+                code: green
+                str: green
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+          - output:
+              class: Constructor
+              code: green
+              str: green
+          - returning from Expression_substitute
+          - calling Expression_substitute
+          - with_arguments:
+              self:
+                class: Constructor
+                code: red
+                str: red
+              e0:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              e1:
+                class: Constructor
+                code: 'true'
+                str: 'true'
+              todo: '[]'
+          - processing
+          - output:
+              class: Constructor
+              code: red
+              str: red
+          - returning from Expression_substitute
+        - output:
+            class: AComparison
+            code: 'false'
+            str: 'false'
+        - returning from Expression_substitute
+      - output:
+          class: AConjunction
+          code: true ∧ false ∧ false
+          str: 'false'
+      - returning from Expression_substitute
+    - output:
+        class: AQuantification
+        code: '∀c[color] : c = red'
+        str: 'false'
+    - returning from Expression_substitute
+  - output:
+      class: Brackets
+      code: '(∀c[color] : c = red)'
+      str: (false)
+  - returning from Expression_substitute
+- output:
+    class: AEquivalence
+    code: 'p ⇔ (∀c[color] : c = red)'
+    str: ~(p)
+- returning from Expression_substitute
+- calling Expression_substitute
+- with_arguments:
+    self:
+      class: AEquivalence
+      code: 'p ⇔ (∀c[color] : c = red)'
+      str: ~(p)
+    e0:
       class: Variable
       code: p
       str: p
@@ -45,7 +297,7 @@
       e0:
         class: Variable
         code: p
-        str: p
+        str: 'false'
       e1:
         class: Constructor
         code: 'false'
@@ -61,7 +313,7 @@
         e0:
           class: Variable
           code: p
-          str: p
+          str: 'false'
         e1:
           class: Constructor
           code: 'false'
@@ -77,7 +329,7 @@
           e0:
             class: Variable
             code: p
-            str: p
+            str: 'false'
           e1:
             class: Constructor
             code: 'false'
@@ -93,7 +345,7 @@
             e0:
               class: Variable
               code: p
-              str: p
+              str: 'false'
             e1:
               class: Constructor
               code: 'false'
@@ -109,7 +361,7 @@
               e0:
                 class: Variable
                 code: p
-                str: p
+                str: 'false'
               e1:
                 class: Constructor
                 code: 'false'
@@ -130,7 +382,7 @@
               e0:
                 class: Variable
                 code: p
-                str: p
+                str: 'false'
               e1:
                 class: Constructor
                 code: 'false'
@@ -156,7 +408,7 @@
             e0:
               class: Variable
               code: p
-              str: p
+              str: 'false'
             e1:
               class: Constructor
               code: 'false'
@@ -172,7 +424,7 @@
               e0:
                 class: Variable
                 code: p
-                str: p
+                str: 'false'
               e1:
                 class: Constructor
                 code: 'false'
@@ -193,7 +445,7 @@
               e0:
                 class: Variable
                 code: p
-                str: p
+                str: 'false'
               e1:
                 class: Constructor
                 code: 'false'
@@ -219,7 +471,7 @@
             e0:
               class: Variable
               code: p
-              str: p
+              str: 'false'
             e1:
               class: Constructor
               code: 'false'
@@ -235,7 +487,7 @@
               e0:
                 class: Variable
                 code: p
-                str: p
+                str: 'false'
               e1:
                 class: Constructor
                 code: 'false'
@@ -256,7 +508,7 @@
               e0:
                 class: Variable
                 code: p
-                str: p
+                str: 'false'
               e1:
                 class: Constructor
                 code: 'false'
@@ -298,11 +550,11 @@
     self:
       class: Variable
       code: p
-      str: p
+      str: 'false'
     e0:
       class: Variable
       code: p
-      str: p
+      str: 'false'
     e1:
       class: Constructor
       code: 'false'

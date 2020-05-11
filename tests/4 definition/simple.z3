@@ -71,17 +71,16 @@ Definitions:
   Rule:∀$b$[color]: b($b$) ⇔$b$ = red ∧ a = red
   Rule:∀$c$[color]: c($c$) ⇔$c$ = red
 Universals:  
-  
+  p
+  a -> red
+  b -> red
 Consequences:
   b = red
-  p
   ~b = blue
   a = red
   ~a = blue
   c = red
   ~c = blue
-  a -> red
-  b -> red
   c -> red
 Simplified:  
   true
@@ -110,7 +109,7 @@ Irrelevant:
              'normal': True,
              'reading': 'a',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'color',
              'value': 'red',
              'values': ['red', 'blue']},
@@ -132,7 +131,7 @@ Irrelevant:
              'normal': True,
              'reading': 'b',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'color',
              'value': 'red',
              'values': ['red', 'blue']},
@@ -176,7 +175,7 @@ Irrelevant:
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},
  'q': {'q': {'environmental': False,
