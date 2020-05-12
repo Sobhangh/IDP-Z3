@@ -29,7 +29,8 @@ Fresh_Variable.substitute = log_calls(Fresh_Variable.substitute)
 
 dir = os.path.dirname(__file__)
 files  = [os.path.join(dir, "1 sandbox/sandbox.idp")]
-files += [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if f.endswith(".idp")]
+files += [x[0]+"/"+f for x in os.walk(dir) for f in x[2] 
+    if f.endswith(".idp") and not f.endswith("sandbox.idp")]
 files.sort()
 for file in files:
     print(file)

@@ -28,7 +28,7 @@ Adds substitute, expand_quantifiers and simplify to logic expression classes
 import copy
 import sys
 
-from debugWithYamlLog import Log, nl
+from debugWithYamlLog import *
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
@@ -54,7 +54,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branc
             self.value   = simpler.value
         else:
             self.simpler = simpler
-    assert value is None or type(value) in [Constructor, NumberConstant]
+    assert self.value is None or type(self.value) in [Constructor, NumberConstant]
     
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -65,7 +65,7 @@ Expression._change = _change
 
 
 def update_exprs(self, new_expr_generator):
-    """ change sub_exprs and simplify. """
+    """ change sub_exprs and simplify. (default implementation) """
     #  default implementation, without simplification
     return self._change(sub_exprs=list(new_expr_generator))
 Expression.update_exprs = update_exprs
@@ -93,11 +93,19 @@ def instantiate(self, e0, e1):
 
     out = copy.copy(self)
 
-    if out.value is None:
-        out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs))
+    out = out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs)) # with simplification
+
+    simpler, just_branch = None, None
+    if out.simpler is not None:
+        simpler = out.simpler.instantiate(e0, e1)
+    if out.just_branch is not None:
+        just_branch = out.just_branch.instantiate(e0, e1)
+    out._change(simpler=simpler, just_branch=just_branch)
+
+    if out.value is not None: # replace by new value
+        out = out.value
+    else:
         out.original = out
-        if out.just_branch is not None:
-            out._change(just_branch=out.just_branch.instantiate(e0, e1))
 
     out.fresh_vars.discard(e0.name)
     if isinstance(e1, Fresh_Variable) or isinstance(e1, Variable):
@@ -435,7 +443,9 @@ def substitute(self, e0, e1, todo=None):
         out.code = self.code
         return out
 
-    new_branch = None
+    simpler, new_branch = None, None
+    if self.simpler is not None:
+        simpler = self.simpler.substitute(e0,e1,todo)
     if self.just_branch is not None:
         Log(f"{nl} definition:")
         new_branch = self.just_branch.substitute(e0, e1, todo)
@@ -447,7 +457,7 @@ def substitute(self, e0, e1, todo=None):
     else:
         new_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs]
         value, new_branch = None, None
-        return self._change(sub_exprs=new_exprs, value=value, just_branch=new_branch)
+        return self._change(sub_exprs=new_exprs, simpler=simpler, value=value, just_branch=new_branch)
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 

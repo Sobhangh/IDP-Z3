@@ -71,7 +71,7 @@
       - calling Expression_substitute
       - with_arguments:
           self:
-            class: IfExpr
+            class: NumberConstant
             code: '1'
             str: '1'
           e0:
@@ -84,78 +84,15 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '1'
-              str: '1'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '0'
-              str: '0'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-        - returning from Expression_substitute
       - output:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
       - returning from Expression_substitute
       - calling Expression_substitute
       - with_arguments:
           self:
-            class: IfExpr
+            class: NumberConstant
             code: '1'
             str: '1'
           e0:
@@ -168,78 +105,15 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '1'
-              str: '1'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '0'
-              str: '0'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-        - returning from Expression_substitute
       - output:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
       - returning from Expression_substitute
       - calling Expression_substitute
       - with_arguments:
           self:
-            class: IfExpr
+            class: NumberConstant
             code: '1'
             str: '1'
           e0:
@@ -252,71 +126,8 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '1'
-              str: '1'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '0'
-              str: '0'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-        - returning from Expression_substitute
       - output:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
       - returning from Expression_substitute
@@ -428,7 +239,7 @@
       - calling Expression_substitute
       - with_arguments:
           self:
-            class: IfExpr
+            class: NumberConstant
             code: '1'
             str: '1'
           e0:
@@ -441,78 +252,15 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '1'
-              str: '1'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '0'
-              str: '0'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-        - returning from Expression_substitute
       - output:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
       - returning from Expression_substitute
       - calling Expression_substitute
       - with_arguments:
           self:
-            class: IfExpr
+            class: NumberConstant
             code: '1'
             str: '1'
           e0:
@@ -525,78 +273,15 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '1'
-              str: '1'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '0'
-              str: '0'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-        - returning from Expression_substitute
       - output:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
       - returning from Expression_substitute
       - calling Expression_substitute
       - with_arguments:
           self:
-            class: IfExpr
+            class: NumberConstant
             code: '1'
             str: '1'
           e0:
@@ -609,71 +294,8 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '1'
-              str: '1'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-        - returning from Expression_substitute
-        - calling Expression_substitute
-        - with_arguments:
-            self:
-              class: NumberConstant
-              code: '0'
-              str: '0'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-        - returning from Expression_substitute
       - output:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
       - returning from Expression_substitute
@@ -766,7 +388,7 @@
     - calling Expression_substitute
     - with_arguments:
         self:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
         e0:
@@ -778,75 +400,15 @@
           code: 'true'
           str: 'true'
     - processing
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-      - returning from Expression_substitute
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from Expression_substitute
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '0'
-          str: '0'
-      - returning from Expression_substitute
     - output:
-        class: IfExpr
+        class: NumberConstant
         code: '1'
         str: '1'
     - returning from Expression_substitute
     - calling Expression_substitute
     - with_arguments:
         self:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
         e0:
@@ -858,75 +420,15 @@
           code: 'true'
           str: 'true'
     - processing
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-      - returning from Expression_substitute
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from Expression_substitute
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '0'
-          str: '0'
-      - returning from Expression_substitute
     - output:
-        class: IfExpr
+        class: NumberConstant
         code: '1'
         str: '1'
     - returning from Expression_substitute
     - calling Expression_substitute
     - with_arguments:
         self:
-          class: IfExpr
+          class: NumberConstant
           code: '1'
           str: '1'
         e0:
@@ -938,68 +440,8 @@
           code: 'true'
           str: 'true'
     - processing
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-      - returning from Expression_substitute
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from Expression_substitute
-      - calling Expression_substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '0'
-            str: '0'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '0'
-          str: '0'
-      - returning from Expression_substitute
     - output:
-        class: IfExpr
+        class: NumberConstant
         code: '1'
         str: '1'
     - returning from Expression_substitute
