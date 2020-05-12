@@ -74,13 +74,16 @@ Expression.update_exprs = update_exprs
 def Expression_substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable) """
 
-    assert not isinstance(e0, Fresh_Variable)
+    assert not isinstance(e0, Fresh_Variable) # should use instantiate instead
+    assert self.just_branch is None # see AppliedSymbol or Variable instead
+
     # similar code in AppliedSymbol !
     if self.code == e0.code:
         return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
+        # will update self.simpler
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
-    return out
+        return out
 Expression.substitute = Expression_substitute
 
 
@@ -435,12 +438,8 @@ Variable     .interpret = interpret
 # @log_calls  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, todo=None):
     """ recursively substitute e0 by e1 in self """
-    global Expression_substitute
 
-    assert not isinstance(e0, Fresh_Variable)
-
-    if type(e0) == Fresh_Variable:
-        return e1 if self.code == e0.code else self
+    assert not isinstance(e0, Fresh_Variable) # should use instantiate instead
 
     if self.code == e0.code and type(e1) == Fresh_Variable:
         out = copy.copy(e1)
@@ -456,15 +455,15 @@ def substitute(self, e0, e1, todo=None):
             
     if self.code == e0.code:
         return self._change(value=e1, just_branch=new_branch)
+    elif self.simpler is not None: # has an interpretation
+        assert self.just_branch is None
+        simpler = self.simpler.substitute(e0,e1,todo)
+        return self._change(simpler=simpler)
     else:
-        out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs)) # with simplification
-        simpler = None
-        if out.simpler is not None:
-            simpler = out.simpler.substitute(e0,e1,todo)
-        return out._change(simpler=simpler, just_branch=new_branch)
+        sub_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs] # no simplification here
+        return self._change(sub_exprs=sub_exprs, just_branch=new_branch)
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
-Fresh_Variable.substitute = substitute
 
 
 # Class Fresh_Variable #######################################################
@@ -472,6 +471,12 @@ Fresh_Variable.substitute = substitute
 def interpret(self, theory):
     return self
 Fresh_Variable.interpret = interpret
+
+# @log  # decorator patched in by tests/main.py
+def substitute(self, e0, e1, todo=None):
+    return e1 if self.code == e0.code else self
+Fresh_Variable.substitute = substitute
+
 
      
 # Class Brackets #######################################################
