@@ -35,7 +35,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -1643,7 +1643,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -2117,7 +2117,7 @@
         str: b
       todo: '[]'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -2641,7 +2641,7 @@
         code: 'false'
         str: 'false'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -3138,7 +3138,7 @@
         code: b
         str: b
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -4040,7 +4040,7 @@
       code: b
       str: b
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -4518,7 +4518,7 @@
         str: 'false'
       todo: '[]'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -4924,7 +4924,7 @@
         code: 'false'
         str: 'false'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -5678,7 +5678,7 @@
       code: 'false'
       str: 'false'
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -6147,7 +6147,7 @@
         code: 'true'
         str: 'true'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -6921,7 +6921,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -7490,7 +7490,7 @@
         code: 'false'
         str: 'false'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -8264,7 +8264,7 @@
       code: 'false'
       str: 'false'
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -9073,7 +9073,7 @@
         code: 'false'
         str: 'false'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -9867,7 +9867,7 @@
       code: 'false'
       str: 'false'
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -10333,7 +10333,7 @@
         str: blue
       todo: '[]'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -10928,7 +10928,7 @@
         code: blue
         str: blue
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -11762,7 +11762,7 @@
       code: blue
       str: blue
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -12331,7 +12331,7 @@
         code: 'true'
         str: 'true'
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -13125,7 +13125,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:
@@ -13673,7 +13673,7 @@
         code: a
         str: a
   - processing
-    - "\n definition:"
+    - 'definition:'
     - calling Expression_substitute
     - with_arguments:
         self:
@@ -14467,7 +14467,7 @@
       code: a
       str: a
 - processing
-  - "\n definition:"
+  - 'definition:'
   - calling Expression_substitute
   - with_arguments:
       self:

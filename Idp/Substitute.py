@@ -434,20 +434,22 @@ Variable     .interpret = interpret
 
 # @log_calls  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, todo=None):
-    """ recursively substitute e0 by e1 in self, introducing a Bracket if changed """
+    """ recursively substitute e0 by e1 in self """
     global Expression_substitute
 
     assert not isinstance(e0, Fresh_Variable)
-    if type(e1) == Fresh_Variable:
+
+    if type(e0) == Fresh_Variable:
+        return e1 if self.code == e0.code else self
+
+    if self.code == e0.code and type(e1) == Fresh_Variable:
         out = copy.copy(e1)
         out.code = self.code
         return out
 
-    simpler, new_branch = None, None
-    if self.simpler is not None:
-        simpler = self.simpler.substitute(e0,e1,todo)
+    new_branch = None
     if self.just_branch is not None:
-        Log(f"{nl} definition:")
+        Log(f"definition:")
         new_branch = self.just_branch.substitute(e0, e1, todo)
         if todo is not None:
             todo.extend(new_branch.implicants())
@@ -455,11 +457,14 @@ def substitute(self, e0, e1, todo=None):
     if self.code == e0.code:
         return self._change(value=e1, just_branch=new_branch)
     else:
-        new_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs]
-        value, new_branch = None, None
-        return self._change(sub_exprs=new_exprs, simpler=simpler, value=value, just_branch=new_branch)
+        out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs)) # with simplification
+        simpler = None
+        if out.simpler is not None:
+            simpler = out.simpler.substitute(e0,e1,todo)
+        return out._change(simpler=simpler, just_branch=new_branch)
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
+Fresh_Variable.substitute = substitute
 
 
 # Class Fresh_Variable #######################################################
@@ -467,11 +472,6 @@ Variable      .substitute = substitute
 def interpret(self, theory):
     return self
 Fresh_Variable.interpret = interpret
-
-# @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, todo=None):
-    return e1 if self.code == e0.code else self
-Fresh_Variable.substitute = substitute
 
      
 # Class Brackets #######################################################

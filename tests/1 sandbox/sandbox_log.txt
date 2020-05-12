@@ -51,7 +51,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - "\n definition:"
+      - 'definition:'
       - calling Expression_substitute
       - with_arguments:
           self:
@@ -207,7 +207,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - "\n definition:"
+      - 'definition:'
       - calling Expression_substitute
       - with_arguments:
           self:
@@ -360,7 +360,7 @@
           code: 'true'
           str: 'true'
     - processing
-      - "\n definition:"
+      - 'definition:'
       - calling Expression_substitute
       - with_arguments:
           self:
@@ -552,7 +552,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - "\n definition:"
+      - 'definition:'
       - calling Expression_substitute
       - with_arguments:
           self:
