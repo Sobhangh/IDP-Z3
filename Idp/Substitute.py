@@ -95,6 +95,7 @@ def instantiate(self, e0, e1):
         return e1
 
     out = copy.copy(self)
+    out.annotations = copy.copy(out.annotations)
 
     out = out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs)) # with simplification
 
@@ -115,6 +116,7 @@ def instantiate(self, e0, e1):
         # e1 is Variable when instantiating some definitions
         out.fresh_vars.add(e1.name)
     out.code = str(out)
+    out.annotations['reading'] = out.code
     return out
 Expression.instantiate = instantiate
 

@@ -108,7 +108,7 @@ Irrelevant:
                    'value': False},
        'red = c': {'environmental': False,
                    'normal': False,
-                   'reading': 'cl = c',
+                   'reading': 'red = c',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
