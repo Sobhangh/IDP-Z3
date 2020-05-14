@@ -513,14 +513,14 @@ class AppliedSymbol(Expression):
         self.name = self.s.name
 
     @classmethod
-    def make(cls, s, args, is_subtence=False):
+    def make(cls, symbol, args, is_subtence=False):
         if 0 < len(args):
-            out = cls(s=Symbol(name=s.name), args=Arguments(sub_exprs=args))
+            out = cls(s=symbol, args=Arguments(sub_exprs=args))
             out.sub_exprs = args
         else:
-            out = Variable(name=s.name)
+            out = Variable(name=symbol.name)
         # annotate
-        out.decl = s.decl
+        out.decl = symbol.decl
         out.is_subtence = is_subtence
         return out.annotate1()
 
@@ -528,7 +528,7 @@ class AppliedSymbol(Expression):
         if len(self.sub_exprs) == 0:
             return self.s.str
         else:
-            return f"{self.s.str}({','.join([x.str for x in self.sub_exprs])})"
+            return f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
 
     def annotate(self, symbol_decls, q_vars):
         self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
@@ -607,9 +607,6 @@ class Variable(AppliedSymbol):
 
     def reified(self):
         return self.translate()
-    
-class Symbol(Variable): 
-    PRECEDENCE = 200
     
 
 class Fresh_Variable(Expression):

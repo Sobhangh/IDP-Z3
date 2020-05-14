@@ -25,7 +25,7 @@ import sys
 
 from debugWithYamlLog import Log, nl
 from textx import metamodel_from_file
-from utils import log
+from utils import log, unquote
 from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
                 Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort)
 
@@ -34,7 +34,7 @@ from Idp.Expression import (Constructor, Expression, IfExpr, AQuantification,
                             BinaryOperator, ARImplication, AEquivalence,
                             AImplication, ADisjunction, AConjunction,
                             AComparison, ASumMinus, AMultDiv, APower, AUnary,
-                            AAggregate, AppliedSymbol, Variable, Symbol,
+                            AAggregate, AppliedSymbol, Variable, 
                             NumberConstant, Brackets, Arguments,
                             Fresh_Variable, TRUE, FALSE)
 
@@ -399,6 +399,18 @@ class Sort(object):
     def getRange(self):
         return [e.translated for e in self.decl.range]
 
+    
+class Symbol(object): 
+    def __init__(self, **kwargs):
+        self.name = unquote(kwargs.pop('name'))
+
+    def annotate(self, symbol_decls, q_vars):
+        self.decl = symbol_decls[self.name]
+        self.type = self.decl.type.name
+        self.normal = True # make sure it is visible in GUI
+        return self
+
+    def __str__(self): return self.name
 
 ################################ Theory ###############################
 
@@ -545,7 +557,7 @@ class Rule(object):
                        for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars}  # merge
 
-        self.symbol = self.symbol.annotate(symbol_decls, q_v).mark_subtences()
+        self.symbol = self.symbol.annotate(symbol_decls, q_v)
         self.args = [arg.annotate(symbol_decls, q_v).mark_subtences() for arg in self.args]
         self.out = self.out.annotate(symbol_decls, q_v).mark_subtences() if self.out else self.out
         self.body = self.body.annotate(symbol_decls, q_v).mark_subtences()
@@ -678,7 +690,7 @@ class Interpretation(object):
         self.arity = len(self.tuples[0].args)  # there must be at least one tuple !
         if self.function and 1 < self.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
-        self.default = self.default if self.function else Symbol(name='false')
+        self.default = self.default if self.function else FALSE
         self.default = self.default.annotate(symbol_decls, {})
 
         def interpret(theory, rank, args, tuples=None):

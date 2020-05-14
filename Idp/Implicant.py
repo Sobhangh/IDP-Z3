@@ -31,7 +31,7 @@ from debugWithYamlLog import log_calls
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, Symbol, NumberConstant, Brackets, Arguments, \
+                    AppliedSymbol, Variable, NumberConstant, Brackets, Arguments, \
                     Fresh_Variable, TRUE, FALSE, ZERO
 
 def _if_subtence(self, truth):

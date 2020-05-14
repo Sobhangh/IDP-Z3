@@ -9,5 +9,5 @@ Steps to repeat:
 * select 4 nonetheless: GUI is updated, but an empty explain box appears.
 
 Options:
-- [ ] auto-hide empty explain box
+- [x] auto-hide empty explain box
 - [ ] ignore possible values when a value has been entered
