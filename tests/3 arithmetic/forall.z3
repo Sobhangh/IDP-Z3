@@ -15,9 +15,9 @@ view expanded
 -- theory -----------------------------------
 p
 
-(ForAll(c!4,
-        Or(Not(And(c!4 > 1, c!4 < 3)),
-           And(c!4 > 0, c!4 < 3)))) ==
+(ForAll(c!6,
+        Or(Not(And(c!6 > 1, c!6 < 3)),
+           And(c!6 > 0, c!6 < 3)))) ==
 q
 
 -- subtences ------------------------------------

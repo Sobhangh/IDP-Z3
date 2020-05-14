@@ -70,6 +70,8 @@ class Expression(object):
 
     def copy(self):
         " create a deep copy (except for Constructor and NumberConstant) "
+        if type(self) in [Constructor, NumberConstant]:
+            return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
         out.value       = None if out.value       is None else out.value      .copy()
@@ -88,6 +90,7 @@ class Expression(object):
     def __repr__(self): return str(self)
 
     def __str__(self):
+        assert self.value is not self
         if self.value   is not None: 
             return str(self.value)
         if self.simpler is not None: 

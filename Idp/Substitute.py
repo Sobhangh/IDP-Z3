@@ -55,6 +55,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branc
         else:
             self.simpler = simpler
     assert self.value is None or type(self.value) in [Constructor, NumberConstant]
+    assert self.value is not self # avoid infinite loops
     
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -79,6 +80,7 @@ def Expression_substitute(self, e0, e1, todo=None):
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
+        if self.code == e1.code: return self # to avoid infinite loops
         return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         # will update self.simpler

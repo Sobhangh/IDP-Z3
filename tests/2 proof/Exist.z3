@@ -3,9 +3,11 @@
 vocabulary {
     type color constructed from {red, blue, green}
     p
+    q(color)
 } 
 theory {
     p <=> (?c[color]: c~=red).
+    ?c[color]: q(c).
 }
 view expanded
 -- vocabulary -------------------------------
@@ -13,13 +15,20 @@ view expanded
 -- theory -----------------------------------
 p
 
+Or(q(red), q(blue), q(green))
+
 -- subtences ------------------------------------
 p
 ∃c[color] : c ≠ red
+∃c[color] : q(c)
 
 -- GUILines ------------------------------------
 p
+q(red)
+q(blue)
+q(green)
 ∃c[color] : c ≠ red
+∃c[color] : q(c)
 
 -- case -------------------------------------
 Type:        
@@ -28,16 +37,19 @@ Definitions:
   
 Universals:  
   p
+  ∃c[color] : q(c)
 Consequences:
   
 Simplified:  
+  true
   true
 Irrelevant:  
   ? ∃c[color] : c ≠ red
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'}],
+{'symbols': [{'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'expanded'},
+             {'idpname': 'q', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
@@ -48,4 +60,29 @@ Irrelevant:
              'relevant': True,
              'status': 'UNIVERSAL',
              'typ': 'Bool',
-             'value': True}}}
+             'value': True}},
+ 'q': {'q(blue)': {'environmental': False,
+                   'normal': True,
+                   'reading': 'q(blue)',
+                   'relevant': True,
+                   'status': 'UNKNOWN',
+                   'typ': 'Bool'},
+       'q(green)': {'environmental': False,
+                    'normal': True,
+                    'reading': 'q(green)',
+                    'relevant': True,
+                    'status': 'UNKNOWN',
+                    'typ': 'Bool'},
+       'q(red)': {'environmental': False,
+                  'normal': True,
+                  'reading': 'q(red)',
+                  'relevant': True,
+                  'status': 'UNKNOWN',
+                  'typ': 'Bool'},
+       '∃c[color] : q(c)': {'environmental': False,
+                            'normal': False,
+                            'reading': '∃c[color] : q(c)',
+                            'relevant': True,
+                            'status': 'UNIVERSAL',
+                            'typ': 'Bool',
+                            'value': True}}}
