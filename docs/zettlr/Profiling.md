@@ -5,3 +5,5 @@ tags: #Perf
 –-
 
 [Types of profilers](https://blog.blackfire.io/profiling-101-for-python-developers-the-many-types-of-profilers-2-6.html)
+
+You can pause a long program in debug mode, by clicking the pause button (in VSCode, PyCharm, …).  This indicates where it spends most of its time.
