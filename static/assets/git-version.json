@@ -1,10 +1,10 @@
 {
-  "dirty": true,
-  "raw": "v0.1-163-geba7aae-dirty",
-  "hash": "geba7aae",
-  "distance": 163,
+  "dirty": false,
+  "raw": "v0.1-128-ge367971",
+  "hash": "ge367971",
+  "distance": 128,
   "tag": "v0.1",
   "semver": null,
-  "suffix": "163-geba7aae-dirty",
+  "suffix": "128-ge367971",
   "semverString": ""
 }
