@@ -642,7 +642,7 @@ class NumberConstant(Expression):
             self.translated = Q(int(ops[0]), int(ops[1]))
             self.type = 'real'
         elif '.' in self.number:
-            self.translated = float(eval(self.number))
+            self.translated = float(eval(self.number if not self.number.endswith('?') else self.number[:-1]))
             self.type = 'real'
         else:
             self.translated = int(self.number)

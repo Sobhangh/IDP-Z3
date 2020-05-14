@@ -3,34 +3,40 @@
 vocabulary {
     
      Base : real
+     Height: real
      p
 }
 
 theory {
-
-p => 16.0 = Base*Base.
-0 < Base.
-p.
+  p => 15.0 = Base*Base.
+  0 < Base.
+  p.
+  Height = 8.0/3.
 }
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-Or(Not(p), Base*Base == 16)
+Or(Not(p), Base*Base == 15)
 
 Base > 0
 
 p
 
+Height == 5333333333333333/2000000000000000
+
 -- subtences ------------------------------------
 p
-16.0 = Base * Base
+15.0 = Base * Base
 0 < Base
+Height = 8.0 / 3
 
 -- GUILines ------------------------------------
 Base
+Height
 p
-16.0 = Base * Base
+15.0 = Base * Base
 0 < Base
+Height = 8.0 / 3
 
 -- case -------------------------------------
 Type:        
@@ -40,10 +46,13 @@ Definitions:
 Universals:  
   p
   0 < Base
+  Height = 8.0 / 3
+  Height -> 2.6666666666666665
 Consequences:
-  16.0 = Base * Base
-  Base -> 4
+  15.0 = Base * Base
+  Base -> 3.8729833462?
 Simplified:  
+  false
   true
   true
   true
@@ -53,6 +62,7 @@ Irrelevant:
 
 -- meta -------------------------------------
 {'symbols': [{'idpname': 'Base', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': 'Height', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
              {'idpname': 'p', 'priority': 'core', 'showOptimize': True, 'type': 'proposition', 'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
@@ -65,9 +75,9 @@ Irrelevant:
                        'status': 'UNIVERSAL',
                        'typ': 'Bool',
                        'value': True},
-          '16.0 = Base * Base': {'environmental': False,
+          '15.0 = Base * Base': {'environmental': False,
                                  'normal': False,
-                                 'reading': '16.0 = Base * Base',
+                                 'reading': '15.0 = Base * Base',
                                  'relevant': True,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
@@ -78,7 +88,21 @@ Irrelevant:
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Real',
-                   'value': '4'}},
+                   'value': '3.8729833462'}},
+ 'Height': {'Height': {'environmental': False,
+                       'normal': True,
+                       'reading': 'Height',
+                       'relevant': True,
+                       'status': 'UNIVERSAL',
+                       'typ': 'Real',
+                       'value': '2.6666666666666665'},
+            'Height = 8.0 / 3': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'Height = 8.0 / 3',
+                                 'relevant': True,
+                                 'status': 'UNIVERSAL',
+                                 'typ': 'Bool',
+                                 'value': True}},
  'p': {'p': {'environmental': False,
              'normal': True,
              'reading': 'p',

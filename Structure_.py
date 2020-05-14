@@ -235,7 +235,10 @@ class Structure_(object):
                 s = self.m.setdefault(symb, {})
                 if key in s:
                     if value is not None:
-                        s[key]["value"] = True if value==TRUE else False if value==FALSE else str(value)
+                        if type(value)==NumberConstant:
+                            s[key]["value"] = str(eval(str(value).replace('?', '')))
+                        else:
+                            s[key]["value"] = True if value==TRUE else False if value==FALSE else str(value)
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']

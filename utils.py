@@ -56,7 +56,7 @@ def in_list(q, ls):
 def is_number(s):
     if str(s) in ['True', 'False']: return False
     try:
-        float(eval(str(s))) # accepts "2/3"
+        float(eval(str(s if not s.endswith('?') else s[:-1]))) # accepts "2/3" or "3.1415?"
         return True
     except:
         return False

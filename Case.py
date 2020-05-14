@@ -158,7 +158,7 @@ class Case:
                         if str(val1) != str(atom.reified()): # if not irrelevant
                         
                             val = str_to_IDP(self.idp, str(val1))
-                            assert val.translate() == val1, str(val) + " is not the same as " + str(val1)
+                            assert str(val.translate()) == str(val1).replace('?', ''), str(val.translate()) + " is not the same as " + str(val1)
 
                             solver.push()
                             solver.add(Not(atom.reified()==val1))
