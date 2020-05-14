@@ -85,6 +85,11 @@ class Expression(object):
         if other.value   is not None: return self == other.value
         if other.simpler is not None: return self == other.simpler
 
+        if type(self)==Brackets or (type(self)==AQuantification and len(self.vars)==0):
+            return self.sub_exprs[0] == other
+        if type(other)==Brackets or (type(other)==AQuantification and len(other.vars)==0):
+            return self == other.sub_exprs[0]
+
         return self.str == other.str and type(self)==type(other)
 
     def __repr__(self): return str(self)
@@ -669,7 +674,6 @@ class Brackets(Expression):
         else: # Annotations instance
             self.annotations = annotations.annotations
         self.fresh_vars = set()
-        self.simpler = self.sub_exprs[0]
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"

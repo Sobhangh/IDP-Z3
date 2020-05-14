@@ -67,6 +67,16 @@ def implicants(self, truth=TRUE): # dead code
 Constructor.implicants = implicants
 
 
+# class AQuantification ############################################################
+
+def implicants(self, truth=TRUE):
+    out = _if_subtence(self, truth)
+    if self.vars == []: # expanded
+        return self.sub_exprs[0].implicants(truth) + out
+    return out
+AQuantification.implicants = implicants
+
+
 # class ADisjunction ############################################################
 
 def implicants1(self, truth=TRUE):
@@ -106,3 +116,10 @@ def implicants1(self, truth=TRUE):
             return [(self.sub_exprs[1], operands1[0])]
     return []
 AComparison.implicants1 = implicants1
+
+
+# class Brackets ############################################################
+
+def implicants(self, truth=TRUE):
+    return self.sub_exprs[0].implicants(truth) + _if_subtence(self, truth)
+Brackets.implicants = implicants

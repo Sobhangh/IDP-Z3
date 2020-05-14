@@ -185,7 +185,7 @@ def expand_quantifiers(self, theory):
             out = AConjunction.make('∧', forms)
         else:
             out = ADisjunction.make('∨', forms)
-        return self._change(simpler=out, sub_exprs=[out])
+        return self._change(sub_exprs=[out])
     return self._change(sub_exprs=forms)
 AQuantification.expand_quantifiers = expand_quantifiers
 
@@ -487,5 +487,5 @@ Fresh_Variable.substitute = substitute
 
 def update_exprs(self, new_expr_generator):
     expr = next(new_expr_generator)
-    return self._change(sub_exprs=[expr], simpler=expr, value=expr.value)
+    return self._change(sub_exprs=[expr], value=expr.value)
 Brackets.update_exprs = update_exprs
