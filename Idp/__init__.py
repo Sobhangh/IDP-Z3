@@ -449,7 +449,7 @@ class Theory(object):
             out.append(i.translate())
             # optional : self.translated.extend(i.justifications())
         for d in self.definitions:
-            out += d.translate(idp)
+            out += d.translate()
         return out
 
 
@@ -507,7 +507,7 @@ class Definition(object):
             out.update(rule.unknown_symbols())
         return out
 
-    def translate(self, idp):
+    def translate(self):
         return [rule.translate() for rule in self.clark.values()]
 
 

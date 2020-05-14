@@ -242,7 +242,7 @@ class Case:
     def translate(self, all_: bool = True) -> BoolRef:
         self.translated = And(
             self.typeConstraints.translate(self.idp)
-            + sum((d.translate(self.idp) for d in self.definitions), [])
+            + sum((d.translate() for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None and (all_ or not l.sentence.has_environmental(False))]
             + [c.translate() for c in self.simplified
