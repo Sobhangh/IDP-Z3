@@ -143,7 +143,7 @@ class Expression(object):
         for e in self.sub_exprs:
             e.collect(questions, all_)
 
-    def questions(self): # for debugging
+    def _questions(self): # for debugging
         questions = OrderedSet()
         self.collect(questions)
         return questions
