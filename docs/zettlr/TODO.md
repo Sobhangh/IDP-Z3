@@ -6,7 +6,6 @@ tags:
 - [ ] Aanbesteding demo
 - [ ] [[AWS hosting]] [[20200401113342]] or Google App Engine
 
-- [ ] flatten nested applicaton f(f(x))
 - [ ] Explanations: inject values in message
 - [ ] [[consequence in dropdown]] [[20200408162211]] 
 - [ ] Float ranges
@@ -27,6 +26,7 @@ tags:
 - [ ] 'Expand all' or list (instead of View expanded/normal)
 
 #### Research topics / may take a while:
+- [ ] use list of simplifications steps for explain
 - [ ] Support for partial functions
 - [ ] Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
 - [ ] Support for non-linear equations [[20200328122541]]
@@ -35,6 +35,7 @@ tags:
 
 
 #### Of dubious benefit / may never be done:
+- [ ] flatten nested applicaton f(f(x))
 - [ ] Type inference (p. 14 of the IDP3 manual)
 - [ ] Support for type hierarchy
 - [ ] Support for namespaces
@@ -55,8 +56,6 @@ tags:
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
-- [ ] reduce number of substitution
-    - [ ] Expr.questions for each constraint → do not substitute if no matching question
 - [ ] merge case.co_constraints and case.definitions (many overlaps)
 - [ ] rewrite in Nim !
 - [ ] use sets to avoid duplicates (e.g. constraints)
@@ -77,7 +76,6 @@ tags:
 - [ ] use EXIST, … instead of AQuantifier.make(), for readability
 - [ ] move consequences into case.simplified ?
 - [ ] sort the operands of equality
-- [ ] AppliedSymbol is_subtence only if no Fresh_Variable !
 - [ ] Expr.sentence -> Expr.ranking ?
 - [ ] distinguish between x=1 entry and x=1 atom in output structure
 - [ ] p(real) should be possible

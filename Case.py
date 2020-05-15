@@ -220,6 +220,7 @@ class Case:
 
                 self.simplified = new_simplified
 
+                """ # useful for explain ??
                 # simplify assignments
                 # e.g. 'Sides=4' becomes false when Sides becomes 3. Nothing to propagate.
                 for old_ass in self.assignments.values():
@@ -241,6 +242,7 @@ class Case:
                         else: # accept new value
                             new_ass = old_ass.update(new_constraint, 
                                 new_constraint.value, CONSQ, self)
+                """
                             
 
     def translate(self, all_: bool = True) -> BoolRef:
