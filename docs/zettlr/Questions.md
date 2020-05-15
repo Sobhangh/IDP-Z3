@@ -15,7 +15,7 @@ There are different types of assignments:
 * copy of an expression (by .copy())
 
 What do we need ?
-* for display : all applied symbols from vocabulary + comparisons + quantified expressions
+* for display : all applied symbols + comparisons + quantified expressions
 * for propagate: don't care (Z3 will do what's needed)
 * for relevance: same as for display (Z3 consequences will reduce the other expressions anyway)
 * for explain: all free comparisons and predicates, to be as explicit as possible over the steps
@@ -23,7 +23,7 @@ What do we need ?
 Principles:
 * Case.viewed < Idp.viewable < Case.assignments
     * viewable (= GUIlines)
-        * all ground instances from vocabulary + quantified expressions + free applied symbols and free comparisons before expansion
+        * all ground instances + quantified expressions + free applied symbols and free comparisons before expansion
     * shown ≤ showable
         * based on normal view vs expanded view → is_visible
     * all (→ Assignments)

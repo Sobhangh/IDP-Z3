@@ -13,7 +13,7 @@ The relevant atoms are those remaining in the simplified expressions **+ the jus
 This can also be used to explain consequences !
 
 TODO:
-- [x] replace justification by just_branch
+- [x] replace justification by just_branch/co_constraints
 - [x] add Expression.proof = OrderedSet[Expression] the proof of an atom = assignments + constraint
 - [ ] _change:(proof, …) : add proof → no Brackets anymore → Expression.eq
 - [ ] getsubtences: add subtences of a proof

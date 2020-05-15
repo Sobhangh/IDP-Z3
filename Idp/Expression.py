@@ -141,8 +141,10 @@ class Expression(object):
         Questions are the terms and the simplest sub-formula that can be evaluated.
         'collect uses the simplified version of the expression.
 
-        all_=False : ignore non-ground applied symbols, 
-                     and formulas under quantifiers (even if expanded)
+        all_=False : ignore formulas under quantifiers (even if expanded)
+                 and AppliedSymbol interpreted in a structure
+
+        default implementation for Constructor, IfExpr, AUnary, Fresh_Variable, Number_constant, Brackets
         """
 
         for e in self.sub_exprs:
@@ -164,12 +166,9 @@ class Expression(object):
             e.co_constraints(co_constraints)
 
     def subtences(self):
-        out = {}
-        if self.is_subtence and self.code not in ['true', 'false']:
-            out[self.code] = self
-        out.update(mergeDicts(e.subtences() for e in self.sub_exprs))
-        if self.co_constraint is not None:
-            out.update(self.co_constraint.subtences())
+        questions = OrderedSet()
+        self.collect(questions, all_=False)
+        out = {k: v for k, v in questions.items() if v.type == 'bool'}
         return out
 
     def as_ground(self): 
@@ -555,9 +554,8 @@ class AppliedSymbol(Expression):
         return self
 
     def collect(self, questions, all_=True):
-        if len(self.fresh_vars)==0:
-            if all_ or all(e.as_ground() is not None for e in self.sub_exprs):
-                questions.add(self)
+        if len(self.fresh_vars)==0 and self.decl.interpretation is None and self.simpler is None:
+            questions.add(self)
         for e in self.sub_exprs:
             e.collect(questions, all_)
         if self.co_constraint is not None:
