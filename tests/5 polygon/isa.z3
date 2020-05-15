@@ -142,10 +142,6 @@ Type:
 Definitions: 
   
 Universals:  
-  ∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
-  ∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)
-  ∀st[subtype] : isa(st,typeOf(st))
-  Type = typeOf(Subtype)
   asi(1tri angle,regular_triangle)
   asi(1tri angle,right_triangle)
   ~asi(1tri angle,rectangle)
@@ -158,11 +154,10 @@ Universals:
   typeOf(right_triangle) -> 1tri angle
   typeOf(rectangle) -> quadrilateral
   typeOf(square) -> quadrilateral
-  isa(regular_triangle,typeOf(regular_triangle))
-  isa(right_triangle,typeOf(right_triangle))
-  isa(rectangle,typeOf(rectangle))
-  isa(square,typeOf(square))
-Consequences:
+  ∀t[type]st[subtype] : isa(st,t) ⇔ asi(t,st)
+  ∀t[type]st[subtype] : typeOf(st) = t ⇔ isa(st,t)
+  ∀st[subtype] : isa(st,typeOf(st))
+  Type = typeOf(Subtype)
   typeOf(regular_triangle) = 1tri angle
   ~typeOf(regular_triangle) = quadrilateral
   typeOf(right_triangle) = 1tri angle
@@ -171,6 +166,8 @@ Consequences:
   typeOf(rectangle) = quadrilateral
   ~typeOf(square) = 1tri angle
   typeOf(square) = quadrilateral
+Consequences:
+  
 Simplified:  
   true
   true
@@ -186,10 +183,6 @@ Simplified:
 Irrelevant:  
   ~typeOf(regular_triangle) = quadrilateral
   ~typeOf(right_triangle) = quadrilateral
-  isa(regular_triangle,typeOf(regular_triangle))
-  isa(right_triangle,typeOf(right_triangle))
-  isa(rectangle,typeOf(rectangle))
-  isa(square,typeOf(square))
 Co-constraints:
   
 
@@ -344,14 +337,14 @@ Co-constraints:
                                                'normal': False,
                                                'reading': 'typeOf(rectangle) = 1tri angle',
                                                'relevant': True,
-                                               'status': 'CONSEQUENCE',
+                                               'status': 'UNIVERSAL',
                                                'typ': 'Bool',
                                                'value': False},
             'typeOf(rectangle) = quadrilateral': {'environmental': False,
                                                   'normal': False,
                                                   'reading': 'typeOf(rectangle) = quadrilateral',
                                                   'relevant': True,
-                                                  'status': 'CONSEQUENCE',
+                                                  'status': 'UNIVERSAL',
                                                   'typ': 'Bool',
                                                   'value': True},
             'typeOf(regular_triangle)': {'environmental': False,
@@ -366,14 +359,14 @@ Co-constraints:
                                                       'normal': False,
                                                       'reading': 'typeOf(regular_triangle) = 1tri angle',
                                                       'relevant': True,
-                                                      'status': 'CONSEQUENCE',
+                                                      'status': 'UNIVERSAL',
                                                       'typ': 'Bool',
                                                       'value': True},
             'typeOf(regular_triangle) = quadrilateral': {'environmental': False,
                                                          'normal': False,
                                                          'reading': 'typeOf(regular_triangle) = quadrilateral',
                                                          'relevant': False,
-                                                         'status': 'CONSEQUENCE',
+                                                         'status': 'UNIVERSAL',
                                                          'typ': 'Bool',
                                                          'value': False},
             'typeOf(right_triangle)': {'environmental': False,
@@ -388,14 +381,14 @@ Co-constraints:
                                                     'normal': False,
                                                     'reading': 'typeOf(right_triangle) = 1tri angle',
                                                     'relevant': True,
-                                                    'status': 'CONSEQUENCE',
+                                                    'status': 'UNIVERSAL',
                                                     'typ': 'Bool',
                                                     'value': True},
             'typeOf(right_triangle) = quadrilateral': {'environmental': False,
                                                        'normal': False,
                                                        'reading': 'typeOf(right_triangle) = quadrilateral',
                                                        'relevant': False,
-                                                       'status': 'CONSEQUENCE',
+                                                       'status': 'UNIVERSAL',
                                                        'typ': 'Bool',
                                                        'value': False},
             'typeOf(square)': {'environmental': False,
@@ -410,14 +403,14 @@ Co-constraints:
                                             'normal': False,
                                             'reading': 'typeOf(square) = 1tri angle',
                                             'relevant': True,
-                                            'status': 'CONSEQUENCE',
+                                            'status': 'UNIVERSAL',
                                             'typ': 'Bool',
                                             'value': False},
             'typeOf(square) = quadrilateral': {'environmental': False,
                                                'normal': False,
                                                'reading': 'typeOf(square) = quadrilateral',
                                                'relevant': True,
-                                               'status': 'CONSEQUENCE',
+                                               'status': 'UNIVERSAL',
                                                'typ': 'Bool',
                                                'value': True},
             '∀st[subtype] : isa(st,typeOf(st))': {'environmental': False,

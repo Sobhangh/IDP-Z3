@@ -329,13 +329,20 @@ Universals:
   ∀n[side] : Angle(n) = 0 ⇔ Vertices < n
   ∀n[side] : Length(n) = 0 ⇔ Sides < n
 Consequences:
+  Sides -> 4
+  Vertices -> 4
+  Type -> quadrilateral
+  Angle(1) -> 90
+  Angle(2) -> 90
+  Angle(3) -> 90
+  Angle(4) -> 90
+  Convex
   ~Type = triangle
   ~Sides = 3
   Type = quadrilateral
   Sides = 4
   ~Vertices = 3
   Vertices = 4
-  Convex
   ∀n[side] : Angle(n) < 180
   ~Subtype = right_triangle
   ~Subtype = regular_triangle
@@ -346,13 +353,6 @@ Consequences:
   Length(2) = Length(4)
   Length(1) ≤ Length(2) + Length(3)
   Length(3) ≤ Length(1) + Length(2)
-  Sides -> 4
-  Vertices -> 4
-  Type -> quadrilateral
-  Angle(1) -> 90
-  Angle(2) -> 90
-  Angle(3) -> 90
-  Angle(4) -> 90
 Simplified:  
   (true)
   (true)
@@ -381,11 +381,6 @@ Simplified:
   true
   false ∨ false ∨ Subtype = rectangle ∨ Subtype = square ∨ false
 Irrelevant:  
-  ~∀n[side] : Angle(n) = 60 ∨ Sides < n
-  ∃n[side] : Angle(n) = 90
-  Length(1) ≤ Length(2) + Length(3)
-  ? Length(2) ≤ Length(3) + Length(1)
-  Length(3) ≤ Length(1) + Length(2)
   ? Large(1)
   ? Large(2)
   ? Large(3)
@@ -393,6 +388,11 @@ Irrelevant:
   ? Base
   ? Height
   ? Surface
+  ~∀n[side] : Angle(n) = 60 ∨ Sides < n
+  ∃n[side] : Angle(n) = 90
+  Length(1) ≤ Length(2) + Length(3)
+  ? Length(2) ≤ Length(3) + Length(1)
+  Length(3) ≤ Length(1) + Length(2)
 Co-constraints:
   
 

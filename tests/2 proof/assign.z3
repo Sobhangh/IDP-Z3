@@ -30,8 +30,8 @@ Type:
 Definitions: 
   
 Universals:  
-  x = 0
   x -> 0
+  x = 0
 Consequences:
   
 Simplified:  

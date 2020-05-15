@@ -85,7 +85,7 @@ class Assignment(object):
         return f"{pre}{self.sentence.annotations['reading']}{post}"
 
     def __log__(self):
-        return {'sentence': self.sentence, 'value': self.value}
+        return self.value
 
     def to_json(self) -> str: return str(self)
 

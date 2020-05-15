@@ -74,24 +74,24 @@ Universals:
   p
   a -> red
   b -> red
-Consequences:
   b = red
-  ~b = blue
   a = red
+Consequences:
+  c -> red
+  ~b = blue
   ~a = blue
   c = red
   ~c = blue
-  c -> red
 Simplified:  
   true
   true
   true
 Irrelevant:  
+  c -> red
   ~b = blue
   ~a = blue
   c = red
   ~c = blue
-  c -> red
 Co-constraints:
   true
 
@@ -126,7 +126,7 @@ Co-constraints:
                    'normal': False,
                    'reading': 'a = red',
                    'relevant': True,
-                   'status': 'CONSEQUENCE',
+                   'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True}},
  'b': {'b': {'environmental': False,
@@ -148,7 +148,7 @@ Co-constraints:
                    'normal': False,
                    'reading': 'b = red',
                    'relevant': True,
-                   'status': 'CONSEQUENCE',
+                   'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True}},
  'c': {'c': {'environmental': False,

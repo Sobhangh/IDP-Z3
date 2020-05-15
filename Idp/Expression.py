@@ -48,7 +48,6 @@ class Expression(object):
     COUNT = 0
     def __init__(self):
         # .sub_exprs : list of Expression, to be translated to Z3
-        self.is_subtence = None           # True if sub-sentence in original code
         self.simpler = None               # a simplified version of the expression, or None
         self.value = None                 # a python value (bool, int, float, string) or None
         self.status = None                # explains how the value was found
@@ -126,12 +125,6 @@ class Expression(object):
         else:
             for e in self.sub_exprs: 
                 self.fresh_vars.update(e.fresh_vars)
-        return self
-
-    def mark_subtences(self):
-        for e in self.sub_exprs: 
-            e.mark_subtences()
-        self.is_subtence = False # by default
         return self
 
     def collect(self, questions, all_=True):
@@ -267,11 +260,10 @@ class AQuantification(Expression):
         self.type = 'bool'
 
     @classmethod
-    def make(cls, q, decls, f, is_subtence=False):
+    def make(cls, q, decls, f):
         "make and annotate a quantified formula"
         out = cls(q=q, vars=list(decls.values()), sorts=list(v.decl for v in decls.values()), f=f)
         out.q_vars = decls
-        out.is_subtence = is_subtence
         return out.annotate1()
 
     def __str1__(self):
@@ -293,11 +285,6 @@ class AQuantification(Expression):
         super().annotate1()
         # remove q_vars
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
-        return self
-
-    def mark_subtences(self):
-        super().mark_subtences()
-        self.is_subtence = (len(self.fresh_vars)==0)
         return self
 
     def collect(self, questions, all_=True):
@@ -327,7 +314,7 @@ class BinaryOperator(Expression):
                else None
 
     @classmethod
-    def make(cls, ops, operands, is_subtence=False):
+    def make(cls, ops, operands):
         """ creates a BinaryOp
             beware: cls must be specific for ops !"""
         if len(operands) == 1:
@@ -335,7 +322,6 @@ class BinaryOperator(Expression):
         if isinstance(ops, str):
             ops = [ops] * (len(operands)-1)
         out = (cls)(sub_exprs=operands, operator=ops)
-        out.is_subtence = is_subtence
         return out.annotate1().simplify1()
         
     def __str1__(self):
@@ -355,12 +341,6 @@ class BinaryOperator(Expression):
                    else 'int'  if any(e.type == 'int'  for e in self.sub_exprs) \
                    else self.sub_exprs[0].type # constructed type, without arithmetic
         return super().annotate1()
-
-    def mark_subtences(self):
-        super().mark_subtences()
-        if 0 < len(self.operator) and self.operator[0] in '=<>≤≥≠':
-            self.is_subtence = (len(self.fresh_vars)==0)
-        return self
 
     def collect(self, questions, all_=True):
         if len(self.fresh_vars)==0 and self.operator[0] in '=<>≤≥≠':
@@ -433,9 +413,8 @@ class AUnary(Expression):
         super().__init__()
 
     @classmethod
-    def make(cls, op, expr, is_subtence=False):
+    def make(cls, op, expr):
         out = AUnary(operator=op, f=expr)
-        out.is_subtence = is_subtence
         return out.annotate1().simplify1()
 
     def __str1__(self):
@@ -497,10 +476,6 @@ class AAggregate(Expression):
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
         return self
 
-    def mark_subtences(self):
-        super().mark_subtences()
-        return self
-
     def collect(self, questions, all_=True):
         if len(self.fresh_vars)==0:
             questions.add(self)
@@ -522,7 +497,7 @@ class AppliedSymbol(Expression):
         self.name = self.s.name
 
     @classmethod
-    def make(cls, symbol, args, is_subtence=False):
+    def make(cls, symbol, args):
         if 0 < len(args):
             out = cls(s=symbol, args=Arguments(sub_exprs=args))
             out.sub_exprs = args
@@ -530,7 +505,6 @@ class AppliedSymbol(Expression):
             out = Variable(name=symbol.name)
         # annotate
         out.decl = symbol.decl
-        out.is_subtence = is_subtence
         return out.annotate1()
 
     def __str1__(self):
@@ -544,14 +518,6 @@ class AppliedSymbol(Expression):
         self.decl = q_vars[self.s.name].decl if self.s.name in q_vars else symbol_decls[self.s.name]
         self.normal = True
         return self.annotate1()
-
-    def mark_subtences(self):
-        super().mark_subtences()
-        if any(type(e) in [Brackets, AppliedSymbol, AUnary, BinaryOperator] for e in self.sub_exprs):
-            self.is_subtence = False
-        else:
-            self.is_subtence = self.type == 'bool' and len(self.fresh_vars)==0
-        return self
 
     def collect(self, questions, all_=True):
         if len(self.fresh_vars)==0 and self.decl.interpretation is None and self.simpler is None:
@@ -604,10 +570,6 @@ class Variable(AppliedSymbol):
             self.normal = True # make sure it is visible in GUI
         return self.annotate1()
 
-    def mark_subtences(self):
-        self.is_subtence = self.type == 'bool'
-        return self
-
     def collect(self, questions, all_=True):
         questions.add(self)
         if self.co_constraint is not None:
@@ -633,9 +595,6 @@ class Fresh_Variable(Expression):
 
     def __str1__(self): return self.name
 
-    def mark_subtences(self):
-        return self
-
 
 class NumberConstant(Expression):
     PRECEDENCE = 200
@@ -660,7 +619,6 @@ class NumberConstant(Expression):
     
     def __str__(self): return self.number
 
-    def mark_subtences(self): return self
     def as_ground(self)     : return self
 
 ZERO = NumberConstant(number='0')

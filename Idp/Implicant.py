@@ -20,7 +20,7 @@
 """
 
 Computes the implicants of an expression, 
-i.e., the sub-expressions that must be true for the expression to be true
+i.e., the sub-expressions that must be true (or false) for the expression to be true
 
 
 """
@@ -34,27 +34,25 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
                     AppliedSymbol, Variable, NumberConstant, Brackets, Arguments, \
                     Fresh_Variable, TRUE, FALSE, ZERO
 
-def _if_subtence(self, truth):
-    return [(self, truth)] if self.is_subtence or type(self) in [AppliedSymbol, Variable] \
-      else []
 
 def _not(truth):
     return FALSE if truth == TRUE else TRUE
 
 # class Expression ############################################################
 
-def implicants(self, truth=TRUE):
+def implicants(self, assignments, truth=TRUE):
+    " returns the implicants of self=truth that are in assignments "
     if self.value is not None: 
         return []
-    out = _if_subtence(self, truth)
+    out = [(self, truth)] if self.code in assignments else []
     if self.simpler is not None: 
-        out = self.simpler.implicants(truth) + out
+        out = self.simpler.implicants(assignments, truth) + out
         return out
-    out = self.implicants1(truth) + out
+    out = self.implicants1(assignments, truth) + out
     return out
 Expression.implicants = implicants
 
-def implicants1(self, truth):
+def implicants1(self, assignments, truth):
     " returns the list of implicants of self (default implementation) "
     return []
 Expression.implicants1 = implicants1
@@ -62,50 +60,50 @@ Expression.implicants1 = implicants1
 
 # class Constructor ############################################################
 
-def implicants(self, truth=TRUE): # dead code
+def implicants(self, assignments, truth=TRUE): # dead code
     return [] # true or false
 Constructor.implicants = implicants
 
 
 # class AQuantification ############################################################
 
-def implicants(self, truth=TRUE):
-    out = _if_subtence(self, truth)
+def implicants(self, assignments, truth=TRUE):
+    out = [(self, truth)] if self.code in assignments else []
     if self.vars == []: # expanded
-        return self.sub_exprs[0].implicants(truth) + out
+        return self.sub_exprs[0].implicants(assignments, truth) + out
     return out
 AQuantification.implicants = implicants
 
 
 # class ADisjunction ############################################################
 
-def implicants1(self, truth=TRUE):
+def implicants1(self, assignments, truth=TRUE):
     if truth == FALSE:
-        return sum( (e.implicants(truth) for e in self.sub_exprs), [])
+        return sum( (e.implicants(assignments, truth) for e in self.sub_exprs), [])
     return []
 ADisjunction.implicants1 = implicants1
 
 
 # class AConjunction ############################################################
 
-def implicants1(self, truth=TRUE):
+def implicants1(self, assignments, truth=TRUE):
     if truth == TRUE:
-        return sum( (e.implicants(truth) for e in self.sub_exprs), [])
+        return sum( (e.implicants(assignments, truth) for e in self.sub_exprs), [])
     return []
 AConjunction.implicants1 = implicants1
 
 
 # class AUnary ############################################################
 
-def implicants1(self, truth=TRUE):
-    return self.sub_exprs[0].implicants(_not(truth)) if self.operator == '~' \
+def implicants1(self, assignments, truth=TRUE):
+    return self.sub_exprs[0].implicants(assignments, _not(truth)) if self.operator == '~' \
       else []
 AUnary.implicants1 = implicants1
 
 
 # class AComparison ############################################################
 
-def implicants1(self, truth=TRUE):
+def implicants1(self, assignments, truth=TRUE):
     if truth == TRUE and len(self.sub_exprs) == 2 and self.operator == ['=']:
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one a consequence, not a universal
@@ -120,6 +118,7 @@ AComparison.implicants1 = implicants1
 
 # class Brackets ############################################################
 
-def implicants(self, truth=TRUE):
-    return self.sub_exprs[0].implicants(truth) + _if_subtence(self, truth)
+def implicants(self, assignments, truth=TRUE):
+    out = [(self, truth)] if self.code in assignments else []
+    return self.sub_exprs[0].implicants(assignments, truth) + out
 Brackets.implicants = implicants

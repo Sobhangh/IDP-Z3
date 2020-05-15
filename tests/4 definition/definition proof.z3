@@ -57,17 +57,17 @@ Type:
 Definitions: 
   Rule:∀$codeOf!0$[color],$codeOf$[code]: codeOf($codeOf!0$,$codeOf$) ⇔($codeOf!0$ = c ∧ $codeOf$ = a) ∨ (~($codeOf!0$ = c) ∧ $codeOf$ = b)
 Universals:  
-  codeOf(red) = b
   codeOf(red) -> b
+  codeOf(red) = b
 Consequences:
+  codeOf(blue) -> a
+  c -> blue
   ~red = c
   ~codeOf(red) = a
   codeOf(blue) = a
   ~codeOf(blue) = b
   ~c = red
   c = blue
-  codeOf(blue) -> a
-  c -> blue
 Simplified:  
   true
   true

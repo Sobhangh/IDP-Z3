@@ -44,13 +44,13 @@ Type:
 Definitions: 
   
 Universals:  
+  Height -> 2.6666666666666665
   p
   0 < Base
   Height = 8.0 / 3
-  Height -> 2.6666666666666665
 Consequences:
-  15.0 = Base * Base
   Base -> 3.8729833462?
+  15.0 = Base * Base
 Simplified:  
   false
   true

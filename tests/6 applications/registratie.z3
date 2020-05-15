@@ -892,6 +892,8 @@ Simplified:
   Registration_Type = Family_Dwelling ∨ Registration_Type = Social_Dwelling ∨ Registration_Type = Social_Purpose ∨ Registration_Type = Exchange_Unbuilt_Ground ∨ Registration_Type = Professional_Purchase ∨ Registration_Type = Energy_Efficient_Dwelling ∨ Registration_Type = Heritage ∨ Registration_Type = Dwelling_For_Social_Renting ∨ Registration_Type = Other
   Tax = 1 ∨ Tax = 2 ∨ Tax = 4 ∨ Tax = 7 ∨ Tax = 6 ∨ Tax = 10 ∨ Tax = 12
 Irrelevant:  
+  ? Municipality
+  ? Core_City
   ? Municipality = other_Municipal
   ? Municipality = Aalst
   ? Municipality = Antwerpen
@@ -947,8 +949,6 @@ Irrelevant:
   ? Municipality = Huldenberg
   ? Municipality = Kortenberg
   ? Municipality = Tervuren
-  ? Municipality
-  ? Core_City
 Co-constraints:
   
 

@@ -60,25 +60,21 @@ class Case:
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
 
         # initialize .assignments
-        self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.idp.subtences.values()}
+        self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.GUILines.values()}
         self.assignments.update({ atom.code : ass for atom, ass in self.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
 
         # find immediate universals
         for c in self.idp.theory.constraints:
             c = c.copy()
             consequences = []
-            new_constraint = c.substitute(TRUE, TRUE, consequences) # to simplify co_constraint
-            consequences.extend(new_constraint.implicants())
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, consequences) # to simplify co_constraint
+            consequences.extend(new_constraint.implicants(self.assignments))
             if consequences:
                 for sentence, value in consequences:
                     ass = Assignment(sentence, value, Status.UNKNOWN)
                     status = Status.ENV_UNIV if not ass.sentence.has_environmental(False) else Status.UNIVERSAL
                     ass.update(None, None, status, self)
             self.simplified.append(c)
-
-        self.assignments.update({ k : Assignment(t.copy(), None, Status.UNKNOWN) 
-            for k, t in idp.vocabulary.terms.items()
-            if k not in self.assignments })
 
         # annotate self.simplified with questions
         for e in self.simplified:
@@ -197,12 +193,12 @@ class Case:
                 # simplify constraints and propagate consequences
                 new_simplified: List[Expression] = []
                 for constraint in self.simplified:
-                    if old.code in constraint.questions:
+                    if old in constraint.questions:
                         consequences = []
-                        new_constraint = constraint.substitute(old, new, consequences)
+                        new_constraint = constraint.substitute(old, new, self.assignments, consequences)
                         del constraint.questions[old.code]
                         new_constraint.questions = constraint.questions
-                        consequences.extend(new_constraint.implicants())
+                        consequences.extend(new_constraint.implicants(self.assignments))
                         if consequences:
                             for sentence, value in consequences:
                                 if sentence.code in self.assignments:
@@ -211,7 +207,7 @@ class Case:
                                         if (all_ or not constraint.has_environmental(False)):
                                             new_ass = old_ass.update(sentence, value, CONSQ, self)
                                             to_propagate.append(new_ass)
-                                            new_constraint = new_constraint.substitute(sentence, value)
+                                            new_constraint = new_constraint.substitute(sentence, value, self.assignments)
                                     elif old_ass.value != value:
                                         # test: theory{ x=4. x=5. }
                                         self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
@@ -228,7 +224,7 @@ class Case:
                 # e.g. 'Sides=4' becomes false when Sides becomes 3. Nothing to propagate.
                 for old_ass in self.assignments.values():
                     before = str(old_ass.sentence)
-                    new_constraint = old_ass.sentence.substitute(old, new)
+                    new_constraint = old_ass.sentence.substitute(old, new, self.assignments)
                     if before != str(new_constraint) \
                     and (all_ or not new_constraint.has_environmental(False)): # is purely environmental
                         if new_constraint.code in self.assignments \

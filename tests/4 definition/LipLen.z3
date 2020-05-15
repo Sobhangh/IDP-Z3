@@ -49,12 +49,12 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
+  ? LipLen
+  ? JacketDesign
   ? LipLen = Short
   ? LipLen = Standard
   ? JacketDesign = Design_230
   ? JacketDesign = Design_400HP
-  ? LipLen
-  ? JacketDesign
 Co-constraints:
   
 

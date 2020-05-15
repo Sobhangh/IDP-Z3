@@ -13,6 +13,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: None
+      q(red): None
+      q(blue): None
+      q(green): None
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': None
     todo: '[]'
 - processing
   - calling substitute
@@ -29,6 +36,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: None
+        q(red): None
+        q(blue): None
+        q(green): None
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': None
       todo: '[]'
   - processing
   - output:
@@ -50,6 +64,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: None
+        q(red): None
+        q(blue): None
+        q(green): None
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': None
       todo: '[]'
   - processing
     - calling substitute
@@ -66,6 +87,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: None
+          q(red): None
+          q(blue): None
+          q(green): None
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': None
         todo: '[]'
     - processing
       - calling substitute
@@ -82,6 +110,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: None
+            q(red): None
+            q(blue): None
+            q(green): None
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': None
           todo: '[]'
       - processing
         - calling substitute
@@ -98,6 +133,13 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: None
+              q(red): None
+              q(blue): None
+              q(green): None
+              '∀c[color] : c = red': None
+              '∀c[color] : q(c)': None
             todo: '[]'
         - processing
         - output:
@@ -139,6 +181,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): None
+      q(blue): None
+      q(green): None
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': None
     todo: '[]'
 - processing
   - calling substitute
@@ -155,6 +204,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): None
+        q(blue): None
+        q(green): None
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': None
       todo: '[]'
   - processing
     - calling substitute
@@ -171,6 +227,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): None
+          q(blue): None
+          q(green): None
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': None
         todo: '[]'
     - processing
       - calling substitute
@@ -187,6 +250,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): None
+            q(blue): None
+            q(green): None
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': None
           todo: '[]'
       - processing
       - output:
@@ -213,6 +283,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): None
+          q(blue): None
+          q(green): None
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': None
         todo: '[]'
     - processing
       - calling substitute
@@ -229,6 +306,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): None
+            q(blue): None
+            q(green): None
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': None
           todo: '[]'
       - processing
       - output:
@@ -255,6 +339,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): None
+          q(blue): None
+          q(green): None
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': None
         todo: '[]'
     - processing
       - calling substitute
@@ -271,6 +362,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): None
+            q(blue): None
+            q(green): None
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': None
           todo: '[]'
       - processing
       - output:
@@ -307,6 +405,13 @@
       class: Constructor
       code: 'false'
       str: 'false'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
     todo: '[]'
 - processing
   - calling substitute
@@ -323,6 +428,13 @@
         class: Constructor
         code: 'false'
         str: 'false'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
       todo: '[]'
   - processing
   - output:
@@ -344,6 +456,13 @@
         class: Constructor
         code: 'false'
         str: 'false'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
       todo: '[]'
   - processing
     - calling substitute
@@ -360,6 +479,13 @@
           class: Constructor
           code: 'false'
           str: 'false'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
         todo: '[]'
     - processing
       - calling substitute
@@ -376,6 +502,13 @@
             class: Constructor
             code: 'false'
             str: 'false'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
           todo: '[]'
       - processing
         - calling substitute
@@ -392,6 +525,13 @@
               class: Constructor
               code: 'false'
               str: 'false'
+            assignments:
+              p: 'false'
+              q(red): 'true'
+              q(blue): 'true'
+              q(green): 'true'
+              '∀c[color] : c = red': None
+              '∀c[color] : q(c)': 'true'
             todo: '[]'
         - processing
         - output:
@@ -433,11 +573,180 @@
       class: Constructor
       code: 'false'
       str: 'false'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
 - output:
     class: Variable
     code: p
     str: 'false'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AppliedSymbol
+      code: q(red)
+      str: q(red)
+    e0:
+      class: Variable
+      code: p
+      str: 'false'
+    e1:
+      class: Constructor
+      code: 'false'
+      str: 'false'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Constructor
+        code: red
+        str: red
+      e0:
+        class: Variable
+        code: p
+        str: 'false'
+      e1:
+        class: Constructor
+        code: 'false'
+        str: 'false'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+  - output:
+      class: Constructor
+      code: red
+      str: red
+  - returning from substitute
+- output:
+    class: AppliedSymbol
+    code: q(red)
+    str: q(red)
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AppliedSymbol
+      code: q(blue)
+      str: q(blue)
+    e0:
+      class: Variable
+      code: p
+      str: 'false'
+    e1:
+      class: Constructor
+      code: 'false'
+      str: 'false'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Constructor
+        code: blue
+        str: blue
+      e0:
+        class: Variable
+        code: p
+        str: 'false'
+      e1:
+        class: Constructor
+        code: 'false'
+        str: 'false'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+  - output:
+      class: Constructor
+      code: blue
+      str: blue
+  - returning from substitute
+- output:
+    class: AppliedSymbol
+    code: q(blue)
+    str: q(blue)
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AppliedSymbol
+      code: q(green)
+      str: q(green)
+    e0:
+      class: Variable
+      code: p
+      str: 'false'
+    e1:
+      class: Constructor
+      code: 'false'
+      str: 'false'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Constructor
+        code: green
+        str: green
+      e0:
+        class: Variable
+        code: p
+        str: 'false'
+      e1:
+        class: Constructor
+        code: 'false'
+        str: 'false'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+  - output:
+      class: Constructor
+      code: green
+      str: green
+  - returning from substitute
+- output:
+    class: AppliedSymbol
+    code: q(green)
+    str: q(green)
 - returning from substitute
 - calling substitute
 - with_arguments:
@@ -453,6 +762,13 @@
       class: Constructor
       code: 'false'
       str: 'false'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -468,6 +784,13 @@
         class: Constructor
         code: 'false'
         str: 'false'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
     - calling substitute
     - with_arguments:
@@ -483,6 +806,13 @@
           class: Constructor
           code: 'false'
           str: 'false'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
     - processing
     - output:
         class: Constructor
@@ -513,6 +843,13 @@
       class: Constructor
       code: 'false'
       str: 'false'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -528,6 +865,13 @@
         class: Constructor
         code: 'false'
         str: 'false'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
     - calling substitute
     - with_arguments:
@@ -543,6 +887,13 @@
           class: Constructor
           code: 'false'
           str: 'false'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
     - processing
       - calling substitute
       - with_arguments:
@@ -558,6 +909,13 @@
             class: Constructor
             code: 'false'
             str: 'false'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
       - processing
       - output:
           class: Constructor
@@ -583,6 +941,13 @@
           class: Constructor
           code: 'false'
           str: 'false'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
     - processing
       - calling substitute
       - with_arguments:
@@ -598,6 +963,13 @@
             class: Constructor
             code: 'false'
             str: 'false'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
       - processing
       - output:
           class: Constructor
@@ -623,6 +995,13 @@
           class: Constructor
           code: 'false'
           str: 'false'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
     - processing
       - calling substitute
       - with_arguments:
@@ -638,6 +1017,13 @@
             class: Constructor
             code: 'false'
             str: 'false'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
       - processing
       - output:
           class: Constructor
@@ -662,371 +1048,10 @@
 - calling substitute
 - with_arguments:
     self:
-      class: AppliedSymbol
-      code: q(red)
-      str: q(red)
-    e0:
-      class: Variable
-      code: p
-      str: 'false'
-    e1:
-      class: Constructor
-      code: 'false'
-      str: 'false'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Constructor
-        code: red
-        str: red
-      e0:
-        class: Variable
-        code: p
-        str: 'false'
-      e1:
-        class: Constructor
-        code: 'false'
-        str: 'false'
-  - processing
-  - output:
-      class: Constructor
-      code: red
-      str: red
-  - returning from substitute
-- output:
-    class: AppliedSymbol
-    code: q(red)
-    str: q(red)
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AppliedSymbol
-      code: q(blue)
-      str: q(blue)
-    e0:
-      class: Variable
-      code: p
-      str: 'false'
-    e1:
-      class: Constructor
-      code: 'false'
-      str: 'false'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Constructor
-        code: blue
-        str: blue
-      e0:
-        class: Variable
-        code: p
-        str: 'false'
-      e1:
-        class: Constructor
-        code: 'false'
-        str: 'false'
-  - processing
-  - output:
-      class: Constructor
-      code: blue
-      str: blue
-  - returning from substitute
-- output:
-    class: AppliedSymbol
-    code: q(blue)
-    str: q(blue)
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AppliedSymbol
-      code: q(green)
-      str: q(green)
-    e0:
-      class: Variable
-      code: p
-      str: 'false'
-    e1:
-      class: Constructor
-      code: 'false'
-      str: 'false'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Constructor
-        code: green
-        str: green
-      e0:
-        class: Variable
-        code: p
-        str: 'false'
-      e1:
-        class: Constructor
-        code: 'false'
-        str: 'false'
-  - processing
-  - output:
-      class: Constructor
-      code: green
-      str: green
-  - returning from substitute
-- output:
-    class: AppliedSymbol
-    code: q(green)
-    str: q(green)
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
       class: AQuantification
       code: '∀c[color] : q(c)'
       str: q(red) ∧ q(blue) ∧ q(green)
     e0:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: q(red) ∧ q(blue) ∧ q(green)
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    todo: '[]'
-- processing
-- output:
-    class: AQuantification
-    code: '∀c[color] : q(c)'
-    str: 'true'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: Variable
-      code: p
-      str: 'false'
-    e0:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-- output:
-    class: Variable
-    code: p
-    str: 'false'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∀c[color] : c = red'
-      str: 'false'
-    e0:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AConjunction
-        code: true ∧ false ∧ false
-        str: 'false'
-      e0:
-        class: AQuantification
-        code: '∀c[color] : q(c)'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: Constructor
-          code: 'false'
-          str: 'false'
-        e0:
-          class: AQuantification
-          code: '∀c[color] : q(c)'
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-    - output:
-        class: Constructor
-        code: 'false'
-        str: 'false'
-    - returning from substitute
-  - output:
-      class: AConjunction
-      code: true ∧ false ∧ false
-      str: 'false'
-  - returning from substitute
-- output:
-    class: AQuantification
-    code: '∀c[color] : c = red'
-    str: 'false'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e0:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-- output:
-    class: AQuantification
-    code: '∀c[color] : q(c)'
-    str: 'true'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AppliedSymbol
-      code: q(red)
-      str: q(red)
-    e0:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Constructor
-        code: red
-        str: red
-      e0:
-        class: AQuantification
-        code: '∀c[color] : q(c)'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-  - output:
-      class: Constructor
-      code: red
-      str: red
-  - returning from substitute
-- output:
-    class: AppliedSymbol
-    code: q(red)
-    str: q(red)
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AppliedSymbol
-      code: q(blue)
-      str: q(blue)
-    e0:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Constructor
-        code: blue
-        str: blue
-      e0:
-        class: AQuantification
-        code: '∀c[color] : q(c)'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-  - output:
-      class: Constructor
-      code: blue
-      str: blue
-  - returning from substitute
-- output:
-    class: AppliedSymbol
-    code: q(blue)
-    str: q(blue)
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AppliedSymbol
-      code: q(green)
-      str: q(green)
-    e0:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Constructor
-        code: green
-        str: green
-      e0:
-        class: AQuantification
-        code: '∀c[color] : q(c)'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-  - output:
-      class: Constructor
-      code: green
-      str: green
-  - returning from substitute
-- output:
-    class: AppliedSymbol
-    code: q(green)
-    str: q(green)
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e0:
       class: AppliedSymbol
       code: q(red)
       str: q(red)
@@ -1034,6 +1059,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
     todo: '[]'
 - processing
   - calling substitute
@@ -1050,6 +1082,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
       todo: '[]'
   - processing
     - calling substitute
@@ -1066,6 +1105,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
         todo: '[]'
     - processing
     - output:
@@ -1087,6 +1133,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
         todo: '[]'
     - processing
       - calling substitute
@@ -1103,6 +1156,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
           todo: '[]'
       - processing
       - output:
@@ -1129,6 +1189,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
         todo: '[]'
     - processing
       - calling substitute
@@ -1145,6 +1212,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
           todo: '[]'
       - processing
       - output:
@@ -1165,7 +1239,7 @@
 - output:
     class: AQuantification
     code: '∀c[color] : q(c)'
-    str: 'true'
+    str: true ∧ q(blue) ∧ q(green)
 - returning from substitute
 - calling substitute
 - with_arguments:
@@ -1181,6 +1255,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
 - output:
     class: Variable
@@ -1190,206 +1271,6 @@
 - calling substitute
 - with_arguments:
     self:
-      class: AQuantification
-      code: '∀c[color] : c = red'
-      str: 'false'
-    e0:
-      class: AppliedSymbol
-      code: q(red)
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AConjunction
-        code: true ∧ false ∧ false
-        str: 'false'
-      e0:
-        class: AppliedSymbol
-        code: q(red)
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: Constructor
-          code: 'false'
-          str: 'false'
-        e0:
-          class: AppliedSymbol
-          code: q(red)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-    - output:
-        class: Constructor
-        code: 'false'
-        str: 'false'
-    - returning from substitute
-  - output:
-      class: AConjunction
-      code: true ∧ false ∧ false
-      str: 'false'
-  - returning from substitute
-- output:
-    class: AQuantification
-    code: '∀c[color] : c = red'
-    str: 'false'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e0:
-      class: AppliedSymbol
-      code: q(red)
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AConjunction
-        code: q(red) ∧ q(blue) ∧ q(green)
-        str: true ∧ q(blue) ∧ q(green)
-      e0:
-        class: AppliedSymbol
-        code: q(red)
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(red)
-          str: 'true'
-        e0:
-          class: AppliedSymbol
-          code: q(red)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-    - output:
-        class: AppliedSymbol
-        code: q(red)
-        str: 'true'
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(blue)
-          str: q(blue)
-        e0:
-          class: AppliedSymbol
-          code: q(red)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: blue
-            str: blue
-          e0:
-            class: AppliedSymbol
-            code: q(red)
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: Constructor
-          code: blue
-          str: blue
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(blue)
-        str: q(blue)
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(green)
-          str: q(green)
-        e0:
-          class: AppliedSymbol
-          code: q(red)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: green
-            str: green
-          e0:
-            class: AppliedSymbol
-            code: q(red)
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: Constructor
-          code: green
-          str: green
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(green)
-        str: q(green)
-    - returning from substitute
-  - output:
-      class: AConjunction
-      code: q(red) ∧ q(blue) ∧ q(green)
-      str: true ∧ q(blue) ∧ q(green)
-  - returning from substitute
-- output:
-    class: AQuantification
-    code: '∀c[color] : q(c)'
-    str: 'true'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
       class: AppliedSymbol
       code: q(red)
       str: 'true'
@@ -1401,6 +1282,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
 - output:
     class: AppliedSymbol
@@ -1421,6 +1309,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -1436,6 +1331,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
   - output:
       class: Constructor
@@ -1461,6 +1363,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -1476,6 +1385,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
   - output:
       class: Constructor
@@ -1491,183 +1407,23 @@
 - with_arguments:
     self:
       class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e0:
-      class: AppliedSymbol
-      code: q(blue)
-      str: q(blue)
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AConjunction
-        code: q(red) ∧ q(blue) ∧ q(green)
-        str: true ∧ q(blue) ∧ q(green)
-      e0:
-        class: AppliedSymbol
-        code: q(blue)
-        str: q(blue)
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      todo: '[]'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(red)
-          str: 'true'
-        e0:
-          class: AppliedSymbol
-          code: q(blue)
-          str: q(blue)
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: red
-            str: red
-          e0:
-            class: AppliedSymbol
-            code: q(blue)
-            str: q(blue)
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          todo: '[]'
-      - processing
-      - output:
-          class: Constructor
-          code: red
-          str: red
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(red)
-        str: 'true'
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(blue)
-          str: q(blue)
-        e0:
-          class: AppliedSymbol
-          code: q(blue)
-          str: q(blue)
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        todo: '[]'
-    - processing
-    - output:
-        class: AppliedSymbol
-        code: q(blue)
-        str: 'true'
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(green)
-          str: q(green)
-        e0:
-          class: AppliedSymbol
-          code: q(blue)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: green
-            str: green
-          e0:
-            class: AppliedSymbol
-            code: q(blue)
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          todo: '[]'
-      - processing
-      - output:
-          class: Constructor
-          code: green
-          str: green
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(green)
-        str: q(green)
-    - returning from substitute
-  - output:
-      class: AConjunction
-      code: q(red) ∧ q(blue) ∧ q(green)
-      str: q(green)
-  - returning from substitute
-- output:
-    class: AQuantification
-    code: '∀c[color] : q(c)'
-    str: 'true'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: Variable
-      code: p
-      str: 'false'
-    e0:
-      class: AppliedSymbol
-      code: q(blue)
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-- output:
-    class: Variable
-    code: p
-    str: 'false'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
       code: '∀c[color] : c = red'
       str: 'false'
     e0:
       class: AppliedSymbol
-      code: q(blue)
+      code: q(red)
       str: 'true'
     e1:
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -1677,12 +1433,19 @@
         str: 'false'
       e0:
         class: AppliedSymbol
-        code: q(blue)
+        code: q(red)
         str: 'true'
       e1:
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
     - calling substitute
     - with_arguments:
@@ -1692,12 +1455,19 @@
           str: 'false'
         e0:
           class: AppliedSymbol
-          code: q(blue)
+          code: q(red)
           str: 'true'
         e1:
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
     - processing
     - output:
         class: Constructor
@@ -1719,30 +1489,235 @@
     self:
       class: AQuantification
       code: '∀c[color] : q(c)'
-      str: 'true'
+      str: true ∧ q(blue) ∧ q(green)
     e0:
       class: AppliedSymbol
-      code: q(blue)
+      code: q(red)
       str: 'true'
     e1:
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
       self:
         class: AConjunction
         code: q(red) ∧ q(blue) ∧ q(green)
-        str: q(green)
+        str: true ∧ q(blue) ∧ q(green)
       e0:
         class: AppliedSymbol
-        code: q(blue)
+        code: q(red)
         str: 'true'
       e1:
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(red)
+          str: 'true'
+        e0:
+          class: AppliedSymbol
+          code: q(red)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+    - output:
+        class: AppliedSymbol
+        code: q(red)
+        str: 'true'
+    - returning from substitute
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(blue)
+          str: q(blue)
+        e0:
+          class: AppliedSymbol
+          code: q(red)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+      - calling substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: blue
+            str: blue
+          e0:
+            class: AppliedSymbol
+            code: q(red)
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: blue
+          str: blue
+      - returning from substitute
+    - output:
+        class: AppliedSymbol
+        code: q(blue)
+        str: q(blue)
+    - returning from substitute
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(green)
+          str: q(green)
+        e0:
+          class: AppliedSymbol
+          code: q(red)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+      - calling substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: green
+            str: green
+          e0:
+            class: AppliedSymbol
+            code: q(red)
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: green
+          str: green
+      - returning from substitute
+    - output:
+        class: AppliedSymbol
+        code: q(green)
+        str: q(green)
+    - returning from substitute
+  - output:
+      class: AConjunction
+      code: q(red) ∧ q(blue) ∧ q(green)
+      str: true ∧ q(blue) ∧ q(green)
+  - returning from substitute
+- output:
+    class: AQuantification
+    code: '∀c[color] : q(c)'
+    str: true ∧ q(blue) ∧ q(green)
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: true ∧ q(blue) ∧ q(green)
+    e0:
+      class: AppliedSymbol
+      code: q(blue)
+      str: q(blue)
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+    todo: '[]'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: q(red) ∧ q(blue) ∧ q(green)
+        str: true ∧ q(blue) ∧ q(green)
+      e0:
+        class: AppliedSymbol
+        code: q(blue)
+        str: q(blue)
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+      todo: '[]'
   - processing
     - calling substitute
     - with_arguments:
@@ -1753,11 +1728,19 @@
         e0:
           class: AppliedSymbol
           code: q(blue)
-          str: 'true'
+          str: q(blue)
         e1:
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+        todo: '[]'
     - processing
       - calling substitute
       - with_arguments:
@@ -1768,11 +1751,19 @@
           e0:
             class: AppliedSymbol
             code: q(blue)
-            str: 'true'
+            str: q(blue)
           e1:
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+          todo: '[]'
       - processing
       - output:
           class: Constructor
@@ -1789,15 +1780,23 @@
         self:
           class: AppliedSymbol
           code: q(blue)
-          str: 'true'
+          str: q(blue)
         e0:
           class: AppliedSymbol
           code: q(blue)
-          str: 'true'
+          str: q(blue)
         e1:
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+        todo: '[]'
     - processing
     - output:
         class: AppliedSymbol
@@ -1818,6 +1817,14 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+        todo: '[]'
     - processing
       - calling substitute
       - with_arguments:
@@ -1833,6 +1840,14 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+          todo: '[]'
       - processing
       - output:
           class: Constructor
@@ -1852,7 +1867,34 @@
 - output:
     class: AQuantification
     code: '∀c[color] : q(c)'
-    str: 'true'
+    str: q(green)
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: p
+      str: 'false'
+    e0:
+      class: AppliedSymbol
+      code: q(blue)
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+- output:
+    class: Variable
+    code: p
+    str: 'false'
 - returning from substitute
 - calling substitute
 - with_arguments:
@@ -1868,6 +1910,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -1883,6 +1932,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
   - output:
       class: Constructor
@@ -1908,6 +1964,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
 - output:
     class: AppliedSymbol
@@ -1928,6 +1991,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -1943,6 +2013,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
   - output:
       class: Constructor
@@ -1958,8 +2035,278 @@
 - with_arguments:
     self:
       class: AQuantification
-      code: '∀c[color] : q(c)'
+      code: '∀c[color] : c = red'
+      str: 'false'
+    e0:
+      class: AppliedSymbol
+      code: q(blue)
       str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: true ∧ false ∧ false
+        str: 'false'
+      e0:
+        class: AppliedSymbol
+        code: q(blue)
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: 'false'
+          str: 'false'
+        e0:
+          class: AppliedSymbol
+          code: q(blue)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+    - output:
+        class: Constructor
+        code: 'false'
+        str: 'false'
+    - returning from substitute
+  - output:
+      class: AConjunction
+      code: true ∧ false ∧ false
+      str: 'false'
+  - returning from substitute
+- output:
+    class: AQuantification
+    code: '∀c[color] : c = red'
+    str: 'false'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: q(green)
+    e0:
+      class: AppliedSymbol
+      code: q(blue)
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: q(red) ∧ q(blue) ∧ q(green)
+        str: q(green)
+      e0:
+        class: AppliedSymbol
+        code: q(blue)
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(red)
+          str: 'true'
+        e0:
+          class: AppliedSymbol
+          code: q(blue)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+      - calling substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: red
+            str: red
+          e0:
+            class: AppliedSymbol
+            code: q(blue)
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: red
+          str: red
+      - returning from substitute
+    - output:
+        class: AppliedSymbol
+        code: q(red)
+        str: 'true'
+    - returning from substitute
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(blue)
+          str: 'true'
+        e0:
+          class: AppliedSymbol
+          code: q(blue)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+    - output:
+        class: AppliedSymbol
+        code: q(blue)
+        str: 'true'
+    - returning from substitute
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(green)
+          str: q(green)
+        e0:
+          class: AppliedSymbol
+          code: q(blue)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+      - calling substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: green
+            str: green
+          e0:
+            class: AppliedSymbol
+            code: q(blue)
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: green
+          str: green
+      - returning from substitute
+    - output:
+        class: AppliedSymbol
+        code: q(green)
+        str: q(green)
+    - returning from substitute
+  - output:
+      class: AConjunction
+      code: q(red) ∧ q(blue) ∧ q(green)
+      str: q(green)
+  - returning from substitute
+- output:
+    class: AQuantification
+    code: '∀c[color] : q(c)'
+    str: q(green)
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: q(green)
     e0:
       class: AppliedSymbol
       code: q(green)
@@ -1968,6 +2315,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
     todo: '[]'
 - processing
   - calling substitute
@@ -1984,6 +2338,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
       todo: '[]'
   - processing
     - calling substitute
@@ -2000,6 +2361,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
         todo: '[]'
     - processing
       - calling substitute
@@ -2016,6 +2384,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
           todo: '[]'
       - processing
       - output:
@@ -2042,6 +2417,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
         todo: '[]'
     - processing
       - calling substitute
@@ -2058,6 +2440,13 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
           todo: '[]'
       - processing
       - output:
@@ -2084,6 +2473,13 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
         todo: '[]'
     - processing
     - output:
@@ -2115,211 +2511,18 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
 - output:
     class: Variable
     code: p
     str: 'false'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∀c[color] : c = red'
-      str: 'false'
-    e0:
-      class: AppliedSymbol
-      code: q(green)
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AConjunction
-        code: true ∧ false ∧ false
-        str: 'false'
-      e0:
-        class: AppliedSymbol
-        code: q(green)
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: Constructor
-          code: 'false'
-          str: 'false'
-        e0:
-          class: AppliedSymbol
-          code: q(green)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-    - output:
-        class: Constructor
-        code: 'false'
-        str: 'false'
-    - returning from substitute
-  - output:
-      class: AConjunction
-      code: true ∧ false ∧ false
-      str: 'false'
-  - returning from substitute
-- output:
-    class: AQuantification
-    code: '∀c[color] : c = red'
-    str: 'false'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∀c[color] : q(c)'
-      str: 'true'
-    e0:
-      class: AppliedSymbol
-      code: q(green)
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AConjunction
-        code: q(red) ∧ q(blue) ∧ q(green)
-        str: 'true'
-      e0:
-        class: AppliedSymbol
-        code: q(green)
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(red)
-          str: 'true'
-        e0:
-          class: AppliedSymbol
-          code: q(green)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: red
-            str: red
-          e0:
-            class: AppliedSymbol
-            code: q(green)
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: Constructor
-          code: red
-          str: red
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(red)
-        str: 'true'
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(blue)
-          str: 'true'
-        e0:
-          class: AppliedSymbol
-          code: q(green)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: blue
-            str: blue
-          e0:
-            class: AppliedSymbol
-            code: q(green)
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-      - processing
-      - output:
-          class: Constructor
-          code: blue
-          str: blue
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(blue)
-        str: 'true'
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(green)
-          str: 'true'
-        e0:
-          class: AppliedSymbol
-          code: q(green)
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-    - processing
-    - output:
-        class: AppliedSymbol
-        code: q(green)
-        str: 'true'
-    - returning from substitute
-  - output:
-      class: AConjunction
-      code: q(red) ∧ q(blue) ∧ q(green)
-      str: 'true'
-  - returning from substitute
-- output:
-    class: AQuantification
-    code: '∀c[color] : q(c)'
-    str: 'true'
 - returning from substitute
 - calling substitute
 - with_arguments:
@@ -2335,6 +2538,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -2350,6 +2560,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
   - output:
       class: Constructor
@@ -2375,6 +2592,13 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
   - calling substitute
   - with_arguments:
@@ -2390,6 +2614,13 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
   - processing
   - output:
       class: Constructor
@@ -2415,10 +2646,612 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
 - processing
 - output:
     class: AppliedSymbol
     code: q(green)
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : c = red'
+      str: 'false'
+    e0:
+      class: AppliedSymbol
+      code: q(green)
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: true ∧ false ∧ false
+        str: 'false'
+      e0:
+        class: AppliedSymbol
+        code: q(green)
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: 'false'
+          str: 'false'
+        e0:
+          class: AppliedSymbol
+          code: q(green)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+    - output:
+        class: Constructor
+        code: 'false'
+        str: 'false'
+    - returning from substitute
+  - output:
+      class: AConjunction
+      code: true ∧ false ∧ false
+      str: 'false'
+  - returning from substitute
+- output:
+    class: AQuantification
+    code: '∀c[color] : c = red'
+    str: 'false'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e0:
+      class: AppliedSymbol
+      code: q(green)
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: q(red) ∧ q(blue) ∧ q(green)
+        str: 'true'
+      e0:
+        class: AppliedSymbol
+        code: q(green)
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(red)
+          str: 'true'
+        e0:
+          class: AppliedSymbol
+          code: q(green)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+      - calling substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: red
+            str: red
+          e0:
+            class: AppliedSymbol
+            code: q(green)
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: red
+          str: red
+      - returning from substitute
+    - output:
+        class: AppliedSymbol
+        code: q(red)
+        str: 'true'
+    - returning from substitute
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(blue)
+          str: 'true'
+        e0:
+          class: AppliedSymbol
+          code: q(green)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+      - calling substitute
+      - with_arguments:
+          self:
+            class: Constructor
+            code: blue
+            str: blue
+          e0:
+            class: AppliedSymbol
+            code: q(green)
+            str: 'true'
+          e1:
+            class: Constructor
+            code: 'true'
+            str: 'true'
+          assignments:
+            p: 'false'
+            q(red): 'true'
+            q(blue): 'true'
+            q(green): 'true'
+            '∀c[color] : c = red': None
+            '∀c[color] : q(c)': 'true'
+      - processing
+      - output:
+          class: Constructor
+          code: blue
+          str: blue
+      - returning from substitute
+    - output:
+        class: AppliedSymbol
+        code: q(blue)
+        str: 'true'
+    - returning from substitute
+    - calling substitute
+    - with_arguments:
+        self:
+          class: AppliedSymbol
+          code: q(green)
+          str: 'true'
+        e0:
+          class: AppliedSymbol
+          code: q(green)
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+    - output:
+        class: AppliedSymbol
+        code: q(green)
+        str: 'true'
+    - returning from substitute
+  - output:
+      class: AConjunction
+      code: q(red) ∧ q(blue) ∧ q(green)
+      str: 'true'
+  - returning from substitute
+- output:
+    class: AQuantification
+    code: '∀c[color] : q(c)'
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e0:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+    todo: '[]'
+- processing
+- output:
+    class: AQuantification
+    code: '∀c[color] : q(c)'
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: Variable
+      code: p
+      str: 'false'
+    e0:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+- output:
+    class: Variable
+    code: p
+    str: 'false'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AppliedSymbol
+      code: q(red)
+      str: 'true'
+    e0:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Constructor
+        code: red
+        str: red
+      e0:
+        class: AQuantification
+        code: '∀c[color] : q(c)'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+  - output:
+      class: Constructor
+      code: red
+      str: red
+  - returning from substitute
+- output:
+    class: AppliedSymbol
+    code: q(red)
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AppliedSymbol
+      code: q(blue)
+      str: 'true'
+    e0:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Constructor
+        code: blue
+        str: blue
+      e0:
+        class: AQuantification
+        code: '∀c[color] : q(c)'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+  - output:
+      class: Constructor
+      code: blue
+      str: blue
+  - returning from substitute
+- output:
+    class: AppliedSymbol
+    code: q(blue)
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AppliedSymbol
+      code: q(green)
+      str: 'true'
+    e0:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: Constructor
+        code: green
+        str: green
+      e0:
+        class: AQuantification
+        code: '∀c[color] : q(c)'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+  - output:
+      class: Constructor
+      code: green
+      str: green
+  - returning from substitute
+- output:
+    class: AppliedSymbol
+    code: q(green)
+    str: 'true'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : c = red'
+      str: 'false'
+    e0:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+  - calling substitute
+  - with_arguments:
+      self:
+        class: AConjunction
+        code: true ∧ false ∧ false
+        str: 'false'
+      e0:
+        class: AQuantification
+        code: '∀c[color] : q(c)'
+        str: 'true'
+      e1:
+        class: Constructor
+        code: 'true'
+        str: 'true'
+      assignments:
+        p: 'false'
+        q(red): 'true'
+        q(blue): 'true'
+        q(green): 'true'
+        '∀c[color] : c = red': None
+        '∀c[color] : q(c)': 'true'
+  - processing
+    - calling substitute
+    - with_arguments:
+        self:
+          class: Constructor
+          code: 'false'
+          str: 'false'
+        e0:
+          class: AQuantification
+          code: '∀c[color] : q(c)'
+          str: 'true'
+        e1:
+          class: Constructor
+          code: 'true'
+          str: 'true'
+        assignments:
+          p: 'false'
+          q(red): 'true'
+          q(blue): 'true'
+          q(green): 'true'
+          '∀c[color] : c = red': None
+          '∀c[color] : q(c)': 'true'
+    - processing
+    - output:
+        class: Constructor
+        code: 'false'
+        str: 'false'
+    - returning from substitute
+  - output:
+      class: AConjunction
+      code: true ∧ false ∧ false
+      str: 'false'
+  - returning from substitute
+- output:
+    class: AQuantification
+    code: '∀c[color] : c = red'
+    str: 'false'
+- returning from substitute
+- calling substitute
+- with_arguments:
+    self:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e0:
+      class: AQuantification
+      code: '∀c[color] : q(c)'
+      str: 'true'
+    e1:
+      class: Constructor
+      code: 'true'
+      str: 'true'
+    assignments:
+      p: 'false'
+      q(red): 'true'
+      q(blue): 'true'
+      q(green): 'true'
+      '∀c[color] : c = red': None
+      '∀c[color] : q(c)': 'true'
+- processing
+- output:
+    class: AQuantification
+    code: '∀c[color] : q(c)'
     str: 'true'
 - returning from substitute
 - '

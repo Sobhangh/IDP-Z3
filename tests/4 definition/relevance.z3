@@ -46,8 +46,8 @@ Definitions:
 Universals:  
   r
 Consequences:
-  rd
   p
+  rd
   i
 Simplified:  
   true

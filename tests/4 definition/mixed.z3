@@ -41,8 +41,8 @@ Type:
 Definitions: 
   Rule:∀: p() ⇔~(q)
 Universals:  
-  x = 1
   x -> 1
+  x = 1
 Consequences:
   
 Simplified:  

@@ -34,9 +34,9 @@ Consequences:
 Simplified:  
   
 Irrelevant:  
+  ? Start_Dt_Dwelling_For_Social_Rent
   ? Start_Dt_Dwelling_For_Social_Rent = 2015
   ? Start_Dt_Dwelling_For_Social_Rent = 2016
-  ? Start_Dt_Dwelling_For_Social_Rent
 Co-constraints:
   
 

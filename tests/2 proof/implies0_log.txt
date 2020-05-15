@@ -13,6 +13,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: None
+      q: None
+      r: None
+      s: None
     todo: '[]'
 - processing
   - calling substitute
@@ -29,6 +34,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: None
+        q: None
+        r: None
+        s: None
       todo: '[]'
   - processing
   - output:
@@ -50,6 +60,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: None
+        q: None
+        r: None
+        s: None
       todo: '[]'
   - processing
     - calling substitute
@@ -66,6 +81,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: None
+          q: None
+          r: None
+          s: None
         todo: '[]'
     - processing
     - output:
@@ -87,6 +107,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: None
+          q: None
+          r: None
+          s: None
         todo: '[]'
     - processing
       - calling substitute
@@ -103,6 +128,11 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: None
+            q: None
+            r: None
+            s: None
           todo: '[]'
       - processing
         - calling substitute
@@ -119,6 +149,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: None
+              q: None
+              r: None
+              s: None
             todo: '[]'
         - processing
         - output:
@@ -140,6 +175,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: None
+              q: None
+              r: None
+              s: None
             todo: '[]'
         - processing
         - output:
@@ -181,6 +221,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: None
+      q: None
+      r: None
+      s: None
     todo: '[]'
 - processing
 - output:
@@ -202,6 +247,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: None
+      r: None
+      s: None
     todo: '[]'
 - processing
   - calling substitute
@@ -218,6 +268,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'true'
+        q: None
+        r: None
+        s: None
       todo: '[]'
   - processing
   - output:
@@ -239,6 +294,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'true'
+        q: None
+        r: None
+        s: None
       todo: '[]'
   - processing
     - calling substitute
@@ -255,6 +315,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'true'
+          q: None
+          r: None
+          s: None
         todo: '[]'
     - processing
     - output:
@@ -276,6 +341,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'true'
+          q: None
+          r: None
+          s: None
         todo: '[]'
     - processing
       - calling substitute
@@ -292,6 +362,11 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'true'
+            q: None
+            r: None
+            s: None
           todo: '[]'
       - processing
         - calling substitute
@@ -308,6 +383,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: 'true'
+              q: None
+              r: None
+              s: None
             todo: '[]'
         - processing
         - output:
@@ -329,6 +409,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: 'true'
+              q: None
+              r: None
+              s: None
             todo: '[]'
         - processing
         - output:
@@ -370,6 +455,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
   - calling substitute
   - with_arguments:
@@ -385,6 +475,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'true'
+        q: 'true'
+        r: None
+        s: None
   - processing
   - output:
       class: Variable
@@ -405,6 +500,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'true'
+        q: 'true'
+        r: None
+        s: None
   - processing
     - calling substitute
     - with_arguments:
@@ -420,6 +520,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'true'
+          q: 'true'
+          r: None
+          s: None
     - processing
     - output:
         class: Variable
@@ -440,6 +545,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'true'
+          q: 'true'
+          r: None
+          s: None
     - processing
       - calling substitute
       - with_arguments:
@@ -455,6 +565,11 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'true'
+            q: 'true'
+            r: None
+            s: None
       - processing
         - calling substitute
         - with_arguments:
@@ -470,6 +585,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: 'true'
+              q: 'true'
+              r: None
+              s: None
         - processing
         - output:
             class: Variable
@@ -490,6 +610,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: 'true'
+              q: 'true'
+              r: None
+              s: None
         - processing
         - output:
             class: Variable
@@ -530,6 +655,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
     todo: '[]'
 - processing
 - output:
@@ -551,6 +681,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable
@@ -571,6 +706,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable
@@ -591,6 +731,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable
@@ -611,6 +756,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable
@@ -631,6 +781,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
     todo: '[]'
 - processing
   - calling substitute
@@ -647,6 +802,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'true'
+        q: 'true'
+        r: None
+        s: None
       todo: '[]'
   - processing
   - output:
@@ -668,6 +828,11 @@
         class: Constructor
         code: 'true'
         str: 'true'
+      assignments:
+        p: 'true'
+        q: 'true'
+        r: None
+        s: None
       todo: '[]'
   - processing
     - calling substitute
@@ -684,6 +849,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'true'
+          q: 'true'
+          r: None
+          s: None
         todo: '[]'
     - processing
     - output:
@@ -705,6 +875,11 @@
           class: Constructor
           code: 'true'
           str: 'true'
+        assignments:
+          p: 'true'
+          q: 'true'
+          r: None
+          s: None
         todo: '[]'
     - processing
       - calling substitute
@@ -721,6 +896,11 @@
             class: Constructor
             code: 'true'
             str: 'true'
+          assignments:
+            p: 'true'
+            q: 'true'
+            r: None
+            s: None
           todo: '[]'
       - processing
         - calling substitute
@@ -737,6 +917,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: 'true'
+              q: 'true'
+              r: None
+              s: None
             todo: '[]'
         - processing
         - output:
@@ -758,6 +943,11 @@
               class: Constructor
               code: 'true'
               str: 'true'
+            assignments:
+              p: 'true'
+              q: 'true'
+              r: None
+              s: None
             todo: '[]'
         - processing
         - output:
@@ -799,6 +989,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable
@@ -819,6 +1014,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable
@@ -839,6 +1039,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable
@@ -859,6 +1064,11 @@
       class: Constructor
       code: 'true'
       str: 'true'
+    assignments:
+      p: 'true'
+      q: 'true'
+      r: None
+      s: None
 - processing
 - output:
     class: Variable

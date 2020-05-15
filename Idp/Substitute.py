@@ -75,7 +75,7 @@ for i in [Constructor, AppliedSymbol, Variable, Fresh_Variable, NumberConstant]:
 
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, todo=None):
+def substitute(self, e0, e1, assignments, todo=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable) 
     
     implementation for everything but AppliedSymbol, Variable and Fresh_variable 
@@ -90,7 +90,7 @@ def substitute(self, e0, e1, todo=None):
         return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         # will update self.simpler
-        out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
+        out = self.update_exprs((e.substitute(e0, e1, assignments, todo) for e in self.sub_exprs))
         return out
 Expression.substitute = substitute
 
@@ -238,9 +238,9 @@ def update_exprs(self, new_expr_generator):
         return self._change(simpler=exprs[1], sub_exprs=exprs)
     for e in exprs:
         if e == TRUE: # they must all be true
-            return self._change(simpler=AConjunction.make('∧', exprs, self.is_subtence), sub_exprs=exprs)
+            return self._change(simpler=AConjunction.make('∧', exprs), sub_exprs=exprs)
         if e == FALSE: # they must all be false
-            return self._change(simpler=AConjunction.make('∧', [AUnary.make('~', e) for e in exprs], self.is_subtence),
+            return self._change(simpler=AConjunction.make('∧', [AUnary.make('~', e) for e in exprs]),
                               sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs
@@ -437,7 +437,6 @@ AAggregate.update_exprs = update_exprs
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
     if self.decl.interpretation is not None: # has a structure
-        self.is_subtence = False
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
         out = self._change(simpler=out, sub_exprs=sub_exprs)
     elif self.name in theory.clark: # has a theory
@@ -453,7 +452,7 @@ AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret
 
 # @log_calls  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, todo=None):
+def substitute(self, e0, e1, assignments, todo=None):
     """ recursively substitute e0 by e1 in self """
 
     assert not isinstance(e0, Fresh_Variable) # should use instantiate instead
@@ -466,18 +465,18 @@ def substitute(self, e0, e1, todo=None):
     new_branch = None
     if self.co_constraint is not None:
         Log(f"definition:")
-        new_branch = self.co_constraint.substitute(e0, e1, todo)
+        new_branch = self.co_constraint.substitute(e0, e1, assignments, todo)
         if todo is not None:
-            todo.extend(new_branch.implicants())
+            todo.extend(new_branch.implicants(assignments))
             
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)
     elif self.simpler is not None: # has an interpretation
         assert self.co_constraint is None
-        simpler = self.simpler.substitute(e0,e1,todo)
+        simpler = self.simpler.substitute(e0,e1,assignments, todo)
         return self._change(simpler=simpler)
     else:
-        sub_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs] # no simplification here
+        sub_exprs = [e.substitute(e0, e1, assignments, todo) for e in self.sub_exprs] # no simplification here
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
@@ -490,7 +489,7 @@ def interpret(self, theory):
 Fresh_Variable.interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, todo=None):
+def substitute(self, e0, e1, assignments, todo=None):
     return e1 if self.code == e0.code else self
 Fresh_Variable.substitute = substitute
 

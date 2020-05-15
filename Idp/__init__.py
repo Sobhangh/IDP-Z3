@@ -220,7 +220,7 @@ class ConstructedTypeDeclaration(object):
         if self.name == 'bool':
             out = [var, AUnary.make('~', var)]
         else:
-            out = [AComparison.make('=', [var, c], True) for c in self.constructors]
+            out = [AComparison.make('=', [var, c]) for c in self.constructors]
         out = ADisjunction.make('∨', out)
         return out
 
@@ -266,15 +266,15 @@ class RangeDeclaration(object):
         if not self.elements: 
             return None
         if self.range and len(self.range) < 20:
-            es = [AComparison.make('=', [var, c], True) for c in self.range]
+            es = [AComparison.make('=', [var, c]) for c in self.range]
             e = ADisjunction.make('∨', es)
             return e
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
-                e = AComparison.make('=', [var, x.fromI], True)
+                e = AComparison.make('=', [var, x.fromI])
             else:
-                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI], True)
+                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
         return ADisjunction.make('∨', sub_exprs)
 
@@ -333,14 +333,12 @@ class SymbolDeclaration(object):
             if len(self.sorts) == 0:
                 expr = Variable(name=self.name)
                 expr.annotate(symbol_decls, {})
-                expr.mark_subtences()
                 expr.normal = True
                 self.instances[expr.code] = expr
             else:
                 for arg in list(self.domain):
                     expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                     expr.annotate(symbol_decls, {})
-                    expr.mark_subtences()
                     expr.normal = True
                     self.instances[expr.code] = expr
 
@@ -439,7 +437,6 @@ class Theory(object):
                     self.clark[symbol.name] = rule
 
         self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
-        self.constraints = [e.mark_subtences()         for e in self.constraints]
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
 
@@ -503,7 +500,6 @@ class Definition(object):
         for symbol, rules in self.clark.items():
             exprs = sum(([rule.body] for rule in rules), [])
             rules[0].body = ADisjunction.make('∨', exprs)
-            rules[0].body.mark_subtences()
             self.clark[symbol] = rules[0]
 
         # expand quantifiers and interpret symbols with structure
@@ -558,9 +554,9 @@ class Rule(object):
         q_v = {**q_vars, **self.q_vars}  # merge
 
         self.symbol = self.symbol.annotate(symbol_decls, q_v)
-        self.args = [arg.annotate(symbol_decls, q_v).mark_subtences() for arg in self.args]
-        self.out = self.out.annotate(symbol_decls, q_v).mark_subtences() if self.out else self.out
-        self.body = self.body.annotate(symbol_decls, q_v).mark_subtences()
+        self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
+        self.out = self.out.annotate(symbol_decls, q_v) if self.out else self.out
+        self.body = self.body.annotate(symbol_decls, q_v)
         return self
 
     def rename_args(self, new_vars):
@@ -645,7 +641,6 @@ class Rule(object):
                 out = out.instantiate(self.args[-1], instance)
         else:
             out = AEquivalence.make('⇔', [instance, out])
-        out.mark_subtences()
         return out
 
     def unknown_symbols(self):

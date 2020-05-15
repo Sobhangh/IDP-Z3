@@ -79,13 +79,15 @@ Definitions:
   Rule:∀$same!0$[num],$same$[num]: same($same!0$,$same$) ⇔$same$ = $same!0$
   Rule:∀$negated!0$[num],$negated$[num]: negated($negated!0$,$negated$) ⇔$negated$ = Jan ∧ ($negated!0$ = Piet) ∨ $negated$ = Piet ∧ ($negated!0$ = Jan)
 Universals:  
+  same(Piet) -> Piet
+  negated(Piet) -> Jan
   same(Piet) = Piet
   same(same(Piet)) = negated(negated(Piet))
   same(same(Piet)) = same(Piet)
   negated(Piet) = Jan
-  same(Piet) -> Piet
-  negated(Piet) -> Jan
 Consequences:
+  same(Jan) -> Jan
+  negated(Jan) -> Piet
   ~negated(negated(Piet)) = Jan
   ~negated(Piet) = Piet
   negated(negated(Piet)) = Piet
@@ -94,8 +96,6 @@ Consequences:
   same(Jan) = Jan
   negated(Jan) = Piet
   ~negated(Jan) = Jan
-  same(Jan) -> Jan
-  negated(Jan) -> Piet
 Simplified:  
   true
   true

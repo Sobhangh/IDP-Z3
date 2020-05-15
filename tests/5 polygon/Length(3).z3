@@ -101,8 +101,8 @@ Type:
 Definitions: 
   
 Universals:  
-  Sides = 3
   Sides -> 3
+  Sides = 3
 Consequences:
   ~Subtype = rectangle
   ~Sides = 4
@@ -114,10 +114,10 @@ Simplified:
   true
   Subtype = regular_triangle ∨ Subtype = right_triangle ∨ false ∨ Subtype = square ∨ Subtype = irregular
 Irrelevant:  
+  ? Type
   ? Length(3) = Length(1)
   ? Type = triangle
   ? Type = quadrilateral
-  ? Type
 Co-constraints:
   
 

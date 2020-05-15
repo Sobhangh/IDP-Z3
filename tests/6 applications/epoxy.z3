@@ -269,9 +269,9 @@ Universals:
   Safe_Low_Storage_T = ELowest_Storage_T(Epoxy)
   Safe_High_Storage_T = EHighest_Storage_T(Epoxy)
 Consequences:
+  KnownHighStorageT
   KnownLowStorageT
   ~ELowest_Storage_T(Epoxy) = -900
-  KnownHighStorageT
   ~EHighest_Storage_T(Epoxy) = -900
 Simplified:  
   KnownCost ⇔ ~( if   Epoxy = e1 then 0.539 else -1 = -1)

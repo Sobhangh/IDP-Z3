@@ -351,6 +351,7 @@ Type:
 Definitions: 
   
 Universals:  
+  Subtype -> regular_triangle
   Subtype = regular_triangle
   Perimeter = sum{n[side] : true : Length(n)}
   sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
@@ -362,17 +363,24 @@ Universals:
   0 ≤ Base
   0 ≤ Height
   ∃n[side] : n ≤ Sides ∧ Length(n) = Base
-  Subtype -> regular_triangle
 Consequences:
+  Sides -> 3
+  Vertices -> 3
+  Type -> triangle
+  Length(4) -> 0
+  Angle(1) -> 60
+  Angle(2) -> 60
+  Angle(3) -> 60
+  Angle(4) -> 0
+  Convex
+  Equilateral
   Type = triangle
   Sides = 3
   ~Type = quadrilateral
   ~Sides = 4
   Vertices = 3
   ~Vertices = 4
-  Convex
   ∀n[side] : Angle(n) < 180
-  Equilateral
   ∀n[side] : Length(n) = Length(1) ∨ Sides < n
   ~Subtype = right_triangle
   ~Subtype = irregular
@@ -389,14 +397,6 @@ Consequences:
   Length(3) ≤ Length(1) + Length(2)
   Surface = (Base * Height) / 2
   ~Surface = -1
-  Sides -> 3
-  Vertices -> 3
-  Type -> triangle
-  Length(4) -> 0
-  Angle(1) -> 60
-  Angle(2) -> 60
-  Angle(3) -> 60
-  Angle(4) -> 0
 Simplified:  
   true
   (true)
@@ -431,16 +431,16 @@ Simplified:
   true
   true
 Irrelevant:  
+  ? Large(1)
+  ? Large(2)
+  ? Large(3)
+  ? Large(4)
   ~∀n[side] : Angle(n) = 90 ∨ Sides < n
   Length(1) = Length(3)
   ~Length(2) = Length(4)
   Length(1) = Length(2)
   ? Surface = Length(1) * Length(2)
   ~Surface = -1
-  ? Large(1)
-  ? Large(2)
-  ? Large(3)
-  ? Large(4)
 Co-constraints:
   
 

@@ -37,10 +37,10 @@ Definitions:
   
 Universals:  
   ~p
-  ∀c[color] : q(c)
   q(red)
   q(blue)
   q(green)
+  ∀c[color] : q(c)
 Consequences:
   
 Simplified:  

@@ -46,21 +46,21 @@ Definitions:
 Universals:  
   
 Consequences:
+  codeOf(red) -> a
+  codeOf(blue) -> b
   codeOf(red) = a
   ~codeOf(red) = b
   ~codeOf(blue) = a
   codeOf(blue) = b
-  codeOf(red) -> a
-  codeOf(blue) -> b
 Simplified:  
   
 Irrelevant:  
+  codeOf(red) -> a
+  codeOf(blue) -> b
   codeOf(red) = a
   ~codeOf(red) = b
   ~codeOf(blue) = a
   codeOf(blue) = b
-  codeOf(red) -> a
-  codeOf(blue) -> b
 Co-constraints:
   
 

@@ -50,27 +50,26 @@ Type:
 Definitions: 
   Rule:∀$t$[num]: t($t$) ⇔$t$ = t0 ∨ $t$ = t1
 Universals:  
-  t0 = Piet
   t0 -> Piet
+  t0 = Piet
 Consequences:
+  t -> Piet
+  t1 -> Piet
   ~t = Jan
   t = Piet
   ~t0 = Jan
   ~t1 = Jan
   t1 = Piet
-  t -> Piet
-  t1 -> Piet
 Simplified:  
   true
   true
 Irrelevant:  
-  ~t = Jan
-  t = Piet
-  ~t0 = Jan
-  ~t1 = Jan
-  t1 = Piet
   t -> Piet
   t1 -> Piet
+  ~t = Jan
+  t = Piet
+  ~t1 = Jan
+  t1 = Piet
 Co-constraints:
   
 
@@ -116,7 +115,7 @@ Co-constraints:
         't0 = Jan': {'environmental': False,
                      'normal': False,
                      'reading': 't0 = Jan',
-                     'relevant': False,
+                     'relevant': True,
                      'status': 'CONSEQUENCE',
                      'typ': 'Bool',
                      'value': False},

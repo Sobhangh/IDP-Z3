@@ -32,6 +32,6 @@ Principles:
 * we need to determine propagated value and relevance for all Case.assignments
 
 Todo:
-- [ ] compute Expr.questions for each constraints
+- [x] compute Expr.questions for each constraints
 - [ ] reduce Expr.questions after each substitute
 - [ ] rename GUILines as showable, and reduce it per view

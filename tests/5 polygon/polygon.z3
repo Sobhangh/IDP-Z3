@@ -313,8 +313,9 @@ Type:
 Definitions: 
   Rule:∀$Large!0$[side]: Large($Large!0$) ⇔10 <  if   $Large!0$ = 4 then 4 else  if   $Large!0$ = 3 then 3 else  if   $Large!0$ = 2 then 2 else  if   $Large!0$ = 1 then 1 else 5
 Universals:  
-  ∀n[side] : Length(n) < Length(n + 1)
+  Perimeter -> 10
   ~Large(1)
+  ∀n[side] : Length(n) < Length(n + 1)
   ~Subtype = rectangle
   Perimeter = sum{n[side] : true : Length(n)}
   sum{n[side] : true : Angle(n)} = (Sides - 2) * 180
@@ -323,15 +324,21 @@ Universals:
   ∀x[side] : Angle(x) ≠ 180
   ∀n[side] : Angle(n) = 0 ⇔ Vertices < n
   ∀n[side] : Length(n) = 0 ⇔ Sides < n
-  Perimeter -> 10
 Consequences:
+  Sides -> 4
+  Vertices -> 4
+  Type -> quadrilateral
+  Subtype -> irregular
+  ~Equilateral
+  ~Large(2)
+  ~Large(3)
+  ~Large(4)
   ~Type = triangle
   ~Sides = 3
   Type = quadrilateral
   Sides = 4
   ~Vertices = 3
   Vertices = 4
-  ~Equilateral
   ~∀n[side] : Length(n) = Length(1) ∨ Sides < n
   ~Subtype = right_triangle
   ~Subtype = regular_triangle
@@ -339,13 +346,6 @@ Consequences:
   ~∀n[side] : Angle(n) = 60 ∨ Sides < n
   ~Subtype = square
   ~∀n[side] : Angle(n) = 90 ∨ Sides < n
-  Sides -> 4
-  Vertices -> 4
-  Type -> quadrilateral
-  Subtype -> irregular
-  ~Large(2)
-  ~Large(3)
-  ~Large(4)
 Simplified:  
   true
   true

@@ -88,3 +88,6 @@ class OrderedSet(dict):
 
     def __iter__(self):
         return iter(self.values())
+    
+    def __contains__(self, expression):
+        return super(OrderedSet, self).__contains__(expression.code)

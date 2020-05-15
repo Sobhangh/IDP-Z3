@@ -859,9 +859,9 @@ Definitions:
 Universals:  
   ~Professional_Declaration_Filed
 Consequences:
+  ~Professional_Buyer
   ~Tax = 4
   ~Registration_Type = Professional_Purchase
-  ~Professional_Buyer
 Simplified:  
   (Tax = 1 ⇒ Registration_Type = Heritage ∧ Region = Flemish_Region)
   Tax = 2 ⇒ Registration_Type = Social_Dwelling ∧ Region = Flemish_Region
@@ -893,9 +893,14 @@ Simplified:
   Registration_Type = Family_Dwelling ∨ Registration_Type = Social_Dwelling ∨ Registration_Type = Social_Purpose ∨ Registration_Type = Exchange_Unbuilt_Ground ∨ false ∨ Registration_Type = Energy_Efficient_Dwelling ∨ Registration_Type = Heritage ∨ Registration_Type = Dwelling_For_Social_Renting ∨ Registration_Type = Other
   Tax = 1 ∨ Tax = 2 ∨ false ∨ Tax = 7 ∨ Tax = 6 ∨ Tax = 10 ∨ Tax = 12
 Irrelevant:  
+  ? Municipality
+  ? Resale
+  ? Transaction_Type
+  ? Core_City
   ? Guarantee_Satisfied
   ? Additional_Security_Required
   ? Additional_Security_Satisfied
+  ? Certification_Date_Sale
   ? Resale = Three_Or_More
   ? Transaction_Type = Public_Sale
   ? Certification_Date_Sale = Certification_Date + 8
@@ -968,11 +973,6 @@ Irrelevant:
   ? Certification_Date_Sale = 2023
   ? Certification_Date_Sale = 2024
   ? Certification_Date_Sale = 2025
-  ? Municipality
-  ? Resale
-  ? Transaction_Type
-  ? Core_City
-  ? Certification_Date_Sale
 Co-constraints:
   true
 

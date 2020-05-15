@@ -32,8 +32,8 @@ Type:
 Definitions: 
   
 Universals:  
-  x = 0
   x -> 0
+  x = 0
 Consequences:
   x + 1 = 1
 Simplified:  

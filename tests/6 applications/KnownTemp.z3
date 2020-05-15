@@ -123,20 +123,20 @@ Type:
 Definitions: 
   
 Universals:  
+  _O(e1)
+  _O(e2)
+  ~_O(e3)
+  OMinT(e1) -> 0
+  OMinT(e2) -> 0
+  OMaxT(e1) -> 20
+  OMaxT(e2) -> 100
   ∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)
   ∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)
   _MinT(M) ≤ T ≤ _MaxT(M)
-  _O(e1)
   OMinT(e1) = 0
   OMaxT(e1) = 20
-  _O(e2)
   OMinT(e2) = 0
   OMaxT(e2) = 100
-  ~_O(e3)
-  OMinT(e1) -> 0
-  OMaxT(e1) -> 20
-  OMinT(e2) -> 0
-  OMaxT(e2) -> 100
 Consequences:
   _MinT(e1) -> 0
   _MinT(e2) -> 0
