@@ -45,6 +45,8 @@ Simplified:
   true
 Irrelevant:  
   ? ∃c[color] : c ≠ red
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

@@ -11,6 +11,7 @@ TODO:
 - [ ] modify Expression.py :
     - [ ] in AAgregate.annotate():
         - [ ] create a new Variable whose name starts with `_` (not a Fresh_variable)
+            - [ ] use an AppliedSymbol instead if the aggregate formula has externally quantified variables (stored in .self_vars)
         - [ ] build the 2 constraints described in the issue on gitlab (using make() functions as in Idp/__init__.py : Rule.compute())
         - [ ] set co_constraint to the conjunction of the 2 constraints
 - [ ] add a test case in `tests/3 arithmetic`

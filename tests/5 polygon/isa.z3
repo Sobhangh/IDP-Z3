@@ -190,6 +190,8 @@ Irrelevant:
   isa(right_triangle,typeOf(right_triangle))
   isa(rectangle,typeOf(rectangle))
   isa(square,typeOf(square))
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

@@ -107,6 +107,11 @@ Irrelevant:
   ~negated(negated(Piet)) = Jan
   ~same(Piet) = Jan
   ~negated(Jan) = Jan
+Co-constraints:
+  true
+  true
+  true
+  true
 
 
 -- meta -------------------------------------

@@ -75,6 +75,8 @@ Simplified:
   true
 Irrelevant:  
   ~codeOf(blue) = b
+Co-constraints:
+  true
 
 
 -- meta -------------------------------------

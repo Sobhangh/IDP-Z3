@@ -153,6 +153,16 @@ class Expression(object):
         self.collect(questions)
         return questions
 
+    def co_constraints(self, co_constraints):
+        """ collects the constraints attached to AST nodes, e.g. definitions 
+        
+        'co_constraints is an OrderedSet of Expression
+        """
+        if self.co_constraint is not None:
+            co_constraints.add(self.co_constraint)
+        for e in self.sub_exprs:
+            e.co_constraints(co_constraints)
+
     def subtences(self):
         out = {}
         if self.is_subtence and self.code not in ['true', 'false']:

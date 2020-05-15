@@ -118,6 +118,8 @@ Irrelevant:
   ? Type = triangle
   ? Type = quadrilateral
   ? Type
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

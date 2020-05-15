@@ -34,6 +34,8 @@ Simplified:
   true
 Irrelevant:  
   ? sum{c[color] : true : 1} = 3
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

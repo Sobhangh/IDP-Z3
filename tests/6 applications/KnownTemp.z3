@@ -154,6 +154,8 @@ Simplified:
   M = e1 ∨ M = e2 ∨ M = e3
 Irrelevant:  
   
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

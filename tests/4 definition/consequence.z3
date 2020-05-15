@@ -50,6 +50,8 @@ Simplified:
 Irrelevant:  
   ? r
   ? s
+Co-constraints:
+  true
 
 
 -- meta -------------------------------------

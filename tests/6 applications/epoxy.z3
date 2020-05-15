@@ -312,6 +312,8 @@ Irrelevant:
   ? EHighest_Storage_T(e3) = 10
   ? EHighest_Storage_T(e3) = 25
   ? EHighest_Storage_T(e3) = 38
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

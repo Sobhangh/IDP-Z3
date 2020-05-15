@@ -71,6 +71,8 @@ Irrelevant:
   t1 = Piet
   t -> Piet
   t1 -> Piet
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

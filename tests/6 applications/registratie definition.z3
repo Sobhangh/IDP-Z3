@@ -973,6 +973,8 @@ Irrelevant:
   ? Transaction_Type
   ? Core_City
   ? Certification_Date_Sale
+Co-constraints:
+  true
 
 
 -- meta -------------------------------------

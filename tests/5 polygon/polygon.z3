@@ -383,6 +383,8 @@ Irrelevant:
   ? Length(2) ≤ Length(3) + Length(1)
   ? Length(3) ≤ Length(1) + Length(2)
   ∀x[side] : 0 ≤ Length(x)
+Co-constraints:
+  true
 
 
 -- meta -------------------------------------

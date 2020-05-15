@@ -55,6 +55,8 @@ Irrelevant:
   ? JacketDesign = Design_400HP
   ? LipLen
   ? JacketDesign
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

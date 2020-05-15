@@ -78,6 +78,8 @@ Simplified:
   cSID = b ∨ cSID = c ∨ cSID = d ∨ cSID = e ∨ cSID = f
 Irrelevant:  
   
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

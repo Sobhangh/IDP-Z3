@@ -99,16 +99,24 @@ class Case:
             has_relevant_symbol = any(s in relevant_symbols for s in symbols)
             if k in relevant_subtences and symbols and has_relevant_symbol:
                 l.relevant = True
+
         if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self) -> str:
+        self.get_co_constraints()
         return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translate(self.idp))}{nl}"
                 f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
                 f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{nl}"
+                f"Co-constraints:{indented}{indented.join(str(c)  for c in self.co_constraints)}{nl}"
         )
+
+    def get_co_constraints(self):
+        self.co_constraints = OrderedSet()
+        for c in self.simplified:
+            c.co_constraints(self.co_constraints)
         
     def get_relevant_subtences(self, all_: bool) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
         #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
@@ -240,6 +248,7 @@ class Case:
                             
 
     def translate(self, all_: bool = True) -> BoolRef:
+        self.get_co_constraints()
         self.translated = And(
             self.typeConstraints.translate(self.idp)
             + sum((d.translate() for d in self.definitions), [])
@@ -247,6 +256,7 @@ class Case:
                     if l.value is not None and (all_ or not l.sentence.has_environmental(False))]
             + [c.translate() for c in self.simplified
                     if all_ or not c.has_environmental(False)]
+            + [c.translate() for c in self.co_constraints]
             )
         return self.translated
 

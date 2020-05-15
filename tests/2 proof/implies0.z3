@@ -40,6 +40,8 @@ Simplified:
   true
 Irrelevant:  
   
+Co-constraints:
+  
 
 
 -- meta -------------------------------------

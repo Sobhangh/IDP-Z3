@@ -159,6 +159,10 @@ Irrelevant:
   ~negated(0) = 1
   ~negated(1) = 0
   ~negated(1) = 1
+Co-constraints:
+  true
+  true
+  true
 
 
 -- meta -------------------------------------

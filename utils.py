@@ -85,3 +85,6 @@ class OrderedSet(dict):
 
     def add(self, el):
         self[el.code] = el
+
+    def __iter__(self):
+        return iter(self.values())

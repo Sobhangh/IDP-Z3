@@ -48,6 +48,11 @@ Simplified:
   true
 Irrelevant:  
   
+Co-constraints:
+  true
+  true
+  true
+  true
 
 
 -- meta -------------------------------------

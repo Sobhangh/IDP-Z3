@@ -57,10 +57,10 @@ tags:
 #### Performance
 - [ ] reduce number of substitution
     - [ ] Expr.questions for each constraint → do not substitute if no matching question
+- [ ] merge case.co_constraints and case.definitions (many overlaps)
 - [ ] rewrite in Nim !
 - [ ] use sets to avoid duplicates (e.g. constraints)
-- [ ] use weakref to share justifications
-- [ ] subtences() → exp is_in expr
+- [ ] use weakref to share co_constraints
 - [ ] avoid mergeDicts.  Use accumulator instead
 - [ ] use `__slots__`
 - [ ] cython, pypy

@@ -61,6 +61,8 @@ Irrelevant:
   codeOf(blue) = b
   codeOf(red) -> a
   codeOf(blue) -> b
+Co-constraints:
+  
 
 
 -- meta -------------------------------------
