@@ -456,7 +456,6 @@ class Theory(object):
         out = []
         for i in self.constraints:
             out.append(i.translate())
-            # optional : self.translated.extend(i.justifications())
         for d in self.definitions:
             out += d.translate()
         return out

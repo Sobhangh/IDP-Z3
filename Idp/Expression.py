@@ -79,12 +79,12 @@ class Expression(object):
         return out
 
     def __eq__(self, other):
-        if self.value   is not None: return self.value == other
+        if self.value   is not None: return self.value   == other
         if self.simpler is not None: return self.simpler == other
         if other.value   is not None: return self == other.value
         if other.simpler is not None: return self == other.simpler
 
-        if type(self)==Brackets or (type(self)==AQuantification and len(self.vars)==0):
+        if type(self)==Brackets or (type(self  )==AQuantification and len(self.vars) ==0):
             return self.sub_exprs[0] == other
         if type(other)==Brackets or (type(other)==AQuantification and len(other.vars)==0):
             return self == other.sub_exprs[0]
@@ -101,14 +101,11 @@ class Expression(object):
             return str(self.simpler)
         return self.__str1__()
     
-    def __log__(self):
+    def __log__(self): # for debugWithYamlLog
         return { 'class': type(self).__name__
             , 'code': self.code
             , 'str': self.str
             , 'co_constraint': self.co_constraint }
-
-    def __hash__(self):
-        return hash(self.code)
 
     def annotate(self, symbol_decls, q_vars):
         " annotate tree after parsing "
@@ -149,7 +146,7 @@ class Expression(object):
         return questions
 
     def co_constraints(self, co_constraints):
-        """ collects the constraints attached to AST nodes, e.g. definitions 
+        """ collects the constraints attached to AST nodes, e.g. instantiated definitions 
         
         'co_constraints is an OrderedSet of Expression
         """
@@ -159,6 +156,7 @@ class Expression(object):
             e.co_constraints(co_constraints)
 
     def subtences(self):
+        " returns questions of type bool "
         questions = OrderedSet()
         self.collect(questions, all_=False)
         out = {k: v for k, v in questions.items() if v.type == 'bool'}
@@ -189,13 +187,7 @@ class Expression(object):
     def has_environmental(self, truth):
         # returns true if it contains a variable whose environmental property is 'truth
         return any(e.has_environmental(truth) for e in self.sub_exprs)
-    
-    def justifications(self):
-        out = sum((e.justifications() for e in self.sub_exprs), [])
-        if self.co_constraint is not None:
-            out.append(self.co_constraint)
-            out.extend(self.co_constraint.justifications())
-        return out
+
 
 class Constructor(Expression):
     PRECEDENCE = 200
