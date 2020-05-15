@@ -17,7 +17,7 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 from z3 import And, Not, sat, unsat, unknown, is_true
-from debugWithYamlLog import DEBUG, Log, nl, indented
+from debugWithYamlLog import Log, nl, indented
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from Solver import mk_solver
@@ -52,7 +52,7 @@ class Case:
 
         self.assignments: Dict[str, Assignment] = {} # atoms + given, with simplified formula and value value
 
-        if DEBUG: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
+        if __debug__: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
         for GuiLine in self.GUILines.values():
             GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
@@ -96,7 +96,7 @@ class Case:
             if k in relevant_subtences and symbols and has_relevant_symbol:
                 l.relevant = True
 
-        if DEBUG: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
+        if __debug__: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
     def __str__(self) -> str:
         self.get_co_constraints()

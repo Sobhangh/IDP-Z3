@@ -1,8 +1,6 @@
 import inspect, os, time
 from yaml import dump
 
-DEBUG = True
-
 
 nl = "\n"
 indented = "\n  "
