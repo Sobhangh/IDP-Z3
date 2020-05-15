@@ -1,5 +1,5 @@
 
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AEquivalence
@@ -36,7 +36,7 @@
       code: p
       str: p
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AComparison
@@ -52,7 +52,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AAggregate
@@ -68,7 +68,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -88,8 +88,8 @@
           class: NumberConstant
           code: '1'
           str: '1'
-      - returning from Expression_substitute
-      - calling Expression_substitute
+      - returning from substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -109,8 +109,8 @@
           class: NumberConstant
           code: '1'
           str: '1'
-      - returning from Expression_substitute
-      - calling Expression_substitute
+      - returning from substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -130,13 +130,13 @@
           class: NumberConstant
           code: '1'
           str: '1'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AAggregate
         code: 'sum{c[color] : true : 1}'
         str: '3'
-    - returning from Expression_substitute
-    - calling Expression_substitute
+    - returning from substitute
+    - calling substitute
     - with_arguments:
         self:
           class: NumberConstant
@@ -156,18 +156,18 @@
         class: NumberConstant
         code: '3'
         str: '3'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AComparison
       code: 'sum{c[color] : true : 1} = 3'
       str: 'true'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AEquivalence
     code: 'p ⇔ sum{c[color] : true : 1} = 3'
     str: p
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AEquivalence
@@ -204,7 +204,7 @@
       code: p
       str: 'true'
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AComparison
@@ -220,7 +220,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AAggregate
@@ -236,7 +236,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -256,8 +256,8 @@
           class: NumberConstant
           code: '1'
           str: '1'
-      - returning from Expression_substitute
-      - calling Expression_substitute
+      - returning from substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -277,8 +277,8 @@
           class: NumberConstant
           code: '1'
           str: '1'
-      - returning from Expression_substitute
-      - calling Expression_substitute
+      - returning from substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -298,13 +298,13 @@
           class: NumberConstant
           code: '1'
           str: '1'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AAggregate
         code: 'sum{c[color] : true : 1}'
         str: '3'
-    - returning from Expression_substitute
-    - calling Expression_substitute
+    - returning from substitute
+    - calling substitute
     - with_arguments:
         self:
           class: NumberConstant
@@ -324,17 +324,17 @@
         class: NumberConstant
         code: '3'
         str: '3'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AComparison
       code: 'sum{c[color] : true : 1} = 3'
       str: 'true'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AEquivalence
     code: 'p ⇔ sum{c[color] : true : 1} = 3'
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -355,7 +355,7 @@
     code: p
     str: 'true'
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AComparison
@@ -370,7 +370,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AAggregate
@@ -385,7 +385,7 @@
         code: 'true'
         str: 'true'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: NumberConstant
@@ -404,8 +404,8 @@
         class: NumberConstant
         code: '1'
         str: '1'
-    - returning from Expression_substitute
-    - calling Expression_substitute
+    - returning from substitute
+    - calling substitute
     - with_arguments:
         self:
           class: NumberConstant
@@ -424,8 +424,8 @@
         class: NumberConstant
         code: '1'
         str: '1'
-    - returning from Expression_substitute
-    - calling Expression_substitute
+    - returning from substitute
+    - calling substitute
     - with_arguments:
         self:
           class: NumberConstant
@@ -444,13 +444,13 @@
         class: NumberConstant
         code: '1'
         str: '1'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AAggregate
       code: 'sum{c[color] : true : 1}'
       str: '3'
-  - returning from Expression_substitute
-  - calling Expression_substitute
+  - returning from substitute
+  - calling substitute
   - with_arguments:
       self:
         class: NumberConstant
@@ -469,12 +469,12 @@
       class: NumberConstant
       code: '3'
       str: '3'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AComparison
     code: 'sum{c[color] : true : 1} = 3'
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - '
 
   Z3 propagation ********************************'

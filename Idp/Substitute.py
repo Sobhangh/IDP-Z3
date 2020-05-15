@@ -41,7 +41,7 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 # class Expression ############################################################
 
 def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branch=None):
-    " change attributes of an expression, and erase derive attributes "
+    " change attributes of an expression, and erase derived attributes "
 
     if sub_exprs   is not None: self.sub_exprs = sub_exprs
     if ops         is not None: self.operator  = ops
@@ -66,14 +66,20 @@ Expression._change = _change
 
 
 def update_exprs(self, new_expr_generator):
-    """ change sub_exprs and simplify. (default implementation) """
+    """ change sub_exprs and simplify. """
     #  default implementation, without simplification
     return self._change(sub_exprs=list(new_expr_generator))
-Expression.update_exprs = update_exprs
+#Expression.update_exprs = update_exprs
+for i in [Constructor, AppliedSymbol, Variable, Fresh_Variable, NumberConstant]:
+    i.update_exprs = update_exprs
+
 
 # @log  # decorator patched in by tests/main.py
-def Expression_substitute(self, e0, e1, todo=None):
-    """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable) """
+def substitute(self, e0, e1, todo=None):
+    """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable) 
+    
+    implementation for everything but AppliedSymbol, Variable and Fresh_variable 
+    """
 
     assert not isinstance(e0, Fresh_Variable) # should use instantiate instead
     assert self.just_branch is None # see AppliedSymbol or Variable instead
@@ -86,7 +92,7 @@ def Expression_substitute(self, e0, e1, todo=None):
         # will update self.simpler
         out = self.update_exprs((e.substitute(e0, e1, todo) for e in self.sub_exprs))
         return out
-Expression.substitute = Expression_substitute
+Expression.substitute = substitute
 
 
 def instantiate(self, e0, e1):
@@ -129,12 +135,19 @@ Expression.simplify1 = simplify1
 
 
 def expand_quantifiers(self, theory):
+    """ replaces quantified formula by its expansion
+
+    implementation for everything but AQuantification and AAgregate 
+    """
     return self.update_exprs(e.expand_quantifiers(theory) for e in self.sub_exprs)
 Expression.expand_quantifiers = expand_quantifiers
 
 
 def interpret(self, theory):
-    " use information in structure and simplify "
+    """ use information in structure and simplify 
+    
+    implementation for everything but AppliedSymbol, Variable and Fresh_variable 
+    """
     out = self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
     out.original = out
     return out

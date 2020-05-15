@@ -1,5 +1,5 @@
 
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AEquivalence
@@ -36,7 +36,7 @@
       code: p
       str: p
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Brackets
@@ -52,7 +52,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AQuantification
@@ -68,7 +68,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: ADisjunction
@@ -84,7 +84,7 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
+        - calling substitute
         - with_arguments:
             self:
               class: Constructor
@@ -104,28 +104,28 @@
             class: Constructor
             code: 'true'
             str: 'true'
-        - returning from Expression_substitute
+        - returning from substitute
       - output:
           class: ADisjunction
           code: false ∨ true ∨ true
           str: 'true'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AQuantification
         code: '∃c[color] : c ≠ red'
         str: 'true'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: Brackets
       code: '(∃c[color] : c ≠ red)'
       str: (true)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AEquivalence
     code: 'p ⇔ (∃c[color] : c ≠ red)'
     str: p
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AQuantification
@@ -141,7 +141,7 @@
       str: 'true'
     todo: '[]'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: ADisjunction
@@ -173,7 +173,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Constructor
@@ -193,7 +193,7 @@
           class: Constructor
           code: red
           str: red
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AppliedSymbol
         code: q(red)
@@ -215,7 +215,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Constructor
@@ -235,7 +235,7 @@
           class: Constructor
           code: blue
           str: blue
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AppliedSymbol
         code: q(blue)
@@ -257,7 +257,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Constructor
@@ -277,7 +277,7 @@
           class: Constructor
           code: green
           str: green
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AppliedSymbol
         code: q(green)
@@ -287,13 +287,13 @@
       class: ADisjunction
       code: q(red) ∨ q(blue) ∨ q(green)
       str: q(red) ∨ q(blue) ∨ q(green)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AQuantification
     code: '∃c[color] : q(c)'
     str: q(red) ∨ q(blue) ∨ q(green)
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AEquivalence
@@ -330,7 +330,7 @@
       code: p
       str: 'true'
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Brackets
@@ -346,7 +346,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AQuantification
@@ -362,7 +362,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: ADisjunction
@@ -378,7 +378,7 @@
             str: 'true'
           todo: '[]'
       - processing
-        - calling Expression_substitute
+        - calling substitute
         - with_arguments:
             self:
               class: Constructor
@@ -398,27 +398,27 @@
             class: Constructor
             code: 'true'
             str: 'true'
-        - returning from Expression_substitute
+        - returning from substitute
       - output:
           class: ADisjunction
           code: false ∨ true ∨ true
           str: 'true'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AQuantification
         code: '∃c[color] : c ≠ red'
         str: 'true'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: Brackets
       code: '(∃c[color] : c ≠ red)'
       str: (true)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AEquivalence
     code: 'p ⇔ (∃c[color] : c ≠ red)'
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -439,7 +439,7 @@
     code: p
     str: 'true'
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AQuantification
@@ -454,7 +454,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: ADisjunction
@@ -469,7 +469,7 @@
         code: 'true'
         str: 'true'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Constructor
@@ -488,18 +488,18 @@
         class: Constructor
         code: 'true'
         str: 'true'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: ADisjunction
       code: false ∨ true ∨ true
       str: 'true'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AQuantification
     code: '∃c[color] : c ≠ red'
     str: 'true'
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AQuantification
@@ -514,7 +514,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: ADisjunction
@@ -544,7 +544,7 @@
           code: 'true'
           str: 'true'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Constructor
@@ -563,7 +563,7 @@
           class: Constructor
           code: red
           str: red
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AppliedSymbol
         code: q(red)
@@ -584,7 +584,7 @@
           code: 'true'
           str: 'true'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Constructor
@@ -603,7 +603,7 @@
           class: Constructor
           code: blue
           str: blue
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AppliedSymbol
         code: q(blue)
@@ -624,7 +624,7 @@
           code: 'true'
           str: 'true'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Constructor
@@ -643,7 +643,7 @@
           class: Constructor
           code: green
           str: green
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AppliedSymbol
         code: q(green)
@@ -653,12 +653,12 @@
       class: ADisjunction
       code: q(red) ∨ q(blue) ∨ q(green)
       str: q(red) ∨ q(blue) ∨ q(green)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AQuantification
     code: '∃c[color] : q(c)'
     str: q(red) ∨ q(blue) ∨ q(green)
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -674,7 +674,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Constructor
@@ -693,7 +693,7 @@
       class: Constructor
       code: red
       str: red
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AppliedSymbol
     code: q(red)
@@ -714,7 +714,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Constructor
@@ -733,7 +733,7 @@
       class: Constructor
       code: blue
       str: blue
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AppliedSymbol
     code: q(blue)
@@ -754,7 +754,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Constructor
@@ -773,13 +773,13 @@
       class: Constructor
       code: green
       str: green
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AppliedSymbol
     code: q(green)
     str: q(green)
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AQuantification
@@ -799,7 +799,7 @@
     class: AQuantification
     code: '∃c[color] : q(c)'
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -820,7 +820,7 @@
     code: p
     str: 'true'
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AQuantification
@@ -835,7 +835,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: ADisjunction
@@ -850,7 +850,7 @@
         code: 'true'
         str: 'true'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Constructor
@@ -869,18 +869,18 @@
         class: Constructor
         code: 'true'
         str: 'true'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: ADisjunction
       code: false ∨ true ∨ true
       str: 'true'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AQuantification
     code: '∃c[color] : c ≠ red'
     str: 'true'
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AQuantification
@@ -899,7 +899,7 @@
     class: AQuantification
     code: '∃c[color] : q(c)'
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -915,7 +915,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Constructor
@@ -934,7 +934,7 @@
       class: Constructor
       code: red
       str: red
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AppliedSymbol
     code: q(red)
@@ -955,7 +955,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Constructor
@@ -974,7 +974,7 @@
       class: Constructor
       code: blue
       str: blue
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AppliedSymbol
     code: q(blue)
@@ -995,7 +995,7 @@
       code: 'true'
       str: 'true'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Constructor
@@ -1014,7 +1014,7 @@
       class: Constructor
       code: green
       str: green
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AppliedSymbol
     code: q(green)

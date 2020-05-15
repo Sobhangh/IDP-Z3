@@ -20,7 +20,7 @@
     code: p
     str: p
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: Brackets
@@ -36,7 +36,7 @@
       str: 'true'
     todo: '[]'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: ADisjunction
@@ -52,7 +52,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AUnary
@@ -68,7 +68,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Brackets
@@ -109,13 +109,13 @@
           class: Brackets
           code: (p)
           str: (p)
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AUnary
         code: ~((p))
         str: ~((p))
-    - returning from Expression_substitute
-    - calling Expression_substitute
+    - returning from substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -156,17 +156,17 @@
         class: Brackets
         code: (p)
         str: (p)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: ADisjunction
       code: ~((p)) ∨ (p)
       str: ~((p)) ∨ (p)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: Brackets
     code: (~((p)) ∨ (p))
     str: (~((p)) ∨ (p))
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -188,7 +188,7 @@
     code: p
     str: 'true'
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: Brackets
@@ -204,7 +204,7 @@
       str: 'true'
     todo: '[]'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: ADisjunction
@@ -220,7 +220,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AUnary
@@ -236,7 +236,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: Brackets
@@ -277,13 +277,13 @@
           class: Brackets
           code: (p)
           str: (true)
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AUnary
         code: ~((p))
         str: 'false'
-    - returning from Expression_substitute
-    - calling Expression_substitute
+    - returning from substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -324,17 +324,17 @@
         class: Brackets
         code: (p)
         str: (true)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: ADisjunction
       code: ~((p)) ∨ (p)
       str: 'true'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: Brackets
     code: (~((p)) ∨ (p))
     str: (true)
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:

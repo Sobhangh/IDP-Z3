@@ -1,5 +1,5 @@
 
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AImplication
@@ -36,7 +36,7 @@
       code: p
       str: p
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AConjunction
@@ -73,7 +73,7 @@
         code: q
         str: q
     - returning from substitute
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -89,7 +89,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: ADisjunction
@@ -151,22 +151,22 @@
           class: ADisjunction
           code: r ∨ s
           str: r ∨ s
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: Brackets
         code: (r ∨ s)
         str: (r ∨ s)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AConjunction
       code: q ∧ (r ∨ s)
       str: q ∧ (r ∨ s)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AImplication
     code: p ⇒ q ∧ (r ∨ s)
     str: p ⇒ q ∧ (r ∨ s)
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -188,7 +188,7 @@
     code: p
     str: p
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AImplication
@@ -225,7 +225,7 @@
       code: p
       str: 'true'
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AConjunction
@@ -262,7 +262,7 @@
         code: q
         str: q
     - returning from substitute
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -278,7 +278,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: ADisjunction
@@ -340,23 +340,23 @@
           class: ADisjunction
           code: r ∨ s
           str: r ∨ s
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: Brackets
         code: (r ∨ s)
         str: (r ∨ s)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AConjunction
       code: q ∧ (r ∨ s)
       str: q ∧ (r ∨ s)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AImplication
     code: p ⇒ q ∧ (r ∨ s)
     str: q ∧ (r ∨ s)
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AImplication
@@ -391,7 +391,7 @@
       code: p
       str: 'true'
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AConjunction
@@ -426,7 +426,7 @@
         code: q
         str: 'true'
     - returning from substitute
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -441,7 +441,7 @@
           code: 'true'
           str: 'true'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: ADisjunction
@@ -500,22 +500,22 @@
           class: ADisjunction
           code: r ∨ s
           str: r ∨ s
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: Brackets
         code: (r ∨ s)
         str: (r ∨ s)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AConjunction
       code: q ∧ (r ∨ s)
       str: (r ∨ s)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AImplication
     code: p ⇒ q ∧ (r ∨ s)
     str: (r ∨ s)
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -617,7 +617,7 @@
     code: s
     str: s
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AImplication
@@ -654,7 +654,7 @@
       code: p
       str: 'true'
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AConjunction
@@ -691,7 +691,7 @@
         code: q
         str: 'true'
     - returning from substitute
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -707,7 +707,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: ADisjunction
@@ -769,22 +769,22 @@
           class: ADisjunction
           code: r ∨ s
           str: r ∨ s
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: Brackets
         code: (r ∨ s)
         str: (r ∨ s)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AConjunction
       code: q ∧ (r ∨ s)
       str: (r ∨ s)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AImplication
     code: p ⇒ q ∧ (r ∨ s)
     str: (r ∨ s)
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:

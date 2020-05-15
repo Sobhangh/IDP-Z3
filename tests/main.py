@@ -19,10 +19,8 @@ from typing import Dict, Any
 
 # patch Log on Idp.Substitute ##############################################################
 
-Expression    .substitute = log_calls(Expression.substitute)
-AppliedSymbol .substitute = log_calls(AppliedSymbol.substitute)
-Variable      .substitute = log_calls(Variable.substitute)
-Fresh_Variable.substitute = log_calls(Fresh_Variable.substitute)
+for i in [Expression, AppliedSymbol, Variable, Fresh_Variable]:
+    i.substitute = log_calls(i.substitute)
 
 
 ###########################################################################################

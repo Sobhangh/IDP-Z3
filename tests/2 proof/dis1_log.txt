@@ -20,7 +20,7 @@
     code: p
     str: p
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: ADisjunction
@@ -82,7 +82,7 @@
     class: ADisjunction
     code: p ∨ q
     str: p ∨ q
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -104,7 +104,7 @@
     code: p
     str: 'true'
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: ADisjunction
@@ -145,7 +145,7 @@
     class: ADisjunction
     code: p ∨ q
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:

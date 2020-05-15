@@ -1,5 +1,5 @@
 
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AComparison
@@ -36,7 +36,7 @@
       code: x
       str: x
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: NumberConstant
@@ -56,13 +56,13 @@
       class: NumberConstant
       code: '0'
       str: '0'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AComparison
     code: x = 0
     str: x = 0
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: ADisjunction
@@ -78,7 +78,7 @@
       str: 'true'
     todo: '[]'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AUnary
@@ -94,7 +94,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -110,7 +110,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: AComparison
@@ -147,7 +147,7 @@
             code: x
             str: x
         - returning from substitute
-        - calling Expression_substitute
+        - calling substitute
         - with_arguments:
             self:
               class: NumberConstant
@@ -167,23 +167,23 @@
             class: NumberConstant
             code: '0'
             str: '0'
-        - returning from Expression_substitute
+        - returning from substitute
       - output:
           class: AComparison
           code: x = 0
           str: x = 0
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: Brackets
         code: (x = 0)
         str: (x = 0)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AUnary
       code: ~((x = 0))
       str: ~((x = 0))
-  - returning from Expression_substitute
-  - calling Expression_substitute
+  - returning from substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Brackets
@@ -199,7 +199,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AComparison
@@ -236,7 +236,7 @@
           code: x
           str: x
       - returning from substitute
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -256,23 +256,23 @@
           class: NumberConstant
           code: '0'
           str: '0'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AComparison
         code: x = 0
         str: x = 0
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: Brackets
       code: (x = 0)
       str: (x = 0)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: ADisjunction
     code: ~((x = 0)) ∨ (x = 0)
     str: ~((x = 0)) ∨ (x = 0)
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AComparison
@@ -292,8 +292,8 @@
     class: AComparison
     code: x = 0
     str: 'true'
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: ADisjunction
@@ -309,7 +309,7 @@
       str: 'true'
     todo: '[]'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AUnary
@@ -325,7 +325,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -341,7 +341,7 @@
           str: 'true'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: AComparison
@@ -361,18 +361,18 @@
           class: AComparison
           code: x = 0
           str: 'true'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: Brackets
         code: (x = 0)
         str: (true)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AUnary
       code: ~((x = 0))
       str: 'false'
-  - returning from Expression_substitute
-  - calling Expression_substitute
+  - returning from substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Brackets
@@ -388,7 +388,7 @@
         str: 'true'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AComparison
@@ -408,18 +408,18 @@
         class: AComparison
         code: x = 0
         str: 'true'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: Brackets
       code: (x = 0)
       str: (true)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: ADisjunction
     code: ~((x = 0)) ∨ (x = 0)
     str: 'true'
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AComparison
@@ -438,7 +438,7 @@
     class: AComparison
     code: x = 0
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
@@ -479,7 +479,7 @@
     code: y
     str: y
 - returning from substitute
-- calling Expression_substitute
+- calling substitute
 - with_arguments:
     self:
       class: AComparison
@@ -516,7 +516,7 @@
       code: x
       str: '0'
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: NumberConstant
@@ -536,13 +536,13 @@
       class: NumberConstant
       code: '0'
       str: '0'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AComparison
     code: x = 0
     str: 'true'
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: ADisjunction
@@ -558,7 +558,7 @@
       str: '0'
     todo: '[]'
 - processing
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: AUnary
@@ -574,7 +574,7 @@
         str: '0'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: Brackets
@@ -590,7 +590,7 @@
           str: '0'
         todo: '[]'
     - processing
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: AComparison
@@ -627,7 +627,7 @@
             code: x
             str: '0'
         - returning from substitute
-        - calling Expression_substitute
+        - calling substitute
         - with_arguments:
             self:
               class: NumberConstant
@@ -647,23 +647,23 @@
             class: NumberConstant
             code: '0'
             str: '0'
-        - returning from Expression_substitute
+        - returning from substitute
       - output:
           class: AComparison
           code: x = 0
           str: 'true'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: Brackets
         code: (x = 0)
         str: (true)
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: AUnary
       code: ~((x = 0))
       str: 'false'
-  - returning from Expression_substitute
-  - calling Expression_substitute
+  - returning from substitute
+  - calling substitute
   - with_arguments:
       self:
         class: Brackets
@@ -679,7 +679,7 @@
         str: '0'
       todo: '[]'
   - processing
-    - calling Expression_substitute
+    - calling substitute
     - with_arguments:
         self:
           class: AComparison
@@ -716,7 +716,7 @@
           code: x
           str: '0'
       - returning from substitute
-      - calling Expression_substitute
+      - calling substitute
       - with_arguments:
           self:
             class: NumberConstant
@@ -736,23 +736,23 @@
           class: NumberConstant
           code: '0'
           str: '0'
-      - returning from Expression_substitute
+      - returning from substitute
     - output:
         class: AComparison
         code: x = 0
         str: 'true'
-    - returning from Expression_substitute
+    - returning from substitute
   - output:
       class: Brackets
       code: (x = 0)
       str: (true)
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: ADisjunction
     code: ~((x = 0)) ∨ (x = 0)
     str: 'true'
-- returning from Expression_substitute
-- calling Expression_substitute
+- returning from substitute
+- calling substitute
 - with_arguments:
     self:
       class: AComparison
@@ -787,7 +787,7 @@
       code: x
       str: '0'
   - returning from substitute
-  - calling Expression_substitute
+  - calling substitute
   - with_arguments:
       self:
         class: NumberConstant
@@ -806,12 +806,12 @@
       class: NumberConstant
       code: '0'
       str: '0'
-  - returning from Expression_substitute
+  - returning from substitute
 - output:
     class: AComparison
     code: x = 0
     str: 'true'
-- returning from Expression_substitute
+- returning from substitute
 - calling substitute
 - with_arguments:
     self:
