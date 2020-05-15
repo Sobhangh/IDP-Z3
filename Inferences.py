@@ -148,7 +148,7 @@ def explain(case, symbol, value, given_json):
         s = Solver()
         s.set(':core.minimize', True)
         (reify, unreify) = reifier(case.GUILines, s)
-        def r1(a): return reify[a] if a in reify else a
+        def r1(a): return reify[str(a)] if str(a) in reify else a
         def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
         ps = {} # {reified: constraint}
         
@@ -214,7 +214,7 @@ def abstract(case, given_json):
                 assignment = case.assignments[atom_string]
                 if assignment.value is None \
                 and assignment.relevant and atom.type == 'bool':
-                    value = solver.model().eval(reify[atom])
+                    value = solver.model().eval(reify[atom.code])
                     if value == True:
                         atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
                     elif value == False:
@@ -236,8 +236,8 @@ def abstract(case, given_json):
         for i, assignment in enumerate(atoms):
             if assignment.value is not None:
                 solver2.push()
-                a = Not(reify2[assignment.sentence.original]) if assignment.value else \
-                    reify2[assignment.sentence.original]
+                a = Not(reify2[assignment.sentence.original.code]) if assignment.value else \
+                    reify2[assignment.sentence.original.code]
                 solver2.add(a)
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
                 result = solver2.check()
@@ -259,8 +259,8 @@ def abstract(case, given_json):
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(assignment)
-                a = Not(reify2[assignment.sentence.original]) if assignment.value else \
-                    reify2[assignment.sentence.original]
+                a = Not(reify2[assignment.sentence.original.code]) if assignment.value else \
+                    reify2[assignment.sentence.original.code]
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)

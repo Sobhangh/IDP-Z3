@@ -33,7 +33,7 @@ def reifier(atoms, solver):
     # returns ({atom: predicateZ3}, {predicateZ3: atom})
     count, (reify, unreify) = 0, ({}, {})
     for atom in atoms.values():
-        reify[atom] = atom.reified()
+        reify[atom.code] = atom.reified()
         unreify[atom.reified()] = atom
         if atom.type == 'bool':
             solver.add(atom.reified() == atom.translate())

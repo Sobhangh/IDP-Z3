@@ -39,7 +39,7 @@ class Case:
     def __init__(self, idp: Idp, jsonstr: str, expanded: List[str]):
 
         self.idp = idp # Idp vocabulary and theory
-        self.given = json_to_literals(idp, jsonstr) # {atom : assignment} from the user interface
+        self.given = json_to_literals(idp, jsonstr) # {atom.code : assignment} from the user interface
         self.expanded_symbols = set(expanded)
 
         # initialisation
@@ -61,7 +61,7 @@ class Case:
 
         # initialize .assignments
         self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.GUILines.values()}
-        self.assignments.update({ atom.code : ass for atom, ass in self.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
+        self.assignments.update({ atom : ass for atom, ass in self.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
 
         # find immediate universals
         for c in self.idp.theory.constraints:

@@ -67,8 +67,6 @@ tags:
 
 #### other NTH (refactoring)
 - [ ] reorganize project folders
-- [ ] get rid of brackets ?  Need to keep multiple annotations
-- [ ] remove Assignment.__hash__, .__eq__
 - [ ] merge Case.assignments and Case.GUILines to be like Structure
 - [ ] remove reifier, Solver.py --> expr.reified(solver)
 - [ ] simplify the generation of Structure_

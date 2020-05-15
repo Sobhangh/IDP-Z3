@@ -55,13 +55,6 @@ class Assignment(object):
         case.assignments[self.sentence.code] = out
         return out
 
-    def __eq__(self, other):
-        # ignores value !
-        return self.sentence == other.sentence
-        
-    def __hash__(self): #TODO remove. Used for sets in abstract
-        return hash(self.sentence.str)
-
     def __repr__(self):
         out = str(self.sentence.code)
         if self.value is None:
@@ -132,11 +125,11 @@ def json_to_literals(idp, jsonstr: str):
                     atom = symbol.instances[atom].copy()
                 if json_atom["typ"] == "Bool":
                     assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
-                    assignments[atom] = assignment
+                    assignments[atom.code] = assignment
                 elif json_atom["value"]:
                     assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                     assignment.relevant = True
-                    assignments[atom] = assignment
+                    assignments[atom.code] = assignment
     return assignments
 
 
@@ -157,8 +150,8 @@ def model_to_json(case, s, reify):
                     d2['status'] = 'EXPANDED'
 
                     atom = case.assignments[atom_code].sentence
-                    if atom in reify:
-                        atomZ3 = reify[atom]
+                    if atom.code in reify:
+                        atomZ3 = reify[atom.code]
                     else:
                         atomZ3 = atom.reified()
                     value = model.eval(atomZ3, model_completion=True)
