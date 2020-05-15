@@ -4,7 +4,7 @@ tags:
    ID: TODO
 –-
 - [ ] Aanbesteding demo
-- [ ] [[AWS hosting]] [[20200401113342]] 
+- [ ] [[AWS hosting]] [[20200401113342]] or Google App Engine
 
 - [ ] flatten nested applicaton f(f(x))
 - [ ] Explanations: inject values in message

@@ -37,7 +37,7 @@
           class: Variable
           code: p
           str: p
-          just_branch:
+          co_constraint:
             class: AEquivalence
             code: p ⇔ true
             str: p
@@ -119,7 +119,7 @@
         class: Variable
         code: p
         str: p
-        just_branch:
+        co_constraint:
           class: AEquivalence
           code: p ⇔ true
           str: p
@@ -193,7 +193,7 @@
           class: Variable
           code: p
           str: p
-          just_branch:
+          co_constraint:
             class: AEquivalence
             code: p ⇔ true
             str: p
@@ -275,7 +275,7 @@
         class: Variable
         code: p
         str: 'true'
-        just_branch:
+        co_constraint:
           class: AEquivalence
           code: p ⇔ true
           str: 'true'
@@ -347,7 +347,7 @@
           class: Variable
           code: p
           str: 'true'
-          just_branch:
+          co_constraint:
             class: AEquivalence
             code: p ⇔ true
             str: 'true'
@@ -425,7 +425,7 @@
         class: Variable
         code: p
         str: 'true'
-        just_branch:
+        co_constraint:
           class: AEquivalence
           code: p ⇔ true
           str: 'true'
@@ -538,7 +538,7 @@
           class: Variable
           code: p
           str: 'true'
-          just_branch:
+          co_constraint:
             class: AEquivalence
             code: p ⇔ true
             str: 'true'
@@ -620,7 +620,7 @@
         class: Variable
         code: p
         str: 'true'
-        just_branch:
+        co_constraint:
           class: AEquivalence
           code: p ⇔ true
           str: 'true'

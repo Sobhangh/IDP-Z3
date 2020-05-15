@@ -64,7 +64,7 @@ class Expression(object):
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
-        self.just_branch = None           # Justification branch (Expression)
+        self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
         # .normal : only set in .instances
 
 
@@ -74,9 +74,9 @@ class Expression(object):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
-        out.value       = None if out.value       is None else out.value      .copy()
-        out.simpler     = None if out.simpler     is None else out.simpler    .copy()
-        out.just_branch = None if out.just_branch is None else out.just_branch.copy()
+        out.value         = None if out.value         is None else out.value        .copy()
+        out.simpler       = None if out.simpler       is None else out.simpler      .copy()
+        out.co_constraint = None if out.co_constraint is None else out.co_constraint.copy()
         return out
 
     def __eq__(self, other):
@@ -106,7 +106,7 @@ class Expression(object):
         return { 'class': type(self).__name__
             , 'code': self.code
             , 'str': self.str
-            , 'just_branch': self.just_branch }
+            , 'co_constraint': self.co_constraint }
 
     def __hash__(self):
         return hash(self.code)
@@ -158,8 +158,8 @@ class Expression(object):
         if self.is_subtence and self.code not in ['true', 'false']:
             out[self.code] = self
         out.update(mergeDicts(e.subtences() for e in self.sub_exprs))
-        if self.just_branch is not None:
-            out.update(self.just_branch.subtences())
+        if self.co_constraint is not None:
+            out.update(self.co_constraint.subtences())
         return out
 
     def as_ground(self): 
@@ -171,8 +171,8 @@ class Expression(object):
         if self.if_symbol is not None: # ignore type constraints
             return {}
         out = mergeDicts(e.unknown_symbols() for e in self.sub_exprs)
-        if self.just_branch is not None:
-            out.update(self.just_branch.unknown_symbols())
+        if self.co_constraint is not None:
+            out.update(self.co_constraint.unknown_symbols())
         return out
 
     def reified(self) -> DatatypeRef:
@@ -190,9 +190,9 @@ class Expression(object):
     
     def justifications(self):
         out = sum((e.justifications() for e in self.sub_exprs), [])
-        if self.just_branch is not None:
-            out.append(self.just_branch)
-            out.extend(self.just_branch.justifications())
+        if self.co_constraint is not None:
+            out.append(self.co_constraint)
+            out.extend(self.co_constraint.justifications())
         return out
 
 class Constructor(Expression):
@@ -550,8 +550,8 @@ class AppliedSymbol(Expression):
                 questions.add(self)
         for e in self.sub_exprs:
             e.collect(questions, all_)
-        if self.just_branch is not None:
-            self.just_branch.collect(questions, all_)
+        if self.co_constraint is not None:
+            self.co_constraint.collect(questions, all_)
 
     def annotate1(self):
         self.type = self.decl.type.name
@@ -602,8 +602,8 @@ class Variable(AppliedSymbol):
 
     def collect(self, questions, all_=True):
         questions.add(self)
-        if self.just_branch is not None:
-            self.just_branch.collect(questions, all_)
+        if self.co_constraint is not None:
+            self.co_constraint.collect(questions, all_)
 
     def reified(self):
         return self.translate()
@@ -627,6 +627,8 @@ class Fresh_Variable(Expression):
 
     def mark_subtences(self):
         return self
+
+
 class NumberConstant(Expression):
     PRECEDENCE = 200
     def __init__(self, **kwargs):

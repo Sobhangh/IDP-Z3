@@ -67,7 +67,7 @@ class Case:
         for c in self.idp.theory.constraints:
             c = c.copy()
             consequences = []
-            new_constraint = c.substitute(TRUE, TRUE, consequences) # to simplify just_branch
+            new_constraint = c.substitute(TRUE, TRUE, consequences) # to simplify co_constraint
             consequences.extend(new_constraint.implicants())
             if consequences:
                 for sentence, value in consequences:

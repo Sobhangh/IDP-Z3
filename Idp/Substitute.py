@@ -40,14 +40,14 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 
 # class Expression ############################################################
 
-def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, just_branch=None):
+def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, co_constraint=None):
     " change attributes of an expression, and erase derived attributes "
 
-    if sub_exprs   is not None: self.sub_exprs = sub_exprs
-    if ops         is not None: self.operator  = ops
-    if just_branch is not None: self.just_branch = just_branch
-    if value       is not None: self.value     = value
-    elif simpler   is not None: 
+    if sub_exprs     is not None: self.sub_exprs     = sub_exprs
+    if ops           is not None: self.operator      = ops
+    if co_constraint is not None: self.co_constraint = co_constraint
+    if value         is not None: self.value         = value
+    elif simpler     is not None: 
         if type(simpler) in [Constructor, NumberConstant]:
             self.value   = simpler
         elif simpler.value is not None: # example: prime.idp
@@ -82,7 +82,7 @@ def substitute(self, e0, e1, todo=None):
     """
 
     assert not isinstance(e0, Fresh_Variable) # should use instantiate instead
-    assert self.just_branch is None # see AppliedSymbol or Variable instead
+    assert self.co_constraint is None # see AppliedSymbol or Variable instead
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
@@ -107,12 +107,12 @@ def instantiate(self, e0, e1):
 
     out = out.update_exprs((e.instantiate(e0, e1) for e in out.sub_exprs)) # with simplification
 
-    simpler, just_branch = None, None
+    simpler, co_constraint = None, None
     if out.simpler is not None:
         simpler = out.simpler.instantiate(e0, e1)
-    if out.just_branch is not None:
-        just_branch = out.just_branch.instantiate(e0, e1)
-    out._change(simpler=simpler, just_branch=just_branch)
+    if out.co_constraint is not None:
+        co_constraint = out.co_constraint.instantiate(e0, e1)
+    out._change(simpler=simpler, co_constraint=co_constraint)
 
     if out.value is not None: # replace by new value
         out = out.value
@@ -443,7 +443,7 @@ def interpret(self, theory):
     elif self.name in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs
-        self.just_branch = theory.clark[self.name].instantiate_definition(sub_exprs, theory)
+        self.co_constraint = theory.clark[self.name].instantiate_definition(sub_exprs, theory)
         out = self
     else:
         out = self._change(sub_exprs=sub_exprs)
@@ -464,21 +464,21 @@ def substitute(self, e0, e1, todo=None):
         return out
 
     new_branch = None
-    if self.just_branch is not None:
+    if self.co_constraint is not None:
         Log(f"definition:")
-        new_branch = self.just_branch.substitute(e0, e1, todo)
+        new_branch = self.co_constraint.substitute(e0, e1, todo)
         if todo is not None:
             todo.extend(new_branch.implicants())
             
     if self.code == e0.code:
-        return self._change(value=e1, just_branch=new_branch)
+        return self._change(value=e1, co_constraint=new_branch)
     elif self.simpler is not None: # has an interpretation
-        assert self.just_branch is None
+        assert self.co_constraint is None
         simpler = self.simpler.substitute(e0,e1,todo)
         return self._change(simpler=simpler)
     else:
         sub_exprs = [e.substitute(e0, e1, todo) for e in self.sub_exprs] # no simplification here
-        return self._change(sub_exprs=sub_exprs, just_branch=new_branch)
+        return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 
