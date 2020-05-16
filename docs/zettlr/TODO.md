@@ -67,7 +67,7 @@ tags:
 
 #### other NTH (refactoring)
 - [ ] reorganize project folders
-- [ ] merge Case.assignments and Case.GUILines to be like Structure
+- [ ] merge Case.assignments and Case.GUILines to be like Structure ([[20200504142301]] Questions)
 - [ ] remove reifier, Solver.py --> expr.reified(solver)
 - [ ] simplify the generation of Structure_
 

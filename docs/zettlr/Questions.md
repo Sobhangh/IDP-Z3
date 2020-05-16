@@ -33,5 +33,7 @@ Principles:
 
 Todo:
 - [x] compute Expr.questions for each constraints
-- [ ] reduce Expr.questions after each substitute
+- [x] reduce Expr.questions after each substitute
 - [ ] rename GUILines as showable, and reduce it per view
+
+See previous analysis [[20200402140335]] Subtences
