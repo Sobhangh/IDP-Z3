@@ -30,7 +30,6 @@ tags:
 - [ ] Support for partial functions
 - [ ] Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
 - [ ] Support for non-linear equations [[20200328122541]]
-- [ ] Parse English [[20200327095115]] 
 - [ ] use pySMT [[20200328102421]] 
 
 
@@ -57,15 +56,17 @@ tags:
 
 #### Performance
 - [ ] merge case.co_constraints and case.definitions (many overlaps)
-- [ ] rewrite in Nim !
+- [ ] rewrite in [[Nim]] !
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share co_constraints
 - [ ] avoid mergeDicts.  Use accumulator instead
 - [ ] use `__slots__`
 - [ ] cython, pypy
+- [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
 - [ ] #Perf
 
 #### other NTH (refactoring)
+- [ ] use [macropy](https://macropy3.readthedocs.io/en/latest/): smartAsserts, pattern matching
 - [ ] reorganize project folders
 - [ ] merge Case.assignments and Case.GUILines to be like Structure ([[20200504142301]] Questions)
 - [ ] remove reifier, Solver.py --> expr.reified(solver)

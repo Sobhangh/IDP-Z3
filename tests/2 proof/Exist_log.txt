@@ -1,592 +1,88 @@
 
-- calling substitute
-- with_arguments:
-    self:
-      class: AEquivalence
-      code: 'p ⇔ (∃c[color] : c ≠ red)'
-      str: p
-    e0:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: None
-      q(red): None
-      q(blue): None
-      q(green): None
-      '∃c[color] : c ≠ red': None
-      '∃c[color] : q(c)': None
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Variable
-        code: p
-        str: p
-      e0:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: None
-        q(red): None
-        q(blue): None
-        q(green): None
-        '∃c[color] : c ≠ red': None
-        '∃c[color] : q(c)': None
-      todo: '[]'
-  - processing
-  - output:
-      class: Variable
-      code: p
-      str: p
-  - returning from substitute
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Brackets
-        code: '(∃c[color] : c ≠ red)'
-        str: (true)
-      e0:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: None
-        q(red): None
-        q(blue): None
-        q(green): None
-        '∃c[color] : c ≠ red': None
-        '∃c[color] : q(c)': None
-      todo: '[]'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AQuantification
-          code: '∃c[color] : c ≠ red'
-          str: 'true'
-        e0:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: None
-          q(red): None
-          q(blue): None
-          q(green): None
-          '∃c[color] : c ≠ red': None
-          '∃c[color] : q(c)': None
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: ADisjunction
-            code: false ∨ true ∨ true
-            str: 'true'
-          e0:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: None
-            q(red): None
-            q(blue): None
-            q(green): None
-            '∃c[color] : c ≠ red': None
-            '∃c[color] : q(c)': None
-          todo: '[]'
-      - processing
-        - calling substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            assignments:
-              p: None
-              q(red): None
-              q(blue): None
-              q(green): None
-              '∃c[color] : c ≠ red': None
-              '∃c[color] : q(c)': None
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from substitute
-      - output:
-          class: ADisjunction
-          code: false ∨ true ∨ true
-          str: 'true'
-      - returning from substitute
-    - output:
-        class: AQuantification
-        code: '∃c[color] : c ≠ red'
-        str: 'true'
-    - returning from substitute
-  - output:
-      class: Brackets
-      code: '(∃c[color] : c ≠ red)'
-      str: (true)
-  - returning from substitute
-- output:
-    class: AEquivalence
-    code: 'p ⇔ (∃c[color] : c ≠ red)'
-    str: p
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∃c[color] : q(c)'
-      str: q(red) ∨ q(blue) ∨ q(green)
-    e0:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: 'true'
-      q(red): None
-      q(blue): None
-      q(green): None
-      '∃c[color] : c ≠ red': None
-      '∃c[color] : q(c)': None
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: ADisjunction
-        code: q(red) ∨ q(blue) ∨ q(green)
-        str: q(red) ∨ q(blue) ∨ q(green)
-      e0:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        q(red): None
-        q(blue): None
-        q(green): None
-        '∃c[color] : c ≠ red': None
-        '∃c[color] : q(c)': None
-      todo: '[]'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(red)
-          str: q(red)
-        e0:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: 'true'
-          q(red): None
-          q(blue): None
-          q(green): None
-          '∃c[color] : c ≠ red': None
-          '∃c[color] : q(c)': None
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: red
-            str: red
-          e0:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: 'true'
-            q(red): None
-            q(blue): None
-            q(green): None
-            '∃c[color] : c ≠ red': None
-            '∃c[color] : q(c)': None
-          todo: '[]'
-      - processing
-      - output:
-          class: Constructor
-          code: red
-          str: red
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(red)
-        str: q(red)
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(blue)
-          str: q(blue)
-        e0:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: 'true'
-          q(red): None
-          q(blue): None
-          q(green): None
-          '∃c[color] : c ≠ red': None
-          '∃c[color] : q(c)': None
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: blue
-            str: blue
-          e0:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: 'true'
-            q(red): None
-            q(blue): None
-            q(green): None
-            '∃c[color] : c ≠ red': None
-            '∃c[color] : q(c)': None
-          todo: '[]'
-      - processing
-      - output:
-          class: Constructor
-          code: blue
-          str: blue
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(blue)
-        str: q(blue)
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AppliedSymbol
-          code: q(green)
-          str: q(green)
-        e0:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: 'true'
-          q(red): None
-          q(blue): None
-          q(green): None
-          '∃c[color] : c ≠ red': None
-          '∃c[color] : q(c)': None
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: Constructor
-            code: green
-            str: green
-          e0:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: 'true'
-            q(red): None
-            q(blue): None
-            q(green): None
-            '∃c[color] : c ≠ red': None
-            '∃c[color] : q(c)': None
-          todo: '[]'
-      - processing
-      - output:
-          class: Constructor
-          code: green
-          str: green
-      - returning from substitute
-    - output:
-        class: AppliedSymbol
-        code: q(green)
-        str: q(green)
-    - returning from substitute
-  - output:
-      class: ADisjunction
-      code: q(red) ∨ q(blue) ∨ q(green)
-      str: q(red) ∨ q(blue) ∨ q(green)
-  - returning from substitute
-- output:
-    class: AQuantification
-    code: '∃c[color] : q(c)'
-    str: q(red) ∨ q(blue) ∨ q(green)
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AEquivalence
-      code: 'p ⇔ (∃c[color] : c ≠ red)'
-      str: p
-    e0:
-      class: Variable
-      code: p
-      str: p
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: 'true'
-      q(red): None
-      q(blue): None
-      q(green): None
-      '∃c[color] : c ≠ red': None
-      '∃c[color] : q(c)': 'true'
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Variable
-        code: p
-        str: p
-      e0:
-        class: Variable
-        code: p
-        str: p
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        q(red): None
-        q(blue): None
-        q(green): None
-        '∃c[color] : c ≠ red': None
-        '∃c[color] : q(c)': 'true'
-      todo: '[]'
-  - processing
-  - output:
-      class: Variable
-      code: p
-      str: 'true'
-  - returning from substitute
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Brackets
-        code: '(∃c[color] : c ≠ red)'
-        str: (true)
-      e0:
-        class: Variable
-        code: p
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        q(red): None
-        q(blue): None
-        q(green): None
-        '∃c[color] : c ≠ red': None
-        '∃c[color] : q(c)': 'true'
-      todo: '[]'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AQuantification
-          code: '∃c[color] : c ≠ red'
-          str: 'true'
-        e0:
-          class: Variable
-          code: p
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: 'true'
-          q(red): None
-          q(blue): None
-          q(green): None
-          '∃c[color] : c ≠ red': None
-          '∃c[color] : q(c)': 'true'
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: ADisjunction
-            code: false ∨ true ∨ true
-            str: 'true'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: 'true'
-            q(red): None
-            q(blue): None
-            q(green): None
-            '∃c[color] : c ≠ red': None
-            '∃c[color] : q(c)': 'true'
-          todo: '[]'
-      - processing
-        - calling substitute
-        - with_arguments:
-            self:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            e0:
-              class: Variable
-              code: p
-              str: 'true'
-            e1:
-              class: Constructor
-              code: 'true'
-              str: 'true'
-            assignments:
-              p: 'true'
-              q(red): None
-              q(blue): None
-              q(green): None
-              '∃c[color] : c ≠ red': None
-              '∃c[color] : q(c)': 'true'
-            todo: '[]'
-        - processing
-        - output:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-        - returning from substitute
-      - output:
-          class: ADisjunction
-          code: false ∨ true ∨ true
-          str: 'true'
-      - returning from substitute
-    - output:
-        class: AQuantification
-        code: '∃c[color] : c ≠ red'
-        str: 'true'
-    - returning from substitute
-  - output:
-      class: Brackets
-      code: '(∃c[color] : c ≠ red)'
-      str: (true)
-  - returning from substitute
-- output:
-    class: AEquivalence
-    code: 'p ⇔ (∃c[color] : c ≠ red)'
-    str: 'true'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AQuantification
-      code: '∃c[color] : q(c)'
-      str: q(red) ∨ q(blue) ∨ q(green)
-    e0:
-      class: AQuantification
-      code: '∃c[color] : q(c)'
-      str: q(red) ∨ q(blue) ∨ q(green)
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: 'true'
-      q(red): None
-      q(blue): None
-      q(green): None
-      '∃c[color] : c ≠ red': None
-      '∃c[color] : q(c)': 'true'
-    todo: '[]'
-- processing
-- output:
-    class: AQuantification
-    code: '∃c[color] : q(c)'
-    str: 'true'
-- returning from substitute
+- 'calling substitute(p,true,true,{''p'': ? p, ''q(red)'': ? q(red), ''q(blue)'':
+  ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+  red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+  - 'calling substitute(p,true,true,{''p'': ? p, ''q(red)'': ? q(red), ''q(blue)'':
+    ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+    red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+  - 'returning from substitute: p'
+  - 'calling substitute((true),true,true,{''p'': ? p, ''q(red)'': ? q(red), ''q(blue)'':
+    ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+    red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+    - 'calling substitute(true,true,true,{''p'': ? p, ''q(red)'': ? q(red), ''q(blue)'':
+      ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+      red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+      - 'calling substitute(true,true,true,{''p'': ? p, ''q(red)'': ? q(red), ''q(blue)'':
+        ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+        red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+        - 'calling substitute(true,true,true,{''p'': ? p, ''q(red)'': ? q(red), ''q(blue)'':
+          ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+          red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+        - 'returning from substitute: true'
+      - 'returning from substitute: true'
+    - 'returning from substitute: true'
+  - 'returning from substitute: (true)'
+- 'returning from substitute: p'
+- 'calling substitute(q(red) ∨ q(blue) ∨ q(green),true,true,{''p'': p, ''q(red)'':
+  ? q(red), ''q(blue)'': ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'':
+  ? ∃c[color] : c ≠ red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+  - 'calling substitute(q(red) ∨ q(blue) ∨ q(green),true,true,{''p'': p, ''q(red)'':
+    ? q(red), ''q(blue)'': ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'':
+    ? ∃c[color] : c ≠ red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+    - 'calling substitute(q(red),true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+      ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+      red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+      - 'calling substitute(red,true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+        ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+        red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+      - 'returning from substitute: red'
+    - 'returning from substitute: q(red)'
+    - 'calling substitute(q(blue),true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+      ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+      red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+      - 'calling substitute(blue,true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+        ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+        red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+      - 'returning from substitute: blue'
+    - 'returning from substitute: q(blue)'
+    - 'calling substitute(q(green),true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+      ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+      red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+      - 'calling substitute(green,true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+        ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+        red, ''∃c[color] : q(c)'': ? ∃c[color] : q(c)},[])'
+      - 'returning from substitute: green'
+    - 'returning from substitute: q(green)'
+  - 'returning from substitute: q(red) ∨ q(blue) ∨ q(green)'
+- 'returning from substitute: q(red) ∨ q(blue) ∨ q(green)'
+- 'calling substitute(p,p,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'': ? q(blue),
+  ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠ red, ''∃c[color]
+  : q(c)'': ∃c[color] : q(c)},[])'
+  - 'calling substitute(p,p,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'': ? q(blue),
+    ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠ red, ''∃c[color]
+    : q(c)'': ∃c[color] : q(c)},[])'
+  - 'returning from substitute: true'
+  - 'calling substitute((true),true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+    ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+    red, ''∃c[color] : q(c)'': ∃c[color] : q(c)},[])'
+    - 'calling substitute(true,true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+      ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+      red, ''∃c[color] : q(c)'': ∃c[color] : q(c)},[])'
+      - 'calling substitute(true,true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+        ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+        red, ''∃c[color] : q(c)'': ∃c[color] : q(c)},[])'
+        - 'calling substitute(true,true,true,{''p'': p, ''q(red)'': ? q(red), ''q(blue)'':
+          ? q(blue), ''q(green)'': ? q(green), ''∃c[color] : c ≠ red'': ? ∃c[color] : c ≠
+          red, ''∃c[color] : q(c)'': ∃c[color] : q(c)},[])'
+        - 'returning from substitute: true'
+      - 'returning from substitute: true'
+    - 'returning from substitute: true'
+  - 'returning from substitute: (true)'
+- 'returning from substitute: true'
+- 'calling substitute(q(red) ∨ q(blue) ∨ q(green),q(red) ∨ q(blue) ∨ q(green),true,{''p'':
+  p, ''q(red)'': ? q(red), ''q(blue)'': ? q(blue), ''q(green)'': ? q(green), ''∃c[color]
+  : c ≠ red'': ? ∃c[color] : c ≠ red, ''∃c[color] : q(c)'': ∃c[color] : q(c)},[])'
+- 'returning from substitute: true'
 - '
 
   Z3 propagation ********************************'

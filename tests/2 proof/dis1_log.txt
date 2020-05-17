@@ -1,193 +1,25 @@
 
-- calling substitute
-- with_arguments:
-    self:
-      class: Variable
-      code: p
-      str: p
-    e0:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: None
-      q: None
-      r: None
-      s: None
-      t: None
-    todo: '[]'
-- processing
-- output:
-    class: Variable
-    code: p
-    str: p
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: ADisjunction
-      code: p ∨ q
-      str: p ∨ q
-    e0:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: 'true'
-      q: None
-      r: None
-      s: None
-      t: None
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Variable
-        code: p
-        str: p
-      e0:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        q: None
-        r: None
-        s: None
-        t: None
-      todo: '[]'
-  - processing
-  - output:
-      class: Variable
-      code: p
-      str: p
-  - returning from substitute
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Variable
-        code: q
-        str: q
-      e0:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        q: None
-        r: None
-        s: None
-        t: None
-      todo: '[]'
-  - processing
-  - output:
-      class: Variable
-      code: q
-      str: q
-  - returning from substitute
-- output:
-    class: ADisjunction
-    code: p ∨ q
-    str: p ∨ q
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: Variable
-      code: p
-      str: p
-    e0:
-      class: Variable
-      code: p
-      str: p
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: 'true'
-      q: None
-      r: None
-      s: None
-      t: None
-    todo: '[]'
-- processing
-- output:
-    class: Variable
-    code: p
-    str: 'true'
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: ADisjunction
-      code: p ∨ q
-      str: p ∨ q
-    e0:
-      class: Variable
-      code: p
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: 'true'
-      q: None
-      r: None
-      s: None
-      t: None
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Variable
-        code: p
-        str: p
-      e0:
-        class: Variable
-        code: p
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        q: None
-        r: None
-        s: None
-        t: None
-      todo: '[]'
-  - processing
-  - output:
-      class: Variable
-      code: p
-      str: 'true'
-  - returning from substitute
-- output:
-    class: ADisjunction
-    code: p ∨ q
-    str: 'true'
-- returning from substitute
+- 'calling substitute(p,true,true,{''p'': ? p, ''q'': ? q, ''r'': ? r, ''s'': ? s,
+  ''t'': ? t},[])'
+- 'returning from substitute: p'
+- 'calling substitute(p ∨ q,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ?
+  s, ''t'': ? t},[])'
+  - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
+    ? t},[])'
+  - 'returning from substitute: p'
+  - 'calling substitute(q,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
+    ? t},[])'
+  - 'returning from substitute: q'
+- 'returning from substitute: p ∨ q'
+- 'calling substitute(p,p,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
+  ? t},[])'
+- 'returning from substitute: true'
+- 'calling substitute(p ∨ q,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ?
+  s, ''t'': ? t},[])'
+  - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
+    ? t},[])'
+  - 'returning from substitute: true'
+- 'returning from substitute: true'
 - '
 
   Z3 propagation ********************************'

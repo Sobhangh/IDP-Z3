@@ -44,19 +44,16 @@ def log_calls(function):
     def _wrapper(*args, **kwds):
         global LOG_FILE, _indent
         if LOG_FILE:
-            Log(f"calling {function.__name__}")
             args_name = inspect.getargspec(function).args
-            Log({'with_arguments': {k:prepare(v) for k,v in zip(args_name, args) if v is not None}})
+            Log(f"calling {function.__name__}({','.join(str(v) for v in args if v is not None)})")
 
-            Log("processing")
             _indent += 2
 
         out = function(*args, *kwds)
 
         if LOG_FILE:
             _indent -= 2
-            Log({'output': out})
-            Log(f"returning from {function.__name__}")
+            Log(f"returning from {function.__name__}: {str(out)}")
         return out    
     return _wrapper
 

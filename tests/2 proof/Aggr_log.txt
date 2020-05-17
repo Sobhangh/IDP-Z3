@@ -1,388 +1,52 @@
 
-- calling substitute
-- with_arguments:
-    self:
-      class: AEquivalence
-      code: 'p ⇔ sum{c[color] : true : 1} = 3'
-      str: p
-    e0:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: None
-      'sum{c[color] : true : 1} = 3': None
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Variable
-        code: p
-        str: p
-      e0:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: None
-        'sum{c[color] : true : 1} = 3': None
-      todo: '[]'
-  - processing
-  - output:
-      class: Variable
-      code: p
-      str: p
-  - returning from substitute
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AComparison
-        code: 'sum{c[color] : true : 1} = 3'
-        str: 'true'
-      e0:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: None
-        'sum{c[color] : true : 1} = 3': None
-      todo: '[]'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AAggregate
-          code: 'sum{c[color] : true : 1}'
-          str: '3'
-        e0:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: None
-          'sum{c[color] : true : 1} = 3': None
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: None
-            'sum{c[color] : true : 1} = 3': None
-          todo: '[]'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from substitute
-      - calling substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: None
-            'sum{c[color] : true : 1} = 3': None
-          todo: '[]'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from substitute
-      - calling substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: None
-            'sum{c[color] : true : 1} = 3': None
-          todo: '[]'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from substitute
-    - output:
-        class: AAggregate
-        code: 'sum{c[color] : true : 1}'
-        str: '3'
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: NumberConstant
-          code: '3'
-          str: '3'
-        e0:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: None
-          'sum{c[color] : true : 1} = 3': None
-        todo: '[]'
-    - processing
-    - output:
-        class: NumberConstant
-        code: '3'
-        str: '3'
-    - returning from substitute
-  - output:
-      class: AComparison
-      code: 'sum{c[color] : true : 1} = 3'
-      str: 'true'
-  - returning from substitute
-- output:
-    class: AEquivalence
-    code: 'p ⇔ sum{c[color] : true : 1} = 3'
-    str: p
-- returning from substitute
-- calling substitute
-- with_arguments:
-    self:
-      class: AEquivalence
-      code: 'p ⇔ sum{c[color] : true : 1} = 3'
-      str: p
-    e0:
-      class: Variable
-      code: p
-      str: p
-    e1:
-      class: Constructor
-      code: 'true'
-      str: 'true'
-    assignments:
-      p: 'true'
-      'sum{c[color] : true : 1} = 3': None
-    todo: '[]'
-- processing
-  - calling substitute
-  - with_arguments:
-      self:
-        class: Variable
-        code: p
-        str: p
-      e0:
-        class: Variable
-        code: p
-        str: p
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        'sum{c[color] : true : 1} = 3': None
-      todo: '[]'
-  - processing
-  - output:
-      class: Variable
-      code: p
-      str: 'true'
-  - returning from substitute
-  - calling substitute
-  - with_arguments:
-      self:
-        class: AComparison
-        code: 'sum{c[color] : true : 1} = 3'
-        str: 'true'
-      e0:
-        class: Variable
-        code: p
-        str: 'true'
-      e1:
-        class: Constructor
-        code: 'true'
-        str: 'true'
-      assignments:
-        p: 'true'
-        'sum{c[color] : true : 1} = 3': None
-      todo: '[]'
-  - processing
-    - calling substitute
-    - with_arguments:
-        self:
-          class: AAggregate
-          code: 'sum{c[color] : true : 1}'
-          str: '3'
-        e0:
-          class: Variable
-          code: p
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: 'true'
-          'sum{c[color] : true : 1} = 3': None
-        todo: '[]'
-    - processing
-      - calling substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: 'true'
-            'sum{c[color] : true : 1} = 3': None
-          todo: '[]'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from substitute
-      - calling substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: 'true'
-            'sum{c[color] : true : 1} = 3': None
-          todo: '[]'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from substitute
-      - calling substitute
-      - with_arguments:
-          self:
-            class: NumberConstant
-            code: '1'
-            str: '1'
-          e0:
-            class: Variable
-            code: p
-            str: 'true'
-          e1:
-            class: Constructor
-            code: 'true'
-            str: 'true'
-          assignments:
-            p: 'true'
-            'sum{c[color] : true : 1} = 3': None
-          todo: '[]'
-      - processing
-      - output:
-          class: NumberConstant
-          code: '1'
-          str: '1'
-      - returning from substitute
-    - output:
-        class: AAggregate
-        code: 'sum{c[color] : true : 1}'
-        str: '3'
-    - returning from substitute
-    - calling substitute
-    - with_arguments:
-        self:
-          class: NumberConstant
-          code: '3'
-          str: '3'
-        e0:
-          class: Variable
-          code: p
-          str: 'true'
-        e1:
-          class: Constructor
-          code: 'true'
-          str: 'true'
-        assignments:
-          p: 'true'
-          'sum{c[color] : true : 1} = 3': None
-        todo: '[]'
-    - processing
-    - output:
-        class: NumberConstant
-        code: '3'
-        str: '3'
-    - returning from substitute
-  - output:
-      class: AComparison
-      code: 'sum{c[color] : true : 1} = 3'
-      str: 'true'
-  - returning from substitute
-- output:
-    class: AEquivalence
-    code: 'p ⇔ sum{c[color] : true : 1} = 3'
-    str: 'true'
-- returning from substitute
+- 'calling substitute(p,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'': ?
+  sum{c[color] : true : 1} = 3},[])'
+  - 'calling substitute(p,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'': ?
+    sum{c[color] : true : 1} = 3},[])'
+  - 'returning from substitute: p'
+  - 'calling substitute(true,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'':
+    ? sum{c[color] : true : 1} = 3},[])'
+    - 'calling substitute(3,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'': ?
+      sum{c[color] : true : 1} = 3},[])'
+      - 'calling substitute(1,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'': ?
+        sum{c[color] : true : 1} = 3},[])'
+      - 'returning from substitute: 1'
+      - 'calling substitute(1,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'': ?
+        sum{c[color] : true : 1} = 3},[])'
+      - 'returning from substitute: 1'
+      - 'calling substitute(1,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'': ?
+        sum{c[color] : true : 1} = 3},[])'
+      - 'returning from substitute: 1'
+    - 'returning from substitute: 3'
+    - 'calling substitute(3,true,true,{''p'': ? p, ''sum{c[color] : true : 1} = 3'': ?
+      sum{c[color] : true : 1} = 3},[])'
+    - 'returning from substitute: 3'
+  - 'returning from substitute: true'
+- 'returning from substitute: p'
+- 'calling substitute(p,p,true,{''p'': p, ''sum{c[color] : true : 1} = 3'': ? sum{c[color]
+  : true : 1} = 3},[])'
+  - 'calling substitute(p,p,true,{''p'': p, ''sum{c[color] : true : 1} = 3'': ? sum{c[color]
+    : true : 1} = 3},[])'
+  - 'returning from substitute: true'
+  - 'calling substitute(true,true,true,{''p'': p, ''sum{c[color] : true : 1} = 3'':
+    ? sum{c[color] : true : 1} = 3},[])'
+    - 'calling substitute(3,true,true,{''p'': p, ''sum{c[color] : true : 1} = 3'': ? sum{c[color]
+      : true : 1} = 3},[])'
+      - 'calling substitute(1,true,true,{''p'': p, ''sum{c[color] : true : 1} = 3'': ? sum{c[color]
+        : true : 1} = 3},[])'
+      - 'returning from substitute: 1'
+      - 'calling substitute(1,true,true,{''p'': p, ''sum{c[color] : true : 1} = 3'': ? sum{c[color]
+        : true : 1} = 3},[])'
+      - 'returning from substitute: 1'
+      - 'calling substitute(1,true,true,{''p'': p, ''sum{c[color] : true : 1} = 3'': ? sum{c[color]
+        : true : 1} = 3},[])'
+      - 'returning from substitute: 1'
+    - 'returning from substitute: 3'
+    - 'calling substitute(3,true,true,{''p'': p, ''sum{c[color] : true : 1} = 3'': ? sum{c[color]
+      : true : 1} = 3},[])'
+    - 'returning from substitute: 3'
+  - 'returning from substitute: true'
+- 'returning from substitute: true'
 - '
 
   Z3 propagation ********************************'

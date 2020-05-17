@@ -14,6 +14,8 @@ Rewrite in [Nim](https://nim-lang.org/) ?
 
 But:
 * poor debugger → need to use logs instead
-* build parser at run-time (to parse English) ??  via a C library ?
+* Google App Engine ?  use [nimporter](https://github.com/Pebaz/nimporter): makes it easy to distribute modules written in nim = alternative to Cython 
 
-[nimporter](https://github.com/Pebaz/nimporter): makes it easy to distribute modules written in nim = alternative to Cython 
+
+Options:
+* rewrite Idp module: send string to analyzer written in Nim, and get a messagepack in return
