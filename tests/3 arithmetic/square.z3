@@ -52,10 +52,10 @@ Consequences:
   Base -> 3.8729833462?
   15.0 = Base * Base
 Simplified:  
-  false
-  true
-  true
-  true
+  true ⇒ false
+  0 < 3.8729833462?
+  p
+  2.6666666666666665 = 2.6666666666666665
 Irrelevant:  
   
 Co-constraints:

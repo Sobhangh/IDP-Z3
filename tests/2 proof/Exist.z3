@@ -41,8 +41,8 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
-  true
+  true ⇔ (true)
+  ∃ : q(red) ∨ q(blue) ∨ q(green)
 Irrelevant:  
   
 Co-constraints:

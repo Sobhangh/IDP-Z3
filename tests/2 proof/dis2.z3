@@ -40,8 +40,8 @@ Universals:
 Consequences:
   q
 Simplified:  
-  true
-  true
+  p
+  false ∨ true
 Irrelevant:  
   ? r
   ? s

@@ -47,7 +47,7 @@ Consequences:
   
 Simplified:  
   p ⇒ s
-  true
+  1 = 1
 Irrelevant:  
   ? r
 Co-constraints:

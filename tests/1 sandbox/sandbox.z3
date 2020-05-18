@@ -32,11 +32,11 @@ Universals:
 Consequences:
   q
 Simplified:  
-  true
+  false ∨ true
 Irrelevant:  
   
 Co-constraints:
-  true
+  true ⇔ true
 
 
 -- meta -------------------------------------

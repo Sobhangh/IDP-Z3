@@ -50,14 +50,14 @@ Consequences:
   rd
   i
 Simplified:  
-  true
+  r
   true
 Irrelevant:  
   ? l
   i
 Co-constraints:
-  true
-  true
+  true ⇔ true
+  true ⇔ true
 
 
 -- meta -------------------------------------

@@ -37,8 +37,8 @@ Universals:
 Consequences:
   x + 1 = 1
 Simplified:  
-  true
-  true
+  0 = 0
+  false ∨ (true)
 Irrelevant:  
   ? y
 Co-constraints:

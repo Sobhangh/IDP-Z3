@@ -865,7 +865,7 @@ Consequences:
 Simplified:  
   (Tax = 1 ⇒ Registration_Type = Heritage ∧ Region = Flemish_Region)
   Tax = 2 ⇒ Registration_Type = Social_Dwelling ∧ Region = Flemish_Region
-  true
+  false ⇒ false
   (Tax = 6 ⇒ (Registration_Type = Energy_Efficient_Dwelling ∨ Registration_Type = Social_Purpose ∨ Registration_Type = Exchange_Unbuilt_Ground) ∧ Region = Flemish_Region)
   Tax = 7 ⇒ (Registration_Type = Family_Dwelling ∨ Registration_Type = Dwelling_For_Social_Renting) ∧ Region = Flemish_Region
   Tax = 10 ⇒ Region = Flemish_Region ∧ Registration_Type = Other
@@ -875,11 +875,11 @@ Simplified:
   Registration_Type = Energy_Efficient_Dwelling ⇒ Type_Of_Real_Estate = Residential ∧ Buyer = Natural_Person ∧ Domicile_Established ∧ Clean_Purchase ∧ (First_Ownership ∨ Causal_Connection) ∧ Energy_Renovation_Planned ∧ Term_Energy_Renovation = Certification_Date + 5
   Registration_Type = Dwelling_For_Social_Renting ⇒ Type_Of_Real_Estate = Residential ∧ Use = Social_Renting ∧ Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3 ∧ Duration_Of_Agreement = Less_Than_9_years
   (Registration_Type = Heritage ⇒ Type_Of_Real_Estate = Residential ∧ Monument ∧ Use = As_Family_Dwelling ∧ Heritage_Investment ∧ Heritage_Plan ∧ Additional_Terms)
-  true
+  false ⇒ false
   (Registration_Type = Social_Purpose ⇒ (Seller = Mpy_Erkend_Door_VMSW ∨ Seller = Vlaams_Woningfonds ∨ Seller = Gelijksoortige_Rechtspersoon_EER) ∧ Use = Community_Purpose)
   Registration_Type = Exchange_Unbuilt_Ground ⇒ Additional_Terms ∧ ~(Monument)
   Registration_Type = Other ⇒ ~(Registration_Type = Family_Dwelling) ∧ ~(Registration_Type = Social_Dwelling) ∧ ~(Registration_Type = Energy_Efficient_Dwelling) ∧ ~(Registration_Type = Dwelling_For_Social_Renting) ∧ ~(Registration_Type = Heritage) ∧ true ∧ ~(Registration_Type = Social_Purpose) ∧ ~(Registration_Type = Exchange_Unbuilt_Ground)
-  true
+  ~(false)
   Tax = 1 ∨ Tax = 2 ∨ false ∨ Tax = 7 ∨ Tax = 6 ∨ Tax = 10 ∨ Tax = 12
   Region = Flemish_Region ∨ Region = Walloon_Region ∨ Region = Brussels_Region
   Type_Of_Real_Estate = Residential ∨ Type_Of_Real_Estate = Residential_Building_Land ∨ Type_Of_Real_Estate = Other_Real_Estate
@@ -974,7 +974,7 @@ Irrelevant:
   ? Certification_Date_Sale = 2024
   ? Certification_Date_Sale = 2025
 Co-constraints:
-  true
+  false ⇔ false
 
 
 -- meta -------------------------------------

@@ -61,8 +61,8 @@ Consequences:
   ~t1 = Jan
   t1 = Piet
 Simplified:  
-  true
-  true
+  Piet = Piet
+  false ∨ true
 Irrelevant:  
   t -> Piet
   t1 -> Piet

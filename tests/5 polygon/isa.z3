@@ -169,16 +169,16 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
-  true
-  true
-  true
+  ∀ : true
+  ∀ : true
+  ∀ : true
+  Type = typeOf(Subtype)
   Type = 1tri angle ∨ Type = quadrilateral
   Subtype = regular_triangle ∨ Subtype = right_triangle ∨ Subtype = rectangle ∨ Subtype = square
   true
   true
-  true
-  true
+  false ∨ true
+  false ∨ true
 Irrelevant:  
   
 Co-constraints:

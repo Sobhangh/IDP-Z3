@@ -43,8 +43,8 @@ Consequences:
   q
   ∀t[real] : 1 < t < 3 ⇒ 0 < t < 3
 Simplified:  
-  true
-  true
+  true ⇔ (true)
+  true ⇔ (true)
 Irrelevant:  
   
 Co-constraints:

@@ -376,9 +376,9 @@ Simplified:
   (true)
   (true)
   (true)
-  true
-  true
-  true
+  false ∨ true
+  false ∨ true
+  false ∨ true
   false ∨ false ∨ Subtype = rectangle ∨ Subtype = square ∨ false
 Irrelevant:  
   ? Large(1)

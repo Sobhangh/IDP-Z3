@@ -628,6 +628,7 @@ class Brackets(Expression):
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
+    def __str1__(self): return str(self)
 
     def as_ground(self): 
         return self.sub_exprs[0].as_ground()

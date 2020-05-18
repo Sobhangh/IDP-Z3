@@ -39,7 +39,7 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
+  p
   (true)
 Irrelevant:  
   ? q

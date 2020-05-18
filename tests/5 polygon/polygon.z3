@@ -367,10 +367,10 @@ Simplified:
   (true)
   (true)
   (true)
-  true
-  true
-  true
-  true
+  false ∨ true
+  false ∨ true
+  false ∨ true
+  false ∨ false ∨ false ∨ false ∨ true
 Irrelevant:  
   ~Large(2)
   ~Large(3)
@@ -383,7 +383,7 @@ Irrelevant:
   ? Length(3) ≤ Length(1) + Length(2)
   ∀x[side] : 0 ≤ Length(x)
 Co-constraints:
-  true
+  false ⇔ false
 
 
 -- meta -------------------------------------

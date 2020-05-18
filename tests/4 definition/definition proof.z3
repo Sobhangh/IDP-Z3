@@ -69,14 +69,14 @@ Consequences:
   ~c = red
   c = blue
 Simplified:  
+  b = b
+  false ∨ true
   true
-  true
-  true
-  true
+  false ∨ true
 Irrelevant:  
   ~codeOf(blue) = b
 Co-constraints:
-  true
+  (false) ∨ (true)
 
 
 -- meta -------------------------------------

@@ -98,9 +98,9 @@ class Case:
                 f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{nl}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
-                f"Simplified:  {indented}{indented.join(str(c)  for c in self.simplified)}{nl}"
+                f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.simplified)}{nl}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{nl}"
-                f"Co-constraints:{indented}{indented.join(str(c)  for c in self.co_constraints)}{nl}"
+                f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{nl}"
         )
 
     def get_co_constraints(self):

@@ -276,13 +276,13 @@ Consequences:
 Simplified:  
   KnownCost ⇔ ~( if   Epoxy = e1 then 0.539 else -1 = -1)
   KnownCost ⇒ _Min_Cost ≤  if   Epoxy = e1 then 0.539 else -1 ≤ _Max_Cost
-  true
-  true
-  true
-  true
-  true
-  true
-  true
+  Cost =  if   Epoxy = e1 then 0.539 else -1
+  true ⇔ true
+  true ⇔ true
+   if   Epoxy = e3 then 15 else  if   Epoxy = e2 then 0 else  if   Epoxy = e1 then 16 else -900 ≤ _Min_Storage_T ≤  if   Epoxy = e3 then 25 else  if   Epoxy = e2 then 10 else  if   Epoxy = e1 then 38 else -900
+   if   Epoxy = e3 then 25 else  if   Epoxy = e2 then 10 else  if   Epoxy = e1 then 38 else -900 ≥ _Max_Storage_T ≥  if   Epoxy = e3 then 15 else  if   Epoxy = e2 then 0 else  if   Epoxy = e1 then 16 else -900
+  Safe_Low_Storage_T =  if   Epoxy = e3 then 15 else  if   Epoxy = e2 then 0 else  if   Epoxy = e1 then 16 else -900
+  Safe_High_Storage_T =  if   Epoxy = e3 then 25 else  if   Epoxy = e2 then 10 else  if   Epoxy = e1 then 38 else -900
   Epoxy = e1 ∨ Epoxy = e2 ∨ Epoxy = e3
   Cost = 0.539 ∨ Cost = -1
   Safe_Low_Storage_T = 0 ∨ Safe_Low_Storage_T = 15 ∨ Safe_Low_Storage_T = 16

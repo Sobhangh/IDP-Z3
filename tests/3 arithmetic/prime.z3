@@ -45,14 +45,14 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
+  (true) ∧ (true) ∧ (true) ∧ (true)
 Irrelevant:  
   
 Co-constraints:
-  true
-  true
-  true
-  true
+  true ⇔ true
+  true ⇔ true
+  true ⇔ true
+  false ⇔ false
 
 
 -- meta -------------------------------------

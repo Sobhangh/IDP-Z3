@@ -386,7 +386,7 @@ Consequences:
   Surface = (Base * Height) / 2
   ~Surface = -1
 Simplified:  
-  true
+  3 = 3
   (true)
   (true)
   ((true))
@@ -409,12 +409,12 @@ Simplified:
   (true)
   (true)
   (true)
-  true
-  true
-  true
-  true
-  true
-  true
+  true ⇒ true
+  false ⇒ false
+  false ⇒ false
+  0 ≤ Base
+  0 ≤ Height
+  ∃ : Length(1) = Base ∨ Length(2) = Base ∨ Length(3) = Base ∨ false
   true
   true
   true

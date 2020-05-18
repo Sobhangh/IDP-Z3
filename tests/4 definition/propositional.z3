@@ -48,13 +48,13 @@ Consequences:
   ~p
   q
 Simplified:  
-  true
-  true
+  false ∨ true
+  r
 Irrelevant:  
   ? s
   ? t
 Co-constraints:
-  true
+  false ⇔ false
 
 
 -- meta -------------------------------------

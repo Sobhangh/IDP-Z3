@@ -36,8 +36,8 @@ Universals:
 Consequences:
   q
 Simplified:  
-  (r ∨ s)
-  true
+  true ⇒ (r ∨ s)
+  p
 Irrelevant:  
   
 Co-constraints:

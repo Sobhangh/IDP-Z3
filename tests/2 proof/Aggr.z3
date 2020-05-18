@@ -31,7 +31,7 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
+  true ⇔ true
 Irrelevant:  
   
 Co-constraints:

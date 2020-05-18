@@ -45,9 +45,9 @@ Consequences:
   ~q
   r
 Simplified:  
-  true
-  true
-  true
+  p
+  false ∨ true
+  false ∨ true
 Irrelevant:  
   ? s
   ? t

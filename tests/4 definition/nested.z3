@@ -97,20 +97,20 @@ Consequences:
   negated(Jan) = Piet
   ~negated(Jan) = Jan
 Simplified:  
+  Piet = Piet
+  same(Piet) = negated(Jan)
   true
-  true
-  true
-  true
-  true
+  false ∨ true
+  false ∨ true
   true
 Irrelevant:  
   ~negated(negated(Piet)) = Jan
   ~same(Piet) = Jan
   ~negated(Jan) = Jan
 Co-constraints:
-  true
-  true
-  true
+  true ∧ true
+  same(Piet) = Piet ∧ true
+  false ∨ true
   true
 
 

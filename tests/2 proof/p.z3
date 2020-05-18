@@ -39,8 +39,8 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
-  true
+  p
+  false ∨ true
 Irrelevant:  
   ? q
   ? r

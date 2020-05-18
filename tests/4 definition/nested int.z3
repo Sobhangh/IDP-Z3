@@ -140,12 +140,12 @@ Consequences:
   ~negated(1) = 0
   ~negated(1) = 1
 Simplified:  
+  -1 = -1
+  negated(1) = -1
   true
   true
-  true
-  true
-  true
-  true
+  false ∨ false ∨ true
+  false ∨ false ∨ true
   true
   true
 Irrelevant:  
@@ -158,9 +158,9 @@ Irrelevant:
   ~negated(1) = 0
   ~negated(1) = 1
 Co-constraints:
-  true
-  true
-  true
+  true ∧ true
+  negated(1) = -1
+  1 = 1
 
 
 -- meta -------------------------------------

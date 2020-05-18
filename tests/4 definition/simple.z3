@@ -93,7 +93,7 @@ Irrelevant:
   c = red
   ~c = blue
 Co-constraints:
-  true
+  true ∧ true
 
 
 -- meta -------------------------------------

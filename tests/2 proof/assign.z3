@@ -35,8 +35,8 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
-  true
+  0 = 0
+  false ∨ (true)
 Irrelevant:  
   ? y
 Co-constraints:

@@ -107,10 +107,10 @@ Consequences:
   ~Subtype = rectangle
   ~Sides = 4
 Simplified:  
-  true
-  true
+  3 = 3
+  false ⇒ false
   Equilateral ⇔ ((Length(1) = Length(1)) ∧ (Length(2) = Length(1)) ∧ (Length(3) = Length(1)) ∧ (true))
-  true
+  false ⇔ false
   true
   Subtype = regular_triangle ∨ Subtype = right_triangle ∨ false ∨ Subtype = square ∨ Subtype = irregular
 Irrelevant:  

@@ -44,8 +44,8 @@ Universals:
 Consequences:
   
 Simplified:  
-  true
-  true
+  false ⇔ (false)
+  ∀ : true
 Irrelevant:  
   
 Co-constraints:

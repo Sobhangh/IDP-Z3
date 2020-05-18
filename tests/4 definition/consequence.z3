@@ -46,12 +46,12 @@ Consequences:
   p
 Simplified:  
   true
-  true
+  q
 Irrelevant:  
   ? r
   ? s
 Co-constraints:
-  true
+  true ⇔ true
 
 
 -- meta -------------------------------------
