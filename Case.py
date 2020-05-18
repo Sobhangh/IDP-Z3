@@ -45,11 +45,10 @@ class Case:
         # initialisation
 
         # Lines in the GUI
-        self.GUILines = {**idp.vocabulary.terms, **idp.subtences} # DEPRECATED use self.assignments instead # {atom_string: Expression}
+        self.GUILines = {**idp.vocabulary.terms, **idp.subtences} # {Expr.code: Expression}
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified: List[Expression] = []
-
         self.assignments: Dict[str, Assignment] = {} # atoms + given, with simplified formula and value value
 
         if __debug__: invariant = ".".join(str(e) for e in self.idp.theory.constraints)

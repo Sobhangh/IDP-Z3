@@ -145,6 +145,25 @@ class Expression(object):
         self.collect(questions)
         return questions
 
+    def subtences(self):
+        " returns questions of type bool "
+        questions = OrderedSet()
+        self.collect(questions, all_=False)
+        out = {k: v for k, v in questions.items() if v.type == 'bool'}
+        return out
+
+    def unknown_symbols(self):
+        """ returns the list of symbols in self, ignoring type constraints
+        
+        returns Dict[name, Declaration] 
+        """
+        if self.if_symbol is not None: # ignore type constraints
+            return {}
+        questions = OrderedSet()
+        self.collect(questions, all_=True)
+        out = {e.decl.name: e.decl for e in questions.values() if hasattr(e, 'decl')}
+        return out
+
     def co_constraints(self, co_constraints):
         """ collects the constraints attached to AST nodes, e.g. instantiated definitions 
         
@@ -155,25 +174,9 @@ class Expression(object):
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
-    def subtences(self):
-        " returns questions of type bool "
-        questions = OrderedSet()
-        self.collect(questions, all_=False)
-        out = {k: v for k, v in questions.items() if v.type == 'bool'}
-        return out
-
     def as_ground(self): 
         " returns a NumberConstant or Constructor, or None "
         return self.value
-
-    def unknown_symbols(self):
-        " returns Dict[name, Declaration] "
-        if self.if_symbol is not None: # ignore type constraints
-            return {}
-        out = mergeDicts(e.unknown_symbols() for e in self.sub_exprs)
-        if self.co_constraint is not None:
-            out.update(self.co_constraint.unknown_symbols())
-        return out
 
     def reified(self) -> DatatypeRef:
         if self._reified is None:
@@ -523,12 +526,6 @@ class AppliedSymbol(Expression):
         self.type = self.decl.type.name
         return super().annotate1()
 
-    def unknown_symbols(self):
-        out = super().unknown_symbols()
-        if self.decl.interpretation is None:
-            out[self.decl.name] = self.decl
-        return out
-
     def has_environmental(self, truth):
         return self.decl.environmental == truth \
             or any(e.has_environmental(truth) for e in self.sub_exprs)
@@ -580,7 +577,6 @@ class Fresh_Variable(Expression):
         super().__init__()
 
         self.type = self.decl.name
-        self._unknown_symbols = {}
         self.sub_exprs = []
         self.translated = FreshConst(self.decl.out.decl.translate())
         self.fresh_vars = set([self.name])

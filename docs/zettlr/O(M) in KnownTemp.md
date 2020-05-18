@@ -1,6 +1,6 @@
 –-
 title: O(M) in KnownTemp
-tags: #bug
+tags: #fixed
    ID: 20200427134729
 –-
 
@@ -19,3 +19,4 @@ Solution:
 - [x] do not cache has_environmental
 
 still not working perfectly…  Enter T=50, Garanteed ⇒ O(M) should not be "to be verified"
+- [x]  don't show _O(M)

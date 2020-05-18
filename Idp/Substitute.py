@@ -59,7 +59,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, co_constra
     
     # reset derived attributes
     self.str = sys.intern(str(self))
-    self._unknown_symbols = None
 
     return self
 Expression._change = _change
