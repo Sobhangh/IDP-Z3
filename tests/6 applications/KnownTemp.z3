@@ -153,7 +153,10 @@ Simplified:
   M = e1 ∨ M = e2 ∨ M = e3
   M = e1 ∨ M = e2 ∨ M = e3
 Irrelevant:  
-  
+  ? _MinT(e3)
+  ? _MaxT(e3)
+  ? OMinT(e3)
+  ? OMaxT(e3)
 Co-constraints:
   
 
@@ -238,7 +241,7 @@ Co-constraints:
            'OMaxT(e3)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMaxT(e3)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''}},
@@ -273,7 +276,7 @@ Co-constraints:
            'OMinT(e3)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMinT(e3)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''}},
@@ -301,7 +304,7 @@ Co-constraints:
            '_MaxT(e3)': {'environmental': True,
                          'normal': True,
                          'reading': '_MaxT(e3)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''}},
@@ -329,7 +332,7 @@ Co-constraints:
            '_MinT(e3)': {'environmental': True,
                          'normal': True,
                          'reading': '_MinT(e3)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''}},

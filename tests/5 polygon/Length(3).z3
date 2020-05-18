@@ -115,7 +115,7 @@ Simplified:
   Subtype = regular_triangle ∨ Subtype = right_triangle ∨ false ∨ Subtype = square ∨ Subtype = irregular
 Irrelevant:  
   ? Type
-  ? Length(3) = Length(1)
+  ? Length(4)
   ? Type = triangle
   ? Type = quadrilateral
 Co-constraints:
@@ -165,13 +165,13 @@ Co-constraints:
             'Length(3) = Length(1)': {'environmental': False,
                                       'normal': False,
                                       'reading': 'Length(3) = Length(1)',
-                                      'relevant': False,
+                                      'relevant': True,
                                       'status': 'UNKNOWN',
                                       'typ': 'Bool'},
             'Length(4)': {'environmental': False,
                           'normal': True,
                           'reading': 'Length(4)',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'UNKNOWN',
                           'typ': 'Real',
                           'value': ''},

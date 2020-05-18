@@ -47,7 +47,7 @@ Simplified:
   true
   true
 Irrelevant:  
-  ? ∀c[color] : c = red
+  
 Co-constraints:
   
 

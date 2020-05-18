@@ -46,8 +46,7 @@ Simplified:
   true
   true
 Irrelevant:  
-  ? ∀t[temp] : 1 < t < 3 ⇒ 0 < t < 3
-  ∀t[real] : 1 < t < 3 ⇒ 0 < t < 3
+  
 Co-constraints:
   
 

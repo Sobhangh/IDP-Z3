@@ -348,7 +348,6 @@ Consequences:
   ~∀n[side] : Angle(n) = 90 ∨ Sides < n
 Simplified:  
   true
-  true
   (true)
   (true)
   (true)
@@ -368,17 +367,17 @@ Simplified:
   (true)
   (true)
   (true)
-  (true)
-  (true)
   true
   true
   true
   true
 Irrelevant:  
+  ~Large(2)
+  ~Large(3)
+  ~Large(4)
   ∀n[side] : Length(n) < Length(n + 1)
   ~∀n[side] : Angle(n) = 60 ∨ Sides < n
   ? ∃n[side] : Angle(n) = 90
-  ? Length(1) = Length(3)
   ? Length(1) ≤ Length(2) + Length(3)
   ? Length(2) ≤ Length(3) + Length(1)
   ? Length(3) ≤ Length(1) + Length(2)
@@ -511,21 +510,21 @@ Co-constraints:
            'Large(2)': {'environmental': False,
                         'normal': True,
                         'reading': 'Large(2)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(3)': {'environmental': False,
                         'normal': True,
                         'reading': 'Large(3)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(4)': {'environmental': False,
                         'normal': True,
                         'reading': 'Large(4)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False}},

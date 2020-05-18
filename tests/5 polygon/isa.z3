@@ -173,7 +173,6 @@ Simplified:
   true
   true
   true
-  true
   Type = 1tri angle ∨ Type = quadrilateral
   Subtype = regular_triangle ∨ Subtype = right_triangle ∨ Subtype = rectangle ∨ Subtype = square
   true
@@ -181,8 +180,7 @@ Simplified:
   true
   true
 Irrelevant:  
-  ~typeOf(regular_triangle) = quadrilateral
-  ~typeOf(right_triangle) = quadrilateral
+  
 Co-constraints:
   
 
@@ -365,7 +363,7 @@ Co-constraints:
             'typeOf(regular_triangle) = quadrilateral': {'environmental': False,
                                                          'normal': False,
                                                          'reading': 'typeOf(regular_triangle) = quadrilateral',
-                                                         'relevant': False,
+                                                         'relevant': True,
                                                          'status': 'UNIVERSAL',
                                                          'typ': 'Bool',
                                                          'value': False},
@@ -387,7 +385,7 @@ Co-constraints:
             'typeOf(right_triangle) = quadrilateral': {'environmental': False,
                                                        'normal': False,
                                                        'reading': 'typeOf(right_triangle) = quadrilateral',
-                                                       'relevant': False,
+                                                       'relevant': True,
                                                        'status': 'UNIVERSAL',
                                                        'typ': 'Bool',
                                                        'value': False},

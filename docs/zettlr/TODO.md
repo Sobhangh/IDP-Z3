@@ -56,6 +56,7 @@ tags:
 
 #### Performance
 - [ ] merge case.co_constraints and case.definitions (many overlaps)
+- [ ] use Require() for goals, instead of p∨~p
 - [ ] rewrite in [[Nim]] !
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share co_constraints
