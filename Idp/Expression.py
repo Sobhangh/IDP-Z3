@@ -472,8 +472,6 @@ class AAggregate(Expression):
         return self
 
     def collect(self, questions, all_=True):
-        if len(self.fresh_vars)==0:
-            questions.add(self)
         if all_:
             for e in self.sub_exprs:
                 e.collect(questions, all_)
