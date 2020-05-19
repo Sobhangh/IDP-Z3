@@ -146,7 +146,7 @@ def model_to_json(case, s, reify):
     for symb, d1 in out.m.items():
         if symb != ' Global':
             for atom_code, d2 in d1.items():
-                if d2['status'] == 'UNKNOWN':
+                if atom_code != '__rank' and d2['status'] == 'UNKNOWN':
                     d2['status'] = 'EXPANDED'
 
                     atom = case.assignments[atom_code].sentence

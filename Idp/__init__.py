@@ -747,8 +747,10 @@ class Goal(object):
     def annotate(self, idp):
         if self.name in idp.vocabulary.symbol_decls:
             self.decl = idp.vocabulary.symbol_decls[self.name]
-            constraint = AConjunction.make('∧', self.decl.typeConstraint(if_symbol=False))
-            idp.theory.constraints.append(constraint)
+            instances = self.decl.typeConstraint(if_symbol=False)
+            if instances:
+                constraint = AConjunction.make('∧', instances)
+                idp.theory.constraints.append(constraint)
 
     def subtences(self):
         return {}

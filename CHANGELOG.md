@@ -8,7 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased] - 2020-04-29
 
 ### API
+* use informational relevance to compute relevance
 * add '__rank' attribute to each symbol, per informational relevance
+
+### GUI
+* sort symbols per relevance rank
 
 
 ## [0.5.0] - 2020-04-29
