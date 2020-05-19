@@ -94,6 +94,8 @@ Irrelevant:
   ~c = blue
 Co-constraints:
   true ∧ true
+  true ∧ true
+  true ⇔ q ∨ r
 
 
 -- meta -------------------------------------

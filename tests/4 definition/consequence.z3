@@ -45,13 +45,14 @@ Universals:
 Consequences:
   p
 Simplified:  
-  true
-  q
+  
 Irrelevant:  
+  p
+  q
   ? r
   ? s
 Co-constraints:
-  true ⇔ true
+  
 
 
 -- meta -------------------------------------
@@ -66,14 +67,14 @@ Co-constraints:
  'p': {'p': {'environmental': False,
              'normal': True,
              'reading': 'p',
-             'relevant': True,
+             'relevant': False,
              'status': 'CONSEQUENCE',
              'typ': 'Bool',
              'value': True}},
  'q': {'q': {'environmental': False,
              'normal': True,
              'reading': 'q',
-             'relevant': True,
+             'relevant': False,
              'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},

@@ -143,18 +143,24 @@ Simplified:
   -1 = -1
   negated(1) = -1
   true
-  true
   false ∨ false ∨ true
-  false ∨ false ∨ true
-  true
-  true
 Irrelevant:  
+  same(0) -> 0
+  same(1) -> 1
+  negated(0) -> 0
+  negated(1) -> -1
   ~same(-1) = 0
   ~same(-1) = 1
   ~same(0) = -1
+  same(0) = 0
   ~same(0) = 1
+  ~same(1) = -1
+  ~same(1) = 0
+  same(1) = 1
   ~negated(0) = -1
+  negated(0) = 0
   ~negated(0) = 1
+  negated(1) = -1
   ~negated(1) = 0
   ~negated(1) = 1
 Co-constraints:
@@ -202,7 +208,7 @@ Co-constraints:
              'negated(0)': {'environmental': False,
                             'normal': True,
                             'reading': 'negated(0)',
-                            'relevant': True,
+                            'relevant': False,
                             'status': 'CONSEQUENCE',
                             'typ': 'Int',
                             'value': '0',
@@ -217,7 +223,7 @@ Co-constraints:
              'negated(0) = 0': {'environmental': False,
                                 'normal': False,
                                 'reading': 'negated(0) = 0',
-                                'relevant': True,
+                                'relevant': False,
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': True},
@@ -231,7 +237,7 @@ Co-constraints:
              'negated(1)': {'environmental': False,
                             'normal': True,
                             'reading': 'negated(1)',
-                            'relevant': True,
+                            'relevant': False,
                             'status': 'CONSEQUENCE',
                             'typ': 'Int',
                             'value': '-1',
@@ -239,7 +245,7 @@ Co-constraints:
              'negated(1) = -1': {'environmental': False,
                                  'normal': False,
                                  'reading': 'negated(1) = -1',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': True},
@@ -303,7 +309,7 @@ Co-constraints:
           'same(0)': {'environmental': False,
                       'normal': True,
                       'reading': 'same(0)',
-                      'relevant': True,
+                      'relevant': False,
                       'status': 'CONSEQUENCE',
                       'typ': 'Int',
                       'value': '0',
@@ -318,7 +324,7 @@ Co-constraints:
           'same(0) = 0': {'environmental': False,
                           'normal': False,
                           'reading': 'same(0) = 0',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': True},
@@ -332,7 +338,7 @@ Co-constraints:
           'same(1)': {'environmental': False,
                       'normal': True,
                       'reading': 'same(1)',
-                      'relevant': True,
+                      'relevant': False,
                       'status': 'CONSEQUENCE',
                       'typ': 'Int',
                       'value': '1',
@@ -340,21 +346,21 @@ Co-constraints:
           'same(1) = -1': {'environmental': False,
                            'normal': False,
                            'reading': 'same(1) = -1',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Bool',
                            'value': False},
           'same(1) = 0': {'environmental': False,
                           'normal': False,
                           'reading': 'same(1) = 0',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': False},
           'same(1) = 1': {'environmental': False,
                           'normal': False,
                           'reading': 'same(1) = 1',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Bool',
                           'value': True}}}

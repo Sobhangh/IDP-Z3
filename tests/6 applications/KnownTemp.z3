@@ -144,19 +144,32 @@ Consequences:
   _MaxT(e2) -> 100
 Simplified:  
   (true)
-  (true)
   (Guaranteed ⇔ _O(M))
-  (true)
-  (true)
-  (true)
   M = e1 ∨ M = e2 ∨ M = e3
   M = e1 ∨ M = e2 ∨ M = e3
   M = e1 ∨ M = e2 ∨ M = e3
 Irrelevant:  
+TODO  _MinT(e1) -> 0
+  _MinT(e2) -> 0
   ? _MinT(e3)
+  _MaxT(e1) -> 20
+  _MaxT(e2) -> 100
   ? _MaxT(e3)
+  _O(e1)
+  _O(e2)
+  ~_O(e3)
+  OMinT(e1) -> 0
+  OMinT(e2) -> 0
   ? OMinT(e3)
+  OMaxT(e1) -> 20
+  OMaxT(e2) -> 100
   ? OMaxT(e3)
+  ∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)
+  ∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)
+  OMinT(e1) = 0
+  OMaxT(e1) = 20
+  OMinT(e2) = 0
+  OMaxT(e2) = 100
 Co-constraints:
   
 
@@ -213,28 +226,28 @@ Co-constraints:
  'OMaxT': {'OMaxT(e1)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMaxT(e1)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_UNIV',
                          'typ': 'Int',
                          'value': '20'},
            'OMaxT(e1) = 20': {'environmental': True,
                               'normal': False,
                               'reading': 'OMaxT(e1) = 20',
-                              'relevant': True,
+                              'relevant': False,
                               'status': 'ENV_UNIV',
                               'typ': 'Bool',
                               'value': True},
            'OMaxT(e2)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMaxT(e2)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_UNIV',
                          'typ': 'Int',
                          'value': '100'},
            'OMaxT(e2) = 100': {'environmental': True,
                                'normal': False,
                                'reading': 'OMaxT(e2) = 100',
-                               'relevant': True,
+                               'relevant': False,
                                'status': 'ENV_UNIV',
                                'typ': 'Bool',
                                'value': True},
@@ -248,28 +261,28 @@ Co-constraints:
  'OMinT': {'OMinT(e1)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMinT(e1)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_UNIV',
                          'typ': 'Int',
                          'value': '0'},
            'OMinT(e1) = 0': {'environmental': True,
                              'normal': False,
                              'reading': 'OMinT(e1) = 0',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'ENV_UNIV',
                              'typ': 'Bool',
                              'value': True},
            'OMinT(e2)': {'environmental': True,
                          'normal': True,
                          'reading': 'OMinT(e2)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_UNIV',
                          'typ': 'Int',
                          'value': '0'},
            'OMinT(e2) = 0': {'environmental': True,
                              'normal': False,
                              'reading': 'OMinT(e2) = 0',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'ENV_UNIV',
                              'typ': 'Bool',
                              'value': True},
@@ -290,14 +303,14 @@ Co-constraints:
  '_MaxT': {'_MaxT(e1)': {'environmental': True,
                          'normal': True,
                          'reading': '_MaxT(e1)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_CONSQ',
                          'typ': 'Int',
                          'value': '20'},
            '_MaxT(e2)': {'environmental': True,
                          'normal': True,
                          'reading': '_MaxT(e2)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_CONSQ',
                          'typ': 'Int',
                          'value': '100'},
@@ -318,14 +331,14 @@ Co-constraints:
            '_MinT(e1)': {'environmental': True,
                          'normal': True,
                          'reading': '_MinT(e1)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_CONSQ',
                          'typ': 'Int',
                          'value': '0'},
            '_MinT(e2)': {'environmental': True,
                          'normal': True,
                          'reading': '_MinT(e2)',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'ENV_CONSQ',
                          'typ': 'Int',
                          'value': '0'},
@@ -345,35 +358,35 @@ Co-constraints:
         '_O(e1)': {'environmental': True,
                    'normal': True,
                    'reading': '_O(e1)',
-                   'relevant': True,
+                   'relevant': False,
                    'status': 'ENV_UNIV',
                    'typ': 'Bool',
                    'value': True},
         '_O(e2)': {'environmental': True,
                    'normal': True,
                    'reading': '_O(e2)',
-                   'relevant': True,
+                   'relevant': False,
                    'status': 'ENV_UNIV',
                    'typ': 'Bool',
                    'value': True},
         '_O(e3)': {'environmental': True,
                    'normal': True,
                    'reading': '_O(e3)',
-                   'relevant': True,
+                   'relevant': False,
                    'status': 'ENV_UNIV',
                    'typ': 'Bool',
                    'value': False},
         '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)': {'environmental': True,
                                                        'normal': False,
                                                        'reading': '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)',
-                                                       'relevant': True,
+                                                       'relevant': False,
                                                        'status': 'ENV_UNIV',
                                                        'typ': 'Bool',
                                                        'value': True},
         '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)': {'environmental': True,
                                                        'normal': False,
                                                        'reading': '∀m[material] : _O(m) ⇒ OMinT(m) = _MinT(m)',
-                                                       'relevant': True,
+                                                       'relevant': False,
                                                        'status': 'ENV_UNIV',
                                                        'typ': 'Bool',
                                                        'value': True}}}

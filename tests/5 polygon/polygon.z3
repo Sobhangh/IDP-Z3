@@ -347,12 +347,15 @@ Consequences:
   ~Subtype = square
   ~∀n[side] : Angle(n) = 90 ∨ Sides < n
 Simplified:  
+  ∀ : true
   true
   (true)
   (true)
   (true)
   (true)
   (Convex ⇔ (Angle(1) < 180 ∧ Angle(2) < 180 ∧ Angle(3) < 180 ∧ Angle(4) < 180))
+  (true)
+  (true)
   (true)
   (true)
   (true)
@@ -375,13 +378,8 @@ Irrelevant:
   ~Large(2)
   ~Large(3)
   ~Large(4)
-  ∀n[side] : Length(n) < Length(n + 1)
   ~∀n[side] : Angle(n) = 60 ∨ Sides < n
   ? ∃n[side] : Angle(n) = 90
-  ? Length(1) ≤ Length(2) + Length(3)
-  ? Length(2) ≤ Length(3) + Length(1)
-  ? Length(3) ≤ Length(1) + Length(2)
-  ∀x[side] : 0 ≤ Length(x)
 Co-constraints:
   false ⇔ false
 

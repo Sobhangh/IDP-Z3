@@ -55,6 +55,7 @@ Irrelevant:
   ? t
 Co-constraints:
   false ⇔ false
+  true ⇔ true
 
 
 -- meta -------------------------------------

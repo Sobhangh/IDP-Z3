@@ -71,9 +71,10 @@ Consequences:
 Simplified:  
   b = b
   false ∨ true
-  true
   false ∨ true
 Irrelevant:  
+  codeOf(blue) -> a
+  codeOf(blue) = a
   ~codeOf(blue) = b
 Co-constraints:
   (false) ∨ (true)
@@ -118,7 +119,7 @@ Co-constraints:
  'codeOf': {'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'CONSEQUENCE',
                              'typ': 'code',
                              'value': 'a',
@@ -126,7 +127,7 @@ Co-constraints:
             'codeOf(blue) = a': {'environmental': False,
                                  'normal': False,
                                  'reading': 'codeOf(blue) = a',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': True},

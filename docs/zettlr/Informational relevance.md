@@ -12,13 +12,18 @@ What is "given"  ?
 
 How to deal with implicit dependence between questions, e.g.:
 * polygon with Sides = 4 ⇒ "1 angle is 90°" is irrelevant ??  Yet, if false, it cannot be square/rectangle ("all angles are 90°")
-* if O(M) is relevant and M unknown, O(e3) should be relevant
+* polygon with Sides = 4, All same lengths → all same lengths should be relevant
+* if O(M) is relevant and M, O(M) unknown, O(e3) should be relevant
 
-Options:
-- [ ] flatten the constraints, i.e. separate the co-constraints
-    - [ ] + collect questions without going through co-constraints
-- [ ] use instantiate, not substitute, for Given. What if environmental ?
+Todo:
+- [x] flatten the constraints, i.e. separate the co-constraints
+- [x] [ ] propagate from goals, avoiding given
+- [ ] quantifier expansion: should be done by reification + co-constraint (not via simpler) so that the link can be broken by given (but only if no fresh_vars)
+- [ ] nested functions: also using co-constraint ? ∃y:O(y)=O(M).  or use a new annotation for links ?
+- [ ] add "learned clauses" obtained by propagating with Z3
 
+abandoned:
+- [ ] use instantiate, not substitute, for Given. But what if decision given vs environmental ? would break propagation
 - [ ] transform into CNF ?
 - [ ] collect questions without going through given ?
     - [ ] is a top-down approach… does not work for bottom up reasoning (i.e. if goal is at the bottom)

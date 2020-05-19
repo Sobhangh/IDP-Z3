@@ -88,7 +88,7 @@ class Case:
         self.full_propagate(all_=True) # now consider all facts and theories
 
         # determine relevant assignemnts
-        self.get_relevant_subtences2()
+        self.get_relevant_subtences()
 
         if __debug__: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -108,70 +108,79 @@ class Case:
         for c in self.simplified:
             c.co_constraints(self.co_constraints)
         
-    def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
-        """ causal interpretation of relevance """
-        #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
-        constraints = ( self.simplified )
+    # def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
+    #     """ causal interpretation of relevance """
+    #     #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
+    #     constraints = ( self.simplified )
 
-        # determine relevant symbols (including defined ones)
-        relevant_symbols = mergeDicts( e.unknown_symbols() for e in constraints )
+    #     # determine relevant symbols (including defined ones)
+    #     relevant_symbols = mergeDicts( e.unknown_symbols() for e in constraints )
 
-        # remove irrelevant domain conditions
-        self.simplified = list(filter(lambda e: e.if_symbol is None or e.if_symbol in relevant_symbols
-                                     , self.simplified))
+    #     # remove irrelevant domain conditions
+    #     self.simplified = list(filter(lambda e: e.if_symbol is None or e.if_symbol in relevant_symbols
+    #                                  , self.simplified))
 
-        # determine relevant subtences
-        relevant_subtences = mergeDicts( e.subtences() for e in constraints )
-        relevant_subtences.update(mergeDicts(s.instances for s in relevant_symbols.values()))
+    #     # determine relevant subtences
+    #     relevant_subtences = mergeDicts( e.subtences() for e in constraints )
+    #     relevant_subtences.update(mergeDicts(s.instances for s in relevant_symbols.values()))
 
-        for k, l in self.assignments.items():
-            symbols = list(l.sentence.unknown_symbols().keys())
-            has_relevant_symbol = any(s in relevant_symbols for s in symbols)
-            if k in relevant_subtences and symbols and has_relevant_symbol:
-                l.relevant = True
+    #     for k, l in self.assignments.items():
+    #         symbols = list(l.sentence.unknown_symbols().keys())
+    #         has_relevant_symbol = any(s in relevant_symbols for s in symbols)
+    #         if k in relevant_subtences and symbols and has_relevant_symbol:
+    #             l.relevant = True
 
-    def get_relevant_subtences2(self):
+    def get_relevant_subtences(self):
         """ informational interpretation of relevance 
         
         sets relevance of questions in self.assignments
-        creates self.symbol_ranking : {symbol.name : int }
+        removes irrelevant constraints in self.simplified
         """
 
         relevant_symbols = {}  # Dict[string: int]
 
-        # annotate self.simplified with symbols, questions, relevant
+        # flatten constraints
+        constraints = []
         for constraint in self.simplified:
-            questions = OrderedSet()
-            constraint.collect(questions, all_=True)
-            constraint.questions = questions
-            constraint.symbols   = {e.decl.name: e.decl for e in questions.values() 
-                if hasattr(e, 'decl')
-                and (e.code not in self.assignments 
-                    or self.assignments[e.code].status != Status.GIVEN)}
-            if constraint.if_symbol is None: # make all constraints relevant
-                for symbol in constraint.symbols:
-                    relevant_symbols[symbol] = 1
+            constraints.append(constraint)
+            temp = OrderedSet() # temp = co_constraints(constraint)
+            constraint.co_constraints(temp)
+            constraints.extend(temp)
+
+        # determine given, reachable in constraints' questions
+        given, reachable = OrderedSet(), OrderedSet()
+        for constraint in constraints:
+            constraint.questions = OrderedSet()
+            constraint.collect(constraint.questions, all_=True, co_constraints=False)
+
+            for q in constraint.questions:
+                if self.goal.name == '' and constraint.if_symbol is None:
+                    reachable.add(q)
+                elif self.goal.name != '' and self.goal.name in q.unknown_symbols():
+                    reachable.add(q)
+
+                if q.code in self.assignments:
+                    if self.assignments[q.code].status == Status.GIVEN:
+                        given.add(q)
+                        if q in reachable:
+                            self.assignments[q.code].relevant = True
+
             constraint.relevant = False
-
-        if self.goal.name != '':
-            relevant_symbols[self.goal.name] = 1
-
+                    
         # find relevant symbols by propagation
-        done, rank = False, 1
-        while not done:
-            done = True # unless something changes
-            rank += 1
-            for constraint in self.simplified:
-                if not constraint.relevant: # already considered
-                    if any(symbol in relevant_symbols 
-                            for symbol in constraint.symbols):
+        changed = True
+        while changed:
+            changed = False
+            for constraint in constraints:
+                if not constraint.relevant: # not yet considered
+                    if any(q in reachable and not q in given for q in constraint.questions):
+                        changed = True
                         constraint.relevant = True
-                        for question in constraint.questions:
-                            if question.code in self.assignments: #TODO
-                                self.assignments[question.code].relevant = True
-                        for symbol in constraint.symbols:
-                            relevant_symbols.setdefault(symbol, rank) # update if not already present
-                        not_done = True
+                        for q in constraint.questions:
+                            if q.code in self.assignments:
+                                self.assignments[q.code].relevant = True
+                            if not q in given:
+                                reachable.add(q)
 
         # remove irrelevant domain conditions
         self.simplified = list(filter(lambda constraint: constraint.relevant, self.simplified))

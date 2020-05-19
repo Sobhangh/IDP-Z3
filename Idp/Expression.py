@@ -124,7 +124,7 @@ class Expression(object):
                 self.fresh_vars.update(e.fresh_vars)
         return self
 
-    def collect(self, questions, all_=True):
+    def collect(self, questions, all_=True, co_constraints=True):
         """collects the questions in self.  
 
         'questions is an OrderedSet of Expression
@@ -133,12 +133,13 @@ class Expression(object):
 
         all_=False : ignore formulas under quantifiers (even if expanded)
                  and AppliedSymbol interpreted in a structure
+        co_constraints=False : ignore co_constraints
 
         default implementation for Constructor, IfExpr, AUnary, Fresh_Variable, Number_constant, Brackets
         """
 
         for e in self.sub_exprs:
-            e.collect(questions, all_)
+            e.collect(questions, all_, co_constraints)
 
     def _questions(self): # for debugging
         questions = OrderedSet()
@@ -171,6 +172,7 @@ class Expression(object):
         """
         if self.co_constraint is not None:
             co_constraints.add(self.co_constraint)
+            self.co_constraint.co_constraints(co_constraints)
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
@@ -282,12 +284,12 @@ class AQuantification(Expression):
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
         return self
 
-    def collect(self, questions, all_=True):
+    def collect(self, questions, all_=True, co_constraints=True):
         if len(self.fresh_vars)==0:
             questions.add(self)
         if all_:
             for e in self.sub_exprs:
-                e.collect(questions, all_)
+                e.collect(questions, all_, co_constraints)
 
 
 class BinaryOperator(Expression):
@@ -337,11 +339,11 @@ class BinaryOperator(Expression):
                    else self.sub_exprs[0].type # constructed type, without arithmetic
         return super().annotate1()
 
-    def collect(self, questions, all_=True):
+    def collect(self, questions, all_=True, co_constraints=True):
         if len(self.fresh_vars)==0 and self.operator[0] in '=<>≤≥≠':
             questions.add(self)
         for e in self.sub_exprs:
-            e.collect(questions, all_)
+            e.collect(questions, all_, co_constraints)
         
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
@@ -471,10 +473,10 @@ class AAggregate(Expression):
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
         return self
 
-    def collect(self, questions, all_=True):
+    def collect(self, questions, all_=True, co_constraints=True):
         if all_:
             for e in self.sub_exprs:
-                e.collect(questions, all_)
+                e.collect(questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
@@ -512,13 +514,13 @@ class AppliedSymbol(Expression):
         self.normal = True
         return self.annotate1()
 
-    def collect(self, questions, all_=True):
+    def collect(self, questions, all_=True, co_constraints=True):
         if len(self.fresh_vars)==0 and self.decl.interpretation is None and self.simpler is None:
             questions.add(self)
         for e in self.sub_exprs:
-            e.collect(questions, all_)
-        if self.co_constraint is not None:
-            self.co_constraint.collect(questions, all_)
+            e.collect(questions, all_, co_constraints)
+        if co_constraints and self.co_constraint is not None:
+            self.co_constraint.collect(questions, all_, co_constraints)
 
     def annotate1(self):
         self.type = self.decl.type.name
@@ -557,10 +559,10 @@ class Variable(AppliedSymbol):
             self.normal = True # make sure it is visible in GUI
         return self.annotate1()
 
-    def collect(self, questions, all_=True):
+    def collect(self, questions, all_=True, co_constraints=True):
         questions.add(self)
-        if self.co_constraint is not None:
-            self.co_constraint.collect(questions, all_)
+        if co_constraints and self.co_constraint is not None:
+            self.co_constraint.collect(questions, all_, co_constraints)
 
     def reified(self):
         return self.translate()
