@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### GUI
 * sort symbols per relevance rank
+* File / Share using URL
 
 
 ## [0.5.0] - 2020-04-29
