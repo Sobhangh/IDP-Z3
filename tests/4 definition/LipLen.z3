@@ -89,7 +89,8 @@ Co-constraints:
                                                   'reading': 'JacketDesign = Design_400HP',
                                                   'relevant': False,
                                                   'status': 'UNKNOWN',
-                                                  'typ': 'Bool'}},
+                                                  'typ': 'Bool'},
+                  '__rank': 9999},
  'LipLen': {'LipLen': {'environmental': False,
                        'normal': True,
                        'reading': 'LipLen',
@@ -109,4 +110,5 @@ Co-constraints:
                                   'reading': 'LipLen = Standard',
                                   'relevant': False,
                                   'status': 'UNKNOWN',
-                                  'typ': 'Bool'}}}
+                                  'typ': 'Bool'},
+            '__rank': 9999}}

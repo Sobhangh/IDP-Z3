@@ -60,6 +60,7 @@ GET response :
         - env_dec: Bool         // true if the theory separates environmental/decision variables
     }
     - <symbol> : string {
+        - '__rank' : integer    // rank of the symbol, per informational relevance
         - <atom/term> : string {
             - typ : string      // "Bool" | "Int" | "Real" | <custom type>
             - environmental : Bool // True if atom/term does not contain a decision variable

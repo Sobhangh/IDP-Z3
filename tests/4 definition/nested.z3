@@ -124,7 +124,8 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'negated': {'negated(Jan)': {'environmental': False,
+ 'negated': {'__rank': 1,
+             'negated(Jan)': {'environmental': False,
                               'normal': True,
                               'reading': 'negated(Jan)',
                               'relevant': False,
@@ -182,7 +183,8 @@ Co-constraints:
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': True}},
- 'same': {'same(Jan)': {'environmental': False,
+ 'same': {'__rank': 1,
+          'same(Jan)': {'environmental': False,
                         'normal': True,
                         'reading': 'same(Jan)',
                         'relevant': False,

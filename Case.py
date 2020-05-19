@@ -134,10 +134,9 @@ class Case:
         """ informational interpretation of relevance 
         
         sets relevance of questions in self.assignments
+        sets rank of symbols in self.relevant_symbols
         removes irrelevant constraints in self.simplified
         """
-
-        relevant_symbols = {}  # Dict[string: int]
 
         # flatten constraints
         constraints = []
@@ -150,6 +149,7 @@ class Case:
         # determine given, reachable in constraints' questions
         given, reachable = OrderedSet(), OrderedSet()
         for constraint in constraints:
+            constraint.relevant = False
             constraint.questions = OrderedSet()
             constraint.collect(constraint.questions, all_=True, co_constraints=False)
 
@@ -162,25 +162,34 @@ class Case:
                 if q.code in self.assignments:
                     if self.assignments[q.code].status == Status.GIVEN:
                         given.add(q)
-                        if q in reachable:
-                            self.assignments[q.code].relevant = True
 
-            constraint.relevant = False
-                    
+        # mark reachable as relevant
+        self.relevant_symbols = {}  # Dict[string: int]
+        for q in reachable:
+            if q.code in self.assignments:
+                self.assignments[q.code].relevant = True
+            for s in q.unknown_symbols():
+                self.relevant_symbols[s] = 1
+
         # find relevant symbols by propagation
-        changed = True
-        while changed:
-            changed = False
+        to_add, rank = reachable, 1
+        while to_add:
+            to_add = OrderedSet()
+            rank += 1
             for constraint in constraints:
-                if not constraint.relevant: # not yet considered
-                    if any(q in reachable and not q in given for q in constraint.questions):
-                        changed = True
-                        constraint.relevant = True
-                        for q in constraint.questions:
-                            if q.code in self.assignments:
-                                self.assignments[q.code].relevant = True
-                            if not q in given:
-                                reachable.add(q)
+                if ( not constraint.relevant # not yet considered
+                and  any(q in reachable and not q in given for q in constraint.questions) ):
+                        to_add.add(constraint)
+            for constraint in to_add:
+                constraint.relevant = True
+                for q in constraint.questions:
+                    if q.code in self.assignments:
+                        self.assignments[q.code].relevant = True
+                    if not q in given:
+                        reachable.add(q)
+                for s in constraint.unknown_symbols(co_constraints=False):
+                    if s not in self.relevant_symbols:
+                        self.relevant_symbols[s] = rank
 
         # remove irrelevant domain conditions
         self.simplified = list(filter(lambda constraint: constraint.relevant, self.simplified))

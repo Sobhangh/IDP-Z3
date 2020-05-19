@@ -176,7 +176,8 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'negated': {'negated(-1)': {'environmental': False,
+ 'negated': {'__rank': 1,
+             'negated(-1)': {'environmental': False,
                              'normal': True,
                              'reading': 'negated(-1)',
                              'relevant': True,
@@ -277,7 +278,8 @@ Co-constraints:
                                                  'status': 'UNIVERSAL',
                                                  'typ': 'Bool',
                                                  'value': True}},
- 'same': {'same(-1)': {'environmental': False,
+ 'same': {'__rank': 1,
+          'same(-1)': {'environmental': False,
                        'normal': True,
                        'reading': 'same(-1)',
                        'relevant': True,

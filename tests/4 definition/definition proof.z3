@@ -87,7 +87,8 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'c': {'c': {'environmental': False,
+ 'c': {'__rank': 1,
+       'c': {'environmental': False,
              'normal': True,
              'reading': 'c',
              'relevant': True,
@@ -116,7 +117,8 @@ Co-constraints:
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
                    'value': False}},
- 'codeOf': {'codeOf(blue)': {'environmental': False,
+ 'codeOf': {'__rank': 1,
+            'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
                              'relevant': False,

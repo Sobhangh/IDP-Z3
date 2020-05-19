@@ -194,6 +194,7 @@ class Structure_(object):
                 elif typ in ["real", "int"]:
                     symbol = {"typ": typ.capitalize(), "value": ""} # default
                 else:
+                    assert False, "dead code"
                     symbol = None
 
                 if symbol:
@@ -207,6 +208,8 @@ class Structure_(object):
                     symbol['normal'] = hasattr(atom, 'normal')
                     symbol['environmental'] = atom.has_environmental(True)
                     s.setdefault(key, symbol)
+
+                    s["__rank"] = self.case.relevant_symbols.get(symb.name, 9999)
                     break
 
         for GuiLine in case.GUILines.values():
@@ -224,7 +227,7 @@ class Structure_(object):
     def addAtom(self, atom, value, status: Status):
         key = atom.code
         if key in self.case.GUILines:
-            for symb in self.case.GUILines[key].unknown_symbols().keys():
+            for symb in self.case.GUILines[key].unknown_symbols():
                 s = self.m.setdefault(symb, {})
                 if key in s:
                     if value is not None:

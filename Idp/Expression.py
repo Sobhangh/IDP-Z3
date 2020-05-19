@@ -153,7 +153,7 @@ class Expression(object):
         out = {k: v for k, v in questions.items() if v.type == 'bool'}
         return out
 
-    def unknown_symbols(self):
+    def unknown_symbols(self, co_constraints=True):
         """ returns the list of symbols in self, ignoring type constraints
         
         returns Dict[name, Declaration] 
@@ -161,7 +161,7 @@ class Expression(object):
         if self.if_symbol is not None: # ignore type constraints
             return {}
         questions = OrderedSet()
-        self.collect(questions, all_=True)
+        self.collect(questions, all_=True, co_constraints=co_constraints)
         out = {e.decl.name: e.decl for e in questions.values() if hasattr(e, 'decl')}
         return out
 

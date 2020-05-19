@@ -59,14 +59,16 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'p': {'p': {'environmental': False,
+ 'p': {'__rank': 1,
+       'p': {'environmental': False,
              'normal': True,
              'reading': 'p',
              'relevant': True,
              'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': False}},
- 'q': {'q(blue)': {'environmental': False,
+ 'q': {'__rank': 1,
+       'q(blue)': {'environmental': False,
                    'normal': True,
                    'reading': 'q(blue)',
                    'relevant': True,

@@ -44,7 +44,8 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'p': {'p': {'environmental': False,
+ 'p': {'__rank': 1,
+       'p': {'environmental': False,
              'normal': True,
              'reading': 'p',
              'relevant': True,

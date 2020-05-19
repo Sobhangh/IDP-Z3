@@ -71,7 +71,8 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'codeOf': {'codeOf(blue)': {'environmental': False,
+ 'codeOf': {'__rank': 9999,
+            'codeOf(blue)': {'environmental': False,
                              'normal': True,
                              'reading': 'codeOf(blue)',
                              'relevant': False,

@@ -51,7 +51,8 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'x': {'x': {'environmental': False,
+ 'x': {'__rank': 1,
+       'x': {'environmental': False,
              'normal': True,
              'reading': 'x',
              'relevant': True,
@@ -72,7 +73,8 @@ Co-constraints:
                  'status': 'UNIVERSAL',
                  'typ': 'Bool',
                  'value': True}},
- 'y': {'y': {'environmental': False,
+ 'y': {'__rank': 9999,
+       'y': {'environmental': False,
              'normal': True,
              'reading': 'y',
              'relevant': False,

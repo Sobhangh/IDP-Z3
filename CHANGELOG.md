@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
 
+## [Unreleased] - 2020-04-29
+
+### API
+* add '__rank' attribute to each symbol, per informational relevance
+
 
 ## [0.5.0] - 2020-04-29
 
