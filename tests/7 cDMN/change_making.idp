@@ -1,0 +1,30 @@
+// https://dmcommunity.org/challenge/challenge-feb-2015/
+
+vocabulary {
+	type Number_t = { 0..1000 } 
+	TotalMoney: Number_t
+	TotalCoins: Number_t
+	OneCent: Number_t
+	TwoCent: Number_t
+	FiveCent: Number_t
+	TenCent: Number_t
+	TwentyCent: Number_t
+	FiftyCent: Number_t
+	OneEuro: Number_t
+	TwoEuro: Number_t
+}
+theory {
+	//Total amount of Money
+	{
+		TotalMoney() = 567 <- true.
+	}
+
+	//Calculation of change
+	TotalMoney() = sum{ : true: OneCent() * 01 }+sum{ : true: TwoCent() * 02 }+sum{ : true: FiveCent() * 05 }+sum{ : true: TenCent() * 10 }+sum{ : true: TwentyCent() * 20 }+sum{ : true: FiftyCent() * 50 }+sum{ : true: OneEuro() * 100 }+sum{ : true: TwoEuro() * 200 }.
+	//Amount of coins
+	TotalCoins() = sum{ : true: OneCent() }+sum{ : true: TwoCent() }+sum{ : true: FiveCent() }+sum{ : true: TenCent() }+sum{ : true: TwentyCent() }+sum{ : true: FiftyCent() }+sum{ : true: OneEuro() }+sum{ : true: TwoEuro() }.
+}
+
+
+structure {
+}

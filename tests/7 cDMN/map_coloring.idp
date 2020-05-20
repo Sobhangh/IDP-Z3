@@ -1,0 +1,18 @@
+// https://dmcommunity.org/challenge/challenge-may-2019/
+
+vocabulary {
+	type Country_t constructed from { Belgium, France, Luxembourg, Netherlands, Germany, Denmark } 
+	type Color_t constructed from { Green, Red, Yellow, Orange } 
+	Color(Country_t): Color_t
+	Country_borders_Country(Country_t, Country_t)
+}
+theory {
+	//Bordering countries can’t share colors
+	!c1[Country_t]: !c2[Country_t]: Country_borders_Country(c1, c2) => Color(c1) ~= Color(c2).
+
+}
+
+
+structure {
+	Country_borders_Country = {Belgium,France;Belgium,Luxembourg;Belgium,Netherlands;Belgium,Germany;Netherlands,Germany;Germany,France;Germany,Denmark;Germany,Luxembourg;France,Luxembourg;}
+}
