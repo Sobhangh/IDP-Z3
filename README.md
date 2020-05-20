@@ -41,3 +41,8 @@ To update autoconfigparam.herokuapp.com:
 * `heroku login`
 * `heroku git:remote -a autoconfigparam`
 * `git push heroku master`
+
+# Testing
+
+To generate the tests, from the top directory run `python3 tests/main.py`.
+After this, you can manually check what has changed.
