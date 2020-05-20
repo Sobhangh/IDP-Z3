@@ -504,7 +504,7 @@ class AppliedSymbol(Expression):
 
     def __str1__(self):
         if len(self.sub_exprs) == 0:
-            return self.s.str
+            return str(self.s)
         else:
             return f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
 

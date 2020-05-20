@@ -5,7 +5,7 @@ vocabulary {
 }
 theory {
   { p.}
-  ~p|q.
+  ~p()|q.
 }
 -- vocabulary -------------------------------
 
