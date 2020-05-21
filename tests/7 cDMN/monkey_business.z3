@@ -1,0 +1,680 @@
+
+-- original ---------------------------------
+// https://dmcommunity.wordpress.com/challenge/challenge-nov-2015/
+
+vocabulary {
+	type Monkey_t constructed from { Anna, Sam, Harriet, Mike } 
+	type Place_t constructed from { Grass, Rock, Branch, Stream } 
+	type Fruit_t constructed from { Apple, Pear, Banana, Orange } 
+	Place(Monkey_t): Place_t
+	Fruit(Monkey_t): Fruit_t
+}
+theory {
+	//Monkey Constraints
+	!Monkey[Monkey_t]: Monkey = Sam => Place(Monkey) = Grass & Fruit(Monkey) ~= Banana.
+
+	!Monkey[Monkey_t]: Place(Monkey) = Rock => Fruit(Monkey) = Apple.
+
+	!Monkey[Monkey_t]: Fruit(Monkey) = Pear => Place(Monkey) ~= Branch.
+
+	!Monkey[Monkey_t]: Monkey = Anna => Place(Monkey) = Stream & Fruit(Monkey) ~= Pear.
+
+	!Monkey[Monkey_t]: Monkey = Harriet => Place(Monkey) ~= Branch.
+
+	!Monkey[Monkey_t]: Monkey = Mike => Fruit(Monkey) ~= Orange.
+
+	//Different Preferences
+	!m1[Monkey_t]: !m2[Monkey_t]: m2 ~= m1 => Place(m1) ~= Place(m2) & Fruit(m1) ~= Fruit(m2).
+
+}
+
+
+structure {
+}
+
+-- vocabulary -------------------------------
+
+-- theory -----------------------------------
+And(Place(Sam) == Grass, Not(Fruit(Sam) == Banana))
+
+And(Or(Not(Place(Anna) == Rock), Fruit(Anna) == Apple),
+    Or(Not(Place(Sam) == Rock), Fruit(Sam) == Apple),
+    Or(Not(Place(Harriet) == Rock), Fruit(Harriet) == Apple),
+    Or(Not(Place(Mike) == Rock), Fruit(Mike) == Apple))
+
+And(Or(Not(Fruit(Anna) == Pear), Not(Place(Anna) == Branch)),
+    Or(Not(Fruit(Sam) == Pear), Not(Place(Sam) == Branch)),
+    Or(Not(Fruit(Harriet) == Pear),
+       Not(Place(Harriet) == Branch)),
+    Or(Not(Fruit(Mike) == Pear), Not(Place(Mike) == Branch)))
+
+And(Place(Anna) == Stream, Not(Fruit(Anna) == Pear))
+
+Not(Place(Harriet) == Branch)
+
+Not(Fruit(Mike) == Orange)
+
+And(And(True,
+        And(Not(Place(Anna) == Place(Sam)),
+            Not(Fruit(Anna) == Fruit(Sam))),
+        And(Not(Place(Anna) == Place(Harriet)),
+            Not(Fruit(Anna) == Fruit(Harriet))),
+        And(Not(Place(Anna) == Place(Mike)),
+            Not(Fruit(Anna) == Fruit(Mike)))),
+    And(And(Not(Place(Sam) == Place(Anna)),
+            Not(Fruit(Sam) == Fruit(Anna))),
+        True,
+        And(Not(Place(Sam) == Place(Harriet)),
+            Not(Fruit(Sam) == Fruit(Harriet))),
+        And(Not(Place(Sam) == Place(Mike)),
+            Not(Fruit(Sam) == Fruit(Mike)))),
+    And(And(Not(Place(Harriet) == Place(Anna)),
+            Not(Fruit(Harriet) == Fruit(Anna))),
+        And(Not(Place(Harriet) == Place(Sam)),
+            Not(Fruit(Harriet) == Fruit(Sam))),
+        True,
+        And(Not(Place(Harriet) == Place(Mike)),
+            Not(Fruit(Harriet) == Fruit(Mike)))),
+    And(And(Not(Place(Mike) == Place(Anna)),
+            Not(Fruit(Mike) == Fruit(Anna))),
+        And(Not(Place(Mike) == Place(Sam)),
+            Not(Fruit(Mike) == Fruit(Sam))),
+        And(Not(Place(Mike) == Place(Harriet)),
+            Not(Fruit(Mike) == Fruit(Harriet))),
+        True))
+
+Or(Place(Anna) == Grass,
+   Place(Anna) == Rock,
+   Place(Anna) == Branch,
+   Place(Anna) == Stream)
+
+Or(Place(Sam) == Grass,
+   Place(Sam) == Rock,
+   Place(Sam) == Branch,
+   Place(Sam) == Stream)
+
+Or(Place(Harriet) == Grass,
+   Place(Harriet) == Rock,
+   Place(Harriet) == Branch,
+   Place(Harriet) == Stream)
+
+Or(Place(Mike) == Grass,
+   Place(Mike) == Rock,
+   Place(Mike) == Branch,
+   Place(Mike) == Stream)
+
+Or(Fruit(Anna) == Apple,
+   Fruit(Anna) == Pear,
+   Fruit(Anna) == Banana,
+   Fruit(Anna) == Orange)
+
+Or(Fruit(Sam) == Apple,
+   Fruit(Sam) == Pear,
+   Fruit(Sam) == Banana,
+   Fruit(Sam) == Orange)
+
+Or(Fruit(Harriet) == Apple,
+   Fruit(Harriet) == Pear,
+   Fruit(Harriet) == Banana,
+   Fruit(Harriet) == Orange)
+
+Or(Fruit(Mike) == Apple,
+   Fruit(Mike) == Pear,
+   Fruit(Mike) == Banana,
+   Fruit(Mike) == Orange)
+
+-- subtences ------------------------------------
+∀Monkey[Monkey_t] : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana
+∀Monkey[Monkey_t] : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple
+∀Monkey[Monkey_t] : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch
+∀Monkey[Monkey_t] : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear
+∀Monkey[Monkey_t] : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch
+∀Monkey[Monkey_t] : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange
+∀m1[Monkey_t] : ∀m2[Monkey_t] : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)
+Place(Anna) = Grass
+Place(Anna) = Rock
+Place(Anna) = Branch
+Place(Anna) = Stream
+Place(Sam) = Grass
+Place(Sam) = Rock
+Place(Sam) = Branch
+Place(Sam) = Stream
+Place(Harriet) = Grass
+Place(Harriet) = Rock
+Place(Harriet) = Branch
+Place(Harriet) = Stream
+Place(Mike) = Grass
+Place(Mike) = Rock
+Place(Mike) = Branch
+Place(Mike) = Stream
+Fruit(Anna) = Apple
+Fruit(Anna) = Pear
+Fruit(Anna) = Banana
+Fruit(Anna) = Orange
+Fruit(Sam) = Apple
+Fruit(Sam) = Pear
+Fruit(Sam) = Banana
+Fruit(Sam) = Orange
+Fruit(Harriet) = Apple
+Fruit(Harriet) = Pear
+Fruit(Harriet) = Banana
+Fruit(Harriet) = Orange
+Fruit(Mike) = Apple
+Fruit(Mike) = Pear
+Fruit(Mike) = Banana
+Fruit(Mike) = Orange
+
+-- GUILines ------------------------------------
+Place(Anna)
+Place(Sam)
+Place(Harriet)
+Place(Mike)
+Fruit(Anna)
+Fruit(Sam)
+Fruit(Harriet)
+Fruit(Mike)
+∀Monkey[Monkey_t] : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana
+∀Monkey[Monkey_t] : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple
+∀Monkey[Monkey_t] : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch
+∀Monkey[Monkey_t] : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear
+∀Monkey[Monkey_t] : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch
+∀Monkey[Monkey_t] : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange
+∀m1[Monkey_t] : ∀m2[Monkey_t] : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)
+Place(Anna) = Grass
+Place(Anna) = Rock
+Place(Anna) = Branch
+Place(Anna) = Stream
+Place(Sam) = Grass
+Place(Sam) = Rock
+Place(Sam) = Branch
+Place(Sam) = Stream
+Place(Harriet) = Grass
+Place(Harriet) = Rock
+Place(Harriet) = Branch
+Place(Harriet) = Stream
+Place(Mike) = Grass
+Place(Mike) = Rock
+Place(Mike) = Branch
+Place(Mike) = Stream
+Fruit(Anna) = Apple
+Fruit(Anna) = Pear
+Fruit(Anna) = Banana
+Fruit(Anna) = Orange
+Fruit(Sam) = Apple
+Fruit(Sam) = Pear
+Fruit(Sam) = Banana
+Fruit(Sam) = Orange
+Fruit(Harriet) = Apple
+Fruit(Harriet) = Pear
+Fruit(Harriet) = Banana
+Fruit(Harriet) = Orange
+Fruit(Mike) = Apple
+Fruit(Mike) = Pear
+Fruit(Mike) = Banana
+Fruit(Mike) = Orange
+
+-- case -------------------------------------
+Type:        
+  
+Definitions: 
+  
+Universals:  
+  Place(Anna) -> Stream
+  Place(Sam) -> Grass
+  ∀Monkey[Monkey_t] : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana
+  ∀Monkey[Monkey_t] : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple
+  ∀Monkey[Monkey_t] : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch
+  ∀Monkey[Monkey_t] : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear
+  ∀Monkey[Monkey_t] : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch
+  ∀Monkey[Monkey_t] : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange
+  ∀m1[Monkey_t] : ∀m2[Monkey_t] : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)
+  Place(Anna) = Stream
+  Place(Sam) = Grass
+  ~Place(Harriet) = Branch
+  ~Fruit(Anna) = Pear
+  ~Fruit(Sam) = Banana
+  ~Fruit(Mike) = Orange
+Consequences:
+  Place(Harriet) -> Rock
+  Place(Mike) -> Branch
+  Fruit(Anna) -> Orange
+  Fruit(Sam) -> Pear
+  Fruit(Harriet) -> Apple
+  Fruit(Mike) -> Banana
+  ~Place(Anna) = Grass
+  ~Place(Anna) = Rock
+  ~Place(Anna) = Branch
+  ~Place(Sam) = Rock
+  ~Place(Sam) = Branch
+  ~Place(Sam) = Stream
+  ~Place(Harriet) = Grass
+  Place(Harriet) = Rock
+  ~Place(Harriet) = Stream
+  ~Place(Mike) = Grass
+  ~Place(Mike) = Rock
+  Place(Mike) = Branch
+  ~Place(Mike) = Stream
+  ~Fruit(Anna) = Apple
+  ~Fruit(Anna) = Banana
+  Fruit(Anna) = Orange
+  ~Fruit(Sam) = Apple
+  Fruit(Sam) = Pear
+  ~Fruit(Sam) = Orange
+  Fruit(Harriet) = Apple
+  ~Fruit(Harriet) = Pear
+  ~Fruit(Harriet) = Banana
+  ~Fruit(Harriet) = Orange
+  ~Fruit(Mike) = Apple
+  ~Fruit(Mike) = Pear
+  Fruit(Mike) = Banana
+Simplified:  
+  ∀ : true
+  ∀ : true
+  ∀ : true
+  ∀ : true
+  ∀ : true
+  ∀ : true
+  ∀ : true
+  false ∨ false ∨ false ∨ true
+  true
+  true
+  true
+  false ∨ false ∨ false ∨ true
+  true
+  true
+  false ∨ false ∨ true ∨ false
+Irrelevant:  
+  ~Place(Sam) = Stream
+  ~Place(Harriet) = Grass
+  ~Place(Harriet) = Stream
+  ~Place(Mike) = Grass
+  ~Place(Mike) = Stream
+  ~Fruit(Sam) = Apple
+  ~Fruit(Sam) = Orange
+  ~Fruit(Harriet) = Pear
+  ~Fruit(Harriet) = Banana
+  ~Fruit(Harriet) = Orange
+Co-constraints:
+  
+
+
+-- meta -------------------------------------
+{'symbols': [{'idpname': 'Place', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
+             {'idpname': 'Fruit', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'}],
+ 'title': 'Interactive Consultant'}
+
+-- propagation ------------------------------
+{' Global': {'env_dec': False},
+ 'Fruit': {'Fruit(Anna)': {'environmental': False,
+                           'normal': True,
+                           'reading': 'Fruit(Anna)',
+                           'relevant': True,
+                           'status': 'CONSEQUENCE',
+                           'typ': 'Fruit_t',
+                           'value': 'Orange',
+                           'values': ['Apple', 'Pear', 'Banana', 'Orange']},
+           'Fruit(Anna) = Apple': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Fruit(Anna) = Apple',
+                                   'relevant': True,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': False},
+           'Fruit(Anna) = Banana': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Fruit(Anna) = Banana',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': False},
+           'Fruit(Anna) = Orange': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Fruit(Anna) = Orange',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': True},
+           'Fruit(Anna) = Pear': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Fruit(Anna) = Pear',
+                                  'relevant': True,
+                                  'status': 'UNIVERSAL',
+                                  'typ': 'Bool',
+                                  'value': False},
+           'Fruit(Harriet)': {'environmental': False,
+                              'normal': True,
+                              'reading': 'Fruit(Harriet)',
+                              'relevant': True,
+                              'status': 'CONSEQUENCE',
+                              'typ': 'Fruit_t',
+                              'value': 'Apple',
+                              'values': ['Apple', 'Pear', 'Banana', 'Orange']},
+           'Fruit(Harriet) = Apple': {'environmental': False,
+                                      'normal': False,
+                                      'reading': 'Fruit(Harriet) = Apple',
+                                      'relevant': True,
+                                      'status': 'CONSEQUENCE',
+                                      'typ': 'Bool',
+                                      'value': True},
+           'Fruit(Harriet) = Banana': {'environmental': False,
+                                       'normal': False,
+                                       'reading': 'Fruit(Harriet) = Banana',
+                                       'relevant': False,
+                                       'status': 'CONSEQUENCE',
+                                       'typ': 'Bool',
+                                       'value': False},
+           'Fruit(Harriet) = Orange': {'environmental': False,
+                                       'normal': False,
+                                       'reading': 'Fruit(Harriet) = Orange',
+                                       'relevant': False,
+                                       'status': 'CONSEQUENCE',
+                                       'typ': 'Bool',
+                                       'value': False},
+           'Fruit(Harriet) = Pear': {'environmental': False,
+                                     'normal': False,
+                                     'reading': 'Fruit(Harriet) = Pear',
+                                     'relevant': False,
+                                     'status': 'CONSEQUENCE',
+                                     'typ': 'Bool',
+                                     'value': False},
+           'Fruit(Mike)': {'environmental': False,
+                           'normal': True,
+                           'reading': 'Fruit(Mike)',
+                           'relevant': True,
+                           'status': 'CONSEQUENCE',
+                           'typ': 'Fruit_t',
+                           'value': 'Banana',
+                           'values': ['Apple', 'Pear', 'Banana', 'Orange']},
+           'Fruit(Mike) = Apple': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Fruit(Mike) = Apple',
+                                   'relevant': True,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': False},
+           'Fruit(Mike) = Banana': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Fruit(Mike) = Banana',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': True},
+           'Fruit(Mike) = Orange': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Fruit(Mike) = Orange',
+                                    'relevant': True,
+                                    'status': 'UNIVERSAL',
+                                    'typ': 'Bool',
+                                    'value': False},
+           'Fruit(Mike) = Pear': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Fruit(Mike) = Pear',
+                                  'relevant': True,
+                                  'status': 'CONSEQUENCE',
+                                  'typ': 'Bool',
+                                  'value': False},
+           'Fruit(Sam)': {'environmental': False,
+                          'normal': True,
+                          'reading': 'Fruit(Sam)',
+                          'relevant': True,
+                          'status': 'CONSEQUENCE',
+                          'typ': 'Fruit_t',
+                          'value': 'Pear',
+                          'values': ['Apple', 'Pear', 'Banana', 'Orange']},
+           'Fruit(Sam) = Apple': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Fruit(Sam) = Apple',
+                                  'relevant': False,
+                                  'status': 'CONSEQUENCE',
+                                  'typ': 'Bool',
+                                  'value': False},
+           'Fruit(Sam) = Banana': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Fruit(Sam) = Banana',
+                                   'relevant': True,
+                                   'status': 'UNIVERSAL',
+                                   'typ': 'Bool',
+                                   'value': False},
+           'Fruit(Sam) = Orange': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Fruit(Sam) = Orange',
+                                   'relevant': False,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': False},
+           'Fruit(Sam) = Pear': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'Fruit(Sam) = Pear',
+                                 'relevant': True,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': True},
+           '__rank': 1,
+           '∀Monkey[Monkey_t] : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
+                                                                                 'normal': False,
+                                                                                 'reading': '∀Monkey[Monkey_t] : '
+                                                                                            'Fruit(Monkey) = Pear ⇒ '
+                                                                                            'Place(Monkey) ≠ Branch',
+                                                                                 'relevant': True,
+                                                                                 'status': 'UNIVERSAL',
+                                                                                 'typ': 'Bool',
+                                                                                 'value': True},
+           '∀Monkey[Monkey_t] : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange': {'environmental': False,
+                                                                          'normal': False,
+                                                                          'reading': '∀Monkey[Monkey_t] : Monkey = '
+                                                                                     'Mike ⇒ Fruit(Monkey) ≠ Orange',
+                                                                          'relevant': True,
+                                                                          'status': 'UNIVERSAL',
+                                                                          'typ': 'Bool',
+                                                                          'value': True}},
+ 'Place': {'Place(Anna)': {'environmental': False,
+                           'normal': True,
+                           'reading': 'Place(Anna)',
+                           'relevant': True,
+                           'status': 'UNIVERSAL',
+                           'typ': 'Place_t',
+                           'value': 'Stream',
+                           'values': ['Grass', 'Rock', 'Branch', 'Stream']},
+           'Place(Anna) = Branch': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Place(Anna) = Branch',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': False},
+           'Place(Anna) = Grass': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Place(Anna) = Grass',
+                                   'relevant': True,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': False},
+           'Place(Anna) = Rock': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Place(Anna) = Rock',
+                                  'relevant': True,
+                                  'status': 'CONSEQUENCE',
+                                  'typ': 'Bool',
+                                  'value': False},
+           'Place(Anna) = Stream': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Place(Anna) = Stream',
+                                    'relevant': True,
+                                    'status': 'UNIVERSAL',
+                                    'typ': 'Bool',
+                                    'value': True},
+           'Place(Harriet)': {'environmental': False,
+                              'normal': True,
+                              'reading': 'Place(Harriet)',
+                              'relevant': True,
+                              'status': 'CONSEQUENCE',
+                              'typ': 'Place_t',
+                              'value': 'Rock',
+                              'values': ['Grass', 'Rock', 'Branch', 'Stream']},
+           'Place(Harriet) = Branch': {'environmental': False,
+                                       'normal': False,
+                                       'reading': 'Place(Harriet) = Branch',
+                                       'relevant': True,
+                                       'status': 'UNIVERSAL',
+                                       'typ': 'Bool',
+                                       'value': False},
+           'Place(Harriet) = Grass': {'environmental': False,
+                                      'normal': False,
+                                      'reading': 'Place(Harriet) = Grass',
+                                      'relevant': False,
+                                      'status': 'CONSEQUENCE',
+                                      'typ': 'Bool',
+                                      'value': False},
+           'Place(Harriet) = Rock': {'environmental': False,
+                                     'normal': False,
+                                     'reading': 'Place(Harriet) = Rock',
+                                     'relevant': True,
+                                     'status': 'CONSEQUENCE',
+                                     'typ': 'Bool',
+                                     'value': True},
+           'Place(Harriet) = Stream': {'environmental': False,
+                                       'normal': False,
+                                       'reading': 'Place(Harriet) = Stream',
+                                       'relevant': False,
+                                       'status': 'CONSEQUENCE',
+                                       'typ': 'Bool',
+                                       'value': False},
+           'Place(Mike)': {'environmental': False,
+                           'normal': True,
+                           'reading': 'Place(Mike)',
+                           'relevant': True,
+                           'status': 'CONSEQUENCE',
+                           'typ': 'Place_t',
+                           'value': 'Branch',
+                           'values': ['Grass', 'Rock', 'Branch', 'Stream']},
+           'Place(Mike) = Branch': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Place(Mike) = Branch',
+                                    'relevant': True,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': True},
+           'Place(Mike) = Grass': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Place(Mike) = Grass',
+                                   'relevant': False,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': False},
+           'Place(Mike) = Rock': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Place(Mike) = Rock',
+                                  'relevant': True,
+                                  'status': 'CONSEQUENCE',
+                                  'typ': 'Bool',
+                                  'value': False},
+           'Place(Mike) = Stream': {'environmental': False,
+                                    'normal': False,
+                                    'reading': 'Place(Mike) = Stream',
+                                    'relevant': False,
+                                    'status': 'CONSEQUENCE',
+                                    'typ': 'Bool',
+                                    'value': False},
+           'Place(Sam)': {'environmental': False,
+                          'normal': True,
+                          'reading': 'Place(Sam)',
+                          'relevant': True,
+                          'status': 'UNIVERSAL',
+                          'typ': 'Place_t',
+                          'value': 'Grass',
+                          'values': ['Grass', 'Rock', 'Branch', 'Stream']},
+           'Place(Sam) = Branch': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Place(Sam) = Branch',
+                                   'relevant': True,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': False},
+           'Place(Sam) = Grass': {'environmental': False,
+                                  'normal': False,
+                                  'reading': 'Place(Sam) = Grass',
+                                  'relevant': True,
+                                  'status': 'UNIVERSAL',
+                                  'typ': 'Bool',
+                                  'value': True},
+           'Place(Sam) = Rock': {'environmental': False,
+                                 'normal': False,
+                                 'reading': 'Place(Sam) = Rock',
+                                 'relevant': True,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': False},
+           'Place(Sam) = Stream': {'environmental': False,
+                                   'normal': False,
+                                   'reading': 'Place(Sam) = Stream',
+                                   'relevant': False,
+                                   'status': 'CONSEQUENCE',
+                                   'typ': 'Bool',
+                                   'value': False},
+           '__rank': 1,
+           '∀Monkey[Monkey_t] : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear': {'environmental': False,
+                                                                                                 'normal': False,
+                                                                                                 'reading': '∀Monkey[Monkey_t] '
+                                                                                                            ': Monkey '
+                                                                                                            '= Anna ⇒ '
+                                                                                                            'Place(Monkey) '
+                                                                                                            '= Stream '
+                                                                                                            '∧ '
+                                                                                                            'Fruit(Monkey) '
+                                                                                                            '≠ Pear',
+                                                                                                 'relevant': True,
+                                                                                                 'status': 'UNIVERSAL',
+                                                                                                 'typ': 'Bool',
+                                                                                                 'value': True},
+           '∀Monkey[Monkey_t] : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
+                                                                             'normal': False,
+                                                                             'reading': '∀Monkey[Monkey_t] : Monkey = '
+                                                                                        'Harriet ⇒ Place(Monkey) ≠ '
+                                                                                        'Branch',
+                                                                             'relevant': True,
+                                                                             'status': 'UNIVERSAL',
+                                                                             'typ': 'Bool',
+                                                                             'value': True},
+           '∀Monkey[Monkey_t] : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana': {'environmental': False,
+                                                                                                 'normal': False,
+                                                                                                 'reading': '∀Monkey[Monkey_t] '
+                                                                                                            ': Monkey '
+                                                                                                            '= Sam ⇒ '
+                                                                                                            'Place(Monkey) '
+                                                                                                            '= Grass ∧ '
+                                                                                                            'Fruit(Monkey) '
+                                                                                                            '≠ Banana',
+                                                                                                 'relevant': True,
+                                                                                                 'status': 'UNIVERSAL',
+                                                                                                 'typ': 'Bool',
+                                                                                                 'value': True},
+           '∀Monkey[Monkey_t] : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple': {'environmental': False,
+                                                                                'normal': False,
+                                                                                'reading': '∀Monkey[Monkey_t] : '
+                                                                                           'Place(Monkey) = Rock ⇒ '
+                                                                                           'Fruit(Monkey) = Apple',
+                                                                                'relevant': True,
+                                                                                'status': 'UNIVERSAL',
+                                                                                'typ': 'Bool',
+                                                                                'value': True},
+           '∀m1[Monkey_t] : ∀m2[Monkey_t] : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)': {'environmental': False,
+                                                                                                       'normal': False,
+                                                                                                       'reading': '∀m1[Monkey_t] '
+                                                                                                                  ': '
+                                                                                                                  '∀m2[Monkey_t] '
+                                                                                                                  ': '
+                                                                                                                  'm2 '
+                                                                                                                  '≠ '
+                                                                                                                  'm1 '
+                                                                                                                  '⇒ '
+                                                                                                                  'Place(m1) '
+                                                                                                                  '≠ '
+                                                                                                                  'Place(m2) '
+                                                                                                                  '∧ '
+                                                                                                                  'Fruit(m1) '
+                                                                                                                  '≠ '
+                                                                                                                  'Fruit(m2)',
+                                                                                                       'relevant': True,
+                                                                                                       'status': 'UNIVERSAL',
+                                                                                                       'typ': 'Bool',
+                                                                                                       'value': True}}}

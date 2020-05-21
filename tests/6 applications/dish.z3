@@ -77,11 +77,11 @@ And((season == Spring) ==
     (season == Winter) == (temperature < 10),
     (season == Summer) == (temperature > 30))
 
-ForAll(c!111,
-       (guestCount == c!111) ==
-       Or(And(c!111 == 4, dayType == Weekday),
-          And(c!111 == 10, dayType == Holiday),
-          And(c!111 == 15, dayType == Weekend)))
+ForAll(c!106,
+       (guestCount == c!106) ==
+       Or(And(c!106 == 4, dayType == Weekday),
+          And(c!106 == 10, dayType == Holiday),
+          And(c!106 == 15, dayType == Weekend)))
 
 -- subtences ------------------------------------
 desiredDish = Stew
