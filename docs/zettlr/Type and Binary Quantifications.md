@@ -1,6 +1,10 @@
-Type and Binary Quantifications
-=
-20200330121959 
+–-
+title: Type and Binary Quantifications
+tags: #analysis #research
+   ID: 20200330121959 
+–-
+
+
 
 See [trail of e-mails](https://docs.google.com/document/d/1BDB8bp1zC6XUMshnoriQLCOQ2okF4vxZWVDOeqbFeXM/edit)
 
@@ -16,4 +20,5 @@ Principles:
 * A formula is _over-approximatable_ if it uses computable types only.  This over-approximation is computed by an algebra.
 * A _Binary quantified formula_ is a formula of the form $\forall x [\phi(x)]: \psi(x).$  or $\exists x [\phi(x)]: \psi(x).$, where $\phi(x)$ is over-approximatable
 
-#analysis #research
+use [panda](https://pandas.pydata.org/) ?
+
