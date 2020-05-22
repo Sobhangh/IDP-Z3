@@ -154,9 +154,10 @@ class Case:
             constraint.collect(constraint.questions, all_=True, co_constraints=False)
 
             for q in constraint.questions:
+                symbols = q.unknown_symbols()
                 if self.goal.name == '' and constraint.if_symbol is None:
                     reachable.add(q)
-                elif self.goal.name != '' and self.goal.name in q.unknown_symbols():
+                elif self.goal.name != '' and len(symbols)==1 and self.goal.name in symbols:
                     reachable.add(q)
 
                 if q.code in self.assignments:
