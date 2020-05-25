@@ -32,5 +32,6 @@ Done:
 
 [Parameters in app.yaml](https://cloud.google.com/appengine/docs/standard/python3/config/appref#entrypoint) for [free tier](https://cloud.google.com/free/docs/gcp-free-tier?hl=fr):
 * instance: visible in console / App Engine / Instances (also type of scaling)
-* timeout ? [depends on type of scaling](https://cloud.google.com/appengine/docs/standard/python/how-instances-are-managed#timeout) automatic = instance of class F → 10 minutes
+    * F4 = 1GB, 2.4 GHz, automatic scaling
+* timeout : [depends on type of scaling](https://cloud.google.com/appengine/docs/standard/python/how-instances-are-managed#timeout) automatic = instance of class F → 10 minutes !
 * threadsafe ? set [max_concurrent_request](https://cloud.google.com/appengine/docs/standard/python3/config/appref#max_concurrent_requests) to 1 ?
