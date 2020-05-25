@@ -145,8 +145,14 @@ class Vocabulary(object):
                                         constructors=[TRUE, FALSE]),
                              'true': TRUE,
                              'false': FALSE}
+
         for s in self.declarations:
             s.annotate(self.symbol_decls)
+
+        goals = SymbolDeclaration(annotations='', name=Symbol(name='__goals'),
+                                sorts=[], out=None)
+        goals.is_var = False
+        goals.annotate(self.symbol_decls)
 
     def __str__(self):
         return (f"vocabulary {{{nl}"
@@ -745,12 +751,16 @@ class Goal(object):
         return self.name
 
     def annotate(self, idp):
-        if self.name in idp.vocabulary.symbol_decls:
-            self.decl = idp.vocabulary.symbol_decls[self.name]
+        symbol_decls = idp.vocabulary.symbol_decls
+        if self.name in symbol_decls:
+            self.decl = symbol_decls[self.name]
             instances = self.decl.typeConstraint(if_symbol=False)
             if instances:
-                constraint = AConjunction.make('∧', instances)
+                goals = Symbol(name='__goals').annotate(symbol_decls, {})
+                constraint = AppliedSymbol.make(goals, instances)
                 idp.theory.constraints.append(constraint)
+            else:
+                raise Exception("goals must be instantiable.")
 
     def subtences(self):
         return {}

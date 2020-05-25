@@ -515,7 +515,8 @@ class AppliedSymbol(Expression):
         return self.annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if len(self.fresh_vars)==0 and self.decl.interpretation is None and self.simpler is None:
+        if len(self.fresh_vars)==0 and self.decl.interpretation is None \
+            and self.simpler is None and self.name != '__goals':
             questions.add(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)

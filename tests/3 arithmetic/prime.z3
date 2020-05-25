@@ -13,10 +13,7 @@ goal Prime
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-And(Or(Prime(1), Not(Prime(1))),
-    Or(Prime(2), Not(Prime(2))),
-    Or(Prime(3), Not(Prime(3))),
-    Or(Prime(4), Not(Prime(4))))
+True
 
 And(Prime(1), Prime(2), Prime(3), Not(Prime(4)))
 
@@ -45,7 +42,7 @@ Universals:
 Consequences:
   
 Simplified:  
-  (true) ∧ (true) ∧ (true) ∧ (true)
+  __goals(true,true,true,true)
 Irrelevant:  
   
 Co-constraints:

@@ -4,36 +4,25 @@ tags: #analysis
    ID: 20200523062416
 –-
 
-aka templates
+## Part 1: `__Symbols` type
+* the `__Symbols` type is the set of symbols defined in the vocabulary.  
+* The constructors for the `__Symbols` are the symbol names preceded by a backtick (`` ` ``), e.g. `` `edge``
+* the `__Symbols` type can appear in function and predicate declaration in the vocabulary section, e.g. `symmetric(__Symbols)`is a predicate declaration
+* predicates and functions over `__Symbols` are part of structures, like any other symbols
+* it's possible to quantify over `__Symbols`, e.g. ``?`p[__Symbols]: symmetric(`p).``
+    * The backtick  (`` ` ``) should be used in front of a variable to indicate that it represents a symbol.  Its use is optional though.
+* a variable of type `__Symbols` can be applied to arguments, e.g. ``?`p[__Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x))``
+    * notice that this requires type inference AFTER expansion of the first quantifier.  
+    * if the arity is wrong, an error is raised by the grounder
+    * Alternatively, this could be written using binary quantification (when available).
 
-Syntax of a macro: `{ f(x) -> phi(x). }`
-* notice the right arrow `->`
-* a symbol is defined only once :`{f(x) -> phi1(x). f(x) -> phi2(x).}` is not allowed
-* macros do no have quantifiers for variables in the head.  
-* macros have no type information.  Type is verified after macro expansion.  → Symbols defined by a macro may not be declared in the vocabulary !
-* symbols defined by a macro may not be part of a structure (and they are NOT shown to the user in the interactive mode of the Interactive Consultant)
-* `phi(x)` can  be of any type: bool, int, real, custom type 
-* `phi(x)` follows Haskell like syntax: `if-then-else`, `case` on constructors, `let`, `where`
+## Part 2: constructive definitions
+* accept only constructive definitions ?
+* a definition can be annotated as "constructive"
+* in that case, the grounder can just instantiate the definition as needed by occurrences in other constraints/definitions.  He does not have to instantiate it for all possible values of the arguments.
+* for example, `{ constructive: !x[real]: square(x) = x*x. }` 
+* other than annotation, constructive definitions follow the usual syntax of definitions
 
-Reserved symbols (always preceded with `__`)
-* `__Symbols` : the type containing all symbols in the vocabulary (excluding reserved symbols).  Used for quantification.
-* ``__arity(`p)``:  the arity of a symbol.  The backtick  (`` ` ``) should be used in front of a variable to indicate that it represents a symbol.  Its use is optional though.
+## Part 3: other
+* other improvements can be done independently/later, such as binary quantification, partial functions, …
 
-Examples:    
-* `{ square(x) -> x*x .}`  This is a macro for reals.
-* ``{ makeSymmetric(`p) -> if __arity(`p)=2 then !x y[`p(x,y)] : `p(y,x) else __error.}``  
-    * Notice the use of binary quantification ``!x y[`p(x,y)] :``  This allows type inference after expansion.
-    * Notice that we do not need `VAL()` to apply `` `p``, as in ``VAL(`p)(3)``.  A variable followed by a list of arguments is always interpreted as an "application".
-    * if `makeSymmetric` is applied to a symbol whose arity is not 2, the expansion will be `__error`, which will result in a syntax error (unknown reserved keyword).
-* ``!`p[__Symbols]: symmetric(`p).``
-* ``!`f[increasing(`f)]: !x[real] y[real]: x<y => `f(x) < `f(y).``
-    * here, ``increasing`` is a predicate defined in the vocabulary as ``increasing(__Symbols)``.  It must be overapproximatable, so that the binary quantification can be expanded.
-
-Implementation:
-1. detect (binary) quantification over symbols, and expand them
-2. expand macros
-3. type verification
-4. (binary) quantifier expansion 
-
-To be further investigated: 
-* can we always expand quantifiers over symbols before quantifiers over variables ?  Or do we need some kind of fixed point computation ?

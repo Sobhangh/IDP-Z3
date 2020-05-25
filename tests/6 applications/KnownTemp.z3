@@ -65,7 +65,7 @@ Not(_O(e3))
 
 Or(M == e1, M == e2, M == e3)
 
-Or(M == e1, M == e2, M == e3)
+True
 
 Or(M == e1, M == e2, M == e3)
 
@@ -146,7 +146,7 @@ Simplified:
   (true)
   (Guaranteed ⇔ _O(M))
   M = e1 ∨ M = e2 ∨ M = e3
-  M = e1 ∨ M = e2 ∨ M = e3
+  __goals(M = e1 ∨ M = e2 ∨ M = e3)
   M = e1 ∨ M = e2 ∨ M = e3
 Irrelevant:  
 TODO  _MinT(e1) -> 0
@@ -304,7 +304,7 @@ Co-constraints:
              'status': 'UNKNOWN',
              'typ': 'Int',
              'value': ''},
-       '__rank': 1},
+       '__rank': 2},
  '_MaxT': {'_MaxT(e1)': {'environmental': True,
                          'normal': True,
                          'reading': '_MaxT(e1)',
@@ -326,7 +326,7 @@ Co-constraints:
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''},
-           '__rank': 1},
+           '__rank': 2},
  '_MinT': {'_MinT(M) ≤ T ≤ _MaxT(M)': {'environmental': True,
                                        'normal': False,
                                        'reading': 'T must be within acceptable range',
@@ -355,7 +355,7 @@ Co-constraints:
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''},
-           '__rank': 1},
+           '__rank': 2},
  '_O': {'_O(M)': {'environmental': True,
                   'normal': True,
                   'reading': '_O(M)',
@@ -383,7 +383,7 @@ Co-constraints:
                    'status': 'ENV_UNIV',
                    'typ': 'Bool',
                    'value': False},
-        '__rank': 1,
+        '__rank': 2,
         '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)': {'environmental': True,
                                                        'normal': False,
                                                        'reading': '∀m[material] : _O(m) ⇒ OMaxT(m) = _MaxT(m)',

@@ -15,7 +15,7 @@ goal p
 -- theory -----------------------------------
 r
 
-Or(p, Not(p))
+True
 
 i == rd
 
@@ -51,7 +51,7 @@ Consequences:
   i
 Simplified:  
   r
-  true
+  __goals(true)
 Irrelevant:  
   ? l
   i

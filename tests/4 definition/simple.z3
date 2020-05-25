@@ -21,7 +21,7 @@ view expanded
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------
-Or(b == red, b == blue)
+True
 
 Or(a == red, a == blue)
 
@@ -83,7 +83,7 @@ Consequences:
   c = red
   ~c = blue
 Simplified:  
-  true
+  __goals(true)
   true
   true
 Irrelevant:  
@@ -109,7 +109,7 @@ Co-constraints:
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'a': {'__rank': 1,
+ 'a': {'__rank': 2,
        'a': {'environmental': False,
              'normal': True,
              'reading': 'a',
@@ -178,7 +178,7 @@ Co-constraints:
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',
                    'value': True}},
- 'p': {'__rank': 1,
+ 'p': {'__rank': 3,
        'p': {'environmental': False,
              'normal': True,
              'reading': 'p',
@@ -186,14 +186,14 @@ Co-constraints:
              'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},
- 'q': {'__rank': 1,
+ 'q': {'__rank': 4,
        'q': {'environmental': False,
              'normal': True,
              'reading': 'q',
              'relevant': True,
              'status': 'UNKNOWN',
              'typ': 'Bool'}},
- 'r': {'__rank': 1,
+ 'r': {'__rank': 4,
        'r': {'environmental': False,
              'normal': True,
              'reading': 'r',

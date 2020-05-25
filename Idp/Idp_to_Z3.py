@@ -192,6 +192,8 @@ AAggregate.translate1 = translate1
 # Class AppliedSymbol, Variable #######################################################
 
 def translate1(self):
+    if self.s.name == '__goals':
+        return TRUE.translated
     if self.s.name == 'abs':
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
