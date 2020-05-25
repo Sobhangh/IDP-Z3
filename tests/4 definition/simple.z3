@@ -38,13 +38,13 @@ And((b == red) == (a == red), Not(b == blue))
 And(c == red, Not(c == blue))
 
 -- subtences ------------------------------------
-b = red
 p
 q
 r
-b = blue
 a = red
 a = blue
+b = red
+b = blue
 c = red
 c = blue
 
@@ -55,10 +55,10 @@ r
 a
 b
 c
-b = red
-b = blue
 a = red
 a = blue
+b = red
+b = blue
 c = red
 c = blue
 
@@ -74,22 +74,22 @@ Universals:
   p
   a -> red
   b -> red
-  b = red
   a = red
+  b = red
 Consequences:
   c -> red
-  ~b = blue
   ~a = blue
+  ~b = blue
   c = red
   ~c = blue
 Simplified:  
-  __goals(true)
+  __goals(red)
   true
   true
 Irrelevant:  
   c -> red
-  ~b = blue
   ~a = blue
+  ~b = blue
   c = red
   ~c = blue
 Co-constraints:

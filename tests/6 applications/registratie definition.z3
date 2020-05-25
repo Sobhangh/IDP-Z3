@@ -874,7 +874,7 @@ Simplified:
   Registration_Type = Exchange_Unbuilt_Ground ⇒ Additional_Terms ∧ ~(Monument)
   Registration_Type = Other ⇒ ~(Registration_Type = Family_Dwelling) ∧ ~(Registration_Type = Social_Dwelling) ∧ ~(Registration_Type = Energy_Efficient_Dwelling) ∧ ~(Registration_Type = Dwelling_For_Social_Renting) ∧ ~(Registration_Type = Heritage) ∧ true ∧ ~(Registration_Type = Social_Purpose) ∧ ~(Registration_Type = Exchange_Unbuilt_Ground)
   ~(false)
-  __goals(Tax = 1 ∨ Tax = 2 ∨ false ∨ Tax = 7 ∨ Tax = 6 ∨ Tax = 10 ∨ Tax = 12)
+  __goals(Tax)
   Region = Flemish_Region ∨ Region = Walloon_Region ∨ Region = Brussels_Region
   Type_Of_Real_Estate = Residential ∨ Type_Of_Real_Estate = Residential_Building_Land ∨ Type_Of_Real_Estate = Other_Real_Estate
   Seller = Vlaams_Woningfonds ∨ Seller = Gelijksoortige_Rechtspersoon_EER ∨ Seller = Mpy_Erkend_Door_VMSW ∨ Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ Seller = ErkendeSocialeHuisvestingsMpy

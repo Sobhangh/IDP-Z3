@@ -610,7 +610,6 @@ class Rule(object):
 
     def compute(self, theory):
         """ expand quantifiers and interpret """
-        self.body = self.body.expand_quantifiers(theory)
 
         # compute self.expanded, by expanding:
         # ∀ v: f(v)=out <=> body
@@ -622,7 +621,7 @@ class Rule(object):
             expr = AppliedSymbol.make(self.symbol, self.args)
         expr = AEquivalence.make('⇔', [expr, self.body])
         expr = AQuantification.make('∀', {**self.q_vars}, expr)
-        self.expanded = expr.expand_quantifiers(theory)
+        self.expanded = expr.expand_quantifiers(theory) # this also expands self.body !
 
         # interpret structures
         self.body     = self.body    .interpret(theory)
@@ -754,7 +753,7 @@ class Goal(object):
         symbol_decls = idp.vocabulary.symbol_decls
         if self.name in symbol_decls:
             self.decl = symbol_decls[self.name]
-            instances = self.decl.typeConstraint(if_symbol=False)
+            instances = self.decl.instances.values()
             if instances:
                 goals = Symbol(name='__goals').annotate(symbol_decls, {})
                 constraint = AppliedSymbol.make(goals, instances)

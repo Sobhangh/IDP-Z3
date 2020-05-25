@@ -146,7 +146,7 @@ Simplified:
   (true)
   (Guaranteed ⇔ _O(M))
   M = e1 ∨ M = e2 ∨ M = e3
-  __goals(M = e1 ∨ M = e2 ∨ M = e3)
+  __goals(M)
   M = e1 ∨ M = e2 ∨ M = e3
 Irrelevant:  
 TODO  _MinT(e1) -> 0
