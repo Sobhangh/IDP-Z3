@@ -1,4 +1,6 @@
 runtime: python38
 
 instance_class: F4
-max_concurrent_requests: 1 # Z3 not threadsafe ! but possibly costly !
+automatic_scaling:
+  max_instances: 20 # to manage costs !
+  max_concurrent_requests: 1 # Z3 not threadsafe ! but possibly costly !

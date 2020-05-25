@@ -34,4 +34,6 @@ Done:
 * instance: visible in console / App Engine / Instances (also type of scaling)
     * F4 = 1GB, 2.4 GHz, automatic scaling
 * timeout : [depends on type of scaling](https://cloud.google.com/appengine/docs/standard/python/how-instances-are-managed#timeout) automatic = instance of class F → 10 minutes !
-* threadsafe ? set [max_concurrent_request](https://cloud.google.com/appengine/docs/standard/python3/config/appref#max_concurrent_requests) to 1 ?
+* threadsafe : set [max_concurrent_request](https://cloud.google.com/appengine/docs/standard/python/migrate-to-python3/config-files) to 1
+    * `Unexpected attribute 'max_concurrent_requests' for object of type AppInfoExternal`
+    * sub-attribute of automatic-scaling !

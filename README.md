@@ -37,6 +37,9 @@ For development of autoconfig3,
 * verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
 * open your browser at http://localhost:4201
 
+To deploy on [Google App Engine](https://gitlab.com/krr/autoconfigz3/-/blob/master/docs/zettlr/Google%20App%20Engine.md):
+* `gcloud app deploy`
+
 To update autoconfigparam.herokuapp.com: 
 * `heroku login`
 * `heroku git:remote -a autoconfigparam`
