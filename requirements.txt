@@ -6,3 +6,4 @@ pyyaml
 pycallgraph2
 gunicorn
 textx
+click==7.0
