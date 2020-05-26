@@ -32,7 +32,6 @@ And((codeOf(red) == a) == (red == c),
 
 -- subtences ------------------------------------
 codeOf(red) = b
-red = c
 codeOf(red) = a
 codeOf(blue) = a
 codeOf(blue) = b
@@ -44,7 +43,6 @@ codeOf(red)
 codeOf(blue)
 c
 codeOf(red) = b
-red = c
 codeOf(red) = a
 codeOf(blue) = a
 codeOf(blue) = b
@@ -62,7 +60,6 @@ Universals:
 Consequences:
   codeOf(blue) -> a
   c -> blue
-  ~red = c
   ~codeOf(red) = a
   codeOf(blue) = a
   ~codeOf(blue) = b
@@ -106,13 +103,6 @@ Co-constraints:
        'c = red': {'environmental': False,
                    'normal': False,
                    'reading': 'c = red',
-                   'relevant': True,
-                   'status': 'CONSEQUENCE',
-                   'typ': 'Bool',
-                   'value': False},
-       'red = c': {'environmental': False,
-                   'normal': False,
-                   'reading': 'red = c',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',

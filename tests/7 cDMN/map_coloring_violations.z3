@@ -77,6 +77,9 @@ And(Violations >= 0, Violations <= 10000)
 -- subtences ------------------------------------
 ∀c1[Country_t] : ∀c2[Country_t] : c1 ≠ Luxembourg ∧ c2 ≠ Luxembourg ∧ Country_borders_Country(c1,c2) ⇒ Color(c1) ≠ Color(c2)
 Violations = sum{ : Color(Luxembourg) = Color(France) : 257} + sum{ : Color(Luxembourg) = Color(Germany) : 904} + sum{ : Color(Luxembourg) = Color(Belgium) : 568}
+Color(Luxembourg) = Color(France)
+Color(Luxembourg) = Color(Germany)
+Color(Luxembourg) = Color(Belgium)
 Color(Belgium) = Green
 Color(Belgium) = Red
 Color(Belgium) = Yellow
@@ -107,6 +110,9 @@ Color(Denmark)
 Violations
 ∀c1[Country_t] : ∀c2[Country_t] : c1 ≠ Luxembourg ∧ c2 ≠ Luxembourg ∧ Country_borders_Country(c1,c2) ⇒ Color(c1) ≠ Color(c2)
 Violations = sum{ : Color(Luxembourg) = Color(France) : 257} + sum{ : Color(Luxembourg) = Color(Germany) : 904} + sum{ : Color(Luxembourg) = Color(Belgium) : 568}
+Color(Luxembourg) = Color(France)
+Color(Luxembourg) = Color(Germany)
+Color(Luxembourg) = Color(Belgium)
 Color(Belgium) = Green
 Color(Belgium) = Red
 Color(Belgium) = Yellow
@@ -273,6 +279,24 @@ Co-constraints:
                                  'typ': 'Color_t',
                                  'value': '',
                                  'values': ['Green', 'Red', 'Yellow']},
+           'Color(Luxembourg) = Color(Belgium)': {'environmental': False,
+                                                  'normal': False,
+                                                  'reading': 'Color(Luxembourg) = Color(Belgium)',
+                                                  'relevant': True,
+                                                  'status': 'UNKNOWN',
+                                                  'typ': 'Bool'},
+           'Color(Luxembourg) = Color(France)': {'environmental': False,
+                                                 'normal': False,
+                                                 'reading': 'Color(Luxembourg) = Color(France)',
+                                                 'relevant': True,
+                                                 'status': 'UNKNOWN',
+                                                 'typ': 'Bool'},
+           'Color(Luxembourg) = Color(Germany)': {'environmental': False,
+                                                  'normal': False,
+                                                  'reading': 'Color(Luxembourg) = Color(Germany)',
+                                                  'relevant': True,
+                                                  'status': 'UNKNOWN',
+                                                  'typ': 'Bool'},
            'Color(Luxembourg) = Green': {'environmental': False,
                                          'normal': False,
                                          'reading': 'Color(Luxembourg) = Green',

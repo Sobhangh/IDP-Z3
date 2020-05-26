@@ -118,11 +118,13 @@ def instantiate(self, e0, e1):
     else:
         out.original = out
 
-    out.fresh_vars.discard(e0.name)
-    if isinstance(e1, Fresh_Variable) or isinstance(e1, Variable):
-        # e1 is Variable when instantiating some definitions
-        out.fresh_vars.add(e1.name)
-    out.code = str(out)
+    if e0.name in out.fresh_vars:
+        out.fresh_vars.discard(e0.name)
+        if type(e1) in [Fresh_Variable, Variable]:
+            # e1 is Variable when instantiating some definitions
+            out.fresh_vars.add(e1.name)
+    if not type(self) in [AQuantification, AAggregate]:
+        out.code = str(out) #TODO code should be instantiation of AQuantification
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate = instantiate

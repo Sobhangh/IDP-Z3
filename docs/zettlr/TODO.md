@@ -4,10 +4,8 @@ tags:
    ID: TODO
 –-
 - [ ] Aanbesteding demo
-- [ ] [[AWS hosting]] [[20200401113342]] or Google App Engine
 
 - [ ] Explanations: inject values in message
-- [ ] [[consequence in dropdown]] [[20200408162211]] 
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
 - [ ] min, max aggregates

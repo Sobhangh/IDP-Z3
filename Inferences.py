@@ -232,35 +232,35 @@ def abstract(case, given_json):
         solver2 = Solver()
         solver2.add(theory2)
         solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
-        (reify2, _) = reifier({str(l.sentence.original) : l.sentence.original for l in atoms}, solver2)
+        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.value is not None:
                 solver2.push()
-                a = Not(reify2[assignment.sentence.original.code]) if assignment.value else \
-                    reify2[assignment.sentence.original.code]
+                a = Not(reify2[assignment.sentence.code]) if assignment.value else \
+                    reify2[assignment.sentence.code]
                 solver2.add(a)
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
                 result = solver2.check()
                 solver2.pop()
                 if result == sat:
                     theory2 = And(theory2, 
-                                substitute(theory2, [(assignment.sentence.original.translate(), BoolVal(True))]),
-                                substitute(theory2, [(assignment.sentence.original.translate(), BoolVal(False))]))
+                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(True))]),
+                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(False))]))
                     solver2.add(theory2)
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
         solver2.add(case.idp.vocabulary.translate(case.idp)) # without theory !
-        (reify2, _) = reifier({str(l.sentence.original) : l.sentence.original for l in atoms}, solver2)
+        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.value is not None:
                 solver2.push()
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(assignment)
-                a = Not(reify2[assignment.sentence.original.code]) if assignment.value else \
-                    reify2[assignment.sentence.original.code]
+                a = Not(reify2[assignment.sentence.code]) if assignment.value else \
+                    reify2[assignment.sentence.code]
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
@@ -276,7 +276,7 @@ def abstract(case, given_json):
         model = {}
         for l in atoms:
             if l.sentence != TRUE:
-                for symb in l.sentence.original.unknown_symbols().keys():
+                for symb in l.sentence.unknown_symbols().keys():
                     model.setdefault(symb, []).append([ l ])
                     break
         # add to models

@@ -163,7 +163,7 @@ def model_to_json(case, s, reify):
                             #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
                             print("*** ", atom.annotations['reading'], " is not defined, and assumed false")
                         d2['value']  = (value == TRUE)
-                    else: #TODO check that value is numeric ?
+                    else:
                         try:
                             d2['value'] = str(eval(str(value).replace('?', '')))
                         except:
@@ -198,14 +198,11 @@ class Structure_(object):
                     symbol = None
 
                 if symbol:
-                    if atom.code in case.assignments:
-                        symbol["status"] = case.assignments[atom.code].status.name
-                        symbol["relevant"] = case.assignments[atom.code].relevant
-                    else:
-                        symbol["status"] = "UNKNOWN" #TODO
-                        symbol["relevant"] = True # unused symbol instance (Large(1))
-                    symbol['reading'] = atom.annotations['reading']
-                    symbol['normal'] = hasattr(atom, 'normal')
+                    assert atom.code in case.assignments
+                    symbol["status"]   = case.assignments[atom.code].status.name
+                    symbol["relevant"] = case.assignments[atom.code].relevant
+                    symbol['reading']  = atom.annotations['reading']
+                    symbol['normal']   = hasattr(atom, 'normal')
                     symbol['environmental'] = atom.has_environmental(True)
                     s.setdefault(key, symbol)
 

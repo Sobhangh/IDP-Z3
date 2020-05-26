@@ -4,8 +4,10 @@ tags: #hosting
    ID: 20200515182231
 –-
 
+Limitation: use of tinyURL limited to program of less than 4K
+
 [Deploying a Flask App](https://medium.com/@dmahugh_70618/deploying-a-flask-app-to-google-app-engine-faa883b5ffab)
-[Host multiple versions of your app](https://rominirani.com/app-engine-dev-tips-6-understand-application-versions-d5b195b3f36c)
+[Host multiple versions of your app](https://rominirani.com/app-engine-dev-tips-6-understand-application-versions-d5b195b3f36c): old !!
 
 Done:
 * [Console](https://console.cloud.google.com/?_ga=2.171405280.1706200510.1590413868-1723277893.1589396646&pli=1), activate account
@@ -37,3 +39,7 @@ Done:
 * threadsafe : set [max_concurrent_request](https://cloud.google.com/appengine/docs/standard/python/migrate-to-python3/config-files) to 1
     * `Unexpected attribute 'max_concurrent_requests' for object of type AppInfoExternal`
     * sub-attribute of automatic-scaling !
+
+
+Todo:
+- [ ] [deploy directly from gitLab](https://medium.com/faun/deploy-directly-from-gitlab-to-google-app-engine-d78bc3f9c983) ?

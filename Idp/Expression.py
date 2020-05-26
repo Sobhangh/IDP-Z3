@@ -59,6 +59,7 @@ class Expression(object):
 
         self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]: over approximated list of fresh_vars (ignores simplifications)
+        self.no_fresh_vars_before_expansion = None # Bool
         self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self._reified = None
@@ -122,6 +123,7 @@ class Expression(object):
         else:
             for e in self.sub_exprs: 
                 self.fresh_vars.update(e.fresh_vars)
+        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -131,7 +133,7 @@ class Expression(object):
         Questions are the terms and the simplest sub-formula that can be evaluated.
         'collect uses the simplified version of the expression.
 
-        all_=False : ignore formulas under quantifiers (even if expanded)
+        all_=False : ignore expanded formulas
                  and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
@@ -204,6 +206,7 @@ class Constructor(Expression):
 
         super().__init__()
         self.fresh_vars = set()
+        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
     
     def __str1__(self): return self.name
 
@@ -282,14 +285,15 @@ class AQuantification(Expression):
         super().annotate1()
         # remove q_vars
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
+        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if len(self.fresh_vars)==0:
+        if self.no_fresh_vars_before_expansion \
+        or (all_ and len(self.fresh_vars)==0):
             questions.add(self)
-        if all_:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+        for e in self.sub_exprs:
+            e.collect(questions, all_, co_constraints)
 
 
 class BinaryOperator(Expression):
@@ -340,7 +344,8 @@ class BinaryOperator(Expression):
         return super().annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if len(self.fresh_vars)==0 and self.operator[0] in '=<>≤≥≠':
+        if self.operator[0] in '=<>≤≥≠' \
+        and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)) :
             questions.add(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
@@ -471,12 +476,12 @@ class AAggregate(Expression):
         self = self.annotate1()
         # remove q_vars after annotate1
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
+        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if all_:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+        for e in self.sub_exprs:
+            e.collect(questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
@@ -514,18 +519,19 @@ class AppliedSymbol(Expression):
         self.normal = True
         return self.annotate1()
 
+    def annotate1(self):
+        self.type = self.decl.type.name
+        return super().annotate1()
+
     def collect(self, questions, all_=True, co_constraints=True):
-        if len(self.fresh_vars)==0 and self.decl.interpretation is None \
-            and self.simpler is None and self.name != '__goals':
+        if self.decl.interpretation is None \
+        and self.simpler is None and self.name != '__goals' \
+        and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)):
             questions.add(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
-
-    def annotate1(self):
-        self.type = self.decl.type.name
-        return super().annotate1()
 
     def has_environmental(self, truth):
         return self.decl.environmental == truth \
@@ -627,7 +633,6 @@ class Brackets(Expression):
             self.annotations['reading'] = None
         else: # Annotations instance
             self.annotations = annotations.annotations
-        self.fresh_vars = set()
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
@@ -640,5 +645,7 @@ class Brackets(Expression):
         self.type = self.sub_exprs[0].type
         if self.annotations['reading']:
             self.sub_exprs[0].annotations = self.annotations
+        self.fresh_vars = self.sub_exprs[0].fresh_vars
+        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 

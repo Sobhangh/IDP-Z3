@@ -43,14 +43,11 @@ And(Not(negated(Piet) == Piet),
 -- subtences ------------------------------------
 same(Piet) = Piet
 same(same(Piet)) = negated(negated(Piet))
-same(same(Piet)) = same(Piet)
-negated(Piet) = Jan
-negated(negated(Piet)) = Jan
-negated(Piet) = Piet
-negated(negated(Piet)) = Piet
 same(Piet) = Jan
 same(Jan) = Piet
 same(Jan) = Jan
+negated(Piet) = Piet
+negated(Piet) = Jan
 negated(Jan) = Piet
 negated(Jan) = Jan
 
@@ -61,14 +58,11 @@ negated(Piet)
 negated(Jan)
 same(Piet) = Piet
 same(same(Piet)) = negated(negated(Piet))
-same(same(Piet)) = same(Piet)
-negated(Piet) = Jan
-negated(negated(Piet)) = Jan
-negated(Piet) = Piet
-negated(negated(Piet)) = Piet
 same(Piet) = Jan
 same(Jan) = Piet
 same(Jan) = Jan
+negated(Piet) = Piet
+negated(Piet) = Jan
 negated(Jan) = Piet
 negated(Jan) = Jan
 
@@ -83,17 +77,14 @@ Universals:
   negated(Piet) -> Jan
   same(Piet) = Piet
   same(same(Piet)) = negated(negated(Piet))
-  same(same(Piet)) = same(Piet)
   negated(Piet) = Jan
 Consequences:
   same(Jan) -> Jan
   negated(Jan) -> Piet
-  ~negated(negated(Piet)) = Jan
-  ~negated(Piet) = Piet
-  negated(negated(Piet)) = Piet
   ~same(Piet) = Jan
   ~same(Jan) = Piet
   same(Jan) = Jan
+  ~negated(Piet) = Piet
   negated(Jan) = Piet
   ~negated(Jan) = Jan
 Simplified:  
@@ -104,7 +95,6 @@ Simplified:
 Irrelevant:  
   same(Jan) -> Jan
   negated(Jan) -> Piet
-  ~negated(negated(Piet)) = Jan
   ~same(Piet) = Jan
   ~same(Jan) = Piet
   same(Jan) = Jan
@@ -113,7 +103,7 @@ Irrelevant:
 Co-constraints:
   true ∧ true
   same(Piet) = Piet ∧ true
-  false ∨ true
+  false ∨ negated(Jan) = Piet
   true
 
 
@@ -168,21 +158,7 @@ Co-constraints:
                                       'relevant': True,
                                       'status': 'CONSEQUENCE',
                                       'typ': 'Bool',
-                                      'value': False},
-             'negated(negated(Piet)) = Jan': {'environmental': False,
-                                              'normal': False,
-                                              'reading': 'negated(negated(Piet)) = Jan',
-                                              'relevant': False,
-                                              'status': 'CONSEQUENCE',
-                                              'typ': 'Bool',
-                                              'value': False},
-             'negated(negated(Piet)) = Piet': {'environmental': False,
-                                               'normal': False,
-                                               'reading': 'negated(negated(Piet)) = Piet',
-                                               'relevant': True,
-                                               'status': 'CONSEQUENCE',
-                                               'typ': 'Bool',
-                                               'value': True}},
+                                      'value': False}},
  'same': {'__rank': 1,
           'same(Jan)': {'environmental': False,
                         'normal': True,
@@ -234,11 +210,4 @@ Co-constraints:
                                                         'relevant': True,
                                                         'status': 'UNIVERSAL',
                                                         'typ': 'Bool',
-                                                        'value': True},
-          'same(same(Piet)) = same(Piet)': {'environmental': False,
-                                            'normal': False,
-                                            'reading': 'same(same(Piet)) = same(Piet)',
-                                            'relevant': True,
-                                            'status': 'UNIVERSAL',
-                                            'typ': 'Bool',
-                                            'value': True}}}
+                                                        'value': True}}}

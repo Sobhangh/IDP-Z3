@@ -38,10 +38,10 @@ And((b == red) == (a == red), Not(b == blue))
 And(c == red, Not(c == blue))
 
 -- subtences ------------------------------------
+a = red
 p
 q
 r
-a = red
 a = blue
 b = red
 b = blue

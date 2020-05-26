@@ -7,7 +7,7 @@ tags: #issues #analysis
 [Issue n°16](https://gitlab.com/krr/autoconfigz3/-/issues/16)
 
 Options:
-- [ ] ask the user to create public gist on github, and accept gist in url ([API](https://developer.github.com/v3/gists/))
+- [x] ask the user to create public gist on github, and accept gist in url ([API](https://developer.github.com/v3/gists/))
 - [x] use [lz-string](https://pieroxy.net/blog/pages/lz-string/index.html)'s compressToEncodedURIComponent to compress source code and attach to URL, as in [graphviz online](https://bit.ly/2S1NLCn)
     * problem : maximum length of URL ?
         * lz-string compresses the registratie.idp file as a 9KB URI component (68% compression)

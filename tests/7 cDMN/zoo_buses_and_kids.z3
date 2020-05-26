@@ -242,6 +242,8 @@ And(Not(Kids_amount == 0),
 
 -- subtences ------------------------------------
 TotalPrice = Amount(Big) * Price(Big) + Amount(Small) * Price(Small)
+∀Bus[Bus_t] : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01
+Kids_amount = sum{Bus[Bus_t] : true : Kids(Bus)}
 0 ≤ Price(Big) ≤ 4000
 0 ≤ Price(Small) ≤ 4000
 Size(Big) = 30
@@ -301,6 +303,8 @@ Kids(Small)
 TotalPrice
 Kids_amount
 TotalPrice = Amount(Big) * Price(Big) + Amount(Small) * Price(Small)
+∀Bus[Bus_t] : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01
+Kids_amount = sum{Bus[Bus_t] : true : Kids(Bus)}
 0 ≤ Price(Big) ≤ 4000
 0 ≤ Price(Small) ≤ 4000
 Size(Big) = 30
@@ -360,6 +364,8 @@ Definitions:
 Universals:  
   Kids_amount -> 300
   TotalPrice = Amount(Big) * Price(Big) + Amount(Small) * Price(Small)
+  ∀Bus[Bus_t] : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01
+  Kids_amount = sum{Bus[Bus_t] : true : Kids(Bus)}
   0 ≤ Price(Big) ≤ 4000
   0 ≤ Price(Small) ≤ 4000
   0 ≤ Kids(Big) ≤ 300
@@ -587,7 +593,32 @@ Co-constraints:
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
-            '__rank': 1},
+            '__rank': 1,
+            '∀Bus[Bus_t] : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01': {'environmental': False,
+                                                                                                                      'normal': False,
+                                                                                                                      'reading': '∀Bus[Bus_t] '
+                                                                                                                                 ': '
+                                                                                                                                 'true '
+                                                                                                                                 '⇒ '
+                                                                                                                                 'Amount(Bus) '
+                                                                                                                                 '= '
+                                                                                                                                 '((Kids(Bus) '
+                                                                                                                                 '- '
+                                                                                                                                 '01) '
+                                                                                                                                 '- '
+                                                                                                                                 '(Kids(Bus) '
+                                                                                                                                 '- '
+                                                                                                                                 '01) '
+                                                                                                                                 '% '
+                                                                                                                                 'Size(Bus)) '
+                                                                                                                                 '/ '
+                                                                                                                                 'Size(Bus) '
+                                                                                                                                 '+ '
+                                                                                                                                 '01',
+                                                                                                                      'relevant': True,
+                                                                                                                      'status': 'UNIVERSAL',
+                                                                                                                      'typ': 'Bool',
+                                                                                                                      'value': True}},
  'Kids': {'Kids(Big)': {'environmental': False,
                         'normal': True,
                         'reading': 'Kids(Big)',
@@ -1513,6 +1544,14 @@ Co-constraints:
                                             '298',
                                             '299',
                                             '300']},
+                 'Kids_amount = sum{Bus[Bus_t] : true : Kids(Bus)}': {'environmental': False,
+                                                                      'normal': False,
+                                                                      'reading': 'Kids_amount = sum{Bus[Bus_t] : true '
+                                                                                 ': Kids(Bus)}',
+                                                                      'relevant': True,
+                                                                      'status': 'UNIVERSAL',
+                                                                      'typ': 'Bool',
+                                                                      'value': True},
                  '__rank': 1},
  'TotalPrice': {'TotalPrice': {'environmental': False,
                                'normal': True,

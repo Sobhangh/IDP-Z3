@@ -58,8 +58,6 @@ And(Not(negated(-1) == -1),
 -- subtences ------------------------------------
 same(-1) = -1
 negated(negated(-1)) = same(-1)
-negated(-1) = 1
-negated(negated(-1)) = -(negated(-1))
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -70,6 +68,7 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
+negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -86,8 +85,6 @@ negated(0)
 negated(1)
 same(-1) = -1
 negated(negated(-1)) = same(-1)
-negated(-1) = 1
-negated(negated(-1)) = -(negated(-1))
 same(-1) = 0
 same(-1) = 1
 same(0) = -1
@@ -98,6 +95,7 @@ same(1) = 0
 same(1) = 1
 negated(-1) = -1
 negated(-1) = 0
+negated(-1) = 1
 negated(0) = -1
 negated(0) = 0
 negated(0) = 1
@@ -117,7 +115,6 @@ Universals:
   same(-1) = -1
   negated(negated(-1)) = same(-1)
   negated(-1) = 1
-  negated(negated(-1)) = -(negated(-1))
 Consequences:
   same(0) -> 0
   same(1) -> 1
@@ -264,13 +261,6 @@ Co-constraints:
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},
-             'negated(negated(-1)) = -(negated(-1))': {'environmental': False,
-                                                       'normal': False,
-                                                       'reading': 'negated(negated(-1)) = -(negated(-1))',
-                                                       'relevant': True,
-                                                       'status': 'UNIVERSAL',
-                                                       'typ': 'Bool',
-                                                       'value': True},
              'negated(negated(-1)) = same(-1)': {'environmental': False,
                                                  'normal': False,
                                                  'reading': 'negated(negated(-1)) = same(-1)',
