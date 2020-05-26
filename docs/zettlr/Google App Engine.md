@@ -40,6 +40,9 @@ Done:
     * `Unexpected attribute 'max_concurrent_requests' for object of type AppInfoExternal`
     * sub-attribute of automatic-scaling !
 
+[Create repository](https://cloud.google.com/source-repositories/docs/pushing-code-from-a-repository?hl=fr) on Google Source Repository:
+* use [existing SSH key](https://cloud.google.com/source-repositories/docs/authentication?hl=fr#use_existing_keys) from ~/.ssh/id_rsa.pub → SSH HP ZBook
+* 
 
 Todo:
 - [ ] [deploy directly from gitLab](https://medium.com/faun/deploy-directly-from-gitlab-to-google-app-engine-d78bc3f9c983) ?

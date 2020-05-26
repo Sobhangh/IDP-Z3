@@ -38,6 +38,8 @@ For development of autoconfig3,
 * open your browser at http://localhost:4201
 
 To deploy on [Google App Engine](https://gitlab.com/krr/autoconfigz3/-/blob/master/docs/zettlr/Google%20App%20Engine.md):
+* make sure that you are on branch master without pending git changes
+* `git push google master`
 * `gcloud app deploy`
 
 To update autoconfigparam.herokuapp.com: 
