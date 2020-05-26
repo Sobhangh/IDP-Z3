@@ -19,9 +19,9 @@
 import re
 from z3 import BoolRef, BoolSort, Const, Implies, And, substitute, Optimize
 
-from Structure_ import *
-from Solver import mk_solver, reifier, Solver, sat, unsat, is_not
-from utils import *
+from .Structure_ import *
+from .Solver import mk_solver, reifier, Solver, sat, unsat, is_not
+from .utils import *
 
 
 """

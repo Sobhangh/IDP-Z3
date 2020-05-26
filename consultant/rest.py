@@ -23,15 +23,15 @@ import os
 import threading
 import traceback
 
-from utils import log
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 from textx import TextXError
 
-from Case import make_case
-from Inferences import *
-from Structure_ import *
+from .utils import log
+from .Case import make_case
+from .Inferences import *
+from .Structure_ import *
 from Idp import Idp, idpparser
 
 from typing import Dict

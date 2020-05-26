@@ -24,7 +24,7 @@ from typing import Union, Optional, Dict, Tuple, cast
 from z3 import Constructor, Not, BoolVal, BoolRef, is_true, is_false, is_bool, DatatypeRef
 
 from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant, Constructor, NumberConstant, AppliedSymbol, Variable, Fresh_Variable
-from utils import *
+from .utils import *
 
 
 class Status(IntFlag):

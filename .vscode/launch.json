@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "rest.py",
+                "FLASK_APP": "main.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "0"
             },
@@ -22,10 +22,10 @@
             "jinja": true
         },
         {
-            "name": "Python: main.py",
+            "name": "Python: test.py",
             "type": "python",
             "request": "launch",
-            "program": "/home/pcarbonn/Documents/repos/autoconfigz3/tests/main.py",
+            "program": "/home/pcarbonn/Documents/repos/autoconfigz3/test.py",
             "console": "integratedTerminal"
         }
     ]

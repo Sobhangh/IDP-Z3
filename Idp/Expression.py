@@ -33,9 +33,9 @@ import re
 import sys
 
 from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
-from utils import mergeDicts, unquote, OrderedSet
-
 from typing import List, Tuple
+
+from consultant.utils import mergeDicts, unquote, OrderedSet
 
 
 class DSLException(Exception):

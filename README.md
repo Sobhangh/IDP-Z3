@@ -15,7 +15,7 @@ pip3 install -r requirements.txt
 # Get started
 To launch the Interactive Consultant web server, run
 ~~~~
-python3 rest.py
+python3 main.py
 ~~~~
 and open your browser at http://127.0.0.1:5000
 
@@ -32,7 +32,7 @@ The website is served from the static directory.  Its code is available at https
 
 For development of autoconfig3,
 
-* `python3 rest.py` in this repository
+* `python3 main.py` in this repository
 * `npm start` the master branch of autoconfig3,
 * verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
 * open your browser at http://localhost:4201
@@ -49,5 +49,5 @@ To update autoconfigparam.herokuapp.com:
 
 # Testing
 
-To generate the tests, from the top directory run `python3 tests/main.py`.
+To generate the tests, from the top directory run `python3 test.py`.
 After this, you can manually check what has changed.

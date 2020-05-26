@@ -1,19 +1,14 @@
 
 import inspect, os, sys, time, pprint
+from typing import Dict
 
-# add parent folder to import path
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-sys.path.insert(0, os.path.join(parentdir, 'Idp'))
 
-from Case import Case
-from Inferences import metaJSON, propagation
+from consultant.Case import Case
+from consultant.Inferences import metaJSON, propagation
+from consultant.utils import start
 from debugWithYamlLog import Log_file, log_calls
-from utils import start
 from Idp import idpparser, SymbolDeclaration
 from Idp.Expression import Expression, AppliedSymbol, Variable, Fresh_Variable
-from typing import Dict
 
 
 # patch Log on Idp.Substitute #################################################
@@ -25,6 +20,7 @@ for i in [Expression, AppliedSymbol, Variable, Fresh_Variable]:
 ###############################################################################
 
 dir = os.path.dirname(__file__)
+dir = os.path.join(dir, "consultant", "tests")
 files = [os.path.join(dir, "1 sandbox/sandbox.idp")]
 files += [x[0]+"/"+f for x in os.walk(dir) for f in x[2] if
           f.endswith(".idp") and not f.endswith("sandbox.idp")]

@@ -149,7 +149,7 @@ Simplified:
   __goals(M)
   M = e1 ∨ M = e2 ∨ M = e3
 Irrelevant:  
-TODO  _MinT(e1) -> 0
+  _MinT(e1) -> 0
   _MinT(e2) -> 0
   ? _MinT(e3)
   _MaxT(e1) -> 20
