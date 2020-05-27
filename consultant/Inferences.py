@@ -223,8 +223,8 @@ def abstract(case, given_json):
                         atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
                     else: #unknown
                         theory2 = And(theory2,
-                                        substitute(theory2, [(atomZ3, BoolVal(True))]),  # don't simplify !
-                                        substitute(theory2, [(atomZ3, BoolVal(False))])) # it would break later substitutions
+                                        substitute(theory2, [(atom.translate(), BoolVal(True))]),  # don't simplify !
+                                        substitute(theory2, [(atom.translate(), BoolVal(False))])) # it would break later substitutions
                     # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
