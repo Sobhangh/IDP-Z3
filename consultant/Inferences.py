@@ -17,6 +17,7 @@
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
 import re
+import time
 from z3 import BoolRef, BoolSort, Const, Implies, And, substitute, Optimize
 
 from .Structure_ import *
@@ -182,6 +183,7 @@ def explain(case, symbol, value, given_json):
     return out.m
 
 def abstract(case, given_json):
+    timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
 
     # extract fixed atoms from constraints
@@ -203,7 +205,7 @@ def abstract(case, given_json):
     solver, reify, unreify = mk_solver(theory, case.GUILines)
     given = json_to_literals(case.idp, given_json) # use non-simplified given data
     solver.add([ass.translate() for ass in given.values()])
-    while solver.check() == sat and count < 50: # for each parametric model
+    while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
         theory2 = And(theory, And(case.idp.vocabulary.translate(case.idp))) # is this a way to copy theory ??
@@ -234,7 +236,7 @@ def abstract(case, given_json):
         solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
         (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
-            if assignment.value is not None:
+            if assignment.value is not None and time.time()<timeout:
                 solver2.push()
                 a = Not(reify2[assignment.sentence.code]) if assignment.value else \
                     reify2[assignment.sentence.code]
@@ -254,7 +256,7 @@ def abstract(case, given_json):
         solver2.add(case.idp.vocabulary.translate(case.idp)) # without theory !
         (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
-            if assignment.value is not None:
+            if assignment.value is not None and time.time()<timeout:
                 solver2.push()
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
@@ -292,7 +294,7 @@ def abstract(case, given_json):
                 active_symbol[symb] = True
 
     # build table of models
-    out["models"] = "" if count < 50 else "More than 50 models..."
+    out["models"] = "" if count < 50 and time.time()<timeout else "Time out or more than 50 models...Showing partial results"
     out["variable"] = [[ [symb] for symb in models.keys() if symb in active_symbol ]]
     for i in range(count):
         out["variable"] += [[ models[symb][i] for symb in models.keys() if symb in active_symbol ]]
