@@ -95,7 +95,6 @@ def caseOf(code):
 
 class eval(Resource):
     def post(self):
-        global cases
         log("start /eval")
         with z3lock:
             try:
@@ -162,7 +161,6 @@ class meta(Resource):
 
         :returns metaJSON: a json string containing the meta.
         """
-        global cases
         log("start /meta")
         with z3lock:
             try:

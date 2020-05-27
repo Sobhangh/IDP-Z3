@@ -1,10 +1,18 @@
 {
   "dirty": true,
-  "raw": "v0.1-171-g1e7f5fd-dirty",
-  "hash": "g1e7f5fd",
-  "distance": 171,
-  "tag": "v0.1",
-  "semver": null,
-  "suffix": "171-g1e7f5fd-dirty",
-  "semverString": ""
+  "raw": "v0.5.1-2-g5557371-dirty",
+  "hash": "g5557371",
+  "distance": 2,
+  "tag": "v0.5.1",
+  "semver": {
+    "raw": "v0.5.1",
+    "major": 0,
+    "minor": 5,
+    "patch": 1,
+    "prerelease": [],
+    "build": [],
+    "version": "0.5.1"
+  },
+  "suffix": "2-g5557371-dirty",
+  "semverString": "0.5.1+2.g5557371.dirty"
 }

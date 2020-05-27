@@ -18,3 +18,6 @@ recursive functions: [example](https://stackoverflow.com/questions/36431075/how-
 (check-sat)
 (get-model)
 ```
+
+It works with Z3py 4.8.5 (in python3), but not with 4.8.7 (in python3.8), and again with 4.8.8 !!!  See repos/cnf.py
+
