@@ -1,5 +1,11 @@
 
-read -p "No pending changes on client ? Ready to deploy to CDN ? (Y/n) " -n 1 -r
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$BRANCH" != "master" ]]; then
+  echo 'Not in master branch -> aborting';
+  exit 1;
+fi
+
+read -p "No pending changes on client and server ? Ready to deploy to CDN ? (Y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
@@ -13,14 +19,12 @@ then
     gsutil -m rsync -r ./consultant/static gs://interactive-consultant/
 fi
 
-read -p "Deploy on GAE ? (Y/n) " -n 1 -r
+read -p "Deploy on Google App Engine ? (Y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    # do dangerous stuff
     echo "deploying..."
     git push google master
     gcloud app deploy
+    gcloud app browse
 fi
-
-python3.8 main.py

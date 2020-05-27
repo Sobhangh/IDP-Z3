@@ -3,17 +3,14 @@ title: TODO
 tags: 
    ID: TODO
 –-
-- [ ] Aanbesteding demo
+- [ ] [[20200527180009]] Aanbesteding demo
 
 - [ ] Explanations: inject values in message
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
 - [ ] min, max aggregates
 
-- [ ] Support for constructor functions (p.6 of the IDP3 manual)
-    - grammar
-    - generate list of constructors
-    - transform occurrences in source code, using If() if variables
+- [ ] Support for [[20200525094548]] Functional constructors (p.6 of the IDP3 manual)
 - [ ] Lexicographic, Pareto and conditional optimization
 - [ ] Support for dates
 - [ ] issues on GitLab
@@ -54,8 +51,7 @@ tags:
 
 #### Performance
 - [ ] merge case.co_constraints and case.definitions (many overlaps)
-- [ ] use Require() for goals, instead of p∨~p
-- [ ] rewrite in [[Nim]] !
+- [ ] rewrite in [[Nim]]
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share co_constraints
 - [ ] avoid mergeDicts.  Use accumulator instead
@@ -66,7 +62,6 @@ tags:
 
 #### other NTH (refactoring)
 - [ ] use [macropy](https://macropy3.readthedocs.io/en/latest/): smartAsserts, pattern matching
-- [ ] reorganize project folders
 - [ ] merge Case.assignments and Case.GUILines to be like Structure ([[20200504142301]] Questions)
 - [ ] remove reifier, Solver.py --> expr.reified(solver)
 - [ ] simplify the generation of Structure_

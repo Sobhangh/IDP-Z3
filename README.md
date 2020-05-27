@@ -39,8 +39,7 @@ For development of autoconfig3,
 
 To deploy on [Google App Engine](https://gitlab.com/krr/autoconfigz3/-/blob/master/docs/zettlr/Google%20App%20Engine.md):
 * make sure that you are on branch master without pending git changes
-* `git push google master`
-* `gcloud app deploy`
+* `./deploy.sh` will ask you whether you want to build the client for CDN, and then to deploy
 
 To update autoconfigparam.herokuapp.com: 
 * `heroku login`

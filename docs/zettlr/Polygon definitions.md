@@ -7,8 +7,8 @@ trying to use [definitions in the polygon theory](https://autoconfigparam.heroku
 
 
 Issues:
-* some definitions are circular : one can compute the number of sides from the Type, and vice-versa.  But we cannot enter such dual definitions because of co-recursivity
-* many quantified atoms missing in GUI → relevance is incorrect
+- [ ] some definitions are circular : one can compute the number of sides from the Type, and vice-versa.  But we cannot enter such dual definitions because of co-recursivity
+- [x] many quantified atoms missing in GUI → relevance is incorrect
 
 Options
 - [x] add `__goals()`  for defined symbols, so that co-constraints is added
