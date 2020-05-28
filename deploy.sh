@@ -32,6 +32,7 @@ if [[ "$BRANCH" != "master" ]]; then
   echo 'Not in master branch -> aborting';
   exit 1;
 fi
+# here, we could require no unstaged changes instead
 require_clean_work_tree
 
 cd ../autoconfig3
@@ -43,7 +44,7 @@ fi
 require_clean_work_tree
 cd ../autoconfigz3
 
-read -p "Ready to build ? (Y/n) " -n 1 -r
+read -p "Ready to build and commit ? (Y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
@@ -54,6 +55,7 @@ then
     
     echo "Copying to static folder ..."
     cp -R ../autoconfig3/dist/* consultant/static
+    git commit -m "deployment" # with latest client
     # next line is for CDN
     # gsutil -m rsync -r ./consultant/static gs://interactive-consultant/
 fi
