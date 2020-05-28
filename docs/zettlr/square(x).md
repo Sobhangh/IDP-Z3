@@ -1,7 +1,7 @@
 –-
 title: square(x)
 tags: #analysis
-   ID: 20200515110058
+Date: 20200515110058
 –-
 
 It would be nice to be able to define `square(x)` like this: `{!x[real] : square(x) = x*x. }`

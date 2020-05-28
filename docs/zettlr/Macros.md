@@ -1,7 +1,7 @@
 –-
 title: Macros
 tags: #analysis
-   ID: 20200523062416
+Date: 20200523062416
 –-
 
 ## Part 1: `__Symbols` type
@@ -12,7 +12,7 @@ tags: #analysis
 * it's possible to quantify over `__Symbols`, e.g. ``?`p[__Symbols]: symmetric(`p).``
     * The backtick  (`` ` ``) should be used in front of a variable to indicate that it represents a symbol.  Its use is optional though.
 * a variable of type `__Symbols` can be applied to arguments, e.g. ``?`p[__Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x))``
-    * notice that this requires type inference AFTER expansion of the first quantifier.  
+    * notice that this requires [[Type inference]] AFTER expansion of the first quantifier.
     * if the arity is wrong, an error is raised by the grounder
     * Alternatively, this could be written using binary quantification (when available).
 

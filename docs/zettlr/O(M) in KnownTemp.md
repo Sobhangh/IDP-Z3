@@ -1,7 +1,7 @@
 –-
 title: O(M) in KnownTemp
 tags: #fixed
-   ID: 20200427134729
+Date: 20200427134729
 –-
 
 Problem: when I choose M->e2, O(M) becomes "to be verified" instead of verified

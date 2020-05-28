@@ -1,7 +1,7 @@
 –-
 title: Polygon definitions
 tags: #analysis 
-   ID: 20200525120420
+Date: 20200525120420
 –-
 trying to use [definitions in the polygon theory](https://autoconfigparam.herokuapp.com/?gist=63b233676f9c465847c01901edf110b7&file=Polygon_definitions.idp)
 

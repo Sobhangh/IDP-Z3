@@ -1,7 +1,7 @@
 –-
 title: Nim
 tags: 
-   ID: 20200510185453
+Date: 20200510185453
 –-
 
 Rewrite in [Nim](https://nim-lang.org/) ?
@@ -10,7 +10,7 @@ Rewrite in [Nim](https://nim-lang.org/) ?
 * can run on web client
 * C/C++ interoperability
 * concurrency
-* solve performance issues such as [[20200513173351]] slow copy
+* solve performance issues such as [[Slow copy]]
 
 But:
 * poor debugger → need to use logs instead

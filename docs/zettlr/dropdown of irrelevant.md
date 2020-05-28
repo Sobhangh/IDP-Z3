@@ -1,7 +1,7 @@
 –-
 title: dropdown of irrelevant
 tags: #fixed
-   ID: 20200429092130
+Date: 20200429092130
 –-
 
 Problem: the dropdown of an irrelevant symbol is shown under other GUI elements, and is thus partially visible

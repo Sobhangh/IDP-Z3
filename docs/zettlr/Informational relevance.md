@@ -1,7 +1,7 @@
 –-
 title: Informational relevance
 tags: #analysis
-   ID: 20200518121626
+Date: 20200518121626
 –-
 
 What is "given"  ?

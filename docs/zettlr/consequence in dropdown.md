@@ -12,7 +12,7 @@ Options:
 - [x] detect Assignments in code, and make them visible
     * but won't work for year calculations in registration application
 - [ ] enumerate all possible assignments and add them to guilines as visible
-    * but propagate only looks at assignments → add them to assignments too [[20200408193022]] merge case.GuiLines and .assignments
+    * but propagate only looks at assignments → add them to assignments too [[Merge case.GuiLines and .assignments]] 
 
 Performance issue ?
 

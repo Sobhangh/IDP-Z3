@@ -1,7 +1,7 @@
 –-
 title: bug in relevance.idp
 tags: #bug
-   ID: 20200430161236
+Date: 20200430161236
 –-
 
 ## Problem 1

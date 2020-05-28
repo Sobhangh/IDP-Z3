@@ -1,7 +1,7 @@
 –-
 title: Questions
 tags: #analysis
-   ID: 20200504142301
+Date: 20200504142301
 –-
 A question can be answered by giving it a value: it's a sub-formula or term, without quantified variables.
 
@@ -36,4 +36,4 @@ Todo:
 - [x] reduce Expr.questions after each substitute
 - [ ] rename GUILines as showable, and reduce it per view
 
-See previous analysis [[20200402140335]] Subtences
+See previous analysis [[Subtences]] 

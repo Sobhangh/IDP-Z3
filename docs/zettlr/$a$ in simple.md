@@ -1,7 +1,7 @@
 –-
 title: \$a\$ in simple.z3
 tags: #fixed
-   ID: 20200427091038
+Date: 20200427091038
 –-
 
 Problem: atom `a = red` has a `'reading': '\$a\$ = red'` in the json result of tests/definition/simple.idp.  The reading should be `a = red` instead.

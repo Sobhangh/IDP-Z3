@@ -1,7 +1,7 @@
 –-
 title: Type and Binary Quantifications
 tags: #analysis #research
-   ID: 20200330121959 
+Date: 20200330121959 
 –-
 
 

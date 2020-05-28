@@ -1,7 +1,7 @@
 –-
 title: Bootstrapping
 tags: 
-   ID: 20200507091746
+Date: 20200507091746
 –-
 
 [Recursive datatypes](https://rise4fun.com/z3/tutorial)

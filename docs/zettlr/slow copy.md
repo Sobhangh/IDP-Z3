@@ -1,7 +1,7 @@
 –-
 title: Slow copy
 tags: #speed
-   ID: 20200513173351
+Date: 20200513173351
 –-
 
 Problem: theory of Djordje ran in 1 sec with 0.4.1, but 15 seconds with master on 13 May.
@@ -22,7 +22,7 @@ Possible solutions:
 * use 1 deepcopy instead of many copy
     * → a bit slower, and misses some (Z3 ?) consequences
 * go back to previous solution where copying is done when necessary: not sure it would help
-* rewrite in [[20200510185453]] Nim ?
+* rewrite in [[Nim]] ?
 
 * do not instantiate sub_exprs if simpler is available
     * → faster, but "definition proof.idp" becomes unsatisfiable

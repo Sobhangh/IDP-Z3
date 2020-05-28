@@ -1,7 +1,7 @@
 –-
 title: Min, max aggregates
 tags: #analysis
-   ID: 20200514183145
+Date: 20200514183145
 –-
 
 Request: see [issue # 10 on gitlab](https://gitlab.com/krr/autoconfigz3/-/issues/10)

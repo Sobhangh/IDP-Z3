@@ -9,7 +9,7 @@ Benefits
 
 Todo:
 * add annotations to expression (is_subtence, reading, ...) for relevance
-* add inductive definitions : [[20200327114743]] SMT-LIB+
+* add inductive definitions : [[SMT-LIB+]]
 
 Options for annotations:
 * modify 'substitute in pySMT

@@ -1,7 +1,7 @@
 –-
 title: Relevance and consequences
 tags: #abandoned
-   ID: 20200403111308
+Date: 20200403111308
 –-
 
 Problem:consequences may or may not be relevant: how to make the difference ?

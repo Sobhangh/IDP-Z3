@@ -1,16 +1,16 @@
 –-
 title: TODO
 tags: 
-   ID: TODO
+Date: TODO
 –-
-- [ ] [[20200527180009]] Aanbesteding demo
+- [ ] [[Aanbesteding demo]] 
 
 - [ ] Explanations: inject values in message
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
 - [ ] min, max aggregates
 
-- [ ] Support for [[20200525094548]] Functional constructors (p.6 of the IDP3 manual)
+- [ ] Support for [[Functional constructors]] (p.6 of the IDP3 manual)
 - [ ] Lexicographic, Pareto and conditional optimization
 - [ ] Support for dates
 - [ ] issues on GitLab
@@ -24,8 +24,8 @@ tags:
 - [ ] use list of simplifications steps for explain
 - [ ] Support for partial functions
 - [ ] Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
-- [ ] Support for non-linear equations [[20200328122541]]
-- [ ] use pySMT [[20200328102421]] 
+- [ ] Support for [[Non linear equations]]
+- [ ] [[use pySMT]] 
 
 
 #### Of dubious benefit / may never be done:
@@ -62,7 +62,7 @@ tags:
 
 #### other NTH (refactoring)
 - [ ] use [macropy](https://macropy3.readthedocs.io/en/latest/): smartAsserts, pattern matching
-- [ ] merge Case.assignments and Case.GUILines to be like Structure ([[20200504142301]] Questions)
+- [ ] merge Case.assignments and Case.GUILines to be like Structure ([[Questions]] )
 - [ ] remove reifier, Solver.py --> expr.reified(solver)
 - [ ] simplify the generation of Structure_
 

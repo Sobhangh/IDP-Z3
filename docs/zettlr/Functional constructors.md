@@ -1,7 +1,7 @@
 –-
 title: Functional constructors
 tags: #analysis 
-   ID: 20200525094548
+Date: 20200525094548
 –-
 
 - grammar
