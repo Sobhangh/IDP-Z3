@@ -108,10 +108,8 @@ class Annotations(object):
         def pair(s):
             p = s.split(':', 1)
             if len(p) == 2:
-                if ':' not in p[1]:
-                    return (p[0], p[1])
-                else:
-                    # In this case we have a Slider.
+                try:
+                    # Do we have a Slider?
                     # The format of p[1] is as follows:
                     # (lower_sym, upper_sym): (lower_bound, upper_bound)
                     pat = r"\(((.*?), (.*?))\)"
@@ -121,10 +119,12 @@ class Annotations(object):
                     l_bound = arg[1][1]
                     u_bound = arg[1][2]
                     slider_arg = {'lower_symbol': l_symb,
-                                  'upper_symbol': u_symb,
-                                  'lower_bound': l_bound,
-                                  'upper_bound': u_bound}
+                                'upper_symbol': u_symb,
+                                'lower_bound': l_bound,
+                                'upper_bound': u_bound}
                     return(p[0], slider_arg)
+                except: # could not parse the slider data
+                    return (p[0], p[1])
             else:
                 return ('reading', p[0])
 

@@ -197,11 +197,16 @@ class Structure_(object):
                     assert False, "dead code"
                     symbol = None
 
+                if symb.name == key and 'reading' in symb.annotations: #inherit reading
+                    reading = symb.annotations['reading']
+                else:
+                    reading = atom.annotations['reading']
+
                 if symbol:
                     assert atom.code in case.assignments
                     symbol["status"]   = case.assignments[atom.code].status.name
                     symbol["relevant"] = case.assignments[atom.code].relevant
-                    symbol['reading']  = atom.annotations['reading']
+                    symbol['reading']  = reading
                     symbol['normal']   = hasattr(atom, 'normal')
                     symbol['environmental'] = atom.has_environmental(True)
                     s.setdefault(key, symbol)
