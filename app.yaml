@@ -23,9 +23,17 @@ handlers:
     static_files: consultant/static/assets/\1
     require_matching_file: false
     upload: consultant/static/assets/.*
-  - url: /.*
+  - url: /meta
     script: auto
     secure: always
     redirect_http_response_code: '301'
+  - url: /eval
+    script: auto
+    secure: always
+    redirect_http_response_code: '301'
+  - url: /(.*)
+    static_files: consultant/static/\1
+    require_matching_file: false
+    upload: consultant/static/.*
   - url: .*
     script: auto

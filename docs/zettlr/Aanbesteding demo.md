@@ -4,19 +4,19 @@ tags: #analysis
 Date: 20200527180009
 –-
 
-- [ ] Show Long info annotations
+- [x] Show Long info annotations
 - [ ] translate to French
-- [ ] add goals()
+- [ ] add goals(), environmental
 - [ ] functional constructors
 
 [idp demo](http://idp.adaptiveplanet.com/)
 last commit by Ingmar in client: [this one](https://gitlab.com/krr/autoconfig3/-/tree/db048a701f6ef6d66bd4b9f955607a4129b84501)
 
-Alle wetgeving vind je op de volgende website:
-[https://www.publicprocurement.be/nl/overheidsopdrachten/regelgeving](https://www.publicprocurement.be/nl/overheidsopdrachten/regelgeving)
+## Law
+[Government website](https://www.publicprocurement.be/fr/marches-publics/reglementation)
+* [Loi du 17 juin 2016](https://www.publicprocurement.be/fr/documents/loi-du-17-juin-2016) ( [modifications 7 avril 2019](https://www.publicprocurement.be/sites/default/files/documents/2016_06_17_loi_marches_publics_wet_overheidsopdrachten_v_2019.pdf), )
+* [A.R de janvier 2013](https://www.publicprocurement.be/fr/documents/arrete-royal-du-14-janvier-2013) ( [modifications 2018](https://www.publicprocurement.be/sites/default/files/documents/regles_generales_algemene_uitvoeringsregels_v_2018_1.pdf) , [annotées](https://drive.google.com/drive/folders/1fQ-gNN77NH4HznMLdAQ9j7mi4IUpqdzT) ) → Modifications au marché: articles 37-38/19 de 
 
-Het leerstuk van de wijzigingen van de opdracht bevindt zich in het
-[K.B. 14 januari 2013 - gecoördineerde versie vanaf 18 april 2018](https://www.publicprocurement.be/sites/default/files/documents/regles_generales_algemene_uitvoeringsregels_v_2018_1.pdf)
 
-De materie wordt geregeld in Afdeling 5 Wijzigingen van de opdracht van art. 37 tem art. 38/19.
+
 

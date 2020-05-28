@@ -42,7 +42,12 @@ Done:
 
 [Create repository](https://cloud.google.com/source-repositories/docs/pushing-code-from-a-repository?hl=fr) on Google Source Repository:
 * use [existing SSH key](https://cloud.google.com/source-repositories/docs/authentication?hl=fr#use_existing_keys) from ~/.ssh/id_rsa.pub → SSH HP ZBook
-* 
+* repo for client
+        * [can the same cloud project have 2 different repositories](https://stackoverflow.com/questions/34674020/possible-way-to-add-multiple-git-repositories-in-the-same-google-cloud-project) ? yes
+        * `gcloud init` and link to interactive-consultant project
+        * `gcloud source repos create interactive-consultant-client`
+        * `git remote add google ssh://pierre.carbonnelle@gmail.com@source.developers.google.com:2022/p/interactive-consultant/r/interactive-consultant-client`
+        * `git push google master`
 
 Todo:
 - [ ] [deploy directly from gitLab](https://medium.com/faun/deploy-directly-from-gitlab-to-google-app-engine-d78bc3f9c983) ?

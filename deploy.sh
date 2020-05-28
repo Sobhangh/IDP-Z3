@@ -43,18 +43,19 @@ fi
 require_clean_work_tree
 cd ../autoconfigz3
 
-read -p "Ready to build and deploy to CDN ? (Y/n) " -n 1 -r
+read -p "Ready to build ? (Y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    echo "Building for deployment..."
+    echo "Building ..."
     cd ../autoconfig3
-    npm run -script deploy
+    npm run -script build # 'build' -> 'deploy' to use CDN
     cd ../autoconfigz3
     
-    echo "Copying to local and CDN..."
+    echo "Copying to static folder ..."
     cp -R ../autoconfig3/dist/* consultant/static
-    gsutil -m rsync -r ./consultant/static gs://interactive-consultant/
+    # next line is for CDN
+    # gsutil -m rsync -r ./consultant/static gs://interactive-consultant/
 fi
 
 read -p "Deploy on Google App Engine ? (Y/n) " -n 1 -r
@@ -63,6 +64,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
     echo "deploying..."
     git push google master
+
+    cd ../autoconfig3
+    git push google master
+    cd ../autoconfigz3
+
     gcloud app deploy
     gcloud app browse
 fi
