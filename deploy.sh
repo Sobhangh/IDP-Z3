@@ -56,16 +56,24 @@ then
     echo "Copying to static folder ..."
     cp -R ../autoconfig3/dist/* consultant/static
     git add -A
-    git commit -m "deployment" # with latest client
+    git commit # with latest client
     # next line is for CDN
     # gsutil -m rsync -r ./consultant/static gs://interactive-consultant/
+fi
+
+read -p "Deploy on Heroku ? (Y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo "deploying on Heroku..."
+    git push heroku master
 fi
 
 read -p "Deploy on Google App Engine ? (Y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    echo "deploying..."
+    echo "deploying on Google App Engine..."
     git push google master
 
     cd ../autoconfig3

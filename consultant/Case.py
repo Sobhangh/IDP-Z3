@@ -161,7 +161,7 @@ class Case:
                     reachable.add(q)
 
                 if q.code in self.assignments:
-                    if self.assignments[q.code].status == Status.GIVEN:
+                    if self.assignments[q.code].status == Status.GIVEN and not q.has_decision():
                         given.add(q)
 
         # mark reachable as relevant
