@@ -49,7 +49,8 @@ def metaJSON(idp):
             "type": symbol_type,
             "priority": "core",
             "showOptimize": True,  # GUI is smart enough to show buttons appropriately
-            "view": "expanded" if i.name == str(idp.goal) else idp.view.viewType
+            "view": "expanded" if i.name == str(idp.goal) else idp.view.viewType,
+            "environmental": i.environmental
         }
         if i.annotations is not None:
             if 'reading' in i.annotations:

@@ -312,7 +312,7 @@ class SymbolDeclaration(object):
         self.range = None  # all possible values
         self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
         self.interpretation = None  # f:tuple -> Expression (only if it is given in a structure)
-        self.environmental = False  # true if in declared (environmental) vocabulary and there is a decision vocabulary
+        self.environmental = False  # true if not declared in the decision vocabulary
 
     def __str__(self):
         args = ','.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''

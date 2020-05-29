@@ -33,7 +33,7 @@ if [[ "$BRANCH" != "master" ]]; then
   exit 1;
 fi
 # here, we could require no unstaged changes instead
-require_clean_work_tree
+# require_clean_work_tree
 
 cd ../autoconfig3
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -50,11 +50,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
     echo "Building ..."
     cd ../autoconfig3
-    npm run -script build # 'build' -> 'deploy' to use CDN
+    npm run -script build # replace 'build' by 'deploy' to use CDN
     cd ../autoconfigz3
     
     echo "Copying to static folder ..."
     cp -R ../autoconfig3/dist/* consultant/static
+    git add -A
     git commit -m "deployment" # with latest client
     # next line is for CDN
     # gsutil -m rsync -r ./consultant/static gs://interactive-consultant/
