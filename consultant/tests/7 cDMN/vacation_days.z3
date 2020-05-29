@@ -135,7 +135,8 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'Vacation_Days',
+{'symbols': [{'environmental': False,
+              'idpname': 'Vacation_Days',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',

@@ -201,7 +201,7 @@ class Case:
 
         # simplify all using given and universals
         to_propagate = list(l for l in self.assignments.values() 
-            if l.value is not None)
+            if l.value is not None and (all_ or not l.sentence.has_decision()))
         self.propagate(to_propagate, all_)
 
         Log(f"{nl}Z3 propagation ********************************")

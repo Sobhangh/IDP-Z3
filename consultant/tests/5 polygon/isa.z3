@@ -186,9 +186,20 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'Type', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
-             {'idpname': 'Subtype', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
-             {'guiname': 'ASI',
+{'symbols': [{'environmental': False,
+              'idpname': 'Type',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'Subtype',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'guiname': 'ASI',
               'idpname': 'asi',
               'longinfo': 'long, this is a long info',
               'priority': 'core',
@@ -196,7 +207,12 @@ Co-constraints:
               'showOptimize': True,
               'type': 'function',
               'view': 'normal'},
-             {'idpname': 'typeOf', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'}],
+             {'environmental': False,
+              'idpname': 'typeOf',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

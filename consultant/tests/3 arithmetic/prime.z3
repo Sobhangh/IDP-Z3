@@ -53,7 +53,12 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'Prime', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
+{'symbols': [{'environmental': False,
+              'idpname': 'Prime',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

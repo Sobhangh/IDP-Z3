@@ -25,7 +25,7 @@ require_clean_work_tree () {
         exit 1
     fi
 }
-
+python3 test.py
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$BRANCH" != "master" ]]; then

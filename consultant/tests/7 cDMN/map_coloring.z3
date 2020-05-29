@@ -153,7 +153,12 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'Color', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'}],
+{'symbols': [{'environmental': False,
+              'idpname': 'Color',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

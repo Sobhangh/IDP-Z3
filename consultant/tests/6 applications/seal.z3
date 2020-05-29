@@ -83,8 +83,18 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'Depth', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'},
-             {'idpname': 'cSID', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'expanded'}],
+{'symbols': [{'environmental': True,
+              'idpname': 'Depth',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 'cSID',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

@@ -75,9 +75,24 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 't', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
-             {'idpname': 't0', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
-             {'idpname': 't1', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'}],
+{'symbols': [{'environmental': False,
+              'idpname': 't',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 't0',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 't1',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

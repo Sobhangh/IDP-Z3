@@ -23,12 +23,16 @@ last commit by Ingmar in client: [this one](https://gitlab.com/krr/autoconfig3/-
 * assert "Autorise par(art. 38)" → everything becomes irrelevant (even if no environmental vocabulary)
     * does not ask to verify "Clause de reexamen"
 * related: assert d(a) [here](https://tinyurl.com/y8xo8zgm) → does not ask to verify e
+    * it works when I replace definitions by constraints
 
 Root causes:
-* Autorise_par blocks paths to environmental 
-* has_decision ignores co-constraint ?
-* has_decision computed on simplified constraint ?
-* relevance should work in 2 phases : environmental vs decision theory ?
+- [x] Autorise_par blocks paths to environmental 
+- [x] environmental propagation includes given decisions
+- [ ] has_decision ignores co-constraint ?
+- [ ] has_decision computed on simplified constraint ?
+- [ ] propagation should work in 2 phases : environmental vs decision theory ?
 
 Options:
 - [x] GIVEN do not block paths if decision variables
+- [x] do not propagate decisions in environmental propagation
+- [ ] separate given + theory in stages (environment, decision, …)

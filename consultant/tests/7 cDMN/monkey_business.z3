@@ -299,8 +299,18 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'Place', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
-             {'idpname': 'Fruit', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'}],
+{'symbols': [{'environmental': False,
+              'idpname': 'Place',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'Fruit',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

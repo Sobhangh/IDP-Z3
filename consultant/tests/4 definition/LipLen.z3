@@ -60,8 +60,14 @@ Co-constraints:
 
 
 -- meta -------------------------------------
-{'symbols': [{'idpname': 'LipLen', 'priority': 'core', 'showOptimize': True, 'type': 'function', 'view': 'normal'},
-             {'idpname': 'JacketDesign',
+{'symbols': [{'environmental': False,
+              'idpname': 'LipLen',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'JacketDesign',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
