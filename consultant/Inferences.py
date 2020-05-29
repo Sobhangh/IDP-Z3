@@ -173,13 +173,19 @@ def explain(case, symbol, value, given_json):
                 for a2 in unsatcore:
                     if type(ps[a2]) == Assignment and a1.sentence.code == ps[a2].sentence.code: #TODO we might miss some equality
                         out.addAtom(a1.sentence, a1.value, a1.status)
+
+            # remove irrelevant atoms
+            for symb, dictionary in out.m.items():
+                out.m[symb] = { k:v for k,v in dictionary.items()
+                    if type(v)==dict and v['status']=='GIVEN' }
+            out.m = {k:v for k,v in out.m.items() if v}
+                
             out.m["*laws*"] = []
             for a1 in case.idp.theory.definitions + case.idp.theory.constraints: 
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.translate()) == str(ps[a2]):
                         out.m["*laws*"].append(a1.annotations['reading'])
-
     return out.m
 
 def abstract(case, given_json):

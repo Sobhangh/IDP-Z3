@@ -67,6 +67,10 @@ class Expression(object):
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
         # .normal : only set in .instances
 
+        # attributes of the top node of a (co-)constraint
+        # .questions
+        # .relevant
+
 
     def copy(self):
         " create a deep copy (except for Constructor and NumberConstant) "
