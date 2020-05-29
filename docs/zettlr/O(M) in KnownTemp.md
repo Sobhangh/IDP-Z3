@@ -15,8 +15,8 @@ Root cause:
 * Once I replace M by e2, O(M) has no decision anymore → environmental !
 
 Solution:
-- [x] has_environmental should use values
-- [x] do not cache has_environmental
+- [x] has_decision should use values
+- [x] do not cache has_decision
 
 still not working perfectly…  Enter T=50, Garanteed ⇒ O(M) should not be "to be verified"
 - [x]  don't show _O(M)

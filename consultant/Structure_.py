@@ -208,7 +208,7 @@ class Structure_(object):
                     symbol["relevant"] = case.assignments[atom.code].relevant
                     symbol['reading']  = reading
                     symbol['normal']   = hasattr(atom, 'normal')
-                    symbol['environmental'] = atom.has_environmental(True)
+                    symbol['environmental'] = symb.environmental
                     s.setdefault(key, symbol)
 
                     s["__rank"] = self.case.relevant_symbols.get(symb.name, 9999)

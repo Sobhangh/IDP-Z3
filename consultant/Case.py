@@ -72,7 +72,7 @@ class Case:
             if consequences:
                 for sentence, value in consequences:
                     ass = Assignment(sentence, value, Status.UNKNOWN)
-                    status = Status.ENV_UNIV if not ass.sentence.has_environmental(False) else Status.UNIVERSAL
+                    status = Status.ENV_UNIV if not ass.sentence.has_decision() else Status.UNIVERSAL
                     ass.update(None, None, status, self)
             self.simplified.append(c)
 
@@ -216,7 +216,7 @@ class Case:
             for key in todo:
                 l = self.assignments[key]
                 if ( l.value is None
-                and (all_ or not l.sentence.has_environmental(False))
+                and (all_ or not l.sentence.has_decision())
                 # and key in self.get_relevant_subtences(all_) 
                 and self.GUILines[key].is_visible):
                     atom = l.sentence
@@ -270,7 +270,7 @@ class Case:
                                 if sentence.code in self.assignments:
                                     old_ass = self.assignments[sentence.code]
                                     if old_ass.value is None:
-                                        if (all_ or not constraint.has_environmental(False)):
+                                        if (all_ or not constraint.has_decision()):
                                             new_ass = old_ass.update(sentence, value, CONSQ, self)
                                             to_propagate.append(new_ass)
                                             new_constraint = new_constraint.substitute(sentence, value, self.assignments)
@@ -293,7 +293,7 @@ class Case:
                     before = str(old_ass.sentence)
                     new_constraint = old_ass.sentence.substitute(old, new, self.assignments)
                     if before != str(new_constraint) \
-                    and (all_ or not new_constraint.has_environmental(False)): # is purely environmental
+                    and (all_ or not new_constraint.has_decision()): # is purely environmental
                         if new_constraint.code in self.assignments \
                         and self.assignments[new_constraint.code].value is not None: # e.g. O(M) becomes O(e2)
                             new_constraint = self.assignments[new_constraint.code].sentence
@@ -317,9 +317,9 @@ class Case:
             self.typeConstraints.translate(self.idp)
             + sum((d.translate() for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
-                    if l.value is not None and (all_ or not l.sentence.has_environmental(False))]
+                    if l.value is not None and (all_ or not l.sentence.has_decision())]
             + [c.translate() for c in self.simplified
-                    if all_ or not c.has_environmental(False)]
+                    if all_ or not c.has_decision()]
             + [c.translate() for c in self.co_constraints]
             )
         return self.translated

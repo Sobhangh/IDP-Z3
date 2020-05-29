@@ -195,9 +195,9 @@ class Expression(object):
                 self._reified = self.translate()
         return self._reified
 
-    def has_environmental(self, truth):
-        # returns true if it contains a variable whose environmental property is 'truth
-        return any(e.has_environmental(truth) for e in self.sub_exprs)
+    def has_decision(self):
+        # returns true if it contains a variable declared in decision vocabulary
+        return any(e.has_decision() for e in self.sub_exprs)
 
 
 class Constructor(Expression):
@@ -537,9 +537,9 @@ class AppliedSymbol(Expression):
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
 
-    def has_environmental(self, truth):
-        return self.decl.environmental == truth \
-            or any(e.has_environmental(truth) for e in self.sub_exprs)
+    def has_decision(self):
+        return not self.decl.environmental \
+            or any(e.has_decision() for e in self.sub_exprs)
 
 class Arguments(object):
     def __init__(self, **kwargs):

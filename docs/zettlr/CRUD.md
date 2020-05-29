@@ -17,4 +17,4 @@ Date: 20200519215126
 | implicant                           | R         | R       | R     | R             |
 | collect, subtences, unknown_symbols | R         | R       |       | R             |
 | co_constraints                      | R         |         |       | R             |
-| has_environmental                   | R         |         |       |               |
+| has_decision                        | R         |         |       |               |
