@@ -79,16 +79,16 @@ class Expression(object):
         out.co_constraint = None if out.co_constraint is None else out.co_constraint.copy()
         return out
 
-    def __eq__(self, other):
-        if self.value   is not None: return self.value   == other
-        if self.simpler is not None: return self.simpler == other
-        if other.value   is not None: return self == other.value
-        if other.simpler is not None: return self == other.simpler
+    def same_as(self, other):
+        if self.value   is not None: return self.value  .same_as(other)
+        if self.simpler is not None: return self.simpler.same_as(other)
+        if other.value   is not None: return self.same_as(other.value)
+        if other.simpler is not None: return self.same_as(other.simpler)
 
         if type(self)==Brackets or (type(self  )==AQuantification and len(self.vars) ==0):
-            return self.sub_exprs[0] == other
+            return self.sub_exprs[0].same_as(other)
         if type(other)==Brackets or (type(other)==AQuantification and len(other.vars)==0):
-            return self == other.sub_exprs[0]
+            return self.same_as(other.sub_exprs[0])
 
         return self.str == other.str and type(self)==type(other)
 

@@ -161,16 +161,16 @@ Expression.interpret = interpret
 def update_exprs(self, new_expr_generator):
     sub_exprs = list(new_expr_generator)
     if_, then_, else_   = sub_exprs[0], sub_exprs[1], sub_exprs[2]
-    if if_ == TRUE:
+    if if_.same_as(TRUE):
             return self._change(simpler=then_, sub_exprs=sub_exprs)
-    elif if_ == FALSE:
+    elif if_.same_as(FALSE):
             return self._change(simpler=else_, sub_exprs=sub_exprs)
     else:
-        if then_ == else_:
+        if then_.same_as(else_):
             return self._change(simpler=then_, sub_exprs=sub_exprs)
-        elif then_ == TRUE and else_ == FALSE:
+        elif then_.same_as(TRUE) and else_.same_as(FALSE):
             return self._change(simpler=if_  , sub_exprs=sub_exprs)
-        elif then_ == FALSE and else_ == TRUE:
+        elif then_.same_as(FALSE) and else_.same_as(TRUE):
             return self._change(simpler=AUnary.make('~', if_), sub_exprs=sub_exprs)
     return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
@@ -215,16 +215,16 @@ AQuantification.update_exprs = update_exprs
 def update_exprs(self, new_expr_generator):
     exprs = list(new_expr_generator)
     value, simpler = None, None
-    if exprs[0] == FALSE: # (false => p) is true
+    if exprs[0].same_as(FALSE): # (false => p) is true
         value = TRUE
         # exprs[0] may be false because exprs[1] was false
-        exprs = [exprs[0], exprs[1] if self.sub_exprs[1]==FALSE else FALSE]
-    if exprs[0] == TRUE: # (true => p) is p
+        exprs = [exprs[0], exprs[1] if self.sub_exprs[1].same_as(FALSE) else FALSE]
+    if exprs[0].same_as(TRUE): # (true => p) is p
         simpler = exprs[1]
-    if exprs[1] == TRUE: # (p => true) is true
+    if exprs[1].same_as(TRUE): # (p => true) is true
         value = TRUE
-        exprs = [exprs[0] if self.sub_exprs[0]==TRUE else TRUE, exprs[1]]
-    if exprs[1] == FALSE: # (p => false) is ~p
+        exprs = [exprs[0] if self.sub_exprs[0].same_as(TRUE) else TRUE, exprs[1]]
+    if exprs[1].same_as(FALSE): # (p => false) is ~p
         simpler = AUnary.make('~', exprs[0])
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AImplication.update_exprs = update_exprs
@@ -238,9 +238,9 @@ def update_exprs(self, new_expr_generator):
     if len(exprs)==1:
         return self._change(simpler=exprs[1], sub_exprs=exprs)
     for e in exprs:
-        if e == TRUE: # they must all be true
+        if e.same_as(TRUE): # they must all be true
             return self._change(simpler=AConjunction.make('∧', exprs), sub_exprs=exprs)
-        if e == FALSE: # they must all be false
+        if e.same_as(FALSE): # they must all be false
             return self._change(simpler=AConjunction.make('∧', [AUnary.make('~', e) for e in exprs]),
                               sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
@@ -254,13 +254,13 @@ def update_exprs(self, new_expr_generator):
     exprs, other = [], []
     value, simpler = None, None
     for i, expr in enumerate(new_expr_generator):
-        if expr == TRUE:
+        if expr.same_as(TRUE):
             # simplify only if one other sub_exprs was unknown
             if any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs)):
                 return self._change(value=TRUE, sub_exprs=[expr])
             value = TRUE
         exprs.append(expr)
-        if expr != FALSE:
+        if not expr.same_as(FALSE):
             other.append(expr)
 
     if len(other) == 0: # all disjuncts are False
@@ -279,13 +279,13 @@ def update_exprs(self, new_expr_generator):
     exprs, other = [], []
     value, simpler = None, None
     for i, expr in enumerate(new_expr_generator):
-        if expr == FALSE: 
+        if expr.same_as(FALSE): 
             # simplify only if one other sub_exprs was unknown
             if any(e.value is None and not i==j for j,e in enumerate(self.sub_exprs)):
                 return self._change(value=FALSE, sub_exprs=[expr])
             value = FALSE
         exprs.append(expr)
-        if expr != TRUE:
+        if not expr.same_as(TRUE):
             other.append(expr)
 
     if len(other) == 0:  # all conjuncts are True
@@ -381,9 +381,9 @@ APower.update_exprs = update_exprs
 def update_exprs(self, new_expr_generator):
     operand = list(new_expr_generator)[0]
     if self.operator == '~':
-        if operand == TRUE:
+        if operand.same_as(TRUE):
             return self._change(value=FALSE, sub_exprs=[operand])
-        if operand == FALSE:
+        if operand.same_as(FALSE):
             return self._change(value=TRUE, sub_exprs=[operand])
     else: # '-'
         a = operand.as_ground()

@@ -59,9 +59,9 @@ class Assignment(object):
         out = str(self.sentence.code)
         if self.value is None:
             return f"? {out}"
-        if self.value == TRUE:
+        if self.value.same_as(TRUE):
             return out
-        if self.value == FALSE:
+        if self.value.same_as(FALSE):
             return f"~{out}"
         return f"{out} -> {str(self.value)}"
 
@@ -69,9 +69,9 @@ class Assignment(object):
         pre, post = '', ''
         if self.value is None:
             pre = f"? "
-        elif self.value == TRUE:
+        elif self.value.same_as(TRUE):
             pre = ""
-        elif self.value == FALSE:
+        elif self.value.same_as(FALSE):
             pre = f"Not "
         else:
             post = f" -> {str(self.value)}"
@@ -86,7 +86,7 @@ class Assignment(object):
         if self.value is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
-            out = self.sentence.original.translate() if self.value==TRUE else Not(self.sentence.original.translate())
+            out = self.sentence.original.translate() if self.value.same_as(TRUE) else Not(self.sentence.original.translate())
         else:
             out = self.sentence.original.translate() == self.value.translate()
         return out
@@ -236,7 +236,8 @@ class Structure_(object):
                         if type(value)==NumberConstant:
                             s[key]["value"] = str(eval(str(value).replace('?', '')))
                         else:
-                            s[key]["value"] = True if value==TRUE else False if value==FALSE else str(value)
+                            s[key]["value"] = True if value.same_as(TRUE) else \
+                                             False if value.same_as(FALSE) else str(value)
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']

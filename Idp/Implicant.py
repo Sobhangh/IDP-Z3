@@ -36,7 +36,7 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
 
 
 def _not(truth):
-    return FALSE if truth == TRUE else TRUE
+    return FALSE if truth.same_as(TRUE) else TRUE
 
 # class Expression ############################################################
 
@@ -78,7 +78,7 @@ AQuantification.implicants = implicants
 # class ADisjunction ############################################################
 
 def implicants1(self, assignments, truth=TRUE):
-    if truth == FALSE:
+    if truth.same_as(FALSE):
         return sum( (e.implicants(assignments, truth) for e in self.sub_exprs), [])
     return []
 ADisjunction.implicants1 = implicants1
@@ -87,7 +87,7 @@ ADisjunction.implicants1 = implicants1
 # class AConjunction ############################################################
 
 def implicants1(self, assignments, truth=TRUE):
-    if truth == TRUE:
+    if truth.same_as(TRUE):
         return sum( (e.implicants(assignments, truth) for e in self.sub_exprs), [])
     return []
 AConjunction.implicants1 = implicants1
@@ -104,7 +104,7 @@ AUnary.implicants1 = implicants1
 # class AComparison ############################################################
 
 def implicants1(self, assignments, truth=TRUE):
-    if truth == TRUE and len(self.sub_exprs) == 2 and self.operator == ['=']:
+    if truth.same_as(TRUE) and len(self.sub_exprs) == 2 and self.operator == ['=']:
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one a consequence, not a universal
         operands1 = [e.as_ground() for e in self.sub_exprs]

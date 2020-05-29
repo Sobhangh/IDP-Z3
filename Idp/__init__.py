@@ -704,16 +704,17 @@ class Interpretation(object):
             else:  # constructs If-then-else recursively
                 out = self.default
                 tuples.sort(key=lambda t: str(t.args[rank]))
-                groups = it.groupby(tuples, key=lambda t: t.args[rank])
+                groups = it.groupby(tuples, key=lambda t: str(t.args[rank]))
 
                 if type(args[rank]) in [Constructor, NumberConstant]:
                     for val, tuples2 in groups:  # try to resolve
-                        if args[rank] == val:
+                        if str(args[rank]) == val:
                             out = interpret(theory, rank+1, args, list(tuples2))
                 else:
                     for val, tuples2 in groups:
-                        out = IfExpr.make(AComparison.make('=', [args[rank], val]),
-                                          interpret(theory, rank+1, args, list(tuples2)),
+                        tuples = list(tuples2)
+                        out = IfExpr.make(AComparison.make('=', [args[rank], tuples[0].args[rank]]),
+                                          interpret(theory, rank+1, args, tuples),
                                           out)
                 return out
         self.decl.interpretation = interpret

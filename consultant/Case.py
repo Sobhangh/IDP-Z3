@@ -274,7 +274,7 @@ class Case:
                                             new_ass = old_ass.update(sentence, value, CONSQ, self)
                                             to_propagate.append(new_ass)
                                             new_constraint = new_constraint.substitute(sentence, value, self.assignments)
-                                    elif old_ass.value != value:
+                                    elif not old_ass.value.same_as(value):
                                         # test: theory{ x=4. x=5. }
                                         self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                         return
