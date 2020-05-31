@@ -23,6 +23,25 @@ Date: 20200523062416
 * for example, `{ constructive: !x[real]: square(x) = x*x. }` 
 * other than annotation, constructive definitions follow the usual syntax of definitions
 
+## Part 3: `__Rules` type
+* the `__Rules` type is the set of Rules defined in the vocabulary.  
+* this could be used to implement special cases of a rule (e.g. penguins are birds that don't fly)
+
+Example
+- Article 1: birds fly.  
+- Article 2: As an exception to Article 1, Penguins do not fly.  
+
+```
+theory {  
+     {  [Art1] Fly(x) <- Bird(x). }  
+     (...)  
+     [Art2] Exception(`Art1,  
+             {~Fly(x) <- Penguin(x). }  
+         ).
+}
+```
+The idea could be generalized with \_\_Definition, \_\_Constraint and __Expression types.
+
 ## Part 3: other
 * other improvements can be done independently/later, such as binary quantification, partial functions, …
 

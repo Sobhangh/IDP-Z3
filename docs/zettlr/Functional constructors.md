@@ -4,6 +4,8 @@ tags: #analysis
 Date: 20200525094548
 –-
 
-- grammar
-- generate list of constructors
-- transform occurrences in source code, using If() if variables
+To do:
+- [ ] grammar
+- [ ] translation to Z3
+- [ ] display
+- [ ] generate list of constructors (for quantifications)
