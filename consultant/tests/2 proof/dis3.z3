@@ -13,48 +13,6 @@ theory {
     ~q|r.
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-p
-
-Or(Not(p), q)
-
-Or(Not(q), r)
-
--- subtences ------------------------------------
-p
-q
-r
-
--- GUILines ------------------------------------
-p
-q
-r
-s
-t
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  p
-Consequences:
-  q
-  r
-Simplified:  
-  p
-  false ∨ true
-  false ∨ true
-Irrelevant:  
-  ? s
-  ? t
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

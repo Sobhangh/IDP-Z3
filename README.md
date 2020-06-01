@@ -48,5 +48,7 @@ To update autoconfigparam.herokuapp.com:
 
 # Testing
 
-To generate the tests, from the top directory run `python3 test.py`.
+To generate the tests, from the top directory run `python3 test.py` or `python3 test.py generate`.
 After this, you can manually check what has changed.
+
+There is also a testing pipeline available, which can be used by running `python3 test.py pipeline`.

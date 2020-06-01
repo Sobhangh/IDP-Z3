@@ -7,43 +7,6 @@ theory {
     p => q & (r|s).
     p.
 }
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(Not(p), And(q, Or(r, s)))
-
-p
-
--- subtences ------------------------------------
-p
-q
-r
-s
-
--- GUILines ------------------------------------
-p
-q
-r
-s
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  p
-Consequences:
-  q
-Simplified:  
-  true ⇒ (r ∨ s)
-  p
-Irrelevant:  
-  
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

@@ -44,7 +44,7 @@ import Idp.Idp_to_Z3
 
 class Idp(object):
     def __init__(self, **kwargs):
-        log("parsing done")
+        #log("parsing done")
         self.vocabulary = kwargs.pop('vocabulary')
         self.decision = kwargs.pop('decision')
         self.theory = kwargs.pop('theory')
@@ -69,7 +69,7 @@ class Idp(object):
         self.goal.annotate(self)
         self.theory.annotate(self.vocabulary)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
-        log("annotated")
+        #log("annotated")
 
         """
         for c in self.theory.constraints:
@@ -80,8 +80,8 @@ class Idp(object):
         # translate
 
         self.vocabulary.translate(self)
-        log("vocabulary translated")
-        log("theory translated")
+        #log("vocabulary translated")
+        #log("theory translated")
         self.goal.translate()
         self.view.translate()
 

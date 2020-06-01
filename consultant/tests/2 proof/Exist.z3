@@ -10,45 +10,6 @@ theory {
     ?c[color]: q(c).
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-p
-
-Or(q(red), q(blue), q(green))
-
--- subtences ------------------------------------
-p
-∃c[color] : c ≠ red
-∃c[color] : q(c)
-
--- GUILines ------------------------------------
-p
-q(red)
-q(blue)
-q(green)
-∃c[color] : c ≠ red
-∃c[color] : q(c)
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  p
-  ∃c[color] : q(c)
-Consequences:
-  
-Simplified:  
-  true ⇔ (true)
-  ∃ : q(red) ∨ q(blue) ∨ q(green)
-Irrelevant:  
-  
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

@@ -14,47 +14,6 @@ theory {
 }
 goal b
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(p, s)
-
-q
-
-p == Or(q, r)
-
--- subtences ------------------------------------
-p
-q
-r
-s
-
--- GUILines ------------------------------------
-p
-q
-r
-s
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  Rule:∀: p() ⇔q ∨ r
-Universals:  
-  q
-Consequences:
-  p
-Simplified:  
-  
-Irrelevant:  
-  p
-  q
-  ? r
-  ? s
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

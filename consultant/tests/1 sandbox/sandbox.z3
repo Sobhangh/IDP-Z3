@@ -7,37 +7,6 @@ theory {
   { p.}
   ~p()|q.
 }
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(Not(p), q)
-
-p
-
--- subtences ------------------------------------
-p
-q
-
--- GUILines ------------------------------------
-p
-q
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  Rule:∀: p() ⇔true
-Universals:  
-  p
-Consequences:
-  q
-Simplified:  
-  false ∨ true
-Irrelevant:  
-  
-Co-constraints:
-  true ⇔ true
-
 
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,

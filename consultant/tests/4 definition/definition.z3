@@ -12,59 +12,6 @@ theory {
  
 view expanded
 
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(codeOf(red) == a, codeOf(red) == b)
-
-Or(codeOf(blue) == a, codeOf(blue) == b)
-
-And(codeOf(red) == a,
-    Not(codeOf(red) == b),
-    Not(codeOf(blue) == a),
-    codeOf(blue) == b)
-
--- subtences ------------------------------------
-codeOf(red) = a
-codeOf(red) = b
-codeOf(blue) = a
-codeOf(blue) = b
-
--- GUILines ------------------------------------
-codeOf(red)
-codeOf(blue)
-codeOf(red) = a
-codeOf(red) = b
-codeOf(blue) = a
-codeOf(blue) = b
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  Rule:∀$codeOf!0$[color],$codeOf$[code]: codeOf($codeOf!0$,$codeOf$) ⇔($codeOf!0$ = red ∧ $codeOf$ = a) ∨ ($codeOf!0$ = blue ∧ $codeOf$ = b)
-Universals:  
-  
-Consequences:
-  codeOf(red) -> a
-  codeOf(blue) -> b
-  codeOf(red) = a
-  ~codeOf(red) = b
-  ~codeOf(blue) = a
-  codeOf(blue) = b
-Simplified:  
-  
-Irrelevant:  
-  codeOf(red) -> a
-  codeOf(blue) -> b
-  codeOf(red) = a
-  ~codeOf(red) = b
-  ~codeOf(blue) = a
-  codeOf(blue) = b
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'codeOf',

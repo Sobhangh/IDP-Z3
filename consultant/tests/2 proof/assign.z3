@@ -9,40 +9,6 @@ theory {
     ~(x=0)|(x=0).
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-x == 0
-
-Or(Not(x == 0), x == 0)
-
--- subtences ------------------------------------
-x = 0
-
--- GUILines ------------------------------------
-x
-y
-x = 0
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  x -> 0
-  x = 0
-Consequences:
-  
-Simplified:  
-  0 = 0
-  false ∨ (true)
-Irrelevant:  
-  ? y
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'x',

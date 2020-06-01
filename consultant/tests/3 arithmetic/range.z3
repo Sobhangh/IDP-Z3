@@ -7,40 +7,6 @@ vocabulary  {
 theory {
 }
 
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(Start_Dt_Dwelling_For_Social_Rent == 2015,
-   Start_Dt_Dwelling_For_Social_Rent == 2016)
-
--- subtences ------------------------------------
-Start_Dt_Dwelling_For_Social_Rent = 2015
-Start_Dt_Dwelling_For_Social_Rent = 2016
-
--- GUILines ------------------------------------
-Start_Dt_Dwelling_For_Social_Rent
-Start_Dt_Dwelling_For_Social_Rent = 2015
-Start_Dt_Dwelling_For_Social_Rent = 2016
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  
-Consequences:
-  
-Simplified:  
-  
-Irrelevant:  
-  ? Start_Dt_Dwelling_For_Social_Rent
-  ? Start_Dt_Dwelling_For_Social_Rent = 2015
-  ? Start_Dt_Dwelling_For_Social_Rent = 2016
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [], 'title': 'Interactive Consultant'}
 
