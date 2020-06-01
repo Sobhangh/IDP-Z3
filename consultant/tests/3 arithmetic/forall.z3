@@ -10,47 +10,6 @@ theory {
    q <=> (!t[real]: 1 < t < 3 => 0 < t < 3).
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-p
-
-(ForAll(c!6,
-        Or(Not(And(c!6 > 1, c!6 < 3)),
-           And(c!6 > 0, c!6 < 3)))) ==
-q
-
--- subtences ------------------------------------
-p
-∀t[temp] : 1 < t < 3 ⇒ 0 < t < 3
-q
-∀t[real] : 1 < t < 3 ⇒ 0 < t < 3
-
--- GUILines ------------------------------------
-p
-q
-∀t[temp] : 1 < t < 3 ⇒ 0 < t < 3
-∀t[real] : 1 < t < 3 ⇒ 0 < t < 3
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  p
-Consequences:
-  q
-  ∀t[real] : 1 < t < 3 ⇒ 0 < t < 3
-Simplified:  
-  true ⇔ (true)
-  true ⇔ (true)
-Irrelevant:  
-  
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

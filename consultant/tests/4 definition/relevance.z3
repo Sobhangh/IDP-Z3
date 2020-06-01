@@ -10,56 +10,6 @@ theory {
   r.
 }
 goal p
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-r
-
-True
-
-i == rd
-
-p == Or(l, r)
-
-r == rd
-
--- subtences ------------------------------------
-r
-rd
-p
-l
-
--- GUILines ------------------------------------
-p
-l
-r
-rd
-i
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  Rule:∀: i() ⇔rd
-  Rule:∀: p() ⇔l ∨ r
-  Rule:∀: r() ⇔rd
-Universals:  
-  r
-Consequences:
-  p
-  rd
-  i
-Simplified:  
-  r
-  __goals(true)
-Irrelevant:  
-  ? l
-  i
-Co-constraints:
-  true ⇔ true
-  true ⇔ true
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

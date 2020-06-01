@@ -13,51 +13,6 @@ theory {
     p|~p. r.
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(p, Not(p))
-
-r
-
-q == r
-
-p == Not(q)
-
--- subtences ------------------------------------
-p
-q
-r
-
--- GUILines ------------------------------------
-p
-q
-r
-s
-t
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  Rule:∀: q() ⇔r
-  Rule:∀: p() ⇔~(q)
-Universals:  
-  r
-Consequences:
-  ~p
-  q
-Simplified:  
-  false ∨ true
-  r
-Irrelevant:  
-  ? s
-  ? t
-Co-constraints:
-  false ⇔ false
-  true ⇔ true
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

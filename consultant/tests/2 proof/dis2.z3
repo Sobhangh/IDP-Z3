@@ -12,44 +12,6 @@ theory {
     ~p|q.
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-p
-
-Or(Not(p), q)
-
--- subtences ------------------------------------
-p
-q
-
--- GUILines ------------------------------------
-p
-q
-r
-s
-t
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  p
-Consequences:
-  q
-Simplified:  
-  p
-  false ∨ true
-Irrelevant:  
-  ? r
-  ? s
-  ? t
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

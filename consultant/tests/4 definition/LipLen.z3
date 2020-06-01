@@ -13,52 +13,6 @@ theory {
         LipLen = Standard <- JacketDesign = Design_400HP.
     }
 }
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(LipLen == Short, LipLen == Standard)
-
-Or(JacketDesign == Design_230, JacketDesign == Design_400HP)
-
-And((LipLen == Short) == (JacketDesign == Design_230),
-    (LipLen == Standard) == (JacketDesign == Design_400HP))
-
--- subtences ------------------------------------
-LipLen = Short
-LipLen = Standard
-JacketDesign = Design_230
-JacketDesign = Design_400HP
-
--- GUILines ------------------------------------
-LipLen
-JacketDesign
-LipLen = Short
-LipLen = Standard
-JacketDesign = Design_230
-JacketDesign = Design_400HP
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  Rule:∀$LipLen$[lipLen]: LipLen($LipLen$) ⇔$LipLen$ = Short ∧ JacketDesign = Design_230 ∨ $LipLen$ = Standard ∧ JacketDesign = Design_400HP
-Universals:  
-  
-Consequences:
-  
-Simplified:  
-  
-Irrelevant:  
-  ? LipLen
-  ? JacketDesign
-  ? LipLen = Short
-  ? LipLen = Standard
-  ? JacketDesign = Design_230
-  ? JacketDesign = Design_400HP
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'LipLen',

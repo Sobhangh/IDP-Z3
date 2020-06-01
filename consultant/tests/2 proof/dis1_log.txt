@@ -1,25 +1,4 @@
 
-- 'calling substitute(p,true,true,{''p'': ? p, ''q'': ? q, ''r'': ? r, ''s'': ? s,
-  ''t'': ? t},[])'
-- 'returning from substitute: p'
-- 'calling substitute(p ∨ q,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ?
-  s, ''t'': ? t},[])'
-  - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-    ? t},[])'
-  - 'returning from substitute: p'
-  - 'calling substitute(q,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-    ? t},[])'
-  - 'returning from substitute: q'
-- 'returning from substitute: p ∨ q'
-- 'calling substitute(p,p,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-  ? t},[])'
-- 'returning from substitute: true'
-- 'calling substitute(p ∨ q,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ?
-  s, ''t'': ? t},[])'
-  - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-    ? t},[])'
-  - 'returning from substitute: true'
-- 'returning from substitute: true'
 - '
 
   Z3 propagation ********************************'

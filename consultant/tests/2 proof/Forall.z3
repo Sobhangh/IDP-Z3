@@ -10,48 +10,6 @@ theory {
     ∀c[color]: q(c).
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Not(p)
-
-And(q(red), q(blue), q(green))
-
--- subtences ------------------------------------
-p
-∀c[color] : c = red
-∀c[color] : q(c)
-
--- GUILines ------------------------------------
-p
-q(red)
-q(blue)
-q(green)
-∀c[color] : c = red
-∀c[color] : q(c)
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  ~p
-  q(red)
-  q(blue)
-  q(green)
-  ∀c[color] : q(c)
-Consequences:
-  
-Simplified:  
-  false ⇔ (false)
-  ∀ : true
-Irrelevant:  
-  
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

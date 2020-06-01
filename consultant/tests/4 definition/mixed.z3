@@ -12,48 +12,6 @@ theory {
  
 }
 
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(Not(p), s)
-
-x == 1
-
-p == Not(q)
-
--- subtences ------------------------------------
-p
-q
-s
-x = 1
-
--- GUILines ------------------------------------
-p
-q
-r
-s
-x
-x = 1
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  Rule:∀: p() ⇔~(q)
-Universals:  
-  x -> 1
-  x = 1
-Consequences:
-  
-Simplified:  
-  p ⇒ s
-  1 = 1
-Irrelevant:  
-  ? r
-Co-constraints:
-  p ⇔ ~(q)
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

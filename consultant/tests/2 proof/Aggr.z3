@@ -8,36 +8,6 @@ theory {
     p <=> sum{c[color] : true : 1} = 3.
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-p
-
--- subtences ------------------------------------
-p
-sum{c[color] : true : 1} = 3
-
--- GUILines ------------------------------------
-p
-sum{c[color] : true : 1} = 3
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  p
-Consequences:
-  
-Simplified:  
-  true ⇔ true
-Irrelevant:  
-  
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

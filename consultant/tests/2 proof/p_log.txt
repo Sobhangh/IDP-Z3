@@ -1,34 +1,4 @@
 
-- 'calling substitute(p,true,true,{''p'': ? p, ''q'': ? q, ''r'': ? r, ''s'': ? s,
-  ''t'': ? t},[])'
-- 'returning from substitute: p'
-- 'calling substitute(~(p) ∨ p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'':
-  ? s, ''t'': ? t},[])'
-  - 'calling substitute(~(p),true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s,
-    ''t'': ? t},[])'
-    - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-      ? t},[])'
-    - 'returning from substitute: p'
-  - 'returning from substitute: ~(p)'
-  - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-    ? t},[])'
-  - 'returning from substitute: p'
-- 'returning from substitute: ~(p) ∨ p'
-- 'calling substitute(p,p,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-  ? t},[])'
-- 'returning from substitute: true'
-- 'calling substitute(~(p) ∨ p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'':
-  ? s, ''t'': ? t},[])'
-  - 'calling substitute(~(p),true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s,
-    ''t'': ? t},[])'
-    - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-      ? t},[])'
-    - 'returning from substitute: true'
-  - 'returning from substitute: false'
-  - 'calling substitute(p,true,true,{''p'': p, ''q'': ? q, ''r'': ? r, ''s'': ? s, ''t'':
-    ? t},[])'
-  - 'returning from substitute: true'
-- 'returning from substitute: true'
 - '
 
   Z3 propagation ********************************'

@@ -9,42 +9,6 @@ theory {
     ~(x+1=1)|(x+1=1).
 }
 view expanded
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-x == 0
-
-Or(Not(x + 1 == 1), x + 1 == 1)
-
--- subtences ------------------------------------
-x = 0
-x + 1 = 1
-
--- GUILines ------------------------------------
-x
-y
-x = 0
-x + 1 = 1
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  x -> 0
-  x = 0
-Consequences:
-  x + 1 = 1
-Simplified:  
-  0 = 0
-  false ∨ (true)
-Irrelevant:  
-  ? y
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'x',
