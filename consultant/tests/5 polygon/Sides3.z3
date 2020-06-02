@@ -602,6 +602,3 @@ view expanded
                                'typ': 'Bool',
                                'value': False},
               '__rank': 1}}
-
-error in expansion
-model is not available

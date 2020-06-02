@@ -529,7 +529,7 @@ class AppliedSymbol(Expression):
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl.interpretation is None \
-        and self.simpler is None and self.name != '__goals' \
+        and self.simpler is None and self.name != '__relevant' \
         and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)):
             questions.add(self)
         for e in self.sub_exprs:

@@ -7,6 +7,11 @@ theory {
   { p.}
   ~p()|q.
 }
+display {
+  relevant(p).
+  expanded(q).
+  view = normal.
+}
 
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
@@ -20,7 +25,7 @@ theory {
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
-              'view': 'normal'}],
+              'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

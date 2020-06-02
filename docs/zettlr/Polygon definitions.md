@@ -11,6 +11,6 @@ Issues:
 - [x] many quantified atoms missing in GUI → relevance is incorrect
 
 Options
-- [x] add `__goals()`  for defined symbols, so that co-constraints is added
-- [x] [ ] problem with `__goals(Subtype)`: 
+- [x] add `__relevant()`  for defined symbols, so that co-constraints is added
+- [x] [ ] problem with `__relevant(Subtype)`: 
 - [x] Expr.no_fresh_vars_before_expansion flag

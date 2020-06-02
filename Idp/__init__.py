@@ -57,6 +57,10 @@ class Idp(object):
         if self.view is None:
             self.view = View(viewType='normal')
 
+        self.display = kwargs.pop('display')
+        if self.display is None:
+            self.display = Display(constraints=[])
+
         self.translated = None  # [Z3Expr]
 
         if self.decision is not None:
@@ -67,6 +71,8 @@ class Idp(object):
         if self.interpretations:
             self.interpretations.annotate(self.vocabulary)
         self.goal.annotate(self)
+        self.view.annotate(self)
+        self.display.annotate(self)
         self.theory.annotate(self.vocabulary)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
         #log("annotated")
@@ -148,10 +154,10 @@ class Vocabulary(object):
         for s in self.declarations:
             s.annotate(self.symbol_decls)
 
-        goals = SymbolDeclaration(annotations='', name=Symbol(name='__goals'),
+        relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
                                 sorts=[], out=None)
-        goals.is_var = False
-        goals.annotate(self.symbol_decls)
+        relevants.is_var = False
+        relevants.annotate(self.symbol_decls)
 
     def __str__(self):
         return (f"vocabulary {{{nl}"
@@ -313,6 +319,7 @@ class SymbolDeclaration(object):
         self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
         self.interpretation = None  # f:tuple -> Expression (only if it is given in a structure)
         self.environmental = False  # true if declared in environment vocabulary
+        self.expanded = False # true if all atoms using this symbol are shown in display
 
     def __str__(self):
         args = ','.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
@@ -753,10 +760,11 @@ class Goal(object):
         symbol_decls = idp.vocabulary.symbol_decls
         if self.name in symbol_decls:
             self.decl = symbol_decls[self.name]
+            self.decl.expanded = True # the goal is always expanded
             instances = self.decl.instances.values()
             if instances:
-                goals = Symbol(name='__goals').annotate(symbol_decls, {})
-                constraint = AppliedSymbol.make(goals, instances)
+                goal = Symbol(name='__relevant').annotate(symbol_decls, {})
+                constraint = AppliedSymbol.make(goal, instances)
                 idp.theory.constraints.append(constraint)
             else:
                 raise Exception("goals must be instantiable.")
@@ -772,13 +780,92 @@ class View(object):
     def __init__(self, **kwargs):
         self.viewType = kwargs.pop('viewType')
 
+    def annotate(self, idp):
+        if self.viewType == 'expanded':
+            for s in idp.vocabulary.symbol_decls.values():
+                s.expanded = True
+
+
     def translate(self):
         return
 
 
-"""
+################################ Display ###############################
+
+class Display(object):
+    def __init__(self, **kwargs):
+        self.constraints = kwargs.pop('constraints')
+
+    def annotate(self, idp):
+        symbol_decls = idp.vocabulary.symbol_decls
+
+        #add display predicate
+        goal = SymbolDeclaration(annotations='', name=Symbol(name='goal'), sorts=[], out=None)
+        goal.is_var = False
+        goal.annotate(symbol_decls)
+
+        expanded = SymbolDeclaration(annotations='', name=Symbol(name='expanded'), sorts=[], out=None)
+        expanded.is_var = False
+        expanded.annotate(symbol_decls)
+
+        relevant = SymbolDeclaration(annotations='', name=Symbol(name='relevant'), sorts=[], out=None)
+        relevant.is_var = False
+        relevant.annotate(symbol_decls)
+
+        viewType = ConstructedTypeDeclaration(name='View', 
+            constructors=[Constructor(name='normal'), Constructor(name='expanded')])
+        viewType.annotate(symbol_decls)
+
+        view = SymbolDeclaration(annotations='', name=Symbol(name='view'), sorts=[], out=Sort(name='View'))
+        view.is_var = False
+        view.annotate(symbol_decls, vocabulary=False)
+        symbol_decls[view.name] = view
+        view.translate()
+
+        # analyse constraints
+        for constraint in self.constraints:
+            constraint.annotate(symbol_decls, {})
+            if type(constraint)==AppliedSymbol:
+                if constraint.name == 'goal': #e.g.,  goal(Prime)
+                    assert len(constraint.sub_exprs)==1, f'goal can have only one argument'
+                    goal = Goal(name=constraint.sub_exprs[0])
+                    goal.annotate(idp)
+                elif constraint.name == 'expanded': # e.g. expanded(Length, Angle)
+                    for symbol in constraint.sub_exprs:
+                        assert symbol.name in symbol_decls, f"argument '{str(symbol)}' of 'expanded' must be a symbol'"
+                        symbol_decls[symbol.name].expanded = True
+                elif constraint.name == 'relevant': # e.g. relevant(Tax)
+                    for symbol in constraint.sub_exprs:
+                        assert symbol.name in symbol_decls, f"argument '{str(symbol)}' of 'expanded' must be a symbol'"
+                        symbol_decl = symbol_decls[symbol.name]
+                        instances = symbol_decl.instances.values()
+                        if instances:
+                            goal = Symbol(name='__relevant').annotate(symbol_decls, {})
+                            constraint = AppliedSymbol.make(goal, instances)
+                            idp.theory.constraints.append(constraint)
+                        else:
+                            raise Exception("relevant symbols must be instantiable.")
+                else:
+                    raise Exception("unknown display contraint: ", constraint)
+            elif type(constraint)==AComparison: # e.g. view = normal
+                assert constraint.is_assignment
+                if constraint.sub_exprs[0].name == 'view':
+                    if constraint.sub_exprs[1].name == 'expanded':
+                        for s in idp.vocabulary.symbol_decls.values():
+                            s.expanded = True
+                    else:
+                        assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
+                else:
+                    raise Exception("unknown display contraint: ", constraint)
+            else:
+                raise Exception("unknown display contraint: ", constraint)
+                
+
+
+
+
 ################################ Main ###############################
-"""
+
 
 dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 
@@ -800,4 +887,4 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          NumberConstant, Brackets, Arguments,
 
                                          Interpretations, Interpretation,
-                                         Tuple, Goal, View])
+                                         Tuple, Goal, View, Display])

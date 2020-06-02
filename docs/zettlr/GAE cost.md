@@ -25,6 +25,7 @@ Objective: 1 instance if only 1 (new) user
     X reduce instance class ?  → slow !
     X increase max_concurrent_requests → not safe !
 - [x] add timeout in abstract inference
+- [ ] add [general timeout using signal](https://www.jujens.eu/posts/en/2018/Jun/02/python-timeout-function/): accepted by GAE ?
 - [ ] [get Monaco editor from CDN](https://stackoverflow.com/questions/51484076/angular-include-cdn-in-component-usage/51534969), not local: not easy (see [here](https://www.ngdevelop.tech/loading-external-libraries-from-cdn-in-angular-application/) and [here](https://medium.com/lacolaco-blog/use-ionic-components-as-web-components-in-angular-2eee2178d5be).  [Impossible for components ?](https://www.reddit.com/r/angularjs/comments/507c9f/including_angular_2_components_from_a_cdn/))
 X reduce the number of request from client, e.g. combine .js files
 X use 2 machines with different max_concurrent_requests: one for static, the other for Z3

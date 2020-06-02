@@ -5,6 +5,7 @@ Idp:
     interpretations=Interpretations?
     goal=Goal?
     view=View?
+    display=Display?
 ;
 
 Comment:
@@ -94,3 +95,5 @@ Goal: 'goal' name=ID;
 
 View: 'view' viewType=ViewType;
   ViewType: 'normal' | 'expanded';
+
+Display: 'display' '{' (constraints=Expression '.')* '}';

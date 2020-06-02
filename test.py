@@ -61,11 +61,25 @@ def generateZ3(theory):
         f"{pprint.pformat(metaJSON(case.idp), width=120)}{nl}"
         f"{nl}-- propagation ------------------------------{nl}"
         f"{pprint.pformat(propagation(case), width=120)}{nl}"
+
+        #additional debug info (optional)
+        # f"{nl}-- vocabulary -------------------------------{nl}"
+        # f"{nl.join(str(t) for t in case.idp.vocabulary.translated)}"
+        # f"{nl}-- theory -----------------------------------{nl}"
+        # f"{(nl+nl).join(str(t) for t in case.idp.theory.translate(case.idp))}{nl}"
+        # f"{nl}-- goal -----------------------------------{nl}"
+        # f"{str(case.idp.goal.translate())}{nl}"
+        # f"{nl}-- subtences ------------------------------------{nl}"
+        # f"{nl.join(str(t) for t in case.idp.subtences)}{nl}"
+        # f"{nl}-- GUILines ------------------------------------{nl}"
+        # f"{nl.join(str(t) for t in case.GUILines)}{nl}"
+        # f"{nl}-- case -------------------------------------{nl}"
+        # f"{str(case)}{nl}"
         )
-    try:
-        expand(case)
-    except Exception as exc:
-        output += f"{nl}error in expansion{nl}{str(exc)}"
+    # try:
+    #     expand(case)
+    # except Exception as exc:
+    #     output += f"{nl}error in expansion{nl}{str(exc)}"
     return output
 
 

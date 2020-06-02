@@ -5,3 +5,8 @@ theory {
   { p.}
   ~p()|q.
 }
+display {
+  relevant(p).
+  expanded(q).
+  view = normal.
+}

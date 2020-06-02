@@ -228,5 +228,7 @@ Registration_Type = Other =>     // @EXPLAIN: Registration_Type cannot be Other
 
 }
 
-goal Tax
-view normal
+display {
+    goal(Tax).
+    view = normal.
+}
