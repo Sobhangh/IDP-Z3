@@ -9,7 +9,9 @@ theory {
     p <=> (?c[color]: c~=red).
     ?c[color]: q(c).
 }
-view expanded
+display {
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

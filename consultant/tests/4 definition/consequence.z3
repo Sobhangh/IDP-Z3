@@ -5,6 +5,7 @@ vocabulary {
     q
     r
     s
+    b
 } 
 
 theory {
@@ -12,8 +13,10 @@ theory {
     p|s.
     q.
 }
-goal b
-view expanded
+display {
+    goal(`b).
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',
@@ -38,11 +41,24 @@ view expanded
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 'b',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
               'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
+ 'b': {'__rank': 1,
+       'b': {'environmental': False,
+             'normal': True,
+             'reading': 'b',
+             'relevant': True,
+             'status': 'UNKNOWN',
+             'typ': 'Bool'}},
  'p': {'__rank': 9999,
        'p': {'environmental': False,
              'normal': True,

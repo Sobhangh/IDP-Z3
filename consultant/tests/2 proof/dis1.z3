@@ -11,7 +11,9 @@ theory {
     p.
     p|q.
 }
-view expanded
+display {
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

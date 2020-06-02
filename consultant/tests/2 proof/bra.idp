@@ -9,4 +9,6 @@ theory {
     p.
     (~(p)|(p)).
 }
-view expanded
+display {
+    view = expanded.
+}

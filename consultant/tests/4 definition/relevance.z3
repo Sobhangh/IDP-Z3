@@ -9,7 +9,9 @@ theory {
   { r <- rd.} 
   r.
 }
-goal p
+display {
+  goal(`p).
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

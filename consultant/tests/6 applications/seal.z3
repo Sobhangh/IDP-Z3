@@ -16,7 +16,9 @@ theory {
      cSID = f ⇔ 8.312 ≤ Depth ≤ 10.748.
 }
 
-view expanded
+display {
+    view = expanded.
+}
 
 
 -- meta -------------------------------------

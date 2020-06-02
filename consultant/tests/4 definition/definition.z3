@@ -10,7 +10,9 @@ theory {
     { !cl[color]: ! cd[code]: codeOf(cl)=cd <- (cl=red & cd=a) | (cl=blue & cd=b). }
 }
  
-view expanded
+display {
+    view = expanded.
+}
 
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,

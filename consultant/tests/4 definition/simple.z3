@@ -16,8 +16,10 @@ theory {
     { b=red <- a=red. }
     { c=red. }
 }
-goal b
-view expanded
+display {
+    goal(`b).
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',

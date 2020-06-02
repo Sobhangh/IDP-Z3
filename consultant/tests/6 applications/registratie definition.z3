@@ -233,8 +233,10 @@ Registration_Type = Other =>     // @EXPLAIN: Registration_Type cannot be Other
 ~Professional_Declaration_Filed.
 }
 
-goal Tax
-view normal
+display {
+    goal(`Tax).
+    view = normal.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': True,
               'idpname': 'Region',

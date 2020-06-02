@@ -143,21 +143,21 @@ class Vocabulary(object):
         self.terms = {}  # {string: Variable or AppliedSymbol}
         self.translated = []
 
-        self.symbol_decls = {'int': RangeDeclaration(name='int', elements=[]),
-                             'real': RangeDeclaration(name='real',
-                                                      elements=[]),
-                             'bool': ConstructedTypeDeclaration(name='bool',
-                                        constructors=[TRUE, FALSE]),
-                             'true': TRUE,
-                             'false': FALSE}
+        # define reserved symbols
+        self.symbol_decls = {'int' : RangeDeclaration(name='int' , elements=[]),
+                             'real': RangeDeclaration(name='real', elements=[])
+                            }
+        for name, constructors in [
+            ('bool',      [TRUE, FALSE]),
+            ('__Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]), 
+        ]:
+            ConstructedTypeDeclaration(name=name, constructors=constructors) \
+                .annotate(self.symbol_decls)
 
+        # annotate declarations
         for s in self.declarations:
             s.annotate(self.symbol_decls)
 
-        relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
-                                sorts=[], out=None)
-        relevants.is_var = False
-        relevants.annotate(self.symbol_decls)
 
     def __str__(self):
         return (f"vocabulary {{{nl}"
@@ -758,6 +758,14 @@ class Goal(object):
 
     def annotate(self, idp):
         symbol_decls = idp.vocabulary.symbol_decls
+
+        # define reserved symbol
+        if '__relevant' not in symbol_decls:
+            relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
+                                    sorts=[], out=None)
+            relevants.is_var = False
+            relevants.annotate(symbol_decls)
+
         if self.name in symbol_decls:
             self.decl = symbol_decls[self.name]
             self.decl.expanded = True # the goal is always expanded
@@ -799,7 +807,7 @@ class Display(object):
     def annotate(self, idp):
         symbol_decls = idp.vocabulary.symbol_decls
 
-        #add display predicate
+        #add display predicates
         goal = SymbolDeclaration(annotations='', name=Symbol(name='goal'), sorts=[], out=None)
         goal.is_var = False
         goal.annotate(symbol_decls)
@@ -826,19 +834,24 @@ class Display(object):
         for constraint in self.constraints:
             constraint.annotate(symbol_decls, {})
             if type(constraint)==AppliedSymbol:
+                symbols = []
+                for symbol in constraint.sub_exprs:
+                    assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
+                    assert symbol.name.startswith('`'), f"argument '{symbol.name}' of '{constraint.name}' must start with a tick '`'"
+                    assert symbol.name[1:] in symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
+                    symbols.append(symbol_decls[symbol.name[1:]])
+
                 if constraint.name == 'goal': #e.g.,  goal(Prime)
                     assert len(constraint.sub_exprs)==1, f'goal can have only one argument'
-                    goal = Goal(name=constraint.sub_exprs[0])
+                    goal = Goal(name=constraint.sub_exprs[0].name[1:])
                     goal.annotate(idp)
+                    idp.goal = goal
                 elif constraint.name == 'expanded': # e.g. expanded(Length, Angle)
-                    for symbol in constraint.sub_exprs:
-                        assert symbol.name in symbol_decls, f"argument '{str(symbol)}' of 'expanded' must be a symbol'"
+                    for symbol in symbols:
                         symbol_decls[symbol.name].expanded = True
                 elif constraint.name == 'relevant': # e.g. relevant(Tax)
-                    for symbol in constraint.sub_exprs:
-                        assert symbol.name in symbol_decls, f"argument '{str(symbol)}' of 'expanded' must be a symbol'"
-                        symbol_decl = symbol_decls[symbol.name]
-                        instances = symbol_decl.instances.values()
+                    for symbol in symbols:
+                        instances = symbol.instances.values()
                         if instances:
                             goal = Symbol(name='__relevant').annotate(symbol_decls, {})
                             constraint = AppliedSymbol.make(goal, instances)
@@ -859,8 +872,6 @@ class Display(object):
                     raise Exception("unknown display contraint: ", constraint)
             else:
                 raise Exception("unknown display contraint: ", constraint)
-                
-
 
 
 

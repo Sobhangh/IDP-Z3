@@ -81,7 +81,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
 
       AppliedSymbol: s=Symbol args=Arguments;
         Arguments: '(' sub_exprs*=Expression[','] ')';
-      Variable: name=/[^\d\W]\w*\b|'(\.|[^'])*'/;
+      Variable: name=/`?[^\d\W]\w*\b|'(\.|[^'])*'/;
       NumberConstant: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Brackets: annotations=Annotations '(' f=Expression ')';

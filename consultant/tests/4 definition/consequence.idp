@@ -3,6 +3,7 @@ vocabulary {
     q
     r
     s
+    b
 } 
 
 theory {
@@ -10,5 +11,7 @@ theory {
     p|s.
     q.
 }
-goal b
-view expanded
+display {
+    goal(`b).
+    view = expanded.
+}

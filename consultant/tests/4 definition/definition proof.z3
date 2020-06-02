@@ -12,7 +12,9 @@ theory {
     codeOf(red)=b.
 }
  
-view expanded
+display {
+    view = expanded.
+}
 
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,

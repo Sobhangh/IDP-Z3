@@ -8,7 +8,9 @@ theory {
     x=0.
     ~(x=0)|(x=0).
 }
-view expanded
+display {
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'x',

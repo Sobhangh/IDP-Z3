@@ -120,7 +120,9 @@ theory {
     ?n[side]: n=<Sides & Length(n)=Base.
 }
 
-view expanded
+display {
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'Sides',

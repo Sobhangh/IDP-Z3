@@ -40,9 +40,10 @@ theory {
     
     M=e1 | M=e2 | M=e3.
 }
-
-goal M
-view expanded
+display {
+    goal(`M).
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': True,
               'idpname': '_MinT',

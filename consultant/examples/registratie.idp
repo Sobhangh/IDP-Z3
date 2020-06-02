@@ -229,6 +229,6 @@ Registration_Type = Other =>     // @EXPLAIN: Registration_Type cannot be Other
 }
 
 display {
-    goal(Tax).
+    goal(`Tax).
     view = normal.
 }

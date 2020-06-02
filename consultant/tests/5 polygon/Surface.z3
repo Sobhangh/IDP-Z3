@@ -115,7 +115,9 @@ theory {
     // TODO : surface
 }
 
-view expanded
+display {
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'Sides',

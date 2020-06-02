@@ -8,8 +8,9 @@ vocabulary {
 theory {
 	{ !x[num] : Prime(x) <- !y[num] : 1<y & y<x => x % y ~=0.}
 }
-
-goal Prime
+display {
+    goal(`Prime).
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'Prime',

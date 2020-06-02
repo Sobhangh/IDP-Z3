@@ -233,8 +233,10 @@ Professional_Buyer =>
 
 }
 
-goal Tax
-view normal
+display {
+    goal(`Tax).
+    view = normal.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': True,
               'idpname': 'Region',

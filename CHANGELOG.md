@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## API
 * add "environmental" of symbols in /meta's response
-* support simple `display` theory, with `goal`, `relevant`, `expanded` and `view`
+* support simple `display` theory, with `goal`, `relevant`, `expanded` and `view` predicates
   * replace `__goals(Term)` by `__relevant(Term)`
 
 

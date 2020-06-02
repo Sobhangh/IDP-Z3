@@ -15,7 +15,9 @@ theory {
 
 }
  
-view expanded
+display {
+    view = expanded.
+}
 -- vocabulary -------------------------------
 
 -- theory -----------------------------------

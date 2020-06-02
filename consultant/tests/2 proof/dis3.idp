@@ -10,4 +10,6 @@ theory {
     ~p|q.
     ~q|r.
 }
-view expanded
+display {
+    view = expanded.
+}

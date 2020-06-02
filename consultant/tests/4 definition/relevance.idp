@@ -7,4 +7,6 @@ theory {
   { r <- rd.} 
   r.
 }
-goal p
+display {
+  goal(`p).
+}

@@ -13,4 +13,6 @@ theory {
 
 }
  
-view expanded
+display {
+    view = expanded.
+}

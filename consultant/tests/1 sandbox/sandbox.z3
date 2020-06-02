@@ -8,8 +8,8 @@ theory {
   ~p()|q.
 }
 display {
-  relevant(p).
-  expanded(q).
+  relevant(`p).
+  expanded(`q).
   view = normal.
 }
 

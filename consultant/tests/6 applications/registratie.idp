@@ -231,5 +231,7 @@ Professional_Buyer =>
 
 }
 
-goal Tax
-view normal
+display {
+    goal(`Tax).
+    view = normal.
+}

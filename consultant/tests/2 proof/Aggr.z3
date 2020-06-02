@@ -7,7 +7,9 @@ vocabulary {
 theory {
     p <=> sum{c[color] : true : 1} = 3.
 }
-view expanded
+display {
+    view = expanded.
+}
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
               'idpname': 'p',
