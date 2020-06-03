@@ -9,7 +9,7 @@ theory {
 }
 display {
   relevant(`p).
-  expanded(`q).
+  expand(`q).
   view = normal.
 }
 

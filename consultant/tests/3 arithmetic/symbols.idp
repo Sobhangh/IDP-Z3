@@ -12,7 +12,8 @@ theory {
 }
 display {
   relevant(`p).
-  expanded(`q).
+  expand(`q).
+  hide(`important).
   goal(`p).
   view = normal.
 }

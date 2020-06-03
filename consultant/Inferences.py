@@ -49,7 +49,7 @@ def metaJSON(idp):
             "type": symbol_type,
             "priority": "core",
             "showOptimize": True,  # GUI is smart enough to show buttons appropriately
-            "view": "expanded" if i.expanded else "normal",
+            "view": i.view.value,
             "environmental": i.environmental
         }
         if i.annotations is not None:

@@ -14,7 +14,8 @@ theory {
 }
 display {
   relevant(`p).
-  expanded(`q).
+  expand(`q).
+  hide(`important).
   goal(`p).
   view = normal.
 }
@@ -36,7 +37,7 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
-              'view': 'normal'}],
+              'view': 'hidden'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------

@@ -22,7 +22,7 @@ POST result:
         - shortinfo: string   // short description of the symbol
         - longinfo : string   // long description of the symbol
         - showOptimize : Bool // true if the optimize button should be shown for this symbol
-        - view: string        // "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
+        - view: string        // "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
         - environmental: Bool // true if declared in environment vocabulary
         } ]
 ```

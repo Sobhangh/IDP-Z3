@@ -18,6 +18,7 @@
 """
 
 from copy import copy
+from enum import Enum
 import itertools as it
 import os
 import re
@@ -40,6 +41,12 @@ from .Expression import (Constructor, Expression, IfExpr, AQuantification,
 import Idp.Substitute
 import Idp.Implicant
 import Idp.Idp_to_Z3
+
+
+class ViewType(Enum):
+    HIDDEN = "hidden"
+    NORMAL = "normal"
+    EXPANDED = "expanded"
 
 
 class Idp(object):
@@ -319,7 +326,7 @@ class SymbolDeclaration(object):
         self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
         self.interpretation = None  # f:tuple -> Expression (only if it is given in a structure)
         self.environmental = False  # true if declared in environment vocabulary
-        self.expanded = False # true if all atoms using this symbol are shown in display
+        self.view = ViewType.NORMAL # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
     def __str__(self):
         args = ','.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
@@ -355,7 +362,7 @@ class SymbolDeclaration(object):
                     self.instances[expr.code] = expr
 
         # determine typeConstraints
-        if self.out.decl.name != 'bool' and self.range:
+        if self.out.decl.name != 'bool' and self.range and self.is_var:
             self.typeConstraints.extend(self.typeConstraint())
         return self
 
@@ -768,7 +775,7 @@ class Goal(object):
 
         if self.name in symbol_decls:
             self.decl = symbol_decls[self.name]
-            self.decl.expanded = True # the goal is always expanded
+            self.decl.view = ViewType.EXPANDED # the goal is always expanded
             instances = self.decl.instances.values()
             if instances:
                 goal = Symbol(name='__relevant').annotate(symbol_decls, {})
@@ -802,27 +809,23 @@ class Display(object):
         self.symbol_decls = idp.vocabulary.symbol_decls
 
         #add display predicates
-        goal = SymbolDeclaration(annotations='', name=Symbol(name='goal'), sorts=[], out=None)
-        goal.is_var = False
-        goal.annotate(self.symbol_decls)
-
-        expanded = SymbolDeclaration(annotations='', name=Symbol(name='expanded'), sorts=[], out=None)
-        expanded.is_var = False
-        expanded.annotate(self.symbol_decls)
-
-        relevant = SymbolDeclaration(annotations='', name=Symbol(name='relevant'), sorts=[], out=None)
-        relevant.is_var = False
-        relevant.annotate(self.symbol_decls)
 
         viewType = ConstructedTypeDeclaration(name='View', 
             constructors=[Constructor(name='normal'), Constructor(name='expanded')])
         viewType.annotate(self.symbol_decls)
 
-        view = SymbolDeclaration(annotations='', name=Symbol(name='view'), sorts=[], out=Sort(name='View'))
-        view.is_var = False
-        view.annotate(self.symbol_decls, vocabulary=False)
-        self.symbol_decls[view.name] = view
-        view.translate()
+        for name, out in [
+            ('goal', None),
+            ('expand', None),
+            ('relevant', None),
+            ('hide', None),
+            ('view', Sort(name='View'))
+        ]:
+            symbol_decl = SymbolDeclaration(annotations='', name=Symbol(name=name), 
+                sorts=[], out=out)
+            symbol_decl.is_var = False
+            symbol_decl.annotate(self.symbol_decls)
+            symbol_decl.translate()
 
         # annotate constraints
         for constraint in self.constraints:
@@ -843,9 +846,12 @@ class Display(object):
                     goal = Goal(name=constraint.sub_exprs[0].name[1:])
                     goal.annotate(idp)
                     idp.goal = goal
-                elif constraint.name == 'expanded': # e.g. expanded(Length, Angle)
+                elif constraint.name == 'expand': # e.g. expand(Length, Angle)
                     for symbol in symbols:
-                        self.symbol_decls[symbol.name].expanded = True
+                        self.symbol_decls[symbol.name].view = ViewType.EXPANDED
+                elif constraint.name == 'hide': # e.g. hide(Length, Angle)
+                    for symbol in symbols:
+                        self.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif constraint.name == 'relevant': # e.g. relevant(Tax)
                     for symbol in symbols:
                         instances = symbol.instances.values()
@@ -862,7 +868,8 @@ class Display(object):
                 if constraint.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in idp.vocabulary.symbol_decls.values():
-                            s.expanded = True
+                            if type(s)==SymbolDeclaration and s.view == ViewType.NORMAL:
+                                s.view = ViewType.EXPANDED # don't change hidden symbols
                     else:
                         assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
                 else:
