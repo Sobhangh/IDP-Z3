@@ -95,11 +95,25 @@ Expression.substitute = substitute
 
 
 def instantiate(self, e0, e1):
-    """ recursively substitute Fresh_Variable e0 by e1 """
+    """ 
+    recursively substitute Fresh_Variable e0 by e1 in self
+    
+    instantiating e0=`x by e1=`f in self=`x(y) returns f(y) (or any instance of f if arities don't match)
+    """
     
     assert isinstance(e0, Fresh_Variable)
-    if self.code == e0.code:
-        return e1
+
+    if type(self) in [AppliedSymbol, Variable, Fresh_Variable] \
+    and self.name == e0.code:
+        if type(self)==AppliedSymbol \
+        and isinstance(e1, Constructor) and e1.name.startswith('`'):
+            if len(self.sub_exprs) == len(e1.symbol.decl.sorts):
+                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
+                return out
+            else:
+                return list(e1.symbol.decl.instances.values())[0] # should be "unknown"
+        elif len(self.sub_exprs)==0:
+            return e1
 
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)

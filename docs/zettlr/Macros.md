@@ -11,9 +11,9 @@ Date: 20200523062416
 - [x] predicates and functions over `` `Symbols`` are part of structures, like any other symbols
 - [x] it's possible to quantify over `` `Symbols``, e.g. ``?`p[`Symbols]: symmetric(`p).``
     - [x] The backtick  (`` ` ``) should be used in front of a variable to indicate that it represents a symbol.  Its use is optional though.
-- [ ] a variable of type `` `Symbols`` can be applied to arguments, e.g. ``?`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x))``
+- [x] a variable of type `` `Symbols`` can be applied to arguments, e.g. ``?`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x))``
+    - [x]  if the arity is wrong, a valid instance of `p`  is given instead (to avoid error when the instance is irrelevant) (should benefit from partial functions when available)
     - [ ] notice that this requires [[Type inference]] AFTER expansion of the first quantifier.
-    - [ ] if the arity is wrong, an error is raised by the grounder
     - [ ] Alternatively, this could be written using binary quantification (when available).
 - [ ] it's possible to quantify over `` `Symbols`` in head of definitions
 
@@ -21,7 +21,7 @@ Questions:
 * use `` `edge `` or `` `edge' `` ? 
     * closing tick will later allow to talk about expressions, e.g. to annotate an expression with a reading
     * but we could use other delimiters, such as `[]`
-    * so, `` `f(x) `` is the same as `` f(x) `` ??
+    * so, `` `f(x) `` is the same as `` f(x) ``, but  `` `p `` is not the same as `` `p() ``!
 * use backticks in display theory ?
     * simpler to implement, and consistent, but there would be no ambiguity in `relevant(p)`
 

@@ -3,14 +3,12 @@ vocabulary {
     important(`Symbols)
 }
 theory {
-  { p.}
   ~p()|q.
   { important(`p). }
   ?`x[`Symbols]: important(`x).
   ~(!`x[`Symbols]: important(`x)).
 
-  // TODO 
-  // !`x[`Symbols]: important(`x) => `x().
+  !`x[`Symbols]: important(`x) => `x().
 }
 display {
   relevant(`p).

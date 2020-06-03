@@ -211,6 +211,7 @@ class Constructor(Expression):
         super().__init__()
         self.fresh_vars = set()
         self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
+        self.symbol = None # set only for `Symbols constructors
     
     def __str1__(self): return self.name
 
@@ -502,11 +503,8 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args):
-        if 0 < len(args):
-            out = cls(s=symbol, args=Arguments(sub_exprs=args))
-            out.sub_exprs = args
-        else:
-            out = Variable(name=symbol.name)
+        out = cls(s=symbol, args=Arguments(sub_exprs=args))
+        out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
         return out.annotate1()

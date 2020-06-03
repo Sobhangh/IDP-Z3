@@ -155,6 +155,9 @@ class Vocabulary(object):
         for s in self.declarations:
             s.annotate(self.symbol_decls)
 
+        for constructor in self.symbol_decls['`Symbols'].constructors:
+            constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self.symbol_decls, {})
+
 
     def __str__(self):
         return (f"vocabulary {{{nl}"

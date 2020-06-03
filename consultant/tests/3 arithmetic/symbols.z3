@@ -5,14 +5,12 @@ vocabulary {
     important(`Symbols)
 }
 theory {
-  { p.}
   ~p()|q.
   { important(`p). }
   ?`x[`Symbols]: important(`x).
   ~(!`x[`Symbols]: important(`x)).
 
-  // TODO 
-  // !`x[`Symbols]: important(`x) => `x().
+  !`x[`Symbols]: important(`x) => `x().
 }
 display {
   relevant(`p).
@@ -43,7 +41,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'important': {'__rank': 9999,
+ 'important': {'__rank': 2,
                'important(`important)': {'environmental': False,
                                          'normal': True,
                                          'reading': 'important(`important)',
@@ -54,28 +52,35 @@ display {
                'important(`p)': {'environmental': False,
                                  'normal': True,
                                  'reading': 'important(`p)',
-                                 'relevant': False,
+                                 'relevant': True,
                                  'status': 'UNIVERSAL',
                                  'typ': 'Bool',
                                  'value': True},
                'important(`q)': {'environmental': False,
                                  'normal': True,
                                  'reading': 'important(`q)',
-                                 'relevant': False,
+                                 'relevant': True,
                                  'status': 'UNIVERSAL',
                                  'typ': 'Bool',
                                  'value': False},
                '∀`x[`Symbols] : important(`x)': {'environmental': False,
                                                  'normal': False,
                                                  'reading': '∀`x[`Symbols] : important(`x)',
-                                                 'relevant': False,
+                                                 'relevant': True,
                                                  'status': 'UNIVERSAL',
                                                  'typ': 'Bool',
                                                  'value': False},
+               '∀`x[`Symbols] : important(`x) ⇒ `x': {'environmental': False,
+                                                      'normal': False,
+                                                      'reading': '∀`x[`Symbols] : important(`x) ⇒ `x',
+                                                      'relevant': True,
+                                                      'status': 'UNIVERSAL',
+                                                      'typ': 'Bool',
+                                                      'value': True},
                '∃`x[`Symbols] : important(`x)': {'environmental': False,
                                                  'normal': False,
                                                  'reading': '∃`x[`Symbols] : important(`x)',
-                                                 'relevant': False,
+                                                 'relevant': True,
                                                  'status': 'UNIVERSAL',
                                                  'typ': 'Bool',
                                                  'value': True}},
@@ -84,12 +89,12 @@ display {
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'UNIVERSAL',
+             'status': 'CONSEQUENCE',
              'typ': 'Bool',
              'value': True}},
  'q': {'__rank': 2,
        'q': {'environmental': False,
-             'normal': True,
+             'normal': False,
              'reading': 'q',
              'relevant': True,
              'status': 'CONSEQUENCE',
