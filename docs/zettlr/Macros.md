@@ -4,17 +4,26 @@ tags: #analysis
 Date: 20200523062416
 –-
 
-## Part 1: `__Symbols` type
-* the `__Symbols` type is the set of symbols defined in the vocabulary.  
-* The constructors for the `__Symbols` are the symbol names preceded by a backtick (`` ` ``), e.g. `` `edge``
-* the `__Symbols` type can appear in function and predicate declaration in the vocabulary section, e.g. `symmetric(__Symbols)`is a predicate declaration
-* predicates and functions over `__Symbols` are part of structures, like any other symbols
-* it's possible to quantify over `__Symbols`, e.g. ``?`p[__Symbols]: symmetric(`p).``
-    * The backtick  (`` ` ``) should be used in front of a variable to indicate that it represents a symbol.  Its use is optional though.
-* a variable of type `__Symbols` can be applied to arguments, e.g. ``?`p[__Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x))``
-    * notice that this requires [[Type inference]] AFTER expansion of the first quantifier.
-    * if the arity is wrong, an error is raised by the grounder
-    * Alternatively, this could be written using binary quantification (when available).
+## Part 1: `` `Symbols`` type
+- [x] the `` `Symbols`` type is the set of symbols defined in the vocabulary.  
+- [x] The constructors for the `` `Symbols`` are the symbol names preceded by a backtick (`` ` ``), e.g. `` `edge``
+- [x] the `` `Symbols`` type can appear in function and predicate declaration in the vocabulary section, e.g. `` `symmetric(`Symbols)``is a predicate declaration
+- [x] predicates and functions over `` `Symbols`` are part of structures, like any other symbols
+- [x] it's possible to quantify over `` `Symbols``, e.g. ``?`p[`Symbols]: symmetric(`p).``
+    - [x] The backtick  (`` ` ``) should be used in front of a variable to indicate that it represents a symbol.  Its use is optional though.
+- [ ] a variable of type `` `Symbols`` can be applied to arguments, e.g. ``?`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x))``
+    - [ ] notice that this requires [[Type inference]] AFTER expansion of the first quantifier.
+    - [ ] if the arity is wrong, an error is raised by the grounder
+    - [ ] Alternatively, this could be written using binary quantification (when available).
+- [ ] it's possible to quantify over `` `Symbols`` in head of definitions
+
+Questions:
+* use `` `edge `` or `` `edge' `` ? 
+    * closing tick will later allow to talk about expressions, e.g. to annotate an expression with a reading
+    * but we could use other delimiters, such as `[]`
+    * so, `` `f(x) `` is the same as `` f(x) `` ??
+* use backticks in display theory ?
+    * simpler to implement, and consistent, but there would be no ambiguity in `relevant(p)`
 
 ## Part 2: constructive definitions
 * accept only constructive definitions ?

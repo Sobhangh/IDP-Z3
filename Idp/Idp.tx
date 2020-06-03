@@ -21,8 +21,8 @@ Vocabulary: 'vocabulary' 'environment'? '{' (declarations=Declaration)* '}';
       RangeElement: fromI=NumberConstant ('..' toI=NumberConstant)?;
 
     SymbolDeclaration: annotations=Annotations name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
-      Sort: name=ID;
-      Symbol: name=ID;
+      Symbol: name=/`?[^\d\W]\w*\b/;
+      Sort: name=/`?[^\d\W]\w*\b/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
@@ -32,7 +32,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations 
-        ('!' (vars=ID '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Unary)? ('<-' body=Expression)? '.' ;
+        ('!' (vars=/`?[^\d\W]\w*\b/ '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Unary)? ('<-' body=Expression)? '.' ;
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
@@ -51,7 +51,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
     Aggregate:      AAggregate      | Base;
 
 
-    AQuantification: q=Quantor (vars=ID '[' sorts=Sort ']' ) + ':' f=Expression;
+    AQuantification: q=Quantor (vars=/`?[^\d\W]\w*\b/ '[' sorts=Sort ']' ) + ':' f=Expression;
       Quantor: '∀' | '!' | '∃' | '?' ;
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
     AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;

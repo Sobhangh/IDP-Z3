@@ -73,6 +73,7 @@ class Idp(object):
         self.goal.annotate(self)
         self.view.annotate(self)
         self.display.annotate(self)
+        self.display.run(self)
         self.theory.annotate(self.vocabulary)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
         #log("annotated")
@@ -86,10 +87,6 @@ class Idp(object):
         # translate
 
         self.vocabulary.translate(self)
-        #log("vocabulary translated")
-        #log("theory translated")
-        self.goal.translate()
-        self.view.translate()
 
     def unknown_symbols(self):
         todo = self.theory.unknown_symbols()
@@ -149,7 +146,7 @@ class Vocabulary(object):
                             }
         for name, constructors in [
             ('bool',      [TRUE, FALSE]),
-            ('__Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]), 
+            ('`Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]), 
         ]:
             ConstructedTypeDeclaration(name=name, constructors=constructors) \
                 .annotate(self.symbol_decls)
@@ -780,9 +777,6 @@ class Goal(object):
     def subtences(self):
         return {}
 
-    def translate(self):
-        return None
-
 
 class View(object):
     def __init__(self, **kwargs):
@@ -794,9 +788,6 @@ class View(object):
                 s.expanded = True
 
 
-    def translate(self):
-        return
-
 
 ################################ Display ###############################
 
@@ -805,41 +796,44 @@ class Display(object):
         self.constraints = kwargs.pop('constraints')
 
     def annotate(self, idp):
-        symbol_decls = idp.vocabulary.symbol_decls
+        self.symbol_decls = idp.vocabulary.symbol_decls
 
         #add display predicates
         goal = SymbolDeclaration(annotations='', name=Symbol(name='goal'), sorts=[], out=None)
         goal.is_var = False
-        goal.annotate(symbol_decls)
+        goal.annotate(self.symbol_decls)
 
         expanded = SymbolDeclaration(annotations='', name=Symbol(name='expanded'), sorts=[], out=None)
         expanded.is_var = False
-        expanded.annotate(symbol_decls)
+        expanded.annotate(self.symbol_decls)
 
         relevant = SymbolDeclaration(annotations='', name=Symbol(name='relevant'), sorts=[], out=None)
         relevant.is_var = False
-        relevant.annotate(symbol_decls)
+        relevant.annotate(self.symbol_decls)
 
         viewType = ConstructedTypeDeclaration(name='View', 
             constructors=[Constructor(name='normal'), Constructor(name='expanded')])
-        viewType.annotate(symbol_decls)
+        viewType.annotate(self.symbol_decls)
 
         view = SymbolDeclaration(annotations='', name=Symbol(name='view'), sorts=[], out=Sort(name='View'))
         view.is_var = False
-        view.annotate(symbol_decls, vocabulary=False)
-        symbol_decls[view.name] = view
+        view.annotate(self.symbol_decls, vocabulary=False)
+        self.symbol_decls[view.name] = view
         view.translate()
 
-        # analyse constraints
+        # annotate constraints
         for constraint in self.constraints:
-            constraint.annotate(symbol_decls, {})
+            constraint.annotate(self.symbol_decls, {})
+
+    def run(self, idp):
+        for constraint in self.constraints:
             if type(constraint)==AppliedSymbol:
                 symbols = []
                 for symbol in constraint.sub_exprs:
                     assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
                     assert symbol.name.startswith('`'), f"argument '{symbol.name}' of '{constraint.name}' must start with a tick '`'"
-                    assert symbol.name[1:] in symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
-                    symbols.append(symbol_decls[symbol.name[1:]])
+                    assert symbol.name[1:] in self.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
+                    symbols.append(self.symbol_decls[symbol.name[1:]])
 
                 if constraint.name == 'goal': #e.g.,  goal(Prime)
                     assert len(constraint.sub_exprs)==1, f'goal can have only one argument'
@@ -848,12 +842,12 @@ class Display(object):
                     idp.goal = goal
                 elif constraint.name == 'expanded': # e.g. expanded(Length, Angle)
                     for symbol in symbols:
-                        symbol_decls[symbol.name].expanded = True
+                        self.symbol_decls[symbol.name].expanded = True
                 elif constraint.name == 'relevant': # e.g. relevant(Tax)
                     for symbol in symbols:
                         instances = symbol.instances.values()
                         if instances:
-                            goal = Symbol(name='__relevant').annotate(symbol_decls, {})
+                            goal = Symbol(name='__relevant').annotate(self.symbol_decls, {})
                             constraint = AppliedSymbol.make(goal, instances)
                             idp.theory.constraints.append(constraint)
                         else:
