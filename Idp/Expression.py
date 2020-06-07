@@ -45,6 +45,10 @@ class DSLException(Exception):
         return self.message
 
 class Expression(object):
+    __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code', 'annotations', 'original',
+        'str', 'fresh_vars', 'type', 'is_visible', '_reified', 'if_symbol', 'co_constraint',
+        'normal', 'questions', 'relevant' )
+
     COUNT = 0
     def __init__(self):
         # .sub_exprs : list of Expression, to be translated to Z3
