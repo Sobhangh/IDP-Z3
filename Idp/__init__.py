@@ -31,12 +31,12 @@ from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
 
 from consultant.utils import applyTo, itertools, in_list, mergeDicts, log, unquote
 from .Expression import (Constructor, Expression, IfExpr, AQuantification,
-                            BinaryOperator, ARImplication, AEquivalence,
-                            AImplication, ADisjunction, AConjunction,
-                            AComparison, ASumMinus, AMultDiv, APower, AUnary,
-                            AAggregate, AppliedSymbol, Variable, 
-                            NumberConstant, Brackets, Arguments,
-                            Fresh_Variable, TRUE, FALSE)
+                         BinaryOperator, ARImplication, AEquivalence,
+                         AImplication, ADisjunction, AConjunction,
+                         AComparison, ASumMinus, AMultDiv, APower, AUnary,
+                         AAggregate, AppliedSymbol, Variable,
+                         NumberConstant, Brackets, Arguments,
+                         Fresh_Variable, TRUE, FALSE)
 
 import Idp.Substitute
 import Idp.Implicant
@@ -599,12 +599,12 @@ class Rule(object):
             elif type(arg) in [NumberConstant, Constructor]:
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Fresh_variable(name=v0), v1)
+                    eq = eq.instantiate(Fresh_Variable(name=v0), v1)
                 self.body = AConjunction.make('∧', [eq, self.body])
             else:  # same(f(x))
                 eq = AComparison.make('=', [nv, arg])
                 for v0, v1 in subst.items():
-                    eq = eq.instantiate(Fresh_variable(name=v0), v1)
+                    eq = eq.instantiate(Fresh_Variable(name=v0), v1)
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         # Any leftover ?
