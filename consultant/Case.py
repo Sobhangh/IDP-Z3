@@ -146,30 +146,44 @@ class Case:
             constraint.co_constraints(temp)
             constraints.extend(temp)
 
-        # determine given, reachable in constraints' questions
-        given, reachable = OrderedSet(), OrderedSet()
+        # initialize reachable with relevant; 
+        # set constraint.relevant, constraint.questions
+        reachable = OrderedSet()
         for constraint in constraints:
             constraint.relevant = False
             constraint.questions = OrderedSet()
-            constraint.collect(constraint.questions, all_=True, co_constraints=False)
+            if type(constraint)==AppliedSymbol and constraint.name=='__relevant':
+                for e in constraint.sub_exprs:
+                    reachable.add(e)
+            else:
+                constraint.collect(constraint.questions, all_=True, co_constraints=False)
+        if len(reachable) == 0: # no goal --> every question is relevant
+            for constraint in constraints:
+                if constraint.if_symbol is None:
+                    for q in constraint.questions:
+                        reachable.add(q)
 
+        # determine given in constraints' questions
+        # add goals in constraint.original to constraint.questions
+        given = OrderedSet()
+        for constraint in constraints:
             for q in constraint.questions:
-                symbols = q.unknown_symbols()
-                if self.goal.name == '' and constraint.if_symbol is None:
-                    reachable.add(q)
-                elif self.goal.name != '' and len(symbols)==1 and self.goal.name in symbols:
-                    reachable.add(q)
-
-                if q.code in self.assignments:
-                    if self.assignments[q.code].status == Status.GIVEN and not q.has_decision():
-                        given.add(q)
+                if q.code in self.assignments \
+                and self.assignments[q.code].status == Status.GIVEN \
+                and not q.has_decision():
+                    given.add(q)
+            qs = OrderedSet()
+            constraint.original.collect(qs, all_=True, co_constraints=False)
+            for q in qs:
+                if q in reachable: # a goal
+                    constraint.questions.add(q)
 
         # mark reachable as relevant
         self.relevant_symbols = {}  # Dict[string: int]
         for q in reachable:
             if q.code in self.assignments:
                 self.assignments[q.code].relevant = True
-            for s in q.unknown_symbols():
+            for s in q.unknown_symbols(co_constraints=False):
                 self.relevant_symbols[s] = 1
 
         # find relevant symbols by propagation
