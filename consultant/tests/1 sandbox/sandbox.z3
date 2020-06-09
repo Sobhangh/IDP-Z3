@@ -38,7 +38,7 @@ display {
              'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},
- 'q': {'__rank': 1,
+ 'q': {'__rank': 2,
        'q': {'environmental': False,
              'normal': True,
              'reading': 'q',

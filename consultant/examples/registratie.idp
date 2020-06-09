@@ -75,8 +75,8 @@ vocabulary decision {
   type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
   type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
 
-  Registration_Type : registration_Type
   Tax : tax_Rate
+  Registration_Type : registration_Type
 }
 
 theory {
@@ -205,4 +205,5 @@ display {
     relevant(`Registration_Type, `Tax).
     goal(`Tax).
     view = normal.
+    expand(`Registration_Type, `Tax).
 }
