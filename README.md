@@ -1,5 +1,5 @@
 Interactive Consultant is an interactive consultant based on logic theory. It is hosted at https://interactive-consultant.ew.r.appspot.com/
-Here is a [video tutorial](https://drive.google.com/open?id=1hZswGXjEK_mIyQVK5NeRhusmWkRFUo90).
+Here is a [video tutorial](https://drive.google.com/open?id=1hZswGXjEK_mIyQVK5NeRhusmWkRFUo90), and a [short paper describing it](https://drive.google.com/file/d/1RLCZq-6c0b4ymNvK5C3XpFp9uE4JdmtJ/view?usp=sharing).
 
 It uses the Z3 SMT solver.  It is made available under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).  
 

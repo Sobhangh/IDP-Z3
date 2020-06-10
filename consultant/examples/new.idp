@@ -1,0 +1,12 @@
+vocabulary {
+    p
+}
+
+theory {
+    p.
+}
+
+display {
+    
+}
+
