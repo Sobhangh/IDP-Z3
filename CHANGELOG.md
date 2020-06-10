@@ -13,6 +13,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   * `view` in /meta can take the `hidden` value
   * replace `__goals(Term)` by `__relevant(Term)`
 
+## GUI
+* File / New
+
 
 ## [0.5.1] - 2020-05-26
 [Access v0.5.1 on Google App Engine](https://20200526t173848-dot-interactive-consultant.ew.r.appspot.com/)

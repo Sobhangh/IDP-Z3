@@ -6,8 +6,9 @@ tags: #analysis
 
 Problem: how to show "Loading…" when Google App Engine starts
 
-Solution: use [App Shell](https://angular.io/guide/app-shell)
-[For Angular 7](https://medium.com/@swathisprasad/getting-started-with-app-shell-using-angular-7-e4d55e4e5d2c)
+Option: 
+- [ ] use [App Shell](https://angular.io/guide/app-shell): [For Angular 7](https://medium.com/@swathisprasad/getting-started-with-app-shell-using-angular-7-e4d55e4e5d2c)
+- [x] use a div with Loading…
 
 done:
 * add routing
