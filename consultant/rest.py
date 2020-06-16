@@ -94,6 +94,46 @@ def idpOf(code):
         idps[code] = idp
         return idp
 
+
+class meta(Resource):
+    """
+    Class which handles the meta.
+    <<Explanation of what the meta is here.>>
+
+    :arg Resource: <<explanation of resource>>
+    """
+    def post(self):
+        """
+        Method to export the metaJSON from the resource.
+
+        :returns metaJSON: a json string containing the meta.
+        """
+        log("start /meta")
+        with z3lock:
+            try:
+                args = parser.parse_args()
+                try:
+                    idp = idpOf(args['code'])
+                    out = metaJSON(idp)
+                    expanded = [dic['idpname'] for dic in out['symbols'] if dic['view']=='expanded']
+                    case = make_case(idp, "{}", tuple(expanded))
+                    out["propagated"] = propagation(case)
+                    return out
+                except Exception as exc:
+                    traceback.print_exc()
+                    return repr(exc)
+            except Exception as exc:
+                traceback.print_exc()
+                return str(exc)
+
+class metaWithGraph(meta): # subclass that generates call graphs
+    def post(self):
+        graphviz = GraphvizOutput()
+        graphviz.output_file = 'docs/meta.png'
+        with PyCallGraph(output=graphviz, config=config):
+            return super().post()
+
+
 class eval(Resource):
     def post(self):
         log("start /eval")
@@ -152,40 +192,6 @@ class evalWithGraph(eval): # subcclass that generates call graphs
 
         graphviz = GraphvizOutput()
         graphviz.output_file = 'docs/'+ method + '.png'
-        with PyCallGraph(output=graphviz, config=config):
-            return super().post()
-
-class meta(Resource):
-    """
-    Class which handles the meta.
-    <<Explanation of what the meta is here.>>
-
-    :arg Resource: <<explanation of resource>>
-    """
-    def post(self):
-        """
-        Method to export the metaJSON from the resource.
-
-        :returns metaJSON: a json string containing the meta.
-        """
-        log("start /meta")
-        with z3lock:
-            try:
-                args = parser.parse_args()
-                try:
-                    idp = idpOf(args['code'])
-                    return metaJSON(idp)
-                except Exception as exc:
-                    traceback.print_exc()
-                    return repr(exc)
-            except Exception as exc:
-                traceback.print_exc()
-                return str(exc)
-
-class metaWithGraph(meta): # subclass that generates call graphs
-    def post(self):
-        graphviz = GraphvizOutput()
-        graphviz.output_file = 'docs/meta.png'
         with PyCallGraph(output=graphviz, config=config):
             return super().post()
 

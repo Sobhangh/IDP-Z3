@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * support simple `display` theory, with `goal`, `relevant`, `expand`, `hide` and `view` predicates
   * `view` in /meta can take the `hidden` value
   * replace `__goals(Term)` by `__relevant(Term)`
+* add `propagated` to /meta's response
 
 ## GUI
 * File / New
