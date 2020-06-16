@@ -8,7 +8,8 @@ Problem: how to show "Loading…" when Google App Engine starts
 
 Option: 
 - [ ] use [App Shell](https://angular.io/guide/app-shell): [For Angular 7](https://medium.com/@swathisprasad/getting-started-with-app-shell-using-angular-7-e4d55e4e5d2c)
-- [x] use a div with Loading…
+- [ ] use a div with Loading…
+- [x] improve use of openCalls in idp.service.ts
 
 done:
 * add routing
