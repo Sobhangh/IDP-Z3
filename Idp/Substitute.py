@@ -1,3 +1,4 @@
+# cython: binding=True
 """
     Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
 

@@ -25,7 +25,7 @@ rest.py on Djordje abstract theory:
 
 
 ## Options:
-- [ ] use [cython](https://cython.org/) for substitute on GAE
+- [ ] use [[Cython]] for substitute on GAE
 - [ ] use reification of quantified formulas + Z3 substitute → major rewrite !
 - [ ] use pypy locally
 - [x] cache the propagation of universals in Case

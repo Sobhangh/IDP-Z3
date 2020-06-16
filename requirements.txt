@@ -1,9 +1,10 @@
-z3-solver
+click==7.0
+Cython
 flask
 flask_restful
 flask_cors
+gunicorn
 pyyaml
 pycallgraph2
-gunicorn
 textx
-click==7.0
+z3-solver

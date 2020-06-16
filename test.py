@@ -27,6 +27,8 @@ import glob
 from typing import Dict
 import argparse
 
+# import pyximport; 
+# pyximport.install(language_level=3)
 
 from consultant.Case import Case
 from consultant.Inferences import metaJSON, propagation, expand

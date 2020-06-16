@@ -14,7 +14,7 @@ Rewrite in [Nim](https://nim-lang.org/) ?
 
 But:
 * poor debugger → need to use logs instead
-* Google App Engine ?  use [nimporter](https://github.com/Pebaz/nimporter): makes it easy to distribute modules written in nim = alternative to Cython 
+* Google App Engine ?  use [nimporter](https://github.com/Pebaz/nimporter): makes it easy to distribute modules written in nim = alternative to [[Cython]] 
 
 
 Options:
