@@ -85,6 +85,8 @@ class Expression(object):
         out.value         = None if out.value         is None else out.value        .copy()
         out.simpler       = None if out.simpler       is None else out.simpler      .copy()
         out.co_constraint = None if out.co_constraint is None else out.co_constraint.copy()
+        if hasattr(self, 'questions'):
+            out.questions = copy.copy(self.questions)
         return out
 
     def same_as(self, other):

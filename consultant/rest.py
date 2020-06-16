@@ -23,7 +23,7 @@ import os
 import threading
 import traceback
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, g
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 from textx import TextXError
@@ -36,6 +36,7 @@ from Idp import Idp, idpparser
 
 from typing import Dict
 
+#pyinstrument from pyinstrument import Profiler
 # library to generate call graph, for documentation purposes
 from pycallgraph2 import PyCallGraph
 from pycallgraph2.output import GraphvizOutput
@@ -72,7 +73,7 @@ class HelloWorld(Resource):
 z3lock = threading.Lock()
 idps: Dict[str, Idp] = {} # {code_string : idp}
 
-def caseOf(code):
+def idpOf(code):
     """
     Function to retrieve an Idp object for IDP code.
     If the object doesn't exist yet, we create it.
@@ -98,10 +99,13 @@ class eval(Resource):
         log("start /eval")
         with z3lock:
             try:
+                #pyinstrument g.profiler = Profiler()
+                #pyinstrument g.profiler.start()
+
                 args = parser.parse_args()
                 #print(args)
 
-                idp = caseOf(args['code'])
+                idp = idpOf(args['code'])
                 method = args['method']
                 given_json = args['active']
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
@@ -133,8 +137,11 @@ class eval(Resource):
                         case = make_case(idpModel, "", expanded)
                     out = abstract(case, given_json)
                 log("end /eval " + method)
+                #pyinstrument g.profiler.stop()
+                #pyinstrument print(g.profiler.output_text(unicode=True, color=True))
                 return out
             except Exception as exc:
+                #pyinstrument g.profiler.stop()
                 traceback.print_exc()
                 return str(exc)
 
@@ -166,7 +173,7 @@ class meta(Resource):
             try:
                 args = parser.parse_args()
                 try:
-                    idp = caseOf(args['code'])
+                    idp = idpOf(args['code'])
                     return metaJSON(idp)
                 except Exception as exc:
                     traceback.print_exc()

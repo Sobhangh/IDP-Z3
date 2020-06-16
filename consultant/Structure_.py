@@ -43,6 +43,11 @@ class Assignment(object):
         self.status = status
         self.relevant = False
 
+    def copy(self):
+        out = copy(self)
+        out.sentence = out.sentence.copy()
+        return out
+
     def update(self, sentence: Optional[Expression], 
                      value: Optional[Expression], 
                      status: Optional[Status], 

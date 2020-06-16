@@ -16,6 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Interactive_Consultant.  If not, see <https://www.gnu.org/licenses/>.
 """
+from copy import copy
 from z3 import And, Not, sat, unsat, unknown, is_true
 from debugWithYamlLog import Log, nl, indented
 
@@ -36,11 +37,10 @@ class Case:
     """
     cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
 
-    def __init__(self, idp: Idp, jsonstr: str, expanded: List[str]):
+    def __init__(self, idp: Idp, expanded: List[str]):
 
         self.idp = idp # Idp vocabulary and theory
         self.goal = idp.goal
-        self.given = json_to_literals(idp, jsonstr) # {atom.code : assignment} from the user interface
         self.expanded_symbols = set(expanded)
 
         # initialisation
@@ -52,7 +52,7 @@ class Case:
         self.simplified: List[Expression] = []
         self.assignments: Dict[str, Assignment] = {} # atoms + given, with simplified formula and value value
 
-        if __debug__: invariant = ".".join(str(e) for e in self.idp.theory.constraints)
+        if __debug__: self.invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
         for GuiLine in self.GUILines.values():
             GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
@@ -61,7 +61,6 @@ class Case:
 
         # initialize .assignments
         self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.GUILines.values()}
-        self.assignments.update({ atom : ass for atom, ass in self.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
 
         # find immediate universals
         for c in self.idp.theory.constraints:
@@ -71,9 +70,9 @@ class Case:
             consequences.extend(new_constraint.implicants(self.assignments))
             if consequences:
                 for sentence, value in consequences:
-                    ass = Assignment(sentence, value, Status.UNKNOWN)
-                    status = Status.ENV_UNIV if not ass.sentence.has_decision() else Status.UNIVERSAL
-                    ass.update(None, None, status, self)
+                    status = Status.ENV_UNIV if not sentence.has_decision() else Status.UNIVERSAL
+                    ass = Assignment(sentence, value, status)
+                    self.assignments[sentence.code] = ass
             self.simplified.append(c)
 
         # annotate self.simplified with questions
@@ -82,15 +81,37 @@ class Case:
             e.collect(questions, all_=True)
             e.questions = questions
 
-        if idp.decision: # if there is a decision vocabulary
+        # propagate universals
+        if self.idp.decision: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
+        
+        self.get_relevant_subtences()
+        if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
+
+
+    def add_given(self, jsonstr: str):
+        if jsonstr == "{}":
+            return self
+
+        out = copy(self)
+        out.assignments = {k: v.copy() for k,v in self.assignments.items()}
+        out.simplified = [c.copy() for c in self.simplified]
+
+        out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
+        out.assignments.update({ atom : ass for atom, ass in out.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
+
+        if out.idp.decision: # if there is a decision vocabulary
+            # first, consider only environmental facts and theory (exclude any statement containing decisions)
+            out.full_propagate(all_=False)
+        out.full_propagate(all_=True) # now consider all facts and theories
 
         # determine relevant assignemnts
-        self.get_relevant_subtences()
+        out.get_relevant_subtences()
 
-        if __debug__: assert invariant == ".".join(str(e) for e in self.idp.theory.constraints)
+        if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
+        return out
 
     def __str__(self) -> str:
         self.get_co_constraints()
@@ -137,6 +158,8 @@ class Case:
         sets rank of symbols in self.relevant_symbols
         removes irrelevant constraints in self.simplified
         """
+        for a in self.assignments.values():
+            a.relevant = False
 
         # flatten constraints
         constraints = []
@@ -257,7 +280,7 @@ class Case:
                                 res1 = unknown
                     solver.pop()
                     if res1 == unknown: # restart solver
-                        solver, _, _ = mk_solver(self.translate(all_), {})
+                        solver, _, _ = mk_solver(theory, {})
                         result = solver.check()
         elif result == unsat:
             print(self.translate(all_))
@@ -343,7 +366,10 @@ def make_case(idp: Idp, jsonstr: str, expanded: List[str]) -> Case:
         if (idp, jsonstr, expanded) in Case.cache:
             return Case.cache[(idp, jsonstr, expanded)]
 
-        case = Case(idp, jsonstr, expanded)
+        if (idp, "{}", expanded) in Case.cache:
+            return Case.cache[(idp, "{}", expanded)].add_given(jsonstr)
+
+        case = Case(idp, expanded).add_given(jsonstr)
 
         if 100<len(Case.cache):
             # remove oldest entry, to prevent memory overflow

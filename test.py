@@ -51,7 +51,7 @@ def generateZ3(theory):
     for expr in idp.subtences.values():
         expanded_symbols.update(expr.unknown_symbols())
     expanded_symbols2 = list(expanded_symbols.keys())
-    case = Case(idp, "", expanded_symbols2)
+    case = Case(idp, expanded_symbols2)
 
     nl = "\n"
     output = (

@@ -50,13 +50,13 @@ Date: TODO
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
-- [ ] cache the propagation of universals
 - [ ] cython, pypy
+- [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
+
 - [ ] merge case.co_constraints and case.definitions (many overlaps)
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share co_constraints
 - [ ] avoid mergeDicts.  Use accumulator instead
-- [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
 - [ ] rewrite in [[Nim]]
 - [ ] #Perf
 
