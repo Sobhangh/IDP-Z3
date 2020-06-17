@@ -50,4 +50,8 @@ X use 2 machines with different max_concurrent_requests: one for static, the oth
     * use http instead of https ? no fix
     * cors-config.json ?  OK   `gsutil cors set cors-config.json gs://interactive-consultant\`
 
-Problem : B8 not responding
+## B8 not responding
+[in this version](https://20200617t153532-dot-interactive-consultant.ew.r.appspot.com/) of server: 
+* Etat = Arrêtée ? → select it and click start
+* /meta does not respond
+* backend instances are [addressable by name](https://stackoverflow.com/questions/11886915/google-app-engine-backend-vs-frontend-instances), so you need [a load balancer](https://cloud.google.com/compute/docs/instance-groups/adding-an-instance-group-to-a-load-balancer) or [backend service](https://cloud.google.com/load-balancing/docs/backend-service) to run them

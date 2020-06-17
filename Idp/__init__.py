@@ -38,6 +38,7 @@ from .Expression import (Constructor, Expression, IfExpr, AQuantification,
                          NumberConstant, Brackets, Arguments,
                          Fresh_Variable, TRUE, FALSE)
 
+import Idp.Simplify
 import Idp.Substitute
 import Idp.Implicant
 import Idp.Idp_to_Z3
