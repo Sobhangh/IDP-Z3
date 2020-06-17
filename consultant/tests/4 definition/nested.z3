@@ -113,7 +113,7 @@ display {
           'same(Piet) = Jan': {'environmental': False,
                                'normal': False,
                                'reading': 'same(Piet) = Jan',
-                               'relevant': False,
+                               'relevant': True,
                                'status': 'CONSEQUENCE',
                                'typ': 'Bool',
                                'value': False},

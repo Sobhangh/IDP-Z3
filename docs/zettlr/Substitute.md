@@ -5,7 +5,7 @@ Date: Substitute
 –-
 
 ## Call graph
-(Partial) Call graph for Expression.substitute():
+(Partial) Call graph for Idp.Substitute, Idp.Simplify modules:
 
 ```mermaid
 graph TD
