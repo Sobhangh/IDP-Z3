@@ -1,11 +1,10 @@
 runtime: python38
 entrypoint: gunicorn -b :$PORT main:app --timeout 90 # timeout after 90 sec
 
-instance_class: F4
-automatic_scaling:
-  max_instances: 10 # to manage costs !
-  max_concurrent_requests: 1 # Z3 not threadsafe ! but possibly costly !
-  min_pending_latency: 300ms # default: 30ms
+instance_class: B8
+basic_scaling:
+  max_instances: 11
+  idle_timeout: 5m
 
 handlers:
   - url: /$

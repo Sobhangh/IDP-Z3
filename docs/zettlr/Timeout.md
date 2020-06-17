@@ -12,3 +12,8 @@ Options:
         * problem: ValueError: signal only works in main thread
 
 test: www…./test
+
+Problem: how to [detect status code](https://stackoverflow.com/questions/43683052/get-status-code-http-get-response-angular2) 502 and properly display it
+* [catch error on http request in truescript](https://stackoverflow.com/questions/35326689/how-to-catch-exception-correctly-from-http-request)
+* response on Show all Models for Registration  is 500 after 21 sec ! using F4
+    * probably due to a memory limit
