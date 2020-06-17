@@ -1,4 +1,5 @@
 runtime: python38
+entrypoint: gunicorn -b :$PORT main:app --timeout 90 # timeout after 90 sec
 
 instance_class: F4
 automatic_scaling:

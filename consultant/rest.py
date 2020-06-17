@@ -67,6 +67,8 @@ parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> max
 
 class HelloWorld(Resource):
     def get(self):
+        import time
+        time.sleep(100)
         return {'hello': 'world'}
 
 
