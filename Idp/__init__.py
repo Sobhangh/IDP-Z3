@@ -598,13 +598,9 @@ class Rule(object):
                     self.body = AConjunction.make('∧', [eq, self.body])
             elif type(arg) in [NumberConstant, Constructor]:
                 eq = AComparison.make('=', [nv, arg])
-                for v0, v1 in subst.items():
-                    eq = eq.instantiate(Fresh_Variable(name=v0), v1)
                 self.body = AConjunction.make('∧', [eq, self.body])
             else:  # same(f(x))
                 eq = AComparison.make('=', [nv, arg])
-                for v0, v1 in subst.items():
-                    eq = eq.instantiate(Fresh_Variable(name=v0), v1)
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         # Any leftover ?

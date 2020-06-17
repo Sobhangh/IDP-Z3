@@ -48,4 +48,6 @@ X use 2 machines with different max_concurrent_requests: one for static, the oth
 * sync bucket ? `gsutil -m rsync -r ./consultant/static gs://interactive-consultant/`
 * [font CORS issue](https://stackoverflow.com/questions/33242062/google-cloud-storage-fonts-cors-issue)
     * use http instead of https ? no fix
-    * cors-config.json ?  OK   `gsutil cors set cors-config.json gs://interactive-consultant
+    * cors-config.json ?  OK   `gsutil cors set cors-config.json gs://interactive-consultant\`
+
+Problem : B8 not responding
