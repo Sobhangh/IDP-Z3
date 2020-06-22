@@ -102,6 +102,12 @@ class Case:
         out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
         out.assignments.update({ atom : ass for atom, ass in out.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
 
+        # annotate self.simplified with questions
+        for e in out.simplified:
+            questions = OrderedSet()
+            e.collect(questions, all_=True)
+            e.questions = questions
+
         if out.idp.decision: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             out.full_propagate(all_=False)
