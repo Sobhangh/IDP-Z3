@@ -1,0 +1,20 @@
+vocabulary {
+    Wages_Salaries_Tips: int
+    Unemployment_Comp: int
+    Taxable_Interest: int
+    Adjusted_Gross_Income: int
+    Eligible
+}
+theory {
+    //Calculate Gross Income
+    {
+        Adjusted_Gross_Income() = 0 <- ~(Eligible()).
+        Adjusted_Gross_Income() = Wages_Salaries_Tips + Taxable_Interest + Unemployment_Comp <- Eligible().
+    }
+
+}
+
+
+structure {
+}
+
