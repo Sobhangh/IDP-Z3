@@ -1,0 +1,32 @@
+
+
+vocabulary {
+	type Post_Bureau_Risk_Categoryt_t constructed from { LOW, HIGH, VERY_LOW, MEDIUM } 
+	Credit_Score: int
+	Application_Risk_Score: int
+	Post_Bureau_Risk_Category: Post_Bureau_Risk_Categoryt_t
+	Existing_Customer
+}
+theory {
+	//Post Bureau
+	{
+		Post_Bureau_Risk_Category() = HIGH <- ~(Existing_Customer()) & Application_Risk_Score() < 120 & Credit_Score() < 590.
+		Post_Bureau_Risk_Category() = MEDIUM <- ~(Existing_Customer()) & Application_Risk_Score() < 120 & 590 =< Credit_Score() & Credit_Score() =< 610.
+		Post_Bureau_Risk_Category() = LOW <- ~(Existing_Customer()) & Application_Risk_Score() < 120 & Credit_Score() > 610.
+		Post_Bureau_Risk_Category() = HIGH <- ~(Existing_Customer()) & 120 =< Application_Risk_Score() & Application_Risk_Score() =< 130 & Credit_Score() < 600.
+		Post_Bureau_Risk_Category() = MEDIUM <- ~(Existing_Customer()) & 120 =< Application_Risk_Score() & Application_Risk_Score() =< 130 & 600 =< Credit_Score() & Credit_Score() =< 625.
+		Post_Bureau_Risk_Category() = LOW <- ~(Existing_Customer()) & 120 =< Application_Risk_Score() & Application_Risk_Score() =< 130 & Credit_Score() > 625.
+		Post_Bureau_Risk_Category() = VERY_LOW <- ~(Existing_Customer()) & Application_Risk_Score() > 130.
+		Post_Bureau_Risk_Category() = HIGH <- Existing_Customer() & Application_Risk_Score() =< 100 & Credit_Score() < 580.
+		Post_Bureau_Risk_Category() = MEDIUM <- Existing_Customer() & Application_Risk_Score() =< 100 & 580 =< Credit_Score() & Credit_Score() =< 600.
+		Post_Bureau_Risk_Category() = LOW <- Existing_Customer() & Application_Risk_Score() =< 100 & Credit_Score() > 600.
+		Post_Bureau_Risk_Category() = HIGH <- Existing_Customer() & Application_Risk_Score() > 100 & Credit_Score() < 590.
+		Post_Bureau_Risk_Category() = MEDIUM <- Existing_Customer() & Application_Risk_Score() > 100 & 590 =< Credit_Score() & Credit_Score() =< 615.
+		Post_Bureau_Risk_Category() = LOW <- Existing_Customer() & Application_Risk_Score() > 100 & Credit_Score() > 615.
+	}
+
+}
+
+
+structure {
+}

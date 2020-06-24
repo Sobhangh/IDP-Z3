@@ -1,0 +1,14 @@
+
+
+vocabulary {
+	Bonus: int
+	Years_of_Work: int
+}
+theory {
+	//Salary Bonus
+	Bonus() = sum{ : Years_of_Work() > 1: 100 }+sum{ : Years_of_Work() > 2: 200 }+sum{ : Years_of_Work() > 3: 300 }+sum{ : Years_of_Work() > 5: 500 }.
+}
+
+
+structure {
+}

@@ -1,0 +1,25 @@
+
+
+vocabulary {
+	Output_AND
+	Output_OR
+	A
+	B
+}
+theory {
+	//AND
+	{
+		Output_AND() <- A() & B().
+	}
+
+	//OR
+	{
+		Output_OR() <- A().
+		Output_OR() <- B().
+	}
+
+}
+
+
+structure {
+}

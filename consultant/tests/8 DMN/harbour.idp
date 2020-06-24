@@ -1,0 +1,33 @@
+
+
+vocabulary {
+	type Refuel_Areat_t constructed from { NA, outdoor, indoor } 
+	Draft: int
+	Refuel_Area: Refuel_Areat_t
+	Length: int
+	Capacity: int
+	Cargo: int
+	Enter
+}
+theory {
+	//Ship Clearance
+	{
+		Enter() <- Length() < 260 & Draft() < 10 & Capacity() < 1000.
+		Enter() <- Length() < 260 & 10 =< Draft() & Draft() =< 12 & Capacity() < 4000 & Cargo() =< 0.75.
+		Enter() <- 260 =< Length() & Length() < 320 & 10 < Draft() & Draft() =< 13 & Capacity() < 6000 & Cargo() =< 0.5.
+		Enter() <- 320 =< Length() & Length() < 400 & Draft() >= 13 & Capacity() > 4000 & Cargo() =< 0.25.
+	}
+
+	//Refuel Area Determination
+	{
+		Refuel_Area() = NA <- ~(Enter()).
+		Refuel_Area() = indoor <- Enter() & Length() =< 350.
+		Refuel_Area() = indoor <- Enter() & Length() > 350 & Cargo() =< 0.3.
+		Refuel_Area() = outdoor <- Enter() & Length() > 350 & Cargo() > 0.3.
+	}
+
+}
+
+
+structure {
+}

@@ -1,0 +1,18 @@
+
+
+vocabulary {
+	Temperature: int
+	Rain_Probability: int
+	Prepare_Terrace
+}
+theory {
+	//Prepare Terrace
+	{
+		Prepare_Terrace() <- Temperature() >= 20 & Rain_Probability() < 50.
+	}
+
+}
+
+
+structure {
+}

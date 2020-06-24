@@ -1,0 +1,20 @@
+
+
+vocabulary {
+	type Advertised_Objectst_t constructed from { Toys, Cars, Videogames } 
+	Advertised_Objects: Advertised_Objectst_t
+	Age: int
+}
+theory {
+	//Advertisement Decision
+	{
+		Advertised_Objects() = Cars <- Age() > 18.
+		Advertised_Objects() = Videogames <- Age() > 12 & ~((Age() > 18)).
+		Advertised_Objects() = Toys <- true & ~((Age() > 18)|(Age() > 12)).
+	}
+
+}
+
+
+structure {
+}
