@@ -1,0 +1,46 @@
+
+
+vocabulary {
+	type sext_t constructed from { Female, Male } 
+	type BMILevelt_t constructed from { Severely_Underweight, Normal, Extreme_Obesity, Underweight, Obese_II, Overweight, Obese_I } 
+	type riskLevelt_t constructed from { Extremely_High, High, Low, Increased, Very_High } 
+	sex: sext_t
+	waist: real
+	bmi: real
+	BMILevel: BMILevelt_t
+	riskLevel: riskLevelt_t
+}
+theory {
+	//BMI Level
+	{
+		BMILevel() = Severely_Underweight <- bmi() < 18.5 & sex() = Male.
+		BMILevel() = Underweight <- bmi() < 18.5 & sex() = Female.
+		BMILevel() = Underweight <- 18.5 =< bmi() & bmi() =< 24.9 & sex() = Male.
+		BMILevel() = Normal <- 18.5 =< bmi() & bmi() =< 24.9 & sex() = Female.
+		BMILevel() = Normal <- 25 =< bmi() & bmi() =< 29.9 & sex() = Male.
+		BMILevel() = Overweight <- 25 =< bmi() & bmi() =< 29.9 & sex() = Female.
+		BMILevel() = Obese_I <- 30 =< bmi() & bmi() =< 34.9.
+		BMILevel() = Obese_II <- 35 =< bmi() & bmi() =< 39.9.
+		BMILevel() = Extreme_Obesity <- bmi() >= 40.
+	}
+
+	//Determine Risk Level
+	{
+		riskLevel() = Increased <- BMILevel() = Overweight & sex() = Male & waist() =< 102.
+		riskLevel() = High <- BMILevel() = Overweight & sex() = Male & waist() > 102.
+		riskLevel() = Increased <- BMILevel() = Overweight & sex() = Female & waist() =< 88.
+		riskLevel() = High <- BMILevel() = Overweight & sex() = Female & waist() > 88.
+		riskLevel() = High <- BMILevel() = Obese_I & sex() = Male & waist() =< 102.
+		riskLevel() = Very_High <- BMILevel() = Obese_I & sex() = Male & waist() > 102.
+		riskLevel() = High <- BMILevel() = Obese_I & sex() = Female & waist() =< 88.
+		riskLevel() = Very_High <- BMILevel() = Obese_I & sex() = Female & waist() > 88.
+		riskLevel() = Very_High <- BMILevel() = Obese_II.
+		riskLevel() = Extremely_High <- BMILevel() = Extreme_Obesity.
+		riskLevel() = Low <- ~(BMILevel() = Overweight | BMILevel() = Obese_I | BMILevel() = Obese_II | BMILevel() = Extreme_Obesity).
+	}
+
+}
+
+
+structure {
+}

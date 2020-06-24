@@ -1,0 +1,18 @@
+
+
+vocabulary {
+	type Animalt_t constructed from { Dog } 
+	Total: real
+	Age: int
+	Animal: Animalt_t
+	ViciousDog
+	Sterilized
+}
+theory {
+	//Animal License Price
+	Total() = sum{ : Age() < 6 & ~(Sterilized()): 20.0 }+sum{ : Age() >= 6 & Sterilized(): 20.0 }+sum{ : Age() >= 6 & ~(Sterilized()): 40.0 }+sum{ : Animal() = Dog & ViciousDog(): 100.0 }.
+}
+
+
+structure {
+}

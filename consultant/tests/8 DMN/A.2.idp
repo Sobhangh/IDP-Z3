@@ -1,0 +1,15 @@
+
+
+vocabulary {
+	price: real
+	age: real
+	priority
+}
+theory {
+	//Calculate Price Decision
+	price() = sum{ : age() < 2: 0 }+sum{ : 3 =< age() & age() =< 16: 20 }+sum{ : age() >= 16: 40 }+sum{ : priority(): 10 }.
+}
+
+
+structure {
+}

@@ -1,0 +1,42 @@
+
+
+vocabulary {
+	type desiredDisht_t constructed from { Pasta, Stew, Spareribs, Light_salad, Beans_salad, Steak } 
+	type seasont_t constructed from { Spring, Summer, Winter } 
+	type dayTypet_t constructed from { Holiday, Weekend, Weekday } 
+	desiredDish: desiredDisht_t
+	season: seasont_t
+	temperature: int
+	guestCount: int
+	dayType: dayTypet_t
+}
+theory {
+	//Dish Decision
+	{
+		desiredDish() = Spareribs <- season() = Winter & guestCount() =< 8.
+		desiredDish() = Pasta <- season() = Winter & guestCount() > 8.
+		desiredDish() = Light_salad <- season() = Summer & guestCount() > 10.
+		desiredDish() = Beans_salad <- season() = Summer & guestCount() =< 10.
+		desiredDish() = Stew <- season() = Spring & guestCount() < 10.
+		desiredDish() = Steak <- season() = Spring & guestCount() >= 10.
+	}
+
+	//Season decision
+	{
+		season() = Summer <- temperature() > 30.
+		season() = Winter <- temperature() < 10.
+		season() = Spring <- 10 =< temperature() & temperature() =< 30.
+	}
+
+	//Guest Count
+	{
+		guestCount() = 4 <- dayType() = Weekday.
+		guestCount() = 10 <- dayType() = Holiday.
+		guestCount() = 15 <- dayType() = Weekend.
+	}
+
+}
+
+
+structure {
+}

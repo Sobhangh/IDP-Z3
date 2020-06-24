@@ -1,0 +1,21 @@
+
+
+vocabulary {
+	amount: int
+	discount: int
+}
+theory {
+	//Order Discount
+	{
+		discount() = 0 <- amount() < 500.
+		discount() = 2 <- 500 =< amount() & amount() =< 999.
+		discount() = 3 <- 1000 =< amount() & amount() =< 1999.
+		discount() = 5 <- 2000 =< amount() & amount() =< 4999.
+		discount() = 8 <- amount() >= 5000.
+	}
+
+}
+
+
+structure {
+}

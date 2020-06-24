@@ -1,0 +1,38 @@
+
+
+vocabulary {
+	type seasont_t constructed from { Fall, Summer, Winter, Spring } 
+	type beveragest_t constructed from { Pinot_Noir, Guiness, Aecht_Schlenkerla_Rauchbier, Water, Bordeaux, Apple_Juice } 
+	type desiredDisht_t constructed from { Stew, Steak, Roastbeef, Dry_Aged_Gourmet_Steak, Light_Salad_and_a_nice_Steak, Spareribs } 
+	season: seasont_t
+	guestCount: int
+	beverages: beveragest_t
+	desiredDish: desiredDisht_t
+	guestsWithChildren
+}
+theory {
+	//Beverages
+	{
+		beverages() = Aecht_Schlenkerla_Rauchbier <- desiredDish() = Spareribs & guestsWithChildren().
+		beverages() = Guiness <- desiredDish() = Stew & guestsWithChildren().
+		beverages() = Bordeaux <- desiredDish() = Roastbeef & guestsWithChildren().
+		beverages() = Pinot_Noir <- desiredDish() = Steak & guestsWithChildren().
+		beverages() = Apple_Juice <- guestsWithChildren().
+		beverages() = Water <- ~(guestsWithChildren()).
+	}
+
+	//Dish
+	{
+		desiredDish() = Spareribs <- season() = Fall & guestCount() =< 8.
+		desiredDish() = Roastbeef <- season() = Winter & guestCount() =< 8.
+		desiredDish() = Dry_Aged_Gourmet_Steak <- season() = Spring & guestCount() =< 4.
+		desiredDish() = Steak <- season() = Spring & 5 =< guestCount() & guestCount() =< 8.
+		desiredDish() = Stew <- season() = Fall & guestCount() > 8.
+		desiredDish() = Light_Salad_and_a_nice_Steak <- season() = Summer.
+	}
+
+}
+
+
+structure {
+}

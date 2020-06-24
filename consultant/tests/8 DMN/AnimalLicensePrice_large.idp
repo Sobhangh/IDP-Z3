@@ -1,0 +1,48 @@
+
+
+vocabulary {
+	type Animal_Typet_t constructed from { Dog } 
+	type Interaction_Reasont_t constructed from { Register } 
+	Animal_Type: Animal_Typet_t
+	Total: int
+	Interaction_Reason: Interaction_Reasont_t
+	Age: int
+	Sterilized
+	Half_Price_Reg
+	Free_Renewal
+	ViciousDog
+	Sterilization_Applicable
+	Vet_Certificate
+	Microchipped
+	Fee_Discount_for_Sterilization
+}
+theory {
+	//DogLicensePrice
+	{
+		Total() = 40 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & ~(Vet_Certificate()) & ~(Fee_Discount_for_Sterilization()) & ~(ViciousDog()) & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 20 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & ~(Vet_Certificate()) & ~(Fee_Discount_for_Sterilization()) & ~(ViciousDog()) & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 143 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & ~(Vet_Certificate()) & ~(Fee_Discount_for_Sterilization()) & ViciousDog() & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 134 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & ~(Vet_Certificate()) & ~(Fee_Discount_for_Sterilization()) & ViciousDog() & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 23 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 11.5 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 126.0 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ViciousDog() & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 114.50 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ViciousDog() & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 23 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 11.5 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 126 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ViciousDog() & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 114.5 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & ~(Microchipped()) & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ViciousDog() & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 17 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 8.5 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 120 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ViciousDog() & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 111.5 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & ~(Sterilized()) & Sterilization_Applicable() & Vet_Certificate() & Fee_Discount_for_Sterilization() & ViciousDog() & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 17 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 8.5 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ~(ViciousDog()) & Half_Price_Reg() & ~(Free_Renewal()).
+		Total() = 120 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ViciousDog() & ~(Half_Price_Reg()) & ~(Free_Renewal()).
+		Total() = 111.5 <- Animal_Type() = Dog & Interaction_Reason() = Register & Age() >= 6 & Microchipped() & Sterilized() & Sterilization_Applicable() & ~(Vet_Certificate()) & Fee_Discount_for_Sterilization() & ViciousDog() & Half_Price_Reg() & ~(Free_Renewal()).
+	}
+
+}
+
+
+structure {
+}
