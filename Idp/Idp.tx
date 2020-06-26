@@ -32,7 +32,7 @@ Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* 
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations 
-        ('!' (vars=/`?[^\d\W]\w*\b/ '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=Unary)? ('<-' body=Expression)? '.' ;
+        ('!' (vars=/`?[^\d\W]\w*\b/ '[' sorts=Sort ']')+ ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)? ('<-' body=Expression)? '.' ;
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
