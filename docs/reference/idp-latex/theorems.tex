@@ -1,0 +1,54 @@
+\usepackage{amsthm}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{theorem}[thm]{Theorem}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem*{lem*}{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conjecture}[thm]{Conjecture}
+\newtheorem{corollary}[thm]{Corollary}
+\newtheorem{proposition}[thm]{Proposition}
+\newtheorem{lemma}[thm]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{definition}[thm]{Definition}
+
+\newtheorem{nota}[thm]{Notation}
+\newtheorem*{nota*}{Notation}
+
+
+\newtheoremstyle{example_basic} 
+{\topsep} %ABOVESPACE
+{\topsep} %BELOWSPACE 
+{\normalfont}% Body font 
+{0pt}% Indent amount (empty = no indent, \parindent = para indent) 
+{\bfseries}% Thm head font 
+{.}% Punctuation after thm head 
+{5pt plus 1pt minus 1pt}% Space after thm head (\newline = linebreak) 
+{}% Thm head spec
+
+\newtheoremstyle{example_contd}
+{\topsep} %ABOVESPACE
+{\topsep} %BELOWSPACE 
+{\normalfont}% Body font 
+{0pt}% Indent amount (empty = no indent, \parindent = para indent) 
+{\bfseries}% Thm head font 
+{.}% Punctuation after thm head 
+{5pt plus 1pt minus 1pt}% Space after thm head (\newline = linebreak) 
+{\thmname{#1} \thmnumber{ #2}\thmnote{#3} (continued)}% Thm head spec 
+
+\theoremstyle{example_basic} 
+\newtheorem{ex}[thm]{Example}
+\newtheorem{example}[thm]{Example}
+\newtheorem{remark}[thm]{Remark}
+
+\newtheorem{ex*}{Example}
+\theoremstyle{example_contd} 
+\newtheorem*{ex_continued}{Example}
+
+\theoremstyle{plain}
+
+

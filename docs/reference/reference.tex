@@ -1,0 +1,63 @@
+\documentclass[a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+ 
+\usepackage[T1]{fontenc} %makes the pdf searchable
+\usepackage{lmodern} %makes the pdf searchable
+
+\input{idp-latex/idp-latex}
+
+
+\newcommand{\globalspace}{idpglobal} %see common.cpp
+\newcommand{\stdspace}{stdspace} %see common.cpp
+\newcommand{\includecode}{\ensuremath{\#}include}
+
+
+\title{The IDP-Z3 reference manual}
+\author{KU Leuven Knowledge Representation and Reasoning research group}
+\begin{document}
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO comment following lines and fix other TODOs %
+\renewcommand{\todo}[1]{}                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ 
+\newpage
+\tableofcontents
+
+\newpage
+
+\todo{everywhere in the text, replace dollar signs and \code{\{ tt ... \}} by \code{code \{ ... \}}}
+
+\input{introduction}
+
+%\input{comments}
+
+%\input{includes}
+
+%\input{namespaces}
+
+%\input{vocabularies}
+
+%\input{theories}
+
+%\input{terms}
+
+%\input{queries}
+
+%\input{structures}
+
+%\input{procedures}
+
+%\input{options}
+
+%\input{idp2}
+
+%\input{errors}
+
+\end{document}
