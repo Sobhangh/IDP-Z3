@@ -11,6 +11,7 @@ Welcome to IDP-Z3's documentation!
    :caption: Contents:
 
    introduction
+   IDPLanguage
 
 
 Indices and tables
