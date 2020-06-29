@@ -23,22 +23,6 @@ Custom types can be defined by specifying a range of numeric values, or a list o
 Functions
 +++++++++
 
-IDP-Z3 has the following built-in functions (to be used as operators):
-
-    * ``+(int, int): int``
-    * ``-(int, int): int``
-    * ``*(int, int): int``
-    * ``/(int, int): int``
-    * ``%(int, int): int`` modulo operator
-    * ``^(int, int): int`` power operator
-    * ``abs(int): int``
-    * ``+(real, real): real``
-    * ``-(real, real): real``
-    * ``*(real, real): real``
-    * ``/(real, real): real``
-    * ``^(real, int): real`` power operator
-    * ``abs(real): int``
-
 A function with name ``MyFunc``, input types ``T1``, ``T2``, ``T3`` and output type ``T``, is declared by:
 
 .. code-block::
@@ -49,8 +33,6 @@ IDP-Z3 does not support partial functions.
 
 Predicates
 ++++++++++
-
-IDP-Z3 has the following built-in predicates (to be used as operators): ``<``, ``=<`` (or ``≤``), ``=``, ``>=`` (or ``≥``), ``>``, ``~=`` (or ``≠``).
 
 A predicate with name ``MyPred`` and argument types ``T1``, ``T2``, ``T3`` is declared by:
 

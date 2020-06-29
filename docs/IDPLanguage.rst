@@ -1,5 +1,5 @@
-IDP Language
-============
+The IDP Language
+================
 
 Overview
 ------------
