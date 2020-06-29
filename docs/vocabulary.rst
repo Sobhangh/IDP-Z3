@@ -1,3 +1,5 @@
+.. _vocabulary:
+
 Vocabulary
 ----------
 
@@ -7,6 +9,7 @@ Each declaration goes on a new line (or are space separated).
 Symbols begins with an alphabetic character or ``_``, followed by alphanumeric characters or ``_``.  
 Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 
+.. _type:
 
 Types
 +++++
@@ -20,6 +23,8 @@ Custom types can be defined by specifying a range of numeric values, or a list o
     type side = {1..4}
     type color constructed from {red, blue, green}
 
+.. _function:
+
 Functions
 +++++++++
 
@@ -31,6 +36,8 @@ A function with name ``MyFunc``, input types ``T1``, ``T2``, ``T3`` and output t
 
 IDP-Z3 does not support partial functions.
 
+.. _predicate:
+
 Predicates
 ++++++++++
 
@@ -39,6 +46,8 @@ A predicate with name ``MyPred`` and argument types ``T1``, ``T2``, ``T3`` is de
 .. code-block::
     
     MyPred(T1, T2, T3)
+
+.. _constant:
 
 Propositions and Constants
 ++++++++++++++++++++++++++
@@ -49,6 +58,8 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
     
     MyProp1 MyProp2.
     MyConstant: int
+
+.. _symbols:
 
 Symbols type
 ++++++++++++
