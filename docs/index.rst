@@ -12,6 +12,7 @@ Welcome to IDP-Z3's documentation!
 
    introduction
    IDPLanguage
+   genindex
    
 
 
@@ -19,5 +20,5 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
+.. * :ref:`modindex`
