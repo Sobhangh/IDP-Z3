@@ -18,7 +18,9 @@ Principles:
     * a recursion-free enumeration, in which functional constructors are based on other computable types, 
     * or a recursion-free definition based on other computable types
 * A formula is _over-approximatable_ if it uses computable types only.  This over-approximation is computed by an algebra.
+    * the result is a [multiset](https://en.wikipedia.org/wiki/Multiset) !
 * A _Binary quantified formula_ is a formula of the form $\forall x [\phi(x)]: \psi(x).$  or $\exists x [\phi(x)]: \psi(x).$, where $\phi(x)$ is over-approximatable
+    * multisets are ok here, but not in aggregate expansions !
 
 use [panda](https://pandas.pydata.org/) ?
 

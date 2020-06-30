@@ -24,7 +24,7 @@ Mathematical expressions and Terms
 A *term* is inductively defined as follows:
 
 Constant
-    a constant_ is a term whose type_ is derived from its declaration in the vocabulary_..
+    a constant_ is a term whose type_ is derived from its declaration in the vocabulary_.
 
 .. _function application:
 

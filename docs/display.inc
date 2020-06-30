@@ -13,7 +13,7 @@ The following predicates and functions are available:
 
 expand
     :math:`expand(s_1, .., s_n)` specifies that :ref:`symbols<symbol>` :math:`s_1, .., s_n` are shown expanded, 
-    i.e., that all sub-sentences where they occur are shown on the screen.
+    i.e., that all sub-sentences of the theory where they occur are shown on the screen.
 
     For example, ``expand(`Length).`` will force the Interactive Consultant to show all sub-sentences containing `Length`.
 

@@ -14,7 +14,7 @@ theory
     specify the definitions and constraints satisfied by any solutions.
 
 structure
-    (optional) specify fixed interpretations of some predicates, functions and constants
+    (optional) specify the interpretation of some predicates, functions and constants.
 
 display
     (optional) configure the user interface of the Interactive Consultant

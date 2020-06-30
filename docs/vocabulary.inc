@@ -11,14 +11,15 @@ Symbols begins with an alphabetic character or ``_``, followed by alphanumeric c
 Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 
 .. _type:
-.. index:: type
+.. _constructor:
+.. index:: type, constructor
 
 Types
 +++++
 
 IDP-Z3 has the following built-in types:  ``bool``, ``int``, ``real``, ```Symbols``.
 
-Custom types can be defined by specifying a range of numeric values, or a list of constructors (of arity 0).
+Custom types can be defined by specifying a range of numeric literals, or a list of constructors (of arity 0).
 
 .. code-block::
 
@@ -65,7 +66,7 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
     MyConstant: int
 
 .. _symbol:
-.. index:: `Symbols symbol
+.. index:: symbol
 
 Symbols type
 ++++++++++++
