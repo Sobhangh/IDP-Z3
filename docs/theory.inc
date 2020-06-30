@@ -5,7 +5,7 @@
 .. |t1|     replace:: :math:`t_1`
 .. |t2|     replace:: :math:`t_2`
 .. |t1,tn|  replace:: :math:`t_1, t_2,.., t_n`
-.. |v1,vn|  replace:: :math:`v_1, v_2,.., v_n`
+.. |v1,vn|  replace:: :math:`v_1  v_2 .. v_n`
 
 .. index:: theory
 
@@ -24,47 +24,44 @@ Mathematical expressions and Terms
 A *term* is inductively defined as follows:
 
 Constant
-    a constant_ is a term.
+    a constant_ is a term whose type_ is derived from its declaration in the vocabulary_..
 
 .. _function application:
 
 Function application
     :math:`F(t_1, t_2,.., t_n)` is a term, when :math:`F` is a function_ symbol of arity |n|, and |t1,tn| are terms.
+    Each term must be of the appropriate type_, as defined in the function declaration in the vocabulary.
+    The resulting type of the function application is also defined in the function declaration.
 
 Constructor
-    a constructor for a type_ is a term.
+    Each constructor of a type_ is a term having that type.
 
 Parenthesis
     (|t|) is a term, when |t| is a term
 
 Numeric literal
-    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are terms.
+    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are numerical terms of type ``int`` or ``real``.
 
 Negation
     -|t| is a numerical term, when |t| is a numerical term.
 
 Arithmetic
     :math:`t_1 ꕕ t_2` is a numerical term, when |t1|, |t2| are two numerical terms, and :math:`ꕕ` is one of the following math operators :math:`+, -, *, /, \hat{}, \%`.
+    Mathematical operators can be chained as customary (e.g. :math:`x+y+z`).
+    The usual order of binding is used.
 
 Cardinality aggregate
-    :math:`\#\{v_1, v_2,.., v_n: \phi\}` is a term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
+    :math:`\#\{v_1[typeOfV_1] .. v_n[typeOfV_n] : \phi\}` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
 
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
 Arithmetic aggregate
-    :math:`ꕕ\{v_1, v_2,.., v_n: \phi : t\}` is a term when :math:`ꕕ` is :math:`sum`, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
+    :math:`ꕕ\{v_1[typeOfV_1] .. v_n[typeOfV_n] : \phi : t\}` is a numerical term when :math:`ꕕ` is :math:`sum`, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
 
     The term denotes the sum of |t| for each distinct tuple of values for |v1,vn| which make |phi| true.
 
 Variable
-    a variable is a term.
-
-In the first two cases, the type_ of the term is derived from its declaration in the vocabulary_.
-In the latter case, the type_ of a variable is derived from the `quantifier expression`_ that declares it (see below).  
-
-In a function application, each argument must be of the appropriate type_.  
-Mathematical operators can be chained as customary (e.g. :math:`x+y+z`).
-The usual order of binding is used.
+    a variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).  
 
 .. _sentence:
 .. _constraint:
@@ -83,6 +80,7 @@ true and false
 
 Predicate application
     :math:`P(t_1, t_2,.., t_n)` is a sentence, when :math:`P` is a predicate_ symbol of arity |n|, and |t1,tn| are terms.
+    Each term must be of the appropriate type_, as defined in the predicate declaration.
     If the arity of :math:`P` is 0, i.e., if :math:`P` is a proposition, then :math:`P` and :math:`P()` are sentences.
     
 Parenthesis
@@ -90,22 +88,32 @@ Parenthesis
     
 Comparison
     :math:`t_1 ꕕ t_2` is a sentence, when |t1|, |t2| are two numerical terms and :math:`ꕕ` is one of the following comparison operators :math:`<, ≤, =, ≥, >, ≠` (or,  using ascii characters: :math:`=<, >=, \sim=`).
+    Comparison operators can be chained as customary.
 
 Negation
-    |not| |phi| is a sentence (or,  using ascii characters: :math:`\sim \phi`) when |phi| is a sentence.
+    |not| |phi| is a sentence (or, using ascii characters: :math:`\sim \phi`) when |phi| is a sentence.
 
 Logic connectives
     :math:`\phi_1 ꕕ \phi_2` is a sentence when :math:`\phi_1, \phi_2` are two sentences and :math:`ꕕ` is one of the following logic connectives :math:`\lor, \land, \Rightarrow, \Leftarrow, \Leftrightarrow` (or using ascii characters: :math:`|, \&, =>, <=, <=>` respectively).
+    Logic connectives can be chained as customary.
 
 .. _quantifier expression:
 .. index:: quantifier expression
 
 Quantified formulas
-    :math:`\exists x[typeOfX]: \phi` and :math:`\forall x[typeOfX]: \phi`  (or, using ascii characters: :math:`?, !` respectively) are *quantifier formulas* with variable :math:`x`, when |phi| is a sentence.
+    *Quantified formulas* are sentences.
+    They have one of these two forms, where :math:`v_1, .., v_n` are variables and |phi| is a sentence:
 
-In a predicate application, each argument must be of the appropriate type_.
-Comparison operators and logic connectives can be chained as customary.
-A variable may only occur in the scope of a quantifier for that variable.
+    .. math::
+
+        \exists v_1[typeOfV_1] .. v_n[typeOfV_n]: \phi
+
+        \forall v_1[typeOfV_1] .. v_n[typeOfV_n]: \phi
+
+    Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
+    For example, ``!x[int] y[int]: f(x,y)=f(y,x).``
+    A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
+
 
 .. _definition:
 .. index:: definition
@@ -117,15 +125,18 @@ A *definition* defines concepts, i.e. predicate_\ s or function_\ s, in terms of
 A definition consists of a set of rules, enclosed by ``{`` and ``}``.
 
 .. index:: rule
-*Rules* have the following form:
+
+*Rules* have one of the following forms:
 
 .. math::
 
-    \forall v_1[typeOfX_1] .. v_n[typeOfX_n] : P(t_1, .., t_n) \leftarrow \phi.
+    &\forall v_1[typeOfV_1] .. v_n[typeOfV_n] : P(t_1, .., t_n) \leftarrow \phi.
 
-where P is a predicate_ symbol, |t1,tn| are terms that may contain the variables |v1,vn| and |phi| is a formula that may contain these variables.
-:math:`P(t_1, t_2,.., t_n)` is called the *head* of the rule and |phi| the body.
-'<-' can be used instead of ':math:`\leftarrow`'.
+    &\forall v_1[typeOfV_1] .. v_n[typeOfV_n] : F(t_1, .., t_n)=t \leftarrow \phi.
+
+where P is a predicate_ symbol, F is a function_ symbol, |t|, |t1,tn| are terms that may contain the variables |v1,vn| and |phi| is a formula that may contain these variables.
+:math:`P(t_1, t_2,.., t_n)` is called the *head* of the rule and |phi| the *body*.
+``<-`` can be used instead of ':math:`\leftarrow`'.
 If the body is ``true``, the left arrow and body of the rule can be omitted.
 
 

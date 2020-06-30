@@ -30,3 +30,4 @@ Read-the-docs:
 For thesis ?
 * [template](https://github.com/jaantollander/Sphinx-Thesis-Template)
 * [latex customisation of sphinx](https://www.sphinx-doc.org/en/master/latex.html)
+* [bibtex](https://sphinxcontrib-bibtex.readthedocs.io/en/latest/)

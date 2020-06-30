@@ -71,7 +71,7 @@ Symbols type
 ++++++++++++
 
 The type ```Symbols`` has one constructor for each function/predicate/constant declared in the vocabulary.
-For the above example, the ```Symbols`` are : ```MyFunc``, ```MyPred``, ```MyProp1``, ```MyProp1``, ```MyConst``.
+For the above example, the constructors of ```Symbols`` are : ```MyFunc``, ```MyPred``, ```MyProp1``, ```MyProp1``, ```MyConst``.
 
 .. index:: annotation (vocabulary)
 
