@@ -1,4 +1,5 @@
 .. _vocabulary:
+.. index:: vocabulary
 
 Vocabulary
 ----------
@@ -10,6 +11,7 @@ Symbols begins with an alphabetic character or ``_``, followed by alphanumeric c
 Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 
 .. _type:
+.. index:: type
 
 Types
 +++++
@@ -24,6 +26,7 @@ Custom types can be defined by specifying a range of numeric values, or a list o
     type color constructed from {red, blue, green}
 
 .. _function:
+.. index:: function
 
 Functions
 +++++++++
@@ -37,6 +40,7 @@ A function with name ``MyFunc``, input types ``T1``, ``T2``, ``T3`` and output t
 IDP-Z3 does not support partial functions.
 
 .. _predicate:
+.. index:: predicate
 
 Predicates
 ++++++++++
@@ -48,6 +52,7 @@ A predicate with name ``MyPred`` and argument types ``T1``, ``T2``, ``T3`` is de
     MyPred(T1, T2, T3)
 
 .. _constant:
+.. index:: constant, proposition
 
 Propositions and Constants
 ++++++++++++++++++++++++++
@@ -59,7 +64,8 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
     MyProp1 MyProp2.
     MyConstant: int
 
-.. _symbols:
+.. _symbol:
+.. index:: `Symbols symbol
 
 Symbols type
 ++++++++++++
@@ -67,3 +73,26 @@ Symbols type
 The type ```Symbols`` has one constructor for each function/predicate/constant declared in the vocabulary.
 For the above example, the ```Symbols`` are : ```MyFunc``, ```MyPred``, ```MyProp1``, ```MyProp1``, ```MyConst``.
 
+.. index:: annotation (vocabulary)
+
+Vocabulary annotations
+++++++++++++++++++++++
+
+To improve the display of functions and predicates in the :ref:`Interactive Consultant <Consultant>`, 
+they can be annotated with their intended meaning, a short comment, or a long comment.
+These annotations are enclosed in ``[`` and ``]``, and come before the symbol declaration.
+
+.. _meaning:
+.. index:: intended meaning
+
+Intended meaning
+    ``[this is a text]`` specifies the intended meaning of the symbol.
+    This text is shown in the header of the symbol's box.
+
+Short info
+    ``[short:this is a short comment]`` specifies the short comment of the symbol.
+    This comment is shown when the mouse is over the info icon in the header of the symbol's box.
+
+Long info
+    ``[long:this is a long comment]`` specifies the long comment of the symbol.
+    This comment is shown when the user clicks the info icon in the header of the symbol's box.

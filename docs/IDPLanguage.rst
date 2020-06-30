@@ -42,5 +42,7 @@ The skeleton of an IDP program is thus as follows:
 
 Everything between ``//`` and the end of the line is a comment.
 
-.. include:: vocabulary.rst
-.. include:: theory.rst
+.. include:: vocabulary.inc
+.. include:: theory.inc
+.. include:: structure.inc
+.. include:: display.inc

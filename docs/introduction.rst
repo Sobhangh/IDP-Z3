@@ -1,9 +1,13 @@
+
 Introduction
 ============
 
 IDP-Z3 is a collection of software components implementing the Knowledge Base paradigm using the IDP language and a Z3 SMT solver.
 
 These components together enable the creation of these solutions:
+
+.. _Consultant:
+.. index:: Interactive Consultant
 
 * the Interactive Consultant, which allow a knowledge expert to enter knowledge about a particular problem domain, and an end user to interactively find solutions for particular problem instances;
 * (to be developed) a program with a command line interface to compute inferences on a knowledge base;

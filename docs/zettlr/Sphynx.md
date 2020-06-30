@@ -21,6 +21,10 @@ Read-the-docs:
 * show list of GitLab projects → Import autoconfig.z3
 * error due to sphinx 1.8.5 → add doc/requirements.txt
 * [view doc online](https://idp-z3.readthedocs.io/en/latest/?)
+* [use .inc file extension](https://stackoverflow.com/a/35541748/474491) for vocabulary
+* python3.8 -m pip install [sphinx-autobuild](https://pypi.org/project/sphinx-autobuild/)
+* sphinx-autobuild docs docs/_build/html
+* open browser at http://127.0.0.1:8000
 
 
 For thesis ?
