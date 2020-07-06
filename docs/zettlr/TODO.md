@@ -50,6 +50,7 @@ Date: TODO
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
+- [ ] use graph library instead of simplify for relevance
 - [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
 
 - [ ] merge case.co_constraints and case.definitions (many overlaps)

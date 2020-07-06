@@ -23,6 +23,12 @@ Mathematical expressions and Terms
 
 A *term* is inductively defined as follows:
 
+Numeric literal
+    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are numerical terms of type ``int`` or ``real``.
+
+Constructor
+    Each constructor of a type_ is a term having that type.
+
 Constant
     a constant_ is a term whose type_ is derived from its declaration in the vocabulary_.
 
@@ -33,15 +39,6 @@ Function application
     Each term must be of the appropriate type_, as defined in the function declaration in the vocabulary.
     The resulting type of the function application is also defined in the function declaration.
 
-Constructor
-    Each constructor of a type_ is a term having that type.
-
-Parenthesis
-    (|t|) is a term, when |t| is a term
-
-Numeric literal
-    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are numerical terms of type ``int`` or ``real``.
-
 Negation
     -|t| is a numerical term, when |t| is a numerical term.
 
@@ -49,6 +46,9 @@ Arithmetic
     :math:`t_1 ꕕ t_2` is a numerical term, when |t1|, |t2| are two numerical terms, and :math:`ꕕ` is one of the following math operators :math:`+, -, *, /, \hat{}, \%`.
     Mathematical operators can be chained as customary (e.g. :math:`x+y+z`).
     The usual order of binding is used.
+
+Parenthesis
+    (|t|) is a term, when |t| is a term
 
 Cardinality aggregate
     :math:`\#\{v_1[typeOfV_1] .. v_n[typeOfV_n] : \phi\}` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
@@ -83,9 +83,6 @@ Predicate application
     Each term must be of the appropriate type_, as defined in the predicate declaration.
     If the arity of :math:`P` is 0, i.e., if :math:`P` is a proposition, then :math:`P` and :math:`P()` are sentences.
     
-Parenthesis
-    (|phi|) is a sentence when |phi| is a sentence.
-    
 Comparison
     :math:`t_1 ꕕ t_2` is a sentence, when |t1|, |t2| are two numerical terms and :math:`ꕕ` is one of the following comparison operators :math:`<, ≤, =, ≥, >, ≠` (or,  using ascii characters: :math:`=<, >=, \sim=`).
     Comparison operators can be chained as customary.
@@ -97,6 +94,9 @@ Logic connectives
     :math:`\phi_1 ꕕ \phi_2` is a sentence when :math:`\phi_1, \phi_2` are two sentences and :math:`ꕕ` is one of the following logic connectives :math:`\lor, \land, \Rightarrow, \Leftarrow, \Leftrightarrow` (or using ascii characters: :math:`|, \&, =>, <=, <=>` respectively).
     Logic connectives can be chained as customary.
 
+Parenthesis
+    (|phi|) is a sentence when |phi| is a sentence.
+    
 .. _quantifier expression:
 .. index:: quantifier expression
 
