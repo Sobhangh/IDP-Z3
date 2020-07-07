@@ -1,33 +1,17 @@
 vocabulary environment {
   type location constructed from {Flemish_Region, Walloon_Region, Brussels_Region}
-
   type real_Estate_Type constructed from {Residential, Residential_Building_Land, Other_Real_Estate}
-
   type destination constructed from {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
   type buyerType constructed from {Natural_Person, Legal_Person, Mixed}
-
   type calculationBase = {190; 200; 210; 220; 225}
   type baseLimit = {200; 220}
-
   type date = {2015..2025}
-
   type agreementDwellingForSocialRenting constructed from {Less_Than_9_years, More_than_9_Or_9_years}
-
   type transaction constructed from {Public_Sale, Out_Hand, Public_Sale_Community}
-
-
-
-  type municipality constructed from {other_Municipal, Aalst, Antwerpen, Boom, Brugge, Dendermonde, Genk, Gent, Hasselt, Kortrijk, Leuven, Mechelen, Oostende, Roeselare, SintNiklaas, Turnhout, Vilvoorde, Affligem, Asse, Beersel, Bever, Dilbeek, Drogenbos, Galmaarden, Gooik, Grimbergen, Halle, Herne, Hoeilaart, Kampenhout, KapelleopdenBos, Kraainem, Lennik, Liedekerke, Linkebeek, Londerzeel, Machelen, Meise, Merchtem, Opwijk, Overijse, Pepingen, Roosdaal, SintGenesiusRode, SintPietersLeeuw, Steenokkerzeel, Ternat, Wemmel, WezembeekOppem, Zaventem, Zemst, Bertem, Huldenberg, Kortenberg, Tervuren}
-
   type resale constructed from {Less_Than_Three, Three_Or_More}
-
-
   type seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
-  ////////////////////////
-
   Region : location
-  Municipality : municipality
   Type_Of_Real_Estate : real_Estate_Type
   Seller : seller
   Buyer : buyerType
@@ -41,12 +25,9 @@ vocabulary environment {
   Transaction_Type : transaction
   Duration_Of_Agreement : agreementDwellingForSocialRenting
 
-  Core_City
-
   Mortgage_Loan_Allowance
   Clean_Purchase
   Causal_Connection
-
 
   Energy_Renovation_Planned
 
@@ -58,9 +39,7 @@ vocabulary environment {
   Additional_Security_Required
   Additional_Security_Satisfied
 
-
   Additional_Terms
-
 
   Start_Dt_Dwelling_For_Social_Rent : date
 
