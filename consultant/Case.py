@@ -167,7 +167,7 @@ class Case:
         for a in self.assignments.values():
             a.relevant = False
 
-        # flatten constraints
+        # collect (co-)constraints
         constraints = []
         for constraint in self.simplified:
             constraints.append(constraint)
@@ -175,37 +175,45 @@ class Case:
             constraint.co_constraints(temp)
             constraints.extend(temp)
 
-        # initialize reachable with relevant; 
-        # set constraint.relevant, constraint.questions
+
+        # initialize reachable with relevant, if any
         reachable = OrderedSet()
         for constraint in constraints:
-            constraint.relevant = False
-            constraint.questions = OrderedSet()
             if type(constraint)==AppliedSymbol and constraint.name=='__relevant':
                 for e in constraint.sub_exprs:
                     reachable.add(e)
-            else:
-                constraint.collect(constraint.questions, all_=True, co_constraints=False)
-        if len(reachable) == 0: # no goal --> every question is relevant
-            for constraint in constraints:
-                if constraint.if_symbol is None:
-                    for q in constraint.questions:
-                        reachable.add(q)
 
-        # determine given in constraints' questions
-        # add goals in constraint.original to constraint.questions
+        # analyse given information
         given = OrderedSet()
+        for q in self.assignments.values():
+            if q.status == Status.GIVEN:
+                if not q.sentence.has_decision():
+                    given.add(q.sentence)
+                else: # tentative decisions are goals
+                    reachable.add(q.sentence)
+
+
+        # set constraint.relevant, constraint.questions
         for constraint in constraints:
-            for q in constraint.questions:
-                if q.code in self.assignments \
-                and self.assignments[q.code].status == Status.GIVEN \
-                and not q.has_decision():
-                    given.add(q)
+            constraint.relevant = False
+            constraint.questions = OrderedSet()
+            constraint.collect(constraint.questions, all_=True, co_constraints=False)
+
+        # add goals in constraint.original to constraint.questions
+        for constraint in constraints:
             qs = OrderedSet()
             constraint.original.collect(qs, all_=True, co_constraints=False)
             for q in qs:
                 if q in reachable: # a goal
                     constraint.questions.add(q)
+
+
+        # nothing relevant --> make every question in a constraint relevant
+        if len(reachable) == 0: 
+            for constraint in constraints:
+                if constraint.if_symbol is None:
+                    for q in constraint.questions:
+                        reachable.add(q)
 
         # mark reachable as relevant
         self.relevant_symbols = {}  # Dict[string: int]
