@@ -158,9 +158,8 @@ class Case:
     #             l.relevant = True
 
     def get_relevant_subtences(self):
-        """ informational interpretation of relevance 
-        
-        sets relevance of questions in self.assignments
+        """         
+        sets 'relevant in self.assignments
         sets rank of symbols in self.relevant_symbols
         removes irrelevant constraints in self.simplified
         """
@@ -181,6 +180,7 @@ class Case:
         for constraint in constraints:
             if type(constraint)==AppliedSymbol and constraint.name=='__relevant':
                 for e in constraint.sub_exprs:
+                    assert e.code in self.assignments, f"Invalid expression in relevant: {e.code}" 
                     reachable.add(e)
 
         # analyse given information
@@ -193,19 +193,22 @@ class Case:
                     reachable.add(q.sentence)
 
 
+        # constraints are set of questions in self.assignments
         # set constraint.relevant, constraint.questions
         for constraint in constraints:
             constraint.relevant = False
             constraint.questions = OrderedSet()
             constraint.collect(constraint.questions, all_=True, co_constraints=False)
 
-        # add goals in constraint.original to constraint.questions
-        for constraint in constraints:
+            # add goals in constraint.original to constraint.questions
+            # only keep questions in self.assignments
             qs = OrderedSet()
             constraint.original.collect(qs, all_=True, co_constraints=False)
             for q in qs:
                 if q in reachable: # a goal
                     constraint.questions.add(q)
+            constraint.questions = OrderedSet([q for q in constraint.questions
+                if q.code in self.assignments])
 
 
         # nothing relevant --> make every question in a constraint relevant
@@ -215,33 +218,26 @@ class Case:
                     for q in constraint.questions:
                         reachable.add(q)
 
-        # mark reachable as relevant
+        # find relevant symbols by breadth-first propagation
         self.relevant_symbols = {}  # Dict[string: int]
-        for q in reachable:
-            if q.code in self.assignments:
-                self.assignments[q.code].relevant = True
-            for s in q.unknown_symbols(co_constraints=False):
-                self.relevant_symbols[s] = 1
-
-        # find relevant symbols by propagation
         to_add, rank = reachable, 1
         while to_add:
-            to_add = OrderedSet()
-            rank += 1
-            for constraint in constraints:
-                if ( not constraint.relevant # not yet considered
-                and  any(q in reachable and not q in given for q in constraint.questions) ):
-                        to_add.add(constraint)
-            for constraint in to_add:
-                constraint.relevant = True
-                for q in constraint.questions:
-                    if q.code in self.assignments:
-                        self.assignments[q.code].relevant = True
-                    if not q in given:
-                        reachable.add(q)
-                for s in constraint.unknown_symbols(co_constraints=False):
+            for q in to_add:
+                self.assignments[q.code].relevant = True
+                for s in q.unknown_symbols(co_constraints=False):
                     if s not in self.relevant_symbols:
                         self.relevant_symbols[s] = rank
+                if not q in given:
+                    reachable.add(q)
+
+            to_add, rank = OrderedSet(), rank+1
+            for constraint in constraints:
+                # consider constraint not yet considered
+                if ( not constraint.relevant
+                # and with a question that is reachable but not given
+                and  any(q in reachable and not q in given for q in constraint.questions) ):
+                    constraint.relevant = True
+                    to_add.update(constraint.questions)
 
         # remove irrelevant domain conditions
         self.simplified = list(filter(lambda constraint: constraint.relevant, self.simplified))
