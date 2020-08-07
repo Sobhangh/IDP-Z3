@@ -16,6 +16,7 @@ Date: TODO
 - [ ] issues on GitLab
 
 #### Syntax changes:
+- [ ] separate theory of environment
 - [ ] move enumerations in vocabulary to the theory block
 - [ ] move enumerations in structure to the theory block
 - [ ] 'Expand all' or list (instead of View expanded/normal)
@@ -50,6 +51,9 @@ Date: TODO
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
+- [ ] full propagate: should have only one expansion per unknown subtence
+- [ ] relevance-based optimal propagate (do not propagate irrelevant subtences)
+- [ ] do not translate Simplified in propagation: using original theory instead
 - [ ] use graph library instead of simplify for relevance
 - [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
 

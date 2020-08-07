@@ -4,6 +4,8 @@ tags: #bug
 Date: 20200430161236
 –-
 
+option: simplify constraint only if it is not a justification of the propagated atoms (→ keep track of what justifies a propagated value)
+
 ## Problem 1
 set q=false in GUI ⇒ q becomes irrelevant, but shouldn't. (it works if ~q added to theory)
 ```
