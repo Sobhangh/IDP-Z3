@@ -232,6 +232,7 @@ class ConstructedTypeDeclaration(object):
         symbol_decls[self.name] = self
         for c in self.constructors:
             c.type = self
+            assert c.name not in symbol_decls, "duplicate constructor in vocabulary: " + c.name
             symbol_decls[c.name] = c
         self.range = self.constructors  # TODO constructor functions
 
