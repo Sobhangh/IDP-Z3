@@ -189,11 +189,9 @@ class Case:
             if q.status == Status.GIVEN:
                 if not q.sentence.has_decision():
                     given.add(q.sentence)
-                else: # tentative decisions are goals
-                    reachable.add(q.sentence)
 
 
-        # constraints are set of questions in self.assignments
+        # constraints have set of questions in self.assignments
         # set constraint.relevant, constraint.questions
         for constraint in constraints:
             constraint.relevant = False
