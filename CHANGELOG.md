@@ -9,13 +9,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## API
 * add "environmental" of symbols in /meta's response
-* support simple `display` theory, with `goal`, `relevant`, `expand`, `hide` and `view` predicates
+* support simple `display` theory, with `goal`, `relevant`, `expand`, `hide`, `view` and `moveSymbols` predicates
   * `view` in /meta can take the `hidden` value
   * replace `__goals(Term)` by `__relevant(Term)`
 * add `propagated` to /meta's response
 
 ## GUI
 * File / New
+* File / Help
 
 
 ## [0.5.1] - 2020-05-26

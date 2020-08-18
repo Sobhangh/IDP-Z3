@@ -802,6 +802,7 @@ class View(object):
 class Display(object):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
+        self.moveSymbols = False
 
     def annotate(self, idp):
         self.symbol_decls = idp.vocabulary.symbol_decls
@@ -817,7 +818,8 @@ class Display(object):
             ('expand', None),
             ('relevant', None),
             ('hide', None),
-            ('view', Sort(name='View'))
+            ('view', Sort(name='View')),
+            ('moveSymbols', None)
         ]:
             symbol_decl = SymbolDeclaration(annotations='', name=Symbol(name=name), 
                 sorts=[], out=out)
@@ -870,6 +872,11 @@ class Display(object):
                                 s.view = ViewType.EXPANDED # don't change hidden symbols
                     else:
                         assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
+                else:
+                    raise Exception("unknown display contraint: ", constraint)
+            elif type(constraint)==Variable:
+                if constraint.name == "moveSymbols":
+                    self.moveSymbols = True
                 else:
                     raise Exception("unknown display contraint: ", constraint)
             else:

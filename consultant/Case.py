@@ -184,9 +184,10 @@ class Case:
                     reachable.add(e)
 
         # analyse given information
-        given = OrderedSet()
+        given, hasGiven = OrderedSet(), False
         for q in self.assignments.values():
             if q.status == Status.GIVEN:
+                hasGiven = True
                 if not q.sentence.has_decision():
                     given.add(q.sentence)
 
@@ -217,14 +218,14 @@ class Case:
                         reachable.add(q)
 
         # find relevant symbols by breadth-first propagation
-        self.relevant_symbols = {}  # Dict[string: int]
+        relevants = {}  # Dict[string: int]
         to_add, rank = reachable, 1
         while to_add:
             for q in to_add:
                 self.assignments[q.code].relevant = True
                 for s in q.unknown_symbols(co_constraints=False):
-                    if s not in self.relevant_symbols:
-                        self.relevant_symbols[s] = rank
+                    if s not in relevants:
+                        relevants[s] = rank
                 if not q in given:
                     reachable.add(q)
 
@@ -236,6 +237,8 @@ class Case:
                 and  any(q in reachable and not q in given for q in constraint.questions) ):
                     constraint.relevant = True
                     to_add.update(constraint.questions)
+        if not hasGiven or self.idp.display.moveSymbols:
+            self.relevant_symbols = relevants
 
         # remove irrelevant domain conditions
         self.simplified = list(filter(lambda constraint: constraint.relevant, self.simplified))

@@ -23,9 +23,9 @@ hide
     For example, ``hide(`Length).`` will force the Interactive Consultant to not display the box containing `Length` information.
 
 view
-    ``view = expanded.`` specifies that symbols are displayed expand_\ ed.
+    ``view = normal.`` (default) specifies that symbols are displayed in normal mode.
 
-    ``view = normal.`` specifies that symbols are displayed in normal mode.
+    ``view = expanded.`` specifies that symbols are displayed expand_\ ed.
 
 relevant
     :math:`relevant(s_1, .., s_n)` specifies that symbols :math:`s_1, .., s_n` are relevant, i.e. that they should never be greyed out.
@@ -35,5 +35,9 @@ relevant
 goal
     :math:`goal(s)` specifies that symbols :math:`s` is a goal, i.e. that it is relevant and shown expanded.
 
+moveSymbols
+    When the *display block* contains ``moveSymbols.``, the Interactive Consultant is allowed to change the layout of symbols on the screen, so that relevant symbols come first.
+
+    By default, the symbols do not move.
 
 
