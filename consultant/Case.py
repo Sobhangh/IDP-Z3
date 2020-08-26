@@ -65,12 +65,12 @@ class Case:
         # find immediate universals
         for c in self.idp.theory.constraints:
             c = c.copy()
+            status = Status.ENV_UNIV if c.block.name=='environment' else Status.UNIVERSAL
             consequences = []
             new_constraint = c.substitute(TRUE, TRUE, self.assignments, consequences) # to simplify co_constraint
             consequences.extend(new_constraint.implicants(self.assignments))
             if consequences:
                 for sentence, value in consequences:
-                    status = Status.ENV_UNIV if not sentence.has_decision() else Status.UNIVERSAL
                     ass = Assignment(sentence, value, status)
                     self.assignments[sentence.code] = ass
             self.simplified.append(c)
@@ -82,7 +82,7 @@ class Case:
             e.questions = questions
 
         # propagate universals
-        if self.idp.decision: # if there is a decision vocabulary
+        if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
@@ -108,7 +108,7 @@ class Case:
             e.collect(questions, all_=True)
             e.questions = questions
 
-        if out.idp.decision: # if there is a decision vocabulary
+        if len(out.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             out.full_propagate(all_=False)
         out.full_propagate(all_=True) # now consider all facts and theories
@@ -367,7 +367,7 @@ class Case:
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None and (all_ or not l.sentence.has_decision())]
             + [c.translate() for c in self.simplified
-                    if all_ or not c.has_decision()]
+                    if all_ or not c.block.name=='environment']
             + [c.translate() for c in self.co_constraints]
             )
         return self.translated

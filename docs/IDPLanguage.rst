@@ -20,7 +20,7 @@ display
     (optional) configure the user interface of the Interactive Consultant
 
 
-The skeleton of an IDP program is thus as follows:
+The basic skeleton of an IDP knowledge base is thus as follows:
 
 .. code-block::
 
@@ -42,6 +42,7 @@ The skeleton of an IDP program is thus as follows:
 
 Everything between ``//`` and the end of the line is a comment.
 
+.. include:: environment.inc
 .. include:: vocabulary.inc
 .. include:: theory.inc
 .. include:: structure.inc

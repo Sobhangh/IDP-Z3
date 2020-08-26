@@ -58,7 +58,17 @@ vocabulary decision {
   Registration_Type : registration_Type
 }
 
-theory {
+theory environment {
+  { Professional_Buyer <-
+      Professional_Declaration_Filed
+      & Guarantee_Satisfied
+      & (Additional_Security_Required & Additional_Security_Satisfied
+      | ~ Additional_Security_Required)
+      & Resale = Three_Or_More.
+  }
+}
+
+theory decision {
 
   { Tax = 1 <-
       Registration_Type = Heritage
@@ -168,15 +178,6 @@ theory {
       & Registration_Type ~= Social_Purpose
       & Registration_Type ~= Exchange_Unbuilt_Ground
   .
-
-    
-  { Professional_Buyer <-
-      Professional_Declaration_Filed
-      & Guarantee_Satisfied
-      & (Additional_Security_Required & Additional_Security_Satisfied
-      | ~ Additional_Security_Required)
-      & Resale = Three_Or_More
-  .}
 
 }
 

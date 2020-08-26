@@ -17,17 +17,11 @@ vocabulary decision {
     Guaranteed
 }
 
-theory {
+theory environment {
     [Observations are accurate]
     ( (! m[material]: _O(m) => OMinT(m)=_MinT(m))
     & (! m[material]: _O(m) => OMaxT(m)=_MaxT(m))
     ).
-
-    [T must be within acceptable range]
-    (_MinT(M) =< T =< _MaxT(M)).
-
-    [A guarantee requires an observation for M]
-    (Guaranteed <=> _O(M)).
 
     [Observation for e1]
     (_O(e1) &  OMinT(e1)= 0 &   OMaxT(e1) = 20).
@@ -37,9 +31,18 @@ theory {
 
     [No observation for e3]
     (~_O(e3)).
+}
+
+theory decision {
+    [T must be within acceptable range]
+    (_MinT(M) =< T =< _MaxT(M)).
+
+    [A guarantee requires an observation for M]
+    (Guaranteed <=> _O(M)).
     
     M=e1 | M=e2 | M=e3.
 }
+
 display {
     goal(`M).
     view = expanded.

@@ -50,7 +50,7 @@ def metaJSON(idp):
             "priority": "core",
             "showOptimize": True,  # GUI is smart enough to show buttons appropriately
             "view": i.view.value,
-            "environmental": i.environmental
+            "environmental": i.block.name=='environment'
         }
         if i.annotations is not None:
             if 'reading' in i.annotations:

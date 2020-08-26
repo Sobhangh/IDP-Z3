@@ -182,7 +182,7 @@ class Structure_(object):
         self.case = case
 
         self.m[' Global'] = {}
-        self.m[' Global']['env_dec'] = bool(case.idp.decision)
+        self.m[' Global']['env_dec'] = bool(len(case.idp.vocabularies)==2)
 
         def initialise(atom):
             typ = atom.type
@@ -213,7 +213,7 @@ class Structure_(object):
                     symbol["relevant"] = case.assignments[atom.code].relevant
                     symbol['reading']  = reading
                     symbol['normal']   = hasattr(atom, 'normal')
-                    symbol['environmental'] = symb.environmental
+                    symbol['environmental'] = symb.block.name=='environment'
                     s.setdefault(key, symbol)
 
                     s["__rank"] = self.case.relevant_symbols.get(symb.name, 9999)

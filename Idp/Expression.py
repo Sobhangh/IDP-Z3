@@ -74,6 +74,7 @@ class Expression(object):
         # attributes of the top node of a (co-)constraint
         # .questions
         # .relevant
+        # .block
 
 
     def copy(self):
@@ -542,7 +543,8 @@ class AppliedSymbol(Expression):
             self.co_constraint.collect(questions, all_, co_constraints)
 
     def has_decision(self):
-        return not self.decl.environmental \
+        assert self.decl.block is not None
+        return not self.decl.block.name=='environment' \
             or any(e.has_decision() for e in self.sub_exprs)
 
 class Arguments(object):

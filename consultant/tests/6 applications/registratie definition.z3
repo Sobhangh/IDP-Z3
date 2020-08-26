@@ -91,7 +91,18 @@ Registration_Type : registration_Type
 Tax : tax_Rate
 }
 
-theory {
+theory environment {  
+    { Professional_Buyer <-
+        Professional_Declaration_Filed
+        & Guarantee_Satisfied
+        & (Additional_Security_Required & Additional_Security_Satisfied
+        | ~ Additional_Security_Required)
+        & Resale = Three_Or_More
+    .}
+~Professional_Declaration_Filed.
+}
+
+theory decision {
 
      // Tax
 
@@ -219,18 +230,6 @@ Registration_Type = Other =>     // @EXPLAIN: Registration_Type cannot be Other
 
 //? x[registration_Type]: Registration_Type = x.
 
-
-
-
-    
-{ Professional_Buyer <-
-    Professional_Declaration_Filed
-    & Guarantee_Satisfied
-    & (Additional_Security_Required & Additional_Security_Satisfied
-    | ~ Additional_Security_Required)
-    & Resale = Three_Or_More
-.}
-~Professional_Declaration_Filed.
 }
 
 display {

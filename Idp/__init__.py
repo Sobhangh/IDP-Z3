@@ -53,9 +53,8 @@ class ViewType(Enum):
 class Idp(object):
     def __init__(self, **kwargs):
         #log("parsing done")
-        self.vocabulary = kwargs.pop('vocabulary')
-        self.decision = kwargs.pop('decision')
-        self.theory = kwargs.pop('theory')
+        self.vocabularies = kwargs.pop('vocabularies')
+        self.theories = kwargs.pop('theories')
         self.interpretations = kwargs.pop('interpretations')
 
         self.goal = kwargs.pop('goal')
@@ -71,13 +70,28 @@ class Idp(object):
 
         self.translated = None  # [Z3Expr]
 
-        if self.decision is not None:
-            for decl in self.vocabulary.symbol_decls.values():
-                decl.environmental = True
-            self.vocabulary.update(self.decision)
+        # combine vocabularies
+        assert len(self.vocabularies) in [1,2], "Only 2 vocabularies are allowed"
+        self.vocabulary = self.vocabularies[0]
+        if len(self.vocabularies)==2:
+            assert self.vocabularies[0].name == 'environment' \
+                and self.vocabularies[1].name == 'decision', \
+                "The first vocabulary must be 'environment', the second, 'decision'"
+            self.vocabulary.update(self.vocabularies[1])
 
         if self.interpretations:
             self.interpretations.annotate(self.vocabulary)
+
+        # combine theories (before annotation!)
+        assert len(self.theories) == len(self.vocabularies), "There should be as many vocabularies as theories"
+        self.theory = self.theories[0]
+        if len(self.theories)==2:
+            assert self.theories[0].name == 'environment' \
+                and self.theories[1].name == 'decision', \
+                "The first theory must be 'environment', the second, 'decision'"
+            self.theory.constraints.extend(self.theories[1].constraints)
+            self.theory.definitions.extend(self.theories[1].definitions)
+
         self.goal.annotate(self)
         self.view.annotate(self)
         self.display.annotate(self)
@@ -144,6 +158,7 @@ class Annotations(object):
 
 class Vocabulary(object):
     def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
         self.terms = {}  # {string: Variable or AppliedSymbol}
         self.translated = []
@@ -161,6 +176,7 @@ class Vocabulary(object):
 
         # annotate declarations
         for s in self.declarations:
+            s.block = self
             s.annotate(self.symbol_decls)
 
         for constructor in self.symbol_decls['`Symbols'].constructors:
@@ -189,10 +205,6 @@ class Vocabulary(object):
             if v.is_var:
                 self.terms.update(v.instances)
         return []
-
-
-class Decision(Vocabulary):
-    pass
 
 
 class ConstructedTypeDeclaration(object):
@@ -327,7 +339,7 @@ class SymbolDeclaration(object):
         self.range = None  # all possible values
         self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
         self.interpretation = None  # f:tuple -> Expression (only if it is given in a structure)
-        self.environmental = False  # true if declared in environment vocabulary
+        self.block = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
     def __str__(self):
@@ -373,6 +385,7 @@ class SymbolDeclaration(object):
         for inst in self.instances.values():
             domain = self.type.check_bounds(inst)
             if domain is not None:
+                domain.block = self.block
                 domain.if_symbol = self.name if if_symbol else None
                 domain.annotations['reading'] = "Possible values for " + str(inst)
                 out.append(domain)
@@ -436,12 +449,19 @@ class Symbol(object):
 
 class Theory(object):
     def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.clark = {}  # {Symbol: Rule}
         self.symbol_decls = None  # {string: decl}
         self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.translated = None
+
+        for constraint in self.constraints:
+            constraint.block = self
+        for definition in self.definitions:
+            for rule in definition.rules:
+                rule.block = self
 
     def annotate(self, vocabulary):
         self.symbol_decls = vocabulary.symbol_decls
@@ -549,6 +569,7 @@ class Rule(object):
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
         self.expanded = None  # Expression
+        self.block = None  # theory where it occurs
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
@@ -656,6 +677,7 @@ class Rule(object):
                 out = out.instantiate(self.args[-1], instance)
         else:
             out = AEquivalence.make('⇔', [instance, out])
+        out.block = self.block
         return out
 
     def unknown_symbols(self):
@@ -769,6 +791,7 @@ class Goal(object):
             relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
                                     sorts=[], out=None)
             relevants.is_var = False
+            relevants.block = self
             relevants.annotate(symbol_decls)
 
         if self.name in symbol_decls:
@@ -778,6 +801,7 @@ class Goal(object):
             if instances:
                 goal = Symbol(name='__relevant').annotate(symbol_decls, {})
                 constraint = AppliedSymbol.make(goal, instances)
+                constraint.block = self
                 idp.theory.constraints.append(constraint)
             else:
                 raise Exception("goals must be instantiable.")
@@ -803,6 +827,7 @@ class Display(object):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
         self.moveSymbols = False
+        self.name = "display"
 
     def annotate(self, idp):
         self.symbol_decls = idp.vocabulary.symbol_decls
@@ -858,6 +883,7 @@ class Display(object):
                         if instances:
                             goal = Symbol(name='__relevant').annotate(self.symbol_decls, {})
                             constraint = AppliedSymbol.make(goal, instances)
+                            constraint.block = self
                             idp.theory.constraints.append(constraint)
                         else:
                             raise Exception("relevant symbols must be instantiable.")
@@ -892,7 +918,7 @@ dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[Idp, Annotations,
 
-                                         Vocabulary, Decision,
+                                         Vocabulary,
                                          ConstructedTypeDeclaration,
                                          Constructor, RangeDeclaration,
                                          SymbolDeclaration, Symbol, Sort,

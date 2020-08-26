@@ -5,8 +5,8 @@ vocabulary decision {
     type csid constructed from {b, c, d, e, f}
     cSID : csid
 }
-
-theory {
+theory environment {}
+theory decision {
      cSID = b ⇔ 2.104 ≤ Depth ≤ 2.476.
      cSID = c ⇔ 2.768 ≤ Depth ≤ 3.391.
      cSID = d ⇔ 4.294 ≤ Depth ≤ 5.206.

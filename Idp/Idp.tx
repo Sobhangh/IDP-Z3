@@ -1,7 +1,6 @@
 Idp:
-    vocabulary=Vocabulary
-    decision=Decision?
-    theory=Theory
+    vocabularies=Vocabulary*
+    theories=Theory*
     interpretations=Interpretations?
     goal=Goal?
     view=View?
@@ -12,7 +11,7 @@ Comment:
   /\/\/.*$/
 ;
 
-Vocabulary: 'vocabulary' 'environment'? '{' (declarations=Declaration)* '}';
+Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
   Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
     ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
@@ -26,9 +25,7 @@ Vocabulary: 'vocabulary' 'environment'? '{' (declarations=Declaration)* '}';
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-Decision: 'vocabulary' 'decision' '{' (declarations=Declaration)* '}';
-
-Theory: 'theory' '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
+Theory: 'theory' (name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations 
