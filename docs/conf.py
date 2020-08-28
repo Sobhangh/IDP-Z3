@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'IDP-Z3'
-copyright = '2020, Pierre Carbonnelle'
-author = 'Pierre Carbonnelle'
+copyright = '2020, Anonymous'
+author = 'Anonymous'
 
 
 # -- General configuration ---------------------------------------------------

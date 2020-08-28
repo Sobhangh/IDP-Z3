@@ -28,8 +28,8 @@ require_clean_work_tree () {
 python3.8 test.py generate
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [[ "$BRANCH" != "master" ]]; then
-  echo 'Not in master branch -> aborting';
+if [[ "$BRANCH" != "Anonymous" ]]; then
+  echo 'Not in Anonymous branch -> aborting';
   exit 1;
 fi
 # here, we could require no unstaged changes instead
@@ -37,8 +37,8 @@ fi
 
 cd ../autoconfig3
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [[ "$BRANCH" != "master" ]]; then
-  echo 'Client not in master branch -> aborting';
+if [[ "$BRANCH" != "Anonymous" ]]; then
+  echo 'Client not in Anonymous branch -> aborting';
   exit 1;
 fi
 require_clean_work_tree
@@ -59,27 +59,4 @@ then
     git commit # with latest client
     # next line is for CDN
     # gsutil -m rsync -r ./consultant/static gs://interactive-consultant/
-fi
-
-read -p "Deploy on Heroku ? (Y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    echo "deploying on Heroku..."
-    git push heroku master
-fi
-
-read -p "Deploy on Google App Engine ? (Y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    echo "deploying on Google App Engine..."
-    git push google master
-
-    cd ../autoconfig3
-    git push google master
-    cd ../autoconfigz3
-
-    gcloud app deploy
-    gcloud app browse
 fi
