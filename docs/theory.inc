@@ -11,6 +11,11 @@
 
 Theory
 ------
+.. code-block::
+
+    theory T:V {
+        // here comes the theory named T, on vocabulary named V
+    }
 
 A *theory* is a set of constraints and definitions to be satisfied.
 Before explaining their syntax, we need to introduce the concept of term. 

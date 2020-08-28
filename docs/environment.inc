@@ -15,14 +15,15 @@ Hence, a more advanced skeleton of an IDP knowledge base is:
     }
 
     vocabulary decision {
+        extern vocabulary environment
         // here comes the specification of the vocabulary to describe the decisions and their consequences
     }
 
-    theory environment {
+    theory environment:environment {
         // here comes the definitions and constraints satisfied by any environment possibly faced by the user
     }
 
-    theory decision {
+    theory decision:decision {
         // here comes the definitions and constraints to be satisfied by any solution
     }
 

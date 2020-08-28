@@ -12,8 +12,9 @@ Comment:
 ;
 
 Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
-  Declaration: ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
+  Declaration: Extern | ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
 
+    Extern: 'extern' 'vocabulary' (name=ID);
     ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
       Constructor: name=/[^\d\W]\w*\b|'(\.|[^'])*'/;
     RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
@@ -25,7 +26,7 @@ Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-Theory: 'theory' (name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
+Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* )* '}';
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations 

@@ -89,6 +89,9 @@ class Idp(object):
             assert self.theories[0].name == 'environment' \
                 and self.theories[1].name == 'decision', \
                 "The first theory must be 'environment', the second, 'decision'"
+            assert self.theories[0].vocab_name == self.theories[0].name \
+               and self.theories[1].vocab_name == self.theories[1].name, \
+               "The vocabulary name must be the same as the theory name"
             self.theory.constraints.extend(self.theories[1].constraints)
             self.theory.definitions.extend(self.theories[1].definitions)
 
@@ -206,6 +209,16 @@ class Vocabulary(object):
                 self.terms.update(v.instances)
         return []
 
+
+class Extern(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+
+    def __str__(self):
+        return f"extern vocabulary {self.name}"
+
+    def annotate(self, symbol_decls):
+        pass
 
 class ConstructedTypeDeclaration(object):
     COUNT = -1
@@ -450,6 +463,7 @@ class Symbol(object):
 class Theory(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+        self.vocab_name = kwargs.pop('vocab_name')
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.clark = {}  # {Symbol: Rule}
@@ -918,7 +932,7 @@ dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[Idp, Annotations,
 
-                                         Vocabulary,
+                                         Vocabulary, Extern,
                                          ConstructedTypeDeclaration,
                                          Constructor, RangeDeclaration,
                                          SymbolDeclaration, Symbol, Sort,

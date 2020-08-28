@@ -3,6 +3,7 @@ title: TODO
 tags: 
 Date: TODO
 –-
+- [ ] generic support for "extern vocabulary V"
 - [ ] [[Aanbesteding demo]] 
 
 - [ ] Explanations: inject values in message

@@ -2,11 +2,13 @@ vocabulary environment {
     Depth : real
 }
 vocabulary decision {
+    extern vocabulary environment
+    
     type csid constructed from {b, c, d, e, f}
     cSID : csid
 }
-theory environment {}
-theory decision {
+theory environment:environment {}
+theory decision:decision {
      cSID = b ⇔ 2.104 ≤ Depth ≤ 2.476.
      cSID = c ⇔ 2.768 ≤ Depth ≤ 3.391.
      cSID = d ⇔ 4.294 ≤ Depth ≤ 5.206.

@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ## API
-* syntax for 2 theories (environment + decision)
+* use IDP3 syntax for 2 theories (environment + decision)
 * add "environmental" of symbols in /meta's response
 * support simple `display` theory, with `goal`, `relevant`, `expand`, `hide`, `view` and `moveSymbols` predicates
   * `view` in /meta can take the `hidden` value

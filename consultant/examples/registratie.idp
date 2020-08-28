@@ -59,7 +59,7 @@ vocabulary decision {
   Registration_Type : registration_Type
 }
 
-theory environment {
+theory environment:environment {
   { Professional_Buyer <-
       Professional_Declaration_Filed
       & Guarantee_Satisfied
@@ -69,7 +69,7 @@ theory environment {
   }
 }
 
-theory decision {
+theory decision:decision {
 
   { Tax = 1 <-
       Registration_Type = Heritage

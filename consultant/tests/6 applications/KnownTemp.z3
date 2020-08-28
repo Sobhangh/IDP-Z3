@@ -11,13 +11,15 @@ vocabulary environment {
 }
 
 vocabulary decision {
+    extern vocabulary environment
+    
     type material constructed from {e1, e2, e3}
     T: int
     M: material
     Guaranteed
 }
 
-theory environment {
+theory environment:environment {
     [Observations are accurate]
     ( (! m[material]: _O(m) => OMinT(m)=_MinT(m))
     & (! m[material]: _O(m) => OMaxT(m)=_MaxT(m))
@@ -33,7 +35,7 @@ theory environment {
     (~_O(e3)).
 }
 
-theory decision {
+theory decision:decision {
     [T must be within acceptable range]
     (_MinT(M) =< T =< _MaxT(M)).
 

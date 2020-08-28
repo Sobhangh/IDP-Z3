@@ -4,6 +4,12 @@
 Vocabulary
 ----------
 
+.. code-block::
+
+    vocabulary V {
+        // here comes the vocabulary named V
+    }
+
 The vocabulary block specifies the types, predicates, functions and constants used to describe the problem domain.
 Each declaration goes on a new line (or are space separated).
 
@@ -97,3 +103,20 @@ Short info
 Long info
     ``[long:this is a long comment]`` specifies the long comment of the symbol.
     This comment is shown when the user clicks the info icon in the header of the symbol's box.
+
+.. _extern:
+.. index:: include vocabulary
+
+Include another vocabulary
++++++++++++++++++++++++++++
+
+A vocabulary W may include a previously defined vocabulary V:
+
+.. code-block::
+
+    vocabulary W {
+        extern vocabulary V
+        // here comes the vocabulary named V
+    }
+
+
