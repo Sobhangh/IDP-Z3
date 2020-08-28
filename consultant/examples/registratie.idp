@@ -12,42 +12,43 @@ vocabulary environment {
   type seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
   Region : location
+
+  // for Heritage
   Type_Of_Real_Estate : real_Estate_Type
-  Seller : seller
-  Buyer : buyerType
-  Use : destination
-
-  Domicile_Established
-  First_Ownership
   Monument
-
-  Resale : resale
-  Transaction_Type : transaction
-  Duration_Of_Agreement : agreementDwellingForSocialRenting
-
-  Mortgage_Loan_Allowance
-  Clean_Purchase
-  Causal_Connection
-
-  Energy_Renovation_Planned
-
+  Use : destination
   Heritage_Investment
   Heritage_Plan
+  Additional_Terms
 
+  // for Social_Dwelling
+  Buyer : buyerType
+  Seller : seller
+  Mortgage_Loan_Allowance
+
+  // For Professional_Purchase
+  Professional_Buyer
   Professional_Declaration_Filed
   Guarantee_Satisfied
   Additional_Security_Required
   Additional_Security_Satisfied
+  Resale : resale
+  Transaction_Type : transaction
+  Certification_Date_Sale : date
 
-  Additional_Terms
-
-  Start_Dt_Dwelling_For_Social_Rent : date
-
+  // For Energy_Efficient_Dwelling
+  Domicile_Established
+  Clean_Purchase
+  First_Ownership
+  Causal_Connection
+  Energy_Renovation_Planned
+  Term_Energy_Renovation : date
   Certification_Date : date
 
-  Term_Energy_Renovation : date
-  Certification_Date_Sale : date
-  Professional_Buyer
+  // For Dwelling_For_Social_Renting
+  Start_Dt_Dwelling_For_Social_Rent : date
+  Duration_Of_Agreement : agreementDwellingForSocialRenting
+
 }
 
 vocabulary decision {
@@ -74,7 +75,7 @@ theory decision {
       Registration_Type = Heritage
       & Region = Flemish_Region.
 
-    Tax = 2 <- // correct amount is 1; 5
+    Tax = 2 <- // correct amount is 1.5
       Registration_Type = Social_Dwelling
       & Region = Flemish_Region.
 
@@ -105,40 +106,6 @@ theory decision {
   // registration types currently only defined for Flanders.
   // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
 
-  Registration_Type = Family_Dwelling =>
-      Type_Of_Real_Estate = Residential
-      & Buyer = Natural_Person
-      & Domicile_Established
-      & Clean_Purchase
-      & (First_Ownership | Causal_Connection)
-      & (~ Energy_Renovation_Planned | Term_Energy_Renovation ~= Certification_Date + 5)
-  .
-
-  Registration_Type = Social_Dwelling =>     
-      Buyer = Natural_Person
-      & Type_Of_Real_Estate = Residential
-      & Use = Social_Housing
-      & (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen | Seller = ErkendeSocialeHuisvestingsMpy)
-      & Mortgage_Loan_Allowance
-  .
-
-  Registration_Type = Energy_Efficient_Dwelling =>
-      Type_Of_Real_Estate = Residential
-      & Buyer = Natural_Person
-      & Domicile_Established
-      & Clean_Purchase
-      & (First_Ownership | Causal_Connection)
-      & Energy_Renovation_Planned
-      & Term_Energy_Renovation = Certification_Date + 5
-  .
-
-  Registration_Type = Dwelling_For_Social_Renting =>
-      Type_Of_Real_Estate = Residential
-      & Use = Social_Renting
-      & Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3
-      & Duration_Of_Agreement = Less_Than_9_years
-  .
-
   [An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
   (Registration_Type = Heritage =>
       Type_Of_Real_Estate = Residential
@@ -149,11 +116,29 @@ theory decision {
       & Additional_Terms)
   .
 
+  Registration_Type = Social_Dwelling =>     
+      Buyer = Natural_Person
+      & Type_Of_Real_Estate = Residential
+      & Use = Social_Housing
+      & (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen | Seller = ErkendeSocialeHuisvestingsMpy)
+      & Mortgage_Loan_Allowance
+  .
+
   Registration_Type = Professional_Purchase => 
       Professional_Buyer
       & Transaction_Type  ~= Public_Sale
       & Use = For_Resale
       & Certification_Date_Sale = Certification_Date + 8
+  .
+
+  Registration_Type = Energy_Efficient_Dwelling =>
+      Type_Of_Real_Estate = Residential
+      & Buyer = Natural_Person
+      & Domicile_Established
+      & Clean_Purchase
+      & (First_Ownership | Causal_Connection)
+      & Energy_Renovation_Planned
+      & Term_Energy_Renovation = Certification_Date + 5
   .
 
   [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.](
@@ -167,6 +152,22 @@ theory decision {
   Registration_Type = Exchange_Unbuilt_Ground => 
       Additional_Terms
       & ~Monument.
+
+  Registration_Type = Family_Dwelling =>
+      Type_Of_Real_Estate = Residential
+      & Buyer = Natural_Person
+      & Domicile_Established
+      & Clean_Purchase
+      & (First_Ownership | Causal_Connection)
+      & (~ Energy_Renovation_Planned | Term_Energy_Renovation ~= Certification_Date + 5)
+  .
+
+  Registration_Type = Dwelling_For_Social_Renting =>
+      Type_Of_Real_Estate = Residential
+      & Use = Social_Renting
+      & Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3
+      & Duration_Of_Agreement = Less_Than_9_years
+  .
 
   Registration_Type = Other =>     // @EXPLAIN: Registration_Type cannot be Other
       Registration_Type ~= Family_Dwelling
@@ -182,7 +183,7 @@ theory decision {
 }
 
 display {
-    relevant(`Registration_Type, `Tax).
+    relevant(`Tax, `Registration_Type).
     goal(`Tax).
     view = normal.
     expand(`Registration_Type, `Tax).

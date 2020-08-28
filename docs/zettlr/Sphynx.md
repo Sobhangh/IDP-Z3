@@ -17,7 +17,7 @@ Done, following [this tutorial](https://sphinx-rtd-tutorial.readthedocs.io/en/la
 * make html
 
 Read-the-docs:
-* create an account using gitLab authorization
+* create an account using gitLab authorization for pierre.carbonnelle
 * show list of GitLab projects → Import autoconfig.z3
 * error due to sphinx 1.8.5 → add doc/requirements.txt
 * [view doc online](https://idp-z3.readthedocs.io/en/latest/?)

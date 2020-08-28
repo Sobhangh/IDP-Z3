@@ -217,7 +217,34 @@ class Case:
                     for q in constraint.questions:
                         reachable.add(q)
 
+        # find relevant symbols by depth-first propagation
+        # relevants, rank = {}, 1
+        # def dfs(question):
+        #     nonlocal relevants, rank
+        #     for constraint in constraints:
+        #         # consider constraint not yet considered
+        #         if ( not constraint.relevant
+        #         # containing the question
+        #         and question in constraint.questions):
+        #             constraint.relevant = True
+        #             for q in constraint.questions:
+        #                 self.assignments[q.code].relevant = True
+        #                 for s in q.unknown_symbols(co_constraints=False):
+        #                     if s not in relevants:
+        #                         relevants[s] = rank
+        #                         rank = rank+1
+        #                 if q.code != question.code \
+        #                 and q.type == 'bool'\
+        #                 and not q in given:
+        #                     print("==>", q)
+        #                     reachable.add(q)
+        #                     dfs(q)
+        # for question in list(reachable.values()):
+        #     dfs(question)
+
         # find relevant symbols by breadth-first propagation
+        # input: reachable, given, constraints
+        # output: self.assignments[].relevant, constraints[].relevant, relevants[].rank
         relevants = {}  # Dict[string: int]
         to_add, rank = reachable, 1
         while to_add:
@@ -229,7 +256,7 @@ class Case:
                 if not q in given:
                     reachable.add(q)
 
-            to_add, rank = OrderedSet(), rank+1
+            to_add, rank = OrderedSet(), 2 # or rank+1
             for constraint in constraints:
                 # consider constraint not yet considered
                 if ( not constraint.relevant

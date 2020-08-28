@@ -78,7 +78,7 @@ display {
              'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}},
- 'rd': {'__rank': 3,
+ 'rd': {'__rank': 2,
         'rd': {'environmental': False,
                'normal': True,
                'reading': 'rd',
