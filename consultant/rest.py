@@ -48,8 +48,12 @@ config.trace_filter = GlobbingFilter(
     )
 
 
-static_file_dir   = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
-examples_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'examples')
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.join(current_dir, os.pardir)
+
+static_file_dir   = os.path.join(current_dir, 'static')
+examples_file_dir = os.path.join(current_dir, 'examples')
+docs_file_dir     = os.path.join(parent_dir , 'docs')
 app = Flask(__name__)
 CORS(app)
 
@@ -218,6 +222,13 @@ def serve_examples_file(path):
 
     return send_from_directory(examples_file_dir, path)
 
+# local help files
+@app.route('/docs/<path:path>', methods=['GET'])
+def serve_docs_file(path):
+    if not os.path.isfile(os.path.join(docs_file_dir, path)):
+        return "file not found: " + path
+
+    return send_from_directory(docs_file_dir, path)
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

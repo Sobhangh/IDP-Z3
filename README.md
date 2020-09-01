@@ -7,17 +7,34 @@ It uses the Z3 SMT solver.  It is made available under the [GNU Affero General P
 # Installation
 * Install python3.8 on your machine, with pip3, making sure that python3 is in the PATH.
 * Use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
-* open a terminal (or command prompt) in that directory and run
+* (For Linux and MacOS) open a terminal in that directory and run
 ~~~~
-pip3 install -r requirements.txt
+python3 -m venv .
+source bin/activate
+python3 -m pip install -r requirements.txt
+~~~~
+
+* (For Windows) open a command prompt in that directory and run
+~~~~
+python3 -m venv .
+.\Scripts\activate
+python3 -m pip install -r requirements.txt
 ~~~~
 
 # Get started
-To launch the Interactive Consultant web server, run
+To launch the Interactive Consultant web server on Linux/MacOS, run
 ~~~~
+source bin/activate
 python3 main.py
 ~~~~
 and open your browser at http://127.0.0.1:5000
+
+On Windows, the commands are:
+~~~~
+.\Scripts\activate
+python3 main.py
+~~~~
+
 
 # Develop
 
