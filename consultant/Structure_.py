@@ -135,6 +135,11 @@ def json_to_literals(idp, jsonstr: str):
                     assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
                     assignment.relevant = True
                     assignments[atom.code] = assignment
+
+                    atom = AComparison.make('=', [atom, str_to_IDP(idp, json_atom["value"])])
+                    assignment = Assignment(atom, TRUE, Status.GIVEN)
+                    assignment.relevant = True
+                    assignments[atom.code] = assignment
     return assignments
 
 

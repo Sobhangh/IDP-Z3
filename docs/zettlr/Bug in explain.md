@@ -15,3 +15,6 @@ Options:
 
 
 # Bug 2: changing a dropdown in explain panel leaves panel open
+option: 
+- [x] don't show listbox, but a fact
+- [ ] fix the bug on the client
