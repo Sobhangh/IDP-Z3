@@ -34,6 +34,7 @@ structure {
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Vacation_Days': {'Vacation_Days(Dewey)': {'environmental': False,
+                                            'is_assignment': True,
                                             'normal': True,
                                             'reading': 'Vacation_Days(Dewey)',
                                             'relevant': True,
@@ -142,6 +143,7 @@ structure {
                                                        '99',
                                                        '100']},
                    'Vacation_Days(Donald)': {'environmental': False,
+                                             'is_assignment': True,
                                              'normal': True,
                                              'reading': 'Vacation_Days(Donald)',
                                              'relevant': True,
@@ -250,6 +252,7 @@ structure {
                                                         '99',
                                                         '100']},
                    'Vacation_Days(Huey)': {'environmental': False,
+                                           'is_assignment': True,
                                            'normal': True,
                                            'reading': 'Vacation_Days(Huey)',
                                            'relevant': True,
@@ -358,6 +361,7 @@ structure {
                                                       '99',
                                                       '100']},
                    'Vacation_Days(Louie)': {'environmental': False,
+                                            'is_assignment': True,
                                             'normal': True,
                                             'reading': 'Vacation_Days(Louie)',
                                             'relevant': True,
@@ -467,6 +471,7 @@ structure {
                                                        '100']},
                    '__rank': 1,
                    '∀Employee[Employee_t] : Vacation_Days(Employee) = sum{ : Employee = Employee : 22} + sum{ : Age(Employee) < 18 ∧ Employee = Employee : 05} + sum{ : Age(Employee) ≥ 60 ∧ Employee = Employee : 05} + sum{ : 18 ≤ Age(Employee) ∧ Age(Employee) < 60 ∧ Service_Years(Employee) ≥ 30 ∧ Employee = Employee : 05} + sum{ : Service_Years(Employee) ≥ 30 ∧ Employee = Employee : 03} + sum{ : Age(Employee) < 60 ∧ Service_Years(Employee) < 30 ∧ Employee = Employee : 03} + sum{ : Age(Employee) < 45 ∧ 15 ≤ Service_Years(Employee) ∧ Service_Years(Employee) < 30 ∧ Employee = Employee : 02} + sum{ : 45 ≤ Age(Employee) ∧ Age(Employee) < 60 ∧ Service_Years(Employee) < 30 ∧ Employee = Employee : 02}': {'environmental': False,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 'is_assignment': False,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  'normal': False,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  'reading': '∀Employee[Employee_t] '
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ': '

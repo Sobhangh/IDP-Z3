@@ -43,6 +43,7 @@ structure {
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Prepare_Terrace': {'Prepare_Terrace': {'environmental': False,
+                                         'is_assignment': False,
                                          'normal': True,
                                          'reading': 'Prepare_Terrace',
                                          'relevant': False,
@@ -50,6 +51,7 @@ structure {
                                          'typ': 'Bool'},
                      '__rank': 9999},
  'Rain_Probability': {'Rain_Probability': {'environmental': False,
+                                           'is_assignment': True,
                                            'normal': True,
                                            'reading': 'Rain_Probability',
                                            'relevant': False,
@@ -58,6 +60,7 @@ structure {
                                            'value': ''},
                       '__rank': 9999},
  'Temperature': {'Temperature': {'environmental': False,
+                                 'is_assignment': True,
                                  'normal': True,
                                  'reading': 'Temperature',
                                  'relevant': False,

@@ -70,6 +70,7 @@ class Expression(object):
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
         # .normal : only set in .instances
+        self.is_assignment = None         # for comparisons only
 
         # attributes of the top node of a (co-)constraint
         # .questions

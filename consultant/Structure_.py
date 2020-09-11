@@ -219,8 +219,9 @@ class Structure_(object):
                     symbol['reading']  = reading
                     symbol['normal']   = hasattr(atom, 'normal')
                     symbol['environmental'] = symb.block.name=='environment'
+                    symbol['is_assignment'] = symbol['typ'] != 'Bool' \
+                        or bool(case.assignments[atom.code].sentence.is_assignment)
                     s.setdefault(key, symbol)
-
                     s["__rank"] = self.case.relevant_symbols.get(symb.name, 9999)
                     break
 

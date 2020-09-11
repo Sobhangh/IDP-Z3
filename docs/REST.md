@@ -77,6 +77,7 @@ GET response :
             - relevant: Bool
             - reading : string  // English reading of the atom/term
             - normal : Bool     // false if to be shown in expanded view only
+            - is_assignment : Bool // true if the atom assigns a value to a symbol
             }
         }
     - '*laws*' : [

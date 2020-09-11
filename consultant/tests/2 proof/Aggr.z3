@@ -23,6 +23,7 @@ display {
 {' Global': {'env_dec': False},
  'p': {'__rank': 1,
        'p': {'environmental': False,
+             'is_assignment': False,
              'normal': True,
              'reading': 'p',
              'relevant': True,
