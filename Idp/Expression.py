@@ -375,6 +375,8 @@ class ARImplication(BinaryOperator):
         # reverse the implication
         self.sub_exprs.reverse()
         out = AImplication(sub_exprs=self.sub_exprs, operator=['⇒']*len(self.operator))
+        if hasattr(self, "block"):
+            out.block = self.block
         return out.annotate(voc, q_vars)
 
 class ADisjunction(BinaryOperator):
