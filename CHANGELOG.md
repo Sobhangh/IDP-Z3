@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [Unreleased]
+* 
+
+## [0.5.2] - 2020-09-15
+[Access v0.5.2 on Google App Engine](https://20200911t211941-dot-interactive-consultant.ew.r.appspot.com/)
 
 ## API
 * use IDP3 syntax for 2 theories (environment + decision)

@@ -17,10 +17,12 @@ Date: TODO
 - [ ] issues on GitLab
 
 #### Syntax changes:
-- [ ] separate theory of environment
+- [ ] structures become data theories consisting of data expressions; these expression can occur also inside theories.
+- [ ] standard extensible way of typing as in type theory : p(t1,t2) would be p::(t1,t2):bool
+- [ ] distinguish identifiers from constants: an identifier c of type t could be typed c:t while a constant c of type t could be typed c():t
+- [ ] [[Type and Binary Quantifications]]
+- [ ] require definitions to be constructive
 - [ ] move enumerations in vocabulary to the theory block
-- [ ] move enumerations in structure to the theory block
-- [ ] 'Expand all' or list (instead of View expanded/normal)
 
 #### Research topics / may take a while:
 - [ ] use list of simplifications steps for explain
