@@ -53,7 +53,7 @@ class ViewType(Enum):
 class Idp(object):
     def __init__(self, **kwargs):
         #log("parsing done")
-        self.vocabularies = kwargs.pop('vocabularies')
+        self.vocabularies = {v.name : v for v in kwargs.pop('vocabularies')}
         self.theories = kwargs.pop('theories')
         self.interpretations = kwargs.pop('interpretations')
 
@@ -72,12 +72,11 @@ class Idp(object):
 
         # combine vocabularies
         assert len(self.vocabularies) in [1,2], "Only 2 vocabularies are allowed"
-        self.vocabulary = self.vocabularies[0]
+        self.vocabulary = next(iter(self.vocabularies.values())) # get first vocabulary
         if len(self.vocabularies)==2:
-            assert self.vocabularies[0].name == 'environment' \
-                and self.vocabularies[1].name == 'decision', \
+            assert list(self.vocabularies.keys()) == ['environment', 'decision'], \
                 "The first vocabulary must be 'environment', the second, 'decision'"
-            self.vocabulary.update(self.vocabularies[1])
+            self.vocabulary.update(self.vocabularies['decision'])
 
         if self.interpretations:
             self.interpretations.annotate(self.vocabulary)
