@@ -174,15 +174,15 @@ class Vocabulary(object):
             ('`Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]), 
         ]:
             ConstructedTypeDeclaration(name=name, constructors=constructors) \
-                .annotate(self.symbol_decls)
+                .annotate(self)
 
         # annotate declarations
         for s in self.declarations:
             s.block = self
-            s.annotate(self.symbol_decls)
+            s.annotate(self)
 
         for constructor in self.symbol_decls['`Symbols'].constructors:
-            constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self.symbol_decls, {})
+            constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self, {})
 
 
     def __str__(self):
@@ -216,7 +216,7 @@ class Extern(object):
     def __str__(self):
         return f"extern vocabulary {self.name}"
 
-    def annotate(self, symbol_decls):
+    def annotate(self, voc):
         pass
 
 class ConstructedTypeDeclaration(object):
@@ -251,13 +251,13 @@ class ConstructedTypeDeclaration(object):
         return (f"type {self.name} constructed from "
                 f"{{{','.join(map(str, self.constructors))}}}")
 
-    def annotate(self, symbol_decls):
-        assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
-        symbol_decls[self.name] = self
+    def annotate(self, voc, idp=None):
+        assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
+        voc.symbol_decls[self.name] = self
         for c in self.constructors:
             c.type = self
-            assert c.name not in symbol_decls, "duplicate constructor in vocabulary: " + c.name
-            symbol_decls[c.name] = c
+            assert c.name not in voc.symbol_decls, "duplicate constructor in vocabulary: " + c.name
+            voc.symbol_decls[c.name] = c
         self.range = self.constructors  # TODO constructor functions
 
     def check_bounds(self, var):
@@ -302,9 +302,9 @@ class RangeDeclaration(object):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." + str(x.toI)) for x in self.elements])
         return f"type {self.name} = {{{elements}}}"
 
-    def annotate(self, symbol_decls):
-        assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
-        symbol_decls[self.name] = self
+    def annotate(self, voc, idp=None):
+        assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
+        voc.symbol_decls[self.name] = self
 
     def check_bounds(self, var):
         if not self.elements: 
@@ -360,13 +360,13 @@ class SymbolDeclaration(object):
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}")
 
-    def annotate(self, symbol_decls, vocabulary=True):
+    def annotate(self, voc, idp=None, vocabulary=True):
         if vocabulary:
-            assert self.name not in symbol_decls, "duplicate declaration in vocabulary: " + self.name
-            symbol_decls[self.name] = self
+            assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
+            voc.symbol_decls[self.name] = self
         for s in self.sorts:
-            s.annotate(symbol_decls)
-        self.out.annotate(symbol_decls)
+            s.annotate(voc)
+        self.out.annotate(voc)
         self.domain = list(itertools.product(*[s.decl.range for s in self.sorts]))
 
         self.type = self.out.decl
@@ -377,13 +377,13 @@ class SymbolDeclaration(object):
         if vocabulary:   # and not self.name.startswith('_'):
             if len(self.sorts) == 0:
                 expr = Variable(name=self.name)
-                expr.annotate(symbol_decls, {})
+                expr.annotate(voc, {})
                 expr.normal = True
                 self.instances[expr.code] = expr
             else:
                 for arg in list(self.domain):
                     expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
-                    expr.annotate(symbol_decls, {})
+                    expr.annotate(voc, {})
                     expr.normal = True
                     self.instances[expr.code] = expr
 
@@ -428,13 +428,13 @@ class Sort(object):
 
     def __str__(self): return self.code
 
-    def annotate(self, symbol_decls):
-        self.decl = symbol_decls[self.name]
+    def annotate(self, voc):
+        self.decl = voc.symbol_decls[self.name]
 
-    def fresh(self, name, symbol_decls):
+    def fresh(self, name, voc):
         decl = SymbolDeclaration(annotations=Annotations(annotations=[]),
                                  name=Symbol(name=name), sorts=[], out=self)
-        decl.annotate(symbol_decls, False)
+        decl.annotate(voc, vocabulary=False)
         return Fresh_Variable(name, decl)
 
     def translate(self):
@@ -448,8 +448,8 @@ class Symbol(object):
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
 
-    def annotate(self, symbol_decls, q_vars):
-        self.decl = symbol_decls[self.name]
+    def annotate(self, voc, q_vars):
+        self.decl = voc.symbol_decls[self.name]
         self.type = self.decl.type.name
         self.normal = True # make sure it is visible in GUI
         return self
@@ -465,8 +465,7 @@ class Theory(object):
         self.vocab_name = kwargs.pop('vocab_name')
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
-        self.clark = {}  # {Symbol: Rule}
-        self.symbol_decls = None  # {string: decl}
+        self.clark = {}  # {Symbol: Rule}$
         self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.translated = None
 
@@ -476,10 +475,10 @@ class Theory(object):
             for rule in definition.rules:
                 rule.block = self
 
-    def annotate(self, vocabulary):
-        self.symbol_decls = vocabulary.symbol_decls
+    def annotate(self, voc):
+        self.voc = voc #TODO
 
-        self.definitions = [e.annotate(self, self.symbol_decls, {}) for e in self.definitions]
+        self.definitions = [e.annotate(self, voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol
         for d in self.definitions:
             for symbol, rule in d.clark.items():
@@ -490,11 +489,11 @@ class Theory(object):
                 else:
                     self.clark[symbol.name] = rule
 
-        self.constraints = [e.annotate(self.symbol_decls, {}) for e in self.constraints]
+        self.constraints = [e.annotate(voc, {}) for e in self.constraints]
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
 
-        for decl in self.symbol_decls.values():
+        for decl in voc.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
 
@@ -531,20 +530,20 @@ class Definition(object):
             out.append(repr(rule))
         return nl.join(out)
 
-    def annotate(self, theory, symbol_decls, q_vars):
-        self.rules = [r.annotate(symbol_decls, q_vars) for r in self.rules]
+    def annotate(self, theory, voc, q_vars):
+        self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
         # create common variables, and rename vars in rule
         self.clark = {}
         for r in self.rules:
-            symbol = symbol_decls[r.symbol.name]
+            symbol = voc.symbol_decls[r.symbol.name]
             if symbol not in self.q_vars:
                 name = f"${symbol.name}$"
                 q_v = {f"${symbol.name}!{str(i)}$":
-                       sort.fresh(f"${symbol.name}!{str(i)}$", symbol_decls)
+                       sort.fresh(f"${symbol.name}!{str(i)}$", voc)
                        for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
-                    q_v[name] = symbol.out.fresh(name, symbol_decls)
+                    q_v[name] = symbol.out.fresh(name, voc)
                 self.q_vars[symbol] = q_v
             new_rule = r.rename_args(self.q_vars[symbol])
             self.clark.setdefault(symbol, []).append(new_rule)
@@ -600,17 +599,17 @@ class Rule(object):
                 f"{self.symbol}({','.join(str(e) for e in self.args)}) "
                 f"⇔{str(self.body)}")
 
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, voc, q_vars):
         # create head variables
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {v: s.fresh(v, symbol_decls)
+        self.q_vars = {v: s.fresh(v, voc)
                        for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars}  # merge
 
-        self.symbol = self.symbol.annotate(symbol_decls, q_v)
-        self.args = [arg.annotate(symbol_decls, q_v) for arg in self.args]
-        self.out = self.out.annotate(symbol_decls, q_v) if self.out else self.out
-        self.body = self.body.annotate(symbol_decls, q_v)
+        self.symbol = self.symbol.annotate(voc, q_v)
+        self.args = [arg.annotate(voc, q_v) for arg in self.args]
+        self.out = self.out.annotate(voc, q_v) if self.out else self.out
+        self.body = self.body.annotate(voc, q_v)
         return self
 
     def rename_args(self, new_vars):
@@ -712,9 +711,9 @@ class Interpretations(object):
     def __init__(self, **kwargs):
         self.interpretations = kwargs.pop('interpretations')
 
-    def annotate(self, vocabulary):
+    def annotate(self, voc):
         for i in self.interpretations:
-            i.annotate(vocabulary.symbol_decls)
+            i.annotate(voc)
 
 
 class Interpretation(object):
@@ -727,16 +726,16 @@ class Interpretation(object):
         self.arity = None
         self.decl = None  # symbol declaration
 
-    def annotate(self, symbol_decls):
-        self.decl = symbol_decls[self.name]
+    def annotate(self, voc):
+        self.decl = voc.symbol_decls[self.name]
         for t in self.tuples:
-            t.annotate(symbol_decls)
+            t.annotate(voc)
         self.function = 0 if self.decl.out.name == 'bool' else -1
         self.arity = len(self.tuples[0].args)  # there must be at least one tuple !
         if self.function and 1 < self.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
         self.default = self.default if self.function else FALSE
-        self.default = self.default.annotate(symbol_decls, {})
+        self.default = self.default.annotate(voc, {})
 
         def interpret(theory, rank, args, tuples=None):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
@@ -775,8 +774,8 @@ class Tuple(object):
     def __str__(self):
         return ",".join([str(a) for a in self.args])
 
-    def annotate(self, symbol_decls):
-        self.args = [arg.annotate(symbol_decls, {}) for arg in self.args]
+    def annotate(self, voc):
+        self.args = [arg.annotate(voc, {}) for arg in self.args]
 
     def interpret(self, theory): return self  # TODO ?
 
@@ -797,22 +796,22 @@ class Goal(object):
         return self.name
 
     def annotate(self, idp):
-        symbol_decls = idp.vocabulary.symbol_decls
+        voc = idp.vocabulary
 
         # define reserved symbol
-        if '__relevant' not in symbol_decls:
+        if '__relevant' not in voc.symbol_decls:
             relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
                                     sorts=[], out=None)
             relevants.is_var = False
             relevants.block = self
-            relevants.annotate(symbol_decls)
+            relevants.annotate(voc)
 
-        if self.name in symbol_decls:
-            self.decl = symbol_decls[self.name]
+        if self.name in voc.symbol_decls:
+            self.decl = voc.symbol_decls[self.name]
             self.decl.view = ViewType.EXPANDED # the goal is always expanded
             instances = self.decl.instances.values()
             if instances:
-                goal = Symbol(name='__relevant').annotate(symbol_decls, {})
+                goal = Symbol(name='__relevant').annotate(voc, {})
                 constraint = AppliedSymbol.make(goal, instances)
                 constraint.block = self
                 idp.theory.constraints.append(constraint)
@@ -843,13 +842,13 @@ class Display(object):
         self.name = "display"
 
     def annotate(self, idp):
-        self.symbol_decls = idp.vocabulary.symbol_decls
+        self.voc = idp.vocabulary
 
         #add display predicates
 
         viewType = ConstructedTypeDeclaration(name='View', 
             constructors=[Constructor(name='normal'), Constructor(name='expanded')])
-        viewType.annotate(self.symbol_decls)
+        viewType.annotate(self.voc)
 
         for name, out in [
             ('goal', None),
@@ -862,12 +861,12 @@ class Display(object):
             symbol_decl = SymbolDeclaration(annotations='', name=Symbol(name=name), 
                 sorts=[], out=out)
             symbol_decl.is_var = False
-            symbol_decl.annotate(self.symbol_decls)
+            symbol_decl.annotate(self.voc)
             symbol_decl.translate()
 
         # annotate constraints
         for constraint in self.constraints:
-            constraint.annotate(self.symbol_decls, {})
+            constraint.annotate(self.voc, {})
 
     def run(self, idp):
         for constraint in self.constraints:
@@ -876,8 +875,8 @@ class Display(object):
                 for symbol in constraint.sub_exprs:
                     assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
                     assert symbol.name.startswith('`'), f"argument '{symbol.name}' of '{constraint.name}' must start with a tick '`'"
-                    assert symbol.name[1:] in self.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
-                    symbols.append(self.symbol_decls[symbol.name[1:]])
+                    assert symbol.name[1:] in self.voc.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
+                    symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
                 if constraint.name == 'goal': #e.g.,  goal(Prime)
                     assert len(constraint.sub_exprs)==1, f'goal can have only one argument'
@@ -886,15 +885,15 @@ class Display(object):
                     idp.goal = goal
                 elif constraint.name == 'expand': # e.g. expand(Length, Angle)
                     for symbol in symbols:
-                        self.symbol_decls[symbol.name].view = ViewType.EXPANDED
+                        self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
                 elif constraint.name == 'hide': # e.g. hide(Length, Angle)
                     for symbol in symbols:
-                        self.symbol_decls[symbol.name].view = ViewType.HIDDEN
+                        self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif constraint.name == 'relevant': # e.g. relevant(Tax)
                     for symbol in symbols:
                         instances = symbol.instances.values()
                         if instances:
-                            goal = Symbol(name='__relevant').annotate(self.symbol_decls, {})
+                            goal = Symbol(name='__relevant').annotate(self.voc, {})
                             constraint = AppliedSymbol.make(goal, instances)
                             constraint.block = self
                             idp.theory.constraints.append(constraint)
@@ -906,7 +905,7 @@ class Display(object):
                 assert constraint.is_assignment
                 if constraint.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
-                        for s in idp.vocabulary.symbol_decls.values():
+                        for s in self.voc.symbol_decls.values():
                             if type(s)==SymbolDeclaration and s.view == ViewType.NORMAL:
                                 s.view = ViewType.EXPANDED # don't change hidden symbols
                     else:

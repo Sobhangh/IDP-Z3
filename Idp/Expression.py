@@ -120,9 +120,9 @@ class Expression(object):
             , 'str': self.str
             , 'co_constraint': self.co_constraint }
 
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, voc, q_vars):
         " annotate tree after parsing "
-        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
+        self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
         return self.annotate1()
 
     def annotate1(self):
@@ -284,14 +284,14 @@ class AQuantification(Expression):
         vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
         return f"{self.q}{vars} : {self.sub_exprs[0].str}"
 
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, voc, q_vars):
         for v in self.vars:
-            assert v not in symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
+            assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {v:s.fresh(v, symbol_decls) \
+        self.q_vars = {v:s.fresh(v, voc) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars} # merge
-        self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
+        self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
 
     def annotate1(self):
@@ -371,11 +371,11 @@ class AEquivalence(BinaryOperator):
 
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, voc, q_vars):
         # reverse the implication
         self.sub_exprs.reverse()
         out = AImplication(sub_exprs=self.sub_exprs, operator=['⇒']*len(self.operator))
-        return out.annotate(symbol_decls, q_vars)
+        return out.annotate(voc, q_vars)
 
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
@@ -391,13 +391,13 @@ class AComparison(BinaryOperator):
         super().__init__(**kwargs)
         self.is_assignment = None
 
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, voc, q_vars):
         # a≠b --> Not(a=b)
         if len(self.sub_exprs) == 2 and self.operator == ['≠']:
-            self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
+            self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
             out = AUnary.make('~', AComparison.make('=', self.sub_exprs))
             return out
-        return super().annotate(symbol_decls, q_vars)
+        return super().annotate(voc, q_vars)
 
     def annotate1(self):
         # f(x)=y
@@ -477,14 +477,14 @@ class AAggregate(Expression):
             )
         return out
 
-    def annotate(self, symbol_decls, q_vars):
+    def annotate(self, voc, q_vars):
         for v in self.vars:
-            assert v not in symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
+            assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {v:s.fresh(v, symbol_decls) \
+        self.q_vars = {v:s.fresh(v, voc) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars} # merge
-        self.sub_exprs = [e.annotate(symbol_decls, q_v) for e in self.sub_exprs]
+        self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         self = self.annotate1()
         # remove q_vars after annotate1
@@ -523,9 +523,9 @@ class AppliedSymbol(Expression):
         else:
             return f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
 
-    def annotate(self, symbol_decls, q_vars):
-        self.sub_exprs = [e.annotate(symbol_decls, q_vars) for e in self.sub_exprs]
-        self.decl = q_vars[self.s.name].decl if self.s.name in q_vars else symbol_decls[self.s.name]
+    def annotate(self, voc, q_vars):
+        self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+        self.decl = q_vars[self.s.name].decl if self.s.name in q_vars else voc.symbol_decls[self.s.name]
         self.normal = True
         return self.annotate1()
 
@@ -566,13 +566,13 @@ class Variable(AppliedSymbol):
 
     def __str1__(self): return self.name
 
-    def annotate(self, symbol_decls, q_vars):
-        if self.name in symbol_decls and type(symbol_decls[self.name]) == Constructor:
-            return symbol_decls[self.name]
+    def annotate(self, voc, q_vars):
+        if self.name in voc.symbol_decls and type(voc.symbol_decls[self.name]) == Constructor:
+            return voc.symbol_decls[self.name]
         if self.name in q_vars:
             return q_vars[self.name]
         else: # in symbol_decls
-            self.decl = symbol_decls[self.name]
+            self.decl = voc.symbol_decls[self.name]
             self.type = self.decl.type.name
             self.normal = True # make sure it is visible in GUI
         return self.annotate1()
