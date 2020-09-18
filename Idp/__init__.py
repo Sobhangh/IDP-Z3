@@ -70,13 +70,17 @@ class Idp(object):
 
         self.translated = None  # [Z3Expr]
 
+        for voc in self.vocabularies.values():
+            voc.annotate(self)
+            voc.translate(self)
+
         # combine vocabularies
         assert len(self.vocabularies) in [1,2], "Only 2 vocabularies are allowed"
         self.vocabulary = next(iter(self.vocabularies.values())) # get first vocabulary
         if len(self.vocabularies)==2:
             assert list(self.vocabularies.keys()) == ['environment', 'decision'], \
                 "The first vocabulary must be 'environment', the second, 'decision'"
-            self.vocabulary.update(self.vocabularies['decision'])
+            self.vocabulary = self.vocabularies['decision']
 
         if self.interpretations:
             self.interpretations.annotate(self.vocabulary)
@@ -108,9 +112,6 @@ class Idp(object):
         for c in self.theory.definitions:
             print(repr(c))
         """
-        # translate
-
-        self.vocabulary.translate(self)
 
     def unknown_symbols(self):
         todo = self.theory.unknown_symbols()
@@ -163,6 +164,7 @@ class Vocabulary(object):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
         self.terms = {}  # {string: Variable or AppliedSymbol}
+        self.idp = None # parent object
         self.translated = []
 
         # define reserved symbols
@@ -176,10 +178,13 @@ class Vocabulary(object):
             ConstructedTypeDeclaration(name=name, constructors=constructors) \
                 .annotate(self)
 
+    def annotate(self, idp):
+        self.idp = idp
+
         # annotate declarations
         for s in self.declarations:
             s.block = self
-            s.annotate(self)
+            s.annotate(self) # updates self.symbol_decls
 
         for constructor in self.symbol_decls['`Symbols'].constructors:
             constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self, {})
@@ -189,11 +194,6 @@ class Vocabulary(object):
         return (f"vocabulary {{{nl}"
                 f"{nl.join(str(i) for i in self.declarations)}"
                 f"{nl}}}{nl}")
-
-    def update(self, other):
-        self.declarations.extend(other.declarations)
-        self.terms       .update(other.terms)
-        self.symbol_decls.update(other.symbol_decls)
 
     def translate(self, idp):
         for i in self.declarations:
@@ -217,7 +217,8 @@ class Extern(object):
         return f"extern vocabulary {self.name}"
 
     def annotate(self, voc):
-        pass
+        other = voc.idp.vocabularies[self.name]
+        voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls} #TODO merge while respecting order
 
 class ConstructedTypeDeclaration(object):
     COUNT = -1

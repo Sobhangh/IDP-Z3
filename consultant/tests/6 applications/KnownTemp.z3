@@ -13,7 +13,6 @@ vocabulary environment {
 vocabulary decision {
     extern vocabulary environment
     
-    type material constructed from {e1, e2, e3}
     T: int
     M: material
     Guaranteed
