@@ -6,7 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [Unreleased]
-* 
+
+## API
+* support named vocabulary for structures
 
 ## [0.5.3] - 2020-09-15
 [Access v0.5.3 on Google App Engine](https://20200915t113559-dot-interactive-consultant.ew.r.appspot.com/)

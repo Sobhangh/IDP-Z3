@@ -1,7 +1,7 @@
 Idp:
     vocabularies=Vocabulary*
     theories=Theory*
-    interpretations=Interpretations?
+    structures=Structures*
     goal=Goal?
     view=View?
     display=Display?
@@ -85,7 +85,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
       Brackets: annotations=Annotations '(' f=Expression ')';
 
 
-Interpretations: 'structure' '{' interpretations*=Interpretation '}';
+Structures: 'structure' (name=ID ':' vocab_name=ID)? '{' interpretations*=Interpretation '}';
   Interpretation: name=Symbol '=' '{' tuples+=Tuple[';'] '}' ('else' default=Base)?;
   Tuple : args*=Base[','];
 

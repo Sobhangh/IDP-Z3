@@ -1,6 +1,6 @@
 
 -- original ---------------------------------
-vocabulary {
+vocabulary isa {
     type type constructed from {'1tri angle', 'quadrilateral'}
     Type : type
 
@@ -29,7 +29,7 @@ theory {
     isa(regular_triangle, '1tri angle').
 }
 
-structure {
+structure isa:isa {
     isa = {regular_triangle, '1tri angle'; right_triangle, '1tri angle';
            rectangle, quadrilateral; square, quadrilateral}
 }

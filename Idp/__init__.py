@@ -54,55 +54,43 @@ class Idp(object):
     def __init__(self, **kwargs):
         #log("parsing done")
         self.vocabularies = {v.name : v for v in kwargs.pop('vocabularies')}
-        self.theories = kwargs.pop('theories')
-        self.interpretations = kwargs.pop('interpretations')
-
+        self.theories = {t.name : t for t in kwargs.pop('theories')}
+        self.structures = {s.name : s for s in kwargs.pop('structures')}
         self.goal = kwargs.pop('goal')
-        if self.goal is None:
-            self.goal = Goal(name="")
         self.view = kwargs.pop('view')
-        if self.view is None:
-            self.view = View(viewType='normal')
-
         self.display = kwargs.pop('display')
-        if self.display is None:
-            self.display = Display(constraints=[])
 
         self.translated = None  # [Z3Expr]
 
+        if self.goal is None:
+            self.goal = Goal(name="")
+        if self.view is None:
+            self.view = View(viewType='normal')
+        if self.display is None:
+            self.display = Display(constraints=[])
+
+        if list(self.vocabularies.keys()) == ['environment', 'decision']:
+            self.vocabulary = self.vocabularies['decision']
+        else:
+            self.vocabulary = next(iter(self.vocabularies.values())) # get first vocabulary
+        if list(self.theories.keys()) == ['environment', 'decision']:
+            self.theory = self.theories['decision']
+            self.theory.constraints.extend(self.theories['environment'].constraints)
+            self.theory.definitions.extend(self.theories['environment'].definitions)
+        else:
+            self.theory = next(iter(self.theories.values())) # get first theory
+        
         for voc in self.vocabularies.values():
             voc.annotate(self)
             voc.translate(self)
-
-        # combine vocabularies
-        assert len(self.vocabularies) in [1,2], "Only 2 vocabularies are allowed"
-        self.vocabulary = next(iter(self.vocabularies.values())) # get first vocabulary
-        if len(self.vocabularies)==2:
-            assert list(self.vocabularies.keys()) == ['environment', 'decision'], \
-                "The first vocabulary must be 'environment', the second, 'decision'"
-            self.vocabulary = self.vocabularies['decision']
-
-        if self.interpretations:
-            self.interpretations.annotate(self.vocabulary)
-
-        # combine theories (before annotation!)
-        assert len(self.theories) == len(self.vocabularies), "There should be as many vocabularies as theories"
-        self.theory = self.theories[0]
-        if len(self.theories)==2:
-            assert self.theories[0].name == 'environment' \
-                and self.theories[1].name == 'decision', \
-                "The first theory must be 'environment', the second, 'decision'"
-            assert self.theories[0].vocab_name == self.theories[0].name \
-               and self.theories[1].vocab_name == self.theories[1].name, \
-               "The vocabulary name must be the same as the theory name"
-            self.theory.constraints.extend(self.theories[1].constraints)
-            self.theory.definitions.extend(self.theories[1].definitions)
+        for struct in self.structures.values():
+            struct.annotate(self)
 
         self.goal.annotate(self)
         self.view.annotate(self)
         self.display.annotate(self)
         self.display.run(self)
-        self.theory.annotate(self.vocabulary)
+        self.theory.annotate(self)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
         #log("annotated")
 
@@ -476,8 +464,10 @@ class Theory(object):
             for rule in definition.rules:
                 rule.block = self
 
-    def annotate(self, voc):
-        self.voc = voc #TODO
+    def annotate(self, idp):
+        self.vocab_name = self.vocab_name if self.vocab_name !='' else None
+        assert self.vocab_name == None or self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
+        voc = idp.vocabularies.get(self.vocab_name, idp.vocabulary)
 
         self.definitions = [e.annotate(self, voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol
@@ -708,11 +698,15 @@ class Rule(object):
 
 ################################ Structure ###############################
 
-class Interpretations(object):
+class Structures(object):
     def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.vocab_name = kwargs.pop('vocab_name')
         self.interpretations = kwargs.pop('interpretations')
 
-    def annotate(self, voc):
+    def annotate(self, idp):
+        assert self.vocab_name == None or self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
+        voc = idp.vocabularies.get(self.vocab_name, idp.vocabulary)
         for i in self.interpretations:
             i.annotate(voc)
 
@@ -945,5 +939,5 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AppliedSymbol, Variable,
                                          NumberConstant, Brackets, Arguments,
 
-                                         Interpretations, Interpretation,
+                                         Structures, Interpretation,
                                          Tuple, Goal, View, Display])
