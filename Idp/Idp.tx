@@ -5,6 +5,7 @@ Idp:
     goal=Goal?
     view=View?
     display=Display?
+    procedure=Procedure?
 ;
 
 Comment:
@@ -95,3 +96,14 @@ View: 'view' viewType=ViewType;
   ViewType: 'normal' | 'expanded';
 
 Display: 'display' '{' (constraints=Expression '.')* '}';
+
+Procedure: 'main' '{' statements=Statement* '}';
+
+  Statement: Call1 | Assignment ;
+  Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=Assignment[','])? ')';
+  Call0 : !Assignment pyExpr=PyExpr;
+  PyExpr : Call1 | String | NumberConstant | ID;
+  String: literal=/"(\.|[^"])*"/;
+
+  Assignment : v=ID '=' val=Call0;
+

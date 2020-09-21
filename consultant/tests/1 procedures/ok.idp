@@ -1,0 +1,17 @@
+vocabulary {
+    // here comes the specification of the vocabulary
+    p
+}
+
+theory {
+    // here comes the definitions and constraints
+    p.
+}
+
+structure {
+    // here comes the interpretation of some symbols
+}
+
+main {
+    print("ok")
+}

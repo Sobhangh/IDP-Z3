@@ -19,8 +19,11 @@ structure
 display
     (optional) configure the user interface of the Interactive Consultant
 
+main
+    (optional) executable procedure in the context of the knowledge base
 
-The basic skeleton of an IDP knowledge base is thus as follows:
+
+The basic skeleton of an IDP knowledge base for the Interactive Consultant is as follows:
 
 .. code-block::
 
@@ -47,3 +50,4 @@ Everything between ``//`` and the end of the line is a comment.
 .. include:: theory.inc
 .. include:: structure.inc
 .. include:: display.inc
+.. include:: main.inc

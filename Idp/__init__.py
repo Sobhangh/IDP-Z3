@@ -59,8 +59,24 @@ class Idp(object):
         self.goal = kwargs.pop('goal')
         self.view = kwargs.pop('view')
         self.display = kwargs.pop('display')
+        self.procedure = kwargs.pop('procedure')
 
         self.translated = None  # [Z3Expr]
+
+        assert self.display is None or self.procedure is None, \
+            "Cannot have both a 'display and a 'main block"
+        if self.display is not None:
+            assert len(self.vocabularies) in [1,2], \
+                "Maximum 2 vocabularies are allowed in Interactive Consultant"
+            assert len(self.theories) in [1,2], \
+                "Maximum 2 theories are allowed in Interactive Consultant"
+
+            if len(self.vocabularies)==2:
+                assert 'environment' in self.vocabularies and 'decision' in self.vocabularies, \
+                    "The 2 vocabularies in Interactive Consultant must be 'environment' and 'decision'"
+            if len(self.theories)==2:
+                assert 'environment' in self.theories and 'decision' in self.theories, \
+                    "The 2 theories in Interactive Consultant must be 'environment' and 'decision'"
 
         if self.goal    is None: self.goal    = Goal(name="")
         if self.view    is None: self.view    = View(viewType='normal')
@@ -909,7 +925,31 @@ class Display(object):
 
 
 
-################################ Main ###############################
+################################ Main ##################################
+
+class Procedure(object):
+    def __init__(self, **kwargs):
+        self.statements = kwargs.pop('statements')
+
+
+class Call1(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.args = kwargs.pop('args')
+        self.kwargs = kwargs.pop('kwargs')
+
+
+class Call0(object):
+    def __init__(self, **kwargs):
+        self.pyExpr = kwargs.pop('pyExpr')
+
+
+class String(object):
+    def __init__(self, **kwargs):
+        self.literal = kwargs.pop('literal')
+
+
+########################################################################
 
 
 dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
@@ -932,4 +972,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          NumberConstant, Brackets, Arguments,
 
                                          Structures, Interpretation,
-                                         Tuple, Goal, View, Display])
+                                         Tuple, Goal, View, Display,
+
+                                         Procedure, Call1, Call0, String])

@@ -48,6 +48,8 @@ def generateZ3(theory):
     """
 
     idp = idpparser.model_from_str(theory)
+    if idp.procedure is not None:
+        return "ok"
 
     expanded_symbols: Dict[str, SymbolDeclaration] = {}
     for expr in idp.subtences.values():
