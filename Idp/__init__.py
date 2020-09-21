@@ -62,13 +62,15 @@ class Idp(object):
 
         self.translated = None  # [Z3Expr]
 
-        if self.goal is None:
-            self.goal = Goal(name="")
-        if self.view is None:
-            self.view = View(viewType='normal')
-        if self.display is None:
-            self.display = Display(constraints=[])
+        if self.goal    is None: self.goal    = Goal(name="")
+        if self.view    is None: self.view    = View(viewType='normal')
+        if self.display is None: self.display = Display(constraints=[])
+        
+        for voc in self.vocabularies.values():
+            voc.annotate(self)
+            voc.translate(self)
 
+        # determine default vocabulary, theory
         if list(self.vocabularies.keys()) == ['environment', 'decision']:
             self.vocabulary = self.vocabularies['decision']
         else:
@@ -79,12 +81,8 @@ class Idp(object):
             self.theory.definitions.extend(self.theories['environment'].definitions)
         else:
             self.theory = next(iter(self.theories.values())) # get first theory
-        
-        for voc in self.vocabularies.values():
-            voc.annotate(self)
-            voc.translate(self)
         for struct in self.structures.values():
-            struct.annotate(self)
+            struct.annotate(self) # attaches an interpretation to the vocabulary
 
         self.goal.annotate(self)
         self.view.annotate(self)
@@ -92,14 +90,6 @@ class Idp(object):
         self.display.run(self)
         self.theory.annotate(self)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
-        #log("annotated")
-
-        """
-        for c in self.theory.constraints:
-            print(repr(c))
-        for c in self.theory.definitions:
-            print(repr(c))
-        """
 
     def unknown_symbols(self):
         todo = self.theory.unknown_symbols()
@@ -480,7 +470,7 @@ class Theory(object):
                 else:
                     self.clark[symbol.name] = rule
 
-        self.constraints = [e.annotate(voc, {}) for e in self.constraints]
+        self.constraints = [e.annotate(voc, {})        for e in self.constraints]
         self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
         self.constraints = [e.interpret         (self) for e in self.constraints]
 
@@ -812,6 +802,8 @@ class Goal(object):
                 idp.theory.constraints.append(constraint)
             else:
                 raise Exception("goals must be instantiable.")
+        elif self.name not in [None, '']:
+            raise Exception("Unknown goal: " + self.name)
 
     def subtences(self):
         return {}
