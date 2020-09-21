@@ -105,5 +105,5 @@ Procedure: 'main' '{' statements=Statement* '}';
   PyExpr : Call1 | String | NumberConstant | ID;
   String: literal=/"(\.|[^"])*"/;
 
-  Assignment : v=ID '=' val=Call0;
+  Assignment : var=ID '=' val=Call0;
 

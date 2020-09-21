@@ -931,6 +931,10 @@ class Procedure(object):
     def __init__(self, **kwargs):
         self.statements = kwargs.pop('statements')
 
+    def __str__(self):
+        newline = "\n"
+        return f"{newline.join(str(s) for s in self.statements)}"
+
 
 class Call1(object):
     def __init__(self, **kwargs):
@@ -938,15 +942,34 @@ class Call1(object):
         self.args = kwargs.pop('args')
         self.kwargs = kwargs.pop('kwargs')
 
+    def __str__(self):
+        kwargs = "" if len(self.kwargs)==0 else f",{','.join(str(a) for a in self.kwargs)}"
+        return f"{self.name}({','.join(str(a) for a in self.args)}{kwargs})"
+
 
 class Call0(object):
     def __init__(self, **kwargs):
         self.pyExpr = kwargs.pop('pyExpr')
 
+    def __str__(self):
+        return str(self.pyExpr)
+
 
 class String(object):
     def __init__(self, **kwargs):
         self.literal = kwargs.pop('literal')
+
+    def __str__(self):
+        return f'{self.literal}'
+
+
+class Assignment(object):
+    def __init__(self, **kwargs):
+        self.var = kwargs.pop('var')
+        self.val = kwargs.pop('val')
+
+    def __str__(self):
+        return f'{self.var} = {self.val}'
 
 
 ########################################################################
@@ -974,4 +997,4 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structures, Interpretation,
                                          Tuple, Goal, View, Display,
 
-                                         Procedure, Call1, Call0, String])
+                                         Procedure, Call1, Call0, String, Assignment])
