@@ -209,6 +209,7 @@ class Extern(object):
         other = voc.idp.vocabularies[self.name]
         voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls} #TODO merge while respecting order
 
+
 class ConstructedTypeDeclaration(object):
     COUNT = -1
 
@@ -330,6 +331,8 @@ class SymbolDeclaration(object):
         if self.out is None:
             self.out = Sort(name='bool')
 
+        self.function = (self.out.name != 'bool')
+        self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         
         self.is_var = True  # unless interpreted later
@@ -703,12 +706,12 @@ class Structure(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
-        self.interpretations = kwargs.pop('interpretations')
+        self.interpretations = {i.name: i for i in kwargs.pop('interpretations')}
 
     def annotate(self, idp):
         assert self.vocab_name == None or self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
         voc = idp.vocabularies.get(self.vocab_name, idp.vocabulary)
-        for i in self.interpretations:
+        for i in self.interpretations.values():
             i.annotate(voc)
 
 
@@ -718,25 +721,21 @@ class Interpretation(object):
         self.tuples = kwargs.pop('tuples')
         self.default = kwargs.pop('default')  # later set to false for predicates
 
-        self.function = None  # -1 if function else 0
-        self.arity = None
         self.decl = None  # symbol declaration
 
     def annotate(self, voc):
         self.decl = voc.symbol_decls[self.name]
         for t in self.tuples:
             t.annotate(voc)
-        self.function = 0 if self.decl.out.name == 'bool' else -1
-        self.arity = len(self.tuples[0].args)  # there must be at least one tuple !
-        if self.function and 1 < self.arity and self.default is None:
+        if self.decl.function and 0 < self.decl.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
-        self.default = self.default if self.function else FALSE
+        self.default = self.default if self.decl.function else FALSE
         self.default = self.default.annotate(voc, {})
 
         def interpret(theory, rank, args, tuples=None):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
-            if rank == self.arity + self.function:  # valid tuple -> return a value
-                if not self.function:
+            if rank == self.decl.arity:  # valid tuple -> return a value
+                if not self.decl.function:
                     return TRUE
                 else:
                     if 1 < len(tuples):
