@@ -1,19 +1,19 @@
-vocabulary {
+vocabulary V {
     // here comes the specification of the vocabulary
     p
 }
 
-theory {
+theory T:V {
     // here comes the definitions and constraints
     p.
 }
 
-structure {
+structure S:V {
     // here comes the interpretation of some symbols
 }
 
 main {
-    print("ok")
-    print(2)
-    t = u
+    print(V)
+    print(T)
+    print(S)
 }

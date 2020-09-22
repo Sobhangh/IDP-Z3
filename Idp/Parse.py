@@ -699,7 +699,7 @@ class Rule(object):
 
 ################################ Structure ###############################
 
-class Structures(object):
+class Structure(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
@@ -988,7 +988,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AppliedSymbol, Variable,
                                          NumberConstant, Brackets, Arguments,
 
-                                         Structures, Interpretation,
+                                         Structure, Interpretation,
                                          Tuple, Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, Assignment])

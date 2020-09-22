@@ -29,9 +29,10 @@ def execute(self):
     """ 
     Execute the IDP program
     """
-    
-    builtins = {'print': print}
-    exec(str(self.procedure), builtins)
+
+    mybuiltins = {'print': print}
+    mylocals = {**self.vocabularies, **self.theories, **self.structures}
+    exec(str(self.procedure), mybuiltins, mylocals)
 Idp.execute = execute
 
 
