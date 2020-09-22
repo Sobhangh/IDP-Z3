@@ -122,3 +122,8 @@ def implicants(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
     return self.sub_exprs[0].implicants(assignments, truth) + out
 Brackets.implicants = implicants
+
+
+
+
+Done = True

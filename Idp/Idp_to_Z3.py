@@ -25,7 +25,7 @@ TODO: vocabulary
 """
 
 
-from debugWithYamlLog import Log, nl
+from debugWithYamlLog import Log
 from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort, Q
 
 from typing import List, Tuple
@@ -237,3 +237,8 @@ NumberConstant.translate = translate
 def translate1(self):
     return self.sub_exprs[0].translate()
 Brackets.translate1 = translate1
+
+
+
+
+Done = True

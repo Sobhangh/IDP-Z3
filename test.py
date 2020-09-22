@@ -49,7 +49,7 @@ def generateZ3(theory):
 
     idp = idpparser.model_from_str(theory)
     if idp.procedure is not None:
-        return "ok"
+        return f"{NEWL.join(str(s) for s in idp.execute())}"
 
     expanded_symbols: Dict[str, SymbolDeclaration] = {}
     for expr in idp.subtences.values():
