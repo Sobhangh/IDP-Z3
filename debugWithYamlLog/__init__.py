@@ -2,7 +2,7 @@ import inspect, os, time
 from yaml import dump
 
 
-nl = "\n"
+NEWL = "\n"
 indented = "\n  "
 
 _indent = 0
@@ -34,8 +34,8 @@ def Log(something):
     global LOG_FILE, _indent
     if LOG_FILE:
         f = open(LOG_FILE, "a")
-        out = f"{nl}{dump([prepare(something)], allow_unicode=True, sort_keys=False)}"[:-1] # drop last \n
-        out = out.replace(nl, nl+(' '*_indent))
+        out = f"{NEWL}{dump([prepare(something)], allow_unicode=True, sort_keys=False)}"[:-1] # drop last \n
+        out = out.replace(NEWL, NEWL+(' '*_indent))
         f.write(out)
         f.close()
 

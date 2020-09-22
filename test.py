@@ -33,7 +33,7 @@ import argparse
 from consultant.Case import Case
 from consultant.Inferences import metaJSON, propagation, expand
 from consultant.utils import start
-from Idp import idpparser, SymbolDeclaration
+from Idp import idpparser, SymbolDeclaration, NEWL
 from consultant.utils import log
 from consultant.Case import make_case
 
@@ -57,33 +57,32 @@ def generateZ3(theory):
     expanded_symbols2 = list(expanded_symbols.keys())
     case = Case(idp, expanded_symbols2)
 
-    nl = "\n"
     output = (
-        f"{nl}-- original ---------------------------------{nl}"
+        f"{NEWL}-- original ---------------------------------{NEWL}"
         f"{theory}"
-        f"{nl}-- meta -------------------------------------{nl}"
-        f"{pprint.pformat(metaJSON(case.idp), width=120)}{nl}"
-        f"{nl}-- propagation ------------------------------{nl}"
-        f"{pprint.pformat(propagation(case), width=120)}{nl}"
+        f"{NEWL}-- meta -------------------------------------{NEWL}"
+        f"{pprint.pformat(metaJSON(case.idp), width=120)}{NEWL}"
+        f"{NEWL}-- propagation ------------------------------{NEWL}"
+        f"{pprint.pformat(propagation(case), width=120)}{NEWL}"
 
         #additional debug info (optional)
-        # f"{nl}-- vocabulary -------------------------------{nl}"
-        # f"{nl.join(str(t) for t in case.idp.vocabulary.translated)}"
-        # f"{nl}-- theory -----------------------------------{nl}"
-        # f"{(nl+nl).join(str(t) for t in case.idp.theory.translate(case.idp))}{nl}"
-        # f"{nl}-- goal -----------------------------------{nl}"
-        # f"{str(case.idp.goal.translate())}{nl}"
-        # f"{nl}-- subtences ------------------------------------{nl}"
-        # f"{nl.join(str(t) for t in case.idp.subtences)}{nl}"
-        # f"{nl}-- GUILines ------------------------------------{nl}"
-        # f"{nl.join(str(t) for t in case.GUILines)}{nl}"
-        # f"{nl}-- case -------------------------------------{nl}"
-        # f"{str(case)}{nl}"
+        # f"{NEWL}-- vocabulary -------------------------------{NEWL}"
+        # f"{NEWL.join(str(t) for t in case.idp.vocabulary.translated)}"
+        # f"{NEWL}-- theory -----------------------------------{NEWL}"
+        # f"{(NEWL+NEWL).join(str(t) for t in case.idp.theory.translate(case.idp))}{NEWL}"
+        # f"{NEWL}-- goal -----------------------------------{NEWL}"
+        # f"{str(case.idp.goal.translate())}{NEWL}"
+        # f"{NEWL}-- subtences ------------------------------------{NEWL}"
+        # f"{NEWL.join(str(t) for t in case.idp.subtences)}{NEWL}"
+        # f"{NEWL}-- GUILines ------------------------------------{NEWL}"
+        # f"{NEWL.join(str(t) for t in case.GUILines)}{NEWL}"
+        # f"{NEWL}-- case -------------------------------------{NEWL}"
+        # f"{str(case)}{NEWL}"
         )
     # try:
     #     expand(case)
     # except Exception as exc:
-    #     output += f"{nl}error in expansion{nl}{str(exc)}"
+    #     output += f"{NEWL}error in expansion{NEWL}{str(exc)}"
     return output
 
 

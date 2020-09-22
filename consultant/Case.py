@@ -18,7 +18,7 @@
 """
 from copy import copy
 from z3 import And, Not, sat, unsat, unknown, is_true
-from debugWithYamlLog import Log, nl, indented
+from debugWithYamlLog import Log, NEWL, indented
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from .Solver import mk_solver
@@ -121,13 +121,13 @@ class Case:
 
     def __str__(self) -> str:
         self.get_co_constraints()
-        return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translate(self.idp))}{nl}"
-                f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{nl}"
-                f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{nl}"
-                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{nl}"
-                f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.simplified)}{nl}"
-                f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{nl}"
-                f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{nl}"
+        return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translate(self.idp))}{NEWL}"
+                f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{NEWL}"
+                f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
+                f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.simplified)}{NEWL}"
+                f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
+                f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
         )
 
     def get_co_constraints(self):
@@ -279,7 +279,7 @@ class Case:
             if l.value is not None and (all_ or not l.sentence.has_decision()))
         self.propagate(to_propagate, all_)
 
-        Log(f"{nl}Z3 propagation ********************************")
+        Log(f"{NEWL}Z3 propagation ********************************")
 
         theory = self.translate(all_)
         solver, _, _ = mk_solver(theory, {})

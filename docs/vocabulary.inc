@@ -18,7 +18,8 @@ Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 
 .. _type:
 .. _constructor:
-.. index:: type, constructor
+.. _symbol:
+.. index:: type, constructor, symbol
 
 Types
 +++++
@@ -31,6 +32,11 @@ Custom types can be defined by specifying a range of numeric literals, or a list
 
     type side = {1..4}
     type color constructed from {red, blue, green}
+
+The type ```Symbols`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
+The constructors are the names of the symbol, prefixed with `````
+For the above example, the constructors of ```Symbols`` are : ```red``, ```blue``, ```green``.
+
 
 .. _function:
 .. index:: function
@@ -70,15 +76,6 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
     
     MyProp1 MyProp2.
     MyConstant: int
-
-.. _symbol:
-.. index:: symbol
-
-Symbols type
-++++++++++++
-
-The type ```Symbols`` has one constructor for each function/predicate/constant declared in the vocabulary.
-For the above example, the constructors of ```Symbols`` are : ```MyFunc``, ```MyPred``, ```MyProp1``, ```MyProp1``, ```MyConst``.
 
 .. index:: annotation (vocabulary)
 
