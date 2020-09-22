@@ -27,10 +27,11 @@ from .Parse import *
 
 def execute(self):
     """ 
-    Generator of strings containing the output of the execution of the IDP program
+    Execute the IDP program
     """
-    yield "ok"
-    yield "ko"
+    
+    builtins = {'print': print}
+    exec(str(self.procedure), builtins)
 Idp.execute = execute
 
 

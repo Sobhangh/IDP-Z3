@@ -1,2 +1,3 @@
 ok
-ko
+ok
+name 'u' is not defined

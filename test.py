@@ -18,14 +18,16 @@ By default, the generate test is run.
 
 Authors: Pierre Carbonelle, Simon Vandevelde
 """
-import os
-import sys
-import time
-import pprint
-import threading
-import glob
-from typing import Dict
 import argparse
+from contextlib import redirect_stdout
+import glob
+import io
+import os
+import pprint
+import sys
+import threading
+import time
+from typing import Dict
 
 # import pyximport; 
 # pyximport.install(language_level=3)
@@ -49,7 +51,14 @@ def generateZ3(theory):
 
     idp = idpparser.model_from_str(theory)
     if idp.procedure is not None:
-        return f"{NEWL.join(str(s) for s in idp.execute())}"
+        # capture stdout, print()
+        with io.StringIO() as buf, redirect_stdout(buf):
+            try:
+                idp.execute()
+            except Exception as exc:
+                print(exc)
+
+            return buf.getvalue()
 
     expanded_symbols: Dict[str, SymbolDeclaration] = {}
     for expr in idp.subtences.values():
