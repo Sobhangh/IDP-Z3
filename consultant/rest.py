@@ -31,7 +31,7 @@ from textx import TextXError
 from .utils import log
 from .Case import make_case
 from .Inferences import *
-from .Structure_ import *
+from .Output import *
 from Idp import Idp, idpparser
 
 from typing import Dict

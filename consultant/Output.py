@@ -150,7 +150,7 @@ def json_to_literals(idp, jsonstr: str):
 
 def model_to_json(case, s, reify):
     model = s.model()
-    out = Structure_(case)
+    out = Output(case)
     out.fill(case)
     
     for symb, d1 in out.m.items():
@@ -181,7 +181,7 @@ def model_to_json(case, s, reify):
     return out.m
 
 
-class Structure_(object):
+class Output(object):
     def __init__(self, case, structure={}):
         self.m = {} # [symbol.name][atom.code][attribute name] -> attribute value
         self.case = case

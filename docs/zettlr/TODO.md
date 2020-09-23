@@ -47,6 +47,7 @@ Date: TODO
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
+- [ ] implement structures as theories, not If formula
 - [ ] incremental propagate: use dependency graph (+ block) to propagate selectively
 - [ ] full propagate: should have only one expansion per unknown subtence
 - [ ] relevance-based optimal propagate (do not propagate irrelevant subtences)
@@ -64,7 +65,7 @@ Date: TODO
 - [ ] use [macropy](https://macropy3.readthedocs.io/en/latest/): smartAsserts, pattern matching
 - [ ] merge Case.assignments and Case.GUILines to be like Structure ([[Questions]] )
 - [ ] remove reifier, Solver.py --> expr.reified(solver)
-- [ ] simplify the generation of Structure_
+- [ ] simplify the generation of Output
 
 - [ ] use EXIST, … instead of AQuantifier.make(), for readability
 - [ ] move consequences into case.simplified ?

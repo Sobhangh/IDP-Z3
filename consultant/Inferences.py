@@ -20,7 +20,7 @@ import re
 import time
 from z3 import BoolRef, BoolSort, Const, Implies, And, substitute, Optimize
 
-from .Structure_ import *
+from .Output import *
 from .Solver import mk_solver, reifier, Solver, sat, unsat, is_not
 from .utils import *
 
@@ -68,7 +68,7 @@ def metaJSON(idp):
 
 
 def propagation(case):
-    out = Structure_(case)
+    out = Output(case)
     out.fill(case)
 
     return out.m
@@ -126,7 +126,7 @@ def optimize(case, symbol, minimize):
     return model_to_json(case, solver, reify)
 
 def explain(case, symbol, value, given_json):
-    out = Structure_(case, case.given)  
+    out = Output(case, case.given)  
 
     negated = value.startswith('~')
     value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \

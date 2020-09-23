@@ -22,7 +22,7 @@ from debugWithYamlLog import Log, NEWL, indented
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from .Solver import mk_solver
-from .Structure_ import json_to_literals, Assignment, Status, str_to_IDP
+from .Output import json_to_literals, Assignment, Status, str_to_IDP
 from .utils import *
 
 # Types

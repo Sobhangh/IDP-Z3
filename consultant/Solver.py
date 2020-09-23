@@ -18,7 +18,7 @@
 """
 from z3 import Solver, sat, unsat, is_not, is_eq, is_bool
 
-from .Structure_ import *
+from .Output import *
 from .utils import *
 
 
