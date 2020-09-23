@@ -1,11 +1,11 @@
 Idp:
-    vocabularies=Vocabulary*
-    theories=Theory*
-    structures=Structure*
+    ( vocabularies=Vocabulary
+    | theories=Theory
+    | structures=Structure
+    | procedures=Procedure) *
     goal=Goal?
     view=View?
     display=Display?
-    procedure=Procedure?
 ;
 
 Comment:
@@ -87,7 +87,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
 
 Structure: 'structure' (name=ID ':' vocab_name=ID)? '{' interpretations*=Interpretation '}';
-  Interpretation: name=Symbol '=' '{' tuples+=Tuple[';'] '}' ('else' default=Base)?;
+  Interpretation: name=Symbol '=' ( default=Base '.' | '{' tuples+=Tuple[';'] '}' ('else' default=Base)? );
   Tuple : args*=Base[','];
 
 Goal: 'goal' name=ID;
@@ -97,7 +97,7 @@ View: 'view' viewType=ViewType;
 
 Display: 'display' '{' (constraints=Expression '.')* '}';
 
-Procedure: 'main' '{' statements=Statement* '}';
+Procedure: 'procedure' name=ID '(' args=ID*')' '{' statements=Statement* '}';
 
   Statement: Call1 | Assignment ;
   Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=Assignment[','])? ')';

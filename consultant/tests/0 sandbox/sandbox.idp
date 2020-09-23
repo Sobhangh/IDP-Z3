@@ -1,12 +1,14 @@
+
+theory {
+  ~p|q.
+}
 vocabulary {
     p q
 }
-theory {
-  { p.}
-  ~p()|q.
+structure {
+  p = true.
 }
 display {
-  relevant(`p).
   expand(`q).
   view = normal.
 }

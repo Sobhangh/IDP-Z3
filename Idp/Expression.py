@@ -580,7 +580,8 @@ class Variable(AppliedSymbol):
         return self.annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        questions.add(self)
+        if self.decl.interpretation is None:
+            questions.add(self)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
 

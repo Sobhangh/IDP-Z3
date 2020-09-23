@@ -27,7 +27,7 @@ import sys
 from debugWithYamlLog import Log, NEWL
 from textx import metamodel_from_file
 from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
-                Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort)
+                Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort, BoolVal)
 
 from consultant.utils import applyTo, itertools, in_list, mergeDicts, log, unquote
 from .Expression import (Constructor, Expression, IfExpr, AQuantification,
@@ -54,11 +54,11 @@ class Idp(object):
         self.goal = kwargs.pop('goal')
         self.view = kwargs.pop('view')
         self.display = kwargs.pop('display')
-        self.procedure = kwargs.pop('procedure')
+        self.procedures = {p.name: p for p in kwargs.pop('procedures')}
 
         self.translated = None  # [Z3Expr]
 
-        assert self.display is None or self.procedure is None, \
+        assert self.display is None or 'main' not in self.procedures, \
             "Cannot have both a 'display and a 'main block"
         if self.display is not None:
             assert len(self.vocabularies) in [1,2], \
@@ -79,7 +79,6 @@ class Idp(object):
         
         for voc in self.vocabularies.values():
             voc.annotate(self)
-            voc.translate(self)
 
         # determine default vocabulary, theory
         if list(self.vocabularies.keys()) == ['environment', 'decision']:
@@ -95,6 +94,9 @@ class Idp(object):
         for struct in self.structures.values():
             struct.annotate(self) # attaches an interpretation to the vocabulary
 
+        
+        for voc in self.vocabularies.values():
+            voc.translate(self)
         self.goal.annotate(self)
         self.view.annotate(self)
         self.display.annotate(self)
@@ -225,8 +227,8 @@ class ConstructedTypeDeclaration(object):
             self.translated = BoolSort()
             self.constructors[0].type = 'bool'
             self.constructors[1].type = 'bool'
-            self.constructors[0].translated = bool(True)
-            self.constructors[1].translated = bool(False)
+            self.constructors[0].translated = BoolVal(True)
+            self.constructors[1].translated = BoolVal(False)
         else:
             self.translated, cstrs = EnumSort(self.name, [c.name for c in
                                                           self.constructors])
@@ -467,6 +469,9 @@ class Theory(object):
         for definition in self.definitions:
             for rule in definition.rules:
                 rule.block = self
+
+    def __str__(self):
+        return self.name
 
     def annotate(self, idp):
         self.vocab_name = self.vocab_name if self.vocab_name !='' else None
@@ -714,6 +719,9 @@ class Structure(object):
         for i in self.interpretations.values():
             i.annotate(voc)
 
+    def __str__(self):
+        return self.name
+
 
 class Interpretation(object):
     def __init__(self, **kwargs):
@@ -727,16 +735,18 @@ class Interpretation(object):
         self.decl = voc.symbol_decls[self.name]
         for t in self.tuples:
             t.annotate(voc)
+            assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
         if self.decl.function and 0 < self.decl.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
-        self.default = self.default if self.decl.function else FALSE
+        self.default = FALSE if not self.decl.function and self.tuples else self.default
         self.default = self.default.annotate(voc, {})
+        assert self.default.as_ground() is not None, f"Must be a ground term: {self.default}"
 
         def interpret(theory, rank, args, tuples=None):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
             if rank == self.decl.arity:  # valid tuple -> return a value
                 if not self.decl.function:
-                    return TRUE
+                    return TRUE if self.tuples else self.default
                 else:
                     if 1 < len(tuples):
                         # raise Exception("Duplicate values in structure for " + str(symbol))
@@ -923,6 +933,8 @@ class Display(object):
 
 class Procedure(object):
     def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.args = kwargs.pop('args')
         self.statements = kwargs.pop('statements')
 
     def __str__(self):

@@ -12,7 +12,7 @@ structure S:V {
     // here comes the interpretation of some symbols
 }
 
-main {
+procedure main () {
     print(V)
     print(T)
     print(S)

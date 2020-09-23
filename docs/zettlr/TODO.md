@@ -8,19 +8,13 @@ Date: TODO
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
 - [ ] min, max aggregates
+- [ ] [[Syntax changes]]
 
 - [ ] Support for [[Functional constructors]] (p.6 of the IDP3 manual)
 - [ ] Lexicographic, Pareto and conditional optimization
 - [ ] Support for dates
 - [ ] issues on GitLab
 
-#### Syntax changes:
-- [ ] structures become data theories consisting of data expressions; these expression can occur also inside theories.
-- [ ] standard extensible way of typing as in type theory : p(t1,t2) would be p::(t1,t2):bool
-- [ ] distinguish identifiers from constants: an identifier c of type t could be typed c:t while a constant c of type t could be typed c():t
-- [ ] [[Type and Binary Quantifications]]
-- [ ] require definitions to be constructive
-- [ ] move enumerations in vocabulary to the theory block
 
 #### Research topics / may take a while:
 - [ ] use list of simplifications steps for explain
@@ -28,6 +22,7 @@ Date: TODO
 - [ ] Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
 - [ ] Support for [[Non linear equations]]
 - [ ] [[use pySMT]] 
+- [ ] require definitions to be constructive
 
 
 #### Of dubious benefit / may never be done:
@@ -63,7 +58,6 @@ Date: TODO
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share co_constraints
 - [ ] avoid mergeDicts.  Use accumulator instead
-- [ ] rewrite in [[Nim]]
 - [ ] #Perf
 
 #### other NTH (refactoring)

@@ -32,7 +32,7 @@ def execute(self):
 
     mybuiltins = {'print': print}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
-    exec(str(self.procedure), mybuiltins, mylocals)
+    exec(str(self.procedures['main']), mybuiltins, mylocals)
 Idp.execute = execute
 
 

@@ -1,26 +1,22 @@
 
 -- original ---------------------------------
+
+theory {
+  ~p|q.
+}
 vocabulary {
     p q
 }
-theory {
-  { p.}
-  ~p()|q.
+structure {
+  p = true.
 }
 display {
-  relevant(`p).
   expand(`q).
   view = normal.
 }
 
 -- meta -------------------------------------
 {'symbols': [{'environmental': False,
-              'idpname': 'p',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'proposition',
-              'view': 'normal'},
-             {'environmental': False,
               'idpname': 'q',
               'priority': 'core',
               'showOptimize': True,
@@ -30,21 +26,12 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'p': {'__rank': 1,
-       'p': {'environmental': False,
-             'is_assignment': False,
-             'normal': True,
-             'reading': 'p',
-             'relevant': True,
-             'status': 'UNIVERSAL',
-             'typ': 'Bool',
-             'value': True}},
- 'q': {'__rank': 2,
+ 'q': {'__rank': 1,
        'q': {'environmental': False,
              'is_assignment': False,
              'normal': True,
              'reading': 'q',
              'relevant': True,
-             'status': 'CONSEQUENCE',
+             'status': 'UNIVERSAL',
              'typ': 'Bool',
              'value': True}}}

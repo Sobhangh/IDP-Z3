@@ -12,7 +12,7 @@ structure {
     // here comes the interpretation of some symbols
 }
 
-main {
+procedure main() {
     print("ok")
     print(2)
     t = u

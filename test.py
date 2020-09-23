@@ -50,7 +50,7 @@ def generateZ3(theory):
     """
 
     idp = idpparser.model_from_str(theory)
-    if idp.procedure is not None:
+    if 'main' in idp.procedures:
         # capture stdout, print()
         with io.StringIO() as buf, redirect_stdout(buf):
             try:
