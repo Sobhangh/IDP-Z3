@@ -38,7 +38,7 @@ python3 main.py
 
 # Develop
 
-You may want to read about the [technical architecture](https://docs.google.com/document/d/1i0oFnk_ITwm2zkF36MzN9ezgZJe0_a7H9Tm1x1V-lKA/edit?usp=sharing).
+You may want to read about the [technical architecture](https://gitlab.com/krr/autoconfigz3/-/blob/master/docs/zettlr/Architecture.md).
 
 The website is served from the static directory.  Its code is available at https://gitlab.com/krr/autoconfig3.  To update it:
 
@@ -54,10 +54,6 @@ For development of autoconfig3,
 * verify IDP_ENDPOINT and META_URL in src/assets/services/AppSettings.ts
 * open your browser at http://localhost:4201
 
-To deploy on [Google App Engine](https://gitlab.com/krr/autoconfigz3/-/blob/master/docs/zettlr/Google%20App%20Engine.md):
-* make sure that you are on branch master without pending git changes
-* `./deploy.sh` will ask you whether you want to build the client for CDN, and then to deploy
-
 The user manual is in the `/docs` folder and can be locally generated as follows:
 ~~~~
 sphinx-autobuild docs docs/_build/html
@@ -65,6 +61,10 @@ sphinx-autobuild docs docs/_build/html
 To view it, open `http://127.0.0.1:8000`
 
 The [documentation on readthedocs](https://readthedocs.org/projects/idp-z3/) is automatically updated from the gitlab repository.
+
+To deploy on [Google App Engine](https://gitlab.com/krr/autoconfigz3/-/blob/master/docs/zettlr/Google%20App%20Engine.md):
+* make sure that you are on branch master without pending git changes
+* `./deploy.sh` will ask you whether you want to build the client for CDN, and then to deploy
 
 # Testing
 

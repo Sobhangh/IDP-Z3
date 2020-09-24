@@ -4,13 +4,13 @@ tags:
 Date: TODO
 –-
 
+- [ ] [[min, max aggregates]]
+- [ ] Support for [[Functional constructors]] (p.6 of the IDP3 manual)
 - [ ] Explanations: inject values in message
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
-- [ ] min, max aggregates
 - [ ] [[Syntax changes]]
 
-- [ ] Support for [[Functional constructors]] (p.6 of the IDP3 manual)
 - [ ] Lexicographic, Pareto and conditional optimization
 - [ ] Support for dates
 - [ ] issues on GitLab

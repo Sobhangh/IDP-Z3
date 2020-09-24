@@ -167,7 +167,7 @@ class Vocabulary(object):
             ('`Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]), 
         ]:
             ConstructedTypeDeclaration(name=name, constructors=constructors) \
-                .annotate(self)
+                .annotate(self) # add it to symbol_decls
 
     def annotate(self, idp):
         self.idp = idp

@@ -18,6 +18,8 @@ Constants must be followed by `()` in vocabulary: `Length():int`  (and in theory
 # (Proposal) Type enumeration
 A type made of constructors uses the enumeration syntax, e.g., `type color = {red; blue; green}` (instead of `constructed from {red, blue, green}`). Notice the `;`
 
+To consider: accessors for functional constructors ? e.g. `type color = rgb(red:nat, blue:nat, green:nat)`
+
 # (Proposal) Binary quantifications
 A quantification has either a type or a sentence:
 `! c[color]: p(c).` 

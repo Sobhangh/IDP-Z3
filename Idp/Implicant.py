@@ -32,7 +32,7 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, Bin
                     ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
                     AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
                     AppliedSymbol, Variable, NumberConstant, Brackets, Arguments, \
-                    Fresh_Variable, TRUE, FALSE, ZERO
+                    TRUE, FALSE, ZERO
 
 
 def _not(truth):
