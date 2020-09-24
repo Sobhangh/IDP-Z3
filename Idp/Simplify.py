@@ -291,16 +291,12 @@ AUnary.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    operands1 = [e.as_ground() for e in operands]
-    if all(e is not None for e in operands1):
-        acc = 0
-        for expr, expr1 in zip(operands, operands1):
-            if expr1 is not None:
-                acc += expr1.translate() if self.aggtype == 'sum' else 1
-            else:
-                exprs.add(expr)
-        out = NumberConstant(number=str(acc))
-        return self._change(value=out, sub_exprs=operands)
+    if self.vars is None: # if the aggregate has already been expanded
+        operands1 = [e.as_ground() for e in operands]
+        if all(e is not None for e in operands1):
+            out = sum(e.translate() for e in operands1)
+            out = NumberConstant(number=str(out))
+            return self._change(value=out, sub_exprs=operands)
 
     return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs

@@ -393,8 +393,8 @@ class Case:
             + sum((d.translate() for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None and (all_ or not l.sentence.has_decision())]
-            + [c.translate() for c in self.simplified
-                    if all_ or not c.block.name=='environment']
+            + [s.translate() for s in self.simplified
+                    if all_ or not s.block.name=='environment']
             + [c.translate() for c in self.co_constraints]
             )
         return self.translated

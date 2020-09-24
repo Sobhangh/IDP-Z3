@@ -664,7 +664,7 @@ class Rule(object):
             expr = AppliedSymbol.make(self.symbol, self.args)
         expr = AEquivalence.make('⇔', [expr, self.body])
         expr = AQuantification.make('∀', {**self.q_vars}, expr)
-        self.expanded = expr.expand_quantifiers(theory) # this also expands self.body !
+        self.expanded = expr.expand_quantifiers(theory)
 
         # interpret structures
         self.body     = self.body    .interpret(theory)
@@ -676,6 +676,7 @@ class Rule(object):
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new)
+        out = out.expand_quantifiers(theory)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
         instance.normal = True

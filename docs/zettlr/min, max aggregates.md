@@ -21,7 +21,7 @@ A bit more complex when the aggregates contain variable y:
 ⇒ Alternative: expand quantifier of y before creating the co-constraints.
 
 # TODO:
-- [ ] preliminary : `Substitute.py\AQuantification` expand outermost quantifier before innermost ones
+- [x] preliminary : `Substitute.py\AQuantification` expand outermost quantifier before innermost ones
     - and run `python test.py` to detect any regression
 - [ ] modify Idp/idp.tx syntax file to accomodate min/max
 - [ ] modify `Substitute.py\AQuantification` :

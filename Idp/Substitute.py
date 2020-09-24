@@ -135,7 +135,7 @@ Expression.interpret = interpret
 # Class AQuantification #######################################################
 
 def expand_quantifiers(self, theory):
-    forms = [self.sub_exprs[0].expand_quantifiers(theory)]
+    forms = [self.sub_exprs[0]]
     self.vars = []
     self.sorts = [] # not used
     for name, var in self.q_vars.items():
@@ -149,6 +149,8 @@ def expand_quantifiers(self, theory):
         else:
             self.vars.append(var)
             self.sorts.append(var.decl)
+    forms = [f.expand_quantifiers(theory) for f in forms]
+
     if not self.vars:
         if self.q == '∀':
             out = AConjunction.make('∧', forms)
@@ -163,10 +165,9 @@ AQuantification.expand_quantifiers = expand_quantifiers
 # Class AAggregate #######################################################
 
 def expand_quantifiers(self, theory):
-    form = IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION]
+    forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION]
                 , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
-                , else_f=NumberConstant(number='0'))
-    forms = [form.expand_quantifiers(theory)]
+                , else_f=NumberConstant(number='0'))]
     for name, var in self.q_vars.items():
         if var.decl.range:
             out = []
@@ -177,8 +178,9 @@ def expand_quantifiers(self, theory):
             forms = out
         else:
             raise Exception('Can only quantify aggregates over finite domains')
+    forms = [f.expand_quantifiers(theory) for f in forms]
     self.vars = None # flag to indicate changes
-    return self._change(sub_exprs=forms)
+    return self.update_exprs(forms)
 AAggregate.expand_quantifiers = expand_quantifiers
 
 
