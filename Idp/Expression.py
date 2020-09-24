@@ -64,7 +64,7 @@ class Expression(object):
         self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]: over approximated list of fresh_vars (ignores simplifications)
         self.no_fresh_vars_before_expansion = None # Bool
-        self.type = None                  # a declaration object, or 'bool', 'real', 'int', or None
+        self.type = None                  # String (e.g. 'bool', 'real', 'int', 'color'), or None
         self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
@@ -532,7 +532,7 @@ class AppliedSymbol(Expression):
         return self.annotate1()
 
     def annotate1(self):
-        self.type = self.decl.type.name
+        self.type = self.decl.type
         return super().annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -575,7 +575,7 @@ class Variable(AppliedSymbol):
             return q_vars[self.name]
         else: # in symbol_decls
             self.decl = voc.symbol_decls[self.name]
-            self.type = self.decl.type.name
+            self.type = self.decl.type
             self.normal = True # make sure it is visible in GUI
         return self.annotate1()
 

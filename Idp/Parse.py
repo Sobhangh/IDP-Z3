@@ -221,7 +221,6 @@ class ConstructedTypeDeclaration(object):
         self.is_var = False
         self.range = self.constructors  # functional constructors are expanded
         self.translated = None
-        self.type = self
 
         if self.name == 'bool':
             self.translated = BoolSort()
@@ -248,7 +247,7 @@ class ConstructedTypeDeclaration(object):
         assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
         voc.symbol_decls[self.name] = self
         for c in self.constructors:
-            c.type = self
+            c.type = self.name
             assert c.name not in voc.symbol_decls, "duplicate constructor in vocabulary: " + c.name
             voc.symbol_decls[c.name] = c
         self.range = self.constructors  # TODO constructor functions
@@ -364,8 +363,8 @@ class SymbolDeclaration(object):
         self.out.annotate(voc)
         self.domain = list(itertools.product(*[s.decl.range for s in self.sorts]))
 
-        self.type = self.out.decl
-        self.range = self.type.range
+        self.type  = self.out.decl.name
+        self.range = self.out.decl.range
 
         # create instances
         self.instances = {}
@@ -390,7 +389,7 @@ class SymbolDeclaration(object):
     def typeConstraint(self, if_symbol=True):
         out = []
         for inst in self.instances.values():
-            domain = self.type.check_bounds(inst)
+            domain = self.out.decl.check_bounds(inst)
             if domain is not None:
                 domain.block = self.block
                 domain.if_symbol = self.name if if_symbol else None
@@ -445,7 +444,7 @@ class Symbol(object):
 
     def annotate(self, voc, q_vars):
         self.decl = voc.symbol_decls[self.name]
-        self.type = self.decl.type.name
+        self.type = self.decl.type
         self.normal = True # make sure it is visible in GUI
         return self
 
