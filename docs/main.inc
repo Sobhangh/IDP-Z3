@@ -3,7 +3,9 @@
 Main block
 ----------
 
-The *main block* consists of python-like statements to be executed in the context of the knowledge base.
+UNDER CONSTRUCTION
+
+The *main block* consists of python-like statements to be executed by the IDP-Z3 executable or the Web IDE, in the context of the knowledge base.
 It takes the following form:
 
 .. code-block::

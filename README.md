@@ -58,10 +58,13 @@ To deploy on [Google App Engine](https://gitlab.com/krr/autoconfigz3/-/blob/mast
 * make sure that you are on branch master without pending git changes
 * `./deploy.sh` will ask you whether you want to build the client for CDN, and then to deploy
 
-To update autoconfigparam.herokuapp.com: 
-* `heroku login`
-* `heroku git:remote -a autoconfigparam`
-* `git push heroku master`
+The user manual is in the `/docs` folder and can be locally generated as follows:
+~~~~
+sphinx-autobuild docs docs/_build/html
+~~~~
+To view it, open `http://127.0.0.1:8000`
+
+The [documentation on readthedocs](https://readthedocs.org/projects/idp-z3/) is automatically updated from the gitlab repository.
 
 # Testing
 
