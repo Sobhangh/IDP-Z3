@@ -22,9 +22,14 @@ To consider: accessors for functional constructors ? e.g. `type color = rgb(red:
 
 # (Proposal) Binary quantifications
 A quantification has either a type or a sentence:
-`! c[color]: p(c).` 
-`! c[color(c)]: p(c)`
-`! x y [p(x,y)]: q(x).`
+~~~~
+! c1 c2 [color]: p(c1,c2).
+! c[color(c)]: p(c).
+! x y [p(x,y)]: q(x)
+! c[color] q: p(c,q)
+~~~~
+A type applies to the variable(s) that precede it; a sentence applies to the variable(s) that precede it. Type inference uses every sentence available.
+
 (See [[Type and Binary Quantifications]] for possible optimisation)
 
 # (Proposal) Partial enumerations

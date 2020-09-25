@@ -13,7 +13,8 @@ Date: 20200523062416
     - [x] The backtick  (`` ` ``) should be used in front of a variable to indicate that it represents a symbol.  Its use is optional though.
 - [x] a variable of type `` `Symbols`` can be applied to arguments, e.g. ``?`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x))``
     - [x]  if the arity is wrong, a valid instance of `p`  is given instead (to avoid error when the instance is irrelevant) (should benefit from partial functions when available)
-    - [ ] notice that this requires [[Type inference]] AFTER expansion of the first quantifier.
+    - [ ] notice that this requires [[Type inference]] AFTER expansion of the first quantifier
+    - [ ] make types optional in quantification
     - [ ] Alternatively, this could be written using binary quantification (when available).
 - [ ] it's possible to quantify over `` `Symbols`` in head of definitions
 

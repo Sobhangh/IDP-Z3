@@ -135,6 +135,11 @@ Expression.interpret = interpret
 # Class AQuantification #######################################################
 
 def expand_quantifiers(self, theory):
+    inferred = self.sub_exprs[0].type_inference()
+    for v, s in inferred.items():
+        assert v not in self.q_vars or self.q_vars[v].decl.out.decl==s.decl, \
+            f"Inconsistent types for {v} in {self}"
+
     forms = [self.sub_exprs[0]]
     self.vars = []
     self.sorts = [] # not used

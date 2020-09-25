@@ -26,6 +26,7 @@ Classes to represent logic expressions.
 """
 
 import copy
+from collections import ChainMap
 import functools
 import itertools as it
 import os
@@ -206,6 +207,10 @@ class Expression(object):
     def has_decision(self):
         # returns true if it contains a variable declared in decision vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
+
+    def type_inference(self):
+        # returns a dictionary {Fresh_Variable : Symbol_Declaration}
+        return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
 
 
 class Constructor(Expression):
@@ -549,6 +554,15 @@ class AppliedSymbol(Expression):
         assert self.decl.block is not None
         return not self.decl.block.name=='environment' \
             or any(e.has_decision() for e in self.sub_exprs)
+
+    def type_inference(self):
+        out = {}
+        for i, e in enumerate(self.sub_exprs):
+            if isinstance(e, Fresh_Variable):
+                out[e.name] = self.decl.sorts[i]
+            else:
+                out.update(e.type_inference())
+        return out
 
 class Arguments(object):
     def __init__(self, **kwargs):

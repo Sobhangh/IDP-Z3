@@ -8,7 +8,7 @@ This document presents the technical architecture of the Interactive Consultant.
 
 The Interactive Consultant is a web application with both client-side and server-side components.  The repository for the client side is [here](https://gitlab.com/krr/autoconfig3), and for the server-side [here](https://gitlab.com/krr/autoconfigz3).  Their respective README.md file has instructions on how to install and run them.  
 
-The [REST.md](https://gitlab.com/krr/autoconfigz3/blob/master/docs/REST.md) file describes the format of the data exchanged between the client and the server.  The exchange of data while using the Interactive Consultant can be visualised in the developer mode of most browsers (Chrome, Mozilla, …).
+The [REST.md](REST.md) file describes the format of the data exchanged between the client and the server.  The exchange of data while using the Interactive Consultant can be visualised in the developer mode of most browsers (Chrome, Mozilla, …).
 
 Their respective TODO.txt, and CHANGELOG.md files contain what you would expect. We follow the principles of [keepachangelog.com](https://keepachangelog.com/en/1.0.0/).
 
