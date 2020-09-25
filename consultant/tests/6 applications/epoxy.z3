@@ -58,7 +58,8 @@ structure {
  
 
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'KnownCost',
               'priority': 'core',
               'showOptimize': True,

@@ -16,7 +16,8 @@ display {
 }
 
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'q',
               'priority': 'core',
               'showOptimize': True,

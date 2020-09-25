@@ -49,7 +49,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'K',
               'priority': 'core',
               'showOptimize': True,

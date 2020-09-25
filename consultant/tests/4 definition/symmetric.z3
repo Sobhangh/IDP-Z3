@@ -11,7 +11,8 @@ theory {
     !`p[`Symbols]: symmetric(`p) => (!x[node] y[node] : `p(x,y) => `p(y,x)).
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'edge',
               'priority': 'core',
               'showOptimize': True,

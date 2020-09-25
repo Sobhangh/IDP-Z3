@@ -23,7 +23,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'Vacation_Days',
               'priority': 'core',
               'showOptimize': True,

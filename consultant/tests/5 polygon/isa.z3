@@ -34,7 +34,8 @@ structure isa:isa {
            rectangle, quadrilateral; square, quadrilateral}
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'Type',
               'priority': 'core',
               'showOptimize': True,

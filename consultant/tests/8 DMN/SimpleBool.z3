@@ -27,7 +27,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'Output_AND',
               'priority': 'core',
               'showOptimize': True,

@@ -20,7 +20,8 @@ display {
   view = normal.
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'p',
               'priority': 'core',
               'showOptimize': True,

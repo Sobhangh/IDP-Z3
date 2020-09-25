@@ -8,7 +8,7 @@ theory {
 }
 
 -- meta -------------------------------------
-{'symbols': [], 'title': 'Interactive Consultant'}
+{'optionalPropagation': False, 'symbols': [], 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},

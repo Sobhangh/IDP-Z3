@@ -124,7 +124,8 @@ display {
     view = expanded.
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'Sides',
               'priority': 'core',
               'showOptimize': True,

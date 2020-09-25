@@ -12,7 +12,8 @@ theory {
     t0=Piet.
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 't',
               'priority': 'core',
               'showOptimize': True,

@@ -238,7 +238,8 @@ display {
     view = normal.
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': True,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': True,
               'idpname': 'Region',
               'priority': 'core',
               'showOptimize': True,

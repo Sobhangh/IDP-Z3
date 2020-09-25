@@ -24,7 +24,8 @@ display {
 
 
 -- meta -------------------------------------
-{'symbols': [{'environmental': True,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': True,
               'idpname': 'Depth',
               'priority': 'core',
               'showOptimize': True,

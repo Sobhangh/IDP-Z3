@@ -14,7 +14,8 @@ theory {
     }
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'LipLen',
               'priority': 'core',
               'showOptimize': True,

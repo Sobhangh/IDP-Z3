@@ -49,7 +49,8 @@ display {
     view = expanded.
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': True,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': True,
               'idpname': '_MinT',
               'priority': 'core',
               'showOptimize': True,

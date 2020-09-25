@@ -12,7 +12,8 @@ display {
     goal(`Prime).
 }
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'Prime',
               'priority': 'core',
               'showOptimize': True,

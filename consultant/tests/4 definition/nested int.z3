@@ -19,7 +19,8 @@ display {
 }
 
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'same',
               'priority': 'core',
               'showOptimize': True,
