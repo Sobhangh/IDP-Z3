@@ -8,3 +8,5 @@ pyyaml
 pycallgraph2
 textx
 z3-solver
+sphinx-autobuild
+sphinx_rtd_theme
