@@ -558,7 +558,7 @@ class AppliedSymbol(Expression):
     def type_inference(self):
         out = {}
         for i, e in enumerate(self.sub_exprs):
-            if isinstance(e, Fresh_Variable):
+            if self.decl.sorts and isinstance(e, Fresh_Variable):
                 out[e.name] = self.decl.sorts[i]
             else:
                 out.update(e.type_inference())

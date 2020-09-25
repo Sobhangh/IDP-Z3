@@ -1,0 +1,10 @@
+vocabulary {
+	type node constructed from {a,b,c}
+	edge(node, node)
+	symmetric(`Symbols)
+}
+theory {
+    edge(a,b).
+	symmetric(`edge).
+    !`p[`Symbols]: symmetric(`p) => (!x[node] y[node] : `p(x,y) => `p(y,x)).
+}
