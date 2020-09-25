@@ -137,23 +137,23 @@ Expression.interpret = interpret
 def expand_quantifiers(self, theory):
     inferred = self.sub_exprs[0].type_inference()
     for v, s in inferred.items():
-        assert v not in self.q_vars or self.q_vars[v].decl.out.decl==s.decl, \
+        assert v not in self.q_vars or self.q_vars[v].sort.decl==s.decl, \
             f"Inconsistent types for {v} in {self}"
 
     forms = [self.sub_exprs[0]]
     self.vars = []
     self.sorts = [] # not used
     for name, var in self.q_vars.items():
-        if var.decl.range:
+        if var.sort.decl.range:
             out = []
             for f in forms:
-                for val in var.decl.range:
+                for val in var.sort.decl.range:
                     new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = out
         else:
             self.vars.append(var)
-            self.sorts.append(var.decl)
+            self.sorts.append(var.sort.decl)
     forms = [f.expand_quantifiers(theory) for f in forms]
 
     if not self.vars:
@@ -174,10 +174,10 @@ def expand_quantifiers(self, theory):
                 , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                 , else_f=NumberConstant(number='0'))]
     for name, var in self.q_vars.items():
-        if var.decl.range:
+        if var.sort.decl.range:
             out = []
             for f in forms:
-                for val in var.decl.range:
+                for val in var.sort.decl.range:
                     new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = out

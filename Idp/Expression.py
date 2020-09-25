@@ -278,10 +278,10 @@ class AQuantification(Expression):
         self.type = 'bool'
 
     @classmethod
-    def make(cls, q, decls, f):
+    def make(cls, q, q_vars, f):
         "make and annotate a quantified formula"
-        out = cls(q=q, vars=list(decls.values()), sorts=list(v.decl for v in decls.values()), f=f)
-        out.q_vars = decls
+        out = cls(q=q, vars=list(q_vars.values()), sorts=list(v.sort for v in q_vars.values()), f=f)
+        out.q_vars = q_vars
         return out.annotate1()
 
     def __str1__(self):
@@ -293,7 +293,9 @@ class AQuantification(Expression):
         for v in self.vars:
             assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {v:s.fresh(v, voc) \
+        for s in self.sorts:
+            s.annotate(voc)
+        self.q_vars = {v:s.fresh(v) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars} # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
@@ -488,7 +490,9 @@ class AAggregate(Expression):
         for v in self.vars:
             assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {v:s.fresh(v, voc) \
+        for s in self.sorts:
+            s.annotate(voc)
+        self.q_vars = {v:s.fresh(v) \
                         for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars} # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
@@ -532,7 +536,7 @@ class AppliedSymbol(Expression):
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-        self.decl = q_vars[self.s.name].decl if self.s.name in q_vars else voc.symbol_decls[self.s.name]
+        self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars else voc.symbol_decls[self.s.name]
         self.normal = True
         return self.annotate1()
 
@@ -558,7 +562,7 @@ class AppliedSymbol(Expression):
     def type_inference(self):
         out = {}
         for i, e in enumerate(self.sub_exprs):
-            if self.decl.sorts and isinstance(e, Fresh_Variable):
+            if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
                 out[e.name] = self.decl.sorts[i]
             else:
                 out.update(e.type_inference())
@@ -605,15 +609,15 @@ class Variable(AppliedSymbol):
 
 class Fresh_Variable(Expression):
     PRECEDENCE = 200
-    def __init__(self, name, decl):
+    def __init__(self, name, sort):
         self.name = name
-        self.decl = decl
+        self.sort = sort
 
         super().__init__()
 
-        self.type = self.decl.name
+        self.type = self.sort.name
         self.sub_exprs = []
-        self.translated = FreshConst(self.decl.out.decl.translate())
+        self.translated = FreshConst(self.sort.decl.translate())
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name

@@ -425,11 +425,8 @@ class Sort(object):
     def annotate(self, voc):
         self.decl = voc.symbol_decls[self.name]
 
-    def fresh(self, name, voc):
-        decl = SymbolDeclaration(annotations=Annotations(annotations=[]),
-                                 name=Symbol(name=name), sorts=[], out=self)
-        decl.annotate(voc, vocabulary=False)
-        return Fresh_Variable(name, decl)
+    def fresh(self, name):
+        return Fresh_Variable(name, self)
 
     def translate(self):
         return self.decl.translate()
@@ -539,10 +536,10 @@ class Definition(object):
             if symbol not in self.q_vars:
                 name = f"${symbol.name}$"
                 q_v = {f"${symbol.name}!{str(i)}$":
-                       sort.fresh(f"${symbol.name}!{str(i)}$", voc)
+                       sort.fresh(f"${symbol.name}!{str(i)}$")
                        for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
-                    q_v[name] = symbol.out.fresh(name, voc)
+                    q_v[name] = symbol.out.fresh(name)
                 self.q_vars[symbol] = q_v
             new_rule = r.rename_args(self.q_vars[symbol])
             self.clark.setdefault(symbol, []).append(new_rule)
@@ -601,7 +598,9 @@ class Rule(object):
     def annotate(self, voc, q_vars):
         # create head variables
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {v: s.fresh(v, voc)
+        for s in self.sorts:
+            s.annotate(voc)
+        self.q_vars = {v: s.fresh(v)
                        for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars}  # merge
 
@@ -647,7 +646,7 @@ class Rule(object):
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
-        self.sorts = [v.decl.out for v in new_vars.values()]
+        self.sorts = [v.sort for v in new_vars.values()]
         self.q_vars = new_vars
         return self
 
