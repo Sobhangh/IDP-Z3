@@ -124,8 +124,8 @@ class meta(Resource):
                     # Generate all symbols.
                     out = metaJSON(idp)
                     # Generate propagation for all symbols.
-                    expanded = [dic['idpname'] for dic in out['symbols'] if
-                                dic['view'] == 'expanded']
+                    expanded = [dic['idpname'] for dic in out['symbols']
+                                if dic['view'] == 'expanded']
                     case = make_case(idp, "{}", tuple(expanded))
                     out["propagated"] = propagation(case)
                     return out

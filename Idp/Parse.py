@@ -846,7 +846,7 @@ class Display(object):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
         self.moveSymbols = False
-        self.prop_optional = False
+        self.optionalPropagation = False
         self.name = "display"
 
     def annotate(self, idp):
@@ -865,7 +865,7 @@ class Display(object):
             ('hide', None),
             ('view', Sort(name='View')),
             ('moveSymbols', None),
-            ('optional_propagation', None)
+            ('optionalPropagation', None)
         ]:
             symbol_decl = SymbolDeclaration(annotations='', name=Symbol(name=name), 
                 sorts=[], out=out)
@@ -924,8 +924,8 @@ class Display(object):
             elif type(constraint)==Variable:
                 if constraint.name == "moveSymbols":
                     self.moveSymbols = True
-                elif constraint.name == "optional_propagation":
-                    self.prop_optional = True
+                elif constraint.name == "optionalPropagation":
+                    self.optionalPropagation = True
                 else:
                     raise Exception("unknown display contraint: ", constraint)
             else:
