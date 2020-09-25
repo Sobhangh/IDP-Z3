@@ -40,4 +40,7 @@ moveSymbols
 
     By default, the symbols do not move.
 
+optionalPropagation
+    When the *display block* contains ``optionalPropagation``, a toggle button will be available in the interface which allows toggling immediate propagation on and off.
 
+    By default, this button is not present.

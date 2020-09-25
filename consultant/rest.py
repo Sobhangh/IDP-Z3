@@ -79,6 +79,7 @@ class HelloWorld(Resource):
 z3lock = threading.Lock()
 idps: Dict[str, Idp] = {} # {code_string : idp}
 
+
 def idpOf(code):
     """
     Function to retrieve an Idp object for IDP code.
@@ -120,8 +121,11 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
+                    # Generate all symbols.
                     out = metaJSON(idp)
-                    expanded = [dic['idpname'] for dic in out['symbols'] if dic['view']=='expanded']
+                    # Generate propagation for all symbols.
+                    expanded = [dic['idpname'] for dic in out['symbols']
+                                if dic['view'] == 'expanded']
                     case = make_case(idp, "{}", tuple(expanded))
                     out["propagated"] = propagation(case)
                     return out
@@ -132,7 +136,8 @@ class meta(Resource):
                 traceback.print_exc()
                 return str(exc)
 
-class metaWithGraph(meta): # subclass that generates call graphs
+
+class metaWithGraph(meta):  # subclass that generates call graphs
     def post(self):
         graphviz = GraphvizOutput()
         graphviz.output_file = 'docs/meta.png'

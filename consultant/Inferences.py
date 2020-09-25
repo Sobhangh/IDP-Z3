@@ -63,7 +63,11 @@ def metaJSON(idp):
                 d['slider'] = i.annotations['Slider']
 
         symbols.append(d)
-    out = {"title": "Interactive Consultant", "symbols": symbols}
+    optionalPropagation = idp.display.optionalPropagation
+
+    # Create the output dictionary.
+    out = {"title": "Interactive Consultant", "symbols": symbols,
+           "optionalPropagation": optionalPropagation}
     return out
 
 
