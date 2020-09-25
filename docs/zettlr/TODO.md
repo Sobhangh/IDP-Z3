@@ -6,6 +6,7 @@ Date: TODO
 
 - [ ] [[min, max aggregates]]
 - [ ] Support for [[Functional constructors]] (p.6 of the IDP3 manual)
+- [ ] support for [[Units of measure]]
 - [ ] Explanations: inject values in message
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)

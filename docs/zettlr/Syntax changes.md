@@ -45,3 +45,6 @@ The statement to give an interpretation to a predicate or function constant ends
 `if.. then.. else..`is a valid expression.
 (what about a case statement ?)
 
+# (Proposal) unit of measures
+see [[Units of measure]]
+
