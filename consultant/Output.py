@@ -39,7 +39,7 @@ def str_to_IDP(idp, val1):
     return val
 
 def json_to_literals(idp, jsonstr: str):
-    assignments: Dict[Expression, Optional[Assignment]] = {} # {atom : assignment} from the GUI (needed for propagate)
+    assignments = Assignments() # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
         json_data = ast.literal_eval(jsonstr \
             .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
@@ -47,28 +47,22 @@ def json_to_literals(idp, jsonstr: str):
             .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
             .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
 
-        assignment: Optional[Assignment]
-        for sym in json_data:
-            for atom in json_data[sym]:
-                json_atom = json_data[sym][atom]
-                assert "value" in json_atom
+        for symbol in json_data:
+            idp_symbol = idp.vocabulary.symbol_decls[symbol]
+            for atom, json_atom in json_data[symbol].items():
                 if atom in idp.subtences:
-                    atom = idp.subtences[atom].copy()
+                    idp_atom = idp.subtences[atom].copy()
                 else:
-                    symbol = idp.vocabulary.symbol_decls[sym]
-                    atom = symbol.instances[atom].copy()
-                if json_atom["typ"] == "Bool":
-                    assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
-                    assignments[atom.code] = assignment
-                elif json_atom["value"]:
-                    assignment = Assignment(atom, str_to_IDP(idp, json_atom["value"]), Status.GIVEN)
-                    assignment.relevant = True
-                    assignments[atom.code] = assignment
+                    idp_atom = idp_symbol.instances[atom].copy()
 
-                    atom = AComparison.make('=', [atom, str_to_IDP(idp, json_atom["value"])])
-                    assignment = Assignment(atom, TRUE, Status.GIVEN)
-                    assignment.relevant = True
-                    assignments[atom.code] = assignment
+                value = str_to_IDP(idp, json_atom["value"])
+                if json_atom["typ"] == "Bool":
+                    assignments.assert_(idp_atom, value, Status.GIVEN, False)
+                elif json_atom["value"]:
+                    assignments.assert_(idp_atom, value, Status.GIVEN, True)
+
+                    idp_atom = AComparison.make('=', [idp_atom, value])
+                    assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
     return assignments
 
 
