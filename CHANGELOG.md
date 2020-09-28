@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## API
 * type of variables can now be omitted in quantifiers and aggregates (but there is no type inference from numeric expressions)
-* (macros) quantification on `Symbols type
+* (macros) quantification on `Symbols type (except definitions)
 * support named vocabulary for structures
 
 ## [0.5.3] - 2020-09-15

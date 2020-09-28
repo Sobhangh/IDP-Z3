@@ -107,7 +107,7 @@ display {
                     'typ': 'Bool',
                     'value': False},
        'b = red': {'environmental': False,
-                   'is_assignment': False,
+                   'is_assignment': True,
                    'normal': False,
                    'reading': 'b = red',
                    'relevant': True,

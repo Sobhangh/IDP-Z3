@@ -22,7 +22,7 @@ from debugWithYamlLog import Log, NEWL, indented
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
 from .Solver import mk_solver
-from .Output import json_to_literals, Assignment, Status, str_to_IDP
+from .Output import json_to_literals, Assignment, Assignments, Status, str_to_IDP
 from .utils import *
 
 # Types
@@ -50,7 +50,7 @@ class Case:
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
         self.simplified: List[Expression] = []
-        self.assignments: Dict[str, Assignment] = {} # atoms + given, with simplified formula and value value
+        self.assignments = Assignments() # atoms + given, with simplified formula and value value
 
         if __debug__: self.invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -58,9 +58,7 @@ class Case:
             GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
                 or (type(GuiLine)==AComparison and GuiLine.is_assignment) \
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
-
-        # initialize .assignments
-        self.assignments = {s.code : Assignment(s.copy(), None, Status.UNKNOWN) for s in self.GUILines.values()}
+            self.assignments.assert_(GuiLine, None, Status.UNKNOWN, False)
 
         # find immediate universals
         for c in self.idp.theory.constraints:
@@ -71,9 +69,8 @@ class Case:
             consequences.extend(new_constraint.implicants(self.assignments))
             if consequences:
                 for sentence, value in consequences:
-                    ass = Assignment(sentence, value, status)
-                    self.assignments[sentence.code] = ass
-            self.simplified.append(c)
+                    self.assignments.assert_(sentence, value, status, False)
+            self.simplified.append(new_constraint)
 
         # annotate self.simplified with questions
         for e in self.simplified:
@@ -96,11 +93,11 @@ class Case:
             return self
 
         out = copy(self)
-        out.assignments = {k: v.copy() for k,v in self.assignments.items()}
+        out.assignments = out.assignments.copy()
         out.simplified = [c.copy() for c in self.simplified]
 
         out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
-        out.assignments.update({ atom : ass for atom, ass in out.given.items() }) #TODO get implicants, but do not add to simplified (otherwise always relevant)
+        out.assignments.update(out.given) #TODO get implicants, but do not add to simplified (otherwise always relevant)
 
         # annotate self.simplified with questions
         for e in out.simplified:
@@ -311,7 +308,7 @@ class Case:
                             solver.pop()
 
                             if res2 == unsat:
-                                ass = l.update(atom, val, CONSQ, self)
+                                ass = self.assignments.assert_(atom, val, CONSQ, self)
                                 #TODO ass.relevant = True
                                 self.propagate([ass], all_)
                             elif res2 == unknown:
@@ -346,7 +343,7 @@ class Case:
                                     old_ass = self.assignments[sentence.code]
                                     if old_ass.value is None:
                                         if (all_ or not constraint.has_decision()):
-                                            new_ass = old_ass.update(sentence, value, CONSQ, self)
+                                            new_ass = self.assignments.assert_(sentence, value, CONSQ, self)
                                             to_propagate.append(new_ass)
                                             new_constraint = new_constraint.substitute(sentence, value, self.assignments)
                                     elif not old_ass.value.same_as(value):

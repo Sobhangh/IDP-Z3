@@ -98,13 +98,13 @@ View: 'view' viewType=ViewType;
 
 Display: 'display' '{' (constraints=Expression '.')* '}';
 
-Procedure: 'procedure' name=ID '(' args=ID*')' '{' statements=Statement* '}';
+Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
 
-  Statement: Call1 | Assignment ;
-  Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=Assignment[','])? ')';
-  Call0 : !Assignment pyExpr=PyExpr;
+  PyStatement: Call1 | PyAssignment ;
+  Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=PyAssignment[','])? ')';
+  Call0 : !PyAssignment pyExpr=PyExpr;
   PyExpr : Call1 | String | NumberConstant | ID;
   String: literal=/"(\.|[^"])*"/;
 
-  Assignment : var=ID '=' val=Call0;
+  PyAssignment : var=ID '=' val=Call0;
 

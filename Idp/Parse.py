@@ -931,10 +931,10 @@ class Procedure(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.args = kwargs.pop('args')
-        self.statements = kwargs.pop('statements')
+        self.pystatements = kwargs.pop('pystatements')
 
     def __str__(self):
-        return f"{NEWL.join(str(s) for s in self.statements)}"
+        return f"{NEWL.join(str(s) for s in self.pystatements)}"
 
 
 class Call1(object):
@@ -964,7 +964,7 @@ class String(object):
         return f'{self.literal}'
 
 
-class Assignment(object):
+class PyAssignment(object):
     def __init__(self, **kwargs):
         self.var = kwargs.pop('var')
         self.val = kwargs.pop('val')
@@ -998,4 +998,4 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, Interpretation,
                                          Tuple, Goal, View, Display,
 
-                                         Procedure, Call1, Call0, String, Assignment])
+                                         Procedure, Call1, Call0, String, PyAssignment])

@@ -37,38 +37,16 @@ class Status(IntFlag):
     EXPANDED    = 64
 
 class Assignment(object):
-    def __init__(self, sentence: Expression, value: Optional[Expression], status: Status):
+    def __init__(self, sentence: Expression, value: Optional[Expression], status: Status, relevant:bool=False):
         self.sentence = sentence
         self.value = value
         self.status = status
-        self.relevant = False
+        self.relevant = relevant
 
     def copy(self):
         out = copy(self)
         out.sentence = out.sentence.copy()
         return out
-
-    def update(self, sentence: Optional[Expression], 
-                     value: Optional[Expression], 
-                     status: Optional[Status], 
-                     case):
-        """ make a copy, and save it in case.assignments """
-        out = copy(self) # needed for explain of irrelevant symbols
-        if sentence is not None: out.sentence = sentence
-        if value    is not None: out.value    = value
-        if status   is not None: out.status   = status
-        case.assignments[self.sentence.code] = out
-        return out
-
-    def __repr__(self):
-        out = str(self.sentence.code)
-        if self.value is None:
-            return f"? {out}"
-        if self.value.same_as(TRUE):
-            return out
-        if self.value.same_as(FALSE):
-            return f"~{out}"
-        return f"{out} -> {str(self.value)}"
 
     def __str__(self):
         pre, post = '', ''
@@ -85,7 +63,8 @@ class Assignment(object):
     def __log__(self):
         return self.value
 
-    def to_json(self) -> str: return str(self)
+    def to_json(self) -> str: # for GUI
+        return str(self)
 
     def translate(self) -> BoolRef:
         if self.value is None:
@@ -94,6 +73,28 @@ class Assignment(object):
             out = self.sentence.original.translate() if self.value.same_as(TRUE) else Not(self.sentence.original.translate())
         else:
             out = self.sentence.original.translate() == self.value.translate()
+        return out
+
+class Assignments(dict):
+    def __init__(self,*arg,**kw):
+      super(Assignments, self).__init__(*arg, **kw)
+
+    def copy(self):
+        return Assignments({k: v.copy() for k,v in self.items()})
+
+    def assert_(self, sentence: Expression, 
+                      value: Optional[Expression], 
+                      status: Optional[Status],
+                      relevant: Optional[bool]):
+        sentence.copy()
+        if sentence.code in self:
+            out = copy(self[sentence.code]) # needed for explain of irrelevant symbols
+            if value    is not None: out.value    = value
+            if status   is not None: out.status   = status
+            if relevant is not None: out.relevant = relevant
+        else:
+            out = Assignment(sentence, value, status, relevant)
+        self[sentence.code] = out
         return out
 
 
