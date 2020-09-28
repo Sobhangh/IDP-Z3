@@ -47,7 +47,7 @@ def substitute(self, e0, e1, assignments, todo=None):
     implementation for everything but AppliedSymbol, Variable and Fresh_variable 
     """
 
-    assert not isinstance(e0, Fresh_Variable) # should use instantiate instead
+    assert not isinstance(e0, Fresh_Variable) or isinstance(e1, Fresh_Variable)# should use instantiate instead
     assert self.co_constraint is None # see AppliedSymbol or Variable instead
 
     # similar code in AppliedSymbol !
@@ -136,6 +136,12 @@ Expression.interpret = interpret
 
 def expand_quantifiers(self, theory):
     inferred = self.sub_exprs[0].type_inference()
+    for q in self.quantees:
+        if q.var not in self.q_vars: # Fresh_Variable not created yet
+            new_var = Fresh_Variable(q.var, inferred[q.var])
+            self.sub_exprs[0].substitute(new_var, new_var, {})
+            self.q_vars[q.var] = new_var
+
     for v, s in inferred.items():
         assert v not in self.q_vars or self.q_vars[v].sort.decl==s.decl, \
             f"Inconsistent types for {v} in {self}"
@@ -170,6 +176,15 @@ AQuantification.expand_quantifiers = expand_quantifiers
 # Class AAggregate #######################################################
 
 def expand_quantifiers(self, theory):
+    inferred = self.sub_exprs[0].type_inference()
+    if 1 < len(self.sub_exprs):
+        inferred = {**inferred, **self.sub_exprs[1].type_inference()}
+    for q in self.quantees:
+        if q.var not in self.q_vars: # Fresh_Variable not created yet
+            new_var = Fresh_Variable(q.var, inferred[q.var])
+            self.sub_exprs[0].substitute(new_var, new_var, {})
+            self.q_vars[q.var] = new_var
+
     forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION]
                 , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                 , else_f=NumberConstant(number='0'))]
@@ -193,7 +208,7 @@ AAggregate.expand_quantifiers = expand_quantifiers
 
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
-    if self.decl.interpretation is not None: # has a structure
+    if self.decl and self.decl.interpretation is not None: # has a structure
         out = (self.decl.interpretation)(theory, 0, sub_exprs)
         out = self._change(simpler=out, sub_exprs=sub_exprs)
     elif self.name in theory.clark: # has a theory
@@ -213,7 +228,7 @@ Variable     .interpret = interpret
 def substitute(self, e0, e1, assignments, todo=None):
     """ recursively substitute e0 by e1 in self """
 
-    assert not isinstance(e0, Fresh_Variable) # should use instantiate instead
+    assert not isinstance(e0, Fresh_Variable) or isinstance(e1, Fresh_Variable)# should use instantiate instead
 
     if self.code == e0.code and type(e1) == Fresh_Variable:
         out = copy.copy(e1)

@@ -209,7 +209,7 @@ class Expression(object):
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-        # returns a dictionary {Fresh_Variable : Symbol_Declaration}
+        # returns a dictionary {Fresh_Variable : Sort}
         return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
 
 
@@ -262,14 +262,23 @@ class IfExpr(Expression):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return super().annotate1()
 
+class Quantee(object):
+    def __init__(self, var, sort):
+        self.var = var
+        self.sort = sort
+
 class AQuantification(Expression):
     PRECEDENCE = 20
     def __init__(self, **kwargs):
         self.q = kwargs.pop('q')
-        self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
-        self.vars = kwargs.pop('vars')
-        self.sorts = kwargs.pop('sorts')
+        self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
+
+        self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
+        self.vars, self.sorts = [], []
+        for q in self.quantees:
+            self.vars.append(q.var)
+            self.sorts.append(q.sort)
 
         self.sub_exprs = [self.f]
         super().__init__()
@@ -280,7 +289,8 @@ class AQuantification(Expression):
     @classmethod
     def make(cls, q, q_vars, f):
         "make and annotate a quantified formula"
-        out = cls(q=q, vars=list(q_vars.values()), sorts=list(v.sort for v in q_vars.values()), f=f)
+        quantees = [Quantee(v.name, v.sort) for v in q_vars.values()]
+        out = cls(q=q, quantees=quantees, f=f)
         out.q_vars = q_vars
         return out.annotate1()
 
@@ -293,10 +303,11 @@ class AQuantification(Expression):
         for v in self.vars:
             assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
         assert len(self.vars) == len(self.sorts), "Internal error"
-        for s in self.sorts:
-            s.annotate(voc)
-        self.q_vars = {v:s.fresh(v) \
-                        for v, s in zip(self.vars, self.sorts)}
+        self.q_vars = {}
+        for v, s in zip(self.vars, self.sorts):
+            if s:
+                s.annotate(voc)
+                self.q_vars[v] = Fresh_Variable(v,s)
         q_v = {**q_vars, **self.q_vars} # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
@@ -455,11 +466,14 @@ class AAggregate(Expression):
 
     def __init__(self, **kwargs):
         self.aggtype = kwargs.pop('aggtype')
-        self.vars = kwargs.pop('vars')
-        self.sorts = kwargs.pop('sorts')
+        self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
+        self.vars, self.sorts = [], []
+        for q in self.quantees:
+            self.vars.append(q.var)
+            self.sorts.append(q.sort)
         self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
         super().__init__()
 
@@ -490,10 +504,11 @@ class AAggregate(Expression):
         for v in self.vars:
             assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
         assert len(self.vars) == len(self.sorts), "Internal error"
-        for s in self.sorts:
-            s.annotate(voc)
-        self.q_vars = {v:s.fresh(v) \
-                        for v, s in zip(self.vars, self.sorts)}
+        self.q_vars = {}
+        for v, s in zip(self.vars, self.sorts):
+            if s:
+                s.annotate(voc)
+                self.q_vars[v] = Fresh_Variable(v,s)
         q_v = {**q_vars, **self.q_vars} # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
@@ -541,7 +556,7 @@ class AppliedSymbol(Expression):
         return self.annotate1()
 
     def annotate1(self):
-        self.type = self.decl.type
+        self.type = self.decl.type if self.decl else None
         return super().annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -562,7 +577,7 @@ class AppliedSymbol(Expression):
     def type_inference(self):
         out = {}
         for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
+            if self.decl.name != '`Symbols' and isinstance(e, Variable):
                 out[e.name] = self.decl.sorts[i]
             else:
                 out.update(e.type_inference())
@@ -591,14 +606,15 @@ class Variable(AppliedSymbol):
             return voc.symbol_decls[self.name]
         if self.name in q_vars:
             return q_vars[self.name]
-        else: # in symbol_decls
+        elif self.name in voc.symbol_decls: # in symbol_decls
             self.decl = voc.symbol_decls[self.name]
             self.type = self.decl.type
             self.normal = True # make sure it is visible in GUI
+        else: pass # a quantification variable without known type yet
         return self.annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.interpretation is None:
+        if self.decl and self.decl.interpretation is None:
             questions.add(self)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)

@@ -25,6 +25,16 @@ Classes to execute the main block of an IDP program
 
 from .Parse import *
 
+"""
+Structure_:
+    { Symbol : { Tuple :  Value? }}
+    { Expression : { () : Value? }}
+    where Value can be an expression, or (ground expression, status, relevant)
+    e.g. struct[p][1,2]=3
+
+    create structure for theory --> no values; used for propagation
+"""
+
 def execute(self):
     """ 
     Execute the IDP program

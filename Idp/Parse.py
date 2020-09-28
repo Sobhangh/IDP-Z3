@@ -406,7 +406,6 @@ class SymbolDeclaration(object):
 
                 if self.out.name == 'bool':
                     types = [x.translate() for x in self.sorts]
-                    rel_vars = [t.getRange() for t in self.sorts]
                     self.translated = Function(self.name, types + [BoolSort()])
                 else:
                     types = [x.translate() for x in self.sorts] + [self.out.translate()]
@@ -425,14 +424,8 @@ class Sort(object):
     def annotate(self, voc):
         self.decl = voc.symbol_decls[self.name]
 
-    def fresh(self, name):
-        return Fresh_Variable(name, self)
-
     def translate(self):
         return self.decl.translate()
-
-    def getRange(self):
-        return [e.translated for e in self.decl.range]
 
     
 class Symbol(object): 
@@ -536,10 +529,10 @@ class Definition(object):
             if symbol not in self.q_vars:
                 name = f"${symbol.name}$"
                 q_v = {f"${symbol.name}!{str(i)}$":
-                       sort.fresh(f"${symbol.name}!{str(i)}$")
+                       Fresh_Variable(f"${symbol.name}!{str(i)}$", sort)
                        for i, sort in enumerate(symbol.sorts)}
                 if symbol.out.name != 'bool':
-                    q_v[name] = symbol.out.fresh(name)
+                    q_v[name] = Fresh_Variable(name, symbol.out)
                 self.q_vars[symbol] = q_v
             new_rule = r.rename_args(self.q_vars[symbol])
             self.clark.setdefault(symbol, []).append(new_rule)
@@ -600,7 +593,7 @@ class Rule(object):
         assert len(self.vars) == len(self.sorts), "Internal error"
         for s in self.sorts:
             s.annotate(voc)
-        self.q_vars = {v: s.fresh(v)
+        self.q_vars = {v:Fresh_Variable(v, s)
                        for v, s in zip(self.vars, self.sorts)}
         q_v = {**q_vars, **self.q_vars}  # merge
 

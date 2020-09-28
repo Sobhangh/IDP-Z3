@@ -50,8 +50,9 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     Aggregate:      AAggregate      | Base;
 
 
-    AQuantification: q=Quantor (vars=/`?[^\d\W]\w*\b/ '[' sorts=Sort ']' )+ ':' f=Expression;
+    AQuantification: q=Quantor quantees=Quantee+ ':' f=Expression;
       Quantor: '∀' | '!' | '∃' | '?' ;
+      Quantee: var=/`?[^\d\W]\w*\b/ ('[' sort=Sort ']')? ;
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
     AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
     AImplication:  sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+;
@@ -62,7 +63,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
     AUnary: !INT !IDPFLOAT               (operator=UnaryOperator  f=Aggregate);
-    AAggregate: aggtype=AggType '{' (vars=ID '[' sorts=Sort ']')*  ':' f=Expression (':'  out=Expression)? '}';
+    AAggregate: aggtype=AggType '{' quantees=Quantee*  ':' f=Expression (':'  out=Expression)? '}';
       AggType: '#' | 'card' | 'sum';
 
     RImplicationOp: '<=' | '⇐';

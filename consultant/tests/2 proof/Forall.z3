@@ -7,7 +7,7 @@ vocabulary {
 } 
 theory {
     p <=> (∀c[color]: c=red).
-    ∀c[color]: q(c).
+    ∀c: q(c).
 }
 display {
     view = expanded.
@@ -64,11 +64,11 @@ display {
                   'status': 'UNIVERSAL',
                   'typ': 'Bool',
                   'value': True},
-       '∀c[color] : q(c)': {'environmental': False,
-                            'is_assignment': False,
-                            'normal': False,
-                            'reading': '∀c[color] : q(c)',
-                            'relevant': True,
-                            'status': 'UNIVERSAL',
-                            'typ': 'Bool',
-                            'value': True}}}
+       '∀c[None] : q(c)': {'environmental': False,
+                           'is_assignment': False,
+                           'normal': False,
+                           'reading': '∀c[None] : q(c)',
+                           'relevant': True,
+                           'status': 'UNIVERSAL',
+                           'typ': 'Bool',
+                           'value': True}}}

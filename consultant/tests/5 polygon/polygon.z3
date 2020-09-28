@@ -91,7 +91,7 @@ theory {
     // General constraints
 
     [The perimeter is the sum of the lengths of the sides]
-    (Perimeter = sum{n[side] : true : Length(n)}).
+    (Perimeter = sum{n : true : Length(n)}).
 
     [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
     (sum{n[side] : true : Angle(n)} = (Sides-2)*180).
@@ -342,7 +342,7 @@ display {
                              'status': 'UNIVERSAL',
                              'typ': 'Real',
                              'value': '10'},
-               'Perimeter = sum{n[side] : true : Length(n)}': {'environmental': False,
+               'Perimeter = sum{n[None] : true : Length(n)}': {'environmental': False,
                                                                'is_assignment': False,
                                                                'normal': False,
                                                                'reading': 'The perimeter is the sum of the lengths of '
