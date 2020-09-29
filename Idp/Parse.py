@@ -158,6 +158,8 @@ class Vocabulary(object):
         self.idp = None # parent object
         self.translated = []
 
+        self.name = 'V' if not self.name else self.name
+
         # define reserved symbols
         self.symbol_decls = {'int' : RangeDeclaration(name='int' , elements=[]),
                              'real': RangeDeclaration(name='real', elements=[])
@@ -453,6 +455,9 @@ class Theory(object):
         self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.translated = None
 
+        self.name = "T" if not self.name else self.name
+        self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
+
         for constraint in self.constraints:
             constraint.block = self
         for definition in self.definitions:
@@ -463,8 +468,7 @@ class Theory(object):
         return self.name
 
     def annotate(self, idp):
-        self.vocab_name = self.vocab_name if self.vocab_name !='' else None
-        assert self.vocab_name == None or self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
+        assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
         voc = idp.vocabularies.get(self.vocab_name, idp.vocabulary)
 
         self.definitions = [e.annotate(self, voc, {}) for e in self.definitions]
@@ -704,6 +708,9 @@ class Structure(object):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
         self.interpretations = {i.name: i for i in kwargs.pop('interpretations')}
+
+        self.name = 'S' if not self.name else self.name
+        self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
     def annotate(self, idp):
         assert self.vocab_name == None or self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name

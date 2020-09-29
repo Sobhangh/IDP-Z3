@@ -18,6 +18,8 @@ Theory
     }
 
 A *theory* is a set of constraints and definitions to be satisfied.
+If the names are omitted, the theory is named T, for vocabulary V.
+
 Before explaining their syntax, we need to introduce the concept of term. 
 
 .. _term:

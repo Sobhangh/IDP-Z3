@@ -21,7 +21,7 @@ vocabulary isa {
     typeOf(subtype): type
 }
 
-theory {
+theory T:isa {
     !t[type] st[subtype]: isa(st,t) <=> asi(t, st).
     !t[type] st[subtype]: typeOf(st) = t <=> isa(st, t).
     !st[subtype]: isa(st, typeOf(st)).

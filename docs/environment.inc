@@ -27,8 +27,12 @@ Hence, a more advanced skeleton of an IDP knowledge base is:
         // here comes the definitions and constraints to be satisfied by any solution
     }
 
-    structure {
-        // here comes the interpretation of some symbols
+    structure environment:environment {
+        // here comes the interpretation of some environmental symbols
+    }
+
+    structure decision:decision {
+        // here comes the interpretation of some decision symbols
     }
 
     display {

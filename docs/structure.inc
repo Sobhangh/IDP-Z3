@@ -2,8 +2,15 @@
 
 Structure
 ---------
+.. code-block::
+
+    structure S:V {
+        // here comes the structure named S, for vocabulary named V
+    }
 
 A *structure* specifies the interpretation of some predicate_\ s and function_\ s.
+If the names are omitted, the structure is named S, for vocabulary V.
+
 A structure is a set of enumerations, having one of the following forms:
 
 .. math::
