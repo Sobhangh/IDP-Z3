@@ -385,19 +385,14 @@ class SymbolDeclaration(object):
 
         # determine typeConstraints
         if self.out.decl.name != 'bool' and self.range and self.is_var:
-            self.typeConstraints.extend(self.typeConstraint())
+            for inst in self.instances.values():
+                domain = self.out.decl.check_bounds(inst)
+                if domain is not None:
+                    domain.block = self.block
+                    domain.if_symbol = self.name
+                    domain.annotations['reading'] = "Possible values for " + str(inst)
+                    self.typeConstraints.append(domain)
         return self
-
-    def typeConstraint(self, if_symbol=True):
-        out = []
-        for inst in self.instances.values():
-            domain = self.out.decl.check_bounds(inst)
-            if domain is not None:
-                domain.block = self.block
-                domain.if_symbol = self.name if if_symbol else None
-                domain.annotations['reading'] = "Possible values for " + str(inst)
-                out.append(domain)
-        return out
 
     def translate(self, idp=None):
         if self.translated is None:
