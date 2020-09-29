@@ -30,6 +30,7 @@ from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
                 Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort, BoolVal)
 
 from consultant.utils import applyTo, itertools, in_list, mergeDicts, log, unquote
+from .Assignments import *
 from .Expression import (Constructor, Expression, IfExpr, AQuantification,
                          BinaryOperator, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
@@ -451,12 +452,14 @@ class Theory(object):
         self.vocab_name = kwargs.pop('vocab_name')
         self.constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
-        self.clark = {}  # {Symbol: Rule}$
-        self.subtences = None  # i.e., sub-sentences.  {string: Expression}
-        self.translated = None
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
+
+        self.clark = {}  # {Symbol: Rule}$
+        self.subtences = None  # i.e., sub-sentences.  {string: Expression}
+        self.assignments = Assignments()
+        self.translated = None
 
         for constraint in self.constraints:
             constraint.block = self
@@ -712,11 +715,14 @@ class Structure(object):
         self.name = 'S' if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
+        self.voc = None
+        self.assignments = Assignments()
+
     def annotate(self, idp):
         assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
-        voc = idp.vocabularies[self.vocab_name]
+        self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
-            i.annotate(voc)
+            i.annotate(self)
 
     def __str__(self):
         return self.name
@@ -730,16 +736,34 @@ class Interpretation(object):
 
         self.decl = None  # symbol declaration
 
-    def annotate(self, voc):
+    def annotate(self, struct):
+        voc = struct.voc
         self.decl = voc.symbol_decls[self.name]
-        for t in self.tuples:
-            t.annotate(voc)
-            assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
         if self.decl.function and 0 < self.decl.arity and self.default is None:
             raise Exception("Default value required for function {} in structure.".format(self.name))
         self.default = FALSE if not self.decl.function and self.tuples else self.default
         self.default = self.default.annotate(voc, {})
         assert self.default.as_ground() is not None, f"Must be a ground term: {self.default}"
+
+        # annotate tuple and compute self.data
+        symbol, count = Symbol(name=self.name).annotate(voc, {}), 0
+        for t in self.tuples:
+            t.annotate(voc)
+            assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
+            if self.decl.function:
+                expr = AppliedSymbol.make(symbol, t.args[:-1])
+                ass = Assignment(expr, t.args[-1], Status.UNIVERSAL)
+            else:
+                expr = AppliedSymbol.make(symbol, t.args)
+                ass = Assignment(expr, TRUE, Status.UNIVERSAL)
+            struct.assignments[f"{self.name}({expr})"] = ass
+            count += 1
+
+        # set default value
+        # TODO perf: if count < len(self.decl.instances):
+        for code, expr in self.decl.instances.items():
+            if code not in struct.assignments:
+                struct.assignments[code] = Assignment(expr, self.default, Status.UNIVERSAL)
 
         def interpret(theory, rank, args, tuples=None):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
@@ -816,7 +840,7 @@ class Goal(object):
             instances = self.decl.instances.values()
             if instances:
                 goal = Symbol(name='__relevant').annotate(voc, {})
-                constraint = AppliedSymbol.make(goal, instances)
+                constraint = AppliedSymbol.make(goal, instances) # ??
                 constraint.block = self
                 idp.theory.constraints.append(constraint)
             else:
@@ -902,7 +926,7 @@ class Display(object):
                         instances = symbol.instances.values()
                         if instances:
                             goal = Symbol(name='__relevant').annotate(self.voc, {})
-                            constraint = AppliedSymbol.make(goal, instances)
+                            constraint = AppliedSymbol.make(goal, instances) # ??
                             constraint.block = self
                             idp.theory.constraints.append(constraint)
                         else:
