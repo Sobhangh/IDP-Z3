@@ -95,9 +95,6 @@ class Idp(object):
         for struct in self.structures.values():
             struct.annotate(self) # attaches an interpretation to the vocabulary
 
-        
-        for voc in self.vocabularies.values():
-            voc.translate(self)
         self.goal.annotate(self)
         self.view.annotate(self)
         self.display.annotate(self)
@@ -183,24 +180,15 @@ class Vocabulary(object):
         for constructor in self.symbol_decls['`Symbols'].constructors:
             constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self, {})
 
+        for v in self.symbol_decls.values():
+            if v.is_var:
+                self.terms.update(v.instances)
+
 
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
                 f"{NEWL.join(str(i) for i in self.declarations)}"
                 f"{NEWL}}}{NEWL}")
-
-    def translate(self, idp):
-        for i in self.declarations:
-            if type(i) in [ConstructedTypeDeclaration, RangeDeclaration]:
-                i.translate()
-        for i in self.declarations:
-            if type(i) == SymbolDeclaration:
-                i.translate(idp)
-
-        for v in self.symbol_decls.values():
-            if v.is_var:
-                self.terms.update(v.instances)
-        return []
 
 
 class Extern(object):

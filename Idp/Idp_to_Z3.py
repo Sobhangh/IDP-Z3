@@ -199,7 +199,7 @@ def translate1(self):
         return If(arg >= 0, arg, -arg)
     else:
         if len(self.sub_exprs) == 0:
-            return self.decl.translated
+            return self.decl.translate()
         else:
             arg = [x.translate() for x in self.sub_exprs]
             #assert  all(a != None for a in arg)
@@ -211,7 +211,7 @@ AppliedSymbol.translate1 = translate1
 # Class Variable #######################################################
 
 def translate1(self):
-    return self.decl.translated
+    return self.decl.translate()
 Variable.translate1 = translate1
 
 
