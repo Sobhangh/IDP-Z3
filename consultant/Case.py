@@ -45,8 +45,7 @@ class Case:
 
         # initialisation
         self.GUILines = {**idp.vocabulary.terms, **idp.subtences} # {Expr.code: Expression}
-        self.typeConstraints = self.idp.vocabulary
-        self.definitions = self.idp.theory.definitions # [Definition]
+        self.definitions = self.idp.theory.definitions # [Definition] could be ignored if definitions are constructive
         self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = Assignments() # atoms + given, with simplified formula and value value
 
@@ -121,8 +120,7 @@ class Case:
 
     def __str__(self) -> str:
         self.get_co_constraints()
-        return (f"Type:        {indented}{indented.join(repr(d) for d in self.typeConstraints.translate(self.idp))}{NEWL}"
-                f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{NEWL}"
+        return (f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{NEWL}"
                 f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.simplified)}{NEWL}"
@@ -387,8 +385,7 @@ class Case:
     def translate(self, all_: bool = True) -> BoolRef:
         self.get_co_constraints()
         self.translated = And(
-            self.typeConstraints.translate(self.idp)
-            + sum((d.translate() for d in self.definitions), [])
+            sum((d.translate() for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None and (all_ or not l.sentence.has_decision())]
             + [s.translate() for s in self.simplified
