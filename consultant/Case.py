@@ -50,6 +50,9 @@ class Case:
         self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = Assignments() # atoms + given, with simplified formula and value value
 
+        for s in self.idp.structures.values():
+            self.assignments.extend(s.assignments)
+
         for GuiLine in self.GUILines.values():
             GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
                 or (type(GuiLine)==AComparison and GuiLine.is_assignment) \

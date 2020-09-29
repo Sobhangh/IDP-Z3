@@ -86,6 +86,10 @@ class Assignments(dict):
     def copy(self):
         return Assignments({k: v.copy() for k,v in self.items()})
 
+    def extend(self, more):
+        for k, v in more.items():
+            self[k] = v.copy()
+
     def assert_(self, sentence: Expression, 
                       value: Optional[Expression], 
                       status: Optional[Status],
