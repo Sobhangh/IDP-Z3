@@ -469,7 +469,7 @@ class Theory(object):
 
     def annotate(self, idp):
         assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
-        voc = idp.vocabularies.get(self.vocab_name, idp.vocabulary)
+        voc = idp.vocabularies[self.vocab_name]
 
         self.definitions = [e.annotate(self, voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol
@@ -713,8 +713,8 @@ class Structure(object):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
     def annotate(self, idp):
-        assert self.vocab_name == None or self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
-        voc = idp.vocabularies.get(self.vocab_name, idp.vocabulary)
+        assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
+        voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
             i.annotate(voc)
 
