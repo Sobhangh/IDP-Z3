@@ -44,15 +44,11 @@ class Case:
         self.expanded_symbols = set(expanded)
 
         # initialisation
-
-        # Lines in the GUI
         self.GUILines = {**idp.vocabulary.terms, **idp.subtences} # {Expr.code: Expression}
         self.typeConstraints = self.idp.vocabulary
         self.definitions = self.idp.theory.definitions # [Definition]
-        self.simplified: List[Expression] = []
+        self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = Assignments() # atoms + given, with simplified formula and value value
-
-        if __debug__: self.invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
         for GuiLine in self.GUILines.values():
             GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
@@ -60,17 +56,21 @@ class Case:
                 or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
             self.assignments.assert_(GuiLine, None, Status.UNKNOWN, False)
 
+        if __debug__: self.invariant = ".".join(str(e) for e in self.idp.theory.constraints)
+
         # find immediate universals
-        for c in self.idp.theory.constraints:
-            c = c.copy()
+        out = OrderedSet()
+        for c in self.simplified:
             status = Status.ENV_UNIV if c.block.name=='environment' else Status.UNIVERSAL
+            # determine consequences, including from co-constraints, e.g. definitions
             consequences = []
-            new_constraint = c.substitute(TRUE, TRUE, self.assignments, consequences) # to simplify co_constraint
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, consequences)
             consequences.extend(new_constraint.implicants(self.assignments))
             if consequences:
                 for sentence, value in consequences:
                     self.assignments.assert_(sentence, value, status, False)
-            self.simplified.append(new_constraint)
+            out.add(new_constraint)
+        self.simplified = out
 
         # annotate self.simplified with questions
         for e in self.simplified:
@@ -164,12 +164,10 @@ class Case:
             a.relevant = False
 
         # collect (co-)constraints
-        constraints = []
+        constraints = OrderedSet()
         for constraint in self.simplified:
-            constraints.append(constraint)
-            temp = OrderedSet() # temp = co_constraints(constraint)
-            constraint.co_constraints(temp)
-            constraints.extend(temp)
+            constraints.add(constraint)
+            constraint.co_constraints(constraints)
 
 
         # initialize reachable with relevant, if any

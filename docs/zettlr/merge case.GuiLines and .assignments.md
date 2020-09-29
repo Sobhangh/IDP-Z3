@@ -12,8 +12,8 @@ Problems:
 * GuiLines used in inferences
 
 TODO:
-- [ ] Assignments are (expr → value) where value can be of any type (not just boolean)
-- [ ] do not create new Assignments in propagate, update them !
+- [x] Assignments are (expr → value) where value can be of any type (not just boolean)
+- [x] do not create new Assignments in propagate, update them !
 - [ ] Assignment() create with visible
 
 #refactoring

@@ -79,15 +79,19 @@ def mergeDicts(l):
 # OrderedSet #############################################
 
 class OrderedSet(dict):
+    """
+    a list of expressions without duplicates (first-in is selected)
+    """
     def __init__(self, els=[]):
         assert isinstance(els, Iterable)
         super(OrderedSet, self).__init__(((el.code,el) for el in els))
 
     def add(self, el):
-        self[el.code] = el
+        if el not in self:
+            self[el.code] = el
 
     def __iter__(self):
-        return iter(self.values())
+        return iter(self.values()) # instead of keys()
     
     def __contains__(self, expression):
         return super(OrderedSet, self).__contains__(expression.code)
