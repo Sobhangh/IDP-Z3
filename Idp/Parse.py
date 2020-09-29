@@ -347,7 +347,6 @@ class SymbolDeclaration(object):
         self.domain = None  # all possible arguments
         self.range = None  # all possible values
         self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
-        self.interpretation = None  # f:tuple -> Expression (only if it is given in a structure)
         self.block = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
@@ -764,33 +763,6 @@ class Interpretation(object):
                 if code not in struct.assignments:
                     struct.assignments.assert_(expr, self.default, Status.UNIVERSAL, False)
 
-        def interpret(theory, rank, args, tuples=None):
-            tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
-            if rank == self.decl.arity:  # valid tuple -> return a value
-                if not self.decl.function:
-                    return TRUE if self.tuples else self.default
-                else:
-                    if 1 < len(tuples):
-                        # raise Exception("Duplicate values in structure for " + str(symbol))
-                        print("Duplicate values in structure for " + str(self.name) + str(tuples[0]) )
-                    return tuples[0].args[rank]
-            else:  # constructs If-then-else recursively
-                out = self.default
-                tuples.sort(key=lambda t: str(t.args[rank]))
-                groups = it.groupby(tuples, key=lambda t: str(t.args[rank]))
-
-                if type(args[rank]) in [Constructor, NumberConstant]:
-                    for val, tuples2 in groups:  # try to resolve
-                        if str(args[rank]) == val:
-                            out = interpret(theory, rank+1, args, list(tuples2))
-                else:
-                    for val, tuples2 in groups:
-                        tuples = list(tuples2)
-                        out = IfExpr.make(AComparison.make('=', [args[rank], tuples[0].args[rank]]),
-                                          interpret(theory, rank+1, args, tuples),
-                                          out)
-                return out
-        self.decl.interpretation = interpret
         self.decl.is_var = False
 
 

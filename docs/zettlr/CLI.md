@@ -15,6 +15,6 @@ Priorities:
 - [ ] print(modelexpand(T1, T2, …, count=n))
 
 TODO
-- [ ] theory has the dictionary of interpreters, not vocabulary → merge theories
-- [ ] structures are theories; theories have interpretations
-- [ ] remove is_var
+- [x] structure is translated to Assignments
+- [ ] merge theories
+- [ ] remove is_var !!  should not be in vocabulary (but only used for questions, so OK ?)

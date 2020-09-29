@@ -33,6 +33,6 @@ display {
              'normal': True,
              'reading': 'q',
              'relevant': True,
-             'status': 'UNIVERSAL',
+             'status': 'CONSEQUENCE',
              'typ': 'Bool',
              'value': True}}}
