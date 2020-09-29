@@ -722,7 +722,7 @@ class Structure(object):
         assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
-            i.annotate(self)
+            i.annotate(self) # this updates self.assignments
 
     def __str__(self):
         return self.name
@@ -746,24 +746,23 @@ class Interpretation(object):
         assert self.default.as_ground() is not None, f"Must be a ground term: {self.default}"
 
         # annotate tuple and compute self.data
-        symbol, count = Symbol(name=self.name).annotate(voc, {}), 0
+        count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.tuples:
             t.annotate(voc)
             assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
             if self.decl.function:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
-                ass = Assignment(expr, t.args[-1], Status.UNIVERSAL)
+                struct.assignments.assert_(expr, t.args[-1], Status.UNIVERSAL, False)
             else:
                 expr = AppliedSymbol.make(symbol, t.args)
-                ass = Assignment(expr, TRUE, Status.UNIVERSAL)
-            struct.assignments[f"{self.name}({expr})"] = ass
+                struct.assignments.assert_(expr, TRUE, Status.UNIVERSAL, False)
             count += 1
 
         # set default value
-        # TODO perf: if count < len(self.decl.instances):
-        for code, expr in self.decl.instances.items():
-            if code not in struct.assignments:
-                struct.assignments[code] = Assignment(expr, self.default, Status.UNIVERSAL)
+        if count < len(self.decl.instances):
+            for code, expr in self.decl.instances.items():
+                if code not in struct.assignments:
+                    struct.assignments.assert_(expr, self.default, Status.UNIVERSAL, False)
 
         def interpret(theory, rank, args, tuples=None):
             tuples = [tuple.interpret(theory) for tuple in self.tuples] if tuples == None else tuples
