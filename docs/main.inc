@@ -1,3 +1,4 @@
+.. _main:
 .. index:: main block
 
 Main block
@@ -5,7 +6,7 @@ Main block
 
 UNDER CONSTRUCTION
 
-The *main block* consists of python-like statements to be executed by the IDP-Z3 executable or the Web IDE, in the context of the knowledge base.
+The *main block* consists of python-like statements to be executed by the :ref:`IDP-Z3 executable<CLI>` or the Web IDE, in the context of the knowledge base.
 It takes the following form:
 
 .. code-block::
@@ -21,7 +22,7 @@ print(...)
 
 model_expand(blocks, max=10)
     Returns a list of models for the theory obtained by merging `blocks` (a list of theories and structures).
-    The result is limited to `max` elements (10 by default), or unlimited if `max` is 0.
+    The result is limited to ``max`` elements (10 by default), or unlimited if ``max`` is 0.
 
-    For example, `print(model_expand([T, S]))` will print (up to) 10 models of theory T with structure S.
+    For example, ``print(model_expand([T, S]))`` will print (up to) 10 models of theory ``T`` with structure ``S``.
 

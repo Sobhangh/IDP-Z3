@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ## API
+* command line interface to execute an IDP program with a main() block
 * type of variables can now be omitted in quantifiers and aggregates (but there is no type inference from numeric expressions)
 * (macros) quantification on `Symbols type (except definitions)
 * support named vocabulary for structures
