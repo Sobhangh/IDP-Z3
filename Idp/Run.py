@@ -83,13 +83,27 @@ def model_expand(theories, max=10):
 
     count = 0
     while count<max or max==0:
-        solver.check()
-        model = solver.model()
-        #TODO pretty print model
-        header = f"{NEWL}Model {count}{NEWL}=========={NEWL}{model}"
-        yield header
-        #TODO exclude this model
         count += 1
+
+        if solver.check() == sat:
+            model = solver.model()
+            #TODO pretty print model
+            header = f"{NEWL}Model {count}{NEWL}=========={NEWL}{model}"
+            yield header
+
+            # exclude this model
+            block = []
+            for z3_decl in model: # FuncDeclRef
+                arg_domains = []
+                for i in range(z3_decl.arity()):
+                    domain, arg_domain = z3_decl.domain(i), []
+                    for j in range(domain.num_constructors()):
+                        arg_domain.append( domain.constructor(j) () )
+                    arg_domains.append(arg_domain)
+                for args in itertools.product(*arg_domains):
+                    block.append(z3_decl(*args) != model.eval(z3_decl(*args)))
+            solver.add(Or(block))
+
 
 def myprint(x):
     if isinstance(x, types.GeneratorType):
