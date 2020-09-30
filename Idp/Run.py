@@ -26,6 +26,35 @@ Classes to execute the main block of an IDP program
 
 from .Parse import *
 
+class Problem(object):
+    """ A combination of theories and structures
+    """
+    def __init__(self, theories):
+        self.definitions = []
+        self.clark = {} # {Declaration: Rule}
+        self.constraints = OrderedSet()
+        self.assignments = Assignments()
+
+        for t in theories:
+            t.addTo(self)
+
+def addTo(self, problem):
+    problem.definitions.append(self.definitions)
+    for symbol, rule in self.clark.items():
+        if symbol not in problem.clark:
+            problem.clark[symbol] = rule
+        else:
+            new_rule = copy(rule)  # not elegant, but rare
+            new_rule.body = AConjunction.make('∧', [problem.clark[symbol].body, rule.body])
+            problem.clark[symbol] = new_rule
+    
+Theory.addTo = addTo
+
+def addTo(self, problem):
+    pass
+Structure.addTo = addTo
+
+
 
 
 def execute(self):

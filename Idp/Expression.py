@@ -169,7 +169,7 @@ class Expression(object):
         return out
 
     def unknown_symbols(self, co_constraints=True):
-        """ returns the list of symbols in self, ignoring type constraints
+        """ returns the list of symbol declarations in self, ignoring type constraints
         
         returns Dict[name, Declaration] 
         """
@@ -591,7 +591,8 @@ class Arguments(object):
 class Variable(AppliedSymbol):
     PRECEDENCE = 200
     def __init__(self, **kwargs):
-        self.name = unquote(kwargs.pop('name'))
+        self.s = kwargs.pop('s')
+        self.name = self.s.name
 
         Expression.__init__(self)
 

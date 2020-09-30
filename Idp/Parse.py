@@ -360,7 +360,7 @@ class SymbolDeclaration(object):
         self.instances = {}
         if vocabulary:   # and not self.name.startswith('_'):
             if len(self.sorts) == 0:
-                expr = Variable(name=self.name)
+                expr = Variable(s=Symbol(name=self.name))
                 expr.annotate(voc, {})
                 expr.normal = True
                 self.instances[expr.code] = expr
@@ -438,7 +438,7 @@ class Theory(object):
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
-        self.clark = {}  # {Symbol: Rule}$
+        self.clark = {}  # {Declaration: Rule}
         self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.assignments = Assignments()
         self.translated = None
@@ -457,15 +457,15 @@ class Theory(object):
         voc = idp.vocabularies[self.vocab_name]
 
         self.definitions = [e.annotate(self, voc, {}) for e in self.definitions]
-        # squash multiple definitions of same symbol
+        # squash multiple definitions of same symbol declaration
         for d in self.definitions:
-            for symbol, rule in d.clark.items():
-                if symbol in self.clark:
+            for decl, rule in d.clark.items():
+                if decl in self.clark:
                     new_rule = copy(rule)  # not elegant, but rare
-                    new_rule.body = AConjunction.make('∧', [self.clark[symbol.name].body, rule.body])
-                    self.clark[symbol.name] = new_rule
+                    new_rule.body = AConjunction.make('∧', [self.clark[decl].body, rule.body])
+                    self.clark[decl] = new_rule
                 else:
-                    self.clark[symbol.name] = rule
+                    self.clark[decl] = rule
 
         self.constraints = OrderedSet([e.annotate(voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
@@ -495,8 +495,8 @@ class Theory(object):
 class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
-        self.clark = None  # {Symbol: Transformed Rule}
-        self.q_vars = {}  # {Symbol: {String: Fresh_Variable}} Fresh variables for arguments & result
+        self.clark = None  # {Declaration: Transformed Rule}
+        self.def_vars = {}  # {String: {String: Fresh_Variable}} Fresh variables for arguments & result
         self.translated = None
 
     def __str__(self):
@@ -504,7 +504,7 @@ class Definition(object):
 
     def __repr__(self):
         out = []
-        for symbol, rule in self.clark.items():
+        for rule in self.clark.values():
             out.append(repr(rule))
         return NEWL.join(out)
 
@@ -514,34 +514,34 @@ class Definition(object):
         # create common variables, and rename vars in rule
         self.clark = {}
         for r in self.rules:
-            symbol = voc.symbol_decls[r.symbol.name]
-            if symbol not in self.q_vars:
-                name = f"${symbol.name}$"
-                q_v = {f"${symbol.name}!{str(i)}$":
-                       Fresh_Variable(f"${symbol.name}!{str(i)}$", sort)
-                       for i, sort in enumerate(symbol.sorts)}
-                if symbol.out.name != 'bool':
-                    q_v[name] = Fresh_Variable(name, symbol.out)
-                self.q_vars[symbol] = q_v
-            new_rule = r.rename_args(self.q_vars[symbol])
-            self.clark.setdefault(symbol, []).append(new_rule)
+            decl = voc.symbol_decls[r.symbol.name]
+            if decl.name not in self.def_vars:
+                name = f"${decl.name}$"
+                q_v = {f"${decl.name}!{str(i)}$":
+                       Fresh_Variable(f"${decl.name}!{str(i)}$", sort)
+                       for i, sort in enumerate(decl.sorts)}
+                if decl.out.name != 'bool':
+                    q_v[name] = Fresh_Variable(name, decl.out)
+                self.def_vars[decl.name] = q_v
+            new_rule = r.rename_args(self.def_vars[decl.name])
+            self.clark.setdefault(decl, []).append(new_rule)
 
         # join the bodies of rules
-        for symbol, rules in self.clark.items():
+        for decl, rules in self.clark.items():
             exprs = sum(([rule.body] for rule in rules), [])
             rules[0].body = ADisjunction.make('∨', exprs)
-            self.clark[symbol] = rules[0]
+            self.clark[decl] = rules[0]
 
         # expand quantifiers and interpret symbols with structure
-        for symbol, rule in self.clark.items():
-            self.clark[symbol] = rule.compute(theory)
+        for decl, rule in self.clark.items():
+            self.clark[decl] = rule.compute(theory)
 
         return self
 
     def unknown_symbols(self):
         out = {}
-        for symbol, rule in self.clark.items():
-            out[symbol.name] = symbol
+        for decl, rule in self.clark.items():
+            out[decl.name] = decl
             out.update(rule.unknown_symbols())
         return out
 

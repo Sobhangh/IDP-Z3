@@ -22,7 +22,7 @@ Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
       RangeElement: fromI=NumberConstant ('..' toI=NumberConstant)?;
 
     SymbolDeclaration: annotations=Annotations name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
-      Symbol: name=/`?[^\d\W]\w*\b/;
+      Symbol: name=/`?[^\d\W]\w*\b|'(\.|[^'])*'/;
       Sort: name=/`?[^\d\W]\w*\b/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
@@ -81,7 +81,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
       AppliedSymbol: s=Symbol args=Arguments;
         Arguments: '(' sub_exprs*=Expression[','] ')';
-      Variable: name=/`?[^\d\W]\w*\b|'(\.|[^'])*'/;
+      Variable: s=Symbol;
       NumberConstant: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Brackets: annotations=Annotations '(' f=Expression ')';

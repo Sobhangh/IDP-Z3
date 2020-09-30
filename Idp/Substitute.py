@@ -208,10 +208,10 @@ AAggregate.expand_quantifiers = expand_quantifiers
 
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
-    if self.name in theory.clark: # has a theory
+    if self.decl in theory.clark: # has a theory
         # no copying !
         self.sub_exprs = sub_exprs
-        self.co_constraint = theory.clark[self.name].instantiate_definition(sub_exprs, theory)
+        self.co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
         out = self
     else:
         out = self._change(sub_exprs=sub_exprs)
