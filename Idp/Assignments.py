@@ -104,3 +104,6 @@ class Assignments(dict):
             out = Assignment(sentence, value, status, relevant)
         self[sentence.code] = out
         return out
+
+    def __str__(self):
+        return NEWL.join(str(a) for a in self.values())

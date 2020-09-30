@@ -17,5 +17,11 @@ It takes the following form:
 The following functions are available:
 
 print(...)
-    prints the arguments on stdout
+    Prints the arguments on stdout
+
+model_expand(blocks, max=10)
+    Returns a list of models for the theory obtained by merging `blocks` (a list of theories and structures).
+    The result is limited to `max` elements (10 by default), or unlimited if `max` is 0.
+
+    For example, `print(model_expand([T, S]))` will print (up to) 10 models of theory T with structure S.
 

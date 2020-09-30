@@ -23,6 +23,8 @@ Classes to execute the main block of an IDP program
 
 """
 
+import types
+from z3 import Solver, sat, unsat, is_not, is_eq, is_bool
 
 from .Parse import *
 
@@ -38,33 +40,74 @@ class Problem(object):
         for t in theories:
             t.addTo(self)
 
+    def translate(self):
+        co_constraints = OrderedSet()
+        for c in self.constraints:
+            c.co_constraints(co_constraints)
+        return And(
+            sum((d.translate() for d in self.definitions), [])
+            + [l.translate() for k, l in self.assignments.items() 
+                    if l.value is not None]
+            + [s.translate() for s in self.constraints]
+            + [c.translate() for c in co_constraints]
+            )
+
 def addTo(self, problem):
-    problem.definitions.append(self.definitions)
-    for symbol, rule in self.clark.items():
-        if symbol not in problem.clark:
-            problem.clark[symbol] = rule
+    problem.definitions.extend(self.definitions)
+    for decl, rule in self.clark.items():
+        if decl not in problem.clark:
+            problem.clark[decl] = rule
         else:
             new_rule = copy(rule)  # not elegant, but rare
-            new_rule.body = AConjunction.make('∧', [problem.clark[symbol].body, rule.body])
-            problem.clark[symbol] = new_rule
-    
+            new_rule.body = AConjunction.make('∧', [problem.clark[decl].body, rule.body])
+            problem.clark[decl] = new_rule
+    problem.constraints.extend(self.constraints)
+    problem.assignments.extend(self.assignments)
 Theory.addTo = addTo
 
 def addTo(self, problem):
-    pass
+    problem.assignments.extend(self.assignments)
 Structure.addTo = addTo
 
 
+def model_expand(theories, max=10):
+    """ theories: a list of theories and structures
+        output: a list of Assignments()
+    """
+    #TODO apply definitions across theory blocks
+    problem = Problem(theories)
+    formula = problem.translate()
 
+    solver = Solver()
+    solver.add(formula)
+
+    count = 0
+    while count<max or max==0:
+        solver.check()
+        model = solver.model()
+        #TODO pretty print model
+        header = f"{NEWL}Model {count}{NEWL}=========={NEWL}{model}"
+        yield header
+        #TODO exclude this model
+        count += 1
+
+def myprint(x):
+    if isinstance(x, types.GeneratorType):
+        for xi in x:
+            print(xi)
+    else:
+        print(x)
 
 def execute(self):
     """ 
     Execute the IDP program
     """
 
-    mybuiltins = {'print': print}
+    main = str(self.procedures['main'])
+    mybuiltins = {'print': myprint}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
-    exec(str(self.procedures['main']), mybuiltins, mylocals)
+    mylocals['model_expand'] = model_expand
+    exec(main, mybuiltins, mylocals)
 Idp.execute = execute
 
 

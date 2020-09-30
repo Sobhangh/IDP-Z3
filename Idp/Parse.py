@@ -949,6 +949,14 @@ class String(object):
         return f'{self.literal}'
 
 
+class PyList(object):
+    def __init__(self, **kwargs):
+        self.elements = kwargs.pop('elements')
+
+    def __str__(self):
+        return f"[{','.join(str(e) for e in self.elements)}]"
+
+
 class PyAssignment(object):
     def __init__(self, **kwargs):
         self.var = kwargs.pop('var')
@@ -983,4 +991,4 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, Interpretation,
                                          Tuple, Goal, View, Display,
 
-                                         Procedure, Call1, Call0, String, PyAssignment])
+                                         Procedure, Call1, Call0, String, PyList, PyAssignment])
