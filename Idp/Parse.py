@@ -29,7 +29,6 @@ from textx import metamodel_from_file
 from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
                 Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort, BoolVal)
 
-from consultant.utils import applyTo, itertools, in_list, mergeDicts, log, unquote, OrderedSet
 from .Assignments import *
 from .Expression import (Constructor, Expression, IfExpr, AQuantification,
                          BinaryOperator, ARImplication, AEquivalence,
@@ -38,6 +37,7 @@ from .Expression import (Constructor, Expression, IfExpr, AQuantification,
                          AAggregate, AppliedSymbol, Variable,
                          NumberConstant, Brackets, Arguments,
                          Fresh_Variable, TRUE, FALSE)
+from .utils import applyTo, itertools, in_list, mergeDicts, log, unquote, OrderedSet
 
 
 class ViewType(Enum):

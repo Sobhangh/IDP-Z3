@@ -34,9 +34,8 @@ from typing import Dict
 
 from consultant.Case import Case
 from consultant.Inferences import metaJSON, propagation, expand
-from consultant.utils import start
 from Idp import idpparser, SymbolDeclaration, NEWL
-from consultant.utils import log
+from Idp.utils import start, log
 from consultant.Case import make_case
 
 z3lock = threading.Lock()

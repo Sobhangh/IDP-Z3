@@ -18,8 +18,8 @@
 """
 from z3 import Solver, sat, unsat, is_not, is_eq, is_bool
 
+from Idp.utils import *
 from .Output import *
-from .utils import *
 
 
 def mk_solver(theory, atoms):

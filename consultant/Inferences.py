@@ -20,9 +20,9 @@ import re
 import time
 from z3 import BoolRef, BoolSort, Const, Implies, And, substitute, Optimize, Not, BoolVal
 
+from Idp.utils import *
 from .Output import *
 from .Solver import mk_solver, reifier, Solver, sat, unsat, is_not
-from .utils import *
 
 
 """

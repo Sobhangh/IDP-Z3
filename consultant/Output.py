@@ -22,7 +22,7 @@ from typing import Optional, Dict
 
 from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant
 from Idp.Run import Status, Assignment, Assignments
-from .utils import *
+from Idp.utils import *
 
 
 

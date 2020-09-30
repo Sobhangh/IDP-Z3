@@ -10,7 +10,7 @@ print(parentdir)
 import Inferences
 from Case import *
 from Solver import *
-from utils import log
+from Idp.utils import log
 from Idp import *
 
 

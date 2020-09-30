@@ -21,9 +21,9 @@ from z3 import And, Not, sat, unsat, unknown, is_true
 from debugWithYamlLog import Log, NEWL, indented
 
 from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
+from Idp.utils import *
 from .Solver import mk_solver
 from .Output import json_to_literals, Assignment, Assignments, Status, str_to_IDP
-from .utils import *
 
 # Types
 from Idp import Idp, SymbolDeclaration
