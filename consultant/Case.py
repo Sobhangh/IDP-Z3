@@ -71,7 +71,7 @@ class Case:
             if consequences:
                 for sentence, value in consequences:
                     self.assignments.assert_(sentence, value, status, False)
-            out.add(new_constraint)
+            out.append(new_constraint)
         self.simplified = out
 
         # annotate self.simplified with questions
@@ -167,7 +167,7 @@ class Case:
         # collect (co-)constraints
         constraints = OrderedSet()
         for constraint in self.simplified:
-            constraints.add(constraint)
+            constraints.append(constraint)
             constraint.co_constraints(constraints)
 
 
@@ -177,7 +177,7 @@ class Case:
             if type(constraint)==AppliedSymbol and constraint.name=='__relevant':
                 for e in constraint.sub_exprs:
                     assert e.code in self.assignments, f"Invalid expression in relevant: {e.code}" 
-                    reachable.add(e)
+                    reachable.append(e)
 
         # analyse given information
         given, hasGiven = OrderedSet(), False
@@ -185,7 +185,7 @@ class Case:
             if q.status == Status.GIVEN:
                 hasGiven = True
                 if not q.sentence.has_decision():
-                    given.add(q.sentence)
+                    given.append(q.sentence)
 
 
         # constraints have set of questions in self.assignments
@@ -201,7 +201,7 @@ class Case:
             constraint.original.collect(qs, all_=True, co_constraints=False)
             for q in qs:
                 if q in reachable: # a goal
-                    constraint.questions.add(q)
+                    constraint.questions.append(q)
             constraint.questions = OrderedSet([q for q in constraint.questions
                 if q.code in self.assignments])
 
@@ -211,7 +211,7 @@ class Case:
             for constraint in constraints:
                 if constraint.if_symbol is None:
                     for q in constraint.questions:
-                        reachable.add(q)
+                        reachable.append(q)
 
         # find relevant symbols by depth-first propagation
         # relevants, rank = {}, 1
@@ -250,7 +250,7 @@ class Case:
                     if s not in relevants:
                         relevants[s] = rank
                 if not q in given:
-                    reachable.add(q)
+                    reachable.append(q)
 
             to_add, rank = OrderedSet(), 2 # or rank+1
             for constraint in constraints:
@@ -259,7 +259,7 @@ class Case:
                 # and with a question that is reachable but not given
                 and  any(q in reachable and not q in given for q in constraint.questions) ):
                     constraint.relevant = True
-                    to_add.update(constraint.questions)
+                    to_add.extend(constraint.questions)
         if not hasGiven or self.idp.display.moveSymbols:
             self.relevant_symbols = relevants
 

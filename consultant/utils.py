@@ -86,7 +86,7 @@ class OrderedSet(dict):
         assert isinstance(els, Iterable)
         super(OrderedSet, self).__init__(((el.code,el) for el in els))
 
-    def add(self, el):
+    def append(self, el):
         if el not in self:
             self[el.code] = el
 
@@ -96,9 +96,9 @@ class OrderedSet(dict):
     def __contains__(self, expression):
         return super(OrderedSet, self).__contains__(expression.code)
     
-    def update(self, more):
+    def extend(self, more):
         for el in more:
-            self.add(el)
+            self.append(el)
     
     # def items(self):
     #     return super(OrderedSet, self).items()

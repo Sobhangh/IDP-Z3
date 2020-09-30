@@ -29,7 +29,7 @@ from textx import metamodel_from_file
 from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
                 Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort, BoolVal)
 
-from consultant.utils import applyTo, itertools, in_list, mergeDicts, log, unquote
+from consultant.utils import applyTo, itertools, in_list, mergeDicts, log, unquote, OrderedSet
 from .Assignments import *
 from .Expression import (Constructor, Expression, IfExpr, AQuantification,
                          BinaryOperator, ARImplication, AEquivalence,
@@ -432,7 +432,7 @@ class Theory(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
-        self.constraints = kwargs.pop('constraints')
+        self.constraints = OrderedSet(kwargs.pop('constraints'))
         self.definitions = kwargs.pop('definitions')
 
         self.name = "T" if not self.name else self.name
@@ -467,9 +467,9 @@ class Theory(object):
                 else:
                     self.clark[symbol.name] = rule
 
-        self.constraints = [e.annotate(voc, {})        for e in self.constraints]
-        self.constraints = [e.expand_quantifiers(self) for e in self.constraints]
-        self.constraints = [e.interpret         (self) for e in self.constraints]
+        self.constraints = OrderedSet([e.annotate(voc, {})        for e in self.constraints])
+        self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
+        self.constraints = OrderedSet([e.interpret         (self) for e in self.constraints])
 
         for decl in voc.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
@@ -481,7 +481,7 @@ class Theory(object):
 
     def unknown_symbols(self):
         return mergeDicts(c.unknown_symbols()
-                          for c in self.constraints + self.definitions)
+                          for c in list(self.constraints) + self.definitions)
 
     def translate(self, idp):
         out = []

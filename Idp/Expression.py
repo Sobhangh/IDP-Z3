@@ -186,7 +186,7 @@ class Expression(object):
         'co_constraints is an OrderedSet of Expression
         """
         if self.co_constraint is not None:
-            co_constraints.add(self.co_constraint)
+            co_constraints.append(self.co_constraint)
             self.co_constraint.co_constraints(co_constraints)
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
@@ -322,7 +322,7 @@ class AQuantification(Expression):
     def collect(self, questions, all_=True, co_constraints=True):
         if self.no_fresh_vars_before_expansion \
         or (all_ and len(self.fresh_vars)==0):
-            questions.add(self)
+            questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
 
@@ -377,7 +377,7 @@ class BinaryOperator(Expression):
     def collect(self, questions, all_=True, co_constraints=True):
         if self.operator[0] in '=<>≤≥≠' \
         and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)) :
-            questions.add(self)
+            questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
         
@@ -563,7 +563,7 @@ class AppliedSymbol(Expression):
         if self.decl.is_var \
         and self.simpler is None and self.name != '__relevant' \
         and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)):
-            questions.add(self)
+            questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
         if co_constraints and self.co_constraint is not None:
@@ -615,7 +615,7 @@ class Variable(AppliedSymbol):
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl and self.decl.is_var:
-            questions.add(self)
+            questions.append(self)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
 

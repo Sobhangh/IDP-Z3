@@ -18,3 +18,6 @@ TODO
 - [x] structure is translated to Assignments
 - [ ] merge theories
 - [ ] remove is_var !!  should not be in vocabulary (but only used for questions, so OK ?)
+
+
+create Electron application from website, using [nativefier](https://github.com/jiahaog/Nativefier)

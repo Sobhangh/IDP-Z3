@@ -189,7 +189,7 @@ def explain(case, symbol, value, given_json):
             out.m = {k:v for k,v in out.m.items() if v}
                 
             out.m["*laws*"] = []
-            for a1 in case.idp.theory.definitions + case.idp.theory.constraints: 
+            for a1 in case.idp.theory.definitions + list(case.idp.theory.constraints): 
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.translate()) == str(ps[a2]):
@@ -222,7 +222,7 @@ def abstract(case, given_json):
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
-        theory2 = And(theory, And(case.idp.vocabulary.translate(case.idp))) # is this a way to copy theory ??
+        theory2 = And(theory) # is this a way to copy theory ??
 
         atoms = [] # [Assignment]
         for atom_string, atom in case.GUILines.items():
@@ -267,7 +267,6 @@ def abstract(case, given_json):
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
-        solver2.add(case.idp.vocabulary.translate(case.idp)) # without theory !
         (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.value is not None and time.time()<timeout:
