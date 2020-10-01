@@ -103,8 +103,8 @@ def generate():
     ###########################################################################
 
     dir = os.path.dirname(__file__)
-    dir = os.path.join(dir, "consultant", "tests")
-    files = glob.glob("./consultant/tests/*/*.idp")
+    dir = os.path.join(dir, "tests")
+    files = glob.glob("./tests/*/*.idp")
     files.sort()
     out_dict, error = {}, 0
     for file in files:
@@ -149,7 +149,7 @@ def pipeline():
     This way, it can be used in a testing pipeline, as explained in
     https://docs.gitlab.com/ee/ci/
     """
-    test_files = glob.glob("./consultant/tests/*/*.idp")
+    test_files = glob.glob("./tests/*/*.idp")
     out_dict = {}
     error = 0
     with z3lock:
