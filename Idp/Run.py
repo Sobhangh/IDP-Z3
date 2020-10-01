@@ -24,7 +24,7 @@ Classes to execute the main block of an IDP program
 """
 
 import types
-from z3 import Solver, sat, unsat, is_not, is_eq, is_bool
+from z3 import Solver, sat, ModelRef
 
 from .Parse import *
 
@@ -63,6 +63,7 @@ def addTo(self, problem):
             problem.clark[decl] = new_rule
     problem.constraints.extend(self.constraints)
     problem.assignments.extend(self.assignments)
+    #TODO apply definitions across theory blocks
 Theory.addTo = addTo
 
 def addTo(self, problem):
@@ -70,26 +71,25 @@ def addTo(self, problem):
 Structure.addTo = addTo
 
 
-def model_expand(theories, max=10):
-    """ theories: a list of theories and structures
-        output: a list of Assignments()
+def model_expand(theories, structures, max=10):
+    """ output: a list of Z3 models, ending with a string
     """
-    #TODO apply definitions across theory blocks
-    problem = Problem(theories)
+    theories = theories if not isinstance(theories, Theory) else [theories]
+    structures = structures if not isinstance(structures, Structure) else [structures]
+
+    problem = Problem(theories + structures)
     formula = problem.translate()
 
     solver = Solver()
     solver.add(formula)
 
     count = 0
-    while count<max or max==0:
-        count += 1
+    while count<max or max<=0:
 
         if solver.check() == sat:
+            count += 1
             model = solver.model()
-            #TODO pretty print model
-            header = f"{NEWL}Model {count}{NEWL}=========={NEWL}{model}"
-            yield header
+            yield model
 
             # exclude this model
             block = []
@@ -103,12 +103,25 @@ def model_expand(theories, max=10):
                 for args in itertools.product(*arg_domains):
                     block.append(z3_decl(*args) != model.eval(z3_decl(*args)))
             solver.add(Or(block))
+        else:
+            break
+
+    if solver.check() == sat:
+        yield f"{NEWL}More models are available."
+    elif 0 < count:
+        yield f"{NEWL}No more models."
+    else:
+        yield "No models."
 
 
 def myprint(x):
     if isinstance(x, types.GeneratorType):
-        for xi in x:
-            print(xi)
+        for i, xi in enumerate(x):
+            if isinstance(xi, ModelRef):
+                print(f"{NEWL}Model {i+1}{NEWL}==========")
+                myprint(xi)
+            else:
+                print(xi)
     else:
         print(x)
 

@@ -14,3 +14,5 @@ Model 3
 Model 4
 ==========
 [q = False, p = True, f = [else -> Var(0) == red]]
+
+No more models.
