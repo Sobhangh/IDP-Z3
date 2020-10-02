@@ -177,10 +177,7 @@ def explain(case, symbol, value, given_json):
             for a1 in case.given.values():
                 for a2 in unsatcore:
                     if type(ps[a2]) == Assignment and a1.sentence.code == ps[a2].sentence.code: #TODO we might miss some equality
-                        if a1.sentence.type == 'bool':
-                            out.addAtom(a1.sentence, a1.value, a1.status)
-                        else:
-                            out.addAtom(AComparison.make('=', [a1.sentence, a1.value]), TRUE, a1.status)
+                        out.addAtom(a1.sentence, a1.value, a1.status)
 
             # remove irrelevant atoms
             for symb, dictionary in out.m.items():
