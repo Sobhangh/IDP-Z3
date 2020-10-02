@@ -20,7 +20,7 @@ import ast
 import sys
 from typing import Optional, Dict
 
-from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant
+from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant, AppliedSymbol, Variable
 from Idp.Run import Status, Assignment, Assignments
 from Idp.utils import *
 
@@ -140,7 +140,7 @@ class Output(object):
                     symbol["status"]   = case.assignments[atom.code].status.name
                     symbol["relevant"] = case.assignments[atom.code].relevant
                     symbol['reading']  = reading
-                    symbol['normal']   = hasattr(atom, 'normal')
+                    symbol['normal']   = type(atom) in [AppliedSymbol, Variable]
                     symbol['environmental'] = symb.block.name=='environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
                         or bool(case.assignments[atom.code].sentence.is_assignment)

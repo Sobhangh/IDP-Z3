@@ -104,7 +104,7 @@ display {
  'q': {'__rank': 2,
        'q': {'environmental': False,
              'is_assignment': False,
-             'normal': False,
+             'normal': True,
              'reading': 'q',
              'relevant': True,
              'status': 'CONSEQUENCE',

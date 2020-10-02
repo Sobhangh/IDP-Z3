@@ -16,8 +16,8 @@ Date: 20200523062416
     - [x] notice that this requires [[Type inference]] AFTER expansion of the first quantifier
     - [x] make types optional in quantification
     - [ ] Alternatively, this could be written using [[Type and Binary Quantifications]] (when available).
-- [ ] it's possible to quantify over `` `Symbols`` in head of definitions
-    - [ ] 
+- [x] it's possible to quantify over `` `Symbols`` in head of definitions
+- [ ] add `` `arity`` predicate
 
 Questions:
 * use `` `edge `` or `` `edge' `` ? 

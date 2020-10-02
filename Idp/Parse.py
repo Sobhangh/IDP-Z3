@@ -362,13 +362,11 @@ class SymbolDeclaration(object):
             if len(self.sorts) == 0:
                 expr = Variable(s=Symbol(name=self.name))
                 expr.annotate(voc, {})
-                expr.normal = True
                 self.instances[expr.code] = expr
             else:
                 for arg in list(self.domain):
                     expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                     expr.annotate(voc, {})
-                    expr.normal = True
                     self.instances[expr.code] = expr
 
         # determine typeConstraints
@@ -386,7 +384,6 @@ class SymbolDeclaration(object):
         if self.translated is None:
             if len(self.sorts) == 0:
                 self.translated = Const(self.name, self.out.translate())
-                self.normal = True
             else:
 
                 if self.out.name == 'bool':
@@ -420,7 +417,6 @@ class Symbol(object):
     def annotate(self, voc, q_vars):
         self.decl = voc.symbol_decls[self.name]
         self.type = self.decl.type
-        self.normal = True # make sure it is visible in GUI
         return self
 
     def __str__(self): return self.name
@@ -663,7 +659,6 @@ class Rule(object):
         out = out.expand_quantifiers(theory)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
-        instance.normal = True
         if len(new_args)+1 == len(self.args):  # a function
             if value is not None:
                 head = AComparison.make("=", [instance, value])

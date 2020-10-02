@@ -70,7 +70,6 @@ class Expression(object):
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
-        # .normal : only set in .instances
         self.is_assignment = None         # for comparisons only
 
         # attributes of the top node of a (co-)constraint
@@ -552,7 +551,6 @@ class AppliedSymbol(Expression):
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
         self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars else voc.symbol_decls[self.s.name]
-        self.normal = True
         return self.annotate1()
 
     def annotate1(self):
@@ -610,7 +608,6 @@ class Variable(AppliedSymbol):
         elif self.name in voc.symbol_decls: # in symbol_decls
             self.decl = voc.symbol_decls[self.name]
             self.type = self.decl.type
-            self.normal = True # make sure it is visible in GUI
         else: pass # a quantification variable without known type yet
         return self.annotate1()
 
