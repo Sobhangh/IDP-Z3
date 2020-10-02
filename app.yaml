@@ -12,6 +12,10 @@ handlers:
     static_files: consultant/static/index.html
     require_matching_file: false
     upload: consultant/static/index.html
+  - url: /IDE
+    static_files: consultant/static/index.html
+    require_matching_file: false
+    upload: consultant/static/index.html
   - url: /examples/(.*)
     static_files: consultant/examples/\1
     require_matching_file: false
