@@ -21,15 +21,42 @@ Installation
 IDP-Z3 is installed using the python package ecosystem, which supports Unix, Windows and MacOS.
 
 * install `python 3 <https://www.python.org/downloads/>`_, with `pip3 <https://pip.pypa.io/en/stable/installing/>`_, making sure that python3 is in the PATH.
-* optional: create a `virtual environment <https://pypi.org/project/virtualenv/>`_
 * use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
-* open a terminal (or command prompt) in that directory and run the following commands to launch the Interactive Consultant locally.
+* (For Linux and MacOS) open a terminal in that directory and run the following commands.
 
 .. code-block::
 
+   python3 -m venv .
+   source bin/activate
    python3 -m pip install -r requirements.txt
+
+* (For Windows) open a terminal in that directory and run the following commands.
+
+.. code-block::
+
+   python3 -m venv .
+   .\Scripts\activate
+   python3 -m pip install -r requirements.txt
+
+Get started
+------------
+
+To launch the web server on Linux/MacOS, run
+
+.. code-block::
+
+   source bin/activate
    python3 main.py
 
-* open http://127.0.0.1:5000/ in your favorite browser to start the Interactive Consultant.
+On Windows, the commands are:
+
+.. code-block::
+
+   .\Scripts\activate
+   python3 main.py
 
 
+After that, you can open the 
+
+* Interactive Consultant at http://127.0.0.1:5000
+* web IDE at http://127.0.0.1:5000/IDE
