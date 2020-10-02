@@ -54,6 +54,7 @@ then
     cd ../autoconfigz3
     
     echo "Copying to static folder ..."
+    rm -rf consultant/static/*
     cp -R ../autoconfig3/dist/* consultant/static
     git add -A
     git commit # with latest client

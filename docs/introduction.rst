@@ -9,9 +9,9 @@ These components together enable the creation of these solutions:
 .. _Consultant:
 .. index:: Interactive Consultant
 
-* the Interactive Consultant, which allow a knowledge expert to enter knowledge about a particular problem domain, and an end user to interactively find solutions for particular problem instances;
+* the `Interactive Consultant <https://interactive-consultant.ew.r.appspot.com/>`, which allow a knowledge expert to enter knowledge about a particular problem domain, and an end user to interactively find solutions for particular problem instances;
 * :ref:`a program<CLI>` with a command line interface to compute inferences on a knowledge base;
-* (to be developed) a web-based Interactive Development Environment (IDE) to create Knowledge bases.
+* a `web-based Interactive Development Environment <https://interactive-consultant.ew.r.appspot.com/IDE/>` (IDE) to create Knowledge bases.
 
 The source code of IDP-Z3 is publicly available under the GNU Affero General Public License.
 
