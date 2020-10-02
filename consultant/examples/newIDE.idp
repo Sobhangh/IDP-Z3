@@ -1,0 +1,16 @@
+vocabulary V {
+    p
+}
+
+theory T {
+    p.
+}
+
+structure S {
+
+}
+
+procedure main() {
+    print(model_expand(T, S))
+}
+
