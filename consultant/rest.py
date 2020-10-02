@@ -248,6 +248,9 @@ class evalWithGraph(eval): # subcclass that generates call graphs
 def serve_dir_directory_index():
     return send_from_directory(static_file_dir, 'index.html')
 
+@app.route('/IDE', methods=['GET'])
+def serve_IDE():
+    return send_from_directory(static_file_dir, 'index.html')
 
 @app.route('/<path:path>', methods=['GET'])
 def serve_file_in_dir(path):
