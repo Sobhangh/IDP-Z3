@@ -19,6 +19,8 @@
 
 with_png = False
 
+from contextlib import redirect_stdout
+import io
 import os
 import threading
 import traceback
@@ -100,6 +102,41 @@ def idpOf(code):
             idps = {k: v for k, v in list(idps.items())[1:]}
         idps[code] = idp
         return idp
+
+
+class run(Resource):
+    """
+    Class which handles the run.
+    <<Explanation of what the run is here.>>
+
+    :arg Resource: <<explanation of resource>>
+    """
+    def post(self):
+        """
+        Method to run an IDP program with a procedure block.
+
+        :returns stdout.
+        """
+        log("start /run")
+        with z3lock:
+            try:
+                args = parser.parse_args()
+                try:
+                    idp = idpOf(args['code'])
+                    # capture stdout, print()
+                    with io.StringIO() as buf, redirect_stdout(buf):
+                        try:
+                            idp.execute()
+                        except Exception as exc:
+                            print(exc)
+                        out = buf.getvalue()
+                    return out
+                except Exception as exc:
+                    traceback.print_exc()
+                    return repr(exc)
+            except Exception as exc:
+                traceback.print_exc()
+                return str(exc)
 
 
 class meta(Resource):
@@ -237,11 +274,12 @@ def serve_docs_file(path):
 
 api.add_resource(HelloWorld, '/test')
 if with_png:
-    api.add_resource(evalWithGraph, '/eval')
     api.add_resource(metaWithGraph, '/meta')
+    api.add_resource(evalWithGraph, '/eval')
 else:
-    api.add_resource(eval, '/eval')
+    api.add_resource(run,  '/run')
     api.add_resource(meta, '/meta')
+    api.add_resource(eval, '/eval')
 
 if __name__ == '__main__':
     app.run(debug=True)

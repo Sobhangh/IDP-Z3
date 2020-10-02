@@ -2,11 +2,11 @@ vocabulary V {
     p
 }
 
-theory T {
+theory T:V {
     p.
 }
 
-structure S {
+structure S:V {
 
 }
 

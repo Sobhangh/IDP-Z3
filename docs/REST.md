@@ -1,5 +1,21 @@
 This file describes the web API.
 
+### URL: /run
+
+This page returns the output of running an IDP program with a procedure block.
+
+POST request:
+
+```json
+    - "code" : string         // source code in FO(ID)
+```
+
+POST result:
+
+```json
+    string                    // stdout of running the program
+```
+
 ### URL: /meta
 
 This page returns the list of symbols.
@@ -7,7 +23,7 @@ This page returns the list of symbols.
 POST request:
 
 ```json
-    - "code" : string 											   // source code in FO(ID)
+    - "code" : string         // source code in FO(ID)
 ```
 
 POST result:
