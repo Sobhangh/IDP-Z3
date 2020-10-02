@@ -552,8 +552,7 @@ class Definition(object):
 class Rule(object):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
-        self.vars = kwargs.pop('vars')
-        self.sorts = kwargs.pop('sorts')
+        self.quantees = kwargs.pop('quantees')
         self.symbol = kwargs.pop('symbol')
         self.args = kwargs.pop('args')  # later augmented with self.out, if any
         self.out = kwargs.pop('out')
@@ -561,6 +560,10 @@ class Rule(object):
         self.expanded = None  # Expression
         self.block = None  # theory where it occurs
 
+        self.vars, self.sorts = [], []
+        for q in self.quantees:
+            self.vars.append(q.var)
+            self.sorts.append(q.sort)
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         assert len(self.vars) == len(self.sorts), "Internal error"
@@ -580,10 +583,10 @@ class Rule(object):
     def annotate(self, voc, q_vars):
         # create head variables
         assert len(self.vars) == len(self.sorts), "Internal error"
-        for s in self.sorts:
-            s.annotate(voc)
-        self.q_vars = {v:Fresh_Variable(v, s)
-                       for v, s in zip(self.vars, self.sorts)}
+        for v, s in zip(self.vars, self.sorts):
+            if s:
+                s.annotate(voc)
+                self.q_vars[v] = Fresh_Variable(v,s)
         q_v = {**q_vars, **self.q_vars}  # merge
 
         self.symbol = self.symbol.annotate(voc, q_v)

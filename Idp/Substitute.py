@@ -73,9 +73,16 @@ def instantiate(self, e0, e1):
     if type(self) in [AppliedSymbol, Variable, Fresh_Variable] \
     and self.name == e0.code:
         if type(self)==AppliedSymbol \
-        and isinstance(e1, Constructor) and e1.name.startswith('`'):
-            if len(self.sub_exprs) == len(e1.symbol.decl.sorts):
+        and self.decl.name == '`Symbols':
+            if isinstance(e1, Constructor) and len(self.sub_exprs) == len(e1.symbol.decl.sorts):
                 out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
+                return out
+            elif isinstance(e1, Fresh_Variable): # replacing variable in a definition
+                out = copy.copy(self)
+                out.code = out.code.replace(e0.code, e1.code)
+                out.str = out.code.replace(e0.code, e1.code)
+                out.name = e1.code
+                out.s.name = e1.code
                 return out
             else:
                 return list(e1.symbol.decl.instances.values())[0] # should be "unknown"

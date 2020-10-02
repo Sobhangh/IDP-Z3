@@ -17,6 +17,7 @@ Date: 20200523062416
     - [x] make types optional in quantification
     - [ ] Alternatively, this could be written using [[Type and Binary Quantifications]] (when available).
 - [ ] it's possible to quantify over `` `Symbols`` in head of definitions
+    - [ ] 
 
 Questions:
 * use `` `edge `` or `` `edge' `` ? 
