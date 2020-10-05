@@ -20,8 +20,11 @@ The following functions are available:
 print(...)
     Prints the arguments on stdout
 
-model_expand(theory, structure, max=10)
+model_expand(theory, structure=None, max=10)
     Returns a list of models of the theory that are expansion of the structure.
+
+    ``theory`` and ``structure`` can be lists, in which case their elements are merged.
+    The structure is optional.
     The result is limited to ``max`` elements (10 by default), or unlimited if ``max`` is 0.
 
     For example, ``print(model_expand(T, S))`` will print (up to) 10 models of theory named ``T`` expanding structure named ``S``.

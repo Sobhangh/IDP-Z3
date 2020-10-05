@@ -128,7 +128,7 @@ Expression.expand_quantifiers = expand_quantifiers
 
 
 def interpret(self, theory):
-    """ use information in structure and simplify 
+    """ for every defined term in self, add the instantiated definition as co-constraint 
     
     implementation for everything but AppliedSymbol, Variable and Fresh_variable 
     """
@@ -216,12 +216,10 @@ AAggregate.expand_quantifiers = expand_quantifiers
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
     if self.decl in theory.clark: # has a theory
-        # no copying !
-        self.sub_exprs = sub_exprs
-        self.co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
-        out = self
+        co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
+        out = self._change(sub_exprs=sub_exprs, co_constraint=co_constraint)
     else:
-        out = self._change(sub_exprs=sub_exprs)
+        out = self._change(sub_exprs=sub_exprs, co_constraint=None)
     out.original = self
     return out
 AppliedSymbol.interpret = interpret

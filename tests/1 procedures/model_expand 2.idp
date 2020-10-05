@@ -1,0 +1,20 @@
+vocabulary V {
+    // here comes the specification of the vocabulary
+    p q
+}
+
+theory T1:V {
+    // here comes the definitions and constraints
+    p.
+}
+theory T2:V {
+    // here comes the definitions and constraints
+    p <=> q.
+    p.
+}
+
+
+procedure main () {
+    print(model_expand([T1, T2]))
+    print(model_expand(T1))
+}

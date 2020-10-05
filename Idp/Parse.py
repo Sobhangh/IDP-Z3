@@ -80,6 +80,8 @@ class Idp(object):
         
         for voc in self.vocabularies.values():
             voc.annotate(self)
+        for t in self.theories.values():
+            t.annotate(self)
 
         # determine default vocabulary, theory
         if list(self.vocabularies.keys()) == ['environment', 'decision']:
@@ -90,6 +92,7 @@ class Idp(object):
             self.theory = self.theories['decision']
             self.theory.constraints.extend(self.theories['environment'].constraints)
             self.theory.definitions.extend(self.theories['environment'].definitions)
+            self.theory.subtences.update(self.theories['environment'].subtences)
         else:
             self.theory = next(iter(self.theories.values())) # get first theory
         for struct in self.structures.values():
@@ -99,7 +102,6 @@ class Idp(object):
         self.view.annotate(self)
         self.display.annotate(self)
         self.display.run(self)
-        self.theory.annotate(self)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
 
     def unknown_symbols(self):
@@ -769,8 +771,6 @@ class Goal(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.decl = None
-        self.justification = None
-        self.constraint = None
 
     def __str__(self):
         return self.name
@@ -794,6 +794,7 @@ class Goal(object):
                 goal = Symbol(name='__relevant').annotate(voc, {})
                 constraint = AppliedSymbol.make(goal, instances) # ??
                 constraint.block = self
+                constraint = constraint.interpret(idp.theory) # for defined goals
                 idp.theory.constraints.append(constraint)
             else:
                 raise Exception("goals must be instantiable.")

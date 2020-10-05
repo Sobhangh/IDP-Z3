@@ -39,6 +39,9 @@ class Problem(object):
 
         for t in theories:
             t.addTo(self)
+    
+        # re-interpret the defined symbols
+        self.constraints = OrderedSet([e.interpret(self) for e in self.constraints])
 
     def translate(self):
         co_constraints = OrderedSet()
@@ -63,7 +66,6 @@ def addTo(self, problem):
             problem.clark[decl] = new_rule
     problem.constraints.extend(self.constraints)
     problem.assignments.extend(self.assignments)
-    #TODO apply definitions across theory blocks
 Theory.addTo = addTo
 
 def addTo(self, problem):
@@ -71,11 +73,13 @@ def addTo(self, problem):
 Structure.addTo = addTo
 
 
-def model_expand(theories, structures, max=10):
+def model_expand(theories, structures=None, max=10):
     """ output: a list of Z3 models, ending with a string
     """
     theories = theories if not isinstance(theories, Theory) else [theories]
-    structures = structures if not isinstance(structures, Structure) else [structures]
+    structures = [] if structures is None else \
+        structures if not isinstance(structures, Structure) \
+        else [structures]
 
     problem = Problem(theories + structures)
     formula = problem.translate()
