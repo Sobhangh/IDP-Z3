@@ -9,8 +9,7 @@ theory T1:V {
 }
 theory T2:V {
     // here comes the definitions and constraints
-    p <=> q.
-    p.
+    {p <- q.}
 }
 
 
