@@ -1,0 +1,10 @@
+vocabulary {
+    double(real): real
+    x: real
+    y: real
+}
+theory {
+    {!x[real]: double(x)= x+x. }
+    x=3.
+    y=double(x).
+}
