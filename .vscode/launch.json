@@ -33,7 +33,7 @@
             "name": "temp",
             "type": "python",
             "request": "launch",
-            "program": "/home/pcarbonn/Documents/repos/autoconfigz3/IDP_Z3.py",
+            "program": "/home/pcarbonn/Documents/repos/autoconfigz3/IDP-Z3.py",
             "console": "integratedTerminal"
         }
     ]
