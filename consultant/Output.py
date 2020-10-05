@@ -55,14 +55,15 @@ def json_to_literals(idp, jsonstr: str):
                 else:
                     idp_atom = idp_symbol.instances[atom].copy()
 
-                value = str_to_IDP(idp, json_atom["value"])
-                if json_atom["typ"] == "Bool":
-                    assignments.assert_(idp_atom, value, Status.GIVEN, False)
-                elif json_atom["value"]:
-                    assignments.assert_(idp_atom, value, Status.GIVEN, True)
+                if json_atom["value"]!='':
+                    value = str_to_IDP(idp, json_atom["value"])
+                    if json_atom["typ"] == "Bool":
+                        assignments.assert_(idp_atom, value, Status.GIVEN, False)
+                    elif json_atom["value"]:
+                        assignments.assert_(idp_atom, value, Status.GIVEN, True)
 
-                    idp_atom = AComparison.make('=', [idp_atom, value])
-                    assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
+                        idp_atom = AComparison.make('=', [idp_atom, value])
+                        assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
     return assignments
 
 
