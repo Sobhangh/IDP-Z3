@@ -13,7 +13,11 @@ These components together enable the creation of these solutions:
 * :ref:`a program<CLI>` with a command line interface to compute inferences on a knowledge base;
 * a `web-based Interactive Development Environment <https://interactive-consultant.ew.r.appspot.com/IDE/>`_ (IDE) to create Knowledge bases.
 
-The source code of IDP-Z3 is publicly available under the GNU Affero General Public License.
+The `source code of IDP-Z3 <https://gitlab.com/krr/autoconfigz3>`_ is publicly available under the GNU Affero General Public License.
+
+.. warning::
+   You may want to verify that you are seeing the documentation relevant for the version of IDP-Z3 you are using.
+   On `readthedocs <https://idp-z3.readthedocs.io/>`_, you can see the version under the title (top left corner), and you can change it using the listbox at the bottom left corner.
 
 Installation
 ------------
