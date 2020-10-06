@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * TBD
 
 ## [0.5.4] - 2020-10-06
-[Access v0.5.4 on Google App Engine](https://20201005t173400-dot-interactive-consultant.ew.r.appspot.com/)
+[Access v0.5.4 on Google App Engine](https://20201006t101829-dot-interactive-consultant.ew.r.appspot.com/)
 
 ## API
 * web IDE to develop and test knowledge bases
