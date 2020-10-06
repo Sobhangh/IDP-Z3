@@ -1,7 +1,7 @@
 Interactive Consultant
 ======================
 The interactive consultant tool enables experts to digitize their knowledge of a specific problem domain.
-With the resulting knowledge base, an online interface is automatically created that serves as a configuration tool supporting end users to find solutions for specific problems within that knowledge domain.
+With the resulting knowledge base, an online interface is automatically created that serves as a web tool supporting end users to find solutions for specific problems within that knowledge domain.
 
 Demo
 ----
