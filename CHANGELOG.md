@@ -7,12 +7,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+* TBD
+
+## [0.5.4] - 2020-10-06
+[Access v0.5.4 on Google App Engine](https://20201005t173400-dot-interactive-consultant.ew.r.appspot.com/)
+
 ## API
 * web IDE to develop and test knowledge bases
 * command line interface to execute an IDP program with a main() block
 * type of variables can now be omitted in quantifiers and aggregates (but there is no type inference from numeric expressions)
 * (macros) quantification on `Symbols type (except definitions)
 * support named vocabulary for structures
+
+## GUI
+* fix data entry issues
 
 ## [0.5.3] - 2020-09-15
 [Access v0.5.3 on Google App Engine](https://20200915t113559-dot-interactive-consultant.ew.r.appspot.com/)
