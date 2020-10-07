@@ -11,7 +11,7 @@ These components together enable the creation of these solutions:
 
 * the `Interactive Consultant <https://interactive-consultant.ew.r.appspot.com/>`_, which allow a knowledge expert to enter knowledge about a particular problem domain, and an end user to interactively find solutions for particular problem instances;
 * :ref:`a program<CLI>` with a command line interface to compute inferences on a knowledge base;
-* a `web-based Interactive Development Environment <https://interactive-consultant.ew.r.appspot.com/IDE/>`_ (IDE) to create Knowledge bases.
+* a `web-based Interactive Development Environment <https://interactive-consultant.ew.r.appspot.com/IDE>`_ (IDE) to create Knowledge bases.
 
 The `source code of IDP-Z3 <https://gitlab.com/krr/autoconfigz3>`_ is publicly available under the GNU Affero General Public License.
 

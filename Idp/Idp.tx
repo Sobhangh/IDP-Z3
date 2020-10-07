@@ -1,4 +1,5 @@
 Idp:
+    Shebang?
     ( vocabularies=Vocabulary
     | theories=Theory
     | structures=Structure
@@ -11,6 +12,8 @@ Idp:
 Comment:
   /\/\/.*$/
 ;
+
+Shebang: '#!' /.$/;
 
 Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
   Declaration: Extern | ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
