@@ -13,7 +13,7 @@ Comment:
   /\/\/.*$/
 ;
 
-Shebang: '#!' /.$/;
+Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
   Declaration: Extern | ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
