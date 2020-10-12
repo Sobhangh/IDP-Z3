@@ -3,9 +3,8 @@ flask
 flask_restful
 flask_cors
 gunicorn
-pyyaml
 pycallgraph2
 textx
-z3-solver
 sphinx-autobuild
 sphinx_rtd_theme
+z3-solver
