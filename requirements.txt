@@ -4,6 +4,7 @@ flask_restful
 flask_cors
 gunicorn
 pycallgraph2
+pyyaml
 textx
 sphinx-autobuild
 sphinx_rtd_theme
