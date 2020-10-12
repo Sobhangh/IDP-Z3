@@ -227,6 +227,7 @@ class ConstructedTypeDeclaration(object):
             assert len(self.constructors) == len(cstrs), "Internal error"
             for c, c3 in zip(self.constructors, cstrs):
                 c.translated = c3
+                c.py_value = c3
                 c.index = ConstructedTypeDeclaration.COUNT
                 ConstructedTypeDeclaration.COUNT -= 1
 

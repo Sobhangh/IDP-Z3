@@ -27,6 +27,7 @@ Adds simplify to logic expression classes
 
 import copy
 import sys
+from z3 import RatNumRef
 
 from debugWithYamlLog import *
 
@@ -200,7 +201,7 @@ def update_exprs(self, operands):
         acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
-            if not (BinaryOperator.MAP[op]) (acc1.translate(), expr1.translate()):
+            if not (BinaryOperator.MAP[op]) (acc1.py_value, expr1.py_value):
                 return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             acc, acc1 = expr, expr1
         return self._change(value=TRUE, sub_exprs=operands)
@@ -214,15 +215,15 @@ AComparison.update_exprs = update_exprs
 def update_arith(self, family, operands):
     operands1 = [e.as_ground() for e in operands]
     if all(e is not None for e in operands1):
-        out = operands1[0].translate()
+        out = operands1[0].py_value
 
         for e, op in zip(operands1[1:], self.operator):
             function = BinaryOperator.MAP[op]
             
             if op=='/' and self.type == 'int': # integer division
-                out //= e.translate()
+                out //= e.py_value
             else:
-                out = function(out, e.translate())
+                out = function(out, e.py_value)
         value = NumberConstant(number=str(out))
         return self._change(value=value, sub_exprs=operands)
     return self._change(sub_exprs=operands)
@@ -244,7 +245,7 @@ def update_exprs(self, operands):
         operands1 = [e.as_ground() for e in operands]
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
-            out = operands1[0].translate() % operands1[1].translate()
+            out = operands1[0].py_value % operands1[1].py_value
             return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
         else:
             return self._change(sub_exprs=operands)
@@ -260,7 +261,7 @@ def update_exprs(self, new_exprs):
     operands1 = [e.as_ground() for e in operands]
     if len(operands) == 2 \
     and all(e is not None for e in operands1):
-        out = operands1[0].translate() ** operands1[1].translate()
+        out = operands1[0].py_value ** operands1[1].py_value
         return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
     else:
         return self._change(sub_exprs=operands)
@@ -294,7 +295,7 @@ def update_exprs(self, new_exprs):
     if self.vars is None: # if the aggregate has already been expanded
         operands1 = [e.as_ground() for e in operands]
         if all(e is not None for e in operands1):
-            out = sum(e.translate() for e in operands1)
+            out = sum(e.py_value for e in operands1)
             out = NumberConstant(number=str(out))
             return self._change(value=out, sub_exprs=operands)
 

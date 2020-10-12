@@ -27,6 +27,7 @@ Classes to represent logic expressions.
 
 import copy
 from collections import ChainMap
+from fractions import Fraction
 import functools
 import itertools as it
 import os
@@ -649,13 +650,21 @@ class NumberConstant(Expression):
 
         ops = self.number.split("/")
         if len(ops) == 2: # possible with str_to_IDP on Z3 value
-            self.translated = Q(int(ops[0]), int(ops[1]))
+            self.py_value = Fraction(self.number)
+            self.translated = Q(self.py_value.numerator, self.py_value.denominator)
             self.type = 'real'
         elif '.' in self.number:
-            self.translated = float(eval(self.number if not self.number.endswith('?') else self.number[:-1]))
+            v = self.number if not self.number.endswith('?') else self.number[:-1]
+            if "e" in v:
+                self.py_value = float(eval(v))
+                self.translated = self.py_value
+            else:
+                self.py_value = Fraction(v)
+                self.translated = Q(self.py_value.numerator, self.py_value.denominator)
             self.type = 'real'
         else:
-            self.translated = int(self.number)
+            self.py_value = int(self.number)
+            self.translated = self.py_value
             self.type = 'int'
     
     def __str__(self): return self.number
