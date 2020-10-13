@@ -1,0 +1,21 @@
+vocabulary V {
+    // here comes the specification of the vocabulary
+    p q
+    type color constructed from {red, blue, green}
+    f(color)
+}
+
+theory T:V {
+    // here comes the definitions and constraints
+    p.
+    f(red).
+}
+
+structure S:V {
+    // here comes the interpretation of some symbols
+    q = false.
+}
+
+procedure main () {
+    print(model_check(T, S))
+}

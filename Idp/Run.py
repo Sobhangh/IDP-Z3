@@ -73,6 +73,22 @@ def addTo(self, problem):
 Structure.addTo = addTo
 
 
+def model_check(theories, structures=None):
+    """ output: "sat", "unsat" or "unknown" 
+    """
+    theories = theories if not isinstance(theories, Theory) else [theories]
+    structures = [] if structures is None else \
+        structures if not isinstance(structures, Structure) \
+        else [structures]
+
+    problem = Problem(theories + structures)
+    formula = problem.translate()
+
+    solver = Solver()
+    solver.add(formula)
+    yield str(solver.check())
+
+
 def model_expand(theories, structures=None, max=10):
     """ output: a list of Z3 models, ending with a string
     """
@@ -138,6 +154,8 @@ def execute(self):
     mybuiltins = {'print': myprint}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
     mylocals['model_expand'] = model_expand
+    mylocals['model_check'] = model_check
+
     exec(main, mybuiltins, mylocals)
 Idp.execute = execute
 
