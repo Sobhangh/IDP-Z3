@@ -19,17 +19,15 @@ The following functions are available:
 
 
 model_check(theory, structure=None)
-    Returns string ``"sat"``, ``"unsat"`` or ``"unknown"``, depending on whether the theory has a model expanding the structure.
-
+    Returns string ``sat``, ``unsat`` or ``unknown``, depending on whether the theory has a model expanding the structure.
     ``theory`` and ``structure`` can be lists, in which case their elements are merged.
     The structure is optional.
 
-    For example, ``print(model_check(T, S))`` will print "sat" if theory named ``T`` has a model expanding structure named ``S``.
+    For example, ``print(model_check(T, S))`` will print ``sat`` if theory named ``T`` has a model expanding structure named ``S``.
 
 
 model_expand(theory, structure=None, max=10)
     Returns a list of models of the theory that are expansion of the structure.
-
     ``theory`` and ``structure`` can be lists, in which case their elements are merged.
     The structure is optional.
     The result is limited to ``max`` elements (10 by default), or unlimited if ``max`` is 0.
