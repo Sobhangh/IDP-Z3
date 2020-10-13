@@ -43,6 +43,15 @@ class Problem(object):
         # re-interpret the defined symbols
         self.constraints = OrderedSet([e.interpret(self) for e in self.constraints])
 
+    @classmethod
+    def make(cls, theories, structures):
+        theories = theories if not isinstance(theories, Theory) else [theories]
+        structures = [] if structures is None else \
+            structures if not isinstance(structures, Structure) \
+            else [structures]
+
+        return cls(theories + structures)
+
     def translate(self):
         co_constraints = OrderedSet()
         for c in self.constraints:
@@ -76,12 +85,8 @@ Structure.addTo = addTo
 def model_check(theories, structures=None):
     """ output: "sat", "unsat" or "unknown" 
     """
-    theories = theories if not isinstance(theories, Theory) else [theories]
-    structures = [] if structures is None else \
-        structures if not isinstance(structures, Structure) \
-        else [structures]
 
-    problem = Problem(theories + structures)
+    problem = Problem.make(theories, structures)
     formula = problem.translate()
 
     solver = Solver()
@@ -92,12 +97,8 @@ def model_check(theories, structures=None):
 def model_expand(theories, structures=None, max=10):
     """ output: a list of Z3 models, ending with a string
     """
-    theories = theories if not isinstance(theories, Theory) else [theories]
-    structures = [] if structures is None else \
-        structures if not isinstance(structures, Structure) \
-        else [structures]
 
-    problem = Problem(theories + structures)
+    problem = Problem.make(theories, structures)
     formula = problem.translate()
 
     solver = Solver()
