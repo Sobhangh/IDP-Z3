@@ -35,5 +35,13 @@ model_expand(theory, structure=None, max=10)
     For example, ``print(model_expand(T, S))`` will print (up to) 10 models of theory named ``T`` expanding structure named ``S``.
 
 
+model_propagate(theory, structure=None)
+    Returns a list of assignments that are true in any expansion of the structure compatible with the theory.
+    ``theory`` and ``structure`` can be lists, in which case their elements are merged.
+    The structure is optional.
+
+    For example, ``print(model_propagate(T, S))`` will print the assignments that are true in any expansion of the structure named ``S`` compatible with the theory named ``T``.
+
+
 print(...)
     Prints the arguments on stdout

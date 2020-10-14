@@ -24,8 +24,10 @@ Classes to execute the main block of an IDP program
 """
 
 import types
-from z3 import Solver, sat, ModelRef
+from z3 import Solver, sat, unsat, ModelRef
 
+from .Assignments import Assignment
+from .Expression import TRUE, FALSE
 from .Parse import *
 
 class Problem(object):
@@ -36,6 +38,8 @@ class Problem(object):
         self.clark = {} # {Declaration: Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
+        self.co_constraints = None
+        self.questions = None
 
         for t in theories:
             t.addTo(self)
@@ -53,15 +57,15 @@ class Problem(object):
         return cls(theories + structures)
 
     def translate(self):
-        co_constraints = OrderedSet()
+        self.co_constraints = OrderedSet()
         for c in self.constraints:
-            c.co_constraints(co_constraints)
+            c.co_constraints(self.co_constraints)
         return And(
             sum((d.translate() for d in self.definitions), [])
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None]
             + [s.translate() for s in self.constraints]
-            + [c.translate() for c in co_constraints]
+            + [c.translate() for c in self.co_constraints]
             )
 
 def addTo(self, problem):
@@ -97,6 +101,7 @@ def model_check(theories, structures=None):
 def model_expand(theories, structures=None, max=10):
     """ output: a list of Z3 models, ending with a string
     """
+    # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
     formula = problem.translate()
@@ -135,6 +140,42 @@ def model_expand(theories, structures=None, max=10):
         yield "No models."
 
 
+def model_propagate(theories, structures=None):
+    """ output: a list of Assignment
+    """
+    # this is a simplified version of Case.py/full_propagate
+
+    problem = Problem.make(theories, structures)
+    formula = problem.translate()
+
+    problem.questions = OrderedSet()
+    for c in problem.constraints:
+        c.collect(problem.questions, all_=True)
+
+    solver = Solver()
+    solver.add(formula)
+    if solver.check() == sat:
+        for q in problem.questions:
+            solver.check()
+            val1 = solver.model().eval(q.reified())
+            if str(val1) != str(q.reified()): # if not irrelevant
+                solver.push()
+                solver.add(Not(q.reified()==val1))
+                res2 = solver.check()
+                solver.pop()
+
+                if res2 == unsat:
+                    if q.type == 'bool':
+                        val = TRUE if str(val1) == 'True' else FALSE
+                    elif q.type in ['real', 'int'] or type(q.decl.out.decl) == RangeDeclaration:
+                        val = NumberConstant(number=str(val1).replace('?', ''))
+                    else: # constructor
+                        val = q.decl.out.decl.map[str(val1)]
+                    assert str(val.translate()) == str(val1).replace('?', ''), str(val.translate()) + " is not the same as " + str(val1)
+
+                    yield Assignment(q, val, Status.CONSEQUENCE, True)
+    yield "No more consequences."
+
 def myprint(x):
     if isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
@@ -154,8 +195,9 @@ def execute(self):
     main = str(self.procedures['main'])
     mybuiltins = {'print': myprint}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
-    mylocals['model_expand'] = model_expand
     mylocals['model_check'] = model_check
+    mylocals['model_expand'] = model_expand
+    mylocals['model_propagate'] = model_propagate
 
     exec(main, mybuiltins, mylocals)
 Idp.execute = execute

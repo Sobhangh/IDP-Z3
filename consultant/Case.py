@@ -20,7 +20,8 @@ from copy import copy
 from z3 import And, Not, sat, unsat, unknown, is_true
 from debugWithYamlLog import Log, NEWL, indented
 
-from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison
+from Idp.Parse import RangeDeclaration
+from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison, NumberConstant
 from Idp.utils import *
 from .Solver import mk_solver
 from .Output import json_to_literals, Assignment, Assignments, Status, str_to_IDP
@@ -298,7 +299,12 @@ class Case:
                         val1 = solver.model().eval(atom.reified())
                         if str(val1) != str(atom.reified()): # if not irrelevant
                         
-                            val = str_to_IDP(self.idp, str(val1))
+                            if atom.type == 'bool':
+                                val = TRUE if str(val1) == 'True' else FALSE
+                            elif atom.type in ['real', 'int'] or type(atom.decl.out.decl) == RangeDeclaration:
+                                val = NumberConstant(number=str(val1).replace('?', ''))
+                            else: # constructor
+                                val = atom.decl.out.decl.map[str(val1)]
                             assert str(val.translate()) == str(val1).replace('?', ''), str(val.translate()) + " is not the same as " + str(val1)
 
                             solver.push()

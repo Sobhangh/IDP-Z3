@@ -214,6 +214,7 @@ class ConstructedTypeDeclaration(object):
         self.is_var = False
         self.range = self.constructors  # functional constructors are expanded
         self.translated = None
+        self.map = {} # {String: constructor}
 
         if self.name == 'bool':
             self.translated = BoolSort()
@@ -230,6 +231,7 @@ class ConstructedTypeDeclaration(object):
                 c.py_value = c3
                 c.index = ConstructedTypeDeclaration.COUNT
                 ConstructedTypeDeclaration.COUNT -= 1
+                self.map[str(c)] = c
 
         self.type = None
 

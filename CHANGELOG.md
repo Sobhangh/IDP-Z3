@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-* add check_model to API
+* add model_check, model_propagate to API
 
 ## [0.5.4] - 2020-10-06
 [Access v0.5.4 on Google App Engine](https://20201006t101829-dot-interactive-consultant.ew.r.appspot.com/)
