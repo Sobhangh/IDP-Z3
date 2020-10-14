@@ -929,10 +929,12 @@ class Call1(object):
         self.name = kwargs.pop('name')
         self.args = kwargs.pop('args')
         self.kwargs = kwargs.pop('kwargs')
+        self.post = kwargs.pop('post')
 
     def __str__(self):
         kwargs = "" if len(self.kwargs)==0 else f",{','.join(str(a) for a in self.kwargs)}"
-        return f"{self.name}({','.join(str(a) for a in self.args)}{kwargs})"
+        return ( f"{self.name}({','.join(str(a) for a in self.args)}{kwargs})"
+                 f"{'' if self.post is None else '.'+str(self.post)}") 
 
 
 class Call0(object):

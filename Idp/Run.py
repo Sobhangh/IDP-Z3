@@ -198,6 +198,7 @@ def execute(self):
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate
+    mylocals['Problem'] = Problem
 
     exec(main, mybuiltins, mylocals)
 Idp.execute = execute
