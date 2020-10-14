@@ -36,11 +36,11 @@ model_expand(theory, structure=None, max=10)
 
 
 model_propagate(theory, structure=None)
-    Returns a list of assignments that are true in any expansion of the structure compatible with the theory.
+    Returns a list of assignments that are true in any expansion of the structure consistent with the theory.
     ``theory`` and ``structure`` can be lists, in which case their elements are merged.
     The structure is optional.
 
-    For example, ``print(model_propagate(T, S))`` will print the assignments that are true in any expansion of the structure named ``S`` compatible with the theory named ``T``.
+    For example, ``print(model_propagate(T, S))`` will print the assignments that are true in any expansion of the structure named ``S`` consistent with the theory named ``T``.
 
 
 print(...)
