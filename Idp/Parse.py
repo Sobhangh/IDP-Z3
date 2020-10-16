@@ -676,7 +676,8 @@ class Rule(object):
         return out
 
     def translate(self):
-        return self.expanded.translate()
+        out = self.expanded.translate() if self.symbol.decl.instances else True
+        return out
 
 
 # Expressions : see Expression.py
