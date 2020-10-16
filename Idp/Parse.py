@@ -794,15 +794,12 @@ class Goal(object):
         if self.name in voc.symbol_decls:
             self.decl = voc.symbol_decls[self.name]
             self.decl.view = ViewType.EXPANDED # the goal is always expanded
-            instances = self.decl.instances.values()
-            if instances:
-                goal = Symbol(name='__relevant').annotate(voc, {})
-                constraint = AppliedSymbol.make(goal, instances) # ??
-                constraint.block = self
-                constraint = constraint.interpret(idp.theory) # for defined goals
-                idp.theory.constraints.append(constraint)
-            else:
-                raise Exception("goals must be instantiable.")
+            assert self.decl.instances, "goals must be instantiable."
+            goal = Symbol(name='__relevant').annotate(voc, {})
+            constraint = AppliedSymbol.make(goal, self.decl.instances.values())
+            constraint.block = self
+            constraint = constraint.interpret(idp.theory) # for defined goals
+            idp.theory.constraints.append(constraint)
         elif self.name not in [None, '']:
             raise Exception("Unknown goal: " + self.name)
 
@@ -881,16 +878,12 @@ class Display(object):
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif constraint.name == 'relevant': # e.g. relevant(Tax)
                     for symbol in symbols:
-                        instances = symbol.instances.values()
-                        if instances:
-                            goal = Symbol(name='__relevant').annotate(self.voc, {})
-                            constraint = AppliedSymbol.make(goal, instances) # ??
-                            constraint.block = self
-                            idp.theory.constraints.append(constraint)
-                        else:
-                            raise Exception("relevant symbols must be instantiable.")
-                else:
-                    raise Exception("unknown display contraint: ", constraint)
+                        assert symbol.instances, "relevant symbols must be instantiable."
+                        goal = Symbol(name='__relevant').annotate(self.voc, {})
+                        constraint = AppliedSymbol.make(goal, symbol.instances.values())
+                        constraint.block = self
+                        constraint = constraint.interpret(idp.theory)
+                        idp.theory.constraints.append(constraint)
             elif type(constraint)==AComparison: # e.g. view = normal
                 assert constraint.is_assignment
                 if constraint.sub_exprs[0].name == 'view':
