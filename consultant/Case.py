@@ -47,6 +47,7 @@ class Case:
         # initialisation
         self.GUILines = {**idp.vocabulary.terms, **idp.subtences} # {Expr.code: Expression}
         self.definitions = self.idp.theory.definitions # [Definition] could be ignored if definitions are constructive
+        self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
         self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = Assignments() # atoms + given, with simplified formula and value value
 
@@ -355,8 +356,8 @@ class Case:
                                         # test: theory{ x=4. x=5. }
                                         self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
                                         return
-                                else:
-                                    print("not found", str(sentence))
+                                # else:
+                                #     print("not found", str(sentence))
                         new_simplified.append(new_constraint)
                     else:
                         new_simplified.append(constraint)
@@ -391,7 +392,7 @@ class Case:
     def translate(self, all_: bool = True) -> BoolRef:
         self.get_co_constraints()
         self.translated = And(
-            sum((d.translate() for d in self.definitions), [])
+            [s.translate() for s in self.def_constraints.values()]
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None and (all_ or not l.sentence.has_decision())]
             + [s.translate() for s in self.simplified

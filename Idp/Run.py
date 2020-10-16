@@ -39,6 +39,7 @@ class Problem(object):
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.co_constraints = None
+        self.def_constraints = {}
         self.questions = None
 
         for t in theories:
@@ -61,7 +62,7 @@ class Problem(object):
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
         return And(
-            sum((d.translate() for d in self.definitions), [])
+            [s.translate() for s in self.def_constraints]
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None]
             + [s.translate() for s in self.constraints]
@@ -79,6 +80,7 @@ def addTo(self, problem):
             problem.clark[decl] = new_rule
     problem.constraints.extend(self.constraints)
     problem.assignments.extend(self.assignments)
+    problem.def_constraints.update(self.def_constraints)
 Theory.addTo = addTo
 
 def addTo(self, problem):

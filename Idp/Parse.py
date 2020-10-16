@@ -92,6 +92,7 @@ class Idp(object):
             self.theory = self.theories['decision']
             self.theory.constraints.extend(self.theories['environment'].constraints)
             self.theory.definitions.extend(self.theories['environment'].definitions)
+            self.theory.def_constraints.update(self.theories['environment'].def_constraints)
             self.theory.subtences.update(self.theories['environment'].subtences)
         else:
             self.theory = next(iter(self.theories.values())) # get first theory
@@ -442,6 +443,7 @@ class Theory(object):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.clark = {}  # {Declaration: Rule}
+        self.def_constraints = {} # {Declaration: Expression}
         self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.assignments = Assignments()
         self.translated = None
@@ -470,6 +472,9 @@ class Theory(object):
                 else:
                     self.clark[decl] = rule
 
+        for decl, rule in self.clark.items():
+            self.def_constraints[decl] = rule.expanded
+
         self.constraints = OrderedSet([e.annotate(voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
         self.constraints = OrderedSet([e.interpret         (self) for e in self.constraints])
@@ -488,10 +493,8 @@ class Theory(object):
 
     def translate(self, idp):
         out = []
-        for i in self.constraints:
+        for i in self.constraints + self.def_constraints.values():
             out.append(i.translate())
-        for d in self.definitions:
-            out += d.translate()
         return out
 
 
@@ -547,9 +550,6 @@ class Definition(object):
             out[decl.name] = decl
             out.update(rule.unknown_symbols())
         return out
-
-    def translate(self):
-        return [rule.translate() for rule in self.clark.values()]
 
 
 class Rule(object):
@@ -673,10 +673,6 @@ class Rule(object):
         if self.out is not None:
             out.update(self.out.unknown_symbols())
         out.update(self.body.unknown_symbols())
-        return out
-
-    def translate(self):
-        out = self.expanded.translate() if self.symbol.decl.instances else True
         return out
 
 
