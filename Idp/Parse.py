@@ -222,6 +222,8 @@ class ConstructedTypeDeclaration(object):
             self.constructors[1].type = 'bool'
             self.constructors[0].translated = BoolVal(True)
             self.constructors[1].translated = BoolVal(False)
+            self.constructors[0].py_value = True
+            self.constructors[1].py_value = False
         else:
             self.translated, cstrs = EnumSort(self.name, [c.name for c in
                                                           self.constructors])
