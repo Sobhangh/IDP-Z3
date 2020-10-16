@@ -624,13 +624,8 @@ class Rule(object):
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
 
-        # Any leftover ?
-        for var in self.vars:
-            if str(var) in subst:
-                pass
-            else:
-                self.body = AQuantification.make('∃', {var: self.q_vars[var]},
-                                                 self.body)
+        assert all(str(var) in subst for var in self.vars), \
+            "Unknown quantification in {str(self)}"
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
@@ -658,7 +653,7 @@ class Rule(object):
         self.expanded = self.expanded.interpret(theory) # definition constraint, expanded
         return self
 
-    def instantiate_definition(self, new_args, theory, value=None):
+    def instantiate_definition(self, new_args, theory):
         out = self.body
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
@@ -666,13 +661,8 @@ class Rule(object):
         out = out.expand_quantifiers(theory)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
-        if len(new_args)+1 == len(self.args):  # a function
-            if value is not None:
-                head = AComparison.make("=", [instance, value])
-                out = out.instantiate(self.args[-1], value)
-                out = AEquivalence.make('⇔', [head, out])
-            else:
-                out = out.instantiate(self.args[-1], instance)
+        if self.symbol.decl.function:  # a function
+            out = out.instantiate(self.args[-1], instance)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block
