@@ -14,9 +14,10 @@ Observations:
     * → change_making does not halt !
     * all definitions are subtences now
     * more stuff is relevant
-* substitute propagated numeric values in definitions
+* substitute propagated numeric values in definitions → fixes issues 48
 
-Principles:
+could still be done:
+- [ ] avoid duplication of expressions in def_constraints and co_constraints
 
 
 Code without quantification on range in rule.compute():

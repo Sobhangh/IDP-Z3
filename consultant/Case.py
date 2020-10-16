@@ -331,62 +331,64 @@ class Case:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
         while to_propagate:
             ass = to_propagate.pop(0)
+            old, new = ass.sentence, ass.value
+            assert new is not None
+            if new.type in ['real', 'int']: # simplify definitions
+                for decl, constraint in self.def_constraints.items():
+                    self.def_constraints[decl] = constraint.substitute(old, new, self.assignments)
+            # simplify constraints and propagate consequences
+            new_simplified: List[Expression] = []
+            for constraint in self.simplified:
+                if old in constraint.questions:
+                    consequences = []
+                    new_constraint = constraint.substitute(old, new, self.assignments, consequences)
+                    del constraint.questions[old.code]
+                    new_constraint.questions = constraint.questions
+                    consequences.extend(new_constraint.implicants(self.assignments))
+                    if consequences:
+                        for sentence, value in consequences:
+                            if sentence.code in self.assignments:
+                                old_ass = self.assignments[sentence.code]
+                                if old_ass.value is None:
+                                    if (all_ or not constraint.has_decision()):
+                                        new_ass = self.assignments.assert_(sentence, value, CONSQ, self)
+                                        to_propagate.append(new_ass)
+                                        new_constraint = new_constraint.substitute(sentence, value, self.assignments)
+                                elif not old_ass.value.same_as(value):
+                                    # test: theory{ x=4. x=5. }
+                                    self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
+                                    return
+                            # else:
+                            #     print("not found", str(sentence))
+                    new_simplified.append(new_constraint)
+                else:
+                    new_simplified.append(constraint)
 
-            if ass.value is not None:
-                old, new = ass.sentence, ass.value
-                # simplify constraints and propagate consequences
-                new_simplified: List[Expression] = []
-                for constraint in self.simplified:
-                    if old in constraint.questions:
-                        consequences = []
-                        new_constraint = constraint.substitute(old, new, self.assignments, consequences)
-                        del constraint.questions[old.code]
-                        new_constraint.questions = constraint.questions
-                        consequences.extend(new_constraint.implicants(self.assignments))
-                        if consequences:
-                            for sentence, value in consequences:
-                                if sentence.code in self.assignments:
-                                    old_ass = self.assignments[sentence.code]
-                                    if old_ass.value is None:
-                                        if (all_ or not constraint.has_decision()):
-                                            new_ass = self.assignments.assert_(sentence, value, CONSQ, self)
-                                            to_propagate.append(new_ass)
-                                            new_constraint = new_constraint.substitute(sentence, value, self.assignments)
-                                    elif not old_ass.value.same_as(value):
-                                        # test: theory{ x=4. x=5. }
-                                        self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
-                                        return
-                                # else:
-                                #     print("not found", str(sentence))
-                        new_simplified.append(new_constraint)
-                    else:
-                        new_simplified.append(constraint)
+            self.simplified = new_simplified
 
-                self.simplified = new_simplified
-
-                """ # useful for explain ??
-                # simplify assignments
-                # e.g. 'Sides=4' becomes false when Sides becomes 3. Nothing to propagate.
-                for old_ass in self.assignments.values():
-                    before = str(old_ass.sentence)
-                    new_constraint = old_ass.sentence.substitute(old, new, self.assignments)
-                    if before != str(new_constraint) \
-                    and (all_ or not new_constraint.has_decision()): # is purely environmental
-                        if new_constraint.code in self.assignments \
-                        and self.assignments[new_constraint.code].value is not None: # e.g. O(M) becomes O(e2)
-                            new_constraint = self.assignments[new_constraint.code].sentence
-                        if new_constraint.value is None: # not reduced to ground
-                            old_ass.update(new_constraint, None, None, self)
-                        elif old_ass.value is not None: # has a value already
-                            if not old_ass.value == new_constraint.value: # different !
-                                self.simplified = cast(List[Expression], [FALSE]) # inconsistent
-                                return
-                            else: # no change
-                                pass
-                        else: # accept new value
-                            new_ass = old_ass.update(new_constraint, 
-                                new_constraint.value, CONSQ, self)
-                """
+            """ # useful for explain ??
+            # simplify assignments
+            # e.g. 'Sides=4' becomes false when Sides becomes 3. Nothing to propagate.
+            for old_ass in self.assignments.values():
+                before = str(old_ass.sentence)
+                new_constraint = old_ass.sentence.substitute(old, new, self.assignments)
+                if before != str(new_constraint) \
+                and (all_ or not new_constraint.has_decision()): # is purely environmental
+                    if new_constraint.code in self.assignments \
+                    and self.assignments[new_constraint.code].value is not None: # e.g. O(M) becomes O(e2)
+                        new_constraint = self.assignments[new_constraint.code].sentence
+                    if new_constraint.value is None: # not reduced to ground
+                        old_ass.update(new_constraint, None, None, self)
+                    elif old_ass.value is not None: # has a value already
+                        if not old_ass.value == new_constraint.value: # different !
+                            self.simplified = cast(List[Expression], [FALSE]) # inconsistent
+                            return
+                        else: # no change
+                            pass
+                    else: # accept new value
+                        new_ass = old_ass.update(new_constraint, 
+                            new_constraint.value, CONSQ, self)
+            """
                             
 
     def translate(self, all_: bool = True) -> BoolRef:
