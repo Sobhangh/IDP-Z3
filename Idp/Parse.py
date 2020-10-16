@@ -603,24 +603,20 @@ class Rule(object):
             input : '!v: f(args) <- body(args)'
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
 
+        #TODO do proper unification: https://eli.thegreenplace.net/2018/unification/
         subst = {}
         assert len(self.args) == len(new_vars), "Internal error"
         for arg, nv in zip(self.args, new_vars.values()):
-            if type(arg) in [Variable, Fresh_Variable]:
-                if arg.name not in subst:  # if new arg variable
-                    if arg.name in self.vars:  # re-use var name
-                        subst[arg.name] = nv
-                        self.body = self.body.instantiate(arg, nv)
-                    else:
-                        eq = AComparison.make('=', [nv, arg])
-                        self.body = AConjunction.make('∧', [eq, self.body])
-                else:  # repeated arg var, e.g., same(x)=x
-                    eq = AComparison.make('=', [nv, subst[arg.name]])
-                    self.body = AConjunction.make('∧', [eq, self.body])
-            elif type(arg) in [NumberConstant, Constructor]:
-                eq = AComparison.make('=', [nv, arg])
+            if type(arg) in [Fresh_Variable] and arg.name not in subst:
+                # re-use var name
+                subst[arg.name] = nv
+                self.body = self.body.instantiate(arg, nv)
+                self.out = self.out.instantiate(arg, nv) if self.out else self.out
+            elif type(arg) in [Fresh_Variable] and arg.name in subst:
+                # repeated arg var, e.g., same(x)=x
+                eq = AComparison.make('=', [nv, subst[arg.name]])
                 self.body = AConjunction.make('∧', [eq, self.body])
-            else:  # same(f(x))
+            else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
 

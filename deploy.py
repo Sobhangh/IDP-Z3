@@ -33,6 +33,7 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
     #     run("git push heroku master")
 
     if input("Deploy on Google App Engine ? (Y/n)") in "Yy":
+        run("git push origin master")
         run("git push google master")
         run("git push google master", cwd='../autoconfig3')
         promote = input("Redirect traffic ? (Y/n)") in "Yy"
