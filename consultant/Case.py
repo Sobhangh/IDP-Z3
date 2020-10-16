@@ -333,9 +333,12 @@ class Case:
             ass = to_propagate.pop(0)
             old, new = ass.sentence, ass.value
             assert new is not None
-            if new.type in ['real', 'int']: # simplify definitions
+
+            # simplify definitions
+            if new.type in ['real', 'int']:
                 for decl, constraint in self.def_constraints.items():
                     self.def_constraints[decl] = constraint.substitute(old, new, self.assignments)
+            
             # simplify constraints and propagate consequences
             new_simplified: List[Expression] = []
             for constraint in self.simplified:

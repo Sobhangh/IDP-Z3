@@ -35,5 +35,6 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
     if input("Deploy on Google App Engine ? (Y/n)") in "Yy":
         run("git push google master")
         run("git push google master", cwd='../autoconfig3')
-        run("gcloud app deploy")
+        promote = input("Redirect traffic ? (Y/n)") in "Yy"
+        run(f"gcloud app deploy {'' if promote else '--no-promote'}")
         run("gcloud app browse")

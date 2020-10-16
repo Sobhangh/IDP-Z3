@@ -26,10 +26,38 @@ The `source code of IDP-Z3 <https://gitlab.com/krr/autoconfigz3>`_ is publicly a
    You may want to verify that you are seeing the documentation relevant for the version of IDP-Z3 you are using.
    On `readthedocs <https://idp-z3.readthedocs.io/>`_, you can see the version under the title (top left corner), and you can change it using the listbox at the bottom left corner.
 
-Installation
-------------
+Installation using poetry
+-------------------------
 
-IDP-Z3 is installed using the python package ecosystem, which supports Unix, Windows and MacOS.
+`Poetry <https://python-poetry.org/>`_ is a package manager for python.
+
+* Install `python3 <https://www.python.org/downloads/>`_ on your machine
+* Install `poetry <https://python-poetry.org/docs/#installation>`_
+
+    * after that, logout and login if requested, to update :code:`$PATH`
+* Use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
+* Open a terminal in that directory 
+* If you have several versions of python3, and want to run on a particular one, e.g., 3.9:
+
+    * run :code:`poetry env use 3.9`
+    * replace :code:`python3` by :code:`python3.9` in the commands below
+* Run :code:`poetry install`
+
+To launch the Interactive Consultant web server:
+
+* open a terminal in that directory and run :code:`poetry run python3 main.py`
+
+After that, you can open 
+
+* the Interactive Consultant at http://127.0.0.1:5000
+* the web IDE at http://127.0.0.1:5000/IDE
+
+
+
+Installation using pip
+----------------------
+
+IDP-Z3 can be installed using the python package ecosystem.
 
 * install `python 3 <https://www.python.org/downloads/>`_, with `pip3 <https://pip.pypa.io/en/stable/installing/>`_, making sure that python3 is in the PATH.
 * use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
@@ -49,9 +77,6 @@ IDP-Z3 is installed using the python package ecosystem, which supports Unix, Win
    .\Scripts\activate
    python3 -m pip install -r requirements.txt
 
-Get started
-------------
-
 To launch the web server on Linux/MacOS, run
 
 .. code-block::
@@ -67,7 +92,7 @@ On Windows, the commands are:
    python3 main.py
 
 
-After that, you can open the 
+After that, you can open 
 
-* Interactive Consultant at http://127.0.0.1:5000
-* web IDE at http://127.0.0.1:5000/IDE
+* the Interactive Consultant at http://127.0.0.1:5000
+* the web IDE at http://127.0.0.1:5000/IDE
