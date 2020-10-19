@@ -38,4 +38,18 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
         run("git push google master", cwd='../autoconfig3')
         promote = input("Redirect traffic ? (Y/n)") in "Yy"
         run(f"gcloud app deploy {'' if promote else '--no-promote'}")
+        
+        # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
+        versions = get("gcloud app versions list --sort-by=~LAST_DEPLOYED").decode("utf-8") 
+        id = versions.splitlines()[1].split("  ")[1]
+        print("latest version : ", id)
+        with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json") as json_file:
+            data = json.load(json_file)
+        data['IDP-Z3 latest'] = f"{id}-dot-interactive-consultant.ew.r.appspot.com/"
+        with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json", "w") as outfile:
+            json.dump(data, outfile, indent=4)
+        run("git add versions.json" , cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
+        run('git commit -m "latest"', cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
+        run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
+
         run("gcloud app browse")
