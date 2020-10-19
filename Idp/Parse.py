@@ -493,8 +493,10 @@ class Theory(object):
 
     def translate(self, idp):
         out = []
-        for i in self.constraints + self.def_constraints.values():
+        for i in self.constraints:
             out.append(i.translate())
+        for d in self.def_constraints:
+            out += d.translate()
         return out
 
 
