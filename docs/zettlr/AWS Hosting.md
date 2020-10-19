@@ -1,6 +1,8 @@
-AWS hosting
-=
-20200401113342
+–-
+title: AWS hosting
+tags: #hosting
+Date: 20200401113342
+–-
 
 [docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
 

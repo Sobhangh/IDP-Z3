@@ -1,6 +1,8 @@
-Heroku 1GB
-=
-20200330172131
+–-
+title: Heroku 1GB error
+tags: #hosting
+Date: 20200330172131
+–-
 
 [Size of checkout and restored submodules exceeds 1 GB. Reduce size and try pushing again](https://www.google.com/search?q=heroku+Size+of+checkout+and+restored+submodules+exceeds+1+GB.+Reduce+size+and+try+pushing+again.&oq=heroku+Size+of+checkout+and+restored+submodules+exceeds+1+GB.+Reduce+size+and+try+pushing+again.&aqs=chrome..69i57.20419j0j7&sourceid=chrome&ie=UTF-8)
 [Unable to push](https://stackoverflow.com/questions/53643408/unable-to-push-to-heroku-after-importing-thousands-of-records)

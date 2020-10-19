@@ -1,6 +1,6 @@
 –-
 title: \$a\$ in simple.z3
-tags: #fixed
+tags: #issue #fixed
 Date: 20200427091038
 –-
 

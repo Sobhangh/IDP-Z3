@@ -1,6 +1,6 @@
 –-
 title: Cython
-tags: #Perf
+tags: #perf
 Date: 20200616143932
 –-
 

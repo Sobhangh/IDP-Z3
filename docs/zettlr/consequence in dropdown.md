@@ -1,6 +1,8 @@
-consequence in dropdown
-=
-20200408162211
+–-
+title: consequence in dropdown
+tags: #analysis
+Date: 20200408162211
+–-
 
 problem: consequences not shown in dropdown when atom does not occur in the theory
 * is_visible in Case() looks for AppliedSymbol, Symbol, but not comparisons
@@ -23,4 +25,3 @@ Where to detect assignments ?
 * in update_regs ?
 
 
-#analysis #GUI

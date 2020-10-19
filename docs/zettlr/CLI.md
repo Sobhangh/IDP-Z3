@@ -1,6 +1,6 @@
 –-
 title: CLI
-tags: 
+tags: #analysis
 Date: 20200918165912
 –-
 

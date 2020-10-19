@@ -1,6 +1,6 @@
 –-
 title: Depth-first relevance
-tags: #abandoned
+tags: #analysis #abandoned
 Date: 20200530094324
 –-
 

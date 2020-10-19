@@ -1,6 +1,6 @@
 –-
 title: Select impossible value
-tags: #bug
+tags: #issue
 Date: 20200427160257
 –-
 

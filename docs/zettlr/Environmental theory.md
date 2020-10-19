@@ -1,6 +1,6 @@
 –-
 title: Environmental theory
-tags: 
+tags: #analysis
 Date: 20200825121056
 –-
 

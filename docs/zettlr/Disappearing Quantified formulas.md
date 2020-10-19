@@ -1,6 +1,8 @@
-Disappearing Quantified formulas
-=
-20200410105450
+–-
+title: Disappearing Quantified formulas
+tags: #analysis
+Date: 20200410105450
+–-
 
 Problem: quantified expressions in theory may not appear in list of subtences
 

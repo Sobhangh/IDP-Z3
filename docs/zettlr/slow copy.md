@@ -1,6 +1,6 @@
 –-
 title: Slow copy
-tags: #speed
+tags: #perf
 Date: 20200513173351
 –-
 

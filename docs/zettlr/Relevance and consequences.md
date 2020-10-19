@@ -1,6 +1,6 @@
 –-
 title: Relevance and consequences
-tags: #abandoned
+tags: #analysis #abandoned
 Date: 20200403111308
 –-
 

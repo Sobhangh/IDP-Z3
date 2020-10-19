@@ -1,6 +1,6 @@
 –-
 title: Proofs
-tags: #abandoned
+tags: #analysis #abandoned
 Date: 20200410173444
 –-
 Notation: $\varphi_p$ is a formula $\varphi$ having a (tentative) proof p.  A proof is an expression.  A proof of $\varphi$ is final when $\varphi$ is $\top$ or $\bot$.

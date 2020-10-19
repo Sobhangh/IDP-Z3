@@ -1,6 +1,6 @@
 –-
 title: pypy
-tags: #Perf
+tags: #perf
 Date: 20200616172332
 –-
 

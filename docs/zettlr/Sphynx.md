@@ -1,6 +1,6 @@
 –-
 title: Sphinx
-tags: #documentation
+tags: #hosting
 ID: 20200629120249
 –-
 

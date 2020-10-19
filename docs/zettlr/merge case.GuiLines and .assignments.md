@@ -1,6 +1,8 @@
-Merge case.GuiLines and .assignments
-=
-20200408193022
+–-
+title: Merge case.GuiLines and .assignments
+tags: #refactoring
+Date: 20200408193022
+–-
 
 Currently:
 * GuiLines: vocabulary.terms + [[subtences]]
@@ -16,4 +18,3 @@ TODO:
 - [x] do not create new Assignments in propagate, update them !
 - [ ] Assignment() create with visible
 
-#refactoring

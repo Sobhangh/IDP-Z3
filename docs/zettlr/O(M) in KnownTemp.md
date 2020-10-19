@@ -1,6 +1,6 @@
 –-
 title: O(M) in KnownTemp
-tags: #fixed
+tags: #issue
 Date: 20200427134729
 –-
 

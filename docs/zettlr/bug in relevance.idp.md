@@ -1,6 +1,6 @@
 –-
 title: bug in relevance.idp
-tags: #bug
+tags: #issue
 Date: 20200430161236
 –-
 
