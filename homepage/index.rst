@@ -11,6 +11,6 @@ The IDP-Z3 suite is currently deployed in the following projects:
 
 Get in touch?
 -------------
-The IDP-Z3 system is available for experimentation through its `online IDE <https://interactive-consultant.ew.r.appspot.com/IDE/>`_.
+The IDP-Z3 system is available for experimentation through its `online IDE <https://interactive-consultant.ew.r.appspot.com/IDE>`_.
 Support for the tool can be found in the online `documentation <https://idp-z3.readthedocs.io/en/latest/>`_, including a guide on how to install the IDP-Z3 system for use offline.
 For further support or other inquiries, you can contact us `by mail <mailto:krr@kuleuven.be>`_.
