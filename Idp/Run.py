@@ -31,64 +31,69 @@ from .Expression import TRUE, FALSE
 from .Parse import *
 
 class Problem(object):
-    """ A combination of theories and structures
+    """ A combination of theory and structure blocks
     """
-    def __init__(self, theories):
+    def __init__(self, blocks):
         self.definitions = []
         self.clark = {} # {Declaration: Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
-        self.co_constraints = None
         self.def_constraints = {}
-        self.questions = None
 
-        for t in theories:
-            t.addTo(self)
-    
-        # re-interpret the defined symbols
-        self.constraints = OrderedSet([e.interpret(self) for e in self.constraints])
+        self._formula = None # the problem expressed in one logic formula
+        self.questions = None # occurrences in the _formula
+
+        for b in blocks:
+            self.add(b)
 
     @classmethod
     def make(cls, theories, structures):
-        theories = theories if not isinstance(theories, Theory) else [theories]
-        structures = [] if structures is None else \
-            structures if not isinstance(structures, Structure) \
-            else [structures]
+        problem = theories if type(theories)=='Problem' else \
+                  cls([theories]) if isinstance(theories, Theory) else \
+                  cls(theories)
 
-        return cls(theories + structures)
+        structures = [] if structures is None else \
+                     [structures] if isinstance(structures, Structure) else \
+                     structures
+        for s in structures:
+            problem.add(s)
+
+        return problem
+
+    def add(self, block):
+        self._formula = None # need to reapply the definitions
+        if type(block) == Structure:
+            self.assignments.extend(block.assignments)
+        elif type(block) == Theory:
+            self.definitions.extend(block.definitions)
+            for decl, rule in block.clark.items():
+                if decl not in block.clark:
+                    self.clark[decl] = rule
+                else:
+                    new_rule = copy(rule)  # not elegant, but rare
+                    new_rule.body = AConjunction.make('∧', [block.clark[decl].body, rule.body])
+                    self.clark[decl] = new_rule
+            self.constraints.extend(block.constraints)
+            self.def_constraints.update(block.def_constraints)
+        else:
+            assert False, "Cannot add to Problem"
 
     def formula(self):
-        self.co_constraints = OrderedSet()
-        for c in self.constraints:
-            c.co_constraints(self.co_constraints)
-        return AConjunction.make('∧',
-              [s for s in self.def_constraints.values()]
-            + [a.formula() for a in self.assignments.values() 
-                    if a.value is not None]
-            + [s for s in self.constraints.values()]
-            + [c for c in self.co_constraints.values()]
-            )
+        if not self._formula:
+            co_constraints = OrderedSet()
+            for c in self.constraints:
+                c.co_constraints(co_constraints)
+            self._formula = AConjunction.make('∧',
+                [s for s in self.def_constraints.values()]
+                + [a.formula() for a in self.assignments.values() 
+                        if a.value is not None]
+                + [s for s in self.constraints.values()]
+                + [c for c in co_constraints.values()]
+                )
+        return self._formula
 
     def translate(self):
         return self.formula().translate()
-
-def addTo(self, problem):
-    problem.definitions.extend(self.definitions)
-    for decl, rule in self.clark.items():
-        if decl not in problem.clark:
-            problem.clark[decl] = rule
-        else:
-            new_rule = copy(rule)  # not elegant, but rare
-            new_rule.body = AConjunction.make('∧', [problem.clark[decl].body, rule.body])
-            problem.clark[decl] = new_rule
-    problem.constraints.extend(self.constraints)
-    problem.assignments.extend(self.assignments)
-    problem.def_constraints.update(self.def_constraints)
-Theory.addTo = addTo
-
-def addTo(self, problem):
-    problem.assignments.extend(self.assignments)
-Structure.addTo = addTo
 
 
 def model_check(theories, structures=None):
@@ -96,10 +101,10 @@ def model_check(theories, structures=None):
     """
 
     problem = Problem.make(theories, structures)
-    formula = problem.translate()
+    z3_formula = problem.translate()
 
     solver = Solver()
-    solver.add(formula)
+    solver.add(z3_formula)
     yield str(solver.check())
 
 
@@ -109,10 +114,10 @@ def model_expand(theories, structures=None, max=10):
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
-    formula = problem.translate()
+    z3_formula = problem.translate()
 
     solver = Solver()
-    solver.add(formula)
+    solver.add(z3_formula)
 
     count = 0
     while count<max or max<=0:
@@ -151,14 +156,12 @@ def model_propagate(theories, structures=None):
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
-    formula = problem.translate()
-
+    z3_formula = problem.translate()
     problem.questions = OrderedSet()
-    for c in problem.constraints:
-        c.collect(problem.questions, all_=True)
+    problem._formula.collect(problem.questions, all_=True)
 
     solver = Solver()
-    solver.add(formula)
+    solver.add(z3_formula)
     if solver.check() == sat:
         for q in problem.questions:
             solver.check()
