@@ -13,22 +13,28 @@ Interactive Code would become:
 self.problem = Problem(environment, environment_structure)
 self.problem.symbolic_propagate(tag=Env_Univ, simplify=True)
 self.problem.add(nv_given, simplify=True) // need to separate ?
-self.problem.propagate(tag=Env_Consq)
+self.problem.propagate(expanded=symbols_symbols, tag=Env_Consq, simplify=True)
 
 self.problem.add(decision, decision_structure)
 self.problem.symbolic_propagate(tag=Universal, simplify=True)
 self.problem.add(dec_given, simplify=True)
-self.problem.propagate(tag=Consequence, simplify=True)
+self.problem.propagate(expanded=expanded_symbols, tag=Consequence, simplify=True)
 self.problem.get_relevant()
 ~~~~
 
 TODO:
 X API: propage questions first, then terms ? does not matter if no simplification
-- [ ] IC: do not restart propagation if model is unknown: it won't fix anything
-- [ ] IC: do not cascade propagate: full propagate will take care of it
+X IC: do not restart propagation if model is unknown: it won't fix anything
+- [x] IC abstract : use assignments, not guilines
+- [ ] IC: guiLines → to_propage, contains only the visible one
+- [ ] API propagate: consider all assignments without value
+    - [ ] API problem: fill assignments with all subtences
+- [ ] API: restart solver if unknown
 - [ ] move definitions, constraints, assignments to Case.Problem just before get_relevant
 - [ ] API: add simplify with one assignment
+- [ ] IC: do not cascade propagate: full propagate will take care of it.  Use API.simplify instead
 - [ ] API: add simplify option to propagate
 - [ ] API: add tag argument to propagate
 - [ ] use API for Case.propagate
+- [ ] IC: remove Case.translate
 - [ ] API: add symbolic_propagate

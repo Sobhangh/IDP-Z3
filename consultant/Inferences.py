@@ -204,16 +204,18 @@ def abstract(case, given_json):
     out["irrelevant"]= list(l for l in case.assignments.values() 
         if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] and not l.relevant)
 
+    questions = {a.sentence.code: a.sentence for a in case.assignments.values()}
+
     # create keys for models using first symbol of atoms
     models, count = {}, 0
-    for GuiLine in case.GUILines.values():
-        for symb in GuiLine.unknown_symbols().keys():
+    for q in questions.values():
+        for symb in q.unknown_symbols().keys():
             models[symb] = [] # models[symb][row] = [relevant atoms]
             break
     
     done = set(out["universal"] + out["given"] + out["fixed"])
     theory = And(case.idp.translate())
-    solver, reify, unreify = mk_solver(theory, case.GUILines)
+    solver, reify, unreify = mk_solver(theory, questions)
     given = json_to_literals(case.idp, given_json) # use non-simplified given data
     solver.add([ass.translate() for ass in given.values()])
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
@@ -222,21 +224,20 @@ def abstract(case, given_json):
         theory2 = And(theory) # is this a way to copy theory ??
 
         atoms = [] # [Assignment]
-        for atom_string, atom in case.GUILines.items():
-            if atom_string in case.assignments:
-                assignment = case.assignments[atom_string]
-                if assignment.value is None \
-                and assignment.relevant and atom.type == 'bool':
-                    value = solver.model().eval(reify[atom.code])
-                    if value == True:
-                        atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
-                    elif value == False:
-                        atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
-                    else: #unknown
-                        theory2 = And(theory2,
-                                        substitute(theory2, [(atom.translate(), BoolVal(True))]),  # don't simplify !
-                                        substitute(theory2, [(atom.translate(), BoolVal(False))])) # it would break later substitutions
-                    # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
+        for atom_string, atom in questions.items():
+            assignment = case.assignments[atom_string]
+            if assignment.value is None \
+            and assignment.relevant and atom.type == 'bool':
+                value = solver.model().eval(reify[atom.code])
+                if value == True:
+                    atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
+                elif value == False:
+                    atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
+                else: #unknown
+                    theory2 = And(theory2,
+                                    substitute(theory2, [(atom.translate(), BoolVal(True))]),  # don't simplify !
+                                    substitute(theory2, [(atom.translate(), BoolVal(False))])) # it would break later substitutions
+                # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
         atoms.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
