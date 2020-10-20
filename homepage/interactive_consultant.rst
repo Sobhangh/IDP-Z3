@@ -10,7 +10,7 @@ The interactive consultant is available `online <https://interactive-consultant.
 To quickstart your experience, the interactive consultant comes with two demo knowledge bases, available under the 'File' header:
 
 * the 'Polygon' knowledge base, which specifies some common knowledge on the number of sides, their length and the angles for some common polygonal shapes; and
-* the 'Registration' knowledge base, which models a of the federal law on property registration and the associated registration taxes.
+* the 'Registration' knowledge base, which models the Belgian federal law on property registration and the associated registration taxes.
 
 A short introductory video on the interactive consultant can be found below:
 
