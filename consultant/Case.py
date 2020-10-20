@@ -45,20 +45,24 @@ class Case:
         self.expanded_symbols = set(expanded)
 
         # initialisation
-        self.GUILines = {**idp.vocabulary.terms, **idp.subtences} # {Expr.code: Expression}
         self.definitions = self.idp.theory.definitions # [Definition] could be ignored if definitions are constructive
         self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
         self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = Assignments() # atoms + given, with simplified formula and value value
 
+        self.GUILines = {} # {Expr.code: Expression} expressions shown to user
+
         for s in self.idp.structures.values():
             self.assignments.extend(s.assignments)
 
-        for GuiLine in self.GUILines.values():
-            GuiLine.is_visible = type(GuiLine) in [AppliedSymbol, Variable] \
-                or (type(GuiLine)==AComparison and GuiLine.is_assignment) \
-                or any(s in self.expanded_symbols for s in GuiLine.unknown_symbols().keys())
-            self.assignments.assert_(GuiLine, None, Status.UNKNOWN, False)
+        for s in list(idp.vocabulary.terms.values()) + list(idp.subtences.values()):
+            self.assignments.assert_(s, None, Status.UNKNOWN, False)
+
+        self.GUILines = {a.sentence.code: a.sentence for a in self.assignments.values()
+            if type(a.sentence) in [AppliedSymbol, Variable] \
+                or (type(a.sentence)==AComparison and a.sentence.is_assignment) \
+                or any(s in self.expanded_symbols for s in a.sentence.unknown_symbols().keys())
+            }
 
         if __debug__: self.invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -291,7 +295,7 @@ class Case:
                 if ( l.value is None
                 and (all_ or not l.sentence.has_decision())
                 # and key in self.get_relevant_subtences(all_) 
-                and self.GUILines[key].is_visible):
+                and key in self.GUILines):
                     atom = l.sentence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())

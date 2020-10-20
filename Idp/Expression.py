@@ -48,7 +48,7 @@ class DSLException(Exception):
 
 class Expression(object):
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code', 'annotations', 'original',
-        'str', 'fresh_vars', 'type', 'is_visible', '_reified', 'if_symbol', 'co_constraint',
+        'str', 'fresh_vars', 'type', '_reified', 'if_symbol', 'co_constraint',
         'normal', 'questions', 'relevant' )
 
     COUNT = 0
@@ -67,7 +67,6 @@ class Expression(object):
         self.fresh_vars = None            # Set[String]: over approximated list of fresh_vars (ignores simplifications)
         self.no_fresh_vars_before_expansion = None # Bool
         self.type = None                  # String (e.g. 'bool', 'real', 'int', 'color'), or None
-        self.is_visible = None            # is shown to user -> need to find whether it is a consequence
         self._reified = None
         self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)

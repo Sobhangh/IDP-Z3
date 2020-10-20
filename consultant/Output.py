@@ -157,7 +157,7 @@ class Output(object):
     def fill(self, case):
         for key, l in case.assignments.items():
             if l.value is not None and key in case.GUILines:
-                if case.GUILines[key].is_visible:
+                if key in case.GUILines:
                     self.addAtom(l.sentence, l.value, l.status)
 
 

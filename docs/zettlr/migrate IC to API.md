@@ -26,7 +26,7 @@ TODO:
 X API: propage questions first, then terms ? does not matter if no simplification
 X IC: do not restart propagation if model is unknown: it won't fix anything
 - [x] IC abstract : use assignments, not guilines
-- [ ] IC: guiLines → to_propage, contains only the visible one
+- [x] IC: GUILines contains only the assignments shown to user
 - [ ] API propagate: consider all assignments without value
     - [ ] API problem: fill assignments with all subtences
 - [ ] API: restart solver if unknown
