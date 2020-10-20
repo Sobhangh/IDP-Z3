@@ -28,7 +28,7 @@ from enum import IntFlag
 from typing import Optional
 from z3 import Not, BoolRef
 
-from .Expression import Expression, TRUE, FALSE
+from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
 from .Parse import *
 
 class Status(IntFlag):
@@ -70,14 +70,18 @@ class Assignment(object):
     def to_json(self) -> str: # for GUI
         return str(self)
 
-    def translate(self) -> BoolRef:
+    def formula(self):
         if self.value is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
-            out = self.sentence.original.translate() if self.value.same_as(TRUE) else Not(self.sentence.original.translate())
+            out = self.sentence.original if self.value.same_as(TRUE) else \
+                AUnary.make('~', self.sentence.original)
         else:
-            out = self.sentence.original.translate() == self.value.translate()
+            out = AComparison.make('=', [self.sentence.original, self.value])
         return out
+
+    def translate(self) -> BoolRef:
+        return self.formula().translate()
 
 class Assignments(dict):
     def __init__(self,*arg,**kw):

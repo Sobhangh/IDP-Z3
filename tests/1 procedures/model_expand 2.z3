@@ -1,7 +1,7 @@
 
 Model 1
 ==========
-[p = True, q = True]
+[q = True, p = True]
 
 No more models.
 

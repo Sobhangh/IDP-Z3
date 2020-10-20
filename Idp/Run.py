@@ -57,17 +57,20 @@ class Problem(object):
 
         return cls(theories + structures)
 
-    def translate(self):
+    def formula(self):
         self.co_constraints = OrderedSet()
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
-        return And(
-            [s.translate() for s in self.def_constraints]
-            + [l.translate() for k, l in self.assignments.items() 
-                    if l.value is not None]
-            + [s.translate() for s in self.constraints]
-            + [c.translate() for c in self.co_constraints]
+        return AConjunction.make('∧',
+              [s for s in self.def_constraints.values()]
+            + [a.formula() for a in self.assignments.values() 
+                    if a.value is not None]
+            + [s for s in self.constraints.values()]
+            + [c for c in self.co_constraints.values()]
             )
+
+    def translate(self):
+        return self.formula().translate()
 
 def addTo(self, problem):
     problem.definitions.extend(self.definitions)

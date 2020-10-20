@@ -5,8 +5,7 @@ Date: 20201020103221
 –-
 
 # version 4.8.8.0
-solver.check() returns `unknown` when there is a non-linearity, e.g. in `tests/5 polygon/Sides3.idp`, `/5 polygon/triangle.idp`, `8 DMN/BMI.idp`
-It returns `sat` as soon as a value is given that removes the non-linearity.
+solver.check() returns `unknown` when there is a non-linearity, e.g. in `tests/5 polygon/Sides3.idp`, `/5 polygon/triangle.idp`, `8 DMN/BMI.idp`. The solver has to be restarted to propage other values (e.g. for `Sides3`).  It returns `sat` as soon as a value is given that removes the non-linearity.
 Except in [[Issue 28]] !?
 Substituting a numeric value is needed for definitions over infinite domains, e.g. `/tests/3 arithmetic/double_def.idp`
 

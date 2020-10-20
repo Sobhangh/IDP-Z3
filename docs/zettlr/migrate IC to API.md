@@ -12,13 +12,14 @@ Interactive Code would become:
 ~~~~
 self.problem = Problem(environment, environment_structure)
 self.problem.symbolic_propagate(tag=Env_Univ, simplify=True)
-self.problem.add(nv_given, simplify=True) // need to separate ?
-self.problem.propagate(expanded=symbols_symbols, tag=Env_Consq, simplify=True)
+self.problem.add(env_given, simplify=True) // need to separate the given !
+self.problem.propagate(todo=self.GUILines, tag=Env_Consq, simplify=True)
 
-self.problem.add(decision, decision_structure)
+self.problem.add(decision)
+self.problem.add(decision_structure)
 self.problem.symbolic_propagate(tag=Universal, simplify=True)
 self.problem.add(dec_given, simplify=True)
-self.problem.propagate(expanded=expanded_symbols, tag=Consequence, simplify=True)
+self.problem.propagate(todo=self.GUILines, tag=Consequence, simplify=True)
 self.problem.get_relevant()
 ~~~~
 
