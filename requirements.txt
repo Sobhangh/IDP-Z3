@@ -9,3 +9,5 @@ textx
 sphinx-autobuild
 sphinx_rtd_theme
 z3-solver
+sphinx_bootstrap_theme
+git+https://github.com/sphinx-contrib/video.git
