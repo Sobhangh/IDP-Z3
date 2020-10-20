@@ -28,7 +28,7 @@ from Idp.utils import *
 
 #################
 # load user's choices
-# see docs/REST.md
+# see docs/zettlr/REST.md
 #################
 
 def str_to_IDP(idp, val1):
@@ -69,7 +69,7 @@ def json_to_literals(idp, jsonstr: str):
 
 #################
 # response to client
-# see docs/REST.md
+# see docs/zettlr/REST.md
 #################
 
 def model_to_json(case, s, reify):

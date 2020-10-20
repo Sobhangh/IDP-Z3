@@ -3,14 +3,14 @@ title: Issue 28
 tags: #issue
 Date: 20201016125353
 –-
-
+See also [[Non-linear equations in Z3]]
 Observations:
 * theory.definitions quantify also over the range of a function → correct for non-constructive definitions
     * if replace quantification by injecting f(x), non-constructive definitions yield different results
 * attach definition to typeConstraints : not a good idea, because of type constraints may contain inequalities (+repetitions)
 * theory.definitions are not simplified by propagation → constraint cannot be solved by Z3
 * do not translate definitions → instances not used in theory are not propagated
-* append all expanded rules to theory.constraints 
+* append all expanded rules to theory.constraints (i.e. remove quantification)
     * → change_making does not halt !
     * all definitions are subtences now
     * more stuff is relevant
