@@ -24,7 +24,7 @@ Classes to execute the main block of an IDP program
 """
 
 import types
-from z3 import Solver, sat, unsat, ModelRef
+from z3 import Solver, sat, unsat, unknown, ModelRef
 
 from .Assignments import Assignment
 from .Expression import TRUE, FALSE
@@ -178,9 +178,13 @@ def model_propagate(theories, structures=None):
                     assert str(val.translate()) == str(val1).replace('?', ''), str(val.translate()) + " is not the same as " + str(val1)
 
                     yield problem.assignments.assert_(q, val, Status.CONSEQUENCE, True)
-    yield "No more consequences."
+                elif res2 == unknown:
+                    yield(f"Unknown: {str(q)}")
+        yield "No more consequences."
+    else:
+        yield "Not satisfiable."
 
-def myprint(x):
+def myprint(x=""):
     if isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
             if isinstance(xi, ModelRef):
