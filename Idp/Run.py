@@ -41,7 +41,7 @@ class Problem(object):
         self.def_constraints = {}
 
         self._formula = None # the problem expressed in one logic formula
-        self.questions = None # occurrences in the _formula
+        self._todo = None # questions to be answered by expand, propagate
 
         for b in blocks:
             self.add(b)
@@ -75,6 +75,7 @@ class Problem(object):
                     self.clark[decl] = new_rule
             self.constraints.extend(block.constraints)
             self.def_constraints.update(block.def_constraints)
+            self.assignments.extend(block.assignments)
         else:
             assert False, "Cannot add to Problem"
 
@@ -84,12 +85,16 @@ class Problem(object):
             for c in self.constraints:
                 c.co_constraints(co_constraints)
             self._formula = AConjunction.make('∧',
-                [s for s in self.def_constraints.values()]
-                + [a.formula() for a in self.assignments.values() 
+                [a.formula() for a in self.assignments.values() 
                         if a.value is not None]
                 + [s for s in self.constraints.values()]
                 + [c for c in co_constraints.values()]
+                + [s for s in self.def_constraints.values()]
                 )
+
+            self._todo = OrderedSet()
+            self._formula.collect(self._todo, all_=True) # start with questions in the formula
+            self._todo.extend([a.sentence for a in self.assignments.values() if a.value is None])
         return self._formula
 
     def translate(self):
@@ -128,17 +133,10 @@ def model_expand(theories, structures=None, max=10):
             yield model
 
             # exclude this model
-            block = []
-            for z3_decl in model: # FuncDeclRef
-                arg_domains = []
-                for i in range(z3_decl.arity()):
-                    domain, arg_domain = z3_decl.domain(i), []
-                    for j in range(domain.num_constructors()):
-                        arg_domain.append( domain.constructor(j) () )
-                    arg_domains.append(arg_domain)
-                for args in itertools.product(*arg_domains):
-                    block.append(z3_decl(*args) != model.eval(z3_decl(*args)))
-            solver.add(Or(block))
+            different = []
+            for q in problem._todo:
+                different.append(q.translate() != model.eval(q.translate()))
+            solver.add(Or(different))
         else:
             break
 
@@ -157,13 +155,11 @@ def model_propagate(theories, structures=None):
 
     problem = Problem.make(theories, structures)
     z3_formula = problem.translate()
-    problem.questions = OrderedSet()
-    problem._formula.collect(problem.questions, all_=True)
 
     solver = Solver()
     solver.add(z3_formula)
     if solver.check() == sat:
-        for q in problem.questions:
+        for q in problem._todo:
             solver.check()
             val1 = solver.model().eval(q.reified())
             if str(val1) != str(q.reified()): # if not irrelevant
@@ -181,7 +177,7 @@ def model_propagate(theories, structures=None):
                         val = q.decl.out.decl.map[str(val1)]
                     assert str(val.translate()) == str(val1).replace('?', ''), str(val.translate()) + " is not the same as " + str(val1)
 
-                    yield Assignment(q, val, Status.CONSEQUENCE, True)
+                    yield problem.assignments.assert_(q, val, Status.CONSEQUENCE, True)
     yield "No more consequences."
 
 def myprint(x):

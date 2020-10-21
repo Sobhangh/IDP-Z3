@@ -48,15 +48,12 @@ class Case:
         self.definitions = self.idp.theory.definitions # [Definition] could be ignored if definitions are constructive
         self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
         self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
-        self.assignments = Assignments() # atoms + given, with simplified formula and value value
+        self.assignments = self.idp.theory.assignments # atoms + given, with simplified formula and value value
 
         self.GUILines = {} # {Expr.code: Expression} expressions shown to user
 
         for s in self.idp.structures.values():
             self.assignments.extend(s.assignments)
-
-        for s in list(idp.vocabulary.terms.values()) + list(idp.subtences.values()):
-            self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
         self.GUILines = {a.sentence.code: a.sentence for a in self.assignments.values()
             if type(a.sentence) in [AppliedSymbol, Variable] \

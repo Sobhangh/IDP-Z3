@@ -94,6 +94,7 @@ class Idp(object):
             self.theory.definitions.extend(self.theories['environment'].definitions)
             self.theory.def_constraints.update(self.theories['environment'].def_constraints)
             self.theory.subtences.update(self.theories['environment'].subtences)
+            self.theory.assignments.extend(self.theories['environment'].assignments)
         else:
             self.theory = next(iter(self.theories.values())) # get first theory
         for struct in self.structures.values():
@@ -486,6 +487,9 @@ class Theory(object):
         self.subtences = {}
         for e in self.constraints:
             self.subtences.update({k: v for k, v in e.subtences().items()})
+
+        for s in list(voc.terms.values()) + list(self.subtences.values()):
+            self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
     def unknown_symbols(self):
         return mergeDicts(c.unknown_symbols()
