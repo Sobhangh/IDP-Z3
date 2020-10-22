@@ -21,7 +21,8 @@ from z3 import And, Not, sat, unsat, unknown, is_true
 from debugWithYamlLog import Log, NEWL, indented
 
 from Idp.Parse import RangeDeclaration
-from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, Variable, AConjunction, ADisjunction, AComparison, NumberConstant
+from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, \
+    Variable, AConjunction, ADisjunction, AComparison, NumberConstant
 from Idp.utils import *
 from .Solver import mk_solver
 from .Output import json_to_literals, Assignment, Assignments, Status, str_to_IDP
@@ -89,6 +90,10 @@ class Case:
             self.full_propagate(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
         
+
+        # simplify all using given and universals
+        self.symbolic_propagate()
+
         self.get_relevant_subtences()
         if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -114,6 +119,9 @@ class Case:
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             out.full_propagate(all_=False)
         out.full_propagate(all_=True) # now consider all facts and theories
+
+        # simplify all using given and universals
+        self.symbolic_propagate()
 
         # determine relevant assignemnts
         out.get_relevant_subtences()
@@ -273,11 +281,6 @@ class Case:
     def full_propagate(self, all_: bool) -> None:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
 
-        # simplify all using given and universals
-        to_propagate = list(l for l in self.assignments.values() 
-            if l.value is not None and (all_ or not l.sentence.has_decision()))
-        self.propagate(to_propagate, all_)
-
         Log(f"{NEWL}Z3 propagation ********************************")
 
         theory = self.translate(all_)
@@ -316,8 +319,6 @@ class Case:
 
                             if res2 == unsat:
                                 ass = self.assignments.assert_(atom, val, CONSQ, self)
-                                #TODO ass.relevant = True
-                                self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
                     solver.pop()
@@ -328,72 +329,30 @@ class Case:
             print(self.translate(all_))
             raise Exception("Not satisfiable !")
 
-    def propagate(self, to_propagate: List[Assignment], all_: bool) -> None:
-        CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
-        while to_propagate:
-            ass = to_propagate.pop(0)
+    def symbolic_propagate(self) -> None:
+        """ inject known assignments in self.simplified """
+        for ass in self.assignments.values():
             old, new = ass.sentence, ass.value
-            assert new is not None
+            # don't propagate if no value or comparison of known value
+            ok = (new is not None)
+            if ( ok and type(old) == AComparison
+            and old.sub_exprs[0].code in self.assignments
+            and self.assignments[old.sub_exprs[0].code].value is not None
+            and old.sub_exprs[1].as_ground() is not None ):
+                ok = False # it's enough to propagate old.sub_exprs[0].code
+            if ok:
+                new_simplified: List[Expression] = []
+                for constraint in self.simplified:
+                    if old in constraint.questions:
+                        new_constraint = constraint.substitute(old, new, self.assignments)
+                        del constraint.questions[old.code]
+                        new_constraint.questions = constraint.questions
+                        new_simplified.append(new_constraint)
+                    else:
+                        new_simplified.append(constraint)
 
-            # simplify definitions
-            if new.type in ['real', 'int']:
-                for decl, constraint in self.def_constraints.items():
-                    self.def_constraints[decl] = constraint.substitute(old, new, self.assignments)
-            
-            # simplify constraints and propagate consequences
-            new_simplified: List[Expression] = []
-            for constraint in self.simplified:
-                if old in constraint.questions:
-                    consequences = []
-                    new_constraint = constraint.substitute(old, new, self.assignments, consequences)
-                    del constraint.questions[old.code]
-                    new_constraint.questions = constraint.questions
-                    consequences.extend(new_constraint.implicants(self.assignments))
-                    if consequences:
-                        for sentence, value in consequences:
-                            if sentence.code in self.assignments:
-                                old_ass = self.assignments[sentence.code]
-                                if old_ass.value is None:
-                                    if (all_ or not constraint.has_decision()):
-                                        new_ass = self.assignments.assert_(sentence, value, CONSQ, self)
-                                        to_propagate.append(new_ass)
-                                        new_constraint = new_constraint.substitute(sentence, value, self.assignments)
-                                elif not old_ass.value.same_as(value):
-                                    # test: theory{ x=4. x=5. }
-                                    self.simplified = cast(List[Expression], [FALSE]) # inconsistent !
-                                    return
-                            # else:
-                            #     print("not found", str(sentence))
-                    new_simplified.append(new_constraint)
-                else:
-                    new_simplified.append(constraint)
+                self.simplified = new_simplified
 
-            self.simplified = new_simplified
-
-            """ # useful for explain ??
-            # simplify assignments
-            # e.g. 'Sides=4' becomes false when Sides becomes 3. Nothing to propagate.
-            for old_ass in self.assignments.values():
-                before = str(old_ass.sentence)
-                new_constraint = old_ass.sentence.substitute(old, new, self.assignments)
-                if before != str(new_constraint) \
-                and (all_ or not new_constraint.has_decision()): # is purely environmental
-                    if new_constraint.code in self.assignments \
-                    and self.assignments[new_constraint.code].value is not None: # e.g. O(M) becomes O(e2)
-                        new_constraint = self.assignments[new_constraint.code].sentence
-                    if new_constraint.value is None: # not reduced to ground
-                        old_ass.update(new_constraint, None, None, self)
-                    elif old_ass.value is not None: # has a value already
-                        if not old_ass.value == new_constraint.value: # different !
-                            self.simplified = cast(List[Expression], [FALSE]) # inconsistent
-                            return
-                        else: # no change
-                            pass
-                    else: # accept new value
-                        new_ass = old_ass.update(new_constraint, 
-                            new_constraint.value, CONSQ, self)
-            """
-                            
 
     def translate(self, all_: bool = True) -> BoolRef:
         self.get_co_constraints()
