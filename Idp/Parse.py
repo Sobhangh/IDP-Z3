@@ -469,6 +469,7 @@ class Theory(object):
                 if decl in self.clark:
                     new_rule = copy(rule)  # not elegant, but rare
                     new_rule.body = AConjunction.make('∧', [self.clark[decl].body, rule.body])
+                    new_rule.block = rule.block
                     self.clark[decl] = new_rule
                 else:
                     self.clark[decl] = rule
@@ -653,6 +654,7 @@ class Rule(object):
         # interpret structures
         self.body     = self.body    .interpret(theory)
         self.expanded = self.expanded.interpret(theory) # definition constraint, expanded
+        self.expanded.block = self.block
         return self
 
     def instantiate_definition(self, new_args, theory):
