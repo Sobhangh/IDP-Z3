@@ -475,7 +475,8 @@ class Theory(object):
                     self.clark[decl] = rule
 
         for decl, rule in self.clark.items():
-            self.def_constraints[decl] = rule.expanded
+            if type(decl) == SymbolDeclaration and decl.domain:
+                self.def_constraints[decl] = rule.expanded
 
         self.constraints = OrderedSet([e.annotate(voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
@@ -610,25 +611,18 @@ class Rule(object):
             input : '!v: f(args) <- body(args)'
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
 
-        #TODO do proper unification: https://eli.thegreenplace.net/2018/unification/
-        subst = {}
+        # TODO proper unification: https://eli.thegreenplace.net/2018/unification/
         assert len(self.args) == len(new_vars), "Internal error"
-        for arg, nv in zip(self.args, new_vars.values()):
-            if type(arg) in [Fresh_Variable] and arg.name not in subst:
-                # re-use var name
-                subst[arg.name] = nv
+        for i in range(len(self.args)):
+            arg, nv = self.args[i],  list(new_vars.values())[i]
+            if type(arg) in [Fresh_Variable] and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
                 self.out = self.out.instantiate(arg, nv) if self.out else self.out
-            elif type(arg) in [Fresh_Variable] and arg.name in subst:
-                # repeated arg var, e.g., same(x)=x
-                eq = AComparison.make('=', [nv, subst[arg.name]])
-                self.body = AConjunction.make('∧', [eq, self.body])
+                for j in range(i, len(self.args)):
+                    self.args[j] = self.args[j].instantiate(arg, nv)
             else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
-
-        assert all(str(var) in subst for var in self.vars), \
-            "Unknown quantification in {str(self)}"
 
         self.args = list(new_vars.values())
         self.vars = list(new_vars.keys())
