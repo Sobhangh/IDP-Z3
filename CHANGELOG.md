@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+* changed license to GNU LGPL 3
 * add model_check, model_propagate to API
 * use poetry for installation
 

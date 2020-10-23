@@ -294,6 +294,9 @@ class Case:
                 l = self.assignments[key]
                 if ( l.value is None
                 and (all_ or not l.sentence.has_decision())
+                # ignore terms starting with '_'
+                and not (type(l.sentence) in [AppliedSymbol, Variable]
+                    and l.sentence.code.startswith('_') )
                 # and key in self.get_relevant_subtences(all_) 
                 and key in self.GUILines):
                     atom = l.sentence
