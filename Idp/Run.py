@@ -31,10 +31,8 @@ from .Expression import TRUE, FALSE
 from .Parse import *
 
 class Problem(object):
-    """ A combination of theory and structure blocks
-    """
+    """ A combination of theory and structure blocks """
     def __init__(self, blocks):
-        self.definitions = []
         self.clark = {} # {Declaration: Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
@@ -48,6 +46,7 @@ class Problem(object):
 
     @classmethod
     def make(cls, theories, structures):
+        """ polymorphic creation """
         problem = theories if type(theories)=='Problem' else \
                   cls([theories]) if isinstance(theories, Theory) else \
                   cls(theories)
@@ -65,13 +64,13 @@ class Problem(object):
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
         elif type(block) == Theory:
-            self.definitions.extend(block.definitions)
             for decl, rule in block.clark.items():
                 if decl not in block.clark:
                     self.clark[decl] = rule
                 else:
                     new_rule = copy(rule)  # not elegant, but rare
-                    new_rule.body = AConjunction.make('∧', [block.clark[decl].body, rule.body])
+                    new_rule.body = AConjunction.make('∧', 
+                        [block.clark[decl].body, rule.body])
                     self.clark[decl] = new_rule
             self.constraints.extend(block.constraints)
             self.def_constraints.update(block.def_constraints)
@@ -80,6 +79,7 @@ class Problem(object):
             assert False, "Cannot add to Problem"
 
     def formula(self):
+        """ the formula encoding the knowledge base """
         if not self._formula:
             co_constraints = OrderedSet()
             for c in self.constraints:
@@ -93,17 +93,19 @@ class Problem(object):
                 )
 
             self._todo = OrderedSet()
-            self._formula.collect(self._todo, all_=True) # start with questions in the formula
-            self._todo.extend([a.sentence for a in self.assignments.values() if a.value is None])
+             # start with questions in the formula
+            self._formula.collect(self._todo, all_=True)
+            self._todo.extend([a.sentence for a in self.assignments.values() 
+                if a.value is None])
         return self._formula
 
     def translate(self):
+        """ translates to Z3 """
         return self.formula().translate()
 
 
 def model_check(theories, structures=None):
-    """ output: "sat", "unsat" or "unknown" 
-    """
+    """ output: "sat", "unsat" or "unknown" """
 
     problem = Problem.make(theories, structures)
     z3_formula = problem.translate()
@@ -114,8 +116,7 @@ def model_check(theories, structures=None):
 
 
 def model_expand(theories, structures=None, max=10):
-    """ output: a list of Z3 models, ending with a string
-    """
+    """ output: a list of Z3 models, ending with a string """
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
@@ -149,8 +150,7 @@ def model_expand(theories, structures=None, max=10):
 
 
 def model_propagate(theories, structures=None):
-    """ output: a list of Assignment
-    """
+    """ output: a list of Assignment """
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
@@ -171,13 +171,16 @@ def model_propagate(theories, structures=None):
                 if res2 == unsat:
                     if q.type == 'bool':
                         val = TRUE if str(val1) == 'True' else FALSE
-                    elif q.type in ['real', 'int'] or type(q.decl.out.decl) == RangeDeclaration:
+                    elif ( q.type in ['real', 'int'] 
+                    or type(q.decl.out.decl) == RangeDeclaration):
                         val = NumberConstant(number=str(val1).replace('?', ''))
                     else: # constructor
                         val = q.decl.out.decl.map[str(val1)]
-                    assert str(val.translate()) == str(val1).replace('?', ''), str(val.translate()) + " is not the same as " + str(val1)
+                    assert str(val.translate()) == str(val1).replace('?', ''),\
+                    str(val.translate()) + " is not the same as " + str(val1)
 
-                    yield problem.assignments.assert_(q, val, Status.CONSEQUENCE, True)
+                    yield problem.assignments.assert_(q, val, 
+                        Status.CONSEQUENCE, True)
                 elif res2 == unknown:
                     yield(f"Unknown: {str(q)}")
         yield "No more consequences."
@@ -196,10 +199,7 @@ def myprint(x=""):
         print(x)
 
 def execute(self):
-    """ 
-    Execute the IDP program
-    """
-
+    """ Execute the IDP program """
     main = str(self.procedures['main'])
     mybuiltins = {'print': myprint}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
