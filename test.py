@@ -27,6 +27,7 @@ import pprint
 import sys
 import threading
 import time
+import traceback
 from typing import Dict
 
 # import pyximport; 
@@ -55,7 +56,8 @@ def generateZ3(theory):
             try:
                 idp.execute()
             except Exception as exc:
-                print(exc)
+                print(traceback.format_exc())
+
 
             return buf.getvalue()
 

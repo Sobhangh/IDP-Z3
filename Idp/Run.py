@@ -27,7 +27,7 @@ import types
 from z3 import Solver, sat, unsat, unknown, ModelRef
 
 from .Assignments import Assignment
-from .Expression import TRUE, FALSE
+from .Expression import TRUE, FALSE, Variable, AppliedSymbol
 from .Parse import *
 
 class Problem(object):
@@ -47,13 +47,13 @@ class Problem(object):
     @classmethod
     def make(cls, theories, structures):
         """ polymorphic creation """
-        problem = theories if type(theories)=='Problem' else \
-                  cls([theories]) if isinstance(theories, Theory) else \
-                  cls(theories)
+        problem = ( theories if type(theories)=='Problem' else 
+                    cls([theories]) if isinstance(theories, Theory) else 
+                    cls(theories) )
 
-        structures = [] if structures is None else \
-                     [structures] if isinstance(structures, Structure) else \
-                     structures
+        structures = ( [] if structures is None else
+                       [structures] if isinstance(structures, Structure) else
+                       structures )
         for s in structures:
             problem.add(s)
 
@@ -96,7 +96,7 @@ class Problem(object):
             self._todo = OrderedSet(a.sentence 
                 for a in self.assignments.values() 
                 if a.value is None
-                and type(a.sentence) in [Fresh_Variable, Variable])
+                and type(a.sentence) in [AppliedSymbol, Variable])
         return self._formula
 
     def translate(self):
