@@ -19,9 +19,10 @@
 import ast
 import sys
 from typing import Optional, Dict
+from z3 import sat
 
 from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant, AppliedSymbol, Variable
-from Idp.Run import Status, Assignment, Assignments
+from Idp.Run import Status, Assignment, Assignments, str_to_IDP
 from Idp.utils import *
 
 
@@ -70,13 +71,6 @@ def metaJSON(idp):
 # see docs/zettlr/REST.md
 #################
 
-def str_to_IDP(idp, val1):
-    if is_number(val1):
-        return NumberConstant(number=val1)
-    val1 = 'true' if str(val1) == 'True' else 'false' if str(val1) == 'False' else val1
-    val = idp.vocabulary.symbol_decls[val1]
-    return val
-
 def json_to_literals(idp, jsonstr: str):
     assignments = Assignments() # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
@@ -95,7 +89,7 @@ def json_to_literals(idp, jsonstr: str):
                     idp_atom = idp_symbol.instances[atom].copy()
 
                 if json_atom["value"]!='':
-                    value = str_to_IDP(idp, json_atom["value"])
+                    value = str_to_IDP(idp_atom, str(json_atom["value"]))
                     if json_atom["typ"] == "Bool":
                         assignments.assert_(idp_atom, value, Status.GIVEN, False)
                     elif json_atom["value"]:
@@ -111,7 +105,7 @@ def json_to_literals(idp, jsonstr: str):
 # see docs/zettlr/REST.md
 #################
 
-def model_to_json(case, s, reify):
+def model_to_json(case, s):
     model = s.model()
     out = Output(case)
     out.fill(case)
@@ -123,24 +117,18 @@ def model_to_json(case, s, reify):
                     d2['status'] = 'EXPANDED'
 
                     atom = case.assignments[atom_code].sentence
-                    if atom.code in reify:
-                        atomZ3 = reify[atom.code]
-                    else:
-                        atomZ3 = atom.reified()
-                    value = model.eval(atomZ3, model_completion=True)
-                    value = str_to_IDP(case.idp, str(value))
+                    s.push() # in case todo contains complex formula
+                    s.add(atom.reified()==atom.translate())
+                    if s.check() == sat:
+                        value = s.model().eval(atom.reified(), model_completion=True)
+                        value = str_to_IDP(atom, str(value))
 
-                    # atom might not have an interpretation in model (if "don't care")
-                    if atom.type == 'bool':
-                        if value not in [TRUE, FALSE]: 
-                            #TODO value may be an expression, e.g. for quantified expression --> assert a value ?
-                            print("*** ", atom.annotations['reading'], " is not defined, and assumed false")
-                        d2['value']  = (value == TRUE)
-                    else:
-                        try:
-                            d2['value'] = str(eval(str(value).replace('?', '')))
-                        except:
+                        # atom might not have an interpretation in model (if "don't care")
+                        if atom.type == 'bool':
+                            d2['value']  = (value == TRUE)
+                        else:
                             d2['value'] = str(value)
+                    s.pop()
     return out.m
 
 

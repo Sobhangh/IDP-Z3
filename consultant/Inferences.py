@@ -43,7 +43,7 @@ def propagation(case):
 def expand(case):
     solver, reify, _ = mk_solver(case.translate(), case.GUILines)
     solver.check()
-    return model_to_json(case, solver, reify)
+    return model_to_json(case, solver)
 
 def optimize(case, symbol, minimize):
     # symbol may be "angle(0)""
@@ -90,7 +90,7 @@ def optimize(case, symbol, minimize):
             solver.pop() # get the last good one
             solver.check()
             break    
-    return model_to_json(case, solver, reify)
+    return model_to_json(case, solver)
 
 def explain(case, symbol, value, given_json):
     out = Output(case, case.given)  

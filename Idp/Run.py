@@ -102,6 +102,21 @@ class Problem(object):
         return self.formula().translate()
 
 
+def str_to_IDP(atom, val_string):
+    if atom.type == 'bool':
+        assert val_string in ['True', 'False'], \
+            f"{atom.annotations['reading']} is not defined, and assumed false"
+        out = ( TRUE if val_string == 'True' else 
+               FALSE)
+    elif ( atom.type in ['real', 'int']
+    or type(atom.decl.out.decl) == RangeDeclaration): # could be a fraction
+        out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
+    else: # constructor
+        assert atom.decl.arity == 0, 'constant expected'
+        out = atom.decl.out.decl.map[val_string]
+    return out
+
+
 def model_check(theories, structures=None):
     """ output: "sat", "unsat" or "unknown" """
 
@@ -172,16 +187,7 @@ def model_propagate(theories, structures=None):
                     solver.pop()
 
                     if res2 == unsat:
-                        s = str(val1) 
-                        if q.type == 'bool':
-                            val = TRUE if s == 'True' else FALSE
-                        elif ( q.type in ['real', 'int']
-                        or type(q.decl.out.decl) == RangeDeclaration):
-                            val = NumberConstant(number=s.replace('?', ''))
-                        else: # constructor
-                            val = q.decl.out.decl.map[s]
-                        assert str(val.translate()) == s.replace('?', ''),\
-                        f"{str(val.translate())} is not the same as {s}"
+                        val = str_to_IDP(q, str(val1))
 
                         yield problem.assignments.assert_(q, val,
                             Status.CONSEQUENCE, True)
