@@ -34,7 +34,7 @@ from Idp import Idp, idpparser
 from Idp.utils import log
 from .Case import make_case
 from .Inferences import *
-from .Output import *
+from .IO import *
 
 from typing import Dict
 

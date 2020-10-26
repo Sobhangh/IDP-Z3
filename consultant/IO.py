@@ -25,6 +25,45 @@ from Idp.Run import Status, Assignment, Assignments
 from Idp.utils import *
 
 
+def metaJSON(idp):
+    """
+    Format a response to meta request.
+
+    :arg idp: the response
+    :returns out: a meta request
+
+    """
+    symbols = []
+    for i in idp.unknown_symbols().values():
+        typ = i.out.name
+        symbol_type = "proposition" if typ == 'bool' and i.sorts==[] else "function"
+        d = {
+            "idpname": str(i.name),
+            "type": symbol_type,
+            "priority": "core",
+            "showOptimize": True,  # GUI is smart enough to show buttons appropriately
+            "view": i.view.value,
+            "environmental": i.block.name=='environment'
+        }
+        if i.annotations is not None:
+            if 'reading' in i.annotations:
+                d['guiname'] = i.annotations['reading']
+            if 'short' in i.annotations:
+                d['shortinfo'] = i.annotations['short']
+            if 'long' in i.annotations:
+                d['longinfo'] = i.annotations['long']
+            if 'Slider' in i.annotations:
+                d['slider'] = i.annotations['Slider']
+
+        symbols.append(d)
+    optionalPropagation = idp.display.optionalPropagation
+
+    # Create the output dictionary.
+    out = {"title": "Interactive Consultant", "symbols": symbols,
+        "optionalPropagation": optionalPropagation}
+    return out
+
+
 
 #################
 # load user's choices

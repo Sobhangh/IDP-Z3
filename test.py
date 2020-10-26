@@ -34,7 +34,8 @@ from typing import Dict
 # pyximport.install(language_level=3)
 
 from consultant.Case import Case
-from consultant.Inferences import metaJSON, propagation, expand
+from consultant.Inferences import propagation, expand
+from consultant.IO import metaJSON
 from Idp import idpparser, SymbolDeclaration, NEWL
 from Idp.utils import start, log
 from consultant.Case import make_case
@@ -57,8 +58,6 @@ def generateZ3(theory):
                 idp.execute()
             except Exception as exc:
                 print(traceback.format_exc())
-
-
             return buf.getvalue()
 
     expanded_symbols: Dict[str, SymbolDeclaration] = {}

@@ -25,7 +25,7 @@ from Idp.Expression import TRUE, FALSE, AppliedSymbol, Variable, AComparison, \
     NumberConstant
 from Idp.utils import *
 from .Solver import mk_solver
-from .Output import json_to_literals, Assignment, Status
+from .IO import json_to_literals, Assignment, Status
 
 # Types
 from Idp import Idp, SymbolDeclaration
