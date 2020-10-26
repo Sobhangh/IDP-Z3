@@ -21,11 +21,11 @@ from z3 import And, Not, sat, unsat, unknown, is_true
 from debugWithYamlLog import Log, NEWL, indented
 
 from Idp.Parse import RangeDeclaration
-from Idp.Expression import Brackets, AUnary, TRUE, FALSE, AppliedSymbol, \
-    Variable, AConjunction, ADisjunction, AComparison, NumberConstant
+from Idp.Expression import TRUE, FALSE, AppliedSymbol, Variable, AComparison, \
+    NumberConstant
 from Idp.utils import *
 from .Solver import mk_solver
-from .Output import json_to_literals, Assignment, Assignments, Status, str_to_IDP
+from .Output import json_to_literals, Assignment, Status
 
 # Types
 from Idp import Idp, SymbolDeclaration
@@ -46,7 +46,6 @@ class Case:
         self.expanded_symbols = set(expanded)
 
         # initialisation
-        self.definitions = self.idp.theory.definitions # [Definition] could be ignored if definitions are constructive
         self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
         self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = self.idp.theory.assignments # atoms + given, with simplified formula and value value
@@ -90,10 +89,6 @@ class Case:
             self.full_propagate(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
         
-
-        # simplify all using given and universals
-        self.symbolic_propagate()
-
         self.get_relevant_subtences()
         if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -119,9 +114,6 @@ class Case:
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             out.full_propagate(all_=False)
         out.full_propagate(all_=True) # now consider all facts and theories
-
-        # simplify all using given and universals
-        self.symbolic_propagate()
 
         # determine relevant assignemnts
         out.get_relevant_subtences()
@@ -281,6 +273,11 @@ class Case:
     def full_propagate(self, all_: bool) -> None:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
 
+        # simplify all using given and universals
+        to_propagate = list(l for l in self.assignments.values() 
+            if l.value is not None and (all_ or not l.sentence.has_decision()))
+        self.propagate(to_propagate, all_)
+
         Log(f"{NEWL}Z3 propagation ********************************")
 
         theory = self.translate(all_)
@@ -322,6 +319,8 @@ class Case:
 
                             if res2 == unsat:
                                 ass = self.assignments.assert_(atom, val, CONSQ, self)
+                                #TODO ass.relevant = True
+                                self.propagate([ass], all_)
                             elif res2 == unknown:
                                 res1 = unknown
                     solver.pop()
@@ -332,29 +331,26 @@ class Case:
             print(self.translate(all_))
             raise Exception("Not satisfiable !")
 
-    def symbolic_propagate(self) -> None:
-        """ inject known assignments in self.simplified """
-        for ass in self.assignments.values():
+    def propagate(self, to_propagate: List[Assignment], all_: bool) -> None:
+        CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
+        while to_propagate:
+            ass = to_propagate.pop(0)
             old, new = ass.sentence, ass.value
-            # don't propagate if no value or comparison of known value
-            ok = (new is not None)
-            if ( ok and type(old) == AComparison
-            and old.sub_exprs[0].code in self.assignments
-            and self.assignments[old.sub_exprs[0].code].value is not None
-            and old.sub_exprs[1].as_ground() is not None ):
-                ok = False # it's enough to propagate old.sub_exprs[0].code
-            if ok:
-                new_simplified: List[Expression] = []
-                for constraint in self.simplified:
-                    if old in constraint.questions:
-                        new_constraint = constraint.substitute(old, new, self.assignments)
-                        del constraint.questions[old.code]
-                        new_constraint.questions = constraint.questions
-                        new_simplified.append(new_constraint)
-                    else:
-                        new_simplified.append(constraint)
+            assert new is not None
+            
+            # simplify constraints
+            new_simplified: List[Expression] = []
+            for constraint in self.simplified:
+                if old in constraint.questions:
+                    consequences = []
+                    new_constraint = constraint.substitute(old, new, self.assignments, consequences)
+                    del constraint.questions[old.code]
+                    new_constraint.questions = constraint.questions
+                    new_simplified.append(new_constraint)
+                else:
+                    new_simplified.append(constraint)
 
-                self.simplified = new_simplified
+            self.simplified = new_simplified
 
 
     def translate(self, all_: bool = True) -> BoolRef:
