@@ -87,7 +87,9 @@ class Case:
         if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
+            self.symbolic_propagate(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
+        self.symbolic_propagate(all_=True)
         
         self.get_relevant_subtences()
         if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
@@ -113,7 +115,9 @@ class Case:
         if len(out.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             out.full_propagate(all_=False)
+            out.symbolic_propagate(all_=False)
         out.full_propagate(all_=True) # now consider all facts and theories
+        out.symbolic_propagate(all_=True)
 
         # determine relevant assignemnts
         out.get_relevant_subtences()
@@ -272,11 +276,6 @@ class Case:
     def full_propagate(self, all_: bool) -> None:
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
 
-        # simplify all using given and universals
-        to_propagate = list(l for l in self.assignments.values() 
-            if l.value is not None and (all_ or not l.sentence.has_decision()))
-        self.propagate(to_propagate, all_)
-
         Log(f"{NEWL}Z3 propagation ********************************")
 
         theory = self.translate(all_)
@@ -317,9 +316,7 @@ class Case:
                             solver.pop()
 
                             if res2 == unsat:
-                                ass = self.assignments.assert_(atom, val, CONSQ, self)
-                                #TODO ass.relevant = True
-                                self.propagate([ass], all_)
+                                ass = self.assignments.assert_(atom, val, CONSQ, True)
                             elif res2 == unknown:
                                 res1 = unknown
                     solver.pop()
@@ -330,26 +327,28 @@ class Case:
             print(self.translate(all_))
             raise Exception("Not satisfiable !")
 
-    def propagate(self, to_propagate: List[Assignment], all_: bool) -> None:
+    def symbolic_propagate(self, all_: bool):
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
-        while to_propagate:
-            ass = to_propagate.pop(0)
-            old, new = ass.sentence, ass.value
-            assert new is not None
-            
-            # simplify constraints
-            new_simplified: List[Expression] = []
-            for constraint in self.simplified:
-                if old in constraint.questions:
-                    consequences = []
-                    new_constraint = constraint.substitute(old, new, self.assignments, consequences)
-                    del constraint.questions[old.code]
-                    new_constraint.questions = constraint.questions
-                    new_simplified.append(new_constraint)
-                else:
-                    new_simplified.append(constraint)
 
-            self.simplified = new_simplified
+        for ass in self.assignments.values():
+            if ( ass.value is not None
+            and (all_ or not ass.sentence.has_decision())):
+                old, new = ass.sentence, ass.value
+                assert new is not None
+                
+                # simplify constraints
+                new_simplified: List[Expression] = []
+                for constraint in self.simplified:
+                    if old in constraint.questions:
+                        consequences = []
+                        new_constraint = constraint.substitute(old, new, self.assignments, consequences)
+                        del constraint.questions[old.code]
+                        new_constraint.questions = constraint.questions
+                        new_simplified.append(new_constraint)
+                    else:
+                        new_simplified.append(constraint)
+
+                self.simplified = new_simplified
 
 
     def translate(self, all_: bool = True) -> BoolRef:
