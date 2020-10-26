@@ -123,8 +123,7 @@ class Case:
 
     def __str__(self) -> str:
         self.get_co_constraints()
-        return (f"Definitions: {indented}{indented.join(repr(d) for d in self.definitions)}{NEWL}"
-                f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
+        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.simplified)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
