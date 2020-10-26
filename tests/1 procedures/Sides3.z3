@@ -1,5 +1,3 @@
-Unknown: Perimeter
-Unknown: Base
 No more consequences.
 
 Vertices -> 3

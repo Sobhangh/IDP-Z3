@@ -60,6 +60,7 @@ class Problem(object):
         return problem
 
     def add(self, block):
+        # TODO reprocess the definitions 
         self._formula = None # need to reapply the definitions
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
@@ -120,6 +121,7 @@ def model_expand(theories, structures=None, max=10):
 
     problem = Problem.make(theories, structures)
     z3_formula = problem.translate()
+    todo = problem._todo
 
     solver = Solver()
     solver.add(z3_formula)
@@ -134,7 +136,7 @@ def model_expand(theories, structures=None, max=10):
 
             # exclude this model
             different = []
-            for q in problem._todo:
+            for q in todo:
                 different.append(q.translate() != model.eval(q.translate()))
             solver.add(Or(different))
         else:
@@ -154,35 +156,45 @@ def model_propagate(theories, structures=None):
 
     problem = Problem.make(theories, structures)
     z3_formula = problem.translate()
+    todo = problem._todo
 
     solver = Solver()
     solver.add(z3_formula)
     if solver.check() == sat:
-        for q in problem._todo:
+        for q in todo:
+            solver.push() # in case todo contains complex formula
             solver.add(q.reified()==q.translate())
-            solver.check()
-            val1 = solver.model().eval(q.reified())
-            if str(val1) != str(q.reified()): # if not irrelevant
-                solver.push()
-                solver.add(Not(q.reified()==val1))
-                res2 = solver.check()
-                solver.pop()
+            res1 = solver.check()
+            if res1 == sat:
+                val1 = solver.model().eval(q.reified())
+                if str(val1) != str(q.reified()): # if not irrelevant
+                    solver.push()
+                    solver.add(Not(q.reified()==val1))
+                    res2 = solver.check()
+                    solver.pop()
 
-                if res2 == unsat:
-                    if q.type == 'bool':
-                        val = TRUE if str(val1) == 'True' else FALSE
-                    elif ( q.type in ['real', 'int'] 
-                    or type(q.decl.out.decl) == RangeDeclaration):
-                        val = NumberConstant(number=str(val1).replace('?', ''))
-                    else: # constructor
-                        val = q.decl.out.decl.map[str(val1)]
-                    assert str(val.translate()) == str(val1).replace('?', ''),\
-                    str(val.translate()) + " is not the same as " + str(val1)
+                    if res2 == unsat:
+                        s = str(val1) 
+                        if q.type == 'bool':
+                            val = TRUE if s == 'True' else FALSE
+                        elif ( q.type in ['real', 'int']
+                        or type(q.decl.out.decl) == RangeDeclaration):
+                            val = NumberConstant(number=s.replace('?', ''))
+                        else: # constructor
+                            val = q.decl.out.decl.map[s]
+                        assert str(val.translate()) == s.replace('?', ''),\
+                        f"{str(val.translate())} is not the same as {s}"
 
-                    yield problem.assignments.assert_(q, val, 
-                        Status.CONSEQUENCE, True)
-                elif res2 == unknown:
-                    yield(f"Unknown: {str(q)}")
+                        yield problem.assignments.assert_(q, val,
+                            Status.CONSEQUENCE, True)
+                    elif res2 == unknown:
+                        res1 = unknown
+            solver.pop()
+            if res1 == unknown:
+                # yield(f"Unknown: {str(q)}")
+                solver = Solver() # restart the solver
+                solver.add(z3_formula)
+
         yield "No more consequences."
     else:
         yield "Not satisfiable."
