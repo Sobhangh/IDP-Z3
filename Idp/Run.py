@@ -66,15 +66,13 @@ class Problem(object):
             self.assignments.extend(block.assignments)
         elif type(block) == Theory:
             for decl, rule in block.clark.items():
-                if decl not in block.clark:
-                    self.clark[decl] = rule
-                else:
-                    new_rule = copy(rule)  # not elegant, but rare
-                    new_rule.body = AConjunction.make('∧', 
-                        [block.clark[decl].body, rule.body])
-                    self.clark[decl] = new_rule
-            self.constraints.extend(block.constraints)
-            self.def_constraints.update(block.def_constraints)
+                assert decl not in self.clark, \
+                    "Not supported yet: symbol defined in 2 different blocks"
+                #TODO apply definition in other blocks
+                self.clark[decl] = copy(rule)
+            self.constraints.extend(v.copy() for v in block.constraints)
+            self.def_constraints.update({k:v.copy() 
+                for k,v in block.def_constraints.items()})
             self.assignments.extend(block.assignments)
         else:
             assert False, "Cannot add to Problem"
@@ -88,8 +86,8 @@ class Problem(object):
             self._formula = AConjunction.make('∧',
                 [a.formula() for a in self.assignments.values() 
                         if a.value is not None]
-                + [s for s in self.constraints.values()]
-                + [c for c in co_constraints.values()]
+                + [s for s in self.constraints]
+                + [c for c in co_constraints]
                 + [s for s in self.def_constraints.values()]
                 )
 
