@@ -39,7 +39,7 @@ class Problem(object):
         self.def_constraints = {}
 
         self._formula = None # the problem expressed in one logic formula
-        self._todo = None # questions to be answered by expand, propagate
+        self._todo = None # terms to be interpreted by expand, propagate
 
         for b in blocks:
             self.add(b)
@@ -92,11 +92,10 @@ class Problem(object):
                 + [s for s in self.def_constraints.values()]
                 )
 
-            self._todo = OrderedSet()
-             # start with questions in the formula
-            self._formula.collect(self._todo, all_=True)
-            self._todo.extend([a.sentence for a in self.assignments.values() 
-                if a.value is None])
+            self._todo = OrderedSet(a.sentence 
+                for a in self.assignments.values() 
+                if a.value is None
+                and type(a.sentence) in [Fresh_Variable, Variable])
         return self._formula
 
     def translate(self):
@@ -160,6 +159,7 @@ def model_propagate(theories, structures=None):
     solver.add(z3_formula)
     if solver.check() == sat:
         for q in problem._todo:
+            solver.add(q.reified()==q.translate())
             solver.check()
             val1 = solver.model().eval(q.reified())
             if str(val1) != str(q.reified()): # if not irrelevant
@@ -186,6 +186,9 @@ def model_propagate(theories, structures=None):
         yield "No more consequences."
     else:
         yield "Not satisfiable."
+        yield str(z3_formula)
+
+
 
 def myprint(x=""):
     if isinstance(x, types.GeneratorType):

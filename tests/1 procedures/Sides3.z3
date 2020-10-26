@@ -1,16 +1,11 @@
-Sides -> 3
-Type -> triangle
-Vertices -> 3
-Convex
-Angle(4) -> 0
-Length(4) -> 0
+Unknown: Perimeter
+Unknown: Base
 No more consequences.
 
-Sides -> 3
-Type -> triangle
 Vertices -> 3
+Type -> triangle
 Convex
-Angle(4) -> 0
-Length(4) -> 0
-Height -> 3
+No more consequences.
+
+Convex
 No more consequences.
