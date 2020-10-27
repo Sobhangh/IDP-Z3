@@ -76,6 +76,20 @@ class Case:
             out.append(new_constraint)
         self.simplified = out
 
+        self._finalize()
+
+    def add_given(self, jsonstr: str):
+
+        out = copy(self)
+        out.assignments = out.assignments.copy()
+        out.simplified = [c.copy() for c in self.simplified]
+
+        out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
+        out.assignments.update(out.given) #TODO get implicants, but do not add to simplified (otherwise always relevant)
+
+        return out._finalize()
+
+    def _finalize(self):
         # annotate self.simplified with questions
         for e in self.simplified:
             questions = OrderedSet()
@@ -92,37 +106,7 @@ class Case:
         
         self.get_relevant_subtences()
         if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
-
-
-    def add_given(self, jsonstr: str):
-        if jsonstr == "{}":
-            return self
-
-        out = copy(self)
-        out.assignments = out.assignments.copy()
-        out.simplified = [c.copy() for c in self.simplified]
-
-        out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
-        out.assignments.update(out.given) #TODO get implicants, but do not add to simplified (otherwise always relevant)
-
-        # annotate self.simplified with questions
-        for e in out.simplified:
-            questions = OrderedSet()
-            e.collect(questions, all_=True)
-            e.questions = questions
-
-        if len(out.idp.vocabularies)==2: # if there is a decision vocabulary
-            # first, consider only environmental facts and theory (exclude any statement containing decisions)
-            out.full_propagate(all_=False)
-            out.symbolic_propagate(all_=False)
-        out.full_propagate(all_=True) # now consider all facts and theories
-        out.symbolic_propagate(all_=True)
-
-        # determine relevant assignemnts
-        out.get_relevant_subtences()
-
-        if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
-        return out
+        return self
 
     def __str__(self) -> str:
         self.get_co_constraints()
