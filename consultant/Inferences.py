@@ -18,11 +18,11 @@
 """
 import re
 import time
-from z3 import BoolRef, BoolSort, Const, Implies, And, substitute, Optimize, Not, BoolVal
+from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, Not, BoolVal
 
+from Idp.Expression import AComparison, AUnary
 from Idp.utils import *
 from .IO import *
-from .Solver import mk_solver, reifier, Solver, sat, unsat, is_not
 
 
 """
@@ -41,7 +41,8 @@ def propagation(case):
     return out.m
 
 def expand(case):
-    solver, reify, _ = mk_solver(case.translate(), case.GUILines)
+    solver = Solver()
+    solver.add(case.translate())
     solver.check()
     return model_to_json(case, solver)
 
@@ -75,7 +76,6 @@ def optimize(case, symbol, minimize):
     else:
         solver.maximize(s)
 
-    (reify, _) = reifier(case.GUILines, solver)
     solver.check()
 
     # deal with strict inequalities, e.g. min(0<x)
@@ -102,23 +102,22 @@ def explain(case, symbol, value, given_json):
         .replace("\\u2228", "∨").replace("\\u2227", "∧")
     value = value[1:] if negated else value
     if value in case.GUILines:
-        to_explain = case.GUILines[value].translate() #TODO value is an atom string
+        to_explain = case.GUILines[value]
 
         # rules used in justification
-        if not to_explain.sort()==BoolSort(): # calculate numeric value
+        if to_explain.type != 'bool': # recalculate numeric value
             # TODO should be given by client
-            s, _, _ = mk_solver(case.translate(), case.GUILines)
+            s = Solver()
+            s.add(case.translate())
             s.check()
-            val = s.model().eval(to_explain)
-            to_explain = to_explain == val
+            val = s.model().eval(to_explain.translate())
+            val = str_to_IDP(to_explain, str(val))
+            to_explain = AComparison.make("=", [to_explain, val])
         if negated:
-            to_explain = Not(to_explain)
+            to_explain = AUnary.make('~', to_explain)
 
         s = Solver()
         s.set(':core.minimize', True)
-        (reify, unreify) = reifier(case.GUILines, s)
-        def r1(a): return reify[str(a)] if str(a) in reify else a
-        def r2(a): return Not(r1(a.children()[0])) if is_not(a) else r1(a)
         ps = {} # {reified: constraint}
         
         given = json_to_literals(case.idp, given_json) # use non-simplified given data
@@ -130,9 +129,8 @@ def explain(case, symbol, value, given_json):
             p = Const("wsdraqsesdf"+str(i+len(given)), BoolSort())
             ps[p] = constraint
             s.add(Implies(p, constraint))
-        s.push()  
 
-        s.add(Not(r2(to_explain)))
+        s.add(Not(to_explain.translate()))
         s.check(list(ps.keys()))
         unsatcore = s.unsat_core()
         
@@ -178,7 +176,8 @@ def abstract(case, given_json):
     
     done = set(out["universal"] + out["given"] + out["fixed"])
     theory = And(case.idp.translate())
-    solver, reify, unreify = mk_solver(theory, questions)
+    solver = Solver()
+    solver.add(theory)
     given = json_to_literals(case.idp, given_json) # use non-simplified given data
     solver.add([ass.translate() for ass in given.values()])
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
@@ -191,7 +190,11 @@ def abstract(case, given_json):
             assignment = case.assignments[atom_string]
             if assignment.value is None \
             and assignment.relevant and atom.type == 'bool':
-                value = solver.model().eval(reify[atom.code])
+                solver.push()
+                solver.add(atom.reified() == atom.translate())
+                solver.check()
+                value = solver.model().eval(atom.reified())
+                solver.pop()
                 if value == True:
                     atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
                 elif value == False:
@@ -209,12 +212,13 @@ def abstract(case, given_json):
         solver2 = Solver()
         solver2.add(theory2)
         solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
-        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.value is not None and time.time()<timeout:
                 solver2.push()
-                a = Not(reify2[assignment.sentence.code]) if assignment.value else \
-                    reify2[assignment.sentence.code]
+                if assignment.sentence.type == 'bool':
+                    solver2.add(assignment.sentence.reified() == assignment.sentence.translate())
+                a = Not(assignment.sentence.reified()) if assignment.value else \
+                    assignment.sentence.reified()
                 solver2.add(a)
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
                 result = solver2.check()
@@ -228,15 +232,16 @@ def abstract(case, given_json):
 
         # remove atoms that are consequences of others in the AMF
         solver2 = Solver()
-        (reify2, _) = reifier({str(l.sentence) : l.sentence for l in atoms}, solver2)
         for i, assignment in enumerate(atoms):
             if assignment.value is not None and time.time()<timeout:
                 solver2.push()
                 solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(assignment)
-                a = Not(reify2[assignment.sentence.code]) if assignment.value else \
-                    reify2[assignment.sentence.code]
+                if assignment.sentence.type == 'bool':
+                    solver2.add(assignment.sentence.reified() == assignment.sentence.translate())
+                a = Not(assignment.sentence.reified()) if assignment.value else \
+                    assignment.sentence.reified()
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)

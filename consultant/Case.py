@@ -24,14 +24,13 @@ from Idp.Parse import RangeDeclaration
 from Idp.Expression import TRUE, FALSE, AppliedSymbol, Variable, AComparison, \
     NumberConstant
 from Idp.utils import *
-from .Solver import mk_solver
 from .IO import json_to_literals, Assignment, Status
 
 # Types
 from Idp import Idp, SymbolDeclaration
 from Idp.Expression import Expression
 from typing import Any, Dict, List, Union, Tuple, cast
-from z3.z3 import BoolRef
+from z3.z3 import Solver, BoolRef
 
 class Case:
     """
@@ -279,7 +278,8 @@ class Case:
         Log(f"{NEWL}Z3 propagation ********************************")
 
         theory = self.translate(all_)
-        solver, _, _ = mk_solver(theory, {})
+        solver = Solver()
+        solver.add(theory)
         result = solver.check()
         if result == sat:
             todo = self.assignments.keys()
@@ -321,7 +321,8 @@ class Case:
                                 res1 = unknown
                     solver.pop()
                     if res1 == unknown: # restart solver
-                        solver, _, _ = mk_solver(theory, {})
+                        solver = Solver()
+                        solver.add(theory)
                         result = solver.check()
         elif result == unsat:
             print(self.translate(all_))

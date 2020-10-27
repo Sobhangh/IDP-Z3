@@ -9,10 +9,9 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 print(parentdir)
 import Inferences
 from Case import *
-from Solver import *
 from Idp.utils import log
 from Idp import *
-
+from z3 import Solver
 
 
 
@@ -28,12 +27,12 @@ else:
         #print(c.interpretations)
         log("translate")
         print(simplify(c.translate()))
-        solver, _, _ = mk_solver(c.translate(), c.GUILines)
+        solver = Solver()
+        solver.add(c.translate())
         print(solver.check())
         log("solve")
         print(list(str(l) for l in consequences(c.translate(), c.GUILines, {}).keys()))
 
-# solver = c.mk_solver()
 # print(solver)
 # print(solver.check())
 # print(solver.model())
