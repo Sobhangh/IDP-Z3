@@ -100,9 +100,9 @@ class Case:
         if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
-            self.symbolic_propagate(all_=False)
+            self.simplify(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
-        self.symbolic_propagate(all_=True)
+        self.simplify(all_=True)
         
         self.get_relevant_subtences()
         if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
@@ -312,7 +312,7 @@ class Case:
             print(self.translate(all_))
             raise Exception("Not satisfiable !")
 
-    def symbolic_propagate(self, all_: bool):
+    def simplify(self, all_: bool):
         CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
 
         for ass in self.assignments.values():
