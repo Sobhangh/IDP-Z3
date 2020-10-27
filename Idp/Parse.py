@@ -501,8 +501,8 @@ class Theory(object):
         out = []
         for i in self.constraints:
             out.append(i.translate())
-        for d in self.def_constraints:
-            out += d.translate()
+        for d in self.def_constraints.values():
+            out.append(d.translate())
         return out
 
 
