@@ -18,7 +18,8 @@
 """
 import re
 import time
-from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, Not, BoolVal
+from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, \
+    Not, BoolVal
 
 from Idp.Expression import AComparison, AUnary
 from Idp.utils import *
@@ -96,8 +97,8 @@ def explain(case, symbol, value, given_json):
     out = Output(case, case.given)  
 
     negated = value.startswith('~')
-    value = value.replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
-        .replace("\\u2200", "∀").replace("\\u2203", "∃") \
+    value = value.replace("\\u2200", "∀").replace("\\u2203", "∃") \
+        .replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
         .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
         .replace("\\u2228", "∨").replace("\\u2227", "∧")
     value = value[1:] if negated else value
@@ -137,17 +138,20 @@ def explain(case, symbol, value, given_json):
         if unsatcore:
             for a1 in case.given.values():
                 for a2 in unsatcore:
-                    if type(ps[a2]) == Assignment and a1.sentence.code == ps[a2].sentence.code: #TODO we might miss some equality
+                    if type(ps[a2]) == Assignment \
+                    and a1.sentence.code == ps[a2].sentence.code: #TODO we might miss some equality
                         out.addAtom(a1.sentence, a1.value, a1.status)
 
             # remove irrelevant atoms
             for symb, dictionary in out.m.items():
                 out.m[symb] = { k:v for k,v in dictionary.items()
-                    if type(v)==dict and v['status']=='GIVEN' and v.get('value', '') != ''}
+                    if type(v)==dict and v['status']=='GIVEN' 
+                    and v.get('value', '') != ''}
             out.m = {k:v for k,v in out.m.items() if v}
                 
             out.m["*laws*"] = []
-            for a1 in list(case.idp.theory.def_constraints.values()) + list(case.idp.theory.constraints): 
+            for a1 in (list(case.idp.theory.def_constraints.values()) 
+                    + list(case.idp.theory.constraints)): 
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.translate()) == str(ps[a2]):
@@ -159,13 +163,18 @@ def abstract(case, given_json):
     out = {} # {category : [Assignment]}
 
     # extract fixed atoms from constraints
-    out["universal"] = list(l for l in case.assignments.values() if l.status == Status.UNIVERSAL)
-    out["given"    ] = list(l for l in case.assignments.values() if l.status == Status.GIVEN)
-    out["fixed"    ] = list(l for l in case.assignments.values() if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
+    out["universal"] = list(l for l in case.assignments.values() 
+                        if l.status == Status.UNIVERSAL)
+    out["given"    ] = list(l for l in case.assignments.values() 
+                        if l.status == Status.GIVEN)
+    out["fixed"    ] = list(l for l in case.assignments.values() 
+                        if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
     out["irrelevant"]= list(l for l in case.assignments.values() 
-        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] and not l.relevant)
+        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
+        and not l.relevant)
 
-    questions = {a.sentence.code: a.sentence for a in case.assignments.values()}
+    questions = {a.sentence.code: a.sentence 
+                for a in case.assignments.values()}
 
     # create keys for models using first symbol of atoms
     models, count = {}, 0
@@ -201,8 +210,8 @@ def abstract(case, given_json):
                     atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
                 else: #unknown
                     theory2 = And(theory2,
-                                    substitute(theory2, [(atom.translate(), BoolVal(True))]),  # don't simplify !
-                                    substitute(theory2, [(atom.translate(), BoolVal(False))])) # it would break later substitutions
+                        substitute(theory2, [(atom.translate(), BoolVal(True))]),  # don't simplify !
+                        substitute(theory2, [(atom.translate(), BoolVal(False))])) # it would break later substitutions
                 # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
@@ -214,19 +223,20 @@ def abstract(case, given_json):
         solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
         for i, assignment in enumerate(atoms):
             if assignment.value is not None and time.time()<timeout:
+                atom = assignment.sentence
                 solver2.push()
-                if assignment.sentence.type == 'bool':
-                    solver2.add(assignment.sentence.reified() == assignment.sentence.translate())
-                a = Not(assignment.sentence.reified()) if assignment.value else \
-                    assignment.sentence.reified()
+                if atom.type == 'bool':
+                    solver2.add(atom.reified() == atom.translate())
+                a = Not(atom.reified()) if assignment.value else atom.reified()
                 solver2.add(a)
-                solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
+                solver2.add(And([l.translate() 
+                                for j, l in enumerate(atoms) if j != i]))
                 result = solver2.check()
                 solver2.pop()
                 if result == sat:
                     theory2 = And(theory2, 
-                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(True))]),
-                                substitute(theory2, [(assignment.sentence.translate(), BoolVal(False))]))
+                        substitute(theory2, [(atom.translate(), BoolVal(True))]),
+                        substitute(theory2, [(atom.translate(), BoolVal(False))]))
                     solver2.add(theory2)
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
 
@@ -234,18 +244,19 @@ def abstract(case, given_json):
         solver2 = Solver()
         for i, assignment in enumerate(atoms):
             if assignment.value is not None and time.time()<timeout:
+                atom = assignment.sentence
                 solver2.push()
-                solver2.add(And([l.translate() for j, l in enumerate(atoms) if j != i]))
+                solver2.add(And([l.translate() 
+                                for j, l in enumerate(atoms) if j != i]))
 
                 # evaluate not(assignment)
-                if assignment.sentence.type == 'bool':
-                    solver2.add(assignment.sentence.reified() == assignment.sentence.translate())
-                a = Not(assignment.sentence.reified()) if assignment.value else \
-                    assignment.sentence.reified()
+                if atom.type == 'bool':
+                    solver2.add(atom.reified() == atom.translate())
+                a = Not(atom.reified()) if assignment.value else atom.reified()
                 result, consq = solver2.consequences([], [a])
                 if result!=sat or consq: # remove it if it's a consequence
                     atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-                    # ??? theory2 = substitute(theory2, [(assignment.sentence, BoolVal(assignment.value & 1))])
+                    # ??? theory2 = substitute(theory2, [(atom, BoolVal(assignment.value & 1))])
                 solver2.pop()
 
         # add constraint to eliminate this model
@@ -273,10 +284,13 @@ def abstract(case, given_json):
                 active_symbol[symb] = True
 
     # build table of models
-    out["models"] = "" if count < 50 and time.time()<timeout else "Time out or more than 50 models...Showing partial results"
-    out["variable"] = [[ [symb] for symb in models.keys() if symb in active_symbol ]]
+    out["models"] = ("" if count < 50 and time.time()<timeout else 
+                "Time out or more than 50 models...Showing partial results")
+    out["variable"] = [[ [symb] for symb in models.keys() 
+                        if symb in active_symbol ]]
     for i in range(count):
-        out["variable"] += [[ models[symb][i] for symb in models.keys() if symb in active_symbol ]]
+        out["variable"] += [[ models[symb][i] for symb in models.keys() 
+                            if symb in active_symbol ]]
     return out
 
 
