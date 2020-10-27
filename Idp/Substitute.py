@@ -132,6 +132,8 @@ def interpret(self, theory):
     
     implementation for everything but AppliedSymbol, Variable and Fresh_variable 
     """
+    if self.if_symbol: # do not interpret typeConstraints
+        return self
     out = self.update_exprs([e.interpret(theory) for e in self.sub_exprs])
     out.original = out
     return out

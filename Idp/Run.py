@@ -66,13 +66,14 @@ class Problem(object):
             self.assignments.extend(block.assignments)
         elif type(block) == Theory:
             for decl, rule in block.clark.items():
-                assert decl not in self.clark, \
-                    "Not supported yet: symbol defined in 2 different blocks"
-                #TODO apply definition in other blocks
-                self.clark[decl] = copy(rule)
+                new_rule = copy(rule)
+                if decl in self.clark:
+                    new_rule.body = AConjunction.make('∧', 
+                        [self.clark[decl].body, new_rule.body])
+                self.clark[decl] = new_rule
             self.constraints.extend(v.copy() for v in block.constraints)
-            self.def_constraints.update({k:v.copy() 
-                for k,v in block.def_constraints.items()})
+            self.def_constraints.update(
+                {k:v.copy() for k,v in block.def_constraints.items()})
             self.assignments.extend(block.assignments)
         else:
             assert False, "Cannot add to Problem"
@@ -82,6 +83,7 @@ class Problem(object):
         if not self._formula:
             co_constraints = OrderedSet()
             for c in self.constraints:
+                c.interpret(self)
                 c.co_constraints(co_constraints)
             self._formula = AConjunction.make('∧',
                 [a.formula() for a in self.assignments.values() 
