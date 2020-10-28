@@ -60,3 +60,5 @@ handlers:
   - url: .*
     script: auto
     secure: always
+    http_headers:
+      Strict-Transport-Security: max-age=31536000; includeSubDomains
