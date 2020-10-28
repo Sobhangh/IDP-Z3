@@ -10,17 +10,19 @@ See [[Non-linear equations in Z3]]
 
 Interactive Code would become:
 ~~~~
-self.problem = Problem(environment, environment_structure)
-self.problem.symbolic_propagate(tag=Env_Univ, simplify=True)
-self.problem.add(env_given, simplify=True) // need to separate the given !
-self.problem.propagate(todo=self.GUILines, tag=Env_Consq, simplify=True)
+self.environment = Problem(environment, environment_structure)
+self.environment.symbolic_propagate(tag=Env_Univ)
+self.decision = Problem([self.environment, decision, decision_structure])
+self.decision.symbolic_propagate(tag=Universal)
 
-self.problem.add(decision)
-self.problem.add(decision_structure)
-self.problem.symbolic_propagate(tag=Universal, simplify=True)
-self.problem.add(dec_given, simplify=True)
-self.problem.propagate(todo=self.GUILines, tag=Consequence, simplify=True)
-self.problem.get_relevant()
+self.environment.add(given)
+# this is a hack: use the same set of assignments
+self.environment.assignments = self.decision.assignments
+self.environment.propagate(tag=Env_Consq)
+self.decision.propagate(tag=Consequence)
+
+self.decision.simplify()
+self.decision.get_relevant()
 ~~~~
 
 TODO:
@@ -31,8 +33,8 @@ X IC: do not restart propagation if model is unknown: it won't fix anything
 - [x] API propagate: consider all assignments without value
     - [x] API problem: fill assignments with all subtences
 X API: restart solver if unknown (not needed ?)
-- [ ] API: add simplify with one assignment
 - [ ] move definitions, constraints, assignments to Case.Problem just before get_relevant
+- [ ] API: add simplify with one assignment
 - [ ] IC: do not cascade propagate: full propagate will take care of it.  Use API.simplify instead
 - [ ] API: add simplify option to propagate
 - [ ] API: add tag argument to propagate

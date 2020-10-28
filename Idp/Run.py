@@ -64,7 +64,7 @@ class Problem(object):
         self._formula = None # need to reapply the definitions
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
-        elif type(block) == Theory:
+        elif type(block) in [Theory, Problem]:
             for decl, rule in block.clark.items():
                 new_rule = copy(rule)
                 if decl in self.clark:
