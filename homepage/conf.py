@@ -104,7 +104,7 @@ html_theme_options = {
     'navbar_links': [
         ("Home", "index"),
         ("Interactive Consultant", "interactive_consultant"),
-        ("Online IDE", "https://interactive-consultant.ew.r.appspot.com/IDE", True),
+        ("Online IDE", "https://interactive-consultant.IDP-Z3.be/IDE", True),
         ("Documentation", "https://docs.idp-z3.be/", True),
     ],
     # A list of tuples containing pages or urls to link to.

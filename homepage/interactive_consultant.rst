@@ -6,7 +6,7 @@ With the resulting knowledge base, an online interface is automatically created 
 Demo
 ----
 
-The interactive consultant is available `online <https://interactive-consultant.ew.r.appspot.com/>`_, offering the possibility to everyone to specify a knowledge base using the IDP language and experiment with the resulting online configuration tool.
+The interactive consultant is available `online <https://interactive-consultant.IDP-Z3.be/>`_, offering the possibility to everyone to specify a knowledge base using the IDP language and experiment with the resulting online configuration tool.
 To quickstart your experience, the interactive consultant comes with two demo knowledge bases, available under the 'File' header:
 
 * the 'Polygon' knowledge base, which specifies some common knowledge on the number of sides, their length and the angles for some common polygonal shapes; and
@@ -15,6 +15,6 @@ To quickstart your experience, the interactive consultant comes with two demo kn
 A short introductory video on the interactive consultant can be found below:
 
 .. rst-class:: center
-.. video:: https://interactive-consultant.ew.r.appspot.com/assets/Interactive_Consultant.mp4
+.. video:: https://interactive-consultant.IDP-Z3.be/assets/Interactive_Consultant.mp4
    :width: 800
    :height: 480
