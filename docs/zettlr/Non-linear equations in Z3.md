@@ -34,7 +34,7 @@ solve(forall, weight==80, height==179)
 
 
 # version 4.8.9.0
-issues: [[Issue 28]], [issue 25](https://gitlab.com/krr/autoconfigz3/-/issues/25)
+issues: [[Issue 28]], [issue 25](https://gitlab.com/krr/IDP-Z3/-/issues/25)
 version 4.8.9.0 has regressions for Non-linear real arithmetic (NRA) ([source](https://github.com/Z3Prover/z3/blob/master/RELEASE_NOTES))
 - [ ] the new solver can be deactivated by setting `smt.arith.solver=2` (todo)
 

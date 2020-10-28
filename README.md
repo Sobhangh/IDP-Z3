@@ -9,7 +9,7 @@ It uses the Z3 SMT solver.  It is made available under the [GNU LGPL v3 License]
 * Install [python3](https://www.python.org/downloads/) on your machine.
 * Install [poetry](https://python-poetry.org/docs/#installation):
     * after that, logout and login if requested, to update `$PATH`
-* Use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
+* Use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine
 * Open a terminal in that directory 
 * If you have several versions of python3, and want to run on a particular one, e.g., 3.9:
     * run `poetry env use 3.9`
@@ -27,7 +27,7 @@ To launch the Interactive Consultant web server:
 
 # Develop
 
-You may want to read about the [technical architecture](https://gitlab.com/krr/autoconfigz3/-/wikis/Architecture).
+You may want to read about the [technical architecture](https://gitlab.com/krr/IDP-Z3/-/wikis/Architecture).
 
 The user manual is in the `/docs` folder and can be locally generated as follows:
 ~~~~
@@ -37,7 +37,7 @@ To view it, open `http://127.0.0.1:8000`
 
 The [documentation on readthedocs](https://readthedocs.org/projects/idp-z3/) is automatically updated from the gitlab repository.
 
-To deploy on [Google App Engine](https://gitlab.com/krr/autoconfigz3/-/blob/master/docs/zettlr/Google%20App%20Engine.md):
+To deploy on [Google App Engine](https://gitlab.com/krr/IDP-Z3/-/blob/master/docs/zettlr/Google%20App%20Engine.md):
 * make sure that you are on branch master without pending git changes
 * run `python3 deploy.py`
 

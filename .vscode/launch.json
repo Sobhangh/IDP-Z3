@@ -26,14 +26,14 @@
             "name": "Python: test.py",
             "type": "python",
             "request": "launch",
-            "program": "/home/pcarbonn/Documents/repos/autoconfigz3/test.py",
+            "program": "/home/pcarbonn/Documents/repos/IDP-Z3/test.py",
             "console": "integratedTerminal"
         },
         {
             "name": "temp",
             "type": "python",
             "request": "launch",
-            "program": "/home/pcarbonn/Documents/repos/autoconfigz3/IDP-Z3.py",
+            "program": "/home/pcarbonn/Documents/repos/IDP-Z3/IDP-Z3.py",
             "console": "integratedTerminal"
         }
     ]

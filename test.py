@@ -1,5 +1,5 @@
 """
-A testing file for the autoconfigz3 project.
+A testing file for the IDP-Z3 project.
 This file includes two tests:
     * generate
     * pipeline

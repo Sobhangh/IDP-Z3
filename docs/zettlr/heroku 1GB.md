@@ -11,7 +11,7 @@ Reason: Monkeytype.sqlite3 !! 1.5 GB
 
 Solution:
 * add monkeytype.sqlite3 to .gitignore
-* make a copy of autoconfigz3
+* make a copy of IDP-Z3
 * drop each stash
 * git filter-branch --force --index-filter \
   "git rm --cached --ignore-unmatch monkeytype.sqlite3" \
@@ -25,7 +25,7 @@ Solution:
 Options:
 * [remove Monkeytype.sqlite3](https://help.github.com/en/github/authenticating-to-github/removing-sensitive-data-from-a-repository).  (Problem: all repositories need to be refreshed !)
 * create a new git repository, without history
-* * remove static from autoconfigz3, then add it, while keeping only one main file
+* * remove static from IDP-Z3, then add it, while keeping only one main file
 * Use 2 separate repos ? [one for react](https://dev.to/smithmanny/deploy-your-react-app-to-heroku-2b6f), the other for the server ?  (not need to build)
 
 react repo: [need to commit package.json](https://stackoverflow.com/questions/33388338/heroku-does-not-read-node-version) !

@@ -20,7 +20,7 @@ The IDP-Z3 components together enable the creation of these solutions:
 * :ref:`a program<CLI>` with a command line interface to compute inferences on a knowledge base;
 * a `web-based Interactive Development Environment <https://interactive-consultant.ew.r.appspot.com/IDE>`_ (IDE) to create Knowledge bases.
 
-The `source code of IDP-Z3 <https://gitlab.com/krr/autoconfigz3>`_ is publicly available under the GNU LGPL v3 license.
+The `source code of IDP-Z3 <https://gitlab.com/krr/IDP-Z3>`_ is publicly available under the GNU LGPL v3 license.
 
 .. warning::
    You may want to verify that you are seeing the documentation relevant for the version of IDP-Z3 you are using.
@@ -35,7 +35,7 @@ Installation using poetry
 * Install `poetry <https://python-poetry.org/docs/#installation>`_
 
     * after that, logout and login if requested, to update :code:`$PATH`
-* Use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
+* Use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine
 * Open a terminal in that directory 
 * If you have several versions of python3, and want to run on a particular one, e.g., 3.9:
 
@@ -60,7 +60,7 @@ Installation using pip
 IDP-Z3 can be installed using the python package ecosystem.
 
 * install `python 3 <https://www.python.org/downloads/>`_, with `pip3 <https://pip.pypa.io/en/stable/installing/>`_, making sure that python3 is in the PATH.
-* use git to clone https://gitlab.com/krr/autoconfigz3 to a directory on your machine
+* use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine
 * (For Linux and MacOS) open a terminal in that directory and run the following commands.
 
 .. code-block::

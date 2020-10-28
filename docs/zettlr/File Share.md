@@ -4,7 +4,7 @@ tags: #analysis
 Date: 20200516101439
 –-
 
-[Issue n°16](https://gitlab.com/krr/autoconfigz3/-/issues/16)
+[Issue n°16](https://gitlab.com/krr/IDP-Z3/-/issues/16)
 
 Options:
 - [x] ask the user to create public gist on github, and accept gist in url ([API](https://developer.github.com/v3/gists/))

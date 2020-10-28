@@ -111,7 +111,7 @@ Various small fixes.
 * Hide irrelevant sentences / symbols (for theories without definitions).
 * More compact symbol panel: header is not shown if only one sentence is shown.
 ### Fixed
-* [Issue #2](https://gitlab.com/krr/autoconfigz3/issues/2)
+* [Issue #2](https://gitlab.com/krr/IDP-Z3/issues/2)
 
 
 ## [0.2.0] - 2020-01-22
