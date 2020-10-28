@@ -12,10 +12,14 @@ handlers:
     static_files: consultant/static/index.html
     require_matching_file: false
     upload: consultant/static/index.html
+    http_headers:
+      Strict-Transport-Security: max-age=31536000; includeSubDomains
   - url: /IDE
     static_files: consultant/static/index.html
     require_matching_file: false
     upload: consultant/static/index.html
+    http_headers:
+      Strict-Transport-Security: max-age=31536000; includeSubDomains
   - url: /examples/(.*)
     static_files: consultant/examples/\1
     require_matching_file: false
