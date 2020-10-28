@@ -24,7 +24,7 @@ The `source code of IDP-Z3 <https://gitlab.com/krr/IDP-Z3>`_ is publicly availab
 
 .. warning::
    You may want to verify that you are seeing the documentation relevant for the version of IDP-Z3 you are using.
-   On `readthedocs <https://idp-z3.readthedocs.io/>`_, you can see the version under the title (top left corner), and you can change it using the listbox at the bottom left corner.
+   On `readthedocs <https://docs.idp-z3.be/>`_, you can see the version under the title (top left corner), and you can change it using the listbox at the bottom left corner.
 
 Installation using poetry
 -------------------------

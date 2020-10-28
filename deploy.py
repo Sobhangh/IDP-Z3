@@ -19,14 +19,14 @@ branch = get('git rev-parse --abbrev-ref HEAD')
 assert branch == b'master\n', "Z3 not in master branch !"
 
 
-branch = get('git rev-parse --abbrev-ref HEAD', cwd="../autoconfig3")
+branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
 assert branch == b'master\n', "autoconfig not in master branch !"
-require_clean_work_tree("../autoconfig3")
+require_clean_work_tree("../web-IDP-Z3")
 
 if input("Ready to build and commit ? (Y/n) ") in "Yy":
-    run('npm run -script build', cwd='../autoconfig3', check=True)
+    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
     print("Copying to static folder ...")
-    copy_tree('../autoconfig3/dist/', 'consultant/static')
+    copy_tree('../web-IDP-Z3/dist/', 'consultant/static')
     run("git add -A")
     run("git commit")
 
@@ -36,7 +36,7 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
     if input("Deploy on Google App Engine ? (Y/n)") in "Yy":
         run("git push origin master")
         run("git push google master")
-        run("git push google master", cwd='../autoconfig3')
+        run("git push google master", cwd='../web-IDP-Z3')
         promote = input("Redirect traffic ? (Y/n)") in "Yy"
         run(f"gcloud app deploy {'' if promote else '--no-promote'}")
         
@@ -46,7 +46,7 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
         print("latest version : ", id)
         with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json") as json_file:
             data = json.load(json_file)
-        data['IDP-Z3 latest'] = f"{id}-dot-interactive-consultant.ew.r.appspot.com/"
+        data['IDP-Z3 latest'] = f"{id}-dot-interactive-consultant.ew.r.appspot.com"
         with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json", "w") as outfile:
             json.dump(data, outfile, indent=4)
         run("git add versions.json" , cwd="../5d82c61fa39e8aa23da1642a2e2b420a")

@@ -105,7 +105,7 @@ html_theme_options = {
         ("Home", "index"),
         ("Interactive Consultant", "interactive_consultant"),
         ("Online IDE", "https://interactive-consultant.ew.r.appspot.com/IDE", True),
-        ("Documentation", "https://idp-z3.readthedocs.io/", True),
+        ("Documentation", "https://docs.idp-z3.be/", True),
     ],
     # A list of tuples containing pages or urls to link to.
     # Valid tuples should be in the following forms:

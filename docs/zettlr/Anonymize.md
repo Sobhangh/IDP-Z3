@@ -6,10 +6,10 @@ Date: 20200901104252
 
 Steps to release an anonymized version of the code:
 * delete autconfigz3/bin, /lib, /lib64, _pycache_
-* in autoconfig3/src/app/app.component.html
+* in web-IDP-Z3/src/app/app.component.html
     * remove KUL logo
     * remove footerContainer with Flemish Impuls program
-* in autoconfig3/src/app/header/header.component.ts
+* in web-IDP-Z3/src/app/header/header.component.ts
     * remove Help / Tutorial entry
     * link for reference: `AppSettings.ORIGIN+'/docs/_build/html/index.html'`
 * in IDP-Z3/README.md: adapt as necessary
