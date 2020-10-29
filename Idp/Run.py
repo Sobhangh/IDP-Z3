@@ -31,7 +31,7 @@ from .Expression import TRUE, FALSE, Variable, AppliedSymbol
 from .Parse import *
 
 class Problem(object):
-    """ A combination of theory and structure blocks """
+    """ A collection of theory and structure blocks """
     def __init__(self, blocks):
         self.clark = {} # {Declaration: Rule}
         self.constraints = OrderedSet()
@@ -98,6 +98,32 @@ class Problem(object):
                 if a.value is None
                 and type(a.sentence) in [AppliedSymbol, Variable])
         return self._formula
+
+    def simplify(self):
+        """ simplify constraints using known assignments """
+        # annotate self.constraints with questions
+        for e in self.constraints:
+            questions = OrderedSet()
+            e.collect(questions, all_=True)
+            e.questions = questions
+
+        for ass in self.assignments.values():
+            old, new = ass.sentence, ass.value
+            if new is not None:
+                # simplify constraints
+                new_constraints: List[Expression] = []
+                for constraint in self.constraints:
+                    if old in constraint.questions: # for performance
+                        self._formula = None # invalidates the formula
+                        consequences = []
+                        new_constraint = constraint.substitute(old, new, self.assignments, consequences)
+                        del constraint.questions[old.code]
+                        new_constraint.questions = constraint.questions
+                        new_constraints.append(new_constraint)
+                    else:
+                        new_constraints.append(constraint)
+                self.constraints = new_constraints
+        return self
 
     def translate(self):
         """ translates to Z3 """

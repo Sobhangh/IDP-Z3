@@ -45,3 +45,24 @@ model_propagate(theory, structure=None)
 
 print(...)
     Prints the arguments on stdout
+
+
+Problem class
++++++++++++++
+
+The main block can also use instances of the ``Problem`` class.
+Instances of the ``Problem`` class represent a collection of theory and structure blocks.
+The class has the following methods:
+
+__init__(self, blocks)
+    Creates an instance of ``Problem`` for the list of blocks, e.g., ``Problem([T,S])``
+
+add(self, block)
+    Adds a theory or structure block to the problem.
+
+formula(self)
+    Returns a python object representing the logic formula equivalent to the problem.
+    This object can be converted to a string using ``str()``.
+
+simplify(self)
+    Simplifies the formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.

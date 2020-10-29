@@ -24,6 +24,7 @@ from Idp.Parse import RangeDeclaration
 from Idp.Expression import TRUE, FALSE, AppliedSymbol, Variable, AComparison, \
     NumberConstant
 from Idp.utils import *
+from Idp.Run import Problem
 from .IO import json_to_literals, Assignment, Status
 
 # Types
@@ -32,13 +33,14 @@ from Idp.Expression import Expression
 from typing import Any, Dict, List, Union, Tuple, cast
 from z3.z3 import Solver, BoolRef
 
-class Case:
+class Case(Problem):
     """
     Contains a state of problem solving
     """
     cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
 
     def __init__(self, idp: Idp, expanded: List[str]):
+        super().__init__([])
 
         self.idp = idp # Idp vocabulary and theory
         self.goal = idp.goal
@@ -90,19 +92,13 @@ class Case:
         return out._finalize()
 
     def _finalize(self):
-        # annotate self.simplified with questions
-        for e in self.constraints:
-            questions = OrderedSet()
-            e.collect(questions, all_=True)
-            e.questions = questions
 
         # propagate universals
         if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
-            self.simplify(all_=False)
         self.full_propagate(all_=True) # now consider all facts and theories
-        self.simplify(all_=True)
+        self.simplify()
         
         self.get_relevant_subtences()
         if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
@@ -311,29 +307,6 @@ class Case:
         elif result == unsat:
             print(self.translate(all_))
             raise Exception("Not satisfiable !")
-
-    def simplify(self, all_: bool):
-        CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
-
-        for ass in self.assignments.values():
-            if ( ass.value is not None
-            and (all_ or not ass.sentence.has_decision())):
-                old, new = ass.sentence, ass.value
-                assert new is not None
-                
-                # simplify constraints
-                new_simplified: List[Expression] = []
-                for constraint in self.constraints:
-                    if old in constraint.questions:
-                        consequences = []
-                        new_constraint = constraint.substitute(old, new, self.assignments, consequences)
-                        del constraint.questions[old.code]
-                        new_constraint.questions = constraint.questions
-                        new_simplified.append(new_constraint)
-                    else:
-                        new_simplified.append(constraint)
-
-                self.constraints = new_simplified
 
 
     def translate(self, all_: bool = True) -> BoolRef:

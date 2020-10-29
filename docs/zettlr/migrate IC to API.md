@@ -12,17 +12,20 @@ Interactive Code would become:
 ~~~~
 self.environment = Problem(environment, environment_structure)
 self.environment.symbolic_propagate(tag=Env_Univ)
-self.decision = Problem([self.environment, decision, decision_structure])
-self.decision.symbolic_propagate(tag=Universal)
 
-self.environment.add(given)
-# this is a hack: use the same set of assignments
-self.environment.assignments = self.decision.assignments
+super.init()
+self.add(self.environment)
+self.add(decision)
+self.add(decision_structure)
+self.symbolic_propagate(tag=Universal)
+
+self.environemnt.add(given)
 self.environment.propagate(tag=Env_Consq)
-self.decision.propagate(tag=Consequence)
+copy assignments from environment to self
+self.propagate(tag=Consequence)
 
-self.decision.simplify()
-self.decision.get_relevant()
+self.simplify()
+self.get_relevant()
 ~~~~
 
 TODO:
