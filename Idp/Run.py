@@ -77,6 +77,7 @@ class Problem(object):
             self.assignments.extend(block.assignments)
         else:
             assert False, "Cannot add to Problem"
+        return self
 
     def formula(self):
         """ the formula encoding the knowledge base """
@@ -98,6 +99,47 @@ class Problem(object):
                 if a.value is None
                 and type(a.sentence) in [AppliedSymbol, Variable])
         return self._formula
+
+    def _propagate(self):
+        z3_formula = self.translate()
+        todo = self._todo
+
+        solver = Solver()
+        solver.add(z3_formula)
+        if solver.check() == sat:
+            for q in todo:
+                solver.push() # in case todo contains complex formula
+                solver.add(q.reified()==q.translate())
+                res1 = solver.check()
+                if res1 == sat:
+                    val1 = solver.model().eval(q.reified())
+                    if str(val1) != str(q.reified()): # if not irrelevant
+                        solver.push()
+                        solver.add(Not(q.reified()==val1))
+                        res2 = solver.check()
+                        solver.pop()
+
+                        if res2 == unsat:
+                            val = str_to_IDP(q, str(val1))
+
+                            yield self.assignments.assert_(q, val,
+                                Status.CONSEQUENCE, True)
+                        elif res2 == unknown:
+                            res1 = unknown
+                solver.pop()
+                if res1 == unknown:
+                    # yield(f"Unknown: {str(q)}")
+                    solver = Solver() # restart the solver
+                    solver.add(z3_formula)
+
+            yield "No more consequences."
+        else:
+            yield "Not satisfiable."
+            yield str(z3_formula)
+
+    def propagate(self):
+        list(self._propagate())
+        return self
 
     def simplify(self):
         """ simplify constraints using known assignments """
@@ -196,42 +238,7 @@ def model_propagate(theories, structures=None):
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
-    z3_formula = problem.translate()
-    todo = problem._todo
-
-    solver = Solver()
-    solver.add(z3_formula)
-    if solver.check() == sat:
-        for q in todo:
-            solver.push() # in case todo contains complex formula
-            solver.add(q.reified()==q.translate())
-            res1 = solver.check()
-            if res1 == sat:
-                val1 = solver.model().eval(q.reified())
-                if str(val1) != str(q.reified()): # if not irrelevant
-                    solver.push()
-                    solver.add(Not(q.reified()==val1))
-                    res2 = solver.check()
-                    solver.pop()
-
-                    if res2 == unsat:
-                        val = str_to_IDP(q, str(val1))
-
-                        yield problem.assignments.assert_(q, val,
-                            Status.CONSEQUENCE, True)
-                    elif res2 == unknown:
-                        res1 = unknown
-            solver.pop()
-            if res1 == unknown:
-                # yield(f"Unknown: {str(q)}")
-                solver = Solver() # restart the solver
-                solver.add(z3_formula)
-
-        yield "No more consequences."
-    else:
-        yield "Not satisfiable."
-        yield str(z3_formula)
-
+    yield from problem._propagate()
 
 
 def myprint(x=""):

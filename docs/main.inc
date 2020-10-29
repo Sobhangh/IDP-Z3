@@ -51,6 +51,7 @@ Problem class
 +++++++++++++
 
 The main block can also use instances of the ``Problem`` class.
+This is beneficial when several inferences must be made in a row.
 Instances of the ``Problem`` class represent a collection of theory and structure blocks.
 The class has the following methods:
 
@@ -64,5 +65,8 @@ formula(self)
     Returns a python object representing the logic formula equivalent to the problem.
     This object can be converted to a string using ``str()``.
 
+propagate(self)
+    Returns the problem with its ``assignments`` property updated with values for terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
+
 simplify(self)
-    Simplifies the formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.
+    Returns the problem with a simplified formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.
