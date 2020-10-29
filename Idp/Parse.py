@@ -185,7 +185,7 @@ class Vocabulary(object):
             constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self, {})
 
         for v in self.symbol_decls.values():
-            if v.is_var:
+            if type(v) == SymbolDeclaration:
                 self.terms.update(v.instances)
 
 
@@ -213,7 +213,6 @@ class ConstructedTypeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
-        self.is_var = False
         self.range = self.constructors  # functional constructors are expanded
         self.translated = None
         self.map = {} # {String: constructor}
@@ -268,7 +267,6 @@ class RangeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')  # maybe 'int', 'real'
         self.elements = kwargs.pop('elements')
-        self.is_var = False
         self.translated = None
 
         self.type = 'int'
@@ -336,7 +334,6 @@ class SymbolDeclaration(object):
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         
-        self.is_var = True  # unless interpreted later
         self.typeConstraints = []
         self.translated = None
 
@@ -379,7 +376,7 @@ class SymbolDeclaration(object):
                     self.instances[expr.code] = expr
 
         # determine typeConstraints
-        if self.out.decl.name != 'bool' and self.range and self.is_var:
+        if self.out.decl.name != 'bool' and self.range:
             for inst in self.instances.values():
                 domain = self.out.decl.check_bounds(inst)
                 if domain is not None:
@@ -717,26 +714,24 @@ class Interpretation(object):
         self.default = self.default.annotate(voc, {})
         assert self.default.as_ground() is not None, f"Must be a ground term: {self.default}"
 
-        # annotate tuple and compute self.data
+        # annotate tuple and update structure.assignments
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.tuples:
             t.annotate(voc)
             assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
             if self.decl.function:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
-                struct.assignments.assert_(expr, t.args[-1], Status.UNIVERSAL, False)
+                struct.assignments.assert_(expr, t.args[-1], Status.STRUCTURE, False)
             else:
                 expr = AppliedSymbol.make(symbol, t.args)
-                struct.assignments.assert_(expr, TRUE, Status.UNIVERSAL, False)
+                struct.assignments.assert_(expr, TRUE, Status.STRUCTURE, False)
             count += 1
 
         # set default value
         if count < len(self.decl.instances):
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
-                    struct.assignments.assert_(expr, self.default, Status.UNIVERSAL, False)
-
-        self.decl.is_var = False
+                    struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
 
 
 class Tuple(object):
@@ -748,8 +743,6 @@ class Tuple(object):
 
     def annotate(self, voc):
         self.args = [arg.annotate(voc, {}) for arg in self.args]
-
-    def interpret(self, theory): return self  # TODO ?
 
     def translate(self):
         return [arg.translate() for arg in self.args]
@@ -772,7 +765,6 @@ class Goal(object):
         if '__relevant' not in voc.symbol_decls:
             relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
                                     sorts=[], out=None)
-            relevants.is_var = False
             relevants.block = self
             relevants.annotate(voc)
 
@@ -832,7 +824,6 @@ class Display(object):
         ]:
             symbol_decl = SymbolDeclaration(annotations='', name=Symbol(name=name), 
                 sorts=[], out=out)
-            symbol_decl.is_var = False
             symbol_decl.annotate(self.voc)
             symbol_decl.translate()
 

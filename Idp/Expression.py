@@ -216,7 +216,6 @@ class Constructor(Expression):
     PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
-        self.is_var = False
         self.sub_exprs = []
         self.index = None # int
 
@@ -558,7 +557,7 @@ class AppliedSymbol(Expression):
         return super().annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.is_var \
+        if self.decl.name != "`Symbols" \
         and self.simpler is None and self.name != '__relevant' \
         and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)):
             questions.append(self)
@@ -612,7 +611,7 @@ class Variable(AppliedSymbol):
         return self.annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl and self.decl.is_var:
+        if self.decl:
             questions.append(self)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)

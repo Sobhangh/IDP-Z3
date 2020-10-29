@@ -183,7 +183,11 @@ class Output(object):
 
     def fill(self, case):
         for key, l in case.assignments.items():
-            if l.value is not None and key in case.GUILines:
+            if l.value is not None:
+                if l.status == Status.STRUCTURE:
+                    key = l.sentence.code
+                    for symb in self.case.GUILines[key].unknown_symbols():
+                        del self.m[symb]
                 if key in case.GUILines:
                     self.addAtom(l.sentence, l.value, l.status)
 

@@ -39,6 +39,7 @@ class Status(IntFlag):
     ENV_CONSQ   = 16
     CONSEQUENCE = 32
     EXPANDED    = 64
+    STRUCTURE   = 128
 
 class Assignment(object):
     def __init__(self, sentence: Expression, value: Optional[Expression], status: Status, relevant:bool=False):

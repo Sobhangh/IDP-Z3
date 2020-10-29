@@ -46,7 +46,7 @@ class Case:
 
         # initialisation
         self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
-        self.simplified = OrderedSet(c.copy() for c in self.idp.theory.constraints)
+        self.constraints = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = self.idp.theory.assignments # atoms + given, with simplified formula and value value
 
         self.GUILines = {} # {Expr.code: Expression} expressions shown to user
@@ -64,7 +64,7 @@ class Case:
 
         # find immediate universals
         out = OrderedSet()
-        for c in self.simplified:
+        for c in self.constraints:
             status = Status.ENV_UNIV if c.block.name=='environment' else Status.UNIVERSAL
             # determine consequences, including from co-constraints, e.g. definitions
             consequences = []
@@ -74,7 +74,7 @@ class Case:
                 for sentence, value in consequences:
                     self.assignments.assert_(sentence, value, status, False)
             out.append(new_constraint)
-        self.simplified = out
+        self.constraints = out
 
         self._finalize()
 
@@ -82,7 +82,7 @@ class Case:
 
         out = copy(self)
         out.assignments = out.assignments.copy()
-        out.simplified = [c.copy() for c in self.simplified]
+        out.constraints = [c.copy() for c in self.constraints]
 
         out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
         out.assignments.update(out.given) #TODO get implicants, but do not add to simplified (otherwise always relevant)
@@ -91,7 +91,7 @@ class Case:
 
     def _finalize(self):
         # annotate self.simplified with questions
-        for e in self.simplified:
+        for e in self.constraints:
             questions = OrderedSet()
             e.collect(questions, all_=True)
             e.questions = questions
@@ -112,27 +112,27 @@ class Case:
         self.get_co_constraints()
         return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
-                f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.simplified)}{NEWL}"
+                f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
         )
 
     def get_co_constraints(self):
         self.co_constraints = OrderedSet()
-        for c in self.simplified:
+        for c in self.constraints:
             c.co_constraints(self.co_constraints)
         
     # def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
     #     """ causal interpretation of relevance """
     #     #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
-    #     constraints = ( self.simplified )
+    #     constraints = ( self.constraints )
 
     #     # determine relevant symbols (including defined ones)
     #     relevant_symbols = mergeDicts( e.unknown_symbols() for e in constraints )
 
     #     # remove irrelevant domain conditions
-    #     self.simplified = list(filter(lambda e: e.if_symbol is None or e.if_symbol in relevant_symbols
-    #                                  , self.simplified))
+    #     self.constraints = list(filter(lambda e: e.if_symbol is None or e.if_symbol in relevant_symbols
+    #                                  , self.constraints))
 
     #     # determine relevant subtences
     #     relevant_subtences = mergeDicts( e.subtences() for e in constraints )
@@ -148,14 +148,14 @@ class Case:
         """         
         sets 'relevant in self.assignments
         sets rank of symbols in self.relevant_symbols
-        removes irrelevant constraints in self.simplified
+        removes irrelevant constraints in self.constraints
         """
         for a in self.assignments.values():
             a.relevant = False
 
         # collect (co-)constraints
         constraints = OrderedSet()
-        for constraint in self.simplified:
+        for constraint in self.constraints:
             constraints.append(constraint)
             constraint.co_constraints(constraints)
 
@@ -253,7 +253,7 @@ class Case:
             self.relevant_symbols = relevants
 
         # remove irrelevant domain conditions
-        self.simplified = list(filter(lambda constraint: constraint.relevant, self.simplified))
+        self.constraints = list(filter(lambda constraint: constraint.relevant, self.constraints))
 
 
     def full_propagate(self, all_: bool) -> None:
@@ -323,7 +323,7 @@ class Case:
                 
                 # simplify constraints
                 new_simplified: List[Expression] = []
-                for constraint in self.simplified:
+                for constraint in self.constraints:
                     if old in constraint.questions:
                         consequences = []
                         new_constraint = constraint.substitute(old, new, self.assignments, consequences)
@@ -333,7 +333,7 @@ class Case:
                     else:
                         new_simplified.append(constraint)
 
-                self.simplified = new_simplified
+                self.constraints = new_simplified
 
 
     def translate(self, all_: bool = True) -> BoolRef:
@@ -342,7 +342,7 @@ class Case:
             [s.translate() for s in self.def_constraints.values()]
             + [l.translate() for k, l in self.assignments.items() 
                     if l.value is not None and (all_ or not l.sentence.has_decision())]
-            + [s.translate() for s in self.simplified
+            + [s.translate() for s in self.constraints
                     if all_ or not s.block.name=='environment']
             + [c.translate() for c in self.co_constraints]
             )
