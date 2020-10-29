@@ -176,8 +176,8 @@ class Output(object):
                     s["__rank"] = self.case.relevant_symbols.get(symb.name, 9999)
                     break
 
-        for GuiLine in case.GUILines.values():
-            initialise(GuiLine)
+        for GuiLine in case.assignments.values():
+            initialise(GuiLine.sentence)
         for ass in structure.values(): # add numeric input for Explain
             initialise(ass.sentence)
 
@@ -186,17 +186,16 @@ class Output(object):
             if l.value is not None:
                 if l.status == Status.STRUCTURE:
                     key = l.sentence.code
-                    for symb in self.case.GUILines[key].unknown_symbols():
+                    for symb in self.case.assignments[key].sentence.unknown_symbols():
                         del self.m[symb]
                         break
-                if key in case.GUILines:
-                    self.addAtom(l.sentence, l.value, l.status)
+                self.addAtom(l.sentence, l.value, l.status)
 
 
     def addAtom(self, atom, value, status: Status):
         key = atom.code
-        if key in self.case.GUILines:
-            for symb in self.case.GUILines[key].unknown_symbols():
+        if key in self.case.assignments:
+            for symb in self.case.assignments[key].sentence.unknown_symbols():
                 s = self.m.setdefault(symb, {})
                 if key in s:
                     if value is not None:

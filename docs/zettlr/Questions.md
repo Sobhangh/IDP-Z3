@@ -21,19 +21,11 @@ What do we need ?
 * for explain: all free comparisons and predicates, to be as explicit as possible over the steps
 
 Principles:
-* Case.viewed < Idp.viewable < Case.assignments
-    * viewable (= GUIlines)
-        * all ground instances + quantified expressions + free applied symbols and free comparisons before expansion
-    * shown ≤ showable
-        * based on normal view vs expanded view → is_visible
-    * all (→ Assignments)
-        * shown + questionables after expansion
-* Expr.questions: computed for each top expression in simplified + questions; reduced by 1 after each substitute
-* we need to determine propagated value and relevance for all Case.assignments
+* we propagate every terms and atoms in theory.assignments
+* theory.assignments does not include questions starting with '_'
 
 Todo:
 - [x] compute Expr.questions for each constraints
 - [x] reduce Expr.questions after each substitute
-- [ ] rename GUILines as showable, and reduce it per view
 
 See previous analysis [[Subtences]] 

@@ -487,8 +487,12 @@ class Theory(object):
         for e in self.constraints:
             self.subtences.update({k: v for k, v in e.subtences().items()})
 
-        for s in list(voc.terms.values()) + list(self.subtences.values()):
-            self.assignments.assert_(s, None, Status.UNKNOWN, False)
+        for s in list(voc.terms.values()):
+            if not s.code.startswith('_'):
+                self.assignments.assert_(s, None, Status.UNKNOWN, False)
+        for s in list(self.subtences.values()):
+            if not type(s) in [AppliedSymbol, Variable]:
+                self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
     def unknown_symbols(self):
         return mergeDicts(c.unknown_symbols()

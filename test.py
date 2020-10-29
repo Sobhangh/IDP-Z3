@@ -83,8 +83,8 @@ def generateZ3(theory):
         # f"{str(case.idp.goal.translate())}{NEWL}"
         # f"{NEWL}-- subtences ------------------------------------{NEWL}"
         # f"{NEWL.join(str(t) for t in case.idp.subtences)}{NEWL}"
-        # f"{NEWL}-- GUILines ------------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in case.GUILines)}{NEWL}"
+        # f"{NEWL}-- assignments ------------------------------------{NEWL}"
+        # f"{NEWL.join(str(t) for t in case.assignments)}{NEWL}"
         # f"{NEWL}-- case -------------------------------------{NEWL}"
         # f"{str(case)}{NEWL}"
         )

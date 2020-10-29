@@ -32,14 +32,13 @@ TODO:
 X API: propage questions first, then terms ? does not matter if no simplification
 X IC: do not restart propagation if model is unknown: it won't fix anything
 - [x] IC abstract : use assignments, not guilines
-- [x] IC: GUILines contains only the assignments shown to user
+- [x] IC: case.GUILines is the same as case.assignments
 - [x] API propagate: consider all assignments without value
     - [x] API problem: fill assignments with all subtences
 X API: restart solver if unknown (not needed ?)
 - [ ] move definitions, constraints, assignments to Case.Problem just before get_relevant
-- [ ] API: add simplify with one assignment
-- [ ] IC: do not cascade propagate: full propagate will take care of it.  Use API.simplify instead
-- [ ] API: add simplify option to propagate
+- [X] API: add simplify
+- [X] IC: do not cascade propagate: full propagate will take care of it.  Use API.simplify instead
 - [ ] API: add tag argument to propagate
 - [ ] use API for Case.propagate
 - [ ] IC: remove Case.translate

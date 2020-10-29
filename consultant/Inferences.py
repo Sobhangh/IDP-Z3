@@ -102,8 +102,8 @@ def explain(case, symbol, value, given_json):
         .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
         .replace("\\u2228", "∨").replace("\\u2227", "∧")
     value = value[1:] if negated else value
-    if value in case.GUILines:
-        to_explain = case.GUILines[value]
+    if value in case.assignments:
+        to_explain = case.assignments[value].sentence
 
         # rules used in justification
         if to_explain.type != 'bool': # recalculate numeric value

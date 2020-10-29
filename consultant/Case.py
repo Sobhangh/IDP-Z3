@@ -51,16 +51,8 @@ class Case(Problem):
         self.constraints = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = self.idp.theory.assignments # atoms + given, with simplified formula and value value
 
-        self.GUILines = {} # {Expr.code: Expression} expressions shown to user
-
         for s in self.idp.structures.values():
             self.assignments.extend(s.assignments)
-
-        self.GUILines = {a.sentence.code: a.sentence for a in self.assignments.values()
-            if type(a.sentence) in [AppliedSymbol, Variable] \
-                or (type(a.sentence)==AComparison and a.sentence.is_assignment) \
-                or any(s in self.expanded_symbols for s in a.sentence.unknown_symbols().keys())
-            }
 
         if __debug__: self.invariant = ".".join(str(e) for e in self.idp.theory.constraints)
 
@@ -268,12 +260,7 @@ class Case(Problem):
             for key in todo:
                 l = self.assignments[key]
                 if ( l.value is None
-                and (all_ or not l.sentence.has_decision())
-                # ignore terms starting with '_'
-                and not (type(l.sentence) in [AppliedSymbol, Variable]
-                    and l.sentence.code.startswith('_') )
-                # and key in self.get_relevant_subtences(all_) 
-                and key in self.GUILines):
+                and (all_ or not l.sentence.has_decision())):
                     atom = l.sentence
                     solver.push()
                     solver.add(atom.reified()==atom.translate())
