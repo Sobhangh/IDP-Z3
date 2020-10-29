@@ -34,7 +34,6 @@ theory {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'double': {},
  'x': {'__rank': 1,
        'x': {'environmental': False,
              'is_assignment': True,

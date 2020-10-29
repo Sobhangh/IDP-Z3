@@ -188,6 +188,7 @@ class Output(object):
                     key = l.sentence.code
                     for symb in self.case.GUILines[key].unknown_symbols():
                         del self.m[symb]
+                        break
                 if key in case.GUILines:
                     self.addAtom(l.sentence, l.value, l.status)
 
@@ -208,4 +209,5 @@ class Output(object):
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']
                     #s[key]["status"] = status.name # for a click on Sides=3
+                break
 
