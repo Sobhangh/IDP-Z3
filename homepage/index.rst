@@ -8,6 +8,7 @@ Projects
 The IDP-Z3 suite is currently deployed in the following projects:
 
 * the `Interactive Consultant <interactive_consultant.html>`_, a tool enabling experts to digitize their knowledge of a specific problem domain, which results automatically in a web tool that supports end users to find solutions for specific problems.
+* `DMN-IDP <https://autoconfig-dmn.herokuapp.com/>`_, a user-friendly tool which combines the readability of the Decision Model and Notation (DMN) standard with the power of the IDP system through an interactive interface.
 
 Get in touch?
 -------------
