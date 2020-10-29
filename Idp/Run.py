@@ -182,7 +182,6 @@ def str_to_IDP(atom, val_string):
     or type(atom.decl.out.decl) == RangeDeclaration): # could be a fraction
         out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
     else: # constructor
-        assert atom.decl.arity == 0, 'constant expected'
         out = atom.decl.out.decl.map[val_string]
     return out
 

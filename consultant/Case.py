@@ -24,7 +24,7 @@ from Idp.Parse import RangeDeclaration
 from Idp.Expression import TRUE, FALSE, AppliedSymbol, Variable, AComparison, \
     NumberConstant
 from Idp.utils import *
-from Idp.Run import Problem
+from Idp.Run import Problem, str_to_IDP
 from .IO import json_to_literals, Assignment, Status
 
 # Types
@@ -268,14 +268,6 @@ class Case(Problem):
                     if res1 == sat:
                         val1 = solver.model().eval(atom.reified())
                         if str(val1) != str(atom.reified()): # if not irrelevant
-                        
-                            if atom.type == 'bool':
-                                val = TRUE if str(val1) == 'True' else FALSE
-                            elif atom.type in ['real', 'int'] or type(atom.decl.out.decl) == RangeDeclaration:
-                                val = NumberConstant(number=str(val1).replace('?', ''))
-                            else: # constructor
-                                val = atom.decl.out.decl.map[str(val1)]
-                            assert str(val.translate()) == str(val1).replace('?', ''), str(val.translate()) + " is not the same as " + str(val1)
 
                             solver.push()
                             solver.add(Not(atom.reified()==val1))
@@ -283,6 +275,7 @@ class Case(Problem):
                             solver.pop()
 
                             if res2 == unsat:
+                                val = str_to_IDP(atom, str(val1))
                                 ass = self.assignments.assert_(atom, val, CONSQ, True)
                             elif res2 == unknown:
                                 res1 = unknown
