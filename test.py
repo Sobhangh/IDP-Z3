@@ -158,7 +158,7 @@ def pipeline():
                     idp = idpparser.model_from_str(fp.read())
                     given_json = ""
 
-                    case = make_case(idp, given_json, tuple([]))
+                    case = make_case(idp, given_json)
 
                     expand(case)
                     propagation(case)
