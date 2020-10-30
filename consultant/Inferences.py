@@ -48,27 +48,8 @@ def expand(case):
     return model_to_json(case, solver)
 
 def optimize(case, symbol, minimize):
-    # symbol may be "angle(0)""
-    def parse_func_with_params(inp):
-        func_name = "([_a-zA-Z]+)"
-        try:
-            p = re.compile(func_name + "$")
-            return p.match(inp).groups()
-        except:
-            func_current_param = func_params_adder = "([_a-zA-Z0-9.]+)"
-            for count in range(10): # max 10 arguments
-                try:
-                    p = re.compile(f"{func_name}\({func_current_param}\)$")
-                    return p.match(inp).groups()
-                except:
-                    func_current_param += ", " + func_params_adder
-    
-    args = parse_func_with_params(symbol)
-    s = case.idp.unknown_symbols()[args[0]]
-    if len(args) == 1:
-        s = s.instances[args[0]].translate()
-    else:
-        s = (s.instances[ f"{args[0]}({','.join(args[1:])})" ]).translate()
+    assert symbol in case.assignments, "Internal error"
+    s = case.assignments[symbol].sentence.translate()
 
     solver = Optimize()
     solver.add(case.translate())
