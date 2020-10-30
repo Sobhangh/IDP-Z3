@@ -35,26 +35,26 @@ def metaJSON(idp):
 
     """
     symbols = []
-    for i in idp.unknown_symbols().values():
-        typ = i.out.name
-        symbol_type = "proposition" if typ == 'bool' and i.sorts==[] else "function"
+    for decl in idp.theory.assignments.symbols.values():
+        typ = decl.out.name
+        symbol_type = "proposition" if typ == 'bool' and decl.sorts==[] else "function"
         d = {
-            "idpname": str(i.name),
+            "idpname": str(decl.name),
             "type": symbol_type,
             "priority": "core",
             "showOptimize": True,  # GUI is smart enough to show buttons appropriately
-            "view": i.view.value,
-            "environmental": i.block.name=='environment'
+            "view": decl.view.value,
+            "environmental": decl.block.name=='environment'
         }
-        if i.annotations is not None:
-            if 'reading' in i.annotations:
-                d['guiname'] = i.annotations['reading']
-            if 'short' in i.annotations:
-                d['shortinfo'] = i.annotations['short']
-            if 'long' in i.annotations:
-                d['longinfo'] = i.annotations['long']
-            if 'Slider' in i.annotations:
-                d['slider'] = i.annotations['Slider']
+        if decl.annotations is not None:
+            if 'reading' in decl.annotations:
+                d['guiname'] = decl.annotations['reading']
+            if 'short' in decl.annotations:
+                d['shortinfo'] = decl.annotations['short']
+            if 'long' in decl.annotations:
+                d['longinfo'] = decl.annotations['long']
+            if 'Slider' in decl.annotations:
+                d['slider'] = decl.annotations['Slider']
 
         symbols.append(d)
     optionalPropagation = idp.display.optionalPropagation
@@ -143,7 +143,9 @@ class Output(object):
         def initialise(atom):
             typ = atom.type
             key = atom.code
-            for symb in atom.unknown_symbols().values():
+            if ( key in case.assignments 
+            and case.assignments[key].symbol_decl is not None):
+                symb = case.assignments[key].symbol_decl
                 s = self.m.setdefault(symb.name, {})
 
                 if typ == 'bool':
@@ -174,7 +176,6 @@ class Output(object):
                         or bool(case.assignments[atom.code].sentence.is_assignment)
                     s.setdefault(key, symbol)
                     s["__rank"] = self.case.relevant_symbols.get(symb.name, 9999)
-                    break
 
         for GuiLine in case.assignments.values():
             initialise(GuiLine.sentence)
@@ -186,17 +187,18 @@ class Output(object):
             if l.value is not None:
                 if l.status == Status.STRUCTURE:
                     key = l.sentence.code
-                    for symb in self.case.assignments[key].sentence.unknown_symbols():
-                        del self.m[symb]
-                        break
+                    symb = self.case.assignments[key].symbol_decl
+                    if symb.name in self.m:
+                        del self.m[symb.name]
                 self.addAtom(l.sentence, l.value, l.status)
 
 
     def addAtom(self, atom, value, status: Status):
         key = atom.code
         if key in self.case.assignments:
-            for symb in self.case.assignments[key].sentence.unknown_symbols():
-                s = self.m.setdefault(symb, {})
+            symb = self.case.assignments[key].symbol_decl
+            if symb is not None:
+                s = self.m.setdefault(symb.name, {})
                 if key in s:
                     if value is not None:
                         if type(value)==NumberConstant:
@@ -208,5 +210,4 @@ class Output(object):
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']
                     #s[key]["status"] = status.name # for a click on Sides=3
-                break
 

@@ -106,15 +106,6 @@ class Idp(object):
         self.display.run(self)
         self.subtences = {**self.theory.subtences, **self.goal.subtences()}
 
-    def unknown_symbols(self):
-        todo = self.theory.unknown_symbols()
-
-        out = {}  # reorder per vocabulary order
-        for symb in self.vocabulary.symbol_decls:
-            if symb in todo:
-                out[symb] = todo[symb]
-        return out
-
     def translate(self):
         return self.theory.translate(self)
 
@@ -494,10 +485,6 @@ class Theory(object):
             if not type(s) in [AppliedSymbol, Variable]:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
-    def unknown_symbols(self):
-        return mergeDicts(c.unknown_symbols()
-                          for c in list(self.constraints) + self.definitions)
-
     def translate(self, idp):
         out = []
         for i in self.constraints:
@@ -552,13 +539,6 @@ class Definition(object):
             self.clark[decl] = rule.compute(theory)
 
         return self
-
-    def unknown_symbols(self):
-        out = {}
-        for decl, rule in self.clark.items():
-            out[decl.name] = decl
-            out.update(rule.unknown_symbols())
-        return out
 
 
 class Rule(object):
@@ -665,13 +645,6 @@ class Rule(object):
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block
-        return out
-
-    def unknown_symbols(self):
-        out = mergeDicts(arg.unknown_symbols() for arg in self.args)  # in case they are expressions
-        if self.out is not None:
-            out.update(self.out.unknown_symbols())
-        out.update(self.body.unknown_symbols())
         return out
 
 

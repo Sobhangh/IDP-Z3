@@ -13,12 +13,6 @@ theory {
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
-              'idpname': 'double',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'function',
-              'view': 'normal'},
-             {'environmental': False,
               'idpname': 'x',
               'priority': 'core',
               'showOptimize': True,

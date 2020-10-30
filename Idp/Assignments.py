@@ -48,6 +48,12 @@ class Assignment(object):
         self.status = status
         self.relevant = relevant
 
+        self.symbol_decl = None # first symbol in the sentence
+        for d in sentence.unknown_symbols(co_constraints=False).values():
+            if not d.name.startswith('_'):
+                self.symbol_decl = d
+                break
+
     def copy(self):
         out = copy(self)
         out.sentence = out.sentence.copy()
@@ -86,7 +92,11 @@ class Assignment(object):
 
 class Assignments(dict):
     def __init__(self,*arg,**kw):
-      super(Assignments, self).__init__(*arg, **kw)
+        super(Assignments, self).__init__(*arg, **kw)
+        self.symbols = {} # { decl.name: decl }
+        for a in self.values():
+            if a.symbol_decl:
+                self.symbols[a.symbol_decl.name] = a.symbol_decl
 
     def copy(self):
         return Assignments({k: v.copy() for k,v in self.items()})
@@ -107,6 +117,8 @@ class Assignments(dict):
             if relevant is not None: out.relevant = relevant
         else:
             out = Assignment(sentence, value, status, relevant)
+            if out.symbol_decl:
+                self.symbols[out.symbol_decl.name] = out.symbol_decl
         self[sentence.code] = out
         return out
 

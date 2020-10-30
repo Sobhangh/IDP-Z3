@@ -34,6 +34,18 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 's',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 't',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
               'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 

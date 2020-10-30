@@ -18,6 +18,12 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 'y',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
               'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 

@@ -8,7 +8,14 @@ theory {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False, 'symbols': [], 'title': 'Interactive Consultant'}
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
+              'idpname': 'Start_Dt_Dwelling_For_Social_Rent',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
+ 'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
