@@ -61,50 +61,43 @@ class Idp(object):
 
         assert self.display is None or 'main' not in self.procedures, \
             "Cannot have both a 'display and a 'main block"
-        if self.display is not None:
-            assert len(self.vocabularies) in [1,2], \
-                "Maximum 2 vocabularies are allowed in Interactive Consultant"
-            assert len(self.theories) in [1,2], \
-                "Maximum 2 theories are allowed in Interactive Consultant"
 
-            if len(self.vocabularies)==2:
-                assert 'environment' in self.vocabularies and 'decision' in self.vocabularies, \
-                    "The 2 vocabularies in Interactive Consultant must be 'environment' and 'decision'"
-            if len(self.theories)==2:
-                assert 'environment' in self.theories and 'decision' in self.theories, \
-                    "The 2 theories in Interactive Consultant must be 'environment' and 'decision'"
-
-        if self.goal    is None: self.goal    = Goal(name="")
-        if self.view    is None: self.view    = View(viewType='normal')
-        if self.display is None: self.display = Display(constraints=[])
-        
         for voc in self.vocabularies.values():
             voc.annotate(self)
         for t in self.theories.values():
             t.annotate(self)
-
-        # determine default vocabulary, theory
-        if list(self.vocabularies.keys()) == ['environment', 'decision']:
-            self.vocabulary = self.vocabularies['decision']
-        else:
-            self.vocabulary = next(iter(self.vocabularies.values())) # get first vocabulary
-        if list(self.theories.keys()) == ['environment', 'decision']:
-            self.theory = self.theories['decision']
-            self.theory.constraints.extend(self.theories['environment'].constraints)
-            self.theory.definitions.extend(self.theories['environment'].definitions)
-            self.theory.def_constraints.update(self.theories['environment'].def_constraints)
-            self.theory.subtences.update(self.theories['environment'].subtences)
-            self.theory.assignments.extend(self.theories['environment'].assignments)
-        else:
-            self.theory = next(iter(self.theories.values())) # get first theory
         for struct in self.structures.values():
             struct.annotate(self) # attaches an interpretation to the vocabulary
 
+        # determine default vocabulary, theory, before annotating display
+        self.vocabulary = next(iter(self.vocabularies.values()))
+        self.theory     = next(iter(self.theories    .values()))
+        if len(self.theories)!=1 and 'main' not in self.procedures: # (implicit) display block
+            assert len(self.vocabularies) == 2, \
+                "Maximum 2 vocabularies are allowed in Interactive Consultant"
+            assert len(self.theories)     == 2, \
+                "Maximum 2 theories are allowed in Interactive Consultant"
+            assert 'environment' in self.vocabularies and 'decision' in self.vocabularies, \
+                "The 2 vocabularies in Interactive Consultant must be 'environment' and 'decision'"
+            assert 'environment' in self.theories and 'decision' in self.theories, \
+                "The 2 theories in Interactive Consultant must be 'environment' and 'decision'"
+
+            self.vocabulary = self.vocabularies['decision']
+            self.theory     = self.theories    ['decision']
+            self.theory.constraints.extend(self.theories['environment'].constraints)
+            self.theory.definitions.extend(self.theories['environment'].definitions)
+            self.theory.def_constraints.update(self.theories['environment'].def_constraints)
+            self.theory.assignments.extend(self.theories['environment'].assignments)
+        
+
+        if self.goal    is None: self.goal    = Goal(name="")
+        if self.view    is None: self.view    = View(viewType='normal')
+        if self.display is None: self.display = Display(constraints=[])
         self.goal.annotate(self)
         self.view.annotate(self)
         self.display.annotate(self)
         self.display.run(self)
-        self.subtences = {**self.theory.subtences, **self.goal.subtences()}
+        self.subtences = self.theory.subtences
 
     def translate(self):
         return self.theory.translate(self)

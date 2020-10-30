@@ -21,7 +21,7 @@ self.symbolic_propagate(tag=Universal)
 
 self.environemnt.add(given)
 self.environment.propagate(tag=Env_Consq)
-copy assignments from environment to self
+self.assignments.extend(self.environment.assignments)
 self.propagate(tag=Consequence)
 
 self.simplify()

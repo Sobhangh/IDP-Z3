@@ -84,6 +84,7 @@ class Problem(object):
             co_constraints = OrderedSet()
             for c in self.constraints:
                 c.interpret(self)
+                #TODO may need to create new empty assignments for instantiated definitions !
                 c.co_constraints(co_constraints)
             self._formula = AConjunction.make('∧',
                 [a.formula() for a in self.assignments.values() 

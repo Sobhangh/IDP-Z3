@@ -128,8 +128,8 @@ def explain(case, symbol, value, given_json):
             out.m = {k:v for k,v in out.m.items() if v}
                 
             out.m["*laws*"] = []
-            for a1 in (list(case.idp.theory.def_constraints.values()) 
-                    + list(case.idp.theory.constraints)): 
+            for a1 in (list(case.def_constraints.values()) 
+                    + list(case.constraints)): 
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.translate()) == str(ps[a2]):
