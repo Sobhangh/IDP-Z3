@@ -17,21 +17,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from copy import copy
-from z3 import And, Not, sat, unsat, unknown, is_true
-from debugWithYamlLog import Log, NEWL, indented
+from debugWithYamlLog import NEWL, indented
 
-from Idp.Parse import RangeDeclaration
-from Idp.Expression import TRUE, FALSE, AppliedSymbol, Variable, AComparison, \
-    NumberConstant
+from Idp.Expression import AppliedSymbol
 from Idp.utils import *
-from Idp.Run import Problem, str_to_IDP
-from .IO import json_to_literals, Assignment, Status
+from Idp.Run import Problem
+from .IO import json_to_literals, Status
 
 # Types
 from Idp import Idp, SymbolDeclaration
 from Idp.Expression import Expression
 from typing import Any, Dict, List, Union, Tuple, cast
-from z3.z3 import Solver, BoolRef
+
 
 class Case(Problem):
     """ Contains a state of problem solving """
@@ -138,7 +135,8 @@ class Case(Problem):
         for constraint in constraints:
             if type(constraint)==AppliedSymbol and constraint.name=='__relevant':
                 for e in constraint.sub_exprs:
-                    assert e.code in self.assignments, f"Invalid expression in relevant: {e.code}" 
+                    assert e.code in self.assignments, \
+                        f"Invalid expression in relevant: {e.code}" 
                     reachable.append(e)
 
         # analyse given information
@@ -155,7 +153,8 @@ class Case(Problem):
         for constraint in constraints:
             constraint.relevant = False
             constraint.questions = OrderedSet()
-            constraint.collect(constraint.questions, all_=True, co_constraints=False)
+            constraint.collect(constraint.questions, 
+                all_=True, co_constraints=False)
 
             # add goals in constraint.original to constraint.questions
             # only keep questions in self.assignments
@@ -219,14 +218,16 @@ class Case(Problem):
                 # consider constraint not yet considered
                 if ( not constraint.relevant
                 # and with a question that is reachable but not given
-                and  any(q in reachable and not q in given for q in constraint.questions) ):
+                and  any(q in reachable and not q in given 
+                        for q in constraint.questions) ):
                     constraint.relevant = True
                     to_add.extend(constraint.questions)
         if not hasGiven or self.idp.display.moveSymbols:
             self.relevant_symbols = relevants
 
         # remove irrelevant domain conditions
-        self.constraints = list(filter(lambda constraint: constraint.relevant, self.constraints))
+        is_relevant = lambda constraint: constraint.relevant
+        self.constraints = list(filter(is_relevant, self.constraints))
 
 def make_case(idp: Idp, jsonstr: str) -> Case:
     """ manages the cache of Cases """
