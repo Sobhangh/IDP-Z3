@@ -88,12 +88,9 @@ def explain(case, symbol, value, given_json):
 
         # rules used in justification
         if to_explain.type != 'bool': # recalculate numeric value
-            # TODO should be given by client, or from case.assignments (beware expand)
-            s = Solver()
-            s.add(case.translate())
-            s.check()
-            val = s.model().eval(to_explain.translate())
-            val = str_to_IDP(to_explain, str(val))
+            val = case.assignments[value].value
+            if val is None: # can't explain an expanded value
+                return out.m
             to_explain = AComparison.make("=", [to_explain, val])
         if negated:
             to_explain = AUnary.make('~', to_explain)
