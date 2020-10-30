@@ -92,6 +92,7 @@ class Problem(object):
                 + [s for s in self.constraints]
                 + [c for c in co_constraints]
                 + [s for s in self.def_constraints.values()]
+                + [TRUE]  # so that it is not empty
                 )
         return self._formula
 

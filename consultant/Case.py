@@ -34,69 +34,61 @@ from typing import Any, Dict, List, Union, Tuple, cast
 from z3.z3 import Solver, BoolRef
 
 class Case(Problem):
-    """
-    Contains a state of problem solving
-    """
+    """ Contains a state of problem solving """
     cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
 
     def __init__(self, idp: Idp):
         super().__init__([])
 
+        if len(idp.theories) == 2:
+            self.environment = Problem([idp.theories['environment']])
+            if 'environment' in idp.structures: 
+                self.environment.add(idp.structures['environment'])
+            self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
+
+            self.add(self.environment)
+            self.add(idp.theories['decision'])
+            if 'decision' in idp.structures: 
+                self.add(idp.structures['decision'])
+        else: # take the first theory and structure
+            self.add(next(iter(idp.theories.values())))
+            if len(idp.structures)==1:
+                self.add(next(iter(idp.structures.values())))
+        self.symbolic_propagate(tag=Status.UNIVERSAL)
+
         self.idp = idp # Idp vocabulary and theory
-        self.goal = idp.goal
-
-        # initialisation
-        self.clark = self.idp.theory.clark
-        self.constraints = OrderedSet(c.copy() for c in self.idp.theory.constraints)
-        self.assignments = self.idp.theory.assignments # atoms + given, with simplified formula and value value
-        self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
-        self._formula = None
-
-        for s in self.idp.structures.values():
-            self.assignments.extend(s.assignments)
-
-        if __debug__: self.invariant = ".".join(str(e) for e in self.idp.theory.constraints)
-
-        # find immediate universals
-        out = OrderedSet()
-        for c in self.constraints:
-            status = Status.ENV_UNIV if c.block.name=='environment' else Status.UNIVERSAL
-            # determine consequences, including from co-constraints, e.g. definitions
-            consequences = []
-            new_constraint = c.substitute(TRUE, TRUE, self.assignments, consequences)
-            consequences.extend(new_constraint.implicants(self.assignments))
-            if consequences:
-                for sentence, value in consequences:
-                    self.assignments.assert_(sentence, value, status, False)
-            out.append(new_constraint)
-        self.constraints = out
 
         self._finalize()
 
     def add_given(self, jsonstr: str):
-
         out = copy(self)
-        out.assignments = out.assignments.copy()
+        out.assignments = self.assignments.copy()
         out.constraints = [c.copy() for c in self.constraints]
 
         out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
-        out.assignments.update(out.given) #TODO get implicants, but do not add to simplified (otherwise always relevant)
-        self._formula = None
 
+        if len(out.idp.theories) == 2:
+            out.environment = copy(self.environment)
+            out.environment.assignments = self.environment.assignments.copy()
+            out.environment.constraints = [c.copy() 
+                for c in self.environment.constraints]
+            out.environment.assignments.update(out.given)
+            out.environment._formula = None
+        else:
+            out.assignments.update(out.given)
+            out._formula = None
         return out._finalize()
 
     def _finalize(self):
-
         # propagate universals
         if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
-            # first, consider only environmental facts and theory (exclude any statement containing decisions)
-            self.full_propagate(all_=False)
+            self.environment.propagate(tag=Status.ENV_CONSQ, extended=True)
+            self.assignments.update(self.environment.assignments)
             self._formula = None
-        self.propagate(tag=Status.CONSEQUENCE, extended=True) # now consider all facts and theories
+        self.propagate(tag=Status.CONSEQUENCE, extended=True)
         self.simplify()
         
         self.get_relevant_subtences()
-        if __debug__: assert self.invariant == ".".join(str(e) for e in self.idp.theory.constraints)
         return self
 
     def __str__(self) -> str:
@@ -247,51 +239,6 @@ class Case(Problem):
         self.constraints = list(filter(lambda constraint: constraint.relevant, self.constraints))
 
 
-    def full_propagate(self, all_: bool) -> None:
-        CONSQ = Status.CONSEQUENCE if all_ else Status.ENV_CONSQ
-
-        Log(f"{NEWL}Z3 propagation ********************************")
-
-        theory = self.translate(all_)
-        solver = Solver()
-        solver.add(theory)
-        result = solver.check()
-        if result == sat:
-            todo = self.assignments.keys()
-
-            # determine consequences on expanded symbols only (for speed)
-            for key in todo:
-                l = self.assignments[key]
-                if ( l.value is None
-                and (all_ or not l.sentence.has_decision())):
-                    atom = l.sentence
-                    solver.push()
-                    solver.add(atom.reified()==atom.translate())
-                    res1 = solver.check()
-                    if res1 == sat:
-                        val1 = solver.model().eval(atom.reified())
-                        if str(val1) != str(atom.reified()): # if not irrelevant
-
-                            solver.push()
-                            solver.add(Not(atom.reified()==val1))
-                            res2 = solver.check()
-                            solver.pop()
-
-                            if res2 == unsat:
-                                val = str_to_IDP(atom, str(val1))
-                                ass = self.assignments.assert_(atom, val, CONSQ, True)
-                            elif res2 == unknown:
-                                res1 = unknown
-                    solver.pop()
-                    if res1 == unknown: # restart solver
-                        solver = Solver()
-                        solver.add(theory)
-                        result = solver.check()
-        elif result == unsat:
-            print(self.translate(all_))
-            raise Exception("Not satisfiable !")
-
-
     def translate(self, all_: bool = True) -> BoolRef:
         self.get_co_constraints()
         self.translated = And(
@@ -305,16 +252,15 @@ class Case(Problem):
         return self.translated
 
 def make_case(idp: Idp, jsonstr: str) -> Case:
-        if (idp, jsonstr) in Case.cache:
-            return Case.cache[(idp, jsonstr)]
+    """ manages the cache of Cases """
+    if (idp, jsonstr) in Case.cache:
+        return Case.cache[(idp, jsonstr)]
 
-        if (idp, "{}") in Case.cache:
-            return Case.cache[(idp, "{}")].add_given(jsonstr)
+    case = Case.cache.get((idp, "{}"), Case(idp))
+    case = case.add_given(jsonstr)
 
-        case = Case(idp).add_given(jsonstr)
-
-        if 100<len(Case.cache):
-            # remove oldest entry, to prevent memory overflow
-            Case.cache = {k:v for k,v in list(Case.cache.items())[1:]}
-        Case.cache[(idp, jsonstr)] = case
-        return case
+    if 100<len(Case.cache):
+        # remove oldest entry, to prevent memory overflow
+        Case.cache = {k:v for k,v in list(Case.cache.items())[1:]}
+    Case.cache[(idp, jsonstr)] = case
+    return case
