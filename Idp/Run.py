@@ -39,7 +39,6 @@ class Problem(object):
         self.def_constraints = {}
 
         self._formula = None # the problem expressed in one logic formula
-        self._todo = None # terms to be interpreted by expand, propagate
 
         for b in blocks:
             self.add(b)
@@ -93,16 +92,17 @@ class Problem(object):
                 + [c for c in co_constraints]
                 + [s for s in self.def_constraints.values()]
                 )
-
-            self._todo = OrderedSet(a.sentence 
-                for a in self.assignments.values() 
-                if a.value is None
-                and type(a.sentence) in [AppliedSymbol, Variable])
         return self._formula
 
-    def _propagate(self):
-        z3_formula = self.translate()
-        todo = self._todo
+    def _todo(self, extended):
+        return OrderedSet(a.sentence 
+            for a in self.assignments.values() 
+            if a.value is None
+            and (extended or type(a.sentence) in [AppliedSymbol, Variable]))
+
+    def _propagate(self, tag, extended):
+        z3_formula = Problem.translate(self) #TODO
+        todo = self._todo(extended)
 
         solver = Solver()
         solver.add(z3_formula)
@@ -121,9 +121,7 @@ class Problem(object):
 
                         if res2 == unsat:
                             val = str_to_IDP(q, str(val1))
-
-                            yield self.assignments.assert_(q, val,
-                                Status.CONSEQUENCE, True)
+                            yield self.assignments.assert_(q, val, tag, True)
                         elif res2 == unknown:
                             res1 = unknown
                 solver.pop()
@@ -137,8 +135,8 @@ class Problem(object):
             yield "Not satisfiable."
             yield str(z3_formula)
 
-    def propagate(self):
-        list(self._propagate())
+    def propagate(self, tag=Status.CONSEQUENCE, extended=False):
+        list(self._propagate(tag, extended))
         return self
 
     def simplify(self):
@@ -197,13 +195,13 @@ def model_check(theories, structures=None):
     yield str(solver.check())
 
 
-def model_expand(theories, structures=None, max=10):
+def model_expand(theories, structures=None, extended=False, max=10):
     """ output: a list of Z3 models, ending with a string """
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
     z3_formula = problem.translate()
-    todo = problem._todo
+    todo = problem._todo(extended)
 
     solver = Solver()
     solver.add(z3_formula)
@@ -237,7 +235,7 @@ def model_propagate(theories, structures=None):
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
-    yield from problem._propagate()
+    yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
 
 
 def myprint(x=""):

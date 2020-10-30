@@ -47,9 +47,11 @@ class Case(Problem):
         self.expanded_symbols = set(expanded)
 
         # initialisation
-        self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
+        self.clark = self.idp.theory.clark
         self.constraints = OrderedSet(c.copy() for c in self.idp.theory.constraints)
         self.assignments = self.idp.theory.assignments # atoms + given, with simplified formula and value value
+        self.def_constraints = self.idp.theory.def_constraints # {Declaration: Expression}
+        self._formula = None
 
         for s in self.idp.structures.values():
             self.assignments.extend(s.assignments)
@@ -80,6 +82,7 @@ class Case(Problem):
 
         out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
         out.assignments.update(out.given) #TODO get implicants, but do not add to simplified (otherwise always relevant)
+        self._formula = None
 
         return out._finalize()
 
@@ -89,7 +92,7 @@ class Case(Problem):
         if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
-        self.full_propagate(all_=True) # now consider all facts and theories
+        self.propagate(tag=Status.CONSEQUENCE, extended=True) # now consider all facts and theories
         self.simplify()
         
         self.get_relevant_subtences()
