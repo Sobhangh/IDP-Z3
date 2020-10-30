@@ -2,6 +2,7 @@ Introduction
 ============
 
 The IDP-Z3 tools implement a knowledge base system combining the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ and a grounder developed in-house, supporting the IDP language.
+It is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium.
 
 Projects
 --------
