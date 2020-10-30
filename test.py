@@ -158,10 +158,14 @@ def pipeline():
                     idp = idpparser.model_from_str(fp.read())
                     given_json = ""
 
-                    case = make_case(idp, given_json)
-
-                    expand(case)
-                    propagation(case)
+                    if idp.procedures == {}:
+                        case = make_case(idp, given_json)
+                        expand(case)
+                        propagation(case)
+                    else:
+                        # avoid files meant to raise an error
+                        if file_name not in ['./tests/1 procedures/ok.idp']:
+                            idp.execute()
                     log("end /eval ")
                     out_dict[file_name] = "Works."
             except Exception as exc:
