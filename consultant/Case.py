@@ -85,18 +85,15 @@ class Case(Problem):
         return self
 
     def __str__(self) -> str:
-        self.get_co_constraints()
+        self.co_constraints = OrderedSet()
+        for c in self.constraints:
+            c.co_constraints(self.co_constraints)
         return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
         )
-
-    def get_co_constraints(self):
-        self.co_constraints = OrderedSet()
-        for c in self.constraints:
-            c.co_constraints(self.co_constraints)
         
     # def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
     #     """ causal interpretation of relevance """
@@ -230,19 +227,6 @@ class Case(Problem):
 
         # remove irrelevant domain conditions
         self.constraints = list(filter(lambda constraint: constraint.relevant, self.constraints))
-
-
-    def translate(self, all_: bool = True) -> BoolRef:
-        self.get_co_constraints()
-        self.translated = And(
-            [s.translate() for s in self.def_constraints.values()]
-            + [l.translate() for k, l in self.assignments.items() 
-                    if l.value is not None and (all_ or not l.sentence.has_decision())]
-            + [s.translate() for s in self.constraints
-                    if all_ or not s.block.name=='environment']
-            + [c.translate() for c in self.co_constraints]
-            )
-        return self.translated
 
 def make_case(idp: Idp, jsonstr: str) -> Case:
     """ manages the cache of Cases """
