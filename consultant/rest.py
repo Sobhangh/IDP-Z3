@@ -163,7 +163,7 @@ class meta(Resource):
                     # Generate propagation for all symbols.
                     expanded = [dic['idpname'] for dic in out['symbols']
                                 if dic['view'] == 'expanded']
-                    case = make_case(idp, "{}", tuple(expanded))
+                    case = make_case(idp, "{}")
                     out["propagated"] = propagation(case)
                     return out
                 except Exception as exc:
@@ -198,7 +198,7 @@ class eval(Resource):
                 given_json = args['active']
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                case = make_case(idp, given_json, expanded)
+                case = make_case(idp, given_json)
 
                 out = {}
                 if method == "propagate":
@@ -215,14 +215,13 @@ class eval(Resource):
                                     + "theory {\n"
                                     + args['symbol']
                                     + "\n}\n"
-                                    + "view expanded"
                         )
                         idpModel = idpparser.model_from_str(newTheory)
                         expanded = {}
-                        for expr in idpModel.subtences.values():
-                            expanded.update(expr.unknown_symbols())
+                        # for expr in idpModel.subtences.values():
+                        #     expanded.update(expr.unknown_symbols())
                         expanded = tuple(expanded.keys())
-                        case = make_case(idpModel, "", expanded)
+                        case = make_case(idpModel, "")
                     out = abstract(case, given_json)
                 log("end /eval " + method)
                 #pyinstrument g.profiler.stop()

@@ -39,12 +39,11 @@ class Case(Problem):
     """
     cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
 
-    def __init__(self, idp: Idp, expanded: List[str]):
+    def __init__(self, idp: Idp):
         super().__init__([])
 
         self.idp = idp # Idp vocabulary and theory
         self.goal = idp.goal
-        self.expanded_symbols = set(expanded)
 
         # initialisation
         self.clark = self.idp.theory.clark
@@ -304,18 +303,17 @@ class Case(Problem):
             )
         return self.translated
 
-def make_case(idp: Idp, jsonstr: str, expanded: List[str]) -> Case:
+def make_case(idp: Idp, jsonstr: str) -> Case:
+        if (idp, jsonstr) in Case.cache:
+            return Case.cache[(idp, jsonstr)]
 
-        if (idp, jsonstr, expanded) in Case.cache:
-            return Case.cache[(idp, jsonstr, expanded)]
+        if (idp, "{}") in Case.cache:
+            return Case.cache[(idp, "{}")].add_given(jsonstr)
 
-        if (idp, "{}", expanded) in Case.cache:
-            return Case.cache[(idp, "{}", expanded)].add_given(jsonstr)
-
-        case = Case(idp, expanded).add_given(jsonstr)
+        case = Case(idp).add_given(jsonstr)
 
         if 100<len(Case.cache):
             # remove oldest entry, to prevent memory overflow
             Case.cache = {k:v for k,v in list(Case.cache.items())[1:]}
-        Case.cache[(idp, jsonstr, expanded)] = case
+        Case.cache[(idp, jsonstr)] = case
         return case
