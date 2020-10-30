@@ -100,6 +100,19 @@ class Problem(object):
             if a.value is None
             and (extended or type(a.sentence) in [AppliedSymbol, Variable]))
 
+    def symbolic_propagate(self, tag=Status.UNIVERSAL):
+        """ determine the immediate consequences of the constraints """
+        for c in self.constraints:
+            # determine consequences, including from co-constraints
+            consequences = []
+            new_constraint = c.substitute(TRUE, TRUE, 
+                self.assignments, consequences)
+            consequences.extend(new_constraint.implicants(self.assignments))
+            if consequences:
+                for sentence, value in consequences:
+                    self.assignments.assert_(sentence, value, tag, False)
+        return self
+
     def _propagate(self, tag, extended):
         z3_formula = Problem.translate(self) #TODO
         todo = self._todo(extended)
@@ -136,6 +149,7 @@ class Problem(object):
             yield str(z3_formula)
 
     def propagate(self, tag=Status.CONSEQUENCE, extended=False):
+        """ determine all the consequences of the constraints """
         list(self._propagate(tag, extended))
         return self
 
@@ -156,7 +170,8 @@ class Problem(object):
                     if old in constraint.questions: # for performance
                         self._formula = None # invalidates the formula
                         consequences = []
-                        new_constraint = constraint.substitute(old, new, self.assignments, consequences)
+                        new_constraint = constraint.substitute(old, new, 
+                            self.assignments, consequences)
                         del constraint.questions[old.code]
                         new_constraint.questions = constraint.questions
                         new_constraints.append(new_constraint)

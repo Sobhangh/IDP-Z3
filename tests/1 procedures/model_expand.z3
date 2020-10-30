@@ -5,11 +5,11 @@ Model 1
 
 Model 2
 ==========
-[q = False, p = True, f = [green -> False, else -> True]]
+[q = False, p = True, f = [blue -> False, else -> True]]
 
 Model 3
 ==========
-[q = False, p = True, f = [blue -> False, else -> True]]
+[q = False, p = True, f = [green -> False, else -> True]]
 
 Model 4
 ==========

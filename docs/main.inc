@@ -65,8 +65,12 @@ formula(self)
     Returns a python object representing the logic formula equivalent to the problem.
     This object can be converted to a string using ``str()``.
 
+symbolic_propagate(self)
+    Returns the problem with its ``assignments`` property updated with direct consequences of the constraints of the problem.
+    This propagation is less complete than ``propagate()``.
+
 propagate(self)
-    Returns the problem with its ``assignments`` property updated with values for terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
+    Returns the problem with its ``assignments`` property updated with values for all terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
 
 simplify(self)
     Returns the problem with a simplified formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.
