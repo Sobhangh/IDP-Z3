@@ -58,6 +58,14 @@ class Problem(object):
 
         return problem
 
+    def copy(self):
+        out = copy(self)
+        out.assignments = self.assignments.copy()
+        out.constraints = [c.copy() for c in self.constraints]
+        out.def_constraints = self.def_constraints.copy()
+        out._formula = None
+        return out
+
     def add(self, block):
         # TODO reprocess the definitions 
         self._formula = None # need to reapply the definitions

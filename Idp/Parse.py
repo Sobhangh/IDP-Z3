@@ -626,7 +626,7 @@ class Rule(object):
         return self
 
     def instantiate_definition(self, new_args, theory):
-        out = self.body
+        out = self.body.copy() # in case there is no arguments
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new)

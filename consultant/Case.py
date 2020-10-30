@@ -61,22 +61,15 @@ class Case(Problem):
         self._finalize()
 
     def add_given(self, jsonstr: str):
-        out = copy(self)
-        out.assignments = self.assignments.copy()
-        out.constraints = [c.copy() for c in self.constraints]
+        out = self.copy()
 
         out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
 
         if len(out.idp.theories) == 2:
-            out.environment = copy(self.environment)
-            out.environment.assignments = self.environment.assignments.copy()
-            out.environment.constraints = [c.copy() 
-                for c in self.environment.constraints]
+            out.environment = self.environment.copy()
             out.environment.assignments.update(out.given)
-            out.environment._formula = None
         else:
             out.assignments.update(out.given)
-            out._formula = None
         return out._finalize()
 
     def _finalize(self):

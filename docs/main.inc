@@ -61,6 +61,9 @@ __init__(self, blocks)
 add(self, block)
     Adds a theory or structure block to the problem.
 
+copy(self)
+    Returns an independent copy of a problem.
+
 formula(self)
     Returns a python object representing the logic formula equivalent to the problem.
     This object can be converted to a string using ``str()``.
