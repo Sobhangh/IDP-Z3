@@ -91,6 +91,7 @@ class Case(Problem):
         if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
             # first, consider only environmental facts and theory (exclude any statement containing decisions)
             self.full_propagate(all_=False)
+            self._formula = None
         self.propagate(tag=Status.CONSEQUENCE, extended=True) # now consider all facts and theories
         self.simplify()
         
