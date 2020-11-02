@@ -32,6 +32,143 @@ from .IO import *
 #################
 """
 
+# def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
+#     """ causal interpretation of relevance """
+#     #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
+#     constraints = ( self.constraints )
+
+#     # determine relevant symbols (including defined ones)
+#     relevant_symbols = mergeDicts( e.unknown_symbols() for e in constraints )
+
+#     # remove irrelevant domain conditions
+#     self.constraints = list(filter(lambda e: e.if_symbol is None or e.if_symbol in relevant_symbols
+#                                  , self.constraints))
+
+#     # determine relevant subtences
+#     relevant_subtences = mergeDicts( e.subtences() for e in constraints )
+#     relevant_subtences.update(mergeDicts(s.instances for s in relevant_symbols.values()))
+
+#     for k, l in self.assignments.items():
+#         symbols = list(l.sentence.unknown_symbols().keys())
+#         has_relevant_symbol = any(s in relevant_symbols for s in symbols)
+#         if k in relevant_subtences and symbols and has_relevant_symbol:
+#             l.relevant = True
+
+def get_relevant_subtences(self):
+    """         
+    sets 'relevant in self.assignments
+    sets rank of symbols in self.relevant_symbols
+    removes irrelevant constraints in self.constraints
+    """
+    # self is a Case
+    for a in self.assignments.values():
+        a.relevant = False
+
+    # collect (co-)constraints
+    constraints = OrderedSet()
+    for constraint in self.constraints:
+        constraints.append(constraint)
+        constraint.co_constraints(constraints)
+
+
+    # initialize reachable with relevant, if any
+    reachable = OrderedSet()
+    for constraint in constraints:
+        if type(constraint)==AppliedSymbol and constraint.name=='__relevant':
+            for e in constraint.sub_exprs:
+                assert e.code in self.assignments, \
+                    f"Invalid expression in relevant: {e.code}" 
+                reachable.append(e)
+
+    # analyse given information
+    given, hasGiven = OrderedSet(), False
+    for q in self.assignments.values():
+        if q.status == Status.GIVEN:
+            hasGiven = True
+            if not q.sentence.has_decision():
+                given.append(q.sentence)
+
+
+    # constraints have set of questions in self.assignments
+    # set constraint.relevant, constraint.questions
+    for constraint in constraints:
+        constraint.relevant = False
+        constraint.questions = OrderedSet()
+        constraint.collect(constraint.questions, 
+            all_=True, co_constraints=False)
+
+        # add goals in constraint.original to constraint.questions
+        # only keep questions in self.assignments
+        qs = OrderedSet()
+        constraint.original.collect(qs, all_=True, co_constraints=False)
+        for q in qs:
+            if q in reachable: # a goal
+                constraint.questions.append(q)
+        constraint.questions = OrderedSet([q for q in constraint.questions
+            if q.code in self.assignments])
+
+
+    # nothing relevant --> make every question in a constraint relevant
+    if len(reachable) == 0: 
+        for constraint in constraints:
+            if constraint.if_symbol is None:
+                for q in constraint.questions:
+                    reachable.append(q)
+
+    # find relevant symbols by depth-first propagation
+    # relevants, rank = {}, 1
+    # def dfs(question):
+    #     nonlocal relevants, rank
+    #     for constraint in constraints:
+    #         # consider constraint not yet considered
+    #         if ( not constraint.relevant
+    #         # containing the question
+    #         and question in constraint.questions):
+    #             constraint.relevant = True
+    #             for q in constraint.questions:
+    #                 self.assignments[q.code].relevant = True
+    #                 for s in q.unknown_symbols(co_constraints=False):
+    #                     if s not in relevants:
+    #                         relevants[s] = rank
+    #                         rank = rank+1
+    #                 if q.code != question.code \
+    #                 and q.type == 'bool'\
+    #                 and not q in given:
+    #                     print("==>", q)
+    #                     reachable.add(q)
+    #                     dfs(q)
+    # for question in list(reachable.values()):
+    #     dfs(question)
+
+    # find relevant symbols by breadth-first propagation
+    # input: reachable, given, constraints
+    # output: self.assignments[].relevant, constraints[].relevant, relevants[].rank
+    relevants = {}  # Dict[string: int]
+    to_add, rank = reachable, 1
+    while to_add:
+        for q in to_add:
+            self.assignments[q.code].relevant = True
+            for s in q.unknown_symbols(co_constraints=False):
+                if s not in relevants:
+                    relevants[s] = rank
+            if not q in given:
+                reachable.append(q)
+
+        to_add, rank = OrderedSet(), 2 # or rank+1
+        for constraint in constraints:
+            # consider constraint not yet considered
+            if ( not constraint.relevant
+            # and with a question that is reachable but not given
+            and  any(q in reachable and not q in given 
+                    for q in constraint.questions) ):
+                constraint.relevant = True
+                to_add.extend(constraint.questions)
+    if not hasGiven or self.idp.display.moveSymbols:
+        self.relevant_symbols = relevants
+
+    # remove irrelevant domain conditions
+    is_relevant = lambda constraint: constraint.relevant
+    self.constraints = list(filter(is_relevant, self.constraints))
 
 
 def explain(case, question):
@@ -112,15 +249,10 @@ def abstract(case, given_json):
         if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
         and not l.relevant)
 
-    questions = {a.sentence.code: a.sentence 
-                for a in case.assignments.values()}
-
     # create keys for models using first symbol of atoms
     models, count = {}, 0
-    for q in questions.values():
-        for symb in q.unknown_symbols().keys():
-            models[symb] = [] # models[symb][row] = [relevant atoms]
-            break
+    for q in case.assignments.values():
+        models[q.symbol_decl.name] = []
     
     done = set(out["universal"] + out["given"] + out["fixed"])
     theory = And(case.idp.theory.translate())
@@ -133,8 +265,8 @@ def abstract(case, given_json):
         theory2 = And(theory) # is this a way to copy theory ??
 
         atoms = [] # [Assignment]
-        for atom_string, atom in questions.items():
-            assignment = case.assignments[atom_string]
+        for assignment in case.assignments.values():
+            atom = assignment.sentence
             if assignment.value is None \
             and assignment.relevant and atom.type == 'bool':
                 solver.push()
@@ -150,7 +282,6 @@ def abstract(case, given_json):
                     theory2 = And(theory2,
                         substitute(theory2, [(atom.translate(), BoolVal(True))]),  # don't simplify !
                         substitute(theory2, [(atom.translate(), BoolVal(False))])) # it would break later substitutions
-                # models.setdefault(groupBy, [[]] * count) # create keys for models using first symbol of atoms
 
         # start with negations !
         atoms.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
@@ -206,9 +337,7 @@ def abstract(case, given_json):
         model = {}
         for l in atoms:
             if l.sentence != TRUE:
-                for symb in l.sentence.unknown_symbols().keys():
-                    model.setdefault(symb, []).append([ l ])
-                    break
+                model.setdefault(l.symbol_decl.name, []).append([ l ])
         # add to models
         for k,v in models.items(): # add model
             models[k] = v + [ model[k] if k in model else [] ]
