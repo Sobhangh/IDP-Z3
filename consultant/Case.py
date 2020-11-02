@@ -35,10 +35,10 @@ class Case(Problem):
     cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
 
     def __init__(self, idp: Idp):
-        super().__init__([])
+        super().__init__()
 
         if len(idp.theories) == 2:
-            self.environment = Problem([idp.theories['environment']])
+            self.environment = Problem(idp.theories['environment'])
             if 'environment' in idp.structures: 
                 self.environment.add(idp.structures['environment'])
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)

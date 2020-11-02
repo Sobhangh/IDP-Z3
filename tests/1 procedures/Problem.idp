@@ -18,5 +18,5 @@ structure S:V {
 }
 
 procedure main () {
-    print(Problem([T, S]).translate())
+    print(Problem(T, S).translate())
 }

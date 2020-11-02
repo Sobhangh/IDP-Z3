@@ -32,7 +32,7 @@ from .Parse import *
 
 class Problem(object):
     """ A collection of theory and structure blocks """
-    def __init__(self, blocks):
+    def __init__(self, *blocks):
         self.clark = {} # {Declaration: Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
@@ -47,8 +47,8 @@ class Problem(object):
     def make(cls, theories, structures):
         """ polymorphic creation """
         problem = ( theories if type(theories)=='Problem' else 
-                    cls([theories]) if isinstance(theories, Theory) else 
-                    cls(theories) )
+                    cls(theories) if isinstance(theories, Theory) else 
+                    cls(*theories) )
 
         structures = ( [] if structures is None else
                        [structures] if isinstance(structures, Structure) else
