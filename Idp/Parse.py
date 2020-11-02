@@ -99,9 +99,6 @@ class Idp(object):
         self.display.run(self)
         self.subtences = self.theory.subtences
 
-    def translate(self):
-        return self.theory.translate(self)
-
 
 ################################ Vocabulary  ###############################
 
@@ -226,7 +223,7 @@ class ConstructedTypeDeclaration(object):
         return (f"type {self.name} constructed from "
                 f"{{{','.join(map(str, self.constructors))}}}")
 
-    def annotate(self, voc, idp=None):
+    def annotate(self, voc):
         assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
         voc.symbol_decls[self.name] = self
         for c in self.constructors:
@@ -276,7 +273,7 @@ class RangeDeclaration(object):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." + str(x.toI)) for x in self.elements])
         return f"type {self.name} = {{{elements}}}"
 
-    def annotate(self, voc, idp=None):
+    def annotate(self, voc):
         assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
         voc.symbol_decls[self.name] = self
 
@@ -334,7 +331,7 @@ class SymbolDeclaration(object):
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}")
 
-    def annotate(self, voc, idp=None, vocabulary=True):
+    def annotate(self, voc, vocabulary=True):
         if vocabulary:
             assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
             voc.symbol_decls[self.name] = self
@@ -370,7 +367,7 @@ class SymbolDeclaration(object):
                     self.typeConstraints.append(domain)
         return self
 
-    def translate(self, idp=None):
+    def translate(self):
         if self.translated is None:
             if len(self.sorts) == 0:
                 self.translated = Const(self.name, self.out.translate())
@@ -478,7 +475,7 @@ class Theory(object):
             if not type(s) in [AppliedSymbol, Variable]:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
-    def translate(self, idp):
+    def translate(self):
         out = []
         for i in self.constraints:
             out.append(i.translate())

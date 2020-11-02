@@ -34,21 +34,21 @@ from .IO import *
 
 
 
-def explain(case, symbol, value, given_json):
+def explain(case, question):
     out = Output(case, case.given)  
 
-    negated = value.startswith('~')
-    value = value.replace("\\u2200", "∀").replace("\\u2203", "∃") \
+    question = question.replace("\\u2200", "∀").replace("\\u2203", "∃") \
         .replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
         .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
         .replace("\\u2228", "∨").replace("\\u2227", "∧")
-    value = value[1:] if negated else value
-    if value in case.assignments:
-        to_explain = case.assignments[value].sentence
+    negated = question.startswith('~')
+    question = question[1:] if negated else question
+    if question in case.assignments:
+        to_explain = case.assignments[question].sentence
 
         # rules used in justification
         if to_explain.type != 'bool': # recalculate numeric value
-            val = case.assignments[value].value
+            val = case.assignments[question].value
             if val is None: # can't explain an expanded value
                 return out.m
             to_explain = AComparison.make("=", [to_explain, val])
@@ -58,15 +58,17 @@ def explain(case, symbol, value, given_json):
         s = Solver()
         s.set(':core.minimize', True)
         ps = {} # {reified: constraint}
-        
-        for i, ass in enumerate(case.given.values()):
-            p = Const("wsdraqsesdf"+str(i), BoolSort())
+
+        for ass in case.given.values():
+            p = ass.translate()
             ps[p] = ass
             s.add(Implies(p, ass.translate()))
-        for i, constraint in enumerate(case.idp.translate()):
-            p = Const("wsdraqsesdf"+str(i+len(case.given)), BoolSort())
-            ps[p] = constraint
-            s.add(Implies(p, constraint))
+        todo = (list(case.idp.theory.constraints) 
+                + list(case.idp.theory.def_constraints.values()))
+        for constraint in todo:
+            p = constraint.reified()
+            ps[p] = constraint.translate()
+            s.add(Implies(p, constraint.translate()))
 
         s.add(Not(to_explain.translate()))
         s.check(list(ps.keys()))
@@ -121,7 +123,7 @@ def abstract(case, given_json):
             break
     
     done = set(out["universal"] + out["given"] + out["fixed"])
-    theory = And(case.idp.translate())
+    theory = And(case.idp.theory.translate())
     solver = Solver()
     solver.add(theory)
     solver.add([ass.translate() for ass in case.given.values()])

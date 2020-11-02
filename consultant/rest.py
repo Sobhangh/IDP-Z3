@@ -208,7 +208,7 @@ class eval(Resource):
                     case.assignments = list(generator)[0]
                     out = Output(case).fill(case)
                 if method == "explain":
-                    out = explain(case, args['symbol'], args['value'], given_json)
+                    out = explain(case, args['value'])
                 if method == "minimize":
                     case = case.optimize(args['symbol'], args['minimize'],
                         complete=False, extended=True)
