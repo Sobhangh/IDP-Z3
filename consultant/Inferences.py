@@ -59,13 +59,12 @@ def explain(case, symbol, value, given_json):
         s.set(':core.minimize', True)
         ps = {} # {reified: constraint}
         
-        given = json_to_literals(case.idp, given_json) # use non-simplified given data
-        for i, ass in enumerate(given.values()):
+        for i, ass in enumerate(case.given.values()):
             p = Const("wsdraqsesdf"+str(i), BoolSort())
             ps[p] = ass
             s.add(Implies(p, ass.translate()))
         for i, constraint in enumerate(case.idp.translate()):
-            p = Const("wsdraqsesdf"+str(i+len(given)), BoolSort())
+            p = Const("wsdraqsesdf"+str(i+len(case.given)), BoolSort())
             ps[p] = constraint
             s.add(Implies(p, constraint))
 
@@ -125,8 +124,7 @@ def abstract(case, given_json):
     theory = And(case.idp.translate())
     solver = Solver()
     solver.add(theory)
-    given = json_to_literals(case.idp, given_json) # use non-simplified given data
-    solver.add([ass.translate() for ass in given.values()])
+    solver.add([ass.translate() for ass in case.given.values()])
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant

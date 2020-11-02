@@ -36,6 +36,7 @@ class Case(Problem):
 
     def __init__(self, idp: Idp):
         super().__init__()
+        self.given = None # Assignments
 
         if len(idp.theories) == 2:
             self.environment = Problem(idp.theories['environment'])

@@ -72,6 +72,7 @@ def metaJSON(idp):
 #################
 
 def json_to_literals(idp, jsonstr: str):
+    """ returns Assignments corresponding to jsonstr """
     assignments = Assignments() # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
         json_data = ast.literal_eval(jsonstr \
