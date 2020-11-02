@@ -1,18 +1,26 @@
 
 Model 1
 ==========
-[p = True, q = False, f = [else -> True]]
+p:={->true}
+q:={->false}
+f:={(red)->true; (blue)->true; (green)->true}
 
 Model 2
 ==========
-[q = False, p = True, f = [green -> False, else -> True]]
+p:={->true}
+q:={->false}
+f:={(red)->true; (blue)->false; (green)->true}
 
 Model 3
 ==========
-[q = False, p = True, f = [blue -> False, else -> True]]
+p:={->true}
+q:={->false}
+f:={(red)->true; (blue)->true; (green)->false}
 
 Model 4
 ==========
-[q = False, p = True, f = [else -> Var(0) == red]]
+p:={->true}
+q:={->false}
+f:={(red)->true; (blue)->false; (green)->false}
 
 No more models.

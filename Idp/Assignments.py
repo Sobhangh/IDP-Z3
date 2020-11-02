@@ -28,7 +28,8 @@ from enum import IntFlag
 from typing import Optional
 from z3 import Not, BoolRef
 
-from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
+from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
+                        Variable, AppliedSymbol
 from .Parse import *
 
 class Status(IntFlag):
@@ -125,4 +126,11 @@ class Assignments(dict):
         return out
 
     def __str__(self):
-        return NEWL.join(str(a) for a in self.values())
+        out = {}
+        for a in self.values():
+            if a.value is not None:
+                c = f"{a.sentence}->{str(a.value)}"
+                c = c[c.index('('):] if '(' in c else c[c.index('->'):]
+                out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
+        return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"
+                         for k, a in out.items())

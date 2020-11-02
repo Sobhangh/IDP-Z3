@@ -221,13 +221,13 @@ def model_check(theories, structures=None):
     yield str(solver.check())
 
 
-def model_expand(theories, structures=None, extended=False, max=10):
-    """ output: a list of Z3 models, ending with a string """
+def model_expand(theories, structures=None, complete=False, max=10):
+    """ output: a list of Assignments, ending with a string """
     # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
     z3_formula = problem.translate()
-    todo = problem._todo(extended)
+    todo = problem._todo(False)
 
     solver = Solver()
     solver.add(z3_formula)
@@ -238,12 +238,23 @@ def model_expand(theories, structures=None, extended=False, max=10):
         if solver.check() == sat:
             count += 1
             model = solver.model()
-            yield model
+            ass = problem.assignments.copy()
+            for q in todo: # restrict to ground applied symbols
+                if all(e.as_ground() is not None for e in q.sub_exprs):
+                    val1 = solver.model().eval(q.translate(), 
+                                            model_completion=complete)
+                    if str(val1) != str(q.translate()): # otherwise, unknown
+                        val = str_to_IDP(q, str(val1))
+                        ass.assert_(q, val, Status.EXPANDED, False)
+            yield ass
 
             # exclude this model
             different = []
-            for q in todo:
-                different.append(q.translate() != model.eval(q.translate()))
+            for a in ass.values():
+                if (a.value is not None
+                and type(a.sentence) in [Variable, AppliedSymbol]):
+                    q = a.sentence
+                    different.append(q.translate() != a.value.translate())
             solver.add(Or(different))
         else:
             break
@@ -267,9 +278,9 @@ def model_propagate(theories, structures=None):
 def myprint(x=""):
     if isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
-            if isinstance(xi, ModelRef):
+            if isinstance(xi, Assignments):
                 print(f"{NEWL}Model {i+1}{NEWL}==========")
-                myprint(xi)
+                print(xi)
             else:
                 print(xi)
     else:
