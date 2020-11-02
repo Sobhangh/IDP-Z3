@@ -112,6 +112,52 @@ class Problem(object):
             and a.symbol_decl is not None
             and (extended or type(a.sentence) in [AppliedSymbol, Variable]))
 
+    def expand(self, max=10, complete=False, extended=False):
+        """ output: a list of Assignments, ending with a string """
+        z3_formula = self.translate()
+        todo = self._todo(extended)
+
+        solver = Solver()
+        solver.add(z3_formula)
+
+        count = 0
+        while count<max or max<=0:
+
+            if solver.check() == sat:
+                count += 1
+                model = solver.model()
+                ass = self.assignments.copy()
+                for q in todo:
+                    if extended or all(e.as_ground() is not None for e in q.sub_exprs):
+                        solver.push() # in case todo contains complex formula
+                        solver.add(q.reified()==q.translate())
+                        res1 = solver.check()
+                        if res1 == sat:
+                            val1 = solver.model().eval(q.reified(), 
+                                                    model_completion=complete)
+                            if str(val1) != str(q.translate()): # otherwise, unknown
+                                val = str_to_IDP(q, str(val1))
+                                ass.assert_(q, val, Status.EXPANDED, None)
+                        solver.pop()
+                yield ass
+
+                # exclude this model
+                different = []
+                for a in ass.values():
+                    if a.status == Status.EXPANDED:
+                        q = a.sentence
+                        different.append(q.translate() != a.value.translate())
+                solver.add(Or(different))
+            else:
+                break
+
+        if solver.check() == sat:
+            yield f"{NEWL}More models are available."
+        elif 0 < count:
+            yield f"{NEWL}No more models."
+        else:
+            yield "No models."
+
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
@@ -225,60 +271,13 @@ def model_check(theories, structures=None):
 def model_expand(theories, structures=None, max=10, complete=False, 
         extended=False):
     """ output: a list of Assignments, ending with a string """
-
     problem = Problem.make(theories, structures)
-    z3_formula = problem.translate()
-    todo = problem._todo(extended)
-
-    solver = Solver()
-    solver.add(z3_formula)
-
-    count = 0
-    while count<max or max<=0:
-
-        if solver.check() == sat:
-            count += 1
-            model = solver.model()
-            ass = problem.assignments.copy()
-            for q in todo:
-                if extended or all(e.as_ground() is not None for e in q.sub_exprs):
-                    solver.push() # in case todo contains complex formula
-                    solver.add(q.reified()==q.translate())
-                    res1 = solver.check()
-                    if res1 == sat:
-                        val1 = solver.model().eval(q.reified(), 
-                                                model_completion=complete)
-                        if str(val1) != str(q.translate()): # otherwise, unknown
-                            val = str_to_IDP(q, str(val1))
-                            ass.assert_(q, val, Status.EXPANDED, None)
-                    solver.pop()
-            yield ass
-
-            # exclude this model
-            different = []
-            for a in ass.values():
-                if a.status == Status.EXPANDED:
-                    q = a.sentence
-                    different.append(q.translate() != a.value.translate())
-            solver.add(Or(different))
-        else:
-            break
-
-    if solver.check() == sat:
-        yield f"{NEWL}More models are available."
-    elif 0 < count:
-        yield f"{NEWL}No more models."
-    else:
-        yield "No models."
-
+    yield from problem.expand(max=max, complete=complete, extended=extended)
 
 def model_propagate(theories, structures=None):
     """ output: a list of Assignment """
-    # this is a simplified version of Case.py/full_propagate
-
     problem = Problem.make(theories, structures)
     yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
-
 
 def myprint(x=""):
     if isinstance(x, types.GeneratorType):

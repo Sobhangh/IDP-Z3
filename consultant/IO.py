@@ -129,7 +129,7 @@ def model_to_json(case, s):
                         else:
                             d2['value'] = str(value)
                     s.pop()
-    return out.m
+    return out
 
 
 class Output(object):
@@ -191,6 +191,7 @@ class Output(object):
                     if symb.name in self.m:
                         del self.m[symb.name]
                 self.addAtom(l.sentence, l.value, l.status)
+        return self.m
 
 
     def addAtom(self, atom, value, status: Status):

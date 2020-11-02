@@ -34,11 +34,11 @@ from typing import Dict
 # pyximport.install(language_level=3)
 
 from consultant.Case import Case
-from consultant.Inferences import propagation, expand
 from consultant.IO import metaJSON
 from Idp import idpparser, SymbolDeclaration, NEWL
 from Idp.utils import start, log
 from consultant.Case import make_case
+from consultant.IO import *
 
 z3lock = threading.Lock()
 
@@ -61,6 +61,7 @@ def generateZ3(theory):
             return buf.getvalue()
 
     case = Case(idp)
+    out = Output(case).fill(case)
 
     output = (
         f"{NEWL}-- original ---------------------------------{NEWL}"
@@ -68,7 +69,7 @@ def generateZ3(theory):
         f"{NEWL}-- meta -------------------------------------{NEWL}"
         f"{pprint.pformat(metaJSON(case.idp), width=120)}{NEWL}"
         f"{NEWL}-- propagation ------------------------------{NEWL}"
-        f"{pprint.pformat(propagation(case), width=120)}{NEWL}"
+        f"{pprint.pformat(out, width=120)}{NEWL}"
 
         #additional debug info (optional)
         # f"{NEWL}-- vocabulary -------------------------------{NEWL}"
@@ -160,8 +161,9 @@ def pipeline():
 
                     if idp.procedures == {}:
                         case = make_case(idp, given_json)
-                        expand(case)
-                        propagation(case)
+                        generator = case.expand(max=1,complete=False, extended=True)
+                        list(generator)[0] # ignore result
+                        out = Output(case).fill(case)
                     else:
                         # avoid files meant to raise an error
                         if file_name not in ['./tests/1 procedures/ok.idp']:

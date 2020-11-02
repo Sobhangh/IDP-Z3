@@ -164,7 +164,8 @@ class meta(Resource):
                     expanded = [dic['idpname'] for dic in out['symbols']
                                 if dic['view'] == 'expanded']
                     case = make_case(idp, "{}")
-                    out["propagated"] = propagation(case)
+                    out = Output(case).fill(case)
+                    out["propagated"] = out
                     return out
                 except Exception as exc:
                     traceback.print_exc()
@@ -202,9 +203,11 @@ class eval(Resource):
 
                 out = {}
                 if method == "propagate":
-                    out = propagation(case)
+                    out = Output(case).fill(case)
                 if method == "modelexpand":
-                    out = expand(case)
+                    generator = case.expand(max=1,complete=False, extended=True)
+                    case.assignments = list(generator)[0]
+                    out = Output(case).fill(case)
                 if method == "explain":
                     out = explain(case, args['symbol'], args['value'], given_json)
                 if method == "minimize":

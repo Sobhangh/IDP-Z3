@@ -70,6 +70,11 @@ formula(self)
     Returns a python object representing the logic formula equivalent to the problem.
     This object can be converted to a string using ``str()``.
 
+expand(self, max=10, complete=False)
+    Returns a list of models of the theory that are expansion of the known assignments.
+    The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.
+    The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
+
 symbolic_propagate(self)
     Returns the problem with its ``assignments`` property updated with direct consequences of the constraints of the problem.
     This propagation is less complete than ``propagate()``.
