@@ -108,6 +108,7 @@ class Problem(object):
         return OrderedSet(a.sentence 
             for a in self.assignments.values() 
             if a.value is None
+            and a.symbol_decl is not None
             and (extended or type(a.sentence) in [AppliedSymbol, Variable]))
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):

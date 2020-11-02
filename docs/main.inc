@@ -39,6 +39,7 @@ model_propagate(theory, structure=None)
     Returns a list of assignments that are true in any expansion of the structure consistent with the theory.
     ``theory`` and ``structure`` can be lists, in which case their elements are merged.
     The structure is optional.
+    Terms and symbols starting with '_' are ignored.
 
     For example, ``print(model_propagate(T, S))`` will print the assignments that are true in any expansion of the structure named ``S`` consistent with the theory named ``T``.
 
@@ -74,6 +75,7 @@ symbolic_propagate(self)
 
 propagate(self)
     Returns the problem with its ``assignments`` property updated with values for all terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
+    Terms and propositions starting with '_' are ignored.
 
 simplify(self)
     Returns the problem with a simplified formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.

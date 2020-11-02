@@ -42,13 +42,15 @@ class Status(IntFlag):
     STRUCTURE   = 128
 
 class Assignment(object):
-    def __init__(self, sentence: Expression, value: Optional[Expression], status: Status, relevant:bool=False):
+    def __init__(self, sentence: Expression, value: Optional[Expression], 
+                       status: Status, relevant:bool=False):
         self.sentence = sentence
         self.value = value
         self.status = status
         self.relevant = relevant
 
-        self.symbol_decl = None # first symbol in the sentence
+        # first symbol in the sentence that does not start with '_'
+        self.symbol_decl = None
         for d in sentence.unknown_symbols(co_constraints=False).values():
             if not d.name.startswith('_'):
                 self.symbol_decl = d

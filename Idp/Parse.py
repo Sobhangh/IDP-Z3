@@ -348,7 +348,7 @@ class SymbolDeclaration(object):
 
         # create instances
         self.instances = {}
-        if vocabulary:   # and not self.name.startswith('_'):
+        if vocabulary:
             if len(self.sorts) == 0:
                 expr = Variable(s=Symbol(name=self.name))
                 expr.annotate(voc, {})
