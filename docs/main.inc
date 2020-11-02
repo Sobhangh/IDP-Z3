@@ -26,12 +26,12 @@ model_check(theory, structure=None)
     For example, ``print(model_check(T, S))`` will print ``sat`` if theory named ``T`` has a model expanding structure named ``S``.
 
 
-model_expand(theory, structure=None, complete=False, max=10)
+model_expand(theory, structure=None, max=10, complete=False)
     Returns a list of models of the theory that are expansion of the structure.
     ``theory`` and ``structure`` can be lists, in which case their elements are merged.
     The structure is optional.
-    The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
     The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.
+    The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
 
     For example, ``print(model_expand(T, S))`` will print (up to) 10 models of theory named ``T`` expanding structure named ``S``.
 

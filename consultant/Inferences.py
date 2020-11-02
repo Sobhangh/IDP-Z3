@@ -22,6 +22,7 @@ from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, \
     Not, BoolVal
 
 from Idp.Expression import AComparison, AUnary
+from Idp.Run import model_expand
 from Idp.utils import *
 from .IO import *
 
@@ -38,14 +39,14 @@ from .IO import *
 def propagation(case):
     out = Output(case)
     out.fill(case)
-
     return out.m
 
 def expand(case):
-    solver = Solver()
-    solver.add(case.translate())
-    solver.check()
-    return model_to_json(case, solver)
+    generator = model_expand(case,max=1,complete=False, extended=True)
+    case.assignments = list(generator)[0]
+    out = Output(case)
+    out.fill(case)
+    return out.m
 
 def optimize(case, symbol, minimize):
     assert symbol in case.assignments, "Internal error"

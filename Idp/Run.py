@@ -24,6 +24,7 @@ Classes to execute the main block of an IDP program
 """
 
 import types
+from typing import Iterable
 from z3 import Solver, sat, unsat, unknown, ModelRef
 
 from .Assignments import Assignment
@@ -47,12 +48,12 @@ class Problem(object):
     def make(cls, theories, structures):
         """ polymorphic creation """
         problem = ( theories if type(theories)=='Problem' else 
-                    cls(theories) if isinstance(theories, Theory) else 
-                    cls(*theories) )
+                    cls(*theories) if isinstance(theories, Iterable) else 
+                    cls(theories))
 
         structures = ( [] if structures is None else
-                       [structures] if isinstance(structures, Structure) else
-                       structures )
+                       structures if isinstance(structures, Iterable) else
+                       [structures] )
         for s in structures:
             problem.add(s)
 
@@ -71,7 +72,7 @@ class Problem(object):
         self._formula = None # need to reapply the definitions
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
-        elif type(block) in [Theory, Problem]:
+        elif type(block) in [Theory, Problem] or type(block).__name__=="Case":
             for decl, rule in block.clark.items():
                 new_rule = copy(rule)
                 if decl in self.clark:
@@ -221,13 +222,13 @@ def model_check(theories, structures=None):
     yield str(solver.check())
 
 
-def model_expand(theories, structures=None, complete=False, max=10):
+def model_expand(theories, structures=None, max=10, complete=False, 
+        extended=False):
     """ output: a list of Assignments, ending with a string """
-    # this is a simplified version of Case.py/full_propagate
 
     problem = Problem.make(theories, structures)
     z3_formula = problem.translate()
-    todo = problem._todo(False)
+    todo = problem._todo(extended)
 
     solver = Solver()
     solver.add(z3_formula)
@@ -239,20 +240,24 @@ def model_expand(theories, structures=None, complete=False, max=10):
             count += 1
             model = solver.model()
             ass = problem.assignments.copy()
-            for q in todo: # restrict to ground applied symbols
-                if all(e.as_ground() is not None for e in q.sub_exprs):
-                    val1 = solver.model().eval(q.translate(), 
-                                            model_completion=complete)
-                    if str(val1) != str(q.translate()): # otherwise, unknown
-                        val = str_to_IDP(q, str(val1))
-                        ass.assert_(q, val, Status.EXPANDED, False)
+            for q in todo:
+                if extended or all(e.as_ground() is not None for e in q.sub_exprs):
+                    solver.push() # in case todo contains complex formula
+                    solver.add(q.reified()==q.translate())
+                    res1 = solver.check()
+                    if res1 == sat:
+                        val1 = solver.model().eval(q.reified(), 
+                                                model_completion=complete)
+                        if str(val1) != str(q.translate()): # otherwise, unknown
+                            val = str_to_IDP(q, str(val1))
+                            ass.assert_(q, val, Status.EXPANDED, None)
+                    solver.pop()
             yield ass
 
             # exclude this model
             different = []
             for a in ass.values():
-                if (a.value is not None
-                and type(a.sentence) in [Variable, AppliedSymbol]):
+                if a.status == Status.EXPANDED:
                     q = a.sentence
                     different.append(q.translate() != a.value.translate())
             solver.add(Or(different))
