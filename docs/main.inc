@@ -75,6 +75,10 @@ expand(self, max=10, complete=False)
     The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.
     The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
 
+optimize(self, term, minimize=True, complete=False)
+    Returns the problem with its ``assignments`` property updated with values such that the term is minimized (or maximized if ``minimize`` is ``False``)
+    The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
+
 symbolic_propagate(self)
     Returns the problem with its ``assignments`` property updated with direct consequences of the constraints of the problem.
     This propagation is less complete than ``propagate()``.

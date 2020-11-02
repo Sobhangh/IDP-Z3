@@ -25,7 +25,7 @@ Classes to execute the main block of an IDP program
 
 import types
 from typing import Iterable
-from z3 import Solver, sat, unsat, unknown, ModelRef
+from z3 import Solver, sat, unsat, unknown, Optimize
 
 from .Assignments import Assignment
 from .Expression import TRUE, FALSE, Variable, AppliedSymbol
@@ -112,6 +112,23 @@ class Problem(object):
             and a.symbol_decl is not None
             and (extended or type(a.sentence) in [AppliedSymbol, Variable]))
 
+    def _from_model(self, solver, todo, complete, extended):
+        """ returns Assignments from model in solver """
+        ass = self.assignments.copy()
+        for q in todo:
+            if extended or all(e.as_ground() is not None for e in q.sub_exprs):
+                solver.push() # in case todo contains complex formula
+                solver.add(q.reified()==q.translate())
+                res1 = solver.check()
+                if res1 == sat:
+                    val1 = solver.model().eval(q.reified(), 
+                                            model_completion=complete)
+                    if str(val1) != str(q.translate()): # otherwise, unknown
+                        val = str_to_IDP(q, str(val1))
+                        ass.assert_(q, val, Status.EXPANDED, None)
+                solver.pop()
+        return ass
+
     def expand(self, max=10, complete=False, extended=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.translate()
@@ -126,20 +143,8 @@ class Problem(object):
             if solver.check() == sat:
                 count += 1
                 model = solver.model()
-                ass = self.assignments.copy()
-                for q in todo:
-                    if extended or all(e.as_ground() is not None for e in q.sub_exprs):
-                        solver.push() # in case todo contains complex formula
-                        solver.add(q.reified()==q.translate())
-                        res1 = solver.check()
-                        if res1 == sat:
-                            val1 = solver.model().eval(q.reified(), 
-                                                    model_completion=complete)
-                            if str(val1) != str(q.translate()): # otherwise, unknown
-                                val = str_to_IDP(q, str(val1))
-                                ass.assert_(q, val, Status.EXPANDED, None)
-                        solver.pop()
-                yield ass
+                ass = self._from_model(solver, todo, complete, extended)
+                yield ass 
 
                 # exclude this model
                 different = []
@@ -157,6 +162,35 @@ class Problem(object):
             yield f"{NEWL}No more models."
         else:
             yield "No models."
+
+    def optimize(self, term, minimize=True, complete=False, extended=False):
+        assert term in self.assignments, "Internal error"
+        s = self.assignments[term].sentence.translate()
+
+        solver = Optimize()
+        solver.add(self.translate())
+        if minimize:
+            solver.minimize(s)
+        else:
+            solver.maximize(s)
+        solver.check()
+
+        # deal with strict inequalities, e.g. min(0<x)
+        solver.push()
+        for i in range(0,10):
+            val = solver.model().eval(s)
+            if minimize:
+                solver.add(s < val)
+            else:
+                solver.add(val < s)
+            if solver.check()!=sat:
+                solver.pop() # get the last good one
+                solver.check()
+                break  
+        self.assignments = self._from_model(solver, self._todo(extended), 
+            complete, extended)
+        return self 
+
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
         """ determine the immediate consequences of the constraints """

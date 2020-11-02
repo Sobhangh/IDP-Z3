@@ -105,32 +105,6 @@ def json_to_literals(idp, jsonstr: str):
 # see docs/zettlr/REST.md
 #################
 
-def model_to_json(case, s):
-    model = s.model()
-    out = Output(case)
-    out.fill(case)
-    
-    for symb, d1 in out.m.items():
-        if symb != ' Global':
-            for atom_code, d2 in d1.items():
-                if atom_code != '__rank' and d2['status'] == 'UNKNOWN':
-                    d2['status'] = 'EXPANDED'
-
-                    atom = case.assignments[atom_code].sentence
-                    s.push() # in case todo contains complex formula
-                    s.add(atom.reified()==atom.translate())
-                    if s.check() == sat:
-                        value = s.model().eval(atom.reified(), model_completion=True)
-                        value = str_to_IDP(atom, str(value))
-
-                        # atom might not have an interpretation in model (if "don't care")
-                        if atom.type == 'bool':
-                            d2['value']  = (value == TRUE)
-                        else:
-                            d2['value'] = str(value)
-                    s.pop()
-    return out
-
 
 class Output(object):
     def __init__(self, case, structure={}):

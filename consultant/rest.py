@@ -164,8 +164,7 @@ class meta(Resource):
                     expanded = [dic['idpname'] for dic in out['symbols']
                                 if dic['view'] == 'expanded']
                     case = make_case(idp, "{}")
-                    out = Output(case).fill(case)
-                    out["propagated"] = out
+                    out["propagated"] = Output(case).fill(case)
                     return out
                 except Exception as exc:
                     traceback.print_exc()
@@ -211,7 +210,9 @@ class eval(Resource):
                 if method == "explain":
                     out = explain(case, args['symbol'], args['value'], given_json)
                 if method == "minimize":
-                    out = optimize(case, args['symbol'], args['minimize'])
+                    case = case.optimize(args['symbol'], args['minimize'],
+                        complete=False, extended=True)
+                    out = Output(case).fill(case)
                 if method == "abstract":
                     if args['symbol'] != "": # theory to explain ?
                         newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
