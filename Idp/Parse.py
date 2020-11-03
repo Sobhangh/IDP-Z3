@@ -456,21 +456,13 @@ class Theory(object):
 
         self.constraints = OrderedSet([e.annotate(voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
-        self.constraints = OrderedSet([e.interpret         (self) for e in self.constraints])
 
         for decl in voc.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
 
-        self.questions = OrderedSet()
-        for e in self.constraints:
-            e.collect(self.questions, all_=False)
-
         for s in list(voc.terms.values()):
             if not s.code.startswith('_'):
-                self.assignments.assert_(s, None, Status.UNKNOWN, False)
-        for s in list(self.questions.values()):
-            if not type(s) in [AppliedSymbol, Variable]:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
     def translate(self):

@@ -115,8 +115,10 @@ class Assignments(dict):
         sentence.copy()
         if sentence.code in self:
             out = copy(self[sentence.code]) # needed for explain of irrelevant symbols
-            if value    is not None: out.value    = value
-            if status   is not None: out.status   = status
+            # don't overwrite
+            if out.value    is None: out.value    = value
+            if out.status   is None or out.status == Status.UNKNOWN: 
+                out.status   = status
             if relevant is not None: out.relevant = relevant
         else:
             out = Assignment(sentence, value, status, relevant)

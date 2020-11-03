@@ -40,6 +40,8 @@ class Problem(object):
         self.def_constraints = {}
 
         self._formula = None # the problem expressed in one logic formula
+        self.co_constraints = None
+        self.questions = None
 
         for b in blocks:
             self.add(b)
@@ -65,14 +67,15 @@ class Problem(object):
         out.constraints = [c.copy() for c in self.constraints]
         out.def_constraints = self.def_constraints.copy()
         out._formula = None
+        self.co_constraints, self.questions = None, None
         return out
 
     def add(self, block):
-        # TODO reprocess the definitions 
         self._formula = None # need to reapply the definitions
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
         elif type(block) in [Theory, Problem] or type(block).__name__=="Case":
+            self.co_constraints, self.questions = None, None
             for decl, rule in block.clark.items():
                 new_rule = copy(rule)
                 if decl in self.clark:
@@ -87,19 +90,27 @@ class Problem(object):
             assert False, "Cannot add to Problem"
         return self
 
+    def _interpret(self):
+        """ re-apply the definitions to the constraints """
+        if self.questions is None:
+            self.co_constraints, self.questions = OrderedSet(), OrderedSet()
+            for c in self.constraints:
+                c.interpret(self)
+                c.co_constraints(self.co_constraints)
+                c.collect(self.questions, all_=False)
+            for s in list(self.questions.values()):
+                if not type(s) in [AppliedSymbol, Variable]:
+                    self.assignments.assert_(s, None, Status.UNKNOWN, False)
+
     def formula(self):
         """ the formula encoding the knowledge base """
         if not self._formula:
-            co_constraints = OrderedSet()
-            for c in self.constraints:
-                c.interpret(self)
-                #TODO may need to create new empty assignments for instantiated definitions !
-                c.co_constraints(co_constraints)
+            self._interpret()
             self._formula = AConjunction.make('∧',
                 [a.formula() for a in self.assignments.values() 
                         if a.value is not None]
                 + [s for s in self.constraints]
-                + [c for c in co_constraints]
+                + [c for c in self.co_constraints]
                 + [s for s in self.def_constraints.values()]
                 + [TRUE]  # so that it is not empty
                 )
@@ -131,7 +142,7 @@ class Problem(object):
 
     def expand(self, max=10, complete=False, extended=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.translate()
+        z3_formula = self.formula().translate()
         todo = self._todo(extended)
 
         solver = Solver()
@@ -168,7 +179,7 @@ class Problem(object):
         s = self.assignments[term].sentence.translate()
 
         solver = Optimize()
-        solver.add(self.translate())
+        solver.add(self.formula().translate())
         if minimize:
             solver.minimize(s)
         else:
@@ -194,6 +205,7 @@ class Problem(object):
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
+        self._interpret()
         for c in self.constraints:
             # determine consequences, including from co-constraints
             consequences = []
@@ -206,7 +218,7 @@ class Problem(object):
         return self
 
     def _propagate(self, tag, extended):
-        z3_formula = Problem.translate(self) #TODO
+        z3_formula = self.formula().translate()
         todo = self._todo(extended)
 
         solver = Solver()
@@ -247,6 +259,8 @@ class Problem(object):
 
     def simplify(self):
         """ simplify constraints using known assignments """
+        self._interpret()
+
         # annotate self.constraints with questions
         for e in self.constraints:
             questions = OrderedSet()
@@ -272,10 +286,6 @@ class Problem(object):
                 self.constraints = new_constraints
         return self
 
-    def translate(self):
-        """ translates to Z3 """
-        return self.formula().translate()
-
 
 def str_to_IDP(atom, val_string):
     if atom.type == 'bool':
@@ -295,7 +305,7 @@ def model_check(theories, structures=None):
     """ output: "sat", "unsat" or "unknown" """
 
     problem = Problem.make(theories, structures)
-    z3_formula = problem.translate()
+    z3_formula = problem.formula().translate()
 
     solver = Solver()
     solver.add(z3_formula)
