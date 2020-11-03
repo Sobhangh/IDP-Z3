@@ -71,7 +71,7 @@ def metaJSON(idp):
 # see docs/zettlr/REST.md
 #################
 
-def json_to_literals(idp, jsonstr: str):
+def json_to_literals(case, jsonstr: str):
     """ returns Assignments corresponding to jsonstr """
     assignments = Assignments() # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
@@ -82,12 +82,9 @@ def json_to_literals(idp, jsonstr: str):
             .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
 
         for symbol in json_data:
-            idp_symbol = idp.vocabulary.symbol_decls[symbol]
+            idp_symbol = case.idp.vocabulary.symbol_decls[symbol]
             for atom, json_atom in json_data[symbol].items():
-                if atom in idp.subtences:
-                    idp_atom = idp.subtences[atom].copy()
-                else:
-                    idp_atom = idp_symbol.instances[atom].copy()
+                idp_atom = case.assignments[atom].sentence.copy()
 
                 if json_atom["value"]!='':
                     value = str_to_IDP(idp_atom, str(json_atom["value"]))

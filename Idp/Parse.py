@@ -97,7 +97,6 @@ class Idp(object):
         self.view.annotate(self)
         self.display.annotate(self)
         self.display.run(self)
-        self.subtences = self.theory.subtences
 
 
 ################################ Vocabulary  ###############################
@@ -423,7 +422,6 @@ class Theory(object):
 
         self.clark = {}  # {Declaration: Rule}
         self.def_constraints = {} # {Declaration: Expression}
-        self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.assignments = Assignments()
         self.translated = None
 
@@ -464,14 +462,14 @@ class Theory(object):
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
 
-        self.subtences = {}
+        self.questions = OrderedSet()
         for e in self.constraints:
-            self.subtences.update({k: v for k, v in e.subtences().items()})
+            e.collect(self.questions, all_=False)
 
         for s in list(voc.terms.values()):
             if not s.code.startswith('_'):
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
-        for s in list(self.subtences.values()):
+        for s in list(self.questions.values()):
             if not type(s) in [AppliedSymbol, Variable]:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
@@ -746,9 +744,6 @@ class Goal(object):
             idp.theory.constraints.append(constraint)
         elif self.name not in [None, '']:
             raise Exception("Unknown goal: " + self.name)
-
-    def subtences(self):
-        return {}
 
 
 class View(object):

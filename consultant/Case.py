@@ -37,7 +37,7 @@ class Case(Problem):
 
     def __init__(self, idp: Idp):
         super().__init__()
-        self.given = None # Assignments
+        self.given = None # Assignments from the user interface
 
         if len(idp.theories) == 2:
             self.environment = Problem(idp.theories['environment'])
@@ -62,7 +62,7 @@ class Case(Problem):
     def add_given(self, jsonstr: str):
         out = self.copy()
 
-        out.given = json_to_literals(out.idp, jsonstr) # {atom.code : assignment} from the user interface
+        out.given = json_to_literals(out, jsonstr)
 
         if len(out.idp.theories) == 2:
             out.environment = self.environment.copy()

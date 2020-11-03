@@ -160,13 +160,6 @@ class Expression(object):
         self.collect(questions)
         return questions
 
-    def subtences(self):
-        " returns questions of type bool "
-        questions = OrderedSet()
-        self.collect(questions, all_=False)
-        out = {k: v for k, v in questions.items() if v.type == 'bool'}
-        return out
-
     def unknown_symbols(self, co_constraints=True):
         """ returns the list of symbol declarations in self, ignoring type constraints
         

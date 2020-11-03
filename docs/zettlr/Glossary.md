@@ -33,7 +33,3 @@ Includes variable-free terms, propositions, and quantified formulas occurring in
 ## **.status**  
 An indicator of how an assignment value has been determined.
 A.k.a, flag.
-
-## **.subtences**
-A *boolean* sub-formula of the theory that can be interpreted in a structure.
-Includes variable-free boolean terms, propositions, and quantified formulas occurring in the theory.
