@@ -67,7 +67,7 @@ class Idp(object):
         for t in self.theories.values():
             t.annotate(self)
         for struct in self.structures.values():
-            struct.annotate(self) # attaches an interpretation to the vocabulary
+            struct.annotate(self)
 
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))

@@ -135,7 +135,6 @@ def interpret(self, theory):
     if self.if_symbol: # do not interpret typeConstraints
         return self
     out = self.update_exprs([e.interpret(theory) for e in self.sub_exprs])
-    out.original = out
     return out
 Expression.interpret = interpret
 
@@ -223,7 +222,6 @@ def interpret(self, theory):
     else:
         out = self._change(sub_exprs=sub_exprs)
         out.co_constraint = None
-    out.original = self
     return out
 AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret
