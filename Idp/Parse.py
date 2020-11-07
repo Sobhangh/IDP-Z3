@@ -644,27 +644,37 @@ class Interpretation(object):
     def annotate(self, struct):
         voc = struct.voc
         self.decl = voc.symbol_decls[self.name]
-        if self.decl.function and 0 < self.decl.arity and self.default is None:
-            raise Exception("Default value required for function {} in structure.".format(self.name))
-        self.default = FALSE if not self.decl.function and self.tuples else self.default
-        self.default = self.default.annotate(voc, {})
-        assert self.default.as_ground() is not None, f"Must be a ground term: {self.default}"
+        if not self.decl.function and self.tuples: 
+            assert self.default is None, \
+                f"Enumeration for predicate '{self.name}' cannot have a default value: {self.default}"
+            self.default = FALSE
 
         # annotate tuple and update structure.assignments
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.tuples:
             t.annotate(voc)
-            assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
+            assert all(a.as_ground() is not None for a in t.args), \
+                    f"Tuple for '{self.name}' must be ground : ({t})"
             if self.decl.function:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
+                assert expr.code not in struct.assignments, \
+                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, t.args[-1], Status.STRUCTURE, False)
             else:
                 expr = AppliedSymbol.make(symbol, t.args)
+                assert expr.code not in struct.assignments, \
+                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, TRUE, Status.STRUCTURE, False)
             count += 1
 
         # set default value
-        if count < len(self.decl.instances):
+        if len(self.decl.instances) == 0: # infinite domain
+            assert self.default is None, \
+                f"Can't use default value for '{self.name}' on infinite domain."
+        elif self.default is not None and count < len(self.decl.instances):
+            self.default = self.default.annotate(voc, {})
+            assert self.default.as_ground() is not None, \
+                    f"Default value for '{self.name}' must be ground: {self.default}"
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
                     struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)

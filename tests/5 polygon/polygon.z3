@@ -122,7 +122,7 @@ theory {
     //?n[side]: n=<Sides & Length(n)=Base.
 }
 structure {
-    Length = {1,1; 2,2; 3,3; 4,4} else 5
+    Length = {1,1; 2,2; 3,3; 4,4}
 }
 
 display {
