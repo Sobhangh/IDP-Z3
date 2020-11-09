@@ -57,7 +57,7 @@ This is beneficial when several inferences must be made in a row (e.g., ``Proble
 Instances of the ``Problem`` class represent a collection of theory and structure blocks.
 The class has the following methods:
 
-__init__(self, *blocks)
+__init__(self, \*blocks)
     Creates an instance of ``Problem`` for the list of blocks, e.g., ``Problem(T,S)``
 
 add(self, block)
