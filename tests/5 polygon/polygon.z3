@@ -120,9 +120,11 @@ theory {
     //0 =< Base.
     //0 =< Height.
     //?n[side]: n=<Sides & Length(n)=Base.
+
+    ~(Length(Sides) is enumerated) => Length(Sides)=4.
 }
 structure {
-    Length = {1,1; 2,2; 3,3; 4,4}
+    Length = {1,1; 2,2; 3,3}
 }
 
 display {

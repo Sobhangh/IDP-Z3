@@ -33,8 +33,8 @@ from debugWithYamlLog import *
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    ADisjunction, AConjunction,  AAggregate, AComparison, \
-                    AppliedSymbol, Variable, NumberConstant, Fresh_Variable 
+                    ADisjunction, AConjunction,  AAggregate, \
+                    AppliedSymbol, Variable, NumberConstant, Fresh_Variable
 
 
 # class Expression ############################################################
@@ -199,7 +199,10 @@ AAggregate.expand_quantifiers = expand_quantifiers
 
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
-    if self.decl in theory.clark: # has a theory
+    if self.is_enumerated:
+        simpler = theory.interpretations[self.name].is_enumerated(self.sub_exprs)
+        out = self._change(simpler=simpler)
+    elif self.decl in theory.clark: # has a theory
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
         out = self._change(sub_exprs=sub_exprs, co_constraint=co_constraint)
     else:

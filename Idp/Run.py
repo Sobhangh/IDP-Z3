@@ -38,6 +38,7 @@ class Problem(object):
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.def_constraints = {}
+        self.interpretations = {}
 
         self._formula = None # the problem expressed in one logic formula
         self.co_constraints = None # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
@@ -72,6 +73,7 @@ class Problem(object):
 
     def add(self, block):
         self._formula = None # need to reapply the definitions
+        self.interpretations.update(block.interpretations) #TODO detect conflicts
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
         elif isinstance(block, Theory) or isinstance(block, Problem):

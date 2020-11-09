@@ -82,8 +82,9 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
     Base:  AppliedSymbol | Variable | NumberConstant | Brackets;
 
-      AppliedSymbol: s=Symbol args=Arguments;
+      AppliedSymbol: s=Symbol args=Arguments is_enumerated=Enumerated?;
         Arguments: '(' sub_exprs*=Expression[','] ')';
+        Enumerated: 'is' 'enumerated';
       Variable: s=Symbol;
       NumberConstant: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;

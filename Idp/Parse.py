@@ -19,7 +19,7 @@
 
 from copy import copy
 from enum import Enum
-import itertools as it
+import itertools
 import os
 import re
 import sys
@@ -395,7 +395,7 @@ class Theory(object):
         self.clark = {}  # {Declaration: Rule}
         self.def_constraints = {} # {Declaration: Expression}
         self.assignments = Assignments()
-        self.translated = None
+        self.interpretations = {}
 
         for constraint in self.constraints:
             constraint.block = self
@@ -451,7 +451,6 @@ class Definition(object):
         self.rules = kwargs.pop('rules')
         self.clark = None  # {Declaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Fresh_Variable}} Fresh variables for arguments & result
-        self.translated = None
 
     def __str__(self):
         return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
@@ -517,7 +516,6 @@ class Rule(object):
             self.args.append(self.out)
         if self.body is None:
             self.body = TRUE
-        self.translated = None
 
     def __repr__(self):
         return (f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
@@ -640,6 +638,7 @@ class Interpretation(object):
         self.default = kwargs.pop('default')  # later set to false for predicates
 
         self.decl = None  # symbol declaration
+        self.is_complete = None # is the function enumeration complete ?
 
     def annotate(self, struct):
         voc = struct.voc
@@ -648,6 +647,8 @@ class Interpretation(object):
             assert self.default is None, \
                 f"Enumeration for predicate '{self.name}' cannot have a default value: {self.default}"
             self.default = FALSE
+
+        self.tuples.sort(key=lambda t: ",".join(map(str, t.args)))
 
         # annotate tuple and update structure.assignments
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
@@ -666,18 +667,47 @@ class Interpretation(object):
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, TRUE, Status.STRUCTURE, False)
             count += 1
+        self.is_complete = (0 < count and count == len(self.decl.instances))
 
         # set default value
         if len(self.decl.instances) == 0: # infinite domain
             assert self.default is None, \
                 f"Can't use default value for '{self.name}' on infinite domain."
-        elif self.default is not None and count < len(self.decl.instances):
+        elif not self.is_complete and self.default is not None:
             self.default = self.default.annotate(voc, {})
             assert self.default.as_ground() is not None, \
                     f"Default value for '{self.name}' must be ground: {self.default}"
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
                     struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
+
+    def is_enumerated(self, args, rank=0, tuples=None):
+        """ returns an Expression that says whether Tuple args is in the enumeration """
+        assert self.decl.function, \
+            f"Can't use 'is enumerated' with predicate {self.name}."
+        if self.is_complete:
+            return TRUE
+        if rank == self.decl.arity:  # valid tuple
+            return TRUE
+        if tuples is None:
+            tuples = self.tuples
+        
+        # constructs If-then-else recursively
+        groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
+        if args[rank].as_ground() is not None:
+            for val, tuples2 in groups:  # try to resolve
+                if str(args[rank]) == val:
+                    return self.is_enumerated(args, rank+1, list(tuples2))
+            return FALSE
+        else:
+            out = FALSE
+            for val, tuples2 in groups:
+                tuples = list(tuples2)
+                out = IfExpr.make(AComparison.make('=', 
+                                    [args[rank], tuples[0].args[rank]]),
+                                    self.is_enumerated(args, rank+1, tuples),
+                                    out)
+            return out
 
 
 class Tuple(object):
