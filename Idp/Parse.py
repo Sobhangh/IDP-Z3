@@ -645,7 +645,8 @@ class Structure(object):
         self.assignments = Assignments()
 
     def annotate(self, idp):
-        assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
+        assert self.vocab_name in idp.vocabularies, \
+            "Unknown vocabulary: " + self.vocab_name
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
             i.annotate(self) # this updates self.assignments

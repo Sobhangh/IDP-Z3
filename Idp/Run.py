@@ -127,7 +127,13 @@ class Problem(object):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            if extended or all(e.as_ground() is not None for e in q.sub_exprs):
+            if isinstance(q, AppliedSymbol):
+                val1 = solver.model().eval(q.translate(), 
+                                        model_completion=complete)
+                if str(val1) != str(q.translate()): # otherwise, unknown
+                    val = str_to_IDP(q, str(val1))
+                    ass.assert_(q, val, Status.EXPANDED, None)
+            elif extended:
                 solver.push() # in case todo contains complex formula
                 solver.add(q.reified()==q.translate())
                 res1 = solver.check()

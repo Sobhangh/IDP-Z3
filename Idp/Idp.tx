@@ -104,7 +104,7 @@ Display: 'display' '{' (constraints=Expression '.')* '}';
 Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
 
   PyStatement: Call1 | PyAssignment ;
-  Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=PyAssignment[','])? ')' ('.' post=Call1)?;
+  Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=PyAssignment[','])? ')' ('.' post=PyExpr)?;
   Call0 : !PyAssignment pyExpr=PyExpr;
   PyExpr : Call1 | String | NumberConstant | ID | PyList;
   String: literal=/"(\.|[^"])*"/;
