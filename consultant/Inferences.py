@@ -20,7 +20,7 @@ from itertools import chain
 import re
 import time
 from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, \
-    Not, BoolVal
+    Not, BoolVal, unsat
 
 from Idp.Expression import AComparison, AUnary
 from Idp.utils import *
@@ -234,7 +234,8 @@ def explain(state, question):
                         out.m["*laws*"].append(a1.annotations['reading'])
     return out.m
 
-def abstract(state, given_json):
+def abstract(case, given_json):
+    return DMN(case, "Eligible")
     timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
 
@@ -313,6 +314,134 @@ def abstract(state, given_json):
                         if symb in active_symbol ]]
     for i in range(count):
         out["variable"] += [[ models[symb][i] for symb in models.keys() 
+                            if symb in active_symbol ]]
+    return out
+
+def DMN(case, goal_string):
+
+    def generalize(theory_formula, conjuncts):
+        goal = conjuncts[-1]
+        solver2 = Solver()
+        solver2.add(theory_formula)
+        for i, c in enumerate(conjuncts[:-1]):
+            if (not c.sentence.same_as(TRUE)
+            and not c.sentence.code==goal_string):
+                solver2.push()
+                conjunction = Implies(And([l.translate() for l in conjuncts[:-1]
+                                        if l.value is not None]),
+                                        goal.translate())
+                conjunction2 = Implies(And([l.translate() 
+                                        for j, l in enumerate(conjuncts[:-1]) 
+                                        if j != i and l.value is not None]),
+                                    goal.translate())
+                solver2.add(Not(Implies(conjunction, conjunction2)))
+                result = solver2.check()
+                if result == unsat: # C' => C
+                    conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+                solver2.pop()
+
+    assert(goal_string in case.assignments), \
+        f"Unknown goal: {goal_string}"
+    goal = case.assignments[goal_string]
+    
+    timeout = time.time()+20 # 20 seconds max
+    out = {} # {category : [Assignment]}
+
+    # extract fixed atoms from constraints
+    out["universal"] = list(l for l in case.assignments.values() 
+                        if l.status == Status.UNIVERSAL)
+    out["given"    ] = list(l for l in case.assignments.values() 
+                        if l.status == Status.GIVEN)
+    out["fixed"    ] = list(l for l in case.assignments.values() 
+                        if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
+    out["irrelevant"]= list(l for l in case.assignments.values() 
+        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
+        and not l.relevant)
+
+    # create keys for models using first symbol of atoms
+    models, count = [], 0
+    
+    done = set(out["universal"] + out["given"] + out["fixed"])
+    theory = case.formula().translate()
+    solver = Solver()
+    solver.add(theory)
+    solver.add([ass.translate() for ass in case.given.values()])
+    while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
+
+        # find the interpretation of all atoms in the model
+        assignments = [] # [Assignment]
+        for assignment in case.assignments.values():
+            atom = assignment.sentence
+            if assignment.value is None \
+            and atom.type == 'bool':
+                value = solver.model().eval(atom.translate())
+                if value == True:
+                    ass = Assignment(atom, TRUE , Status.UNKNOWN)
+                elif value == False:
+                    ass = Assignment(atom, FALSE, Status.UNKNOWN)
+                else: #unknown
+                    ass = None
+                if ass is not None:
+                    if atom.code == goal_string:
+                        goal = ass
+                    else:
+                        assignments.append(ass)
+        # start with negations !
+        assignments.sort(key=lambda l: (l.value==FALSE, str(l.sentence)))
+        assignments.append(goal) # place goal at end
+
+        if goal.value is not None:
+            generalize(case.formula().translate(), assignments)
+            models.append(assignments)
+
+        # add constraint to eliminate this model
+        modelZ3 = Not(And( [l.translate() for l in assignments if l.value is not None] ))
+        theory = And(theory, modelZ3)
+        solver.add(modelZ3)
+
+        count +=1
+    
+    models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
+    
+    # first hit policy
+    theory = case.formula().translate()
+    models1 = []
+    for i in range(len(models)):
+        models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
+        model = models.pop(0)
+        models1.append(model)
+        theory = And(theory, Not(And([l.translate() for l in model[:-1]
+                                        if l.value is not None])))
+        for model in models:
+            generalize(theory, model)
+    models = models1
+
+    # detect symbols with assignments
+    active_symbol = {}
+    for i, model in enumerate(models):
+        for ass in model:
+            if ass.sentence != TRUE:
+                active_symbol[ass.symbol_decl.name] = True
+    #create empty table
+    table = {}
+    for ass in case.assignments.values():
+        if (ass.symbol_decl.name in active_symbol
+        and ass.symbol_decl.name not in table):
+            table[ass.symbol_decl.name] = [ [] for i in range(len(models))]
+    # fill table
+    for i, model in enumerate(models):
+        print([str(a) for a in model if a.sentence != TRUE])
+        for ass in model:
+            if ass.sentence != TRUE:
+                table[ass.symbol_decl.name][i].append(ass)
+
+    # build table of models
+    out["models"] = ("" if count < 50 and time.time()<timeout else 
+                "Time out or more than 50 models...Showing partial results")
+    out["variable"] = [[ [symb] for symb in table.keys() 
+                        if symb in active_symbol ]]
+    for i in range(count):
+        out["variable"] += [[ table[symb][i] for symb in table.keys() 
                             if symb in active_symbol ]]
     return out
 

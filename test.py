@@ -37,6 +37,9 @@ from consultant.State import State, make_state
 from consultant.IO import *
 from Idp import idpparser, SymbolDeclaration, NEWL
 from Idp.utils import start, log
+from consultant.Case import make_case
+from consultant.IO import *
+from consultant.Inferences import DMN
 
 z3lock = threading.Lock()
 
@@ -182,11 +185,29 @@ if __name__ == "__main__":
     parser.add_argument('TEST', nargs='*', default=["generate"])
     args = parser.parse_args()
 
-    error = 0
-    if "generate" in args.TEST:
-        error = generate()
-    if "pipeline" in args.TEST:
-        p_error = pipeline()
-        error = max(error, p_error)
+    theory = """
+vocabulary V {
+    A
+    B
+    C
+    D
+    E
+    F
+    G
+    H
+    I
+    Eligible
+}
 
-    sys.exit(error)
+theory T:V {
+    {
+        Eligible <- B & (C|D).
+        Eligible <- B & E & F.
+        Eligible <- B & E & G & ~H.
+    }
+    A => ~Eligible.
+}
+    """
+    idp = idpparser.model_from_str(theory)
+    case = Case(idp).add_given("{}")
+    out = DMN(case, "Eligible")
