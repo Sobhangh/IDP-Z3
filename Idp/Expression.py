@@ -48,7 +48,7 @@ class DSLException(Exception):
 
 class Expression(object):
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code', 'annotations', 'original',
-        'str', 'fresh_vars', 'type', '_reified', 'if_symbol', 'co_constraint',
+        'str', 'fresh_vars', 'type', '_reified', 'is_type_constraint_for', 'co_constraint',
         'normal', 'questions', 'relevant' )
 
     COUNT = 0
@@ -68,7 +68,7 @@ class Expression(object):
         self.no_fresh_vars_before_expansion = None # Bool
         self.type = None                  # String (e.g. 'bool', 'real', 'int', 'color'), or None
         self._reified = None
-        self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
+        self.is_type_constraint_for = None# (string) this constraint is relevant if Symbol is relevant
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
         self.is_assignment = None         # for comparisons only
 
@@ -165,7 +165,7 @@ class Expression(object):
         
         returns Dict[name, Declaration] 
         """
-        if self.if_symbol is not None: # ignore type constraints
+        if self.is_type_constraint_for is not None: # ignore type constraints
             return {}
         questions = OrderedSet()
         self.collect(questions, all_=True, co_constraints=co_constraints)

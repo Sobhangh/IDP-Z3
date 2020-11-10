@@ -41,7 +41,7 @@ from .IO import *
 #     relevant_symbols = mergeDicts( e.unknown_symbols() for e in constraints )
 
 #     # remove irrelevant domain conditions
-#     self.constraints = list(filter(lambda e: e.if_symbol is None or e.if_symbol in relevant_symbols
+#     self.constraints = list(filter(lambda e: e.is_type_constraint_for is None or e.is_type_constraint_for in relevant_symbols
 #                                  , self.constraints))
 
 #     # determine relevant subtences
@@ -111,7 +111,7 @@ def get_relevant_subtences(self):
     # nothing relevant --> make every question in a constraint relevant
     if len(reachable) == 0: 
         for constraint in constraints:
-            if constraint.if_symbol is None:
+            if constraint.is_type_constraint_for is None:
                 for q in constraint.questions:
                     reachable.append(q)
 
@@ -174,10 +174,7 @@ def get_relevant_subtences(self):
 def explain(case, question):
     out = Output(case, case.given)  
 
-    question = question.replace("\\u2200", "∀").replace("\\u2203", "∃") \
-        .replace("\\u2264", "≤").replace("\\u2265", "≥").replace("\\u2260", "≠") \
-        .replace("\\u21d2", "⇒").replace("\\u21d4", "⇔").replace("\\u21d0", "⇐") \
-        .replace("\\u2228", "∨").replace("\\u2227", "∧")
+    question = decode_UTF(question)
     negated = question.startswith('~')
     question = question[1:] if negated else question
     if question in case.assignments:

@@ -24,7 +24,7 @@ Classes to represent assignments of values to expressions
 """
 
 from copy import copy
-from enum import IntFlag
+from enum import Enum
 from typing import Optional
 from z3 import Not, BoolRef
 
@@ -32,15 +32,15 @@ from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
                         Variable, AppliedSymbol
 from .Parse import *
 
-class Status(IntFlag):
+class Status(Enum):
     UNKNOWN     = 1
     GIVEN       = 2
-    ENV_UNIV    = 4
-    UNIVERSAL   = 8
-    ENV_CONSQ   = 16
-    CONSEQUENCE = 32
-    EXPANDED    = 64
-    STRUCTURE   = 128
+    ENV_UNIV    = 3
+    UNIVERSAL   = 4
+    ENV_CONSQ   = 5
+    CONSEQUENCE = 6
+    EXPANDED    = 7
+    STRUCTURE   = 8
 
 class Assignment(object):
     def __init__(self, sentence: Expression, value: Optional[Expression], 
@@ -112,11 +112,15 @@ class Assignments(dict):
                       value: Optional[Expression], 
                       status: Optional[Status],
                       relevant: Optional[bool]):
-        sentence.copy()
+        sentence = sentence.copy()
         if sentence.code in self:
             out = copy(self[sentence.code]) # needed for explain of irrelevant symbols
             # don't overwrite
-            if out.value    is None: out.value    = value
+            if out.value is None: 
+                out.value = value
+            else:
+                assert value is None or str(out.value) == str(value), \
+                    f"Internal error: changing value of {out.sentence} from {out.value} to {value}"
             if out.status   is None or out.status == Status.UNKNOWN: 
                 out.status   = status
             if relevant is not None: out.relevant = relevant
@@ -130,9 +134,10 @@ class Assignments(dict):
     def __str__(self):
         out = {}
         for a in self.values():
-            if a.value is not None:
-                c = f"{a.sentence}->{str(a.value)}"
-                c = c[c.index('('):] if '(' in c else c[c.index('->'):]
+            if isinstance(a.sentence, AppliedSymbol) and a.value is not None:
+                c = ",".join(str(e) for e in a.sentence.sub_exprs)
+                c = f"({c})" if c else c 
+                c = f"{c}->{str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
         return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"
                          for k, a in out.items())

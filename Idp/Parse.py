@@ -361,7 +361,7 @@ class SymbolDeclaration(object):
                 domain = self.out.decl.check_bounds(inst)
                 if domain is not None:
                     domain.block = self.block
-                    domain.if_symbol = self.name
+                    domain.is_type_constraint_for = self.name
                     domain.annotations['reading'] = "Possible values for " + str(inst)
                     self.typeConstraints.append(domain)
         return self

@@ -40,7 +40,7 @@ class Problem(object):
         self.def_constraints = {}
 
         self._formula = None # the problem expressed in one logic formula
-        self.co_constraints = None
+        self.co_constraints = None # see Glossary.md
         self.questions = None
 
         for b in blocks:
@@ -74,7 +74,7 @@ class Problem(object):
         self._formula = None # need to reapply the definitions
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
-        elif type(block) in [Theory, Problem] or type(block).__name__=="Case":
+        elif isinstance(block, Theory) or isinstance(block, Problem):
             self.co_constraints, self.questions = None, None
             for decl, rule in block.clark.items():
                 new_rule = copy(rule)

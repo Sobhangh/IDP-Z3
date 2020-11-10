@@ -20,7 +20,7 @@ Terms that begin with '_' are excluded.
 A statement in the theory block, or a type constraint resulting from a symbol declaration in the vocabulary.
 
 ## **.co_constraint**  
-A constraint attached to a formula.  
+A constraint attached to a sub-formula.  
 Can represent the instantiation of a definition.
 
 ## **.def_constraints**  
