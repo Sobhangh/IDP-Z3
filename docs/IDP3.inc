@@ -3,7 +3,7 @@
 Differences with IDP3
 ---------------------
 
-Here are the main differences with IDP3:
+Here are the main differences with IDP3, listed for migration purposes:
 
 min/max aggregates
     IDP-Z3 does not support these aggregates (yet).
@@ -42,6 +42,7 @@ Structure
     Function enumerations must have an ``else`` part. 
     (see also `IEP 04 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-04-Incomplete-enumerations>`_)
 
-Type hierarchy
+Type
+    Type enumerations must be done in the vocabulary block (not in the structure block).
     IDP-Z3 does not support type hierarchies.
 
