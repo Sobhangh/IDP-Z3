@@ -20,8 +20,8 @@ structure S2:V {
 
 theory T:V {
     opposite(red) is enumerated.
-    ~(opposite(blue) is enumerated) => opposite(blue)=blue.
-    ~(opposite(Color) is enumerated).
+    opposite(blue) is not enumerated => opposite(blue)=blue.
+    opposite(Color) is not enumerated.
 }
 theory T2:V {
     Color=blue.
