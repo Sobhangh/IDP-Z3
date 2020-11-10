@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * add model_check(), model_propagate() to API
 * add Problem class to API, with copy(), symbolic_propagate(), propagate(), simplify()
 * use poetry for installation
+* support [IEP 04 Incomplete enumerations](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-04-Incomplete-enumerations)
 
 ## [0.5.4] - 2020-10-06
 [Access v0.5.4 on Google App Engine](https://20201006t101829-dot-interactive-consultant.ew.r.appspot.com/)

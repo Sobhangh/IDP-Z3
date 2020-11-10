@@ -121,6 +121,12 @@ Quantified formulas
     For example, ``!x[int] y[int]: f(x,y)=f(y,x).``
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
 
+"is (not) enumerated"
+    :math:`f(a,b)\ is\ enumerated` and :math:`f(a,b)\ is\ not\ enumerated` are sentences, 
+    where :math:`f` is a function defined by an enumeration and applied to arguments :math:`a` and :math:`b`.
+    Its truth value reflects whether :math:`(a,b)` is enumerated in :math:`f`'s enumeration.
+    If the enumeration has a default value, every tuple of arguments is enumerated.
+
 
 .. _definition:
 .. index:: definition

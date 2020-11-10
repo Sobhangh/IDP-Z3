@@ -674,6 +674,7 @@ class Interpretation(object):
             assert self.default is None, \
                 f"Can't use default value for '{self.name}' on infinite domain."
         elif not self.is_complete and self.default is not None:
+            self.is_complete = True
             self.default = self.default.annotate(voc, {})
             assert self.default.as_ground() is not None, \
                     f"Default value for '{self.name}' must be ground: {self.default}"
