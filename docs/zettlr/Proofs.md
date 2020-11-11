@@ -16,7 +16,7 @@ Todo:
 - [ ] replace by True/false → add to consequences (stash: consequences)
 - [x] proof for arithmetic, comparison
 - [ ] Expression.substitutions(), not Assignments.substitutions
-- [ ] simplify Case.propagate
+- [ ] simplify State.propagate
 
 - [ ] consequences, todo as dictionary → re-use previous results
 - [ ] batch substitutions together
@@ -228,9 +228,9 @@ todo = S(theory, True)
 while todo:
     todo1 = []
     theory = substitute(theory, consequences, *todo1)
-    add consequences to Case.assignments
+    add consequences to State.assignments
     todo = S(theory,True)
-    add todo to Case.assignments
+    add todo to State.assignments
 ```
 
 Remaining Issues:

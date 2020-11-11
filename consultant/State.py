@@ -31,9 +31,9 @@ from Idp.Expression import Expression
 from typing import Any, Dict, List, Union, Tuple, cast
 
 
-class Case(Problem):
+class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
+    cache: Dict[Tuple[Idp, str, List[str]], 'State'] = {}
 
     def __init__(self, idp: Idp):
 
@@ -118,19 +118,19 @@ class Case(Problem):
         )
         
 
-def make_case(idp: Idp, jsonstr: str) -> Case:
-    """ manages the cache of Cases """
-    if (idp, jsonstr) in Case.cache:
-        return Case.cache[(idp, jsonstr)]
+def make_state(idp: Idp, jsonstr: str) -> State:
+    """ manages the cache of States """
+    if (idp, jsonstr) in State.cache:
+        return State.cache[(idp, jsonstr)]
 
-    if (idp, "{}") in Case.cache:
-        case = Case.cache[(idp, "{}")]
+    if (idp, "{}") in State.cache:
+        state = State.cache[(idp, "{}")]
     else:
-        case = Case(idp)
-    case = case.add_given(jsonstr)
+        state = State(idp)
+    state = state.add_given(jsonstr)
 
-    if 100<len(Case.cache):
+    if 100<len(State.cache):
         # remove oldest entry, to prevent memory overflow
-        Case.cache = {k:v for k,v in list(Case.cache.items())[1:]}
-    Case.cache[(idp, jsonstr)] = case
-    return case
+        State.cache = {k:v for k,v in list(State.cache.items())[1:]}
+    State.cache[(idp, jsonstr)] = state
+    return state

@@ -17,7 +17,7 @@ TODO:
 - [x] add Expression.proof = OrderedSet[Expression] the proof of an atom = assignments + constraint
 - [ ] _change:(proof, …) : add proof → no Brackets anymore → Expression.eq
 - [ ] getsubtences: add subtences of a proof
-- [ ] Case: get relevant after propagation, no need to compute relevant_symbols
+- [ ] State: get relevant after propagation, no need to compute relevant_symbols
 - [ ] Explain
 
 When are consequences relevant ?

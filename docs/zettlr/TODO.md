@@ -55,7 +55,7 @@ Date: TODO
 - [ ] use graph library instead of simplify for relevance
 - [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
 
-- [ ] merge case.co_constraints and case.definitions (many overlaps)
+- [ ] merge state.co_constraints and state.definitions (many overlaps)
 - [ ] use sets to avoid duplicates (e.g. constraints)
 - [ ] use weakref to share co_constraints
 - [ ] avoid mergeDicts.  Use accumulator instead
@@ -66,7 +66,7 @@ Date: TODO
 - [ ] simplify the generation of Output
 
 - [ ] use EXIST, … instead of AQuantifier.make(), for readability
-- [ ] move consequences into case.constraints ?
+- [ ] move consequences into state.constraints ?
 - [ ] sort the operands of equality
 - [ ] Expr.sentence -> Expr.ranking ?
 - [ ] distinguish between x=1 entry and x=1 atom in output structure

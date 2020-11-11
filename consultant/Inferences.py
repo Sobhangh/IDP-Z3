@@ -60,7 +60,7 @@ def get_relevant_subtences(self):
     sets rank of symbols in self.relevant_symbols
     removes irrelevant constraints in self.constraints
     """
-    # self is a Case
+    # self is a State
     for a in self.assignments.values():
         a.relevant = False
 
@@ -171,18 +171,18 @@ def get_relevant_subtences(self):
     self.constraints = list(filter(is_relevant, self.constraints))
 
 
-def explain(case, question):
-    out = Output(case, case.given)  
+def explain(state, question):
+    out = Output(state, state.given)  
 
     question = decode_UTF(question)
     negated = question.startswith('~')
     question = question[1:] if negated else question
-    if question in case.assignments:
-        to_explain = case.assignments[question].sentence
+    if question in state.assignments:
+        to_explain = state.assignments[question].sentence
 
         # rules used in justification
         if to_explain.type != 'bool': # recalculate numeric value
-            val = case.assignments[question].value
+            val = state.assignments[question].value
             if val is None: # can't explain an expanded value
                 return out.m
             to_explain = AComparison.make("=", [to_explain, val])
@@ -193,12 +193,12 @@ def explain(case, question):
         s.set(':core.minimize', True)
         ps = {} # {reified: constraint}
 
-        for ass in case.given.values():
+        for ass in state.given.values():
             p = ass.translate()
             ps[p] = ass
             s.add(Implies(p, ass.translate()))
-        todo = (list(case.idp.theory.constraints) 
-                + list(case.idp.theory.def_constraints.values()))
+        todo = (list(state.idp.theory.constraints) 
+                + list(state.idp.theory.def_constraints.values()))
         for constraint in todo:
             p = constraint.reified()
             ps[p] = constraint.translate()
@@ -209,7 +209,7 @@ def explain(case, question):
         unsatcore = s.unsat_core()
         
         if unsatcore:
-            for a1 in case.given.values():
+            for a1 in state.given.values():
                 for a2 in unsatcore:
                     if type(ps[a2]) == Assignment \
                     and a1.sentence.code == ps[a2].sentence.code: #TODO we might miss some equality
@@ -223,46 +223,46 @@ def explain(case, question):
             out.m = {k:v for k,v in out.m.items() if v}
                 
             out.m["*laws*"] = []
-            for a1 in (list(case.idp.theory.def_constraints.values()) 
-                    + list(case.idp.theory.constraints)): 
+            for a1 in (list(state.idp.theory.def_constraints.values()) 
+                    + list(state.idp.theory.constraints)): 
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.translate()) == str(ps[a2]):
                         out.m["*laws*"].append(a1.annotations['reading'])
     return out.m
 
-def abstract(case, given_json):
+def abstract(state, given_json):
     timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
 
     # extract fixed atoms from constraints
-    out["universal"] = list(l for l in case.assignments.values() 
+    out["universal"] = list(l for l in state.assignments.values() 
                         if l.status == Status.UNIVERSAL)
-    out["given"    ] = list(l for l in case.assignments.values() 
+    out["given"    ] = list(l for l in state.assignments.values() 
                         if l.status == Status.GIVEN)
-    out["fixed"    ] = list(l for l in case.assignments.values() 
+    out["fixed"    ] = list(l for l in state.assignments.values() 
                         if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
-    out["irrelevant"]= list(l for l in case.assignments.values() 
+    out["irrelevant"]= list(l for l in state.assignments.values() 
         if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
         and not l.relevant)
 
     # create keys for models using first symbol of atoms
     models, count = {}, 0
-    for q in case.assignments.values():
+    for q in state.assignments.values():
         models[q.symbol_decl.name] = []
     
     done = set(out["universal"] + out["given"] + out["fixed"])
-    theory = And(case.idp.theory.translate())
+    theory = And(state.idp.theory.translate())
     solver = Solver()
     solver.add(theory)
-    solver.add([ass.translate() for ass in case.given.values()])
+    solver.add([ass.translate() for ass in state.given.values()])
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
 
         # theory that forces irrelevant atoms to be irrelevant
         theory2 = And(theory) # is this a way to copy theory ??
 
         atoms = [] # [Assignment]
-        for assignment in case.assignments.values():
+        for assignment in state.assignments.values():
             atom = assignment.sentence
             if assignment.value is None \
             and assignment.relevant and atom.type == 'bool':

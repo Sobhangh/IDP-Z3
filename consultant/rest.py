@@ -32,7 +32,7 @@ from textx import TextXError
 
 from Idp import Idp, idpparser
 from Idp.utils import log
-from .Case import make_case
+from .State import make_state
 from .Inferences import *
 from .IO import *
 
@@ -158,9 +158,9 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
-                    case = make_case(idp, "{}")
+                    state = make_state(idp, "{}")
                     out = metaJSON(idp)
-                    out["propagated"] = Output(case).fill(case)
+                    out["propagated"] = Output(state).fill(state)
                     return out
                 except Exception as exc:
                     traceback.print_exc()
@@ -194,21 +194,21 @@ class eval(Resource):
                 given_json = args['active']
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                case = make_case(idp, given_json)
+                state = make_state(idp, given_json)
 
                 out = {}
                 if method == "propagate":
-                    out = Output(case).fill(case)
+                    out = Output(state).fill(state)
                 if method == "modelexpand":
-                    generator = case.expand(max=1,complete=False, extended=True)
-                    case.assignments = list(generator)[0]
-                    out = Output(case).fill(case)
+                    generator = state.expand(max=1,complete=False, extended=True)
+                    state.assignments = list(generator)[0]
+                    out = Output(state).fill(state)
                 if method == "explain":
-                    out = explain(case, args['value'])
+                    out = explain(state, args['value'])
                 if method == "minimize":
-                    case = case.optimize(args['symbol'], args['minimize'],
+                    state = state.optimize(args['symbol'], args['minimize'],
                         complete=False, extended=True)
-                    out = Output(case).fill(case)
+                    out = Output(state).fill(state)
                 if method == "abstract":
                     if args['symbol'] != "": # theory to explain ?
                         newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
@@ -221,8 +221,8 @@ class eval(Resource):
                         # for expr in idpModel.subtences.values():
                         #     expanded.update(expr.unknown_symbols())
                         expanded = tuple(expanded.keys())
-                        case = make_case(idpModel, "")
-                    out = abstract(case, given_json)
+                        state = make_state(idpModel, "")
+                    out = abstract(state, given_json)
                 log("end /eval " + method)
                 #pyinstrument g.profiler.stop()
                 #pyinstrument print(g.profiler.output_text(unicode=True, color=True))

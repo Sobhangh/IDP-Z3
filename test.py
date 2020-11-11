@@ -33,12 +33,10 @@ from typing import Dict
 # import pyximport; 
 # pyximport.install(language_level=3)
 
-from consultant.Case import Case
-from consultant.IO import metaJSON
+from consultant.State import State, make_state
+from consultant.IO import *
 from Idp import idpparser, SymbolDeclaration, NEWL
 from Idp.utils import start, log
-from consultant.Case import make_case
-from consultant.IO import *
 
 z3lock = threading.Lock()
 
@@ -60,31 +58,31 @@ def generateZ3(theory):
                 print(traceback.format_exc())
             return buf.getvalue()
 
-    case = Case(idp)
-    out = Output(case).fill(case)
+    state = State(idp)
+    out = Output(state).fill(state)
 
     output = (
         f"{NEWL}-- original ---------------------------------{NEWL}"
         f"{theory}"
         f"{NEWL}-- meta -------------------------------------{NEWL}"
-        f"{pprint.pformat(metaJSON(case.idp), width=120)}{NEWL}"
+        f"{pprint.pformat(metaJSON(state.idp), width=120)}{NEWL}"
         f"{NEWL}-- propagation ------------------------------{NEWL}"
         f"{pprint.pformat(out, width=120)}{NEWL}"
 
         #additional debug info (optional)
         # f"{NEWL}-- vocabulary -------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in case.idp.vocabulary.translated)}"
+        # f"{NEWL.join(str(t) for t in state.idp.vocabulary.translated)}"
         # f"{NEWL}-- theory -----------------------------------{NEWL}"
-        # f"{(NEWL+NEWL).join(str(t) for t in case.idp.theory.translate(case.idp))}{NEWL}"
+        # f"{(NEWL+NEWL).join(str(t) for t in state.idp.theory.translate(state.idp))}{NEWL}"
         # f"{NEWL}-- goal -----------------------------------{NEWL}"
-        # f"{str(case.idp.goal.translate())}{NEWL}"
+        # f"{str(state.idp.goal.translate())}{NEWL}"
         # f"{NEWL}-- assignments ------------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in case.assignments)}{NEWL}"
-        # f"{NEWL}-- case -------------------------------------{NEWL}"
-        # f"{str(case)}{NEWL}"
+        # f"{NEWL.join(str(t) for t in state.assignments)}{NEWL}"
+        # f"{NEWL}-- state -------------------------------------{NEWL}"
+        # f"{str(state)}{NEWL}"
         )
     # try:
-    #     expand(case)
+    #     expand(state)
     # except Exception as exc:
     #     output += f"{NEWL}error in expansion{NEWL}{str(exc)}"
     return output
@@ -158,10 +156,10 @@ def pipeline():
                     given_json = ""
 
                     if idp.procedures == {}:
-                        case = make_case(idp, given_json)
-                        generator = case.expand(max=1,complete=False, extended=True)
+                        state = make_state(idp, given_json)
+                        generator = state.expand(max=1,complete=False, extended=True)
                         list(generator)[0] # ignore result
-                        out = Output(case).fill(case)
+                        out = Output(state).fill(state)
                     else:
                         # avoid files meant to raise an error
                         if file_name not in ['./tests/1 procedures/ok.idp']:

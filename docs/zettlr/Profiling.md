@@ -28,7 +28,7 @@ rest.py on Djordje abstract theory:
 - [ ] use [[Cython]] for substitute on GAE
 - [ ] use reification of quantified formulas + Z3 substitute → major rewrite !
 - [ ] use pypy locally
-- [x] cache the propagation of universals in Case
+- [x] cache the propagation of universals in State
 - [ ] non-interactive version
 - [x] use `__slots__` → no change
 - [ ] avoid function lookup by testing type

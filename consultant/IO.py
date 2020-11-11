@@ -78,16 +78,16 @@ def decode_UTF(json_str):
         .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
         .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
 
-def json_to_literals(case, jsonstr: str):
+def json_to_literals(state, jsonstr: str):
     """ returns Assignments corresponding to jsonstr """
     assignments = Assignments() # {atom : assignment} from the GUI (needed for propagate)
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
 
         for symbol in json_data:
-            idp_symbol = case.idp.vocabulary.symbol_decls[symbol]
+            idp_symbol = state.idp.vocabulary.symbol_decls[symbol]
             for atom, json_atom in json_data[symbol].items():
-                idp_atom = case.assignments[atom].sentence.copy()
+                idp_atom = state.assignments[atom].sentence.copy()
 
                 if json_atom["value"]!='':
                     value = str_to_IDP(idp_atom, str(json_atom["value"]))
@@ -108,19 +108,19 @@ def json_to_literals(case, jsonstr: str):
 
 
 class Output(object):
-    def __init__(self, case, structure={}):
+    def __init__(self, state, structure={}):
         self.m = {} # [symbol.name][atom.code][attribute name] -> attribute value
-        self.case = case
+        self.state = state
 
         self.m[' Global'] = {}
-        self.m[' Global']['env_dec'] = bool(len(case.idp.vocabularies)==2)
+        self.m[' Global']['env_dec'] = bool(len(state.idp.vocabularies)==2)
 
         def initialise(atom):
             typ = atom.type
             key = atom.code
-            if ( key in case.assignments 
-            and case.assignments[key].symbol_decl is not None):
-                symb = case.assignments[key].symbol_decl
+            if ( key in state.assignments 
+            and state.assignments[key].symbol_decl is not None):
+                symb = state.assignments[key].symbol_decl
                 s = self.m.setdefault(symb.name, {})
 
                 if typ == 'bool':
@@ -141,28 +141,28 @@ class Output(object):
                     reading = atom.annotations['reading']
 
                 if symbol:
-                    assert atom.code in case.assignments
-                    symbol["status"]   = case.assignments[atom.code].status.name
-                    symbol["relevant"] = case.assignments[atom.code].relevant
+                    assert atom.code in state.assignments
+                    symbol["status"]   = state.assignments[atom.code].status.name
+                    symbol["relevant"] = state.assignments[atom.code].relevant
                     symbol['reading']  = reading
                     symbol['normal']   = type(atom) in [AppliedSymbol, Variable]
                     symbol['environmental'] = symb.block.name=='environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
-                        or bool(case.assignments[atom.code].sentence.is_assignment)
+                        or bool(state.assignments[atom.code].sentence.is_assignment)
                     s.setdefault(key, symbol)
-                    s["__rank"] = self.case.relevant_symbols.get(symb.name, 9999)
+                    s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
 
-        for GuiLine in case.assignments.values():
+        for GuiLine in state.assignments.values():
             initialise(GuiLine.sentence)
         for ass in structure.values(): # add numeric input for Explain
             initialise(ass.sentence)
 
-    def fill(self, case):
-        for key, l in case.assignments.items():
+    def fill(self, state):
+        for key, l in state.assignments.items():
             if l.value is not None:
                 if l.status == Status.STRUCTURE:
                     key = l.sentence.code
-                    symb = self.case.assignments[key].symbol_decl
+                    symb = self.state.assignments[key].symbol_decl
                     if symb.name in self.m:
                         del self.m[symb.name]
                 self.addAtom(l.sentence, l.value, l.status)
@@ -171,8 +171,8 @@ class Output(object):
 
     def addAtom(self, atom, value, status: Status):
         key = atom.code
-        if key in self.case.assignments:
-            symb = self.case.assignments[key].symbol_decl
+        if key in self.state.assignments:
+            symb = self.state.assignments[key].symbol_decl
             if symb is not None:
                 s = self.m.setdefault(symb.name, {})
                 if key in s:
