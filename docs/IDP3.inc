@@ -46,3 +46,5 @@ Type
     Type enumerations must be done in the vocabulary block (not in the structure block).
     IDP-Z3 does not support type hierarchies.
 
+To improve performance, do not quantify over the value of a function.
+Use ``p(f(x))`` instead of ``?y: f(x)=y & p(y)``.
