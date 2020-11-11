@@ -36,6 +36,29 @@ class Case(Problem):
     cache: Dict[Tuple[Idp, str, List[str]], 'Case'] = {}
 
     def __init__(self, idp: Idp):
+
+        # determine default vocabulary, theory, before annotating display
+        if len(idp.theories)!=1 and 'main' not in idp.procedures: # (implicit) display block
+            assert len(idp.vocabularies) == 2, \
+                "Maximum 2 vocabularies are allowed in Interactive Consultant"
+            assert len(idp.theories)     == 2, \
+                "Maximum 2 theories are allowed in Interactive Consultant"
+            assert 'environment' in idp.vocabularies and 'decision' in idp.vocabularies, \
+                "The 2 vocabularies in Interactive Consultant must be 'environment' and 'decision'"
+            assert 'environment' in idp.theories and 'decision' in idp.theories, \
+                "The 2 theories in Interactive Consultant must be 'environment' and 'decision'"
+
+            idp.vocabulary = idp.vocabularies['decision']
+            idp.theory     = idp.theories    ['decision']
+            idp.theory.constraints.extend(idp.theories['environment'].constraints)
+            idp.theory.definitions.extend(idp.theories['environment'].definitions)
+            idp.theory.def_constraints.update(idp.theories['environment'].def_constraints)
+            idp.theory.assignments.extend(idp.theories['environment'].assignments)
+        idp.goal.annotate(idp)
+        idp.view.annotate(idp)
+        idp.display.annotate(idp)
+        idp.display.run(idp)
+
         super().__init__()
         self.given = None # Assignments from the user interface
 
@@ -100,7 +123,10 @@ def make_case(idp: Idp, jsonstr: str) -> Case:
     if (idp, jsonstr) in Case.cache:
         return Case.cache[(idp, jsonstr)]
 
-    case = Case.cache.get((idp, "{}"), Case(idp))
+    if (idp, "{}") in Case.cache:
+        case = Case.cache[(idp, "{}")]
+    else:
+        case = Case(idp)
     case = case.add_given(jsonstr)
 
     if 100<len(Case.cache):

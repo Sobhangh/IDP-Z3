@@ -158,12 +158,8 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
-                    # Generate all symbols.
-                    out = metaJSON(idp)
-                    # Generate propagation for all symbols.
-                    expanded = [dic['idpname'] for dic in out['symbols']
-                                if dic['view'] == 'expanded']
                     case = make_case(idp, "{}")
+                    out = metaJSON(idp)
                     out["propagated"] = Output(case).fill(case)
                     return out
                 except Exception as exc:

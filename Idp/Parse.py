@@ -57,11 +57,6 @@ class Idp(object):
         self.display = kwargs.pop('display')
         self.procedures = {p.name: p for p in kwargs.pop('procedures')}
 
-        self.translated = None  # [Z3Expr]
-
-        assert self.display is None or 'main' not in self.procedures, \
-            "Cannot have both a 'display and a 'main block"
-
         for voc in self.vocabularies.values():
             voc.annotate(self)
         for t in self.theories.values():
@@ -72,32 +67,9 @@ class Idp(object):
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
         self.theory     = next(iter(self.theories    .values()))
-        if len(self.theories)!=1 and 'main' not in self.procedures: # (implicit) display block
-            assert len(self.vocabularies) == 2, \
-                "Maximum 2 vocabularies are allowed in Interactive Consultant"
-            assert len(self.theories)     == 2, \
-                "Maximum 2 theories are allowed in Interactive Consultant"
-            assert 'environment' in self.vocabularies and 'decision' in self.vocabularies, \
-                "The 2 vocabularies in Interactive Consultant must be 'environment' and 'decision'"
-            assert 'environment' in self.theories and 'decision' in self.theories, \
-                "The 2 theories in Interactive Consultant must be 'environment' and 'decision'"
-
-            self.vocabulary = self.vocabularies['decision']
-            self.theory     = self.theories    ['decision']
-            self.theory.constraints.extend(self.theories['environment'].constraints)
-            self.theory.definitions.extend(self.theories['environment'].definitions)
-            self.theory.def_constraints.update(self.theories['environment'].def_constraints)
-            self.theory.assignments.extend(self.theories['environment'].assignments)
-        
-
         if self.goal    is None: self.goal    = Goal(name="")
         if self.view    is None: self.view    = View(viewType='normal')
         if self.display is None: self.display = Display(constraints=[])
-        self.goal.annotate(self)
-        self.view.annotate(self)
-        self.display.annotate(self)
-        self.display.run(self)
-
 
 ################################ Vocabulary  ###############################
 
