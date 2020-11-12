@@ -70,25 +70,6 @@ def instantiate(self, e0, e1):
     
     assert isinstance(e0, Fresh_Variable)
 
-    if type(self) in [AppliedSymbol, Variable, Fresh_Variable] \
-    and self.name == e0.code:
-        if type(self)==AppliedSymbol \
-        and self.decl.name == '`Symbols':
-            if isinstance(e1, Constructor) and len(self.sub_exprs) == len(e1.symbol.decl.sorts):
-                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
-                return out
-            elif isinstance(e1, Fresh_Variable): # replacing variable in a definition
-                out = copy.copy(self)
-                out.code = out.code.replace(e0.code, e1.code)
-                out.str = out.code.replace(e0.code, e1.code)
-                out.name = e1.code
-                out.s.name = e1.code
-                return out
-            else:
-                return list(e1.symbol.decl.instances.values())[0] # should be "unknown"
-        elif len(self.sub_exprs)==0:
-            return e1
-
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
 
@@ -259,8 +240,34 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 
+def instantiate(self, e0, e1):
+    assert isinstance(e0, Fresh_Variable)
+
+    if self.name == e0.code:
+        if type(self)==AppliedSymbol \
+        and self.decl.name == '`Symbols':
+            if isinstance(e1, Constructor) and len(self.sub_exprs) == len(e1.symbol.decl.sorts):
+                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
+                return out
+            elif isinstance(e1, Fresh_Variable): # replacing variable in a definition
+                out = copy.copy(self)
+                out.code = out.code.replace(e0.code, e1.code)
+                out.str = out.code.replace(e0.code, e1.code)
+                out.name = e1.code
+                out.s.name = e1.code
+                return out
+            else:
+                return list(e1.symbol.decl.instances.values())[0] # should be "unknown"
+        elif len(self.sub_exprs)==0:
+            return e1
+    return Expression.instantiate(self, e0, e1)
+AppliedSymbol .instantiate = instantiate
+Variable      .instantiate = instantiate
+
 
 # Class Fresh_Variable #######################################################
+
+Fresh_Variable.instantiate = instantiate
 
 def interpret(self, theory):
     return self
