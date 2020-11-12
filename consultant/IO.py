@@ -26,7 +26,7 @@ from Idp.Run import Status, Assignment, Assignments, str_to_IDP
 from Idp.utils import *
 
 
-def metaJSON(idp):
+def metaJSON(state):
     """
     Format a response to meta request.
 
@@ -35,7 +35,7 @@ def metaJSON(idp):
 
     """
     symbols = []
-    for decl in idp.theory.assignments.symbols.values():
+    for decl in state.assignments.symbols.values():
         typ = decl.out.name
         symbol_type = "proposition" if typ == 'bool' and decl.sorts==[] else "function"
         d = {
@@ -57,7 +57,7 @@ def metaJSON(idp):
                 d['slider'] = decl.annotations['Slider']
 
         symbols.append(d)
-    optionalPropagation = idp.display.optionalPropagation
+    optionalPropagation = state.idp.display.optionalPropagation
 
     # Create the output dictionary.
     out = {"title": "Interactive Consultant", "symbols": symbols,

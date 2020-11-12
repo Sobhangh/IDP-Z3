@@ -1,0 +1,8 @@
+vocabulary {
+    f(int):int
+}
+
+theory {
+    f(1)>=2.
+}
+display { view = expanded. }

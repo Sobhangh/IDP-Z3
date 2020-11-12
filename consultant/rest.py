@@ -159,7 +159,7 @@ class meta(Resource):
                 try:
                     idp = idpOf(args['code'])
                     state = make_state(idp, "{}")
-                    out = metaJSON(idp)
+                    out = metaJSON(state)
                     out["propagated"] = Output(state).fill(state)
                     return out
                 except Exception as exc:

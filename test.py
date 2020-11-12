@@ -65,7 +65,7 @@ def generateZ3(theory):
         f"{NEWL}-- original ---------------------------------{NEWL}"
         f"{theory}"
         f"{NEWL}-- meta -------------------------------------{NEWL}"
-        f"{pprint.pformat(metaJSON(state.idp), width=120)}{NEWL}"
+        f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
         f"{NEWL}-- propagation ------------------------------{NEWL}"
         f"{pprint.pformat(out, width=120)}{NEWL}"
 
