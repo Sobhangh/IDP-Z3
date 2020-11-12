@@ -33,7 +33,7 @@ from debugWithYamlLog import *
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    ADisjunction, AConjunction,  AAggregate, AUnary, \
+                    ADisjunction, AConjunction,  AAggregate, AUnary, AComparison, \
                     AppliedSymbol, Variable, NumberConstant, Fresh_Variable
 
 

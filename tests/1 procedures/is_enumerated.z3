@@ -56,7 +56,7 @@ Traceback (most recent call last):
     self._interpret()
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 100, in _interpret
     c.interpret(self)
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Substitute.py", line 220, in interpret
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Substitute.py", line 222, in interpret
     simpler = theory.interpretations[self.name].is_enumerated(self.sub_exprs)
 KeyError: 'is_color'
 
