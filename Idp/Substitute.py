@@ -33,7 +33,7 @@ from debugWithYamlLog import *
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    ADisjunction, AConjunction,  AAggregate, \
+                    ADisjunction, AConjunction,  AAggregate, AComparison, \
                     AppliedSymbol, Variable, NumberConstant, Fresh_Variable 
 
 
@@ -111,6 +111,8 @@ def instantiate(self, e0, e1):
         if type(e1) in [Fresh_Variable, Variable]:
             # e1 is Variable when instantiating some definitions
             out.fresh_vars.add(e1.name)
+        if isinstance(out, AComparison):
+            out.annotate1()
     if not type(self) in [AQuantification, AAggregate]:
         out.code = str(out) #TODO code should be instantiation of AQuantification
     out.annotations['reading'] = out.code
