@@ -37,7 +37,7 @@ from consultant.State import State, make_state
 from consultant.IO import *
 from Idp import idpparser, SymbolDeclaration, NEWL
 from Idp.utils import start, log
-from consultant.Case import make_case
+from consultant.State import make_state
 from consultant.IO import *
 from consultant.Inferences import DMN
 
@@ -209,5 +209,5 @@ theory T:V {
 }
     """
     idp = idpparser.model_from_str(theory)
-    case = Case(idp).add_given("{}")
+    case = State(idp).add_given("{}")
     out = DMN(case, "Eligible")
