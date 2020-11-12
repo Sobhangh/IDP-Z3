@@ -407,7 +407,7 @@ class AComparison(BinaryOperator):
     def annotate1(self):
         # f(x)=y
         self.is_assignment = len(self.sub_exprs) == 2 and self.operator in [['='], ['≠']] \
-            and type(self.sub_exprs[0]).__name__ in ["AppliedSymbol", "Variable"] \
+            and isinstance(self.sub_exprs[0], AppliedSymbol) \
             and all(e.as_ground() is not None for e in self.sub_exprs[0].sub_exprs) \
             and self.sub_exprs[1].as_ground() is not None
         return super().annotate1()

@@ -145,7 +145,8 @@ class Output(object):
                     symbol["status"]   = state.assignments[atom.code].status.name
                     symbol["relevant"] = state.assignments[atom.code].relevant
                     symbol['reading']  = reading
-                    symbol['normal']   = type(atom) in [AppliedSymbol, Variable]
+                    symbol['normal']   = (isinstance(atom, AppliedSymbol) 
+                        and not atom.is_enumerated)
                     symbol['environmental'] = symb.block.name=='environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
                         or bool(state.assignments[atom.code].sentence.is_assignment)

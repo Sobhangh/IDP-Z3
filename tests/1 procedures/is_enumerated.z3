@@ -41,7 +41,7 @@ f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 No more models.
 T3, S
 Traceback (most recent call last):
-  File "test.py", line 58, in generateZ3
+  File "test.py", line 56, in generateZ3
     idp.execute()
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 355, in execute
     exec(main, mybuiltins, mylocals)

@@ -19,7 +19,6 @@
 from copy import copy
 from debugWithYamlLog import NEWL, indented
 
-from Idp.Expression import AppliedSymbol
 from Idp.utils import *
 from Idp.Run import Problem
 from .IO import json_to_literals, Status

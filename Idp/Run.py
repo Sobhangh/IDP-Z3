@@ -101,7 +101,7 @@ class Problem(object):
                 c.co_constraints(self.co_constraints)
                 c.collect(self.questions, all_=False)
             for s in list(self.questions.values()):
-                if not type(s) in [AppliedSymbol, Variable]:
+                if not isinstance(s, AppliedSymbol) or s.is_enumerated:
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
     def formula(self):
@@ -123,7 +123,7 @@ class Problem(object):
             for a in self.assignments.values() 
             if a.value is None
             and a.symbol_decl is not None
-            and (extended or type(a.sentence) in [AppliedSymbol, Variable]))
+            and (extended or isinstance(a.sentence, AppliedSymbol)))
 
     def _from_model(self, solver, todo, complete, extended):
         """ returns Assignments from model in solver """
