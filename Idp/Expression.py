@@ -541,7 +541,10 @@ class AppliedSymbol(Expression):
 
     def annotate1(self):
         self.type = self.decl.type if self.decl else None
-        return super().annotate1()
+        out = super().annotate1()
+        if out.decl is None or out.decl.name == "`Symbols": # a symbol variable
+            out.fresh_vars.add(self.s.name)
+        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl.name != "`Symbols" \

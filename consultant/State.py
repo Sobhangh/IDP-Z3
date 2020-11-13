@@ -123,11 +123,9 @@ def make_state(idp: Idp, jsonstr: str) -> State:
     if (idp, jsonstr) in State.cache:
         return State.cache[(idp, jsonstr)]
 
-    if (idp, "{}") in State.cache:
-        state = State.cache[(idp, "{}")]
-    else:
-        state = State(idp)
-    state = state.add_given(jsonstr)
+    if (idp, "{}") not in State.cache:
+        State.cache[(idp, "{}")] = State(idp)
+    state = State.cache[(idp, "{}")].add_given(jsonstr)
 
     if 100<len(State.cache):
         # remove oldest entry, to prevent memory overflow

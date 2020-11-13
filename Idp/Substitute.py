@@ -94,8 +94,7 @@ def instantiate(self, e0, e1):
             out.fresh_vars.add(e1.name)
         if isinstance(out, AComparison):
             out.annotate1()
-    if not type(self) in [AQuantification, AAggregate]:
-        out.code = str(out) #TODO code should be instantiation of AQuantification
+    out.code = str(out)
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate = instantiate
