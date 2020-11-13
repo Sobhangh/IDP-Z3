@@ -133,7 +133,7 @@ class run(Resource):
                     return out
                 except Exception as exc:
                     traceback.print_exc()
-                    return repr(exc)
+                    return str(exc)
             except Exception as exc:
                 traceback.print_exc()
                 return str(exc)
@@ -164,7 +164,7 @@ class meta(Resource):
                     return out
                 except Exception as exc:
                     traceback.print_exc()
-                    return repr(exc)
+                    return str(exc)
             except Exception as exc:
                 traceback.print_exc()
                 return str(exc)
