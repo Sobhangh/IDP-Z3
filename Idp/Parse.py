@@ -569,14 +569,19 @@ class Rule(object):
         # compute self.expanded, by expanding:
         # ∀ v: f(v)=out <=> body
         # (after joining the rules of the same symbols)
-        if self.out:
-            expr = AppliedSymbol.make(self.symbol, self.args[:-1])
-            expr = AComparison.make('=', [expr, self.args[-1]])
+        if any(s.name =="`Symbols" for s in self.sorts):
+            # don't expand macros, to avoid arity and type errors
+            # will be done later with optimized binary quantification
+            self.expanded = TRUE
         else:
-            expr = AppliedSymbol.make(self.symbol, self.args)
-        expr = AEquivalence.make('⇔', [expr, self.body])
-        expr = AQuantification.make('∀', {**self.q_vars}, expr)
-        self.expanded = expr.expand_quantifiers(theory)
+            if self.out:
+                expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+                expr = AComparison.make('=', [expr, self.args[-1]])
+            else:
+                expr = AppliedSymbol.make(self.symbol, self.args)
+            expr = AEquivalence.make('⇔', [expr, self.body])
+            expr = AQuantification.make('∀', {**self.q_vars}, expr)
+            self.expanded = expr.expand_quantifiers(theory)
 
         # interpret structures
         self.body     = self.body    .interpret(theory)

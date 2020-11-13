@@ -119,6 +119,5 @@ display {
                                          'normal': True,
                                          'reading': 'symmetric(`symmetric)',
                                          'relevant': False,
-                                         'status': 'CONSEQUENCE',
-                                         'typ': 'Bool',
-                                         'value': True}}}
+                                         'status': 'UNKNOWN',
+                                         'typ': 'Bool'}}}

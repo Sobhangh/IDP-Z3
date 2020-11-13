@@ -140,6 +140,8 @@ def expand_quantifiers(self, theory):
     self.vars = []
     self.sorts = [] # not used
     for name, var in self.q_vars.items():
+        assert var.sort.name != '`Symbols', \
+            "Can't quantify over symbols in a constraint.  Quantify in a definition instead."
         if var.sort.decl.range:
             out = []
             for f in forms:
@@ -179,6 +181,8 @@ def expand_quantifiers(self, theory):
                 , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                 , else_f=NumberConstant(number='0'))]
     for name, var in self.q_vars.items():
+        assert var.sort.name != '`Symbols', \
+            "Can't quantify over symbols in a constraint.  Quantify in a definition instead."
         if var.sort.decl.range:
             out = []
             for f in forms:
