@@ -8,7 +8,7 @@ vocabulary {
 } 
 
 theory {
-    { !cl[color]: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
+    { !cl: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
     codeOf(red)=b.
 }
  

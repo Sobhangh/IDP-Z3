@@ -67,9 +67,6 @@ def instantiate(self, e0, e1):
     
     instantiating e0=`x by e1=`f in self=`x(y) returns f(y) (or any instance of f if arities don't match)
     """
-    
-    assert isinstance(e0, Fresh_Variable)
-
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
 
@@ -244,8 +241,6 @@ AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 
 def instantiate(self, e0, e1):
-    assert isinstance(e0, Fresh_Variable)
-
     if self.name == e0.code:
         if type(self)==AppliedSymbol \
         and self.decl.name == '`Symbols':
