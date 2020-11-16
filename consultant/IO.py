@@ -169,7 +169,6 @@ class Output(object):
                 self.addAtom(l.sentence, l.value, l.status)
         return self.m
 
-
     def addAtom(self, atom, value, status: Status):
         key = atom.code
         if key in self.state.assignments:

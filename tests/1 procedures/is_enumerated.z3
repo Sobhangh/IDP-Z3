@@ -13,6 +13,27 @@ opposite:={(red)->green; (blue)->blue; (green)->red}
 f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 
 No more models.
+propagate
+And(Color == blue,
+    opposite(red) == green,
+    opposite(blue) == blue,
+    opposite(green) == red,
+    f(A, A) == A,
+    f(A, B) == A,
+    f(B, A) == B,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    Or(f(B, B) == A, f(B, B) == B),
+    True)
 T, S2
 No models.
 T2, S
@@ -45,7 +66,7 @@ Traceback (most recent call last):
     idp.execute()
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 355, in execute
     exec(main, mybuiltins, mylocals)
-  File "<string>", line 10, in <module>
+  File "<string>", line 12, in <module>
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 336, in myprint
     for i, xi in enumerate(x):
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 327, in model_expand

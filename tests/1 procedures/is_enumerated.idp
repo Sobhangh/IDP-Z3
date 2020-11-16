@@ -39,6 +39,8 @@ theory T4:V {
 procedure main() {
     print("T, S")
     print(model_expand(T, S))
+    print("propagate")
+    print(str(Problem(T,S).propagate().simplify().formula().translate()))
     print("T, S2")
     print(model_expand(T, S2))
     print("T2, S")

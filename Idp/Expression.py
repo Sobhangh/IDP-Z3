@@ -537,7 +537,7 @@ class AppliedSymbol(Expression):
             return f"{str(self.s)}{self.is_enumerated}"
         else:
             return (f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
-                    f"{self.is_enumerated}")
+                    f"{' '+self.is_enumerated if self.is_enumerated else ''}")
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
@@ -555,7 +555,7 @@ class AppliedSymbol(Expression):
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl.name != "`Symbols" \
-        and self.simpler is None and self.name != '__relevant':
+        and self.name != '__relevant':
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)

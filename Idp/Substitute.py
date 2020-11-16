@@ -204,6 +204,7 @@ def interpret(self, theory):
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('~', simpler)
         out = self._change(simpler=simpler)
+        out.original = simpler # so that translated assignment is correct
     elif self.decl in theory.clark: # has a theory
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
         out = self._change(sub_exprs=sub_exprs, co_constraint=co_constraint)

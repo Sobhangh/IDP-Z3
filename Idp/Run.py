@@ -68,7 +68,7 @@ class Problem(object):
         out.constraints = [c.copy() for c in self.constraints]
         out.def_constraints = self.def_constraints.copy()
         out._formula = None
-        self.co_constraints, self.questions = None, None
+        out.co_constraints, out.questions = None, None
         return out
 
     def add(self, block):
