@@ -96,8 +96,8 @@ AConjunction.implicants1 = implicants1
 # class AUnary ############################################################
 
 def implicants1(self, assignments, truth=TRUE):
-    return self.sub_exprs[0].implicants(assignments, _not(truth)) if self.operator == '~' \
-      else []
+    return ( [] if self.operator != '¬' else
+        self.sub_exprs[0].implicants(assignments, _not(truth)) )
 AUnary.implicants1 = implicants1
 
 

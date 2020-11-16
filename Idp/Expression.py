@@ -400,7 +400,7 @@ class AComparison(BinaryOperator):
         # a≠b --> Not(a=b)
         if len(self.sub_exprs) == 2 and self.operator == ['≠']:
             self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-            out = AUnary.make('~', AComparison.make('=', self.sub_exprs))
+            out = AUnary.make('¬', AComparison.make('=', self.sub_exprs))
             return out
         return super().annotate(voc, q_vars)
 
@@ -427,7 +427,7 @@ class AUnary(Expression):
 
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        self.operator = kwargs.pop('operator').replace('¬', '~')
+        self.operator = kwargs.pop('operator').replace('~', '¬')
 
         self.sub_exprs = [self.f]
         super().__init__()

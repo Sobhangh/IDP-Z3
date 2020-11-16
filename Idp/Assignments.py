@@ -85,7 +85,7 @@ class Assignment(object):
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
             out = self.sentence.original if self.value.same_as(TRUE) else \
-                AUnary.make('~', self.sentence.original)
+                AUnary.make('¬', self.sentence.original)
         else:
             out = AComparison.make('=', [self.sentence.original, self.value])
         return out

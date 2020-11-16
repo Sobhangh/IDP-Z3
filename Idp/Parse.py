@@ -205,7 +205,7 @@ class ConstructedTypeDeclaration(object):
 
     def check_bounds(self, var):
         if self.name == 'bool':
-            out = [var, AUnary.make('~', var)]
+            out = [var, AUnary.make('¬', var)]
         else:
             out = [AComparison.make('=', [var, c]) for c in self.constructors]
         out = ADisjunction.make('∨', out)

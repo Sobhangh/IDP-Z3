@@ -175,7 +175,7 @@ def explain(state, question):
     out = Output(state, state.given)  
 
     question = decode_UTF(question)
-    negated = question.startswith('~')
+    negated = question.replace('~', '¬').startswith('¬')
     question = question[1:] if negated else question
     if question in state.assignments:
         to_explain = state.assignments[question].sentence
@@ -187,7 +187,7 @@ def explain(state, question):
                 return out.m
             to_explain = AComparison.make("=", [to_explain, val])
         if negated:
-            to_explain = AUnary.make('~', to_explain)
+            to_explain = AUnary.make('¬', to_explain)
 
         s = Solver()
         s.set(':core.minimize', True)
