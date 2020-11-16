@@ -260,7 +260,8 @@ class Problem(object):
 
     def propagate(self, tag=Status.CONSEQUENCE, extended=False):
         """ determine all the consequences of the constraints """
-        list(self._propagate(tag, extended))
+        out = list(self._propagate(tag, extended))
+        assert out[0] != "Not satisfiable.", "Not satisfiable."
         return self
 
     def simplify(self):
