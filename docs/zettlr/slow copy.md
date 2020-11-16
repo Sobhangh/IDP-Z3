@@ -7,7 +7,7 @@ Date: 20200513173351
 Problem: theory of Djordje ran in 1 sec with 0.4.1, but 15 seconds with master on 13 May.
 
 Root cause analysis:
-* interrupting the program after 5 seconds shows that it is copying the subtences to create assignment in Case.py
+* interrupting the program after 5 seconds shows that it is copying the subtences to create assignment in State.py
     * one subtence is very big due to quantification: 4*4*8*8*14 terms: 14000 terms
     * still, copying it is surprisingly slow
 * is the data structure incorrect somehow ?

@@ -24,28 +24,38 @@ Classes to represent assignments of values to expressions
 """
 
 from copy import copy
-from enum import IntFlag
+from enum import Enum, auto
 from typing import Optional
 from z3 import Not, BoolRef
 
-from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
+from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
+                        Variable, AppliedSymbol
 from .Parse import *
 
-class Status(IntFlag):
-    UNKNOWN     = 1
-    GIVEN       = 2
-    ENV_UNIV    = 4
-    UNIVERSAL   = 8
-    ENV_CONSQ   = 16
-    CONSEQUENCE = 32
-    EXPANDED    = 64
+class Status(Enum):
+    UNKNOWN     = auto()
+    GIVEN       = auto()
+    ENV_UNIV    = auto()
+    UNIVERSAL   = auto()
+    ENV_CONSQ   = auto()
+    CONSEQUENCE = auto()
+    EXPANDED    = auto()
+    STRUCTURE   = auto()
 
 class Assignment(object):
-    def __init__(self, sentence: Expression, value: Optional[Expression], status: Status, relevant:bool=False):
+    def __init__(self, sentence: Expression, value: Optional[Expression], 
+                       status: Status, relevant:bool=False):
         self.sentence = sentence
         self.value = value
         self.status = status
         self.relevant = relevant
+
+        # first symbol in the sentence that does not start with '_'
+        self.symbol_decl = None
+        for d in sentence.unknown_symbols(co_constraints=False).values():
+            if not d.name.startswith('_'):
+                self.symbol_decl = d
+                break
 
     def copy(self):
         out = copy(self)
@@ -75,7 +85,7 @@ class Assignment(object):
             raise Exception("can't translate unknown value")
         if self.sentence.type == 'bool':
             out = self.sentence.original if self.value.same_as(TRUE) else \
-                AUnary.make('~', self.sentence.original)
+                AUnary.make('¬', self.sentence.original)
         else:
             out = AComparison.make('=', [self.sentence.original, self.value])
         return out
@@ -85,7 +95,11 @@ class Assignment(object):
 
 class Assignments(dict):
     def __init__(self,*arg,**kw):
-      super(Assignments, self).__init__(*arg, **kw)
+        super(Assignments, self).__init__(*arg, **kw)
+        self.symbols = {} # { decl.name: decl }
+        for a in self.values():
+            if a.symbol_decl:
+                self.symbols[a.symbol_decl.name] = a.symbol_decl
 
     def copy(self):
         return Assignments({k: v.copy() for k,v in self.items()})
@@ -98,16 +112,32 @@ class Assignments(dict):
                       value: Optional[Expression], 
                       status: Optional[Status],
                       relevant: Optional[bool]):
-        sentence.copy()
+        sentence = sentence.copy()
         if sentence.code in self:
             out = copy(self[sentence.code]) # needed for explain of irrelevant symbols
-            if value    is not None: out.value    = value
-            if status   is not None: out.status   = status
+            # don't overwrite
+            if out.value is None: 
+                out.value = value
+            else:
+                assert value is None or str(out.value) == str(value), \
+                    f"Internal error: changing value of {out.sentence} from {out.value} to {value}"
+            if out.status   is None or out.status == Status.UNKNOWN: 
+                out.status   = status
             if relevant is not None: out.relevant = relevant
         else:
             out = Assignment(sentence, value, status, relevant)
+            if out.symbol_decl:
+                self.symbols[out.symbol_decl.name] = out.symbol_decl
         self[sentence.code] = out
         return out
 
     def __str__(self):
-        return NEWL.join(str(a) for a in self.values())
+        out = {}
+        for a in self.values():
+            if isinstance(a.sentence, AppliedSymbol) and a.value is not None:
+                c = ",".join(str(e) for e in a.sentence.sub_exprs)
+                c = f"({c})" if c else c 
+                c = f"{c}->{str(a.value)}"
+                out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
+        return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"
+                         for k, a in out.items())

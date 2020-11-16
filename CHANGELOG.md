@@ -8,7 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 * changed license to GNU LGPL 3
-* add model_check, model_propagate to API
+* add model_check(), model_propagate() to API
+* add Problem class to API, with copy(), symbolic_propagate(), propagate(), simplify()
 * use poetry for installation
 
 ## [0.5.4] - 2020-10-06

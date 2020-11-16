@@ -1,5 +1,5 @@
 –-
-title: Merge case.GuiLines and .assignments
+title: Merge state.GuiLines and .assignments
 tags: #refactoring
 Date: 20200408193022
 –-

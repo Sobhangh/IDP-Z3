@@ -171,7 +171,7 @@ AComparison.translate1 = translate1
 # Class AUnary #######################################################
 
 AUnary.MAP = {'-': lambda x: 0 - x,
-           '~': lambda x: Not(x)
+              '¬': lambda x: Not(x)
           }
 
 def translate1(self):

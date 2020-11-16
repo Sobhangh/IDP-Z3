@@ -40,7 +40,7 @@ TODO for relevance: in branch Pierre
 - [ ] implicants(self)
     - [x] compute implicants by traversing the tree, searching for subtences, AppliedSymbols without values
     - [ ] generate 2 substitutions for equality (x→a, and (x=a) → true)  (only 1 if the equality is false)
-    - [ ] rewrite Case.propagate
+    - [ ] rewrite State.propagate
 - [ ] other
     - [ ] batch substitute
     - [ ] remove dead code

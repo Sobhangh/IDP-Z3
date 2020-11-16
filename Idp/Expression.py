@@ -48,7 +48,7 @@ class DSLException(Exception):
 
 class Expression(object):
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code', 'annotations', 'original',
-        'str', 'fresh_vars', 'type', '_reified', 'if_symbol', 'co_constraint',
+        'str', 'fresh_vars', 'type', '_reified', 'is_type_constraint_for', 'co_constraint',
         'normal', 'questions', 'relevant' )
 
     COUNT = 0
@@ -65,10 +65,9 @@ class Expression(object):
 
         self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]: over approximated list of fresh_vars (ignores simplifications)
-        self.no_fresh_vars_before_expansion = None # Bool
         self.type = None                  # String (e.g. 'bool', 'real', 'int', 'color'), or None
         self._reified = None
-        self.if_symbol = None             # (string) this constraint is relevant if Symbol is relevant
+        self.is_type_constraint_for = None# (string) this constraint is relevant if Symbol is relevant
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
         self.is_assignment = None         # for comparisons only
 
@@ -135,7 +134,6 @@ class Expression(object):
         else:
             for e in self.sub_exprs: 
                 self.fresh_vars.update(e.fresh_vars)
-        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -160,19 +158,12 @@ class Expression(object):
         self.collect(questions)
         return questions
 
-    def subtences(self):
-        " returns questions of type bool "
-        questions = OrderedSet()
-        self.collect(questions, all_=False)
-        out = {k: v for k, v in questions.items() if v.type == 'bool'}
-        return out
-
     def unknown_symbols(self, co_constraints=True):
         """ returns the list of symbol declarations in self, ignoring type constraints
         
         returns Dict[name, Declaration] 
         """
-        if self.if_symbol is not None: # ignore type constraints
+        if self.is_type_constraint_for is not None: # ignore type constraints
             return {}
         questions = OrderedSet()
         self.collect(questions, all_=True, co_constraints=co_constraints)
@@ -216,13 +207,11 @@ class Constructor(Expression):
     PRECEDENCE = 200
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
-        self.is_var = False
         self.sub_exprs = []
         self.index = None # int
 
         super().__init__()
         self.fresh_vars = set()
-        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         self.symbol = None # set only for `Symbols constructors
     
     def __str1__(self): return self.name
@@ -315,15 +304,13 @@ class AQuantification(Expression):
         super().annotate1()
         # remove q_vars
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
-        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.no_fresh_vars_before_expansion \
-        or (all_ and len(self.fresh_vars)==0):
-            questions.append(self)
-        for e in self.sub_exprs:
-            e.collect(questions, all_, co_constraints)
+        questions.append(self)
+        if all_:
+            for e in self.sub_exprs:
+                e.collect(questions, all_, co_constraints)
 
 
 class BinaryOperator(Expression):
@@ -374,8 +361,7 @@ class BinaryOperator(Expression):
         return super().annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.operator[0] in '=<>≤≥≠' \
-        and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)) :
+        if self.operator[0] in '=<>≤≥≠':
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
@@ -414,7 +400,7 @@ class AComparison(BinaryOperator):
         # a≠b --> Not(a=b)
         if len(self.sub_exprs) == 2 and self.operator == ['≠']:
             self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-            out = AUnary.make('~', AComparison.make('=', self.sub_exprs))
+            out = AUnary.make('¬', AComparison.make('=', self.sub_exprs))
             return out
         return super().annotate(voc, q_vars)
 
@@ -441,7 +427,7 @@ class AUnary(Expression):
 
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        self.operator = kwargs.pop('operator')
+        self.operator = kwargs.pop('operator').replace('~', '¬')
 
         self.sub_exprs = [self.f]
         super().__init__()
@@ -514,12 +500,12 @@ class AAggregate(Expression):
         self = self.annotate1()
         # remove q_vars after annotate1
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
-        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
-        for e in self.sub_exprs:
-            e.collect(questions, all_, co_constraints)
+        if all_ or len(self.sorts)==0:
+            for e in self.sub_exprs:
+                e.collect(questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
@@ -555,12 +541,14 @@ class AppliedSymbol(Expression):
 
     def annotate1(self):
         self.type = self.decl.type if self.decl else None
-        return super().annotate1()
+        out = super().annotate1()
+        if out.decl is None or out.decl.name == "`Symbols": # a symbol variable
+            out.fresh_vars.add(self.s.name)
+        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.is_var \
-        and self.simpler is None and self.name != '__relevant' \
-        and (self.no_fresh_vars_before_expansion or (all_ and len(self.fresh_vars)==0)):
+        if self.decl.name != "`Symbols" \
+        and self.simpler is None and self.name != '__relevant':
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
@@ -612,7 +600,7 @@ class Variable(AppliedSymbol):
         return self.annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl and self.decl.is_var:
+        if self.decl:
             questions.append(self)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
@@ -700,6 +688,5 @@ class Brackets(Expression):
         if self.annotations['reading']:
             self.sub_exprs[0].annotations = self.annotations
         self.fresh_vars = self.sub_exprs[0].fresh_vars
-        self.no_fresh_vars_before_expansion = (len(self.fresh_vars)==0)
         return self
 

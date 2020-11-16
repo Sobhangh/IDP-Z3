@@ -1,0 +1,20 @@
+vocabulary V {
+    // here comes the specification of the vocabulary
+    p q r
+}
+
+theory T:V {
+    // here comes the definitions and constraints
+    p|q.
+    p&r.
+}
+
+structure S:V {
+    p=true.
+}
+
+procedure main () {
+    print(str(Problem(T,S).simplify().formula()))
+    print()
+    print(str(Problem(T,S).propagate().simplify().formula()))
+}

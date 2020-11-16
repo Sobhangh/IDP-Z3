@@ -57,67 +57,19 @@ class Idp(object):
         self.display = kwargs.pop('display')
         self.procedures = {p.name: p for p in kwargs.pop('procedures')}
 
-        self.translated = None  # [Z3Expr]
-
-        assert self.display is None or 'main' not in self.procedures, \
-            "Cannot have both a 'display and a 'main block"
-        if self.display is not None:
-            assert len(self.vocabularies) in [1,2], \
-                "Maximum 2 vocabularies are allowed in Interactive Consultant"
-            assert len(self.theories) in [1,2], \
-                "Maximum 2 theories are allowed in Interactive Consultant"
-
-            if len(self.vocabularies)==2:
-                assert 'environment' in self.vocabularies and 'decision' in self.vocabularies, \
-                    "The 2 vocabularies in Interactive Consultant must be 'environment' and 'decision'"
-            if len(self.theories)==2:
-                assert 'environment' in self.theories and 'decision' in self.theories, \
-                    "The 2 theories in Interactive Consultant must be 'environment' and 'decision'"
-
-        if self.goal    is None: self.goal    = Goal(name="")
-        if self.view    is None: self.view    = View(viewType='normal')
-        if self.display is None: self.display = Display(constraints=[])
-        
         for voc in self.vocabularies.values():
             voc.annotate(self)
         for t in self.theories.values():
             t.annotate(self)
-
-        # determine default vocabulary, theory
-        if list(self.vocabularies.keys()) == ['environment', 'decision']:
-            self.vocabulary = self.vocabularies['decision']
-        else:
-            self.vocabulary = next(iter(self.vocabularies.values())) # get first vocabulary
-        if list(self.theories.keys()) == ['environment', 'decision']:
-            self.theory = self.theories['decision']
-            self.theory.constraints.extend(self.theories['environment'].constraints)
-            self.theory.definitions.extend(self.theories['environment'].definitions)
-            self.theory.def_constraints.update(self.theories['environment'].def_constraints)
-            self.theory.subtences.update(self.theories['environment'].subtences)
-            self.theory.assignments.extend(self.theories['environment'].assignments)
-        else:
-            self.theory = next(iter(self.theories.values())) # get first theory
         for struct in self.structures.values():
-            struct.annotate(self) # attaches an interpretation to the vocabulary
+            struct.annotate(self)
 
-        self.goal.annotate(self)
-        self.view.annotate(self)
-        self.display.annotate(self)
-        self.display.run(self)
-        self.subtences = {**self.theory.subtences, **self.goal.subtences()}
-
-    def unknown_symbols(self):
-        todo = self.theory.unknown_symbols()
-
-        out = {}  # reorder per vocabulary order
-        for symb in self.vocabulary.symbol_decls:
-            if symb in todo:
-                out[symb] = todo[symb]
-        return out
-
-    def translate(self):
-        return self.theory.translate(self)
-
+        # determine default vocabulary, theory, before annotating display
+        self.vocabulary = next(iter(self.vocabularies.values()))
+        self.theory     = next(iter(self.theories    .values()))
+        if self.goal    is None: self.goal    = Goal(name="")
+        if self.view    is None: self.view    = View(viewType='normal')
+        if self.display is None: self.display = Display(constraints=[])
 
 ################################ Vocabulary  ###############################
 
@@ -185,7 +137,7 @@ class Vocabulary(object):
             constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self, {})
 
         for v in self.symbol_decls.values():
-            if v.is_var:
+            if type(v) == SymbolDeclaration:
                 self.terms.update(v.instances)
 
 
@@ -213,7 +165,6 @@ class ConstructedTypeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.constructors = kwargs.pop('constructors')
-        self.is_var = False
         self.range = self.constructors  # functional constructors are expanded
         self.translated = None
         self.map = {} # {String: constructor}
@@ -243,7 +194,7 @@ class ConstructedTypeDeclaration(object):
         return (f"type {self.name} constructed from "
                 f"{{{','.join(map(str, self.constructors))}}}")
 
-    def annotate(self, voc, idp=None):
+    def annotate(self, voc):
         assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
         voc.symbol_decls[self.name] = self
         for c in self.constructors:
@@ -254,7 +205,7 @@ class ConstructedTypeDeclaration(object):
 
     def check_bounds(self, var):
         if self.name == 'bool':
-            out = [var, AUnary.make('~', var)]
+            out = [var, AUnary.make('¬', var)]
         else:
             out = [AComparison.make('=', [var, c]) for c in self.constructors]
         out = ADisjunction.make('∨', out)
@@ -268,7 +219,6 @@ class RangeDeclaration(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')  # maybe 'int', 'real'
         self.elements = kwargs.pop('elements')
-        self.is_var = False
         self.translated = None
 
         self.type = 'int'
@@ -294,7 +244,7 @@ class RangeDeclaration(object):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." + str(x.toI)) for x in self.elements])
         return f"type {self.name} = {{{elements}}}"
 
-    def annotate(self, voc, idp=None):
+    def annotate(self, voc):
         assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
         voc.symbol_decls[self.name] = self
 
@@ -336,7 +286,6 @@ class SymbolDeclaration(object):
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         
-        self.is_var = True  # unless interpreted later
         self.typeConstraints = []
         self.translated = None
 
@@ -353,7 +302,7 @@ class SymbolDeclaration(object):
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}")
 
-    def annotate(self, voc, idp=None, vocabulary=True):
+    def annotate(self, voc, vocabulary=True):
         if vocabulary:
             assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
             voc.symbol_decls[self.name] = self
@@ -367,7 +316,7 @@ class SymbolDeclaration(object):
 
         # create instances
         self.instances = {}
-        if vocabulary:   # and not self.name.startswith('_'):
+        if vocabulary:
             if len(self.sorts) == 0:
                 expr = Variable(s=Symbol(name=self.name))
                 expr.annotate(voc, {})
@@ -379,17 +328,17 @@ class SymbolDeclaration(object):
                     self.instances[expr.code] = expr
 
         # determine typeConstraints
-        if self.out.decl.name != 'bool' and self.range and self.is_var:
+        if self.out.decl.name != 'bool' and self.range:
             for inst in self.instances.values():
                 domain = self.out.decl.check_bounds(inst)
                 if domain is not None:
                     domain.block = self.block
-                    domain.if_symbol = self.name
+                    domain.is_type_constraint_for = self.name
                     domain.annotations['reading'] = "Possible values for " + str(inst)
                     self.typeConstraints.append(domain)
         return self
 
-    def translate(self, idp=None):
+    def translate(self):
         if self.translated is None:
             if len(self.sorts) == 0:
                 self.translated = Const(self.name, self.out.translate())
@@ -445,7 +394,6 @@ class Theory(object):
 
         self.clark = {}  # {Declaration: Rule}
         self.def_constraints = {} # {Declaration: Expression}
-        self.subtences = None  # i.e., sub-sentences.  {string: Expression}
         self.assignments = Assignments()
         self.translated = None
 
@@ -480,24 +428,16 @@ class Theory(object):
 
         self.constraints = OrderedSet([e.annotate(voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
-        self.constraints = OrderedSet([e.interpret         (self) for e in self.constraints])
 
         for decl in voc.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
 
-        self.subtences = {}
-        for e in self.constraints:
-            self.subtences.update({k: v for k, v in e.subtences().items()})
+        for s in list(voc.terms.values()):
+            if not s.code.startswith('_'):
+                self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
-        for s in list(voc.terms.values()) + list(self.subtences.values()):
-            self.assignments.assert_(s, None, Status.UNKNOWN, False)
-
-    def unknown_symbols(self):
-        return mergeDicts(c.unknown_symbols()
-                          for c in list(self.constraints) + self.definitions)
-
-    def translate(self, idp):
+    def translate(self):
         out = []
         for i in self.constraints:
             out.append(i.translate())
@@ -551,13 +491,6 @@ class Definition(object):
             self.clark[decl] = rule.compute(theory)
 
         return self
-
-    def unknown_symbols(self):
-        out = {}
-        for decl, rule in self.clark.items():
-            out[decl.name] = decl
-            out.update(rule.unknown_symbols())
-        return out
 
 
 class Rule(object):
@@ -615,7 +548,8 @@ class Rule(object):
         assert len(self.args) == len(new_vars), "Internal error"
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
-            if type(arg) in [Fresh_Variable] and arg.name not in new_vars:
+            if type(arg) in [Fresh_Variable, Variable] \
+            and arg.name in self.vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
                 self.out = self.out.instantiate(arg, nv) if self.out else self.out
                 for j in range(i, len(self.args)):
@@ -636,14 +570,19 @@ class Rule(object):
         # compute self.expanded, by expanding:
         # ∀ v: f(v)=out <=> body
         # (after joining the rules of the same symbols)
-        if self.out:
-            expr = AppliedSymbol.make(self.symbol, self.args[:-1])
-            expr = AComparison.make('=', [expr, self.args[-1]])
+        if any(s.name =="`Symbols" for s in self.sorts):
+            # don't expand macros, to avoid arity and type errors
+            # will be done later with optimized binary quantification
+            self.expanded = TRUE
         else:
-            expr = AppliedSymbol.make(self.symbol, self.args)
-        expr = AEquivalence.make('⇔', [expr, self.body])
-        expr = AQuantification.make('∀', {**self.q_vars}, expr)
-        self.expanded = expr.expand_quantifiers(theory)
+            if self.out:
+                expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+                expr = AComparison.make('=', [expr, self.args[-1]])
+            else:
+                expr = AppliedSymbol.make(self.symbol, self.args)
+            expr = AEquivalence.make('⇔', [expr, self.body])
+            expr = AQuantification.make('∀', {**self.q_vars}, expr)
+            self.expanded = expr.expand_quantifiers(theory)
 
         # interpret structures
         self.body     = self.body    .interpret(theory)
@@ -652,7 +591,7 @@ class Rule(object):
         return self
 
     def instantiate_definition(self, new_args, theory):
-        out = self.body
+        out = self.body.copy() # in case there is no arguments
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new)
@@ -664,13 +603,6 @@ class Rule(object):
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block
-        return out
-
-    def unknown_symbols(self):
-        out = mergeDicts(arg.unknown_symbols() for arg in self.args)  # in case they are expressions
-        if self.out is not None:
-            out.update(self.out.unknown_symbols())
-        out.update(self.body.unknown_symbols())
         return out
 
 
@@ -691,7 +623,8 @@ class Structure(object):
         self.assignments = Assignments()
 
     def annotate(self, idp):
-        assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
+        assert self.vocab_name in idp.vocabularies, \
+            "Unknown vocabulary: " + self.vocab_name
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
             i.annotate(self) # this updates self.assignments
@@ -717,26 +650,24 @@ class Interpretation(object):
         self.default = self.default.annotate(voc, {})
         assert self.default.as_ground() is not None, f"Must be a ground term: {self.default}"
 
-        # annotate tuple and compute self.data
+        # annotate tuple and update structure.assignments
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.tuples:
             t.annotate(voc)
             assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
             if self.decl.function:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
-                struct.assignments.assert_(expr, t.args[-1], Status.UNIVERSAL, False)
+                struct.assignments.assert_(expr, t.args[-1], Status.STRUCTURE, False)
             else:
                 expr = AppliedSymbol.make(symbol, t.args)
-                struct.assignments.assert_(expr, TRUE, Status.UNIVERSAL, False)
+                struct.assignments.assert_(expr, TRUE, Status.STRUCTURE, False)
             count += 1
 
         # set default value
         if count < len(self.decl.instances):
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
-                    struct.assignments.assert_(expr, self.default, Status.UNIVERSAL, False)
-
-        self.decl.is_var = False
+                    struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
 
 
 class Tuple(object):
@@ -748,8 +679,6 @@ class Tuple(object):
 
     def annotate(self, voc):
         self.args = [arg.annotate(voc, {}) for arg in self.args]
-
-    def interpret(self, theory): return self  # TODO ?
 
     def translate(self):
         return [arg.translate() for arg in self.args]
@@ -772,7 +701,6 @@ class Goal(object):
         if '__relevant' not in voc.symbol_decls:
             relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
                                     sorts=[], out=None)
-            relevants.is_var = False
             relevants.block = self
             relevants.annotate(voc)
 
@@ -787,9 +715,6 @@ class Goal(object):
             idp.theory.constraints.append(constraint)
         elif self.name not in [None, '']:
             raise Exception("Unknown goal: " + self.name)
-
-    def subtences(self):
-        return {}
 
 
 class View(object):
@@ -832,7 +757,6 @@ class Display(object):
         ]:
             symbol_decl = SymbolDeclaration(annotations='', name=Symbol(name=name), 
                 sorts=[], out=out)
-            symbol_decl.is_var = False
             symbol_decl.annotate(self.voc)
             symbol_decl.translate()
 

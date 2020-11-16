@@ -87,6 +87,14 @@ structure {
                        'typ': 'Animalt_t',
                        'value': 'Dog',
                        'values': ['Dog']},
+            'Animal = Dog': {'environmental': False,
+                             'is_assignment': True,
+                             'normal': False,
+                             'reading': 'Animal = Dog',
+                             'relevant': True,
+                             'status': 'UNIVERSAL',
+                             'typ': 'Bool',
+                             'value': True},
             '__rank': 1},
  'Sterilized': {'Sterilized': {'environmental': False,
                                'is_assignment': False,
@@ -104,7 +112,7 @@ structure {
                      'status': 'UNKNOWN',
                      'typ': 'Real',
                      'value': ''},
-           'Total = sum{ : Age < 6 ∧ ~((Sterilized)) : 20.0} + sum{ : Age ≥ 6 ∧ Sterilized : 20.0} + sum{ : Age ≥ 6 ∧ ~((Sterilized)) : 40.0} + sum{ : Animal = Dog ∧ ViciousDog : 100.0}': {'environmental': False,
+           'Total = sum{ : Age < 6 ∧ ¬((Sterilized)) : 20.0} + sum{ : Age ≥ 6 ∧ Sterilized : 20.0} + sum{ : Age ≥ 6 ∧ ¬((Sterilized)) : 40.0} + sum{ : Animal = Dog ∧ ViciousDog : 100.0}': {'environmental': False,
                                                                                                                                                                                              'is_assignment': False,
                                                                                                                                                                                              'normal': False,
                                                                                                                                                                                              'reading': 'Total '
@@ -115,7 +123,7 @@ structure {
                                                                                                                                                                                                         '< '
                                                                                                                                                                                                         '6 '
                                                                                                                                                                                                         '∧ '
-                                                                                                                                                                                                        '~((Sterilized)) '
+                                                                                                                                                                                                        '¬((Sterilized)) '
                                                                                                                                                                                                         ': '
                                                                                                                                                                                                         '20.0} '
                                                                                                                                                                                                         '+ '
@@ -135,7 +143,7 @@ structure {
                                                                                                                                                                                                         '≥ '
                                                                                                                                                                                                         '6 '
                                                                                                                                                                                                         '∧ '
-                                                                                                                                                                                                        '~((Sterilized)) '
+                                                                                                                                                                                                        '¬((Sterilized)) '
                                                                                                                                                                                                         ': '
                                                                                                                                                                                                         '40.0} '
                                                                                                                                                                                                         '+ '

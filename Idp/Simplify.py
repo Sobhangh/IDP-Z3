@@ -94,7 +94,7 @@ def update_exprs(self, sub_exprs):
         elif then_.same_as(TRUE) and else_.same_as(FALSE):
             return self._change(simpler=if_  , sub_exprs=sub_exprs)
         elif then_.same_as(FALSE) and else_.same_as(TRUE):
-            return self._change(simpler=AUnary.make('~', if_), sub_exprs=sub_exprs)
+            return self._change(simpler=AUnary.make('¬', if_), sub_exprs=sub_exprs)
     return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
 
@@ -122,7 +122,7 @@ def update_exprs(self, exprs):
         value = TRUE
         exprs = [exprs[0] if self.sub_exprs[0].same_as(TRUE) else TRUE, exprs[1]]
     if exprs[1].same_as(FALSE): # (p => false) is ~p
-        simpler = AUnary.make('~', exprs[0])
+        simpler = AUnary.make('¬', exprs[0])
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AImplication.update_exprs = update_exprs
 
@@ -137,7 +137,7 @@ def update_exprs(self, exprs):
         if e.same_as(TRUE): # they must all be true
             return self._change(simpler=AConjunction.make('∧', exprs), sub_exprs=exprs)
         if e.same_as(FALSE): # they must all be false
-            return self._change(simpler=AConjunction.make('∧', [AUnary.make('~', e) for e in exprs]),
+            return self._change(simpler=AConjunction.make('∧', [AUnary.make('¬', e) for e in exprs]),
                               sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs
@@ -273,7 +273,7 @@ APower.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operand = list(new_exprs)[0]
-    if self.operator == '~':
+    if self.operator == '¬':
         if operand.same_as(TRUE):
             return self._change(value=FALSE, sub_exprs=[operand])
         if operand.same_as(FALSE):

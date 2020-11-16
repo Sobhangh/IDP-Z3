@@ -18,6 +18,12 @@ display {
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
+              'idpname': 'p',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
+              'view': 'normal'},
+             {'environmental': False,
               'idpname': 'q',
               'priority': 'core',
               'showOptimize': True,
@@ -27,6 +33,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
+ 'p': {},
  'q': {'__rank': 1,
        'q': {'environmental': False,
              'is_assignment': False,

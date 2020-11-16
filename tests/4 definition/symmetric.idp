@@ -5,8 +5,8 @@ vocabulary {
 }
 theory {
     edge(a,b).
-	{ symmetric(`edge). }
-    !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
+	symmetric(`edge). 
+    { !`p[`Symbols]: symmetric(`p) <- (!x y : `p(x,y) => `p(y,x)).}
 }
 display {
 	expand(`edge).

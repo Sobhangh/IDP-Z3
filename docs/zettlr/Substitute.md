@@ -14,7 +14,7 @@ graph TD
     Annotate --> instantiate_definition;
     Annotate --> rename_args;
     
-    Case --> full_propagate;
+    State --> full_propagate;
     full_propagate --> propagate;
     propagate --> substitute;
     substitute --> update_exprs;

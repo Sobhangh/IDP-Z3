@@ -32,9 +32,9 @@ from textx import TextXError
 
 from Idp import Idp, idpparser
 from Idp.utils import log
-from .Case import make_case
+from .State import make_state
 from .Inferences import *
-from .Output import *
+from .IO import *
 
 from typing import Dict
 
@@ -133,7 +133,7 @@ class run(Resource):
                     return out
                 except Exception as exc:
                     traceback.print_exc()
-                    return repr(exc)
+                    return str(exc)
             except Exception as exc:
                 traceback.print_exc()
                 return str(exc)
@@ -158,17 +158,13 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
-                    # Generate all symbols.
-                    out = metaJSON(idp)
-                    # Generate propagation for all symbols.
-                    expanded = [dic['idpname'] for dic in out['symbols']
-                                if dic['view'] == 'expanded']
-                    case = make_case(idp, "{}", tuple(expanded))
-                    out["propagated"] = propagation(case)
+                    state = make_state(idp, "{}")
+                    out = metaJSON(state)
+                    out["propagated"] = Output(state).fill(state)
                     return out
                 except Exception as exc:
                     traceback.print_exc()
-                    return repr(exc)
+                    return str(exc)
             except Exception as exc:
                 traceback.print_exc()
                 return str(exc)
@@ -198,32 +194,35 @@ class eval(Resource):
                 given_json = args['active']
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                case = make_case(idp, given_json, expanded)
+                state = make_state(idp, given_json)
 
                 out = {}
                 if method == "propagate":
-                    out = propagation(case)
+                    out = Output(state).fill(state)
                 if method == "modelexpand":
-                    out = expand(case)
+                    generator = state.expand(max=1,complete=False, extended=True)
+                    state.assignments = list(generator)[0]
+                    out = Output(state).fill(state)
                 if method == "explain":
-                    out = explain(case, args['symbol'], args['value'], given_json)
+                    out = explain(state, args['value'])
                 if method == "minimize":
-                    out = optimize(case, args['symbol'], args['minimize'])
+                    state = state.optimize(args['symbol'], args['minimize'],
+                        complete=False, extended=True)
+                    out = Output(state).fill(state)
                 if method == "abstract":
                     if args['symbol'] != "": # theory to explain ?
                         newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
                                     + "theory {\n"
                                     + args['symbol']
                                     + "\n}\n"
-                                    + "view expanded"
                         )
                         idpModel = idpparser.model_from_str(newTheory)
                         expanded = {}
-                        for expr in idpModel.subtences.values():
-                            expanded.update(expr.unknown_symbols())
+                        # for expr in idpModel.subtences.values():
+                        #     expanded.update(expr.unknown_symbols())
                         expanded = tuple(expanded.keys())
-                        case = make_case(idpModel, "", expanded)
-                    out = abstract(case, given_json)
+                        state = make_state(idpModel, "")
+                    out = abstract(state, given_json)
                 log("end /eval " + method)
                 #pyinstrument g.profiler.stop()
                 #pyinstrument print(g.profiler.output_text(unicode=True, color=True))

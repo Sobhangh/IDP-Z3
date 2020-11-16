@@ -8,7 +8,7 @@ vocabulary {
 } 
 
 theory {
-    { !cl[color]: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
+    { !cl: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
     codeOf(red)=b.
 }
  
@@ -56,6 +56,14 @@ display {
                    'is_assignment': True,
                    'normal': False,
                    'reading': 'c = red',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': False},
+       'red = c': {'environmental': False,
+                   'is_assignment': False,
+                   'normal': False,
+                   'reading': 'red = c',
                    'relevant': True,
                    'status': 'CONSEQUENCE',
                    'typ': 'Bool',

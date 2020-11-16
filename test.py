@@ -27,16 +27,16 @@ import pprint
 import sys
 import threading
 import time
+import traceback
 from typing import Dict
 
 # import pyximport; 
 # pyximport.install(language_level=3)
 
-from consultant.Case import Case
-from consultant.Inferences import metaJSON, propagation, expand
+from consultant.State import State, make_state
+from consultant.IO import *
 from Idp import idpparser, SymbolDeclaration, NEWL
 from Idp.utils import start, log
-from consultant.Case import make_case
 
 z3lock = threading.Lock()
 
@@ -55,40 +55,34 @@ def generateZ3(theory):
             try:
                 idp.execute()
             except Exception as exc:
-                print(exc)
-
+                print(traceback.format_exc())
             return buf.getvalue()
 
-    expanded_symbols: Dict[str, SymbolDeclaration] = {}
-    for expr in idp.subtences.values():
-        expanded_symbols.update(expr.unknown_symbols())
-    expanded_symbols2 = list(expanded_symbols.keys())
-    case = Case(idp, expanded_symbols2)
+    state = State(idp)
+    out = Output(state).fill(state)
 
     output = (
         f"{NEWL}-- original ---------------------------------{NEWL}"
         f"{theory}"
         f"{NEWL}-- meta -------------------------------------{NEWL}"
-        f"{pprint.pformat(metaJSON(case.idp), width=120)}{NEWL}"
+        f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
         f"{NEWL}-- propagation ------------------------------{NEWL}"
-        f"{pprint.pformat(propagation(case), width=120)}{NEWL}"
+        f"{pprint.pformat(out, width=120)}{NEWL}"
 
         #additional debug info (optional)
         # f"{NEWL}-- vocabulary -------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in case.idp.vocabulary.translated)}"
+        # f"{NEWL.join(str(t) for t in state.idp.vocabulary.translated)}"
         # f"{NEWL}-- theory -----------------------------------{NEWL}"
-        # f"{(NEWL+NEWL).join(str(t) for t in case.idp.theory.translate(case.idp))}{NEWL}"
+        # f"{(NEWL+NEWL).join(str(t) for t in state.idp.theory.translate(state.idp))}{NEWL}"
         # f"{NEWL}-- goal -----------------------------------{NEWL}"
-        # f"{str(case.idp.goal.translate())}{NEWL}"
-        # f"{NEWL}-- subtences ------------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in case.idp.subtences)}{NEWL}"
-        # f"{NEWL}-- GUILines ------------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in case.GUILines)}{NEWL}"
-        # f"{NEWL}-- case -------------------------------------{NEWL}"
-        # f"{str(case)}{NEWL}"
+        # f"{str(state.idp.goal.translate())}{NEWL}"
+        # f"{NEWL}-- assignments ------------------------------------{NEWL}"
+        # f"{NEWL.join(str(t) for t in state.assignments)}{NEWL}"
+        # f"{NEWL}-- state -------------------------------------{NEWL}"
+        # f"{str(state)}{NEWL}"
         )
     # try:
-    #     expand(case)
+    #     expand(state)
     # except Exception as exc:
     #     output += f"{NEWL}error in expansion{NEWL}{str(exc)}"
     return output
@@ -161,10 +155,15 @@ def pipeline():
                     idp = idpparser.model_from_str(fp.read())
                     given_json = ""
 
-                    case = make_case(idp, given_json, tuple([]))
-
-                    expand(case)
-                    propagation(case)
+                    if idp.procedures == {}:
+                        state = make_state(idp, given_json)
+                        generator = state.expand(max=1,complete=False, extended=True)
+                        list(generator)[0] # ignore result
+                        out = Output(state).fill(state)
+                    else:
+                        # avoid files meant to raise an error
+                        if file_name not in ['./tests/1 procedures/ok.idp']:
+                            idp.execute()
                     log("end /eval ")
                     out_dict[file_name] = "Works."
             except Exception as exc:

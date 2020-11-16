@@ -3,10 +3,15 @@ title: Non-linear equations in Z3
 tags: #issue #perf
 Date: 20201020103221
 –-
+General principles / assumptions:
+
+* it does not seem necessary to simplify non-linear equations by injecting known values.
+* the solver does not need to be restarted when unknown is found
+* however, quantification of non-linear equations over infinite range should be avoided \[\[Issue 28\]\]
 
 # version 4.8.8.0
 solver.check() returns `unknown` when there is a non-linearity, e.g. in `tests/5 polygon/Sides3.idp`, `/5 polygon/triangle.idp`, `8 DMN/BMI.idp`. The solver has to be restarted to propage other values (e.g. for `Sides3`).  It returns `sat` as soon as a value is given that removes the non-linearity.
-Except in [[Issue 28]] !?  Except in `tests/1 procedures/` ?!
+Except in [[Issue 28]], because of quantification over range in def_constraints !?
 
 Substituting a numeric value is needed for definitions over infinite domains, e.g. `/tests/3 arithmetic/double_def.idp`
 

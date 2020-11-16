@@ -52,3 +52,4 @@ Everything between ``//`` and the end of the line is a comment.
 .. include:: structure.inc
 .. include:: display.inc
 .. include:: main.inc
+.. include:: IDP3.inc

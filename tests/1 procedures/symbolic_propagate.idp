@@ -1,0 +1,19 @@
+vocabulary V {
+    // here comes the specification of the vocabulary
+    p q
+    i: int
+    r: real
+    type color constructed from {red, blue, green}
+    c: color
+    type range = {0..5}
+    ra: range
+}
+
+theory T:V {
+    // here comes the definitions and constraints
+    q & c=blue & i=1 & r=2.0 & ra=3 & (?x[range]: x=ra).
+}
+
+procedure main () {
+    print(str(Problem(T).symbolic_propagate().simplify().formula()))
+}

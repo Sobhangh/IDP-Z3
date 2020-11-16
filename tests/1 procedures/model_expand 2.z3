@@ -1,12 +1,13 @@
 
 Model 1
 ==========
-[p = True, q = True]
+p:={->true}
+q:={->true}
 
 No more models.
 
 Model 1
 ==========
-[p = True]
+p:={->true}
 
 No more models.

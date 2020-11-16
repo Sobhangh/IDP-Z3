@@ -2,24 +2,18 @@
 -- original ---------------------------------
 vocabulary {
     double(real): real
-    x: real
+    X: real
     y: real
 }
 theory {
     {!x[real]: double(x)= x+x. }
-    x=3.
-    y=double(x).
+    X()=3.
+    y=double(X()).
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
-              'idpname': 'double',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'function',
-              'view': 'normal'},
-             {'environmental': False,
-              'idpname': 'x',
+              'idpname': 'X',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
@@ -29,29 +23,43 @@ theory {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'double',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
               'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'double': {},
- 'x': {'__rank': 1,
-       'x': {'environmental': False,
+ 'X': {'X': {'environmental': False,
              'is_assignment': True,
              'normal': True,
-             'reading': 'x',
+             'reading': 'X',
              'relevant': True,
              'status': 'UNIVERSAL',
              'typ': 'Real',
              'value': '3'},
-       'x = 3': {'environmental': False,
+       'X = 3': {'environmental': False,
                  'is_assignment': True,
                  'normal': False,
-                 'reading': 'x = 3',
+                 'reading': 'X = 3',
                  'relevant': True,
                  'status': 'UNIVERSAL',
                  'typ': 'Bool',
-                 'value': True}},
+                 'value': True},
+       '__rank': 1},
+ 'double': {'__rank': 1,
+            'double(X) = X + X': {'environmental': False,
+                                  'is_assignment': False,
+                                  'normal': False,
+                                  'reading': 'double(X) = X + X',
+                                  'relevant': True,
+                                  'status': 'UNIVERSAL',
+                                  'typ': 'Bool',
+                                  'value': True}},
  'y': {'__rank': 1,
        'y': {'environmental': False,
              'is_assignment': True,
@@ -61,10 +69,10 @@ theory {
              'status': 'CONSEQUENCE',
              'typ': 'Real',
              'value': '6'},
-       'y = double(x)': {'environmental': False,
+       'y = double(X)': {'environmental': False,
                          'is_assignment': False,
                          'normal': False,
-                         'reading': 'y = double(x)',
+                         'reading': 'y = double(X)',
                          'relevant': True,
                          'status': 'UNIVERSAL',
                          'typ': 'Bool',

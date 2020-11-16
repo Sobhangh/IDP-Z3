@@ -5,10 +5,8 @@ vocabulary {
 theory {
   ~p()|q.
   { important(`p). }
-  ?`x[`Symbols]: important(`x).
-  ~(!`x[`Symbols]: important(`x)).
 
-  !`x[`Symbols]: important(`x) => `x().
+  { !`x[`Symbols]: important(`x) <- `x(). }
 }
 display {
   relevant(`p).

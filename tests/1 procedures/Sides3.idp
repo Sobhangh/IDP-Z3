@@ -31,7 +31,6 @@ vocabulary V {
 }
 
 theory T:V {
-    Sides = 3. 
 
     [Definition of triangle]
     (Type=triangle      <=> Sides=3).
@@ -119,12 +118,18 @@ theory T:V {
 
 }
 
+structure S1:V {
+    Sides=3.
+}
+
 structure S:V {
     Base=3. Surface=4.5.
 }
 
 procedure main() {
     print(model_propagate(T))
+    print()    
+    print(model_propagate(T, S1))
     print()
     print(model_propagate(T, S))
 }

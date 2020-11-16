@@ -8,11 +8,10 @@ sys.path.insert(0,os.path.join(parentdir, 'Idp'))
 
 print(parentdir)
 import Inferences
-from Case import *
-from Solver import *
+from State import *
 from Idp.utils import log
 from Idp import *
-
+from z3 import Solver
 
 
 
@@ -21,19 +20,19 @@ model: File = idpparser.model_from_file(file)
 
 log("parse")
 if False:
-    cProfile.run('Case(model.translate)')
+    cProfile.run('State(model.translate)')
 else:
     for i in range(1):
-        c = Case(model)
+        c = State(model)
         #print(c.interpretations)
         log("translate")
         print(simplify(c.translate()))
-        solver, _, _ = mk_solver(c.translate(), c.GUILines)
+        solver = Solver()
+        solver.add(c.translate())
         print(solver.check())
         log("solve")
         print(list(str(l) for l in consequences(c.translate(), c.GUILines, {}).keys()))
 
-# solver = c.mk_solver()
 # print(solver)
 # print(solver.check())
 # print(solver.model())

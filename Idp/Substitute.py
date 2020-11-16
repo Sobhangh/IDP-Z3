@@ -33,7 +33,7 @@ from debugWithYamlLog import *
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    ADisjunction, AConjunction,  AAggregate, \
+                    ADisjunction, AConjunction,  AAggregate, AComparison, \
                     AppliedSymbol, Variable, NumberConstant, Fresh_Variable 
 
 
@@ -67,28 +67,6 @@ def instantiate(self, e0, e1):
     
     instantiating e0=`x by e1=`f in self=`x(y) returns f(y) (or any instance of f if arities don't match)
     """
-    
-    assert isinstance(e0, Fresh_Variable)
-
-    if type(self) in [AppliedSymbol, Variable, Fresh_Variable] \
-    and self.name == e0.code:
-        if type(self)==AppliedSymbol \
-        and self.decl.name == '`Symbols':
-            if isinstance(e1, Constructor) and len(self.sub_exprs) == len(e1.symbol.decl.sorts):
-                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
-                return out
-            elif isinstance(e1, Fresh_Variable): # replacing variable in a definition
-                out = copy.copy(self)
-                out.code = out.code.replace(e0.code, e1.code)
-                out.str = out.code.replace(e0.code, e1.code)
-                out.name = e1.code
-                out.s.name = e1.code
-                return out
-            else:
-                return list(e1.symbol.decl.instances.values())[0] # should be "unknown"
-        elif len(self.sub_exprs)==0:
-            return e1
-
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
 
@@ -111,8 +89,9 @@ def instantiate(self, e0, e1):
         if type(e1) in [Fresh_Variable, Variable]:
             # e1 is Variable when instantiating some definitions
             out.fresh_vars.add(e1.name)
-    if not type(self) in [AQuantification, AAggregate]:
-        out.code = str(out) #TODO code should be instantiation of AQuantification
+        if isinstance(out, AComparison):
+            out.annotate1()
+    out.code = str(out)
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate = instantiate
@@ -132,8 +111,9 @@ def interpret(self, theory):
     
     implementation for everything but AppliedSymbol, Variable and Fresh_variable 
     """
+    if self.is_type_constraint_for: # do not interpret typeConstraints
+        return self
     out = self.update_exprs([e.interpret(theory) for e in self.sub_exprs])
-    out.original = out
     return out
 Expression.interpret = interpret
 
@@ -157,6 +137,8 @@ def expand_quantifiers(self, theory):
     self.vars = []
     self.sorts = [] # not used
     for name, var in self.q_vars.items():
+        assert var.sort.name != '`Symbols', \
+            "Can't quantify over symbols in a constraint.  Quantify in a definition instead."
         if var.sort.decl.range:
             out = []
             for f in forms:
@@ -196,6 +178,8 @@ def expand_quantifiers(self, theory):
                 , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                 , else_f=NumberConstant(number='0'))]
     for name, var in self.q_vars.items():
+        assert var.sort.name != '`Symbols', \
+            "Can't quantify over symbols in a constraint.  Quantify in a definition instead."
         if var.sort.decl.range:
             out = []
             for f in forms:
@@ -221,7 +205,6 @@ def interpret(self, theory):
     else:
         out = self._change(sub_exprs=sub_exprs)
         out.co_constraint = None
-    out.original = self
     return out
 AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret
@@ -257,8 +240,32 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 
+def instantiate(self, e0, e1):
+    if self.name == e0.code:
+        if type(self)==AppliedSymbol \
+        and self.decl.name == '`Symbols':
+            if isinstance(e1, Constructor) and len(self.sub_exprs) == len(e1.symbol.decl.sorts):
+                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
+                return out
+            elif isinstance(e1, Fresh_Variable): # replacing variable in a definition
+                out = copy.copy(self)
+                out.code = out.code.replace(e0.code, e1.code)
+                out.str = out.code.replace(e0.code, e1.code)
+                out.name = e1.code
+                out.s.name = e1.code
+                return out
+            else:
+                return list(e1.symbol.decl.instances.values())[0] # should be "unknown"
+        elif len(self.sub_exprs)==0:
+            return e1
+    return Expression.instantiate(self, e0, e1)
+AppliedSymbol .instantiate = instantiate
+Variable      .instantiate = instantiate
+
 
 # Class Fresh_Variable #######################################################
+
+Fresh_Variable.instantiate = instantiate
 
 def interpret(self, theory):
     return self

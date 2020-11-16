@@ -1,16 +1,11 @@
-Sides -> 3
-Type -> triangle
-Vertices -> 3
-Convex
-Angle(4) -> 0
-Length(4) -> 0
 No more consequences.
 
-Sides -> 3
-Type -> triangle
 Vertices -> 3
-Convex
-Angle(4) -> 0
+Type -> triangle
 Length(4) -> 0
-Height -> 3
+Angle(4) -> 0
+Convex
+No more consequences.
+
+Convex
 No more consequences.
