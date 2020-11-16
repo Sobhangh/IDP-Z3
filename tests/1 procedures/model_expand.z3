@@ -9,13 +9,13 @@ Model 2
 ==========
 p:={->true}
 q:={->false}
-f:={(red)->true; (blue)->false; (green)->true}
+f:={(red)->true; (blue)->true; (green)->false}
 
 Model 3
 ==========
 p:={->true}
 q:={->false}
-f:={(red)->true; (blue)->true; (green)->false}
+f:={(red)->true; (blue)->false; (green)->true}
 
 Model 4
 ==========

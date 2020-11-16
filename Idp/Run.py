@@ -40,7 +40,7 @@ class Problem(object):
         self.def_constraints = {}
 
         self._formula = None # the problem expressed in one logic formula
-        self.co_constraints = None # see Glossary.md
+        self.co_constraints = None # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
         self.questions = None
 
         for b in blocks:

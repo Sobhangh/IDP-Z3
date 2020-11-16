@@ -24,7 +24,7 @@ Classes to represent assignments of values to expressions
 """
 
 from copy import copy
-from enum import Enum
+from enum import Enum, auto
 from typing import Optional
 from z3 import Not, BoolRef
 
@@ -33,14 +33,14 @@ from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
 from .Parse import *
 
 class Status(Enum):
-    UNKNOWN     = 1
-    GIVEN       = 2
-    ENV_UNIV    = 3
-    UNIVERSAL   = 4
-    ENV_CONSQ   = 5
-    CONSEQUENCE = 6
-    EXPANDED    = 7
-    STRUCTURE   = 8
+    UNKNOWN     = auto()
+    GIVEN       = auto()
+    ENV_UNIV    = auto()
+    UNIVERSAL   = auto()
+    ENV_CONSQ   = auto()
+    CONSEQUENCE = auto()
+    EXPANDED    = auto()
+    STRUCTURE   = auto()
 
 class Assignment(object):
     def __init__(self, sentence: Expression, value: Optional[Expression], 

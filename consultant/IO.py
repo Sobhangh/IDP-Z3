@@ -76,7 +76,7 @@ def decode_UTF(json_str):
         .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
         .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃")
         .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
-        .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧"))
+        .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧").replace("\\\\u00ac", "~"))
 
 def json_to_literals(state, jsonstr: str):
     """ returns Assignments corresponding to jsonstr """
