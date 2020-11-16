@@ -77,7 +77,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
     SumMinusOp:      '+' | '-';
     MultDivOp:       '*' | '/' | '%';
-    UnaryOperator:   '-' | '~';
+    UnaryOperator:   '-' | '~' | '¬';
     
 
     Base:  AppliedSymbol | Variable | NumberConstant | Brackets;

@@ -427,7 +427,7 @@ class AUnary(Expression):
 
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        self.operator = kwargs.pop('operator')
+        self.operator = kwargs.pop('operator').replace('¬', '~')
 
         self.sub_exprs = [self.f]
         super().__init__()
