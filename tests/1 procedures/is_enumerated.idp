@@ -9,7 +9,7 @@ vocabulary V {
 }
 
 structure S:V {
-    opposite = {red, green; green, red}
+    opposite = {red, green; green, green}
     f = {A,A, A; A,B, A; B,A, B}
 }
 
@@ -24,8 +24,8 @@ theory T:V {
     opposite(Color) is not enumerated.
 }
 theory T2:V {
-    Color=blue.
-    opposite(blue)=blue.
+    opposite(blue)=green.
+    opposite(Color)=Color.
     f(A,B) is enumerated.
 }
 theory T3:V {

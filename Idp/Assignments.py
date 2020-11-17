@@ -52,10 +52,8 @@ class Assignment(object):
 
         # first symbol in the sentence that does not start with '_'
         self.symbol_decl = None
-        symbols = sentence.unknown_symbols(co_constraints=False).values()
-        if isinstance(self.sentence, AppliedSymbol) and self.sentence.is_enumerated:
-            symbols = list(symbols)[1:] # ignore the enumerated symbol
-        for d in symbols:
+        self.symbols = list(sentence.unknown_symbols(co_constraints=False).values())
+        for d in self.symbols:
             if not d.name.startswith('_'):
                 self.symbol_decl = d
                 break

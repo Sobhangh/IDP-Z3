@@ -161,12 +161,22 @@ class Output(object):
     def fill(self, state):
         for key, l in state.assignments.items():
             if l.value is not None:
-                if l.status == Status.STRUCTURE:
-                    key = l.sentence.code
-                    symb = self.state.assignments[key].symbol_decl
-                    if symb.name in self.m:
-                        del self.m[symb.name]
                 self.addAtom(l.sentence, l.value, l.status)
+        # remove symbols in structure, and reassign sentences if possible
+        for key, l in state.assignments.items():
+            if l.status == Status.STRUCTURE:
+                key = l.sentence.code
+                symb = self.state.assignments[key].symbol_decl
+                if symb.name in self.m:
+                    for key, sentence in self.m[symb.name].items():
+                        if key in self.state.assignments:
+                            for s in self.state.assignments[key].symbols:
+                                if (not s.name.startswith('_') 
+                                and s.name in self.m
+                                and s.name != symb.name):
+                                    self.m[s.name][key] = sentence
+                                    break
+                    self.m[symb.name] = {}
         return self.m
 
     def addAtom(self, atom, value, status: Status):
