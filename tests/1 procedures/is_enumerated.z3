@@ -77,7 +77,7 @@ Traceback (most recent call last):
     self._interpret()
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 100, in _interpret
     c.interpret(self)
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Substitute.py", line 203, in interpret
-    simpler = theory.interpretations[self.name].is_enumerated(self.sub_exprs)
-KeyError: 'is_color'
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Substitute.py", line 204, in interpret
+    assert self.decl.function, \
+AssertionError: Can't use 'is enumerated' with predicate is_color.
 

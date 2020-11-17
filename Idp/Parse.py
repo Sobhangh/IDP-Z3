@@ -634,8 +634,11 @@ class Structure(object):
 class Interpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
-        self.tuples = kwargs.pop('tuples')
+        self.enumeration = kwargs.pop('enumeration')
         self.default = kwargs.pop('default')  # later set to false for predicates
+
+        if not self.enumeration:
+            self.enumeration = Enumeration(tuples=[])
 
         self.decl = None  # symbol declaration
         self.is_complete = None # is the function enumeration complete ?
@@ -643,17 +646,16 @@ class Interpretation(object):
     def annotate(self, struct):
         voc = struct.voc
         self.decl = voc.symbol_decls[self.name]
-        if not self.decl.function and self.tuples: 
+        if not self.decl.function and self.enumeration.tuples: 
             assert self.default is None, \
                 f"Enumeration for predicate '{self.name}' cannot have a default value: {self.default}"
             self.default = FALSE
 
-        self.tuples.sort(key=lambda t: ",".join(map(str, t.args)))
+        self.enumeration.annotate(voc)
 
-        # annotate tuple and update structure.assignments
+        # update structure.assignments
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
-        for t in self.tuples:
-            t.annotate(voc)
+        for t in self.enumeration.tuples:
             assert all(a.as_ground() is not None for a in t.args), \
                     f"Tuple for '{self.name}' must be ground : ({t})"
             if self.decl.function:
@@ -682,14 +684,22 @@ class Interpretation(object):
                 if code not in struct.assignments:
                     struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
 
-    def is_enumerated(self, args, rank=0, tuples=None):
+class Enumeration(object):
+    def __init__(self, **kwargs):
+        self.tuples = kwargs.pop('tuples')
+
+    def annotate(self, voc):
+        self.tuples.sort(key=lambda t: ",".join(map(str, t.args)))
+        for t in self.tuples:
+            t.annotate(voc)
+
+    def contains(self, args, arity=None, rank=0, tuples=None):
         """ returns an Expression that says whether Tuple args is in the enumeration """
-        assert self.decl.function, \
-            f"Can't use 'is enumerated' with predicate {self.name}."
-        if self.is_complete:
-            return TRUE
-        if rank == self.decl.arity:  # valid tuple
-            return TRUE
+
+        if arity is None:
+            arity = len(args)
+        if rank == arity:  # valid tuple
+            return TRUE   
         if tuples is None:
             tuples = self.tuples
         
@@ -698,7 +708,7 @@ class Interpretation(object):
         if args[rank].as_ground() is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
-                    return self.is_enumerated(args, rank+1, list(tuples2))
+                    return self.contains(args, arity, rank+1, list(tuples2))
             return FALSE
         else:
             out = FALSE
@@ -706,7 +716,7 @@ class Interpretation(object):
                 tuples = list(tuples2)
                 out = IfExpr.make(AComparison.make('=', 
                                     [args[rank], tuples[0].args[rank]]),
-                                    self.is_enumerated(args, rank+1, tuples),
+                                    self.contains(args, arity, rank+1, tuples),
                                     out)
             return out
 
@@ -937,7 +947,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AppliedSymbol, Variable,
                                          NumberConstant, Brackets, Arguments,
 
-                                         Structure, Interpretation,
+                                         Structure, Interpretation, Enumeration,
                                          Tuple, Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

@@ -534,10 +534,12 @@ class AppliedSymbol(Expression):
 
     def __str1__(self):
         if len(self.sub_exprs) == 0:
-            return f"{str(self.s)}{self.is_enumerated}"
+            out = f"{str(self.s)}"
         else:
-            return (f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
-                    f"{' '+self.is_enumerated if self.is_enumerated else ''}")
+            out= f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
+        return ( f"{out}"
+                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
+                )
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
