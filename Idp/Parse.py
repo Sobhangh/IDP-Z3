@@ -631,7 +631,7 @@ class Structure(object):
         return self.name
 
 
-class Interpretation(object):
+class SymbolInterpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.enumeration = kwargs.pop('enumeration')
@@ -656,7 +656,7 @@ class Interpretation(object):
         # update structure.assignments
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.enumeration.tuples:
-            assert all(a.as_ground() is not None for a in t.args), \
+            assert all(a.as_rigid() is not None for a in t.args), \
                     f"Tuple for '{self.name}' must be ground : ({t})"
             if self.decl.function:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
@@ -669,16 +669,17 @@ class Interpretation(object):
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, TRUE, Status.STRUCTURE, False)
             count += 1
-        self.is_complete = (0 < count and count == len(self.decl.instances))
+        self.is_complete = (not self.decl.function or 
+            (0 < count and count == len(self.decl.instances)))
 
         # set default value
         if len(self.decl.instances) == 0: # infinite domain
             assert self.default is None, \
                 f"Can't use default value for '{self.name}' on infinite domain."
-        elif not self.is_complete and self.default is not None:
+        elif self.default is not None:
             self.is_complete = True
             self.default = self.default.annotate(voc, {})
-            assert self.default.as_ground() is not None, \
+            assert self.default.as_rigid() is not None, \
                     f"Default value for '{self.name}' must be ground: {self.default}"
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
@@ -705,7 +706,7 @@ class Enumeration(object):
         
         # constructs If-then-else recursively
         groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
-        if args[rank].as_ground() is not None:
+        if args[rank].as_rigid() is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
                     return self.contains(args, arity, rank+1, list(tuples2))
@@ -947,7 +948,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AppliedSymbol, Variable,
                                          NumberConstant, Brackets, Arguments,
 
-                                         Structure, Interpretation, Enumeration,
+                                         Structure, SymbolInterpretation, Enumeration,
                                          Tuple, Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

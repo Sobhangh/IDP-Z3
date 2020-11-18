@@ -81,7 +81,6 @@ def decode_UTF(json_str):
 def json_to_literals(state, jsonstr: str):
     """ returns Assignments corresponding to jsonstr """
     out = Assignments()
-    state.assignments = state.assignments.copy()
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
         for symbol in json_data:

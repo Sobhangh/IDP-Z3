@@ -67,6 +67,7 @@ class Problem(object):
         out.assignments = self.assignments.copy()
         out.constraints = [c.copy() for c in self.constraints]
         out.def_constraints = self.def_constraints.copy()
+        # copy() is called before making substitutions => invalidate derived fields
         out._formula = None
         out.co_constraints, out.questions = None, None
         return out

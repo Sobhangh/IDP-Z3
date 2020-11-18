@@ -181,7 +181,7 @@ class Expression(object):
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
-    def as_ground(self): 
+    def as_rigid(self): 
         " returns a NumberConstant or Constructor, or None "
         return self.value
 
@@ -216,7 +216,7 @@ class Constructor(Expression):
     
     def __str1__(self): return self.name
 
-    def as_ground(self): return self
+    def as_rigid(self): return self
 
 TRUE  = Constructor(name='true')
 FALSE = Constructor(name='false')
@@ -408,8 +408,8 @@ class AComparison(BinaryOperator):
         # f(x)=y
         self.is_assignment = len(self.sub_exprs) == 2 and self.operator in [['='], ['≠']] \
             and isinstance(self.sub_exprs[0], AppliedSymbol) \
-            and all(e.as_ground() is not None for e in self.sub_exprs[0].sub_exprs) \
-            and self.sub_exprs[1].as_ground() is not None
+            and all(e.as_rigid() is not None for e in self.sub_exprs[0].sub_exprs) \
+            and self.sub_exprs[1].as_rigid() is not None
         return super().annotate1()
 
 
@@ -666,7 +666,7 @@ class NumberConstant(Expression):
     
     def __str__(self): return self.number
 
-    def as_ground(self)     : return self
+    def as_rigid(self)     : return self
 
 ZERO = NumberConstant(number='0')
 ONE  = NumberConstant(number='1')
@@ -690,8 +690,8 @@ class Brackets(Expression):
     def __str__(self): return f"({self.sub_exprs[0].str})"
     def __str1__(self): return str(self)
 
-    def as_ground(self): 
-        return self.sub_exprs[0].as_ground()
+    def as_rigid(self): 
+        return self.sub_exprs[0].as_rigid()
 
     def annotate1(self):
         self.type = self.sub_exprs[0].type
