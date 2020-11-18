@@ -214,7 +214,7 @@ def interpret(self, theory):
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     if simpler is not None:
-        out.original = simpler # so that translated assignment is correct
+        out.original = simpler.copy() # so that translated assignment is correct
     return out
 AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret

@@ -100,7 +100,7 @@ class Problem(object):
                 c.interpret(self)
                 c.co_constraints(self.co_constraints)
                 c.collect(self.questions, all_=False)
-            for s in list(self.questions.values()):
+            for s in self.questions.values():
                 if not isinstance(s, AppliedSymbol) or s.is_enumerated:
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
 

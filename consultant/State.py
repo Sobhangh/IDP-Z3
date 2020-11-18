@@ -57,6 +57,7 @@ class State(Problem):
         idp.view.annotate(idp)
         idp.display.annotate(idp)
         idp.display.run(idp)
+        self.idp = idp # Idp vocabulary and theory
 
         super().__init__()
         self.given = None # Assignments from the user interface
@@ -72,30 +73,25 @@ class State(Problem):
             if 'decision' in idp.structures: 
                 self.add(idp.structures['decision'])
         else: # take the first theory and structure
+            self.environment = None
             self.add(next(iter(idp.theories.values())))
             if len(idp.structures)==1:
                 self.add(next(iter(idp.structures.values())))
         self.symbolic_propagate(tag=Status.UNIVERSAL)
-
-        self.idp = idp # Idp vocabulary and theory
 
         self._finalize()
 
     def add_given(self, jsonstr: str):
         out = self.copy()
 
+        if out.environment is not None:
+            _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
-
-        if len(out.idp.theories) == 2:
-            out.environment = self.environment.copy()
-            out.environment.assignments.update(out.given)
-        else:
-            out.assignments.update(out.given)
         return out._finalize()
 
     def _finalize(self):
         # propagate universals
-        if len(self.idp.vocabularies)==2: # if there is a decision vocabulary
+        if self.environment is not None: # if there is a decision vocabulary
             self.environment.propagate(tag=Status.ENV_CONSQ, extended=True)
             self.assignments.update(self.environment.assignments)
             self._formula = None

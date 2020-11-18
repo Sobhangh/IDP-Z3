@@ -322,7 +322,7 @@ class SymbolDeclaration(object):
                 expr.annotate(voc, {})
                 self.instances[expr.code] = expr
             else:
-                for arg in list(self.domain):
+                for arg in self.domain:
                     expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                     expr.annotate(voc, {})
                     self.instances[expr.code] = expr
@@ -433,7 +433,7 @@ class Theory(object):
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
 
-        for s in list(voc.terms.values()):
+        for s in voc.terms.values():
             if not s.code.startswith('_'):
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 

@@ -80,25 +80,26 @@ def decode_UTF(json_str):
 
 def json_to_literals(state, jsonstr: str):
     """ returns Assignments corresponding to jsonstr """
-    assignments = Assignments() # {atom : assignment} from the GUI (needed for propagate)
+    out = Assignments()
+    state.assignments = state.assignments.copy()
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
-
         for symbol in json_data:
-            idp_symbol = state.idp.vocabulary.symbol_decls[symbol]
             for atom, json_atom in json_data[symbol].items():
-                idp_atom = state.assignments[atom].sentence.copy()
+                if atom in state.assignments:
+                    idp_atom = state.assignments[atom].sentence
 
-                if json_atom["value"]!='':
-                    value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                    if json_atom["typ"] == "Bool":
-                        assignments.assert_(idp_atom, value, Status.GIVEN, False)
-                    elif json_atom["value"]:
-                        assignments.assert_(idp_atom, value, Status.GIVEN, True)
+                    if json_atom["value"]!='':
+                        value = str_to_IDP(idp_atom, str(json_atom["value"]))
+                        if json_atom["typ"] == "Bool":
+                            state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
+                        elif json_atom["value"]:
+                            state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
 
-                        idp_atom = AComparison.make('=', [idp_atom, value])
-                        assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
-    return assignments
+                            idp_atom = AComparison.make('=', [idp_atom, value])
+                            state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
+                        out[atom] = state.assignments[atom]
+    return out
 
 
 #################
@@ -113,16 +114,15 @@ class Output(object):
         self.state = state
 
         self.m[' Global'] = {}
-        self.m[' Global']['env_dec'] = bool(len(state.idp.vocabularies)==2)
+        self.m[' Global']['env_dec'] = state.environment is not None
 
-        def initialise(atom):
-            typ = atom.type
-            key = atom.code
-            if ( key in state.assignments 
-            and state.assignments[key].symbol_decl is not None):
-                symb = state.assignments[key].symbol_decl
+        for key, ass in state.assignments.items():
+            atom = ass.sentence
+            symb = state.assignments[key].symbol_decl
+            if symb is not None:
                 s = self.m.setdefault(symb.name, {})
 
+                typ = atom.type
                 if typ == 'bool':
                     symbol = {"typ": 'Bool'}
                 elif 0 < len(symb.range):
@@ -141,42 +141,38 @@ class Output(object):
                     reading = atom.annotations['reading']
 
                 if symbol:
-                    assert atom.code in state.assignments
-                    symbol["status"]   = state.assignments[atom.code].status.name
-                    symbol["relevant"] = state.assignments[atom.code].relevant
+                    symbol["status"]   = ass.status.name
+                    symbol["relevant"] = ass.relevant
                     symbol['reading']  = reading
                     symbol['normal']   = (isinstance(atom, AppliedSymbol) 
                         and not atom.is_enumerated)
                     symbol['environmental'] = symb.block.name=='environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
-                        or bool(state.assignments[atom.code].sentence.is_assignment)
+                        or bool(ass.sentence.is_assignment)
                     s.setdefault(key, symbol)
                     s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
 
-        for GuiLine in state.assignments.values():
-            initialise(GuiLine.sentence)
-        for ass in structure.values(): # add numeric input for Explain
-            initialise(ass.sentence)
+        # remove symbols that are in a structure
+        for key, l in state.assignments.items():
+            if l.status == Status.STRUCTURE:
+                symb = self.state.assignments[key].symbol_decl
+                if symb.name in self.m:
+                    # reassign sentences if possible
+                    for k, data in self.m[symb.name].items():
+                        if k in self.state.assignments:
+                            for s in self.state.assignments[k].symbols:
+                                if (not s.name.startswith('_') 
+                                and s.name in self.m
+                                and s.name != symb.name):
+                                    self.state.assignments[k].symbol_decl = s
+                                    self.m[s.name][k] = data
+                                    break
+                    self.m[symb.name] = {}       
 
     def fill(self, state):
         for key, l in state.assignments.items():
             if l.value is not None:
                 self.addAtom(l.sentence, l.value, l.status)
-        # remove symbols in structure, and reassign sentences if possible
-        for key, l in state.assignments.items():
-            if l.status == Status.STRUCTURE:
-                key = l.sentence.code
-                symb = self.state.assignments[key].symbol_decl
-                if symb.name in self.m:
-                    for key, sentence in self.m[symb.name].items():
-                        if key in self.state.assignments:
-                            for s in self.state.assignments[key].symbols:
-                                if (not s.name.startswith('_') 
-                                and s.name in self.m
-                                and s.name != symb.name):
-                                    self.m[s.name][key] = sentence
-                                    break
-                    self.m[symb.name] = {}
         return self.m
 
     def addAtom(self, atom, value, status: Status):
