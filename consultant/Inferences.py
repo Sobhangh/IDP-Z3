@@ -198,6 +198,7 @@ def explain(state, question):
             if ass.status in [Status.GIVEN, Status.STRUCTURE, Status.UNIVERSAL]:
                 p = ass.translate()
                 ps[p] = ass
+                #TODO use assert_and_track ?
                 s.add(Implies(p, ass.translate()))
         todo = chain(state.constraints, state.def_constraints.values())
         for constraint in todo:

@@ -55,6 +55,7 @@ Date: TODO
 - [ ] use graph library instead of simplify for relevance
 - [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
 - [ ] skolemisation: replace existential quantifications in theory by an uninterpreted function
+- [ ] propagation: use [this propagation algorithm](https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3) ?
 
 - [ ] merge state.co_constraints and state.definitions (many overlaps)
 - [ ] use sets to avoid duplicates (e.g. constraints)
