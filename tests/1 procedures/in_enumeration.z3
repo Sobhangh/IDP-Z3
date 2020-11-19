@@ -1,5 +1,5 @@
 No more consequences.
-(p ⇒ Color = blue ∨ Color = red) ∧ (Color = red ∨ Color = blue ∨ Color = green) ∧ true
+(p ⇒  if   Color = red then true else Color = blue) ∧ (Color = red ∨ Color = blue ∨ Color = green) ∧ true
 
 Model 1
 ==========
@@ -13,17 +13,11 @@ p:={->false}
 
 Model 3
 ==========
-Color:={->blue}
+Color:={->green}
 p:={->false}
 
 Model 4
 ==========
-Color:={->green}
-p:={->false}
-
-Model 5
-==========
 Color:={->blue}
-p:={->true}
 
 No more models.
