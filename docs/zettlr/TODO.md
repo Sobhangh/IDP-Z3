@@ -54,6 +54,7 @@ Date: TODO
 - [ ] do not translate Simplified in propagation: using original theory instead
 - [ ] use graph library instead of simplify for relevance
 - [ ] reify quantifications and use Z3's simplify (and ignore irrelevant reification) (but what about dReal ?)
+- [ ] skolemisation: replace existential quantifications in theory by an uninterpreted function
 
 - [ ] merge state.co_constraints and state.definitions (many overlaps)
 - [ ] use sets to avoid duplicates (e.g. constraints)
