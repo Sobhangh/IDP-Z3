@@ -211,6 +211,8 @@ def interpret(self, theory):
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('¬', simpler)
     if self.decl in theory.clark: # has a theory
+        #TODO need to quantify the co_constraints for the fresh_vars
+        assert not self.fresh_vars, "Internal error"
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     if simpler is not None:
