@@ -133,13 +133,15 @@ class Assignments(dict):
         return out
 
     def __str__(self):
-        out = {}
+        out, out2 = {},[]
         for a in self.values():
             if (isinstance(a.sentence, AppliedSymbol) and a.value is not None
-            and not a.sentence.is_enumerated):
+            and not a.sentence.is_enumerated and not a.sentence.in_enumeration):
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
                 c = f"({c})" if c else c 
                 c = f"{c}->{str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
+            else:
+                out2.append(f"{str(a.sentence)}->{str(a.value)}")
         return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"
-                         for k, a in out.items())
+                         for k, a in out.items()) # + NEWL.join(out2)

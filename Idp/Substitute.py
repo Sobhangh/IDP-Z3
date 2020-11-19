@@ -210,6 +210,11 @@ def interpret(self, theory):
             simpler = interpretation.enumeration.contains(self.sub_exprs)
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('¬', simpler)
+    elif self.in_enumeration:
+        # re-create original Applied Symbol
+        core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
+        simpler = self.in_enumeration.contains([core])
+        simpler.annotations = self.annotations
     if self.decl in theory.clark: # has a theory
         #TODO need to quantify the co_constraints for the fresh_vars
         assert not self.fresh_vars, "Internal error"

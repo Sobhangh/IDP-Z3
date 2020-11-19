@@ -144,7 +144,7 @@ class Output(object):
                     symbol["relevant"] = ass.relevant
                     symbol['reading']  = reading
                     symbol['normal']   = (isinstance(atom, AppliedSymbol) 
-                        and not atom.is_enumerated)
+                        and not atom.is_enumerated and not atom.in_enumeration)
                     symbol['environmental'] = symb.block.name=='environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
                         or bool(ass.sentence.is_assignment)

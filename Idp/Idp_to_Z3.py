@@ -115,7 +115,10 @@ def translate1(self):
 
     for i in range(1, len(self.sub_exprs)):
         function = BinaryOperator.MAP[self.operator[i - 1]]
-        out = function(out, self.sub_exprs[i].translate())
+        try:
+            out = function(out, self.sub_exprs[i].translate())
+        except e:
+            raise e
     return out
 BinaryOperator.translate1 = translate1
 

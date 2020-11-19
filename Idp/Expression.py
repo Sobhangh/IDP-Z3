@@ -517,6 +517,10 @@ class AppliedSymbol(Expression):
             self.is_enumerated = kwargs.pop('is_enumerated')
         else:
             self.is_enumerated = ''
+        if 'in_enumeration' in kwargs:
+            self.in_enumeration = kwargs.pop('in_enumeration')
+        else:
+            self.in_enumeration = None
 
         self.sub_exprs = self.args.sub_exprs
         super().__init__()
@@ -537,17 +541,23 @@ class AppliedSymbol(Expression):
             out = f"{str(self.s)}"
         else:
             out= f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
+        if self.in_enumeration:
+            enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return ( f"{out}"
                  f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
+                 f"{ f' in {{{enum}}}' if self.in_enumeration else ''}"
                 )
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
         self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars else voc.symbol_decls[self.s.name]
+        self.s.decl = self.decl
+        if self.in_enumeration:
+            self.in_enumeration.annotate(voc)
         return self.annotate1()
 
     def annotate1(self):
-        self.type = ( 'bool' if self.is_enumerated else
+        self.type = ( 'bool' if self.is_enumerated or self.in_enumeration else
                     self.decl.type if self.decl else 
                     None )
         out = super().annotate1()
@@ -595,6 +605,7 @@ class Variable(AppliedSymbol):
         self.decl = None
         self.translated = None
         self.is_enumerated = None
+        self.in_enumeration = None
 
     def __str1__(self): return self.name
 

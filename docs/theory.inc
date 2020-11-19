@@ -132,6 +132,11 @@ Quantified formulas
     Its truth value reflects whether :math:`(a,b)` is enumerated in :math:`f`'s enumeration.
     If the enumeration has a default value, every tuple of arguments is enumerated.
 
+"in {1,2,3,4}"
+    :math:`f(args)\ in\ enumeration` is a sentence, where
+    :math:`f` is a function applied to arguments :math:`args`
+    and :math:`enumeration` is an enumeration.
+
 if .. then .. else ..
     :math:`if\ t_1\ then\ t_2\ else\ t_3` is a sentence when |t1|, |t2| and |t3| are sentences.
 
