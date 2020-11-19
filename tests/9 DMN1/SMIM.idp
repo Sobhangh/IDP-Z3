@@ -126,44 +126,31 @@ CAC40	,
 
     Eligible(Security)
 
-    AcceptedCountry(CountryType)
     AcceptedSupra(Issuers)
 }
 
 theory T:V {
 
     {
-        !s[Security]: Eligible(s) <- Issuer_Type(s) = Sovereign &
-        				AcceptedCountry(Country(s)) & 
-        				HasRating(s) =< 77.
+        !s[Security]: Eligible(s) <- Issuer_Type(s) = Sovereign
+            & Country(s) in {Aus; Bel; Can;Den;Est;Fin;Fra;Ger;Hon;Ire;Isr;Ita;Jap;Lux;Net;New;Nor;Por;Sin;Slo;Sou;Spa;Swe;Swi;UniK;UniS} 
+            & HasRating(s) =< 77.
         
-       !s[Security]: Eligible(s) <- Issuer_Type(s) = Supra &
-        				AcceptedSupra(Issuer(s)) &
-            			HasRating(s) =< 77.
+       !s[Security]: Eligible(s) <- Issuer_Type(s) = Supra
+            & Issuer(s) in {AfricanDevelopmentBank; AsianDevelopmentBank;
+                BankForInternationalSettlements; CaribbeanDevelopmentBank;
+                CouncilOfEuropeDevelopmentBank;
+                EuropeanBankForReconstructionAndDevelopment; EuropeanCentralBank;
+                EuropeanInvestmentBank; EuropeanInvestmentFund;
+                InterAmericanDevelopmentBank;
+                InternationalBankForReconstructionAndDevelopment;
+                InternationalFinanceCorporation; InternationalMonetaryFund;
+                MultilateralInvestmentGuaranteeAgency; NordicInvestmentBank }
+            & HasRating(s) =< 77.
         
     }
 }
 
-structure {
-    AcceptedCountry = {Aus; Bel; Can;Den;Est;Fin;Fra;
-        Ger;Hon;Ire;Isr;Ita;Jap;Lux;Net;New;Nor;Por;
-        Sin;Slo;Sou;Spa;Swe;Swi;UniK;UniS}
-    AcceptedSupra = {AfricanDevelopmentBank; 
-        AsianDevelopmentBank;
-        BankForInternationalSettlements; 
-        CaribbeanDevelopmentBank;
-        CouncilOfEuropeDevelopmentBank;
-        EuropeanBankForReconstructionAndDevelopment;
-        EuropeanCentralBank;
-        EuropeanInvestmentBank;
-        EuropeanInvestmentFund;
-        InterAmericanDevelopmentBank;
-        InternationalBankForReconstructionAndDevelopment;
-        InternationalFinanceCorporation;
-        InternationalMonetaryFund;
-        MultilateralInvestmentGuaranteeAgency;
-        NordicInvestmentBank}
-}
 display {
     goal(`Eligible).
 }
