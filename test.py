@@ -185,29 +185,41 @@ if __name__ == "__main__":
     parser.add_argument('TEST', nargs='*', default=["generate"])
     args = parser.parse_args()
 
-    theory = """
-vocabulary V {
-    A
-    B
-    C
-    D
-    E
-    F
-    G
-    H
-    I
-    Eligible
-}
+    test_files = glob.glob("./tests/9 DMN1/*.idp")
+    for file_name in test_files:
+        try:
+            with open(file_name, "r") as fp:
+                idp = idpparser.model_from_str(fp.read())
+                case = State(idp).add_given("{}")
+                # capture stdout, print()
+                with io.StringIO() as buf, redirect_stdout(buf):
+                    try:
+                        out = DMN(case, "Eligible(BE001)")
+                    except Exception as exc:
+                        print(traceback.format_exc())
+                    output = buf.getvalue()
+                
+        except Exception as exc:
+            pass
 
-theory T:V {
-    {
-        Eligible <- B & (C|D).
-        Eligible <- B & E & F.
-        Eligible <- B & E & G & ~H.
-    }
-    A => ~Eligible.
-}
-    """
-    idp = idpparser.model_from_str(theory)
-    case = State(idp).add_given("{}")
-    out = DMN(case, "Eligible")
+        z3 = file_name.replace(".idp", ".z3")
+        if os.path.isfile(z3):
+            f = open(z3, "r")
+            if output != f.read():
+                out_dict[file] = "**** unexpected result !"
+                error = 1
+            f.close()
+
+        f = open(z3, "w")
+        f.write(output)
+        f.close()
+
+    total = round(time.process_time()-start, 3)
+    print("*** Total: ", total)
+
+    dir = os.path.dirname(__file__)
+    dir = os.path.join(dir, "tests")
+
+    f = open(os.path.join(dir, "duration.txt"), "w")
+    f.write(str(total))
+    f.close()

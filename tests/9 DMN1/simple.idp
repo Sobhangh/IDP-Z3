@@ -1,0 +1,22 @@
+vocabulary V {
+    type Security constructed from {BE001}
+    A
+    B
+    C
+    D
+    E
+    F
+    G
+    H
+    I
+    Eligible(Security)
+}
+
+theory T:V {
+    {
+        Eligible(BE001) <- B & (C|D).
+        Eligible(BE001) <- B & E & F.
+        Eligible(BE001) <- B & E & G & ~H.
+    }
+    A => ~Eligible(BE001).
+}

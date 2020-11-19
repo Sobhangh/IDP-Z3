@@ -1,0 +1,169 @@
+vocabulary V {
+    type Security constructed from {BE001}
+    type IssuerType constructed from {Sovereign, Corporate, Supra, Issuer1}
+    type CountryType constructed from {	Aus		,
+Bel		,
+Can		,
+Den		,
+Est		,
+Fin		,
+Fra		,
+Ger		,
+Hon		,
+Ire		,
+Isr		,
+Ita		,
+Jap		,
+Lux		,
+Net		,
+New		,
+Nor		,
+Por		,
+Sin		,
+Slo		,
+Sou		,
+Spa		,
+Swe		,
+Swi		,
+UniK	,
+UniS	
+}
+    type Issuers constructed from {	
+	Austria		,
+	Belgium		,
+	Canada		,
+	Denmark		,
+	Estonia		,
+	Finland		,
+	France		,
+	Germany		,
+	HongKong	,
+	Ireland		,
+	Israel		,
+	Italy		,
+	Japan		,
+	Luxembourg		,
+	Netherlands		,
+	NewZealand		,
+	Norway		,
+	Portugal		,
+	Singapore		,
+	Slovakia		,
+	Slovenia		,
+	SouthKorea		,
+	Spain		,
+	Sweden		,
+	Switzerland		,
+	UK		,
+	UnitedStates		,
+	AfricanDevelopmentBank		,
+	AsianDevelopmentBank		,
+	BankForInternationalSettlements		,
+	CaribbeanDevelopmentBank		,
+	CouncilOfEuropeDevelopmentBank		,
+	EuropeanBankForReconstructionAndDevelopment		,
+	EuropeanCentralBank		,
+	EuropeanInvestmentBank		,
+	EuropeanInvestmentFund		,
+	InterAmericanDevelopmentBank		,
+	InternationalBankForReconstructionAndDevelopment		,
+	InternationalFinanceCorporation		,
+	InternationalMonetaryFund		,
+	MultilateralInvestmentGuaranteeAgency		,
+	NordicInvestmentBank		,
+	GovernmentNationalMortgageAssociation		,
+	FederalHomeLoanMortgageCorporation		,
+	FederalNationalMortgageAssociation		,
+	TVA		,
+	FFCBFC		,
+	FHLB		,
+	FAMC		,
+	FICO		,
+	REFCO		,
+	OPIC		,
+	BRITISHCOLUMBIA		,
+	TORONTO		,
+	MANITOBA		,
+	NEWBRUNsELEC		,
+	NEWBRUNSWICK		,
+	NEWFOUNDLAND		,
+	NOVASCOTIA		,
+	ONTARIO		,
+	PRINCEEDWARDISLD		,
+	ALBERTA		,
+	QUEBEC 		,
+	SASKATCHEWAN		,
+issuer1	,
+issuer2	,
+issuer3	,
+ATXPrime		,
+ ASX50		,
+ BEL20		,
+ TSX60		,
+ StoxxEurope50		,
+ StoxxEurope600		,
+CAC40	,
+ BSF120		,
+ OMXHelsinki25		,
+ HDAX		,
+ HangSeng		,
+ Nikkei225		,
+ AEX25		,
+ FTSESTI		,
+ IBEX35		,
+ OMXStockholm30		,
+ SMI		,
+ FTSE350		,
+ SP500		,
+ NASDAQ100		,
+ KOSPI100		
+
+}
+	HasRating(Security) : int
+    Country(Security) : CountryType
+    Issuer_Type(Security)  : IssuerType
+    Issuer(Security) : Issuers
+
+    Eligible(Security)
+
+    AcceptedCountry(CountryType)
+    AcceptedSupra(Issuers)
+}
+
+theory T:V {
+
+    {
+        !s[Security]: Eligible(s) <- Issuer_Type(s) = Sovereign &
+        				AcceptedCountry(Country(s)) & 
+        				HasRating(s) =< 77.
+        
+       !s[Security]: Eligible(s) <- Issuer_Type(s) = Supra &
+        				AcceptedSupra(Issuer(s)) &
+            			HasRating(s) =< 77.
+        
+    }
+}
+
+structure {
+    AcceptedCountry = {Aus; Bel; Can;Den;Est;Fin;Fra;
+        Ger;Hon;Ire;Isr;Ita;Jap;Lux;Net;New;Nor;Por;
+        Sin;Slo;Sou;Spa;Swe;Swi;UniK;UniS}
+    AcceptedSupra = {AfricanDevelopmentBank; 
+        AsianDevelopmentBank;
+        BankForInternationalSettlements; 
+        CaribbeanDevelopmentBank;
+        CouncilOfEuropeDevelopmentBank;
+        EuropeanBankForReconstructionAndDevelopment;
+        EuropeanCentralBank;
+        EuropeanInvestmentBank;
+        EuropeanInvestmentFund;
+        InterAmericanDevelopmentBank;
+        InternationalBankForReconstructionAndDevelopment;
+        InternationalFinanceCorporation;
+        InternationalMonetaryFund;
+        MultilateralInvestmentGuaranteeAgency;
+        NordicInvestmentBank}
+}
+display {
+    goal(`Eligible).
+}

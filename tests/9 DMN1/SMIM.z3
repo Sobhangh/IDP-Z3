@@ -1,0 +1,5 @@
+['Not HasRating(BE001) ≤ 77', 'Not Eligible(BE001)']
+['Not Issuer_Type(BE001) = Sovereign', 'Not Issuer_Type(BE001) = Supra', 'Not Eligible(BE001)']
+['Not Issuer_Type(BE001) = Supra', 'Eligible(BE001)']
+['Not Issuer(BE001) = AfricanDevelopmentBank', 'Not Issuer(BE001) = AsianDevelopmentBank', 'Not Issuer(BE001) = BankForInternationalSettlements', 'Not Issuer(BE001) = CaribbeanDevelopmentBank', 'Not Issuer(BE001) = CouncilOfEuropeDevelopmentBank', 'Not Issuer(BE001) = EuropeanBankForReconstructionAndDevelopment', 'Not Issuer(BE001) = EuropeanCentralBank', 'Not Issuer(BE001) = EuropeanInvestmentBank', 'Not Issuer(BE001) = EuropeanInvestmentFund', 'Not Issuer(BE001) = InterAmericanDevelopmentBank', 'Not Issuer(BE001) = InternationalBankForReconstructionAndDevelopment', 'Not Issuer(BE001) = InternationalFinanceCorporation', 'Not Issuer(BE001) = InternationalMonetaryFund', 'Not Issuer(BE001) = MultilateralInvestmentGuaranteeAgency', 'Not Issuer(BE001) = NordicInvestmentBank', 'Not Eligible(BE001)']
+['Eligible(BE001)']
