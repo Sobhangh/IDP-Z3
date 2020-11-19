@@ -234,8 +234,8 @@ def explain(state, question):
                         out.m["*laws*"].append(a1.annotations['reading'])
     return out.m
 
-def abstract(case, given_json):
-    return DMN(case, "Eligible")
+def abstract(state, given_json):
+    return DMN(state, "Eligible")
     timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
 
@@ -317,13 +317,14 @@ def abstract(case, given_json):
                             if symb in active_symbol ]]
     return out
 
-def DMN(case, goal_string):
+def DMN(state, goal_string):
 
     def generalize(theory_formula, conjuncts):
         goal = conjuncts[-1]
         solver2 = Solver()
         solver2.add(theory_formula)
-        for i, c in enumerate(conjuncts[:-1]):
+        for i in reversed(range(len(conjuncts)-1)):
+            c = conjuncts[i]
             if (not c.sentence.same_as(TRUE)
             and not c.sentence.code==goal_string):
                 solver2.push()
@@ -340,38 +341,39 @@ def DMN(case, goal_string):
                     conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
                 solver2.pop()
 
-    assert(goal_string in case.assignments), \
+    assert(goal_string in state.assignments), \
         f"Unknown goal: {goal_string}"
-    goal = case.assignments[goal_string]
+    goal = state.assignments[goal_string]
     
     timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
 
     # extract fixed atoms from constraints
-    out["universal"] = list(l for l in case.assignments.values() 
+    out["universal"] = list(l for l in state.assignments.values() 
                         if l.status == Status.UNIVERSAL)
-    out["given"    ] = list(l for l in case.assignments.values() 
+    out["given"    ] = list(l for l in state.assignments.values() 
                         if l.status == Status.GIVEN)
-    out["fixed"    ] = list(l for l in case.assignments.values() 
+    out["fixed"    ] = list(l for l in state.assignments.values() 
                         if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
-    out["irrelevant"]= list(l for l in case.assignments.values() 
+    out["irrelevant"]= list(l for l in state.assignments.values() 
         if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
         and not l.relevant)
 
     # create keys for models using first symbol of atoms
     models, count = [], 0
     
-    done = set(out["universal"] + out["given"] + out["fixed"])
-    theory = case.formula().translate()
+    done = set(out["universal"] + out["given"] + out["fixed"]) 
+
+    theory = state.formula().translate()
     solver = Solver()
     solver.add(theory)
-    solver.add([ass.translate() for ass in case.given.values()])
+    solver.add([ass.translate() for ass in state.given.values()])
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
 
         # find the interpretation of all atoms in the model
         assignments = [] # [Assignment]
-        for assignment in case.assignments.values():
-            atom = assignment.sentence
+        for atom in state.questions.values():
+            assignment = state.assignments[atom.code]
             if assignment.value is None \
             and atom.type == 'bool':
                 value = solver.model().eval(atom.translate())
@@ -391,7 +393,7 @@ def DMN(case, goal_string):
         assignments.append(goal) # place goal at end
 
         if goal.value is not None:
-            generalize(case.formula().translate(), assignments)
+            generalize(state.formula().translate(), assignments)
             models.append(assignments)
 
         # add constraint to eliminate this model
@@ -404,7 +406,7 @@ def DMN(case, goal_string):
     models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
     
     # first hit policy
-    theory = case.formula().translate()
+    theory = state.formula().translate()
     models1 = []
     for i in range(len(models)):
         models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
@@ -424,7 +426,7 @@ def DMN(case, goal_string):
                 active_symbol[ass.symbol_decl.name] = True
     #create empty table
     table = {}
-    for ass in case.assignments.values():
+    for ass in state.assignments.values():
         if (ass.symbol_decl.name in active_symbol
         and ass.symbol_decl.name not in table):
             table[ass.symbol_decl.name] = [ [] for i in range(len(models))]
