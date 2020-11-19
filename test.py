@@ -187,6 +187,7 @@ if __name__ == "__main__":
 
     test_files = glob.glob("./tests/9 DMN1/*.idp")
     for file_name in test_files:
+        print(file_name)
         try:
             with open(file_name, "r") as fp:
                 idp = idpparser.model_from_str(fp.read())
@@ -200,13 +201,13 @@ if __name__ == "__main__":
                     output = buf.getvalue()
                 
         except Exception as exc:
-            pass
+            output = traceback.format_exc()
 
         z3 = file_name.replace(".idp", ".z3")
         if os.path.isfile(z3):
             f = open(z3, "r")
             if output != f.read():
-                out_dict[file] = "**** unexpected result !"
+                print(f"**** unexpected result !{file_name}" )
                 error = 1
             f.close()
 
