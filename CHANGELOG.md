@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 ## [0.5.5] - 2020-11-19
+[Access v0.5.5 on Google App Engine](https://20201119t122325-dot-interactive-consultant.ew.r.appspot.com/)
 
 ### API
 * changed license to GNU LGPL 3
@@ -16,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * support `if .. then .. else ..`
 
 ### GUI
+* support Shebang line
 * add buttons to insert UTF codes in editor
 
 
