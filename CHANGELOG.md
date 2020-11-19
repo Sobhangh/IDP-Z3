@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * add Problem class to API, with copy(), symbolic_propagate(), propagate(), simplify()
 * use poetry for installation
 * support [IEP 04 Incomplete enumerations](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-04-Incomplete-enumerations)
+* support `if .. then .. else ..`
 
 ### GUI
 * add buttons to insert UTF codes in editor

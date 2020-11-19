@@ -1,0 +1,13 @@
+vocabulary {
+    p q r
+    type color constructed from {red, blue, green}
+    Color:color
+}
+theory {
+    if p then q else r.
+    Color() = (if p then blue else green).
+}
+
+procedure main() {
+    print(model_expand(T))
+}
