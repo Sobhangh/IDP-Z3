@@ -162,7 +162,8 @@ def pipeline():
                         out = Output(state).fill(state)
                     else:
                         # avoid files meant to raise an error
-                        if file_name not in ['./tests/1 procedures/ok.idp']:
+                        if file_name not in ['./tests/1 procedures/ok.idp',
+                            './tests/1 procedures/is_enumerated.idp']:
                             idp.execute()
                     log("end /eval ")
                     out_dict[file_name] = "Works."

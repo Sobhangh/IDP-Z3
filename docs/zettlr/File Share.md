@@ -16,6 +16,7 @@ Options:
         * use [tinyurl api](https://codepen.io/Ephellon/pen/EvvGGp), or [bit.ly](https://dev.bitly.com/v4_documentation.html#operation/createBitlink) ([comparison](https://blog.rebrandly.com/8-best-free-url-shortener-apis-for-creating-your-short-links/))  [example bit.ly v4 code](https://stackoverflow.com/questions/55968819/how-to-shorten-url-with-bitly-v4-api-and-jquery) (requires authorization)
     * [integration in Angular](https://github.com/shailendragusain/ng-lz-string/issues/9)
 - [ ] save gist via server, as in [webIDP](https://bitbucket.org/krr/idp-webid/src/master/)'s [submitGist](https://bitbucket.org/krr/idp-webid/src/master/src/webID.hs)
+- [ ] use [a custom url-shortener](https://github.com/nelsontky/gh-pages-url-shortener)
 
 Nice to have: link to this specific version of IDP-Z3
 

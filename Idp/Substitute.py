@@ -33,8 +33,8 @@ from debugWithYamlLog import *
 
 from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    ADisjunction, AConjunction,  AAggregate, AComparison, \
-                    AppliedSymbol, Variable, NumberConstant, Fresh_Variable 
+                    ADisjunction, AConjunction,  AAggregate, AUnary, AComparison, \
+                    AppliedSymbol, Variable, NumberConstant, Fresh_Variable, TRUE
 
 
 # class Expression ############################################################
@@ -199,12 +199,22 @@ AAggregate.expand_quantifiers = expand_quantifiers
 
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
+    simpler, co_constraint = None, None
+    if self.is_enumerated:
+        assert self.decl.function, \
+            f"Can't use 'is enumerated' with predicate {self.name}."         
+        interpretation = theory.interpretations[self.name]
+        if interpretation.is_complete:
+            simpler = TRUE
+        else:
+            simpler = interpretation.enumeration.contains(self.sub_exprs)
+        if 'not' in self.is_enumerated:
+            simpler = AUnary.make('¬', simpler)
     if self.decl in theory.clark: # has a theory
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
-        out = self._change(sub_exprs=sub_exprs, co_constraint=co_constraint)
-    else:
-        out = self._change(sub_exprs=sub_exprs)
-        out.co_constraint = None
+    out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
+    if simpler is not None:
+        out.original = simpler.copy() # so that translated assignment is correct
     return out
 AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret

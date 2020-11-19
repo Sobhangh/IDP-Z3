@@ -7,28 +7,36 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### API
 * changed license to GNU LGPL 3
 * add model_check(), model_propagate() to API
 * add Problem class to API, with copy(), symbolic_propagate(), propagate(), simplify()
 * use poetry for installation
+* support [IEP 04 Incomplete enumerations](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-04-Incomplete-enumerations)
+* support `if .. then .. else ..`
+
+### GUI
+* add buttons to insert UTF codes in editor
+
 
 ## [0.5.4] - 2020-10-06
 [Access v0.5.4 on Google App Engine](https://20201006t101829-dot-interactive-consultant.ew.r.appspot.com/)
 
-## API
+### API
 * web IDE to develop and test knowledge bases
 * command line interface to execute an IDP program with a main() block
 * type of variables can now be omitted in quantifiers and aggregates (but there is no type inference from numeric expressions)
 * (macros) quantification on `Symbols type (except definitions)
 * support named vocabulary for structures
 
-## GUI
+### GUI
 * fix data entry issues
+
 
 ## [0.5.3] - 2020-09-15
 [Access v0.5.3 on Google App Engine](https://20200915t113559-dot-interactive-consultant.ew.r.appspot.com/)
 
-## API
+### API
 * use IDP3 syntax for 2 theories (environment + decision)
 * support simple `display` theory, with `goal`, `relevant`, `expand`, `hide`, `view` and `moveSymbols` predicates
   * `view` in /meta can take the `hidden` value
@@ -36,7 +44,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * add "environmental" of symbols in /meta's response
 * add "is_assignment' to /eval's response
 
-## GUI
+### GUI
 * File / New
 * File / Help
 

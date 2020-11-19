@@ -120,9 +120,11 @@ theory {
     //0 =< Base.
     //0 =< Height.
     //?n[side]: n=<Sides & Length(n)=Base.
+
+    ~(Length(Sides) is enumerated) => Length(Sides)=4.
 }
 structure {
-    Length = {1,1; 2,2; 3,3; 4,4} else 5
+    Length = {1,1; 2,2; 3,3}
 }
 
 display {
@@ -359,7 +361,23 @@ display {
                                                                'typ': 'Bool',
                                                                'value': True},
                '__rank': 1},
- 'Sides': {'Sides': {'environmental': False,
+ 'Sides': {'Length(Sides) = 4': {'environmental': False,
+                                 'is_assignment': False,
+                                 'normal': False,
+                                 'reading': 'Length(Sides) = 4',
+                                 'relevant': True,
+                                 'status': 'CONSEQUENCE',
+                                 'typ': 'Bool',
+                                 'value': True},
+           'Length(Sides) is enumerated': {'environmental': False,
+                                           'is_assignment': False,
+                                           'normal': False,
+                                           'reading': 'Length(Sides) is enumerated',
+                                           'relevant': True,
+                                           'status': 'CONSEQUENCE',
+                                           'typ': 'Bool',
+                                           'value': False},
+           'Sides': {'environmental': False,
                      'is_assignment': True,
                      'normal': True,
                      'reading': 'Sides',
@@ -384,7 +402,23 @@ display {
                          'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': True},
-           '__rank': 1},
+           '__rank': 1,
+           '∀n[side] : Length(n) = 0 ⇔ Sides < n': {'environmental': False,
+                                                    'is_assignment': False,
+                                                    'normal': False,
+                                                    'reading': 'A polygon with N sides has N lengths',
+                                                    'relevant': True,
+                                                    'status': 'UNIVERSAL',
+                                                    'typ': 'Bool',
+                                                    'value': True},
+           '∀n[side] : Length(n) = Length(1) ∨ Sides < n': {'environmental': False,
+                                                            'is_assignment': False,
+                                                            'normal': False,
+                                                            'reading': 'All sides have the same length',
+                                                            'relevant': True,
+                                                            'status': 'CONSEQUENCE',
+                                                            'typ': 'Bool',
+                                                            'value': False}},
  'Subtype': {'Subtype': {'environmental': False,
                          'is_assignment': True,
                          'normal': True,

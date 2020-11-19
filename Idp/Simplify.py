@@ -196,7 +196,7 @@ AConjunction.update_exprs = update_exprs
 # Class AComparison #######################################################
 
 def update_exprs(self, operands):
-    operands1 = [e.as_ground() for e in operands]
+    operands1 = [e.as_rigid() for e in operands]
     if all(e is not None for e in operands1):
         acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
@@ -213,7 +213,7 @@ AComparison.update_exprs = update_exprs
 #############################################################
 
 def update_arith(self, family, operands):
-    operands1 = [e.as_ground() for e in operands]
+    operands1 = [e.as_rigid() for e in operands]
     if all(e is not None for e in operands1):
         out = operands1[0].py_value
 
@@ -242,7 +242,7 @@ ASumMinus.update_exprs = update_exprs
 
 def update_exprs(self, operands):
     if any(op == '%' for op in self.operator): # special case !
-        operands1 = [e.as_ground() for e in operands]
+        operands1 = [e.as_rigid() for e in operands]
         if len(operands) == 2 \
         and all(e is not None for e in operands1):
             out = operands1[0].py_value % operands1[1].py_value
@@ -258,7 +258,7 @@ AMultDiv.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    operands1 = [e.as_ground() for e in operands]
+    operands1 = [e.as_rigid() for e in operands]
     if len(operands) == 2 \
     and all(e is not None for e in operands1):
         out = operands1[0].py_value ** operands1[1].py_value
@@ -279,7 +279,7 @@ def update_exprs(self, new_exprs):
         if operand.same_as(FALSE):
             return self._change(value=TRUE, sub_exprs=[operand])
     else: # '-'
-        a = operand.as_ground()
+        a = operand.as_rigid()
         if a is not None:
             if type(a) == NumberConstant:
                 return self._change(value=NumberConstant(number=str(- a.translate())), sub_exprs=[operand])
@@ -293,7 +293,7 @@ AUnary.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     if self.vars is None: # if the aggregate has already been expanded
-        operands1 = [e.as_ground() for e in operands]
+        operands1 = [e.as_rigid() for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
             out = NumberConstant(number=str(out))

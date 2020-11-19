@@ -29,7 +29,7 @@ from typing import Optional
 from z3 import Not, BoolRef
 
 from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
-                        Variable, AppliedSymbol
+                        AppliedSymbol
 from .Parse import *
 
 class Status(Enum):
@@ -52,7 +52,8 @@ class Assignment(object):
 
         # first symbol in the sentence that does not start with '_'
         self.symbol_decl = None
-        for d in sentence.unknown_symbols(co_constraints=False).values():
+        self.symbols = sentence.unknown_symbols(co_constraints=False).values()
+        for d in self.symbols:
             if not d.name.startswith('_'):
                 self.symbol_decl = d
                 break
@@ -134,7 +135,8 @@ class Assignments(dict):
     def __str__(self):
         out = {}
         for a in self.values():
-            if isinstance(a.sentence, AppliedSymbol) and a.value is not None:
+            if (isinstance(a.sentence, AppliedSymbol) and a.value is not None
+            and not a.sentence.is_enumerated):
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
                 c = f"({c})" if c else c 
                 c = f"{c}->{str(a.value)}"

@@ -19,7 +19,7 @@
 
 from copy import copy
 from enum import Enum
-import itertools as it
+import itertools
 import os
 import re
 import sys
@@ -322,7 +322,7 @@ class SymbolDeclaration(object):
                 expr.annotate(voc, {})
                 self.instances[expr.code] = expr
             else:
-                for arg in list(self.domain):
+                for arg in self.domain:
                     expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                     expr.annotate(voc, {})
                     self.instances[expr.code] = expr
@@ -395,7 +395,7 @@ class Theory(object):
         self.clark = {}  # {Declaration: Rule}
         self.def_constraints = {} # {Declaration: Expression}
         self.assignments = Assignments()
-        self.translated = None
+        self.interpretations = {}
 
         for constraint in self.constraints:
             constraint.block = self
@@ -433,7 +433,7 @@ class Theory(object):
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
 
-        for s in list(voc.terms.values()):
+        for s in voc.terms.values():
             if not s.code.startswith('_'):
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
@@ -451,7 +451,6 @@ class Definition(object):
         self.rules = kwargs.pop('rules')
         self.clark = None  # {Declaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Fresh_Variable}} Fresh variables for arguments & result
-        self.translated = None
 
     def __str__(self):
         return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
@@ -517,7 +516,6 @@ class Rule(object):
             self.args.append(self.out)
         if self.body is None:
             self.body = TRUE
-        self.translated = None
 
     def __repr__(self):
         return (f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
@@ -633,41 +631,95 @@ class Structure(object):
         return self.name
 
 
-class Interpretation(object):
+class SymbolInterpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
-        self.tuples = kwargs.pop('tuples')
+        self.enumeration = kwargs.pop('enumeration')
         self.default = kwargs.pop('default')  # later set to false for predicates
 
+        if not self.enumeration:
+            self.enumeration = Enumeration(tuples=[])
+
         self.decl = None  # symbol declaration
+        self.is_complete = None # is the function enumeration complete ?
 
     def annotate(self, struct):
         voc = struct.voc
         self.decl = voc.symbol_decls[self.name]
-        if self.decl.function and 0 < self.decl.arity and self.default is None:
-            raise Exception("Default value required for function {} in structure.".format(self.name))
-        self.default = FALSE if not self.decl.function and self.tuples else self.default
-        self.default = self.default.annotate(voc, {})
-        assert self.default.as_ground() is not None, f"Must be a ground term: {self.default}"
+        if not self.decl.function and self.enumeration.tuples: 
+            assert self.default is None, \
+                f"Enumeration for predicate '{self.name}' cannot have a default value: {self.default}"
+            self.default = FALSE
 
-        # annotate tuple and update structure.assignments
+        self.enumeration.annotate(voc)
+
+        # update structure.assignments
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
-        for t in self.tuples:
-            t.annotate(voc)
-            assert all(a.as_ground() is not None for a in t.args), f"Must be a ground term: {t}"
+        for t in self.enumeration.tuples:
+            assert all(a.as_rigid() is not None for a in t.args), \
+                    f"Tuple for '{self.name}' must be ground : ({t})"
             if self.decl.function:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
+                assert expr.code not in struct.assignments, \
+                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, t.args[-1], Status.STRUCTURE, False)
             else:
                 expr = AppliedSymbol.make(symbol, t.args)
+                assert expr.code not in struct.assignments, \
+                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, TRUE, Status.STRUCTURE, False)
             count += 1
+        self.is_complete = (not self.decl.function or 
+            (0 < count and count == len(self.decl.instances)))
 
         # set default value
-        if count < len(self.decl.instances):
+        if len(self.decl.instances) == 0: # infinite domain
+            assert self.default is None, \
+                f"Can't use default value for '{self.name}' on infinite domain."
+        elif self.default is not None:
+            self.is_complete = True
+            self.default = self.default.annotate(voc, {})
+            assert self.default.as_rigid() is not None, \
+                    f"Default value for '{self.name}' must be ground: {self.default}"
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
                     struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
+
+class Enumeration(object):
+    def __init__(self, **kwargs):
+        self.tuples = kwargs.pop('tuples')
+
+    def annotate(self, voc):
+        self.tuples.sort(key=lambda t: ",".join(map(str, t.args)))
+        for t in self.tuples:
+            t.annotate(voc)
+
+    def contains(self, args, arity=None, rank=0, tuples=None):
+        """ returns an Expression that says whether Tuple args is in the enumeration """
+
+        if arity is None:
+            arity = len(args)
+        if rank == arity:  # valid tuple
+            return TRUE   
+        if tuples is None:
+            tuples = self.tuples
+        
+        # constructs If-then-else recursively
+        groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
+        if args[rank].as_rigid() is not None:
+            for val, tuples2 in groups:  # try to resolve
+                if str(args[rank]) == val:
+                    return self.contains(args, arity, rank+1, list(tuples2))
+            return FALSE
+        else:
+            out = FALSE
+            for val, tuples2 in groups:
+                tuples = list(tuples2)
+                out = IfExpr.make(AComparison.make('=', 
+                                    [args[rank], tuples[0].args[rank]]),
+                                    self.contains(args, arity, rank+1, tuples),
+                                    out)
+            return out
 
 
 class Tuple(object):
@@ -896,7 +948,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AppliedSymbol, Variable,
                                          NumberConstant, Brackets, Arguments,
 
-                                         Structure, Interpretation,
+                                         Structure, SymbolInterpretation, Enumeration,
                                          Tuple, Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

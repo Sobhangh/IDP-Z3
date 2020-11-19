@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+from itertools import chain
 import re
 import time
 from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, \
@@ -172,7 +173,7 @@ def get_relevant_subtences(self):
 
 
 def explain(state, question):
-    out = Output(state, state.given)  
+    out = Output(state, state.given)
 
     question = decode_UTF(question)
     negated = question.replace('~', '¬').startswith('¬')
@@ -193,41 +194,42 @@ def explain(state, question):
         s.set(':core.minimize', True)
         ps = {} # {reified: constraint}
 
-        for ass in state.given.values():
-            p = ass.translate()
-            ps[p] = ass
-            s.add(Implies(p, ass.translate()))
-        todo = (list(state.idp.theory.constraints) 
-                + list(state.idp.theory.def_constraints.values()))
+        for ass in state.assignments.values():
+            if ass.status in [Status.GIVEN, Status.STRUCTURE, Status.UNIVERSAL]:
+                p = ass.translate()
+                ps[p] = ass
+                s.add(Implies(p, ass.translate()))
+        todo = chain(state.constraints, state.def_constraints.values())
         for constraint in todo:
             p = constraint.reified()
-            ps[p] = constraint.translate()
-            s.add(Implies(p, constraint.translate()))
+            constraint.original = constraint.original.interpret(state)
+            ps[p] = constraint.original.translate()
+            s.add(Implies(p, constraint.original.translate()))
 
         s.add(Not(to_explain.translate()))
         s.check(list(ps.keys()))
         unsatcore = s.unsat_core()
         
         if unsatcore:
-            for a1 in state.given.values():
-                for a2 in unsatcore:
-                    if type(ps[a2]) == Assignment \
-                    and a1.sentence.code == ps[a2].sentence.code: #TODO we might miss some equality
-                        out.addAtom(a1.sentence, a1.value, a1.status)
+            for a1 in state.assignments.values():
+                if a1.status in [Status.GIVEN, Status.STRUCTURE, Status.UNIVERSAL]:
+                    for a2 in unsatcore:
+                        if type(ps[a2]) == Assignment \
+                        and a1.sentence.same_as(ps[a2].sentence): #TODO we might miss some equality
+                            out.addAtom(a1.sentence, a1.value, a1.status)
 
             # remove irrelevant atoms
             for symb, dictionary in out.m.items():
                 out.m[symb] = { k:v for k,v in dictionary.items()
-                    if type(v)==dict and v['status']=='GIVEN' 
+                    if type(v)==dict and v['status'] in ['GIVEN', 'STRUCTURE', 'UNIVERSAL'] 
                     and v.get('value', '') != ''}
             out.m = {k:v for k,v in out.m.items() if v}
                 
             out.m["*laws*"] = []
-            for a1 in (list(state.idp.theory.def_constraints.values()) 
-                    + list(state.idp.theory.constraints)): 
+            for a1 in chain(state.def_constraints.values(), state.constraints): 
                 #TODO find the rule
                 for a2 in unsatcore:
-                    if str(a1.translate()) == str(ps[a2]):
+                    if str(a1.original.translate()) == str(ps[a2]):
                         out.m["*laws*"].append(a1.annotations['reading'])
     return out.m
 
@@ -252,7 +254,7 @@ def abstract(state, given_json):
         models[q.symbol_decl.name] = []
     
     done = set(out["universal"] + out["given"] + out["fixed"])
-    theory = And(state.idp.theory.translate())
+    theory = And(state.formula().translate())
     solver = Solver()
     solver.add(theory)
     solver.add([ass.translate() for ass in state.given.values()])

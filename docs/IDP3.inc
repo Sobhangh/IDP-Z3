@@ -16,6 +16,9 @@ Infinite domains
     IDP-Z3 supports infinite domains: ``int, real``.
     However, quantifications over infinite domains is discouraged.
 
+if .. then .. else ..
+    IDP-Z3 supports `if .. then .. else ..` terms and sentences.
+
 LTC
     IDP-Z3 does not support LTC vocabularies.
 

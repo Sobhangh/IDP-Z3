@@ -28,11 +28,9 @@ i.e., the sub-expressions that must be true (or false) for the expression to be 
 from typing import List, Tuple
 from debugWithYamlLog import log_calls
 
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
-                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, NumberConstant, Brackets, Arguments, \
-                    TRUE, FALSE, ZERO
+from Idp.Expression import Constructor, Expression, AQuantification, \
+                    ADisjunction, AConjunction,  \
+                    AComparison, AUnary, Brackets, TRUE, FALSE
 
 
 def _not(truth):
@@ -107,7 +105,7 @@ def implicants1(self, assignments, truth=TRUE):
     if truth.same_as(TRUE) and len(self.sub_exprs) == 2 and self.operator == ['=']:
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one a consequence, not a universal
-        operands1 = [e.as_ground() for e in self.sub_exprs]
+        operands1 = [e.as_rigid() for e in self.sub_exprs]
         if   operands1[1] is not None:
             return [(self.sub_exprs[0], operands1[1])]
         elif operands1[0] is not None:

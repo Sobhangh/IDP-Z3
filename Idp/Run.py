@@ -38,6 +38,7 @@ class Problem(object):
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.def_constraints = {}
+        self.interpretations = {}
 
         self._formula = None # the problem expressed in one logic formula
         self.co_constraints = None # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
@@ -66,12 +67,14 @@ class Problem(object):
         out.assignments = self.assignments.copy()
         out.constraints = [c.copy() for c in self.constraints]
         out.def_constraints = self.def_constraints.copy()
+        # copy() is called before making substitutions => invalidate derived fields
         out._formula = None
-        self.co_constraints, self.questions = None, None
+        out.co_constraints, out.questions = None, None
         return out
 
     def add(self, block):
         self._formula = None # need to reapply the definitions
+        self.interpretations.update(block.interpretations) #TODO detect conflicts
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
         elif isinstance(block, Theory) or isinstance(block, Problem):
@@ -98,8 +101,8 @@ class Problem(object):
                 c.interpret(self)
                 c.co_constraints(self.co_constraints)
                 c.collect(self.questions, all_=False)
-            for s in list(self.questions.values()):
-                if not type(s) in [AppliedSymbol, Variable]:
+            for s in self.questions.values():
+                if not isinstance(s, AppliedSymbol) or s.is_enumerated:
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
     def formula(self):
@@ -121,7 +124,7 @@ class Problem(object):
             for a in self.assignments.values() 
             if a.value is None
             and a.symbol_decl is not None
-            and (extended or type(a.sentence) in [AppliedSymbol, Variable]))
+            and (extended or isinstance(a.sentence, AppliedSymbol)))
 
     def _from_model(self, solver, todo, complete, extended):
         """ returns Assignments from model in solver """

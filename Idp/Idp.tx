@@ -82,7 +82,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
     Base:  AppliedSymbol | Variable | NumberConstant | Brackets;
 
-      AppliedSymbol: s=Symbol args=Arguments;
+      AppliedSymbol: s=Symbol args=Arguments is_enumerated=/(is\s+(not\s+)?enumerated)?/;
         Arguments: '(' sub_exprs*=Expression[','] ')';
       Variable: s=Symbol;
       NumberConstant: number=IDPFLOAT | number=INT;
@@ -90,8 +90,9 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
       Brackets: annotations=Annotations '(' f=Expression ')';
 
 
-Structure: 'structure' (name=ID ':' vocab_name=ID)? '{' interpretations*=Interpretation '}';
-  Interpretation: name=Symbol '=' ( default=Base '.' | '{' tuples+=Tuple[';'] '}' ('else' default=Base)? );
+Structure: 'structure' (name=ID ':' vocab_name=ID)? '{' interpretations*=SymbolInterpretation '}';
+  SymbolInterpretation: name=Symbol '=' ( default=Base '.' | enumeration=Enumeration ('else' default=Base)? );
+  Enumeration : '{' tuples+=Tuple[';'] '}';
   Tuple : args*=Base[','];
 
 Goal: 'goal' name=ID;

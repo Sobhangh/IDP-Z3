@@ -4,6 +4,7 @@
 .. |t|      replace:: :math:`t`
 .. |t1|     replace:: :math:`t_1`
 .. |t2|     replace:: :math:`t_2`
+.. |t3|     replace:: :math:`t_3`
 .. |t1,tn|  replace:: :math:`t_1, t_2,.., t_n`
 .. |v1,vn|  replace:: :math:`v_1  v_2 .. v_n`
 
@@ -39,6 +40,9 @@ Constructor
 Constant
     a constant_ is a term whose type_ is derived from its declaration in the vocabulary_.
 
+Variable
+    a variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).  
+
 .. _function application:
 
 Function application
@@ -67,8 +71,9 @@ Arithmetic aggregate
 
     The term denotes the sum of |t| for each distinct tuple of values for |v1,vn| which make |phi| true.
 
-Variable
-    a variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).  
+(if .. then .. else ..)
+    :math:`(if\ t_1\ then\ t_2\ else\ t_3)` is a term when |t1| is a sentence, |t2| and |t3| are terms of the same type.
+
 
 .. _sentence:
 .. _constraint:
@@ -120,6 +125,15 @@ Quantified formulas
     Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
     For example, ``!x[int] y[int]: f(x,y)=f(y,x).``
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
+
+"is (not) enumerated"
+    :math:`f(a,b)\ is\ enumerated` and :math:`f(a,b)\ is\ not\ enumerated` are sentences, 
+    where :math:`f` is a function defined by an enumeration and applied to arguments :math:`a` and :math:`b`.
+    Its truth value reflects whether :math:`(a,b)` is enumerated in :math:`f`'s enumeration.
+    If the enumeration has a default value, every tuple of arguments is enumerated.
+
+if .. then .. else ..
+    :math:`if\ t_1\ then\ t_2\ else\ t_3` is a sentence when |t1|, |t2| and |t3| are sentences.
 
 
 .. _definition:
