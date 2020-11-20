@@ -1,5 +1,5 @@
 No more consequences.
-(p ⇒  if   Color = red then true else Color = blue) ∧ (Color = red ∨ Color = blue ∨ Color = green) ∧ true
+(p ⇒ Color = blue ∧ Color = red) ∧ (Color = red ∨ Color = blue ∨ Color = green) ∧ true
 
 Model 1
 ==========
