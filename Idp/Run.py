@@ -140,8 +140,10 @@ class Problem(object):
                 if res1 == sat:
                     val1 = solver.model().eval(q.reified(), 
                                             model_completion=complete)
+                else:
+                    val1 = None # dead code
                 solver.pop()
-            if str(val1) != str(q.translate()): # otherwise, unknown
+            if val1 is not None and str(val1) != str(q.translate()): # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
                 ass.assert_(q, val, Status.EXPANDED, None)
         return ass
