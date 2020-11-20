@@ -715,7 +715,7 @@ class Enumeration(object):
             if rank + 1 == arity: # use OR
                 out = [ AComparison.make('=', [args[rank], t.args[rank]])
                         for t in tuples]
-                return ADisjunction.make('∧', out)
+                return ADisjunction.make('∨', out)
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
