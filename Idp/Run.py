@@ -130,7 +130,17 @@ class Problem(object):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            val1 = solver.model().eval(q.translate(), model_completion=complete)
+            if not q.is_reified():
+                val1 = solver.model().eval(q.translate(), 
+                                        model_completion=complete)
+            elif extended:
+                solver.push() # in case todo contains complex formula
+                solver.add(q.reified()==q.translate())
+                res1 = solver.check()
+                if res1 == sat:
+                    val1 = solver.model().eval(q.reified(), 
+                                            model_completion=complete)
+                solver.pop()
             if str(val1) != str(q.translate()): # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
                 ass.assert_(q, val, Status.EXPANDED, None)
