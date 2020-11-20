@@ -185,13 +185,12 @@ class Expression(object):
         " returns a NumberConstant or Constructor, or None "
         return self.value
 
+    def is_reified(self): return True
+
     def reified(self) -> DatatypeRef:
         if self._reified is None:
-            if self.type == 'bool':
-                self._reified = Const('*'+str(Expression.COUNT), BoolSort())
-                Expression.COUNT += 1
-            else:
-                self._reified = self.translate()
+            self._reified = Const('*'+str(Expression.COUNT), BoolSort())
+            Expression.COUNT += 1
         return self._reified
 
     def has_decision(self):
@@ -588,6 +587,13 @@ class AppliedSymbol(Expression):
                 out.update(e.type_inference())
         return out
 
+    def is_reified(self):
+        return (self.in_enumeration or self.is_enumerated)
+
+    def reified(self):
+        return ( super().reified() if self.is_reified() else 
+                 self.translate() )
+
 class Arguments(object):
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
@@ -626,9 +632,6 @@ class Variable(AppliedSymbol):
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
 
-    def reified(self):
-        return self.translate()
-    
 
 class Fresh_Variable(Expression):
     PRECEDENCE = 200

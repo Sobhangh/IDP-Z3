@@ -23,9 +23,6 @@ And(Color == blue,
     f(B, A) == B,
     True,
     True,
-    Not(Or(Color == green, Color == red)),
-    True,
-    True,
     True,
     True,
     True,
@@ -66,16 +63,16 @@ T3, S
 Traceback (most recent call last):
   File "test.py", line 56, in generateZ3
     idp.execute()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 358, in execute
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 354, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 12, in <module>
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 339, in myprint
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 335, in myprint
     for i, xi in enumerate(x):
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 330, in model_expand
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 326, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 155, in expand
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 151, in expand
     z3_formula = self.formula().translate()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 112, in formula
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 111, in formula
     self._interpret()
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 101, in _interpret
     c.interpret(self)

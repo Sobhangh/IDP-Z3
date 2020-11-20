@@ -102,8 +102,7 @@ class Problem(object):
                 c.co_constraints(self.co_constraints)
                 c.collect(self.questions, all_=False)
             for s in list(self.questions.values()):
-                if ( not isinstance(s, AppliedSymbol) 
-                or s.is_enumerated or s.in_enumeration):
+                if s.is_reified():
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
     def formula(self):
@@ -125,18 +124,15 @@ class Problem(object):
             for a in self.assignments.values() 
             if a.value is None
             and a.symbol_decl is not None
-            and (extended or isinstance(a.sentence, AppliedSymbol)))
+            and (not a.sentence.is_reified() or extended))
 
     def _from_model(self, solver, todo, complete, extended):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            if isinstance(q, AppliedSymbol):
+            if not q.is_reified():
                 val1 = solver.model().eval(q.translate(), 
                                         model_completion=complete)
-                if str(val1) != str(q.translate()): # otherwise, unknown
-                    val = str_to_IDP(q, str(val1))
-                    ass.assert_(q, val, Status.EXPANDED, None)
             elif extended:
                 solver.push() # in case todo contains complex formula
                 solver.add(q.reified()==q.translate())
@@ -144,10 +140,10 @@ class Problem(object):
                 if res1 == sat:
                     val1 = solver.model().eval(q.reified(), 
                                             model_completion=complete)
-                    if str(val1) != str(q.translate()): # otherwise, unknown
-                        val = str_to_IDP(q, str(val1))
-                        ass.assert_(q, val, Status.EXPANDED, None)
                 solver.pop()
+            if str(val1) != str(q.translate()): # otherwise, unknown
+                val = str_to_IDP(q, str(val1))
+                ass.assert_(q, val, Status.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False, extended=False):

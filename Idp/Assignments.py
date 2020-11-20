@@ -135,8 +135,7 @@ class Assignments(dict):
     def __str__(self):
         out, out2 = {},[]
         for a in self.values():
-            if (isinstance(a.sentence, AppliedSymbol) and a.value is not None
-            and not a.sentence.is_enumerated and not a.sentence.in_enumeration):
+            if a.value is not None and not a.sentence.is_reified():
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
                 c = f"({c})" if c else c 
                 c = f"{c}->{str(a.value)}"
