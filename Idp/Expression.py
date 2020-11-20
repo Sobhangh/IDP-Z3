@@ -66,7 +66,7 @@ class Expression(object):
         self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]: over approximated list of fresh_vars (ignores simplifications)
         self.type = None                  # String (e.g. 'bool', 'real', 'int', 'color'), or None
-        self._reified = None
+        self._reified = None              # An expression is reified when it cannot be evaluated as is in Z3
         self.is_type_constraint_for = None# (string) this constraint is relevant if Symbol is relevant
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
         self.is_assignment = None         # for comparisons only
@@ -215,7 +215,8 @@ class Constructor(Expression):
     
     def __str1__(self): return self.name
 
-    def as_rigid(self): return self
+    def as_rigid(self)  : return self
+    def is_reified(self): return False
 
 TRUE  = Constructor(name='true')
 FALSE = Constructor(name='false')
@@ -588,7 +589,8 @@ class AppliedSymbol(Expression):
         return out
 
     def is_reified(self):
-        return (self.in_enumeration or self.is_enumerated)
+        return ( self.in_enumeration or self.is_enumerated
+                 or any(e.is_reified() for e in self.sub_exprs) )
 
     def reified(self):
         return ( super().reified() if self.is_reified() else 
@@ -681,6 +683,7 @@ class NumberConstant(Expression):
     def __str__(self): return self.number
 
     def as_rigid(self)     : return self
+    def is_reified(self)   : return False
 
 ZERO = NumberConstant(number='0')
 ONE  = NumberConstant(number='1')
