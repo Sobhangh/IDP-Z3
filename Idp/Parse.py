@@ -700,7 +700,7 @@ class Enumeration(object):
         if arity is None:
             arity = len(args)
         if rank == arity:  # valid tuple
-            return TRUE   
+            return TRUE
         if tuples is None:
             tuples = self.tuples
         
@@ -712,6 +712,10 @@ class Enumeration(object):
                     return self.contains(args, arity, rank+1, list(tuples2))
             return FALSE
         else:
+            if rank + 1 == arity: # use OR
+                out = [ AComparison.make('=', [args[rank], t.args[rank]])
+                        for t in tuples]
+                return ADisjunction.make('∧', out)
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
