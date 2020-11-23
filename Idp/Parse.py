@@ -694,7 +694,7 @@ class Enumeration(object):
         for t in self.tuples:
             t.annotate(voc)
 
-    def contains(self, args, arity=None, rank=0, tuples=None):
+    def contains(self, args, function, arity=None, rank=0, tuples=None):
         """ returns an Expression that says whether Tuple args is in the enumeration """
 
         if arity is None:
@@ -703,13 +703,15 @@ class Enumeration(object):
             return TRUE
         if tuples is None:
             tuples = self.tuples
+            assert all(len(t.args)==arity+(1 if function else 0) for t in tuples), \
+                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'."
         
         # constructs If-then-else recursively
         groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].as_rigid() is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
-                    return self.contains(args, arity, rank+1, list(tuples2))
+                    return self.contains(args, function, arity, rank+1, list(tuples2))
             return FALSE
         else:
             if rank + 1 == arity: # use OR
@@ -721,7 +723,7 @@ class Enumeration(object):
                 tuples = list(tuples2)
                 out = IfExpr.make(AComparison.make('=', 
                                     [args[rank], tuples[0].args[rank]]),
-                                    self.contains(args, arity, rank+1, tuples),
+                                    self.contains(args, function, arity, rank+1, tuples),
                                     out)
             return out
 

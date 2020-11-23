@@ -207,13 +207,13 @@ def interpret(self, theory):
         if interpretation.is_complete:
             simpler = TRUE
         else:
-            simpler = interpretation.enumeration.contains(self.sub_exprs)
+            simpler = interpretation.enumeration.contains(self.sub_exprs, True)
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('¬', simpler)
     elif self.in_enumeration:
         # re-create original Applied Symbol
         core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
-        simpler = self.in_enumeration.contains([core])
+        simpler = self.in_enumeration.contains([core], False)
         simpler.annotations = self.annotations
     if self.decl in theory.clark: # has a theory
         #TODO need to quantify the co_constraints for the fresh_vars
