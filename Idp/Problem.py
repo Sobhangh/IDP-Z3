@@ -230,7 +230,8 @@ class Problem(object):
 
         solver = Solver()
         solver.add(z3_formula)
-        if solver.check() == sat:
+        result = solver.check()
+        if result == sat:
             for q in todo:
                 solver.push() # in case todo contains complex formula
                 solver.add(q.reified()==q.translate())
@@ -253,10 +254,12 @@ class Problem(object):
                     # yield(f"Unknown: {str(q)}")
                     solver = Solver() # restart the solver
                     solver.add(z3_formula)
-
             yield "No more consequences."
-        else:
+        elif result == unsat:
             yield "Not satisfiable."
+            yield str(z3_formula)
+        else:
+            yield "Unknown satisfiability."
             yield str(z3_formula)
 
     def propagate(self, tag=Status.CONSEQUENCE, extended=False):
@@ -294,6 +297,33 @@ class Problem(object):
                 self.constraints = new_constraints
         return self
 
+    def _generalize(self, structure, known=None, z3_formula=None):
+        """finds a subset of structure 
+            that is a minimum satisfying assignment for self
+
+        Invariants 'known and 'z3_formula can be supplied for better performance
+        """
+        if known is None:
+            known = And([ass.translate() for ass in self.assignments.values()
+                            if ass.status != Status.UNKNOWN]
+                        + [ass.sentence.reified()==ass.sentence.translate()
+                            for ass in self.assignments.values()
+                            if ass.sentence.is_reified()])
+        if z3_formula is None:
+            z3_formula = self.formula().translate()
+
+        conjuncts = ( structure if not isinstance(structure, Problem) else
+                      [ass for ass in structure.assignments.values()
+                        if ass.status == Status.UNKNOWN] )
+        for i, c in enumerate(conjuncts):
+            conjunction2 = And([l.translate() 
+                    for j, l in enumerate(conjuncts) 
+                    if j != i])
+            solver = Solver()
+            solver.add(And(known, conjunction2, Not(z3_formula)))
+            if solver.check() == unsat:
+                conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+        return conjuncts
 
 def str_to_IDP(atom, val_string):
     if atom.type == 'bool':

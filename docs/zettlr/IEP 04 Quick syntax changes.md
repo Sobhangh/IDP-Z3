@@ -24,3 +24,5 @@ Binary quantification:
 - [ ] Cardinality aggregate
 
 - [x] if .. then .. else
+
+- [ ] Cheatsheet

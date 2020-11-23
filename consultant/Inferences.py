@@ -255,78 +255,34 @@ def abstract(state, given_json):
         models[q.symbol_decl.name] = []
     
     done = set(out["universal"] + out["given"] + out["fixed"])
-    theory = And(state.formula().translate())
+    known = And([ass.translate() for ass in state.assignments.values()
+                    if ass.status != Status.UNKNOWN]
+                + [ass.sentence.reified()==ass.sentence.translate()
+                    for ass in state.assignments.values()
+                    if ass.sentence.is_reified()])
+
+    theory = state.formula().translate()
     solver = Solver()
     solver.add(theory)
-    solver.add([ass.translate() for ass in state.given.values()])
+    solver.add(known)
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
-
-        # theory that forces irrelevant atoms to be irrelevant
-        theory2 = And(theory) # is this a way to copy theory ??
 
         atoms = [] # [Assignment]
         for assignment in state.assignments.values():
             atom = assignment.sentence
-            if assignment.value is None \
-            and assignment.relevant and atom.type == 'bool':
-                solver.push()
-                solver.add(atom.reified() == atom.translate())
-                solver.check()
-                value = solver.model().eval(atom.reified())
-                solver.pop()
-                if value == True:
+            if assignment.value is None and atom.type == 'bool':
+                if not atom.is_reified():
+                    val1 = solver.model().eval(atom.translate())
+                else:
+                    val1 = solver.model().eval(atom.reified())
+                if val1 == True:
                     atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
-                elif value == False:
+                elif val1 == False:
                     atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
-                else: #unknown
-                    theory2 = And(theory2,
-                        substitute(theory2, [(atom.translate(), BoolVal(True))]),  # don't simplify !
-                        substitute(theory2, [(atom.translate(), BoolVal(False))])) # it would break later substitutions
 
         # start with negations !
         atoms.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
-
-        # remove atoms that are irrelevant in AMF
-        solver2 = Solver()
-        solver2.add(theory2)
-        solver2.add([l.translate() for l in done]) # universal + given + fixed (ignore irrelevant)
-        for i, assignment in enumerate(atoms):
-            if assignment.value is not None and time.time()<timeout:
-                atom = assignment.sentence
-                solver2.push()
-                if atom.type == 'bool':
-                    solver2.add(atom.reified() == atom.translate())
-                a = Not(atom.reified()) if assignment.value else atom.reified()
-                solver2.add(a)
-                solver2.add(And([l.translate() 
-                                for j, l in enumerate(atoms) if j != i]))
-                result = solver2.check()
-                solver2.pop()
-                if result == sat:
-                    theory2 = And(theory2, 
-                        substitute(theory2, [(atom.translate(), BoolVal(True))]),
-                        substitute(theory2, [(atom.translate(), BoolVal(False))]))
-                    solver2.add(theory2)
-                    atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-
-        # remove atoms that are consequences of others in the AMF
-        solver2 = Solver()
-        for i, assignment in enumerate(atoms):
-            if assignment.value is not None and time.time()<timeout:
-                atom = assignment.sentence
-                solver2.push()
-                solver2.add(And([l.translate() 
-                                for j, l in enumerate(atoms) if j != i]))
-
-                # evaluate not(assignment)
-                if atom.type == 'bool':
-                    solver2.add(atom.reified() == atom.translate())
-                a = Not(atom.reified()) if assignment.value else atom.reified()
-                result, consq = solver2.consequences([], [a])
-                if result!=sat or consq: # remove it if it's a consequence
-                    atoms[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-                    # ??? theory2 = substitute(theory2, [(atom, BoolVal(assignment.value & 1))])
-                solver2.pop()
+        atoms = state._generalize(atoms, known, theory)
 
         # add constraint to eliminate this model
         modelZ3 = Not(And( [l.translate() for l in atoms] ))
