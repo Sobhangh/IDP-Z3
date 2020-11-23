@@ -235,7 +235,6 @@ def explain(state, question):
     return out.m
 
 def abstract(state, given_json):
-    return DMN(state, "Eligible")
     timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
 
