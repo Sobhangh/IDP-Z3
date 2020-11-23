@@ -319,28 +319,6 @@ def abstract(state, given_json):
 
 def DMN(state, goal_string):
 
-    def generalize(theory_formula, conjuncts):
-        goal = conjuncts[-1]
-        solver2 = Solver()
-        solver2.add(theory_formula)
-        for i in reversed(range(len(conjuncts)-1)):
-            c = conjuncts[i]
-            if (not c.sentence.same_as(TRUE)
-            and not c.sentence.code==goal_string):
-                solver2.push()
-                conjunction = Implies(And([l.translate() for l in conjuncts[:-1]
-                                        if l.value is not None]),
-                                        goal.translate())
-                conjunction2 = Implies(And([l.translate() 
-                                        for j, l in enumerate(conjuncts[:-1]) 
-                                        if j != i and l.value is not None]),
-                                    goal.translate())
-                solver2.add(Not(Implies(conjunction, conjunction2)))
-                result = solver2.check()
-                if result == unsat: # C' => C
-                    conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-                solver2.pop()
-
     assert(goal_string in state.assignments), \
         f"Unknown goal: {goal_string}"
     goal = state.assignments[goal_string]
@@ -364,24 +342,41 @@ def DMN(state, goal_string):
     
     done = set(out["universal"] + out["given"] + out["fixed"]) 
 
+    # ignore type constraints
+    questions = OrderedSet()
+    for c in state.constraints:
+        if not c.is_type_constraint_for:
+            c.collect(questions)
+
+    known = And([ass.translate() for ass in state.assignments.values()
+                    if ass.status != Status.UNKNOWN]
+                + [q.reified()==q.translate()
+                    for q in questions
+                    if q.is_reified()])
+
     theory = state.formula().translate()
     solver = Solver()
     solver.add(theory)
-    solver.add([ass.translate() for ass in state.given.values()])
+    solver.add(known)
     while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
-
         # find the interpretation of all atoms in the model
         assignments = [] # [Assignment]
-        for atom in state.questions.values():
+        model = solver.model()
+        for atom in questions.values():
             assignment = state.assignments[atom.code]
-            if assignment.value is None \
-            and atom.type == 'bool':
-                value = solver.model().eval(atom.translate())
-                if value == True:
+            if assignment.value is None and atom.type == 'bool':
+                if not atom.is_reified():
+                    val1 = model.eval(atom.translate())
+                else:
+                    val1 = model.eval(atom.reified())
+                    val2 = model.eval(atom.translate())
+                    assert (val1 == val2), \
+                        f"{val1} <-> {val2}: {atom.reified()} <=> {atom.translate()}"
+                if val1 == True:
                     ass = Assignment(atom, TRUE , Status.UNKNOWN)
-                elif value == False:
+                elif val1 == False:
                     ass = Assignment(atom, FALSE, Status.UNKNOWN)
-                else: #unknown
+                else:
                     ass = None
                 if ass is not None:
                     if atom.code == goal_string:
@@ -393,12 +388,13 @@ def DMN(state, goal_string):
         assignments.append(goal) # place goal at end
 
         if goal.value is not None:
-            generalize(state.formula().translate(), assignments)
+            state._generalize(assignments, known, theory)
             models.append(assignments)
 
         # add constraint to eliminate this model
-        modelZ3 = Not(And( [l.translate() for l in assignments if l.value is not None] ))
-        theory = And(theory, modelZ3)
+        modelZ3 = Not(And( [l.translate() for l in assignments 
+            if l.value is not None] ))
+        known = And(known, modelZ3)
         solver.add(modelZ3)
 
         count +=1
@@ -409,13 +405,13 @@ def DMN(state, goal_string):
     theory = state.formula().translate()
     models1 = []
     for i in range(len(models)):
-        models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
-        model = models.pop(0)
+        model = models.pop(0).copy()
         models1.append(model)
-        theory = And(theory, Not(And([l.translate() for l in model[:-1]
+        known = And(known, Not(And([l.translate() for l in model[:-1]
                                         if l.value is not None])))
         for model in models:
-            generalize(theory, model)
+            state._generalize(model, known, theory)
+        models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
     models = models1
 
     # detect symbols with assignments
