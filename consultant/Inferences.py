@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+from debugWithYamlLog import NEWL
 from itertools import chain
 import re
 import time
@@ -343,7 +344,7 @@ def DMN(state, goal_string, first_hit=True):
             table[ass.symbol_decl.name] = [ [] for i in range(len(models))]
     # fill table
     for i, model in enumerate(models):
-        print([str(a) for a in model if a.sentence != TRUE])
+        print('[', f"{NEWL}  ".join(str(a) for a in model if a.sentence != TRUE), ']')
         for ass in model:
             if ass.sentence != TRUE:
                 table[ass.symbol_decl.name][i].append(ass)
