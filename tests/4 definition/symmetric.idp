@@ -5,8 +5,10 @@ vocabulary {
 }
 theory {
     edge(a,b).
-	symmetric(`edge). 
-    { !`p[`Symbols]: symmetric(`p) <- (!x y : `p(x,y) => `p(y,x)).}
+    !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
+}
+structure {
+	symmetric = {`edge}
 }
 display {
 	expand(`edge).

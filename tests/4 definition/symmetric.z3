@@ -7,8 +7,10 @@ vocabulary {
 }
 theory {
     edge(a,b).
-	symmetric(`edge). 
-    { !`p[`Symbols]: symmetric(`p) <- (!x y : `p(x,y) => `p(y,x)).}
+    !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
+}
+structure {
+	symmetric = {`edge}
 }
 display {
 	expand(`edge).
@@ -97,27 +99,15 @@ display {
                         'relevant': True,
                         'status': 'UNKNOWN',
                         'typ': 'Bool'},
-          '∀x[None]y[None] : edge(x,y) ⇒ edge(y,x)': {'environmental': False,
-                                                      'is_assignment': False,
-                                                      'normal': False,
-                                                      'reading': '∀x[None]y[None] : edge(x,y) ⇒ edge(y,x)',
-                                                      'relevant': True,
-                                                      'status': 'CONSEQUENCE',
-                                                      'typ': 'Bool',
-                                                      'value': True}},
- 'symmetric': {'__rank': 1,
-               'symmetric(`edge)': {'environmental': False,
-                                    'is_assignment': False,
-                                    'normal': True,
-                                    'reading': 'symmetric(`edge)',
-                                    'relevant': True,
-                                    'status': 'UNIVERSAL',
-                                    'typ': 'Bool',
-                                    'value': True},
-               'symmetric(`symmetric)': {'environmental': False,
-                                         'is_assignment': False,
-                                         'normal': True,
-                                         'reading': 'symmetric(`symmetric)',
-                                         'relevant': False,
-                                         'status': 'UNKNOWN',
-                                         'typ': 'Bool'}}}
+          '∀`p[`Symbols] : symmetric(`p) ⇒ (∀x[None]y[None] : `p(x,y) ⇒ `p(y,x))': {'environmental': False,
+                                                                                    'is_assignment': False,
+                                                                                    'normal': False,
+                                                                                    'reading': '∀`p[`Symbols] : '
+                                                                                               'symmetric(`p) ⇒ '
+                                                                                               '(∀x[None]y[None] : '
+                                                                                               '`p(x,y) ⇒ `p(y,x))',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNIVERSAL',
+                                                                                    'typ': 'Bool',
+                                                                                    'value': True}},
+ 'symmetric': {}}

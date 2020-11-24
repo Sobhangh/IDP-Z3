@@ -115,7 +115,10 @@ def translate1(self):
 
     for i in range(1, len(self.sub_exprs)):
         function = BinaryOperator.MAP[self.operator[i - 1]]
-        out = function(out, self.sub_exprs[i].translate())
+        try:
+            out = function(out, self.sub_exprs[i].translate())
+        except Exception as e:
+            raise e
     return out
 BinaryOperator.translate1 = translate1
 
@@ -198,6 +201,8 @@ def translate1(self):
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
     else:
+        assert len(self.sub_exprs) == self.decl.arity, \
+            f"Incorrect number of arguments for {self.s.name}"
         if len(self.sub_exprs) == 0:
             return self.decl.translate()
         else:

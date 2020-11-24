@@ -23,9 +23,6 @@ And(Color == blue,
     f(B, A) == B,
     True,
     True,
-    Not(If(Color == red, True, Color == green)),
-    True,
-    True,
     True,
     True,
     True,
@@ -66,20 +63,20 @@ T3, S
 Traceback (most recent call last):
   File "test.py", line 56, in generateZ3
     idp.execute()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 357, in execute
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 77, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 12, in <module>
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 338, in myprint
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 58, in myprint
     for i, xi in enumerate(x):
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 329, in model_expand
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 49, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 154, in expand
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Problem.py", line 152, in expand
     z3_formula = self.formula().translate()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 111, in formula
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Problem.py", line 110, in formula
     self._interpret()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 101, in _interpret
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Problem.py", line 100, in _interpret
     c.interpret(self)
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Substitute.py", line 204, in interpret
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Substitute.py", line 200, in interpret
     assert self.decl.function, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

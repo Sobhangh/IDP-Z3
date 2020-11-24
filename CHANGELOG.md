@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
 
+## [unreleased]
+
+### API
+* support [IEP 08 'in' operator](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-08-'in'-operator)
+* better support quantification over symbols
+
+
+### GUI
+
+
 ## [0.5.5] - 2020-11-19
 [Access v0.5.5 on Google App Engine](https://20201119t122325-dot-interactive-consultant.ew.r.appspot.com/)
 

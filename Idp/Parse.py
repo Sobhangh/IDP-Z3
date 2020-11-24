@@ -680,10 +680,40 @@ class SymbolInterpretation(object):
             self.is_complete = True
             self.default = self.default.annotate(voc, {})
             assert self.default.as_rigid() is not None, \
-                    f"Default value for '{self.name}' must be ground: {self.default}"
+                f"Default value for '{self.name}' must be ground: {self.default}"
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
                     struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
+
+    def interpret(self, theory, rank, applied, args, tuples=None):
+        tuples = self.enumeration.tuples if tuples == None else tuples
+        if rank == self.decl.arity:  # valid tuple -> return a value
+            if not self.decl.function:
+                return TRUE if tuples else self.default
+            else:
+                assert len(tuples) <= 1, \
+                    f"Duplicate values in structure for {str(self.name)}{str(tuples[0])}"
+                if not tuples: # enumeration of constant
+                    return self.default
+                return tuples[0].args[rank]
+        else:  # constructs If-then-else recursively
+            out = self.default if self.default is not None else applied.original
+            tuples.sort(key=lambda t: str(t.args[rank]))
+            groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
+
+            if type(args[rank]) in [Constructor, NumberConstant]:
+                for val, tuples2 in groups:  # try to resolve
+                    if str(args[rank]) == val:
+                        out = self.interpret(theory, rank+1, applied, args, 
+                                            list(tuples2))
+            else:
+                for val, tuples2 in groups:
+                    tuples = list(tuples2)
+                    out = IfExpr.make(
+                        AComparison.make('=', [args[rank], tuples[0].args[rank]]),
+                        self.interpret(theory, rank+1, applied, args, tuples),
+                        out)
+            return out
 
 class Enumeration(object):
     def __init__(self, **kwargs):
@@ -694,30 +724,36 @@ class Enumeration(object):
         for t in self.tuples:
             t.annotate(voc)
 
-    def contains(self, args, arity=None, rank=0, tuples=None):
+    def contains(self, args, function, arity=None, rank=0, tuples=None):
         """ returns an Expression that says whether Tuple args is in the enumeration """
 
         if arity is None:
             arity = len(args)
         if rank == arity:  # valid tuple
-            return TRUE   
+            return TRUE
         if tuples is None:
             tuples = self.tuples
+            assert all(len(t.args)==arity+(1 if function else 0) for t in tuples), \
+                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'."
         
         # constructs If-then-else recursively
         groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].as_rigid() is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
-                    return self.contains(args, arity, rank+1, list(tuples2))
+                    return self.contains(args, function, arity, rank+1, list(tuples2))
             return FALSE
         else:
+            if rank + 1 == arity: # use OR
+                out = [ AComparison.make('=', [args[rank], t.args[rank]])
+                        for t in tuples]
+                return ADisjunction.make('∨', out)
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
                 out = IfExpr.make(AComparison.make('=', 
                                     [args[rank], tuples[0].args[rank]]),
-                                    self.contains(args, arity, rank+1, tuples),
+                                    self.contains(args, function, arity, rank+1, tuples),
                                     out)
             return out
 

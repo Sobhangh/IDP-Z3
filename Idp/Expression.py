@@ -66,7 +66,7 @@ class Expression(object):
         self.str = self.code              # memoization of str(), representing its value
         self.fresh_vars = None            # Set[String]: over approximated list of fresh_vars (ignores simplifications)
         self.type = None                  # String (e.g. 'bool', 'real', 'int', 'color'), or None
-        self._reified = None
+        self._reified = None              # An expression is reified when it cannot be evaluated as is in Z3
         self.is_type_constraint_for = None# (string) this constraint is relevant if Symbol is relevant
         self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
         self.is_assignment = None         # for comparisons only
@@ -185,13 +185,12 @@ class Expression(object):
         " returns a NumberConstant or Constructor, or None "
         return self.value
 
+    def is_reified(self): return True
+
     def reified(self) -> DatatypeRef:
         if self._reified is None:
-            if self.type == 'bool':
-                self._reified = Const('*'+str(Expression.COUNT), BoolSort())
-                Expression.COUNT += 1
-            else:
-                self._reified = self.translate()
+            self._reified = Const('*'+str(Expression.COUNT), BoolSort())
+            Expression.COUNT += 1
         return self._reified
 
     def has_decision(self):
@@ -216,7 +215,8 @@ class Constructor(Expression):
     
     def __str1__(self): return self.name
 
-    def as_rigid(self): return self
+    def as_rigid(self)  : return self
+    def is_reified(self): return False
 
 TRUE  = Constructor(name='true')
 FALSE = Constructor(name='false')
@@ -517,6 +517,10 @@ class AppliedSymbol(Expression):
             self.is_enumerated = kwargs.pop('is_enumerated')
         else:
             self.is_enumerated = ''
+        if 'in_enumeration' in kwargs:
+            self.in_enumeration = kwargs.pop('in_enumeration')
+        else:
+            self.in_enumeration = None
 
         self.sub_exprs = self.args.sub_exprs
         super().__init__()
@@ -537,17 +541,23 @@ class AppliedSymbol(Expression):
             out = f"{str(self.s)}"
         else:
             out= f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
+        if self.in_enumeration:
+            enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return ( f"{out}"
                  f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
+                 f"{ f' in {{{enum}}}' if self.in_enumeration else ''}"
                 )
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
         self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars else voc.symbol_decls[self.s.name]
+        self.s.decl = self.decl
+        if self.in_enumeration:
+            self.in_enumeration.annotate(voc)
         return self.annotate1()
 
     def annotate1(self):
-        self.type = ( 'bool' if self.is_enumerated else
+        self.type = ( 'bool' if self.is_enumerated or self.in_enumeration else
                     self.decl.type if self.decl else 
                     None )
         out = super().annotate1()
@@ -578,6 +588,14 @@ class AppliedSymbol(Expression):
                 out.update(e.type_inference())
         return out
 
+    def is_reified(self):
+        return ( self.in_enumeration or self.is_enumerated
+                 or any(e.is_reified() for e in self.sub_exprs) )
+
+    def reified(self):
+        return ( super().reified() if self.is_reified() else 
+                 self.translate() )
+
 class Arguments(object):
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
@@ -595,6 +613,7 @@ class Variable(AppliedSymbol):
         self.decl = None
         self.translated = None
         self.is_enumerated = None
+        self.in_enumeration = None
 
     def __str1__(self): return self.name
 
@@ -615,9 +634,6 @@ class Variable(AppliedSymbol):
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
 
-    def reified(self):
-        return self.translate()
-    
 
 class Fresh_Variable(Expression):
     PRECEDENCE = 200
@@ -667,6 +683,7 @@ class NumberConstant(Expression):
     def __str__(self): return self.number
 
     def as_rigid(self)     : return self
+    def is_reified(self)   : return False
 
 ZERO = NumberConstant(number='0')
 ONE  = NumberConstant(number='1')

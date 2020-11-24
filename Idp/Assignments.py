@@ -120,8 +120,7 @@ class Assignments(dict):
             if out.value is None: 
                 out.value = value
             else:
-                assert value is None or str(out.value) == str(value), \
-                    f"Internal error: changing value of {out.sentence} from {out.value} to {value}"
+                pass # issue #35 error will be caught later by Z3
             if out.status   is None or out.status == Status.UNKNOWN: 
                 out.status   = status
             if relevant is not None: out.relevant = relevant
@@ -135,8 +134,7 @@ class Assignments(dict):
     def __str__(self):
         out = {}
         for a in self.values():
-            if (isinstance(a.sentence, AppliedSymbol) and a.value is not None
-            and not a.sentence.is_enumerated):
+            if a.value is not None and not a.sentence.is_reified():
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
                 c = f"({c})" if c else c 
                 c = f"{c}->{str(a.value)}"

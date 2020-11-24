@@ -137,8 +137,6 @@ def expand_quantifiers(self, theory):
     self.vars = []
     self.sorts = [] # not used
     for name, var in self.q_vars.items():
-        assert var.sort.name != '`Symbols', \
-            "Can't quantify over symbols in a constraint.  Quantify in a definition instead."
         if var.sort.decl.range:
             out = []
             for f in forms:
@@ -178,8 +176,6 @@ def expand_quantifiers(self, theory):
                 , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
                 , else_f=NumberConstant(number='0'))]
     for name, var in self.q_vars.items():
-        assert var.sort.name != '`Symbols', \
-            "Can't quantify over symbols in a constraint.  Quantify in a definition instead."
         if var.sort.decl.range:
             out = []
             for f in forms:
@@ -207,9 +203,19 @@ def interpret(self, theory):
         if interpretation.is_complete:
             simpler = TRUE
         else:
-            simpler = interpretation.enumeration.contains(self.sub_exprs)
+            simpler = interpretation.enumeration.contains(sub_exprs, True)
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('¬', simpler)
+    elif self.in_enumeration:
+        # re-create original Applied Symbol
+        core = AppliedSymbol.make(self.s, sub_exprs).copy()
+        simpler = self.in_enumeration.contains([core], False)
+        simpler.annotations = self.annotations
+    elif ( self.name in theory.interpretations
+    and any(s.name == '`Symbols' for s in self.decl.sorts)):
+        # apply enumeration of predicate over symbols to allow simplification
+        # do not do it otherwise, for performance reasons
+        simpler = (theory.interpretations[self.name].interpret)(theory, 0, self, sub_exprs)
     if self.decl in theory.clark: # has a theory
         #TODO need to quantify the co_constraints for the fresh_vars
         assert not self.fresh_vars, "Internal error"
@@ -254,9 +260,9 @@ Variable      .substitute = substitute
 
 def instantiate(self, e0, e1):
     if self.name == e0.code:
-        if type(self)==AppliedSymbol \
-        and self.decl.name == '`Symbols':
-            if isinstance(e1, Constructor) and len(self.sub_exprs) == len(e1.symbol.decl.sorts):
+        if type(self)==AppliedSymbol and self.decl.name == '`Symbols':
+            if (isinstance(e1, Constructor) 
+            and len(self.sub_exprs) == len(e1.symbol.decl.sorts)):
                 out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
                 return out
             elif isinstance(e1, Fresh_Variable): # replacing variable in a definition
