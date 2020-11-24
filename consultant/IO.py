@@ -154,7 +154,7 @@ class Output(object):
         for key, l in state.assignments.items():
             if l.status == Status.STRUCTURE:
                 symb = self.state.assignments[key].symbol_decl
-                if symb.name in self.m:
+                if symb and symb.name in self.m:
                     # reassign sentences if possible
                     for k, data in self.m[symb.name].items():
                         if k in self.state.assignments:
