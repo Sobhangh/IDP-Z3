@@ -201,6 +201,8 @@ def translate1(self):
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
     else:
+        assert len(self.sub_exprs) == self.decl.arity, \
+            f"Incorrect number of arguments for {self.s.name}"
         if len(self.sub_exprs) == 0:
             return self.decl.translate()
         else:
