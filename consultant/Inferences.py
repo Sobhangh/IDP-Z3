@@ -235,93 +235,10 @@ def explain(state, question):
     return out.m
 
 def abstract(state, given_json):
-    timeout = time.time()+20 # 20 seconds max
-    out = {} # {category : [Assignment]}
+    return DMN(state, "", False)
 
-    # extract fixed atoms from constraints
-    out["universal"] = list(l for l in state.assignments.values() 
-                        if l.status == Status.UNIVERSAL)
-    out["given"    ] = list(l for l in state.assignments.values() 
-                        if l.status == Status.GIVEN)
-    out["fixed"    ] = list(l for l in state.assignments.values() 
-                        if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
-    out["irrelevant"]= list(l for l in state.assignments.values() 
-        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
-        and not l.relevant)
+def DMN(state, goal_string, first_hit=True):
 
-    # create keys for models using first symbol of atoms
-    models, count = {}, 0
-    for q in state.assignments.values():
-        models[q.symbol_decl.name] = []
-    
-    done = set(out["universal"] + out["given"] + out["fixed"])
-    known = And([ass.translate() for ass in state.assignments.values()
-                    if ass.status != Status.UNKNOWN]
-                + [ass.sentence.reified()==ass.sentence.translate()
-                    for ass in state.assignments.values()
-                    if ass.sentence.is_reified()])
-
-    theory = state.formula().translate()
-    solver = Solver()
-    solver.add(theory)
-    solver.add(known)
-    while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
-
-        atoms = [] # [Assignment]
-        for assignment in state.assignments.values():
-            atom = assignment.sentence
-            if assignment.value is None and atom.type == 'bool':
-                if not atom.is_reified():
-                    val1 = solver.model().eval(atom.translate())
-                else:
-                    val1 = solver.model().eval(atom.reified())
-                if val1 == True:
-                    atoms += [ Assignment(atom, TRUE , Status.UNKNOWN) ]
-                elif val1 == False:
-                    atoms += [ Assignment(atom, FALSE, Status.UNKNOWN) ]
-
-        # start with negations !
-        atoms.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
-        atoms = state._generalize(atoms, known, theory)
-
-        # add constraint to eliminate this model
-        modelZ3 = Not(And( [l.translate() for l in atoms] ))
-        theory = And(theory, modelZ3)
-        solver.add(modelZ3)
-
-        # group atoms by symbols
-        model = {}
-        for l in atoms:
-            if l.sentence != TRUE:
-                model.setdefault(l.symbol_decl.name, []).append([ l ])
-        # add to models
-        for k,v in models.items(): # add model
-            models[k] = v + [ model[k] if k in model else [] ]
-        count +=1
-
-    # detect symbols with atoms
-    active_symbol = {}
-    for symb in models.keys():
-        for i in range(count):
-            if not models[symb][i] == []:
-                active_symbol[symb] = True
-
-    # build table of models
-    out["models"] = ("" if count < 50 and time.time()<timeout else 
-                "Time out or more than 50 models...Showing partial results")
-    out["variable"] = [[ [symb] for symb in models.keys() 
-                        if symb in active_symbol ]]
-    for i in range(count):
-        out["variable"] += [[ models[symb][i] for symb in models.keys() 
-                            if symb in active_symbol ]]
-    return out
-
-def DMN(state, goal_string):
-
-    assert(goal_string in state.assignments), \
-        f"Unknown goal: {goal_string}"
-    goal = state.assignments[goal_string]
-    
     timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
 
@@ -345,7 +262,7 @@ def DMN(state, goal_string):
     questions = OrderedSet()
     for c in state.constraints:
         if not c.is_type_constraint_for:
-            c.collect(questions)
+            c.collect(questions, all_=False)
 
     known = And([ass.translate() for ass in state.assignments.values()
                     if ass.status != Status.UNKNOWN]
@@ -354,6 +271,7 @@ def DMN(state, goal_string):
                     if q.is_reified()])
 
     theory = state.formula().translate()
+    goal = None
     solver = Solver()
     solver.add(theory)
     solver.add(known)
@@ -368,9 +286,6 @@ def DMN(state, goal_string):
                     val1 = model.eval(atom.translate())
                 else:
                     val1 = model.eval(atom.reified())
-                    val2 = model.eval(atom.translate())
-                    assert (val1 == val2), \
-                        f"{val1} <-> {val2}: {atom.reified()} <=> {atom.translate()}"
                 if val1 == True:
                     ass = Assignment(atom, TRUE , Status.UNKNOWN)
                 elif val1 == False:
@@ -383,35 +298,36 @@ def DMN(state, goal_string):
                     else:
                         assignments.append(ass)
         # start with negations !
-        assignments.sort(key=lambda l: (l.value==FALSE, str(l.sentence)))
-        assignments.append(goal) # place goal at end
+        assignments.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
+        assignments.append(goal if goal is not None else TRUE)
 
-        if goal.value is not None:
-            state._generalize(assignments, known, theory)
-            models.append(assignments)
+        state._generalize(assignments, known, theory)
+        models.append(assignments)
 
         # add constraint to eliminate this model
         modelZ3 = Not(And( [l.translate() for l in assignments 
             if l.value is not None] ))
-        known = And(known, modelZ3)
         solver.add(modelZ3)
 
         count +=1
     
     models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
     
-    # first hit policy
-    theory = state.formula().translate()
-    models1 = []
-    for i in range(len(models)):
-        model = models.pop(0).copy()
-        models1.append(model)
-        known = And(known, Not(And([l.translate() for l in model[:-1]
-                                        if l.value is not None])))
-        for model in models:
-            state._generalize(model, known, theory)
-        models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
-    models = models1
+    if first_hit:
+        theory = state.formula().translate()
+        models1 = []
+        while models:
+            model = models.pop(0).copy()
+            models1.append(model)
+            known = And(known, Not(And([l.translate() for l in model[:-1]
+                                            if l.value is not None])))
+            # models = filter(lambda m: Solver(And(known, m))==sat, models)
+            for model in models:
+                state._generalize(model, known, theory)
+            # check if goal is removed. if so, ignore the model
+            models = list(m for m in models if not m[-1].sentence.same_as(TRUE))
+            models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
+        models = models1
 
     # detect symbols with assignments
     active_symbol = {}
@@ -437,7 +353,7 @@ def DMN(state, goal_string):
                 "Time out or more than 50 models...Showing partial results")
     out["variable"] = [[ [symb] for symb in table.keys() 
                         if symb in active_symbol ]]
-    for i in range(count):
+    for i in range(len(models)):
         out["variable"] += [[ table[symb][i] for symb in table.keys() 
                             if symb in active_symbol ]]
     return out
