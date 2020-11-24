@@ -388,6 +388,7 @@ class Theory(object):
         self.vocab_name = kwargs.pop('vocab_name')
         self.constraints = OrderedSet(kwargs.pop('constraints'))
         self.definitions = kwargs.pop('definitions')
+        self.interpretations = {i.name: i for i in kwargs.pop('interpretations')}
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -395,7 +396,6 @@ class Theory(object):
         self.clark = {}  # {Declaration: Rule}
         self.def_constraints = {} # {Declaration: Expression}
         self.assignments = Assignments()
-        self.interpretations = {}
 
         for constraint in self.constraints:
             constraint.block = self
@@ -408,9 +408,9 @@ class Theory(object):
 
     def annotate(self, idp):
         assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
-        voc = idp.vocabularies[self.vocab_name]
+        self.voc = idp.vocabularies[self.vocab_name]
 
-        self.definitions = [e.annotate(self, voc, {}) for e in self.definitions]
+        self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol declaration
         for d in self.definitions:
             for decl, rule in d.clark.items():
@@ -426,14 +426,17 @@ class Theory(object):
             if type(decl) == SymbolDeclaration and decl.domain:
                 self.def_constraints[decl] = rule.expanded
 
-        self.constraints = OrderedSet([e.annotate(voc, {})        for e in self.constraints])
+        self.constraints = OrderedSet([e.annotate(self.voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
 
-        for decl in voc.symbol_decls.values():
+        for decl in self.voc.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
 
-        for s in voc.terms.values():
+        for i in self.interpretations.values():
+            i.annotate(self) # this updates self.assignments
+
+        for s in self.voc.terms.values():
             if not s.code.startswith('_'):
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 

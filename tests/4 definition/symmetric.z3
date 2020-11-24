@@ -8,8 +8,6 @@ vocabulary {
 theory {
     edge(a,b).
     !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
-}
-structure {
 	symmetric = {`edge}
 }
 display {
@@ -18,17 +16,17 @@ display {
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
-              'idpname': 'edge',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'function',
-              'view': 'expanded'},
-             {'environmental': False,
               'idpname': 'symmetric',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
-              'view': 'normal'}],
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'edge',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
