@@ -120,8 +120,7 @@ class Assignments(dict):
             if out.value is None: 
                 out.value = value
             else:
-                assert value is None or str(out.value) == str(value), \
-                    f"Internal error: changing value of {out.sentence} from {out.value} to {value}"
+                pass # issue #35 error will be caught later by Z3
             if out.status   is None or out.status == Status.UNKNOWN: 
                 out.status   = status
             if relevant is not None: out.relevant = relevant
