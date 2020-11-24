@@ -117,7 +117,7 @@ def translate1(self):
         function = BinaryOperator.MAP[self.operator[i - 1]]
         try:
             out = function(out, self.sub_exprs[i].translate())
-        except e:
+        except Exception as e:
             raise e
     return out
 BinaryOperator.translate1 = translate1
