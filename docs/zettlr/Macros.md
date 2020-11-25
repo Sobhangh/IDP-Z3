@@ -19,6 +19,16 @@ Date: 20200523062416
 - [x] it's possible to quantify over `` `Symbols`` in head of definitions
 - [ ] add `` `arity`` predicate
 
+Quantification over symbols in constraints:
+- [ ] make it work with symmetric enumeration in theory
+    - [ ] instantiate an implication should first instantiate the implicant, then, if not false, the consequent.  If implicant is false, value is True, sub_exprs = ….
+    - [ ] instantiate AppliedSymbol with Symbol argument should interpret applied symbol, if possible
+- [ ] make it work with symmetric enumeration in structure
+    - [ ] Problem should contain merged vocabularies (instead of structures) + detect conflicts
+    - [ ] Problem should use vocabularies, not structures
+    - [ ] option to give type expansion in structure; expand_quantifier should be done 1) tentatively in annotate; 2) finally in interpret, given all the structures
+    - [ ] Symbols.range should be regenerated before interpret and quantification expansion
+
 Questions:
 * use `` `edge `` or `` `edge' `` ? 
     * closing tick will later allow to talk about expressions, e.g. to annotate an expression with a reading
