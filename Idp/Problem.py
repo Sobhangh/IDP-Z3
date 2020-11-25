@@ -323,7 +323,7 @@ class Problem(object):
             solver.add(And(known, conjunction2, Not(z3_formula)))
             if solver.check() == unsat:
                 conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-        return conjuncts
+        return [c for c in conjuncts if c.sentence != TRUE]
 
 def str_to_IDP(atom, val_string):
     if atom.type == 'bool':

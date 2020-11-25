@@ -1,10 +1,10 @@
 [ Not B
   Not Eligible(BE001) ]
 [ Not A
-  D
+  C
   Eligible(BE001) ]
 [ Not A
-  C
+  D
   Eligible(BE001) ]
 [ Not C
   Not D

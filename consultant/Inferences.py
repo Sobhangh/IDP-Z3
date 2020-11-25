@@ -302,7 +302,7 @@ def DMN(state, goal_string, first_hit=True):
         assignments.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
         assignments.append(goal if goal is not None else TRUE)
 
-        state._generalize(assignments, known, theory)
+        assignments = state._generalize(assignments, known, theory)
         models.append(assignments)
 
         # add constraint to eliminate this model
@@ -312,7 +312,7 @@ def DMN(state, goal_string, first_hit=True):
 
         count +=1
     
-    models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
+    models.sort(key=len)
     
     if first_hit:
         theory = state.formula().translate()
@@ -324,12 +324,11 @@ def DMN(state, goal_string, first_hit=True):
             #TODO ignore if known to be impossible
             models1.append(model)
             # models = filter(lambda m: Solver(And(known, m))==sat, models)
-            for model in models:
-                state._generalize(model, known, theory)
+            models = [state._generalize(m, known, theory) for m in models]
             # check if goal is removed. if so, ignore the model
             #TODO remove next line
-            models = list(m for m in models if not m[-1].sentence.same_as(TRUE))
-            models.sort(key=lambda conjuncts: len([l for l in conjuncts if l.sentence != TRUE]))
+            models = list(m for m in models if m[-1].sentence.code == goal_string)
+            models.sort(key=len)
         models = models1
     #TODO post-process
 
@@ -347,10 +346,9 @@ def DMN(state, goal_string, first_hit=True):
             table[ass.symbol_decl.name] = [ [] for i in range(len(models))]
     # fill table
     for i, model in enumerate(models):
-        print('[', f"{NEWL}  ".join(str(a) for a in model if a.sentence != TRUE), ']')
+        print('[', f"{NEWL}  ".join(str(a) for a in model), ']')
         for ass in model:
-            if ass.sentence != TRUE:
-                table[ass.symbol_decl.name][i].append(ass)
+            table[ass.symbol_decl.name][i].append(ass)
 
     # build table of models
     out["models"] = ("" if count < 50 and time.time()<timeout else 
