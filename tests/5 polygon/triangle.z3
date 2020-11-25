@@ -556,7 +556,7 @@ display {
                                      'is_assignment': True,
                                      'normal': False,
                                      'reading': 'Subtype = irregular',
-                                     'relevant': True,
+                                     'relevant': False,
                                      'status': 'CONSEQUENCE',
                                      'typ': 'Bool',
                                      'value': False},

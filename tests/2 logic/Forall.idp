@@ -1,12 +1,15 @@
-vocabulary {
-    type color constructed from {red, blue, green}
+vocabulary V {
+    type Color constructed from {red, blue, green}
     p
-    q(color)
+    q(Color)
+    color(): Color
+    r
 } 
-theory {
-    p <=> (∀c[color]: c=red).
-    ∀c: q(c).
+theory T:V {
+    p <=> (∀c[Color]: c=red).
+    q = {red; blue}
+    (∀c[Color]: ~q(c) => c=color()).
 }
-display {
-    view = expanded.
+procedure main() {
+    print(str(Problem(T).formula()))
 }

@@ -56,7 +56,8 @@ def substitute(self, e0, e1, assignments, todo=None):
         return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         # will update self.simpler
-        out = self.update_exprs([e.substitute(e0, e1, assignments, todo) for e in self.sub_exprs])
+        out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
+                                for e in self.sub_exprs)
         return out
 Expression.substitute = substitute
 
@@ -70,7 +71,8 @@ def instantiate(self, e0, e1):
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
 
-    out = out.update_exprs([e.instantiate(e0, e1) for e in out.sub_exprs]) # with simplification
+    # instantiate expressions, with simplification
+    out = out.update_exprs(e.instantiate(e0, e1) for e in out.sub_exprs)
 
     simpler, co_constraint = None, None
     if out.simpler is not None:
@@ -102,7 +104,8 @@ def expand_quantifiers(self, theory):
 
     implementation for everything but AQuantification and AAgregate 
     """
-    return self.update_exprs([e.expand_quantifiers(theory) for e in self.sub_exprs])
+    return self.update_exprs(e.expand_quantifiers(theory)
+                                for e in self.sub_exprs)
 Expression.expand_quantifiers = expand_quantifiers
 
 
@@ -113,7 +116,7 @@ def interpret(self, theory):
     """
     if self.is_type_constraint_for: # do not interpret typeConstraints
         return self
-    out = self.update_exprs([e.interpret(theory) for e in self.sub_exprs])
+    out = self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
     return out
 Expression.interpret = interpret
 
