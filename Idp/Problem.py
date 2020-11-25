@@ -315,7 +315,7 @@ class Problem(object):
         conjuncts = ( structure if not isinstance(structure, Problem) else
                       [ass for ass in structure.assignments.values()
                         if ass.status == Status.UNKNOWN] )
-        for i, c in enumerate(conjuncts):
+        for i, c in reversed(list(enumerate(conjuncts))):
             conjunction2 = And([l.translate() 
                     for j, l in enumerate(conjuncts) 
                     if j != i])
