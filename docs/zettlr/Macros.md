@@ -21,7 +21,7 @@ Date: 20200523062416
 
 Quantification over symbols in constraints:
 - [ ] make it work with symmetric enumeration in theory
-    - [ ] instantiate an implication should first instantiate the implicant, then, if not false, the consequent.  If implicant is false, value is True, sub_exprs = ….
+    - [x] instantiate an implication should first instantiate the implicant, then, if not false, the consequent.  If implicant is false, value is True, sub_exprs = ….
     - [ ] instantiate AppliedSymbol with Symbol argument should interpret applied symbol, if possible
 - [ ] make it work with symmetric enumeration in structure
     - [ ] Problem should contain merged vocabularies (instead of structures) + detect conflicts

@@ -66,7 +66,7 @@ Expression._change = _change
 
 
 def update_exprs(self, new_exprs):
-    """ change sub_exprs and simplify. """
+    """ change sub_exprs and simplify, while keeping relevant info. """
     #  default implementation, without simplification
     return self._change(sub_exprs=list(new_exprs))
 #Expression.update_exprs = update_exprs
@@ -113,20 +113,21 @@ AQuantification.update_exprs = update_exprs
 # Class AImplication #######################################################
 
 def update_exprs(self, new_exprs):
-    exprs = list(new_exprs)
+    exprs0 = next(new_exprs)
     value, simpler = None, None
-    if exprs[0].same_as(FALSE): # (false => p) is true
-        value = TRUE
+    if exprs0.same_as(FALSE): # (false => p) is true
         # exprs[0] may be false because exprs[1] was false
-        exprs = [exprs[0], exprs[1] if self.sub_exprs[1].same_as(FALSE) else FALSE]
-    if exprs[0].same_as(TRUE): # (true => p) is p
-        simpler = exprs[1]
-    if exprs[1].same_as(TRUE): # (p => true) is true
+        exprs1 = self.sub_exprs[1] if self.sub_exprs[1].same_as(FALSE) else FALSE
         value = TRUE
-        exprs = [exprs[0] if self.sub_exprs[0].same_as(TRUE) else TRUE, exprs[1]]
-    if exprs[1].same_as(FALSE): # (p => false) is ~p
-        simpler = AUnary.make('¬', exprs[0])
-    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
+    elif exprs0.same_as(TRUE): # (true => p) is p
+        exprs1 = next(new_exprs)
+        simpler = exprs1
+    elif (exprs1 :=  next(new_exprs)).same_as(TRUE): # (p => true) is true
+        exprs0 = exprs0 if self.sub_exprs[0].same_as(TRUE) else TRUE
+        value = TRUE
+    elif exprs1.same_as(FALSE): # (p => false) is ~p
+        simpler = AUnary.make('¬', exprs0)
+    return self._change(value=value, simpler=simpler, sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
 
 
