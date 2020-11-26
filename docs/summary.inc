@@ -5,6 +5,7 @@ Syntax summary
 
 The following code illustrates the syntax of IDP.
 T denotes a type, c a constructor, p a proposition or predicate, f a constant or function.
+The equivalent ASCII-only encoding is shown on the right.
 
 .. code-block::
 
@@ -25,11 +26,12 @@ T denotes a type, c a constructor, p a proposition or predicate, f a constant or
     }
 
     theory T:V {
-        (~p1&p2 | p3 => p4 <=> p5) <= p6.
+        (¬p1∧p2 ∨ p3 ⇒ p4 ⇔ p5) ⇐ p6.             (~p1&p2 | p3 => p4 <=> p5) <= p6.
         p(f1(f2())).
-        f1() < f2() =< f3() = f4() >= f5() > f6().
-        !x[T]: p(x).
-        ?x: p(x).
+        f1() < f2() ≤ f3() = f4() ≥ f5() > f6().  f1() < f2() =< f3() = f4() >= f5() > f6().
+        f() ≠ c.                                  f() ~= c.
+        ∀x[T]: p(x).                              !x[T]: p(x).
+        ∃x: p(x).                                 ?x: p(x).
 
         f() in {1;2;3}.
         f() = #{x[T]: p(x)}.
@@ -42,9 +44,9 @@ T denotes a type, c a constructor, p a proposition or predicate, f a constant or
         p(5) is not enumerated.
 
         { p(1).
-          !x: p1(x) <- p2(x). 
+          ∀x: p1(x) <- p2(x).                     !x: p1(x) <- p2(x). 
           f(1)=1.
-          !x: f(x)=1 <- p(x).
+          ∀x: f(x)=1 <- p(x).                     !x: f(x)=1 <- p(x).
         }
 
         [this is the intended meaning of the rule]
