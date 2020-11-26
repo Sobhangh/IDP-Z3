@@ -23,7 +23,7 @@ import time
 from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, \
     Not, BoolVal, unsat
 
-from Idp.Expression import AComparison, AUnary
+from Idp.Expression import AComparison, AUnary, AConjunction, ADisjunction
 from Idp.utils import *
 from .IO import *
 
@@ -239,6 +239,14 @@ def abstract(state, given_json):
     return DMN(state, "", False)
 
 def DMN(state, goal_string, first_hit=True):
+    if goal_string:
+        # add (goal | ~goal) to state.constraints
+        assert goal_string in state.assignments, (
+            f"Unrecognized goal string: {goal_string}")
+        temp = state.assignments[goal_string].sentence
+        temp = ADisjunction.make('∨', [temp, AUnary.make('¬', temp)])
+        temp = temp.interpret(state)
+        state.constraints.append(temp)
 
     timeout = time.time()+20 # 20 seconds max
     out = {} # {category : [Assignment]}
@@ -264,6 +272,8 @@ def DMN(state, goal_string, first_hit=True):
     for c in state.constraints:
         if not c.is_type_constraint_for:
             c.collect(questions, all_=False)
+    assert not goal_string or goal_string in [a.code for a in questions], \
+        f"Internal error"
 
     known = And([ass.translate() for ass in state.assignments.values()
                     if ass.status != Status.UNKNOWN]
@@ -299,8 +309,9 @@ def DMN(state, goal_string, first_hit=True):
                     else:
                         assignments.append(ass)
         # start with negations !
-        assignments.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
-        assignments.append(goal if goal is not None else TRUE)
+        assignments.sort(key=lambda l: (l.value==FALSE, str(l.sentence)))
+        if goal is not None:
+            assignments.append(goal)
 
         assignments = state._generalize(assignments, known, theory)
         models.append(assignments)
@@ -324,7 +335,7 @@ def DMN(state, goal_string, first_hit=True):
             solver = Solver()
             solver.add(theory)
             solver.add(possible)
-            if solver.check() == sat:
+            if solver.check() == sat or len(models)==0:
                 known = possible
                 models1.append(model)
                 models = [state._generalize(m, known, theory) for m in models]

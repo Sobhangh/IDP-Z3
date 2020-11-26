@@ -1,24 +1,9 @@
 [ Not B
   Not Eligible(BE001) ]
-[ Not A
-  C
+[ C
   Eligible(BE001) ]
-[ Not A
-  D
-  Eligible(BE001) ]
-[ Not C
-  Not D
-  Not E
+[ Not F
   Not Eligible(BE001) ]
-[ Not A
-  F
-  Eligible(BE001) ]
-[ Not A
-  Not H
-  G
-  Eligible(BE001) ]
-[ Not C
-  Not D
-  Not F
-  Not G
+[ Not E
   Not Eligible(BE001) ]
+[ Eligible(BE001) ]
