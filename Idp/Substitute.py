@@ -92,7 +92,8 @@ def instantiate(self, e0, e1):
         if isinstance(out, AComparison):
             out.annotate1()
     out.code = str(out)
-    out.annotations['reading'] = out.code
+    if 'reading' in self.annotations and self.annotations['reading']:
+        out.annotations['reading'] = self.annotations['reading']
     return out
 Expression.instantiate = instantiate
 
@@ -206,6 +207,7 @@ def interpret(self, theory):
             simpler = interpretation.enumeration.contains(sub_exprs, True)
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('¬', simpler)
+        simpler.annotations = self.annotations
     elif self.in_enumeration:
         # re-create original Applied Symbol
         core = AppliedSymbol.make(self.s, sub_exprs).copy()
