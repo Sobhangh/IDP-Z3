@@ -22,8 +22,3 @@
   Not F
   Not G
   Not Eligible(BE001) ]
-[ Not C
-  Not D
-  Not F
-  H
-  Not Eligible(BE001) ]

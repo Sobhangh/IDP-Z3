@@ -13,4 +13,3 @@
   Not Eligible(BE001) ]
 [ Not Issuer_Type(BE001) = Supra
   Not Eligible(BE001) ]
-[ Eligible(BE001) ]

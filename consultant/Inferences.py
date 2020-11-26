@@ -319,18 +319,17 @@ def DMN(state, goal_string, first_hit=True):
         models1 = []
         while models:
             model = models.pop(0).copy()
-            known = And(known, Not(And([l.translate() for l in model[:-1]
+            possible = And(known, Not(And([l.translate() for l in model[:-1]
                                             if l.value is not None])))
-            #TODO ignore if known to be impossible
-            models1.append(model)
-            # models = filter(lambda m: Solver(And(known, m))==sat, models)
-            models = [state._generalize(m, known, theory) for m in models]
-            # check if goal is removed. if so, ignore the model
-            #TODO remove next line
-            models = list(m for m in models if m[-1].sentence.code == goal_string)
-            models.sort(key=len)
+            solver = Solver()
+            solver.add(theory)
+            solver.add(possible)
+            if solver.check() == sat:
+                known = possible
+                models1.append(model)
+                models = [state._generalize(m, known, theory) for m in models]
+                models.sort(key=len)
         models = models1
-    #TODO post-process
 
     # detect symbols with assignments
     active_symbol = {}
