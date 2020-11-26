@@ -4,6 +4,7 @@ vocabulary {
 	type node constructed from {a,b,c}
 	edge(node, node)
 	symmetric(`Symbols)
+    Start: node
 }
 theory {
     edge(a,b).
@@ -26,11 +27,48 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
-              'view': 'expanded'}],
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 'Start',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
+ 'Start': {'Start': {'environmental': False,
+                     'is_assignment': True,
+                     'normal': True,
+                     'reading': 'Start',
+                     'relevant': False,
+                     'status': 'UNKNOWN',
+                     'typ': 'node',
+                     'value': '',
+                     'values': ['a', 'b', 'c']},
+           'Start = a': {'environmental': False,
+                         'is_assignment': True,
+                         'normal': False,
+                         'reading': 'Start = a',
+                         'relevant': False,
+                         'status': 'UNKNOWN',
+                         'typ': 'Bool'},
+           'Start = b': {'environmental': False,
+                         'is_assignment': True,
+                         'normal': False,
+                         'reading': 'Start = b',
+                         'relevant': False,
+                         'status': 'UNKNOWN',
+                         'typ': 'Bool'},
+           'Start = c': {'environmental': False,
+                         'is_assignment': True,
+                         'normal': False,
+                         'reading': 'Start = c',
+                         'relevant': False,
+                         'status': 'UNKNOWN',
+                         'typ': 'Bool'},
+           '__rank': 9999},
  'edge': {'__rank': 1,
           'edge(a,a)': {'environmental': False,
                         'is_assignment': False,

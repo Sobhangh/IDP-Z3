@@ -426,15 +426,15 @@ class Theory(object):
             if type(decl) == SymbolDeclaration and decl.domain:
                 self.def_constraints[decl] = rule.expanded
 
+        for i in self.interpretations.values():
+            i.annotate(self) # this updates self.assignments
+
         self.constraints = OrderedSet([e.annotate(self.voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
 
         for decl in self.voc.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
                 self.constraints.extend(decl.typeConstraints)
-
-        for i in self.interpretations.values():
-            i.annotate(self) # this updates self.assignments
 
         for s in self.voc.terms.values():
             if not s.code.startswith('_'):
@@ -551,10 +551,10 @@ class Rule(object):
             arg, nv = self.args[i],  list(new_vars.values())[i]
             if type(arg) in [Fresh_Variable, Variable] \
             and arg.name in self.vars and arg.name not in new_vars:
-                self.body = self.body.instantiate(arg, nv)
-                self.out = self.out.instantiate(arg, nv) if self.out else self.out
+                self.body = self.body.instantiate(arg, nv, self.block)
+                self.out = self.out.instantiate(arg, nv, self.block) if self.out else self.out
                 for j in range(i, len(self.args)):
-                    self.args[j] = self.args[j].instantiate(arg, nv)
+                    self.args[j] = self.args[j].instantiate(arg, nv, self.block)
             else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
@@ -595,12 +595,12 @@ class Rule(object):
         out = self.body.copy() # in case there is no arguments
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
-            out = out.instantiate(old, new)
+            out = out.instantiate(old, new, self.block)
         out = out.expand_quantifiers(theory)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
         if self.symbol.decl.function:  # a function
-            out = out.instantiate(self.args[-1], instance)
+            out = out.instantiate(self.args[-1], instance, self.block)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block
