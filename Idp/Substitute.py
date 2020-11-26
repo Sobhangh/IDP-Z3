@@ -279,15 +279,14 @@ def instantiate(self, e0, e1, theory):
                 return list(e1.symbol.decl.instances.values())[0] # should be "unknown"
         elif len(self.sub_exprs)==0:
             return e1
-    elif self.name in theory.interpretations:
-        out = Expression.instantiate(self, e0, e1, theory)
+    out = Expression.instantiate(self, e0, e1, theory)
+    if self.name in theory.interpretations:
         # interpret if substituting a symbol, to guard against type/arity error
         # don't do it otherwise, for performance reasons
         if any(e.sort.name == '`Symbols' for e in self.sub_exprs 
                 if type(e) == Fresh_Variable):
             out = out.interpret(theory)
-        return out
-    return Expression.instantiate(self, e0, e1, theory)
+    return out
 AppliedSymbol .instantiate = instantiate
 Variable      .instantiate = instantiate
 
