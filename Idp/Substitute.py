@@ -221,7 +221,9 @@ def interpret(self, theory):
         simpler = (theory.interpretations[self.name].interpret)(theory, 0, self, sub_exprs)
     if self.decl in theory.clark: # has a theory
         #TODO need to quantify the co_constraints for the fresh_vars
-        assert not self.fresh_vars, "Internal error"
+        assert not self.fresh_vars, (
+            f"The following variable(s) has not been quantified: "
+            f"{','.join([str(v) for v in self.fresh_vars])}" )
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     if simpler is not None:
