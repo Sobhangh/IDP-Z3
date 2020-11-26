@@ -91,6 +91,13 @@ class Assignment(object):
             out = AComparison.make('=', [self.sentence.original, self.value])
         return out
 
+    def negate(self):
+        if self.sentence.type == 'bool':
+            self.value = FALSE if self.value.same_as(TRUE) else TRUE
+        else:
+            assert False, "Internal error"
+        return self
+
     def translate(self) -> BoolRef:
         return self.formula().translate()
 

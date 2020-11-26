@@ -341,6 +341,18 @@ def DMN(state, goal_string, first_hit=True):
                 models = [state._generalize(m, known, theory) for m in models]
                 models.sort(key=len)
         models = models1
+        # post process if last model is just the goal
+        # replace [p=>~G, G] by [~p=>G]
+        if len(models[-1]) == 1:
+            hypothesis, consequent = [], models.pop()[0].negate()
+            while True:
+                last = models.pop()
+                if len(last)==2 and last[-1].value.same_as(consequent.value):
+                    hypothesis.append(last[0].negate())
+                else:
+                    models.append(last)
+                    break
+            models.append(hypothesis + [consequent.negate()])
 
     # detect symbols with assignments
     active_symbol = {}
