@@ -72,16 +72,24 @@ class State(Problem):
             self.add(idp.theories['decision'])
             if 'decision' in idp.structures: 
                 self.add(idp.structures['decision'])
-        else: # take the first theory and structure
+        else:  # take the first theory and structure
             self.environment = None
             self.add(next(iter(idp.theories.values())))
-            if len(idp.structures)==1:
+            if len(idp.structures) == 1:
                 self.add(next(iter(idp.structures.values())))
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
 
     def add_given(self, jsonstr: str):
+        """
+        Add the assignments that the user gave through the interface.
+        These are in the form of a json string.
+
+        :arg jsonstr: the user's assignment in json
+        :returns: the state with the jsonstr added
+        :rtype: State
+        """
         out = self.copy()
 
         if out.environment is not None:
@@ -97,7 +105,6 @@ class State(Problem):
             self._formula = None
         self.propagate(tag=Status.CONSEQUENCE, extended=True)
         self.simplify()
-        
         get_relevant_subtences(self)
         return self
 
@@ -111,10 +118,16 @@ class State(Problem):
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
         )
-        
 
 def make_state(idp: Idp, jsonstr: str) -> State:
-    """ manages the cache of States """
+    """
+    Manages the cache of States.
+
+    :arg idp: IDP code parsed into Idp object
+    :arg jsonstr: the user's assignments in json
+    :returns: the complete state of the system
+    :rtype: State
+    """
     if (idp, jsonstr) in State.cache:
         return State.cache[(idp, jsonstr)]
 

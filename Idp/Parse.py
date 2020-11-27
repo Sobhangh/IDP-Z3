@@ -609,7 +609,14 @@ class Rule(object):
 ################################ Structure ###############################
 
 class Structure(object):
+    """
+    Pythonic representation of the IDP structure, as parsed by textx.
+    """
     def __init__(self, **kwargs):
+        """
+        The textx parser creates the Structure object. All information used in
+        this method directly comes from text.
+        """
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
         self.interpretations = {i.name: i for i in kwargs.pop('interpretations')}
@@ -621,17 +628,29 @@ class Structure(object):
         self.assignments = Assignments()
 
     def annotate(self, idp):
+        """
+        Annotates the vocabulary with the enumerations found in the
+        structure(s).
+
+        :arg idp: a `Parse.Idp` object.
+        :returns None:
+        """
         assert self.vocab_name in idp.vocabularies, \
             "Unknown vocabulary: " + self.vocab_name
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
-            i.annotate(self) # this updates self.assignments
+            i.annotate(self)  # this updates self.assignments
 
     def __str__(self):
         return self.name
 
 
 class SymbolInterpretation(object):
+    """
+    Pythonic representation of an IDP symbol, such as a predicate or function.
+    This object is first created by the textx parser, after which it is
+    annotated by the structure.
+    """
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.enumeration = kwargs.pop('enumeration')
@@ -641,19 +660,21 @@ class SymbolInterpretation(object):
             self.enumeration = Enumeration(tuples=[])
 
         self.decl = None  # symbol declaration
-        self.is_complete = None # is the function enumeration complete ?
+        self.is_complete = None  # is the function enumeration complete ?
 
     def annotate(self, struct):
         voc = struct.voc
         self.decl = voc.symbol_decls[self.name]
-        if not self.decl.function and self.enumeration.tuples: 
+        if not self.decl.function and self.enumeration.tuples:
             assert self.default is None, \
                 f"Enumeration for predicate '{self.name}' cannot have a default value: {self.default}"
             self.default = FALSE
 
         self.enumeration.annotate(voc)
 
-        # update structure.assignments
+        # Update structure.assignments, set status to STRUCTURE or to DEFAULT.
+        status = Status.STRUCTURE if struct.name != 'default' \
+            else Status.DEFAULT
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.enumeration.tuples:
             assert all(a.as_rigid() is not None for a in t.args), \
@@ -662,12 +683,12 @@ class SymbolInterpretation(object):
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
                 assert expr.code not in struct.assignments, \
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                struct.assignments.assert_(expr, t.args[-1], Status.STRUCTURE, False)
+                struct.assignments.assert_(expr, t.args[-1], status, False)
             else:
                 expr = AppliedSymbol.make(symbol, t.args)
                 assert expr.code not in struct.assignments, \
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                struct.assignments.assert_(expr, TRUE, Status.STRUCTURE, False)
+                struct.assignments.assert_(expr, TRUE, status, False)
             count += 1
         self.is_complete = (not self.decl.function or 
             (0 < count and count == len(self.decl.instances)))
@@ -683,7 +704,8 @@ class SymbolInterpretation(object):
                 f"Default value for '{self.name}' must be ground: {self.default}"
             for code, expr in self.decl.instances.items():
                 if code not in struct.assignments:
-                    struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
+                    struct.assignments.assert_(expr, self.default,
+                                               status, False)
 
     def interpret(self, theory, rank, applied, args, tuples=None):
         tuples = self.enumeration.tuples if tuples == None else tuples
