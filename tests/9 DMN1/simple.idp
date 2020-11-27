@@ -18,3 +18,7 @@ theory T:V {
         Eligible(BE001) <- B & E & F.
     }
 }
+
+procedure main() {
+	print(model_to_DMN(T, goal_string="Eligible(BE001)"))
+}

@@ -236,106 +236,10 @@ def explain(state, question):
     return out.m
 
 def abstract(state, given_json):
-    return DMN(state, "", False)
-
-def DMN(state, goal_string, timeout=20, max_rows=50, first_hit=True):
-    if goal_string:
-        # add (goal | ~goal) to state.constraints
-        assert goal_string in state.assignments, (
-            f"Unrecognized goal string: {goal_string}")
-        temp = state.assignments[goal_string].sentence
-        temp = ADisjunction.make('∨', [temp, AUnary.make('¬', temp)])
-        temp = temp.interpret(state)
-        state.constraints.append(temp)
-
-    # ignore type constraints
-    questions = OrderedSet()
-    for c in state.constraints:
-        if not c.is_type_constraint_for:
-            c.collect(questions, all_=False)
-    assert not goal_string or goal_string in [a.code for a in questions], \
-        f"Internal error"
-
-    known = And([ass.translate() for ass in state.assignments.values()
-                    if ass.status != Status.UNKNOWN]
-                + [q.reified()==q.translate()
-                    for q in questions
-                    if q.is_reified()])
-
-    theory = state.formula().translate()
-    solver = Solver()
-    solver.add(theory)
-    solver.add(known)
-
-    max_time = time.time()+timeout # 20 seconds max
-    goal, models, count = None, [], 0
-    while solver.check() == sat and count < max_rows and time.time()<max_time: # for each parametric model
-        # find the interpretation of all atoms in the model
-        assignments = [] # [Assignment]
-        model = solver.model()
-        for atom in questions.values():
-            assignment = state.assignments[atom.code]
-            if assignment.value is None and atom.type == 'bool':
-                if not atom.is_reified():
-                    val1 = model.eval(atom.translate())
-                else:
-                    val1 = model.eval(atom.reified())
-                if val1 == True:
-                    ass = Assignment(atom, TRUE , Status.UNKNOWN)
-                elif val1 == False:
-                    ass = Assignment(atom, FALSE, Status.UNKNOWN)
-                else:
-                    ass = None
-                if ass is not None:
-                    if atom.code == goal_string:
-                        goal = ass
-                    else:
-                        assignments.append(ass)
-        # start with negations !
-        # assignments.sort(key=lambda l: (l.value==FALSE, str(l.sentence)))
-        if goal is not None:
-            assignments.append(goal)
-
-        assignments = state._generalize(assignments, known, theory)
-        models.append(assignments)
-
-        # add constraint to eliminate this model
-        modelZ3 = Not(And( [l.translate() for l in assignments 
-            if l.value is not None] ))
-        solver.add(modelZ3)
-
-        count +=1
-    
-    models.sort(key=len)
-    
-    if first_hit:
-        theory = state.formula().translate()
-        models1 = []
-        while models:
-            model = models.pop(0).copy()
-            possible = And(known, Not(And([l.translate() for l in model[:-1]
-                                            if l.value is not None])))
-            solver = Solver()
-            solver.add(theory)
-            solver.add(possible)
-            if solver.check() == sat or len(models)==0:
-                known = possible
-                models1.append(model)
-                models = [state._generalize(m, known, theory) for m in models]
-                models.sort(key=len)
-        models = models1
-        # post process if last model is just the goal
-        # replace [p=>~G, G] by [~p=>G]
-        if len(models[-1]) == 1:
-            hypothesis, consequent = [], models.pop()[0].negate()
-            while True:
-                last = models.pop()
-                if len(last)==2 and last[-1].value.same_as(consequent.value):
-                    hypothesis.append(last[0].negate())
-                else:
-                    models.append(last)
-                    break
-            models.append(hypothesis + [consequent.negate()])
+    timeout, max_rows = 20, 50
+    max_time = time.time()+timeout
+    models = state.DMN(goal_string="", timeout=timeout, max_rows=max_rows, 
+                        first_hit=False)
 
     # detect symbols with assignments
     active_symbol = {}
@@ -371,7 +275,7 @@ def DMN(state, goal_string, timeout=20, max_rows=50, first_hit=True):
         if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
         and not l.relevant)
 
-    out["models"] = ("" if count < max_rows and time.time()<max_time else 
+    out["models"] = ("" if len(models) < max_rows and time.time()<max_time else 
         "Time out or more than {max_rows} models...Showing partial results")
     out["variable"] = [[ [symb] for symb in table.keys() 
                         if symb in active_symbol ]]

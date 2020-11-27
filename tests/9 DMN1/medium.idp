@@ -20,3 +20,7 @@ theory T:V {
     }
     A => ~Eligible(BE001).
 }
+
+procedure main() {
+	print(model_to_DMN(T, goal_string="Eligible(BE001)"))
+}

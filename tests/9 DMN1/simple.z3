@@ -8,3 +8,4 @@
 ∧ F
 ⇒ Eligible(BE001)
 
+end of DMN table

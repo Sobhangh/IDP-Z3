@@ -53,6 +53,17 @@ def model_propagate(theories, structures=None):
     problem = Problem.make(theories, structures)
     yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
 
+def model_to_DMN(theories, structures=None, goal_string="", 
+                timeout=20, max_rows=50, first_hit=True):
+    """ output: a list of DMN rows """
+    problem = Problem.make(theories, structures)
+    for model in problem.DMN(goal_string, timeout, max_rows, first_hit):
+        yield((f"  " 
+              f"{f'{NEWL}∧ '.join(str(a) for a in model[:-1])}"
+              f"{NEWL}⇒ " f"{str(model[-1])}"))
+        yield("")
+    yield "end of DMN table"
+
 def myprint(x=""):
     if isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
@@ -72,6 +83,7 @@ def execute(self):
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate
+    mylocals['model_to_DMN'] = model_to_DMN
     mylocals['Problem'] = Problem
 
     exec(main, mybuiltins, mylocals)

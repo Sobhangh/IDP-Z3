@@ -37,9 +37,6 @@ from consultant.State import State, make_state
 from consultant.IO import *
 from Idp import idpparser, SymbolDeclaration, NEWL
 from Idp.utils import start, log
-from consultant.State import make_state
-from consultant.IO import *
-from consultant.Inferences import DMN
 
 z3lock = threading.Lock()
 
@@ -185,42 +182,11 @@ if __name__ == "__main__":
     parser.add_argument('TEST', nargs='*', default=["generate"])
     args = parser.parse_args()
 
-    test_files = glob.glob("./tests/9 DMN1/*.idp")
-    for file_name in test_files:
-        print(file_name)
-        try:
-            with open(file_name, "r") as fp:
-                idp = idpparser.model_from_str(fp.read())
-                case = State(idp).add_given("{}")
-                # capture stdout, print()
-                with io.StringIO() as buf, redirect_stdout(buf):
-                    try:
-                        out = DMN(case, "Eligible(BE001)")
-                    except Exception as exc:
-                        print(traceback.format_exc())
-                    output = buf.getvalue()
-                
-        except Exception as exc:
-            output = traceback.format_exc()
+    error = 0
+    if "generate" in args.TEST:
+        error = generate()
+    if "pipeline" in args.TEST:
+        p_error = pipeline()
+        error = max(error, p_error)
 
-        z3 = file_name.replace(".idp", ".z3")
-        if os.path.isfile(z3):
-            f = open(z3, "r")
-            if output != f.read():
-                print(f"**** unexpected result !{file_name}" )
-                error = 1
-            f.close()
-
-        f = open(z3, "w")
-        f.write(output)
-        f.close()
-
-    total = round(time.process_time()-start, 3)
-    print("*** Total: ", total)
-
-    dir = os.path.dirname(__file__)
-    dir = os.path.join(dir, "tests")
-
-    f = open(os.path.join(dir, "duration.txt"), "w")
-    f.write(str(total))
-    f.close()
+    sys.exit(error)

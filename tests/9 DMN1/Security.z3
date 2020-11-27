@@ -22,3 +22,4 @@
 ∧ Country(BE001) in {Aus, Bel, Can, Den, Est, Fin, Fra, Ger, Hon, Ire, Isr, Ita, Jap, Lux, Net, New, Nor, Por, Sin, Slo, Sou, Spa, Swe, Swi, UniK, UniS}
 ⇒ Eligible(BE001)
 
+end of DMN table
