@@ -92,7 +92,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
       Brackets: annotations=Annotations '(' f=Expression ')';
 
 
-Structure: 'structure' (name=ID ':' vocab_name=ID)? '{' interpretations*=SymbolInterpretation '}';
+Structure: 'structure' (name=ID)? (':' vocab_name=ID)? '{' interpretations*=SymbolInterpretation '}';
   SymbolInterpretation: name=Symbol '=' ( default=Base '.' | enumeration=Enumeration ('else' default=Base)? );
   Enumeration : '{' tuples+=Tuple[';'] '}';
   Tuple : args*=Base[','];
