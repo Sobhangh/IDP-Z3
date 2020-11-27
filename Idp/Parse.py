@@ -410,6 +410,9 @@ class Theory(object):
         assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
         self.voc = idp.vocabularies[self.vocab_name]
 
+        for i in self.interpretations.values():
+            i.annotate(self) # this updates self.assignments
+
         self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol declaration
         for d in self.definitions:
@@ -425,9 +428,6 @@ class Theory(object):
         for decl, rule in self.clark.items():
             if type(decl) == SymbolDeclaration and decl.domain:
                 self.def_constraints[decl] = rule.expanded
-
-        for i in self.interpretations.values():
-            i.annotate(self) # this updates self.assignments
 
         self.constraints = OrderedSet([e.annotate(self.voc, {})        for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
