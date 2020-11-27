@@ -385,6 +385,11 @@ class ARImplication(BinaryOperator):
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
 
+    def __str1__(self):
+        if not hasattr(self, 'enumerated'):
+            return super().__str1__()
+        return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
+
 
 class AConjunction(BinaryOperator):
     PRECEDENCE = 70

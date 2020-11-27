@@ -92,8 +92,7 @@ def instantiate(self, e0, e1):
         if isinstance(out, AComparison):
             out.annotate1()
     out.code = str(out)
-    if 'reading' in self.annotations and self.annotations['reading']:
-        out.annotations['reading'] = self.annotations['reading']
+    out.annotations['reading'] = out.code
     return out
 Expression.instantiate = instantiate
 
