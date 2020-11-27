@@ -1,12 +1,12 @@
   Not B
 ⇒ Not Eligible(BE001)
 
-  C
-∧ Not A
+  Not A
+∧ C
 ⇒ Eligible(BE001)
 
-  D
-∧ Not A
+  Not A
+∧ D
 ⇒ Eligible(BE001)
 
   Not C
@@ -14,12 +14,12 @@
 ∧ Not E
 ⇒ Not Eligible(BE001)
 
-  F
-∧ Not A
+  Not A
+∧ F
 ⇒ Eligible(BE001)
 
-  G
-∧ Not A
+  Not A
+∧ G
 ∧ Not H
 ⇒ Eligible(BE001)
 
@@ -29,9 +29,9 @@
 ∧ Not G
 ⇒ Not Eligible(BE001)
 
-  H
-∧ Not C
+  Not C
 ∧ Not D
 ∧ Not F
+∧ H
 ⇒ Not Eligible(BE001)
 

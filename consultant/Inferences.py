@@ -292,7 +292,7 @@ def DMN(state, goal_string, timeout=20, max_rows=50, first_hit=True):
                     else:
                         assignments.append(ass)
         # start with negations !
-        assignments.sort(key=lambda l: (l.value==FALSE, str(l.sentence)))
+        # assignments.sort(key=lambda l: (l.value==FALSE, str(l.sentence)))
         if goal is not None:
             assignments.append(goal)
 
