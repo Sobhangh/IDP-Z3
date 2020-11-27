@@ -238,7 +238,7 @@ def explain(state, question):
 def abstract(state, given_json):
     return DMN(state, "", False)
 
-def DMN(state, goal_string, first_hit=True):
+def DMN(state, goal_string, timeout=20, max_rows=50, first_hit=True):
     if goal_string:
         # add (goal | ~goal) to state.constraints
         assert goal_string in state.assignments, (
@@ -247,25 +247,6 @@ def DMN(state, goal_string, first_hit=True):
         temp = ADisjunction.make('∨', [temp, AUnary.make('¬', temp)])
         temp = temp.interpret(state)
         state.constraints.append(temp)
-
-    timeout = time.time()+20 # 20 seconds max
-    out = {} # {category : [Assignment]}
-
-    # extract fixed atoms from constraints
-    out["universal"] = list(l for l in state.assignments.values() 
-                        if l.status == Status.UNIVERSAL)
-    out["given"    ] = list(l for l in state.assignments.values() 
-                        if l.status == Status.GIVEN)
-    out["fixed"    ] = list(l for l in state.assignments.values() 
-                        if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
-    out["irrelevant"]= list(l for l in state.assignments.values() 
-        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
-        and not l.relevant)
-
-    # create keys for models using first symbol of atoms
-    models, count = [], 0
-    
-    done = set(out["universal"] + out["given"] + out["fixed"]) 
 
     # ignore type constraints
     questions = OrderedSet()
@@ -282,11 +263,13 @@ def DMN(state, goal_string, first_hit=True):
                     if q.is_reified()])
 
     theory = state.formula().translate()
-    goal = None
     solver = Solver()
     solver.add(theory)
     solver.add(known)
-    while solver.check() == sat and count < 50 and time.time()<timeout: # for each parametric model
+
+    max_time = time.time()+timeout # 20 seconds max
+    goal, models, count = None, [], 0
+    while solver.check() == sat and count < max_rows and time.time()<max_time: # for each parametric model
         # find the interpretation of all atoms in the model
         assignments = [] # [Assignment]
         model = solver.model()
@@ -368,13 +351,28 @@ def DMN(state, goal_string, first_hit=True):
             table[ass.symbol_decl.name] = [ [] for i in range(len(models))]
     # fill table
     for i, model in enumerate(models):
-        print('[', f"{NEWL}  ".join(str(a) for a in model), ']')
+        print((f"  " 
+              f"{f'{NEWL}∧ '.join(str(a) for a in model[:-1])}"
+              f"{NEWL}⇒ " f"{str(model[-1])}"))
+        print()
         for ass in model:
             table[ass.symbol_decl.name][i].append(ass)
 
     # build table of models
-    out["models"] = ("" if count < 50 and time.time()<timeout else 
-                "Time out or more than 50 models...Showing partial results")
+    out = {} # {category : [Assignment]}
+
+    out["universal"] = list(l for l in state.assignments.values() 
+                        if l.status == Status.UNIVERSAL)
+    out["given"    ] = list(l for l in state.assignments.values() 
+                        if l.status == Status.GIVEN)
+    out["fixed"    ] = list(l for l in state.assignments.values() 
+                        if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
+    out["irrelevant"]= list(l for l in state.assignments.values() 
+        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE] 
+        and not l.relevant)
+
+    out["models"] = ("" if count < max_rows and time.time()<max_time else 
+        "Time out or more than {max_rows} models...Showing partial results")
     out["variable"] = [[ [symb] for symb in table.keys() 
                         if symb in active_symbol ]]
     for i in range(len(models)):
