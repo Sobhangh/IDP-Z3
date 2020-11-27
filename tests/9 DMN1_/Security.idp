@@ -167,5 +167,5 @@ theory T:V {
 }
 
 procedure main() {
-	print(model_to_DMN(T, goal_string="Eligible(BE001)"))
+	print(to_DMN(T, goal_string="Eligible(BE001)"))
 }

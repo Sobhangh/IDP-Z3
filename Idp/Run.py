@@ -53,7 +53,7 @@ def model_propagate(theories, structures=None):
     problem = Problem.make(theories, structures)
     yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
 
-def model_to_DMN(theories, structures=None, goal_string="", 
+def to_DMN(theories, structures=None, goal_string="", 
                 timeout=20, max_rows=50, first_hit=True):
     """ output: a list of DMN rows """
     problem = Problem.make(theories, structures)
@@ -83,7 +83,7 @@ def execute(self):
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate
-    mylocals['model_to_DMN'] = model_to_DMN
+    mylocals['to_DMN'] = to_DMN
     mylocals['Problem'] = Problem
 
     exec(main, mybuiltins, mylocals)

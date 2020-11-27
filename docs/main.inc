@@ -44,7 +44,7 @@ model_propagate(theory, structure=None)
 
     For example, ``print(model_propagate(T, S))`` will print the assignments that are true in any expansion of the structure named ``S`` consistent with the theory named ``T``.
 
-model_to_DMN(theory, theories, structures=None, goal_string="", timeout=20, max_rows=50, first_hit=True)
+to_DMN(theories, structures=None, goal_string="", timeout=20, max_rows=50, first_hit=True)
     Returns the rows for a DMN table that defines ``goal_string``.
     ``goal_string`` must be one of the atoms in the theory.
 
