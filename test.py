@@ -102,24 +102,25 @@ def generate():
     files.sort()
     out_dict, error = {}, 0
     for file in files:
-        print(file)
-        # Log_file(file) # optional
-        f = open(file, "r")
-        theory = f.read()
-        output = generateZ3(theory)
+        if "_/" not in file:
+            print(file)
+            # Log_file(file) # optional
+            f = open(file, "r")
+            theory = f.read()
+            output = generateZ3(theory)
 
-        z3 = file.replace(".z3", ".z3z3")
-        z3 = z3.replace(".idp", ".z3")
-        if os.path.isfile(z3):
-            f = open(z3, "r")
-            if output != f.read():
-                out_dict[file] = "**** unexpected result !"
-                error = 1
+            z3 = file.replace(".z3", ".z3z3")
+            z3 = z3.replace(".idp", ".z3")
+            if os.path.isfile(z3):
+                f = open(z3, "r")
+                if output != f.read():
+                    out_dict[file] = "**** unexpected result !"
+                    error = 1
+                f.close()
+
+            f = open(z3, "w")
+            f.write(output)
             f.close()
-
-        f = open(z3, "w")
-        f.write(output)
-        f.close()
 
     total = round(time.process_time()-start, 3)
     print("*** Total: ", total)
