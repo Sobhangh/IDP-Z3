@@ -689,6 +689,7 @@ class SymbolInterpretation(object):
                     struct.assignments.assert_(expr, self.default, Status.STRUCTURE, False)
 
     def interpret(self, theory, rank, applied, args, tuples=None):
+        """ returns the interpretation of self applied to args """
         tuples = self.enumeration.tuples if tuples == None else tuples
         if rank == self.decl.arity:  # valid tuple -> return a value
             if not self.decl.function:
