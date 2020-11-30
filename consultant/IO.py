@@ -89,7 +89,9 @@ def decode_UTF(json_str: str) -> str:
 
 
 def json_to_literals(state, jsonstr: str):
-    """ returns Assignments corresponding to jsonstr
+    """ Parse a json string and create assignments in a state accordingly.
+    This function can also overwrite assignments that have already been set as
+    a default assignment, effectively overriding the default.
 
     :arg state: a State object containing the concepts that appear in the json
     :arg jsonstr: the user's assignments in json
@@ -100,13 +102,17 @@ def json_to_literals(state, jsonstr: str):
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
         for symbol in json_data:
+            # If no value was given for a symbol, we still check to see if we
+            # need to unset a default value.
             if (len(json_data[symbol]) == 0 or
                (symbol in json_data[symbol] and
                json_data[symbol][symbol]['value'] == '')):
+                # Override default value.
                 if symbol in state.assignments:
                     state.assignments[symbol].value = None
                     state.assignments[symbol].status = Status.UNKNOWN
                 continue
+
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
@@ -125,6 +131,7 @@ def json_to_literals(state, jsonstr: str):
                                 state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
                             out[atom] = state.assignments[atom]
                     else:
+                        # Override default value.
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
                         state.assignments[atom].value = value
                         state.assignments[atom].status = Status.GIVEN
