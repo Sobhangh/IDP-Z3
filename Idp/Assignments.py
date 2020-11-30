@@ -41,7 +41,7 @@ class Status(Enum):
     CONSEQUENCE = auto()
     EXPANDED    = auto()
     STRUCTURE   = auto()
-    DEFAULT     = auto()
+    DEFAULT = auto()
 
 class Assignment(object):
     def __init__(self, sentence: Expression, value: Optional[Expression], 
@@ -120,10 +120,6 @@ class Assignments(dict):
             # don't overwrite
             if out.value is None:
                 out.value = value
-            # We do overwrite if the the symbol appears in the default struct.
-            elif out.status == Status.DEFAULT:
-                out.value = value
-                out.status == Status.GIVEN
             else:
                 pass  # issue #35 error will be caught later by Z3
             if out.status is None or out.status == Status.UNKNOWN:

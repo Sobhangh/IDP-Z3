@@ -674,7 +674,7 @@ class SymbolInterpretation(object):
 
         # Update structure.assignments, set status to STRUCTURE or to DEFAULT.
         status = Status.STRUCTURE if struct.name != 'default' \
-            else Status.DEFAULT
+            else Status.GIVEN
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.enumeration.tuples:
             assert all(a.as_rigid() is not None for a in t.args), \

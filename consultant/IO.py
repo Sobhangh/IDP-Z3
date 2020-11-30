@@ -61,7 +61,7 @@ def metaJSON(state):
 
     # Create the output dictionary.
     out = {"title": "Interactive Consultant", "symbols": symbols,
-        "optionalPropagation": optionalPropagation}
+           "optionalPropagation": optionalPropagation}
     return out
 
 
@@ -102,11 +102,14 @@ def json_to_literals(state, jsonstr: str):
         for symbol in json_data:
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
+                    print(atom, state.assignments[atom])
                     idp_atom = state.assignments[atom].sentence
                     if json_atom["value"] != '':
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
+                        print('value', value)
                         if json_atom["typ"] == "Bool":
                             state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
+                            print(idp_atom, value, Status.GIVEN, False)
                         elif json_atom["value"]:
                             state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
 
@@ -117,6 +120,7 @@ def json_to_literals(state, jsonstr: str):
                         # If a symbol becomes unknown in the interface,
                         # explicitly reset its assignment (in order to reset
                         # DEFAULT symbols).
+                        print('UNKNOWN', idp_atom)
                         state.assignments.assert_(idp_atom, None,
                                                   Status.UNKNOWN, True)
     return out
@@ -169,7 +173,10 @@ class Output(object):
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
                         or bool(ass.sentence.is_assignment)
                     s.setdefault(key, symbol)
-                    s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
+                    try:
+                        s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
+                    except:
+                        s["__rank"] = 1
 
         # Remove symbols that are in a non-default structure,
         # and set symbols that are in the default structure as given.

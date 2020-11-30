@@ -76,10 +76,12 @@ class State(Problem):
             self.environment = None
             self.add(next(iter(idp.theories.values())))
             if len(idp.structures) == 1:
-                self.add(next(iter(idp.structures.values())))
+                # self.add(next(iter(idp.structures.values())))
+                pass
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
+        # print(self)
 
     def add_given(self, jsonstr: str):
         """
@@ -91,10 +93,27 @@ class State(Problem):
         :rtype: State
         """
         out = self.copy()
+        print('jsonstr', jsonstr)
+        print('before given', out.assignments)
 
         if out.environment is not None:
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
+        print('given', out.given.items())
+
+        print('before default', out.assignments)
+        if 'default' in out.idp.structures:
+            default_assignments = out.idp.structures['default'].assignments
+            for symbol, assignment in default_assignments.items():
+                print('Default symbol', symbol)
+                if symbol in out.given.keys():
+                    print("Skipped:", symbol, out.given[symbol].value)
+                    continue
+                atom = assignment.sentence
+                value = assignment.value
+                out.assignments.assert_(atom, value, Status.GIVEN, True)
+
+        print('after given', out.assignments)
         return out._finalize()
 
     def _finalize(self):
@@ -112,7 +131,7 @@ class State(Problem):
         self.co_constraints = OrderedSet()
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
-        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
+        return (f"Universals:  {indented}{indented.join(str(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
@@ -129,7 +148,7 @@ def make_state(idp: Idp, jsonstr: str) -> State:
     :rtype: State
     """
     if (idp, jsonstr) in State.cache:
-        return State.cache[(idp, jsonstr)]
+        return State.cache[(idp, jsonstr)].add_given(jsonstr)
 
     if (idp, "{}") not in State.cache:
         State.cache[(idp, "{}")] = State(idp)
@@ -138,5 +157,6 @@ def make_state(idp: Idp, jsonstr: str) -> State:
     if 100<len(State.cache):
         # remove oldest entry, to prevent memory overflow
         State.cache = {k:v for k,v in list(State.cache.items())[1:]}
-    State.cache[(idp, jsonstr)] = state
+    if jsonstr != "{}":
+        State.cache[(idp, jsonstr)] = state
     return state
