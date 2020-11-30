@@ -4,12 +4,11 @@ vocabulary {
 	type node constructed from {a,b,c}
 	edge(node, node)
 	symmetric(`Symbols)
+    Start: node
 }
 theory {
     edge(a,b).
     !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
-}
-structure {
 	symmetric = {`edge}
 }
 display {
@@ -18,13 +17,19 @@ display {
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
+              'idpname': 'symmetric',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
               'idpname': 'edge',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
               'view': 'expanded'},
              {'environmental': False,
-              'idpname': 'symmetric',
+              'idpname': 'Start',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
@@ -33,6 +38,37 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
+ 'Start': {'Start': {'environmental': False,
+                     'is_assignment': True,
+                     'normal': True,
+                     'reading': 'Start',
+                     'relevant': False,
+                     'status': 'UNKNOWN',
+                     'typ': 'node',
+                     'value': '',
+                     'values': ['a', 'b', 'c']},
+           'Start = a': {'environmental': False,
+                         'is_assignment': True,
+                         'normal': False,
+                         'reading': 'Start = a',
+                         'relevant': False,
+                         'status': 'UNKNOWN',
+                         'typ': 'Bool'},
+           'Start = b': {'environmental': False,
+                         'is_assignment': True,
+                         'normal': False,
+                         'reading': 'Start = b',
+                         'relevant': False,
+                         'status': 'UNKNOWN',
+                         'typ': 'Bool'},
+           'Start = c': {'environmental': False,
+                         'is_assignment': True,
+                         'normal': False,
+                         'reading': 'Start = c',
+                         'relevant': False,
+                         'status': 'UNKNOWN',
+                         'typ': 'Bool'},
+           '__rank': 9999},
  'edge': {'__rank': 1,
           'edge(a,a)': {'environmental': False,
                         'is_assignment': False,

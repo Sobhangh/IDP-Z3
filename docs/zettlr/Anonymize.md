@@ -1,5 +1,5 @@
 –-
-title: Anomymize
+title: Anonymize
 tags: #hosting
 Date: 20200901104252
 –-

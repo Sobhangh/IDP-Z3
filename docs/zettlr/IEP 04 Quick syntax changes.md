@@ -12,7 +12,7 @@ Constant vs Identifiers
 Enumerations
 - [ ] implement "mathematical" syntax in structure
 - [ ] allow rigid enumeration in vocabulary
-- [ ] allow rigid enumeration in theory
+- [x] allow rigid enumeration in theory
 - [ ] allow constructed from in theory
 - [ ] implement csv syntax
 

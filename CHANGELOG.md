@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [unreleased]
 
 ### API
+* support [IEP 03 quick syntax changes](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-03-Quick-syntax-changes):
+  * enumerations in theory block
 * support [IEP 08 'in' operator](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-08-'in'-operator)
 * better support quantification over symbols
 

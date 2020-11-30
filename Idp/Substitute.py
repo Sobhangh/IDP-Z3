@@ -56,12 +56,13 @@ def substitute(self, e0, e1, assignments, todo=None):
         return self._change(value=e1) # e1 is Constructor or NumberConstant
     else:
         # will update self.simpler
-        out = self.update_exprs([e.substitute(e0, e1, assignments, todo) for e in self.sub_exprs])
+        out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
+                                for e in self.sub_exprs)
         return out
 Expression.substitute = substitute
 
 
-def instantiate(self, e0, e1):
+def instantiate(self, e0, e1, theory):
     """ 
     recursively substitute Fresh_Variable e0 by e1 in self
     
@@ -70,13 +71,14 @@ def instantiate(self, e0, e1):
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
 
-    out = out.update_exprs([e.instantiate(e0, e1) for e in out.sub_exprs]) # with simplification
+    # instantiate expressions, with simplification
+    out = out.update_exprs(e.instantiate(e0, e1, theory) for e in out.sub_exprs)
 
     simpler, co_constraint = None, None
     if out.simpler is not None:
-        simpler = out.simpler.instantiate(e0, e1)
+        simpler = out.simpler.instantiate(e0, e1, theory)
     if out.co_constraint is not None:
-        co_constraint = out.co_constraint.instantiate(e0, e1)
+        co_constraint = out.co_constraint.instantiate(e0, e1, theory)
     out._change(simpler=simpler, co_constraint=co_constraint)
 
     if out.value is not None: # replace by new value
@@ -102,7 +104,8 @@ def expand_quantifiers(self, theory):
 
     implementation for everything but AQuantification and AAgregate 
     """
-    return self.update_exprs([e.expand_quantifiers(theory) for e in self.sub_exprs])
+    return self.update_exprs(e.expand_quantifiers(theory)
+                                for e in self.sub_exprs)
 Expression.expand_quantifiers = expand_quantifiers
 
 
@@ -113,7 +116,7 @@ def interpret(self, theory):
     """
     if self.is_type_constraint_for: # do not interpret typeConstraints
         return self
-    out = self.update_exprs([e.interpret(theory) for e in self.sub_exprs])
+    out = self.update_exprs(e.interpret(theory) for e in self.sub_exprs)
     return out
 Expression.interpret = interpret
 
@@ -141,7 +144,7 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.sort.decl.range:
-                    new_f = f.instantiate(var, val)
+                    new_f = f.instantiate(var, val, theory)
                     out.append(new_f)
             forms = out
         else:
@@ -180,7 +183,7 @@ def expand_quantifiers(self, theory):
             out = []
             for f in forms:
                 for val in var.sort.decl.range:
-                    new_f = f.instantiate(var, val)
+                    new_f = f.instantiate(var, val, theory)
                     out.append(new_f)
             forms = out
         else:
@@ -218,7 +221,9 @@ def interpret(self, theory):
         simpler = (theory.interpretations[self.name].interpret)(theory, 0, self, sub_exprs)
     if self.decl in theory.clark: # has a theory
         #TODO need to quantify the co_constraints for the fresh_vars
-        assert not self.fresh_vars, "Internal error"
+        assert not self.fresh_vars, (
+            f"The following variable(s) has not been quantified: "
+            f"{','.join([str(v) for v in self.fresh_vars])}" )
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     if simpler is not None:
@@ -258,7 +263,7 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 
-def instantiate(self, e0, e1):
+def instantiate(self, e0, e1, theory):
     if self.name == e0.code:
         if type(self)==AppliedSymbol and self.decl.name == '`Symbols':
             if (isinstance(e1, Constructor) 
@@ -276,7 +281,14 @@ def instantiate(self, e0, e1):
                 return list(e1.symbol.decl.instances.values())[0] # should be "unknown"
         elif len(self.sub_exprs)==0:
             return e1
-    return Expression.instantiate(self, e0, e1)
+    out = Expression.instantiate(self, e0, e1, theory)
+    if self.name in theory.interpretations:
+        # interpret if substituting a symbol, to guard against type/arity error
+        # don't do it otherwise, for performance reasons
+        if any(e.sort.name == '`Symbols' for e in self.sub_exprs 
+                if type(e) == Fresh_Variable):
+            out = out.interpret(theory)
+    return out
 AppliedSymbol .instantiate = instantiate
 Variable      .instantiate = instantiate
 

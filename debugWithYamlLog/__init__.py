@@ -10,7 +10,7 @@ _indent = 0
 LOG_FILE = None
 def Log_file(path):
     global LOG_FILE
-    if 'roof' in path or 'andbox' in path:
+    if 'ogic' in path or 'andbox' in path:
         path, filename = os.path.split(path)
         LOG_FILE = newpath = os.path.join(path, filename.replace('.idp', '_log.txt'))
         indent = 0
