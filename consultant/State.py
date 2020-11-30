@@ -75,9 +75,11 @@ class State(Problem):
         else:  # take the first theory and structure
             self.environment = None
             self.add(next(iter(idp.theories.values())))
-            if len(idp.structures) == 1:
+            for name, struct in idp.structures.items():
+                if name != "default":
+                    self.add(struct)
+            # if len(idp.structures) == 1:
                 # self.add(next(iter(idp.structures.values())))
-                pass
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
