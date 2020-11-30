@@ -66,9 +66,9 @@ Expression._change = _change
 
 
 def update_exprs(self, new_exprs):
-    """ change sub_exprs and simplify. """
+    """ change sub_exprs and simplify, while keeping relevant info. """
     #  default implementation, without simplification
-    return self._change(sub_exprs=new_exprs)
+    return self._change(sub_exprs=list(new_exprs))
 #Expression.update_exprs = update_exprs
 for i in [Constructor, AppliedSymbol, Variable, Fresh_Variable, NumberConstant]:
     i.update_exprs = update_exprs
@@ -82,7 +82,8 @@ Expression.simplify1 = simplify1
 
 # Class IfExpr ################################################################
 
-def update_exprs(self, sub_exprs):
+def update_exprs(self, new_exprs):
+    sub_exprs = list(new_exprs)
     if_, then_, else_   = sub_exprs[0], sub_exprs[1], sub_exprs[2]
     if if_.same_as(TRUE):
             return self._change(simpler=then_, sub_exprs=sub_exprs)
@@ -102,7 +103,8 @@ IfExpr.update_exprs = update_exprs
 
 # Class AQuantification #######################################################
 
-def update_exprs(self, exprs):
+def update_exprs(self, new_exprs):
+    exprs = list(new_exprs)
     simpler = exprs[0] if not self.vars else None
     return self._change(simpler=simpler, sub_exprs=exprs)
 AQuantification.update_exprs = update_exprs
@@ -110,27 +112,30 @@ AQuantification.update_exprs = update_exprs
 
 # Class AImplication #######################################################
 
-def update_exprs(self, exprs):
+def update_exprs(self, new_exprs):
+    exprs0 = next(new_exprs)
     value, simpler = None, None
-    if exprs[0].same_as(FALSE): # (false => p) is true
-        value = TRUE
+    if exprs0.same_as(FALSE): # (false => p) is true
         # exprs[0] may be false because exprs[1] was false
-        exprs = [exprs[0], exprs[1] if self.sub_exprs[1].same_as(FALSE) else FALSE]
-    if exprs[0].same_as(TRUE): # (true => p) is p
-        simpler = exprs[1]
-    if exprs[1].same_as(TRUE): # (p => true) is true
+        exprs1 = self.sub_exprs[1] if self.sub_exprs[1].same_as(FALSE) else FALSE
         value = TRUE
-        exprs = [exprs[0] if self.sub_exprs[0].same_as(TRUE) else TRUE, exprs[1]]
-    if exprs[1].same_as(FALSE): # (p => false) is ~p
-        simpler = AUnary.make('¬', exprs[0])
-    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
+    elif exprs0.same_as(TRUE): # (true => p) is p
+        exprs1 = next(new_exprs)
+        simpler = exprs1
+    elif (exprs1 :=  next(new_exprs)).same_as(TRUE): # (p => true) is true
+        exprs0 = exprs0 if self.sub_exprs[0].same_as(TRUE) else TRUE
+        value = TRUE
+    elif exprs1.same_as(FALSE): # (p => false) is ~p
+        simpler = AUnary.make('¬', exprs0)
+    return self._change(value=value, simpler=simpler, sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
 
 
 
 # Class AEquivalence #######################################################
 
-def update_exprs(self, exprs):
+def update_exprs(self, new_exprs):
+    exprs = list(new_exprs)
     if len(exprs)==1:
         return self._change(simpler=exprs[1], sub_exprs=exprs)
     for e in exprs:
@@ -195,7 +200,8 @@ AConjunction.update_exprs = update_exprs
 
 # Class AComparison #######################################################
 
-def update_exprs(self, operands):
+def update_exprs(self, new_exprs):
+    operands = list(new_exprs)
     operands1 = [e.as_rigid() for e in operands]
     if all(e is not None for e in operands1):
         acc, acc1 = operands[0], operands1[0]
@@ -213,6 +219,7 @@ AComparison.update_exprs = update_exprs
 #############################################################
 
 def update_arith(self, family, operands):
+    operands = list(operands)
     operands1 = [e.as_rigid() for e in operands]
     if all(e is not None for e in operands1):
         out = operands1[0].py_value
@@ -240,7 +247,8 @@ ASumMinus.update_exprs = update_exprs
 
 # Class AMultDiv #######################################################
 
-def update_exprs(self, operands):
+def update_exprs(self, new_exprs):
+    operands = list(new_exprs)
     if any(op == '%' for op in self.operator): # special case !
         operands1 = [e.as_rigid() for e in operands]
         if len(operands) == 2 \
@@ -307,7 +315,7 @@ AAggregate.update_exprs = update_exprs
 # Class Brackets #######################################################
 
 def update_exprs(self, new_exprs):
-    expr = new_exprs[0]
+    expr = list(new_exprs)[0]
     return self._change(sub_exprs=[expr], value=expr.value)
 Brackets.update_exprs = update_exprs
 

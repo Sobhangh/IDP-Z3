@@ -75,7 +75,7 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
 
 .. code-block::
     
-    MyProp1 MyProp2.
+    MyProposition
     MyConstant: int
 
 .. index:: annotation (vocabulary)

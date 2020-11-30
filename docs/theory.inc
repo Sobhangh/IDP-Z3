@@ -112,6 +112,10 @@ Parenthesis
 .. _quantifier expression:
 .. index:: quantifier expression
 
+Enumeration
+    An enumeration (e.g. ``p = {1;2;3}``) is a sentence. 
+    Enumerations follow the syntax described in `structure`_.
+
 Quantified formulas
     *Quantified formulas* are sentences.
     They have one of these two forms, where :math:`v_1, .., v_n` are variables and |phi| is a sentence:
@@ -126,9 +130,14 @@ Quantified formulas
     For example, ``!x[int] y[int]: f(x,y)=f(y,x).``
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
 
-Enumeration
-    An enumeation (e.g. ``p = {1;2;3}``) is a sentence. 
-    Enumerations follow the syntax described in `structure`_.
+    When quantifying a formula of type ```Symbols``, 
+    the expression must contain a "guard" to prevent arity or type error.
+    A guard is a predicate over ```Symbols`` that is defined by an enumeration in the same theory block.
+    In the following example, ``symmetric`` must be defined by enumeration.
+
+    .. code-block::
+
+        !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
 
 "is (not) enumerated"
     :math:`f(a,b)\ is\ enumerated` and :math:`f(a,b)\ is\ not\ enumerated` are sentences, 
