@@ -96,22 +96,18 @@ class State(Problem):
         print('jsonstr', jsonstr)
         print('before given', out.assignments)
 
-        if out.environment is not None:
-            _ = json_to_literals(out.environment, jsonstr)
-        out.given = json_to_literals(out, jsonstr)
-        print('given', out.given.items())
-
-        print('before default', out.assignments)
         if 'default' in out.idp.structures:
             default_assignments = out.idp.structures['default'].assignments
             for symbol, assignment in default_assignments.items():
                 print('Default symbol', symbol)
-                if symbol in out.given.keys():
-                    print("Skipped:", symbol, out.given[symbol].value)
-                    continue
                 atom = assignment.sentence
                 value = assignment.value
                 out.assignments.assert_(atom, value, Status.GIVEN, True)
+
+        if out.environment is not None:
+            _ = json_to_literals(out.environment, jsonstr)
+        out.given = json_to_literals(out, jsonstr)
+        print('given', out.given.items())
 
         print('after given', out.assignments)
         return out._finalize()

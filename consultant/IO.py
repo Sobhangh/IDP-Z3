@@ -100,29 +100,34 @@ def json_to_literals(state, jsonstr: str):
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
         for symbol in json_data:
+            if (len(json_data[symbol]) == 0 or
+               (symbol in json_data[symbol] and
+               json_data[symbol][symbol]['value'] == '')):
+                if symbol in state.assignments:
+                    state.assignments[symbol].value = None
+                    state.assignments[symbol].status = Status.UNKNOWN
+                continue
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
-                    print(atom, state.assignments[atom])
                     idp_atom = state.assignments[atom].sentence
-                    if json_atom["value"] != '':
-                        value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        print('value', value)
-                        if json_atom["typ"] == "Bool":
-                            state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
-                            print(idp_atom, value, Status.GIVEN, False)
-                        elif json_atom["value"]:
-                            state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
+                    print('aaa', atom, state.assignments[atom].value, idp_atom)
+                    if state.assignments[atom].value == '':
+                        if json_atom["value"] != '':
+                            value = str_to_IDP(idp_atom, str(json_atom["value"]))
+                            print('value', value)
+                            if json_atom["typ"] == "Bool":
+                                state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
+                                print(idp_atom, value, Status.GIVEN, False)
+                            elif json_atom["value"]:
+                                state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
 
-                            idp_atom = AComparison.make('=', [idp_atom, value])
-                            state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
-                        out[atom] = state.assignments[atom]
+                                idp_atom = AComparison.make('=', [idp_atom, value])
+                                state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
+                            out[atom] = state.assignments[atom]
                     else:
-                        # If a symbol becomes unknown in the interface,
-                        # explicitly reset its assignment (in order to reset
-                        # DEFAULT symbols).
-                        print('UNKNOWN', idp_atom)
-                        state.assignments.assert_(idp_atom, None,
-                                                  Status.UNKNOWN, True)
+                        value = str_to_IDP(idp_atom, str(json_atom["value"]))
+                        state.assignments[atom].value = value
+                        state.assignments[atom].status = Status.GIVEN
     return out
 
 
