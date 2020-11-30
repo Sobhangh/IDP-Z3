@@ -81,35 +81,32 @@ class State(Problem):
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
-        # print(self)
 
     def add_given(self, jsonstr: str):
         """
         Add the assignments that the user gave through the interface.
         These are in the form of a json string.
+        This method also sets the values of the default structure.
 
         :arg jsonstr: the user's assignment in json
         :returns: the state with the jsonstr added
         :rtype: State
         """
         out = self.copy()
-        print('jsonstr', jsonstr)
-        print('before given', out.assignments)
 
+        # Set all the default values.
         if 'default' in out.idp.structures:
             default_assignments = out.idp.structures['default'].assignments
             for symbol, assignment in default_assignments.items():
-                print('Default symbol', symbol)
                 atom = assignment.sentence
                 value = assignment.value
                 out.assignments.assert_(atom, value, Status.GIVEN, True)
 
+        # Set all the given values. This can override the default values.
         if out.environment is not None:
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
-        print('given', out.given.items())
 
-        print('after given', out.assignments)
         return out._finalize()
 
     def _finalize(self):
@@ -127,7 +124,7 @@ class State(Problem):
         self.co_constraints = OrderedSet()
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
-        return (f"Universals:  {indented}{indented.join(str(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
+        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"

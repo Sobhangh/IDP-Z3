@@ -629,8 +629,9 @@ class Structure(object):
 
     def annotate(self, idp):
         """
-        Annotates the vocabulary with the enumerations found in the
-        structure(s).
+        Annotates the structure with the enumerations found in it.
+        Every enumeration is converted into an assignment, which is added to
+        `self.assignments`.
 
         :arg idp: a `Parse.Idp` object.
         :returns None:
@@ -663,6 +664,12 @@ class SymbolInterpretation(object):
         self.is_complete = None  # is the function enumeration complete ?
 
     def annotate(self, struct):
+        """
+        Annotate the symbol.
+
+        :arg struct: a Structure object
+        :returns None:
+        """
         voc = struct.voc
         self.decl = voc.symbol_decls[self.name]
         if not self.decl.function and self.enumeration.tuples:
@@ -674,7 +681,7 @@ class SymbolInterpretation(object):
 
         # Update structure.assignments, set status to STRUCTURE or to DEFAULT.
         status = Status.STRUCTURE if struct.name != 'default' \
-            else Status.GIVEN
+            else Status.DEFAULT
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.enumeration.tuples:
             assert all(a.as_rigid() is not None for a in t.args), \

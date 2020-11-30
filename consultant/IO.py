@@ -178,13 +178,9 @@ class Output(object):
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
                         or bool(ass.sentence.is_assignment)
                     s.setdefault(key, symbol)
-                    try:
-                        s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
-                    except:
-                        s["__rank"] = 1
+                    s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
 
-        # Remove symbols that are in a non-default structure,
-        # and set symbols that are in the default structure as given.
+        # Remove symbols that are in a structure.
         for key, l in state.assignments.items():
             if l.status == Status.STRUCTURE:
                 symb = self.state.assignments[key].symbol_decl
@@ -201,10 +197,6 @@ class Output(object):
                                     break
                     self.m[symb.name] = {}
 
-            if l.status == Status.DEFAULT:
-                symb = self.state.assignments[key].symbol_decl
-                if symb and symb.name in self.m:
-                    self.m[symb.name][str(l.sentence)]['status'] = 'GIVEN'
 
     def fill(self, state):
         for key, l in state.assignments.items():
