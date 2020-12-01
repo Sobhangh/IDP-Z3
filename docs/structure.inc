@@ -1,5 +1,7 @@
 .. index:: structure
 
+.. _structure:
+
 Structure
 ---------
 .. code-block::
