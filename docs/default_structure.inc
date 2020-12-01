@@ -10,7 +10,7 @@ However, these values are set as if they were given by the user: they are shown 
 The symbols can still be assigned different values, or they can be unset.
 
 In this way, this type of structure is used to form a *default* set of values for symbols.
-To denote a structure as default structure, the name 'default' should be given.
+Such a structure is given the name 'default', to denote that it specifies default values.
 The syntax of the block remains the same.
 
 .. code-block::
