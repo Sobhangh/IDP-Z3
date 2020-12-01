@@ -1,3 +1,4 @@
+.. index:: annotation (vocabulary)
 
 Vocabulary annotations
 ----------------------
@@ -21,6 +22,4 @@ Long info
     ``[long:this is a long comment]`` specifies the long comment of the symbol.
     This comment is shown when the user clicks the info icon in the header of the symbol's box.
 
-.. _extern:
-.. index:: include vocabulary
 

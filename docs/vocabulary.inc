@@ -78,7 +78,9 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
     MyProposition
     MyConstant: int
 
-.. index:: annotation (vocabulary)
+
+.. _extern:
+.. index:: include vocabulary
 
 Include another vocabulary
 +++++++++++++++++++++++++++
