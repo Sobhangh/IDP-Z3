@@ -341,6 +341,14 @@ class Problem(object):
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
+        # ignore questions about defined symbols (except goal)
+        qs = OrderedSet()
+        for q in questions.values():
+            if ( goal_string == q.code
+            or any(s not in self.clark
+                    for s in q.unknown_symbols(co_constraints=False).values())):
+                        qs.append(q)
+        questions = qs
         assert not goal_string or goal_string in [a.code for a in questions], \
             f"Internal error"
 
