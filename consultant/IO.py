@@ -116,14 +116,11 @@ def json_to_literals(state, jsonstr: str):
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
-                    print('aaa', atom, state.assignments[atom].value, idp_atom)
                     if state.assignments[atom].value == '':
                         if json_atom["value"] != '':
                             value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                            print('value', value)
                             if json_atom["typ"] == "Bool":
                                 state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
-                                print(idp_atom, value, Status.GIVEN, False)
                             elif json_atom["value"]:
                                 state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
 

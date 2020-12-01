@@ -41,7 +41,6 @@ class Status(Enum):
     CONSEQUENCE = auto()
     EXPANDED    = auto()
     STRUCTURE   = auto()
-    DEFAULT     = auto()
 
 class Assignment(object):
     def __init__(self, sentence: Expression, value: Optional[Expression], 

@@ -78,8 +78,6 @@ class State(Problem):
             for name, struct in idp.structures.items():
                 if name != "default":
                     self.add(struct)
-            # if len(idp.structures) == 1:
-                # self.add(next(iter(idp.structures.values())))
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
@@ -96,13 +94,9 @@ class State(Problem):
         """
         out = self.copy()
 
-        # Set all the default values.
+        # Set the values of the default structure.
         if 'default' in out.idp.structures:
-            default_assignments = out.idp.structures['default'].assignments
-            for symbol, assignment in default_assignments.items():
-                atom = assignment.sentence
-                value = assignment.value
-                out.assignments.assert_(atom, value, Status.GIVEN, True)
+            out.add(out.idp.structures['default'])
 
         # Set all the given values. This can override the default values.
         if out.environment is not None:
