@@ -1,0 +1,119 @@
+vocabulary V { 
+	type Security constructed from {
+		BE001
+	}
+type AppliedRating_List constructed from { 
+AAA_52,
+AAXX_PlUs_XX_53,
+AA_54,
+AXX_MiNuS_XX1XX_PlUs_XX_55,
+AAXX_MiNuS_XX_56,
+AXX_PlUs_XX_57,
+A_58,
+AXX_MiNuS_XX_59,
+AXX_MiNuS_XX1_60,
+BBBXX_PlUs_XX_61,
+BBB_62,
+AXX_MiNuS_XX2_63,
+BBBXX_MiNuS_XX_64,
+AXX_MiNuS_XX3_65,
+BBXX_PlUs_XX_66,
+BB_67,
+BBXX_MiNuS_XX_68,
+B_ST_69,
+BXX_PlUs_XX_70,
+B_71,
+BXX_MiNuS_XX_72,
+CCC_73,
+CC_74,
+C_75,
+C_ST_76,
+D_77,
+D_ST_78,
+NR_79,
+NR_ST_80
+}
+
+type CountryOfRisk_List constructed from { 
+Argentina_91,
+Australia_94,
+Austria_95,
+Bahamas_97,
+Barbados_100,
+Belgium_102,
+Bermuda_105,
+Brazil_112,
+British_Virgin_Is_114,
+Bulgaria_116,
+C_I_Guernsey_119,
+Canada_122,
+Cayman_Is_124,
+Chile_127,
+China_128,
+Croatia_137,
+Cyprus_140,
+Czech_Rep_141,
+Denmark_145,
+Estonia_156,
+Finland_165,
+France_166,
+Germany_174,
+Greece_178,
+Hong_Kong_190,
+Hungary_191,
+Iceland_192,
+India_193,
+Indonesia_194,
+Ireland_199,
+Israel_201,
+Italy_202,
+Japan_204,
+Jersey_205,
+Kuwait_210,
+Latvia_213,
+Lithuania_219,
+Luxembourg_220,
+Malaysia_225,
+Malta_228,
+Mexico_234,
+Netherlands_248,
+New_Zealand_251,
+Norway_258,
+Philippines_270,
+Poland_272,
+Portugal_273,
+Rep_of_Korea_276,
+Romania_281,
+Russia_282,
+Singapore_297,
+Slovakia_298,
+Slovenia_299,
+South_Africa_302,
+Spain_303,
+Sweden_314,
+Switzerland_315,
+Taiwan_317,
+Thailand_319,
+Turkey_326,
+United_Arab_Emirates_333,
+United_Kingdom_334,
+United_States_336,
+Venezuela_343
+}
+
+AppliedRating_10(Security): AppliedRating_List
+CountryOfRisk_20(Security): CountryOfRisk_List
+Eligible(Security)
+NonEligible(Security)
+}
+
+
+theory T: V {
+{
+!s[Security]: Eligible(s)    <- CountryOfRisk_20(s) in {Argentina_91;Austria_95}  & ~NonEligible(s).
+!s[Security]: NonEligible(s) <- CountryOfRisk_20(s) in {Argentina_91}.
+}
+}
+procedure main() {
+        print(to_DMN(T, goal_string = "Eligible(BE001)"))
+    }

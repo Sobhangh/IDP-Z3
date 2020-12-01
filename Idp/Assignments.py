@@ -75,6 +75,9 @@ class Assignment(object):
             post = f" -> {str(self.value)}"
         return f"{pre}{self.sentence.annotations['reading']}{post}"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __log__(self):
         return self.value
 

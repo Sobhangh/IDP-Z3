@@ -342,17 +342,20 @@ class Problem(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        qs = OrderedSet()
+        qs, defs = OrderedSet(), []
         for q in questions.values():
             if ( goal_string == q.code
             or any(s not in self.clark
                     for s in q.unknown_symbols(co_constraints=False).values())):
                         qs.append(q)
+            else:
+                defs.append(q.co_constraint)
         questions = qs
         assert not goal_string or goal_string in [a.code for a in questions], \
             f"Internal error"
 
-        known = And([ass.translate() for ass in self.assignments.values()
+        known = And([d.translate() for d in defs]
+                    + [ass.translate() for ass in self.assignments.values()
                         if ass.status != Status.UNKNOWN]
                     + [q.reified()==q.translate()
                         for q in questions
