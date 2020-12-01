@@ -83,6 +83,54 @@ The code is organised by steps, not by classes:  for example, all methods to sub
 
 Substitute() modifies the AST "in place".  Because the results of step 1-2 are cached, steps 4-7 are done after copying the AST (custom `copy()`).  
 
+The following diagram is a simplification of the full call tree, focusing on the transformations of the AST.
+
+```mermaid
+graph TD
+    IDP-Z3 --> idpparser
+    IDP-Z3 --> execute
+    
+    execute -.-> symbolic_propagate;
+    symbolic_propagate --> implicants;
+    execute -.-> simplify;
+    simplify --> substitute;
+    substitute --> update_exprs;
+    execute -.-> formula
+    formula --> interpret
+    
+    idpparser --> Annotate
+    Annotate --> expand_quantifiers;
+    Annotate --> interpret;
+    Annotate --> rename_args;
+    
+    instantiate_definition --> instantiate;
+    instantiate_definition --> expand_quantifiers;
+    expand_quantifiers --> instantiate;
+    interpret --> instantiate_definition
+    interpret --> update_exprs;
+    expand_quantifiers --> update_exprs;
+    
+    
+    instantiate_definition --> make;
+    update_exprs --> _change;
+    update_exprs -.-> make;
+    expand_quantifiers --> make;
+    make --> simplify1;
+    Annotate --> annotate1;
+    make --> annotate1;
+    
+    expand_quantifiers --> _change;
+
+    instantiate --> _change;
+		    rename_args --> instantiate;
+    instantiate_definition --> interpret;
+    instantiate_definition --> expand_quantifiers
+    Annotate --> make;
+    simplify1 --> update_exprs;
+    instantiate --> update_exprs;
+
+```
+
 ## Appendix: Dependencies and Licences
 The IDP-Z3 tools are published under the [GNU LGPL v3 license](https://www.gnu.org/licenses/lgpl-3.0.en.html).    
 
