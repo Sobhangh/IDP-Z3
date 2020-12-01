@@ -12,6 +12,7 @@ However, there are some specific changes and additions when using IDP-Z3 in the 
 
 .. include:: display.inc
 .. include:: vocabulary_annotations.inc
+.. include:: environment.inc
 .. include:: default_structure.inc
 
 

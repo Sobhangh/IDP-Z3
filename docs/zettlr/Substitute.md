@@ -6,21 +6,30 @@ Date: Substitute
 
 ## Call graph
 (Partial) Call graph for Idp.Substitute, Idp.Simplify modules:
+The following diagram is a simplification of the full call tree, focusing on the transformations of the AST.
 
 ```mermaid
 graph TD
+    IDP-Z3 --> idpparser
+    IDP-Z3 --> execute
+    
+    execute -.-> symbolic_propagate;
+    symbolic_propagate --> implicants;
+    execute -.-> simplify;
+    simplify --> substitute;
+    substitute --> update_exprs;
+    execute -.-> formula
+    formula --> interpret
+    
+    idpparser --> Annotate
     Annotate --> expand_quantifiers;
     Annotate --> interpret;
-    Annotate --> instantiate_definition;
     Annotate --> rename_args;
     
-    State --> full_propagate;
-    full_propagate --> propagate;
-    propagate --> substitute;
-    substitute --> update_exprs;
-    
     instantiate_definition --> instantiate;
+    instantiate_definition --> expand_quantifiers;
     expand_quantifiers --> instantiate;
+    interpret --> instantiate_definition
     interpret --> update_exprs;
     expand_quantifiers --> update_exprs;
     
@@ -38,6 +47,7 @@ graph TD
     instantiate --> _change;
 		    rename_args --> instantiate;
     instantiate_definition --> interpret;
+    instantiate_definition --> expand_quantifiers
     Annotate --> make;
     simplify1 --> update_exprs;
     instantiate --> update_exprs;

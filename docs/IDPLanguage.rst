@@ -46,7 +46,6 @@ The basic skeleton of an IDP knowledge base for the Interactive Consultant is as
 Everything between ``//`` and the end of the line is a comment.
 
 .. include:: shebang.inc
-.. include:: environment.inc
 .. include:: vocabulary.inc
 .. include:: theory.inc
 .. include:: structure.inc
