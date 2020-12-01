@@ -17,7 +17,7 @@ structure
     (optional) specify the interpretation of some predicates, functions and constants.
 
 display
-    (optional) configure the user interface of the Interactive Consultant
+    (optional) configure the user interface of the :ref:`interactive_consultant`.
 
 main
     (optional) executable procedure in the context of the knowledge base
@@ -50,7 +50,6 @@ Everything between ``//`` and the end of the line is a comment.
 .. include:: vocabulary.inc
 .. include:: theory.inc
 .. include:: structure.inc
-.. include:: display.inc
 .. include:: main.inc
 .. include:: IDP3.inc
 .. include:: summary.inc

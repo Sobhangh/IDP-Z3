@@ -15,36 +15,35 @@ vocabulary {
     
     
     ECost(t_epoxy): t_cost
-    _Min_Cost: real
-    _Max_Cost: real
-    [Slider: (_Min_Cost, _Max_Cost): (0.2, 1)]
+    Min_Cost: real
+    Max_Cost: real
+    [Slider: (Min_Cost, Max_Cost): (0.2, 1)]
     Cost: t_cost
 
-    _Min_Storage_T: real
-    _Max_Storage_T: real
+    Min_Storage_T: real
+    Max_Storage_T: real
 
     ELowest_Storage_T(t_epoxy): t_safe_low_storage_t
     EHighest_Storage_T(t_epoxy): t_safe_high_storage_t 
-    [Slider: (_Min_Storage_T, ): (-25, 25)]
+    [Slider: (Min_Storage_T, ): (-25, 25)]
     Safe_Low_Storage_T: t_safe_low_storage_t
-    [Slider: ( , _Max_Storage_T): (-25, 25)]
+    [Slider: ( , Max_Storage_T): (-25, 25)]
     Safe_High_Storage_T: t_safe_high_storage_t 
     
 
 
 }
 
-
 theory {
     KnownCost <=> ECost(Epoxy) ~= -1. // Default t_cost is -1.
-    KnownCost => _Min_Cost =< ECost(Epoxy) =< _Max_Cost.
+    KnownCost => Min_Cost =< ECost(Epoxy) =< Max_Cost.
     Cost = ECost(Epoxy).  
 
     KnownLowStorageT <=> ELowest_Storage_T(Epoxy) ~= -900. 
     KnownHighStorageT <=> EHighest_Storage_T(Epoxy) ~= -900.
 
-    ELowest_Storage_T(Epoxy) =< _Min_Storage_T =< EHighest_Storage_T(Epoxy).
-    EHighest_Storage_T(Epoxy) >= _Max_Storage_T >= ELowest_Storage_T(Epoxy).
+    ELowest_Storage_T(Epoxy) =< Min_Storage_T =< EHighest_Storage_T(Epoxy).
+    EHighest_Storage_T(Epoxy) >= Max_Storage_T >= ELowest_Storage_T(Epoxy).
     Safe_Low_Storage_T = ELowest_Storage_T(Epoxy).
     Safe_High_Storage_T = EHighest_Storage_T(Epoxy).
 }
@@ -56,6 +55,13 @@ structure {
 
 }
  
+structure default {
+    Max_Storage_T = {23} // room temperature
+}
+
+display {
+    hide(`Max_Storage_T, `Min_Storage_T).
+}
 
 -- meta -------------------------------------
 {'optionalPropagation': False,
@@ -90,15 +96,39 @@ structure {
               'type': 'function',
               'view': 'normal'},
              {'environmental': False,
+              'idpname': 'Min_Cost',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'Max_Cost',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
               'idpname': 'Cost',
               'priority': 'core',
               'showOptimize': True,
               'slider': {'lower_bound': '0.2',
-                         'lower_symbol': '_Min_Cost',
+                         'lower_symbol': 'Min_Cost',
                          'upper_bound': '1',
-                         'upper_symbol': '_Max_Cost'},
+                         'upper_symbol': 'Max_Cost'},
               'type': 'function',
               'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'Min_Storage_T',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'hidden'},
+             {'environmental': False,
+              'idpname': 'Max_Storage_T',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'hidden'},
              {'environmental': False,
               'idpname': 'ELowest_Storage_T',
               'priority': 'core',
@@ -116,7 +146,7 @@ structure {
               'priority': 'core',
               'showOptimize': True,
               'slider': {'lower_bound': '-25',
-                         'lower_symbol': '_Min_Storage_T',
+                         'lower_symbol': 'Min_Storage_T',
                          'upper_bound': '25',
                          'upper_symbol': ''},
               'type': 'function',
@@ -128,7 +158,7 @@ structure {
               'slider': {'lower_bound': '-25',
                          'lower_symbol': ' ',
                          'upper_bound': '25',
-                         'upper_symbol': '_Max_Storage_T'},
+                         'upper_symbol': 'Max_Storage_T'},
               'type': 'function',
               'view': 'normal'}],
  'title': 'Interactive Consultant'}
@@ -185,16 +215,16 @@ structure {
                                                 'status': 'CONSEQUENCE',
                                                 'typ': 'Bool',
                                                 'value': False},
-           'EHighest_Storage_T(Epoxy) ≥ _Max_Storage_T ≥ ELowest_Storage_T(Epoxy)': {'environmental': False,
-                                                                                     'is_assignment': False,
-                                                                                     'normal': False,
-                                                                                     'reading': 'EHighest_Storage_T(Epoxy) '
-                                                                                                '≥ _Max_Storage_T ≥ '
-                                                                                                'ELowest_Storage_T(Epoxy)',
-                                                                                     'relevant': True,
-                                                                                     'status': 'UNIVERSAL',
-                                                                                     'typ': 'Bool',
-                                                                                     'value': True},
+           'EHighest_Storage_T(Epoxy) ≥ Max_Storage_T ≥ ELowest_Storage_T(Epoxy)': {'environmental': False,
+                                                                                    'is_assignment': False,
+                                                                                    'normal': False,
+                                                                                    'reading': 'EHighest_Storage_T(Epoxy) '
+                                                                                               '≥ Max_Storage_T ≥ '
+                                                                                               'ELowest_Storage_T(Epoxy)',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNIVERSAL',
+                                                                                    'typ': 'Bool',
+                                                                                    'value': True},
            'ELowest_Storage_T(Epoxy) = -900': {'environmental': False,
                                                'is_assignment': False,
                                                'normal': False,
@@ -203,16 +233,16 @@ structure {
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': False},
-           'ELowest_Storage_T(Epoxy) ≤ _Min_Storage_T ≤ EHighest_Storage_T(Epoxy)': {'environmental': False,
-                                                                                     'is_assignment': False,
-                                                                                     'normal': False,
-                                                                                     'reading': 'ELowest_Storage_T(Epoxy) '
-                                                                                                '≤ _Min_Storage_T ≤ '
-                                                                                                'EHighest_Storage_T(Epoxy)',
-                                                                                     'relevant': True,
-                                                                                     'status': 'UNIVERSAL',
-                                                                                     'typ': 'Bool',
-                                                                                     'value': True},
+           'ELowest_Storage_T(Epoxy) ≤ Min_Storage_T ≤ EHighest_Storage_T(Epoxy)': {'environmental': False,
+                                                                                    'is_assignment': False,
+                                                                                    'normal': False,
+                                                                                    'reading': 'ELowest_Storage_T(Epoxy) '
+                                                                                               '≤ Min_Storage_T ≤ '
+                                                                                               'EHighest_Storage_T(Epoxy)',
+                                                                                    'relevant': True,
+                                                                                    'status': 'UNIVERSAL',
+                                                                                    'typ': 'Bool',
+                                                                                    'value': True},
            'Epoxy': {'environmental': False,
                      'is_assignment': True,
                      'normal': True,
@@ -243,13 +273,6 @@ structure {
                           'relevant': True,
                           'status': 'UNKNOWN',
                           'typ': 'Bool'},
-           '_Min_Cost ≤ ECost(Epoxy) ≤ _Max_Cost': {'environmental': False,
-                                                    'is_assignment': False,
-                                                    'normal': False,
-                                                    'reading': '_Min_Cost ≤ ECost(Epoxy) ≤ _Max_Cost',
-                                                    'relevant': True,
-                                                    'status': 'UNKNOWN',
-                                                    'typ': 'Bool'},
            '__rank': 1},
  'KnownCost': {'KnownCost': {'environmental': False,
                              'is_assignment': False,
@@ -277,6 +300,49 @@ structure {
                                            'typ': 'Bool',
                                            'value': True},
                       '__rank': 1},
+ 'Max_Cost': {'Max_Cost': {'environmental': False,
+                           'is_assignment': True,
+                           'normal': True,
+                           'reading': 'Max_Cost',
+                           'relevant': True,
+                           'status': 'UNKNOWN',
+                           'typ': 'Real',
+                           'value': ''},
+              '__rank': 1},
+ 'Max_Storage_T': {'Max_Storage_T': {'environmental': False,
+                                     'is_assignment': True,
+                                     'normal': True,
+                                     'reading': 'Max_Storage_T',
+                                     'relevant': True,
+                                     'status': 'UNKNOWN',
+                                     'typ': 'Real',
+                                     'value': ''},
+                   '__rank': 1},
+ 'Min_Cost': {'Min_Cost': {'environmental': False,
+                           'is_assignment': True,
+                           'normal': True,
+                           'reading': 'Min_Cost',
+                           'relevant': True,
+                           'status': 'UNKNOWN',
+                           'typ': 'Real',
+                           'value': ''},
+              'Min_Cost ≤ ECost(Epoxy) ≤ Max_Cost': {'environmental': False,
+                                                     'is_assignment': False,
+                                                     'normal': False,
+                                                     'reading': 'Min_Cost ≤ ECost(Epoxy) ≤ Max_Cost',
+                                                     'relevant': True,
+                                                     'status': 'UNKNOWN',
+                                                     'typ': 'Bool'},
+              '__rank': 1},
+ 'Min_Storage_T': {'Min_Storage_T': {'environmental': False,
+                                     'is_assignment': True,
+                                     'normal': True,
+                                     'reading': 'Min_Storage_T',
+                                     'relevant': True,
+                                     'status': 'UNKNOWN',
+                                     'typ': 'Real',
+                                     'value': ''},
+                   '__rank': 1},
  'Safe_High_Storage_T': {'Safe_High_Storage_T': {'environmental': False,
                                                  'is_assignment': True,
                                                  'normal': True,

@@ -92,6 +92,9 @@ class Problem(object):
             assert False, "Cannot add to Problem"
         return self
 
+    def add_assignments(self, assignments):
+        self.assignments.extend(assignments)
+
     def _interpret(self):
         """ re-apply the definitions to the constraints """
         if self.questions is None:

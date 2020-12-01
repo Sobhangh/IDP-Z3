@@ -72,21 +72,37 @@ class State(Problem):
             self.add(idp.theories['decision'])
             if 'decision' in idp.structures: 
                 self.add(idp.structures['decision'])
-        else: # take the first theory and structure
+        else:  # take the first theory and structure
             self.environment = None
             self.add(next(iter(idp.theories.values())))
-            if len(idp.structures)==1:
-                self.add(next(iter(idp.structures.values())))
+            for name, struct in idp.structures.items():
+                if name != "default":
+                    self.add(struct)
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
 
     def add_given(self, jsonstr: str):
+        """
+        Add the assignments that the user gave through the interface.
+        These are in the form of a json string.
+        This method also sets the values of the default structure.
+
+        :arg jsonstr: the user's assignment in json
+        :returns: the state with the jsonstr added
+        :rtype: State
+        """
         out = self.copy()
 
+        # Set the values of the default structure.
+        if 'default' in out.idp.structures:
+            out.add(out.idp.structures['default'])
+
+        # Set all the given values. This can override the default values.
         if out.environment is not None:
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
+
         return out._finalize()
 
     def _finalize(self):
@@ -97,7 +113,6 @@ class State(Problem):
             self._formula = None
         self.propagate(tag=Status.CONSEQUENCE, extended=True)
         self.simplify()
-        
         get_relevant_subtences(self)
         return self
 
@@ -111,12 +126,18 @@ class State(Problem):
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
         )
-        
 
 def make_state(idp: Idp, jsonstr: str) -> State:
-    """ manages the cache of States """
+    """
+    Manages the cache of States.
+
+    :arg idp: IDP code parsed into Idp object
+    :arg jsonstr: the user's assignments in json
+    :returns: the complete state of the system
+    :rtype: State
+    """
     if (idp, jsonstr) in State.cache:
-        return State.cache[(idp, jsonstr)]
+        return State.cache[(idp, jsonstr)].add_given(jsonstr)
 
     if (idp, "{}") not in State.cache:
         State.cache[(idp, "{}")] = State(idp)
@@ -125,5 +146,6 @@ def make_state(idp: Idp, jsonstr: str) -> State:
     if 100<len(State.cache):
         # remove oldest entry, to prevent memory overflow
         State.cache = {k:v for k,v in list(State.cache.items())[1:]}
-    State.cache[(idp, jsonstr)] = state
+    if jsonstr != "{}":
+        State.cache[(idp, jsonstr)] = state
     return state

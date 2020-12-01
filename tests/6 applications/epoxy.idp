@@ -13,36 +13,35 @@ vocabulary {
     
     
     ECost(t_epoxy): t_cost
-    _Min_Cost: real
-    _Max_Cost: real
-    [Slider: (_Min_Cost, _Max_Cost): (0.2, 1)]
+    Min_Cost: real
+    Max_Cost: real
+    [Slider: (Min_Cost, Max_Cost): (0.2, 1)]
     Cost: t_cost
 
-    _Min_Storage_T: real
-    _Max_Storage_T: real
+    Min_Storage_T: real
+    Max_Storage_T: real
 
     ELowest_Storage_T(t_epoxy): t_safe_low_storage_t
     EHighest_Storage_T(t_epoxy): t_safe_high_storage_t 
-    [Slider: (_Min_Storage_T, ): (-25, 25)]
+    [Slider: (Min_Storage_T, ): (-25, 25)]
     Safe_Low_Storage_T: t_safe_low_storage_t
-    [Slider: ( , _Max_Storage_T): (-25, 25)]
+    [Slider: ( , Max_Storage_T): (-25, 25)]
     Safe_High_Storage_T: t_safe_high_storage_t 
     
 
 
 }
 
-
 theory {
     KnownCost <=> ECost(Epoxy) ~= -1. // Default t_cost is -1.
-    KnownCost => _Min_Cost =< ECost(Epoxy) =< _Max_Cost.
+    KnownCost => Min_Cost =< ECost(Epoxy) =< Max_Cost.
     Cost = ECost(Epoxy).  
 
     KnownLowStorageT <=> ELowest_Storage_T(Epoxy) ~= -900. 
     KnownHighStorageT <=> EHighest_Storage_T(Epoxy) ~= -900.
 
-    ELowest_Storage_T(Epoxy) =< _Min_Storage_T =< EHighest_Storage_T(Epoxy).
-    EHighest_Storage_T(Epoxy) >= _Max_Storage_T >= ELowest_Storage_T(Epoxy).
+    ELowest_Storage_T(Epoxy) =< Min_Storage_T =< EHighest_Storage_T(Epoxy).
+    EHighest_Storage_T(Epoxy) >= Max_Storage_T >= ELowest_Storage_T(Epoxy).
     Safe_Low_Storage_T = ELowest_Storage_T(Epoxy).
     Safe_High_Storage_T = EHighest_Storage_T(Epoxy).
 }
@@ -54,3 +53,10 @@ structure {
 
 }
  
+structure default {
+    Max_Storage_T = {23} // room temperature
+}
+
+display {
+    hide(`Max_Storage_T, `Min_Storage_T).
+}

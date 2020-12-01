@@ -61,7 +61,7 @@ def metaJSON(state):
 
     # Create the output dictionary.
     out = {"title": "Interactive Consultant", "symbols": symbols,
-        "optionalPropagation": optionalPropagation}
+           "optionalPropagation": optionalPropagation}
     return out
 
 
@@ -71,33 +71,67 @@ def metaJSON(state):
 # see docs/zettlr/REST.md
 #################
 
-def decode_UTF(json_str):
-    return (json_str
-        .replace("\\\\u2264", "≤").replace("\\\\u2265", "≥").replace("\\\\u2260", "≠")
-        .replace("\\\\u2200", "∀").replace("\\\\u2203", "∃")
-        .replace("\\\\u21d2", "⇒").replace("\\\\u21d4", "⇔").replace("\\\\u21d0", "⇐")
-        .replace("\\\\u2228", "∨").replace("\\\\u2227", "∧").replace("\\\\u00ac", "¬"))
+
+def decode_UTF(json_str: str) -> str:
+    """ Convert all Python unicode to actual unicode characters.
+
+    :arg json_str: the string to convert
+    :returns: the converted string
+    :rtype: str
+    """
+    decode_dict = {'\\\\u2264': '≤', '\\\\u2265': '≥', '\\\\u2260': '≠',
+                   '\\\\u2200': "∀", '\\\\u2203': '∃', '\\\\u21d2': '⇒',
+                   '\\\\u21d4': '⇔', '\\\\u21d0': '⇐', '\\\\u2228': '∨',
+                   '\\\\u2227': '∧', '\\\\u00ac': '¬'}
+    for source, char in decode_dict.items():
+        json_str = json_str.replace(source, char)
+    return json_str
+
 
 def json_to_literals(state, jsonstr: str):
-    """ returns Assignments corresponding to jsonstr """
+    """ Parse a json string and create assignments in a state accordingly.
+    This function can also overwrite assignments that have already been set as
+    a default assignment, effectively overriding the default.
+
+    :arg state: a State object containing the concepts that appear in the json
+    :arg jsonstr: the user's assignments in json
+    :returns: the assignments
+    :rtype: Idp.Assignments
+    """
     out = Assignments()
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
         for symbol in json_data:
+            # If no value was given for a symbol, we still check to see if we
+            # need to unset a default value.
+            if (len(json_data[symbol]) == 0 or
+               (symbol in json_data[symbol] and
+               json_data[symbol][symbol]['value'] == '')):
+                # Override default value.
+                if symbol in state.assignments:
+                    state.assignments[symbol].value = None
+                    state.assignments[symbol].status = Status.UNKNOWN
+                continue
+
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
+                    if state.assignments[atom].value == '':
+                        if json_atom["value"] != '':
+                            value = str_to_IDP(idp_atom, str(json_atom["value"]))
+                            if json_atom["typ"] == "Bool":
+                                state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
+                            elif json_atom["value"]:
+                                state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
 
-                    if json_atom["value"]!='':
+                                idp_atom = AComparison.make('=', [idp_atom, value])
+                                state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
+                            out[atom] = state.assignments[atom]
+                    else:
+                        # Override default value.
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        if json_atom["typ"] == "Bool":
-                            state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
-                        elif json_atom["value"]:
-                            state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
-
-                            idp_atom = AComparison.make('=', [idp_atom, value])
-                            state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
-                        out[atom] = state.assignments[atom]
+                        state.assignments[atom].value = value
+                        state.assignments[atom].status = Status.GIVEN
     return out
 
 
@@ -150,7 +184,7 @@ class Output(object):
                     s.setdefault(key, symbol)
                     s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
 
-        # remove symbols that are in a structure
+        # Remove symbols that are in a structure.
         for key, l in state.assignments.items():
             if l.status == Status.STRUCTURE:
                 symb = self.state.assignments[key].symbol_decl
@@ -159,13 +193,14 @@ class Output(object):
                     for k, data in self.m[symb.name].items():
                         if k in self.state.assignments:
                             for s in self.state.assignments[k].symbols:
-                                if (not s.name.startswith('_') 
-                                and s.name in self.m
-                                and s.name != symb.name):
+                                if (not s.name.startswith('_')
+                                   and s.name in self.m
+                                   and s.name != symb.name):
                                     self.state.assignments[k].symbol_decl = s
                                     self.m[s.name][k] = data
                                     break
-                    self.m[symb.name] = {}       
+                    self.m[symb.name] = {}
+
 
     def fill(self, state):
         for key, l in state.assignments.items():
@@ -181,7 +216,7 @@ class Output(object):
                 s = self.m.setdefault(symb.name, {})
                 if key in s:
                     if value is not None:
-                        if type(value)==NumberConstant:
+                        if type(value) == NumberConstant:
                             s[key]["value"] = str(eval(str(value).replace('?', '')))
                         else:
                             s[key]["value"] = True if value.same_as(TRUE) else \

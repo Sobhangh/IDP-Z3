@@ -109,21 +109,22 @@ class Assignments(dict):
         for v in more.values():
             self.assert_(v.sentence, v.value, v.status, v.relevant)
 
-    def assert_(self, sentence: Expression, 
-                      value: Optional[Expression], 
-                      status: Optional[Status],
-                      relevant: Optional[bool]):
+    def assert_(self, sentence: Expression,
+                value: Optional[Expression],
+                status: Optional[Status],
+                relevant: Optional[bool]):
         sentence = sentence.copy()
         if sentence.code in self:
-            out = copy(self[sentence.code]) # needed for explain of irrelevant symbols
+            out = copy(self[sentence.code])  # needed for explain of irrelevant symbols
             # don't overwrite
-            if out.value is None: 
+            if out.value is None:
                 out.value = value
             else:
-                pass # issue #35 error will be caught later by Z3
-            if out.status   is None or out.status == Status.UNKNOWN: 
-                out.status   = status
-            if relevant is not None: out.relevant = relevant
+                pass  # issue #35 error will be caught later by Z3
+            if out.status is None or out.status == Status.UNKNOWN:
+                out.status = status
+            if relevant is not None:
+                out.relevant = relevant
         else:
             out = Assignment(sentence, value, status, relevant)
             if out.symbol_decl:

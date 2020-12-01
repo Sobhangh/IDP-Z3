@@ -28,6 +28,7 @@ import sys
 import threading
 import time
 import traceback
+import re
 from typing import Dict
 
 # import pyximport; 
@@ -107,6 +108,10 @@ def generate():
         f = open(file, "r")
         theory = f.read()
         output = generateZ3(theory)
+
+        # Remove absolute paths from output.
+        output = re.sub(r'(/.*)(?=Idp/)', '', output)
+        output = re.sub(r'(/.*)(?=consultant/)', '', output)
 
         z3 = file.replace(".z3", ".z3z3")
         z3 = z3.replace(".idp", ".z3")
