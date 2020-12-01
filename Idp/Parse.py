@@ -651,7 +651,8 @@ class Structure(object):
 
 class SymbolInterpretation(object):
     """
-    Pythonic representation of an IDP symbol, such as a predicate or function.
+    Pythonic representation of the interpretation of an IDP symbol, 
+    such as a predicate or function.
     This object is first created by the textx parser, after which it is
     annotated by the structure.
     """
