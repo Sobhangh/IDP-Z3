@@ -238,7 +238,7 @@ def explain(state, question):
 def abstract(state, given_json):
     timeout, max_rows = 20, 50
     max_time = time.time()+timeout
-    models = state.DMN(goal_string="", timeout=timeout, max_rows=max_rows, 
+    models = state.decision_table(goal_string="", timeout=timeout, max_rows=max_rows, 
                         first_hit=False)
 
     # detect symbols with assignments

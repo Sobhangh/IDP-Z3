@@ -324,7 +324,7 @@ class Problem(object):
                 return [] # the conjuncts are not satisfiable given 'knonw
         return [c for c in conjuncts if c.sentence != TRUE]
 
-    def DMN(self, goal_string="", timeout=20, max_rows=50, first_hit=True):
+    def decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True):
         if goal_string:
             # add (goal | ~goal) to self.constraints
             assert goal_string in self.assignments, (

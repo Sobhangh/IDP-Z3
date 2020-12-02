@@ -9,7 +9,6 @@
 ∧ Not E
 ⇒ ?
 
-  
 ⇒ Eligible(BE001)
 
-end of DMN table
+end of decision table
