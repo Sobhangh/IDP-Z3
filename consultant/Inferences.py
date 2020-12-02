@@ -250,15 +250,12 @@ def abstract(state, given_json):
     #create empty table
     table = {}
     for ass in state.assignments.values():
-        if (ass.symbol_decl.name in active_symbol
+        if (ass.symbol_decl is not None
+        and ass.symbol_decl.name in active_symbol
         and ass.symbol_decl.name not in table):
             table[ass.symbol_decl.name] = [ [] for i in range(len(models))]
     # fill table
     for i, model in enumerate(models):
-        print((f"  " 
-              f"{f'{NEWL}∧ '.join(str(a) for a in model[:-1])}"
-              f"{NEWL}⇒ " f"{str(model[-1])}"))
-        print()
         for ass in model:
             table[ass.symbol_decl.name][i].append(ass)
 

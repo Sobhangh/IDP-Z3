@@ -95,11 +95,9 @@ class Assignment(object):
         return out
 
     def negate(self):
-        if self.sentence.type == 'bool':
-            self.value = FALSE if self.value.same_as(TRUE) else TRUE
-        else:
-            assert False, "Internal error"
-        return self
+        assert self.sentence.type == 'bool', "Internal error"
+        value = FALSE if self.value.same_as(TRUE) else TRUE
+        return Assignment(self.sentence, value, self.status, self.relevant)
 
     def translate(self) -> BoolRef:
         return self.formula().translate()

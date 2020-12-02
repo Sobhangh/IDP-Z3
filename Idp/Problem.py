@@ -298,18 +298,12 @@ class Problem(object):
                 self.constraints = new_constraints
         return self
 
-    def _generalize(self, structure, known=None, z3_formula=None):
-        """finds a subset of structure 
-            that is a minimum satisfying assignment for self
+    def _generalize(self, structure, known, z3_formula=None):
+        """finds a subset of 'structure 
+            that is a minimum satisfying assignment for self, given 'known
 
-        Invariants 'known and 'z3_formula can be supplied for better performance
+        Invariant 'z3_formula can be supplied for better performance
         """
-        if known is None:
-            known = And([ass.translate() for ass in self.assignments.values()
-                            if ass.status != Status.UNKNOWN]
-                        + [ass.sentence.reified()==ass.sentence.translate()
-                            for ass in self.assignments.values()
-                            if ass.sentence.is_reified()])
         if z3_formula is None:
             z3_formula = self.formula().translate()
 
@@ -321,9 +315,13 @@ class Problem(object):
                     for j, l in enumerate(conjuncts) 
                     if j != i])
             solver = Solver()
-            solver.add(And(known, conjunction2, Not(z3_formula)))
-            if solver.check() == unsat:
-                conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+            solver.add(And(known, conjunction2))
+            if solver.check() == sat:
+                solver.add(Not(z3_formula))
+                if solver.check() == unsat:
+                    conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+            else:
+                return [] # the conjuncts are not satisfiable given 'knonw
         return [c for c in conjuncts if c.sentence != TRUE]
 
     def DMN(self, goal_string="", timeout=20, max_rows=50, first_hit=True):
@@ -348,7 +346,7 @@ class Problem(object):
             or any(s not in self.clark
                     for s in q.unknown_symbols(co_constraints=False).values())):
                         qs.append(q)
-            else:
+            elif q.co_constraint is not None:
                 defs.append(q.co_constraint)
         questions = qs
         assert not goal_string or goal_string in [a.code for a in questions], \
@@ -404,37 +402,55 @@ class Problem(object):
             solver.add(modelZ3)
 
             count +=1
-        
+
         models.sort(key=len)
         
         if first_hit:
             theory = self.formula().translate()
-            models1 = []
+            models1, last_model = [], []
             while models:
+                if len(models) == 1:
+                    models1.append(models[0])
+                    break
                 model = models.pop(0).copy()
-                possible = And(known, Not(And([l.translate() for l in model[:-1]
-                                                if l.value is not None])))
-                solver = Solver()
-                solver.add(theory)
-                solver.add(possible)
-                if solver.check() == sat or len(models)==0:
-                    known = possible
-                    models1.append(model)
-                    models = [self._generalize(m, known, theory) for m in models]
-                    models.sort(key=len)
-            models = models1
+                condition = [l.translate() for l in model
+                                if l.value is not None
+                                and l.sentence.code != goal_string]
+                if condition:
+                    possible = Not(And(condition))
+                    solver = Solver()
+                    solver.add(theory)
+                    solver.add(known)
+                    solver.add(possible)
+                    if solver.check() == sat:
+                        known = And(known, possible)
+                        models1.append(model)
+                        models = [self._generalize(m, known, theory) 
+                            for m in models]
+                        models = [m for m in models if m] # ignore impossible models
+                        models.sort(key=len)
+                    # else: unsatisfiable --> ignore
+                else: # when not deterministic
+                    last_model = [model]
+            models = models1 + last_model
             # post process if last model is just the goal
             # replace [p=>~G, G] by [~p=>G]
-            if len(models[-1]) == 1:
-                hypothesis, consequent = [], models.pop()[0].negate()
+            if (len(models[-1]) == 1
+            and models[-1][0].sentence.code == goal_string):
+                last_model = models.pop()
+                hypothesis, consequent = [], last_model[0].negate()
                 while models:
                     last = models.pop()
-                    if len(last)==2 and last[-1].value.same_as(consequent.value):
+                    if (len(last) == 2 
+                    and last[-1].sentence.code == goal_string
+                    and last[-1].value.same_as(consequent.value)):
                         hypothesis.append(last[0].negate())
                     else:
                         models.append(last)
                         break
-                models.append(hypothesis + [consequent.negate()])
+                models.append(hypothesis + [last_model[0]])
+                if hypothesis: 
+                    models.append([consequent])
         return models
 
 def str_to_IDP(atom, val_string):

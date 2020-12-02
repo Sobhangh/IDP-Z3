@@ -59,8 +59,8 @@ def to_DMN(theories, structures=None, goal_string="",
     problem = Problem.make(theories, structures)
     for model in problem.DMN(goal_string, timeout, max_rows, first_hit):
         yield((f"  " 
-              f"{f'{NEWL}∧ '.join(str(a) for a in model[:-1])}"
-              f"{NEWL}⇒ " f"{str(model[-1])}"))
+              f"{f'{NEWL}∧ '.join(str(a) for a in model if a.sentence.code != goal_string)}"
+              f"{NEWL}⇒ " f"{str(model[-1]) if model[-1].sentence.code == goal_string else '?'}"))
         yield("")
     yield "end of DMN table"
 
