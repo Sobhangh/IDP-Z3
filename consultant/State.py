@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+Management of the State of problem solving with the Interactive Consultant.
+"""
+
 from copy import copy
 from debugWithYamlLog import NEWL, indented
 

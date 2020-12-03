@@ -1,6 +1,6 @@
 .. _idp_run:
 
-Idp.Run reference
+Idp.Run
 =========================
 
 .. automodule:: Idp.Run

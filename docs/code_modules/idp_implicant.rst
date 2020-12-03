@@ -1,7 +1,7 @@
 .. _idp_implicant:
 
-Idp.Implicant reference
+Idp.Propagate
 =========================
 
-.. automodule:: Idp.Implicant
+.. automodule:: Idp.Propagate
    :members:

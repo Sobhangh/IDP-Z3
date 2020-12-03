@@ -1,6 +1,6 @@
 .. _idp_utils
 
-Idp.utils reference
+Idp.utils
 =========================
 
 .. automodule:: Idp.utils

@@ -19,7 +19,14 @@
 
 """
 
-Adds substitute, expand_quantifiers and interpret to logic expression classes
+Methods to 
+
+* substitute a constant by its value in an expression
+* replace symbols interpreted in a structure by their interpretation
+* instantiate an expresion, i.e. replace a variable by a value
+* expand quantifiers
+
+This module monkey-patches the Expression class and sub-classes.
 
 ( see docs/zettlr/Substitute.md )
 
@@ -248,7 +255,7 @@ def substitute(self, e0, e1, assignments, todo=None):
         Log(f"definition:")
         new_branch = self.co_constraint.substitute(e0, e1, assignments, todo)
         if todo is not None:
-            todo.extend(new_branch.implicants(assignments))
+            todo.extend(new_branch.symbolic_propagate(assignments))
             
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)

@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+
+Classes to parse and annotate an IDP-Z3 theory.
+
+"""
+
 from copy import copy
 from enum import Enum
 import itertools

@@ -1,6 +1,6 @@
 .. _idp_substitute:
 
-Idp.Substitute reference
+Idp.Substitute
 =========================
 
 .. automodule:: Idp.Substitute

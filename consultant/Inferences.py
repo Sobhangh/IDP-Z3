@@ -15,6 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+This module contains the logic for inferences 
+that are specific for the Interactive Consultant.
+"""
+
 from itertools import chain
 import re
 import time

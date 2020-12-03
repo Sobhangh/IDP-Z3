@@ -1,6 +1,6 @@
 .. _consultant_rest:
 
-consultant.rest reference
+consultant.rest
 =========================
 
 .. automodule:: consultant.rest

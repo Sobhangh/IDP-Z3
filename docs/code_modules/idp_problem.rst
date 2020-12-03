@@ -1,6 +1,6 @@
 .. _idp_problem:
 
-Idp.Problem reference
+Idp.Problem
 =========================
 
 .. automodule:: Idp.Problem

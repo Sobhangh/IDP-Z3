@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+This module implements the IDP-Z3 web server
+"""
+
 with_png = False
 
 from contextlib import redirect_stdout

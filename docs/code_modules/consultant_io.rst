@@ -1,6 +1,6 @@
 .. _consultant_io:
 
-consultant.IO reference
+consultant.IO
 =======================
 
 .. automodule:: consultant.IO

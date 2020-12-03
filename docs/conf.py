@@ -13,8 +13,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-# sys.path.insert(0, os.path.abspath('../consultant/'))
-# sys.path.insert(0, os.path.abspath('../Idp/'))
+sys.path.insert(0, os.path.abspath('../consultant/'))
+sys.path.insert(0, os.path.abspath('../Idp/'))
 
 
 # -- Project information -----------------------------------------------------
@@ -33,6 +33,7 @@ extensions = [
         "sphinx.ext.autodoc",
         "sphinx.ext.doctest",
         "sphinx.ext.viewcode",
+        "sphinx.ext.napoleon"
 ]
 
 # Add any paths that contain templates here, relative to this directory.

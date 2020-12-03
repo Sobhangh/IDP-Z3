@@ -17,9 +17,10 @@
 
 """
 
-Adds simplify to logic expression classes
+Methods to simplify a logic expression.
 
-( see docs/zettlr/Substitute.md )
+This module monkey-patches the Expression class and sub-classes.
+
 
 """
 

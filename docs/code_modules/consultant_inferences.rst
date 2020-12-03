@@ -1,6 +1,6 @@
 .. _consultant_inferences:
 
-consultant.Inferences reference
+consultant.Inferences
 ===============================
 
 .. automodule:: consultant.Inferences

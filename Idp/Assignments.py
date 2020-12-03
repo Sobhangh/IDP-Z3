@@ -18,8 +18,12 @@
 
 """
 
-Classes to represent assignments of values to expressions
+Classes to store assignments of values to questions, i.e.,
 
+* to predicates and functions applied to arguments, 
+* to comparisons, 
+* to outermost quantified expressions
+A value is a rigid term.
 """
 
 from copy import copy
@@ -32,6 +36,7 @@ from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
 from .Parse import *
 
 class Status(Enum):
+    """Describes how the value of a question was obtained"""
     UNKNOWN     = auto()
     GIVEN       = auto()
     ENV_UNIV    = auto()
@@ -42,6 +47,19 @@ class Status(Enum):
     STRUCTURE   = auto()
 
 class Assignment(object):
+    """Represent the assignment of a value to a question.
+
+    Also contains a reference to the symbol under which it should be displayed.
+
+    Attributes:
+        sentence ([Expression]): the question to be assigned a value
+
+        value ([Expression, optional]): a rigid term
+
+        status ([Status]): qualifies how the value was obtained
+
+        relevant ([bool]): states whether the sentence is relevant
+    """
     def __init__(self, sentence: Expression, value: Optional[Expression], 
                        status: Status, relevant:bool=False):
         self.sentence = sentence
@@ -94,6 +112,7 @@ class Assignment(object):
         return self.formula().translate()
 
 class Assignments(dict):
+    """Contains a set of Assignment"""
     def __init__(self,*arg,**kw):
         super(Assignments, self).__init__(*arg, **kw)
         self.symbols = {} # { decl.name: decl }

@@ -17,10 +17,11 @@
 
 """
 
-Computes the implicants of an expression, 
-i.e., the sub-expressions that must be true (or false) for the expression to be true
+Computes the consequences of an expression, 
+i.e., the sub-expressions that are necessarily true (or false) 
+if the expression is true (or false)
 
-
+This module monkey-patches the Expression class and sub-classes.
 """
 
 from typing import List, Tuple
@@ -36,46 +37,45 @@ def _not(truth):
 
 # class Expression ############################################################
 
-def implicants(self, assignments, truth=TRUE):
-    " returns the implicants of self=truth that are in assignments "
+def symbolic_propagate(self, assignments, truth=TRUE):
     if self.value is not None: 
         return []
     out = [(self, truth)] if self.code in assignments else []
     if self.simpler is not None: 
-        out = self.simpler.implicants(assignments, truth) + out
+        out = self.simpler.symbolic_propagate(assignments, truth) + out
         return out
     out = self.implicants1(assignments, truth) + out
     return out
-Expression.implicants = implicants
+Expression.symbolic_propagate = symbolic_propagate
 
 def implicants1(self, assignments, truth):
-    " returns the list of implicants of self (default implementation) "
+    " returns the list of symbolic_propagate of self (default implementation) "
     return []
 Expression.implicants1 = implicants1
 
 
 # class Constructor ############################################################
 
-def implicants(self, assignments, truth=TRUE): # dead code
+def symbolic_propagate(self, assignments, truth=TRUE): # dead code
     return [] # true or false
-Constructor.implicants = implicants
+Constructor.symbolic_propagate = symbolic_propagate
 
 
 # class AQuantification ############################################################
 
-def implicants(self, assignments, truth=TRUE):
+def symbolic_propagate(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
     if self.vars == []: # expanded
-        return self.sub_exprs[0].implicants(assignments, truth) + out
+        return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
     return out
-AQuantification.implicants = implicants
+AQuantification.symbolic_propagate = symbolic_propagate
 
 
 # class ADisjunction ############################################################
 
 def implicants1(self, assignments, truth=TRUE):
     if truth.same_as(FALSE):
-        return sum( (e.implicants(assignments, truth) for e in self.sub_exprs), [])
+        return sum( (e.symbolic_propagate(assignments, truth) for e in self.sub_exprs), [])
     return []
 ADisjunction.implicants1 = implicants1
 
@@ -84,7 +84,7 @@ ADisjunction.implicants1 = implicants1
 
 def implicants1(self, assignments, truth=TRUE):
     if truth.same_as(TRUE):
-        return sum( (e.implicants(assignments, truth) for e in self.sub_exprs), [])
+        return sum( (e.symbolic_propagate(assignments, truth) for e in self.sub_exprs), [])
     return []
 AConjunction.implicants1 = implicants1
 
@@ -93,7 +93,7 @@ AConjunction.implicants1 = implicants1
 
 def implicants1(self, assignments, truth=TRUE):
     return ( [] if self.operator != '¬' else
-        self.sub_exprs[0].implicants(assignments, _not(truth)) )
+        self.sub_exprs[0].symbolic_propagate(assignments, _not(truth)) )
 AUnary.implicants1 = implicants1
 
 
@@ -114,10 +114,24 @@ AComparison.implicants1 = implicants1
 
 # class Brackets ############################################################
 
-def implicants(self, assignments, truth=TRUE):
+def symbolic_propagate(self, assignments, truth=TRUE):
+    """returns the consequences of `self=truth` that are in assignments.
+
+    The consequences are obtained by symbolic processing (no calls to Z3).
+
+    Args:
+        assignments ([Assignments]):
+            The set of questions to chose from. Their value is ignored.
+
+        truth ([type], optional):
+            The truth value of the expression `self`. Defaults to TRUE.
+
+    Returns:
+        A list of pairs (Expression, bool), descring the literals that are implicant
+    """
     out = [(self, truth)] if self.code in assignments else []
-    return self.sub_exprs[0].implicants(assignments, truth) + out
-Brackets.implicants = implicants
+    return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
+Brackets.symbolic_propagate = symbolic_propagate
 
 
 

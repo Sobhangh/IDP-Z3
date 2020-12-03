@@ -19,7 +19,7 @@
 
 Classes to represent logic expressions.
 
-(They are monkey patched by Substitute.py and Implicant.py)
+(They are monkey-patched by other modules)
 
 """
 
@@ -45,6 +45,60 @@ class DSLException(Exception):
         return self.message
 
 class Expression(object):
+    """The abstract class of AST nodes representing (sub-)expressions.
+
+    Attributes:
+        code ([string]): 
+            Textual representation of the expression.  Often used as a key.
+
+            It is generated from the sub-tree.
+            Some tree transformation change it (e.g., instantiate), others don't.
+        
+        sub_exprs ([List[Expression]]):
+            The children of the AST node.
+            
+            The list may be reduced by simplification.
+
+        type ([string]):
+            The name of the type of the expression, e.g., `bool`
+
+        co_constraint ([Optional[Expression]]):
+            A constraint attached to the node.
+
+            For example, the co_constraint of `square(length(top()))` is
+            `square(length(top())) = length(top())*length(top()).`, 
+            assuming `square` is appropriately defined.
+
+            The co_constraint of a defined symbol applied to arguments 
+            is the instantiation of the definition for those arguments.
+            This is useful for definitions over infinite domains, 
+            as well as to compute relevant questions.
+        
+        simpler ([[Expression], optional]):
+            A simpler, equivalent expression.
+
+            Equivalence is computed in the context of the theory and structure.
+            Simplifying an expression is useful for efficiency 
+            and to compute relevant questions
+
+        value ([Optional[Expression]]):
+            A rigid term equivalent to the expression, obtained by transformation.
+
+            Equivalence is computed in the context of the theory and structure.
+
+        annotations ([Dict]): 
+            The set of annotations given by the expert in the IDP source code.
+
+            `annotations['reading']` is the annotation 
+            giving the intended meaning of the expression (in English).
+
+        original ([Expression]):
+            The original expression, before transformation
+
+        fresh_vars ([Set(string)]):
+            The set of names of the variables in the expression
+
+    """
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code', 'annotations', 'original',
         'str', 'fresh_vars', 'type', '_reified', 'is_type_constraint_for', 'co_constraint',
         'normal', 'questions', 'relevant' )
@@ -54,7 +108,6 @@ class Expression(object):
         # .sub_exprs : list of Expression, to be translated to Z3
         self.simpler = None               # a simplified version of the expression, or None
         self.value = None                 # a python value (bool, int, float, string) or None
-        self.status = None                # explains how the value was found
 
         # .code uniquely identifies an expression, irrespective of its value
         self.code = sys.intern(str(self)) # normalized idp code, before transformations
