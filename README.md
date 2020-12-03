@@ -53,4 +53,4 @@ There is also a testing pipeline available, which can be used by running `poetry
 
 # Deploy
 
-See the instructions [here](https://gitlab.com/krr/IDP-Z3/-/wikis/Deployment-guide).
+See the instructions [here](https://gitlab.com/krr/IDP-Z3/-/wikis/Development-and-deployment-guide).
