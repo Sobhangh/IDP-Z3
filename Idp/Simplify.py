@@ -1,21 +1,19 @@
-"""
-    Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
-
-    This file is part of Interactive_Consultant.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""
+# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+#
+# This file is part of Interactive_Consultant.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
@@ -122,11 +120,13 @@ def update_exprs(self, new_exprs):
     elif exprs0.same_as(TRUE): # (true => p) is p
         exprs1 = next(new_exprs)
         simpler = exprs1
-    elif (exprs1 :=  next(new_exprs)).same_as(TRUE): # (p => true) is true
-        exprs0 = exprs0 if self.sub_exprs[0].same_as(TRUE) else TRUE
-        value = TRUE
-    elif exprs1.same_as(FALSE): # (p => false) is ~p
-        simpler = AUnary.make('¬', exprs0)
+    else:
+        exprs1 = next(new_exprs)
+        if exprs1.same_as(TRUE): # (p => true) is true
+            exprs0 = exprs0 if self.sub_exprs[0].same_as(TRUE) else TRUE
+            value = TRUE
+        elif exprs1.same_as(FALSE): # (p => false) is ~p
+            simpler = AUnary.make('¬', exprs0)
     return self._change(value=value, simpler=simpler, sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
 
