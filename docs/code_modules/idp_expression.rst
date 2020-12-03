@@ -5,5 +5,4 @@ Idp.Expression
 
 .. automodule:: Idp.Expression
    :members:
-   :undoc-members:
    :show-inheritance:
