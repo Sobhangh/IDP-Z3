@@ -1,1 +1,9 @@
-sphinx==3.1.1
+click==7.0
+flask
+flask_restful
+flask_cors
+gunicorn
+pycallgraph2
+pyyaml
+textx
+z3-solver
