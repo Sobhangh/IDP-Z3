@@ -17,7 +17,6 @@
 
 """
 
-Classes to represent logic expressions.
 
 (They are monkey-patched by other modules)
 
@@ -41,22 +40,24 @@ from .utils import mergeDicts, unquote, OrderedSet
 class DSLException(Exception):
     def __init__(self, message):
         self.message = message
+
     def __str__(self):
         return self.message
+
 
 class Expression(object):
     """The abstract class of AST nodes representing (sub-)expressions.
 
     Attributes:
-        code ([string]): 
+        code ([string]):
             Textual representation of the expression.  Often used as a key.
 
             It is generated from the sub-tree.
             Some tree transformation change it (e.g., instantiate), others don't.
-        
+
         sub_exprs ([List[Expression]]):
             The children of the AST node.
-            
+
             The list may be reduced by simplification.
 
         type ([string]):
@@ -66,19 +67,19 @@ class Expression(object):
             A constraint attached to the node.
 
             For example, the co_constraint of `square(length(top()))` is
-            `square(length(top())) = length(top())*length(top()).`, 
+            `square(length(top())) = length(top())*length(top()).`,
             assuming `square` is appropriately defined.
 
-            The co_constraint of a defined symbol applied to arguments 
+            The co_constraint of a defined symbol applied to arguments
             is the instantiation of the definition for those arguments.
-            This is useful for definitions over infinite domains, 
+            This is useful for definitions over infinite domains,
             as well as to compute relevant questions.
-        
+
         simpler ([[Expression], optional]):
             A simpler, equivalent expression.
 
             Equivalence is computed in the context of the theory and structure.
-            Simplifying an expression is useful for efficiency 
+            Simplifying an expression is useful for efficiency
             and to compute relevant questions.
 
         value ([Optional[Expression]]):
@@ -86,10 +87,10 @@ class Expression(object):
 
             Equivalence is computed in the context of the theory and structure.
 
-        annotations ([Dict]): 
+        annotations ([Dict]):
             The set of annotations given by the expert in the IDP source code.
 
-            `annotations['reading']` is the annotation 
+            `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
         original ([Expression]):
@@ -188,14 +189,14 @@ class Expression(object):
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
-        """collects the questions in self.  
+        """collects the questions in self.
 
-        'questions is an OrderedSet of Expression
+        `questions` is an OrderedSet of Expression
         Questions are the terms and the simplest sub-formula that can be evaluated.
-        'collect uses the simplified version of the expression.
+        `collect` uses the simplified version of the expression.
 
         all_=False : ignore expanded formulas
-                 and AppliedSymbol interpreted in a structure
+        and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
         default implementation for Constructor, IfExpr, AUnary, Fresh_Variable, Number_constant, Brackets
@@ -211,8 +212,8 @@ class Expression(object):
 
     def unknown_symbols(self, co_constraints=True):
         """ returns the list of symbol declarations in self, ignoring type constraints
-        
-        returns Dict[name, Declaration] 
+
+        returns Dict[name, Declaration]
         """
         if self.is_type_constraint_for is not None: # ignore type constraints
             return {}
@@ -222,9 +223,10 @@ class Expression(object):
         return out
 
     def co_constraints(self, co_constraints):
-        """ collects the constraints attached to AST nodes, e.g. instantiated definitions 
-        
-        'co_constraints is an OrderedSet of Expression
+        """ collects the constraints attached to AST nodes, e.g. instantiated
+        definitions
+
+        `co_constraints is an OrderedSet of Expression
         """
         if self.co_constraint is not None:
             co_constraints.append(self.co_constraint)
