@@ -34,7 +34,7 @@ class Problem(object):
     Attributes:
         constraints ([OrderedSet]): a set of assertions.
 
-        assignments ([Assignment]): the set of assignments
+        assignments ([Assignment]): the set of assignments.
             The assignments are updated by the different steps of the problem resolution.
 
         clark ([dict[SymbolDeclaration, Rule]]): 
@@ -46,11 +46,11 @@ class Problem(object):
         interpretations ([dict[string, SymbolInterpretation]]):
             A mapping of enumerated symbols to their interpretation.
 
-        _formula ([Expression]): the logic formula that represents the problem
+        _formula ([Expression]): the logic formula that represents the problem.
 
         questions ([OrderedSet]): the set of questions in the problem.
             Questions include predicates and functions applied to arguments, 
-            comparisons, and variable-free quantified expressions
+            comparisons, and variable-free quantified expressions.
 
         co_constraints ([OrderedSet]): the set of co_constraints in the problem.
     """

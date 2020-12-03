@@ -60,7 +60,7 @@ class Expression(object):
             The list may be reduced by simplification.
 
         type ([string]):
-            The name of the type of the expression, e.g., `bool`
+            The name of the type of the expression, e.g., `bool`.
 
         co_constraint ([Optional[Expression]]):
             A constraint attached to the node.
@@ -79,7 +79,7 @@ class Expression(object):
 
             Equivalence is computed in the context of the theory and structure.
             Simplifying an expression is useful for efficiency 
-            and to compute relevant questions
+            and to compute relevant questions.
 
         value ([Optional[Expression]]):
             A rigid term equivalent to the expression, obtained by transformation.
@@ -93,10 +93,10 @@ class Expression(object):
             giving the intended meaning of the expression (in English).
 
         original ([Expression]):
-            The original expression, before transformation
+            The original expression, before transformation.
 
         fresh_vars ([Set(string)]):
-            The set of names of the variables in the expression
+            The set of names of the variables in the expression.
 
     """
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code', 'annotations', 'original',

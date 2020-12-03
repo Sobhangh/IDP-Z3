@@ -18,12 +18,8 @@
 
 """
 
-Classes to store assignments of values to questions, i.e.,
+Classes to store assignments of values to questions
 
-* to predicates and functions applied to arguments, 
-* to comparisons, 
-* to outermost quantified expressions
-A value is a rigid term.
 """
 
 from copy import copy
@@ -48,8 +44,15 @@ class Status(Enum):
 
 class Assignment(object):
     """Represent the assignment of a value to a question.
+    Questions can be:
+    
+    * predicates and functions applied to arguments, 
+    * comparisons, 
+    * outermost quantified expressions
 
-    Also contains a reference to the symbol under which it should be displayed.
+    A value is a rigid term.
+
+    An assignment also has a reference to the symbol under which it should be displayed.
 
     Attributes:
         sentence ([Expression]): the question to be assigned a value
@@ -59,6 +62,8 @@ class Assignment(object):
         status ([Status]): qualifies how the value was obtained
 
         relevant ([bool]): states whether the sentence is relevant
+
+        symbol_decl ([SymbolDeclaration]): declaration of the symbol under which it should be displayed.
     """
     def __init__(self, sentence: Expression, value: Optional[Expression], 
                        status: Status, relevant:bool=False):
