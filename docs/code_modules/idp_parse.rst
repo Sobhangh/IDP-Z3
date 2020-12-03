@@ -1,6 +1,6 @@
 .. _idp_parse:
 
-Idp.Parse reference
+Idp.Parse
 =========================
 
 .. automodule:: Idp.Parse

@@ -17,7 +17,7 @@
 
 """
 
-Class to represent a collection of theory and structure blocks
+Class to represent a collection of theory and structure blocks.
 
 """
 
@@ -29,7 +29,31 @@ from .Expression import TRUE, FALSE, Variable, AppliedSymbol
 from .Parse import *
 
 class Problem(object):
-    """ A collection of theory and structure blocks """
+    """A collection of theory and structure blocks.
+
+    Attributes:
+        constraints ([OrderedSet]): a set of assertions.
+
+        assignments ([Assignment]): the set of assignments.
+            The assignments are updated by the different steps of the problem resolution.
+
+        clark ([dict[SymbolDeclaration, Rule]]): 
+            A mapping of defined symbol to the rule that defines it.
+
+        def_constraints ([dict[SymbolDeclaration], Expression]): 
+            A mapping of defined symbol to the whole-domain constraint equivalent to its definition.
+
+        interpretations ([dict[string, SymbolInterpretation]]):
+            A mapping of enumerated symbols to their interpretation.
+
+        _formula ([Expression]): the logic formula that represents the problem.
+
+        questions ([OrderedSet]): the set of questions in the problem.
+            Questions include predicates and functions applied to arguments, 
+            comparisons, and variable-free quantified expressions.
+
+        co_constraints ([OrderedSet]): the set of co_constraints in the problem.
+    """
     def __init__(self, *blocks):
         self.clark = {} # {Declaration: Rule}
         self.constraints = OrderedSet()
@@ -219,7 +243,7 @@ class Problem(object):
             consequences = []
             new_constraint = c.substitute(TRUE, TRUE, 
                 self.assignments, consequences)
-            consequences.extend(new_constraint.implicants(self.assignments))
+            consequences.extend(new_constraint.symbolic_propagate(self.assignments))
             if consequences:
                 for sentence, value in consequences:
                     self.assignments.assert_(sentence, value, tag, False)

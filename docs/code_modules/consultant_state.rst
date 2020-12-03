@@ -1,6 +1,6 @@
 .. _consultant_state:
 
-consultant.State reference
+consultant.State
 ==========================
 
 .. automodule:: consultant.State

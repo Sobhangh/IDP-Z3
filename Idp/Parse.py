@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+
+Classes to parse and annotate an IDP-Z3 theory.
+
+"""
+
 from copy import copy
 from enum import Enum
 import itertools
@@ -272,6 +278,40 @@ class RangeDeclaration(object):
 
 
 class SymbolDeclaration(object):
+    """An entry in the vocabulary, declaring a symbol.
+
+    Attributes:
+        annotations : the annotations given by the expert.
+
+            `annotations['reading']` is the annotation 
+            giving the intended meaning of the expression (in English).
+
+        name ([string]): the identifier of the symbol
+
+        sorts ([List[Sort]]): the types of the arguments
+
+        out : the type of the symbol
+
+        type ([string]): the name of the type of the symbol
+
+        arity ([int]): the number of arguments
+
+        function ([bool]): `True` if the symbol is a function
+
+        domain ([List]): the list of possible tuples of arguments
+
+        instances ([Dict[string, Expression]]): 
+            a mapping from the code of a symbol applied to a tuple of arguments,
+            to its parsed AST
+
+        range ([List[Expression]]): the list of possible values
+
+        typeConstraints ([List[Expression]]): 
+            the type constraint on the ranges of the symbol 
+            applied to each possible tuple of arguments
+        
+    """
+
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
         self.name = sys.intern(kwargs.pop('name').name)  # a string, not a Symbol
@@ -287,7 +327,7 @@ class SymbolDeclaration(object):
         self.typeConstraints = []
         self.translated = None
 
-        self.type = None  # a declaration object
+        self.type = None  # a string
         self.domain = None  # all possible arguments
         self.range = None  # all possible values
         self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'

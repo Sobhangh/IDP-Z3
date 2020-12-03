@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+    Various utilities (in particular, OrderedSet)
+"""
+
 from collections import ChainMap, Iterable
 import itertools
 import time

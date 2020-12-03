@@ -1,7 +1,8 @@
 .. _idp_expression:
 
-Idp.Expression reference
+Idp.Expression
 =========================
 
 .. automodule:: Idp.Expression
    :members:
+   :show-inheritance:

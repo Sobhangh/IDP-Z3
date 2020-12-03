@@ -1,6 +1,6 @@
 .. _idp_assignments:
 
-Idp.Assignments reference
+Idp.Assignments
 =========================
 
 .. automodule:: Idp.Assignments

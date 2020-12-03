@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+This module contains code to create and analyze messages to/from the web client.
+"""
+
 import ast
 import sys
 from typing import Optional, Dict

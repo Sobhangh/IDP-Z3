@@ -1,6 +1,6 @@
 .. _idp_simplify:
 
-Idp.Simplify reference
+Idp.Simplify
 =========================
 
 .. automodule:: Idp.Simplify
