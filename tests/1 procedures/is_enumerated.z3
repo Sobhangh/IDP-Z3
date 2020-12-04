@@ -63,10 +63,10 @@ T3, S
 Traceback (most recent call last):
   File "test.py", line 56, in generateZ3
     idp.execute()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 89, in execute
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 90, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 12, in <module>
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 69, in myprint
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 70, in myprint
     for i, xi in enumerate(x):
   File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 49, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)

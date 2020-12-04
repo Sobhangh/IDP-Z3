@@ -162,7 +162,7 @@ theory T:V {
         !s: Eligible(s) <- Issuer(s) in {BRITISHCOLUMBIA; TORONTO; MANITOBA;
             NEWBRUNsELEC; NEWBRUNSWICK; NEWFOUNDLAND; NOVASCOTIA; ONTARIO;
             PRINCEEDWARDISLD; ALBERTA; QUEBEC ; SASKATCHEWAN} &
-         AssetSubClass(s) ~= ABS.
+         HasRating(s) =< 77 & AssetSubClass(s) ~= ABS.
     }
 }
 

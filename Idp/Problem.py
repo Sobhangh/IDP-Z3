@@ -298,33 +298,60 @@ class Problem(object):
                 self.constraints = new_constraints
         return self
 
-    def _generalize(self, structure, known, z3_formula=None):
-        """finds a subset of 'structure 
-            that is a minimum satisfying assignment for self, given 'known
+    def _generalize(self, conjuncts, known, z3_formula=None):
+        """finds a subset of `conjuncts`
+            that is still a minimum satisfying assignment for `self`, given `known`.
 
-        Invariant 'z3_formula can be supplied for better performance
+        Args:
+            conjuncts (List[Assignment]): a list of assignments
+                The last element of conjuncts is the goal or TRUE
+            known: a z3 formula describing what is known (e.g. reification axioms)
+            z3_formula: the z3 formula of the problem.  
+                Can be supplied for better performance
+
+        Returns:
+            [List[Assignment]]: A subset of `conjuncts`
+                that is a minimum satisfying assignment for `self`, given `known`
         """
         if z3_formula is None:
             z3_formula = self.formula().translate()
 
-        conjuncts = ( structure if not isinstance(structure, Problem) else
-                      [ass for ass in structure.assignments.values()
-                        if ass.status == Status.UNKNOWN] )
-        for i, c in (list(enumerate(conjuncts))): # optional: reverse the list
-            conjunction2 = And([l.translate() 
-                    for j, l in enumerate(conjuncts) 
-                    if j != i])
-            solver = Solver()
-            solver.add(And(known, conjunction2))
-            if solver.check() == sat:
-                solver.add(Not(z3_formula))
+        conditions, goal = conjuncts[:-1], conjuncts[-1]
+        # verify satisfiability
+        solver = Solver()
+        z3_conditions = And([l.translate() for l in conditions])
+        solver.add(And(z3_formula, known, z3_conditions))
+        if solver.check() != sat:
+            return []
+        else:
+            for i, c in (list(enumerate(conditions))): # optional: reverse the list
+                conditions_i = And([l.translate()
+                        for j, l in enumerate(conditions) 
+                        if j != i])
+                hypothesis = And(z3_formula, known, conditions_i)
+                solver = Solver()
+                if goal.sentence == TRUE or goal.value is None:  # find an abstract model
+                    # z3_formula & known & conditions => conditions_i is always true
+                    solver.add(Not(Implies(And(known, conditions_i), z3_conditions)))
+                else:# decision table
+                    # z3_formula & known & conditions => goal is always true
+                    solver.add(Not(Implies(hypothesis, goal.translate())))
                 if solver.check() == unsat:
-                    conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-            else:
-                return [] # the conjuncts are not satisfiable given 'knonw
-        return [c for c in conjuncts if c.sentence != TRUE]
+                    conditions[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+            return [c for c in conditions if c.sentence != TRUE]+[goal]
 
     def decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True):
+        """returns a decision table for `goal_string`, given `self`.
+
+        Args:
+            goal_string (str, optional): the last column of the table.
+            timeout (int, optional): maximum duration in seconds. Defaults to 20.
+            max_rows (int, optional): maximum number of rows. Defaults to 50.
+            first_hit (bool, optional): requested hit-policy. Defaults to True.
+
+        Returns:
+            list(list(Assignment)): the non-empty cells of the decision table
+        """
         if goal_string:
             # add (goal | ~goal) to self.constraints
             assert goal_string in self.assignments, (
@@ -340,20 +367,17 @@ class Problem(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        qs, defs = OrderedSet(), []
+        qs = OrderedSet()
         for q in questions.values():
             if ( goal_string == q.code
             or any(s not in self.clark
                     for s in q.unknown_symbols(co_constraints=False).values())):
                         qs.append(q)
-            elif q.co_constraint is not None:
-                defs.append(q.co_constraint)
         questions = qs
         assert not goal_string or goal_string in [a.code for a in questions], \
             f"Internal error"
 
-        known = And([d.translate() for d in defs]
-                    + [ass.translate() for ass in self.assignments.values()
+        known = And([ass.translate() for ass in self.assignments.values()
                         if ass.status != Status.UNKNOWN]
                     + [q.reified()==q.translate()
                         for q in questions
@@ -382,16 +406,15 @@ class Problem(object):
                     elif val1 == False:
                         ass = Assignment(atom, FALSE, Status.UNKNOWN)
                     else:
-                        ass = None
-                    if ass is not None:
-                        if atom.code == goal_string:
-                            goal = ass
-                        else:
-                            assignments.append(ass)
+                        ass = Assignment(atom, None, Status.UNKNOWN)
+                    if atom.code == goal_string:
+                        goal = ass
+                    elif ass.value is not None:
+                        assignments.append(ass)
             # start with negations !
-            # assignments.sort(key=lambda l: (l.value==FALSE, str(l.sentence)))
-            if goal is not None:
-                assignments.append(goal)
+            assignments.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
+            assignments.append(goal if goal_string else
+                                Assignment(TRUE, TRUE, Status.UNKNOWN))
 
             assignments = self._generalize(assignments, known, theory)
             models.append(assignments)
@@ -407,6 +430,10 @@ class Problem(object):
         
         if first_hit:
             theory = self.formula().translate()
+            solver = Solver()
+            solver.add(theory)
+            solver.check()
+            known2 = known
             models1, last_model = [], []
             while models:
                 if len(models) == 1:
@@ -417,17 +444,20 @@ class Problem(object):
                                 if l.value is not None
                                 and l.sentence.code != goal_string]
                 if condition:
+                    solver.push()
                     possible = Not(And(condition))
-                    solver = Solver()
-                    solver.add(theory)
-                    solver.add(known)
+                    solver.add(known2)
                     solver.add(possible)
-                    if solver.check() == sat:
-                        known = And(known, possible)
+                    result = solver.check()
+                    solver.pop()
+                    if result == sat:
+                        known2 = And(known2, possible)
                         models1.append(model)
-                        models = [self._generalize(m, known, theory) 
+                        models = [self._generalize(m, known2, theory) 
                             for m in models]
                         models = [m for m in models if m] # ignore impossible models
+                        models = list(dict([(",".join([str(c) for c in m]), m) 
+                                            for m in models]).values())
                         models.sort(key=len)
                     # else: unsatisfiable --> ignore
                 else: # when not deterministic
@@ -436,7 +466,8 @@ class Problem(object):
             # post process if last model is just the goal
             # replace [p=>~G, G] by [~p=>G]
             if (len(models[-1]) == 1
-            and models[-1][0].sentence.code == goal_string):
+            and models[-1][0].sentence.code == goal_string
+            and models[-1][0].value is not None):
                 last_model = models.pop()
                 hypothesis, consequent = [], last_model[0].negate()
                 while models:
@@ -448,7 +479,10 @@ class Problem(object):
                     else:
                         models.append(last)
                         break
-                models.append(hypothesis + [last_model[0]])
+                hypothesis.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
+                model = hypothesis + [last_model[0]]
+                model = self._generalize(model, known, theory)
+                models.append(model)
                 if hypothesis: 
                     models.append([consequent])
         return models

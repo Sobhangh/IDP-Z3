@@ -257,7 +257,8 @@ def abstract(state, given_json):
     # fill table
     for i, model in enumerate(models):
         for ass in model:
-            table[ass.symbol_decl.name][i].append(ass)
+            if ass.sentence != TRUE:
+                table[ass.symbol_decl.name][i].append(ass)
 
     # build table of models
     out = {} # {category : [Assignment]}
