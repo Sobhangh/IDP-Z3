@@ -27,7 +27,7 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or
 
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, FALSE, AConjunction, NumberConstant
-from .Parse import Structure, Theory, RangeDeclaration
+from .Parse import Structure, Theory, RangeDeclaration, str_to_IDP
 from .utils import OrderedSet, NEWL
 
 class Problem(object):
@@ -351,18 +351,5 @@ class Problem(object):
             if solver.check() == unsat:
                 conjuncts[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
         return conjuncts
-
-def str_to_IDP(atom, val_string):
-    if atom.type == 'bool':
-        assert val_string in ['True', 'False'], \
-            f"{atom.annotations['reading']} is not defined, and assumed false"
-        out = ( TRUE if val_string == 'True' else 
-               FALSE)
-    elif ( atom.type in ['real', 'int']
-    or type(atom.decl.out.decl) == RangeDeclaration): # could be a fraction
-        out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
-    else: # constructor
-        out = atom.decl.out.decl.map[val_string]
-    return out
 
 Done = True
