@@ -5,3 +5,4 @@ Idp.Parse
 
 .. automodule:: Idp.Parse
    :members:
+   :show-inheritance:

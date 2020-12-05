@@ -21,14 +21,13 @@ that are specific for the Interactive Consultant.
 """
 
 from itertools import chain
-import re
 import time
-from z3 import Solver, BoolSort, Const, Implies, And, substitute, Optimize, \
-    Not, BoolVal
+from z3 import Solver, Implies, And, Not, sat
 
-from Idp.Expression import AComparison, AUnary
-from Idp.utils import *
-from .IO import *
+from Idp.Expression import AComparison, AUnary, AppliedSymbol, TRUE, FALSE
+from Idp.Assignments import Status, Assignment
+from Idp.utils import OrderedSet
+from .IO import Output, decode_UTF
 
 
 """

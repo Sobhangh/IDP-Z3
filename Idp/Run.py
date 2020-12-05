@@ -24,9 +24,10 @@ Classes to execute the main block of an IDP program
 import types
 from z3 import Solver
 
-from .Assignments import Assignment
-from .Parse import *
-from .Problem import Problem, str_to_IDP
+from .Parse import Idp
+from .Problem import Problem
+from .Assignments import Status, Assignments
+from .utils import NEWL
 
 
 def model_check(theories, structures=None):

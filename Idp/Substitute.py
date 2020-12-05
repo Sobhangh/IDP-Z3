@@ -33,14 +33,13 @@ This module monkey-patches the Expression class and sub-classes.
 """
 
 import copy
-import sys
 
-from debugWithYamlLog import *
+from debugWithYamlLog import Log
 
-from typing import List, Tuple
 from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    ADisjunction, AConjunction,  AAggregate, AUnary, AComparison, \
-                    AppliedSymbol, Variable, NumberConstant, Fresh_Variable, TRUE
+                    ADisjunction, AConjunction,  AAggregate, AUnary, \
+                    AComparison, AppliedSymbol, Variable, NumberConstant, \
+                    Fresh_Variable, TRUE
 
 
 # class Expression ############################################################

@@ -21,15 +21,15 @@
 Classes to store assignments of values to questions
 
 """
+__all__ = ["Status", "Assignment", "Assignments"]
 
 from copy import copy
 from enum import Enum, auto
 from typing import Optional
-from z3 import Not, BoolRef
+from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
-                        AppliedSymbol
-from .Parse import *
+from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
+from .utils import NEWL
 
 class Status(Enum):
     """Describes how the value of a question was obtained"""
@@ -41,6 +41,7 @@ class Status(Enum):
     CONSEQUENCE = auto()
     EXPANDED    = auto()
     STRUCTURE   = auto()
+
 
 class Assignment(object):
     """Represent the assignment of a value to a question.
@@ -55,15 +56,15 @@ class Assignment(object):
     An assignment also has a reference to the symbol under which it should be displayed.
 
     Attributes:
-        sentence ([Expression]): the question to be assigned a value
+        sentence (Expression): the question to be assigned a value
 
-        value ([Expression, optional]): a rigid term
+        value (Expression, optional): a rigid term
 
-        status ([Status]): qualifies how the value was obtained
+        status (Status): qualifies how the value was obtained
 
-        relevant ([bool]): states whether the sentence is relevant
+        relevant (bool): states whether the sentence is relevant
 
-        symbol_decl ([SymbolDeclaration]): declaration of the symbol under which it should be displayed.
+        symbol_decl (SymbolDeclaration): declaration of the symbol under which it should be displayed.
     """
     def __init__(self, sentence: Expression, value: Optional[Expression], 
                        status: Status, relevant:bool=False):

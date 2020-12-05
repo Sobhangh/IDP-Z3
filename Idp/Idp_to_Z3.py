@@ -24,15 +24,13 @@ TODO: vocabulary
 """
 
 
-from debugWithYamlLog import Log
-from z3 import DatatypeRef, FreshConst, Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, Const, BoolSort, Q
+from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
-from typing import List, Tuple
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
-                    ARImplication, AEquivalence, AImplication, ADisjunction, AConjunction,  \
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, NumberConstant, Brackets, Arguments, \
-                    Fresh_Variable, TRUE, FALSE, ZERO, DSLException
+from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
+                    BinaryOperator, ADisjunction, AConjunction, \
+                    AComparison, AUnary, AAggregate, \
+                    AppliedSymbol, Variable, NumberConstant, Brackets, \
+                    Fresh_Variable, TRUE, DSLException
 
 
 

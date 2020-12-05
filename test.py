@@ -29,15 +29,14 @@ import threading
 import time
 import traceback
 import re
-from typing import Dict
 
 # import pyximport; 
 # pyximport.install(language_level=3)
 
 from consultant.State import State, make_state
-from consultant.IO import *
-from Idp import idpparser, SymbolDeclaration, NEWL
-from Idp.utils import start, log
+from consultant.IO import Output, metaJSON
+from Idp import idpparser
+from Idp.utils import start, log, NEWL
 
 z3lock = threading.Lock()
 

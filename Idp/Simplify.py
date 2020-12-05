@@ -24,18 +24,13 @@ This module monkey-patches the Expression class and sub-classes.
 
 """
 
-import copy
 import sys
-from z3 import RatNumRef
 
-from debugWithYamlLog import *
-
-from typing import List, Tuple
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, BinaryOperator, \
-                    AEquivalence, AImplication, ADisjunction, AConjunction,  \
-                    AComparison, ASumMinus, AMultDiv, APower, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, NumberConstant, Brackets, \
-                    Fresh_Variable, TRUE, FALSE
+from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
+                    BinaryOperator, AEquivalence, AImplication, ADisjunction, \
+                    AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
+                    AUnary, AAggregate, AppliedSymbol, Variable, \
+                    NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE
 
 
 # class Expression ############################################################

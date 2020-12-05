@@ -19,18 +19,15 @@
 Management of the State of problem solving with the Interactive Consultant.
 """
 
-from copy import copy
 from debugWithYamlLog import NEWL, indented
 
-from Idp.utils import *
 from Idp.Run import Problem
 from .IO import json_to_literals, Status
 from .Inferences import get_relevant_subtences
 
 # Types
-from Idp import Idp, SymbolDeclaration
-from Idp.Expression import Expression
-from typing import Any, Dict, List, Union, Tuple, cast
+from Idp import Idp
+from typing import Dict, List, Tuple
 
 
 class State(Problem):

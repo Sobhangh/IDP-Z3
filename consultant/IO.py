@@ -20,13 +20,10 @@ This module contains code to create and analyze messages to/from the web client.
 """
 
 import ast
-import sys
-from typing import Optional, Dict
-from z3 import sat
 
-from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant, AppliedSymbol, Variable
-from Idp.Run import Status, Assignment, Assignments, str_to_IDP
-from Idp.utils import *
+from Idp.Expression import (TRUE, FALSE, AComparison, NumberConstant)
+from Idp.Parse import str_to_IDP
+from Idp.Assignments import Assignments, Status
 
 
 def metaJSON(state):

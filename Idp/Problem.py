@@ -21,38 +21,40 @@ Class to represent a collection of theory and structure blocks.
 
 """
 
+from copy import copy
 from typing import Iterable
-from z3 import Solver, sat, unsat, unknown, Optimize
+from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or
 
-from .Assignments import Assignment, Status
-from .Expression import TRUE, FALSE, Variable, AppliedSymbol
-from .Parse import *
+from .Assignments import Status, Assignment, Assignments
+from .Expression import TRUE, FALSE, AConjunction, NumberConstant
+from .Parse import Structure, Theory, RangeDeclaration
+from .utils import OrderedSet, NEWL
 
 class Problem(object):
     """A collection of theory and structure blocks.
 
     Attributes:
-        constraints ([OrderedSet]): a set of assertions.
+        constraints (OrderedSet): a set of assertions.
 
-        assignments ([Assignment]): the set of assignments.
+        assignments (Assignment): the set of assignments.
             The assignments are updated by the different steps of the problem resolution.
 
-        clark ([dict[SymbolDeclaration, Rule]]): 
+        clark (dict[SymbolDeclaration, Rule]): 
             A mapping of defined symbol to the rule that defines it.
 
-        def_constraints ([dict[SymbolDeclaration], Expression]): 
+        def_constraints (dict[SymbolDeclaration], Expression): 
             A mapping of defined symbol to the whole-domain constraint equivalent to its definition.
 
-        interpretations ([dict[string, SymbolInterpretation]]):
+        interpretations (dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        _formula ([Expression]): the logic formula that represents the problem.
+        _formula (Expression): the logic formula that represents the problem.
 
-        questions ([OrderedSet]): the set of questions in the problem.
+        questions (OrderedSet): the set of questions in the problem.
             Questions include predicates and functions applied to arguments, 
             comparisons, and variable-free quantified expressions.
 
-        co_constraints ([OrderedSet]): the set of co_constraints in the problem.
+        co_constraints (OrderedSet): the set of co_constraints in the problem.
     """
     def __init__(self, *blocks):
         self.clark = {} # {Declaration: Rule}

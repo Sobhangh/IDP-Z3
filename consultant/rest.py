@@ -27,16 +27,15 @@ import os
 import threading
 import traceback
 
-from flask import Flask, send_from_directory, g
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
-from textx import TextXError
 
 from Idp import Idp, idpparser
 from Idp.utils import log
 from .State import make_state
-from .Inferences import *
-from .IO import *
+from .Inferences import explain, abstract
+from .IO import Output, metaJSON
 
 from typing import Dict
 

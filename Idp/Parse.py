@@ -20,6 +20,11 @@
 Classes to parse and annotate an IDP-Z3 theory.
 
 """
+__all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
+           "ConstructedTypeDeclaration", "RangeDeclaration",
+           "SymbolDeclaration", "Sort", "Symbol", "Theory", "Definition",
+           "Rule", "Structure", "Enumeration", "Tuple",
+           "Goal", "View", "Display", "Procedure", "idpparser", ]
 
 from copy import copy
 from enum import Enum
@@ -28,21 +33,33 @@ import os
 import re
 import sys
 
-from debugWithYamlLog import Log, NEWL
 from textx import metamodel_from_file
-from z3 import (IntSort, BoolSort, RealSort, Or, And, Const, ForAll, Exists,
-                Z3Exception, Sum, If, Function, FreshConst, Implies, EnumSort, BoolVal)
+from z3 import (IntSort, BoolSort, RealSort, Const, Function, EnumSort, 
+                BoolVal)
 
-from .Assignments import *
-from .Expression import (Constructor, Expression, IfExpr, AQuantification,
-                         BinaryOperator, ARImplication, AEquivalence,
+from .Assignments import Status, Assignments
+from .Expression import (Constructor, IfExpr, AQuantification,
+                         ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, Variable,
                          NumberConstant, Brackets, Arguments,
                          Fresh_Variable, TRUE, FALSE)
-from .utils import applyTo, itertools, in_list, mergeDicts, log, unquote, OrderedSet
+from .utils import (unquote, OrderedSet, NEWL)
 
+
+def str_to_IDP(atom, val_string):
+    if atom.type == 'bool':
+        assert val_string in ['True', 'False'], \
+            f"{atom.annotations['reading']} is not defined, and assumed false"
+        out = ( TRUE if val_string == 'True' else 
+               FALSE)
+    elif ( atom.type in ['real', 'int']
+    or type(atom.decl.out.decl) == RangeDeclaration): # could be a fraction
+        out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
+    else: # constructor
+        out = atom.decl.out.decl.map[val_string]
+    return out
 
 class ViewType(Enum):
     HIDDEN = "hidden"
@@ -51,6 +68,8 @@ class ViewType(Enum):
 
 
 class Idp(object):
+    """The class of AST nodes representing an IDP-Z3 program.
+    """
     def __init__(self, **kwargs):
         #log("parsing done")
         self.vocabularies = {v.name : v for v in kwargs.pop('vocabularies')}
@@ -109,6 +128,8 @@ class Annotations(object):
 
 
 class Vocabulary(object):
+    """The class of AST nodes representing a vocabulary block.
+    """
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
@@ -278,38 +299,38 @@ class RangeDeclaration(object):
 
 
 class SymbolDeclaration(object):
-    """An entry in the vocabulary, declaring a symbol.
+    """The class of AST nodes representing an entry in the vocabulary,
+    declaring a symbol.
 
     Attributes:
         annotations : the annotations given by the expert.
 
-            `annotations['reading']` is the annotation 
+            `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
-        name ([string]): the identifier of the symbol
+        name (string): the identifier of the symbol
 
-        sorts ([List[Sort]]): the types of the arguments
+        sorts (List[Sort]): the types of the arguments
 
         out : the type of the symbol
 
-        type ([string]): the name of the type of the symbol
+        type (string): the name of the type of the symbol
 
-        arity ([int]): the number of arguments
+        arity (int): the number of arguments
 
-        function ([bool]): `True` if the symbol is a function
+        function (bool): `True` if the symbol is a function
 
-        domain ([List]): the list of possible tuples of arguments
+        domain (List): the list of possible tuples of arguments
 
-        instances ([Dict[string, Expression]]): 
+        instances (Dict[string, Expression]): 
             a mapping from the code of a symbol applied to a tuple of arguments,
             to its parsed AST
 
-        range ([List[Expression]]): the list of possible values
+        range (List[Expression]): the list of possible values
 
-        typeConstraints ([List[Expression]]): 
-            the type constraint on the ranges of the symbol 
+        typeConstraints (List[Expression]): 
+            the type constraint on the ranges of the symbol
             applied to each possible tuple of arguments
-        
     """
 
     def __init__(self, **kwargs):
@@ -421,6 +442,8 @@ class Symbol(object):
 
 
 class Theory(object):
+    """ The class of AST nodes representing a theory block.
+    """
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
@@ -651,7 +674,7 @@ class Rule(object):
 
 class Structure(object):
     """
-    Pythonic representation of the IDP structure, as parsed by textx.
+    The class of AST nodes representing an structure block.
     """
     def __init__(self, **kwargs):
         """
