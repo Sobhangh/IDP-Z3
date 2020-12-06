@@ -31,12 +31,12 @@ Installation using poetry
 
 `Poetry <https://python-poetry.org/>`_ is a package manager for python.
 
-* Install `python3 <https://www.python.org/downloads/>`_ on your machine
-* Install `poetry <https://python-poetry.org/docs/#installation>`_
+* `Install python3 <https://www.python.org/downloads/>`_ on your machine
+* `Install poetry <https://python-poetry.org/docs/#installation>`_
 
     * after that, logout and login if requested, to update :code:`$PATH`
 * Use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine
-* Open a terminal in that directory 
+* Open a terminal in that directory
 * If you have several versions of python3, and want to run on a particular one, e.g., 3.9:
 
     * run :code:`poetry env use 3.9`
@@ -47,7 +47,7 @@ To launch the Interactive Consultant web server:
 
 * open a terminal in that directory and run :code:`poetry run python3 main.py`
 
-After that, you can open 
+After that, you can open
 
 * the Interactive Consultant at http://127.0.0.1:5000
 * the web IDE at http://127.0.0.1:5000/IDE
@@ -92,7 +92,7 @@ On Windows, the commands are:
    python3 main.py
 
 
-After that, you can open 
+After that, you can open
 
 * the Interactive Consultant at http://127.0.0.1:5000
 * the web IDE at http://127.0.0.1:5000/IDE

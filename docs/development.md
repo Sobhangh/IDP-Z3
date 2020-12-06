@@ -5,12 +5,14 @@ We use "[IDP enhancement proposals](https://gitlab.com/krr/IDP-Z3/-/wikis/home)"
 All developments are explicitly linked to a GitLab issue (except minor documentation changes).  It is recommended to seek feedback on issues about proposed enhancements via the [IDP-Z3 Slack channel](https://app.slack.com/client/TQ52NCU9Z/CQJNPHG5C).  We use the issue attributes to keep track of priorities and assignments.
 
 The comments on git commits follow  [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).  We never commit to the main branch (master): instead, we develop on feature branches, create a merge request when a branch is ready, and merge it to main when approved.  Each merge request is approved by a person different from the developer.  The checklist for approval include:
-* is the GitLab issue clearly identified in the description of the merge request
-* is there a test case in /tests ?
-* has `poetry run python3 test.py` regression test been run successfully ?
-* has the /docs been updated ?
-* has the CHANGELOG.md been updated ?
-* has the main branch been pulled recently (to make it up-to-date) ([never do a rebase on a shared branch !](https://www.daolf.com/posts/git-series-part-2/))
+
+- [ ] add regression tests in /tests
+- [ ] run `poetry run python3 test.py` regression tests successfully
+- [ ] update docstrings of modified methods/class; no warnings of flake8 linter in modified code
+- [ ] update /docs for end users (and developers)
+- [ ] update [CHANGELOG.md](https://keepachangelog.com/en/1.0.0/)
+- [ ] merge the master branch into this branch before final merge ([never do a rebase on a shared branch !](https://www.daolf.com/posts/git-series-part-2/))
+
 
 The [README.md](https://gitlab.com/krr/IDP-Z3/-/blob/master/README.md) file describes the shell commands used in development.
 
@@ -26,9 +28,9 @@ Profiling a highly recursive program is similarly challenging.  It is best to us
 
 The latest version of the documentation and homepage is deployed automatically after each push to GitLab. Deployment of the clients to[ Google App Engine](https://cloud.google.com/appengine/docs/flexible/python) is automated by the `./deploy.py` script.
 
-# Appendix: setting up a deployment environment
+## Appendix: setting up a deployment environment
 
-### Setup local repositories
+**Setup local repositories**
 
 1. Make sure you are a member of the krr group in GitLab, and have your ssh key in your GitLab account.
 2. Add your ssh key to the [IDP-Z3 github account](https://github.com/IDP-Z3)
@@ -40,7 +42,7 @@ git clone git@gist.github.com:5d82c61fa39e8aa23da1642a2e2b420a.git
 ```
 
 
-### Setup Google Cloud Components
+**Setup Google Cloud Components**
 
 1. Ensure you have access to the google app engine [console](https://console.cloud.google.com/home/dashboard?project=interactive-consultant) and have an activated google app engine account
 2. Install [google-cloud-sdk](https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version) through the [guide](https://cloud.google.com/sdk/docs/quickstart) or using a package manager (e.g. brew or macports for mac)
@@ -54,7 +56,7 @@ git remote add google ssh://email-address@source.developers.google.com:2022/p/in
 
 (The google cloud source is for reference only; it is not used to build the service)
 
-### Deploy new version on Google App Engine
+**Deploy new version on Google App Engine**
 
 Run `python deploy.py` (in the IDP-Z3 folder).
 It will:

@@ -16,8 +16,6 @@ sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../consultant/'))
 sys.path.insert(0, os.path.abspath('../Idp/'))
 
-exclude_patterns = ['zettlr/*.md']
-
 # -- Project information -----------------------------------------------------
 
 project = 'IDP-Z3'
@@ -38,6 +36,7 @@ extensions = [
         "sphinx.ext.doctest",
         "sphinx.ext.viewcode",
         "sphinx.ext.napoleon",
+        "sphinxcontrib.mermaid",
         "recommonmark"
 ]
 
@@ -47,7 +46,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'zettlr/*.md']
 
 
 # -- Options for HTML output -------------------------------------------------
