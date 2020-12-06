@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../consultant/'))
 sys.path.insert(0, os.path.abspath('../Idp/'))
 
+exclude_patterns = ['zettlr/*.md']
 
 # -- Project information -----------------------------------------------------
 
@@ -36,7 +37,8 @@ extensions = [
         "sphinx.ext.autodoc",
         "sphinx.ext.doctest",
         "sphinx.ext.viewcode",
-        "sphinx.ext.napoleon"
+        "sphinx.ext.napoleon",
+        "recommonmark"
 ]
 
 # Add any paths that contain templates here, relative to this directory.

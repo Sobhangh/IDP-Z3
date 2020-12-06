@@ -5,9 +5,10 @@ flask_cors
 gunicorn
 pycallgraph2
 pyyaml
+recommonmark
 textx
 sphinx-autobuild
+sphinx_bootstrap_theme
 sphinx_rtd_theme
 z3-solver
-sphinx_bootstrap_theme
 git+https://github.com/sphinx-contrib/video.git
