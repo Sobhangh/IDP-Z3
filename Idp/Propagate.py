@@ -17,8 +17,8 @@
 
 """
 
-Computes the consequences of an expression, 
-i.e., the sub-expressions that are necessarily true (or false) 
+Computes the consequences of an expression,
+i.e., the sub-expressions that are necessarily true (or false)
 if the expression is true (or false)
 
 This module monkey-patches the Expression class and sub-classes.
@@ -29,12 +29,13 @@ from typing import List, Tuple, Optional
 from Idp.Expression import Constructor, Expression, AQuantification, \
                     ADisjunction, AConjunction, \
                     AComparison, AUnary, Brackets, TRUE, FALSE
+from Idp.Assignments import Assignments
 
 
 def _not(truth):
     return FALSE if truth.same_as(TRUE) else TRUE
 
-# class Expression ############################################################
+# class Expression  ############################################################
 
 
 def symbolic_propagate(self,
@@ -55,10 +56,10 @@ def symbolic_propagate(self,
     Returns:
         A list of pairs (Expression, bool), descring the literals that are implicant
     """
-    if self.value is not None: 
+    if self.value is not None:
         return []
     out = [(self, truth)] if self.code in assignments else []
-    if self.simpler is not None: 
+    if self.simpler is not None:
         out = self.simpler.symbolic_propagate(assignments, truth) + out
         return out
     out = self.propagate1(assignments, truth) + out
@@ -76,24 +77,24 @@ def propagate1(self, assignments, truth):
 Expression.propagate1 = propagate1
 
 
-# class Constructor ############################################################
+# class Constructor  ############################################################
 
-def symbolic_propagate(self, assignments, truth=TRUE): # dead code
-    return [] # true or false
+def symbolic_propagate(self, assignments, truth=TRUE):  # dead code
+    return []  # true or false
 Constructor.symbolic_propagate = symbolic_propagate
 
 
-# class AQuantification ############################################################
+# class AQuantification  ############################################################
 
 def symbolic_propagate(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
-    if self.vars == []: # expanded
+    if self.vars == []:  # expanded
         return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
     return out
 AQuantification.symbolic_propagate = symbolic_propagate
 
 
-# class ADisjunction ############################################################
+# class ADisjunction  ############################################################
 
 def propagate1(self, assignments, truth=TRUE):
     if truth.same_as(FALSE):
@@ -102,7 +103,7 @@ def propagate1(self, assignments, truth=TRUE):
 ADisjunction.propagate1 = propagate1
 
 
-# class AConjunction ############################################################
+# class AConjunction  ############################################################
 
 def propagate1(self, assignments, truth=TRUE):
     if truth.same_as(TRUE):
@@ -111,7 +112,7 @@ def propagate1(self, assignments, truth=TRUE):
 AConjunction.propagate1 = propagate1
 
 
-# class AUnary ############################################################
+# class AUnary  ############################################################
 
 def propagate1(self, assignments, truth=TRUE):
     return ( [] if self.operator != '¬' else
@@ -119,7 +120,7 @@ def propagate1(self, assignments, truth=TRUE):
 AUnary.propagate1 = propagate1
 
 
-# class AComparison ############################################################
+# class AComparison  ############################################################
 
 def propagate1(self, assignments, truth=TRUE):
     if truth.same_as(TRUE) and len(self.sub_exprs) == 2 and self.operator == ['=']:
@@ -134,7 +135,7 @@ def propagate1(self, assignments, truth=TRUE):
 AComparison.propagate1 = propagate1
 
 
-# class Brackets ############################################################
+# class Brackets  ############################################################
 
 def symbolic_propagate(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []

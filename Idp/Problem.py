@@ -57,14 +57,14 @@ class Problem(object):
         co_constraints (OrderedSet): the set of co_constraints in the problem.
     """
     def __init__(self, *blocks):
-        self.clark = {} # {Declaration: Rule}
+        self.clark = {}  # {Declaration: Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.def_constraints = {}
         self.interpretations = {}
 
-        self._formula = None # the problem expressed in one logic formula
-        self.co_constraints = None # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
+        self._formula = None  # the problem expressed in one logic formula
+        self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
         self.questions = None
 
         for b in blocks:
@@ -96,7 +96,7 @@ class Problem(object):
         return out
 
     def add(self, block):
-        self._formula = None # need to reapply the definitions
+        self._formula = None  # need to reapply the definitions
         self.interpretations.update(block.interpretations) #TODO detect conflicts
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
@@ -170,9 +170,9 @@ class Problem(object):
                         q.reified(),
                         model_completion=complete)
                 else:
-                    val1 = None # dead code
+                    val1 = None  # dead code
                 solver.pop()
-            if val1 is not None and str(val1) != str(q.translate()): # otherwise, unknown
+            if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
                 ass.assert_(q, val, Status.EXPANDED, None)
         return ass
@@ -268,7 +268,7 @@ class Problem(object):
                 res1 = solver.check()
                 if res1 == sat:
                     val1 = solver.model().eval(q.reified())
-                    if str(val1) != str(q.reified()): # if not irrelevant
+                    if str(val1) != str(q.reified()):  # if not irrelevant
                         solver.push()
                         solver.add(Not(q.reified()==val1))
                         res2 = solver.check()
@@ -314,8 +314,8 @@ class Problem(object):
                 # simplify constraints
                 new_constraints: List[Expression] = []
                 for constraint in self.constraints:
-                    if old in constraint.questions: # for performance
-                        self._formula = None # invalidates the formula
+                    if old in constraint.questions:  # for performance
+                        self._formula = None  # invalidates the formula
                         consequences = []
                         new_constraint = constraint.substitute(old, new,
                             self.assignments, consequences)

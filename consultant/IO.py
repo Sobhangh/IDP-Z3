@@ -143,7 +143,7 @@ def json_to_literals(state, jsonstr: str):
 
 class Output(object):
     def __init__(self, state, structure={}):
-        self.m = {} # [symbol.name][atom.code][attribute name] -> attribute value
+        self.m = {}  # [symbol.name][atom.code][attribute name] -> attribute value
         self.state = state
 
         self.m[' Global'] = {}
@@ -163,12 +163,12 @@ class Output(object):
                     symbol = {"typ": typ, "value": ""  #TODO
                               , "values": [str(v) for v in symb.range]}
                 elif typ in ["real", "int"]:
-                    symbol = {"typ": typ.capitalize(), "value": ""} # default
+                    symbol = {"typ": typ.capitalize(), "value": ""}  # default
                 else:
                     assert False, "dead code"
                     symbol = None
 
-                if symb.name == key and 'reading' in symb.annotations: #inherit reading
+                if symb.name == key and 'reading' in symb.annotations:  #inherit reading
                     reading = symb.annotations['reading']
                 else:
                     reading = atom.annotations['reading']
@@ -224,5 +224,4 @@ class Output(object):
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']
-                    #s[key]["status"] = status.name # for a click on Sides=3
-
+                    #s[key]["status"] = status.name  # for a click on Sides=3

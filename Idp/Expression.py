@@ -107,6 +107,7 @@ class Expression(object):
         'normal', 'questions', 'relevant' )
 
     COUNT = 0
+
     def __init__(self):
         self.sub_exprs: List["Expression"]
         self.simpler: Optional["Expression"] = None
@@ -148,12 +149,14 @@ class Expression(object):
         if other.value   is not None: return self.same_as(other.value)
         if other.simpler is not None: return self.same_as(other.simpler)
 
-        if type(self)==Brackets or (type(self  )==AQuantification and len(self.vars) ==0):
+        if (isinstance(self, Brackets)
+            or (isinstance(self, AQuantification) and len(self.vars) == 0)):
             return self.sub_exprs[0].same_as(other)
-        if type(other)==Brackets or (type(other)==AQuantification and len(other.vars)==0):
+        if (isinstance(other, Brackets)
+            or (isinstance(other, AQuantification) and len(other.vars) == 0)):
             return self.same_as(other.sub_exprs[0])
 
-        return self.str == other.str and type(self)==type(other)
+        return self.str == other.str and type(self) == type(other)
 
     def __repr__(self): return str(self)
 
@@ -165,7 +168,7 @@ class Expression(object):
             return str(self.simpler)
         return self.__str1__()
 
-    def __log__(self): # for debugWithYamlLog
+    def __log__(self):  # for debugWithYamlLog
         return { 'class': type(self).__name__
             , 'code': self.code
             , 'str': self.str
@@ -205,7 +208,7 @@ class Expression(object):
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
 
-    def _questions(self): # for debugging
+    def _questions(self):  # for debugging
         questions = OrderedSet()
         self.collect(questions)
         return questions
@@ -215,7 +218,7 @@ class Expression(object):
 
         returns Dict[name, Declaration]
         """
-        if self.is_type_constraint_for is not None: # ignore type constraints
+        if self.is_type_constraint_for is not None:  # ignore type constraints
             return {}
         questions = OrderedSet()
         self.collect(questions, all_=True, co_constraints=co_constraints)
@@ -254,37 +257,46 @@ class Expression(object):
         # returns a dictionary {Fresh_Variable : Sort}
         return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
 
+    def __str1__(self) -> str:
+        return ''  # monkey-patched
+
+    def update_exprs(self, new_exprs) -> "Expression":
+        return self  # monkey-patched
+
+    def simplify1(self) -> "Expression":
+        return self  # monkey-patched
+
     def substitute(self,
                    e0: "Expression",
                    e1: "Expression",
                    assignments: "Assignments",
                    todo=None) -> "Expression":
-        pass  # monkey-patched
+        return self  # monkey-patched
 
     def instantiate(self,
                     e0: "Expression",
                     e1: "Expression",
                     theory: Any
                     ) -> "Expression":
-        pass  # monkey-patched
+        return self  # monkey-patched
 
     def interpret(self, theory: Any) -> "Expression":
-        pass  # monkey-patched
+        return self  # monkey-patched
 
     def expand_quantifiers(self, theory: Any) -> "Expression":
-        pass  # monkey-patched
+        return self  # monkey-patched
 
     def symbolic_propagate(self,
                            assignments: "Assignments",
                            truth: Optional["Constructor"]=None
                            ) -> List[Tuple["Expression", "Constructor"]]:
-        pass  # monkey-patched
+        return []  # monkey-patched
 
     def propagate1(self,
                    assignments: "Assignments",
                    truth: Optional["Expression"]=None
                    ) -> List[Tuple["Expression", bool]]:
-        pass  # monkey-patched
+        return []  # monkey-patched
 
     def translate(self):
         pass  # monkey-patched
@@ -297,11 +309,11 @@ class Constructor(Expression):
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
         self.sub_exprs = []
-        self.index = None # int
+        self.index = None  # int
 
         super().__init__()
         self.fresh_vars = set()
-        self.symbol = None # set only for `Symbols constructors
+        self.symbol = None  # set only for `Symbols constructors
         self.translated: Any = None
 
     def __str1__(self): return self.name
@@ -362,7 +374,7 @@ class AQuantification(Expression):
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.q_vars = {} # dict[String, Fresh_Variable]
+        self.q_vars = {}  # dict[String, Fresh_Variable]
         self.type = 'bool'
 
     @classmethod
@@ -387,7 +399,7 @@ class AQuantification(Expression):
             if s:
                 s.annotate(voc)
                 self.q_vars[v] = Fresh_Variable(v,s)
-        q_v = {**q_vars, **self.q_vars} # merge
+        q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
 
@@ -405,6 +417,7 @@ class AQuantification(Expression):
 
 
 class BinaryOperator(Expression):
+    PRECEDENDE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
 
     def __init__(self, **kwargs):
@@ -449,7 +462,7 @@ class BinaryOperator(Expression):
         if self.type is None:
             self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
                    else 'int'  if any(e.type == 'int'  for e in self.sub_exprs) \
-                   else self.sub_exprs[0].type # constructed type, without arithmetic
+                   else self.sub_exprs[0].type  # constructed type, without arithmetic
         return super().annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -552,7 +565,7 @@ class AAggregate(Expression):
         for q in self.quantees:
             self.vars.append(q.var)
             self.sorts.append(q.sort)
-        self.sub_exprs = [self.f, self.out] if self.out else [self.f] # later: expressions to be summed
+        self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
         super().__init__()
 
         self.q_vars = {}
@@ -560,7 +573,7 @@ class AAggregate(Expression):
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
         if self.aggtype != "sum" and self.out is not None:
-            raise Exception("Can't have output variable for #")
+            raise Exception("Can't have output variable for  #")
 
     def __str1__(self):
         if self.vars is not None:
@@ -587,7 +600,7 @@ class AAggregate(Expression):
             if s:
                 s.annotate(voc)
                 self.q_vars[v] = Fresh_Variable(v,s)
-        q_v = {**q_vars, **self.q_vars} # merge
+        q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
         self = self.annotate1()
@@ -654,7 +667,7 @@ class AppliedSymbol(Expression):
                     self.decl.type if self.decl else
                     None )
         out = super().annotate1()
-        if out.decl is None or out.decl.name == "`Symbols": # a symbol variable
+        if out.decl is None or out.decl.name == "`Symbols":  # a symbol variable
             out.fresh_vars.add(self.s.name)
         return out
 
@@ -715,10 +728,10 @@ class Variable(AppliedSymbol):
             return voc.symbol_decls[self.name]
         if self.name in q_vars:
             return q_vars[self.name]
-        elif self.name in voc.symbol_decls: # in symbol_decls
+        elif self.name in voc.symbol_decls:  # in symbol_decls
             self.decl = voc.symbol_decls[self.name]
             self.type = self.decl.type
-        else: pass # a quantification variable without known type yet
+        else: pass  # a quantification variable without known type yet
         return self.annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -755,7 +768,7 @@ class NumberConstant(Expression):
         self.fresh_vars = set()
 
         ops = self.number.split("/")
-        if len(ops) == 2: # possible with str_to_IDP on Z3 value
+        if len(ops) == 2:  # possible with str_to_IDP on Z3 value
             self.py_value = Fraction(self.number)
             self.translated = Q(self.py_value.numerator, self.py_value.denominator)
             self.type = 'real'
@@ -793,7 +806,7 @@ class Brackets(Expression):
             self.annotations = annotations
         elif annotations is None:
             self.annotations['reading'] = None
-        else: # Annotations instance
+        else:  # Annotations instance
             self.annotations = annotations.annotations
 
     # don't @use_value, to have parenthesis

@@ -33,7 +33,7 @@ def _default(self, obj):
     return getattr(obj.__class__, "to_json", _default.default)(obj)
 
 _default.default = JSONEncoder.default  # Save unmodified default.
-JSONEncoder.default = _default # Replace it.
+JSONEncoder.default = _default  # Replace it.
 
 
 
@@ -50,7 +50,7 @@ def unquote(s):
     return s
 
 def in_list(q, ls):
-    if not ls: return True # e.g. for int, real
+    if not ls: return True  # e.g. for int, real
     if len(ls)==1: return q == ls[0]
     return Or([q == i for i in ls])
 
@@ -78,7 +78,7 @@ def mergeDicts(l):
     # merge a list of dicts (possibly a comprehension
     return dict(ChainMap(*reversed(list(l))))
 
-# OrderedSet #############################################
+# OrderedSet  #############################################
 
 class OrderedSet(dict):
     """
@@ -94,16 +94,16 @@ class OrderedSet(dict):
 
     def __iter__(self):
         return iter(self.values()) # instead of keys()
-    
+
     def __contains__(self, expression):
         return super(OrderedSet, self).__contains__(expression.code)
-    
+
     def extend(self, more):
         for el in more:
             self.append(el)
-    
+
     # def items(self):
     #     return super(OrderedSet, self).items()
-    
+
     # def popitem(self):
     #     return super(OrderedSet, self).popitem()

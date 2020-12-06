@@ -30,7 +30,7 @@ import time
 import traceback
 import re
 
-# import pyximport; 
+# import pyximport;
 # pyximport.install(language_level=3)
 
 from consultant.State import State, make_state
@@ -89,7 +89,7 @@ def generateZ3(theory):
 
 
 def generate():
-    # optional patch Log on Idp.Substitute ####################################
+    # optional patch Log on Idp.Substitute  ####################################
 
     # for i in [Expression, AppliedSymbol, Variable, Fresh_Variable]:
     #     i.substitute = log_calls(i.substitute)
@@ -162,7 +162,7 @@ def pipeline():
                     if idp.procedures == {}:
                         state = make_state(idp, given_json)
                         generator = state.expand(max=1,complete=False, extended=True)
-                        list(generator)[0] # ignore result
+                        list(generator)[0]  # ignore result
                         out = Output(state).fill(state)
                     else:
                         # avoid files meant to raise an error

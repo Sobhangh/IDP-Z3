@@ -22,22 +22,23 @@ Management of the State of problem solving with the Interactive Consultant.
 from debugWithYamlLog import NEWL, indented
 
 from Idp.Run import Problem
+from Idp.utils import OrderedSet
 from .IO import json_to_literals, Status
 from .Inferences import get_relevant_subtences
 
 # Types
 from Idp import Idp
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 
 class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[Idp, str, List[str]], 'State'] = {}
+    cache: Dict[Tuple[Idp, str], 'State'] = {}
 
     def __init__(self, idp: Idp):
 
         # determine default vocabulary, theory, before annotating display
-        if len(idp.theories)!=1 and 'main' not in idp.procedures: # (implicit) display block
+        if len(idp.theories)!=1 and 'main' not in idp.procedures:  # (implicit) display block
             assert len(idp.vocabularies) == 2, \
                 "Maximum 2 vocabularies are allowed in Interactive Consultant"
             assert len(idp.theories)     == 2, \
@@ -57,20 +58,20 @@ class State(Problem):
         idp.view.annotate(idp)
         idp.display.annotate(idp)
         idp.display.run(idp)
-        self.idp = idp # Idp vocabulary and theory
+        self.idp = idp  # Idp vocabulary and theory
 
         super().__init__()
-        self.given = None # Assignments from the user interface
+        self.given = None  # Assignments from the user interface
 
         if len(idp.theories) == 2:
             self.environment = Problem(idp.theories['environment'])
-            if 'environment' in idp.structures: 
+            if 'environment' in idp.structures:
                 self.environment.add(idp.structures['environment'])
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
 
             self.add(self.environment)
             self.add(idp.theories['decision'])
-            if 'decision' in idp.structures: 
+            if 'decision' in idp.structures:
                 self.add(idp.structures['decision'])
         else:  # take the first theory and structure
             self.environment = None
@@ -107,7 +108,7 @@ class State(Problem):
 
     def _finalize(self):
         # propagate universals
-        if self.environment is not None: # if there is a decision vocabulary
+        if self.environment is not None:  # if there is a decision vocabulary
             self.environment.propagate(tag=Status.ENV_CONSQ, extended=True)
             self.assignments.update(self.environment.assignments)
             self._formula = None
@@ -125,7 +126,8 @@ class State(Problem):
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
-        )
+                )
+
 
 def make_state(idp: Idp, jsonstr: str) -> State:
     """
@@ -143,9 +145,9 @@ def make_state(idp: Idp, jsonstr: str) -> State:
         State.cache[(idp, "{}")] = State(idp)
     state = State.cache[(idp, "{}")].add_given(jsonstr)
 
-    if 100<len(State.cache):
+    if 100 < len(State.cache):
         # remove oldest entry, to prevent memory overflow
-        State.cache = {k:v for k,v in list(State.cache.items())[1:]}
+        State.cache = {k: v for k, v in list(State.cache.items())[1:]}
     if jsonstr != "{}":
         State.cache[(idp, jsonstr)] = state
     return state

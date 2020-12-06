@@ -80,7 +80,7 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
-idps: Dict[str, Idp] = {} # {code_string : idp}
+idps: Dict[str, Idp] = {}  # {code_string : idp}
 
 
 def idpOf(code):
@@ -211,7 +211,7 @@ class eval(Resource):
                         complete=False, extended=True)
                     out = Output(state).fill(state)
                 if method == "abstract":
-                    if args['symbol'] != "": # theory to explain ?
+                    if args['symbol'] != "":  # theory to explain ?
                         newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
                                     + "theory {\n"
                                     + args['symbol']
@@ -233,7 +233,7 @@ class eval(Resource):
                 traceback.print_exc()
                 return str(exc)
 
-class evalWithGraph(eval): # subcclass that generates call graphs
+class evalWithGraph(eval):  # subcclass that generates call graphs
     def post(self):
         args = parser.parse_args()
         method = args['method']

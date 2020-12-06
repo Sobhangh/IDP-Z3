@@ -102,7 +102,7 @@ class Assignment(object):
     def __log__(self):
         return self.value
 
-    def to_json(self) -> str: # for GUI
+    def to_json(self) -> str:  # for GUI
         return str(self)
 
     def formula(self):
@@ -122,7 +122,7 @@ class Assignments(dict):
     """Contains a set of Assignment"""
     def __init__(self,*arg,**kw):
         super(Assignments, self).__init__(*arg, **kw)
-        self.symbols = {} # { decl.name: decl }
+        self.symbols = {}  # { decl.name: decl }
         for a in self.values():
             if a.symbol_decl:
                 self.symbols[a.symbol_decl.name] = a.symbol_decl
@@ -145,7 +145,7 @@ class Assignments(dict):
             if out.value is None:
                 out.value = value
             else:
-                pass  # issue #35 error will be caught later by Z3
+                pass  # issue  #35 error will be caught later by Z3
             if out.status is None or out.status == Status.UNKNOWN:
                 out.status = status
             if relevant is not None:

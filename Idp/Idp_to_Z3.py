@@ -33,37 +33,40 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     Fresh_Variable, TRUE, DSLException
 
 
+# class Expression  ############################################################
 
-# class Expression ############################################################
-
-def translate(self): 
-    if self.value   is not None: 
+def translate(self):
+    if self.value   is not None:
         return self.value.translate()
-    if self.simpler is not None: 
+    if self.simpler is not None:
         return self.simpler.translate()
     return self.translate1()
+
+
 Expression.translate = translate
 
-# class Constructor ############################################################
 
+# class Constructor  ############################################################
 
-def translate(self): 
+def translate(self):
     return self.translated
+
+
 Constructor.translate = translate
 
 
-
-# Class IfExpr ################################################################
+# Class IfExpr  ################################################################
 
 def translate1(self):
     return If(self.sub_exprs[IfExpr.IF  ].translate()
             , self.sub_exprs[IfExpr.THEN].translate()
             , self.sub_exprs[IfExpr.ELSE].translate())
+
+
 IfExpr.translate1 = translate1
 
 
-
-# Class AQuantification #######################################################
+# Class AQuantification  #######################################################
 
 def translate1(self):
     for v in self.q_vars.values():
@@ -75,18 +78,19 @@ def translate1(self):
 
         if self.q == '∀':
             forms = And(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0: # not fully expanded !
+            if len(finalvars) > 0:  # not fully expanded !
                 forms = ForAll([v.translate() for v in finalvars], forms)
         else:
             forms = Or(forms) if 1<len(forms) else forms[0]
-            if len(finalvars) > 0: # not fully expanded !
+            if len(finalvars) > 0:  # not fully expanded !
                 forms = Exists(finalvars, forms)
         return forms
+
+
 AQuantification.translate1 = translate1
 
 
-
-# Class BinaryOperator #######################################################
+# Class BinaryOperator  #######################################################
 
 BinaryOperator.MAP = { '∧': lambda x, y: And(x, y),
             '∨': lambda x, y: Or(x, y),
@@ -107,6 +111,7 @@ BinaryOperator.MAP = { '∧': lambda x, y: And(x, y),
             '≠': lambda x, y: x != y
             }
 
+
 def translate1(self):
     out = self.sub_exprs[0].translate()
 
@@ -117,11 +122,12 @@ def translate1(self):
         except Exception as e:
             raise e
     return out
+
+
 BinaryOperator.translate1 = translate1
 
 
-
-# Class ADisjunction #######################################################
+# Class ADisjunction  #######################################################
 
 def translate1(self):
     if len(self.sub_exprs) == 1:
@@ -129,11 +135,12 @@ def translate1(self):
     else:
         out = Or ([e.translate() for e in self.sub_exprs])
     return out
+
+
 ADisjunction.translate1 = translate1
 
 
-
-# Class AConjunction #######################################################
+# Class AConjunction  #######################################################
 
 def translate1(self):
     if len(self.sub_exprs) == 1:
@@ -141,10 +148,12 @@ def translate1(self):
     else:
         out = And([e.translate() for e in self.sub_exprs])
     return out
+
+
 AConjunction.translate1 = translate1
 
 
-# Class AComparison #######################################################
+# Class AComparison  #######################################################
 
 def translate1(self):
     assert not self.operator == ['≠']
@@ -164,11 +173,12 @@ def translate1(self):
         return And(out)
     else:
         return out[0]
+
+
 AComparison.translate1 = translate1
 
 
-
-# Class AUnary #######################################################
+# Class AUnary  #######################################################
 
 AUnary.MAP = {'-': lambda x: 0 - x,
               '¬': lambda x: Not(x)
@@ -178,18 +188,21 @@ def translate1(self):
     out = self.sub_exprs[0].translate()
     function = AUnary.MAP[self.operator]
     return function(out)
+
+
 AUnary.translate1 = translate1
 
 
-# Class AAggregate #######################################################
+# Class AAggregate  #######################################################
 
 def translate1(self):
     return Sum([f.translate() for f in self.sub_exprs])
+
+
 AAggregate.translate1 = translate1
 
 
-
-# Class AppliedSymbol #######################################################
+# Class AppliedSymbol  #######################################################
 
 def translate1(self):
     if self.s.name == '__relevant':
@@ -206,41 +219,45 @@ def translate1(self):
             arg = [x.translate() for x in self.sub_exprs]
             #assert  all(a != None for a in arg)
             return (self.decl.translate())(arg)
+
+
 AppliedSymbol.translate1 = translate1
 
 
-
-# Class Variable #######################################################
+# Class Variable  #######################################################
 
 def translate1(self):
     return self.decl.translate()
+
+
 Variable.translate1 = translate1
 
 
-
-# Class Fresh_Variable #######################################################
+# Class Fresh_Variable  #######################################################
 
 def translate(self):
     return self.translated
+
+
 Fresh_Variable.translate = translate
 
 
+# Class NumberConstant  #######################################################
 
-# Class NumberConstant #######################################################
-     
 def translate(self):
     return self.translated
+
+
 NumberConstant.translate = translate
 
 
-
-# Class Brackets #######################################################
+# Class Brackets  #######################################################
 
 def translate1(self):
     return self.sub_exprs[0].translate()
+
+
 Brackets.translate1 = translate1
-
-
 
 
 Done = True

@@ -56,9 +56,9 @@ def str_to_IDP(atom, val_string):
         out = (TRUE if val_string == 'True' else
                FALSE)
     elif (atom.type in ['real', 'int']
-    or type(atom.decl.out.decl) == RangeDeclaration): # could be a fraction
+    or type(atom.decl.out.decl) == RangeDeclaration):  # could be a fraction
         out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
-    else: # constructor
+    else:  # constructor
         out = atom.decl.out.decl.map[val_string]
     return out
 
@@ -120,7 +120,7 @@ class Annotations(object):
                                 'lower_bound': l_bound,
                                 'upper_bound': u_bound}
                     return(p[0], slider_arg)
-                except: # could not parse the slider data
+                except:  # could not parse the slider data
                     return (p[0], p[1])
             else:
                 return ('reading', p[0])
@@ -135,7 +135,7 @@ class Vocabulary(object):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
         self.terms = {}  # {string: Variable or AppliedSymbol}
-        self.idp = None # parent object
+        self.idp = None  # parent object
         self.translated = []
 
         self.name = 'V' if not self.name else self.name
@@ -167,7 +167,6 @@ class Vocabulary(object):
             if type(v) == SymbolDeclaration:
                 self.terms.update(v.instances)
 
-
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
                 f"{NEWL.join(str(i) for i in self.declarations)}"
@@ -183,7 +182,7 @@ class Extern(object):
 
     def annotate(self, voc):
         other = voc.idp.vocabularies[self.name]
-        voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls} #TODO merge while respecting order
+        voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls}  #TODO merge while respecting order
 
 
 class ConstructedTypeDeclaration(object):
@@ -194,7 +193,7 @@ class ConstructedTypeDeclaration(object):
         self.constructors = kwargs.pop('constructors')
         self.range = self.constructors  # functional constructors are expanded
         self.translated = None
-        self.map = {} # {String: constructor}
+        self.map = {}  # {String: constructor}
 
         if self.name == 'bool':
             self.translated = BoolSort()
@@ -445,7 +444,7 @@ class Symbol(object):
 Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
 
 
-################################ Theory ###############################
+################################ Theory  ###############################
 
 
 class Theory(object):
@@ -462,7 +461,7 @@ class Theory(object):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.clark = {}  # {Declaration: Rule}
-        self.def_constraints = {} # {Declaration: Expression}
+        self.def_constraints = {}  # {Declaration: Expression}
         self.assignments = Assignments()
 
         for constraint in self.constraints:
@@ -677,7 +676,7 @@ class Rule(object):
 
 # Expressions : see Expression.py
 
-################################ Structure ###############################
+################################ Structure  ###############################
 
 class Structure(object):
     """
@@ -773,7 +772,7 @@ class SymbolInterpretation(object):
                             (0 < count and count == len(self.decl.instances)))
 
         # set default value
-        if len(self.decl.instances) == 0: # infinite domain
+        if len(self.decl.instances) == 0:  # infinite domain
             assert self.default is None, \
                 f"Can't use default value for '{self.name}' on infinite domain."
         elif self.default is not None:
@@ -795,7 +794,7 @@ class SymbolInterpretation(object):
             else:
                 assert len(tuples) <= 1, \
                     f"Duplicate values in structure for {str(self.name)}{str(tuples[0])}"
-                if not tuples: # enumeration of constant
+                if not tuples:  # enumeration of constant
                     return self.default
                 return tuples[0].args[rank]
         else:  # constructs If-then-else recursively
@@ -846,7 +845,7 @@ class Enumeration(object):
                     return self.contains(args, function, arity, rank+1, list(tuples2))
             return FALSE
         else:
-            if rank + 1 == arity: # use OR
+            if rank + 1 == arity:  # use OR
                 out = [AComparison.make('=', [args[rank], t.args[rank]])
                        for t in tuples]
                 return ADisjunction.make('∨', out)
@@ -874,7 +873,7 @@ class Tuple(object):
         return [arg.translate() for arg in self.args]
 
 
-################################ Goal, View ###############################
+################################ Goal, View  ###############################
 
 class Goal(object):
     def __init__(self, **kwargs):
@@ -896,7 +895,7 @@ class Goal(object):
 
         if self.name in voc.symbol_decls:
             self.decl = voc.symbol_decls[self.name]
-            self.decl.view = ViewType.EXPANDED # the goal is always expanded
+            self.decl.view = ViewType.EXPANDED  # the goal is always expanded
             assert self.decl.instances, "goals must be instantiable."
             goal = Symbol(name='__relevant').annotate(voc, {})
             constraint = AppliedSymbol.make(goal, self.decl.instances.values())
@@ -918,7 +917,7 @@ class View(object):
 
 
 
-################################ Display ###############################
+################################ Display  ###############################
 
 class Display(object):
     def __init__(self, **kwargs):
@@ -966,18 +965,18 @@ class Display(object):
                     assert symbol.name[1:] in self.voc.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if constraint.name == 'goal': #e.g.,  goal(Prime)
+                if constraint.name == 'goal':  #e.g.,  goal(Prime)
                     assert len(constraint.sub_exprs)==1, f'goal can have only one argument'
                     goal = Goal(name=constraint.sub_exprs[0].name[1:])
                     goal.annotate(idp)
                     idp.goal = goal
-                elif constraint.name == 'expand': # e.g. expand(Length, Angle)
+                elif constraint.name == 'expand':  # e.g. expand(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
-                elif constraint.name == 'hide': # e.g. hide(Length, Angle)
+                elif constraint.name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
-                elif constraint.name == 'relevant': # e.g. relevant(Tax)
+                elif constraint.name == 'relevant':  # e.g. relevant(Tax)
                     for symbol in symbols:
                         assert symbol.instances, "relevant symbols must be instantiable."
                         goal = Symbol(name='__relevant').annotate(self.voc, {})
@@ -985,13 +984,13 @@ class Display(object):
                         constraint.block = self
                         constraint = constraint.interpret(idp.theory)
                         idp.theory.constraints.append(constraint)
-            elif type(constraint)==AComparison: # e.g. view = normal
+            elif type(constraint)==AComparison:  # e.g. view = normal
                 assert constraint.is_assignment
                 if constraint.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
                             if type(s)==SymbolDeclaration and s.view == ViewType.NORMAL:
-                                s.view = ViewType.EXPANDED # don't change hidden symbols
+                                s.view = ViewType.EXPANDED  # don't change hidden symbols
                     else:
                         assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
                 else:
@@ -1008,7 +1007,7 @@ class Display(object):
 
 
 
-################################ Main ##################################
+################################ Main  ##################################
 
 class Procedure(object):
     def __init__(self, **kwargs):
