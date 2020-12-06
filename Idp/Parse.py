@@ -32,9 +32,10 @@ import itertools
 import os
 import re
 import sys
+from typing import Dict, Union, Optional
 
 from textx import metamodel_from_file
-from z3 import (IntSort, BoolSort, RealSort, Const, Function, EnumSort, 
+from z3 import (IntSort, BoolSort, RealSort, Const, Function, EnumSort,
                 BoolVal)
 
 from .Assignments import Status, Assignments
@@ -52,9 +53,9 @@ def str_to_IDP(atom, val_string):
     if atom.type == 'bool':
         assert val_string in ['True', 'False'], \
             f"{atom.annotations['reading']} is not defined, and assumed false"
-        out = ( TRUE if val_string == 'True' else 
+        out = (TRUE if val_string == 'True' else
                FALSE)
-    elif ( atom.type in ['real', 'int']
+    elif (atom.type in ['real', 'int']
     or type(atom.decl.out.decl) == RangeDeclaration): # could be a fraction
         out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
     else: # constructor
@@ -140,12 +141,13 @@ class Vocabulary(object):
         self.name = 'V' if not self.name else self.name
 
         # define reserved symbols
-        self.symbol_decls = {'int' : RangeDeclaration(name='int' , elements=[]),
-                             'real': RangeDeclaration(name='real', elements=[])
-                            }
+        self.symbol_decls: Dict[str, Type] \
+            = {'int' : RangeDeclaration(name='int' , elements=[]),
+               'real': RangeDeclaration(name='real', elements=[])
+               }
         for name, constructors in [
             ('bool',      [TRUE, FALSE]),
-            ('`Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]), 
+            ('`Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]),
         ]:
             ConstructedTypeDeclaration(name=name, constructors=constructors) \
                 .annotate(self) # add it to symbol_decls
@@ -245,6 +247,7 @@ class RangeDeclaration(object):
         self.name = kwargs.pop('name')  # maybe 'int', 'real'
         self.elements = kwargs.pop('elements')
         self.translated = None
+        self.constructors = None  # not used
 
         self.type = 'int'
         self.range = []
@@ -274,7 +277,7 @@ class RangeDeclaration(object):
         voc.symbol_decls[self.name] = self
 
     def check_bounds(self, var):
-        if not self.elements: 
+        if not self.elements:
             return None
         if self.range and len(self.range) < 20:
             es = [AComparison.make('=', [var, c]) for c in self.range]
@@ -322,13 +325,13 @@ class SymbolDeclaration(object):
 
         domain (List): the list of possible tuples of arguments
 
-        instances (Dict[string, Expression]): 
+        instances (Dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of arguments,
             to its parsed AST
 
         range (List[Expression]): the list of possible values
 
-        typeConstraints (List[Expression]): 
+        typeConstraints (List[Expression]):
             the type constraint on the ranges of the symbol
             applied to each possible tuple of arguments
     """
@@ -344,7 +347,7 @@ class SymbolDeclaration(object):
         self.function = (self.out.name != 'bool')
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
-        
+
         self.typeConstraints = []
         self.translated = None
 
@@ -352,8 +355,8 @@ class SymbolDeclaration(object):
         self.domain = None  # all possible arguments
         self.range = None  # all possible values
         self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
-        self.block = None  # vocabulary where it is declared
-        self.view = ViewType.NORMAL # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
+        self.block: Optional[Block] = None  # vocabulary where it is declared
+        self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
     def __str__(self):
         args = ','.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
@@ -426,8 +429,8 @@ class Sort(object):
     def translate(self):
         return self.decl.translate()
 
-    
-class Symbol(object): 
+
+class Symbol(object):
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
 
@@ -437,6 +440,10 @@ class Symbol(object):
         return self
 
     def __str__(self): return self.name
+
+
+Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
+
 
 ################################ Theory ###############################
 
@@ -712,7 +719,7 @@ class Structure(object):
 
 class SymbolInterpretation(object):
     """
-    Pythonic representation of the interpretation of an IDP symbol, 
+    Pythonic representation of the interpretation of an IDP symbol,
     such as a predicate or function.
     This object is first created by the textx parser, after which it is
     annotated by the structure.
@@ -762,8 +769,8 @@ class SymbolInterpretation(object):
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, TRUE, status, False)
             count += 1
-        self.is_complete = (not self.decl.function or 
-            (0 < count and count == len(self.decl.instances)))
+        self.is_complete = (not self.decl.function or
+                            (0 < count and count == len(self.decl.instances)))
 
         # set default value
         if len(self.decl.instances) == 0: # infinite domain
@@ -799,8 +806,8 @@ class SymbolInterpretation(object):
             if type(args[rank]) in [Constructor, NumberConstant]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret(theory, rank+1, applied, args, 
-                                            list(tuples2))
+                        out = self.interpret(theory, rank+1, applied, args,
+                                             list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
@@ -830,7 +837,7 @@ class Enumeration(object):
             tuples = self.tuples
             assert all(len(t.args)==arity+(1 if function else 0) for t in tuples), \
                 "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'."
-        
+
         # constructs If-then-else recursively
         groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].as_rigid() is not None:
@@ -840,16 +847,16 @@ class Enumeration(object):
             return FALSE
         else:
             if rank + 1 == arity: # use OR
-                out = [ AComparison.make('=', [args[rank], t.args[rank]])
-                        for t in tuples]
+                out = [AComparison.make('=', [args[rank], t.args[rank]])
+                       for t in tuples]
                 return ADisjunction.make('∨', out)
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
-                out = IfExpr.make(AComparison.make('=', 
-                                    [args[rank], tuples[0].args[rank]]),
-                                    self.contains(args, function, arity, rank+1, tuples),
-                                    out)
+                out = IfExpr.make(
+                    AComparison.make('=', [args[rank], tuples[0].args[rank]]),
+                    self.contains(args, function, arity, rank+1, tuples),
+                    out)
             return out
 
 
@@ -925,8 +932,9 @@ class Display(object):
 
         #add display predicates
 
-        viewType = ConstructedTypeDeclaration(name='View', 
-            constructors=[Constructor(name='normal'), Constructor(name='expanded')])
+        viewType = ConstructedTypeDeclaration(name='View',
+            constructors=[Constructor(name='normal'),
+                          Constructor(name='expanded')])
         viewType.annotate(self.voc)
 
         for name, out in [
@@ -938,7 +946,8 @@ class Display(object):
             ('moveSymbols', None),
             ('optionalPropagation', None)
         ]:
-            symbol_decl = SymbolDeclaration(annotations='', name=Symbol(name=name), 
+            symbol_decl = SymbolDeclaration(annotations='',
+                                            name=Symbol(name=name),
                 sorts=[], out=out)
             symbol_decl.annotate(self.voc)
             symbol_decl.translate()
@@ -1021,7 +1030,7 @@ class Call1(object):
     def __str__(self):
         kwargs = "" if len(self.kwargs)==0 else f",{','.join(str(a) for a in self.kwargs)}"
         return ( f"{self.name}({','.join(str(a) for a in self.args)}{kwargs})"
-                 f"{'' if self.post is None else '.'+str(self.post)}") 
+                 f"{'' if self.post is None else '.'+str(self.post)}")
 
 
 class Call0(object):
@@ -1059,6 +1068,7 @@ class PyAssignment(object):
 
 ########################################################################
 
+Block = Union[Vocabulary, Theory, Goal, Structure, Display]
 
 dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
 

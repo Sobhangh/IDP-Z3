@@ -22,12 +22,12 @@ Class to represent a collection of theory and structure blocks.
 """
 
 from copy import copy
-from typing import Iterable
+from typing import Iterable, List
 from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or
 
 from .Assignments import Status, Assignment, Assignments
-from .Expression import TRUE, FALSE, AConjunction, NumberConstant
-from .Parse import Structure, Theory, RangeDeclaration, str_to_IDP
+from .Expression import TRUE, AConjunction, Expression
+from .Parse import Structure, Theory, str_to_IDP
 from .utils import OrderedSet, NEWL
 
 class Problem(object):
@@ -39,19 +39,19 @@ class Problem(object):
         assignments (Assignment): the set of assignments.
             The assignments are updated by the different steps of the problem resolution.
 
-        clark (dict[SymbolDeclaration, Rule]): 
+        clark (dict[SymbolDeclaration, Rule]):
             A mapping of defined symbol to the rule that defines it.
 
-        def_constraints (dict[SymbolDeclaration], Expression): 
+        def_constraints (dict[SymbolDeclaration], Expression):
             A mapping of defined symbol to the whole-domain constraint equivalent to its definition.
 
         interpretations (dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        _formula (Expression): the logic formula that represents the problem.
+        _formula (Expression, optional): the logic formula that represents the problem.
 
         questions (OrderedSet): the set of questions in the problem.
-            Questions include predicates and functions applied to arguments, 
+            Questions include predicates and functions applied to arguments,
             comparisons, and variable-free quantified expressions.
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
@@ -73,8 +73,8 @@ class Problem(object):
     @classmethod
     def make(cls, theories, structures):
         """ polymorphic creation """
-        problem = ( theories if type(theories)=='Problem' else 
-                    cls(*theories) if isinstance(theories, Iterable) else 
+        problem = ( theories if type(theories)=='Problem' else
+                    cls(*theories) if isinstance(theories, Iterable) else
                     cls(theories))
 
         structures = ( [] if structures is None else
@@ -105,7 +105,7 @@ class Problem(object):
             for decl, rule in block.clark.items():
                 new_rule = copy(rule)
                 if decl in self.clark:
-                    new_rule.body = AConjunction.make('∧', 
+                    new_rule.body = AConjunction.make('∧',
                         [self.clark[decl].body, new_rule.body])
                 self.clark[decl] = new_rule
             self.constraints.extend(v.copy() for v in block.constraints)
@@ -135,9 +135,10 @@ class Problem(object):
         """ the formula encoding the knowledge base """
         if not self._formula:
             self._interpret()
-            self._formula = AConjunction.make('∧',
-                [a.formula() for a in self.assignments.values() 
-                        if a.value is not None]
+            self._formula = AConjunction.make(
+                '∧',
+                [a.formula() for a in self.assignments.values()
+                 if a.value is not None]
                 + [s for s in self.constraints]
                 + [c for c in self.co_constraints]
                 + [s for s in self.def_constraints.values()]
@@ -146,8 +147,8 @@ class Problem(object):
         return self._formula
 
     def _todo(self, extended):
-        return OrderedSet(a.sentence 
-            for a in self.assignments.values() 
+        return OrderedSet(
+            a.sentence for a in self.assignments.values()
             if a.value is None
             and a.symbol_decl is not None
             and (not a.sentence.is_reified() or extended))
@@ -157,15 +158,17 @@ class Problem(object):
         ass = self.assignments.copy()
         for q in todo:
             if not q.is_reified():
-                val1 = solver.model().eval(q.translate(), 
-                                        model_completion=complete)
+                val1 = solver.model().eval(
+                    q.translate(),
+                    model_completion=complete)
             elif extended:
                 solver.push() # in case todo contains complex formula
-                solver.add(q.reified()==q.translate())
+                solver.add(q.reified() == q.translate())
                 res1 = solver.check()
                 if res1 == sat:
-                    val1 = solver.model().eval(q.reified(), 
-                                            model_completion=complete)
+                    val1 = solver.model().eval(
+                        q.reified(),
+                        model_completion=complete)
                 else:
                     val1 = None # dead code
                 solver.pop()
@@ -189,7 +192,7 @@ class Problem(object):
                 count += 1
                 model = solver.model()
                 ass = self._from_model(solver, todo, complete, extended)
-                yield ass 
+                yield ass
 
                 # exclude this model
                 different = []
@@ -231,10 +234,10 @@ class Problem(object):
             if solver.check()!=sat:
                 solver.pop() # get the last good one
                 solver.check()
-                break  
-        self.assignments = self._from_model(solver, self._todo(extended), 
+                break
+        self.assignments = self._from_model(solver, self._todo(extended),
             complete, extended)
-        return self 
+        return self
 
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
@@ -243,7 +246,7 @@ class Problem(object):
         for c in self.constraints:
             # determine consequences, including from co-constraints
             consequences = []
-            new_constraint = c.substitute(TRUE, TRUE, 
+            new_constraint = c.substitute(TRUE, TRUE,
                 self.assignments, consequences)
             consequences.extend(new_constraint.symbolic_propagate(self.assignments))
             if consequences:
@@ -314,7 +317,7 @@ class Problem(object):
                     if old in constraint.questions: # for performance
                         self._formula = None # invalidates the formula
                         consequences = []
-                        new_constraint = constraint.substitute(old, new, 
+                        new_constraint = constraint.substitute(old, new,
                             self.assignments, consequences)
                         del constraint.questions[old.code]
                         new_constraint.questions = constraint.questions
@@ -325,7 +328,7 @@ class Problem(object):
         return self
 
     def _generalize(self, structure, known=None, z3_formula=None):
-        """finds a subset of structure 
+        """finds a subset of structure
             that is a minimum satisfying assignment for self
 
         Invariants 'known and 'z3_formula can be supplied for better performance
@@ -343,8 +346,8 @@ class Problem(object):
                       [ass for ass in structure.assignments.values()
                         if ass.status == Status.UNKNOWN] )
         for i, c in enumerate(conjuncts):
-            conjunction2 = And([l.translate() 
-                    for j, l in enumerate(conjuncts) 
+            conjunction2 = And([l.translate()
+                    for j, l in enumerate(conjuncts)
                     if j != i])
             solver = Solver()
             solver.add(And(known, conjunction2, Not(z3_formula)))

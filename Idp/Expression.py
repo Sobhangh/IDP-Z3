@@ -32,6 +32,7 @@ import copy
 from collections import ChainMap
 from fractions import Fraction
 import sys
+from typing import Optional, List, Tuple, Dict, Set, Any
 
 from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
 
@@ -62,14 +63,14 @@ class Expression(object):
             The list may be reduced by simplification.
 
         type (string):
-            The name of the type of the expression, e.g., `bool`.
+            The name of the type of the expression, e.g., ``bool``.
 
-        co_constraint (Optional[Expression]):
+        co_constraint (Expression, optional):
             A constraint attached to the node.
 
-            For example, the co_constraint of `square(length(top()))` is
-            `square(length(top())) = length(top())*length(top()).`,
-            assuming `square` is appropriately defined.
+            For example, the co_constraint of ``square(length(top()))`` is
+            ``square(length(top())) = length(top())*length(top()).``,
+            assuming ``square`` is appropriately defined.
 
             The co_constraint of a defined symbol applied to arguments
             is the instantiation of the definition for those arguments.
@@ -91,7 +92,7 @@ class Expression(object):
         annotations (Dict):
             The set of annotations given by the expert in the IDP source code.
 
-            `annotations['reading']` is the annotation
+            ``annotations['reading']`` is the annotation
             giving the intended meaning of the expression (in English).
 
         original (Expression):
@@ -107,28 +108,26 @@ class Expression(object):
 
     COUNT = 0
     def __init__(self):
-        # .sub_exprs : list of Expression, to be translated to Z3
-        self.simpler = None               # a simplified version of the expression, or None
-        self.value = None                 # a python value (bool, int, float, string) or None
+        self.sub_exprs: List["Expression"]
+        self.simpler: Optional["Expression"] = None
+        self.value: Optional["Expression"] = None
 
-        # .code uniquely identifies an expression, irrespective of its value
-        self.code = sys.intern(str(self)) # normalized idp code, before transformations
-        self.annotations = {'reading': self.code} # dict(String, String)
-        self.original = self              # untouched version of the expression, from IDP code or Expr.make()
+        self.code: str = sys.intern(str(self))
+        self.annotations: Dict[str, str] = {'reading': self.code}
+        self.original: Expression = self
 
-        self.str = self.code              # memoization of str(), representing its value
-        self.fresh_vars = None            # Set[String]: over approximated list of fresh_vars (ignores simplifications)
-        self.type = None                  # String (e.g. 'bool', 'real', 'int', 'color'), or None
-        self._reified = None              # An expression is reified when it cannot be evaluated as is in Z3
-        self.is_type_constraint_for = None# (string) this constraint is relevant if Symbol is relevant
-        self.co_constraint = None         # constraint attached to the node, e.g. instantiated definition (Expression)
-        self.is_assignment = None         # for comparisons only
+        self.str: str = self.code
+        self.fresh_vars: Optional[Set[str]] = None
+        self.type: Optional[str] = None
+        self._reified: Optional["Expression"] = None
+        self.is_type_constraint_for: Optional[str] = None
+        self.co_constraint: Optional["Expression"] = None
+        self.is_assignment: Optional[bool] = None
 
         # attributes of the top node of a (co-)constraint
-        # .questions
-        # .relevant
-        # .block
-
+        self.questions: Optional[OrderedSet] = None
+        self.relevant: Optional[bool] = None
+        self.block: Any = None
 
     def copy(self):
         " create a deep copy (except for Constructor and NumberConstant) "
@@ -160,12 +159,12 @@ class Expression(object):
 
     def __str__(self):
         assert self.value is not self
-        if self.value   is not None: 
+        if self.value   is not None:
             return str(self.value)
-        if self.simpler is not None: 
+        if self.simpler is not None:
             return str(self.simpler)
         return self.__str1__()
-    
+
     def __log__(self): # for debugWithYamlLog
         return { 'class': type(self).__name__
             , 'code': self.code
@@ -185,7 +184,7 @@ class Expression(object):
         if self.simpler is not None:
             self.fresh_vars = self.simpler.fresh_vars
         else:
-            for e in self.sub_exprs: 
+            for e in self.sub_exprs:
                 self.fresh_vars.update(e.fresh_vars)
         return self
 
@@ -235,7 +234,7 @@ class Expression(object):
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
-    def as_rigid(self): 
+    def as_rigid(self):
         " returns a NumberConstant or Constructor, or None "
         return self.value
 
@@ -255,6 +254,43 @@ class Expression(object):
         # returns a dictionary {Fresh_Variable : Sort}
         return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
 
+    def substitute(self,
+                   e0: "Expression",
+                   e1: "Expression",
+                   assignments: "Assignments",
+                   todo=None) -> "Expression":
+        pass  # monkey-patched
+
+    def instantiate(self,
+                    e0: "Expression",
+                    e1: "Expression",
+                    theory: Any
+                    ) -> "Expression":
+        pass  # monkey-patched
+
+    def interpret(self, theory: Any) -> "Expression":
+        pass  # monkey-patched
+
+    def expand_quantifiers(self, theory: Any) -> "Expression":
+        pass  # monkey-patched
+
+    def symbolic_propagate(self,
+                           assignments: "Assignments",
+                           truth: Optional["Constructor"]=None
+                           ) -> List[Tuple["Expression", "Constructor"]]:
+        pass  # monkey-patched
+
+    def propagate1(self,
+                   assignments: "Assignments",
+                   truth: Optional["Expression"]=None
+                   ) -> List[Tuple["Expression", bool]]:
+        pass  # monkey-patched
+
+    def translate(self):
+        pass  # monkey-patched
+
+    def translate1(self):
+        pass  # monkey-patched
 
 class Constructor(Expression):
     PRECEDENCE = 200
@@ -266,7 +302,8 @@ class Constructor(Expression):
         super().__init__()
         self.fresh_vars = set()
         self.symbol = None # set only for `Symbols constructors
-    
+        self.translated: Any = None
+
     def __str1__(self): return self.name
 
     def as_rigid(self)  : return self
@@ -294,7 +331,7 @@ class IfExpr(Expression):
     def make(cls, if_f, then_f, else_f):
         out = (cls)(if_f=if_f, then_f=then_f, else_f=else_f)
         return out.annotate1().simplify1()
-        
+
     def __str1__(self):
         return ( f" if   {self.sub_exprs[IfExpr.IF  ].str}"
                  f" then {self.sub_exprs[IfExpr.THEN].str}"
@@ -368,6 +405,7 @@ class AQuantification(Expression):
 
 
 class BinaryOperator(Expression):
+    MAP = dict()  # monkey-patched
 
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
@@ -395,7 +433,7 @@ class BinaryOperator(Expression):
             ops = [ops] * (len(operands)-1)
         out = (cls)(sub_exprs=operands, operator=ops)
         return out.annotate1().simplify1()
-        
+
     def __str1__(self):
         def parenthesis(precedence, x):
             return f"({x.str})" if type(x).PRECEDENCE <= precedence else f"{x.str}"
@@ -404,7 +442,7 @@ class BinaryOperator(Expression):
         for i in range(1, len(self.sub_exprs)):
             temp += f" {self.operator[i-1]} {parenthesis(precedence, self.sub_exprs[i])}"
         return temp
-    
+
     def annotate1(self):
         assert not (self.operator[0]=='⇒' and 2 < len(self.sub_exprs)), \
                 "Implication is not associative.  Please use parenthesis."
@@ -419,10 +457,10 @@ class BinaryOperator(Expression):
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
-        
+
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
-    
+
 class AEquivalence(BinaryOperator):
     PRECEDENCE = 40
 
@@ -469,15 +507,16 @@ class AComparison(BinaryOperator):
 
 class ASumMinus(BinaryOperator):
     PRECEDENCE = 90
-    
+
 class AMultDiv(BinaryOperator):
     PRECEDENCE = 100
 
 class APower(BinaryOperator):
     PRECEDENCE = 110
-    
+
 class AUnary(Expression):
     PRECEDENCE = 120
+    MAP = dict()  # monkey-patched
 
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
@@ -612,7 +651,7 @@ class AppliedSymbol(Expression):
 
     def annotate1(self):
         self.type = ( 'bool' if self.is_enumerated or self.in_enumeration else
-                    self.decl.type if self.decl else 
+                    self.decl.type if self.decl else
                     None )
         out = super().annotate1()
         if out.decl is None or out.decl.name == "`Symbols": # a symbol variable
@@ -647,7 +686,7 @@ class AppliedSymbol(Expression):
                  or any(e.is_reified() for e in self.sub_exprs) )
 
     def reified(self):
-        return ( super().reified() if self.is_reified() else 
+        return ( super().reified() if self.is_reified() else
                  self.translate() )
 
 class Arguments(object):
@@ -733,7 +772,7 @@ class NumberConstant(Expression):
             self.py_value = int(self.number)
             self.translated = self.py_value
             self.type = 'int'
-    
+
     def __str__(self): return self.number
 
     def as_rigid(self)     : return self
@@ -761,7 +800,7 @@ class Brackets(Expression):
     def __str__(self): return f"({self.sub_exprs[0].str})"
     def __str1__(self): return str(self)
 
-    def as_rigid(self): 
+    def as_rigid(self):
         return self.sub_exprs[0].as_rigid()
 
     def annotate1(self):

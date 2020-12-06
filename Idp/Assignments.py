@@ -46,9 +46,9 @@ class Status(Enum):
 class Assignment(object):
     """Represent the assignment of a value to a question.
     Questions can be:
-    
-    * predicates and functions applied to arguments, 
-    * comparisons, 
+
+    * predicates and functions applied to arguments,
+    * comparisons,
     * outermost quantified expressions
 
     A value is a rigid term.
@@ -60,14 +60,15 @@ class Assignment(object):
 
         value (Expression, optional): a rigid term
 
-        status (Status): qualifies how the value was obtained
+        status (Status, optional): qualifies how the value was obtained
 
-        relevant (bool): states whether the sentence is relevant
+        relevant (bool, optional): states whether the sentence is relevant
 
         symbol_decl (SymbolDeclaration): declaration of the symbol under which it should be displayed.
     """
-    def __init__(self, sentence: Expression, value: Optional[Expression], 
-                       status: Status, relevant:bool=False):
+    def __init__(self, sentence: Expression, value: Optional[Expression],
+                 status: Optional[Status],
+                 relevant: Optional[bool] = False):
         self.sentence = sentence
         self.value = value
         self.status = status
@@ -161,7 +162,7 @@ class Assignments(dict):
         for a in self.values():
             if a.value is not None and not a.sentence.is_reified():
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
-                c = f"({c})" if c else c 
+                c = f"({c})" if c else c
                 c = f"{c}->{str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
         return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"

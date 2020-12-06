@@ -70,7 +70,7 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "Idp/Run.py", line 48, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "Idp/Problem.py", line 179, in expand
+  File "Idp/Problem.py", line 182, in expand
     z3_formula = self.formula().translate()
   File "Idp/Problem.py", line 137, in formula
     self._interpret()

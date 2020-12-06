@@ -24,8 +24,10 @@ if the expression is true (or false)
 This module monkey-patches the Expression class and sub-classes.
 """
 
+from typing import List, Tuple, Optional
+
 from Idp.Expression import Constructor, Expression, AQuantification, \
-                    ADisjunction, AConjunction,  \
+                    ADisjunction, AConjunction, \
                     AComparison, AUnary, Brackets, TRUE, FALSE
 
 
@@ -34,7 +36,25 @@ def _not(truth):
 
 # class Expression ############################################################
 
-def symbolic_propagate(self, assignments, truth=TRUE):
+
+def symbolic_propagate(self,
+                       assignments: "Assignments",
+                       truth: Optional[Constructor] = TRUE
+                       ) -> List[Tuple[Expression, Constructor]]:
+    """returns the consequences of `self=truth` that are in assignments.
+
+    The consequences are obtained by symbolic processing (no calls to Z3).
+
+    Args:
+        assignments (Assignments):
+            The set of questions to chose from. Their value is ignored.
+
+        truth (Constructor, optional):
+            The truth value of the expression `self`. Defaults to TRUE.
+
+    Returns:
+        A list of pairs (Expression, bool), descring the literals that are implicant
+    """
     if self.value is not None: 
         return []
     out = [(self, truth)] if self.code in assignments else []
@@ -43,11 +63,16 @@ def symbolic_propagate(self, assignments, truth=TRUE):
         return out
     out = self.propagate1(assignments, truth) + out
     return out
+
+
 Expression.symbolic_propagate = symbolic_propagate
+
 
 def propagate1(self, assignments, truth):
     " returns the list of symbolic_propagate of self (default implementation) "
     return []
+
+
 Expression.propagate1 = propagate1
 
 
@@ -112,20 +137,6 @@ AComparison.propagate1 = propagate1
 # class Brackets ############################################################
 
 def symbolic_propagate(self, assignments, truth=TRUE):
-    """returns the consequences of `self=truth` that are in assignments.
-
-    The consequences are obtained by symbolic processing (no calls to Z3).
-
-    Args:
-        assignments (Assignments):
-            The set of questions to chose from. Their value is ignored.
-
-        truth (type, optional):
-            The truth value of the expression `self`. Defaults to TRUE.
-
-    Returns:
-        A list of pairs (Expression, bool), descring the literals that are implicant
-    """
     out = [(self, truth)] if self.code in assignments else []
     return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
 Brackets.symbolic_propagate = symbolic_propagate
