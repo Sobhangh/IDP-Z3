@@ -42,14 +42,15 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     Fresh_Variable, TRUE
 
 
-# class Expression  ############################################################
+# class Expression  ###########################################################
 
 
 # @log  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, assignments, todo=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable)
 
-    implementation for everything but AppliedSymbol, Variable and Fresh_variable
+    implementation for everything but AppliedSymbol, Variable and
+    Fresh_variable
     """
 
     assert not isinstance(e0, Fresh_Variable) or isinstance(e1, Fresh_Variable)# should use instantiate instead
@@ -57,8 +58,9 @@ def substitute(self, e0, e1, assignments, todo=None):
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
-        if self.code == e1.code: return self  # to avoid infinite loops
-        return self._change(value=e1) # e1 is Constructor or NumberConstant
+        if self.code == e1.code:
+            return self  # to avoid infinite loops
+        return self._change(value=e1)  # e1 is Constructor or NumberConstant
     else:
         # will update self.simpler
         out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
@@ -71,13 +73,15 @@ def instantiate(self, e0, e1, theory):
     """
     recursively substitute Fresh_Variable e0 by e1 in self
 
-    instantiating e0=`x by e1=`f in self=`x(y) returns f(y) (or any instance of f if arities don't match)
+    instantiating e0=`x by e1=`f in self=`x(y) returns f(y)
+    (or any instance of f if arities don't match)
     """
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
 
     # instantiate expressions, with simplification
-    out = out.update_exprs(e.instantiate(e0, e1, theory) for e in out.sub_exprs)
+    out = out.update_exprs(e.instantiate(e0, e1, theory) for e
+                           in out.sub_exprs)
 
     simpler, co_constraint = None, None
     if out.simpler is not None:
@@ -115,9 +119,11 @@ Expression.expand_quantifiers = expand_quantifiers
 
 
 def interpret(self, theory):
-    """ for every defined term in self, add the instantiated definition as co-constraint
+    """ for every defined term in self, add the instantiated definition
+    as co-constraint
 
-    implementation for everything but AppliedSymbol, Variable and Fresh_variable
+    implementation for everything but AppliedSymbol, Variable and
+    Fresh_variable
     """
     if self.is_type_constraint_for:  # do not interpret typeConstraints
         return self
@@ -126,8 +132,7 @@ def interpret(self, theory):
 Expression.interpret = interpret
 
 
-
-# Class AQuantification  #######################################################
+# Class AQuantification  ######################################################
 
 def expand_quantifiers(self, theory):
     inferred = self.sub_exprs[0].type_inference()
@@ -167,8 +172,7 @@ def expand_quantifiers(self, theory):
 AQuantification.expand_quantifiers = expand_quantifiers
 
 
-
-# Class AAggregate  #######################################################
+# Class AAggregate  ######################################################
 
 def expand_quantifiers(self, theory):
     inferred = self.sub_exprs[0].type_inference()
@@ -180,9 +184,9 @@ def expand_quantifiers(self, theory):
             self.sub_exprs[0].substitute(new_var, new_var, {})
             self.q_vars[q.var] = new_var
 
-    forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION]
-                , then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT]
-                , else_f=NumberConstant(number='0'))]
+    forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
+             then_f=NumberConstant(number='1') if self.out is None else self.sub_exprs[AAggregate.OUT],
+             else_f=NumberConstant(number='0'))]
     for name, var in self.q_vars.items():
         if var.sort.decl.range:
             out = []
@@ -199,7 +203,7 @@ def expand_quantifiers(self, theory):
 AAggregate.expand_quantifiers = expand_quantifiers
 
 
-# Class AppliedSymbol, Variable  #######################################################
+# Class AppliedSymbol, Variable  ##############################################
 
 def interpret(self, theory):
     sub_exprs = [e.interpret(theory) for e in self.sub_exprs]
@@ -219,20 +223,22 @@ def interpret(self, theory):
         core = AppliedSymbol.make(self.s, sub_exprs).copy()
         simpler = self.in_enumeration.contains([core], False)
         simpler.annotations = self.annotations
-    elif ( self.name in theory.interpretations
-    and any(s.name == '`Symbols' for s in self.decl.sorts)):
+    elif (self.name in theory.interpretations
+            and any(s.name == '`Symbols' for s in self.decl.sorts)):
         # apply enumeration of predicate over symbols to allow simplification
         # do not do it otherwise, for performance reasons
-        simpler = (theory.interpretations[self.name].interpret)(theory, 0, self, sub_exprs)
+        simpler = (theory.interpretations[self.name].interpret)(theory, 0,
+                                                                self,
+                                                                sub_exprs)
     if self.decl in theory.clark:  # has a theory
         #TODO need to quantify the co_constraints for the fresh_vars
         assert not self.fresh_vars, (
             f"The following variable(s) has not been quantified: "
-            f"{','.join([str(v) for v in self.fresh_vars])}" )
+            f"{','.join([str(v) for v in self.fresh_vars])}")
         co_constraint = theory.clark[self.decl].instantiate_definition(sub_exprs, theory)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     if simpler is not None:
-        out.original = simpler.copy() # so that translated assignment is correct
+        out.original = simpler.copy()  # so that translated assignment is correct
     return out
 AppliedSymbol.interpret = interpret
 Variable     .interpret = interpret
@@ -251,7 +257,7 @@ def substitute(self, e0, e1, assignments, todo=None):
 
     new_branch = None
     if self.co_constraint is not None:
-        Log(f"definition:")
+        Log("definition:")
         new_branch = self.co_constraint.substitute(e0, e1, assignments, todo)
         if todo is not None:
             todo.extend(new_branch.symbolic_propagate(assignments))
@@ -260,7 +266,7 @@ def substitute(self, e0, e1, assignments, todo=None):
         return self._change(value=e1, co_constraint=new_branch)
     elif self.simpler is not None:  # has an interpretation
         assert self.co_constraint is None
-        simpler = self.simpler.substitute(e0,e1,assignments, todo)
+        simpler = self.simpler.substitute(e0, e1, assignments, todo)
         return self._change(simpler=simpler)
     else:
         sub_exprs = [e.substitute(e0, e1, assignments, todo) for e in self.sub_exprs]  # no simplification here
@@ -270,9 +276,9 @@ Variable      .substitute = substitute
 
 def instantiate(self, e0, e1, theory):
     if self.name == e0.code:
-        if type(self)==AppliedSymbol and self.decl.name == '`Symbols':
+        if type(self) == AppliedSymbol and self.decl.name == '`Symbols':
             if (isinstance(e1, Constructor)
-            and len(self.sub_exprs) == len(e1.symbol.decl.sorts)):
+               and len(self.sub_exprs) == len(e1.symbol.decl.sorts)):
                 out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
                 return out
             elif isinstance(e1, Fresh_Variable):  # replacing variable in a definition
@@ -284,7 +290,7 @@ def instantiate(self, e0, e1, theory):
                 return out
             else:
                 return list(e1.symbol.decl.instances.values())[0]  # should be "unknown"
-        elif len(self.sub_exprs)==0:
+        elif len(self.sub_exprs) == 0:
             return e1
     out = Expression.instantiate(self, e0, e1, theory)
     if self.name in theory.interpretations:

@@ -55,7 +55,8 @@ class Expression(object):
             Textual representation of the expression.  Often used as a key.
 
             It is generated from the sub-tree.
-            Some tree transformation change it (e.g., instantiate), others don't.
+            Some tree transformations change it (e.g., instantiate),
+            others don't.
 
         sub_exprs (List[Expression]):
             The children of the AST node.
@@ -85,7 +86,8 @@ class Expression(object):
             and to compute relevant questions.
 
         value (Optional[Expression]):
-            A rigid term equivalent to the expression, obtained by transformation.
+            A rigid term equivalent to the expression, obtained by
+            transformation.
 
             Equivalence is computed in the context of the theory and structure.
 
@@ -102,9 +104,10 @@ class Expression(object):
             The set of names of the variables in the expression.
 
     """
-    __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code', 'annotations', 'original',
-        'str', 'fresh_vars', 'type', '_reified', 'is_type_constraint_for', 'co_constraint',
-        'normal', 'questions', 'relevant' )
+    __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code',
+                 'annotations', 'original', 'str', 'fresh_vars', 'type',
+                 '_reified', 'is_type_constraint_for', 'co_constraint',
+                 'normal', 'questions', 'relevant')
 
     COUNT = 0
 
@@ -136,24 +139,29 @@ class Expression(object):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
-        out.value         = None if out.value         is None else out.value        .copy()
-        out.simpler       = None if out.simpler       is None else out.simpler      .copy()
-        out.co_constraint = None if out.co_constraint is None else out.co_constraint.copy()
+        out.value = None if out.value is None else out.value.copy()
+        out.simpler = None if out.simpler is None else out.simpler.copy()
+        out.co_constraint = (None if out.co_constraint is None
+                             else out.co_constraint.copy())
         if hasattr(self, 'questions'):
             out.questions = copy.copy(self.questions)
         return out
 
     def same_as(self, other):
-        if self.value   is not None: return self.value  .same_as(other)
-        if self.simpler is not None: return self.simpler.same_as(other)
-        if other.value   is not None: return self.same_as(other.value)
-        if other.simpler is not None: return self.same_as(other.simpler)
+        if self.value is not None:
+            return self.value  .same_as(other)
+        if self.simpler is not None:
+            return self.simpler.same_as(other)
+        if other.value is not None:
+            return self.same_as(other.value)
+        if other.simpler is not None:
+            return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
-            or (isinstance(self, AQuantification) and len(self.vars) == 0)):
+           or (isinstance(self, AQuantification) and len(self.vars) == 0)):
             return self.sub_exprs[0].same_as(other)
         if (isinstance(other, Brackets)
-            or (isinstance(other, AQuantification) and len(other.vars) == 0)):
+           or (isinstance(other, AQuantification) and len(other.vars) == 0)):
             return self.same_as(other.sub_exprs[0])
 
         return self.str == other.str and type(self) == type(other)
@@ -162,17 +170,17 @@ class Expression(object):
 
     def __str__(self):
         assert self.value is not self
-        if self.value   is not None:
+        if self.value is not None:
             return str(self.value)
         if self.simpler is not None:
             return str(self.simpler)
         return self.__str1__()
 
     def __log__(self):  # for debugWithYamlLog
-        return { 'class': type(self).__name__
-            , 'code': self.code
-            , 'str': self.str
-            , 'co_constraint': self.co_constraint }
+        return {'class': type(self).__name__,
+                'code': self.code,
+                'str': self.str,
+                'co_constraint': self.co_constraint}
 
     def annotate(self, voc, q_vars):
         " annotate tree after parsing "
@@ -195,14 +203,16 @@ class Expression(object):
         """collects the questions in self.
 
         `questions` is an OrderedSet of Expression
-        Questions are the terms and the simplest sub-formula that can be evaluated.
+        Questions are the terms and the simplest sub-formula that
+        can be evaluated.
         `collect` uses the simplified version of the expression.
 
         all_=False : ignore expanded formulas
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for Constructor, IfExpr, AUnary, Fresh_Variable, Number_constant, Brackets
+        default implementation for Constructor, IfExpr, AUnary, Fresh_Variable,
+        Number_constant, Brackets
         """
 
         for e in self.sub_exprs:
@@ -222,7 +232,8 @@ class Expression(object):
             return {}
         questions = OrderedSet()
         self.collect(questions, all_=True, co_constraints=co_constraints)
-        out = {e.decl.name: e.decl for e in questions.values() if hasattr(e, 'decl')}
+        out = {e.decl.name: e.decl for e in questions.values()
+               if hasattr(e, 'decl')}
         return out
 
     def co_constraints(self, co_constraints):
@@ -250,7 +261,8 @@ class Expression(object):
         return self._reified
 
     def has_decision(self):
-        # returns true if it contains a variable declared in decision vocabulary
+        # returns true if it contains a variable declared in decision
+        # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
@@ -288,13 +300,13 @@ class Expression(object):
 
     def symbolic_propagate(self,
                            assignments: "Assignments",
-                           truth: Optional["Constructor"]=None
+                           truth: Optional["Constructor"] = None
                            ) -> List[Tuple["Expression", "Constructor"]]:
         return []  # monkey-patched
 
     def propagate1(self,
                    assignments: "Assignments",
-                   truth: Optional["Expression"]=None
+                   truth: Optional["Expression"] = None
                    ) -> List[Tuple["Expression", bool]]:
         return []  # monkey-patched
 
@@ -304,8 +316,10 @@ class Expression(object):
     def translate1(self):
         pass  # monkey-patched
 
+
 class Constructor(Expression):
     PRECEDENCE = 200
+
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
         self.sub_exprs = []
@@ -318,10 +332,12 @@ class Constructor(Expression):
 
     def __str1__(self): return self.name
 
-    def as_rigid(self)  : return self
+    def as_rigid(self): return self
+
     def is_reified(self): return False
 
-TRUE  = Constructor(name='true')
+
+TRUE = Constructor(name='true')
 FALSE = Constructor(name='false')
 
 
@@ -345,21 +361,24 @@ class IfExpr(Expression):
         return out.annotate1().simplify1()
 
     def __str1__(self):
-        return ( f" if   {self.sub_exprs[IfExpr.IF  ].str}"
-                 f" then {self.sub_exprs[IfExpr.THEN].str}"
-                 f" else {self.sub_exprs[IfExpr.ELSE].str}" )
+        return (f" if   {self.sub_exprs[IfExpr.IF  ].str}"
+                f" then {self.sub_exprs[IfExpr.THEN].str}"
+                f" else {self.sub_exprs[IfExpr.ELSE].str}")
 
     def annotate1(self):
         self.type = self.sub_exprs[IfExpr.THEN].type
         return super().annotate1()
+
 
 class Quantee(object):
     def __init__(self, var, sort):
         self.var = var
         self.sort = sort
 
+
 class AQuantification(Expression):
     PRECEDENCE = 20
+
     def __init__(self, **kwargs):
         self.q = kwargs.pop('q')
         self.quantees = kwargs.pop('quantees')
@@ -398,7 +417,7 @@ class AQuantification(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v,s)
+                self.q_vars[v] = Fresh_Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
@@ -457,11 +476,11 @@ class BinaryOperator(Expression):
         return temp
 
     def annotate1(self):
-        assert not (self.operator[0]=='⇒' and 2 < len(self.sub_exprs)), \
+        assert not (self.operator[0] == '⇒' and 2 < len(self.sub_exprs)), \
                 "Implication is not associative.  Please use parenthesis."
         if self.type is None:
             self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
-                   else 'int'  if any(e.type == 'int'  for e in self.sub_exprs) \
+                   else 'int' if any(e.type == 'int' for e in self.sub_exprs) \
                    else self.sub_exprs[0].type  # constructed type, without arithmetic
         return super().annotate1()
 
@@ -471,21 +490,27 @@ class BinaryOperator(Expression):
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
 
+
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
+
 
 class AEquivalence(BinaryOperator):
     PRECEDENCE = 40
 
+
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
+
     def annotate(self, voc, q_vars):
         # reverse the implication
         self.sub_exprs.reverse()
-        out = AImplication(sub_exprs=self.sub_exprs, operator=['⇒']*len(self.operator))
+        out = AImplication(sub_exprs=self.sub_exprs,
+                           operator=['⇒']*len(self.operator))
         if hasattr(self, "block"):
             out.block = self.block
         return out.annotate(voc, q_vars)
+
 
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
@@ -497,6 +522,7 @@ class AConjunction(BinaryOperator):
 
 class AComparison(BinaryOperator):
     PRECEDENCE = 80
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_assignment = None
@@ -511,21 +537,25 @@ class AComparison(BinaryOperator):
 
     def annotate1(self):
         # f(x)=y
-        self.is_assignment = len(self.sub_exprs) == 2 and self.operator in [['='], ['≠']] \
-            and isinstance(self.sub_exprs[0], AppliedSymbol) \
-            and all(e.as_rigid() is not None for e in self.sub_exprs[0].sub_exprs) \
-            and self.sub_exprs[1].as_rigid() is not None
+        self.is_assignment = len(self.sub_exprs) == 2 and \
+                self.operator in [['='], ['≠']] \
+                and isinstance(self.sub_exprs[0], AppliedSymbol) \
+                and all(e.as_rigid() is not None for e in self.sub_exprs[0].sub_exprs) \
+                and self.sub_exprs[1].as_rigid() is not None
         return super().annotate1()
 
 
 class ASumMinus(BinaryOperator):
     PRECEDENCE = 90
 
+
 class AMultDiv(BinaryOperator):
     PRECEDENCE = 100
 
+
 class APower(BinaryOperator):
     PRECEDENCE = 110
+
 
 class AUnary(Expression):
     PRECEDENCE = 120
@@ -550,6 +580,7 @@ class AUnary(Expression):
         self.type = self.sub_exprs[0].type
         return super().annotate1()
 
+
 class AAggregate(Expression):
     PRECEDENCE = 130
     CONDITION = 0
@@ -565,7 +596,8 @@ class AAggregate(Expression):
         for q in self.quantees:
             self.vars.append(q.var)
             self.sorts.append(q.sort)
-        self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
+        self.sub_exprs = [self.f, self.out] if self.out else [self.f]
+        # later: expressions to be summed
         super().__init__()
 
         self.q_vars = {}
@@ -580,15 +612,13 @@ class AAggregate(Expression):
             assert len(self.vars) == len(self.sorts), "Internal error"
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
-            out = ( f"{self.aggtype}{{{vars} : "
-                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
-                    f"{output}}}"
-                )
+            out = (f"{self.aggtype}{{{vars} : "
+                   f"{self.sub_exprs[AAggregate.CONDITION].str}"
+                   f"{output}}}")
         else:
-            out = ( f"{self.aggtype}{{"
-                    f"{','.join(e.str for e in self.sub_exprs)}"
-                    f"}}"
-            )
+            out = (f"{self.aggtype}{{"
+                   f"{','.join(e.str for e in self.sub_exprs)}"
+                   f"}}")
         return out
 
     def annotate(self, voc, q_vars):
@@ -599,7 +629,7 @@ class AAggregate(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v,s)
+                self.q_vars[v] = Fresh_Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
@@ -609,13 +639,14 @@ class AAggregate(Expression):
         return self
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if all_ or len(self.sorts)==0:
+        if all_ or len(self.sorts) == 0:
             for e in self.sub_exprs:
                 e.collect(questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
     PRECEDENCE = 200
+
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
@@ -646,34 +677,32 @@ class AppliedSymbol(Expression):
         if len(self.sub_exprs) == 0:
             out = f"{str(self.s)}"
         else:
-            out= f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
+            out = f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
-        return ( f"{out}"
-                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
-                 f"{ f' in {{{enum}}}' if self.in_enumeration else ''}"
-                )
+        return (f"{out}"
+                f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
+                f"{ f' in {{{enum}}}' if self.in_enumeration else ''}")
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-        self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars else voc.symbol_decls[self.s.name]
+        self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
+            else voc.symbol_decls[self.s.name]
         self.s.decl = self.decl
         if self.in_enumeration:
             self.in_enumeration.annotate(voc)
         return self.annotate1()
 
     def annotate1(self):
-        self.type = ( 'bool' if self.is_enumerated or self.in_enumeration else
-                    self.decl.type if self.decl else
-                    None )
+        self.type = ('bool' if self.is_enumerated or self.in_enumeration else
+                     self.decl.type if self.decl else None)
         out = super().annotate1()
         if out.decl is None or out.decl.name == "`Symbols":  # a symbol variable
             out.fresh_vars.add(self.s.name)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.name != "`Symbols" \
-        and self.name != '__relevant':
+        if self.decl.name != "`Symbols" and self.name != '__relevant':
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
@@ -682,7 +711,7 @@ class AppliedSymbol(Expression):
 
     def has_decision(self):
         assert self.decl.block is not None
-        return not self.decl.block.name=='environment' \
+        return not self.decl.block.name == 'environment' \
             or any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
@@ -695,20 +724,22 @@ class AppliedSymbol(Expression):
         return out
 
     def is_reified(self):
-        return ( self.in_enumeration or self.is_enumerated
-                 or any(e.is_reified() for e in self.sub_exprs) )
+        return (self.in_enumeration or self.is_enumerated
+                or any(e.is_reified() for e in self.sub_exprs))
 
     def reified(self):
-        return ( super().reified() if self.is_reified() else
-                 self.translate() )
+        return (super().reified() if self.is_reified() else self.translate())
+
 
 class Arguments(object):
     def __init__(self, **kwargs):
         self.sub_exprs = kwargs.pop('sub_exprs')
         super().__init__()
 
+
 class Variable(AppliedSymbol):
     PRECEDENCE = 200
+
     def __init__(self, **kwargs):
         self.s = kwargs.pop('s')
         self.name = self.s.name
@@ -731,7 +762,8 @@ class Variable(AppliedSymbol):
         elif self.name in voc.symbol_decls:  # in symbol_decls
             self.decl = voc.symbol_decls[self.name]
             self.type = self.decl.type
-        else: pass  # a quantification variable without known type yet
+        else:
+            pass  # a quantification variable without known type yet
         return self.annotate1()
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -743,6 +775,7 @@ class Variable(AppliedSymbol):
 
 class Fresh_Variable(Expression):
     PRECEDENCE = 200
+
     def __init__(self, name, sort):
         self.name = name
         self.sort = sort
@@ -759,6 +792,7 @@ class Fresh_Variable(Expression):
 
 class NumberConstant(Expression):
     PRECEDENCE = 200
+
     def __init__(self, **kwargs):
         self.number = kwargs.pop('number')
 
@@ -788,14 +822,17 @@ class NumberConstant(Expression):
 
     def __str__(self): return self.number
 
-    def as_rigid(self)     : return self
-    def is_reified(self)   : return False
+    def as_rigid(self): return self
+    def is_reified(self): return False
+
 
 ZERO = NumberConstant(number='0')
-ONE  = NumberConstant(number='1')
+ONE = NumberConstant(number='1')
+
 
 class Brackets(Expression):
     PRECEDENCE = 200
+
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         annotations = kwargs.pop('annotations')

@@ -33,29 +33,36 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE
 
 
-# class Expression  ############################################################
+# class Expression  ###########################################################
 
-def _change(self, sub_exprs=None, ops=None, value=None, simpler=None, co_constraint=None):
+def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
+            co_constraint=None):
     " change attributes of an expression, and resets derived attributes "
 
-    if sub_exprs     is not None: self.sub_exprs     = sub_exprs
-    if ops           is not None: self.operator      = ops
-    if co_constraint is not None: self.co_constraint = co_constraint
-    if value         is not None: self.value         = value
-    elif simpler     is not None:
+    if sub_exprs is not None:
+        self.sub_exprs = sub_exprs
+    if ops is not None:
+        self.operator = ops
+    if co_constraint is not None:
+        self.co_constraint = co_constraint
+    if value is not None:
+        self.value = value
+    elif simpler is not None:
         if type(simpler) in [Constructor, NumberConstant]:
-            self.value   = simpler
+            self.value = simpler
         elif simpler.value is not None:  # example: prime.idp
-            self.value   = simpler.value
+            self.value = simpler.value
         else:
             self.simpler = simpler
-    assert self.value is None or type(self.value) in [Constructor, NumberConstant]
+    assert self.value is None or type(self.value) in [Constructor,
+                                                      NumberConstant]
     assert self.value is not self  # avoid infinite loops
 
     # reset derived attributes
     self.str = sys.intern(str(self))
 
     return self
+
 Expression._change = _change
 
 
@@ -63,7 +70,9 @@ def update_exprs(self, new_exprs):
     """ change sub_exprs and simplify, while keeping relevant info. """
     #  default implementation, without simplification
     return self._change(sub_exprs=list(new_exprs))
-#Expression.update_exprs = update_exprs
+
+
+# Expression.update_exprs = update_exprs
 for i in [Constructor, AppliedSymbol, Variable, Fresh_Variable, NumberConstant]:
     i.update_exprs = update_exprs
 
@@ -74,28 +83,30 @@ Expression.simplify1 = simplify1
 
 
 
-# Class IfExpr  ################################################################
+# Class IfExpr  ###############################################################
+
 
 def update_exprs(self, new_exprs):
     sub_exprs = list(new_exprs)
-    if_, then_, else_   = sub_exprs[0], sub_exprs[1], sub_exprs[2]
+    if_, then_, else_ = sub_exprs[0], sub_exprs[1], sub_exprs[2]
     if if_.same_as(TRUE):
-            return self._change(simpler=then_, sub_exprs=sub_exprs)
+        return self._change(simpler=then_, sub_exprs=sub_exprs)
     elif if_.same_as(FALSE):
-            return self._change(simpler=else_, sub_exprs=sub_exprs)
+        return self._change(simpler=else_, sub_exprs=sub_exprs)
     else:
         if then_.same_as(else_):
             return self._change(simpler=then_, sub_exprs=sub_exprs)
         elif then_.same_as(TRUE) and else_.same_as(FALSE):
-            return self._change(simpler=if_  , sub_exprs=sub_exprs)
+            return self._change(simpler=if_, sub_exprs=sub_exprs)
         elif then_.same_as(FALSE) and else_.same_as(TRUE):
-            return self._change(simpler=AUnary.make('¬', if_), sub_exprs=sub_exprs)
+            return self._change(simpler=AUnary.make('¬', if_),
+                                sub_exprs=sub_exprs)
     return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
 
 
 
-# Class AQuantification  #######################################################
+# Class AQuantification  ######################################################
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
@@ -111,7 +122,8 @@ def update_exprs(self, new_exprs):
     value, simpler = None, None
     if exprs0.same_as(FALSE):  # (false => p) is true
         # exprs[0] may be false because exprs[1] was false
-        exprs1 = self.sub_exprs[1] if self.sub_exprs[1].same_as(FALSE) else FALSE
+        exprs1 = self.sub_exprs[1] if self.sub_exprs[1].same_as(FALSE)\
+            else FALSE
         value = TRUE
     elif exprs0.same_as(TRUE):  # (true => p) is p
         exprs1 = next(new_exprs)
@@ -123,26 +135,26 @@ def update_exprs(self, new_exprs):
             value = TRUE
         elif exprs1.same_as(FALSE):  # (p => false) is ~p
             simpler = AUnary.make('¬', exprs0)
-    return self._change(value=value, simpler=simpler, sub_exprs=[exprs0, exprs1])
+    return self._change(value=value, simpler=simpler,
+                        sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
-
 
 
 # Class AEquivalence  #######################################################
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
-    if len(exprs)==1:
+    if len(exprs) == 1:
         return self._change(simpler=exprs[1], sub_exprs=exprs)
     for e in exprs:
         if e.same_as(TRUE):  # they must all be true
-            return self._change(simpler=AConjunction.make('∧', exprs), sub_exprs=exprs)
+            return self._change(simpler=AConjunction.make('∧', exprs),
+                                sub_exprs=exprs)
         if e.same_as(FALSE):  # they must all be false
             return self._change(simpler=AConjunction.make('∧', [AUnary.make('¬', e) for e in exprs]),
-                              sub_exprs=exprs)
+                                sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs
-
 
 
 # Class ADisjunction  #######################################################
@@ -153,7 +165,7 @@ def update_exprs(self, new_exprs):
     for i, expr in enumerate(new_exprs):
         if expr.same_as(TRUE):
             # simplify only if one other sub_exprs was unknown
-            if any(e.value is None and not i == j for j,e in enumerate(self.sub_exprs)):
+            if any(e.value is None and not i == j for j, e in enumerate(self.sub_exprs)):
                 return self._change(value=TRUE, sub_exprs=[expr])
             value = TRUE
         exprs.append(expr)
@@ -163,10 +175,9 @@ def update_exprs(self, new_exprs):
     if len(other) == 0:  # all disjuncts are False
         value = FALSE
     if len(other) == 1:
-         simpler=other[0]
+        simpler = other[0]
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
-
 
 
 # Class AConjunction  #######################################################
@@ -178,7 +189,7 @@ def update_exprs(self, new_exprs):
     for i, expr in enumerate(new_exprs):
         if expr.same_as(FALSE):
             # simplify only if one other sub_exprs was unknown
-            if any(e.value is None and not i == j for j,e in enumerate(self.sub_exprs)):
+            if any(e.value is None and not i == j for j, e in enumerate(self.sub_exprs)):
                 return self._change(value=FALSE, sub_exprs=[expr])
             value = FALSE
         exprs.append(expr)
@@ -211,7 +222,6 @@ def update_exprs(self, new_exprs):
 AComparison.update_exprs = update_exprs
 
 
-
 #############################################################
 
 def update_arith(self, family, operands):
@@ -223,14 +233,13 @@ def update_arith(self, family, operands):
         for e, op in zip(operands1[1:], self.operator):
             function = BinaryOperator.MAP[op]
 
-            if op=='/' and self.type == 'int':  # integer division
+            if op == '/' and self.type == 'int':  # integer division
                 out //= e.py_value
             else:
                 out = function(out, e.py_value)
         value = NumberConstant(number=str(out))
         return self._change(value=value, sub_exprs=operands)
     return self._change(sub_exprs=operands)
-
 
 
 # Class ASumMinus  #######################################################
@@ -240,7 +249,6 @@ def update_exprs(self, new_exprs):
 ASumMinus.update_exprs = update_exprs
 
 
-
 # Class AMultDiv  #######################################################
 
 def update_exprs(self, new_exprs):
@@ -248,7 +256,7 @@ def update_exprs(self, new_exprs):
     if any(op == '%' for op in self.operator):  # special case !
         operands1 = [e.as_rigid() for e in operands]
         if len(operands) == 2 \
-        and all(e is not None for e in operands1):
+           and all(e is not None for e in operands1):
             out = operands1[0].py_value % operands1[1].py_value
             return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
         else:
@@ -257,20 +265,18 @@ def update_exprs(self, new_exprs):
 AMultDiv.update_exprs = update_exprs
 
 
-
 # Class APower  #######################################################
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     operands1 = [e.as_rigid() for e in operands]
     if len(operands) == 2 \
-    and all(e is not None for e in operands1):
+       and all(e is not None for e in operands1):
         out = operands1[0].py_value ** operands1[1].py_value
         return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
     else:
         return self._change(sub_exprs=operands)
 APower.update_exprs = update_exprs
-
 
 
 # Class AUnary  #######################################################
@@ -291,7 +297,6 @@ def update_exprs(self, new_exprs):
 AUnary.update_exprs = update_exprs
 
 
-
 # Class AAggregate  #######################################################
 
 def update_exprs(self, new_exprs):
@@ -305,7 +310,6 @@ def update_exprs(self, new_exprs):
 
     return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
-
 
 
 # Class Brackets  #######################################################

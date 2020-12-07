@@ -33,20 +33,19 @@ from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     Fresh_Variable, TRUE, DSLException
 
 
-# class Expression  ############################################################
+# class Expression  ###########################################################
 
 def translate(self):
-    if self.value   is not None:
+    if self.value is not None:
         return self.value.translate()
     if self.simpler is not None:
         return self.simpler.translate()
     return self.translate1()
 
-
 Expression.translate = translate
 
 
-# class Constructor  ############################################################
+# class Constructor  ##########################################################
 
 def translate(self):
     return self.translated
@@ -55,18 +54,19 @@ def translate(self):
 Constructor.translate = translate
 
 
-# Class IfExpr  ################################################################
+# Class IfExpr  ###############################################################
 
 def translate1(self):
-    return If(self.sub_exprs[IfExpr.IF  ].translate()
-            , self.sub_exprs[IfExpr.THEN].translate()
-            , self.sub_exprs[IfExpr.ELSE].translate())
+    return If(self.sub_exprs[IfExpr.IF].translate(),
+              self.sub_exprs[IfExpr.THEN].translate(),
+              self.sub_exprs[IfExpr.ELSE].translate())
 
 
 IfExpr.translate1 = translate1
 
 
-# Class AQuantification  #######################################################
+# Class AQuantification  ######################################################
+
 
 def translate1(self):
     for v in self.q_vars.values():
@@ -77,11 +77,11 @@ def translate1(self):
         finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
 
         if self.q == '∀':
-            forms = And(forms) if 1<len(forms) else forms[0]
+            forms = And(forms) if 1 < len(forms) else forms[0]
             if len(finalvars) > 0:  # not fully expanded !
                 forms = ForAll([v.translate() for v in finalvars], forms)
         else:
-            forms = Or(forms) if 1<len(forms) else forms[0]
+            forms = Or(forms) if 1 < len(forms) else forms[0]
             if len(finalvars) > 0:  # not fully expanded !
                 forms = Exists(finalvars, forms)
         return forms
@@ -92,24 +92,24 @@ AQuantification.translate1 = translate1
 
 # Class BinaryOperator  #######################################################
 
-BinaryOperator.MAP = { '∧': lambda x, y: And(x, y),
-            '∨': lambda x, y: Or(x, y),
-            '⇒': lambda x, y: Or(Not(x), y),
-            '⇐': lambda x, y: Or(x, Not(y)),
-            '⇔': lambda x, y: x == y,
-            '+': lambda x, y: x + y,
-            '-': lambda x, y: x - y,
-            '*': lambda x, y: x * y,
-            '/': lambda x, y: x / y,
-            '%': lambda x, y: x % y,
-            '^': lambda x, y: x ** y,
-            '=': lambda x, y: x == y,
-            '<': lambda x, y: x < y,
-            '>': lambda x, y: x > y,
-            '≤': lambda x, y: x <= y,
-            '≥': lambda x, y: x >= y,
-            '≠': lambda x, y: x != y
-            }
+BinaryOperator.MAP = {'∧': lambda x, y: And(x, y),
+                      '∨': lambda x, y: Or(x, y),
+                      '⇒': lambda x, y: Or(Not(x), y),
+                      '⇐': lambda x, y: Or(x, Not(y)),
+                      '⇔': lambda x, y: x == y,
+                      '+': lambda x, y: x + y,
+                      '-': lambda x, y: x - y,
+                      '*': lambda x, y: x * y,
+                      '/': lambda x, y: x / y,
+                      '%': lambda x, y: x % y,
+                      '^': lambda x, y: x ** y,
+                      '=': lambda x, y: x == y,
+                      '<': lambda x, y: x < y,
+                      '>': lambda x, y: x > y,
+                      '≤': lambda x, y: x <= y,
+                      '≥': lambda x, y: x >= y,
+                      '≠': lambda x, y: x != y
+                      }
 
 
 def translate1(self):
@@ -133,7 +133,7 @@ def translate1(self):
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate()
     else:
-        out = Or ([e.translate() for e in self.sub_exprs])
+        out = Or([e.translate() for e in self.sub_exprs])
     return out
 
 
@@ -167,8 +167,9 @@ def translate1(self):
         assert y is not None
         try:
             out = out + [function(x, y)]
-        except Z3Exception as E:
-            raise DSLException("{}{}{}".format(str(x), self.operator[i - 1], str(y)))
+        except Z3Exception:
+            raise DSLException("{}{}{}".format(str(x),
+                               self.operator[i - 1], str(y)))
     if 1 < len(out):
         return And(out)
     else:
@@ -182,7 +183,7 @@ AComparison.translate1 = translate1
 
 AUnary.MAP = {'-': lambda x: 0 - x,
               '¬': lambda x: Not(x)
-          }
+              }
 
 def translate1(self):
     out = self.sub_exprs[0].translate()
@@ -217,7 +218,7 @@ def translate1(self):
             return self.decl.translate()
         else:
             arg = [x.translate() for x in self.sub_exprs]
-            #assert  all(a != None for a in arg)
+            # assert  all(a != None for a in arg)
             return (self.decl.translate())(arg)
 
 

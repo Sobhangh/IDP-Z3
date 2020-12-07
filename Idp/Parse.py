@@ -55,12 +55,13 @@ def str_to_IDP(atom, val_string):
             f"{atom.annotations['reading']} is not defined, and assumed false"
         out = (TRUE if val_string == 'True' else
                FALSE)
-    elif (atom.type in ['real', 'int']
-    or type(atom.decl.out.decl) == RangeDeclaration):  # could be a fraction
+    elif (atom.type in ['real', 'int'] or
+            type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
         out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
     else:  # constructor
         out = atom.decl.out.decl.map[val_string]
     return out
+
 
 class ViewType(Enum):
     HIDDEN = "hidden"
@@ -72,10 +73,10 @@ class Idp(object):
     """The class of AST nodes representing an IDP-Z3 program.
     """
     def __init__(self, **kwargs):
-        #log("parsing done")
-        self.vocabularies = {v.name : v for v in kwargs.pop('vocabularies')}
-        self.theories = {t.name : t for t in kwargs.pop('theories')}
-        self.structures = {s.name : s for s in kwargs.pop('structures')}
+        # log("parsing done")
+        self.vocabularies = {v.name: v for v in kwargs.pop('vocabularies')}
+        self.theories = {t.name: t for t in kwargs.pop('theories')}
+        self.structures = {s.name: s for s in kwargs.pop('structures')}
         self.goal = kwargs.pop('goal')
         self.view = kwargs.pop('view')
         self.display = kwargs.pop('display')
@@ -90,12 +91,15 @@ class Idp(object):
 
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
-        self.theory     = next(iter(self.theories    .values()))
-        if self.goal    is None: self.goal    = Goal(name="")
-        if self.view    is None: self.view    = View(viewType='normal')
-        if self.display is None: self.display = Display(constraints=[])
+        self.theory = next(iter(self.theories    .values()))
+        if self.goal is None:
+            self.goal = Goal(name="")
+        if self.view is None:
+            self.view = View(viewType='normal')
+        if self.display is None:
+            self.display = Display(constraints=[])
 
-################################ Vocabulary  ###############################
+################################ Vocabulary  ##############################
 
 
 class Annotations(object):
@@ -116,9 +120,9 @@ class Annotations(object):
                     l_bound = arg[1][1]
                     u_bound = arg[1][2]
                     slider_arg = {'lower_symbol': l_symb,
-                                'upper_symbol': u_symb,
-                                'lower_bound': l_bound,
-                                'upper_bound': u_bound}
+                                  'upper_symbol': u_symb,
+                                  'lower_bound': l_bound,
+                                  'upper_bound': u_bound}
                     return(p[0], slider_arg)
                 except:  # could not parse the slider data
                     return (p[0], p[1])
@@ -142,15 +146,16 @@ class Vocabulary(object):
 
         # define reserved symbols
         self.symbol_decls: Dict[str, Type] \
-            = {'int' : RangeDeclaration(name='int' , elements=[]),
+            = {'int': RangeDeclaration(name='int', elements=[]),
                'real': RangeDeclaration(name='real', elements=[])
                }
         for name, constructors in [
             ('bool',      [TRUE, FALSE]),
-            ('`Symbols', [Constructor(name=f"`{s.name}") for s in self.declarations if type(s)==SymbolDeclaration]),
+            ('`Symbols', [Constructor(name=f"`{s.name}") for s in
+                          self.declarations if type(s) == SymbolDeclaration]),
         ]:
             ConstructedTypeDeclaration(name=name, constructors=constructors) \
-                .annotate(self) # add it to symbol_decls
+                .annotate(self)  # add it to symbol_decls
 
     def annotate(self, idp):
         self.idp = idp
@@ -158,10 +163,11 @@ class Vocabulary(object):
         # annotate declarations
         for s in self.declarations:
             s.block = self
-            s.annotate(self) # updates self.symbol_decls
+            s.annotate(self)  # updates self.symbol_decls
 
         for constructor in self.symbol_decls['`Symbols'].constructors:
-            constructor.symbol = Symbol(name=constructor.name[1:]).annotate(self, {})
+            constructor.symbol = (Symbol(name=constructor.name[1:])
+                                  .annotate(self, {}))
 
         for v in self.symbol_decls.values():
             if type(v) == SymbolDeclaration:
@@ -268,7 +274,8 @@ class RangeDeclaration(object):
             self.type = 'real'
 
     def __str__(self):
-        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." + str(x.toI)) for x in self.elements])
+        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." +
+                                             str(x.toI)) for x in self.elements])
         return f"type {self.name} = {{{elements}}}"
 
     def annotate(self, voc):
@@ -325,8 +332,8 @@ class SymbolDeclaration(object):
         domain (List): the list of possible tuples of arguments
 
         instances (Dict[string, Expression]):
-            a mapping from the code of a symbol applied to a tuple of arguments,
-            to its parsed AST
+            a mapping from the code of a symbol applied to a tuple of
+            arguments to its parsed AST
 
         range (List[Expression]): the list of possible values
 
@@ -372,7 +379,7 @@ class SymbolDeclaration(object):
         self.out.annotate(voc)
         self.domain = list(itertools.product(*[s.decl.range for s in self.sorts]))
 
-        self.type  = self.out.decl.name
+        self.type = self.out.decl.name
         self.range = self.out.decl.range
 
         # create instances
@@ -478,7 +485,7 @@ class Theory(object):
         self.voc = idp.vocabularies[self.vocab_name]
 
         for i in self.interpretations.values():
-            i.annotate(self) # this updates self.assignments
+            i.annotate(self)  # this updates self.assignments
 
         self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol declaration
@@ -496,7 +503,7 @@ class Theory(object):
             if type(decl) == SymbolDeclaration and decl.domain:
                 self.def_constraints[decl] = rule.expanded
 
-        self.constraints = OrderedSet([e.annotate(self.voc, {})        for e in self.constraints])
+        self.constraints = OrderedSet([e.annotate(self.voc, {}) for e in self.constraints])
         self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
 
         for decl in self.voc.symbol_decls.values():
@@ -815,6 +822,7 @@ class SymbolInterpretation(object):
                         self.interpret(theory, rank+1, applied, args, tuples),
                         out)
             return out
+
 
 class Enumeration(object):
     def __init__(self, **kwargs):

@@ -31,16 +31,17 @@ from z3 import BoolRef
 from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
 from .utils import NEWL
 
+
 class Status(Enum):
     """Describes how the value of a question was obtained"""
-    UNKNOWN     = auto()
-    GIVEN       = auto()
-    ENV_UNIV    = auto()
-    UNIVERSAL   = auto()
-    ENV_CONSQ   = auto()
+    UNKNOWN = auto()
+    GIVEN = auto()
+    ENV_UNIV = auto()
+    UNIVERSAL = auto()
+    ENV_CONSQ = auto()
     CONSEQUENCE = auto()
-    EXPANDED    = auto()
-    STRUCTURE   = auto()
+    EXPANDED = auto()
+    STRUCTURE = auto()
 
 
 class Assignment(object):
@@ -53,7 +54,8 @@ class Assignment(object):
 
     A value is a rigid term.
 
-    An assignment also has a reference to the symbol under which it should be displayed.
+    An assignment also has a reference to the symbol under which it should be
+    displayed.
 
     Attributes:
         sentence (Expression): the question to be assigned a value
@@ -64,7 +66,8 @@ class Assignment(object):
 
         relevant (bool, optional): states whether the sentence is relevant
 
-        symbol_decl (SymbolDeclaration): declaration of the symbol under which it should be displayed.
+        symbol_decl (SymbolDeclaration): declaration of the symbol under which
+        it should be displayed.
     """
     def __init__(self, sentence: Expression, value: Optional[Expression],
                  status: Optional[Status],
@@ -90,11 +93,11 @@ class Assignment(object):
     def __str__(self):
         pre, post = '', ''
         if self.value is None:
-            pre = f"? "
+            pre = "? "
         elif self.value.same_as(TRUE):
             pre = ""
         elif self.value.same_as(FALSE):
-            pre = f"Not "
+            pre = "Not "
         else:
             post = f" -> {str(self.value)}"
         return f"{pre}{self.sentence.annotations['reading']}{post}"
@@ -118,9 +121,10 @@ class Assignment(object):
     def translate(self) -> BoolRef:
         return self.formula().translate()
 
+
 class Assignments(dict):
     """Contains a set of Assignment"""
-    def __init__(self,*arg,**kw):
+    def __init__(self, *arg, **kw):
         super(Assignments, self).__init__(*arg, **kw)
         self.symbols = {}  # { decl.name: decl }
         for a in self.values():
@@ -128,7 +132,7 @@ class Assignments(dict):
                 self.symbols[a.symbol_decl.name] = a.symbol_decl
 
     def copy(self):
-        return Assignments({k: v.copy() for k,v in self.items()})
+        return Assignments({k: v.copy() for k, v in self.items()})
 
     def extend(self, more):
         for v in more.values():
@@ -140,7 +144,8 @@ class Assignments(dict):
                 relevant: Optional[bool]):
         sentence = sentence.copy()
         if sentence.code in self:
-            out = copy(self[sentence.code])  # needed for explain of irrelevant symbols
+            # needed for explain of irrelevant symbols
+            out = copy(self[sentence.code])
             # don't overwrite
             if out.value is None:
                 out.value = value

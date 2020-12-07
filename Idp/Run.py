@@ -41,16 +41,18 @@ def model_check(theories, structures=None):
     yield str(solver.check())
 
 
-def model_expand(theories, structures=None, max=10, complete=False, 
-        extended=False):
+def model_expand(theories, structures=None, max=10, complete=False,
+                 extended=False):
     """ output: a list of Assignments, ending with a string """
     problem = Problem.make(theories, structures)
     yield from problem.expand(max=max, complete=complete, extended=extended)
+
 
 def model_propagate(theories, structures=None):
     """ output: a list of Assignment """
     problem = Problem.make(theories, structures)
     yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
+
 
 def myprint(x=""):
     if isinstance(x, types.GeneratorType):
@@ -63,6 +65,7 @@ def myprint(x=""):
     else:
         print(x)
 
+
 def execute(self):
     """ Execute the IDP program """
     main = str(self.procedures['main'])
@@ -74,6 +77,7 @@ def execute(self):
     mylocals['Problem'] = Problem
 
     exec(main, mybuiltins, mylocals)
+
 Idp.execute = execute
 
 

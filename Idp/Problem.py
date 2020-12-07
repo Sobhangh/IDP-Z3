@@ -37,18 +37,21 @@ class Problem(object):
         constraints (OrderedSet): a set of assertions.
 
         assignments (Assignment): the set of assignments.
-            The assignments are updated by the different steps of the problem resolution.
+            The assignments are updated by the different steps of the problem
+            resolution.
 
         clark (dict[SymbolDeclaration, Rule]):
             A mapping of defined symbol to the rule that defines it.
 
         def_constraints (dict[SymbolDeclaration], Expression):
-            A mapping of defined symbol to the whole-domain constraint equivalent to its definition.
+            A mapping of defined symbol to the whole-domain constraint
+            equivalent to its definition.
 
         interpretations (dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        _formula (Expression, optional): the logic formula that represents the problem.
+        _formula (Expression, optional): the logic formula that represents
+            the problem.
 
         questions (OrderedSet): the set of questions in the problem.
             Questions include predicates and functions applied to arguments,
@@ -73,13 +76,13 @@ class Problem(object):
     @classmethod
     def make(cls, theories, structures):
         """ polymorphic creation """
-        problem = ( theories if type(theories)=='Problem' else
-                    cls(*theories) if isinstance(theories, Iterable) else
-                    cls(theories))
+        problem = (theories if type(theories) == 'Problem' else
+                   cls(*theories) if isinstance(theories, Iterable) else
+                   cls(theories))
 
-        structures = ( [] if structures is None else
-                       structures if isinstance(structures, Iterable) else
-                       [structures] )
+        structures = ([] if structures is None else
+                      structures if isinstance(structures, Iterable) else
+                      [structures])
         for s in structures:
             problem.add(s)
 
@@ -162,7 +165,7 @@ class Problem(object):
                     q.translate(),
                     model_completion=complete)
             elif extended:
-                solver.push() # in case todo contains complex formula
+                solver.push()  # in case todo contains complex formula
                 solver.add(q.reified() == q.translate())
                 res1 = solver.check()
                 if res1 == sat:
@@ -186,7 +189,7 @@ class Problem(object):
         solver.add(z3_formula)
 
         count = 0
-        while count<max or max<=0:
+        while count < max or max <= 0:
 
             if solver.check() == sat:
                 count += 1
@@ -225,20 +228,19 @@ class Problem(object):
 
         # deal with strict inequalities, e.g. min(0<x)
         solver.push()
-        for i in range(0,10):
+        for i in range(0, 10):
             val = solver.model().eval(s)
             if minimize:
                 solver.add(s < val)
             else:
                 solver.add(val < s)
-            if solver.check()!=sat:
-                solver.pop() # get the last good one
+            if solver.check() != sat:
+                solver.pop()  # get the last good one
                 solver.check()
                 break
         self.assignments = self._from_model(solver, self._todo(extended),
             complete, extended)
         return self
-
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
@@ -263,14 +265,14 @@ class Problem(object):
         result = solver.check()
         if result == sat:
             for q in todo:
-                solver.push() # in case todo contains complex formula
-                solver.add(q.reified()==q.translate())
+                solver.push()  # in case todo contains complex formula
+                solver.add(q.reified() == q.translate())
                 res1 = solver.check()
                 if res1 == sat:
                     val1 = solver.model().eval(q.reified())
                     if str(val1) != str(q.reified()):  # if not irrelevant
                         solver.push()
-                        solver.add(Not(q.reified()==val1))
+                        solver.add(Not(q.reified() == val1))
                         res2 = solver.check()
                         solver.pop()
 
@@ -282,7 +284,7 @@ class Problem(object):
                 solver.pop()
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
-                    solver = Solver() # restart the solver
+                    solver = Solver()  # restart the solver
                     solver.add(z3_formula)
             yield "No more consequences."
         elif result == unsat:
@@ -331,24 +333,25 @@ class Problem(object):
         """finds a subset of structure
             that is a minimum satisfying assignment for self
 
-        Invariants 'known and 'z3_formula can be supplied for better performance
+        Invariants 'known and 'z3_formula can be supplied for better
+        performance
         """
         if known is None:
             known = And([ass.translate() for ass in self.assignments.values()
                             if ass.status != Status.UNKNOWN]
-                        + [ass.sentence.reified()==ass.sentence.translate()
+                        + [ass.sentence.reified() == ass.sentence.translate()
                             for ass in self.assignments.values()
                             if ass.sentence.is_reified()])
         if z3_formula is None:
             z3_formula = self.formula().translate()
 
-        conjuncts = ( structure if not isinstance(structure, Problem) else
-                      [ass for ass in structure.assignments.values()
-                        if ass.status == Status.UNKNOWN] )
+        conjuncts = (structure if not isinstance(structure, Problem) else
+                     [ass for ass in structure.assignments.values()
+                     if ass.status == Status.UNKNOWN])
         for i, c in enumerate(conjuncts):
             conjunction2 = And([l.translate()
-                    for j, l in enumerate(conjuncts)
-                    if j != i])
+                               for j, l in enumerate(conjuncts)
+                               if j != i])
             solver = Solver()
             solver.add(And(known, conjunction2, Not(z3_formula)))
             if solver.check() == unsat:

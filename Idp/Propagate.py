@@ -35,7 +35,7 @@ from Idp.Assignments import Assignments
 def _not(truth):
     return FALSE if truth.same_as(TRUE) else TRUE
 
-# class Expression  ############################################################
+# class Expression  ###########################################################
 
 
 def symbolic_propagate(self,
@@ -54,7 +54,8 @@ def symbolic_propagate(self,
             The truth value of the expression `self`. Defaults to TRUE.
 
     Returns:
-        A list of pairs (Expression, bool), descring the literals that are implicant
+        A list of pairs (Expression, bool), descring the literals that
+        are implicant
     """
     if self.value is not None:
         return []
@@ -77,14 +78,14 @@ def propagate1(self, assignments, truth):
 Expression.propagate1 = propagate1
 
 
-# class Constructor  ############################################################
+# class Constructor  ##########################################################
 
 def symbolic_propagate(self, assignments, truth=TRUE):  # dead code
     return []  # true or false
 Constructor.symbolic_propagate = symbolic_propagate
 
 
-# class AQuantification  ############################################################
+# class AQuantification  ######################################################
 
 def symbolic_propagate(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
@@ -94,7 +95,7 @@ def symbolic_propagate(self, assignments, truth=TRUE):
 AQuantification.symbolic_propagate = symbolic_propagate
 
 
-# class ADisjunction  ############################################################
+# class ADisjunction  #########################################################
 
 def propagate1(self, assignments, truth=TRUE):
     if truth.same_as(FALSE):
@@ -103,7 +104,7 @@ def propagate1(self, assignments, truth=TRUE):
 ADisjunction.propagate1 = propagate1
 
 
-# class AConjunction  ############################################################
+# class AConjunction  #########################################################
 
 def propagate1(self, assignments, truth=TRUE):
     if truth.same_as(TRUE):
@@ -120,12 +121,13 @@ def propagate1(self, assignments, truth=TRUE):
 AUnary.propagate1 = propagate1
 
 
-# class AComparison  ############################################################
+# class AComparison  ##########################################################
 
 def propagate1(self, assignments, truth=TRUE):
     if truth.same_as(TRUE) and len(self.sub_exprs) == 2 and self.operator == ['=']:
         # generates both (x->0) and (x=0->True)
-        # generating only one from universals would make the second one a consequence, not a universal
+        # generating only one from universals would make the second one
+        # a consequence, not a universal
         operands1 = [e.as_rigid() for e in self.sub_exprs]
         if   operands1[1] is not None:
             return [(self.sub_exprs[0], operands1[1])]
