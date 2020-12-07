@@ -22,7 +22,7 @@ that are specific for the Interactive Consultant.
 
 from itertools import chain
 import time
-from z3 import Solver, Implies, And, Not, sat
+from z3 import Solver, Implies, And, Not, sat, is_true, is_false
 
 from Idp.Expression import AComparison, AUnary, AppliedSymbol, TRUE, FALSE
 from Idp.Assignments import Status, Assignment
@@ -282,9 +282,9 @@ def abstract(state, given_json):
                     val1 = solver.model().eval(atom.translate())
                 else:
                     val1 = solver.model().eval(atom.reified())
-                if val1 is True:
+                if is_true(val1):
                     atoms += [Assignment(atom, TRUE, Status.UNKNOWN)]
-                elif val1 is False:
+                elif is_false(val1):
                     atoms += [Assignment(atom, FALSE, Status.UNKNOWN)]
 
         # start with negations !
