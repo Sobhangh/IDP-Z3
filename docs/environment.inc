@@ -8,7 +8,7 @@ To capture this difference, the IDP language allows the creation of 2 vocabulari
 The first one is called 'environment', the second 'decision'.
 Hence, a more advanced skeleton of an IDP knowledge base is:
 
-.. code-block::
+.. code::
 
     vocabulary environment {
         // here comes the specification of the vocabulary to describe the environment

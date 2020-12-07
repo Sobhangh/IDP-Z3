@@ -25,7 +25,7 @@ main
 
 The basic skeleton of an IDP knowledge base for the Interactive Consultant is as follows:
 
-.. code-block::
+.. code::
 
     vocabulary {
         // here comes the specification of the vocabulary

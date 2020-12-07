@@ -1,6 +1,6 @@
 .. index:: default structure
 
-.. _default_structure: 
+.. _default_structure:
 
 Default Structure
 -----------------
@@ -13,7 +13,7 @@ In this way, this type of structure is used to form a *default* set of values fo
 Such a structure is given the name 'default', to denote that it specifies default values.
 The syntax of the block remains the same.
 
-.. code-block::
+.. code::
 
     structure default {
         // here comes the structure

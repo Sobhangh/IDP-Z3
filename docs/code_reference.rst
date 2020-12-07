@@ -32,6 +32,9 @@ The components of IDP-Z3 are shown below.
 * IDP-Z3 solver: performs inferences on IDP-Z3 theories
 * `Z3 <https://github.com/Z3Prover/z3>`_: `SMT solver <https://en.wikipedia.org/wiki/Satisfiability_modulo_theories>`_ developed by Microsoft
 
+The `source code of IDP-Z3 <https://gitlab.com/krr/IDP-Z3>`_ is publicly available under the GNU LGPL v3 license.
+
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents:

@@ -12,7 +12,7 @@
 
 Theory
 ------
-.. code-block::
+.. code::
 
     theory T:V {
         // here comes the theory named T, on vocabulary named V
@@ -21,7 +21,7 @@ Theory
 A *theory* is a set of constraints and definitions to be satisfied.
 If the names are omitted, the theory is named T, for vocabulary V.
 
-Before explaining their syntax, we need to introduce the concept of term. 
+Before explaining their syntax, we need to introduce the concept of term.
 
 .. _term:
 .. index:: term
@@ -41,7 +41,7 @@ Constant
     a constant_ is a term whose type_ is derived from its declaration in the vocabulary_.
 
 Variable
-    a variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).  
+    a variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).
 
 .. _function application:
 
@@ -94,7 +94,7 @@ Predicate application
     :math:`P(t_1, t_2,.., t_n)` is a sentence, when :math:`P` is a predicate_ symbol of arity |n|, and |t1,tn| are terms.
     Each term must be of the appropriate type_, as defined in the predicate declaration.
     If the arity of :math:`P` is 0, i.e., if :math:`P` is a proposition, then :math:`P` and :math:`P()` are sentences.
-    
+
 Comparison
     :math:`t_1 ꕕ t_2` is a sentence, when |t1|, |t2| are two numerical terms and :math:`ꕕ` is one of the following comparison operators :math:`<, ≤, =, ≥, >, ≠` (or,  using ascii characters: :math:`=<, >=, \sim=`).
     Comparison operators can be chained as customary.
@@ -108,12 +108,12 @@ Logic connectives
 
 Parenthesis
     (|phi|) is a sentence when |phi| is a sentence.
-    
+
 .. _quantifier expression:
 .. index:: quantifier expression
 
 Enumeration
-    An enumeration (e.g. ``p = {1;2;3}``) is a sentence. 
+    An enumeration (e.g. ``p = {1;2;3}``) is a sentence.
     Enumerations follow the syntax described in `structure`_.
 
 Quantified formulas
@@ -130,17 +130,17 @@ Quantified formulas
     For example, ``!x[int] y[int]: f(x,y)=f(y,x).``
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
 
-    When quantifying a formula of type ```Symbols``, 
+    When quantifying a formula of type ```Symbols``,
     the expression must contain a "guard" to prevent arity or type error.
     A guard is a predicate over ```Symbols`` that is defined by an enumeration in the same theory block.
     In the following example, ``symmetric`` must be defined by enumeration.
 
-    .. code-block::
+    .. code::
 
         !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
 
 "is (not) enumerated"
-    :math:`f(a,b)\ is\ enumerated` and :math:`f(a,b)\ is\ not\ enumerated` are sentences, 
+    :math:`f(a,b)\ is\ enumerated` and :math:`f(a,b)\ is\ not\ enumerated` are sentences,
     where :math:`f` is a function defined by an enumeration and applied to arguments :math:`a` and :math:`b`.
     Its truth value reflects whether :math:`(a,b)` is enumerated in :math:`f`'s enumeration.
     If the enumeration has a default value, every tuple of arguments is enumerated.

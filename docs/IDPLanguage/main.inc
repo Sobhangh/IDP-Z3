@@ -7,7 +7,7 @@ Main block
 The *main block* consists of python-like statements to be executed by the :ref:`IDP-Z3 executable<CLI>` or the Web IDE, in the context of the knowledge base.
 It takes the following form:
 
-.. code-block::
+.. code::
 
     procedure main() {
         // here comes the python-like code to be executed

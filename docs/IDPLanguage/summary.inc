@@ -7,7 +7,7 @@ The following code illustrates the syntax of IDP.
 T denotes a type, c a constructor, p a proposition or predicate, f a constant or function.
 The equivalent ASCII-only encoding is shown on the right.
 
-.. code-block::
+.. code::
 
     vocabulary V {
         type T constructed from {c1, c2}
@@ -44,7 +44,7 @@ The equivalent ASCII-only encoding is shown on the right.
         p(5) is not enumerated.
 
         { p(1).
-          ∀x: p1(x) <- p2(x).                     !x: p1(x) <- p2(x). 
+          ∀x: p1(x) <- p2(x).                     !x: p1(x) <- p2(x).
           f(1)=1.
           ∀x: f(x)=1 <- p(x).                     !x: f(x)=1 <- p(x).
         }
