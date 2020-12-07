@@ -20,50 +20,53 @@
 """
 
 from collections import ChainMap, Iterable
-import itertools
+from json import JSONEncoder
 import time
 
-
+NEWL = "\n"
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"
 method and uses it to encode the object if found.
 """
-from json import JSONEncoder
 
 def _default(self, obj):
     return getattr(obj.__class__, "to_json", _default.default)(obj)
 
 _default.default = JSONEncoder.default  # Save unmodified default.
-JSONEncoder.default = _default # Replace it.
-
+JSONEncoder.default = _default  # Replace it.
 
 
 start = time.process_time()
+
+
 def log(action):
     global start
-    print("*** ", action, round(time.process_time()-start,3))
+    print("*** ", action, round(time.process_time()-start, 3))
     start = time.process_time()
 
 
 def unquote(s):
-    if s[0]=="'" and s[-1]=="'":
+    if s[0] == "'" and s[-1] == "'":
         return s[1:-1]
     return s
 
+
 def in_list(q, ls):
-    if not ls: return True # e.g. for int, real
-    if len(ls)==1: return q == ls[0]
+    if not ls:
+        return True  # e.g. for int, real
+    if len(ls) == 1:
+        return q == ls[0]
     return Or([q == i for i in ls])
 
 
 def is_number(s):
-    if str(s) in ['True', 'False']: return False
+    if str(s) in ['True', 'False']:
+        return False
     try:
         float(eval(str(s if not s.endswith('?') else s[:-1]))) # accepts "2/3" or "3.1415?"
         return True
     except:
         return False
-
 
 
 def splitLast(l):
@@ -75,11 +78,13 @@ def applyTo(sym, arg):
         return sym
     return sym(arg)
 
+
 def mergeDicts(l):
     # merge a list of dicts (possibly a comprehension
     return dict(ChainMap(*reversed(list(l))))
 
-# OrderedSet #############################################
+# OrderedSet  #############################################
+
 
 class OrderedSet(dict):
     """
@@ -87,24 +92,24 @@ class OrderedSet(dict):
     """
     def __init__(self, els=[]):
         assert isinstance(els, Iterable)
-        super(OrderedSet, self).__init__(((el.code,el) for el in els))
+        super(OrderedSet, self).__init__(((el.code, el) for el in els))
 
     def append(self, el):
         if el not in self:
             self[el.code] = el
 
     def __iter__(self):
-        return iter(self.values()) # instead of keys()
-    
+        return iter(self.values())  # instead of keys()
+
     def __contains__(self, expression):
         return super(OrderedSet, self).__contains__(expression.code)
-    
+
     def extend(self, more):
         for el in more:
             self.append(el)
-    
+
     # def items(self):
     #     return super(OrderedSet, self).items()
-    
+
     # def popitem(self):
     #     return super(OrderedSet, self).popitem()

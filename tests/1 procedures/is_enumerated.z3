@@ -61,22 +61,22 @@ f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 No more models.
 T3, S
 Traceback (most recent call last):
-  File "test.py", line 57, in generateZ3
+  File "test.py", line 56, in generateZ3
     idp.execute()
-  File "Idp/Run.py", line 77, in execute
+  File "Idp/Run.py", line 76, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 12, in <module>
-  File "Idp/Run.py", line 58, in myprint
+  File "Idp/Run.py", line 57, in myprint
     for i, xi in enumerate(x):
-  File "Idp/Run.py", line 49, in model_expand
+  File "Idp/Run.py", line 48, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "Idp/Problem.py", line 155, in expand
+  File "Idp/Problem.py", line 182, in expand
     z3_formula = self.formula().translate()
-  File "Idp/Problem.py", line 113, in formula
+  File "Idp/Problem.py", line 137, in formula
     self._interpret()
-  File "Idp/Problem.py", line 103, in _interpret
+  File "Idp/Problem.py", line 127, in _interpret
     c.interpret(self)
-  File "Idp/Substitute.py", line 203, in interpret
+  File "Idp/Substitute.py", line 208, in interpret
     assert self.decl.function, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

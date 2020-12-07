@@ -4,7 +4,7 @@ The IDP Language
 Overview
 ------------
 
-The IDP language is used to create knowledge bases.  
+The IDP language is used to create knowledge bases.
 An IDP program is made of the following blocks of code:
 
 vocabulary
@@ -45,10 +45,10 @@ The basic skeleton of an IDP knowledge base for the Interactive Consultant is as
 
 Everything between ``//`` and the end of the line is a comment.
 
-.. include:: shebang.inc
-.. include:: vocabulary.inc
-.. include:: theory.inc
-.. include:: structure.inc
-.. include:: main.inc
-.. include:: IDP3.inc
-.. include:: summary.inc
+.. include:: IDPLanguage/shebang.inc
+.. include:: IDPLanguage/vocabulary.inc
+.. include:: IDPLanguage/theory.inc
+.. include:: IDPLanguage/structure.inc
+.. include:: IDPLanguage/main.inc
+.. include:: IDPLanguage/IDP3.inc
+.. include:: IDPLanguage/summary.inc

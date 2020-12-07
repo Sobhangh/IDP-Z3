@@ -16,17 +16,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This module contains code to create and analyze messages to/from the web client.
+This module contains code to create and analyze messages to/from the
+web client.
 """
 
 import ast
-import sys
-from typing import Optional, Dict
-from z3 import sat
 
-from Idp.Expression import Expression, TRUE, FALSE, AComparison, NumberConstant, AppliedSymbol, Variable
-from Idp.Run import Status, Assignment, Assignments, str_to_IDP
-from Idp.utils import *
+from Idp.Expression import (TRUE, FALSE, AComparison, NumberConstant)
+from Idp.Parse import str_to_IDP
+from Idp.Assignments import Assignments, Status
 
 
 def metaJSON(state):
@@ -40,14 +38,14 @@ def metaJSON(state):
     symbols = []
     for decl in state.assignments.symbols.values():
         typ = decl.out.name
-        symbol_type = "proposition" if typ == 'bool' and decl.sorts==[] else "function"
+        symbol_type = "proposition" if typ == 'bool' and decl.sorts == [] else "function"
         d = {
             "idpname": str(decl.name),
             "type": symbol_type,
             "priority": "core",
             "showOptimize": True,  # GUI is smart enough to show buttons appropriately
             "view": decl.view.value,
-            "environmental": decl.block.name=='environment'
+            "environmental": decl.block.name == 'environment'
         }
         if decl.annotations is not None:
             if 'reading' in decl.annotations:
@@ -66,7 +64,6 @@ def metaJSON(state):
     out = {"title": "Interactive Consultant", "symbols": symbols,
            "optionalPropagation": optionalPropagation}
     return out
-
 
 
 #################
@@ -146,7 +143,7 @@ def json_to_literals(state, jsonstr: str):
 
 class Output(object):
     def __init__(self, state, structure={}):
-        self.m = {} # [symbol.name][atom.code][attribute name] -> attribute value
+        self.m = {}  # [symbol.name][atom.code][attribute name] -> attribute value
         self.state = state
 
         self.m[' Global'] = {}
@@ -166,22 +163,22 @@ class Output(object):
                     symbol = {"typ": typ, "value": ""  #TODO
                               , "values": [str(v) for v in symb.range]}
                 elif typ in ["real", "int"]:
-                    symbol = {"typ": typ.capitalize(), "value": ""} # default
+                    symbol = {"typ": typ.capitalize(), "value": ""}  # default
                 else:
                     assert False, "dead code"
                     symbol = None
 
-                if symb.name == key and 'reading' in symb.annotations: #inherit reading
+                if symb.name == key and 'reading' in symb.annotations:  #inherit reading
                     reading = symb.annotations['reading']
                 else:
                     reading = atom.annotations['reading']
 
                 if symbol:
-                    symbol["status"]   = ass.status.name
+                    symbol["status"] = ass.status.name
                     symbol["relevant"] = ass.relevant
-                    symbol['reading']  = reading
-                    symbol['normal']   = not atom.is_reified()
-                    symbol['environmental'] = symb.block.name=='environment'
+                    symbol['reading'] = reading
+                    symbol['normal'] = not atom.is_reified()
+                    symbol['environmental'] = symb.block.name == 'environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
                         or bool(ass.sentence.is_assignment)
                     s.setdefault(key, symbol)
@@ -203,7 +200,6 @@ class Output(object):
                                     self.m[s.name][k] = data
                                     break
                     self.m[symb.name] = {}
-
 
     def fill(self, state):
         for key, l in state.assignments.items():
@@ -227,5 +223,4 @@ class Output(object):
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']
-                    #s[key]["status"] = status.name # for a click on Sides=3
-
+                    #s[key]["status"] = status.name  # for a click on Sides=3

@@ -5,5 +5,7 @@ flask_cors
 gunicorn
 pycallgraph2
 pyyaml
+recommonmark
+sphinxcontrib-mermaid
 textx
 z3-solver
