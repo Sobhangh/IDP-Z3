@@ -6,9 +6,10 @@ gunicorn
 pycallgraph2
 pyyaml
 recommonmark
-textx
 sphinx-autobuild
 sphinx_bootstrap_theme
+sphinxcontrib-mermaid
 sphinx_rtd_theme
+textx
 z3-solver
 git+https://github.com/sphinx-contrib/video.git
