@@ -139,7 +139,7 @@ def make_state(idp: Idp, jsonstr: str) -> State:
     :rtype: State
     """
     if (idp, jsonstr) in State.cache:
-        return State.cache[(idp, jsonstr)].add_given(jsonstr)
+        return State.cache[(idp, jsonstr)]
 
     if (idp, "{}") not in State.cache:
         State.cache[(idp, "{}")] = State(idp)
