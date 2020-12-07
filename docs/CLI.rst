@@ -5,7 +5,7 @@ Command Line Interface
 
 IDP-Z3 can be run through a Command Line Interface:
 
-.. code-block::
+.. code::
 
     python3 IDP-Z3.py path/to/file.idp
 
