@@ -36,7 +36,6 @@ The components of IDP-Z3 are shown below.
    :maxdepth: 3
    :caption: Contents:
 
-   development.md
    Architecture.md
    idp.rst
    consultant.rst
