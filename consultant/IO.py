@@ -16,7 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This module contains code to create and analyze messages to/from the web client.
+This module contains code to create and analyze messages to/from the
+web client.
 """
 
 import ast
@@ -37,14 +38,14 @@ def metaJSON(state):
     symbols = []
     for decl in state.assignments.symbols.values():
         typ = decl.out.name
-        symbol_type = "proposition" if typ == 'bool' and decl.sorts==[] else "function"
+        symbol_type = "proposition" if typ == 'bool' and decl.sorts == [] else "function"
         d = {
             "idpname": str(decl.name),
             "type": symbol_type,
             "priority": "core",
             "showOptimize": True,  # GUI is smart enough to show buttons appropriately
             "view": decl.view.value,
-            "environmental": decl.block.name=='environment'
+            "environmental": decl.block.name == 'environment'
         }
         if decl.annotations is not None:
             if 'reading' in decl.annotations:
@@ -63,7 +64,6 @@ def metaJSON(state):
     out = {"title": "Interactive Consultant", "symbols": symbols,
            "optionalPropagation": optionalPropagation}
     return out
-
 
 
 #################
@@ -174,11 +174,11 @@ class Output(object):
                     reading = atom.annotations['reading']
 
                 if symbol:
-                    symbol["status"]   = ass.status.name
+                    symbol["status"] = ass.status.name
                     symbol["relevant"] = ass.relevant
-                    symbol['reading']  = reading
-                    symbol['normal']   = not atom.is_reified()
-                    symbol['environmental'] = symb.block.name=='environment'
+                    symbol['reading'] = reading
+                    symbol['normal'] = not atom.is_reified()
+                    symbol['environmental'] = symb.block.name == 'environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
                         or bool(ass.sentence.is_assignment)
                     s.setdefault(key, symbol)
@@ -200,7 +200,6 @@ class Output(object):
                                     self.m[s.name][k] = data
                                     break
                     self.m[symb.name] = {}
-
 
     def fill(self, state):
         for key, l in state.assignments.items():

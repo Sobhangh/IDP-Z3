@@ -38,10 +38,10 @@ class State(Problem):
     def __init__(self, idp: Idp):
 
         # determine default vocabulary, theory, before annotating display
-        if len(idp.theories)!=1 and 'main' not in idp.procedures:  # (implicit) display block
+        if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
             assert len(idp.vocabularies) == 2, \
                 "Maximum 2 vocabularies are allowed in Interactive Consultant"
-            assert len(idp.theories)     == 2, \
+            assert len(idp.theories) == 2, \
                 "Maximum 2 theories are allowed in Interactive Consultant"
             assert 'environment' in idp.vocabularies and 'decision' in idp.vocabularies, \
                 "The 2 vocabularies in Interactive Consultant must be 'environment' and 'decision'"
