@@ -24,6 +24,10 @@ The IDP-Z3 components together enable the creation of these solutions:
    You may want to verify that you are seeing the documentation relevant for the version of IDP-Z3 you are using.
    On `readthedocs <https://docs.idp-z3.be/>`_, you can see the version under the title (top left corner), and you can change it using the listbox at the bottom left corner.
 
+
+.. _Installation:
+.. index:: Installation
+
 Installation using poetry
 -------------------------
 
