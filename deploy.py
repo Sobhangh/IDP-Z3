@@ -56,5 +56,5 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
         run('git commit -m "latest"', cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
         run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
 
-        version = '' if promote else f'--version="{id}"'}
+        version = '' if promote else f'--version="{id}"'
         run(f"gcloud app browse {version}")
