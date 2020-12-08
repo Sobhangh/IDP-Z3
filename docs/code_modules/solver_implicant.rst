@@ -1,4 +1,4 @@
-.. _idp_implicant:
+.. _solver_implicant:
 
 idp_solver.Propagate
 =========================

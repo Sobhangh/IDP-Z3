@@ -1,4 +1,4 @@
-.. _idp_parse:
+.. _solver_parse:
 
 idp_solver.Parse
 =========================

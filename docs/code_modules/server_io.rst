@@ -1,7 +1,7 @@
-.. _consultant_io:
+.. _server_io:
 
-consultant.IO
+idp_server.IO
 =======================
 
-.. automodule:: consultant.IO
+.. automodule:: idp_server.IO
    :members:

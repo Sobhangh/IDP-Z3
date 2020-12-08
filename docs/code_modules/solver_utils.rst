@@ -1,4 +1,4 @@
-.. _idp_utils
+.. _solver_utils
 
 idp_solver.utils
 =========================

@@ -1,7 +1,7 @@
-.. _consultant_inferences:
+.. _server_inferences:
 
-consultant.Inferences
+idp_server.Inferences
 ===============================
 
-.. automodule:: consultant.Inferences
+.. automodule:: idp_server.Inferences
    :members:

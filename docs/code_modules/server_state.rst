@@ -1,7 +1,7 @@
-.. _consultant_state:
+.. _server_state:
 
-consultant.State
+idp_server.State
 ==========================
 
-.. automodule:: consultant.State
+.. automodule:: idp_server.State
    :members:

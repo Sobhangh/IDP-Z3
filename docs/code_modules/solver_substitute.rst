@@ -1,4 +1,4 @@
-.. _idp_substitute:
+.. _solver_substitute:
 
 idp_solver.Substitute
 =========================

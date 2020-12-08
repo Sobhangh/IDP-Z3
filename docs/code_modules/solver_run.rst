@@ -1,4 +1,4 @@
-.. _idp_run:
+.. _solver_run:
 
 idp_solver.Run
 =========================

@@ -1,7 +1,7 @@
-.. _consultant_rest:
+.. _server_rest:
 
-consultant.rest
+idp_server.rest
 =========================
 
-.. automodule:: consultant.rest
+.. automodule:: idp_server.rest
    :members:

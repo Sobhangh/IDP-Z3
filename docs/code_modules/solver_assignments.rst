@@ -1,4 +1,4 @@
-.. _idp_assignments:
+.. _solver_assignments:
 
 idp_solver.Assignments
 =========================

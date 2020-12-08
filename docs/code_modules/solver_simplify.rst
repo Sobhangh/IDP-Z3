@@ -1,4 +1,4 @@
-.. _idp_simplify:
+.. _solver_simplify:
 
 idp_solver.Simplify
 =========================

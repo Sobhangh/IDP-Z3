@@ -1,4 +1,4 @@
-.. _idp_problem:
+.. _solver_problem:
 
 idp_solver.Problem
 =========================

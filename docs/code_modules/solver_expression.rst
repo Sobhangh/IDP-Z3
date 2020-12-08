@@ -1,4 +1,4 @@
-.. _idp_expression:
+.. _solver_expression:
 
 idp_solver.Expression
 =========================
