@@ -26,7 +26,7 @@ TODO: vocabulary
 
 from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
+from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     BinaryOperator, ADisjunction, AConjunction, \
                     AComparison, AUnary, AAggregate, \
                     AppliedSymbol, Variable, NumberConstant, Brackets, \

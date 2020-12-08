@@ -37,6 +37,6 @@ The components of IDP-Z3 are shown below.
    :caption: Contents:
 
    Architecture.md
-   idp.rst
-   consultant.rst
+   idp_solver.rst
+   idp_server.rst
 

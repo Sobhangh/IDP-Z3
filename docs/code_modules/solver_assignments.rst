@@ -1,7 +1,7 @@
 .. _idp_assignments:
 
-Idp.Assignments
+idp_solver.Assignments
 =========================
 
-.. automodule:: Idp.Assignments
+.. automodule:: idp_solver.Assignments
    :members:

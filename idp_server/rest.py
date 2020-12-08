@@ -31,8 +31,8 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
-from Idp import Idp, idpparser
-from Idp.utils import log
+from idp_solver import Idp, idpparser
+from idp_solver.utils import log
 from .State import make_state
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON

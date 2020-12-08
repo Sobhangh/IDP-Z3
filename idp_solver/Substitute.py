@@ -36,7 +36,7 @@ import copy
 
 from debugWithYamlLog import Log
 
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
+from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     ADisjunction, AConjunction,  AAggregate, AUnary, \
                     AComparison, AppliedSymbol, Variable, NumberConstant, \
                     Fresh_Variable, TRUE

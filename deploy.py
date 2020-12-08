@@ -11,7 +11,7 @@ def require_clean_work_tree(cwd):
     assert 0 == run('git diff-files --quiet --ignore-submodules --', cwd=cwd).returncode, \
         "cannot deploy: you have unstaged changes."
     assert 0 == run('git diff-index --cached --quiet HEAD --ignore-submodules --', cwd=cwd).returncode, \
-        "cannot deploy: your index contains uncommitted changes." 
+        "cannot deploy: your index contains uncommitted changes."
 
 run('python3.8 test.py generate')
 
@@ -28,7 +28,7 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
     if update_statics:
         run('npm run -script build', cwd='../web-IDP-Z3', check=True)
         print("Copying to static folder ...")
-        copy_tree('../web-IDP-Z3/dist/', 'consultant/static')
+        copy_tree('../web-IDP-Z3/dist/', 'idp_server/static')
         run("git add -A")
         run("git commit")
 
@@ -42,9 +42,9 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
             run("git push google master", cwd='../web-IDP-Z3')
         promote = input("Redirect traffic ? (Y/n) ") in "Yy"
         run(f"gcloud app deploy {'' if promote else '--no-promote'}")
-        
+
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
-        versions = get("gcloud app versions list --sort-by=~LAST_DEPLOYED").decode("utf-8") 
+        versions = get("gcloud app versions list --sort-by=~LAST_DEPLOYED").decode("utf-8")
         id = versions.splitlines()[1].split("  ")[1]
         print("latest version : ", id)
         with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json") as json_file:

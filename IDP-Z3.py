@@ -27,7 +27,7 @@ import argparse
 import os
 import sys
 
-from Idp import idpparser
+from idp_solver import idpparser
 
 
 if __name__ == "__main__":
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         file = os.path.join(dir, args.FILE[0])
         with open(file, "r") as f:
             theory = f.read()
-        
+
         idp = idpparser.model_from_str(theory)
         idp.execute()
 

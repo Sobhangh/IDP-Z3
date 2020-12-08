@@ -33,10 +33,10 @@ import re
 # import pyximport;
 # pyximport.install(language_level=3)
 
-from consultant.State import State, make_state
-from consultant.IO import Output, metaJSON
-from Idp import idpparser
-from Idp.utils import start, log, NEWL
+from idp_server.State import State, make_state
+from idp_server.IO import Output, metaJSON
+from idp_solver import idpparser
+from idp_solver.utils import start, log, NEWL
 
 z3lock = threading.Lock()
 
@@ -89,7 +89,7 @@ def generateZ3(theory):
 
 
 def generate():
-    # optional patch Log on Idp.Substitute  ####################################
+    # optional patch Log on idp_solver.Substitute  ####################################
 
     # for i in [Expression, AppliedSymbol, Variable, Fresh_Variable]:
     #     i.substitute = log_calls(i.substitute)
@@ -109,8 +109,8 @@ def generate():
         output = generateZ3(theory)
 
         # Remove absolute paths from output.
-        output = re.sub(r'(/.*)(?=Idp/)', '', output)
-        output = re.sub(r'(/.*)(?=consultant/)', '', output)
+        output = re.sub(r'(/.*)(?=idp_solver/)', '', output)
+        output = re.sub(r'(/.*)(?=idp_server/)', '', output)
 
         z3 = file.replace(".z3", ".z3z3")
         z3 = z3.replace(".idp", ".z3")

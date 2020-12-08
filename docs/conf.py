@@ -13,8 +13,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('../consultant/'))
-sys.path.insert(0, os.path.abspath('../Idp/'))
+sys.path.insert(0, os.path.abspath('../idp_server/'))
+sys.path.insert(0, os.path.abspath('../idp_solver/'))
 
 # -- Project information -----------------------------------------------------
 

@@ -2,7 +2,8 @@
 
 This document presents the technical architecture of IDP-Z3.
 
-Essentially, the IDP-Z3 components translate the requested inferences on the knowledge base into satisfiability problems that Z3 can solve. See [this tutorial](https://ericpony.github.io/z3py-tutorial/guide-examples.htm) for an introduction to Z3 (or [this guide](https://docs.google.com/presentation/d/1BgXIJNZJD6YTAT5k5ZSMv4irMeMA9a41EnJsIO1eK9Y/edit?usp=sharing)).
+Essentially, the IDP-Z3 components translate the requested inferences on the knowledge base into satisfiability problems that Z3 can solve.
+
 
 ## Web clients
 The clients are written in [Typescript](https://www.typescriptlang.org/), using the [Angular](https://angular.io/) framework (version 7.1), and the [primeNG](https://www.primefaces.org/primeng/#/) library of widgets.  It uses the [Monaco editor](https://www.npmjs.com/package/ngx-monaco-editor). The interactions with the server are controlled by [idp.service.ts](https://gitlab.com/krr/autoconfig3/blob/master/src/services/idp.service.ts).  The [AppSettings file](https://gitlab.com/krr/autoconfig3/blob/master/src/services/AppSettings.ts) contains important settings, such as the address of the IDP-Z3 server.
@@ -11,27 +12,32 @@ The [REST.md](https://gitlab.com/krr/IDP-Z3/-/blob/master/docs/zettlr/REST.md) f
 
 The web clients could be packaged into an executable using [nativefier](https://github.com/jiahaog/Nativefier).
 
+
 ## Read The Docs, Homepage
 The [online documentation](http://docs.idp-z3.be/en/stable/) and [Homepage](https://www.idp-z3.be/) are written in [ReStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html),  generated using [sphinx](https://www.sphinx-doc.org/en/master/) and hosted on [readthedocs.org](https://readthedocs.org/projects/idp-z3/) and [GitLab Pages](https://gitlab.com/krr/IDP-Z3/pages) respectively.  The contents is in the `/docs` and `/homepage` folders of IDP-Z3.
 
-## IDP-Z3 server
-The code for the IDP-Z3 server is in the `/consultant` folder.
+We use the following sphinx extensions: [Mermaid (diagrams)](https://pypi.org/project/sphinxcontrib-mermaid/), and [Markdown](https://www.sphinx-doc.org/en/master/usage/markdown.html).
 
-The IDP-Z3 server is written in python 3.8, using the [Flask framework](https://flask.palletsprojects.com/en/1.1.x/).  Pages are served by [rest.py](https://gitlab.com/krr/autoconfigz3/blob/master/consultant/rest.py).  Static files are served from the [/static](https://gitlab.com/krr/autoconfigz3/tree/master/consultant/static) directory, including the compiled version of the client software.
+
+## IDP-Z3 server
+The code for the IDP-Z3 server is in the `/idp_server` folder.
+
+The IDP-Z3 server is written in python 3.8, using the [Flask framework](https://flask.palletsprojects.com/en/1.1.x/).  Pages are served by [rest.py](https://gitlab.com/krr/autoconfigz3/blob/master/idp_server/rest.py).  Static files are served from the [/static](https://gitlab.com/krr/autoconfigz3/tree/master/idp_server/static) directory, including the compiled version of the client software.
 
 At start-up, and every time the idp code is changed on the client, the idp code is sent to the `/meta` URL by the client.  The server responds with the list of symbols to be displayed. A subsequent call (`/eval`) returns the questions to be displayed.  After that, when the user clicks on a GUI element, information is sent to the `/eval` URL, and the server responds as necessary. 
 
-The information given by the user is combined with the idp code (in [State.py](http://docs.idp-z3.be/en/latest/code_modules/consultant_state.html)), and, using adequate inferences, the questions are put in these categories with their associated value (if any):
+The information given by the user is combined with the idp code (in [State.py](http://docs.idp-z3.be/en/latest/code_modules/server_state.html)), and, using adequate inferences, the questions are put in these categories with their associated value (if any):
 * given: given by the user
 * universal: always true (or false), per idp code
 * consequences: consequences of user’s input according to theory
 * irrelevant: made irrelevant by user’s input
 * unknown
 
-The IDP-Z3 server implements custom inferences such as the computation of relevance ([Inferences.py](http://docs.idp-z3.be/en/latest/code_modules/consultant_inferences.html)), and the handling of environmental vs. decision variables.
+The IDP-Z3 server implements custom inferences such as the computation of relevance ([Inferences.py](http://docs.idp-z3.be/en/latest/code_modules/server_inferences.html)), and the handling of environmental vs. decision variables.
+
 
 ## IDP-Z3 solver
-The code for the IDP-Z3 solver and IDP-Z3-CLI is in the `/Idp` folder. The IDP-Z3 solver exposes [an API](http://docs.idp-z3.be/en/latest/IDPLanguage.html#main-block) implemented by [Run.py](http://docs.idp-z3.be/en/latest/code_modules/idp_run.html) and [Problem.py](http://docs.idp-z3.be/en/latest/code_modules/idp_problem.html).
+The code for the IDP-Z3 solver and IDP-Z3-CLI is in the `/idp_solver` folder. The IDP-Z3 solver exposes [an API](http://docs.idp-z3.be/en/latest/IDPLanguage.html#main-block) implemented by [Run.py](http://docs.idp-z3.be/en/latest/code_modules/idp_run.html) and [Problem.py](http://docs.idp-z3.be/en/latest/code_modules/idp_problem.html).
 
 Translating knowledge inferences into satisfiability problems that Z3 can solve involves these steps:
 1.  parsing the idp code and the info entered by the user, 
@@ -39,7 +45,7 @@ Translating knowledge inferences into satisfiability problems that Z3 can solve 
 3.  calling the appropriate method,
 4.  formatting the response.
 
-The IDP-Z3 code is parsed into an [abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST) using the [textx package](https://github.com/textX/textX), according to [this grammar](https://gitlab.com/krr/autoconfigz3/blob/master/Idp/Idp.tx).  There is one python class per type of AST nodes (see [Parse.py](http://docs.idp-z3.be/en/latest/code_modules/idp_parse.html) and [Expression.py](http://docs.idp-z3.be/en/latest/code_modules/idp_expression.html))
+The IDP-Z3 code is parsed into an [abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST) using the [textx package](https://github.com/textX/textX), according to [this grammar](https://gitlab.com/krr/autoconfigz3/blob/master/idp_solver/idp_solver.tx).  There is one python class per type of AST nodes (see [Parse.py](http://docs.idp-z3.be/en/latest/code_modules/idp_parse.html) and [Expression.py](http://docs.idp-z3.be/en/latest/code_modules/idp_expression.html))
 
 The conversion to the Z3 format is performed by the following passes over the AST generated by the parser:
 1.  annotate the nodes by resolving names, and computing some derived information (e.g. type) (`annotate()`)
@@ -53,16 +59,22 @@ The conversion to the Z3 format is performed by the following passes over the AS
 
 The code is organised by steps, not by classes:  for example, all methods to substitute an expression by another are grouped in [Substitute.py](http://docs.idp-z3.be/en/latest/code_modules/idp_substitute.html).  We use [monkey-patching](https://www.geeksforgeeks.org/monkey-patching-in-python-dynamic-behavior/) to attach methods to the classes declared in another module.
 
-Important classes of the IDP-Z3 solver are: [Expression](http://docs.idp-z3.be/en/latest/code_modules/idp_expression.html#Idp.Expression.Expression), [Assignment](http://docs.idp-z3.be/en/latest/code_modules/idp_assignments.html#Idp.Assignments.Assignment), [Problem](http://docs.idp-z3.be/en/latest/code_modules/idp_problem.html#Idp.Problem.Problem).
+Important classes of the IDP-Z3 solver are: [Expression](http://docs.idp-z3.be/en/latest/code_modules/idp_expression.html#idp_solver.Expression.Expression), [Assignment](http://docs.idp-z3.be/en/latest/code_modules/idp_assignments.html#idp_solver.Assignments.Assignment), [Problem](http://docs.idp-z3.be/en/latest/code_modules/idp_problem.html#idp_solver.Problem.Problem).
 
 Substitute() modifies the AST "in place".  Because the results of step 1-2 are cached, steps 4-7 are done after copying the AST (custom `copy()`).
 
+
+## Z3
+
+See [this tutorial](https://ericpony.github.io/z3py-tutorial/guide-examples.htm) for an introduction to Z3 (or [this guide](https://docs.google.com/presentation/d/1BgXIJNZJD6YTAT5k5ZSMv4irMeMA9a41EnJsIO1eK9Y/edit?usp=sharing)).
+
+You may also want to refer to the [Z3py reference](https://z3prover.github.io/api/html/namespacez3py.html).
 
 
 ## Appendix: Dependencies and Licences
 The IDP-Z3 tools are published under the [GNU LGPL v3 license](https://www.gnu.org/licenses/lgpl-3.0.en.html).  
 
-The server software uses the following components:
+The server software uses the following components (see [requirements.txt](https://gitlab.com/krr/IDP-Z3/-/blob/master/requirements.txt)):
 
 * [Z3](https://github.com/Z3Prover/z3): [MIT license](https://github.com/Z3Prover/z3/blob/master/LICENSE.txt)
 * [Z3-solver](https://pypi.org/project/z3-solver/): MIT license
