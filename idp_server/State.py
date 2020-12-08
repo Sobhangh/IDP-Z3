@@ -21,13 +21,13 @@ Management of the State of problem solving with the Interactive Consultant.
 
 from debugWithYamlLog import NEWL, indented
 
-from Idp.Run import Problem
-from Idp.utils import OrderedSet
+from idp_solver.Run import Problem
+from idp_solver.utils import OrderedSet
 from .IO import json_to_literals, Status
 from .Inferences import get_relevant_subtences
 
 # Types
-from Idp import Idp
+from idp_solver import Idp
 from typing import Dict, Tuple
 
 

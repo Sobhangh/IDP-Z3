@@ -26,10 +26,10 @@ This module monkey-patches the Expression class and sub-classes.
 
 from typing import List, Tuple, Optional
 
-from Idp.Expression import Constructor, Expression, AQuantification, \
+from idp_solver.Expression import Constructor, Expression, AQuantification, \
                     ADisjunction, AConjunction, \
                     AComparison, AUnary, Brackets, TRUE, FALSE
-from Idp.Assignments import Assignments
+from idp_solver.Assignments import Assignments
 
 
 def _not(truth):

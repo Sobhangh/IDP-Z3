@@ -1,7 +1,7 @@
 .. _idp_utils
 
-Idp.utils
+idp_solver.utils
 =========================
 
-.. automodule:: Idp.utils
+.. automodule:: idp_solver.utils
    :members:

@@ -26,7 +26,7 @@ This module monkey-patches the Expression class and sub-classes.
 
 import sys
 
-from Idp.Expression import Constructor, Expression, IfExpr, AQuantification, \
+from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     BinaryOperator, AEquivalence, AImplication, ADisjunction, \
                     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
                     AUnary, AAggregate, AppliedSymbol, Variable, \

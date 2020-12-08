@@ -1,8 +1,8 @@
 .. _idp_parse:
 
-Idp.Parse
+idp_solver.Parse
 =========================
 
-.. automodule:: Idp.Parse
+.. automodule:: idp_solver.Parse
    :members:
    :show-inheritance:

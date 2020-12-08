@@ -1,7 +1,7 @@
 .. _idp_simplify:
 
-Idp.Simplify
+idp_solver.Simplify
 =========================
 
-.. automodule:: Idp.Simplify
+.. automodule:: idp_solver.Simplify
    :members:

@@ -1,7 +1,7 @@
 .. _idp_substitute:
 
-Idp.Substitute
+idp_solver.Substitute
 =========================
 
-.. automodule:: Idp.Substitute
+.. automodule:: idp_solver.Substitute
    :members:

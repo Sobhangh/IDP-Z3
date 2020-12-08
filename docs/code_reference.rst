@@ -40,6 +40,6 @@ The `source code of IDP-Z3 <https://gitlab.com/krr/IDP-Z3>`_ is publicly availab
    :caption: Contents:
 
    Architecture.md
-   idp.rst
-   consultant.rst
+   idp_solver.rst
+   idp_server.rst
 

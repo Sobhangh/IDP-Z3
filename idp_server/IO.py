@@ -22,9 +22,9 @@ web client.
 
 import ast
 
-from Idp.Expression import (TRUE, FALSE, AComparison, NumberConstant)
-from Idp.Parse import str_to_IDP
-from Idp.Assignments import Assignments, Status
+from idp_solver.Expression import (TRUE, FALSE, AComparison, NumberConstant)
+from idp_solver.Parse import str_to_IDP
+from idp_solver.Assignments import Assignments, Status
 
 
 def metaJSON(state):
@@ -96,7 +96,7 @@ def json_to_literals(state, jsonstr: str):
     :arg state: a State object containing the concepts that appear in the json
     :arg jsonstr: the user's assignments in json
     :returns: the assignments
-    :rtype: Idp.Assignments
+    :rtype: idp_solver.Assignments
     """
     out = Assignments()
     if jsonstr:

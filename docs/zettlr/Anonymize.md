@@ -18,11 +18,11 @@ Steps to release an anonymized version of the code:
 * replace copyright text in all source code (see below)
 * remove unnecessary code in deploy.sh
 * run ./deploy.sh without deployment to GAE, Heroku
-* in IDP-Z3/consultant/static/assets/
+* in IDP-Z3/idp_server/static/assets/
     * delete KU Leuven Logo.png
     * delete Interactive_Consultant.mp4
 * copy IDP-Z3 to anon
-* delete 
+* delete
     * anon/.git
     * anon/docs/zetllr
 

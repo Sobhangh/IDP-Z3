@@ -4,13 +4,13 @@ import os,sys,inspect,time
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
-sys.path.insert(0,os.path.join(parentdir, 'Idp'))
+sys.path.insert(0,os.path.join(parentdir, 'idp_solver'))
 
 print(parentdir)
 import Inferences
 from State import *
-from Idp.utils import log
-from Idp import *
+from idp_solver.utils import log
+from idp_solver import *
 from z3 import Solver
 
 

@@ -1,8 +1,8 @@
 .. _idp_expression:
 
-Idp.Expression
+idp_solver.Expression
 =========================
 
-.. automodule:: Idp.Expression
+.. automodule:: idp_solver.Expression
    :members:
    :show-inheritance:
