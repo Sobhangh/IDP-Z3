@@ -1,6 +1,6 @@
 
-consultant module
-=================
+``idp_server`` module
+=====================
 
 .. toctree::
    :maxdepth: 3

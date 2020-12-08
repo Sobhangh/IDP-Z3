@@ -1,5 +1,5 @@
-idp_solver module
-==========
+``idp_solver`` module
+=====================
 
 .. toctree::
    :maxdepth: 3
