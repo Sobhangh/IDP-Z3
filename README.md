@@ -26,7 +26,7 @@ To launch the Interactive Consultant web server:
 
 # Develop
 
-You may want to read about the [technical architecture](https://gitlab.com/krr/IDP-Z3/-/wikis/Architecture).
+You may want to read about the [technical documentation](http://docs.idp-z3.be/en/latest/code_reference.html) and the [Development and deployment guide](https://gitlab.com/krr/IDP-Z3/-/wikis/Development-and-deployment-guide).
 
 The user manual is in the `/docs` folder and can be locally generated as follows:
 ~~~~
