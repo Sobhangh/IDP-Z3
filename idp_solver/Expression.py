@@ -535,8 +535,6 @@ class AConjunction(BinaryOperator):
 
 class AComparison(BinaryOperator):
     PRECEDENCE = 80
-    Enumeration: Optional["Enumeration"] = None # to resolve circular dependencies
-    Tuple: Optional["Tuple"] = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -558,12 +556,6 @@ class AComparison(BinaryOperator):
                 and all(e.as_rigid() is not None for e in self.sub_exprs[0].sub_exprs) \
                 and self.sub_exprs[1].as_rigid() is not None
         return super().annotate1()
-
-    def as_set_condition(self):
-        return ((None, None, None) if not self.is_assignment else
-                (self.sub_exprs[0], True,
-                 AComparison.Enumeration(
-                     tuples=[AComparison.Tuple(args=[self.sub_exprs[1]])])))
 
 
 class ASumMinus(BinaryOperator):
@@ -600,11 +592,6 @@ class AUnary(Expression):
     def annotate1(self):
         self.type = self.sub_exprs[0].type
         return super().annotate1()
-
-    def as_set_condition(self):
-        (x, y, z) = self.sub_exprs[0].as_set_condition()
-        return ((None, None, None) if x is None else
-                (x, not y, z))
 
 
 class AAggregate(Expression):
@@ -759,13 +746,6 @@ class AppliedSymbol(Expression):
             self._reified = ( super().reified() if self.is_reified() else
                  self.translate() )
         return self._reified
-
-    def as_set_condition(self):
-        # determine core after substitutions
-        core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
-
-        return ((None, None, None) if not self.in_enumeration else
-                (core, True, self.in_enumeration))
 
 
 class Arguments(object):

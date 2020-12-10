@@ -873,9 +873,6 @@ class Enumeration(object):
             return out
 
 
-AComparison.Enumeration = Enumeration # to resolve circular dependencies
-
-
 class Tuple(object):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
@@ -892,9 +889,6 @@ class Tuple(object):
 
     def translate(self):
         return [arg.translate() for arg in self.args]
-
-
-AComparison.Tuple = Tuple
 
 
 ################################ Goal, View  ###############################

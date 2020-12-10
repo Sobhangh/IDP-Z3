@@ -31,7 +31,7 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
                     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
                     AUnary, AAggregate, AppliedSymbol, Variable, \
                     NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE
-
+from idp_solver.Parse import Enumeration, Tuple
 
 # class Expression  ###########################################################
 
@@ -221,6 +221,11 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
+def as_set_condition(self):
+    return ((None, None, None) if not self.is_assignment else
+            (self.sub_exprs[0], True,
+             Enumeration(tuples=[Tuple(args=[self.sub_exprs[1]])])))
+AComparison.as_set_condition = as_set_condition
 
 #############################################################
 
@@ -296,6 +301,12 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
+def as_set_condition(self):
+    (x, y, z) = self.sub_exprs[0].as_set_condition()
+    return ((None, None, None) if x is None else
+            (x, not y, z))
+AUnary.as_set_condition = as_set_condition
+
 
 # Class AAggregate  #######################################################
 
@@ -310,6 +321,17 @@ def update_exprs(self, new_exprs):
 
     return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
+
+
+# Class AppliedSymbol  #######################################################
+
+def as_set_condition(self):
+    # determine core after substitutions
+    core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
+
+    return ((None, None, None) if not self.in_enumeration else
+            (core, True, self.in_enumeration))
+AppliedSymbol.as_set_condition = as_set_condition
 
 
 # Class Brackets  #######################################################
