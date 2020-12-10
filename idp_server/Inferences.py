@@ -72,7 +72,8 @@ def get_relevant_subtences(self):
     # initialize reachable with relevant, if any
     reachable = OrderedSet()
     for constraint in constraints:
-        if type(constraint)==AppliedSymbol and constraint.name=='__relevant':
+        if type(constraint) == AppliedSymbol and \
+           constraint.name == '__relevant':
             for e in constraint.sub_exprs:
                 assert e.code in self.assignments, \
                     f"Invalid expression in relevant: {e.code}"
@@ -86,25 +87,23 @@ def get_relevant_subtences(self):
             if not q.sentence.has_decision():
                 given.append(q.sentence)
 
-
     # constraints have set of questions in self.assignments
     # set constraint.relevant, constraint.questions
     for constraint in constraints:
         constraint.relevant = False
         constraint.questions = OrderedSet()
         constraint.collect(constraint.questions,
-            all_=True, co_constraints=False)
+                           all_=True, co_constraints=False)
 
         # add goals in constraint.original to constraint.questions
         # only keep questions in self.assignments
         qs = OrderedSet()
         constraint.original.collect(qs, all_=True, co_constraints=False)
         for q in qs:
-            if q in reachable: # a goal
+            if q in reachable:  # a goal
                 constraint.questions.append(q)
         constraint.questions = OrderedSet([q for q in constraint.questions
-            if q.code in self.assignments])
-
+                                           if q.code in self.assignments])
 
     # nothing relevant --> make every question in a constraint relevant
     if len(reachable) == 0:
@@ -149,16 +148,16 @@ def get_relevant_subtences(self):
             for s in q.unknown_symbols(co_constraints=False):
                 if s not in relevants:
                     relevants[s] = rank
-            if not q in given:
+            if q not in given:
                 reachable.append(q)
 
-        to_add, rank = OrderedSet(), 2 # or rank+1
+        to_add, rank = OrderedSet(), 2  # or rank+1
         for constraint in constraints:
             # consider constraint not yet considered
-            if ( not constraint.relevant
-            # and with a question that is reachable but not given
-            and  any(q in reachable and not q in given
-                    for q in constraint.questions) ):
+            if (not constraint.relevant
+                # and with a question that is reachable but not given
+                and any(q in reachable and q not in given
+                        for q in constraint.questions)):
                 constraint.relevant = True
                 to_add.extend(constraint.questions)
     if not hasGiven or self.idp.display.moveSymbols:
@@ -179,9 +178,9 @@ def explain(state, question):
         to_explain = state.assignments[question].sentence
 
         # rules used in justification
-        if to_explain.type != 'bool': # recalculate numeric value
+        if to_explain.type != 'bool':  # recalculate numeric value
             val = state.assignments[question].value
-            if val is None: # can't explain an expanded value
+            if val is None:  # can't explain an expanded value
                 return out.m
             to_explain = AComparison.make("=", [to_explain, val])
         if negated:
@@ -189,10 +188,11 @@ def explain(state, question):
 
         s = Solver()
         s.set(':core.minimize', True)
-        ps = {} # {reified: constraint}
+        ps = {}  # {reified: constraint}
 
         for ass in state.assignments.values():
-            if ass.status in [Status.GIVEN, Status.STRUCTURE, Status.UNIVERSAL]:
+            if ass.status in [Status.GIVEN, Status.STRUCTURE,
+                              Status.UNIVERSAL]:
                 p = ass.translate()
                 ps[p] = ass
                 #TODO use assert_and_track ?
@@ -210,18 +210,20 @@ def explain(state, question):
 
         if unsatcore:
             for a1 in state.assignments.values():
-                if a1.status in [Status.GIVEN, Status.STRUCTURE, Status.UNIVERSAL]:
+                if a1.status in [Status.GIVEN, Status.STRUCTURE,
+                                 Status.UNIVERSAL]:
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
-                        and a1.sentence.same_as(ps[a2].sentence): #TODO we might miss some equality
+                        and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
                             out.addAtom(a1.sentence, a1.value, a1.status)
 
             # remove irrelevant atoms
             for symb, dictionary in out.m.items():
-                out.m[symb] = { k:v for k,v in dictionary.items()
-                    if type(v)==dict and v['status'] in ['GIVEN', 'STRUCTURE', 'UNIVERSAL']
-                    and v.get('value', '') != ''}
-            out.m = {k:v for k,v in out.m.items() if v}
+                out.m[symb] = {k: v for k, v in dictionary.items()
+                               if type(v) == dict and v['status'] in
+                               ['GIVEN', 'STRUCTURE', 'UNIVERSAL']
+                               and v.get('value', '') != ''}
+            out.m = {k: v for k, v in out.m.items() if v}
 
             out.m["*laws*"] = []
             for a1 in chain(state.def_constraints.values(), state.constraints):
@@ -260,14 +262,15 @@ def abstract(state, given_json):
     out = {} # {category : [Assignment]}
 
     out["universal"] = list(l for l in state.assignments.values()
-                        if l.status == Status.UNIVERSAL)
+                            if l.status == Status.UNIVERSAL)
     out["given"    ] = list(l for l in state.assignments.values()
-                        if l.status == Status.GIVEN)
+                            if l.status == Status.GIVEN)
     out["fixed"    ] = list(l for l in state.assignments.values()
-                        if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
+                            if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
     out["irrelevant"]= list(l for l in state.assignments.values()
-        if not l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE]
-        and not l.relevant)
+                            if l.status not in [Status.ENV_CONSQ,
+                                                Status.CONSEQUENCE]
+                            and not l.relevant)
 
     out["models"] = ("" if len(models) < max_rows and time.time()<max_time else
         "Time out or more than {max_rows} models...Showing partial results")

@@ -677,7 +677,6 @@ class AppliedSymbol(Expression):
 
         self.decl = None
         self.name = self.s.name
-        self.core = None # the bare AppliedSymbol, without in_enumeration
 
     @classmethod
     def make(cls, symbol, args, **kwargs):

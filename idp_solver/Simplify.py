@@ -33,6 +33,7 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
                     NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE
 from idp_solver.Parse import Enumeration, Tuple
 
+
 # class Expression  ###########################################################
 
 def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
