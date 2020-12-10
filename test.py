@@ -98,7 +98,7 @@ def generate():
 
     dir = os.path.dirname(__file__)
     dir = os.path.join(dir, "tests")
-    files = glob.glob("./tests/9*/*.idp")
+    files = glob.glob("./tests/*/*.idp")
     files.sort()
     out_dict, error = {}, 0
     for file in files:
@@ -121,6 +121,10 @@ def generate():
                 out_dict[file] = "**** unexpected result !"
                 error = 1
             f.close()
+
+        f = open(z3, "w")
+        f.write(output)
+        f.close()
 
     total = round(time.process_time()-start, 3)
     print("*** Total: ", total)

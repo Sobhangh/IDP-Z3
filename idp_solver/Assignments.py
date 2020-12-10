@@ -102,6 +102,9 @@ class Assignment(object):
             post = f" -> {str(self.value)}"
         return f"{pre}{self.sentence.annotations['reading']}{post}"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __log__(self):
         return self.value
 
@@ -117,6 +120,11 @@ class Assignment(object):
         else:
             out = AComparison.make('=', [self.sentence.original, self.value])
         return out
+
+    def negate(self):
+        assert self.sentence.type == 'bool', "Internal error"
+        value = FALSE if self.value.same_as(TRUE) else TRUE
+        return Assignment(self.sentence, value, self.status, self.relevant)
 
     def translate(self) -> BoolRef:
         return self.formula().translate()

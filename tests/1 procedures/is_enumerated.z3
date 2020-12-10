@@ -63,18 +63,18 @@ T3, S
 Traceback (most recent call last):
   File "test.py", line 56, in generateZ3
     idp.execute()
-  File "idp_solver/Run.py", line 79, in execute
+  File "idp_solver/Run.py", line 93, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 12, in <module>
-  File "idp_solver/Run.py", line 59, in myprint
+  File "idp_solver/Run.py", line 72, in myprint
     for i, xi in enumerate(x):
   File "idp_solver/Run.py", line 48, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "idp_solver/Problem.py", line 185, in expand
+  File "idp_solver/Problem.py", line 187, in expand
     z3_formula = self.formula().translate()
-  File "idp_solver/Problem.py", line 140, in formula
+  File "idp_solver/Problem.py", line 142, in formula
     self._interpret()
-  File "idp_solver/Problem.py", line 130, in _interpret
+  File "idp_solver/Problem.py", line 132, in _interpret
     c.interpret(self)
   File "idp_solver/Substitute.py", line 212, in interpret
     assert self.decl.function, \

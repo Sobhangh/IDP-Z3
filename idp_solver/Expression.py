@@ -256,7 +256,7 @@ class Expression(object):
 
     def reified(self) -> DatatypeRef:
         if self._reified is None:
-            self._reified = Const('*'+str(Expression.COUNT), BoolSort())
+            self._reified = Const(b'*'+self.code.encode(), BoolSort())
             Expression.COUNT += 1
         return self._reified
 
@@ -515,6 +515,11 @@ class ARImplication(BinaryOperator):
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
 
+    def __str1__(self):
+        if not hasattr(self, 'enumerated'):
+            return super().__str1__()
+        return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
+
 
 class AConjunction(BinaryOperator):
     PRECEDENCE = 70
@@ -728,7 +733,10 @@ class AppliedSymbol(Expression):
                 or any(e.is_reified() for e in self.sub_exprs))
 
     def reified(self):
-        return (super().reified() if self.is_reified() else self.translate())
+        if self._reified is None:
+            self._reified = ( super().reified() if self.is_reified() else
+                 self.translate() )
+        return self._reified
 
 
 class Arguments(object):

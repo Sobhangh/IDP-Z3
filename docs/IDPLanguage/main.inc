@@ -7,7 +7,7 @@ Main block
 The *main block* consists of python-like statements to be executed by the :ref:`IDP-Z3 executable<CLI>` or the Web IDE, in the context of the knowledge base.
 It takes the following form:
 
-.. code::
+.. code-block::
 
     procedure main() {
         // here comes the python-like code to be executed
@@ -96,4 +96,4 @@ simplify(self)
 
 decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
     Returns the rows for a decision table that defines ``goal_string``.
-    ``goal_string`` must be one of the atoms in the theory. 
+    ``goal_string`` must be one of the atoms in the theory.

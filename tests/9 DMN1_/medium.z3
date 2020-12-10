@@ -1,10 +1,10 @@
   Not B
 ⇒ Not Eligible(BE001)
 
-  C
+  D
 ⇒ Eligible(BE001)
 
-  D
+  C
 ⇒ Eligible(BE001)
 
   Not E
