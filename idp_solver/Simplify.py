@@ -25,13 +25,16 @@ This module monkey-patches the Expression class and sub-classes.
 """
 
 import sys
+from typing import List
 
-from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    BinaryOperator, AEquivalence, AImplication, ADisjunction, \
-                    AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
-                    AUnary, AAggregate, AppliedSymbol, Variable, \
-                    NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE
-from idp_solver.Parse import Enumeration, Tuple
+from .Expression import (
+    Constructor, Expression, IfExpr, AQuantification, \
+    BinaryOperator, AEquivalence, AImplication, ADisjunction, \
+    AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
+    AUnary, AAggregate, AppliedSymbol, Variable, \
+    NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE)
+from .Parse import Enumeration, Tuple
+from .Assignments import Status, Assignment
 
 
 # class Expression  ###########################################################
@@ -342,5 +345,44 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=[expr], value=expr.value)
 Brackets.update_exprs = update_exprs
 
+
+# set conditions  #######################################################
+
+def join_set_conditions(conditions: List[Assignment]) -> List[Assignment]:
+    # merge conditions on the same term (equality or 'in')
+    for i, c in enumerate(conditions):
+        (x, belongs, y) = c.as_set_condition()
+        if x:
+            for j in range(i):
+                (x1, belongs1, y1) = conditions[j].as_set_condition()
+                if x1 and x.same_as(x1):
+                    if belongs and belongs1:
+                        new_tuples = (y.tuples & y1.tuples) # intersect
+                    elif belongs and not belongs1:
+                        new_tuples = (y.tuples ^ y1.tuples) # difference
+                    elif not belongs and belongs1:
+                        belongs = belongs1
+                        new_tuples = (y1.tuples ^ y.tuples)
+                    else:
+                        new_tuples = y.tuples | y1.tuples # union
+                        # sort again
+                        new_tuples = list(new_tuples.values())
+
+                    out = AppliedSymbol.make(
+                        symbol=x.s, args=x.sub_exprs,
+                        in_enumeration=Enumeration(tuples=new_tuples)
+                    )
+
+                    core = AppliedSymbol.make(out.s, out.sub_exprs).copy()
+                    out.simpler = out.in_enumeration.contains([core], False)
+
+                    out = Assignment(out,
+                                        TRUE if belongs else FALSE,
+                                        Status.UNKNOWN)
+
+                    conditions[j] = out # keep the first one
+                    conditions[i] = Assignment(TRUE, TRUE,
+                                                Status.UNKNOWN)
+    return [c for c in conditions if c.sentence != TRUE]
 
 Done = True

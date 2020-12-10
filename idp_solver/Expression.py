@@ -316,7 +316,7 @@ class Expression(object):
     def translate1(self):
         pass  # monkey-patched
 
-    def as_set_condition(self):
+    def as_set_condition(self) -> Tuple[Optional["AppliedSymbol"], Optional[bool], Optional["Enumeration"]]:
         """Returns an equivalent expression of the type "x in y", or None
 
         Returns:
@@ -859,7 +859,7 @@ class Brackets(Expression):
         if type(annotations) == dict:
             self.annotations = annotations
         elif annotations is None:
-            self.annotations['reading'] = None
+            self.annotations['reading'] = ''
         else:  # Annotations instance
             self.annotations = annotations.annotations
 

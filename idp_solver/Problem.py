@@ -21,6 +21,7 @@ Class to represent a collection of theory and structure blocks.
 
 """
 
+from idp_solver.Simplify import join_set_conditions
 import time
 from copy import copy
 from typing import Iterable, List
@@ -331,7 +332,10 @@ class Problem(object):
                 self.constraints = new_constraints
         return self
 
-    def _generalize(self, conjuncts, known, z3_formula=None):
+    def _generalize(self,
+                    conjuncts: List[Assignment],
+                    known, z3_formula=None
+    ) -> List[Assignment]:
         """finds a subset of `conjuncts`
             that is still a minimum satisfying assignment for `self`, given `known`.
 
@@ -366,45 +370,12 @@ class Problem(object):
                 if goal.sentence == TRUE or goal.value is None:  # find an abstract model
                     # z3_formula & known & conditions => conditions_i is always true
                     solver.add(Not(Implies(And(known, conditions_i), z3_conditions)))
-                else:# decision table
+                else:  # decision table
                     # z3_formula & known & conditions => goal is always true
                     solver.add(Not(Implies(hypothesis, goal.translate())))
                 if solver.check() == unsat:
                     conditions[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
-            # merge conditions on the same term (equality or 'in')
-            for i, c in enumerate(conditions):
-                (x, belongs, y) = c.as_set_condition()
-                if x:
-                    for j in range(i):
-                        (x1, belongs1, y1) = conditions[j].as_set_condition()
-                        if x1 and x.same_as(x1):
-                            if belongs and belongs1:
-                                new_tuples = (y.tuples & y1.tuples) # intersect
-                            elif belongs and not belongs1:
-                                new_tuples = (y.tuples ^ y1.tuples) # difference
-                            elif not belongs and belongs1:
-                                belongs = belongs1
-                                new_tuples = (y1.tuples ^ y.tuples)
-                            else:
-                                new_tuples = y.tuples | y1.tuples # union
-                                # sort again
-                                new_tuples = list(new_tuples.values())
-
-                            out = AppliedSymbol.make(
-                                symbol=x.s, args=x.sub_exprs,
-                                in_enumeration=Enumeration(tuples=new_tuples)
-                            )
-
-                            core = AppliedSymbol.make(out.s, out.sub_exprs).copy()
-                            out.simpler = out.in_enumeration.contains([core], False)
-
-                            out = Assignment(out,
-                                             TRUE if belongs else FALSE,
-                                             Status.UNKNOWN)
-
-                            conditions[j] = out # keep the first one
-                            conditions[i] = Assignment(TRUE, TRUE,
-                                                       Status.UNKNOWN)
+            conditions = join_set_conditions(conditions)
             return [c for c in conditions if c.sentence != TRUE]+[goal]
 
     def decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True):

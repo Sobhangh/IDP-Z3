@@ -70,11 +70,11 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "idp_solver/Run.py", line 48, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "idp_solver/Problem.py", line 187, in expand
+  File "idp_solver/Problem.py", line 188, in expand
     z3_formula = self.formula().translate()
-  File "idp_solver/Problem.py", line 142, in formula
+  File "idp_solver/Problem.py", line 143, in formula
     self._interpret()
-  File "idp_solver/Problem.py", line 132, in _interpret
+  File "idp_solver/Problem.py", line 133, in _interpret
     c.interpret(self)
   File "idp_solver/Substitute.py", line 212, in interpret
     assert self.decl.function, \
