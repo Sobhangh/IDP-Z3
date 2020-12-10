@@ -135,9 +135,9 @@ class Assignment(object):
         Returns:
             Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "appSymb is (not) in enumeration"
         """
-        (x,y) = self.sentence.as_set_condition()
+        (x, y, z) = self.sentence.as_set_condition()
         if x:
-            return (x, self.value.same_as(TRUE), y)
+            return (x, y if self.value.same_as(TRUE) else not y, z)
         return (None, None, None)
 
 class Assignments(dict):

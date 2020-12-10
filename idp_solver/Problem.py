@@ -377,7 +377,7 @@ class Problem(object):
                 if x:
                     for j in range(i):
                         (x1, belongs1, y1) = conditions[j].as_set_condition()
-                        if x1 and x.core.same_as(x1.core):
+                        if x1 and x.same_as(x1):
                             if belongs and belongs1:
                                 new_tuples = (y.tuples & y1.tuples) # intersect
                             elif belongs and not belongs1:
@@ -394,6 +394,9 @@ class Problem(object):
                                 symbol=x.s, args=x.sub_exprs,
                                 in_enumeration=Enumeration(tuples=new_tuples)
                             )
+
+                            core = AppliedSymbol.make(out.s, out.sub_exprs).copy()
+                            out.simpler = out.in_enumeration.contains([core], False)
 
                             out = Assignment(out,
                                              TRUE if belongs else FALSE,

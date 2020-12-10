@@ -830,6 +830,9 @@ class Enumeration(object):
             self.tuples.sort(key=lambda t: t.code)
             self.tuples = OrderedSet(self.tuples)
 
+    def __repr__(self):
+        return ", ".join([repr(t) for t in self.tuples])
+
     def annotate(self, voc):
         for t in self.tuples:
             t.annotate(voc)
@@ -870,6 +873,9 @@ class Enumeration(object):
             return out
 
 
+AComparison.Enumeration = Enumeration # to resolve circular dependencies
+
+
 class Tuple(object):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
@@ -878,11 +884,17 @@ class Tuple(object):
     def __str__(self):
         return self.code
 
+    def __repr__(self):
+        return self.code
+
     def annotate(self, voc):
         self.args = [arg.annotate(voc, {}) for arg in self.args]
 
     def translate(self):
         return [arg.translate() for arg in self.args]
+
+
+AComparison.Tuple = Tuple
 
 
 ################################ Goal, View  ###############################

@@ -320,9 +320,9 @@ class Expression(object):
         """Returns an equivalent expression of the type "x in y", or None
 
         Returns:
-            Tuple[Optional[AppliedSymbol], Optional[Enumeration]]: meaning "expr is in enumeration"
+            Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "expr is (not) in enumeration"
         """
-        return (None, None)
+        return (None, None, None)
 
 
 class Constructor(Expression):
@@ -535,6 +535,8 @@ class AConjunction(BinaryOperator):
 
 class AComparison(BinaryOperator):
     PRECEDENCE = 80
+    Enumeration: Optional["Enumeration"] = None # to resolve circular dependencies
+    Tuple: Optional["Tuple"] = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -556,6 +558,12 @@ class AComparison(BinaryOperator):
                 and all(e.as_rigid() is not None for e in self.sub_exprs[0].sub_exprs) \
                 and self.sub_exprs[1].as_rigid() is not None
         return super().annotate1()
+
+    def as_set_condition(self):
+        return ((None, None, None) if not self.is_assignment else
+                (self.sub_exprs[0], True,
+                 AComparison.Enumeration(
+                     tuples=[AComparison.Tuple(args=[self.sub_exprs[1]])])))
 
 
 class ASumMinus(BinaryOperator):
@@ -592,6 +600,11 @@ class AUnary(Expression):
     def annotate1(self):
         self.type = self.sub_exprs[0].type
         return super().annotate1()
+
+    def as_set_condition(self):
+        (x, y, z) = self.sub_exprs[0].as_set_condition()
+        return ((None, None, None) if x is None else
+                (x, not y, z))
 
 
 class AAggregate(Expression):
@@ -713,10 +726,6 @@ class AppliedSymbol(Expression):
         out = super().annotate1()
         if out.decl is None or out.decl.name == "`Symbols":  # a symbol variable
             out.fresh_vars.add(self.s.name)
-        if self.in_enumeration:
-            self.core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
-            self.simpler = self.in_enumeration.contains([self.core], False)
-            self.simpler.annotations = self.annotations
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -752,8 +761,11 @@ class AppliedSymbol(Expression):
         return self._reified
 
     def as_set_condition(self):
-        return ((None, None) if not self.in_enumeration else
-                (self, self.in_enumeration))
+        # determine core after substitutions
+        core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
+
+        return ((None, None, None) if not self.in_enumeration else
+                (core, True, self.in_enumeration))
 
 
 class Arguments(object):
@@ -786,6 +798,7 @@ class Variable(AppliedSymbol):
             return q_vars[self.name]
         elif self.name in voc.symbol_decls:  # in symbol_decls
             self.decl = voc.symbol_decls[self.name]
+            self.s.decl = self.decl
             self.type = self.decl.type
         else:
             pass  # a quantification variable without known type yet

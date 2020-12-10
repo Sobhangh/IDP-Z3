@@ -6,16 +6,12 @@
 ∧ C
 ⇒ Eligible(BE001)
 
-  Not B
-∧ Not C
+  Not C
+∧ Not E
 ⇒ ? Eligible(BE001)
 
   B
-∧ E
 ⇒ Eligible(BE001)
-
-  B
-⇒ ? Eligible(BE001)
 
   Not E
 ⇒ ? Eligible(BE001)
