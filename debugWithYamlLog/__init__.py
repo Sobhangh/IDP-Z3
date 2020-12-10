@@ -10,7 +10,7 @@ _indent = 0
 LOG_FILE = None
 def Log_file(path):
     global LOG_FILE
-    if 'roof' in path or 'andbox' in path:
+    if 'ogic' in path or 'andbox' in path:
         path, filename = os.path.split(path)
         LOG_FILE = newpath = os.path.join(path, filename.replace('.idp', '_log.txt'))
         indent = 0
@@ -34,7 +34,7 @@ def Log(something):
     global LOG_FILE, _indent
     if LOG_FILE:
         f = open(LOG_FILE, "a")
-        out = f"{NEWL}{dump([prepare(something)], allow_unicode=True, sort_keys=False)}"[:-1] # drop last \n
+        out = f"{NEWL}{dump([prepare(something)], allow_unicode=True, sort_keys=False)}"[:-1]  # drop last \n
         out = out.replace(NEWL, NEWL+(' '*_indent))
         f.write(out)
         f.close()
@@ -54,6 +54,6 @@ def log_calls(function):
         if LOG_FILE:
             _indent -= 2
             Log(f"returning from {function.__name__}: {str(out)}")
-        return out    
+        return out
     return _wrapper
 

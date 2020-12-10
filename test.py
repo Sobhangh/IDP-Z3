@@ -28,15 +28,15 @@ import sys
 import threading
 import time
 import traceback
-from typing import Dict
+import re
 
 # import pyximport;
 # pyximport.install(language_level=3)
 
-from consultant.State import State, make_state
-from consultant.IO import *
-from Idp import idpparser, SymbolDeclaration, NEWL
-from Idp.utils import start, log
+from idp_server.State import State, make_state
+from idp_server.IO import Output, metaJSON
+from idp_solver import idpparser
+from idp_solver.utils import start, log, NEWL
 
 z3lock = threading.Lock()
 
@@ -89,7 +89,7 @@ def generateZ3(theory):
 
 
 def generate():
-    # optional patch Log on Idp.Substitute ####################################
+    # optional patch Log on idp_solver.Substitute  ####################################
 
     # for i in [Expression, AppliedSymbol, Variable, Fresh_Variable]:
     #     i.substitute = log_calls(i.substitute)
@@ -109,17 +109,17 @@ def generate():
             theory = f.read()
             output = generateZ3(theory)
 
-            z3 = file.replace(".z3", ".z3z3")
-            z3 = z3.replace(".idp", ".z3")
-            if os.path.isfile(z3):
-                f = open(z3, "r")
-                if output != f.read():
-                    out_dict[file] = "**** unexpected result !"
-                    error = 1
-                f.close()
+        # Remove absolute paths from output.
+        output = re.sub(r'(/.*)(?=idp_solver/)', '', output)
+        output = re.sub(r'(/.*)(?=idp_server/)', '', output)
 
-            f = open(z3, "w")
-            f.write(output)
+        z3 = file.replace(".z3", ".z3z3")
+        z3 = z3.replace(".idp", ".z3")
+        if os.path.isfile(z3):
+            f = open(z3, "r")
+            if output != f.read():
+                out_dict[file] = "**** unexpected result !"
+                error = 1
             f.close()
 
     total = round(time.process_time()-start, 3)
@@ -159,7 +159,7 @@ def pipeline():
                     if idp.procedures == {}:
                         state = make_state(idp, given_json)
                         generator = state.expand(max=1,complete=False, extended=True)
-                        list(generator)[0] # ignore result
+                        list(generator)[0]  # ignore result
                         out = Output(state).fill(state)
                     else:
                         # avoid files meant to raise an error

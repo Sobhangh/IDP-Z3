@@ -1,50 +1,77 @@
-"""
-    Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+#
+# This file is part of Interactive_Consultant.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-    This file is part of Interactive_Consultant.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
-"""
-
-Classes to represent assignments of values to expressions
 
 """
+
+Classes to store assignments of values to questions
+
+"""
+__all__ = ["Status", "Assignment", "Assignments"]
 
 from copy import copy
 from enum import Enum, auto
 from typing import Optional
-from z3 import Not, BoolRef
+from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, AUnary, AComparison, \
-                        AppliedSymbol
-from .Parse import *
+from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
+from .utils import NEWL
+
 
 class Status(Enum):
-    UNKNOWN     = auto()
-    GIVEN       = auto()
-    ENV_UNIV    = auto()
-    UNIVERSAL   = auto()
-    ENV_CONSQ   = auto()
+    """Describes how the value of a question was obtained"""
+    UNKNOWN = auto()
+    GIVEN = auto()
+    ENV_UNIV = auto()
+    UNIVERSAL = auto()
+    ENV_CONSQ = auto()
     CONSEQUENCE = auto()
-    EXPANDED    = auto()
-    STRUCTURE   = auto()
+    EXPANDED = auto()
+    STRUCTURE = auto()
+
 
 class Assignment(object):
-    def __init__(self, sentence: Expression, value: Optional[Expression], 
-                       status: Status, relevant:bool=False):
+    """Represent the assignment of a value to a question.
+    Questions can be:
+
+    * predicates and functions applied to arguments,
+    * comparisons,
+    * outermost quantified expressions
+
+    A value is a rigid term.
+
+    An assignment also has a reference to the symbol under which it should be
+    displayed.
+
+    Attributes:
+        sentence (Expression): the question to be assigned a value
+
+        value (Expression, optional): a rigid term
+
+        status (Status, optional): qualifies how the value was obtained
+
+        relevant (bool, optional): states whether the sentence is relevant
+
+        symbol_decl (SymbolDeclaration): declaration of the symbol under which
+        it should be displayed.
+    """
+    def __init__(self, sentence: Expression, value: Optional[Expression],
+                 status: Optional[Status],
+                 relevant: Optional[bool] = False):
         self.sentence = sentence
         self.value = value
         self.status = status
@@ -66,22 +93,19 @@ class Assignment(object):
     def __str__(self):
         pre, post = '', ''
         if self.value is None:
-            pre = f"? "
+            pre = "? "
         elif self.value.same_as(TRUE):
             pre = ""
         elif self.value.same_as(FALSE):
-            pre = f"Not "
+            pre = "Not "
         else:
             post = f" -> {str(self.value)}"
         return f"{pre}{self.sentence.annotations['reading']}{post}"
 
-    def __repr__(self):
-        return self.__str__()
-
     def __log__(self):
         return self.value
 
-    def to_json(self) -> str: # for GUI
+    def to_json(self) -> str:  # for GUI
         return str(self)
 
     def formula(self):
@@ -94,44 +118,43 @@ class Assignment(object):
             out = AComparison.make('=', [self.sentence.original, self.value])
         return out
 
-    def negate(self):
-        assert self.sentence.type == 'bool', "Internal error"
-        value = FALSE if self.value.same_as(TRUE) else TRUE
-        return Assignment(self.sentence, value, self.status, self.relevant)
-
     def translate(self) -> BoolRef:
         return self.formula().translate()
 
+
 class Assignments(dict):
-    def __init__(self,*arg,**kw):
+    """Contains a set of Assignment"""
+    def __init__(self, *arg, **kw):
         super(Assignments, self).__init__(*arg, **kw)
-        self.symbols = {} # { decl.name: decl }
+        self.symbols = {}  # { decl.name: decl }
         for a in self.values():
             if a.symbol_decl:
                 self.symbols[a.symbol_decl.name] = a.symbol_decl
 
     def copy(self):
-        return Assignments({k: v.copy() for k,v in self.items()})
+        return Assignments({k: v.copy() for k, v in self.items()})
 
     def extend(self, more):
         for v in more.values():
             self.assert_(v.sentence, v.value, v.status, v.relevant)
 
-    def assert_(self, sentence: Expression, 
-                      value: Optional[Expression], 
-                      status: Optional[Status],
-                      relevant: Optional[bool]):
+    def assert_(self, sentence: Expression,
+                value: Optional[Expression],
+                status: Optional[Status],
+                relevant: Optional[bool]):
         sentence = sentence.copy()
         if sentence.code in self:
-            out = copy(self[sentence.code]) # needed for explain of irrelevant symbols
+            # needed for explain of irrelevant symbols
+            out = copy(self[sentence.code])
             # don't overwrite
-            if out.value is None: 
+            if out.value is None:
                 out.value = value
             else:
-                pass # issue #35 error will be caught later by Z3
-            if out.status   is None or out.status == Status.UNKNOWN: 
-                out.status   = status
-            if relevant is not None: out.relevant = relevant
+                pass  # issue  #35 error will be caught later by Z3
+            if out.status is None or out.status == Status.UNKNOWN:
+                out.status = status
+            if relevant is not None:
+                out.relevant = relevant
         else:
             out = Assignment(sentence, value, status, relevant)
             if out.symbol_decl:
@@ -144,7 +167,7 @@ class Assignments(dict):
         for a in self.values():
             if a.value is not None and not a.sentence.is_reified():
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
-                c = f"({c})" if c else c 
+                c = f"({c})" if c else c
                 c = f"{c}->{str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
         return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"

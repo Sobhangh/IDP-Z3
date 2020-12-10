@@ -13,6 +13,8 @@ Welcome to IDP-Z3's documentation!
    introduction
    IDPLanguage
    CLI
+   interactive_consultant
+   code_reference
    genindex
    
 

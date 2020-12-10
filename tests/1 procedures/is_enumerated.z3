@@ -63,20 +63,20 @@ T3, S
 Traceback (most recent call last):
   File "test.py", line 56, in generateZ3
     idp.execute()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 90, in execute
+  File "idp_solver/Run.py", line 79, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 12, in <module>
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 70, in myprint
+  File "idp_solver/Run.py", line 59, in myprint
     for i, xi in enumerate(x):
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Run.py", line 49, in model_expand
+  File "idp_solver/Run.py", line 48, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Problem.py", line 153, in expand
+  File "idp_solver/Problem.py", line 185, in expand
     z3_formula = self.formula().translate()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Problem.py", line 111, in formula
+  File "idp_solver/Problem.py", line 140, in formula
     self._interpret()
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Problem.py", line 101, in _interpret
+  File "idp_solver/Problem.py", line 130, in _interpret
     c.interpret(self)
-  File "/home/pcarbonn/Documents/repos/IDP-Z3/Idp/Substitute.py", line 200, in interpret
+  File "idp_solver/Substitute.py", line 212, in interpret
     assert self.decl.function, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

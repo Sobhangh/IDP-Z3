@@ -141,7 +141,7 @@ display {
                                'is_assignment': True,
                                'normal': False,
                                'reading': 'same(Piet) = Jan',
-                               'relevant': True,
+                               'relevant': False,
                                'status': 'CONSEQUENCE',
                                'typ': 'Bool',
                                'value': False},

@@ -20,23 +20,25 @@ The IDP-Z3 components together enable the creation of these solutions:
 * :ref:`a program<CLI>` with a command line interface to compute inferences on a knowledge base;
 * a `web-based Interactive Development Environment <https://interactive-consultant.ew.r.appspot.com/IDE>`_ (IDE) to create Knowledge bases.
 
-The `source code of IDP-Z3 <https://gitlab.com/krr/IDP-Z3>`_ is publicly available under the GNU LGPL v3 license.
-
 .. warning::
    You may want to verify that you are seeing the documentation relevant for the version of IDP-Z3 you are using.
    On `readthedocs <https://docs.idp-z3.be/>`_, you can see the version under the title (top left corner), and you can change it using the listbox at the bottom left corner.
+
+
+.. _Installation:
+.. index:: Installation
 
 Installation using poetry
 -------------------------
 
 `Poetry <https://python-poetry.org/>`_ is a package manager for python.
 
-* Install `python3 <https://www.python.org/downloads/>`_ on your machine
-* Install `poetry <https://python-poetry.org/docs/#installation>`_
+* `Install python3 <https://www.python.org/downloads/>`_ on your machine
+* `Install poetry <https://python-poetry.org/docs/#installation>`_
 
     * after that, logout and login if requested, to update :code:`$PATH`
 * Use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine
-* Open a terminal in that directory 
+* Open a terminal in that directory
 * If you have several versions of python3, and want to run on a particular one, e.g., 3.9:
 
     * run :code:`poetry env use 3.9`
@@ -47,7 +49,7 @@ To launch the Interactive Consultant web server:
 
 * open a terminal in that directory and run :code:`poetry run python3 main.py`
 
-After that, you can open 
+After that, you can open
 
 * the Interactive Consultant at http://127.0.0.1:5000
 * the web IDE at http://127.0.0.1:5000/IDE
@@ -63,7 +65,7 @@ IDP-Z3 can be installed using the python package ecosystem.
 * use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine
 * (For Linux and MacOS) open a terminal in that directory and run the following commands.
 
-.. code-block::
+.. code::
 
    python3 -m venv .
    source bin/activate
@@ -71,7 +73,7 @@ IDP-Z3 can be installed using the python package ecosystem.
 
 * (For Windows) open a terminal in that directory and run the following commands.
 
-.. code-block::
+.. code::
 
    python3 -m venv .
    .\Scripts\activate
@@ -79,20 +81,20 @@ IDP-Z3 can be installed using the python package ecosystem.
 
 To launch the web server on Linux/MacOS, run
 
-.. code-block::
+.. code::
 
    source bin/activate
    python3 main.py
 
 On Windows, the commands are:
 
-.. code-block::
+.. code::
 
    .\Scripts\activate
    python3 main.py
 
 
-After that, you can open 
+After that, you can open
 
 * the Interactive Consultant at http://127.0.0.1:5000
 * the web IDE at http://127.0.0.1:5000/IDE

@@ -9,42 +9,43 @@ def get(c, **kwargs):
 
 def require_clean_work_tree(cwd):
     assert 0 == run('git diff-files --quiet --ignore-submodules --', cwd=cwd).returncode, \
-        "cannot deploy: you have unstaged changes."
+        "Cannot deploy: you have unstaged changes."
     assert 0 == run('git diff-index --cached --quiet HEAD --ignore-submodules --', cwd=cwd).returncode, \
-        "cannot deploy: your index contains uncommitted changes." 
+        "Cannot deploy: your index contains uncommitted changes."
 
 run('python3.8 test.py generate')
 
-branch = get('git rev-parse --abbrev-ref HEAD')
-assert branch == b'master\n', "Z3 not in master branch !"
+update_statics = input("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ") in "Yy"
+if update_statics:
+    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
+    print("Copying to static folder ...")
+    copy_tree('../web-IDP-Z3/dist/', 'idp_server/static')
+    run("git add -A")
+    run("git commit")
 
+    if input("Commit and deploy to Google App Engine? (Y/n) ") in "Yy":
 
-branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
-assert branch == b'master\n', "autoconfig not in master branch !"
-require_clean_work_tree("../web-IDP-Z3")
+        branch = get('git rev-parse --abbrev-ref HEAD')
+        assert branch == b'master\n', \
+            "Cannot deploy: Z3 not in master branch !"
 
-if input("Ready to build and commit ? (Y/n) ") in "Yy":
-    update_statics = input("Update the static files? (Y/n) ") in "Yy"
-    if update_statics:
-        run('npm run -script build', cwd='../web-IDP-Z3', check=True)
-        print("Copying to static folder ...")
-        copy_tree('../web-IDP-Z3/dist/', 'consultant/static')
-        run("git add -A")
-        run("git commit")
+        branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
+        assert branch == b'master\n', \
+            "Cannot deploy: autoconfig not in master branch !"
+        require_clean_work_tree("../web-IDP-Z3")
 
-    # if input("Deploy on Heroku ?") in "Yy":
-    #     run("git push heroku master")
+        # if input("Deploy on Heroku ?") in "Yy":
+        #     run("git push heroku master")
 
-    if input("Deploy on Google App Engine ? (Y/n) ") in "Yy":
         run("git push origin master")
         run("git push google master")
         if update_statics:
             run("git push google master", cwd='../web-IDP-Z3')
         promote = input("Redirect traffic ? (Y/n) ") in "Yy"
         run(f"gcloud app deploy {'' if promote else '--no-promote'}")
-        
+
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
-        versions = get("gcloud app versions list --sort-by=~LAST_DEPLOYED").decode("utf-8") 
+        versions = get("gcloud app versions list --sort-by=~LAST_DEPLOYED").decode("utf-8")
         id = versions.splitlines()[1].split("  ")[1]
         print("latest version : ", id)
         with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json") as json_file:
@@ -56,4 +57,5 @@ if input("Ready to build and commit ? (Y/n) ") in "Yy":
         run('git commit -m "latest"', cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
         run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
 
-        run(f"gcloud app browse {'' if promote else f'--version={id}'}")
+        version = '' if promote else f'--version="{id}"'
+        run(f"gcloud app browse {version}")

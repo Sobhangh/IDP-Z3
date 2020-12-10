@@ -1,20 +1,22 @@
+# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+#
+# This file is part of Interactive_Consultant.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
-    Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
-
-    This file is part of Interactive_Consultant.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+This module implements the IDP-Z3 web server
 """
 
 with_png = False
@@ -25,16 +27,15 @@ import os
 import threading
 import traceback
 
-from flask import Flask, send_from_directory, g
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
-from textx import TextXError
 
-from Idp import Idp, idpparser
-from Idp.utils import log
+from idp_solver import Idp, idpparser
+from idp_solver.utils import log
 from .State import make_state
-from .Inferences import *
-from .IO import *
+from .Inferences import explain, abstract
+from .IO import Output, metaJSON
 
 from typing import Dict
 
@@ -46,16 +47,17 @@ from pycallgraph2 import GlobbingFilter
 from pycallgraph2 import Config
 config = Config(max_depth=8)
 config.trace_filter = GlobbingFilter(
-    exclude=['arpeggio.*','ast.*','flask*', 'json.*', 'pycallgraph2.*', 'textx.*','werkzeug.*', 'z3.*']
+    exclude=['arpeggio.*', 'ast.*', 'flask*', 'json.*', 'pycallgraph2.*',
+             'textx.*', 'werkzeug.*', 'z3.*']
     )
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.join(current_dir, os.pardir)
 
-static_file_dir   = os.path.join(current_dir, 'static')
+static_file_dir = os.path.join(current_dir, 'static')
 examples_file_dir = os.path.join(current_dir, 'examples')
-docs_file_dir     = os.path.join(parent_dir , 'docs')
+docs_file_dir = os.path.join(parent_dir, 'docs')
 app = Flask(__name__)
 CORS(app)
 
@@ -79,7 +81,7 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
-idps: Dict[str, Idp] = {} # {code_string : idp}
+idps: Dict[str, Idp] = {}  # {code_string : idp}
 
 
 def idpOf(code):
@@ -200,22 +202,23 @@ class eval(Resource):
                 if method == "propagate":
                     out = Output(state).fill(state)
                 if method == "modelexpand":
-                    generator = state.expand(max=1,complete=False, extended=True)
+                    generator = state.expand(max=1, complete=False,
+                                             extended=True)
                     state.assignments = list(generator)[0]
                     out = Output(state).fill(state)
                 if method == "explain":
                     out = explain(state, args['value'])
                 if method == "minimize":
                     state = state.optimize(args['symbol'], args['minimize'],
-                        complete=False, extended=True)
+                                           complete=False, extended=True)
                     out = Output(state).fill(state)
                 if method == "abstract":
-                    if args['symbol'] != "": # theory to explain ?
-                        newTheory = ( str(idpparser.model_from_str(args['code']).vocabulary)
-                                    + "theory {\n"
-                                    + args['symbol']
-                                    + "\n}\n"
-                        )
+                    if args['symbol'] != "":  # theory to explain ?
+                        newTheory = (str(idpparser.model_from_str(args['code']).vocabulary)
+                                     + "theory {\n"
+                                     + args['symbol']
+                                     + "\n}\n"
+                                     )
                         idpModel = idpparser.model_from_str(newTheory)
                         expanded = {}
                         # for expr in idpModel.subtences.values():
@@ -232,13 +235,14 @@ class eval(Resource):
                 traceback.print_exc()
                 return str(exc)
 
-class evalWithGraph(eval): # subcclass that generates call graphs
+
+class evalWithGraph(eval):  # subcclass that generates call graphs
     def post(self):
         args = parser.parse_args()
         method = args['method']
 
         graphviz = GraphvizOutput()
-        graphviz.output_file = 'docs/'+ method + '.png'
+        graphviz.output_file = 'docs/' + method + '.png'
         with PyCallGraph(output=graphviz, config=config):
             return super().post()
 
@@ -247,9 +251,11 @@ class evalWithGraph(eval): # subcclass that generates call graphs
 def serve_dir_directory_index():
     return send_from_directory(static_file_dir, 'index.html')
 
+
 @app.route('/IDE', methods=['GET'])
 def serve_IDE():
     return send_from_directory(static_file_dir, 'index.html')
+
 
 @app.route('/<path:path>', methods=['GET'])
 def serve_file_in_dir(path):
@@ -266,6 +272,7 @@ def serve_examples_file(path):
 
     return send_from_directory(examples_file_dir, path)
 
+
 # local help files
 @app.route('/docs/<path:path>', methods=['GET'])
 def serve_docs_file(path):
@@ -273,6 +280,7 @@ def serve_docs_file(path):
         return "file not found: " + path
 
     return send_from_directory(docs_file_dir, path)
+
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

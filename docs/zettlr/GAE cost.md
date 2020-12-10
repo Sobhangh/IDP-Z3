@@ -16,7 +16,7 @@ Objective: 1 instance if only 1 (new) user
 
 ## Options:
 - [x] use [Cloud Storage](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files)
-    - problem with version history ? 
+    - problem with version history ?
         - Each evolving file has an ID → OK
         - editor has no ID, but is served by static dir (see below) → OK
 - [x] [app.yaml scaling elements](https://cloud.google.com/appengine/docs/standard/python3/config/appref#scaling_elements)
@@ -45,13 +45,13 @@ X use 2 machines with different max_concurrent_requests: one for static, the oth
     * `gsutil mb gs://interactive-consultant`
     * `gsutil defacl set public-read gs://interactive-consultant`
 - use [--deploy-url in ng guild](https://stackoverflow.com/questions/46613816/how-to-deploy-angular-4-front-end-to-cdn)
-* sync bucket ? `gsutil -m rsync -r ./consultant/static gs://interactive-consultant/`
+* sync bucket ? `gsutil -m rsync -r ./idp_server/static gs://interactive-consultant/`
 * [font CORS issue](https://stackoverflow.com/questions/33242062/google-cloud-storage-fonts-cors-issue)
     * use http instead of https ? no fix
     * cors-config.json ?  OK   `gsutil cors set cors-config.json gs://interactive-consultant\`
 
 ## B8 not responding
-[in this version](https://20200617t153532-dot-interactive-consultant.ew.r.appspot.com/) of server: 
+[in this version](https://20200617t153532-dot-interactive-consultant.ew.r.appspot.com/) of server:
 * Etat = Arrêtée ? → select it and click start
 * /meta does not respond
 * backend instances are [addressable by name](https://stackoverflow.com/questions/11886915/google-app-engine-backend-vs-frontend-instances), so you need [a load balancer](https://cloud.google.com/compute/docs/instance-groups/adding-an-instance-group-to-a-load-balancer) or [backend service](https://cloud.google.com/load-balancing/docs/backend-service) to run them
