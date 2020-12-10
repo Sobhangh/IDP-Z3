@@ -28,8 +28,8 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
-    FALSE
-from .Parse import Structure, Theory, str_to_IDP
+    FALSE, AppliedSymbol
+from .Parse import Structure, Enumeration, Theory, str_to_IDP
 from .utils import OrderedSet, NEWL
 
 class Problem(object):
@@ -371,6 +371,37 @@ class Problem(object):
                     solver.add(Not(Implies(hypothesis, goal.translate())))
                 if solver.check() == unsat:
                     conditions[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+            # merge conditions on the same term (equality or 'in')
+            for i, c in enumerate(conditions):
+                (x, belongs, y) = c.as_set_condition()
+                if x:
+                    for j in range(i):
+                        (x1, belongs1, y1) = conditions[j].as_set_condition()
+                        if x1 and x.core.same_as(x1.core):
+                            if belongs and belongs1:
+                                new_tuples = (y.tuples & y1.tuples) # intersect
+                            elif belongs and not belongs1:
+                                new_tuples = (y.tuples ^ y1.tuples) # difference
+                            elif not belongs and belongs1:
+                                belongs = belongs1
+                                new_tuples = (y1.tuples ^ y.tuples)
+                            else:
+                                new_tuples = y.tuples | y1.tuples # union
+                                # sort again
+                                new_tuples = list(new_tuples.values())
+
+                            out = AppliedSymbol.make(
+                                symbol=x.s, args=x.sub_exprs,
+                                in_enumeration=Enumeration(tuples=new_tuples)
+                            )
+
+                            out = Assignment(out,
+                                             TRUE if belongs else FALSE,
+                                             Status.UNKNOWN)
+
+                            conditions[j] = out # keep the first one
+                            conditions[i] = Assignment(TRUE, TRUE,
+                                                       Status.UNKNOWN)
             return [c for c in conditions if c.sentence != TRUE]+[goal]
 
     def decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True):

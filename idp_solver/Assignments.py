@@ -129,6 +129,16 @@ class Assignment(object):
     def translate(self) -> BoolRef:
         return self.formula().translate()
 
+    def as_set_condition(self):
+        """returns an equivalent set condition, or None
+
+        Returns:
+            Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "appSymb is (not) in enumeration"
+        """
+        (x,y) = self.sentence.as_set_condition()
+        if x:
+            return (x, self.value.same_as(TRUE), y)
+        return (None, None, None)
 
 class Assignments(dict):
     """Contains a set of Assignment"""

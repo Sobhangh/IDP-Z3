@@ -806,7 +806,6 @@ class SymbolInterpretation(object):
                 return tuples[0].args[rank]
         else:  # constructs If-then-else recursively
             out = self.default if self.default is not None else applied.original
-            tuples.sort(key=lambda t: str(t.args[rank]))
             groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if type(args[rank]) in [Constructor, NumberConstant]:
@@ -827,9 +826,11 @@ class SymbolInterpretation(object):
 class Enumeration(object):
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
+        if not isinstance(self.tuples, OrderedSet):
+            self.tuples.sort(key=lambda t: t.code)
+            self.tuples = OrderedSet(self.tuples)
 
     def annotate(self, voc):
-        self.tuples.sort(key=lambda t: ",".join(map(str, t.args)))
         for t in self.tuples:
             t.annotate(voc)
 
@@ -872,9 +873,10 @@ class Enumeration(object):
 class Tuple(object):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
+        self.code = sys.intern(",".join([str(a) for a in self.args]))
 
     def __str__(self):
-        return ",".join([str(a) for a in self.args])
+        return self.code
 
     def annotate(self, voc):
         self.args = [arg.annotate(voc, {}) for arg in self.args]

@@ -316,6 +316,14 @@ class Expression(object):
     def translate1(self):
         pass  # monkey-patched
 
+    def as_set_condition(self):
+        """Returns an equivalent expression of the type "x in y", or None
+
+        Returns:
+            Tuple[Optional[AppliedSymbol], Optional[Enumeration]]: meaning "expr is in enumeration"
+        """
+        return (None, None)
+
 
 class Constructor(Expression):
     PRECEDENCE = 200
@@ -669,10 +677,11 @@ class AppliedSymbol(Expression):
 
         self.decl = None
         self.name = self.s.name
+        self.core = None # the bare AppliedSymbol, without in_enumeration
 
     @classmethod
-    def make(cls, symbol, args):
-        out = cls(s=symbol, args=Arguments(sub_exprs=args))
+    def make(cls, symbol, args, **kwargs):
+        out = cls(s=symbol, args=Arguments(sub_exprs=args), **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
@@ -704,6 +713,10 @@ class AppliedSymbol(Expression):
         out = super().annotate1()
         if out.decl is None or out.decl.name == "`Symbols":  # a symbol variable
             out.fresh_vars.add(self.s.name)
+        if self.in_enumeration:
+            self.core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
+            self.simpler = self.in_enumeration.contains([self.core], False)
+            self.simpler.annotations = self.annotations
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -737,6 +750,10 @@ class AppliedSymbol(Expression):
             self._reified = ( super().reified() if self.is_reified() else
                  self.translate() )
         return self._reified
+
+    def as_set_condition(self):
+        return ((None, None) if not self.in_enumeration else
+                (self, self.in_enumeration))
 
 
 class Arguments(object):

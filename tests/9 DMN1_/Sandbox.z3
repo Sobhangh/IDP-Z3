@@ -1,7 +1,9 @@
-  Not c in {blue, green}
-∧ Not c in {red, blue}
-⇒ Not p
-
+  Not c in {blue, red}
 ⇒ p
+
+  Not c in {blue}
+⇒ p
+
+⇒ Not p
 
 end of decision table

@@ -219,11 +219,6 @@ def interpret(self, theory):
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('¬', simpler)
         simpler.annotations = self.annotations
-    elif self.in_enumeration:
-        # re-create original Applied Symbol
-        core = AppliedSymbol.make(self.s, sub_exprs).copy()
-        simpler = self.in_enumeration.contains([core], False)
-        simpler.annotations = self.annotations
     elif (self.name in theory.interpretations
             and any(s.name == '`Symbols' for s in self.decl.sorts)):
         # apply enumeration of predicate over symbols to allow simplification

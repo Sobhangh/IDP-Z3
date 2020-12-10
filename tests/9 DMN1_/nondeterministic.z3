@@ -1,23 +1,27 @@
-  Not B
-∧ Not E
+  Not C
+∧ Not F
 ⇒ ? Eligible(BE001)
 
   B
 ∧ C
 ⇒ Eligible(BE001)
 
+  Not B
+∧ Not C
+⇒ ? Eligible(BE001)
+
+  B
+∧ E
+⇒ Eligible(BE001)
+
+  B
+⇒ ? Eligible(BE001)
+
   Not E
 ⇒ ? Eligible(BE001)
 
-  Not B
-∧ F
+  Not F
 ⇒ ? Eligible(BE001)
-
-  C
-⇒ ? Eligible(BE001)
-
-  F
-⇒ Eligible(BE001)
 
 ⇒ ? Eligible(BE001)
 

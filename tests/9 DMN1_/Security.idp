@@ -31,7 +31,7 @@ country1,
 country2
 
 }
-    type Issuers constructed from {	
+    type Issuers constructed from {
 	Austria		,
 	Belgium		,
 	Canada		,
@@ -119,11 +119,11 @@ CAC40	,
  FTSE350		,
  SP500		,
  NASDAQ100		,
- KOSPI100		
+ KOSPI100
 
 }
     type AssetSubClasses constructed from {Bond, Convertible, Share, Warrant, Option, MBS, ABS, CDO, IRS, Eurobond}
-    
+
     AssetSubClass(Security) : AssetSubClasses
 	HasRating(Security) : int
     Country(Security) : CountryType
@@ -139,11 +139,11 @@ theory T:V {
 
     {
         !s[Security]: Eligible(s) <- Issuer_Type(s) = Sovereign
-            & Country(s) in {Aus; Bel; Can;Den;Est;Fin;Fra;Ger;Hon;Ire;Isr;Ita;Jap;Lux;Net;New;Nor;Por;Sin;Slo;Sou;Spa;Swe;Swi;UniK;UniS} 
+            & Country(s) in {Aus; Bel; Can;Den;Est;Fin;Fra;Ger;Hon;Ire;Isr;Ita;Jap;Lux;Net;New;Nor;Por;Sin;Slo;Sou;Spa;Swe;Swi;UniK;UniS}
             & HasRating(s) =< 77.
-        
+
        !s[Security]: Eligible(s) <- Issuer_Type(s) = Supra
-            & Issuer(s) in {AfricanDevelopmentBank; AsianDevelopmentBank;
+            & Issuer(s) in {AfricanDevelopmentBank;
                 BankForInternationalSettlements; CaribbeanDevelopmentBank;
                 CouncilOfEuropeDevelopmentBank;
                 EuropeanBankForReconstructionAndDevelopment; EuropeanCentralBank;
@@ -158,7 +158,7 @@ theory T:V {
             FederalHomeLoanMortgageCorporation;
             FederalNationalMortgageAssociation} &
         HasRating(s) =< 77 & AssetSubClass(s) ~= ABS.
-          
+
         !s: Eligible(s) <- Issuer(s) in {BRITISHCOLUMBIA; TORONTO; MANITOBA;
             NEWBRUNsELEC; NEWBRUNSWICK; NEWFOUNDLAND; NOVASCOTIA; ONTARIO;
             PRINCEEDWARDISLD; ALBERTA; QUEBEC ; SASKATCHEWAN} &

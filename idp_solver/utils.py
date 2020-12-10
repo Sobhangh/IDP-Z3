@@ -113,3 +113,16 @@ class OrderedSet(dict):
 
     # def popitem(self):
     #     return super(OrderedSet, self).popitem()
+
+    def __or__(self, other): # |, union
+        out = OrderedSet(self) # makes a copy
+        out.extend(other)
+        return out
+
+    def __and__(self, other): # &, intersection
+        out = OrderedSet({v for v in self if v in other})
+        return out
+
+    def __xor__(self, other): # ^, difference
+        out = OrderedSet({v for v in self if v not in other})
+        return out
