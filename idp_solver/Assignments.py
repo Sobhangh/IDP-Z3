@@ -108,6 +108,12 @@ class Assignment(object):
     def __log__(self):
         return self.value
 
+    def same_as(self, other):
+        return (self.sentence.same_as(other.sentence)
+                and ((self.value is None and other.value is None)
+                     or (self.value is not None and other.value is not None
+                         and self.value.same_as(other.value))))
+
     def to_json(self) -> str:  # for GUI
         return str(self)
 

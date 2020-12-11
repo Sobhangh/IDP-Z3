@@ -114,17 +114,21 @@ def generate():
         output = re.sub(r'(/.*)(?=idp_server/)', '', output)
 
         z3 = file.replace(".z3", ".z3z3")
-        z3 = z3.replace(".idp", ".z3")
-        if os.path.isfile(z3):
-            f = open(z3, "r")
-            if output != f.read():
-                out_dict[file] = "**** unexpected result !"
-                error = 1
+        z3 = z3.replace(".idp", ".z*")
+        ok = False
+        for result in glob.glob(z3):
+            f = open(result, "r")
+            if output == f.read():
+                ok = True
+                break
             f.close()
+        if not ok:
+            out_dict[file] = "**** unexpected result !"
+            error = 1
 
-        f = open(z3, "w")
-        f.write(output)
-        f.close()
+            f = open(z3.replace(".z*", ".z3"), "w")
+            f.write(output)
+            f.close()
 
     total = round(time.process_time()-start, 3)
     print("*** Total: ", total)

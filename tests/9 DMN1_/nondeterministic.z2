@@ -1,5 +1,5 @@
   Not C
-∧ Not F
+∧ Not E
 ⇒ ? Eligible(BE001)
 
   Not B
@@ -9,10 +9,10 @@
   C
 ⇒ Eligible(BE001)
 
-  Not E
+  Not B
 ⇒ ? Eligible(BE001)
 
-  B
+  F
 ⇒ Eligible(BE001)
 
 ⇒ ? Eligible(BE001)

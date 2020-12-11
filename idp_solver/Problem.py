@@ -499,7 +499,7 @@ class Problem(object):
                         models.sort(key=len)
                     # else: unsatisfiable --> ignore
                 else: # when not deterministic
-                    last_model = [model]
+                    last_model += [model]
             models = models1 + last_model
             # post process if last model is just the goal
             # replace [p=>~G, G] by [~p=>G]
@@ -523,6 +523,20 @@ class Problem(object):
                 models.append(model)
                 if hypothesis:
                     models.append([consequent])
+
+            # post process to merge similar successive models
+            # {x in c1 => g. x in c2 => g.} becomes {x in c1 U c2 => g.}
+            # must be done after first-hit transformation
+            for i in range(len(models)-1, 0, -1):  # reverse order
+                m, prev = models[i], models[i-1]
+                if (len(m) == 2 and len(prev) == 2
+                    and m[1].same_as(prev[1])):  # same goals
+                    # p | (~p & q) = ~(~p & ~q)
+                    new = join_set_conditions([prev[0].negate(), m[0].negate()])
+                    if len(new) == 1:
+                        new = new[0].negate()
+                        models[i-1] = [new, models[i-1][1]]
+                        del models[i]
         return models
 
 Done = True
