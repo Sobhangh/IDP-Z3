@@ -25,9 +25,9 @@ import time
 
 NEWL = "\n"
 
-BOOL = "bool"
-INT = "int"
-REAL = "real"
+BOOL = "Bool"
+INT = "Int"
+REAL = "Real"
 
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"

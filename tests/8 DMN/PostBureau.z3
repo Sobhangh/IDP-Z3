@@ -3,9 +3,9 @@
 
 
 vocabulary {
-	type Post_Bureau_Risk_Categoryt_t constructed from { LOW, HIGH, VERY_LOW, MEDIUM } 
-	Credit_Score: int
-	Application_Risk_Score: int
+	type Post_Bureau_Risk_Categoryt_t constructed from { LOW, HIGH, VERY_LOW, MEDIUM }
+	Credit_Score: Int
+	Application_Risk_Score: Int
 	Post_Bureau_Risk_Category: Post_Bureau_Risk_Categoryt_t
 	Existing_Customer
 }

@@ -3,9 +3,9 @@
 
 
 vocabulary {
-	type Advertised_Objectst_t constructed from { Toys, Cars, Videogames } 
+	type Advertised_Objectst_t constructed from { Toys, Cars, Videogames }
 	Advertised_Objects: Advertised_Objectst_t
-	Age: int
+	Age: Int
 }
 theory {
 	//Advertisement Decision

@@ -1,8 +1,8 @@
 vocabulary V {
     // here comes the specification of the vocabulary
     p q
-    i: int
-    r: real
+    i: Int
+    r: Real
     type color constructed from {red, blue, green}
     c: color
     type range = {0..5}

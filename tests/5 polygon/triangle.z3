@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    
+
     type sides = {3..4}
     Sides: sides
     Vertices: sides
@@ -11,8 +11,8 @@ vocabulary {
     Type : type
 
     type side = {1..4}
-    Length(side):real
-    Angle(side):real
+    Length(side):Real
+    Angle(side):Real
 
     type subtype constructed from
         { regular_triangle
@@ -24,16 +24,16 @@ vocabulary {
 
     Convex
     Equilateral
-    Perimeter:real
+    Perimeter:Real
 
     Large(side)
-    Base : real
-    Height: real
-    Surface:real
+    Base : Real
+    Height: Real
+    Surface:Real
 }
 
 theory {
-    Subtype=regular_triangle. 
+    Subtype=regular_triangle.
 
     [Definition of triangle]
     (Type=triangle      <=> Sides=3).
