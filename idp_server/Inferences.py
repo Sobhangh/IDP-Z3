@@ -26,7 +26,7 @@ from z3 import Solver, Implies, And, Not, sat, is_true, is_false
 
 from idp_solver.Expression import AComparison, AUnary, AppliedSymbol, TRUE, FALSE
 from idp_solver.Assignments import Status, Assignment
-from idp_solver.utils import OrderedSet
+from idp_solver.utils import OrderedSet, BOOL
 from .IO import Output, decode_UTF
 
 
