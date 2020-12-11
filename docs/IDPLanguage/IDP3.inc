@@ -13,7 +13,7 @@ Inductive definitions
     IDP-Z3 does not support inductive definitions.
 
 Infinite domains
-    IDP-Z3 supports infinite domains: ``int, real``.
+    IDP-Z3 supports infinite domains: ``Int, Real``.
     However, quantifications over infinite domains is discouraged.
 
 if .. then .. else ..
@@ -26,7 +26,7 @@ Namespaces
     IDP-Z3 does not support namespaces.
 
 N-ary constructors
-    IDP-Z3 does not support n-ary constructors, e.g., ``RGB(int, int, int)``.
+    IDP-Z3 does not support n-ary constructors, e.g., ``RGB(Int, Int, Int)``.
     See `IEP 06 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-06-n-ary-constructors>`_
 
 Partial functions
@@ -42,7 +42,7 @@ Qualified quantifications
 
 Structure
     IDP-Z3 does not support ``u`` uncertain interpretations (p.17 of IDP3 manual).
-    Function enumerations must have an ``else`` part. 
+    Function enumerations must have an ``else`` part.
     (see also `IEP 04 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-04-Incomplete-enumerations>`_)
 
 Type
