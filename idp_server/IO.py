@@ -157,14 +157,14 @@ class Output(object):
 
                 typ = atom.type
                 if typ == BOOL:
-                    symbol = {"typ": 'Bool'}
+                    symbol = {"typ": typ}
                 elif 0 < len(symb.range):
-                    typ = (typ if symb.out.decl.type not in [INT, REAL]
-                           else symb.out.decl.type.capitalize())
+                    typ = (typ if symb.out.decl.type is None else
+                           symb.out.decl.type)
                     symbol = {"typ": typ, "value": ""  #TODO
                               , "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT]:
-                    symbol = {"typ": typ.capitalize(), "value": ""}  # default
+                    symbol = {"typ": typ, "value": ""}  # default
                 else:
                     assert False, "dead code"
                     symbol = None
