@@ -135,7 +135,7 @@ def get_relevant_subtences(self):
     #                         relevants[s] = rank
     #                         rank = rank+1
     #                 if q.code != question.code \
-    #                 and q.type == 'bool'\
+    #                 and q.type == BOOL\
     #                 and not q in given:
     #                     print("==>", q)
     #                     reachable.add(q)
@@ -184,7 +184,7 @@ def explain(state, question):
         to_explain = state.assignments[question].sentence
 
         # rules used in justification
-        if to_explain.type != 'bool':  # recalculate numeric value
+        if to_explain.type != BOOL:  # recalculate numeric value
             val = state.assignments[question].value
             if val is None:  # can't explain an expanded value
                 return out.m
@@ -277,7 +277,7 @@ def abstract(state, given_json):
         atoms = []  # [Assignment]
         for assignment in state.assignments.values():
             atom = assignment.sentence
-            if assignment.value is None and atom.type == 'bool':
+            if assignment.value is None and atom.type == BOOL:
                 if not atom.is_reified():
                     val1 = solver.model().eval(atom.translate())
                 else:

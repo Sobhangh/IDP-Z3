@@ -25,7 +25,7 @@ import ast
 from idp_solver.Expression import (TRUE, FALSE, AComparison, NumberConstant)
 from idp_solver.Parse import str_to_IDP
 from idp_solver.Assignments import Assignments, Status
-
+from idp_solver.utils import BOOL, INT, REAL
 
 def metaJSON(state):
     """
@@ -38,7 +38,7 @@ def metaJSON(state):
     symbols = []
     for decl in state.assignments.symbols.values():
         typ = decl.out.name
-        symbol_type = "proposition" if typ == 'bool' and decl.sorts == [] else "function"
+        symbol_type = "proposition" if typ == BOOL and decl.sorts == [] else "function"
         d = {
             "idpname": str(decl.name),
             "type": symbol_type,
@@ -156,13 +156,14 @@ class Output(object):
                 s = self.m.setdefault(symb.name, {})
 
                 typ = atom.type
-                if typ == 'bool':
+                if typ == BOOL:
                     symbol = {"typ": 'Bool'}
                 elif 0 < len(symb.range):
-                    typ = symb.out.decl.type.capitalize() if symb.out.decl.type in ['int', 'real'] else typ
+                    typ = (typ if symb.out.decl.type not in [INT, REAL]
+                           else symb.out.decl.type.capitalize())
                     symbol = {"typ": typ, "value": ""  #TODO
                               , "values": [str(v) for v in symb.range]}
-                elif typ in ["real", "int"]:
+                elif typ in [REAL, INT]:
                     symbol = {"typ": typ.capitalize(), "value": ""}  # default
                 else:
                     assert False, "dead code"

@@ -46,16 +46,16 @@ from .Expression import (Constructor, IfExpr, AQuantification,
                          AAggregate, AppliedSymbol, Variable,
                          NumberConstant, Brackets, Arguments,
                          Fresh_Variable, TRUE, FALSE)
-from .utils import (unquote, OrderedSet, NEWL)
+from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
 
 
 def str_to_IDP(atom, val_string):
-    if atom.type == 'bool':
+    if atom.type == BOOL:
         assert val_string in ['True', 'False'], \
             f"{atom.annotations['reading']} is not defined, and assumed false"
         out = (TRUE if val_string == 'True' else
                FALSE)
-    elif (atom.type in ['real', 'int'] or
+    elif (atom.type in [REAL, INT] or
             type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
         out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
     else:  # constructor
@@ -146,11 +146,11 @@ class Vocabulary(object):
 
         # define reserved symbols
         self.symbol_decls: Dict[str, Type] \
-            = {'int': RangeDeclaration(name='int', elements=[]),
-               'real': RangeDeclaration(name='real', elements=[])
+            = {INT: RangeDeclaration(name=INT, elements=[]),
+               REAL: RangeDeclaration(name=REAL, elements=[])
                }
         for name, constructors in [
-            ('bool',      [TRUE, FALSE]),
+            (BOOL,      [TRUE, FALSE]),
             ('`Symbols', [Constructor(name=f"`{s.name}") for s in
                           self.declarations if type(s) == SymbolDeclaration]),
         ]:
@@ -201,10 +201,10 @@ class ConstructedTypeDeclaration(object):
         self.translated = None
         self.map = {}  # {String: constructor}
 
-        if self.name == 'bool':
+        if self.name == BOOL:
             self.translated = BoolSort()
-            self.constructors[0].type = 'bool'
-            self.constructors[1].type = 'bool'
+            self.constructors[0].type = BOOL
+            self.constructors[1].type = BOOL
             self.constructors[0].translated = BoolVal(True)
             self.constructors[1].translated = BoolVal(False)
             self.constructors[0].py_value = True
@@ -237,7 +237,7 @@ class ConstructedTypeDeclaration(object):
         self.range = self.constructors  # TODO constructor functions
 
     def check_bounds(self, var):
-        if self.name == 'bool':
+        if self.name == BOOL:
             out = [var, AUnary.make('¬', var)]
         else:
             out = [AComparison.make('=', [var, c]) for c in self.constructors]
@@ -250,29 +250,29 @@ class ConstructedTypeDeclaration(object):
 
 class RangeDeclaration(object):
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')  # maybe 'int', 'real'
+        self.name = kwargs.pop('name')  # maybe INT, REAL
         self.elements = kwargs.pop('elements')
         self.translated = None
         self.constructors = None  # not used
 
-        self.type = 'int'
+        self.type = INT
         self.range = []
         for x in self.elements:
             if x.toI is None:
                 self.range.append(x.fromI)
                 if type(x.fromI.translated) != int:
-                    self.type = 'real'
-            elif x.fromI.type == 'int' and x.toI.type == 'int':
+                    self.type = REAL
+            elif x.fromI.type == INT and x.toI.type == INT:
                 for i in range(x.fromI.translated, x.toI.translated + 1):
                     self.range.append(NumberConstant(number=str(i)))
             else:
                 assert False, "Can't have a range over reals: " + self.name
 
-        if self.name == 'int':
+        if self.name == INT:
             self.translated = IntSort()
-        elif self.name == 'real':
+        elif self.name == REAL:
             self.translated = RealSort()
-            self.type = 'real'
+            self.type = REAL
 
     def __str__(self):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." +
@@ -301,7 +301,7 @@ class RangeDeclaration(object):
 
     def translate(self):
         if self.translated is None:
-            if self.type == 'int':
+            if self.type == INT:
                 self.translated = IntSort()
             else:
                 self.translated = RealSort()
@@ -349,9 +349,9 @@ class SymbolDeclaration(object):
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
-            self.out = Sort(name='bool')
+            self.out = Sort(name=BOOL)
 
-        self.function = (self.out.name != 'bool')
+        self.function = (self.out.name != BOOL)
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
 
@@ -369,7 +369,7 @@ class SymbolDeclaration(object):
         args = ','.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
         return (f"{self.name}"
                 f"{ '('+args+')' if args else ''}"
-                f"{'' if self.out.name == 'bool' else f' : {self.out.name}'}")
+                f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
     def annotate(self, voc, vocabulary=True):
         if vocabulary:
@@ -397,7 +397,7 @@ class SymbolDeclaration(object):
                     self.instances[expr.code] = expr
 
         # determine typeConstraints
-        if self.out.decl.name != 'bool' and self.range:
+        if self.out.decl.name != BOOL and self.range:
             for inst in self.instances.values():
                 domain = self.out.decl.check_bounds(inst)
                 if domain is not None:
@@ -413,7 +413,7 @@ class SymbolDeclaration(object):
                 self.translated = Const(self.name, self.out.translate())
             else:
 
-                if self.out.name == 'bool':
+                if self.out.name == BOOL:
                     types = [x.translate() for x in self.sorts]
                     self.translated = Function(self.name, types + [BoolSort()])
                 else:
@@ -551,7 +551,7 @@ class Definition(object):
                 q_v = {f"${decl.name}!{str(i)}$":
                        Fresh_Variable(f"${decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
-                if decl.out.name != 'bool':
+                if decl.out.name != BOOL:
                     q_v[name] = Fresh_Variable(name, decl.out)
                 self.def_vars[decl.name] = q_v
             new_rule = r.rename_args(self.def_vars[decl.name])
