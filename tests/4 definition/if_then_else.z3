@@ -9,7 +9,6 @@ Color:={->green}
 Model 2
 ==========
 p:={->false}
-q:={->false}
 r:={->true}
 Color:={->green}
 
