@@ -18,6 +18,10 @@ By default, the generate test is run.
 
 Authors: Pierre Carbonelle, Simon Vandevelde
 """
+
+import snoop # for debugging
+snoop.install()
+
 import argparse
 from contextlib import redirect_stdout
 import glob

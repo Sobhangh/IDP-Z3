@@ -1,3 +1,4 @@
+birdseye
 click==7.0
 flask
 flask_restful
@@ -6,6 +7,7 @@ gunicorn
 pycallgraph2
 pyyaml
 recommonmark
+snoop
 sphinx-autobuild
 sphinx_bootstrap_theme
 sphinxcontrib-mermaid

@@ -1,7 +1,7 @@
 ok
 2
 Traceback (most recent call last):
-  File "test.py", line 56, in generateZ3
+  File "/home/pcarbonn/Documents/repos/IDP-Z3/test.py", line 60, in generateZ3
     idp.execute()
   File "idp_solver/Run.py", line 79, in execute
     exec(main, mybuiltins, mylocals)
