@@ -1,22 +1,22 @@
 
 Model 1
 ==========
-p:={->true}
+p:={->false}
 q:={->true}
 r:={->true}
-Color:={->blue}
+Color:={->green}
 
 Model 2
 ==========
-p:={->true}
-q:={->true}
-r:={->false}
-Color:={->blue}
+p:={->false}
+q:={->false}
+r:={->true}
+Color:={->green}
 
 Model 3
 ==========
-p:={->false}
-r:={->true}
-Color:={->green}
+p:={->true}
+q:={->true}
+Color:={->blue}
 
 No more models.
