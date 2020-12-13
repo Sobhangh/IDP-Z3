@@ -76,7 +76,7 @@ Traceback (most recent call last):
     self._interpret()
   File "idp_solver/Problem.py", line 130, in _interpret
     c.interpret(self)
-  File "idp_solver/Substitute.py", line 212, in interpret
+  File "idp_solver/Substitute.py", line 210, in interpret
     assert self.decl.function, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

@@ -19,10 +19,9 @@
 Management of the State of problem solving with the Interactive Consultant.
 """
 
-from debugWithYamlLog import NEWL, indented
 
 from idp_solver.Run import Problem
-from idp_solver.utils import OrderedSet
+from idp_solver.utils import OrderedSet, NEWL, indented
 from .IO import json_to_literals, Status
 from .Inferences import get_relevant_subtences
 
