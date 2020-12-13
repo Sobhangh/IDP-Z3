@@ -24,6 +24,8 @@ from json import JSONEncoder
 import time
 
 NEWL = "\n"
+indented = "\n  "
+
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"
 method and uses it to encode the object if found.

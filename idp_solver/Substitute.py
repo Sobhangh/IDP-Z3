@@ -34,8 +34,6 @@ This module monkey-patches the Expression class and sub-classes.
 
 import copy
 
-from debugWithYamlLog import Log
-
 from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     ADisjunction, AConjunction,  AAggregate, AUnary, \
                     AComparison, AppliedSymbol, Variable, NumberConstant, \
@@ -258,7 +256,6 @@ def substitute(self, e0, e1, assignments, todo=None):
 
     new_branch = None
     if self.co_constraint is not None:
-        Log("definition:")
         new_branch = self.co_constraint.substitute(e0, e1, assignments, todo)
         if todo is not None:
             todo.extend(new_branch.symbolic_propagate(assignments))
