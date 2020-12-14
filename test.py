@@ -18,9 +18,11 @@ By default, the generate test is run.
 
 Authors: Pierre Carbonelle, Simon Vandevelde
 """
-
-import snoop # for debugging
-snoop.install()
+try:
+    import snoop # for debugging
+    snoop.install()
+except:
+    pass
 
 import argparse
 from contextlib import redirect_stdout
