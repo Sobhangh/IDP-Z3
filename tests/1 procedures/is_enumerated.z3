@@ -61,7 +61,7 @@ f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 No more models.
 T3, S
 Traceback (most recent call last):
-  File "IDP-Z3/test.py", line 56, in generateZ3
+  File "IDP-Z3/test.py", line 60, in generateZ3
     idp.execute()
   File "IDP-Z3/idp_solver/Run.py", line 93, in execute
     exec(main, mybuiltins, mylocals)
@@ -76,7 +76,7 @@ Traceback (most recent call last):
     self._interpret()
   File "IDP-Z3/idp_solver/Problem.py", line 133, in _interpret
     c.interpret(self)
-  File "IDP-Z3/idp_solver/Substitute.py", line 212, in interpret
+  File "IDP-Z3/idp_solver/Substitute.py", line 210, in interpret
     assert self.decl.function, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 
