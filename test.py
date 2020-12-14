@@ -18,6 +18,12 @@ By default, the generate test is run.
 
 Authors: Pierre Carbonelle, Simon Vandevelde
 """
+try:
+    import snoop # for debugging
+    snoop.install()
+except:
+    pass
+
 import argparse
 from contextlib import redirect_stdout
 import glob
@@ -109,8 +115,8 @@ def generate():
         output = generateZ3(theory)
 
         # Remove absolute paths from output.
-        output = re.sub(r'(/.*)(?=idp_solver/)', '', output)
-        output = re.sub(r'(/.*)(?=idp_server/)', '', output)
+        output = re.sub(r'(/.*)(?=IDP-Z3/)', '', output)
+        output = re.sub(r'(/.*)(?=web-IDP-Z3/)', '', output)
 
         z3 = file.replace(".z3", ".z3z3")
         z3 = z3.replace(".idp", ".z3")
