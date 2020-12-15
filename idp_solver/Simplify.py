@@ -348,13 +348,23 @@ Brackets.update_exprs = update_exprs
 
 # set conditions  #######################################################
 
-def join_set_conditions(conditions: List[Assignment]) -> List[Assignment]:
-    # merge conditions on the same term (equality or 'in')
-    for i, c in enumerate(conditions):
+def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
+    """In a list of assignments, merge assignments that are set-conditions on the same term.
+
+    An equality and a membership predicate (`in` operator) are both set-conditions.
+
+    Args:
+        assignments (List[Assignment]): the list of assignments to make more compact
+
+    Returns:
+        List[Assignment]: the compacted list of assignments
+    """
+    #
+    for i, c in enumerate(assignments):
         (x, belongs, y) = c.as_set_condition()
         if x:
             for j in range(i):
-                (x1, belongs1, y1) = conditions[j].as_set_condition()
+                (x1, belongs1, y1) = assignments[j].as_set_condition()
                 if x1 and x.same_as(x1):
                     if belongs and belongs1:
                         new_tuples = (y.tuples & y1.tuples) # intersect
@@ -380,9 +390,9 @@ def join_set_conditions(conditions: List[Assignment]) -> List[Assignment]:
                                         TRUE if belongs else FALSE,
                                         Status.UNKNOWN)
 
-                    conditions[j] = out # keep the first one
-                    conditions[i] = Assignment(TRUE, TRUE,
+                    assignments[j] = out # keep the first one
+                    assignments[i] = Assignment(TRUE, TRUE,
                                                 Status.UNKNOWN)
-    return [c for c in conditions if c.sentence != TRUE]
+    return [c for c in assignments if c.sentence != TRUE]
 
 Done = True

@@ -21,7 +21,6 @@ Class to represent a collection of theory and structure blocks.
 
 """
 
-from idp_solver.Simplify import join_set_conditions
 import time
 from copy import copy
 from typing import Iterable, List
@@ -29,8 +28,9 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
-    FALSE, AppliedSymbol
-from .Parse import Structure, Enumeration, Theory, str_to_IDP
+    FALSE
+from .Parse import Structure, Theory, str_to_IDP
+from .Simplify import join_set_conditions
 from .utils import OrderedSet, NEWL
 
 class Problem(object):

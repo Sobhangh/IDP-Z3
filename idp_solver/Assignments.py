@@ -108,7 +108,15 @@ class Assignment(object):
     def __log__(self):
         return self.value
 
-    def same_as(self, other):
+    def same_as(self, other:"Assignment") -> bool:
+        """returns True if self has the same sentence and truth value as other.
+
+        Args:
+            other (Assignment): an assignment
+
+        Returns:
+            bool: True if self has the same sentence and truth value as other.
+        """
         return (self.sentence.same_as(other.sentence)
                 and ((self.value is None and other.value is None)
                      or (self.value is not None and other.value is not None
@@ -128,7 +136,15 @@ class Assignment(object):
         return out
 
     def negate(self):
-        assert self.sentence.type == 'bool', "Internal error"
+        """returns an Assignment for the same sentence, but an opposite truth value.
+
+        Raises:
+            AssertionError: Cannot negate a non-boolean assignment
+
+        Returns:
+            [type]: returns an Assignment for the same sentence, but an opposite truth value.
+        """
+        assert self.sentence.type == 'bool', "Cannot negate a non-boolean assignment"
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
