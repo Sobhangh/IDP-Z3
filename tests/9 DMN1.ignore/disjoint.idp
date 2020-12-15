@@ -1,0 +1,12 @@
+vocabulary V {
+    p q r
+}
+
+theory T:V {
+   r=>p. q.
+}
+
+procedure main() {
+	print(decision_table(T, goal_string="p"))
+}
+//TODO q should not appear
