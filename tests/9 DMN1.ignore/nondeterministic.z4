@@ -9,10 +9,10 @@
   C
 ⇒ Eligible(BE001)
 
-  Not E
+  Not B
 ⇒ ? Eligible(BE001)
 
-  B
+  E
 ⇒ Eligible(BE001)
 
 ⇒ ? Eligible(BE001)
