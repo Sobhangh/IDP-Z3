@@ -5,6 +5,9 @@ description = "IDP-Z3 is a collection of software components implementing the Kn
 authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
 license = "GNU LGPL 3"
 
+[tool.poetry.scripts]
+IDP-Z3 = "idp_solver.IDP_Z3:cli"
+
 [tool.poetry.dependencies]
 python = "^3.7"
 Click="^7.0"
@@ -25,7 +28,8 @@ sphinx-autobuild="^0.7.1"
 sphinxcontrib-mermaid="^0.5.0"
 sphinx-rtd-theme="^0.5.0"
 recommonmark="^0.6.0"
+Cython = "^0.29.21"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0", "cython"]
 build-backend = "poetry.core.masonry.api"
