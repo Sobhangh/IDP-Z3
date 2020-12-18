@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "IDP-Z3"
+name = "idp-solver"
 version = "0.5.4"
 description = "IDP-Z3 is a collection of software components implementing the Knowledge Base paradigm using the IDP language and a Z3 SMT solver."
 authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
