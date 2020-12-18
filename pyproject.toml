@@ -31,5 +31,5 @@ recommonmark="^0.6.0"
 Cython = "^0.29.21"
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "cython"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
