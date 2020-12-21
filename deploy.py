@@ -53,8 +53,24 @@ if update_statics:
     assert branch == b'master\n', \
         "Cannot deploy: IDP-Z3 not in master branch !"
 
+    # Check if web-IDP-Z3 is on latest version and clean.
+    branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
+    assert branch == b'master\n', \
+        "Cannot deploy: web-IDP-Z3 not in master branch !"
+    require_clean_work_tree("../web-IDP-Z3")
+
+    # Generate static and commit.
+    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
+    print("Copying to static folder ...")
+    copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
+
+    # We don't want to add all files, only the static and the updated tests.
+    run("git add ./idp_server/static ./tests")
+    run("git commit")
+
     # Create new version tag.
-    if query_user("Create new tag? (Y/n) "):
+    new_tag = query_user("Create new tag? (Y/n) ")
+    if new_tag:
         tag_version = query_user("New tag: ", get=True)
         run("git tag {}".format(tag_version))
 
@@ -67,29 +83,19 @@ if update_statics:
         with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
-    if query_user("Deploy idp_server module to Pypi? (Y/n) "):
+        # Publish new version on Pypi.
         run("poetry install")
         run("poetry build")
         run("poetry publish")
         run("rm -rf ./dist")
 
-    # Check if web-IDP-Z3 is on latest version and clean.
-    branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
-    assert branch == b'master\n', \
-        "Cannot deploy: web-IDP-Z3 not in master branch !"
-    require_clean_work_tree("../web-IDP-Z3")
+        # Add new tag to versions.json
 
-    # Generate static, commit and push it.
-    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
-    print("Copying to static folder ...")
-    copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
-    # We don't want to add all files, only the static and the updated tests.
-    run("git add ./idp_server/static ./tests")
-    run("git commit")
     if query_user("Push to GitLab? (Y/n)"):
         run("git push origin master")
 
-    if query_user("Deploy to Google App Engine? (Y/n) "):
+    if new_tag or query_user("Deploy to Google App Engine? (Y/n) "):
+        print("Deploying to GAE")
 
         # if input("Deploy on Heroku ?") in "Yy":
         #     run("git push heroku master")
