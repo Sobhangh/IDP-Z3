@@ -246,11 +246,8 @@ def abstract(state, given_json):
             if (ass.sentence != TRUE
             and ass.symbol_decl is not None):
                 active_symbol[ass.symbol_decl.name] = True
-                table[ass.symbol_decl.name]= [ [] for i in range(len(models))]
-    # fill table
-    for i, model in enumerate(models):
-        for ass in model:
-            if ass.sentence != TRUE:
+                if (ass.symbol_decl.name not in table):
+                    table[ass.symbol_decl.name]= [ [] for i in range(len(models))]
                 table[ass.symbol_decl.name][i].append(ass)
 
     # build table of models
