@@ -98,3 +98,22 @@ After that, you can open
 
 * the Interactive Consultant at http://127.0.0.1:5000
 * the web IDE at http://127.0.0.1:5000/IDE
+
+Installation of idp_solver module
+---------------------------------
+
+The idp_solver module is available for installation through the official Python package repository.
+This comes with a command line program, :code:`idp_solver` that functions as described in :ref:`CLI`.
+
+To install the module via poetry, the following commands can be used to add the module, and then install it.
+
+.. code::
+
+   poetry add idp_solver
+   poetry install
+
+Installing the module via pip can be done as such:
+
+.. code::
+
+   pip3 install idp_solver
