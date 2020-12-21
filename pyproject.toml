@@ -6,7 +6,7 @@ authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
 license = "GNU LGPL 3"
 
 [tool.poetry.scripts]
-IDP-Z3 = "idp_solver.IDP_Z3:cli"
+idp-solver = "idp_solver.IDP_Z3:cli"
 
 [tool.poetry.dependencies]
 python = "^3.7"
