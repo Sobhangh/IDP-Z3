@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * support [IEP 08 'in' operator](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-08-'in'-operator)
 * better support quantification over symbols
 * docs: added an IDP-Z3 developer reference
+* generation of DMN table for a goal
 
 
 ### GUI

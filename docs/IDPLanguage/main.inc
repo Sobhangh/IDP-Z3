@@ -44,6 +44,9 @@ model_propagate(theory, structure=None)
 
     For example, ``print(model_propagate(T, S))`` will print the assignments that are true in any expansion of the structure named ``S`` consistent with the theory named ``T``.
 
+decision_table(theories, structures=None, goal_string="", timeout=20, max_rows=50, first_hit=True)
+    Experimental.  Returns the rows for a decision table that defines ``goal_string``.
+    ``goal_string`` must be a predicate application defined in the theory.
 
 print(...)
     Prints the arguments on stdout
@@ -90,3 +93,7 @@ propagate(self)
 
 simplify(self)
     Returns the problem with a simplified formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.
+
+decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
+    Experimental.  Returns the rows for a decision table that defines ``goal_string``.
+    ``goal_string`` must be a predicate application defined in the theory.

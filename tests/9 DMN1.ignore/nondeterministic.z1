@@ -1,0 +1,15 @@
+  Not B
+⇒ ? Eligible(BE001)
+
+  C
+⇒ Eligible(BE001)
+
+  Not F
+⇒ ? Eligible(BE001)
+
+  E
+⇒ Eligible(BE001)
+
+⇒ ? Eligible(BE001)
+
+end of decision table

@@ -102,8 +102,25 @@ class Assignment(object):
             post = f" -> {str(self.value)}"
         return f"{pre}{self.sentence.annotations['reading']}{post}"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __log__(self):
         return self.value
+
+    def same_as(self, other:"Assignment") -> bool:
+        """returns True if self has the same sentence and truth value as other.
+
+        Args:
+            other (Assignment): an assignment
+
+        Returns:
+            bool: True if self has the same sentence and truth value as other.
+        """
+        return (self.sentence.same_as(other.sentence)
+                and ((self.value is None and other.value is None)
+                     or (self.value is not None and other.value is not None
+                         and self.value.same_as(other.value))))
 
     def to_json(self) -> str:  # for GUI
         return str(self)
@@ -118,9 +135,32 @@ class Assignment(object):
             out = AComparison.make('=', [self.sentence.original, self.value])
         return out
 
+    def negate(self):
+        """returns an Assignment for the same sentence, but an opposite truth value.
+
+        Raises:
+            AssertionError: Cannot negate a non-boolean assignment
+
+        Returns:
+            [type]: returns an Assignment for the same sentence, but an opposite truth value.
+        """
+        assert self.sentence.type == 'bool', "Cannot negate a non-boolean assignment"
+        value = FALSE if self.value.same_as(TRUE) else TRUE
+        return Assignment(self.sentence, value, self.status, self.relevant)
+
     def translate(self) -> BoolRef:
         return self.formula().translate()
 
+    def as_set_condition(self):
+        """returns an equivalent set condition, or None
+
+        Returns:
+            Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "appSymb is (not) in enumeration"
+        """
+        (x, y, z) = self.sentence.as_set_condition()
+        if x:
+            return (x, y if self.value.same_as(TRUE) else not y, z)
+        return (None, None, None)
 
 class Assignments(dict):
     """Contains a set of Assignment"""

@@ -1,0 +1,32 @@
+vocabulary V {
+    type Security constructed from {BE001}
+    A
+    B
+    C
+    D
+    E
+    F
+    G
+    H
+    I
+    Eligible(Security)
+    NotEligible(Security)
+    Eligible1(Security)
+}
+
+theory T:V {
+    {
+        !s: Eligible(s) <- ~NotEligible(s).
+    }
+    {
+        !s: NotEligible(s) <- B & C.
+        !s: NotEligible(s) <- ~Eligible1(s).
+    }
+    {
+        Eligible1(BE001) <- B & E & F.
+    }
+}
+
+procedure main() {
+	print(decision_table(T, goal_string="Eligible(BE001)"))
+}
