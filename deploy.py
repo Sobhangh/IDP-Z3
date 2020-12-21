@@ -1,11 +1,32 @@
+"""
+Script to deploy the IDP-Z3 project, to be used whenever there is a new version
+ready.
+
+It does the following things:
+    * add a tag in git;
+    * update version in pyproject.toml;
+    * deploy idp-solver module to pypi;
+    * deploy IDP-Z3 to GAE;
+    * add version in versions.json.
+
+Before actually deploying, it runs the tests to make sure that there are no
+errors.
+
+Authors: Pierre Carbonnelle, Simon Vandevelde
+"""
 from distutils.dir_util import copy_tree
 import json
 import subprocess
+import re
+
 
 def run(c, **kwargs):
     return subprocess.run(c.split(' '), **kwargs)
+
+
 def get(c, **kwargs):
     return run(c, capture_output=True, **kwargs).stdout
+
 
 def require_clean_work_tree(cwd):
     assert 0 == run('git diff-files --quiet --ignore-submodules --', cwd=cwd).returncode, \
@@ -13,31 +34,67 @@ def require_clean_work_tree(cwd):
     assert 0 == run('git diff-index --cached --quiet HEAD --ignore-submodules --', cwd=cwd).returncode, \
         "Cannot deploy: your index contains uncommitted changes."
 
-run('python3.8 test.py generate')
 
-update_statics = input("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ") in "Yy"
+def query_user(query, default="y", get=False):
+    if get is True:
+        return input(query)
+    if default == "y":
+        return input(query) in "Yy"
+    else:
+        return input(query) in "Nn"
+
+
+run('python3 test.py generate')
+
+update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
 if update_statics:
+    # Verify we are on master branch.
+    branch = get('git rev-parse --abbrev-ref HEAD')
+    assert branch == b'master\n', \
+        "Cannot deploy: IDP-Z3 not in master branch !"
+
+    # Create new version tag.
+    if query_user("Create new tag? (Y/n) "):
+        tag_version = query_user("New tag: ", get=True)
+        run("git tag {}".format(tag_version))
+
+        # We also need to modify the pyproject.toml.
+        with open("./pyproject.toml", "r") as fp:
+            pyproject = fp.read()
+        pyproject = re.sub(r'version = ".*"',
+                           'version = "{}"'.format(tag_version),
+                           pyproject)
+        with open("./pyproject.toml", "w") as fp:
+            fp.write(pyproject)
+
+    if query_user("Deploy idp_server module to Pypi? (Y/n) "):
+        run("poetry install")
+        run("poetry build")
+        run("poetry publish")
+        run("rm -rf ./dist")
+
+    # Check if web-IDP-Z3 is on latest version and clean.
+    branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
+    assert branch == b'master\n', \
+        "Cannot deploy: web-IDP-Z3 not in master branch !"
+    require_clean_work_tree("../web-IDP-Z3")
+
+    # Generate static, commit and push it.
     run('npm run -script build', cwd='../web-IDP-Z3', check=True)
     print("Copying to static folder ...")
-    copy_tree('../web-IDP-Z3/dist/', 'idp_server/static')
-    run("git add -A")
+    copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
+    # We don't want to add all files, only the static and the updated tests.
+    run("git add ./idp_server/static ./tests")
     run("git commit")
+    if query_user("Push to GitLab? (Y/n)"):
+        run("git push origin master")
 
-    if input("Commit and deploy to Google App Engine? (Y/n) ") in "Yy":
-
-        branch = get('git rev-parse --abbrev-ref HEAD')
-        assert branch == b'master\n', \
-            "Cannot deploy: Z3 not in master branch !"
-
-        branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
-        assert branch == b'master\n', \
-            "Cannot deploy: autoconfig not in master branch !"
-        require_clean_work_tree("../web-IDP-Z3")
+    if query_user("Deploy to Google App Engine? (Y/n) "):
 
         # if input("Deploy on Heroku ?") in "Yy":
         #     run("git push heroku master")
 
-        run("git push origin master")
+        # Push to GitLab and GAE.
         run("git push google master")
         if update_statics:
             run("git push google master", cwd='../web-IDP-Z3')
