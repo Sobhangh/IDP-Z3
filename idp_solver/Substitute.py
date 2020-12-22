@@ -216,6 +216,7 @@ def interpret(self, theory):
             simpler = interpretation.enumeration.contains(sub_exprs, True)
         if 'not' in self.is_enumerated:
             simpler = AUnary.make('¬', simpler)
+        simpler.annotations = self.annotations
     elif self.in_enumeration:
         # re-create original Applied Symbol
         core = AppliedSymbol.make(self.s, sub_exprs).copy()

@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * better support quantification over symbols
 * docs: added an IDP-Z3 developer reference
 * publish idp_solver module on [Pypi](https://pypi.org/project/idp-solver/), with command line script
+* generation of DMN table for a goal
 
 
 ### GUI

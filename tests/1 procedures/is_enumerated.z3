@@ -63,18 +63,18 @@ T3, S
 Traceback (most recent call last):
   File "test.py", line 63, in generateZ3
     idp.execute()
-  File "IDP-Z3/idp_solver/Run.py", line 79, in execute
+  File "IDP-Z3/idp_solver/Run.py", line 93, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 12, in <module>
-  File "IDP-Z3/idp_solver/Run.py", line 59, in myprint
+  File "IDP-Z3/idp_solver/Run.py", line 72, in myprint
     for i, xi in enumerate(x):
   File "IDP-Z3/idp_solver/Run.py", line 48, in model_expand
     yield from problem.expand(max=max, complete=complete, extended=extended)
-  File "IDP-Z3/idp_solver/Problem.py", line 185, in expand
+  File "IDP-Z3/idp_solver/Problem.py", line 188, in expand
     z3_formula = self.formula().translate()
-  File "IDP-Z3/idp_solver/Problem.py", line 140, in formula
+  File "IDP-Z3/idp_solver/Problem.py", line 143, in formula
     self._interpret()
-  File "IDP-Z3/idp_solver/Problem.py", line 130, in _interpret
+  File "IDP-Z3/idp_solver/Problem.py", line 133, in _interpret
     c.interpret(self)
   File "IDP-Z3/idp_solver/Substitute.py", line 211, in interpret
     f"Can't use 'is enumerated' with predicate {self.name}."

@@ -25,12 +25,16 @@ This module monkey-patches the Expression class and sub-classes.
 """
 
 import sys
+from typing import List
 
-from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    BinaryOperator, AEquivalence, AImplication, ADisjunction, \
-                    AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
-                    AUnary, AAggregate, AppliedSymbol, Variable, \
-                    NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE
+from .Expression import (
+    Constructor, Expression, IfExpr, AQuantification, \
+    BinaryOperator, AEquivalence, AImplication, ADisjunction, \
+    AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
+    AUnary, AAggregate, AppliedSymbol, Variable, \
+    NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE)
+from .Parse import Enumeration, Tuple
+from .Assignments import Status, Assignment
 
 
 # class Expression  ###########################################################
@@ -221,6 +225,11 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
+def as_set_condition(self):
+    return ((None, None, None) if not self.is_assignment else
+            (self.sub_exprs[0], True,
+             Enumeration(tuples=[Tuple(args=[self.sub_exprs[1]])])))
+AComparison.as_set_condition = as_set_condition
 
 #############################################################
 
@@ -296,6 +305,12 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
+def as_set_condition(self):
+    (x, y, z) = self.sub_exprs[0].as_set_condition()
+    return ((None, None, None) if x is None else
+            (x, not y, z))
+AUnary.as_set_condition = as_set_condition
+
 
 # Class AAggregate  #######################################################
 
@@ -312,6 +327,17 @@ def update_exprs(self, new_exprs):
 AAggregate.update_exprs = update_exprs
 
 
+# Class AppliedSymbol  #######################################################
+
+def as_set_condition(self):
+    # determine core after substitutions
+    core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
+
+    return ((None, None, None) if not self.in_enumeration else
+            (core, True, self.in_enumeration))
+AppliedSymbol.as_set_condition = as_set_condition
+
+
 # Class Brackets  #######################################################
 
 def update_exprs(self, new_exprs):
@@ -319,5 +345,54 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=[expr], value=expr.value)
 Brackets.update_exprs = update_exprs
 
+
+# set conditions  #######################################################
+
+def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
+    """In a list of assignments, merge assignments that are set-conditions on the same term.
+
+    An equality and a membership predicate (`in` operator) are both set-conditions.
+
+    Args:
+        assignments (List[Assignment]): the list of assignments to make more compact
+
+    Returns:
+        List[Assignment]: the compacted list of assignments
+    """
+    #
+    for i, c in enumerate(assignments):
+        (x, belongs, y) = c.as_set_condition()
+        if x:
+            for j in range(i):
+                (x1, belongs1, y1) = assignments[j].as_set_condition()
+                if x1 and x.same_as(x1):
+                    if belongs and belongs1:
+                        new_tuples = (y.tuples & y1.tuples) # intersect
+                    elif belongs and not belongs1:
+                        new_tuples = (y.tuples ^ y1.tuples) # difference
+                    elif not belongs and belongs1:
+                        belongs = belongs1
+                        new_tuples = (y1.tuples ^ y.tuples)
+                    else:
+                        new_tuples = y.tuples | y1.tuples # union
+                        # sort again
+                        new_tuples = list(new_tuples.values())
+
+                    out = AppliedSymbol.make(
+                        symbol=x.s, args=x.sub_exprs,
+                        in_enumeration=Enumeration(tuples=new_tuples)
+                    )
+
+                    core = AppliedSymbol.make(out.s, out.sub_exprs).copy()
+                    out.simpler = out.in_enumeration.contains([core], False)
+
+                    out = Assignment(out,
+                                        TRUE if belongs else FALSE,
+                                        Status.UNKNOWN)
+
+                    assignments[j] = out # keep the first one
+                    assignments[i] = Assignment(TRUE, TRUE,
+                                                Status.UNKNOWN)
+    return [c for c in assignments if c.sentence != TRUE]
 
 Done = True

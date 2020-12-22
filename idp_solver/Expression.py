@@ -256,7 +256,7 @@ class Expression(object):
 
     def reified(self) -> DatatypeRef:
         if self._reified is None:
-            self._reified = Const('*'+str(Expression.COUNT), BoolSort())
+            self._reified = Const(b'*'+self.code.encode(), BoolSort())
             Expression.COUNT += 1
         return self._reified
 
@@ -315,6 +315,14 @@ class Expression(object):
 
     def translate1(self):
         pass  # monkey-patched
+
+    def as_set_condition(self) -> Tuple[Optional["AppliedSymbol"], Optional[bool], Optional["Enumeration"]]:
+        """Returns an equivalent expression of the type "x in y", or None
+
+        Returns:
+            Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "expr is (not) in enumeration"
+        """
+        return (None, None, None)
 
 
 class Constructor(Expression):
@@ -515,6 +523,11 @@ class ARImplication(BinaryOperator):
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
 
+    def __str1__(self):
+        if not hasattr(self, 'enumerated'):
+            return super().__str1__()
+        return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
+
 
 class AConjunction(BinaryOperator):
     PRECEDENCE = 70
@@ -666,8 +679,8 @@ class AppliedSymbol(Expression):
         self.name = self.s.name
 
     @classmethod
-    def make(cls, symbol, args):
-        out = cls(s=symbol, args=Arguments(sub_exprs=args))
+    def make(cls, symbol, args, **kwargs):
+        out = cls(s=symbol, args=Arguments(sub_exprs=args), **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
@@ -728,7 +741,10 @@ class AppliedSymbol(Expression):
                 or any(e.is_reified() for e in self.sub_exprs))
 
     def reified(self):
-        return (super().reified() if self.is_reified() else self.translate())
+        if self._reified is None:
+            self._reified = ( super().reified() if self.is_reified() else
+                 self.translate() )
+        return self._reified
 
 
 class Arguments(object):
@@ -761,6 +777,7 @@ class Variable(AppliedSymbol):
             return q_vars[self.name]
         elif self.name in voc.symbol_decls:  # in symbol_decls
             self.decl = voc.symbol_decls[self.name]
+            self.s.decl = self.decl
             self.type = self.decl.type
         else:
             pass  # a quantification variable without known type yet
@@ -842,7 +859,7 @@ class Brackets(Expression):
         if type(annotations) == dict:
             self.annotations = annotations
         elif annotations is None:
-            self.annotations['reading'] = None
+            self.annotations['reading'] = ''
         else:  # Annotations instance
             self.annotations = annotations.annotations
 

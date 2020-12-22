@@ -30,12 +30,6 @@ from idp_solver.utils import OrderedSet
 from .IO import Output, decode_UTF
 
 
-"""
-#################
-# INFERENCES
-#################
-"""
-
 # def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
 #     """ causal interpretation of relevance """
 #     #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
@@ -58,7 +52,6 @@ from .IO import Output, decode_UTF
 #         if k in relevant_subtences and symbols and has_relevant_symbol:
 #             l.relevant = True
 
-
 def get_relevant_subtences(self):
     """
     sets 'relevant in self.assignments
@@ -74,6 +67,7 @@ def get_relevant_subtences(self):
     for constraint in self.constraints:
         constraints.append(constraint)
         constraint.co_constraints(constraints)
+
 
     # initialize reachable with relevant, if any
     reachable = OrderedSet()
@@ -161,7 +155,7 @@ def get_relevant_subtences(self):
         for constraint in constraints:
             # consider constraint not yet considered
             if (not constraint.relevant
-            # and with a question that is reachable but not given
+                # and with a question that is reachable but not given
                 and any(q in reachable and q not in given
                         for q in constraint.questions)):
                 constraint.relevant = True
@@ -220,7 +214,7 @@ def explain(state, question):
                                  Status.UNIVERSAL]:
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
-                           and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
+                        and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
                             out.addAtom(a1.sentence, a1.value, a1.status)
 
             # remove irrelevant atoms
@@ -239,86 +233,45 @@ def explain(state, question):
                         out.m["*laws*"].append(a1.annotations['reading'])
     return out.m
 
-
 def abstract(state, given_json):
-    timeout = time.time()+20  # 20 seconds max
-    out = {}  # {category : [Assignment]}
+    timeout, max_rows = 20, 50
+    max_time = time.time()+timeout
+    models = state.decision_table(goal_string="", timeout=timeout, max_rows=max_rows,
+                        first_hit=False)
 
-    # extract fixed atoms from constraints
-    out["universal"] = list(l for l in state.assignments.values()
-                            if l.status == Status.UNIVERSAL)
-    out["given"] = list(l for l in state.assignments.values()
-                        if l.status == Status.GIVEN)
-    out["fixed"] = list(l for l in state.assignments.values()
-                        if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
-    out["irrelevant"] = list(l for l in state.assignments.values()
-                             if l.status not in [Status.ENV_CONSQ,
-                                                 Status.CONSEQUENCE]
-                             and not l.relevant)
-
-    # create keys for models using first symbol of atoms
-    models, count = {}, 0
-    for q in state.assignments.values():
-        models[q.symbol_decl.name] = []
-
-    # done = set(out["universal"] + out["given"] + out["fixed"])
-    known = And([ass.translate() for ass in state.assignments.values()
-                 if ass.status != Status.UNKNOWN]
-                + [ass.sentence.reified() == ass.sentence.translate()
-                    for ass in state.assignments.values()
-                    if ass.sentence.is_reified()])
-
-    theory = state.formula().translate()
-    solver = Solver()
-    solver.add(theory)
-    solver.add(known)
-    while solver.check() == sat and count < 50 and time.time() < timeout:  # for each parametric model
-
-        atoms = []  # [Assignment]
-        for assignment in state.assignments.values():
-            atom = assignment.sentence
-            if assignment.value is None and atom.type == 'bool':
-                if not atom.is_reified():
-                    val1 = solver.model().eval(atom.translate())
-                else:
-                    val1 = solver.model().eval(atom.reified())
-                if is_true(val1):
-                    atoms += [Assignment(atom, TRUE, Status.UNKNOWN)]
-                elif is_false(val1):
-                    atoms += [Assignment(atom, FALSE, Status.UNKNOWN)]
-
-        # start with negations !
-        atoms.sort(key=lambda l: (l.value == TRUE, str(l.sentence)))
-        atoms = state._generalize(atoms, known, theory)
-
-        # add constraint to eliminate this model
-        modelZ3 = Not(And([l.translate() for l in atoms]))
-        theory = And(theory, modelZ3)
-        solver.add(modelZ3)
-
-        # group atoms by symbols
-        model = {}
-        for l in atoms:
-            if l.sentence != TRUE:
-                model.setdefault(l.symbol_decl.name, []).append([l])
-        # add to models
-        for k, v in models.items():  # add model
-            models[k] = v + [model[k] if k in model else []]
-        count += 1
-
-    # detect symbols with atoms
-    active_symbol = {}
-    for symb in models.keys():
-        for i in range(count):
-            if not models[symb][i] == []:
-                active_symbol[symb] = True
+    # detect symbols with assignments
+    table, active_symbol = {}, {}
+    for i, model in enumerate(models):
+        for ass in model:
+            if (ass.sentence != TRUE
+            and ass.symbol_decl is not None):
+                active_symbol[ass.symbol_decl.name] = True
+                if (ass.symbol_decl.name not in table):
+                    table[ass.symbol_decl.name]= [ [] for i in range(len(models))]
+                table[ass.symbol_decl.name][i].append(ass)
 
     # build table of models
-    out["models"] = ("" if count < 50 and time.time() < timeout else
-                     "Time out or more than 50 models...Showing partial results")
-    out["variable"] = [[[symb] for symb in models.keys()
-                        if symb in active_symbol]]
-    for i in range(count):
-        out["variable"] += [[models[symb][i] for symb in models.keys()
-                            if symb in active_symbol]]
+    out = {} # {category : [Assignment]}
+
+    out["universal"] = list(l for l in state.assignments.values()
+                            if l.status == Status.UNIVERSAL)
+    out["given"    ] = list(l for l in state.assignments.values()
+                            if l.status == Status.GIVEN)
+    out["fixed"    ] = list(l for l in state.assignments.values()
+                            if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
+    out["irrelevant"]= list(l for l in state.assignments.values()
+                            if l.status not in [Status.ENV_CONSQ,
+                                                Status.CONSEQUENCE]
+                            and not l.relevant)
+
+    out["models"] = ("" if len(models) < max_rows and time.time()<max_time else
+        "Time out or more than {max_rows} models...Showing partial results")
+    out["variable"] = [[ [symb] for symb in table.keys()
+                        if symb in active_symbol ]]
+    for i in range(len(models)):
+        out["variable"] += [[ table[symb][i] for symb in table.keys()
+                            if symb in active_symbol ]]
     return out
+
+
+

@@ -33,7 +33,7 @@ Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
 Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
 
   Definition: '{' rules*=Rule '}';
-  Rule: annotations=Annotations 
+  Rule: annotations=Annotations
         ('!' quantees=Quantee+ ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)? ('<-' body=Expression)? '.' ;
       Quantee: var=/`?[^\d\W]\w*\b/ ('[' sort=Sort ']')? ;
 
@@ -78,12 +78,12 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     SumMinusOp:      '+' | '-';
     MultDivOp:       '*' | '/' | '%';
     UnaryOperator:   '-' | '~' | '¬';
-    
+
 
     Base:  AppliedSymbol | Variable | NumberConstant | Brackets;
 
-      AppliedSymbol: s=Symbol args=Arguments 
-              ( is_enumerated=/is\s+(not\s+)?enumerated/ 
+      AppliedSymbol: s=Symbol args=Arguments
+              ( is_enumerated=/is\s+(not\s+)?enumerated/
               | 'in' in_enumeration=Enumeration)?;
         Arguments: '(' sub_exprs*=Expression[','] ')';
       Variable: s=Symbol;
