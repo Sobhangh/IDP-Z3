@@ -1,4 +1,3 @@
-
 # Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
 
 # This file is part of Interactive_Consultant.
@@ -30,7 +29,7 @@ import sys
 from idp_solver import idpparser
 
 
-if __name__ == "__main__":
+def cli(args=None):
     parser = argparse.ArgumentParser(description='IDP-Z3')
     parser.add_argument('FILE', nargs='*')
     args = parser.parse_args()
@@ -46,3 +45,7 @@ if __name__ == "__main__":
         idp.execute()
 
     sys.exit(error)
+
+
+if __name__ == "__main__":
+    cli()

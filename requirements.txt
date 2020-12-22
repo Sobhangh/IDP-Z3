@@ -3,6 +3,7 @@ flask
 flask_restful
 flask_cors
 gunicorn
+pretty_errors
 pycallgraph2
 pyyaml
 recommonmark
