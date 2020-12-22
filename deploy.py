@@ -80,7 +80,7 @@ if update_statics:
         pyproject = re.sub(r'version = ".*"',
                            f'version = "{tag_version}"',
                            pyproject)
-        with open("./.toml", "w") as fp:
+        with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
         # Publish new version on Pypi.
