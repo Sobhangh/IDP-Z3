@@ -64,23 +64,23 @@ if update_statics:
     print("Copying to static folder ...")
     copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
 
-    # We don't want to add all files, only the static and the updated tests.
-    run("git add ./idp_server/static ./tests")
+    # add and commit
+    run("git add -A")
     run("git commit")
 
     # Create new version tag.
     new_tag = query_user("Create new tag? (Y/n) ")
     if new_tag:
         tag_version = query_user("New tag: ", get=True)
-        run("git tag {}".format(tag_version))
+        run(f"git tag {tag_version}")
 
         # We also need to modify the pyproject.toml.
         with open("./pyproject.toml", "r") as fp:
             pyproject = fp.read()
         pyproject = re.sub(r'version = ".*"',
-                           'version = "{}"'.format(tag_version),
+                           f'version = "{tag_version}"',
                            pyproject)
-        with open("./pyproject.toml", "w") as fp:
+        with open("./.toml", "w") as fp:
             fp.write(pyproject)
 
         # Publish new version on Pypi.
@@ -89,23 +89,19 @@ if update_statics:
         run("poetry publish")
         run("rm -rf ./dist")
 
-        # Add new tag to versions.json
+    run("git push origin master")
 
-    if query_user("Push to GitLab? (Y/n)"):
-        run("git push origin master")
+    # if input("Deploy on Heroku ?") in "Yy":
+    #     run("git push heroku master")
 
     if new_tag or query_user("Deploy to Google App Engine? (Y/n) "):
         print("Deploying to GAE")
 
-        # if input("Deploy on Heroku ?") in "Yy":
-        #     run("git push heroku master")
-
-        # Push to GitLab and GAE.
+        # Push to google repository and deploy on GAE.
         run("git push google master")
         if update_statics:
             run("git push google master", cwd='../web-IDP-Z3')
-        promote = input("Redirect traffic ? (Y/n) ") in "Yy"
-        run(f"gcloud app deploy {'' if promote else '--no-promote'}")
+        run(f"gcloud app deploy {'' if new_tag else '--no-promote'}")
 
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
         versions = get("gcloud app versions list --sort-by=~LAST_DEPLOYED").decode("utf-8")
@@ -114,11 +110,14 @@ if update_statics:
         with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json") as json_file:
             data = json.load(json_file)
         data['IDP-Z3 latest'] = f"{id}-dot-interactive-consultant.ew.r.appspot.com"
+        if new_tag:
+            data[f'IDP-Z3 {new_tag}'] = data['IDP-Z3 latest']
         with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json", "w") as outfile:
             json.dump(data, outfile, indent=4)
         run("git add versions.json" , cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
         run('git commit -m "latest"', cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
         run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
 
-        version = '' if promote else f'--version="{id}"'
+        # open browser on GAE
+        version = '' if new_tag else f'--version="{id}"'
         run(f"gcloud app browse {version}")

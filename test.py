@@ -30,6 +30,7 @@ import glob
 import io
 import os
 import pprint
+import pretty_errors
 import sys
 import threading
 import time

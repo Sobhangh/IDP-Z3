@@ -13,6 +13,7 @@ python = "^3.7"
 Click="^7.0"
 textX="^2.1.0"
 z3-solver="4.8.8.0"
+pretty-errors = "^1.2.19"
 
 [tool.poetry.dev-dependencies]
 birdseye = "^0.8.4"

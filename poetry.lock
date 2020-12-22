@@ -10,7 +10,7 @@ python-versions = "*"
 name = "aniso8601"
 version = "8.1.0"
 description = "A library for parsing ISO 8601 strings."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -38,15 +38,15 @@ test = ["flake8", "coverage", "coveralls", "pytest"]
 name = "asttokens"
 version = "2.0.4"
 description = "Annotate AST trees with source code positions"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
-[package.extras]
-test = ["astroid", "pytest"]
-
 [package.dependencies]
 six = "*"
+
+[package.extras]
+test = ["astroid", "pytest"]
 
 [[package]]
 name = "babel"
@@ -63,12 +63,9 @@ pytz = ">=2015.7"
 name = "birdseye"
 version = "0.8.4"
 description = "Graphical Python debugger which lets you easily view the values of all evaluated expressions"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
-
-[package.extras]
-tests = ["bs4", "selenium", "requests", "pytest", "numpy", "pandas"]
 
 [package.dependencies]
 asttokens = "*"
@@ -81,11 +78,14 @@ littleutils = ">=0.2"
 outdated = "*"
 sqlalchemy = "*"
 
+[package.extras]
+tests = ["bs4", "selenium", "requests", "pytest", "numpy", "pandas"]
+
 [[package]]
 name = "cached-property"
 version = "1.5.2"
 description = "A decorator for caching properties in classes."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -93,7 +93,7 @@ python-versions = "*"
 name = "certifi"
 version = "2020.12.5"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -101,7 +101,7 @@ python-versions = "*"
 name = "chardet"
 version = "4.0.0"
 description = "Universal encoding detector for Python 2 and 3"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -109,7 +109,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "cheap-repr"
 version = "0.4.4"
 description = "Better version of repr/reprlib for short, cheap string representations."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -128,10 +128,9 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-marker = "sys_platform == \"win32\""
 
 [[package]]
 name = "commonmark"
@@ -164,7 +163,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "executing"
 version = "0.5.3"
 description = "Get the currently executing AST node of a frame, and other information"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -172,14 +171,9 @@ python-versions = "*"
 name = "flask"
 version = "1.1.2"
 description = "A simple framework for building complex web applications."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-
-[package.extras]
-dev = ["pytest", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
-docs = ["sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
-dotenv = ["python-dotenv"]
 
 [package.dependencies]
 click = ">=5.1"
@@ -187,11 +181,16 @@ itsdangerous = ">=0.24"
 Jinja2 = ">=2.10.1"
 Werkzeug = ">=0.15"
 
+[package.extras]
+dev = ["pytest", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
+docs = ["sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
+dotenv = ["python-dotenv"]
+
 [[package]]
 name = "flask-cors"
 version = "3.0.9"
 description = "A Flask extension adding a decorator for CORS support"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -203,7 +202,7 @@ Six = "*"
 name = "flask-humanize"
 version = "0.3.0"
 description = "Common humanization utilities for Flask applications."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -215,12 +214,9 @@ humanize = ">=0.5.1"
 name = "flask-restful"
 version = "0.3.8"
 description = "Simple framework for creating REST APIs"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
-
-[package.extras]
-docs = ["sphinx"]
 
 [package.dependencies]
 aniso8601 = ">=0.82"
@@ -228,11 +224,14 @@ Flask = ">=0.8"
 pytz = "*"
 six = ">=1.3.0"
 
+[package.extras]
+docs = ["sphinx"]
+
 [[package]]
 name = "future"
 version = "0.18.2"
 description = "Clean single-source support for Python 3 and 2"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -240,7 +239,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "gunicorn"
 version = "20.0.4"
 description = "WSGI HTTP Server for UNIX"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.4"
 
@@ -250,28 +249,22 @@ gevent = ["gevent (>=0.13)"]
 setproctitle = ["setproctitle"]
 tornado = ["tornado (>=0.2)"]
 
-[package.dependencies]
-setuptools = ">=3.0"
-
 [[package]]
 name = "humanize"
 version = "3.2.0"
 description = "Python humanize utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
 [package.extras]
 tests = ["freezegun", "pytest", "pytest-cov"]
 
-[package.dependencies]
-setuptools = "*"
-
 [[package]]
 name = "idna"
 version = "2.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -287,7 +280,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "itsdangerous"
 version = "1.1.0"
 description = "Various helpers to pass data to untrusted environments and back."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -295,21 +288,21 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "jinja2"
 version = "2.11.2"
 description = "A very fast and expressive template engine."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
-[package.extras]
-i18n = ["Babel (>=0.8)"]
-
 [package.dependencies]
 MarkupSafe = ">=0.23"
+
+[package.extras]
+i18n = ["Babel (>=0.8)"]
 
 [[package]]
 name = "littleutils"
 version = "0.2.2"
 description = "Small personal collection of python utility functions"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -323,16 +316,13 @@ python-versions = "*"
 
 [package.dependencies]
 six = "*"
-
-[package.dependencies.tornado]
-version = "*"
-python = ">=2.8"
+tornado = {version = "*", markers = "python_version > \"2.7\""}
 
 [[package]]
 name = "markupsafe"
 version = "1.1.1"
 description = "Safely add untrusted strings to HTML/XML markup."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
@@ -340,7 +330,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 name = "outdated"
 version = "0.2.0"
 description = "Check if a version of a PyPI package is outdated"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -376,6 +366,17 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "pretty-errors"
+version = "1.2.19"
+description = "Prettifies Python exception output to make it legible."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+colorama = "*"
+
+[[package]]
 name = "pycallgraph2"
 version = "1.1.3"
 description = "Python Call Graph is a Python module that creates call graph visualizations for Python applications."
@@ -387,7 +388,7 @@ python-versions = "*"
 name = "pygments"
 version = "2.7.3"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -422,7 +423,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "pytz"
 version = "2020.4"
 description = "World timezone definitions, modern and historical"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -451,13 +452,9 @@ sphinx = ">=1.3.1"
 name = "requests"
 version = "2.25.1"
 description = "Python HTTP for Humans."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-
-[package.extras]
-security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
-socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
 [package.dependencies]
 certifi = ">=2017.4.17"
@@ -465,11 +462,15 @@ chardet = ">=3.0.2,<5"
 idna = ">=2.5,<3"
 urllib3 = ">=1.21.1,<1.27"
 
+[package.extras]
+security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
+socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
+
 [[package]]
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -477,12 +478,9 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "snoop"
 version = "0.2.5"
 description = "Powerful debugging tools for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
-
-[package.extras]
-tests = ["pytest", "littleutils", "numpy (>=1.16.3)", "pandas (>=0.24.2)", "birdseye", "django"]
 
 [package.dependencies]
 asttokens = "*"
@@ -490,6 +488,9 @@ cheap_repr = ">=0.4.0"
 executing = "*"
 pygments = "*"
 six = "*"
+
+[package.extras]
+tests = ["pytest", "littleutils", "numpy (>=1.16.3)", "pandas (>=0.24.2)", "birdseye", "django"]
 
 [[package]]
 name = "snowballstemmer"
@@ -507,22 +508,16 @@ category = "dev"
 optional = false
 python-versions = ">=3.5"
 
-[package.extras]
-docs = ["sphinxcontrib-websupport"]
-lint = ["flake8 (>=3.5.0)", "flake8-import-order", "mypy (>=0.790)", "docutils-stubs"]
-test = ["pytest", "pytest-cov", "html5lib", "typed-ast", "cython"]
-
 [package.dependencies]
 alabaster = ">=0.7,<0.8"
 babel = ">=1.3"
-colorama = ">=0.3.5"
+colorama = {version = ">=0.3.5", markers = "sys_platform == \"win32\""}
 docutils = ">=0.12"
 imagesize = "*"
 Jinja2 = ">=2.3"
 packaging = "*"
 Pygments = ">=2.0"
 requests = ">=2.5.0"
-setuptools = "*"
 snowballstemmer = ">=1.1"
 sphinxcontrib-applehelp = "*"
 sphinxcontrib-devhelp = "*"
@@ -530,6 +525,11 @@ sphinxcontrib-htmlhelp = "*"
 sphinxcontrib-jsmath = "*"
 sphinxcontrib-qthelp = "*"
 sphinxcontrib-serializinghtml = "*"
+
+[package.extras]
+docs = ["sphinxcontrib-websupport"]
+lint = ["flake8 (>=3.5.0)", "flake8-import-order", "mypy (>=0.790)", "docutils-stubs"]
+test = ["pytest", "pytest-cov", "html5lib", "typed-ast", "cython"]
 
 [[package]]
 name = "sphinx-autobuild"
@@ -556,11 +556,11 @@ category = "dev"
 optional = false
 python-versions = "*"
 
-[package.extras]
-dev = ["transifex-client", "sphinxcontrib-httpdomain", "bump2version"]
-
 [package.dependencies]
 sphinx = "*"
+
+[package.extras]
+dev = ["transifex-client", "sphinxcontrib-httpdomain", "bump2version"]
 
 [[package]]
 name = "sphinxcontrib-applehelp"
@@ -645,7 +645,7 @@ test = ["pytest"]
 name = "sqlalchemy"
 version = "1.3.21"
 description = "Database Abstraction Library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -669,13 +669,13 @@ category = "main"
 optional = false
 python-versions = "*"
 
+[package.dependencies]
+Arpeggio = ">=1.9.0"
+
 [package.extras]
 cli = ["click (>=7.0,<8.0)"]
 dev = ["textx-dev", "click (>=7.0,<8.0)", "mkdocs", "mike", "twine"]
 test = ["click (>=7.0,<8.0)", "flake8", "tox", "jinja2", "coverage", "coveralls", "pytest", "html5lib"]
-
-[package.dependencies]
-Arpeggio = ">=1.9.0"
 
 [[package]]
 name = "tornado"
@@ -689,7 +689,7 @@ python-versions = ">= 3.5"
 name = "urllib3"
 version = "1.26.2"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
@@ -713,7 +713,7 @@ watchmedo = ["PyYAML (>=3.10)", "argh (>=0.24.1)"]
 name = "werkzeug"
 version = "1.0.1"
 description = "The comprehensive WSGI web application library."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -730,9 +730,9 @@ optional = false
 python-versions = "*"
 
 [metadata]
-lock-version = "1.0"
+lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "7e0419cb6fc330e3c3aec733a0b0b59cb8e50a12e59cd82bcc567ae2cbd9b0b6"
+content-hash = "f73b1c6310f8a1eed97e0b70ee5b2b88237a47583765aadb3fb35accb75b33d1"
 
 [metadata.files]
 alabaster = [
@@ -931,6 +931,10 @@ pathtools = [
 port-for = [
     {file = "port-for-0.3.1.tar.gz", hash = "sha256:b16a84bb29c2954db44c29be38b17c659c9c27e33918dec16b90d375cc596f1c"},
 ]
+pretty-errors = [
+    {file = "pretty_errors-1.2.19-py3-none-any.whl", hash = "sha256:87fd3071dbc302c9064f5b9a6114ea1678dda6ace70cbcd1452e46661af408e6"},
+    {file = "pretty_errors-1.2.19.tar.gz", hash = "sha256:b37b8a84634e9e6294273926e9cdea99414390e9a329293d018a1b4bbe8e2aa7"},
+]
 pycallgraph2 = [
     {file = "pycallgraph2-1.1.3-py2.py3-none-any.whl", hash = "sha256:0e8eb7b8651074c549c6ea2efaee5bd953bcaf2fb028b8ad1abdbad7386eb306"},
     {file = "pycallgraph2-1.1.3.tar.gz", hash = "sha256:f5d02c1ea446cd7051ad886fc61c6698c1d1f6b759ac5e32ddec5fab153b73c8"},
@@ -1011,8 +1015,6 @@ pyyaml = [
     {file = "PyYAML-5.3.1-cp37-cp37m-win_amd64.whl", hash = "sha256:73f099454b799e05e5ab51423c7bcf361c58d3206fa7b0d555426b1f4d9a3eaf"},
     {file = "PyYAML-5.3.1-cp38-cp38-win32.whl", hash = "sha256:06a0d7ba600ce0b2d2fe2e78453a470b5a6e000a985dd4a4e54e436cc36b0e97"},
     {file = "PyYAML-5.3.1-cp38-cp38-win_amd64.whl", hash = "sha256:95f71d2af0ff4227885f7a6605c37fd53d3a106fcab511b8860ecca9fcf400ee"},
-    {file = "PyYAML-5.3.1-cp39-cp39-win32.whl", hash = "sha256:ad9c67312c84def58f3c04504727ca879cb0013b2517c85a9a253f0cb6380c0a"},
-    {file = "PyYAML-5.3.1-cp39-cp39-win_amd64.whl", hash = "sha256:6034f55dab5fea9e53f436aa68fa3ace2634918e8b5994d82f3621c04ff5ed2e"},
     {file = "PyYAML-5.3.1.tar.gz", hash = "sha256:b8eac752c5e14d3eca0e6dd9199cd627518cb5ec06add0de9d32baeee6fe645d"},
 ]
 recommonmark = [
