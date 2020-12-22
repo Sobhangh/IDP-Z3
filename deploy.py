@@ -64,10 +64,6 @@ if update_statics:
     print("Copying to static folder ...")
     copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
 
-    # add and commit
-    run("git add -A")
-    run("git commit")
-
     # Create new version tag.
     new_tag = query_user("Create new tag? (Y/n) ")
     if new_tag:
@@ -83,13 +79,17 @@ if update_statics:
         with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
+    # add and commit
+    run("git add -A")
+    run("git commit")
+    run("git push origin master")
+
+    if new_tag:
         # Publish new version on Pypi.
         run("poetry install")
         run("poetry build")
         run("poetry publish")
         run("rm -rf ./dist")
-
-    run("git push origin master")
 
     # if input("Deploy on Heroku ?") in "Yy":
     #     run("git push heroku master")
@@ -99,8 +99,7 @@ if update_statics:
 
         # Push to google repository and deploy on GAE.
         run("git push google master")
-        if update_statics:
-            run("git push google master", cwd='../web-IDP-Z3')
+        run("git push google master", cwd='../web-IDP-Z3')
         run(f"gcloud app deploy {'' if new_tag else '--no-promote'}")
 
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
@@ -111,7 +110,7 @@ if update_statics:
             data = json.load(json_file)
         data['IDP-Z3 latest'] = f"{id}-dot-interactive-consultant.ew.r.appspot.com"
         if new_tag:
-            data[f'IDP-Z3 {new_tag}'] = data['IDP-Z3 latest']
+            data[f'IDP-Z3 {tag_version}'] = data['IDP-Z3 latest']
         with open("../5d82c61fa39e8aa23da1642a2e2b420a/versions.json", "w") as outfile:
             json.dump(data, outfile, indent=4)
         run("git add versions.json" , cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
