@@ -144,7 +144,7 @@ class Assignment(object):
         Returns:
             [type]: returns an Assignment for the same sentence, but an opposite truth value.
         """
-        assert self.sentence.type == 'bool', "Cannot negate a non-boolean assignment"
+        assert self.sentence.type == BOOL, "Cannot negate a non-boolean assignment"
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
