@@ -1,9 +1,9 @@
 
 -- original ---------------------------------
 vocabulary {
-    
-     Base : real
-     Height: real
+
+     Base : Real
+     Height: Real
      p
 }
 
