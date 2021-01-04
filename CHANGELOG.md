@@ -12,11 +12,21 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [unreleased]
 
 ### API
+
+### GUI
+
+
+## [0.5.6] - 2020-12-22
+[Access v0.5.6 on Google App Engine](https://20201222t185754-dot-interactive-consultant.ew.r.appspot.com/)
+
+### API
 * support [IEP 03 quick syntax changes](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-03-Quick-syntax-changes):
   * enumerations in theory block
 * support [IEP 08 'in' operator](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-08-'in'-operator)
 * better support quantification over symbols
 * docs: added an IDP-Z3 developer reference
+* publish idp_solver module on [Pypi](https://pypi.org/project/idp-solver/), with command line script
+* generation of DMN table for a goal
 
 
 ### GUI

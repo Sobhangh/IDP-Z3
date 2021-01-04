@@ -24,10 +24,7 @@ from json import JSONEncoder
 import time
 
 NEWL = "\n"
-
-BOOL = "Bool"
-INT = "Int"
-REAL = "Real"
+indented = "\n  "
 
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"
@@ -118,3 +115,31 @@ class OrderedSet(dict):
 
     # def popitem(self):
     #     return super(OrderedSet, self).popitem()
+
+    def __or__(self, other: "OrderedSet") -> "OrderedSet":
+        """returns the union of self and other.  Use: `self | other`.
+
+        Returns:
+            OrderedSet: the union of self and other
+        """
+        out = OrderedSet(self) # makes a copy
+        out.extend(other)
+        return out
+
+    def __and__(self, other: "OrderedSet") -> "OrderedSet":
+        """returns the intersection of self and other.  Use: `self & other`.
+
+        Returns:
+            OrderedSet: the intersection of self and other
+        """
+        out = OrderedSet({v for v in self if v in other})
+        return out
+
+    def __xor__(self, other: "OrderedSet") -> "OrderedSet":
+        """returns the self minus other.  Use: `self ^ other`.
+
+        Returns:
+            OrderedSet: self minus other
+        """
+        out = OrderedSet({v for v in self if v not in other})
+        return out

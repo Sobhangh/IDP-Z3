@@ -54,6 +54,19 @@ def model_propagate(theories, structures=None):
     yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
 
 
+def decision_table(theories, structures=None, goal_string="",
+                timeout=20, max_rows=50, first_hit=True):
+    """ output: a list of rows for a decision table"""
+    problem = Problem.make(theories, structures)
+    for model in problem.decision_table(goal_string, timeout, max_rows, first_hit):
+        row = f'{NEWL}∧ '.join(str(a) for a in model
+            if a.sentence.code != goal_string)
+        yield((f"{(f'  {row}{NEWL}') if row else ''}"
+              f"⇒ {str(model[-1]) if model[-1].sentence.code == goal_string else '?'}"))
+        yield("")
+    yield "end of decision table"
+
+
 def myprint(x=""):
     if isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
@@ -74,6 +87,7 @@ def execute(self):
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate
+    mylocals['decision_table'] = decision_table
     mylocals['Problem'] = Problem
 
     exec(main, mybuiltins, mylocals)

@@ -1,0 +1,14 @@
+vocabulary V {
+    type Color constructed from {red, blue, green, yellow}
+    c: Color
+    p
+}
+
+theory T:V {
+    { p() <- ~c() in {red; blue}.
+      p() <- ~(c() in {blue;green}).}
+}
+
+procedure main() {
+	print(decision_table(T, goal_string="p"))
+}

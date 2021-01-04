@@ -3,7 +3,7 @@ title: Google App Engine
 tags: #hosting
 Date: 20200515182231
 –-
-GAE 
+GAE
 
 [Deploying a Flask App](https://medium.com/@dmahugh_70618/deploying-a-flask-app-to-google-app-engine-faa883b5ffab)
 [Host multiple versions of your app](https://rominirani.com/app-engine-dev-tips-6-understand-application-versions-d5b195b3f36c): old !!
@@ -46,7 +46,7 @@ Done:
         * `gcloud init` and link to interactive-consultant project
         * `gcloud source repos create interactive-consultant-client`
         * `git remote add google ssh://pierre.carbonnelle@gmail.com@source.developers.google.com:2022/p/interactive-consultant/r/interactive-consultant-client`
-        * `git push google master`
+        * `git push google main`
 
 Todo:
 - [ ] [deploy directly from gitLab](https://medium.com/faun/deploy-directly-from-gitlab-to-google-app-engine-d78bc3f9c983) ?
