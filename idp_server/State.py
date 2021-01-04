@@ -93,6 +93,8 @@ class State(Problem):
         :rtype: State
         """
         out = self.copy()
+        if out.environment:
+            out.environment = out.environment.copy()
 
         # Set the values of the default structure.
         if 'default' in out.idp.structures:
