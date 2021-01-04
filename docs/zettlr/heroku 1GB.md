@@ -17,10 +17,10 @@ Solution:
   "git rm --cached --ignore-unmatch monkeytype.sqlite3" \
   --prune-empty --tag-name-filter cat -- --all
 * heroku git:remote -a interactiveconsultant
-* git push heroku master
+* git push heroku main
 * git push origin --force --all
 * did not do step 10 - garbage collection
-  
+
 
 Options:
 * [remove Monkeytype.sqlite3](https://help.github.com/en/github/authenticating-to-github/removing-sensitive-data-from-a-repository).  (Problem: all repositories need to be refreshed !)
