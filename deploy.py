@@ -48,15 +48,15 @@ run('python3 test.py generate')
 
 update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
 if update_statics:
-    # Verify we are on master branch.
+    # Verify we are on main branch.
     branch = get('git rev-parse --abbrev-ref HEAD')
-    assert branch == b'master\n', \
-        "Cannot deploy: IDP-Z3 not in master branch !"
+    assert branch == b'main\n', \
+        "Cannot deploy: IDP-Z3 not in main branch !"
 
     # Check if web-IDP-Z3 is on latest version and clean.
     branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
-    assert branch == b'master\n', \
-        "Cannot deploy: web-IDP-Z3 not in master branch !"
+    assert branch == b'main\n', \
+        "Cannot deploy: web-IDP-Z3 not in main branch !"
     require_clean_work_tree("../web-IDP-Z3")
 
     # Generate static and commit.
@@ -82,7 +82,7 @@ if update_statics:
     # add and commit
     run("git add -A")
     run("git commit")
-    run("git push origin master")
+    run("git push origin main")
 
     if new_tag:
         # Publish new version on Pypi.
@@ -92,14 +92,14 @@ if update_statics:
         run("rm -rf ./dist")
 
     # if input("Deploy on Heroku ?") in "Yy":
-    #     run("git push heroku master")
+    #     run("git push heroku main")
 
     if new_tag or query_user("Deploy to Google App Engine? (Y/n) "):
         print("Deploying to GAE")
 
         # Push to google repository and deploy on GAE.
-        run("git push google master")
-        run("git push google master", cwd='../web-IDP-Z3')
+        run("git push google main")
+        run("git push google main", cwd='../web-IDP-Z3')
         run(f"gcloud app deploy {'' if new_tag else '--no-promote'}")
 
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
@@ -115,7 +115,7 @@ if update_statics:
             json.dump(data, outfile, indent=4)
         run("git add versions.json" , cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
         run('git commit -m "latest"', cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
-        run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
+        run("git push origin main", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
 
         # open browser on GAE
         version = '' if new_tag else f'--version="{id}"'
