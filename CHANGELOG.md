@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [unreleased]
 
+### API
+
+### GUI
+
+
+## [0.6.1] - 2021-01-04
+
 Issue #52: use `main` branch instead of `master`
 
 ### API
