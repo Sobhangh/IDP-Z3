@@ -115,7 +115,7 @@ if update_statics:
             json.dump(data, outfile, indent=4)
         run("git add versions.json" , cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
         run('git commit -m "latest"', cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
-        run("git push origin main", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
+        run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
 
         # open browser on GAE
         version = '' if new_tag else f'--version="{id}"'
