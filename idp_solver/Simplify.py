@@ -35,6 +35,7 @@ from .Expression import (
     NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE)
 from .Parse import Enumeration, Tuple
 from .Assignments import Status, Assignment
+from .utils import INT
 
 
 # class Expression  ###########################################################
