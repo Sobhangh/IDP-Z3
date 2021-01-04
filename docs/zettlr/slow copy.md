@@ -4,7 +4,7 @@ tags: #perf
 Date: 20200513173351
 –-
 
-Problem: theory of Djordje ran in 1 sec with 0.4.1, but 15 seconds with master on 13 May.
+Problem: theory of Djordje ran in 1 sec with 0.4.1, but 15 seconds with main on 13 May.
 
 Root cause analysis:
 * interrupting the program after 5 seconds shows that it is copying the subtences to create assignment in State.py
@@ -12,9 +12,9 @@ Root cause analysis:
     * still, copying it is surprisingly slow
 * is the data structure incorrect somehow ?
 
-Differences between 0.4.1 and master:
+Differences between 0.4.1 and main:
 * 0.4.1 does not do deepcopy of formula, but copies a node whenever it changes
-* 0.4.1 does not update every conjuncts if one is false.  master does, to correctly compute relevance
+* 0.4.1 does not update every conjuncts if one is false.  main does, to correctly compute relevance
 
 Possible solutions:
 * use [ujson](https://stackoverflow.com/questions/24756712/deepcopy-is-extremely-slow) to copy, or [pickle](https://gist.github.com/justinfx/3174062) ?? → 10 times faster ?

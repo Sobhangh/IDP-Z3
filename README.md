@@ -34,13 +34,13 @@ poetry run sphinx-autobuild docs docs/_build/html
 ~~~~
 To view it, open `http://127.0.0.1:8000`
 
-The [documentation](https://docs.IDP-Z3.be) on [readthedocs](https://readthedocs.org/projects/idp-z3/) is automatically updated from the master branch of the GitLab repository.
+The [documentation](https://docs.IDP-Z3.be) on [readthedocs](https://readthedocs.org/projects/idp-z3/) is automatically updated from the main branch of the GitLab repository.
 
 The [home page](https://www.IDP-Z3.be) is in the `/homepage` folder and can be locally generated as follows:
 ~~~~
 poetry run sphinx-autobuild homepage homepage/_build/html
 ~~~~
-To view it, open `http://127.0.0.1:8000`.  The website is also automatically updated from the master branch of the GitLab repository.
+To view it, open `http://127.0.0.1:8000`.  The website is also automatically updated from the main branch of the GitLab repository.
 
 
 # Testing
