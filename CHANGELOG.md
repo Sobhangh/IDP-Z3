@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 
 ### GUI
+* fix issue #57
 
 
 ## [0.5.6] - 2020-12-22
