@@ -1,9 +1,9 @@
 
 
 vocabulary {
-	Years_of_Service: int
-	Age: int
-	vacationdays: int
+	Years_of_Service: Int
+	Age: Int
+	vacationdays: Int
 	extra5
 	extra3
 	extra2

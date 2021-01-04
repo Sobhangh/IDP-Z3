@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    
+
     type sides = {3..4}
     Sides: sides
 
@@ -10,7 +10,7 @@ vocabulary {
     Type : type
 
     type side = {1..4}
-    Length(side):real
+    Length(side):Real
 
     type subtype constructed from
         { regular_triangle
@@ -24,7 +24,7 @@ vocabulary {
 }
 
 theory {
-    Sides=3. 
+    Sides=3.
 
     Subtype=rectangle => Length(3)=Length(1).
 

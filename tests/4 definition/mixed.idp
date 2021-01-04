@@ -1,11 +1,11 @@
 vocabulary {
 p q r s
-x:int
+x:Int
 }
 
 theory {
     {p <- ~q.}
     p => s.
    x=1.
- 
+
 }

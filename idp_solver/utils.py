@@ -25,6 +25,9 @@ import time
 
 NEWL = "\n"
 indented = "\n  "
+BOOL = "Bool"
+INT = "Int"
+REAL = "Real"
 
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"
@@ -55,7 +58,7 @@ def unquote(s):
 
 def in_list(q, ls):
     if not ls:
-        return True  # e.g. for int, real
+        return True  # e.g. for INT, REAL
     if len(ls) == 1:
         return q == ls[0]
     return Or([q == i for i in ls])

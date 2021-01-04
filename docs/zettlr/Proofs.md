@@ -9,8 +9,8 @@ $(original)$ is the formula before any substitutions
 Todo:
 - [x] implications have arity 2 only
 - [x] check that replace_by arguments does not include self.proof
-- [x] if phi then a else a → a 
-- [x] don't add brackets in replace_by if not bool
+- [x] if phi then a else a → a
+- [x] don't add brackets in replace_by if not Bool
 - [x] add typeConstraints
 - [ ] proof should be an expression, not a list of atoms → simpler !
 - [ ] replace by True/false → add to consequences (stash: consequences)
@@ -46,7 +46,7 @@ x[x \rarr a] & \rightarrowtail a_{x=a} \\
 (a_{p^1}=b_{p^2}) & \rightarrowtail (\bot)_{p^1 \land p^2}  ~~~~ consequences: [(original) \rarr \bot]
 \end{cases}
 $$
-where a, b are ground terms. 
+where a, b are ground terms.
 
 #### Bracket
 $$
@@ -54,7 +54,7 @@ $$
 (\psi_p) [\varphi \rarr truth]   & \rightarrowtail (\psi_p[\varphi \rarr truth]) \\
 (\top_p) & \rightarrowtail (\top_p)_p  ~~~~ consequences: [(original) \rarr \top] \\
 (\bot_p) & \rightarrowtail (\bot_p)_p  ~~~~ consequences: [(original) \rarr \bot]
-\end{cases} 
+\end{cases}
 $$
 
 #### Negation
@@ -74,16 +74,16 @@ $$
 % no proof
 %(\psi^0 \land…\land \psi^{i})    & \rightarrowtail  (\psi^0 \land…\land \psi^{i})_{(\psi^0 \land…\land \psi^{i})} \\
 % down
-(\psi^0_{p^0} \land…\land \psi^{i}_{p^i})_p[\phi \rarr truth]    & \rightarrowtail 
+(\psi^0_{p^0} \land…\land \psi^{i}_{p^i})_p[\phi \rarr truth]    & \rightarrowtail
 (\psi^0_{p^0}[\phi \rarr truth] \land…\land \psi^i_{p^i}[\phi \rarr truth])_p \\
 % T &
-(\top_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail 
+(\top_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail
 (\psi^1_{p^1} \land…\land \psi^{i}_{p^i})_{p \land p^0} \\
 % T
-(\top_{p^0})_p    & \rightarrowtail (\top_{p^0})_{p \land p^0}  ~~~~ consequences: [(original) \rarr \top] \\ 
+(\top_{p^0})_p    & \rightarrowtail (\top_{p^0})_{p \land p^0}  ~~~~ consequences: [(original) \rarr \top] \\
 %+ S(\psi^0, \top) +truth+S(\psi^i, \top) \\
 % F &
-(\bot_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail 
+(\bot_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p    & \rightarrowtail
 (\bot)_{p^0} ~~~~ consequences: [(original) \rarr \bot]
 \end{cases}
 $$
@@ -96,10 +96,10 @@ $$
 % no proof
 % (\psi^0 \lor…\lor \psi^{i})    & \rightarrowtail (\psi^0 \lor…\lor \psi^{i})_{(\psi^0 \lor…\lor \psi^{i})} \\
 % down
-(\psi^0_{p^0} \lor…\lor \psi^{i}_{p^i})_p[\phi \rarr truth]    & \rightarrowtail 
+(\psi^0_{p^0} \lor…\lor \psi^{i}_{p^i})_p[\phi \rarr truth]    & \rightarrowtail
 (\psi^0_{p^0}[\phi \rarr truth] \lor…\lor \psi^i_{p^i}[\phi \rarr truth])_p \\
 % T |
-(\top_{p^0} \lor \psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_p    & \rightarrowtail  
+(\top_{p^0} \lor \psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_p    & \rightarrowtail
 \top_{p^0}  ~~~~ consequences: [(original) \rarr \top]\\
 % F |
 (\bot_{p^0} \lor \psi^1_{p^1} \lor…\lor \psi^{i}_{p^i})_p    & \rightarrowtail
@@ -118,16 +118,16 @@ $$
 % no proof
 % (\psi^0 \Rarr…\Rarr \psi^{i})    & \rightarrowtail (\psi^0 \Rarr…\Rarr \psi^{i})_{(\psi^0 \Rarr…\Rarr \psi^{i})} \\
 % down
-(\psi^0_{p^0} \Rarr \psi^{1}_{p^1})[\phi \rarr truth]    & \rightarrowtail 
+(\psi^0_{p^0} \Rarr \psi^{1}_{p^1})[\phi \rarr truth]    & \rightarrowtail
 (\psi^0_{p^0}[\phi \rarr truth] \Rarr \psi^1_{p^1}[\phi \rarr truth]) \\
 % F =>
-(\bot_{p^0} \Rarr \psi^1_{p^1})    & \rightarrowtail  
+(\bot_{p^0} \Rarr \psi^1_{p^1})    & \rightarrowtail
 (\top)_{p^0}  ~~~~ consequences: [(original) \rarr \top]\\
 % => T
 (\psi^0_{p^0} \Rarr \top_{p^1})    & \rightarrowtail
 (\top)_{p^1}  ~~~~ consequences: [(original) \rarr \top]\\
 % T =>
-(\top_{p^0} \Rarr \psi^1_{p^1})    & \rightarrowtail  
+(\top_{p^0} \Rarr \psi^1_{p^1})    & \rightarrowtail
 (\psi^1_{p^0 \land p^1}) \\
 % => F
 (\psi^0_{p^0} \Rarr \bot_{p^1})    & \rightarrowtail
@@ -143,10 +143,10 @@ $$
 % no proof
 % (\psi^0 \Lrarr…\Lrarr \psi^{i})   & \rightarrowtail (\psi^0 \Lrarr…\Lrarr \psi^{i})_{(\psi^0 \Lrarr…\Lrarr \psi^{i})} \\
 % down
-(\psi^0_{p^0} \Lrarr…\Lrarr \psi^{i}_{p^i})_p[\phi \rarr truth]    & \rightarrowtail 
+(\psi^0_{p^0} \Lrarr…\Lrarr \psi^{i}_{p^i})_p[\phi \rarr truth]    & \rightarrowtail
 (\psi^0_{p^0}[\phi \rarr truth] \Lrarr…\Lrarr \psi^i_{p^i}[\phi \rarr truth])_p \\
 % T ⇔
-(\top_{p^0} \Lrarr \psi^1_{p^1} \Lrarr…\Lrarr \psi^{i}_{p^i})_p    & \rightarrowtail  
+(\top_{p^0} \Lrarr \psi^1_{p^1} \Lrarr…\Lrarr \psi^{i}_{p^i})_p    & \rightarrowtail
 (\top_{p^0} \land \psi^1_{p^1} \land…\land \psi^{i}_{p^i})_p \\
 % F ⇔
 (\bot_{p^0} \Lrarr \psi^1_{p^1} \Lrarr…\Lrarr \psi^{i}_{p^i})_p    & \rightarrowtail
@@ -161,16 +161,16 @@ $$
 % no proof
 % (\psi^0 \Rarr…\Rarr \psi^{i})    & \rightarrowtail (\psi^0 \Rarr…\Rarr \psi^{i})_{(\psi^0 \Rarr…\Rarr \psi^{i})} \\
 % down
-(if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})[\phi \rarr truth]    & \rightarrowtail 
+(if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})[\phi \rarr truth]    & \rightarrowtail
 (if~ \psi^0_{p^0}[\phi \rarr truth]) ~then~ (\psi^1_{p^1}[\phi \rarr truth]) ~else~ (\psi^{2}_{p^2}[\phi \rarr truth])) \\
 % if T
-(if~ \top_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail  
+(if~ \top_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail
 (\psi^{1}_{p^1})_{p^0}\\
 % if T
 (if~ \bot_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail
 (\psi^{2}_{p^2})_{p^0}\\
 % then a else a
-(if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~ \psi^{1}_{p^2})    & \rightarrowtail  
+(if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~ \psi^{1}_{p^2})    & \rightarrowtail
 (\psi^1_{p^1})_{p^1 \land p^2} \\
 % if psi then T else F
 (if~ \psi^0_{p^0} ~then~ \top_{p^1} ~else~ \bot_{p^2})    & \rightarrowtail
@@ -187,16 +187,16 @@ Notation: $\psi_{[\phi]}$ means that $\psi$ is subject to definition $\phi$.
 $$
 (6) \begin{cases}
 % down
-(\psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})[\phi \rarr truth]    & \rightarrowtail 
+(\psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})[\phi \rarr truth]    & \rightarrowtail
 (if~ \psi^0_{p^0}[\phi \rarr truth]) ~then~ (\psi^1_{p^1}[\phi \rarr truth]) ~else~ (\psi^{2}_{p^2}[\phi \rarr truth])) \\
 % if T
-(if~ \top_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail  
+(if~ \top_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail
 (\psi^{1}_{p^1})_{p^0}\\
 % if T
 (if~ \bot_{p^0} ~then~ \psi^{1}_{p^1} ~else~\psi^{2}_{p^2})    & \rightarrowtail
 (\psi^{2}_{p^2})_{p^0}\\
 % then a else a
-(if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~ \psi^{1}_{p^2})    & \rightarrowtail  
+(if~ \psi^0_{p^0} ~then~ \psi^{1}_{p^1} ~else~ \psi^{1}_{p^2})    & \rightarrowtail
 (\psi^1_{p^1})_{p^1 \land p^2} \\
 % if psi then T else F
 (if~ \psi^0_{p^0} ~then~ \top_{p^1} ~else~ \bot_{p^2})    & \rightarrowtail

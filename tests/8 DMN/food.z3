@@ -3,13 +3,13 @@
 
 
 vocabulary {
-	type desiredDisht_t constructed from { Pasta, Stew, Spareribs, Light_salad, Beans_salad, Steak } 
-	type seasont_t constructed from { Spring, Summer, Winter } 
-	type dayTypet_t constructed from { Holiday, Weekend, Weekday } 
+	type desiredDisht_t constructed from { Pasta, Stew, Spareribs, Light_salad, Beans_salad, Steak }
+	type seasont_t constructed from { Spring, Summer, Winter }
+	type dayTypet_t constructed from { Holiday, Weekend, Weekday }
 	desiredDish: desiredDisht_t
 	season: seasont_t
-	temperature: int
-	guestCount: int
+	temperature: Int
+	guestCount: Int
 	dayType: dayTypet_t
 }
 theory {

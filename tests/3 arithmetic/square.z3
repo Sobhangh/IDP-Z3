@@ -1,9 +1,9 @@
 
 -- original ---------------------------------
 vocabulary {
-    
-     Base : real
-     Height: real
+
+     Base : Real
+     Height: Real
      p
 }
 
@@ -13,57 +13,9 @@ theory {
   p.
   Height = 8.0/3.
 }
--- vocabulary -------------------------------
-
--- theory -----------------------------------
-Or(Not(p), Base*Base == 15)
-
-Base > 0
-
-p
-
-Height == 5333333333333333/2000000000000000
-
--- subtences ------------------------------------
-p
-15.0 = Base * Base
-0 < Base
-Height = 8.0 / 3
-
--- GUILines ------------------------------------
-Base
-Height
-p
-15.0 = Base * Base
-0 < Base
-Height = 8.0 / 3
-
--- case -------------------------------------
-Type:        
-  
-Definitions: 
-  
-Universals:  
-  Height -> 2.6666666666666665
-  p
-  0 < Base
-  Height = 8.0 / 3
-Consequences:
-  Base -> 3.8729833462?
-  15.0 = Base * Base
-Simplified:  
-  true ⇒ false
-  0 < 3.8729833462?
-  p
-  2.6666666666666665 = 2.6666666666666665
-Irrelevant:  
-  
-Co-constraints:
-  
-
-
 -- meta -------------------------------------
-{'symbols': [{'environmental': False,
+{'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
               'idpname': 'Base',
               'priority': 'core',
               'showOptimize': True,
@@ -86,6 +38,7 @@ Co-constraints:
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
  'Base': {'0 < Base': {'environmental': False,
+                       'is_assignment': False,
                        'normal': False,
                        'reading': '0 < Base',
                        'relevant': True,
@@ -93,6 +46,7 @@ Co-constraints:
                        'typ': 'Bool',
                        'value': True},
           '15.0 = Base * Base': {'environmental': False,
+                                 'is_assignment': False,
                                  'normal': False,
                                  'reading': '15.0 = Base * Base',
                                  'relevant': True,
@@ -100,6 +54,7 @@ Co-constraints:
                                  'typ': 'Bool',
                                  'value': True},
           'Base': {'environmental': False,
+                   'is_assignment': True,
                    'normal': True,
                    'reading': 'Base',
                    'relevant': True,
@@ -108,6 +63,7 @@ Co-constraints:
                    'value': '3.8729833462'},
           '__rank': 1},
  'Height': {'Height': {'environmental': False,
+                       'is_assignment': True,
                        'normal': True,
                        'reading': 'Height',
                        'relevant': True,
@@ -115,6 +71,7 @@ Co-constraints:
                        'typ': 'Real',
                        'value': '2.6666666666666665'},
             'Height = 8.0 / 3': {'environmental': False,
+                                 'is_assignment': False,
                                  'normal': False,
                                  'reading': 'Height = 8.0 / 3',
                                  'relevant': True,
@@ -124,6 +81,7 @@ Co-constraints:
             '__rank': 1},
  'p': {'__rank': 1,
        'p': {'environmental': False,
+             'is_assignment': False,
              'normal': True,
              'reading': 'p',
              'relevant': True,

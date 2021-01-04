@@ -85,7 +85,7 @@ Professional_Buyer
 
 vocabulary decision {
     extern vocabulary environment
-    
+
     type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
     type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
 
@@ -147,7 +147,7 @@ Tax = 12 =>
     | Region = Walloon_Region
 ).
 
-//? x[int]: Tax = x.
+//? x[Int]: Tax = x.
 
 // registration types currently only defined for Flanders.
 // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
@@ -162,7 +162,7 @@ Registration_Type = Family_Dwelling =>
     & (~ Energy_Renovation_Planned | Term_Energy_Renovation ~= Certification_Date + 5)
 .
 
-Registration_Type = Social_Dwelling =>     
+Registration_Type = Social_Dwelling =>
     Buyer = Natural_Person
     & Type_Of_Real_Estate = Residential
     & Use = Social_Housing
@@ -197,7 +197,7 @@ Registration_Type = Dwelling_For_Social_Renting =>
     & Additional_Terms)
 .
 
-Registration_Type = Professional_Purchase => 
+Registration_Type = Professional_Purchase =>
     Professional_Buyer
     & Transaction_Type  ~= Public_Sale
     & Use = For_Resale
@@ -205,14 +205,14 @@ Registration_Type = Professional_Purchase =>
 .
 
 [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.](
-Registration_Type = Social_Purpose =>     
+Registration_Type = Social_Purpose =>
     (Seller = Mpy_Erkend_Door_VMSW
     | Seller = Vlaams_Woningfonds
     | Seller = Gelijksoortige_Rechtspersoon_EER)
     & Use = Community_Purpose
 ).
 
-Registration_Type = Exchange_Unbuilt_Ground => 
+Registration_Type = Exchange_Unbuilt_Ground =>
     Additional_Terms
     & ~Monument.
 

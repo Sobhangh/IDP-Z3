@@ -1,41 +1,41 @@
 vocabulary environment {
-    Social_Habitat
-    Licensed_Seller
-    Low_Rent
+    social_habitat
+    licensed_seller
+    low_rent
 
 }
 
 vocabulary decision {
     extern vocabulary environment
 
-    type registration_Type constructed from {Social, Modest, Other}
-    type tax_Rate = {1; 7; 10}
+    type Registration_Type constructed from {Social, Modest, Other}
+    type Tax_Rate = {1; 7; 10}
 
-    Registration_Type : registration_Type
-    Tax_rate : tax_Rate
+    registration_Type : Registration_Type
+    tax_rate : Tax_Rate
 
 }
 
 theory environment:environment {
     // theory of possible situations
 
-    Social_Habitat => Low_Rent.
+    social_habitat => low_rent.
 }
 
 theory decision:decision {
     // legislation
 
-    { Tax_rate = 1  <- Registration_Type = Social.
-      Tax_rate = 7  <- Registration_Type = Modest.
-      Tax_rate = 10 <- Registration_Type = Other.
+    { tax_rate = 1  <- registration_Type = Social.
+      tax_rate = 7  <- registration_Type = Modest.
+      tax_rate = 10 <- registration_Type = Other.
     }
 
-    Registration_Type = Social => Licensed_Seller & Social_Habitat.
-    Registration_Type = Modest => Low_Rent.
+    registration_Type = Social => licensed_seller & social_habitat.
+    registration_Type = Modest => low_rent.
 
 }
 
 display {
-    goal(`Tax_rate).
+    goal(`tax_rate).
     view = normal.
 }
