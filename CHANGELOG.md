@@ -176,4 +176,4 @@ Various small fixes.
     * simplify REST API
     * reorganize source code file per chronological order of calls
     * remove unused code
-* improve minization of real terms for theories with strict inequalities (by repeatedly calling minimize)
+* improve minization of Real terms for theories with strict inequalities (by repeatedly calling minimize)
