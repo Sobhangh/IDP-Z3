@@ -13,6 +13,7 @@ Issue #52: use `main` branch instead of `master`
 * (breaking) IEP 10: capitalize Bool, Int, Real types
 
 ### GUI
+* fix issue #57
 
 
 ## [0.5.6] - 2020-12-22
