@@ -26,7 +26,7 @@ from z3 import Solver, Implies, And, Not, sat, is_true, is_false
 
 from idp_solver.Expression import AComparison, AUnary, AppliedSymbol, TRUE, FALSE
 from idp_solver.Assignments import Status, Assignment
-from idp_solver.utils import OrderedSet
+from idp_solver.utils import OrderedSet, BOOL
 from .IO import Output, decode_UTF
 
 
@@ -129,7 +129,7 @@ def get_relevant_subtences(self):
     #                         relevants[s] = rank
     #                         rank = rank+1
     #                 if q.code != question.code \
-    #                 and q.type == 'bool'\
+    #                 and q.type == BOOL\
     #                 and not q in given:
     #                     print("==>", q)
     #                     reachable.add(q)
@@ -178,7 +178,7 @@ def explain(state, question):
         to_explain = state.assignments[question].sentence
 
         # rules used in justification
-        if to_explain.type != 'bool':  # recalculate numeric value
+        if to_explain.type != BOOL:  # recalculate numeric value
             val = state.assignments[question].value
             if val is None:  # can't explain an expanded value
                 return out.m

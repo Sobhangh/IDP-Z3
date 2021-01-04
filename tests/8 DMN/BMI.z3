@@ -3,16 +3,16 @@
 
 
 vocabulary {
-    type BMILevelt_t constructed from { Obese_II, Obese_I, Normal, Severely_Underweight, Underweight, Overweight, Extreme_Obesity } 
-    type sext_t constructed from { Male, Female } 
-    type riskLevelt_t constructed from { High, Very_High, Low, Increased, Extremely_High } 
-    bmi: real
-    length: real
+    type BMILevelt_t constructed from { Obese_II, Obese_I, Normal, Severely_Underweight, Underweight, Overweight, Extreme_Obesity }
+    type sext_t constructed from { Male, Female }
+    type riskLevelt_t constructed from { High, Very_High, Low, Increased, Extremely_High }
+    bmi: Real
+    length: Real
     BMILevel: BMILevelt_t
     sex: sext_t
     riskLevel: riskLevelt_t
-    waist: real
-    weight: real
+    waist: Real
+    weight: Real
 }
 theory {
     //BMI Level

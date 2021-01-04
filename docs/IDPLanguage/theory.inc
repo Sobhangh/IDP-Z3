@@ -32,7 +32,7 @@ Mathematical expressions and Terms
 A *term* is inductively defined as follows:
 
 Numeric literal
-    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are numerical terms of type ``int`` or ``real``.
+    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are numerical terms of type ``Int`` or ``Real``.
 
 Constructor
     Each constructor of a type_ is a term having that type.
@@ -127,7 +127,7 @@ Quantified formulas
         \forall v_1[typeOfV_1] .. v_n[typeOfV_n]: \phi
 
     Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
-    For example, ``!x[int] y[int]: f(x,y)=f(y,x).``
+    For example, ``!x[Int] y[Int]: f(x,y)=f(y,x).``
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
 
     When quantifying a formula of type ```Symbols``,

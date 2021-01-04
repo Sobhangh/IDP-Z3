@@ -1,12 +1,12 @@
 
 -- original ---------------------------------
 vocabulary {
-    double(real): real
-    X: real
-    y: real
+    double(Real): Real
+    X: Real
+    y: Real
 }
 theory {
-    {!x[real]: double(x)= x+x. }
+    {!x[Real]: double(x)= x+x. }
     X()=3.
     y=double(X()).
 }

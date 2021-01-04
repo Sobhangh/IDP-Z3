@@ -31,7 +31,7 @@ from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
     FALSE
 from .Parse import Structure, Theory, str_to_IDP
 from .Simplify import join_set_conditions
-from .utils import OrderedSet, NEWL
+from .utils import OrderedSet, NEWL, BOOL
 
 class Problem(object):
     """A collection of theory and structure blocks.
@@ -434,7 +434,7 @@ class Problem(object):
             model = solver.model()
             for atom in questions.values():
                 assignment = self.assignments[atom.code]
-                if assignment.value is None and atom.type == 'bool':
+                if assignment.value is None and atom.type == BOOL:
                     if not atom.is_reified():
                         val1 = model.eval(atom.translate())
                     else:

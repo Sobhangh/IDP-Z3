@@ -3,8 +3,8 @@
 
 
 vocabulary {
-	Temperature: int
-	Rain_Probability: int
+	Temperature: Int
+	Rain_Probability: Int
 	Prepare_Terrace
 }
 theory {

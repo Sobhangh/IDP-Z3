@@ -1,11 +1,11 @@
 
 -- original ---------------------------------
 vocabulary environment {
-    Depth : real
+    Depth : Real
 }
 vocabulary decision {
     extern vocabulary environment
-    
+
     type csid constructed from {b, c, d, e, f}
     cSID : csid
 }

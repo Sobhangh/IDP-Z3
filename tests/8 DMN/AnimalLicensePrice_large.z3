@@ -3,12 +3,12 @@
 
 
 vocabulary {
-	type Animal_Typet_t constructed from { Dog } 
-	type Interaction_Reasont_t constructed from { Register } 
+	type Animal_Typet_t constructed from { Dog }
+	type Interaction_Reasont_t constructed from { Register }
 	Animal_Type: Animal_Typet_t
-	Total: int
+	Total: Int
 	Interaction_Reason: Interaction_Reasont_t
-	Age: int
+	Age: Int
 	Sterilized
 	Half_Price_Reg
 	Free_Renewal

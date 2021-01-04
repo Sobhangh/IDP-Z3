@@ -25,7 +25,7 @@ X fresh_vars : use Dict[name, type?] , not Set() → instead store type in Fresh
 X verify types in formula and raise error
 - [x] type inference in quantification
     - [x] expand outer quantifier first
-    - [ ] int/real type inference from arithmetic operations
+    - [ ] Int/Real type inference from arithmetic operations
 - [x] type inference in aggregates
 - [ ] add arity to predicate name, to allow overloading by number of arguments
 - [ ] separate symbol_decls in 2 dictionaries, one for type, the other for function/predicates

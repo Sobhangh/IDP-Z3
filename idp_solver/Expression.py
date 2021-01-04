@@ -36,7 +36,7 @@ from typing import Optional, List, Tuple, Dict, Set, Any
 
 from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
 
-from .utils import unquote, OrderedSet
+from .utils import unquote, OrderedSet, BOOL, INT, REAL
 
 
 class DSLException(Exception):
@@ -402,7 +402,7 @@ class AQuantification(Expression):
         super().__init__()
 
         self.q_vars = {}  # dict[String, Fresh_Variable]
-        self.type = 'bool'
+        self.type = BOOL
 
     @classmethod
     def make(cls, q, q_vars, f):
@@ -459,8 +459,8 @@ class BinaryOperator(Expression):
 
         super().__init__()
 
-        self.type = 'bool' if self.operator[0] in '&|∧∨⇒⇐⇔' \
-               else 'bool' if self.operator[0] in '=<>≤≥≠' \
+        self.type = BOOL if self.operator[0] in '&|∧∨⇒⇐⇔' \
+               else BOOL if self.operator[0] in '=<>≤≥≠' \
                else None
 
     @classmethod
@@ -487,8 +487,8 @@ class BinaryOperator(Expression):
         assert not (self.operator[0] == '⇒' and 2 < len(self.sub_exprs)), \
                 "Implication is not associative.  Please use parenthesis."
         if self.type is None:
-            self.type = 'real' if any(e.type == 'real' for e in self.sub_exprs) \
-                   else 'int' if any(e.type == 'int' for e in self.sub_exprs) \
+            self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
+                   else INT if any(e.type == INT for e in self.sub_exprs) \
                    else self.sub_exprs[0].type  # constructed type, without arithmetic
         return super().annotate1()
 
@@ -645,7 +645,7 @@ class AAggregate(Expression):
                 self.q_vars[v] = Fresh_Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-        self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
+        self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
         self = self.annotate1()
         # remove q_vars after annotate1
         self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
@@ -707,7 +707,7 @@ class AppliedSymbol(Expression):
         return self.annotate1()
 
     def annotate1(self):
-        self.type = ('bool' if self.is_enumerated or self.in_enumeration else
+        self.type = (BOOL if self.is_enumerated or self.in_enumeration else
                      self.decl.type if self.decl else None)
         out = super().annotate1()
         if out.decl is None or out.decl.name == "`Symbols":  # a symbol variable
@@ -822,7 +822,7 @@ class NumberConstant(Expression):
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
             self.py_value = Fraction(self.number)
             self.translated = Q(self.py_value.numerator, self.py_value.denominator)
-            self.type = 'real'
+            self.type = REAL
         elif '.' in self.number:
             v = self.number if not self.number.endswith('?') else self.number[:-1]
             if "e" in v:
@@ -831,11 +831,11 @@ class NumberConstant(Expression):
             else:
                 self.py_value = Fraction(v)
                 self.translated = Q(self.py_value.numerator, self.py_value.denominator)
-            self.type = 'real'
+            self.type = REAL
         else:
             self.py_value = int(self.number)
             self.translated = self.py_value
-            self.type = 'int'
+            self.type = INT
 
     def __str__(self): return self.number
 

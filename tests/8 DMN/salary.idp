@@ -1,8 +1,8 @@
 
 
 vocabulary {
-	Bonus: int
-	Years_of_Work: int
+	Bonus: Int
+	Years_of_Work: Int
 }
 theory {
 	//Salary Bonus

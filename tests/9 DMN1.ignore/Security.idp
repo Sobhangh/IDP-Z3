@@ -125,7 +125,7 @@ CAC40	,
     type AssetSubClasses constructed from {Bond, Convertible, Share, Warrant, Option, MBS, ABS, CDO, IRS, Eurobond}
 
     AssetSubClass(Security) : AssetSubClasses
-	HasRating(Security) : int
+	HasRating(Security) : Int
     Country(Security) : CountryType
     Issuer_Type(Security)  : IssuerType
     Issuer(Security) : Issuers
