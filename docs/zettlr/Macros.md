@@ -5,7 +5,7 @@ Date: 20200523062416
 –-
 
 ## Part 1: `` `Symbols`` type
-- [x] the `` `Symbols`` type is the set of symbols defined in the vocabulary.  
+- [x] the `` `Symbols`` type is the set of symbols defined in the vocabulary.
 - [x] The constructors for the `` `Symbols`` are the symbol names preceded by a backtick (`` ` ``), e.g. `` `edge``
 - [x] the `` `Symbols`` type can appear in function and predicate declaration in the vocabulary section, e.g. `` `symmetric(`Symbols)``is a predicate declaration
 - [x] predicates and functions over `` `Symbols`` are part of structures, like any other symbols
@@ -26,11 +26,11 @@ Quantification over symbols in constraints:
 - [ ] make it work with symmetric enumeration in structure
     - [ ] Problem should contain merged vocabularies (instead of structures) + detect conflicts
     - [ ] Problem should use vocabularies, not structures
-    - [ ] option to give type expansion in structure; expand_quantifier should be done 1) tentatively in annotate; 2) finally in interpret, given all the structures
+    - [ ] option to give type expansion in structure;
     - [ ] Symbols.range should be regenerated before interpret and quantification expansion
 
 Questions:
-* use `` `edge `` or `` `edge' `` ? 
+* use `` `edge `` or `` `edge' `` ?
     * closing tick will later allow to talk about expressions, e.g. to annotate an expression with a reading
     * but we could use other delimiters, such as `[]`
     * so, `` `f(x) `` is the same as `` f(x) ``, but  `` `p `` is not the same as `` `p() ``!
@@ -41,23 +41,23 @@ Questions:
 * accept only constructive definitions ?
 * a definition can be annotated as "constructive"
 * in that case, the grounder can just instantiate the definition as needed by occurrences in other constraints/definitions.  He does not have to instantiate it for all possible values of the arguments.
-* for example, `{ constructive: !x[real]: square(x) = x*x. }` 
+* for example, `{ constructive: !x[real]: square(x) = x*x. }`
 * other than annotation, constructive definitions follow the usual syntax of definitions
 
 ## Part 3: `__Rules` type
-* the `__Rules` type is the set of Rules defined in the vocabulary.  
+* the `__Rules` type is the set of Rules defined in the vocabulary.
 * this could be used to implement special cases of a rule (e.g. penguins are birds that don't fly)
 
 Example
-- Article 1: birds fly.  
-- Article 2: As an exception to Article 1, Penguins do not fly.  
+- Article 1: birds fly.
+- Article 2: As an exception to Article 1, Penguins do not fly.
 
 ```
-theory {  
-     {  [Art1] Fly(x) <- Bird(x). }  
-     (...)  
-     [Art2] Exception(`Art1,  
-             {~Fly(x) <- Penguin(x). }  
+theory {
+     {  [Art1] Fly(x) <- Bird(x). }
+     (...)
+     [Art2] Exception(`Art1,
+             {~Fly(x) <- Penguin(x). }
          ).
 }
 ```
