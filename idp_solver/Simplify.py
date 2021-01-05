@@ -35,6 +35,7 @@ from .Expression import (
     NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE)
 from .Parse import Enumeration, Tuple
 from .Assignments import Status, Assignment
+from .utils import INT
 
 
 # class Expression  ###########################################################
@@ -242,7 +243,7 @@ def update_arith(self, family, operands):
         for e, op in zip(operands1[1:], self.operator):
             function = BinaryOperator.MAP[op]
 
-            if op == '/' and self.type == 'int':  # integer division
+            if op == '/' and self.type == INT:  # integer division
                 out //= e.py_value
             else:
                 out = function(out, e.py_value)

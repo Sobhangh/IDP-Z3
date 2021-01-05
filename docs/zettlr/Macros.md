@@ -41,7 +41,7 @@ Questions:
 * accept only constructive definitions ?
 * a definition can be annotated as "constructive"
 * in that case, the grounder can just instantiate the definition as needed by occurrences in other constraints/definitions.  He does not have to instantiate it for all possible values of the arguments.
-* for example, `{ constructive: !x[real]: square(x) = x*x. }`
+* for example, `{ constructive: !x[Real]: square(x) = x*x. }`
 * other than annotation, constructive definitions follow the usual syntax of definitions
 
 ## Part 3: `__Rules` type

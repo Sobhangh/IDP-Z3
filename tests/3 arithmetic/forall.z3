@@ -1,13 +1,13 @@
 
 -- original ---------------------------------
 vocabulary {
-    Works(real)
+    Works(Real)
     type temp = {0; 1; 2}
     p q
 }
 theory {
    p <=> (!t[temp]: 1 < t < 3 => 0 < t < 3).
-   q <=> (!t[real]: 1 < t < 3 => 0 < t < 3).
+   q <=> (!t[Real]: 1 < t < 3 => 0 < t < 3).
 }
 display {
     view = expanded.

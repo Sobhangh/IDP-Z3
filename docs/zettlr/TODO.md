@@ -1,6 +1,6 @@
 –-
 title: TODO
-tags: 
+tags:
 Date: TODO
 –-
 
@@ -22,7 +22,7 @@ Date: TODO
 - [ ] Support for partial functions
 - [ ] Support for partial interpretations (ct, cf, u) (p.17 of the IDP3 manual)
 - [ ] Support for [[Non linear equations]]
-- [ ] [[use pySMT]] 
+- [ ] [[use pySMT]]
 - [ ] require definitions to be constructive
 
 
@@ -72,7 +72,7 @@ Date: TODO
 - [ ] sort the operands of equality
 - [ ] Expr.sentence -> Expr.ranking ?
 - [ ] distinguish between x=1 entry and x=1 atom in output structure
-- [ ] p(real) should be possible
+- [ ] p(Real) should be possible
 - [ ] #refactoring
 
 #general

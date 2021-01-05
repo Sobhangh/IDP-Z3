@@ -25,14 +25,15 @@ Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 Types
 +++++
 
-IDP-Z3 has the following built-in types:  ``bool``, ``int``, ``real``, ```Symbols``.
+IDP-Z3 has the following built-in types:  ``Bool``, ``Int``, ``Real``, ```Symbols``.
 
 Custom types can be defined by specifying a range of numeric literals, or a list of constructors (of arity 0).
+Their name should be capitalized, by convention.
 
 .. code::
 
-    type side = {1..4}
-    type color constructed from {red, blue, green}
+    type Side = {1..4}
+    type Color constructed from {red, blue, green}
 
 The type ```Symbols`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
@@ -76,7 +77,7 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
 .. code::
 
     MyProposition
-    MyConstant: int
+    MyConstant: Int
 
 
 .. _extern:

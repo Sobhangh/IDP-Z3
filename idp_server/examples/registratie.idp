@@ -1,192 +1,190 @@
 vocabulary environment {
-  type location constructed from {Flemish_Region, Walloon_Region, Brussels_Region}
-  type real_Estate_Type constructed from {Residential, Residential_Building_Land, Other_Real_Estate}
-  type destination constructed from {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
-  type buyerType constructed from {Natural_Person, Legal_Person, Mixed}
-  type calculationBase = {190; 200; 210; 220; 225}
-  type baseLimit = {200; 220}
-  type date = {2015..2025}
-  type agreementDwellingForSocialRenting constructed from {Less_Than_9_years, More_than_9_Or_9_years}
-  type transaction constructed from {Public_Sale, Out_Hand, Public_Sale_Community}
-  type resale constructed from {Less_Than_Three, Three_Or_More}
-  type seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
+  type Location constructed from {Flemish_Region, Walloon_Region, Brussels_Region}
+  type Real_Estate_Type constructed from {Residential, Residential_Building_Land, Other_Real_Estate}
+  type Destination constructed from {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
+  type Buyer_Type constructed from {Natural_Person, Legal_Person, Mixed}
+  type Date = {2015..2025}
+  type Agreement_Dwelling_For_Social_Renting constructed from {Less_Than_9_years, More_than_9_Or_9_years}
+  type Transaction constructed from {Public_Sale, Out_Hand, Public_Sale_Community}
+  type Resale constructed from {Less_Than_Three, Three_Or_More}
+  type Seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
-  Region : location
+  region : Location
 
   // for Heritage
-  Type_Of_Real_Estate : real_Estate_Type
-  Monument
-  Use : destination
-  Heritage_Investment
-  Heritage_Plan
-  Additional_Terms
+  type_of_real_estate : Real_Estate_Type
+  monument
+  use : Destination
+  heritage_investment
+  heritage_plan
+  additional_terms
 
   // for Social_Dwelling
-  Buyer : buyerType
-  Seller : seller
-  Mortgage_Loan_Allowance
+  buyer : Buyer_Type
+  seller : Seller
+  mortgage_loan_allowance
 
   // For Professional_Purchase
-  Professional_Buyer
-  Professional_Declaration_Filed
-  Guarantee_Satisfied
-  Additional_Security_Required
-  Additional_Security_Satisfied
-  Resale : resale
-  Transaction_Type : transaction
-  Certification_Date_Sale : date
+  professional_buyer
+  professional_declaration_filed
+  guarantee_satisfied
+  additional_security_required
+  additional_security_satisfied
+  resale : Resale
+  transaction_type : Transaction
+  certification_date_sale : Date
 
   // For Energy_Efficient_Dwelling
-  Domicile_Established
-  Clean_Purchase
-  First_Ownership
-  Causal_Connection
-  Energy_Renovation_Planned
-  Term_Energy_Renovation : date
-  Certification_Date : date
+  domicile_established
+  clean_purchase
+  first_ownership
+  causal_connection
+  energy_renovation_planned
+  term_energy_renovation : Date
+  certification_date : Date
 
   // For Dwelling_For_Social_Renting
-  Start_Dt_Dwelling_For_Social_Rent : date
-  Duration_Of_Agreement : agreementDwellingForSocialRenting
+  start_dt_dwelling_for_social_rent : Date
+  duration_of_agreement : Agreement_Dwelling_For_Social_Renting
 
 }
 
 vocabulary decision {
   extern vocabulary environment
-  
-  type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
-  type tax_Rate = {1; 2; 4; 6; 7; 10; 12}
 
-  Tax : tax_Rate
-  Registration_Type : registration_Type
+  type Registration_type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
+  type Tax_Rate = {1; 2; 4; 6; 7; 10; 12}
+
+  tax : Tax_Rate
+  registration_type : Registration_type
 }
 
 theory environment:environment {
-  { Professional_Buyer <-
-      Professional_Declaration_Filed
-      & Guarantee_Satisfied
-      & (Additional_Security_Required & Additional_Security_Satisfied
-      | ~ Additional_Security_Required)
-      & Resale = Three_Or_More.
+  { professional_buyer <-
+      professional_declaration_filed
+      & guarantee_satisfied
+      & (additional_security_required & additional_security_satisfied
+      | ~ additional_security_required)
+      & resale = Three_Or_More.
   }
 }
 
 theory decision:decision {
 
-  { Tax = 1 <-
-      Registration_Type = Heritage
-      & Region = Flemish_Region.
+  { tax = 1 <-
+      registration_type = Heritage
+      & region = Flemish_Region.
 
-    Tax = 2 <- // correct amount is 1.5
-      Registration_Type = Social_Dwelling
-      & Region = Flemish_Region.
+    tax = 2 <- // correct amount is 1.5
+      registration_type = Social_Dwelling
+      & region = Flemish_Region.
 
-    Tax = 4 <-
-      Registration_Type = Professional_Purchase
-      & Region = Flemish_Region.
+    tax = 4 <-
+      registration_type = Professional_Purchase
+      & region = Flemish_Region.
 
-    Tax = 6 <-
-      (Registration_Type = Energy_Efficient_Dwelling
-      | Registration_Type = Social_Purpose
-      | Registration_Type = Exchange_Unbuilt_Ground)
-      & Region = Flemish_Region.
+    tax = 6 <-
+      (registration_type = Energy_Efficient_Dwelling
+      | registration_type = Social_Purpose
+      | registration_type = Exchange_Unbuilt_Ground)
+      & region = Flemish_Region.
 
-    Tax = 7 <-
-      (Registration_Type = Family_Dwelling
-      | Registration_Type = Dwelling_For_Social_Renting)
-      & Region = Flemish_Region.
+    tax = 7 <-
+      (registration_type = Family_Dwelling
+      | registration_type = Dwelling_For_Social_Renting)
+      & region = Flemish_Region.
 
-    Tax = 10 <-
-      Region = Flemish_Region
-      & Registration_Type = Other.
+    tax = 10 <-
+      region = Flemish_Region
+      & registration_type = Other.
 
-    Tax = 12 <-
-      Region = Brussels_Region
-      | Region = Walloon_Region.
+    tax = 12 <-
+      region = Brussels_Region
+      | region = Walloon_Region.
   }
 
   // registration types currently only defined for Flanders.
   // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
 
   [An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
-  (Registration_Type = Heritage =>
-      Type_Of_Real_Estate = Residential
-      & Monument
-      & Use = As_Family_Dwelling
-      & Heritage_Investment
-      & Heritage_Plan
-      & Additional_Terms)
+  (registration_type = Heritage =>
+      type_of_real_estate = Residential
+      & monument
+      & use = As_Family_Dwelling
+      & heritage_investment
+      & heritage_plan
+      & additional_terms)
   .
 
-  Registration_Type = Social_Dwelling =>     
-      Buyer = Natural_Person
-      & Type_Of_Real_Estate = Residential
-      & Use = Social_Housing
-      & (Seller = Vlaamse_Mpy_Voor_Sociaal_Wonen | Seller = ErkendeSocialeHuisvestingsMpy)
-      & Mortgage_Loan_Allowance
+  registration_type = Social_Dwelling =>
+      buyer = Natural_Person
+      & type_of_real_estate = Residential
+      & use = Social_Housing
+      & (seller = Vlaamse_Mpy_Voor_Sociaal_Wonen | seller = ErkendeSocialeHuisvestingsMpy)
+      & mortgage_loan_allowance
   .
 
-  Registration_Type = Professional_Purchase => 
-      Professional_Buyer
-      & Transaction_Type  ~= Public_Sale
-      & Use = For_Resale
-      & Certification_Date_Sale = Certification_Date + 8
+  registration_type = Professional_Purchase =>
+      professional_buyer
+      & transaction_type  ~= Public_Sale
+      & use = For_Resale
+      & certification_date_sale = certification_date + 8
   .
 
-  Registration_Type = Energy_Efficient_Dwelling =>
-      Type_Of_Real_Estate = Residential
-      & Buyer = Natural_Person
-      & Domicile_Established
-      & Clean_Purchase
-      & (First_Ownership | Causal_Connection)
-      & Energy_Renovation_Planned
-      & Term_Energy_Renovation = Certification_Date + 5
+  registration_type = Energy_Efficient_Dwelling =>
+      type_of_real_estate = Residential
+      & buyer = Natural_Person
+      & domicile_established
+      & clean_purchase
+      & (first_ownership | causal_connection)
+      & energy_renovation_planned
+      & term_energy_renovation = certification_date + 5
   .
 
   [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.](
-  Registration_Type = Social_Purpose =>     
-      (Seller = Mpy_Erkend_Door_VMSW
-      | Seller = Vlaams_Woningfonds
-      | Seller = Gelijksoortige_Rechtspersoon_EER)
-      & Use = Community_Purpose
+  registration_type = Social_Purpose =>
+      (seller = Mpy_Erkend_Door_VMSW
+      | seller = Vlaams_Woningfonds
+      | seller = Gelijksoortige_Rechtspersoon_EER)
+      & use = Community_Purpose
   ).
 
-  Registration_Type = Exchange_Unbuilt_Ground => 
-      Additional_Terms
-      & ~Monument.
+  registration_type = Exchange_Unbuilt_Ground =>
+      additional_terms
+      & ~monument.
 
-  Registration_Type = Family_Dwelling =>
-      Type_Of_Real_Estate = Residential
-      & Buyer = Natural_Person
-      & Domicile_Established
-      & Clean_Purchase
-      & (First_Ownership | Causal_Connection)
-      & (~ Energy_Renovation_Planned | Term_Energy_Renovation ~= Certification_Date + 5)
+  registration_type = Family_Dwelling =>
+      type_of_real_estate = Residential
+      & buyer = Natural_Person
+      & domicile_established
+      & clean_purchase
+      & (first_ownership | causal_connection)
+      & (~ energy_renovation_planned | term_energy_renovation ~= certification_date + 5)
   .
 
-  Registration_Type = Dwelling_For_Social_Renting =>
-      Type_Of_Real_Estate = Residential
-      & Use = Social_Renting
-      & Start_Dt_Dwelling_For_Social_Rent = Certification_Date + 3
-      & Duration_Of_Agreement = Less_Than_9_years
+  registration_type = Dwelling_For_Social_Renting =>
+      type_of_real_estate = Residential
+      & use = Social_Renting
+      & start_dt_dwelling_for_social_rent = certification_date + 3
+      & duration_of_agreement = Less_Than_9_years
   .
 
-  Registration_Type = Other =>     // @EXPLAIN: Registration_Type cannot be Other
-      Registration_Type ~= Family_Dwelling
-      & Registration_Type ~= Social_Dwelling
-      & Registration_Type ~= Energy_Efficient_Dwelling
-      & Registration_Type ~= Dwelling_For_Social_Renting
-      & Registration_Type ~= Heritage
-      & Registration_Type ~= Professional_Purchase
-      & Registration_Type ~= Social_Purpose
-      & Registration_Type ~= Exchange_Unbuilt_Ground
+  registration_type = Other =>     // @EXPLAIN: registration_type cannot be Other
+      registration_type ~= Family_Dwelling
+      & registration_type ~= Social_Dwelling
+      & registration_type ~= Energy_Efficient_Dwelling
+      & registration_type ~= Dwelling_For_Social_Renting
+      & registration_type ~= Heritage
+      & registration_type ~= Professional_Purchase
+      & registration_type ~= Social_Purpose
+      & registration_type ~= Exchange_Unbuilt_Ground
   .
 
 }
 
 display {
-    relevant(`Tax, `Registration_Type).
-    goal(`Tax).
+    relevant(`tax, `registration_type).
+    goal(`tax).
     view = normal.
-    expand(`Registration_Type, `Tax).
+    expand(`registration_type, `tax).
 }

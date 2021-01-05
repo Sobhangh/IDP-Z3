@@ -1,9 +1,9 @@
 
 -- original ---------------------------------
 vocabulary {
-    x:int
-    y:int
-} 
+    x:Int
+    y:Int
+}
 theory {
     x=0.
     ~(x=0)|(x=0).

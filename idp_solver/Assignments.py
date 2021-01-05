@@ -29,7 +29,7 @@ from typing import Optional
 from z3 import BoolRef
 
 from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
-from .utils import NEWL
+from .utils import NEWL, BOOL
 
 
 class Status(Enum):
@@ -128,7 +128,7 @@ class Assignment(object):
     def formula(self):
         if self.value is None:
             raise Exception("can't translate unknown value")
-        if self.sentence.type == 'bool':
+        if self.sentence.type == BOOL:
             out = self.sentence.original if self.value.same_as(TRUE) else \
                 AUnary.make('¬', self.sentence.original)
         else:
@@ -144,7 +144,7 @@ class Assignment(object):
         Returns:
             [type]: returns an Assignment for the same sentence, but an opposite truth value.
         """
-        assert self.sentence.type == 'bool', "Cannot negate a non-boolean assignment"
+        assert self.sentence.type == BOOL, "Cannot negate a non-boolean assignment"
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 

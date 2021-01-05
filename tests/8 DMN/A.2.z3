@@ -3,8 +3,8 @@
 
 
 vocabulary {
-	price: real
-	age: real
+	price: Real
+	age: Real
 	priority
 }
 theory {
