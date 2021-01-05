@@ -76,7 +76,7 @@ Traceback (most recent call last):
     self._interpret()
   File "IDP-Z3/idp_solver/Problem.py", line 133, in _interpret
     c.interpret(self)
-  File "IDP-Z3/idp_solver/Substitute.py", line 216, in interpret
+  File "IDP-Z3/idp_solver/Substitute.py", line 219, in interpret
     f"Can't use 'is enumerated' with predicate {self.name}."
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

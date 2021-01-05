@@ -609,8 +609,8 @@ class AAggregate(Expression):
         for q in self.quantees:
             self.vars.append(q.var)
             self.sorts.append(q.sort)
-        self.sub_exprs = [self.f, self.out] if self.out else [self.f]
-        # later: expressions to be summed
+        self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
+        self.expanded = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
         self.q_vars = {}
@@ -621,7 +621,7 @@ class AAggregate(Expression):
             raise Exception("Can't have output variable for  #")
 
     def __str1__(self):
-        if self.vars is not None:
+        if not self.expanded:
             assert len(self.vars) == len(self.sorts), "Internal error"
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""

@@ -172,6 +172,8 @@ AQuantification.expand_quantifiers = expand_quantifiers
 # Class AAggregate  ######################################################
 
 def expand_quantifiers(self, theory):
+    if self.expanded:
+        return Expression.expand_quantifiers(self, theory)
     inferred = self.sub_exprs[0].type_inference()
     if 1 < len(self.sub_exprs):
         inferred = {**inferred, **self.sub_exprs[1].type_inference()}
@@ -202,6 +204,7 @@ def expand_quantifiers(self, theory):
     self.q_vars = {}
     forms = [f.expand_quantifiers(theory) for f in forms]
     self.vars = None  # flag to indicate changes
+    self.expanded = True
     return self.update_exprs(forms)
 AAggregate.expand_quantifiers = expand_quantifiers
 
