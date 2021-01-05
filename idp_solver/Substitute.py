@@ -106,16 +106,6 @@ def instantiate(self, e0, e1, theory):
 Expression.instantiate = instantiate
 
 
-def expand_quantifiers(self, theory):
-    """ replaces quantified formula by its expansion
-
-    implementation for everything but AQuantification and AAgregate
-    """
-    return self.update_exprs(e.expand_quantifiers(theory)
-                                for e in self.sub_exprs)
-Expression.expand_quantifiers = expand_quantifiers
-
-
 def interpret(self, theory):
     """ for every defined term in self, add the instantiated definition
     as co-constraint
@@ -132,7 +122,7 @@ Expression.interpret = interpret
 
 # Class AQuantification  ######################################################
 
-def expand_quantifiers(self, theory):
+def interpret(self, theory):
     inferred = self.sub_exprs[0].type_inference()
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
@@ -157,23 +147,24 @@ def expand_quantifiers(self, theory):
         else:
             new_vars[name] = var
     self.q_vars = new_vars
-    forms = [f.expand_quantifiers(theory) for f in forms]
+    forms = [f.interpret(theory) for f in forms]
 
     if not self.q_vars:
+        self.expanded = True
         if self.q == '∀':
             out = AConjunction.make('∧', forms)
         else:
             out = ADisjunction.make('∨', forms)
         return self._change(sub_exprs=[out])
     return self._change(sub_exprs=forms)
-AQuantification.expand_quantifiers = expand_quantifiers
+AQuantification.interpret = interpret
 
 
 # Class AAggregate  ######################################################
 
-def expand_quantifiers(self, theory):
+def interpret(self, theory):
     if self.expanded:
-        return Expression.expand_quantifiers(self, theory)
+        return Expression.interpret(self, theory)
     inferred = self.sub_exprs[0].type_inference()
     if 1 < len(self.sub_exprs):
         inferred = {**inferred, **self.sub_exprs[1].type_inference()}
@@ -202,11 +193,11 @@ def expand_quantifiers(self, theory):
         else:
             raise Exception('Can only quantify aggregates over finite domains')
     self.q_vars = {}
-    forms = [f.expand_quantifiers(theory) for f in forms]
+    forms = [f.interpret(theory) for f in forms]
     self.vars = None  # flag to indicate changes
     self.expanded = True
     return self.update_exprs(forms)
-AAggregate.expand_quantifiers = expand_quantifiers
+AAggregate.interpret = interpret
 
 
 # Class AppliedSymbol, Variable  ##############################################
@@ -217,14 +208,15 @@ def interpret(self, theory):
     if self.is_enumerated:
         assert self.decl.function, \
             f"Can't use 'is enumerated' with predicate {self.name}."
-        interpretation = theory.interpretations[self.name]
-        if interpretation.is_complete:
-            simpler = TRUE
-        else:
-            simpler = interpretation.enumeration.contains(sub_exprs, True)
-        if 'not' in self.is_enumerated:
-            simpler = AUnary.make('¬', simpler)
-        simpler.annotations = self.annotations
+        if self.name in theory.interpretations:
+            interpretation = theory.interpretations[self.name]
+            if interpretation.is_complete:
+                simpler = TRUE
+            else:
+                simpler = interpretation.enumeration.contains(sub_exprs, True)
+            if 'not' in self.is_enumerated:
+                simpler = AUnary.make('¬', simpler)
+            simpler.annotations = self.annotations
     elif self.in_enumeration:
         # re-create original Applied Symbol
         core = AppliedSymbol.make(self.s, sub_exprs).copy()

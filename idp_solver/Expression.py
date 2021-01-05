@@ -126,7 +126,6 @@ class Expression(object):
         self._reified: Optional["Expression"] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional["Expression"] = None
-        self.is_assignment: Optional[bool] = None
 
         # attributes of the top node of a (co-)constraint
         self.questions: Optional[OrderedSet] = None
@@ -253,6 +252,14 @@ class Expression(object):
         return self.value
 
     def is_reified(self): return True
+
+    def is_assignment(self) -> bool:
+        """
+
+        Returns:
+            bool: True if `self` assigns a rigid term to a rigid function application
+        """
+        return False
 
     def reified(self) -> DatatypeRef:
         if self._reified is None:
@@ -399,6 +406,7 @@ class AQuantification(Expression):
             self.sorts.append(q.sort)
 
         self.sub_exprs = [self.f]
+        self.expanded = False
         super().__init__()
 
         self.q_vars = {}  # dict[String, Fresh_Variable]
@@ -413,9 +421,12 @@ class AQuantification(Expression):
         return out.annotate1()
 
     def __str1__(self):
-        assert len(self.vars) == len(self.sorts), "Internal error"
-        vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-        return f"{self.q}{vars} : {self.sub_exprs[0].str}"
+        if not self.expanded:
+            assert len(self.vars) == len(self.sorts), "Internal error"
+            vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+            return f"{self.q}{vars} : {self.sub_exprs[0].str}"
+        else:
+            return self.sub_exprs[0].str
 
     def annotate(self, voc, q_vars):
         for v in self.vars:
@@ -538,7 +549,6 @@ class AComparison(BinaryOperator):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.is_assignment = None
 
     def annotate(self, voc, q_vars):
         # a≠b --> Not(a=b)
@@ -548,14 +558,14 @@ class AComparison(BinaryOperator):
             return out
         return super().annotate(voc, q_vars)
 
-    def annotate1(self):
+    def is_assignment(self):
         # f(x)=y
-        self.is_assignment = len(self.sub_exprs) == 2 and \
+        return len(self.sub_exprs) == 2 and \
                 self.operator in [['='], ['≠']] \
                 and isinstance(self.sub_exprs[0], AppliedSymbol) \
-                and all(e.as_rigid() is not None for e in self.sub_exprs[0].sub_exprs) \
+                and all(e.as_rigid() is not None
+                        for e in self.sub_exprs[0].sub_exprs) \
                 and self.sub_exprs[1].as_rigid() is not None
-        return super().annotate1()
 
 
 class ASumMinus(BinaryOperator):
@@ -710,7 +720,7 @@ class AppliedSymbol(Expression):
         self.type = ('bool' if self.is_enumerated or self.in_enumeration else
                      self.decl.type if self.decl else None)
         out = super().annotate1()
-        if out.decl.name == "`Symbols":  # a symbol variable
+        if out.decl and out.decl.name == "`Symbols":  # a symbol variable
             out.fresh_vars.add(self.s.name)
         return out
 

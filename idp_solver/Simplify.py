@@ -226,7 +226,7 @@ def update_exprs(self, new_exprs):
 AComparison.update_exprs = update_exprs
 
 def as_set_condition(self):
-    return ((None, None, None) if not self.is_assignment else
+    return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
              Enumeration(tuples=[Tuple(args=[self.sub_exprs[1]])])))
 AComparison.as_set_condition = as_set_condition

@@ -55,44 +55,28 @@ def generateZ3(theory):
     Also try to expand the theory and report error.
     """
 
-    idp = idpparser.model_from_str(theory)
-    if 'main' in idp.procedures:
-        # capture stdout, print()
-        with io.StringIO() as buf, redirect_stdout(buf):
-            try:
+    # capture stdout, print()
+    with io.StringIO() as buf, redirect_stdout(buf):
+        try:
+            idp = idpparser.model_from_str(theory)
+            if 'main' in idp.procedures:
                 idp.execute()
-            except Exception as exc:
-                print(traceback.format_exc())
-            return buf.getvalue()
+            else:
+                state = State(idp)
+                out = Output(state).fill(state)
 
-    state = State(idp)
-    out = Output(state).fill(state)
+                print(
+                    f"{NEWL}-- original ---------------------------------{NEWL}"
+                    f"{theory}"
+                    f"{NEWL}-- meta -------------------------------------{NEWL}"
+                    f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
+                    f"{NEWL}-- propagation ------------------------------{NEWL}"
+                    f"{pprint.pformat(out, width=120)}{NEWL}",
+                    end ="")
+        except Exception as exc:
+            print(traceback.format_exc())
+        return buf.getvalue()
 
-    output = (
-        f"{NEWL}-- original ---------------------------------{NEWL}"
-        f"{theory}"
-        f"{NEWL}-- meta -------------------------------------{NEWL}"
-        f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
-        f"{NEWL}-- propagation ------------------------------{NEWL}"
-        f"{pprint.pformat(out, width=120)}{NEWL}"
-
-        #additional debug info (optional)
-        # f"{NEWL}-- vocabulary -------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in state.idp.vocabulary.translated)}"
-        # f"{NEWL}-- theory -----------------------------------{NEWL}"
-        # f"{(NEWL+NEWL).join(str(t) for t in state.idp.theory.translate(state.idp))}{NEWL}"
-        # f"{NEWL}-- goal -----------------------------------{NEWL}"
-        # f"{str(state.idp.goal.translate())}{NEWL}"
-        # f"{NEWL}-- assignments ------------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in state.assignments)}{NEWL}"
-        # f"{NEWL}-- state -------------------------------------{NEWL}"
-        # f"{str(state)}{NEWL}"
-        )
-    # try:
-    #     expand(state)
-    # except Exception as exc:
-    #     output += f"{NEWL}error in expansion{NEWL}{str(exc)}"
-    return output
 
 
 def generate():

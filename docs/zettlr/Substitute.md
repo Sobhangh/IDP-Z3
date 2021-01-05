@@ -22,34 +22,29 @@ graph TD
     formula --> interpret
 
     idpparser --> Annotate
-    Annotate --> expand_quantifiers;
     Annotate --> interpret;
     Annotate --> rename_args;
 
+    rename_args --> instantiate;
+    instantiate_definition --> interpret;
+    interpret --> instantiate;
     instantiate_definition --> instantiate;
-    instantiate_definition --> expand_quantifiers;
-    expand_quantifiers --> instantiate;
     interpret --> instantiate_definition
     interpret --> update_exprs;
-    expand_quantifiers --> update_exprs;
 
-
+    update_exprs -.-> make;
     instantiate_definition --> make;
     update_exprs --> _change;
-    update_exprs -.-> make;
-    expand_quantifiers --> make;
+    interpret --> make;
+    simplify1 --> update_exprs;
     make --> simplify1;
     Annotate --> annotate1;
     make --> annotate1;
 
-    expand_quantifiers --> _change;
-
     instantiate --> _change;
-		    rename_args --> instantiate;
-    instantiate_definition --> interpret;
-    instantiate_definition --> expand_quantifiers
+    interpret --> _change;
+
     Annotate --> make;
-    simplify1 --> update_exprs;
     instantiate --> update_exprs;
 
 ```

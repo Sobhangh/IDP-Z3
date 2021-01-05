@@ -503,8 +503,10 @@ class Theory(object):
             if type(decl) == SymbolDeclaration and decl.domain:
                 self.def_constraints[decl] = rule.expanded
 
-        self.constraints = OrderedSet([e.annotate(self.voc, {}) for e in self.constraints])
-        self.constraints = OrderedSet([e.expand_quantifiers(self) for e in self.constraints])
+        self.constraints = OrderedSet([e.annotate(self.voc, {})
+                                       for e in self.constraints])
+        self.constraints = OrderedSet([e.interpret(self)
+                                       for e in self.constraints])
 
         for decl in self.voc.symbol_decls.values():
             if type(decl) == SymbolDeclaration:
@@ -657,7 +659,7 @@ class Rule(object):
                 expr = AppliedSymbol.make(self.symbol, self.args)
             expr = AEquivalence.make('⇔', [expr, self.body])
             expr = AQuantification.make('∀', {**self.q_vars}, expr)
-            self.expanded = expr.expand_quantifiers(theory)
+            self.expanded = expr.interpret(theory)
 
         # interpret structures
         self.body     = self.body    .interpret(theory)
@@ -670,7 +672,6 @@ class Rule(object):
         assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new, self.block)
-        out = out.expand_quantifiers(theory)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
         if self.symbol.decl.function:  # a function
@@ -1003,7 +1004,7 @@ class Display(object):
                         constraint = constraint.interpret(idp.theory)
                         idp.theory.constraints.append(constraint)
             elif type(constraint)==AComparison:  # e.g. view = normal
-                assert constraint.is_assignment
+                assert constraint.is_assignment()
                 if constraint.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():

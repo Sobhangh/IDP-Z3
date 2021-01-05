@@ -3,7 +3,7 @@ vocabulary V {
     Color: color
     opposite(color): color
     is_color(color)
-    
+
     type AB constructed from {A, B}
     f(AB,AB):AB
 }
@@ -28,9 +28,6 @@ theory T2:V {
     opposite(Color)=Color.
     f(A,B) is enumerated.
 }
-theory T3:V {
-    is_color(red) is enumerated.
-}
 theory T4:V {
     Color = blue.
     (f(B,B) is enumerated).
@@ -47,6 +44,4 @@ procedure main() {
     print(model_expand(T2, S))
     print("T4, S2")
     print(model_expand(T4, S2))
-    print("T3, S")
-    print(model_expand(T3, S))
 }
