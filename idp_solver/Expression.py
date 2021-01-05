@@ -158,10 +158,10 @@ class Expression(object):
             return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification) and len(self.vars) == 0)):
+           or (isinstance(self, AQuantification) and len(self.q_vars) == 0)):
             return self.sub_exprs[0].same_as(other)
         if (isinstance(other, Brackets)
-           or (isinstance(other, AQuantification) and len(other.vars) == 0)):
+           or (isinstance(other, AQuantification) and len(other.q_vars) == 0)):
             return self.same_as(other.sub_exprs[0])
 
         return self.str == other.str and type(self) == type(other)
@@ -425,7 +425,7 @@ class AQuantification(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Fresh_Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
@@ -642,7 +642,7 @@ class AAggregate(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Fresh_Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else 'int'
@@ -710,7 +710,7 @@ class AppliedSymbol(Expression):
         self.type = ('bool' if self.is_enumerated or self.in_enumeration else
                      self.decl.type if self.decl else None)
         out = super().annotate1()
-        if out.decl is None or out.decl.name == "`Symbols":  # a symbol variable
+        if out.decl.name == "`Symbols":  # a symbol variable
             out.fresh_vars.add(self.s.name)
         return out
 
@@ -730,7 +730,7 @@ class AppliedSymbol(Expression):
     def type_inference(self):
         out = {}
         for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Variable):
+            if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
                 out[e.name] = self.decl.sorts[i]
             else:
                 out.update(e.type_inference())
@@ -799,9 +799,10 @@ class Fresh_Variable(Expression):
 
         super().__init__()
 
-        self.type = self.sort.name
+        self.type = sort.name if sort else ''
         self.sub_exprs = []
-        self.translated = FreshConst(self.sort.decl.translate())
+        self.translated = (FreshConst(sort.decl.translate()) if sort else
+                           None)
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name

@@ -89,7 +89,7 @@ Constructor.symbolic_propagate = symbolic_propagate
 
 def symbolic_propagate(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
-    if self.vars == []:  # expanded
+    if not self.q_vars:  # expanded
         return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
     return out
 AQuantification.symbolic_propagate = symbolic_propagate

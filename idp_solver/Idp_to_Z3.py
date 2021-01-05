@@ -69,21 +69,18 @@ IfExpr.translate1 = translate1
 
 
 def translate1(self):
-    for v in self.q_vars.values():
-        v.translate()
-    if not self.vars:
+    if not self.q_vars:
         return self.sub_exprs[0].translate()
     else:
-        finalvars, forms = self.vars, [f.translate() for f in self.sub_exprs]
+        finalvars = [v.translate() for v in self.q_vars.values()]
+        forms = [f.translate() for f in self.sub_exprs]
 
         if self.q == '∀':
             forms = And(forms) if 1 < len(forms) else forms[0]
-            if len(finalvars) > 0:  # not fully expanded !
-                forms = ForAll([v.translate() for v in finalvars], forms)
+            forms = ForAll(finalvars, forms)
         else:
             forms = Or(forms) if 1 < len(forms) else forms[0]
-            if len(finalvars) > 0:  # not fully expanded !
-                forms = Exists(finalvars, forms)
+            forms = Exists(finalvars, forms)
         return forms
 
 
