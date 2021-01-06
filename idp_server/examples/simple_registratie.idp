@@ -37,6 +37,5 @@ theory decision:decision {
 
 display {
     goal(`tax_rate).
-    relevant(`tax_rate, `registration_Type).
     view = normal.
 }

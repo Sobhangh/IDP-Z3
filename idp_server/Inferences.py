@@ -163,10 +163,6 @@ def get_relevant_subtences(self):
     if not hasGiven or self.idp.display.moveSymbols:
         self.relevant_symbols = relevants
 
-    # remove irrelevant domain conditions
-    is_relevant = lambda constraint: constraint.relevant
-    self.constraints = list(filter(is_relevant, self.constraints))
-
 
 def explain(state, question):
     out = Output(state, state.given)
