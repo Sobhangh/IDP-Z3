@@ -11,8 +11,8 @@ vocabulary decision {
     type Registration_Type constructed from {Social, Modest, Other}
     type Tax_Rate = {1; 7; 10}
 
-    registration_Type : Registration_Type
     tax_rate : Tax_Rate
+    registration_Type : Registration_Type
 
 }
 
@@ -37,5 +37,6 @@ theory decision:decision {
 
 display {
     goal(`tax_rate).
+    relevant(`tax_rate, `registration_Type).
     view = normal.
 }
