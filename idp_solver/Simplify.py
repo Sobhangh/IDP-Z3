@@ -317,7 +317,7 @@ AUnary.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    if self.expanded:
+    if self.quantifier_is_expanded:
         operands1 = [e.as_rigid() for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)

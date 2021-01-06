@@ -150,7 +150,7 @@ def interpret(self, theory):
     forms = [f.interpret(theory) for f in forms]
 
     if not self.q_vars:
-        self.expanded = True
+        self.quantifier_is_expanded = True
         if self.q == '∀':
             out = AConjunction.make('∧', forms)
         else:
@@ -163,7 +163,7 @@ AQuantification.interpret = interpret
 # Class AAggregate  ######################################################
 
 def interpret(self, theory):
-    if self.expanded:
+    if self.quantifier_is_expanded:
         return Expression.interpret(self, theory)
     inferred = self.sub_exprs[0].type_inference()
     if 1 < len(self.sub_exprs):
@@ -195,7 +195,7 @@ def interpret(self, theory):
     self.q_vars = {}
     forms = [f.interpret(theory) for f in forms]
     self.vars = None  # flag to indicate changes
-    self.expanded = True
+    self.quantifier_is_expanded = True
     return self.update_exprs(forms)
 AAggregate.interpret = interpret
 

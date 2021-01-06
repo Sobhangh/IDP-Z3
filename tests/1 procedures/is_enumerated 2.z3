@@ -11,9 +11,9 @@ Traceback (most recent call last):
     obj.__init__(**attrs)
   File "IDP-Z3/idp_solver/Parse.py", line 88, in __init__
     t.annotate(self)
-  File "IDP-Z3/idp_solver/Parse.py", line 509, in annotate
+  File "IDP-Z3/idp_solver/Parse.py", line 510, in annotate
     for e in self.constraints])
-  File "IDP-Z3/idp_solver/Parse.py", line 509, in <listcomp>
+  File "IDP-Z3/idp_solver/Parse.py", line 510, in <listcomp>
     for e in self.constraints])
   File "IDP-Z3/idp_solver/Substitute.py", line 210, in interpret
     f"Can't use 'is enumerated' with predicate {self.name}."
