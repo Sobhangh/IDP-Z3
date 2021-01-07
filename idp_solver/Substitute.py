@@ -188,11 +188,10 @@ def interpret(self, theory):
                 for val in var.sort.decl.range:
                     new_f = f.instantiate(var, val, theory)
                     out.append(new_f)
-            forms = out
+            forms = [f.interpret(theory) for f in out]
         else:
             raise Exception('Can only quantify aggregates over finite domains')
     self.q_vars = {}
-    forms = [f.interpret(theory) for f in forms]
     self.vars = None  # flag to indicate changes
     self.quantifier_is_expanded = True
     return self.update_exprs(forms)
