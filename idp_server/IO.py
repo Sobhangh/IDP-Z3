@@ -116,22 +116,17 @@ def json_to_literals(state, jsonstr: str):
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
-                    if state.assignments[atom].value == '':
-                        if json_atom["value"] != '':
-                            value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                            if json_atom["typ"] == "Bool":
-                                state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
-                            elif json_atom["value"]:
-                                state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
-
-                                idp_atom = AComparison.make('=', [idp_atom, value])
-                                state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
-                            out[atom] = state.assignments[atom]
-                    else:
-                        # Override default value.
+                    if json_atom["value"] != '':
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        state.assignments[atom].value = value
-                        state.assignments[atom].status = Status.GIVEN
+                        state.assignments.assert_(idp_atom, value,
+                                                  Status.GIVEN, False)
+                        if json_atom["typ"] != "Bool":
+                            idp_atom = AComparison.make('=', [idp_atom, value])
+                            state.assignments.assert_(idp_atom, TRUE,
+                                                      Status.GIVEN, False)
+                    else:
+                        state.assignments[atom].value = None
+                    out[atom] = state.assignments[atom]
     return out
 
 
