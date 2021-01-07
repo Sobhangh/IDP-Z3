@@ -143,11 +143,10 @@ def interpret(self, theory):
                 for val in var.sort.decl.range:
                     new_f = f.instantiate(var, val, theory)
                     out.append(new_f)
-            forms = out
+            forms = [f.interpret(theory) for f in out]
         else:
             new_vars[name] = var
     self.q_vars = new_vars
-    forms = [f.interpret(theory) for f in forms]
 
     if not self.q_vars:
         self.quantifier_is_expanded = True
@@ -288,12 +287,6 @@ def instantiate(self, e0, e1, theory):
         elif len(self.sub_exprs) == 0:
             return e1
     out = Expression.instantiate(self, e0, e1, theory)
-    if self.name in theory.interpretations:
-        # interpret if substituting a symbol, to guard against type/arity error
-        # don't do it otherwise, for performance reasons
-        if any(e.sort.name == '`Symbols' for e in self.sub_exprs
-                if type(e) == Fresh_Variable):
-            out = out.interpret(theory)
     return out
 AppliedSymbol .instantiate = instantiate
 Variable      .instantiate = instantiate
