@@ -105,11 +105,11 @@ def generate():
 
     dir = os.path.dirname(__file__)
     dir = os.path.join(dir, "tests")
-    files = glob.glob("./tests/*/*.idp")
+    files = glob.glob("./tests/9*/*.idp")
     files.sort()
     out_dict, error = {}, 0
     for file in files:
-        if r"ignore" not in file:
+        if True: # r"ignore" not in file:
             print(file)
             # Log_file(file) # optional
             f = open(file, "r")

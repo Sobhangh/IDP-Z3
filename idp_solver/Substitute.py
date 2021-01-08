@@ -221,6 +221,8 @@ def interpret(self, theory):
         # re-create original Applied Symbol
         core = AppliedSymbol.make(self.s, sub_exprs).copy()
         simpler = self.in_enumeration.contains([core], False)
+        if 'not' in self.is_enumeration:
+            simpler = AUnary.make('¬', simpler)
         simpler.annotations = self.annotations
     elif (self.name in theory.interpretations
             and any(s.name == '`Symbols' for s in self.decl.sorts)):
