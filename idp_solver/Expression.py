@@ -707,14 +707,18 @@ class AppliedSymbol(Expression):
         self.s.decl = self.decl
         if self.in_enumeration:
             self.in_enumeration.annotate(voc)
-        out = self.annotate1()
         # move the negation out
         if 'not' in self.is_enumerated:
-            out.is_enumerated = 'is enumerated'
+            out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                     is_enumerated='is enumerated')
             out = AUnary.make('¬', out)
-        if 'not' in self.is_enumeration:
-            out.is_enumeration = 'in'
+        elif 'not' in self.is_enumeration:
+            out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                     is_enumeration='in',
+                                     in_enumeration=self.in_enumeration)
             out = AUnary.make('¬', out)
+        else:
+            out = self.annotate1()
         return out
 
     def annotate1(self):
