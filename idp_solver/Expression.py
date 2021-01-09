@@ -295,14 +295,11 @@ class Expression(object):
     def instantiate(self,
                     e0: "Expression",
                     e1: "Expression",
-                    theory: Any
+                    problem: Any
                     ) -> "Expression":
         return self  # monkey-patched
 
-    def interpret(self, theory: Any) -> "Expression":
-        return self  # monkey-patched
-
-    def expand_quantifiers(self, theory: Any) -> "Expression":
+    def interpret(self, problem: Any) -> "Expression":
         return self  # monkey-patched
 
     def symbolic_propagate(self,
