@@ -294,8 +294,7 @@ class Expression(object):
 
     def instantiate(self,
                     e0: "Expression",
-                    e1: "Expression",
-                    problem: Any
+                    e1: "Expression"
                     ) -> "Expression":
         return self  # monkey-patched
 

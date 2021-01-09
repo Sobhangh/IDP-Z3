@@ -67,7 +67,7 @@ def substitute(self, e0, e1, assignments, todo=None):
 Expression.substitute = substitute
 
 
-def instantiate(self, e0, e1, problem):
+def instantiate(self, e0, e1):
     """
     recursively substitute Fresh_Variable e0 by e1 in self
 
@@ -78,14 +78,14 @@ def instantiate(self, e0, e1, problem):
     out.annotations = copy.copy(out.annotations)
 
     # instantiate expressions, with simplification
-    out = out.update_exprs(e.instantiate(e0, e1, problem) for e
+    out = out.update_exprs(e.instantiate(e0, e1) for e
                            in out.sub_exprs)
 
     simpler, co_constraint = None, None
     if out.simpler is not None:
-        simpler = out.simpler.instantiate(e0, e1, problem)
+        simpler = out.simpler.instantiate(e0, e1)
     if out.co_constraint is not None:
-        co_constraint = out.co_constraint.instantiate(e0, e1, problem)
+        co_constraint = out.co_constraint.instantiate(e0, e1)
     out._change(simpler=simpler, co_constraint=co_constraint)
 
     if out.value is not None:  # replace by new value
@@ -146,7 +146,7 @@ def interpret(self, problem):
             out = []
             for f in forms:
                 for val in var.sort.decl.range:
-                    new_f = f.instantiate(var, val, problem)
+                    new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = [f.interpret(problem) for f in out]
         else:
@@ -191,7 +191,7 @@ def interpret(self, problem):
             out = []
             for f in forms:
                 for val in var.sort.decl.range:
-                    new_f = f.instantiate(var, val, problem)
+                    new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = [f.interpret(problem) for f in out]
         else:
@@ -272,7 +272,7 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 Variable      .substitute = substitute
 
-def instantiate(self, e0, e1, problem):
+def instantiate(self, e0, e1):
     if self.name == e0.code:
         if type(self) == AppliedSymbol and self.decl.name == '`Symbols':
             if (isinstance(e1, Constructor)
@@ -290,7 +290,7 @@ def instantiate(self, e0, e1, problem):
                 return list(e1.symbol.decl.instances.values())[0]  # should be "unknown"
         elif len(self.sub_exprs) == 0:
             return e1
-    out = Expression.instantiate(self, e0, e1, problem)
+    out = Expression.instantiate(self, e0, e1)
     return out
 AppliedSymbol .instantiate = instantiate
 Variable      .instantiate = instantiate
@@ -298,7 +298,7 @@ Variable      .instantiate = instantiate
 
 # Class Fresh_Variable  #######################################################
 
-def instantiate(self, e0, e1, problem):
+def instantiate(self, e0, e1):
     return e1 if self.code == e0.code else self
 Fresh_Variable.instantiate = instantiate
 
