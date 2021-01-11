@@ -45,7 +45,7 @@ from .Expression import (Constructor, IfExpr, AQuantification,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          NumberConstant, Brackets, Arguments,
-                         Fresh_Variable, TRUE, FALSE)
+                         Variable, TRUE, FALSE)
 from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
 
 
@@ -525,7 +525,7 @@ class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
         self.clark = None  # {Declaration: Transformed Rule}
-        self.def_vars = {}  # {String: {String: Fresh_Variable}} Fresh variables for arguments & result
+        self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
 
     def __str__(self):
         return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
@@ -546,10 +546,10 @@ class Definition(object):
             if decl.name not in self.def_vars:
                 name = f"${decl.name}$"
                 q_v = {f"${decl.name}!{str(i)}$":
-                       Fresh_Variable(f"${decl.name}!{str(i)}$", sort)
+                       Variable(f"${decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
                 if decl.out.name != BOOL:
-                    q_v[name] = Fresh_Variable(name, decl.out)
+                    q_v[name] = Variable(name, decl.out)
                 self.def_vars[decl.name] = q_v
             new_rule = r.rename_args(self.def_vars[decl.name])
             self.clark.setdefault(decl, []).append(new_rule)
@@ -585,7 +585,7 @@ class Rule(object):
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {}  # {string: Fresh_Variable}
+        self.q_vars = {}  # {string: Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
             self.args.append(self.out)
@@ -603,7 +603,7 @@ class Rule(object):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-            self.q_vars[v] = Fresh_Variable(v,s)
+            self.q_vars[v] = Variable(v,s)
         q_v = {**q_vars, **self.q_vars}  # merge
 
         self.symbol = self.symbol.annotate(voc, q_v)
@@ -621,7 +621,7 @@ class Rule(object):
         assert len(self.args) == len(new_vars), "Internal error"
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
-            if type(arg) == Fresh_Variable \
+            if type(arg) == Variable \
             and arg.name in self.vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
                 self.out = self.out.instantiate(arg, nv) if self.out else self.out

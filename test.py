@@ -82,7 +82,7 @@ def generateZ3(theory):
 def generate():
     # optional patch Log on idp_solver.Substitute  ####################################
 
-    # for i in [Expression, AppliedSymbol, Fresh_Variable]:
+    # for i in [Expression, AppliedSymbol, Variable]:
     #     i.substitute = log_calls(i.substitute)
 
     ###########################################################################

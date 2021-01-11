@@ -30,7 +30,7 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
                     BinaryOperator, ADisjunction, AConjunction, \
                     AComparison, AUnary, AAggregate, \
                     AppliedSymbol, UnappliedSymbol, NumberConstant, Brackets, \
-                    Fresh_Variable, TRUE, DSLException
+                    Variable, TRUE, DSLException
 
 
 # class Expression  ###########################################################
@@ -232,13 +232,13 @@ def translate1(self):
 UnappliedSymbol.translate1 = translate
 
 
-# Class Fresh_Variable  #######################################################
+# Class Variable  #######################################################
 
 def translate(self):
     return self.translated
 
 
-Fresh_Variable.translate = translate
+Variable.translate = translate
 
 
 # Class NumberConstant  #######################################################

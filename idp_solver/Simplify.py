@@ -32,7 +32,7 @@ from .Expression import (
     BinaryOperator, AEquivalence, AImplication, ADisjunction, \
     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
     AUnary, AAggregate, AppliedSymbol, UnappliedSymbol, \
-    NumberConstant, Brackets, Fresh_Variable, TRUE, FALSE)
+    NumberConstant, Brackets, Variable, TRUE, FALSE)
 from .Parse import Enumeration, Tuple
 from .Assignments import Status, Assignment
 from .utils import INT
@@ -78,7 +78,7 @@ def update_exprs(self, new_exprs):
 
 
 # Expression.update_exprs = update_exprs
-for i in [Constructor, AppliedSymbol, UnappliedSymbol, Fresh_Variable, NumberConstant]:
+for i in [Constructor, AppliedSymbol, UnappliedSymbol, Variable, NumberConstant]:
     i.update_exprs = update_exprs
 
 

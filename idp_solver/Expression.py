@@ -25,7 +25,7 @@ __all__ = ["Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
            "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
-           "Arguments", "UnappliedSymbol", "Fresh_Variable",
+           "Arguments", "UnappliedSymbol", "Variable",
            "NumberConstant", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
 
 import copy
@@ -210,7 +210,7 @@ class Expression(object):
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for Constructor, IfExpr, AUnary, Fresh_Variable,
+        default implementation for Constructor, IfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
 
@@ -273,7 +273,7 @@ class Expression(object):
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-        # returns a dictionary {Fresh_Variable : Sort}
+        # returns a dictionary {Variable : Sort}
         return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
 
     def __str1__(self) -> str:
@@ -405,7 +405,7 @@ class AQuantification(Expression):
         self.quantifier_is_expanded = False
         super().__init__()
 
-        self.q_vars = {}  # dict[String, Fresh_Variable]
+        self.q_vars = {}  # dict[String, Variable]
         self.type = BOOL
 
     @classmethod
@@ -432,7 +432,7 @@ class AQuantification(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-            self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
@@ -648,7 +648,7 @@ class AAggregate(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-            self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
@@ -736,7 +736,7 @@ class AppliedSymbol(Expression):
     def type_inference(self):
         out = {}
         for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
+            if self.decl.name != '`Symbols' and isinstance(e, Variable):
                 out[e.name] = self.decl.sorts[i]
             else:
                 out.update(e.type_inference())
@@ -759,7 +759,13 @@ class Arguments(object):
         super().__init__()
 
 
-class UnappliedSymbol(AppliedSymbol):
+class UnappliedSymbol(Expression):
+    """The result of parsing a symbol not applied to arguments.
+    Can be a constructor, a quantified variable,
+    or a symbol application without arguments (by abuse of notation, e.g. 'p')
+
+    Converted to the proper AST class by annotate().
+    """
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
@@ -791,7 +797,7 @@ class UnappliedSymbol(AppliedSymbol):
         assert False, "Internal error"
 
 
-class Fresh_Variable(Expression):
+class Variable(Expression):
     PRECEDENCE = 200
 
     def __init__(self, name, sort):
