@@ -25,7 +25,7 @@ __all__ = ["Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
            "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
-           "Arguments", "Variable", "Fresh_Variable",
+           "Arguments", "UnappliedSymbol", "Fresh_Variable",
            "NumberConstant", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
 
 import copy
@@ -759,7 +759,7 @@ class Arguments(object):
         super().__init__()
 
 
-class Variable(AppliedSymbol):
+class UnappliedSymbol(AppliedSymbol):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):

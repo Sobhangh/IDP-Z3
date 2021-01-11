@@ -29,7 +29,7 @@ from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     BinaryOperator, ADisjunction, AConjunction, \
                     AComparison, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, NumberConstant, Brackets, \
+                    AppliedSymbol, UnappliedSymbol, NumberConstant, Brackets, \
                     Fresh_Variable, TRUE, DSLException
 
 
@@ -223,13 +223,13 @@ def translate1(self):
 AppliedSymbol.translate1 = translate1
 
 
-# Class Variable  #######################################################
+# Class UnappliedSymbol  #######################################################
 
 def translate1(self):
     assert False, "Internal error"
 
 
-Variable.translate1 = translate
+UnappliedSymbol.translate1 = translate
 
 
 # Class Fresh_Variable  #######################################################

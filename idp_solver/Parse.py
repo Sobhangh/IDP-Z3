@@ -43,7 +43,7 @@ from .Expression import (Constructor, IfExpr, AQuantification,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
-                         AAggregate, AppliedSymbol, Variable,
+                         AAggregate, AppliedSymbol, UnappliedSymbol,
                          NumberConstant, Brackets, Arguments,
                          Fresh_Variable, TRUE, FALSE)
 from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
@@ -138,7 +138,7 @@ class Vocabulary(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
-        self.terms = {}  # {string: Variable or AppliedSymbol}
+        self.terms = {}  # {string: Constructor or AppliedSymbol}
         self.idp = None  # parent object
         self.translated = []
 
@@ -361,7 +361,7 @@ class SymbolDeclaration(object):
         self.type = None  # a string
         self.domain = None  # all possible arguments
         self.range = None  # all possible values
-        self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
+        self.instances = None  # {string: AppliedSymbol} not starting with '_'
         self.block: Optional[Block] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
@@ -621,7 +621,7 @@ class Rule(object):
         assert len(self.args) == len(new_vars), "Internal error"
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
-            if type(arg) in [Fresh_Variable, Variable] \
+            if type(arg) == Fresh_Variable \
             and arg.name in self.vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
                 self.out = self.out.instantiate(arg, nv) if self.out else self.out
@@ -1010,7 +1010,7 @@ class Display(object):
                         assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
                 else:
                     raise Exception("unknown display contraint: ", constraint)
-            elif type(constraint)==Variable:
+            elif type(constraint) == UnappliedSymbol:
                 if constraint.name == "moveSymbols":
                     self.moveSymbols = True
                 elif constraint.name == "optionalPropagation":
@@ -1100,7 +1100,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          ADisjunction, AConjunction,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
-                                         AppliedSymbol, Variable,
+                                         AppliedSymbol, UnappliedSymbol,
                                          NumberConstant, Brackets, Arguments,
 
                                          Structure, SymbolInterpretation, Enumeration,

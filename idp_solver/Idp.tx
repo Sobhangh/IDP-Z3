@@ -80,13 +80,13 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     UnaryOperator:   '-' | '~' | '¬';
 
 
-    Base:  AppliedSymbol | Variable | NumberConstant | Brackets;
+    Base:  AppliedSymbol | UnappliedSymbol | NumberConstant | Brackets;
 
       AppliedSymbol: s=Symbol args=Arguments
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | 'in' in_enumeration=Enumeration)?;
         Arguments: '(' sub_exprs*=Expression[','] ')';
-      Variable: s=Symbol;
+      UnappliedSymbol: s=Symbol;
       NumberConstant: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Brackets: annotations=Annotations '(' f=Expression ')';

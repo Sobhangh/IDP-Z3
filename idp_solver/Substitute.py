@@ -36,7 +36,7 @@ import copy
 
 from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     ADisjunction, AConjunction,  AAggregate, AUnary, \
-                    AComparison, AppliedSymbol, Variable, NumberConstant, \
+                    AComparison, AppliedSymbol, UnappliedSymbol, NumberConstant, \
                     Fresh_Variable, TRUE
 
 
@@ -47,12 +47,12 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
 def substitute(self, e0, e1, assignments, todo=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable)
 
-    implementation for everything but AppliedSymbol, Variable and
+    implementation for everything but AppliedSymbol, UnappliedSymbol and
     Fresh_variable
     """
 
-    assert not isinstance(e0, Fresh_Variable) or isinstance(e1, Fresh_Variable)# should use instantiate instead
-    assert self.co_constraint is None  # see AppliedSymbol or Variable instead
+    assert not isinstance(e0, Fresh_Variable) or isinstance(e1, Fresh_Variable)  # should use instantiate instead
+    assert self.co_constraint is None  # see AppliedSymbol instead
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
@@ -95,8 +95,7 @@ def instantiate(self, e0, e1):
 
     if e0.name in out.fresh_vars:
         out.fresh_vars.discard(e0.name)
-        if type(e1) in [Fresh_Variable, Variable]:
-            # e1 is Variable when instantiating some definitions
+        if type(e1) == Fresh_Variable:
             out.fresh_vars.add(e1.name)
         if isinstance(out, AComparison):
             out.annotate1()
@@ -203,7 +202,7 @@ def interpret(self, problem):
 AAggregate.interpret = interpret
 
 
-# Class AppliedSymbol, Variable  ##############################################
+# Class AppliedSymbol  ##############################################
 
 def interpret(self, problem):
     sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
