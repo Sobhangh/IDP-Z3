@@ -152,7 +152,7 @@ def pipeline():
             if file_name not in ['./tests/1 procedures/ok.idp',
                 './tests/1 procedures/is_enumerated 2.idp']:
                 try:
-                    log("start /eval")
+                    log(f"start /eval {file_name}")
                     with open(file_name, "r") as fp:
 
                         idp = idpparser.model_from_str(fp.read())
