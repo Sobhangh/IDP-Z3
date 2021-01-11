@@ -243,7 +243,6 @@ def interpret(self, problem):
         out.original = simpler.copy()  # so that translated assignment is correct
     return out
 AppliedSymbol.interpret = interpret
-Variable     .interpret = interpret
 
 
 # @log_calls  # decorator patched in by tests/main.py
@@ -270,7 +269,6 @@ def substitute(self, e0, e1, assignments, todo=None):
                      for e in self.sub_exprs]  # no simplification here
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
-Variable      .substitute = substitute
 
 def instantiate(self, e0, e1):
     if self.name == e0.code:
@@ -293,7 +291,6 @@ def instantiate(self, e0, e1):
     out = Expression.instantiate(self, e0, e1)
     return out
 AppliedSymbol .instantiate = instantiate
-Variable      .instantiate = instantiate
 
 
 # Class Fresh_Variable  #######################################################

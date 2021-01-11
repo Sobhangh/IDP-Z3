@@ -782,18 +782,13 @@ class Variable(AppliedSymbol):
         if self.name in q_vars:
             return q_vars[self.name]
         elif self.name in voc.symbol_decls:  # in symbol_decls
-            self.decl = voc.symbol_decls[self.name]
-            self.s.decl = self.decl
-            self.type = self.decl.type
-        else:
-            pass  # a quantification variable without known type yet
-        return self.annotate1()
+            out = AppliedSymbol(s=self.s,
+                                args=Arguments(sub_exprs=self.sub_exprs))
+            return out.annotate(voc, q_vars)
+        assert False, f"Unknown symbol: {self.name}"
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl:
-            questions.append(self)
-        if co_constraints and self.co_constraint is not None:
-            self.co_constraint.collect(questions, all_, co_constraints)
+        assert False, "Internal error"
 
 
 class Fresh_Variable(Expression):

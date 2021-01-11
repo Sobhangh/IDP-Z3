@@ -386,15 +386,10 @@ class SymbolDeclaration(object):
         # create instances
         self.instances = {}
         if vocabulary:
-            if len(self.sorts) == 0:
-                expr = Variable(s=Symbol(name=self.name))
+            for arg in self.domain:
+                expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                 expr.annotate(voc, {})
                 self.instances[expr.code] = expr
-            else:
-                for arg in self.domain:
-                    expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
-                    expr.annotate(voc, {})
-                    self.instances[expr.code] = expr
 
         # determine typeConstraints
         if self.out.decl.name != BOOL and self.range:
@@ -608,7 +603,7 @@ class Rule(object):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v,s)
+            self.q_vars[v] = Fresh_Variable(v,s)
         q_v = {**q_vars, **self.q_vars}  # merge
 
         self.symbol = self.symbol.annotate(voc, q_v)

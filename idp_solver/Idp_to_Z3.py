@@ -226,10 +226,10 @@ AppliedSymbol.translate1 = translate1
 # Class Variable  #######################################################
 
 def translate1(self):
-    return self.decl.translate()
+    assert False, "Internal error"
 
 
-Variable.translate1 = translate1
+Variable.translate1 = translate
 
 
 # Class Fresh_Variable  #######################################################
