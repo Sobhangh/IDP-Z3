@@ -100,8 +100,11 @@ def json_to_literals(state, jsonstr: str):
     """
     out = Assignments()
 
-    if jsonstr != '{}':
+    if jsonstr:
+        print('jsonstr', jsonstr)
         json_data = ast.literal_eval(decode_UTF(jsonstr))
+        if json_data == {}:
+            return out
         default = [x for x, v in state.assignments.items()
                    if v.status == Status.GIVEN]
 
