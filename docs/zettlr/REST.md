@@ -37,6 +37,7 @@ POST result:
         - reading  : string   // English reading of the symbol
         - shortinfo: string   // short description of the symbol
         - longinfo : string   // long description of the symbol
+        - category : string   // display category of the symbol
         - showOptimize : Bool // true if the optimize button should be shown for this symbol
         - view: string        // "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
         - environmental: Bool // true if declared in environment vocabulary

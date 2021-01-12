@@ -54,6 +54,8 @@ def metaJSON(state):
                 d['shortinfo'] = decl.annotations['short']
             if 'long' in decl.annotations:
                 d['longinfo'] = decl.annotations['long']
+            if 'category' in decl.annotations:
+                d['category'] = decl.annotations['category']
             if 'Slider' in decl.annotations:
                 d['slider'] = decl.annotations['Slider']
 
