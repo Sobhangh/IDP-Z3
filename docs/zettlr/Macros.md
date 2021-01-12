@@ -26,7 +26,7 @@ Quantification over symbols in constraints:
 - [ ] make it work with symmetric enumeration in structure
     - [ ] Problem should contain merged vocabularies (instead of structures) + detect conflicts
     - [ ] Problem should use vocabularies, not structures
-    - [ ] option to give type expansion in structure; expand_quantifier should be done 1) tentatively in annotate; 2) finally in interpret, given all the structures
+    - [ ] option to give type expansion in structure;
     - [ ] Symbols.range should be regenerated before interpret and quantification expansion
 
 Questions:
