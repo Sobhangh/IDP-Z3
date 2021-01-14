@@ -26,17 +26,17 @@ TODO: vocabulary
 
 from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
-from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    BinaryOperator, ADisjunction, AConjunction, \
-                    AComparison, AUnary, AAggregate, \
-                    AppliedSymbol, Variable, NumberConstant, Brackets, \
-                    Fresh_Variable, TRUE, DSLException
+from idp_solver.Expression import (Constructor, Expression, IfExpr,
+                                   AQuantification, BinaryOperator,
+                                   ADisjunction, AConjunction,
+                                   AComparison, AUnary, AAggregate,
+                                   AppliedSymbol, Variable, NumberConstant,
+                                   Brackets, Fresh_Variable, TRUE,
+                                   DSLException, IDPZ3Error,
+                                   create_error_msg)
 from textx import get_location
 
 
-class IDPZ3Error(Exception):
-    """ raised whenever an error occurs in the conversion from AST to Z3 """
-    pass
 
 # class Expression  ###########################################################
 
@@ -215,14 +215,30 @@ def translate1(self):
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
     else:
-        assert len(self.sub_exprs) == self.decl.arity, \
-            f"Incorrect number of arguments for {self.s.name}"
-        if len(self.sub_exprs) == 0:
-            return self.decl.translate()
-        else:
-            arg = [x.translate() for x in self.sub_exprs]
-            # assert  all(a != None for a in arg)
-            return (self.decl.translate())(arg)
+        try:
+            assert len(self.sub_exprs) == self.decl.arity, \
+                f"Incorrect number of arguments"
+            if len(self.sub_exprs) == 0:
+                return self.decl.translate()
+            else:
+                arg = [x.translate() for x in self.sub_exprs]
+                # assert  all(a != None for a in arg)
+                return (self.decl.translate())(arg)
+        except AttributeError as e:
+            # Using argument on symbol that has no arity.
+            if str(e) == "'RangeDeclaration' object has no attribute 'arity'":
+                msg = "Symbol {} does not accept an argument." .format(self)
+                raise IDPZ3Error(create_error_msg(self, msg))
+            # Unknown error.
+            else:
+                raise AttributeError(e)
+        except AssertionError as e:
+            # Incorrect number of arguments.
+            if str(e) == "Incorrect number of arguments":
+                msg = "Incorrect number of arguments for {}".format(self)
+                raise IDPZ3Error(create_error_msg(self, msg))
+            else:
+                raise AssertionError(e)
 
 
 AppliedSymbol.translate1 = translate1
@@ -234,11 +250,13 @@ def translate1(self):
     try:
         return self.decl.translate()
     except AttributeError as e:
-        location = get_location(self)
-        location = "Error on line {}, col {}:".format(location['line'], location['col'])
-        error_str = "{} symbol {} not declared in vocabulary".format(location,
-                                                                     self)
-        raise IDPZ3Error(error_str)
+        # Used symbol not in voc (e.g. forgotten, or typo)
+        if str(e) == "'NoneType' object has no attribute 'translate'":
+            msg = "symbol {} not declared in vocabulary".format(self)
+            raise IDPZ3Error(create_error_msg(self, msg))
+        # Unknown error.
+        else:
+            raise AttributeError(e)
 
 
 Variable.translate1 = translate1

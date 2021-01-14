@@ -37,6 +37,7 @@ from typing import Optional, List, Tuple, Dict, Set, Any
 from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
 
 from .utils import unquote, OrderedSet, BOOL, INT, REAL
+from textx import get_location
 
 
 class DSLException(Exception):
@@ -45,6 +46,22 @@ class DSLException(Exception):
 
     def __str__(self):
         return self.message
+
+
+class IDPZ3Error(Exception):
+    """ raised whenever an error occurs in the conversion from AST to Z3 """
+    pass
+
+
+def create_error_msg(textx_obj, error_msg):
+    """ function to prepend an error msg with a line and col nb
+
+    Returns:
+        the error message
+    """
+    location = get_location(textx_obj)
+    return ("Error on line {}, col {}: {}"
+            .format(location['line'], location['col'], error_msg))
 
 
 class Expression(object):
@@ -707,25 +724,29 @@ class AppliedSymbol(Expression):
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
     def annotate(self, voc, q_vars):
-        self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-        self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
-            else voc.symbol_decls[self.s.name]
-        self.s.decl = self.decl
-        if self.in_enumeration:
-            self.in_enumeration.annotate(voc)
-        # move the negation out
-        if 'not' in self.is_enumerated:
-            out = AppliedSymbol.make(self.s, self.sub_exprs,
-                                     is_enumerated='is enumerated')
-            out = AUnary.make('¬', out)
-        elif 'not' in self.is_enumeration:
-            out = AppliedSymbol.make(self.s, self.sub_exprs,
-                                     is_enumeration='in',
-                                     in_enumeration=self.in_enumeration)
-            out = AUnary.make('¬', out)
-        else:
-            out = self.annotate1()
-        return out
+        try:
+            self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+            self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
+                else voc.symbol_decls[self.s.name]
+            self.s.decl = self.decl
+            if self.in_enumeration:
+                self.in_enumeration.annotate(voc)
+            # move the negation out
+            if 'not' in self.is_enumerated:
+                out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                         is_enumerated='is enumerated')
+                out = AUnary.make('¬', out)
+            elif 'not' in self.is_enumeration:
+                out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                         is_enumeration='in',
+                                         in_enumeration=self.in_enumeration)
+                out = AUnary.make('¬', out)
+            else:
+                out = self.annotate1()
+            return out
+        except KeyError:
+            msg = "Unknown symbol {}".format(self)
+            raise IDPZ3Error(create_error_msg(self, msg))
 
     def annotate1(self):
         self.type = (BOOL if self.is_enumerated or self.in_enumeration else
