@@ -31,7 +31,12 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
                     AComparison, AUnary, AAggregate, \
                     AppliedSymbol, Variable, NumberConstant, Brackets, \
                     Fresh_Variable, TRUE, DSLException
+from textx import get_location
 
+
+class IDPZ3Error(Exception):
+    """ raised whenever an error occurs in the conversion from AST to Z3 """
+    pass
 
 # class Expression  ###########################################################
 
@@ -226,7 +231,14 @@ AppliedSymbol.translate1 = translate1
 # Class Variable  #######################################################
 
 def translate1(self):
-    return self.decl.translate()
+    try:
+        return self.decl.translate()
+    except AttributeError as e:
+        location = get_location(self)
+        location = "Error on line {}, col {}:".format(location['line'], location['col'])
+        error_str = "{} symbol {} not declared in vocabulary".format(location,
+                                                                     self)
+        raise IDPZ3Error(error_str)
 
 
 Variable.translate1 = translate1
