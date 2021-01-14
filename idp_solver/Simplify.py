@@ -335,7 +335,7 @@ def as_set_condition(self):
     core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
 
     return ((None, None, None) if not self.in_enumeration else
-            (core, True, self.in_enumeration))
+            (core, 'not' not in self.is_enumeration, self.in_enumeration))
 AppliedSymbol.as_set_condition = as_set_condition
 
 
@@ -376,11 +376,12 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                         new_tuples = (y1.tuples ^ y.tuples)
                     else:
                         new_tuples = y.tuples | y1.tuples # union
-                        # sort again
-                        new_tuples = list(new_tuples.values())
+                    # sort again
+                    new_tuples = list(new_tuples.values())
 
                     out = AppliedSymbol.make(
                         symbol=x.s, args=x.sub_exprs,
+                        is_enumeration='in',
                         in_enumeration=Enumeration(tuples=new_tuples)
                     )
 
@@ -392,8 +393,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                                         Status.UNKNOWN)
 
                     assignments[j] = out # keep the first one
-                    assignments[i] = Assignment(TRUE, TRUE,
-                                                Status.UNKNOWN)
+                    assignments[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
     return [c for c in assignments if c.sentence != TRUE]
 
 Done = True
