@@ -176,7 +176,7 @@ class Output(object):
                     symbol['normal'] = not atom.is_reified()
                     symbol['environmental'] = symb.block.name == 'environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
-                        or bool(ass.sentence.is_assignment)
+                        or bool(ass.sentence.is_assignment())
                     s.setdefault(key, symbol)
                     s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
 

@@ -55,44 +55,28 @@ def generateZ3(theory):
     Also try to expand the theory and report error.
     """
 
-    idp = idpparser.model_from_str(theory)
-    if 'main' in idp.procedures:
-        # capture stdout, print()
-        with io.StringIO() as buf, redirect_stdout(buf):
-            try:
+    # capture stdout, print()
+    with io.StringIO() as buf, redirect_stdout(buf):
+        try:
+            idp = idpparser.model_from_str(theory)
+            if 'main' in idp.procedures:
                 idp.execute()
-            except Exception as exc:
-                print(traceback.format_exc())
-            return buf.getvalue()
+            else:
+                state = State(idp)
+                out = Output(state).fill(state)
 
-    state = State(idp)
-    out = Output(state).fill(state)
+                print(
+                    f"{NEWL}-- original ---------------------------------{NEWL}"
+                    f"{theory}"
+                    f"{NEWL}-- meta -------------------------------------{NEWL}"
+                    f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
+                    f"{NEWL}-- propagation ------------------------------{NEWL}"
+                    f"{pprint.pformat(out, width=120)}{NEWL}",
+                    end ="")
+        except Exception as exc:
+            print(traceback.format_exc())
+        return buf.getvalue()
 
-    output = (
-        f"{NEWL}-- original ---------------------------------{NEWL}"
-        f"{theory}"
-        f"{NEWL}-- meta -------------------------------------{NEWL}"
-        f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
-        f"{NEWL}-- propagation ------------------------------{NEWL}"
-        f"{pprint.pformat(out, width=120)}{NEWL}"
-
-        #additional debug info (optional)
-        # f"{NEWL}-- vocabulary -------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in state.idp.vocabulary.translated)}"
-        # f"{NEWL}-- theory -----------------------------------{NEWL}"
-        # f"{(NEWL+NEWL).join(str(t) for t in state.idp.theory.translate(state.idp))}{NEWL}"
-        # f"{NEWL}-- goal -----------------------------------{NEWL}"
-        # f"{str(state.idp.goal.translate())}{NEWL}"
-        # f"{NEWL}-- assignments ------------------------------------{NEWL}"
-        # f"{NEWL.join(str(t) for t in state.assignments)}{NEWL}"
-        # f"{NEWL}-- state -------------------------------------{NEWL}"
-        # f"{str(state)}{NEWL}"
-        )
-    # try:
-    #     expand(state)
-    # except Exception as exc:
-    #     output += f"{NEWL}error in expansion{NEWL}{str(exc)}"
-    return output
 
 
 def generate():
@@ -164,29 +148,29 @@ def pipeline():
     error = 0
     with z3lock:
         for file_name in test_files:
-            try:
-                log("start /eval")
-                with open(file_name, "r") as fp:
+            # avoid files meant to raise an error
+            if file_name not in ['./tests/1 procedures/ok.idp',
+                './tests/1 procedures/is_enumerated 2.idp']:
+                try:
+                    log("start /eval")
+                    with open(file_name, "r") as fp:
 
-                    idp = idpparser.model_from_str(fp.read())
-                    given_json = ""
+                        idp = idpparser.model_from_str(fp.read())
+                        given_json = ""
 
-                    if idp.procedures == {}:
-                        state = make_state(idp, given_json)
-                        generator = state.expand(max=1,complete=False, extended=True)
-                        list(generator)[0]  # ignore result
-                        out = Output(state).fill(state)
-                    else:
-                        # avoid files meant to raise an error
-                        if file_name not in ['./tests/1 procedures/ok.idp',
-                            './tests/1 procedures/is_enumerated.idp']:
+                        if idp.procedures == {}:
+                            state = make_state(idp, given_json)
+                            generator = state.expand(max=1,complete=False, extended=True)
+                            list(generator)[0]  # ignore result
+                            out = Output(state).fill(state)
+                        else:
                             idp.execute()
+                        log("end /eval ")
+                        out_dict[file_name] = "Works."
+                except Exception as exc:
+                    error = 1
+                    out_dict[file_name] = str(exc)
                     log("end /eval ")
-                    out_dict[file_name] = "Works."
-            except Exception as exc:
-                error = 1
-                out_dict[file_name] = str(exc)
-                log("end /eval ")
 
     for k, v in out_dict.items():
         print("{: >60} {: >20}".format(k, v))
