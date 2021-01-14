@@ -101,7 +101,6 @@ def json_to_literals(state, jsonstr: str):
     out = Assignments()
 
     if jsonstr:
-        print('jsonstr', jsonstr)
         json_data = ast.literal_eval(decode_UTF(jsonstr))
         if json_data == {}:
             return out
@@ -112,14 +111,12 @@ def json_to_literals(state, jsonstr: str):
             # If a boolean is unset, it does not show up in the jsonstr.
             # If it is not in jsonstr we unset the default value.
             if symbol not in json_data:
-                state.assignments[symbol].value = None
-                state.assignments[symbol].status = Status.UNKNOWN
+                state.assignments[symbol].unset()
 
         for symbol in json_data:
             # If no value was given for a default symbol we unset it.
             if len(json_data[symbol]) == 0 and symbol in default:
-                state.assignments[symbol].value = None
-                state.assignments[symbol].status = Status.UNKNOWN
+                state.assignments[symbol].unset()
                 continue
 
             for atom, json_atom in json_data[symbol].items():
@@ -130,8 +127,7 @@ def json_to_literals(state, jsonstr: str):
                     # in the interface, we need to unset the value of the
                     # symbol to avoid errors.
                     if atom.startswith('{} ='.format(symbol)):
-                        state.assignments[symbol].value = None
-                        state.assignments[symbol].status = Status.UNKNOWN
+                        state.assignments[symbol].unset()
 
                     # If the atom is unknown, set its value as normal.
                     if json_atom["value"] != '' and\

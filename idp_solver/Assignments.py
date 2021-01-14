@@ -162,6 +162,15 @@ class Assignment(object):
             return (x, y if self.value.same_as(TRUE) else not y, z)
         return (None, None, None)
 
+    def unset(self):
+        """ Unsets the value of an assignment.
+
+        Returns:
+            None
+        """
+        self.value = None
+        self.status = Status.UNKNOWN
+
 class Assignments(dict):
     """Contains a set of Assignment"""
     def __init__(self, *arg, **kw):
