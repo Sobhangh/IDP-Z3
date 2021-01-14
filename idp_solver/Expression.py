@@ -442,9 +442,12 @@ class AQuantification(Expression):
             return self.sub_exprs[0].str
 
     def annotate(self, voc, q_vars):
-        for v in self.vars:
-            assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
-        assert len(self.vars) == len(self.sorts), "Internal error"
+        try:
+            for v in self.vars:
+                assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
+            assert len(self.vars) == len(self.sorts), "Internal error"
+        except AssertionError as e:
+            raise IDPZ3Error(create_error_msg(self, e))
         self.q_vars = {}
         for v, s in zip(self.vars, self.sorts):
             if s:

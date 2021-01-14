@@ -188,9 +188,13 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               }
 
 def translate1(self):
-    out = self.sub_exprs[0].translate()
-    function = AUnary.MAP[self.operator]
-    return function(out)
+    try:
+        out = self.sub_exprs[0].translate()
+        function = AUnary.MAP[self.operator]
+        return function(out)
+    except Z3Exception as e:
+        msg = "Incorrect statement: {}".format(self)
+        raise IDPZ3Error(create_error_msg(self, msg))
 
 
 AUnary.translate1 = translate1
