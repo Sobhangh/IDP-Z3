@@ -126,7 +126,6 @@ class Expression(object):
         self._reified: Optional["Expression"] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional["Expression"] = None
-        self.is_assignment: Optional[bool] = None
 
         # attributes of the top node of a (co-)constraint
         self.questions: Optional[OrderedSet] = None
@@ -158,10 +157,10 @@ class Expression(object):
             return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification) and len(self.vars) == 0)):
+           or (isinstance(self, AQuantification) and len(self.q_vars) == 0)):
             return self.sub_exprs[0].same_as(other)
         if (isinstance(other, Brackets)
-           or (isinstance(other, AQuantification) and len(other.vars) == 0)):
+           or (isinstance(other, AQuantification) and len(other.q_vars) == 0)):
             return self.same_as(other.sub_exprs[0])
 
         return self.str == other.str and type(self) == type(other)
@@ -254,6 +253,14 @@ class Expression(object):
 
     def is_reified(self): return True
 
+    def is_assignment(self) -> bool:
+        """
+
+        Returns:
+            bool: True if `self` assigns a rigid term to a rigid function application
+        """
+        return False
+
     def reified(self) -> DatatypeRef:
         if self._reified is None:
             self._reified = Const(b'*'+self.code.encode(), BoolSort())
@@ -287,15 +294,11 @@ class Expression(object):
 
     def instantiate(self,
                     e0: "Expression",
-                    e1: "Expression",
-                    theory: Any
+                    e1: "Expression"
                     ) -> "Expression":
         return self  # monkey-patched
 
-    def interpret(self, theory: Any) -> "Expression":
-        return self  # monkey-patched
-
-    def expand_quantifiers(self, theory: Any) -> "Expression":
+    def interpret(self, problem: Any) -> "Expression":
         return self  # monkey-patched
 
     def symbolic_propagate(self,
@@ -399,6 +402,7 @@ class AQuantification(Expression):
             self.sorts.append(q.sort)
 
         self.sub_exprs = [self.f]
+        self.quantifier_is_expanded = False
         super().__init__()
 
         self.q_vars = {}  # dict[String, Fresh_Variable]
@@ -413,9 +417,12 @@ class AQuantification(Expression):
         return out.annotate1()
 
     def __str1__(self):
-        assert len(self.vars) == len(self.sorts), "Internal error"
-        vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
-        return f"{self.q}{vars} : {self.sub_exprs[0].str}"
+        if not self.quantifier_is_expanded:
+            assert len(self.vars) == len(self.sorts), "Internal error"
+            vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+            return f"{self.q}{vars} : {self.sub_exprs[0].str}"
+        else:
+            return self.sub_exprs[0].str
 
     def annotate(self, voc, q_vars):
         for v in self.vars:
@@ -425,7 +432,7 @@ class AQuantification(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Fresh_Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
@@ -538,7 +545,6 @@ class AComparison(BinaryOperator):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.is_assignment = None
 
     def annotate(self, voc, q_vars):
         # a≠b --> Not(a=b)
@@ -548,14 +554,14 @@ class AComparison(BinaryOperator):
             return out
         return super().annotate(voc, q_vars)
 
-    def annotate1(self):
+    def is_assignment(self):
         # f(x)=y
-        self.is_assignment = len(self.sub_exprs) == 2 and \
+        return len(self.sub_exprs) == 2 and \
                 self.operator in [['='], ['≠']] \
                 and isinstance(self.sub_exprs[0], AppliedSymbol) \
-                and all(e.as_rigid() is not None for e in self.sub_exprs[0].sub_exprs) \
+                and all(e.as_rigid() is not None
+                        for e in self.sub_exprs[0].sub_exprs) \
                 and self.sub_exprs[1].as_rigid() is not None
-        return super().annotate1()
 
 
 class ASumMinus(BinaryOperator):
@@ -609,8 +615,8 @@ class AAggregate(Expression):
         for q in self.quantees:
             self.vars.append(q.var)
             self.sorts.append(q.sort)
-        self.sub_exprs = [self.f, self.out] if self.out else [self.f]
-        # later: expressions to be summed
+        self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
+        self.quantifier_is_expanded = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
         self.q_vars = {}
@@ -621,7 +627,7 @@ class AAggregate(Expression):
             raise Exception("Can't have output variable for  #")
 
     def __str1__(self):
-        if self.vars is not None:
+        if not self.quantifier_is_expanded:
             assert len(self.vars) == len(self.sorts), "Internal error"
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
@@ -642,7 +648,7 @@ class AAggregate(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Fresh_Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
@@ -710,7 +716,7 @@ class AppliedSymbol(Expression):
         self.type = (BOOL if self.is_enumerated or self.in_enumeration else
                      self.decl.type if self.decl else None)
         out = super().annotate1()
-        if out.decl is None or out.decl.name == "`Symbols":  # a symbol variable
+        if out.decl and out.decl.name == "`Symbols":  # a symbol variable
             out.fresh_vars.add(self.s.name)
         return out
 
@@ -730,7 +736,7 @@ class AppliedSymbol(Expression):
     def type_inference(self):
         out = {}
         for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Variable):
+            if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
                 out[e.name] = self.decl.sorts[i]
             else:
                 out.update(e.type_inference())
@@ -799,9 +805,10 @@ class Fresh_Variable(Expression):
 
         super().__init__()
 
-        self.type = self.sort.name
+        self.type = sort.name if sort else ''
         self.sub_exprs = []
-        self.translated = FreshConst(self.sort.decl.translate())
+        self.translated = (FreshConst(sort.decl.translate()) if sort else
+                           None)
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name

@@ -115,7 +115,7 @@ IfExpr.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
-    simpler = exprs[0] if not self.vars else None
+    simpler = exprs[0] if not self.q_vars else None
     return self._change(simpler=simpler, sub_exprs=exprs)
 AQuantification.update_exprs = update_exprs
 
@@ -227,7 +227,7 @@ def update_exprs(self, new_exprs):
 AComparison.update_exprs = update_exprs
 
 def as_set_condition(self):
-    return ((None, None, None) if not self.is_assignment else
+    return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
              Enumeration(tuples=[Tuple(args=[self.sub_exprs[1]])])))
 AComparison.as_set_condition = as_set_condition
@@ -317,7 +317,7 @@ AUnary.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    if self.vars is None:  # if the aggregate has already been expanded
+    if self.quantifier_is_expanded:
         operands1 = [e.as_rigid() for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)

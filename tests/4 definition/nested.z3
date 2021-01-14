@@ -71,7 +71,7 @@ display {
                                'value': 'Jan',
                                'values': ['Piet', 'Jan']},
              'negated(Piet) = Jan': {'environmental': False,
-                                     'is_assignment': False,
+                                     'is_assignment': True,
                                      'normal': False,
                                      'reading': 'negated(Piet) = Jan',
                                      'relevant': True,
