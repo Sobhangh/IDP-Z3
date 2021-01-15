@@ -365,13 +365,13 @@ class Problem(object):
                 conditions_i = And([l.translate()
                         for j, l in enumerate(conditions)
                         if j != i])
-                hypothesis = And(z3_formula, known, conditions_i)
                 solver = Solver()
                 if goal.sentence == TRUE or goal.value is None:  # find an abstract model
                     # z3_formula & known & conditions => conditions_i is always true
                     solver.add(Not(Implies(And(known, conditions_i), z3_conditions)))
                 else:  # decision table
                     # z3_formula & known & conditions => goal is always true
+                    hypothesis = And(z3_formula, known, conditions_i)
                     solver.add(Not(Implies(hypothesis, goal.translate())))
                 if solver.check() == unsat:
                     conditions[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
@@ -467,10 +467,6 @@ class Problem(object):
         models.sort(key=len)
 
         if first_hit:
-            theory = self.formula().translate()
-            solver = Solver()
-            solver.add(theory)
-            solver.check()
             known2 = known
             models1, last_model = [], []
             while models:
@@ -482,13 +478,12 @@ class Problem(object):
                                 if l.value is not None
                                 and l.sentence.code != goal_string]
                 if condition:
-                    solver.push()
                     possible = Not(And(condition))
+                    solver = Solver()
                     solver.add(known2)
                     solver.add(possible)
                     result = solver.check()
-                    solver.pop()
-                    if result == sat:
+                    if result == sat: # condition is satisfiable
                         known2 = And(known2, possible)
                         models1.append(model)
                         models = [self._generalize(m, known2, theory)

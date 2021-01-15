@@ -115,7 +115,7 @@ IfExpr.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
-    simpler = exprs[0] if not self.vars else None
+    simpler = exprs[0] if not self.q_vars else None
     return self._change(simpler=simpler, sub_exprs=exprs)
 AQuantification.update_exprs = update_exprs
 
@@ -227,7 +227,7 @@ def update_exprs(self, new_exprs):
 AComparison.update_exprs = update_exprs
 
 def as_set_condition(self):
-    return ((None, None, None) if not self.is_assignment else
+    return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
              Enumeration(tuples=[Tuple(args=[self.sub_exprs[1]])])))
 AComparison.as_set_condition = as_set_condition
@@ -317,7 +317,7 @@ AUnary.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    if self.vars is None:  # if the aggregate has already been expanded
+    if self.quantifier_is_expanded:
         operands1 = [e.as_rigid() for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
@@ -335,7 +335,7 @@ def as_set_condition(self):
     core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
 
     return ((None, None, None) if not self.in_enumeration else
-            (core, True, self.in_enumeration))
+            (core, 'not' not in self.is_enumeration, self.in_enumeration))
 AppliedSymbol.as_set_condition = as_set_condition
 
 
@@ -376,11 +376,12 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                         new_tuples = (y1.tuples ^ y.tuples)
                     else:
                         new_tuples = y.tuples | y1.tuples # union
-                        # sort again
-                        new_tuples = list(new_tuples.values())
+                    # sort again
+                    new_tuples = list(new_tuples.values())
 
                     out = AppliedSymbol.make(
                         symbol=x.s, args=x.sub_exprs,
+                        is_enumeration='in',
                         in_enumeration=Enumeration(tuples=new_tuples)
                     )
 
@@ -392,8 +393,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                                         Status.UNKNOWN)
 
                     assignments[j] = out # keep the first one
-                    assignments[i] = Assignment(TRUE, TRUE,
-                                                Status.UNKNOWN)
+                    assignments[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
     return [c for c in assignments if c.sentence != TRUE]
 
 Done = True

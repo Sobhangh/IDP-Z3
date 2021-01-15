@@ -116,22 +116,23 @@ def json_to_literals(state, jsonstr: str):
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
-                    if state.assignments[atom].value == '':
-                        if json_atom["value"] != '':
-                            value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                            if json_atom["typ"] == "Bool":
-                                state.assignments.assert_(idp_atom, value, Status.GIVEN, False)
-                            elif json_atom["value"]:
-                                state.assignments.assert_(idp_atom, value, Status.GIVEN, True)
-
-                                idp_atom = AComparison.make('=', [idp_atom, value])
-                                state.assignments.assert_(idp_atom, TRUE, Status.GIVEN, True)
-                            out[atom] = state.assignments[atom]
-                    else:
-                        # Override default value.
+                    # If the atom is still unknown, set its value.
+                    if json_atom["value"] != '' and\
+                            state.assignments[atom].status == Status.UNKNOWN:
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        state.assignments[atom].value = value
-                        state.assignments[atom].status = Status.GIVEN
+                        state.assignments.assert_(idp_atom, value,
+                                                  Status.GIVEN, False)
+                        if json_atom["typ"] != "Bool":
+                            idp_atom = AComparison.make('=', [idp_atom, value])
+                            state.assignments.assert_(idp_atom, TRUE,
+                                                      Status.GIVEN, False)
+                    # If the atom was already set in default struct, overwrite.
+                    elif json_atom["value"] != '':
+                        value = str_to_IDP(idp_atom, str(json_atom["value"]))
+                        state.assignments[symbol].value = value
+                    else:
+                        state.assignments[atom].value = None
+                    out[atom] = state.assignments[atom]
     return out
 
 
@@ -181,7 +182,7 @@ class Output(object):
                     symbol['normal'] = not atom.is_reified()
                     symbol['environmental'] = symb.block.name == 'environment'
                     symbol['is_assignment'] = symbol['typ'] != 'Bool' \
-                        or bool(ass.sentence.is_assignment)
+                        or bool(ass.sentence.is_assignment())
                     s.setdefault(key, symbol)
                     s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
 

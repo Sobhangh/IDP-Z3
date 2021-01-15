@@ -63,7 +63,7 @@ display {
                                  'typ': 'Bool',
                                  'value': False},
              'negated(-1) = 1': {'environmental': False,
-                                 'is_assignment': False,
+                                 'is_assignment': True,
                                  'normal': False,
                                  'reading': 'negated(-1) = 1',
                                  'relevant': True,
