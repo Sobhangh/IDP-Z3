@@ -291,7 +291,17 @@ class Expression(object):
 
     def type_inference(self):
         # returns a dictionary {Fresh_Variable : Sort}
-        return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
+        try:
+            return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
+        except AttributeError as e:
+            msg = "Error"
+            if "has no attribute 'sorts'" in str(e):
+                msg = "Incorrect arity for {}".format(self)
+            else:
+                msg = e
+                # msg = "Unknown error for {}".format(self)
+            raise IDPZ3Error(create_error_msg(self, msg))
+            raise AttributeError(e)
 
     def __str1__(self) -> str:
         return ''  # monkey-patched
@@ -773,13 +783,21 @@ class AppliedSymbol(Expression):
             or any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-        out = {}
-        for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
-                out[e.name] = self.decl.sorts[i]
+        try:
+            out = {}
+            for i, e in enumerate(self.sub_exprs):
+                if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
+                    out[e.name] = self.decl.sorts[i]
+                else:
+                    out.update(e.type_inference())
+            return out
+        except AttributeError as e:
+            #
+            if "object has no attribute 'sorts'" in str(e):
+                msg = "Unexpected arity for symbol {}".format(self)
             else:
-                out.update(e.type_inference())
-        return out
+                msg = "Unknown error for symbol {}".format(self)
+            raise IDPZ3Error(create_error_msg(self, msg))
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated

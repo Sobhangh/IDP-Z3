@@ -45,7 +45,8 @@ from .Expression import (Constructor, IfExpr, AQuantification,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, Variable,
                          NumberConstant, Brackets, Arguments,
-                         Fresh_Variable, TRUE, FALSE)
+                         Fresh_Variable, TRUE, FALSE, IDPZ3Error,
+                         create_error_msg)
 from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
 
 
@@ -719,7 +720,10 @@ class Structure(object):
             "Unknown vocabulary: " + self.vocab_name
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
-            i.annotate(self)  # this updates self.assignments
+            try:
+                i.annotate(self)  # this updates self.assignments
+            except AssertionError as e:
+                raise IDPZ3Error(create_error_msg(i, e))
 
     def __str__(self):
         return self.name
