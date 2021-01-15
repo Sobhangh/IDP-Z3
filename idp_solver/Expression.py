@@ -547,12 +547,11 @@ class AComparison(BinaryOperator):
         super().__init__(**kwargs)
 
     def annotate(self, voc, q_vars):
+        out = super().annotate(voc, q_vars)
         # a≠b --> Not(a=b)
         if len(self.sub_exprs) == 2 and self.operator == ['≠']:
-            self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
             out = AUnary.make('¬', AComparison.make('=', self.sub_exprs))
-            return out
-        return super().annotate(voc, q_vars)
+        return out
 
     def is_assignment(self):
         # f(x)=y
@@ -673,6 +672,10 @@ class AppliedSymbol(Expression):
             self.is_enumerated = kwargs.pop('is_enumerated')
         else:
             self.is_enumerated = ''
+        if 'is_enumeration' in kwargs:
+            self.is_enumeration = kwargs.pop('is_enumeration')
+        else:
+            self.is_enumeration = ''
         if 'in_enumeration' in kwargs:
             self.in_enumeration = kwargs.pop('in_enumeration')
         else:
@@ -701,7 +704,7 @@ class AppliedSymbol(Expression):
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return (f"{out}"
                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
-                f"{ f' in {{{enum}}}' if self.in_enumeration else ''}")
+                f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
@@ -710,7 +713,19 @@ class AppliedSymbol(Expression):
         self.s.decl = self.decl
         if self.in_enumeration:
             self.in_enumeration.annotate(voc)
-        return self.annotate1()
+        # move the negation out
+        if 'not' in self.is_enumerated:
+            out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                     is_enumerated='is enumerated')
+            out = AUnary.make('¬', out)
+        elif 'not' in self.is_enumeration:
+            out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                     is_enumeration='in',
+                                     in_enumeration=self.in_enumeration)
+            out = AUnary.make('¬', out)
+        else:
+            out = self.annotate1()
+        return out
 
     def annotate1(self):
         self.type = (BOOL if self.is_enumerated or self.in_enumeration else
@@ -772,6 +787,7 @@ class Variable(AppliedSymbol):
         self.decl = None
         self.translated = None
         self.is_enumerated = None
+        self.is_enumeration = None
         self.in_enumeration = None
 
     def __str1__(self): return self.name
