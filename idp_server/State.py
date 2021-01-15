@@ -97,14 +97,29 @@ class State(Problem):
             out.environment = out.environment.copy()
 
         # Set the values of the default structure.
-        if 'default' in out.idp.structures:
-            out.add(out.idp.structures['default'])
+        # if 'default' in out.idp.structures:
+        #     out.add(out.idp.structures['default'])
 
         # Set all the given values. This can override the default values.
         if out.environment is not None:
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
 
+        return out._finalize()
+
+    def add_default(self):
+        """
+        Add the assignments that are listed in the default structure.
+
+        Returns
+        -------
+        State
+            A state object containing the new assignments
+        """
+        out = self.copy()
+        # Set the values of the default structure.
+        if 'default' in out.idp.structures:
+            out.add(out.idp.structures['default'])
         return out._finalize()
 
     def _finalize(self):
@@ -143,7 +158,8 @@ def make_state(idp: Idp, jsonstr: str) -> State:
         return State.cache[(idp, jsonstr)]
 
     if (idp, "{}") not in State.cache:
-        State.cache[(idp, "{}")] = State(idp)
+        # We add the default assignments to the 'base' state.
+        State.cache[(idp, "{}")] = State(idp).add_default()
     state = State.cache[(idp, "{}")].add_given(jsonstr)
 
     if 100 < len(State.cache):

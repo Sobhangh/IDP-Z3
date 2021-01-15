@@ -116,7 +116,9 @@ def json_to_literals(state, jsonstr: str):
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
-                    if json_atom["value"] != '':
+                    # If the atom is still unknown, set its value.
+                    if json_atom["value"] != '' and\
+                            state.assignments[atom].status == Status.UNKNOWN:
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
                         state.assignments.assert_(idp_atom, value,
                                                   Status.GIVEN, False)
@@ -124,6 +126,10 @@ def json_to_literals(state, jsonstr: str):
                             idp_atom = AComparison.make('=', [idp_atom, value])
                             state.assignments.assert_(idp_atom, TRUE,
                                                       Status.GIVEN, False)
+                    # If the atom was already set in default struct, overwrite.
+                    elif json_atom["value"] != '':
+                        value = str_to_IDP(idp_atom, str(json_atom["value"]))
+                        state.assignments[symbol].value = value
                     else:
                         state.assignments[atom].value = None
                     out[atom] = state.assignments[atom]

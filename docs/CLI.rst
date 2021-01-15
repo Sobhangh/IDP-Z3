@@ -3,18 +3,19 @@
 Command Line Interface
 ======================
 
-IDP-Z3 can be run through a Command Line Interface,
-using poetry (see :ref:`Installation<Installation>`):
+IDP-Z3 can be run through a Command Line Interface.
+
+If you have downloaded IDP-Z3 from the GitLab repo, you may run the CLI using poetry (see :ref:`Installation<Installation>`):
 
 .. code::
 
-    poetry run python3 IDP-Z3.py path/to/file.idp
+    poetry run python3 idp-solver.py path/to/file.idp
 
-where path/to/file.idp is a relative path to the file containing the IDP program to be run.
+where `path/to/file.idp` is the path to the file containing the IDP program to be run.
 This file must contain a :ref:`main block<main>`.
 
-Alternatively, you can run it using pip-installed packages.
+Alternatively, if you installed it via pip, you can run it with the following command:
 
 .. code::
 
-    python3 IDP-Z3.py path/to/file.idp
+    idp-solver path/to/file.idp
