@@ -31,18 +31,18 @@ from idp_solver import idpparser
 
 def cli(args=None):
     parser = argparse.ArgumentParser(description='IDP-Z3')
-    parser.add_argument('FILE', nargs='*')
+    parser.add_argument('inputfile', type=str,
+                        help='path to the input file')
     args = parser.parse_args()
 
     error = 0
-    if args.FILE:
-        dir = os.path.dirname(__file__)
-        file = os.path.join(dir, args.FILE[0])
-        with open(file, "r") as f:
-            theory = f.read()
 
-        idp = idpparser.model_from_str(theory)
-        idp.execute()
+    inputf = os.path.abspath(args.inputfile)
+    with open(inputf, "r") as f:
+        theory = f.read()
+
+    idp = idpparser.model_from_str(theory)
+    idp.execute()
 
     sys.exit(error)
 
