@@ -32,7 +32,7 @@ from .Expression import (
     BinaryOperator, AEquivalence, AImplication, ADisjunction, \
     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
     AUnary, AAggregate, AppliedSymbol, UnappliedSymbol, \
-    NumberConstant, Brackets, Variable, TRUE, FALSE)
+    Number, Brackets, Variable, TRUE, FALSE)
 from .Parse import Enumeration, Tuple
 from .Assignments import Status, Assignment
 from .utils import INT
@@ -53,14 +53,14 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
     if value is not None:
         self.value = value
     elif simpler is not None:
-        if type(simpler) in [Constructor, NumberConstant]:
+        if type(simpler) in [Constructor, Number]:
             self.value = simpler
         elif simpler.value is not None:  # example: prime.idp
             self.value = simpler.value
         else:
             self.simpler = simpler
     assert self.value is None or type(self.value) in [Constructor,
-                                                      NumberConstant]
+                                                      Number]
     assert self.value is not self  # avoid infinite loops
 
     # reset derived attributes
@@ -78,7 +78,7 @@ def update_exprs(self, new_exprs):
 
 
 # Expression.update_exprs = update_exprs
-for i in [Constructor, AppliedSymbol, UnappliedSymbol, Variable, NumberConstant]:
+for i in [Constructor, AppliedSymbol, UnappliedSymbol, Variable, Number]:
     i.update_exprs = update_exprs
 
 
@@ -247,7 +247,7 @@ def update_arith(self, family, operands):
                 out //= e.py_value
             else:
                 out = function(out, e.py_value)
-        value = NumberConstant(number=str(out))
+        value = Number(number=str(out))
         return self._change(value=value, sub_exprs=operands)
     return self._change(sub_exprs=operands)
 
@@ -268,7 +268,7 @@ def update_exprs(self, new_exprs):
         if len(operands) == 2 \
            and all(e is not None for e in operands1):
             out = operands1[0].py_value % operands1[1].py_value
-            return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
+            return self._change(value=Number(number=str(out)), sub_exprs=operands)
         else:
             return self._change(sub_exprs=operands)
     return update_arith(self, '*', operands)
@@ -283,7 +283,7 @@ def update_exprs(self, new_exprs):
     if len(operands) == 2 \
        and all(e is not None for e in operands1):
         out = operands1[0].py_value ** operands1[1].py_value
-        return self._change(value=NumberConstant(number=str(out)), sub_exprs=operands)
+        return self._change(value=Number(number=str(out)), sub_exprs=operands)
     else:
         return self._change(sub_exprs=operands)
 APower.update_exprs = update_exprs
@@ -301,8 +301,8 @@ def update_exprs(self, new_exprs):
     else:  # '-'
         a = operand.as_rigid()
         if a is not None:
-            if type(a) == NumberConstant:
-                return self._change(value=NumberConstant(number=str(- a.translate())), sub_exprs=[operand])
+            if type(a) == Number:
+                return self._change(value=Number(number=str(- a.translate())), sub_exprs=[operand])
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
@@ -321,7 +321,7 @@ def update_exprs(self, new_exprs):
         operands1 = [e.as_rigid() for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
-            out = NumberConstant(number=str(out))
+            out = Number(number=str(out))
             return self._change(value=out, sub_exprs=operands)
 
     return self._change(sub_exprs=operands)

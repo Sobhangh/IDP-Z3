@@ -26,7 +26,7 @@ __all__ = ["Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
            "Arguments", "UnappliedSymbol", "Variable",
-           "NumberConstant", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
+           "Number", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
 
 import copy
 from collections import ChainMap
@@ -133,8 +133,8 @@ class Expression(object):
         self.block: Any = None
 
     def copy(self):
-        " create a deep copy (except for Constructor and NumberConstant) "
-        if type(self) in [Constructor, NumberConstant]:
+        " create a deep copy (except for Constructor and Number) "
+        if type(self) in [Constructor, Number]:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -248,7 +248,7 @@ class Expression(object):
             e.co_constraints(co_constraints)
 
     def as_rigid(self):
-        " returns a NumberConstant or Constructor, or None "
+        " returns a Number or Constructor, or None "
         return self.value
 
     def is_reified(self): return True
@@ -762,7 +762,8 @@ class Arguments(object):
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.
     Can be a constructor, a quantified variable,
-    or a symbol application without arguments (by abuse of notation, e.g. 'p')
+    or a symbol application without arguments (by abuse of notation, e.g. 'p').
+    (The parsing of numbers result directly in Number nodes)
 
     Converted to the proper AST class by annotate().
     """
@@ -815,7 +816,7 @@ class Variable(Expression):
     def __str1__(self): return self.name
 
 
-class NumberConstant(Expression):
+class Number(Expression):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
@@ -851,8 +852,8 @@ class NumberConstant(Expression):
     def is_reified(self): return False
 
 
-ZERO = NumberConstant(number='0')
-ONE = NumberConstant(number='1')
+ZERO = Number(number='0')
+ONE = Number(number='1')
 
 
 class Brackets(Expression):

@@ -44,7 +44,7 @@ from .Expression import (Constructor, IfExpr, AQuantification,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
-                         NumberConstant, Brackets, Arguments,
+                         Number, Brackets, Arguments,
                          Variable, TRUE, FALSE)
 from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
 
@@ -57,7 +57,7 @@ def str_to_IDP(atom, val_string):
                FALSE)
     elif (atom.type in [REAL, INT] or
             type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
-        out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
+        out = Number(number=str(eval(val_string.replace('?', ''))))
     else:  # constructor
         out = atom.decl.out.decl.map[val_string]
     return out
@@ -264,7 +264,7 @@ class RangeDeclaration(object):
                     self.type = REAL
             elif x.fromI.type == INT and x.toI.type == INT:
                 for i in range(x.fromI.translated, x.toI.translated + 1):
-                    self.range.append(NumberConstant(number=str(i)))
+                    self.range.append(Number(number=str(i)))
             else:
                 assert False, "Can't have a range over reals: " + self.name
 
@@ -805,7 +805,7 @@ class SymbolInterpretation(object):
             out = self.default if self.default is not None else applied.original
             groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if type(args[rank]) in [Constructor, NumberConstant]:
+            if type(args[rank]) in [Constructor, Number]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret(theory, rank+1, applied, args,
@@ -1101,7 +1101,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,
-                                         NumberConstant, Brackets, Arguments,
+                                         Number, Brackets, Arguments,
 
                                          Structure, SymbolInterpretation, Enumeration,
                                          Tuple, Goal, View, Display,

@@ -22,7 +22,7 @@ web client.
 
 import ast
 
-from idp_solver.Expression import (TRUE, FALSE, AComparison, NumberConstant)
+from idp_solver.Expression import (TRUE, FALSE, AComparison, Number)
 from idp_solver.Parse import str_to_IDP
 from idp_solver.Assignments import Assignments, Status
 from idp_solver.utils import BOOL, INT, REAL
@@ -211,7 +211,7 @@ class Output(object):
                 s = self.m.setdefault(symb.name, {})
                 if key in s:
                     if value is not None:
-                        if type(value) == NumberConstant:
+                        if type(value) == Number:
                             s[key]["value"] = str(eval(str(value).replace('?', '')))
                         else:
                             s[key]["value"] = True if value.same_as(TRUE) else \

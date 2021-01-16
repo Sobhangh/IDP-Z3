@@ -22,7 +22,7 @@ Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
     ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
       Constructor: name=/[^\d\W]\w*\b|'(\.|[^'])*'/;
     RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
-      RangeElement: fromI=NumberConstant ('..' toI=NumberConstant)?;
+      RangeElement: fromI=Number ('..' toI=Number)?;
 
     SymbolDeclaration: annotations=Annotations name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
       Symbol: name=/`?[^\d\W]\w*\b|'(\.|[^'])*'/;
@@ -80,14 +80,14 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     UnaryOperator:   '-' | '~' | '¬';
 
 
-    Base:  AppliedSymbol | UnappliedSymbol | NumberConstant | Brackets;
+    Base:  AppliedSymbol | UnappliedSymbol | Number | Brackets;
 
       AppliedSymbol: s=Symbol args=Arguments
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | 'in' in_enumeration=Enumeration)?;
         Arguments: '(' sub_exprs*=Expression[','] ')';
       UnappliedSymbol: s=Symbol;
-      NumberConstant: number=IDPFLOAT | number=INT;
+      Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Brackets: annotations=Annotations '(' f=Expression ')';
 
@@ -109,7 +109,7 @@ Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}'
   PyStatement: Call1 | PyAssignment ;
   Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=PyAssignment[','])? ')' ('.' post=PyExpr)?;
   Call0 : !PyAssignment pyExpr=PyExpr;
-  PyExpr : Call1 | String | NumberConstant | ID | PyList;
+  PyExpr : Call1 | String | Number | ID | PyList;
   String: literal=/"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 

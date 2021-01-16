@@ -36,7 +36,7 @@ import copy
 
 from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     ADisjunction, AConjunction,  AAggregate, AUnary, \
-                    AComparison, AppliedSymbol, UnappliedSymbol, NumberConstant, \
+                    AComparison, AppliedSymbol, UnappliedSymbol, Number, \
                     Variable, TRUE
 
 
@@ -58,7 +58,7 @@ def substitute(self, e0, e1, assignments, todo=None):
     if self.code == e0.code:
         if self.code == e1.code:
             return self  # to avoid infinite loops
-        return self._change(value=e1)  # e1 is Constructor or NumberConstant
+        return self._change(value=e1)  # e1 is Constructor or Number
     else:
         # will update self.simpler
         out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
@@ -182,9 +182,9 @@ def interpret(self, problem):
             f"Inconsistent types for {v} in {self}"
 
     forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
-             then_f=NumberConstant(number='1') if self.out is None else
+             then_f=Number(number='1') if self.out is None else
                     self.sub_exprs[AAggregate.OUT],
-             else_f=NumberConstant(number='0'))]
+             else_f=Number(number='0'))]
     for name, var in self.q_vars.items():
         if var.sort.decl.range:
             out = []
