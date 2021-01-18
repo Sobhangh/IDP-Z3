@@ -26,16 +26,15 @@ TODO: vocabulary
 
 from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
-from idp_solver.Expression import (Constructor, Expression, IfExpr,
-                                   AQuantification, BinaryOperator,
-                                   ADisjunction, AConjunction,
-                                   AComparison, AUnary, AAggregate,
-                                   AppliedSymbol, Variable, NumberConstant,
-                                   Brackets, Fresh_Variable, TRUE,
-                                   DSLException, IDPZ3Error,
-                                   create_error_msg)
 from textx import get_location
 
+from idp_solver.Expression import (Constructor, Expression, IfExpr,
+                                   AQuantification, BinaryOperator,
+                                   ADisjunction, AConjunction, AComparison,
+                                   AUnary, AAggregate, AppliedSymbol,
+                                   UnappliedSymbol, Number, Brackets,
+                                   Variable, TRUE, DSLException,
+                                   IDPZ3Error, create_error_msg)
 
 
 # class Expression  ###########################################################
@@ -248,40 +247,41 @@ def translate1(self):
 AppliedSymbol.translate1 = translate1
 
 
-# Class Variable  #######################################################
+# Class UnappliedSymbol  #######################################################
 
 def translate1(self):
-    try:
-        return self.decl.translate()
-    except AttributeError as e:
-        # Used symbol not in voc (e.g. forgotten, or typo)
-        if str(e) == "'NoneType' object has no attribute 'translate'":
-            msg = "symbol {} not declared in vocabulary".format(self)
-            raise IDPZ3Error(create_error_msg(self, msg))
-        # Unknown error.
-        else:
-            raise AttributeError(e)
+    # try:
+    #     return self.decl.translate()
+    # except AttributeError as e:
+    #     # Used symbol not in voc (e.g. forgotten, or typo)
+    #     if str(e) == "'NoneType' object has no attribute 'translate'":
+    #         msg = "symbol {} not declared in vocabulary".format(self)
+    #         raise IDPZ3Error(create_error_msg(self, msg))
+    #     # Unknown error.
+    #     else:
+    #         raise AttributeError(e)
+    assert False, "Internal error"
 
 
-Variable.translate1 = translate1
+UnappliedSymbol.translate1 = translate
 
 
-# Class Fresh_Variable  #######################################################
-
-def translate(self):
-    return self.translated
-
-
-Fresh_Variable.translate = translate
-
-
-# Class NumberConstant  #######################################################
+# Class Variable  #######################################################
 
 def translate(self):
     return self.translated
 
 
-NumberConstant.translate = translate
+Variable.translate = translate
+
+
+# Class Number  #######################################################
+
+def translate(self):
+    return self.translated
+
+
+Number.translate = translate
 
 
 # Class Brackets  #######################################################

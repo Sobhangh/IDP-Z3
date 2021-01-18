@@ -3,12 +3,13 @@
 vocabulary {
     type color constructed from {red, blue, green}
     p
-} 
+}
 theory {
     p <=> sum{c[color] : true : 1} = 3.
 }
 display {
     view = expanded.
+    moveSymbols.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,
