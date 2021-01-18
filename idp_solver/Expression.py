@@ -783,25 +783,18 @@ class AppliedSymbol(Expression):
             or any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-# <<<<<<< HEAD
-        # try:
-        #     out = {}
-        #     for i, e in enumerate(self.sub_exprs):
-        #         if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
-        #             out[e.name] = self.decl.sorts[i]
-        #         else:
-        #             out.update(e.type_inference())
-        #     return out
-        # except AttributeError as e:
-        #     #
-        #     if "object has no attribute 'sorts'" in str(e):
-        #         msg = "Unexpected arity for symbol {}".format(self)
-# =======
-        out = {}
-        for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Variable):
-                out[e.name] = self.decl.sorts[i]
-# >>>>>>> main
+        try:
+            out = {}
+            for i, e in enumerate(self.sub_exprs):
+                if self.decl.name != '`Symbols' and isinstance(e, Variable):
+                    out[e.name] = self.decl.sorts[i]
+                else:
+                    out.update(e.type_inference())
+            return out
+        except AttributeError as e:
+            #
+            if "object has no attribute 'sorts'" in str(e):
+                msg = "Unexpected arity for symbol {}".format(self)
             else:
                 msg = "Unknown error for symbol {}".format(self)
             raise IDPZ3Error(create_error_msg(self, msg))
