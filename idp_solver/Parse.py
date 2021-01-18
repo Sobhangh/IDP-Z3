@@ -43,9 +43,9 @@ from .Expression import (Constructor, IfExpr, AQuantification,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
-                         AAggregate, AppliedSymbol, Variable,
-                         NumberConstant, Brackets, Arguments,
-                         Fresh_Variable, TRUE, FALSE)
+                         AAggregate, AppliedSymbol, UnappliedSymbol,
+                         Number, Brackets, Arguments,
+                         Variable, TRUE, FALSE)
 from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
 
 
@@ -57,7 +57,7 @@ def str_to_IDP(atom, val_string):
                FALSE)
     elif (atom.type in [REAL, INT] or
             type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
-        out = NumberConstant(number=str(eval(val_string.replace('?', ''))))
+        out = Number(number=str(eval(val_string.replace('?', ''))))
     else:  # constructor
         out = atom.decl.out.decl.map[val_string]
     return out
@@ -138,7 +138,7 @@ class Vocabulary(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
-        self.terms = {}  # {string: Variable or AppliedSymbol}
+        self.terms = {}  # {string: Constructor or AppliedSymbol}
         self.idp = None  # parent object
         self.translated = []
 
@@ -264,7 +264,7 @@ class RangeDeclaration(object):
                     self.type = REAL
             elif x.fromI.type == INT and x.toI.type == INT:
                 for i in range(x.fromI.translated, x.toI.translated + 1):
-                    self.range.append(NumberConstant(number=str(i)))
+                    self.range.append(Number(number=str(i)))
             else:
                 assert False, "Can't have a range over reals: " + self.name
 
@@ -361,7 +361,7 @@ class SymbolDeclaration(object):
         self.type = None  # a string
         self.domain = None  # all possible arguments
         self.range = None  # all possible values
-        self.instances = None  # {string: Variable or AppliedSymbol} not starting with '_'
+        self.instances = None  # {string: AppliedSymbol} not starting with '_'
         self.block: Optional[Block] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
@@ -386,15 +386,10 @@ class SymbolDeclaration(object):
         # create instances
         self.instances = {}
         if vocabulary:
-            if len(self.sorts) == 0:
-                expr = Variable(s=Symbol(name=self.name))
+            for arg in self.domain:
+                expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                 expr.annotate(voc, {})
                 self.instances[expr.code] = expr
-            else:
-                for arg in self.domain:
-                    expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
-                    expr.annotate(voc, {})
-                    self.instances[expr.code] = expr
 
         # determine typeConstraints
         if self.out.decl.name != BOOL and self.range:
@@ -530,7 +525,7 @@ class Definition(object):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
         self.clark = None  # {Declaration: Transformed Rule}
-        self.def_vars = {}  # {String: {String: Fresh_Variable}} Fresh variables for arguments & result
+        self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
 
     def __str__(self):
         return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
@@ -551,10 +546,10 @@ class Definition(object):
             if decl.name not in self.def_vars:
                 name = f"${decl.name}$"
                 q_v = {f"${decl.name}!{str(i)}$":
-                       Fresh_Variable(f"${decl.name}!{str(i)}$", sort)
+                       Variable(f"${decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
                 if decl.out.name != BOOL:
-                    q_v[name] = Fresh_Variable(name, decl.out)
+                    q_v[name] = Variable(name, decl.out)
                 self.def_vars[decl.name] = q_v
             new_rule = r.rename_args(self.def_vars[decl.name])
             self.clark.setdefault(decl, []).append(new_rule)
@@ -590,7 +585,7 @@ class Rule(object):
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         assert len(self.vars) == len(self.sorts), "Internal error"
-        self.q_vars = {}  # {string: Fresh_Variable}
+        self.q_vars = {}  # {string: Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
             self.args.append(self.out)
@@ -608,7 +603,7 @@ class Rule(object):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-                self.q_vars[v] = Fresh_Variable(v,s)
+            self.q_vars[v] = Variable(v,s)
         q_v = {**q_vars, **self.q_vars}  # merge
 
         self.symbol = self.symbol.annotate(voc, q_v)
@@ -626,7 +621,7 @@ class Rule(object):
         assert len(self.args) == len(new_vars), "Internal error"
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
-            if type(arg) in [Fresh_Variable, Variable] \
+            if type(arg) == Variable \
             and arg.name in self.vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
                 self.out = self.out.instantiate(arg, nv) if self.out else self.out
@@ -810,7 +805,7 @@ class SymbolInterpretation(object):
             out = self.default if self.default is not None else applied.original
             groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if type(args[rank]) in [Constructor, NumberConstant]:
+            if type(args[rank]) in [Constructor, Number]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret(theory, rank+1, applied, args,
@@ -1015,7 +1010,7 @@ class Display(object):
                         assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
                 else:
                     raise Exception("unknown display contraint: ", constraint)
-            elif type(constraint)==Variable:
+            elif type(constraint) == UnappliedSymbol:
                 if constraint.name == "moveSymbols":
                     self.moveSymbols = True
                 elif constraint.name == "optionalPropagation":
@@ -1105,8 +1100,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          ADisjunction, AConjunction,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
-                                         AppliedSymbol, Variable,
-                                         NumberConstant, Brackets, Arguments,
+                                         AppliedSymbol, UnappliedSymbol,
+                                         Number, Brackets, Arguments,
 
                                          Structure, SymbolInterpretation, Enumeration,
                                          Tuple, Goal, View, Display,

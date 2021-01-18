@@ -25,8 +25,8 @@ __all__ = ["Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
            "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
-           "Arguments", "Variable", "Fresh_Variable",
-           "NumberConstant", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
+           "Arguments", "UnappliedSymbol", "Variable",
+           "Number", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
 
 import copy
 from collections import ChainMap
@@ -133,8 +133,8 @@ class Expression(object):
         self.block: Any = None
 
     def copy(self):
-        " create a deep copy (except for Constructor and NumberConstant) "
-        if type(self) in [Constructor, NumberConstant]:
+        " create a deep copy (except for Constructor and Number) "
+        if type(self) in [Constructor, Number]:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -210,7 +210,7 @@ class Expression(object):
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for Constructor, IfExpr, AUnary, Fresh_Variable,
+        default implementation for Constructor, IfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
 
@@ -248,7 +248,7 @@ class Expression(object):
             e.co_constraints(co_constraints)
 
     def as_rigid(self):
-        " returns a NumberConstant or Constructor, or None "
+        " returns a Number or Constructor, or None "
         return self.value
 
     def is_reified(self): return True
@@ -273,7 +273,7 @@ class Expression(object):
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-        # returns a dictionary {Fresh_Variable : Sort}
+        # returns a dictionary {Variable : Sort}
         return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
 
     def __str1__(self) -> str:
@@ -405,7 +405,7 @@ class AQuantification(Expression):
         self.quantifier_is_expanded = False
         super().__init__()
 
-        self.q_vars = {}  # dict[String, Fresh_Variable]
+        self.q_vars = {}  # dict[String, Variable]
         self.type = BOOL
 
     @classmethod
@@ -432,7 +432,7 @@ class AQuantification(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-            self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         return self.annotate1()
@@ -647,7 +647,7 @@ class AAggregate(Expression):
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
-            self.q_vars[v] = Fresh_Variable(v, s)
+            self.q_vars[v] = Variable(v, s)
         q_v = {**q_vars, **self.q_vars}  # merge
         self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
         self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
@@ -751,7 +751,7 @@ class AppliedSymbol(Expression):
     def type_inference(self):
         out = {}
         for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Fresh_Variable):
+            if self.decl.name != '`Symbols' and isinstance(e, Variable):
                 out[e.name] = self.decl.sorts[i]
             else:
                 out.update(e.type_inference())
@@ -774,7 +774,14 @@ class Arguments(object):
         super().__init__()
 
 
-class Variable(AppliedSymbol):
+class UnappliedSymbol(Expression):
+    """The result of parsing a symbol not applied to arguments.
+    Can be a constructor, a quantified variable,
+    or a symbol application without arguments (by abuse of notation, e.g. 'p').
+    (The parsing of numbers result directly in Number nodes)
+
+    Converted to the proper AST class by annotate().
+    """
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
@@ -798,21 +805,16 @@ class Variable(AppliedSymbol):
         if self.name in q_vars:
             return q_vars[self.name]
         elif self.name in voc.symbol_decls:  # in symbol_decls
-            self.decl = voc.symbol_decls[self.name]
-            self.s.decl = self.decl
-            self.type = self.decl.type
-        else:
-            pass  # a quantification variable without known type yet
-        return self.annotate1()
+            out = AppliedSymbol(s=self.s,
+                                args=Arguments(sub_exprs=self.sub_exprs))
+            return out.annotate(voc, q_vars)
+        assert False, f"Unknown symbol: {self.name}"
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl:
-            questions.append(self)
-        if co_constraints and self.co_constraint is not None:
-            self.co_constraint.collect(questions, all_, co_constraints)
+        assert False, "Internal error"
 
 
-class Fresh_Variable(Expression):
+class Variable(Expression):
     PRECEDENCE = 200
 
     def __init__(self, name, sort):
@@ -830,7 +832,7 @@ class Fresh_Variable(Expression):
     def __str1__(self): return self.name
 
 
-class NumberConstant(Expression):
+class Number(Expression):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
@@ -866,8 +868,8 @@ class NumberConstant(Expression):
     def is_reified(self): return False
 
 
-ZERO = NumberConstant(number='0')
-ONE = NumberConstant(number='1')
+ZERO = Number(number='0')
+ONE = Number(number='1')
 
 
 class Brackets(Expression):
