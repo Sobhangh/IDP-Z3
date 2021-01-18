@@ -102,10 +102,21 @@ def json_to_literals(state, jsonstr: str):
 
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
-        if json_data == {}:
-            return out
         default = [x for x, v in state.assignments.items()
                    if v.status == Status.GIVEN]
+        if json_data == {}:
+            # If json_data was empty (e.g. at beginning), we need to check if
+            # we can make more assertions.
+            for symbol in default:
+                idp_atom = state.assignments[symbol].sentence
+                # We do not need to create comparisons for all types.
+                if idp_atom.type in ["Real", "Bool", "Int"]:
+                    continue
+                value = state.assignments[symbol].value
+                idp_atom = AComparison.make('=', [idp_atom, value])
+                state.assignments.assert_(idp_atom, TRUE,
+                                          Status.GIVEN, False)
+            return out
 
         for symbol in default:
             # If a boolean is unset, it does not show up in the jsonstr.
@@ -124,9 +135,11 @@ def json_to_literals(state, jsonstr: str):
                     idp_atom = state.assignments[atom].sentence
 
                     # If a checkmark of the form "symbol = value" is checked
-                    # in the interface, we need to unset the value of the
+                    # in the interface and the symbol has not been given a
+                    # value in the dropdown, we need to unset the value of the
                     # symbol to avoid errors.
-                    if atom.startswith('{} ='.format(symbol)):
+                    if (atom.startswith('{} ='.format(symbol)) and
+                       symbol not in json_data[symbol]):
                         state.assignments[symbol].unset()
 
                     # If the atom is unknown, set its value as normal.
