@@ -250,16 +250,6 @@ AppliedSymbol.translate1 = translate1
 # Class UnappliedSymbol  #######################################################
 
 def translate1(self):
-    # try:
-    #     return self.decl.translate()
-    # except AttributeError as e:
-    #     # Used symbol not in voc (e.g. forgotten, or typo)
-    #     if str(e) == "'NoneType' object has no attribute 'translate'":
-    #         msg = "symbol {} not declared in vocabulary".format(self)
-    #         raise IDPZ3Error(create_error_msg(self, msg))
-    #     # Unknown error.
-    #     else:
-    #         raise AttributeError(e)
     assert False, "Internal error"
 
 
