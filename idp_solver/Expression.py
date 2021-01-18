@@ -737,29 +737,29 @@ class AppliedSymbol(Expression):
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
     def annotate(self, voc, q_vars):
+        self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
         try:
-            self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
             self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
                 else voc.symbol_decls[self.s.name]
-            self.s.decl = self.decl
-            if self.in_enumeration:
-                self.in_enumeration.annotate(voc)
-            # move the negation out
-            if 'not' in self.is_enumerated:
-                out = AppliedSymbol.make(self.s, self.sub_exprs,
-                                         is_enumerated='is enumerated')
-                out = AUnary.make('¬', out)
-            elif 'not' in self.is_enumeration:
-                out = AppliedSymbol.make(self.s, self.sub_exprs,
-                                         is_enumeration='in',
-                                         in_enumeration=self.in_enumeration)
-                out = AUnary.make('¬', out)
-            else:
-                out = self.annotate1()
-            return out
         except KeyError:
             msg = "Unknown symbol {}".format(self)
             raise IDPZ3Error(create_error_msg(self, msg))
+        self.s.decl = self.decl
+        if self.in_enumeration:
+            self.in_enumeration.annotate(voc)
+        # move the negation out
+        if 'not' in self.is_enumerated:
+            out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                     is_enumerated='is enumerated')
+            out = AUnary.make('¬', out)
+        elif 'not' in self.is_enumeration:
+            out = AppliedSymbol.make(self.s, self.sub_exprs,
+                                     is_enumeration='in',
+                                     in_enumeration=self.in_enumeration)
+            out = AUnary.make('¬', out)
+        else:
+            out = self.annotate1()
+        return out
 
     def annotate1(self):
         self.type = (BOOL if self.is_enumerated or self.in_enumeration else
@@ -850,10 +850,13 @@ class UnappliedSymbol(Expression):
             out = AppliedSymbol(s=self.s,
                                 args=Arguments(sub_exprs=self.sub_exprs))
             return out.annotate(voc, q_vars)
-        assert False, f"Unknown symbol: {self.name}"
+        # If this code is reached, an undefined symbol was present.
+        msg = "Symbol not in vocabulary: {}".format(self.name)
+        raise IDPZ3Error(create_error_msg(self, msg))
 
     def collect(self, questions, all_=True, co_constraints=True):
-        assert False, "Internal error"
+        msg = "Internal error: {}".format(self.name)
+        raise IDPZ3Error(create_error_msg(self, msg))
 
 
 class Variable(Expression):
