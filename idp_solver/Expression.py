@@ -301,7 +301,6 @@ class Expression(object):
                 msg = e
                 # msg = "Unknown error for {}".format(self)
             raise IDPZ3Error(create_error_msg(self, msg))
-            raise AttributeError(e)
 
     def __str1__(self) -> str:
         return ''  # monkey-patched
