@@ -430,7 +430,8 @@ class Problem(object):
 
         max_time = time.time()+timeout # 20 seconds max
         models, count = [], 0
-        while solver.check() == sat and count < max_rows and time.time()<max_time: # for each parametric model
+        while (solver.check() == sat  # for each parametric model
+               and count < max_rows and time.time() < max_time):
             # find the interpretation of all atoms in the model
             assignments = [] # [Assignment]
             model = solver.model()
@@ -496,7 +497,7 @@ class Problem(object):
         if first_hit:
             known2 = known
             models1, last_model = [], []
-            while models:
+            while models and time.time() < max_time:
                 if len(models) == 1:
                     models1.append(models[0])
                     break
