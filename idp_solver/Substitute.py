@@ -36,8 +36,8 @@ import copy
 
 from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
                     ADisjunction, AConjunction,  AAggregate, AUnary, \
-                    AComparison, AppliedSymbol, Variable, NumberConstant, \
-                    Fresh_Variable, TRUE
+                    AComparison, AppliedSymbol, UnappliedSymbol, Number, \
+                    Variable, TRUE
 
 
 # class Expression  ###########################################################
@@ -45,20 +45,20 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
 
 # @log  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, assignments, todo=None):
-    """ recursively substitute e0 by e1 in self (e0 is not a Fresh_Variable)
+    """ recursively substitute e0 by e1 in self (e0 is not a Variable)
 
-    implementation for everything but AppliedSymbol, Variable and
+    implementation for everything but AppliedSymbol, UnappliedSymbol and
     Fresh_variable
     """
 
-    assert not isinstance(e0, Fresh_Variable) or isinstance(e1, Fresh_Variable)# should use instantiate instead
-    assert self.co_constraint is None  # see AppliedSymbol or Variable instead
+    assert not isinstance(e0, Variable) or isinstance(e1, Variable)  # should use instantiate instead
+    assert self.co_constraint is None  # see AppliedSymbol instead
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
         if self.code == e1.code:
             return self  # to avoid infinite loops
-        return self._change(value=e1)  # e1 is Constructor or NumberConstant
+        return self._change(value=e1)  # e1 is Constructor or Number
     else:
         # will update self.simpler
         out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
@@ -69,7 +69,7 @@ Expression.substitute = substitute
 
 def instantiate(self, e0, e1):
     """
-    recursively substitute Fresh_Variable e0 by e1 in self
+    recursively substitute Variable e0 by e1 in self
 
     instantiating e0=`x by e1=`f in self=`x(y) returns f(y)
     (or any instance of f if arities don't match)
@@ -95,8 +95,7 @@ def instantiate(self, e0, e1):
 
     if e0.name in out.fresh_vars:
         out.fresh_vars.discard(e0.name)
-        if type(e1) in [Fresh_Variable, Variable]:
-            # e1 is Variable when instantiating some definitions
+        if type(e1) == Variable:
             out.fresh_vars.add(e1.name)
         if isinstance(out, AComparison):
             out.annotate1()
@@ -131,7 +130,7 @@ def interpret(self, problem):
     inferred = self.sub_exprs[0].type_inference()
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
-            new_var = Fresh_Variable(q, inferred[q])
+            new_var = Variable(q, inferred[q])
             self.sub_exprs[0].substitute(new_var, new_var, {})
             self.q_vars[q] = new_var
 
@@ -174,7 +173,7 @@ def interpret(self, problem):
         inferred = {**inferred, **self.sub_exprs[1].type_inference()}
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
-            new_var = Fresh_Variable(q, inferred[q])
+            new_var = Variable(q, inferred[q])
             self.sub_exprs[0].substitute(new_var, new_var, {})
             self.q_vars[q] = new_var
 
@@ -183,9 +182,9 @@ def interpret(self, problem):
             f"Inconsistent types for {v} in {self}"
 
     forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
-             then_f=NumberConstant(number='1') if self.out is None else
+             then_f=Number(number='1') if self.out is None else
                     self.sub_exprs[AAggregate.OUT],
-             else_f=NumberConstant(number='0'))]
+             else_f=Number(number='0'))]
     for name, var in self.q_vars.items():
         if var.sort.decl.range:
             out = []
@@ -203,7 +202,7 @@ def interpret(self, problem):
 AAggregate.interpret = interpret
 
 
-# Class AppliedSymbol, Variable  ##############################################
+# Class AppliedSymbol  ##############################################
 
 def interpret(self, problem):
     sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
@@ -245,14 +244,13 @@ def interpret(self, problem):
         out.original = simpler.copy()  # so that translated assignment is correct
     return out
 AppliedSymbol.interpret = interpret
-Variable     .interpret = interpret
 
 
 # @log_calls  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, assignments, todo=None):
     """ recursively substitute e0 by e1 in self """
 
-    assert not isinstance(e0, Fresh_Variable) or isinstance(e1, Fresh_Variable), \
+    assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
         f"should use 'instantiate instead of 'substitute for {e0}->{e1}"
 
     new_branch = None
@@ -272,7 +270,6 @@ def substitute(self, e0, e1, assignments, todo=None):
                      for e in self.sub_exprs]  # no simplification here
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
-Variable      .substitute = substitute
 
 def instantiate(self, e0, e1):
     if self.name == e0.code:
@@ -281,7 +278,7 @@ def instantiate(self, e0, e1):
                and len(self.sub_exprs) == len(e1.symbol.decl.sorts)):
                 out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
                 return out
-            elif isinstance(e1, Fresh_Variable):  # replacing variable in a definition
+            elif isinstance(e1, Variable):  # replacing variable in a definition
                 out = copy.copy(self)
                 out.code = out.code.replace(e0.code, e1.code)
                 out.str = out.code.replace(e0.code, e1.code)
@@ -295,23 +292,22 @@ def instantiate(self, e0, e1):
     out = Expression.instantiate(self, e0, e1)
     return out
 AppliedSymbol .instantiate = instantiate
-Variable      .instantiate = instantiate
 
 
-# Class Fresh_Variable  #######################################################
+# Class Variable  #######################################################
 
 def instantiate(self, e0, e1):
     return e1 if self.code == e0.code else self
-Fresh_Variable.instantiate = instantiate
+Variable.instantiate = instantiate
 
 def interpret(self, problem):
     return self
-Fresh_Variable.interpret = interpret
+Variable.interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, assignments, todo=None):
     return e1 if self.code == e0.code else self
-Fresh_Variable.substitute = substitute
+Variable.substitute = substitute
 
 
 
