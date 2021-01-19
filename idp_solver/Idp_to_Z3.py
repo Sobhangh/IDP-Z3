@@ -191,7 +191,7 @@ def translate1(self):
         function = AUnary.MAP[self.operator]
         return function(out)
     except:
-        self.raise_error(f"Incorrect syntax {self}")
+        raise self.create_error(f"Incorrect syntax {self}")
 
 
 AUnary.translate1 = translate1
@@ -216,9 +216,10 @@ def translate1(self):
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
     else:
-        if len(self.sub_exprs) != self.decl.arity:
-            self.raise_error(f"Incorrect number of arguments for {self}")
         try:
+            if len(self.sub_exprs) != self.decl.arity:
+                raise self.create_error(f"Incorrect number of arguments for"
+                                        f" {self}")
             if len(self.sub_exprs) == 0:
                 return self.decl.translate()
             else:
@@ -228,7 +229,8 @@ def translate1(self):
         except AttributeError as e:
             # Using argument on symbol that has no arity.
             if str(e) == "'RangeDeclaration' object has no attribute 'arity'":
-                self.raise_error(f"Symbol {self} does not accept an argument")
+                raise self.create_error(f"Symbol {self} does not accept an"
+                                        f" argument")
             # Unknown error.
             else:
                 raise AttributeError(e)

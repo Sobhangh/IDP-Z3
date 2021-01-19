@@ -286,7 +286,7 @@ class Expression(object):
                 msg = f"Incorrect arity for {self}"
             else:
                 msg = f"Unknown error for {self}"
-            self.raise_error(msg)
+            raise self.create_error(msg)
 
     def __str1__(self) -> str:
         return ''  # monkey-patched
@@ -339,11 +339,11 @@ class Expression(object):
         """
         return (None, None, None)
 
-    def raise_error(self, msg):
+    def create_error(self, msg):
         location = get_location(self)
         line = location['line']
         col = location['col']
-        raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
+        return IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 
 class Constructor(Expression):
     PRECEDENCE = 200
@@ -445,10 +445,11 @@ class AQuantification(Expression):
         # First we check for some common errors.
         for v in self.vars:
             if v in voc.symbol_decls:
-                self.raise_error(f"the quantified variable '{v}' cannot have"
-                                 f" the same name as another symbol")
+                raise self.create_error(f"the quantified variable '{v}'"
+                                        f" cannot have the same name as"
+                                        f" another symbol")
         if len(self.vars) != len(self.sorts):
-            self.raise_error("Internal error")
+            raise self.create_error("Internal error")
 
         self.q_vars = {}
         for v, s in zip(self.vars, self.sorts):
@@ -734,7 +735,7 @@ class AppliedSymbol(Expression):
             self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
                 else voc.symbol_decls[self.s.name]
         except KeyError:
-            self.raise_error(f"Unknown symbol {self}")
+            raise self.create_error(f"Unknown symbol {self}")
         self.s.decl = self.decl
         if self.in_enumeration:
             self.in_enumeration.annotate(voc)
@@ -788,7 +789,7 @@ class AppliedSymbol(Expression):
                 msg = f"Unexpected arity for symbol {self}"
             else:
                 msg = f"Unknown error for symbol {self}"
-            raise self.raise_error(msg)
+            raise self.create_error(msg)
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
@@ -842,10 +843,10 @@ class UnappliedSymbol(Expression):
                                 args=Arguments(sub_exprs=self.sub_exprs))
             return out.annotate(voc, q_vars)
         # If this code is reached, an undefined symbol was present.
-        self.raise_error(f"Symbol not in vocabulary: {self}")
+        raise self.create_error(f"Symbol not in vocabulary: {self}")
 
     def collect(self, questions, all_=True, co_constraints=True):
-        self.raise_error(f"Internal error: {self}")
+        raise self.create_error(f"Internal error: {self}")
 
 
 class Variable(Expression):
