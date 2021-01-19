@@ -294,13 +294,11 @@ class Expression(object):
         try:
             return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
         except AttributeError as e:
-            msg = "Error"
             if "has no attribute 'sorts'" in str(e):
-                msg = "Incorrect arity for {}".format(self)
+                msg = f"Incorrect arity for {self}"
             else:
-                msg = e
-                # msg = "Unknown error for {}".format(self)
-            raise IDPZ3Error(create_error_msg(self, msg))
+                msg = f"Unknown error for {self}"
+            self.raise_error(msg)
 
     def __str1__(self) -> str:
         return ''  # monkey-patched
@@ -353,6 +351,11 @@ class Expression(object):
         """
         return (None, None, None)
 
+    def raise_error(self, msg):
+        location = get_location(self)
+        line = location['line']
+        col = location['col']
+        raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 
 class Constructor(Expression):
     PRECEDENCE = 200
@@ -454,12 +457,10 @@ class AQuantification(Expression):
         # First we check for some common errors.
         for v in self.vars:
             if v in voc.symbol_decls:
-                msg = ("the quantifier variable '{}' cannot have"
-                       " the same name as another symbol.".format(v))
-                raise IDPZ3Error(create_error_msg(self, msg))
+                self.raise_error(f"the quantified variable '{v}' cannot have"
+                                 f" the same name as another symbol")
         if len(self.vars) != len(self.sorts):
-            msg = "Internal error"
-            raise IDPZ3Error(create_error_msg(self, msg))
+            self.raise_error("Internal error")
 
         self.q_vars = {}
         for v, s in zip(self.vars, self.sorts):
@@ -745,8 +746,7 @@ class AppliedSymbol(Expression):
             self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
                 else voc.symbol_decls[self.s.name]
         except KeyError:
-            msg = "Unknown symbol {}".format(self)
-            raise IDPZ3Error(create_error_msg(self, msg))
+            self.raise_error(f"Unknown symbol {self}")
         self.s.decl = self.decl
         if self.in_enumeration:
             self.in_enumeration.annotate(voc)
@@ -797,10 +797,10 @@ class AppliedSymbol(Expression):
         except AttributeError as e:
             #
             if "object has no attribute 'sorts'" in str(e):
-                msg = "Unexpected arity for symbol {}".format(self)
+                msg = f"Unexpected arity for symbol {self}"
             else:
-                msg = "Unknown error for symbol {}".format(self)
-            raise IDPZ3Error(create_error_msg(self, msg))
+                msg = f"Unknown error for symbol {self}"
+            raise self.raise_error(msg)
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
@@ -854,12 +854,10 @@ class UnappliedSymbol(Expression):
                                 args=Arguments(sub_exprs=self.sub_exprs))
             return out.annotate(voc, q_vars)
         # If this code is reached, an undefined symbol was present.
-        msg = "Symbol not in vocabulary: {}".format(self.name)
-        raise IDPZ3Error(create_error_msg(self, msg))
+        self.raise_error(f"Symbol not in vocabulary: {self}")
 
     def collect(self, questions, all_=True, co_constraints=True):
-        msg = "Internal error: {}".format(self.name)
-        raise IDPZ3Error(create_error_msg(self, msg))
+        self.raise_error(f"Internal error: {self}")
 
 
 class Variable(Expression):
