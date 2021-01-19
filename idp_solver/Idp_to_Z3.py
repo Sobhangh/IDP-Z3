@@ -216,9 +216,9 @@ def translate1(self):
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
     else:
+        if len(self.sub_exprs) != self.decl.arity:
+            self.raise_error(f"Incorrect number of arguments for {self}")
         try:
-            assert len(self.sub_exprs) == self.decl.arity, \
-                f"Incorrect number of arguments"
             if len(self.sub_exprs) == 0:
                 return self.decl.translate()
             else:
@@ -232,12 +232,6 @@ def translate1(self):
             # Unknown error.
             else:
                 raise AttributeError(e)
-        except AssertionError as e:
-            # Incorrect number of arguments.
-            if str(e) == "Incorrect number of arguments":
-                self.raise_error(f"Incorrect number of arguments for {self}")
-            else:
-                raise AssertionError(e)
 
 
 AppliedSymbol.translate1 = translate1
