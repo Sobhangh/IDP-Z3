@@ -26,11 +26,14 @@ TODO: vocabulary
 
 from z3 import Or, Not, And, ForAll, Exists, Z3Exception, Sum, If
 
-from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    BinaryOperator, ADisjunction, AConjunction, \
-                    AComparison, AUnary, AAggregate, \
-                    AppliedSymbol, UnappliedSymbol, Number, Brackets, \
-                    Variable, TRUE, DSLException
+from textx import get_location
+
+from idp_solver.Expression import (Constructor, Expression, IfExpr,
+                                   AQuantification, BinaryOperator,
+                                   ADisjunction, AConjunction, AComparison,
+                                   AUnary, AAggregate, AppliedSymbol,
+                                   UnappliedSymbol, Number, Brackets,
+                                   Variable, TRUE, DSLException)
 
 
 # class Expression  ###########################################################
@@ -183,9 +186,12 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               }
 
 def translate1(self):
-    out = self.sub_exprs[0].translate()
-    function = AUnary.MAP[self.operator]
-    return function(out)
+    try:
+        out = self.sub_exprs[0].translate()
+        function = AUnary.MAP[self.operator]
+        return function(out)
+    except:
+        raise self.create_error(f"Incorrect syntax {self}")
 
 
 AUnary.translate1 = translate1
@@ -210,14 +216,24 @@ def translate1(self):
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
     else:
-        assert len(self.sub_exprs) == self.decl.arity, \
-            f"Incorrect number of arguments for {self.s.name}"
-        if len(self.sub_exprs) == 0:
-            return self.decl.translate()
-        else:
-            arg = [x.translate() for x in self.sub_exprs]
-            # assert  all(a != None for a in arg)
-            return (self.decl.translate())(arg)
+        try:
+            if len(self.sub_exprs) != self.decl.arity:
+                raise self.create_error(f"Incorrect number of arguments for"
+                                        f" {self}")
+            if len(self.sub_exprs) == 0:
+                return self.decl.translate()
+            else:
+                arg = [x.translate() for x in self.sub_exprs]
+                # assert  all(a != None for a in arg)
+                return (self.decl.translate())(arg)
+        except AttributeError as e:
+            # Using argument on symbol that has no arity.
+            if str(e) == "'RangeDeclaration' object has no attribute 'arity'":
+                raise self.create_error(f"Symbol {self} does not accept an"
+                                        f" argument")
+            # Unknown error.
+            else:
+                raise AttributeError(e)
 
 
 AppliedSymbol.translate1 = translate1
