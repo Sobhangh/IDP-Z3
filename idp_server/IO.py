@@ -138,7 +138,7 @@ def json_to_literals(state, jsonstr: str):
                     # in the interface and the symbol has not been given a
                     # value in the dropdown, we need to unset the value of the
                     # symbol to avoid errors.
-                    if (atom.startswith('{} ='.format(symbol)) and
+                    if (atom.startswith(f'{symbol} =') and
                        symbol not in json_data[symbol]):
                         state.assignments[symbol].unset()
 
