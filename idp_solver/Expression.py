@@ -52,18 +52,6 @@ class IDPZ3Error(Exception):
     """ raised whenever an error occurs in the conversion from AST to Z3 """
     pass
 
-
-def create_error_msg(textx_obj, error_msg):
-    """ function to prepend an error msg with a line and col nb
-
-    Returns:
-        the error message
-    """
-    location = get_location(textx_obj)
-    return ("Error on line {}, col {}: {}"
-            .format(location['line'], location['col'], error_msg))
-
-
 class Expression(object):
     """The abstract class of AST nodes representing (sub-)expressions.
 

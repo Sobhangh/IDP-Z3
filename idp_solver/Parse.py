@@ -45,8 +45,7 @@ from .Expression import (Constructor, IfExpr, AQuantification,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Arguments,
-                         Variable, TRUE, FALSE, IDPZ3Error,
-                         create_error_msg)
+                         Variable, TRUE, FALSE, IDPZ3Error)
 from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
 
 
@@ -711,14 +710,11 @@ class Structure(object):
         :arg idp: a `Parse.Idp` object.
         :returns None:
         """
-        assert self.vocab_name in idp.vocabularies, \
-            "Unknown vocabulary: " + self.vocab_name
+        if self.vocab_name not in idp.vocabularies:
+            raise IDPZ3Error(f"Unknown vocabulary: {self.vocab_name}")
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
-            try:
-                i.annotate(self)  # this updates self.assignments
-            except AssertionError as e:
-                raise IDPZ3Error(create_error_msg(i, e))
+            i.annotate(self)  # this updates self.assignments
 
     def __str__(self):
         return self.name
@@ -922,7 +918,7 @@ class Goal(object):
             constraint = constraint.interpret(idp.theory) # for defined goals
             idp.theory.constraints.append(constraint)
         elif self.name not in [None, '']:
-            raise Exception("Unknown goal: " + self.name)
+            raise IDPZ3Error(f"Unknown goal: {self.name}")
 
 
 class View(object):
@@ -1013,16 +1009,17 @@ class Display(object):
                     else:
                         assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
                 else:
-                    raise Exception("unknown display contraint: ", constraint)
+                    raise IDPZ3Error(f"unknown display contraint: {constraint}")
             elif type(constraint) == UnappliedSymbol:
                 if constraint.name == "moveSymbols":
                     self.moveSymbols = True
                 elif constraint.name == "optionalPropagation":
                     self.optionalPropagation = True
                 else:
-                    raise Exception("unknown display contraint: ", constraint)
+                    raise IDPZ3Error(f"unknown display contraint:"
+                                     f"{constraint}")
             else:
-                raise Exception("unknown display contraint: ", constraint)
+                raise IDPZ3Error(f"unknown display contraint: {constraint}")
 
 
 

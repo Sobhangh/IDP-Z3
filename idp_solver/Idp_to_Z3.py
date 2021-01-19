@@ -33,8 +33,7 @@ from idp_solver.Expression import (Constructor, Expression, IfExpr,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Brackets,
-                                   Variable, TRUE, DSLException,
-                                   IDPZ3Error, create_error_msg)
+                                   Variable, TRUE, DSLException)
 
 
 # class Expression  ###########################################################
@@ -191,9 +190,8 @@ def translate1(self):
         out = self.sub_exprs[0].translate()
         function = AUnary.MAP[self.operator]
         return function(out)
-    except Z3Exception as e:
-        msg = "Incorrect statement: {}".format(self)
-        raise IDPZ3Error(create_error_msg(self, msg))
+    except:
+        self.raise_error(f"Incorrect syntax {self}")
 
 
 AUnary.translate1 = translate1
@@ -230,16 +228,14 @@ def translate1(self):
         except AttributeError as e:
             # Using argument on symbol that has no arity.
             if str(e) == "'RangeDeclaration' object has no attribute 'arity'":
-                msg = "Symbol {} does not accept an argument." .format(self)
-                raise IDPZ3Error(create_error_msg(self, msg))
+                self.raise_error(f"Symbol {self} does not accept an argument")
             # Unknown error.
             else:
                 raise AttributeError(e)
         except AssertionError as e:
             # Incorrect number of arguments.
             if str(e) == "Incorrect number of arguments":
-                msg = "Incorrect number of arguments for {}".format(self)
-                raise IDPZ3Error(create_error_msg(self, msg))
+                self.raise_error(f"Incorrect number of arguments for {self}")
             else:
                 raise AssertionError(e)
 
