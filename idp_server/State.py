@@ -82,11 +82,24 @@ class State(Problem):
 
         self._finalize()
 
+    def add_default(self):
+        """
+        Add the values of the default structure without propagating.
+
+        :returns: the state with the default values added
+        :rtype: State
+        """
+        out = self.copy()
+        # Set the values of the default structure.
+        if 'default' in out.idp.structures:
+            out.add(out.idp.structures['default'])
+
+        return out
+
     def add_given(self, jsonstr: str):
         """
         Add the assignments that the user gave through the interface.
         These are in the form of a json string.
-        This method also sets the values of the default structure.
 
         :arg jsonstr: the user's assignment in json
         :returns: the state with the jsonstr added
@@ -96,30 +109,10 @@ class State(Problem):
         if out.environment:
             out.environment = out.environment.copy()
 
-        # Set the values of the default structure.
-        # if 'default' in out.idp.structures:
-        #     out.add(out.idp.structures['default'])
-
-        # Set all the given values. This can override the default values.
         if out.environment is not None:
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
 
-        return out._finalize()
-
-    def add_default(self):
-        """
-        Add the assignments that are listed in the default structure.
-
-        Returns
-        -------
-        State
-            A state object containing the new assignments
-        """
-        out = self.copy()
-        # Set the values of the default structure.
-        if 'default' in out.idp.structures:
-            out.add(out.idp.structures['default'])
         return out._finalize()
 
     def _finalize(self):
@@ -155,7 +148,11 @@ def make_state(idp: Idp, jsonstr: str) -> State:
     :rtype: State
     """
     if (idp, jsonstr) in State.cache:
-        return State.cache[(idp, jsonstr)]
+        # If reset was pressed, we still need to run add_given.
+        if jsonstr == "{}":
+            return State.cache[(idp, jsonstr)].add_given("{}")
+        else:
+            return State.cache[(idp, jsonstr)]
 
     if (idp, "{}") not in State.cache:
         # We add the default assignments to the 'base' state.

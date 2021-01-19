@@ -99,24 +99,50 @@ def json_to_literals(state, jsonstr: str):
     :rtype: idp_solver.Assignments
     """
     out = Assignments()
+
     if jsonstr:
         json_data = ast.literal_eval(decode_UTF(jsonstr))
+        default = [x for x, v in state.assignments.items()
+                   if v.status == Status.GIVEN]
+        if json_data == {}:
+            # If json_data was empty (e.g. at beginning), we need to check if
+            # we can make more assertions.
+            for symbol in default:
+                idp_atom = state.assignments[symbol].sentence
+                # We do not need to create comparisons for all types.
+                if idp_atom.type in ["Real", "Bool", "Int"]:
+                    continue
+                value = state.assignments[symbol].value
+                idp_atom = AComparison.make('=', [idp_atom, value])
+                state.assignments.assert_(idp_atom, TRUE,
+                                          Status.GIVEN, False)
+            return out
+
+        for symbol in default:
+            # If a boolean is unset, it does not show up in the jsonstr.
+            # If it is not in jsonstr we unset the default value.
+            if symbol not in json_data:
+                state.assignments[symbol].unset()
+
         for symbol in json_data:
-            # If no value was given for a symbol, we still check to see if we
-            # need to unset a default value.
-            if (len(json_data[symbol]) == 0 or
-               (symbol in json_data[symbol] and
-               json_data[symbol][symbol]['value'] == '')):
-                # Override default value.
-                if symbol in state.assignments:
-                    state.assignments[symbol].value = None
-                    state.assignments[symbol].status = Status.UNKNOWN
+            # If no value was given for a default symbol we unset it.
+            if len(json_data[symbol]) == 0 and symbol in default:
+                state.assignments[symbol].unset()
                 continue
 
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
-                    # If the atom is still unknown, set its value.
+
+                    # If a checkmark of the form "symbol = value" is checked
+                    # in the interface and the symbol has not been given a
+                    # value in the dropdown, we need to unset the value of the
+                    # symbol to avoid errors.
+                    if (atom.startswith(f'{symbol} =') and
+                       symbol not in json_data[symbol]):
+                        state.assignments[symbol].unset()
+
+                    # If the atom is unknown, set its value as normal.
                     if json_atom["value"] != '' and\
                             state.assignments[atom].status == Status.UNKNOWN:
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
@@ -126,10 +152,12 @@ def json_to_literals(state, jsonstr: str):
                             idp_atom = AComparison.make('=', [idp_atom, value])
                             state.assignments.assert_(idp_atom, TRUE,
                                                       Status.GIVEN, False)
+
                     # If the atom was already set in default struct, overwrite.
                     elif json_atom["value"] != '':
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        state.assignments[symbol].value = value
+                        state.assignments[atom].value = value
+
                     else:
                         state.assignments[atom].value = None
                     out[atom] = state.assignments[atom]
