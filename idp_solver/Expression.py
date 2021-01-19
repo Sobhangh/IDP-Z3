@@ -37,6 +37,7 @@ from typing import Optional, List, Tuple, Dict, Set, Any
 from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
 
 from .utils import unquote, OrderedSet, BOOL, INT, REAL
+from textx import get_location
 
 
 class DSLException(Exception):
@@ -46,6 +47,10 @@ class DSLException(Exception):
     def __str__(self):
         return self.message
 
+
+class IDPZ3Error(Exception):
+    """ raised whenever an error occurs in the conversion from AST to Z3 """
+    pass
 
 class Expression(object):
     """The abstract class of AST nodes representing (sub-)expressions.
@@ -274,7 +279,14 @@ class Expression(object):
 
     def type_inference(self):
         # returns a dictionary {Variable : Sort}
-        return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
+        try:
+            return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
+        except AttributeError as e:
+            if "has no attribute 'sorts'" in str(e):
+                msg = f"Incorrect arity for {self}"
+            else:
+                msg = f"Unknown error for {self}"
+            raise self.create_error(msg)
 
     def __str1__(self) -> str:
         return ''  # monkey-patched
@@ -327,6 +339,11 @@ class Expression(object):
         """
         return (None, None, None)
 
+    def create_error(self, msg):
+        location = get_location(self)
+        line = location['line']
+        col = location['col']
+        return IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 
 class Constructor(Expression):
     PRECEDENCE = 200
@@ -425,9 +442,15 @@ class AQuantification(Expression):
             return self.sub_exprs[0].str
 
     def annotate(self, voc, q_vars):
+        # First we check for some common errors.
         for v in self.vars:
-            assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
-        assert len(self.vars) == len(self.sorts), "Internal error"
+            if v in voc.symbol_decls:
+                raise self.create_error(f"the quantified variable '{v}'"
+                                        f" cannot have the same name as"
+                                        f" another symbol")
+        if len(self.vars) != len(self.sorts):
+            raise self.create_error("Internal error")
+
         self.q_vars = {}
         for v, s in zip(self.vars, self.sorts):
             if s:
@@ -708,8 +731,11 @@ class AppliedSymbol(Expression):
 
     def annotate(self, voc, q_vars):
         self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-        self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
-            else voc.symbol_decls[self.s.name]
+        try:
+            self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
+                else voc.symbol_decls[self.s.name]
+        except KeyError:
+            raise self.create_error(f"Unknown symbol {self}")
         self.s.decl = self.decl
         if self.in_enumeration:
             self.in_enumeration.annotate(voc)
@@ -749,13 +775,21 @@ class AppliedSymbol(Expression):
             or any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-        out = {}
-        for i, e in enumerate(self.sub_exprs):
-            if self.decl.name != '`Symbols' and isinstance(e, Variable):
-                out[e.name] = self.decl.sorts[i]
+        try:
+            out = {}
+            for i, e in enumerate(self.sub_exprs):
+                if self.decl.name != '`Symbols' and isinstance(e, Variable):
+                    out[e.name] = self.decl.sorts[i]
+                else:
+                    out.update(e.type_inference())
+            return out
+        except AttributeError as e:
+            #
+            if "object has no attribute 'sorts'" in str(e):
+                msg = f"Unexpected arity for symbol {self}"
             else:
-                out.update(e.type_inference())
-        return out
+                msg = f"Unknown error for symbol {self}"
+            raise self.create_error(msg)
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
@@ -808,10 +842,11 @@ class UnappliedSymbol(Expression):
             out = AppliedSymbol(s=self.s,
                                 args=Arguments(sub_exprs=self.sub_exprs))
             return out.annotate(voc, q_vars)
-        assert False, f"Unknown symbol: {self.name}"
+        # If this code is reached, an undefined symbol was present.
+        raise self.create_error(f"Symbol not in vocabulary: {self}")
 
     def collect(self, questions, all_=True, co_constraints=True):
-        assert False, "Internal error"
+        raise self.create_error(f"Internal error: {self}")
 
 
 class Variable(Expression):

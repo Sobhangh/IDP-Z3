@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [unreleased]
 
 ### API
+* More verbose error messages + line and col numbers (issue #64)
 
 ### GUI
 * fix #59: "Explain" not working in SimpleRegistration
