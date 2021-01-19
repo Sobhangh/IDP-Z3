@@ -82,14 +82,24 @@ class State(Problem):
 
         self._finalize()
 
+    def add_default(self):
+        """
+        Add the values of the default structure without propagating.
+
+        :returns: the state with the default values added
+        :rtype: State
+        """
+        out = self.copy()
+        # Set the values of the default structure.
+        if 'default' in out.idp.structures:
+            out.add(out.idp.structures['default'])
+
+        return out
+
     def add_given(self, jsonstr: str):
         """
         Add the assignments that the user gave through the interface.
         These are in the form of a json string.
-
-        This method also sets the values of the default structure.
-        We need to add them at the same time to make sure that the default
-        values have not been propagated throughout the state yet.
 
         :arg jsonstr: the user's assignment in json
         :returns: the state with the jsonstr added
@@ -98,10 +108,6 @@ class State(Problem):
         out = self.copy()
         if out.environment:
             out.environment = out.environment.copy()
-
-        # Set the values of the default structure.
-        if 'default' in out.idp.structures:
-            out.add(out.idp.structures['default'])
 
         if out.environment is not None:
             _ = json_to_literals(out.environment, jsonstr)
@@ -142,7 +148,7 @@ def make_state(idp: Idp, jsonstr: str) -> State:
     :rtype: State
     """
     if (idp, jsonstr) in State.cache:
-        # If reset was pressed, we still need to add the default structure.
+        # If reset was pressed, we still need to run add_given.
         if jsonstr == "{}":
             return State.cache[(idp, jsonstr)].add_given("{}")
         else:
@@ -150,7 +156,7 @@ def make_state(idp: Idp, jsonstr: str) -> State:
 
     if (idp, "{}") not in State.cache:
         # We add the default assignments to the 'base' state.
-        State.cache[(idp, "{}")] = State(idp)
+        State.cache[(idp, "{}")] = State(idp).add_default()
     state = State.cache[(idp, "{}")].add_given(jsonstr)
 
     if 100 < len(State.cache):
