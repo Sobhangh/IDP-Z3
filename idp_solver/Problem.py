@@ -392,13 +392,15 @@ class Problem(object):
         Returns:
             list(list(Assignment)): the non-empty cells of the decision table
         """
+        max_time = time.time()+timeout  # 20 seconds max
+
         if goal_string:
-            # add (goal | ~goal) to self.constraints
+            # add (goal | ~goal) to self.constraints, so that it is a question
             assert goal_string in self.assignments, (
                 f"Unrecognized goal string: {goal_string}")
             temp = self.assignments[goal_string].sentence
             temp = ADisjunction.make('∨', [temp, AUnary.make('¬', temp)])
-            temp = temp.interpret(self)
+            temp = temp.interpret(self)  # add definition of the goal, if any
             self.constraints.append(temp)
 
         # ignore type constraints
@@ -419,8 +421,7 @@ class Problem(object):
 
         known = And([ass.translate() for ass in self.assignments.values()
                         if ass.status != Status.UNKNOWN]
-                    + [q.reified()==q.translate()
-                        for q in questions
+                    + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
         theory = self.formula().translate()
@@ -428,12 +429,11 @@ class Problem(object):
         solver.add(theory)
         solver.add(known)
 
-        max_time = time.time()+timeout # 20 seconds max
         models, count = [], 0
         while (solver.check() == sat  # for each parametric model
                and count < max_rows and time.time() < max_time):
             # find the interpretation of all atoms in the model
-            assignments = [] # [Assignment]
+            assignments = []  # [Assignment]
             model = solver.model()
             goal = None
             for atom in questions.values():
