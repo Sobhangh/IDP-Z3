@@ -1,13 +1,14 @@
 
 -- original ---------------------------------
 vocabulary {
-    Works(Real)
+    Works(ℝ)
     type temp = {0; 1; 2}
     p q
 }
 theory {
    p <=> (!t[temp]: 1 < t < 3 => 0 < t < 3).
-   q <=> (!t[Real]: 1 < t < 3 => 0 < t < 3).
+   q <=> (!t[ℝ]: 1 < t < 3 => 0 < t < 3).
+   ?x[Real]: Works(x).
 }
 display {
     view = expanded.
@@ -25,11 +26,26 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 'Works',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
               'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
+ 'Works': {'__rank': 1,
+           '∃x[ℝ] : Works(x)': {'environmental': False,
+                                'is_assignment': False,
+                                'normal': False,
+                                'reading': '∃x[ℝ] : Works(x)',
+                                'relevant': True,
+                                'status': 'UNIVERSAL',
+                                'typ': 'Bool',
+                                'value': True}},
  'p': {'__rank': 1,
        'p': {'environmental': False,
              'is_assignment': False,

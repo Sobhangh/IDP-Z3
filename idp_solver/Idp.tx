@@ -26,7 +26,7 @@ Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
 
     SymbolDeclaration: annotations=Annotations name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
       Symbol: name=/`?[^\d\W]\w*\b|'(\.|[^'])*'/;
-      Sort: name=/`?[^\d\W]\w*\b/;
+      Sort: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 

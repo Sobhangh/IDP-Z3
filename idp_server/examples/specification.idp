@@ -9,8 +9,8 @@ vocabulary {
     type : Type
 
     type Side_Nr = {1..4}
-    length(Side_Nr):Real
-    angle(Side_Nr):Real
+    length(Side_Nr):ℝ
+    angle(Side_Nr):ℝ
 
     type Subtype constructed from
         { regular_triangle
@@ -22,11 +22,11 @@ vocabulary {
 
     convex
     equilateral
-    perimeter:Real
+    perimeter:ℝ
 
-    // base : Real
-    // height: Real
-    // surface:Real
+    // base : ℝ
+    // height: ℝ
+    // surface:ℝ
 }
 
 theory {
