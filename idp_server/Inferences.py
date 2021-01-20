@@ -27,7 +27,7 @@ from z3 import Solver, Implies, And, Not, sat, is_true, is_false
 from idp_solver.Expression import AComparison, AUnary, AppliedSymbol, TRUE, FALSE
 from idp_solver.Assignments import Status, Assignment
 from idp_solver.utils import OrderedSet, BOOL
-from .IO import Output, decode_UTF
+from .IO import Output
 
 
 # def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
@@ -167,7 +167,6 @@ def get_relevant_subtences(self):
 def explain(state, question):
     out = Output(state, state.given)
 
-    question = decode_UTF(question)
     negated = question.replace('~', '¬').startswith('¬')
     question = question[1:] if negated else question
     if question in state.assignments:
