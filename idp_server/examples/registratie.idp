@@ -60,7 +60,7 @@ vocabulary decision {
 }
 
 theory environment:environment {
-  { professional_buyer <-
+  { professional_buyer ←
       professional_declaration_filed
       ∧ guarantee_satisfied
       ∧ (additional_security_required ∧ additional_security_satisfied
@@ -71,34 +71,34 @@ theory environment:environment {
 
 theory decision:decision {
 
-  { tax = 1 <-
+  { tax = 1 ←
       registration_type = Heritage
       ∧ region = Flemish_Region.
 
-    tax = 2 <- // correct amount is 1.5
+    tax = 2 ← // correct amount is 1.5
       registration_type = Social_Dwelling
       ∧ region = Flemish_Region.
 
-    tax = 4 <-
+    tax = 4 ←
       registration_type = Professional_Purchase
       ∧ region = Flemish_Region.
 
-    tax = 6 <-
+    tax = 6 ←
       (registration_type = Energy_Efficient_Dwelling
       ∨ registration_type = Social_Purpose
       ∨ registration_type = Exchange_Unbuilt_Ground)
       ∧ region = Flemish_Region.
 
-    tax = 7 <-
+    tax = 7 ←
       (registration_type = Family_Dwelling
       ∨ registration_type = Dwelling_For_Social_Renting)
       ∧ region = Flemish_Region.
 
-    tax = 10 <-
+    tax = 10 ←
       region = Flemish_Region
       ∧ registration_type = Other.
 
-    tax = 12 <-
+    tax = 12 ←
       region = Brussels_Region
       ∨ region = Walloon_Region.
   }
