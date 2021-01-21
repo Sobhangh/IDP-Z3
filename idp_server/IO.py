@@ -72,22 +72,6 @@ def metaJSON(state):
 #################
 
 
-def decode_UTF(json_str: str) -> str:
-    """ Convert all Python unicode to actual unicode characters.
-
-    :arg json_str: the string to convert
-    :returns: the converted string
-    :rtype: str
-    """
-    decode_dict = {'\\\\u2264': '≤', '\\\\u2265': '≥', '\\\\u2260': '≠',
-                   '\\\\u2200': "∀", '\\\\u2203': '∃', '\\\\u21d2': '⇒',
-                   '\\\\u21d4': '⇔', '\\\\u21d0': '⇐', '\\\\u2228': '∨',
-                   '\\\\u2227': '∧', '\\\\u00ac': '¬'}
-    for source, char in decode_dict.items():
-        json_str = json_str.replace(source, char)
-    return json_str
-
-
 def json_to_literals(state, jsonstr: str):
     """ Parse a json string and create assignments in a state accordingly.
     This function can also overwrite assignments that have already been set as
@@ -101,7 +85,7 @@ def json_to_literals(state, jsonstr: str):
     out = Assignments()
 
     if jsonstr:
-        json_data = ast.literal_eval(decode_UTF(jsonstr))
+        json_data = ast.literal_eval(jsonstr)
         default = [x for x, v in state.assignments.items()
                    if v.status == Status.GIVEN]
         if json_data == {}:
