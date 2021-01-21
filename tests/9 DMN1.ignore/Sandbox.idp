@@ -10,5 +10,5 @@ theory T:V {
 }
 
 procedure main() {
-	print(decision_table(T, goal_string="p"))
+	print(decision_table(T, goal_string="p", verify=True))
 }
