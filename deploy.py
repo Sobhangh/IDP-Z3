@@ -118,5 +118,5 @@ if update_statics:
         run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
 
         # open browser on GAE
-        version = '' if new_tag else f'--version="{id}"'
+        version = '' if new_tag else f'--version={id}'
         run(f"gcloud app browse {version}")
