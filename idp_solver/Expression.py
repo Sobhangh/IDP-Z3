@@ -812,12 +812,6 @@ class AppliedSymbol(Expression):
         if self.name == 'unit' or self.name == 'category':
             constructor = Constructor(name=self.sub_exprs[0].name)
             constructors[self.name].append(constructor)
-        else:
-            for e in self.sub_exprs:
-                if (type(e)) == UnappliedSymbol:
-                    print(e)
-                    constructors[self.name].append(e)
-
 
 class Arguments(object):
     def __init__(self, **kwargs):
