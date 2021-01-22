@@ -723,6 +723,7 @@ class AppliedSymbol(Expression):
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
+        return out.annotate1()
 
     def __str1__(self):
         if len(self.sub_exprs) == 0:
