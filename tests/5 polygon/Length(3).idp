@@ -1,14 +1,14 @@
 vocabulary {
 
     type sides = {3..4}
-    Sides: sides
+    Sides: ()→sides
 
 
     type type constructed from {triangle, quadrilateral}
-    Type : type
+    Type : ()→type
 
     type side = {1..4}
-    Length(side):Real
+    Length: (side)→Real
 
     type subtype constructed from
         { regular_triangle
@@ -16,9 +16,9 @@ vocabulary {
         , rectangle
         , square
         , irregular}
-    Subtype : subtype
+    Subtype : ()→subtype
 
-    Equilateral
+    Equilateral:()
 }
 
 theory {

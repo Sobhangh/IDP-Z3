@@ -1,19 +1,19 @@
 
 
 vocabulary {
-	type Line_t constructed from { First, Second, Third } 
-	type Digit_t = { 0..9 } 
-	type Number_t = { 0..1000 } 
-	type Syllables_t = { 0..7 } 
-	Allowed_Syllables(Line_t): Syllables_t
-	Syllables_for_Hundreds(Digit_t): Syllables_t
-	Syllables_for_Tens(Digit_t): Syllables_t
-	Syllables_for_Units(Digit_t): Syllables_t
-	Syllables(Line_t): Syllables_t
-	Solution(Line_t): Number_t
-	Hundreds(Line_t): Digit_t
-	Tens(Line_t): Digit_t
-	Units(Line_t): Digit_t
+	type Line_t constructed from { First, Second, Third }
+	type Digit_t = { 0..9 }
+	type Number_t = { 0..1000 }
+	type Syllables_t = { 0..7 }
+	Allowed_Syllables: (Line_t)→ Syllables_t
+	Syllables_for_Hundreds:(Digit_t)→ Syllables_t
+	Syllables_for_Tens:(Digit_t)→ Syllables_t
+	Syllables_for_Units:(Digit_t)→ Syllables_t
+	Syllables:(Line_t)→ Syllables_t
+	Solution:(Line_t)→ Number_t
+	Hundreds:(Line_t)→ Digit_t
+	Tens:(Line_t)→ Digit_t
+	Units:(Line_t)→ Digit_t
 }
 theory {
 	//Syllables for every Line
@@ -37,7 +37,7 @@ theory {
 
 
 structure {
-	Syllables_for_Hundreds = {0, 0; 1, 3; 2, 3; 3, 3; 4, 3; 5, 3; 6, 3; 7, 4; 8, 3; 9, 3; } else 3 
-	Syllables_for_Tens = {0, 0; 1, 7; 2, 2; 3, 2; 4, 2; 5, 2; 6, 2; 7, 3; 8, 2; 9, 2; } else 2 
-	Syllables_for_Units = {0, 0; 1, 1; 2, 1; 3, 1; 4, 1; 5, 1; 6, 1; 7, 2; 8, 1; 9, 1; } else 1 
+	Syllables_for_Hundreds = {0, 0; 1, 3; 2, 3; 3, 3; 4, 3; 5, 3; 6, 3; 7, 4; 8, 3; 9, 3; } else 3
+	Syllables_for_Tens = {0, 0; 1, 7; 2, 2; 3, 2; 4, 2; 5, 2; 6, 2; 7, 3; 8, 2; 9, 2; } else 2
+	Syllables_for_Units = {0, 0; 1, 1; 2, 1; 3, 1; 4, 1; 5, 1; 6, 1; 7, 2; 8, 1; 9, 1; } else 1
 }

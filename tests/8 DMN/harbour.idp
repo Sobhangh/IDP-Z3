@@ -2,12 +2,12 @@
 
 vocabulary {
 	type Refuel_Areat_t constructed from { NA, outdoor, indoor }
-	Draft: Int
-	Refuel_Area: Refuel_Areat_t
-	Length: Int
-	Capacity: Int
-	Cargo: Int
-	Enter
+	Draft: ()→Int
+	Refuel_Area: ()→Refuel_Areat_t
+	Length: ()→Int
+	Capacity: ()→Int
+	Cargo: ()→Int
+	Enter:()
 }
 theory {
 	//Ship Clearance

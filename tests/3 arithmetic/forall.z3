@@ -1,9 +1,9 @@
 
 -- original ---------------------------------
 vocabulary {
-    Works(ℝ)
+    Works: (ℝ)
     type temp = {0; 1; 2}
-    p q
+    p, q:()
 }
 theory {
    p <=> (!t[temp]: 1 < t < 3 => 0 < t < 3).

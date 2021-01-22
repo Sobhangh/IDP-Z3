@@ -6,11 +6,11 @@ vocabulary {
 	type seasont_t constructed from { Fall, Summer, Winter, Spring }
 	type beveragest_t constructed from { Pinot_Noir, Guiness, Aecht_Schlenkerla_Rauchbier, Water, Bordeaux, Apple_Juice }
 	type desiredDisht_t constructed from { Stew, Steak, Roastbeef, Dry_Aged_Gourmet_Steak, Light_Salad_and_a_nice_Steak, Spareribs }
-	season: seasont_t
-	guestCount: Int
-	beverages: beveragest_t
-	desiredDish: desiredDisht_t
-	guestsWithChildren
+	season: ()→seasont_t
+	guestCount: ()→Int
+	beverages: ()→beveragest_t
+	desiredDish: ()→desiredDisht_t
+	guestsWithChildren:()
 }
 theory {
 	//Beverages

@@ -1,19 +1,19 @@
 vocabulary environment {
     type material constructed from {e1, e2, e3}
-    _MinT(material): Int // physical
-    _MaxT(material): Int
-    _O(material)         // observed
-    OMinT(material): Int // observations
-    OMaxT(material): Int
+    _MinT:(material)→ Int // physical
+    _MaxT:(material)→ Int
+    _O:(material)         // observed
+    OMinT:(material)→ Int // observations
+    OMaxT:(material)→ Int
 
 }
 
 vocabulary decision {
     extern vocabulary environment
 
-    T: Int
-    M: material
-    Guaranteed
+    T: ()→Int
+    M: ()→material
+    Guaranteed:()
 }
 
 theory environment:environment {

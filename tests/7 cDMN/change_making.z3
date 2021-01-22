@@ -3,17 +3,17 @@
 // https://dmcommunity.org/challenge/challenge-feb-2015/
 
 vocabulary {
-	type Number_t = { 0..1000 } 
-	TotalMoney: Number_t
-	TotalCoins: Number_t
-	OneCent: Number_t
-	TwoCent: Number_t
-	FiveCent: Number_t
-	TenCent: Number_t
-	TwentyCent: Number_t
-	FiftyCent: Number_t
-	OneEuro: Number_t
-	TwoEuro: Number_t
+	type Number_t = { 0..1000 }
+	TotalMoney: ()→Number_t
+	TotalCoins: ()→Number_t
+	OneCent: ()→Number_t
+	TwoCent: ()→Number_t
+	FiveCent: ()→Number_t
+	TenCent: ()→Number_t
+	TwentyCent: ()→Number_t
+	FiftyCent: ()→Number_t
+	OneEuro: ()→Number_t
+	TwoEuro: ()→Number_t
 }
 theory {
 	//Total amount of Money

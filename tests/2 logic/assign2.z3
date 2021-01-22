@@ -1,8 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    x:Int
-    y:Int
+    x, y:()→Int
 }
 theory {
     x=0.

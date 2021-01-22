@@ -1,8 +1,8 @@
 	vocabulary V {
     // here comes the specification of the vocabulary
-    p q
+    p, q: ()
     type color constructed from {red, blue, green}
-    f(color)
+    f: (color)
 }
 
 theory T:V {

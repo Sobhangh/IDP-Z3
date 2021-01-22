@@ -2,7 +2,7 @@
 -- original ---------------------------------
 vocabulary {
     type color constructed from {red, blue, green}
-    p
+    p: ()
 }
 theory {
     p <=> sum{c[color] : true : 1} = 3.

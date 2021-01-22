@@ -1,12 +1,12 @@
 
 -- original ---------------------------------
 vocabulary {
-    p l r rd i
+    p, l, r, rd, i: ()
 }
 theory {
   { i <- rd.}
   { p <- l | r.}
-  { r <- rd.} 
+  { r <- rd.}
   r.
 }
 display {

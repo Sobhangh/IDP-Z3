@@ -1,15 +1,15 @@
 vocabulary V {
     type Security constructed from {BE001}
-    A
-    B
-    C
-    D
-    E
-    F
-    G
-    H
-    I
-    Eligible(Security)
+    A:()
+    B:()
+    C:()
+    D:()
+    E:()
+    F:()
+    G:()
+    H:()
+    I:()
+    Eligible:(Security)
 }
 
 theory T:V {

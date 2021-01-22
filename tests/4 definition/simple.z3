@@ -1,14 +1,10 @@
 
 -- original ---------------------------------
 vocabulary {
-    p
-    q
-    r
+    p, q, r: ()
     type color constructed from {red, blue}
-    a : color
-    b : color
-    c : color
-} 
+    a, b, c : ()→color
+}
 
 theory {
     { p <- q | r. }

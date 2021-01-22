@@ -1,11 +1,11 @@
 
 -- original ---------------------------------
 vocabulary {
-    Wages_Salaries_Tips: Int
-    Unemployment_Comp: Int
-    Taxable_Interest: Int
-    Adjusted_Gross_Income: Int
-    Eligible
+    Wages_Salaries_Tips: () → Int
+    Unemployment_Comp: ()→Int
+    Taxable_Interest: ()→Int
+    Adjusted_Gross_Income: ()→Int
+    Eligible: ()
 }
 theory {
     //Calculate Gross Income

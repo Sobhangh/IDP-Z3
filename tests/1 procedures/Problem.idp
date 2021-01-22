@@ -1,12 +1,12 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    p q
-    i: Int
-    r: Real
+    p, q: ()
+    i: () → Int
+    r: () → Real
     type color constructed from {red, blue, green}
-    c: color
+    c: () → color
     type range = {0..5}
-    ra: range
+    ra: () → range
 }
 
 theory T:V {

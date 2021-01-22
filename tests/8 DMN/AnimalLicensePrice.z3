@@ -4,11 +4,11 @@
 
 vocabulary {
 	type Animalt_t constructed from { Dog }
-	Total: Real
-	Age: Int
-	Animal: Animalt_t
-	ViciousDog
-	Sterilized
+	Total: ()→Real
+	Age: ()→Int
+	Animal: ()→Animalt_t
+	ViciousDog:()
+	Sterilized:()
 }
 theory {
 	//Animal License Price

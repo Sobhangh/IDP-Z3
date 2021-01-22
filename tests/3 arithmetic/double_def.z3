@@ -1,9 +1,9 @@
 
 -- original ---------------------------------
 vocabulary {
-    double(Real): Real
-    X: Real
-    y: Real
+    double: (Real)→ Real
+    X: ()→Real
+    y: ()→Real
 }
 theory {
     {!x[Real]: double(x)= x+x. }

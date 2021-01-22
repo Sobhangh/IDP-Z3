@@ -1,6 +1,6 @@
 vocabulary {
     // here comes the specification of the vocabulary
-    p
+    p: ()
 }
 
 theory {

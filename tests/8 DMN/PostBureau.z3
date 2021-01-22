@@ -4,10 +4,10 @@
 
 vocabulary {
 	type Post_Bureau_Risk_Categoryt_t constructed from { LOW, HIGH, VERY_LOW, MEDIUM }
-	Credit_Score: Int
-	Application_Risk_Score: Int
-	Post_Bureau_Risk_Category: Post_Bureau_Risk_Categoryt_t
-	Existing_Customer
+	Credit_Score: ()→Int
+	Application_Risk_Score: ()→Int
+	Post_Bureau_Risk_Category: ()→Post_Bureau_Risk_Categoryt_t
+	Existing_Customer:()
 }
 theory {
 	//Post Bureau

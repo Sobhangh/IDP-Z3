@@ -2,8 +2,8 @@
 -- original ---------------------------------
 vocabulary V {
     type color constructed from {red, blue, green}
-    Color: color
-    opposite(color): color
+    Color: () -> color
+    opposite: (color) → color
 }
 
 structure S:V {

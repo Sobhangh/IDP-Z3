@@ -28,57 +28,57 @@ type seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_E
 
 ////////////////////////
 
-Region : location
-Municipality : municipality
-Type_Of_Real_Estate : real_Estate_Type
-Seller : seller
-Buyer : buyerType
-Use : destination
+Region : ()→location
+Municipality : ()→municipality
+Type_Of_Real_Estate : ()→real_Estate_Type
+Seller : ()→seller
+Buyer : ()→buyerType
+Use : ()→destination
 
-Domicile_Established
-First_Ownership
-Monument
+Domicile_Established:()
+First_Ownership:()
+Monument:()
 
-Resale : resale
-Transaction_Type : transaction
-Duration_Of_Agreement : agreementDwellingForSocialRenting
+Resale : ()→resale
+Transaction_Type : ()→transaction
+Duration_Of_Agreement : ()→agreementDwellingForSocialRenting
 
-Core_City
+Core_City:()
 
 //SocialSeller
-Mortgage_Loan_Allowance
-Clean_Purchase
-Causal_Connection
+Mortgage_Loan_Allowance:()
+Clean_Purchase:()
+Causal_Connection:()
 
 
-Energy_Renovation_Planned
+Energy_Renovation_Planned:()
 
 //SocialRentingAgreement
-Heritage_Investment
-Heritage_Plan
+Heritage_Investment:()
+Heritage_Plan:()
 //AdditionalConditions
 
-Professional_Declaration_Filed
-Guarantee_Satisfied
-Additional_Security_Required
-Additional_Security_Satisfied
+Professional_Declaration_Filed:()
+Guarantee_Satisfied:()
+Additional_Security_Required:()
+Additional_Security_Satisfied:()
 
-//TaxableBase : calculationBase
-//PermittedBase : baseLimit
+//TaxableBase : ()→calculationBase
+//PermittedBase : ()→baseLimit
 
-Additional_Terms
+Additional_Terms:()
 
 
-Start_Dt_Dwelling_For_Social_Rent : date
+Start_Dt_Dwelling_For_Social_Rent : ()→date
 
-Certification_Date : date
+Certification_Date : ()→date
 
-Term_Energy_Renovation : date
-Certification_Date_Sale : date
-//DomicileDate : date
+Term_Energy_Renovation : ()→date
+Certification_Date_Sale : ()→date
+//DomicileDate : ()→date
 
-//IsDiscount: DiscountType
-Professional_Buyer
+//IsDiscount: ()→DiscountType
+Professional_Buyer:()
 }
 
 vocabulary decision {
@@ -87,8 +87,8 @@ vocabulary decision {
     type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
     type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
 
-    Registration_Type : registration_Type
-    Tax : tax_Rate
+    Registration_Type : ()→registration_Type
+    Tax : ()→tax_Rate
 }
 
 theory environment:environment {

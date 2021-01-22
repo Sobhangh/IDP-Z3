@@ -2,9 +2,9 @@
 -- original ---------------------------------
 vocabulary {
     type num = {-1; 0; 1}
-    same(num) : num
-    negated(num) : num
-} 
+    same: (num) → num
+    negated: (num) → num
+}
 
 theory {
     { !x[num]: same(x) = x. }
@@ -13,7 +13,7 @@ theory {
     negated(negated(-1)) = same(-1).
 
 }
- 
+
 display {
     view = expanded.
 }

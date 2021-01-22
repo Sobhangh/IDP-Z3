@@ -3,10 +3,10 @@
 
 
 vocabulary {
-	Output_AND
-	Output_OR
-	A
-	B
+	Output_AND:()
+	Output_OR:()
+	A:()
+	B:()
 }
 theory {
 	//AND

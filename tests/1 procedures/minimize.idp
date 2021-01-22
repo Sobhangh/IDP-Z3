@@ -1,14 +1,14 @@
 vocabulary V {
 
     type sides = {3..4}
-    Sides, Vertices: sides
+    Sides, Vertices: () → sides
 
 
     type type constructed from {triangle, quadrilateral}
-    Type : type
+    Type : () → type
 
     type side = {1..4}
-    Length, Angle (side):Real
+    Length, Angle : (side) → Real
 
     type subtype constructed from
         { regular_triangle
@@ -16,13 +16,13 @@ vocabulary V {
         , rectangle
         , square
         , irregular}
-    Subtype : subtype
+    Subtype : () →subtype
 
-    Convex, Equilateral
-    Perimeter:Real
+    Convex, Equilateral: ()
+    Perimeter: () → Real
 
-    Large, Wide (side)
-    Base, Height, Surface : Real
+    Large, Wide : (side)
+    Base, Height, Surface : () → Real
 }
 
 theory T:V {

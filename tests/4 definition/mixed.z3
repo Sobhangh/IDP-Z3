@@ -1,8 +1,8 @@
 
 -- original ---------------------------------
 vocabulary {
-p q r s
-x:Int
+p, q, r, s: ()
+x:()→Int
 }
 
 theory {

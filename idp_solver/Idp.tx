@@ -24,7 +24,7 @@ Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
     RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
       RangeElement: fromI=Number ('..' toI=Number)?;
 
-    SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;
+    SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':' '(' sorts*=Sort[','] ')' (('->' | '→') out=Sort)?;
       Symbol: name=/`?[^\d\W]\w*\b|'(\.|[^'])*'/;
       Sort: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ/;
 

@@ -3,12 +3,12 @@
 
 
 vocabulary {
-	Years_of_Service: Int
-	Age: Int
-	vacationdays: Int
-	extra5
-	extra3
-	extra2
+	Years_of_Service: ()→Int
+	Age: ()→Int
+	vacationdays: ()→Int
+	extra5:()
+	extra3:()
+	extra2:()
 }
 theory {
 	//Extra 5 Days

@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    f(Int):Int
+    f:(Int)→Int
 }
 
 theory {

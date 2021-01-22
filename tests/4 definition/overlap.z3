@@ -2,9 +2,9 @@
 -- original ---------------------------------
 vocabulary {
 	type num constructed from {Jan, Piet}
-    t:num
-    t0: num
-    t1: num  
+    t:()→num
+    t0: ()→num
+    t1: ()→num
 }
 
 theory {

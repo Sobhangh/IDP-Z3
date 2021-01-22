@@ -3,9 +3,9 @@
 
 
 vocabulary {
-	Temperature: Int
-	Rain_Probability: Int
-	Prepare_Terrace
+	Temperature: ()→Int
+	Rain_Probability: ()→Int
+	Prepare_Terrace:()
 }
 theory {
 	//Prepare Terrace

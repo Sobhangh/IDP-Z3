@@ -5,28 +5,26 @@ vocabulary {
     type t_safe_high_storage_t = {10; 25; 38}
 
 
-    KnownCost
-    KnownHighStorageT
-    KnownLowStorageT
+    KnownCost, KnownHighStorageT, KnownLowStorageT:()
 
-    Epoxy: t_epoxy
+    Epoxy: ()→t_epoxy
 
 
-    ECost(t_epoxy): t_cost
-    Min_Cost: Real
-    Max_Cost: Real
+    ECost:(t_epoxy)→ t_cost
+    Min_Cost: ()→Real
+    Max_Cost: ()→Real
     [Slider: (Min_Cost, Max_Cost): (0.2, 1)]
-    Cost: t_cost
+    Cost:()→t_cost
 
-    Min_Storage_T: Real
-    Max_Storage_T: Real
+    Min_Storage_T: ()→Real
+    Max_Storage_T: ()→Real
 
-    ELowest_Storage_T(t_epoxy): t_safe_low_storage_t
-    EHighest_Storage_T(t_epoxy): t_safe_high_storage_t
+    ELowest_Storage_T: (t_epoxy)→ t_safe_low_storage_t
+    EHighest_Storage_T: (t_epoxy)→ t_safe_high_storage_t
     [Slider: (Min_Storage_T, ): (-25, 25)]
-    Safe_Low_Storage_T: t_safe_low_storage_t
+    Safe_Low_Storage_T: ()→t_safe_low_storage_t
     [Slider: ( , Max_Storage_T): (-25, 25)]
-    Safe_High_Storage_T: t_safe_high_storage_t
+    Safe_High_Storage_T: ()→t_safe_high_storage_t
 
 
 

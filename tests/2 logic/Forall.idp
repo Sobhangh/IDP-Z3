@@ -1,10 +1,10 @@
 vocabulary V {
     type Color constructed from {red, blue, green}
-    p
-    q(Color)
-    color(): Color
-    r
-} 
+    p: ()
+    q:(Color)
+    color: ()→ Color
+    r:()
+}
 theory T:V {
     p <=> (∀c[Color]: c=red).
     q = {red; blue}

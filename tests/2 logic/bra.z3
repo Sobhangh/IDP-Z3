@@ -1,12 +1,8 @@
 
 -- original ---------------------------------
 vocabulary {
-    p
-    q
-    r
-    s
-    t
-} 
+    p, q, r, s, t: ()
+}
 theory {
     p.
     (~(p)|(p)).

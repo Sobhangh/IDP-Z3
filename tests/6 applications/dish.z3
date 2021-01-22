@@ -6,11 +6,11 @@ vocabulary {
 	type desiredDish_t constructed from { Stew, Spareribs, Beans_salad, Steak, Light_salad, Pasta }
 	type season_t constructed from { Spring, Winter, Summer }
 	type dayType_t constructed from { Weekday, Holiday, Weekend }
-	temperature: Real
-	desiredDish: desiredDish_t
-	season: season_t
-	dayType: dayType_t
-	guestCount: Real
+	temperature: ()→Real
+	desiredDish: ()→desiredDish_t
+	season: ()→season_t
+	dayType: ()→dayType_t
+	guestCount: ()→Real
 }
 theory {
 	//dishDecisionTable

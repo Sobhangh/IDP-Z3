@@ -3,13 +3,13 @@ This file creates problem in the gitlab pipeline, for unknown reasons.
 // https://dmcommunity.wordpress.com/challenge/challenge-jan-2016/
 
 vocabulary {
-	type Vacation_Days_t = { 0..100 } 
-	type Age_t = { 0..100 } 
-	type Service_Years_t = { 0..100 } 
-	type Employee_t constructed from { Huey, Dewey, Louie, Donald } 
-	Vacation_Days(Employee_t): Vacation_Days_t
-	Age(Employee_t): Age_t
-	Service_Years(Employee_t): Service_Years_t
+	type Vacation_Days_t = { 0..100 }
+	type Age_t = { 0..100 }
+	type Service_Years_t = { 0..100 }
+	type Employee_t constructed from { Huey, Dewey, Louie, Donald }
+	Vacation_Days:(Employee_t)→ Vacation_Days_t
+	Age:(Employee_t)→ Age_t
+	Service_Years:(Employee_t)→ Service_Years_t
 }
 theory {
 	//Vacation days of employee
@@ -18,6 +18,6 @@ theory {
 
 
 structure {
-	Age = {Huey, 17; Dewey, 70; Louie, 35; Donald, 46; } else 46 
-	Service_Years = {Huey, 1; Dewey, 31; Louie, 16; Donald, 10; } else 10 
+	Age = {Huey, 17; Dewey, 70; Louie, 35; Donald, 46; } else 46
+	Service_Years = {Huey, 1; Dewey, 31; Louie, 16; Donald, 10; } else 10
 }

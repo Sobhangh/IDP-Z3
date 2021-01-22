@@ -1,13 +1,13 @@
 
 -- original ---------------------------------
 vocabulary environment {
-    Depth : Real
+    Depth : ()→Real
 }
 vocabulary decision {
     extern vocabulary environment
 
     type csid constructed from {b, c, d, e, f}
-    cSID : csid
+    cSID : ()→csid
 }
 theory environment:environment {}
 theory decision:decision {

@@ -2,9 +2,9 @@
 -- original ---------------------------------
 vocabulary {
     type num constructed from { Piet, Jan}
-    same(num) : num
-    negated(num) : num
-} 
+    same: (num) → num
+    negated: (num) → num
+}
 
 theory {
     { !x[num]: same(x) = x. }
@@ -13,7 +13,7 @@ theory {
     same(same(Piet))= negated(negated(Piet)).
 
 }
- 
+
 display {
     view = expanded.
 }
