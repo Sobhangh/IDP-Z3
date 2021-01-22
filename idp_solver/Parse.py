@@ -377,7 +377,7 @@ class SymbolDeclaration(object):
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
 
-        self.typeConstraints = []
+        self.typeConstraints = None
         self.translated = None
 
         self.type = None  # a string
@@ -415,6 +415,7 @@ class SymbolDeclaration(object):
                 self.instances[expr.code] = expr
 
         # determine typeConstraints
+        self.typeConstraints = []
         if self.out.decl.name != BOOL and self.range:
             for inst in self.instances.values():
                 domain = self.out.decl.check_bounds(inst)
