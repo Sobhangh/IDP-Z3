@@ -1009,9 +1009,14 @@ class Display(object):
                 for i, symbol in enumerate(constraint.sub_exprs):
                     if constraint.name in ['unit', 'category'] and i == 0:
                         continue
-
-                    assert symbol.name.startswith('`'), f"argument '{symbol.name}' of '{constraint.name}' must start with a tick '`'"
-                    assert symbol.name[1:] in self.voc.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
+                    if not symbol.name.startswith('`'):
+                        msg = (f"arg '{symbol.name}' of {constraint.name}'"
+                               f" must begin with a tick '`'")
+                        raise constraint.create_error(msg)
+                    if symbol.name[1:] not in self.voc.symbols_decls:
+                        msg = (f"argument '{symbol.name}' of "
+                               f" '{constraint.name} must be a symbol")
+                        raise constraint.create_error(msg)
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
                 if constraint.name == 'goal':  # e.g.,  goal(Prime)
