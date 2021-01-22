@@ -951,10 +951,11 @@ class Display(object):
                           Constructor(name='expanded')])
         viewType.annotate(self.voc)
 
-        unit_constructors = self.__generate_unit_constructors()
-        unitType = ConstructedTypeDeclaration(name='Unit',
-                                              constructors=unit_constructors)
-        unitType.annotate(self.voc)
+        unit_construc = self.__generate_unit_constructors()
+        if len(unit_construc) > 0:
+            unitType = ConstructedTypeDeclaration(name='Unit',
+                                                  constructors=unit_construc)
+            unitType.annotate(self.voc)
 
         for name, out in [
             ('goal', None),
