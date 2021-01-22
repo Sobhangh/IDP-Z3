@@ -126,4 +126,6 @@ structure {
 
 display {
     view = expanded.
+    unit('m', `Length, `Perimeter).
+    unit('degrees', `Angle).
 }
