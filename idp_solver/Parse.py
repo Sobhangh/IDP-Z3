@@ -361,6 +361,9 @@ class SymbolDeclaration(object):
 
         unit (str):
             the unit of the symbol, such as m (meters)
+
+        category (str):
+            the category that the symbol should belong to
     """
 
     def __init__(self, **kwargs):
@@ -380,6 +383,7 @@ class SymbolDeclaration(object):
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         self.unit: str = None
+        self.category: str = None
 
         self.typeConstraints = None
         self.translated = None
@@ -1066,6 +1070,10 @@ class Display(object):
                 elif constraint.name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
+                elif constraint.name == 'category':
+                    # e.g. category('Shape', `type).
+                    for symbol in symbols:
+                        symbol.category = str(constraint.sub_exprs[0])
             elif type(constraint) == AComparison:  # e.g. view = normal
                 assert constraint.is_assignment()
                 if constraint.sub_exprs[0].name == 'view':
