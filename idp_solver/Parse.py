@@ -1041,7 +1041,6 @@ class Display(object):
                 # All arguments should be symbols, except for the first
                 # argument of 'unit' and 'category'.
                 for i, symbol in enumerate(constraint.sub_exprs):
-                    assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
                     if constraint.name in ['unit', 'category'] and i == 0:
                         continue
 
