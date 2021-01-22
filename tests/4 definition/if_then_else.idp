@@ -9,5 +9,5 @@ theory {
 }
 
 procedure main() {
-    print(model_expand(T))
+    print(decision_table(T, first_hit=False))
 }

@@ -144,6 +144,19 @@ class Vocabulary(object):
 
         self.name = 'V' if not self.name else self.name
 
+        # expand multi-symbol declarations
+        temp = []
+        for decl in self.declarations:
+            if not isinstance(decl, SymbolDeclaration):
+                temp.append(decl)
+            else:
+                for symbol in decl.symbols:
+                    new = copy(decl)  # shallow copy !
+                    new.name = sys.intern(symbol.name)
+                    new.symbols = None
+                    temp.append(new)
+        self.declarations = temp
+
         # define reserved symbols
         self.symbol_decls: Dict[str, Type] \
             = {INT: RangeDeclaration(name=INT, elements=[]),
@@ -310,7 +323,9 @@ class RangeDeclaration(object):
 
 class SymbolDeclaration(object):
     """The class of AST nodes representing an entry in the vocabulary,
-    declaring a symbol.
+    declaring one or more symbols.
+    Multi-symbols declaration are replaced by single-symbol declarations
+    before the annotate() stage.
 
     Attributes:
         annotations : the annotations given by the expert.
@@ -318,7 +333,9 @@ class SymbolDeclaration(object):
             `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
-        name (string): the identifier of the symbol
+        symbols ([Symbol]): the symbols beind defined, before expansion
+
+        name (string): the identifier of the symbol, after expansion of the node
 
         sorts (List[Sort]): the types of the arguments
 
@@ -345,7 +362,12 @@ class SymbolDeclaration(object):
 
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
-        self.name = sys.intern(kwargs.pop('name').name)  # a string, not a Symbol
+        if 'symbols' in kwargs:
+            self.symbols = kwargs.pop('symbols')
+            self.name = None
+        else:
+            self.name = sys.intern(kwargs.pop('name').name)
+            self.symbols = None
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
@@ -372,6 +394,7 @@ class SymbolDeclaration(object):
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
     def annotate(self, voc, vocabulary=True):
+        assert self.name is not None, "Internal error"
         if vocabulary:
             assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
             voc.symbol_decls[self.name] = self

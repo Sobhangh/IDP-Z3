@@ -11,9 +11,9 @@ Traceback (most recent call last):
     obj.__init__(**attrs)
   File "IDP-Z3/idp_solver/Parse.py", line 88, in __init__
     t.annotate(self)
-  File "IDP-Z3/idp_solver/Parse.py", line 514, in annotate
+  File "IDP-Z3/idp_solver/Parse.py", line 537, in annotate
     self.constraints = OrderedSet([e.interpret(self)
-  File "IDP-Z3/idp_solver/Parse.py", line 514, in <listcomp>
+  File "IDP-Z3/idp_solver/Parse.py", line 537, in <listcomp>
     self.constraints = OrderedSet([e.interpret(self)
   File "IDP-Z3/idp_solver/Substitute.py", line 211, in interpret
     assert self.decl.function, \
