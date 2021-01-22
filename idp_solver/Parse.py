@@ -955,11 +955,25 @@ class Display(object):
                           Constructor(name='expanded')])
         viewType.annotate(self.voc)
 
-        unit_construc = self.__generate_unit_constructors()
-        if len(unit_construc) > 0:
-            unitType = ConstructedTypeDeclaration(name='Unit',
-                                                  constructors=unit_construc)
-            unitType.annotate(self.voc)
+        # Check the AST for any constructors that belong to open types.
+        # For now, the only open types are `unit` and `category`.
+        open_constructors = {'unit': [], 'category': []}
+        for constraint in self.constraints:
+            constraint.generate_constructors(open_constructors)
+
+        # Next, we convert the list of constructors to actual types.
+        open_types = {}
+        for name, constructors in open_constructors.items():
+            # If no constructors were found, then the type is not used.
+            if not constructors:
+                open_types[name] = None
+                continue
+
+            type_name = name.capitalize()  # e.g. type Unit (not unit)
+            open_type = ConstructedTypeDeclaration(name=type_name,
+                                                   constructors=constructors)
+            open_type.annotate(self.voc)
+            open_types[name] = Sort(name=type_name)
 
         for name, out in [
             ('goal', None),
@@ -969,7 +983,8 @@ class Display(object):
             ('view', Sort(name='View')),
             ('moveSymbols', None),
             ('optionalPropagation', None),
-            ('unit', None)
+            ('unit', open_types['unit']),
+            ('category', open_types['category'])
         ]:
             symbol_decl = SymbolDeclaration(annotations='',
                                             name=Symbol(name=name),
@@ -1049,14 +1064,15 @@ class Display(object):
 
         :returns List[Expression.Constructor]:
         """
-        constructors = []
+        constr = {'unit': [], 'category': []}
         for constraint in self.constraints:
-            if type(constraint) == AppliedSymbol and constraint.name == 'unit':
-                unit = re.findall(r'\((.*?),', str(constraint.code))[0]
-                constructor = Constructor(name=unit)
-                constructors.append(constructor)
-
-        return constructors
+            constraint.find_unapplied(constr)
+            # if type(constraint) == AppliedSymbol and constraint.name == 'unit':
+            #     unit = re.findall(r'\((.*?),', str(constraint.code))[0]
+            #     constructor = Constructor(name=unit)
+            #     constructors.append(constructor)
+        print('real', constr)
+        return constr
 
 
 
