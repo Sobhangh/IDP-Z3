@@ -59,4 +59,8 @@ structure default {
 
 display {
     hide(`Max_Storage_T, `Min_Storage_T).
+    unit('eur', `ECost, `Min_Cost, `Max_Cost, `Cost).
+    unit('degrees', `Min_Storage_T, `Max_Storage_T, `ELowest_Storage_T, `EHighest_Storage_T, `Safe_Low_Storage_T, `Safe_High_Storage_T).
+
+
 }
