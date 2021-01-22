@@ -44,3 +44,8 @@ optionalPropagation
     When the *display block* contains ``optionalPropagation``, a toggle button will be available in the interface which allows toggling immediate propagation on and off.
 
     By default, this button is not present.
+
+unit
+    :math:`unit(unitstr, s_1, ..., s_n)` specifies the unit of one or more symbols. This unit will then show up in the symbol's header in the Interactive Consultant. The :math:`unitstr` should be surrounded by single quotes.
+
+    For example: ``unit('m', length, perimeter).``
