@@ -951,6 +951,11 @@ class Display(object):
                           Constructor(name='expanded')])
         viewType.annotate(self.voc)
 
+        unit_constructors = self.__generate_unit_constructors()
+        unitType = ConstructedTypeDeclaration(name='Unit',
+                                              constructors=unit_constructors)
+        unitType.annotate(self.voc)
+
         for name, out in [
             ('goal', None),
             ('expand', None),
@@ -958,7 +963,8 @@ class Display(object):
             ('hide', None),
             ('view', Sort(name='View')),
             ('moveSymbols', None),
-            ('optionalPropagation', None)
+            ('optionalPropagation', None),
+            ('unit', None)
         ]:
             symbol_decl = SymbolDeclaration(annotations='',
                                             name=Symbol(name=name),
@@ -974,7 +980,11 @@ class Display(object):
         for constraint in self.constraints:
             if type(constraint)==AppliedSymbol:
                 symbols = []
-                for symbol in constraint.sub_exprs:
+                # All arguments should be symbols, except for the first
+                # argument of 'unit' and 'category'.
+                for i, symbol in enumerate(constraint.sub_exprs):
+                    if constraint.name in ['unit', 'category'] and i == 0:
+                        continue
                     assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
                     assert symbol.name.startswith('`'), f"argument '{symbol.name}' of '{constraint.name}' must start with a tick '`'"
                     assert symbol.name[1:] in self.voc.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
@@ -999,6 +1009,10 @@ class Display(object):
                         constraint.block = self
                         constraint = constraint.interpret(idp.theory)
                         idp.theory.constraints.append(constraint)
+                elif constraint.name == 'unit':  # e.g. unit('m', `length):
+                    for symbol in symbols:
+                        symbol.annotations['unit'] = str(constraint
+                                                         .sub_exprs[0])
             elif type(constraint)==AComparison:  # e.g. view = normal
                 assert constraint.is_assignment()
                 if constraint.sub_exprs[0].name == 'view':
@@ -1007,9 +1021,9 @@ class Display(object):
                             if type(s)==SymbolDeclaration and s.view == ViewType.NORMAL:
                                 s.view = ViewType.EXPANDED  # don't change hidden symbols
                     else:
-                        assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
+                        assert constraint.sub_exprs[1].name == 'normal', f"unknown display constraint: {constraint}"
                 else:
-                    raise IDPZ3Error(f"unknown display contraint: {constraint}")
+                    raise IDPZ3Error(f"unknown display constraint: {constraint}")
             elif type(constraint) == UnappliedSymbol:
                 if constraint.name == "moveSymbols":
                     self.moveSymbols = True
@@ -1020,6 +1034,25 @@ class Display(object):
                                      f"{constraint}")
             else:
                 raise IDPZ3Error(f"unknown display contraint: {constraint}")
+
+    def __generate_unit_constructors(self):
+        """Method to generate a constructor for every string found in a unit
+        predicate.
+        E.g., for `unit('m', `length)` it creates
+        `Expression.Constructor(name='m')`.
+
+        If there are multiple units, a constructor is created for each one.
+
+        :returns List[Expression.Constructor]:
+        """
+        constructors = []
+        for constraint in self.constraints:
+            if type(constraint) == AppliedSymbol and constraint.name == 'unit':
+                unit = re.findall(r'\((.*?),', str(constraint.code))[0]
+                constructor = Constructor(name=unit)
+                constructors.append(constructor)
+
+        return constructors
 
 
 
