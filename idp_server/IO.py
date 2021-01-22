@@ -46,7 +46,8 @@ def metaJSON(state):
             "showOptimize": True,  # GUI is smart enough to show buttons appropriately
             "view": decl.view.value,
             "environmental": decl.block.name == 'environment',
-            "unit": decl.unit
+            "unit": decl.unit,
+            "category": decl.category
         }
         if decl.annotations is not None:
             if 'reading' in decl.annotations:
