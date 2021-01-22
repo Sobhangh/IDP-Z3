@@ -341,6 +341,9 @@ class SymbolDeclaration(object):
         typeConstraints (List[Expression]):
             the type constraint on the ranges of the symbol
             applied to each possible tuple of arguments
+
+        unit (str):
+            the unit of the symbol, such as m (meters)
     """
 
     def __init__(self, **kwargs):
@@ -354,6 +357,7 @@ class SymbolDeclaration(object):
         self.function = (self.out.name != BOOL)
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
+        self.unit: str = None
 
         self.typeConstraints = []
         self.translated = None
@@ -1012,8 +1016,7 @@ class Display(object):
                         idp.theory.constraints.append(constraint)
                 elif constraint.name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
-                        symbol.annotations['unit'] = str(constraint
-                                                         .sub_exprs[0])
+                        symbol.unit = str(constraint.sub_exprs[0])
             elif type(constraint) == AComparison:  # e.g. view = normal
                 assert constraint.is_assignment()
                 if constraint.sub_exprs[0].name == 'view':
