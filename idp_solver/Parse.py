@@ -978,7 +978,7 @@ class Display(object):
     def annotate(self, idp):
         self.voc = idp.vocabulary
 
-        #add display predicates
+        # add display predicates
 
         viewType = ConstructedTypeDeclaration(name='View',
             constructors=[Constructor(name='normal'),
@@ -1003,7 +1003,7 @@ class Display(object):
         ]:
             symbol_decl = SymbolDeclaration(annotations='',
                                             name=Symbol(name=name),
-                sorts=[], out=out)
+                                            sorts=[], out=out)
             symbol_decl.annotate(self.voc)
             symbol_decl.translate()
 
@@ -1013,7 +1013,7 @@ class Display(object):
 
     def run(self, idp):
         for constraint in self.constraints:
-            if type(constraint)==AppliedSymbol:
+            if type(constraint) == AppliedSymbol:
                 symbols = []
                 # All arguments should be symbols, except for the first
                 # argument of 'unit' and 'category'.
@@ -1025,8 +1025,8 @@ class Display(object):
                     assert symbol.name[1:] in self.voc.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if constraint.name == 'goal':  #e.g.,  goal(Prime)
-                    assert len(constraint.sub_exprs)==1, f'goal can have only one argument'
+                if constraint.name == 'goal':  # e.g.,  goal(Prime)
+                    assert len(constraint.sub_exprs) == 1, f'goal can have only one argument'
                     goal = Goal(name=constraint.sub_exprs[0].name[1:])
                     goal.annotate(idp)
                     idp.goal = goal
@@ -1048,12 +1048,12 @@ class Display(object):
                     for symbol in symbols:
                         symbol.annotations['unit'] = str(constraint
                                                          .sub_exprs[0])
-            elif type(constraint)==AComparison:  # e.g. view = normal
+            elif type(constraint) == AComparison:  # e.g. view = normal
                 assert constraint.is_assignment()
                 if constraint.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
-                            if type(s)==SymbolDeclaration and s.view == ViewType.NORMAL:
+                            if type(s) == SymbolDeclaration and s.view == ViewType.NORMAL:
                                 s.view = ViewType.EXPANDED  # don't change hidden symbols
                     else:
                         assert constraint.sub_exprs[1].name == 'normal', f"unknown display constraint: {constraint}"
