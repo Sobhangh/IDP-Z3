@@ -1007,9 +1007,10 @@ class Display(object):
                 # All arguments should be symbols, except for the first
                 # argument of 'unit' and 'category'.
                 for i, symbol in enumerate(constraint.sub_exprs):
+                    assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
                     if constraint.name in ['unit', 'category'] and i == 0:
                         continue
-                    assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
+
                     assert symbol.name.startswith('`'), f"argument '{symbol.name}' of '{constraint.name}' must start with a tick '`'"
                     assert symbol.name[1:] in self.voc.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
@@ -1061,27 +1062,6 @@ class Display(object):
                                      f"{constraint}")
             else:
                 raise IDPZ3Error(f"unknown display contraint: {constraint}")
-
-    def __generate_unit_constructors(self):
-        """Method to generate a constructor for every string found in a unit
-        predicate.
-        E.g., for `unit('m', `length)` it creates
-        `Expression.Constructor(name='m')`.
-
-        If there are multiple units, a constructor is created for each one.
-
-        :returns List[Expression.Constructor]:
-        """
-        constr = {'unit': [], 'category': []}
-        for constraint in self.constraints:
-            constraint.find_unapplied(constr)
-            # if type(constraint) == AppliedSymbol and constraint.name == 'unit':
-            #     unit = re.findall(r'\((.*?),', str(constraint.code))[0]
-            #     constructor = Constructor(name=unit)
-            #     constructors.append(constructor)
-        print('real', constr)
-        return constr
-
 
 
 ################################ Main  ##################################
