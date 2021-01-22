@@ -15,12 +15,13 @@ The equivalent ASCII-only encoding is shown on the right.
         type T = {1..3}
         // built-in types: 𝔹, ℤ, ℝ, `Symbols      Bool, Int, Real, `Symbols
 
-        p
-        p(T)
-        f(T):T
+        p : ()
+        p1, p2 : (T)
+        f: (T) → T                                f: (T) -> T
+        f1, f2: (T) → T                           f1, f2: (T) -> T
 
         [this is the intended meaning of p]
-        p
+        p : ()
 
         extern vocabulary W
     }

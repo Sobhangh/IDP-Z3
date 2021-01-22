@@ -1,16 +1,14 @@
 vocabulary {
 
     type Nr_of_sides = {3..4}
-    nr_of_sides: Nr_of_sides
-    nr_of_vertices: Nr_of_sides
+    nr_of_sides, nr_of_vertices: () → Nr_of_sides
 
 
     type Type constructed from {triangle, quadrilateral}
-    type : Type
+    type : () → Type
 
     type Side_Nr = {1..4}
-    length(Side_Nr):ℝ
-    angle(Side_Nr):ℝ
+    length, angle : (Side_Nr) → ℝ
 
     type Subtype constructed from
         { regular_triangle
@@ -18,15 +16,14 @@ vocabulary {
         , rectangle
         , square
         , irregular}
-    subtype : Subtype
+    subtype : () → Subtype
 
-    convex
-    equilateral
-    perimeter:ℝ
+    convex, equilateral : ()
+    perimeter: () → ℝ
 
-    // base : ℝ
-    // height: ℝ
-    // surface:ℝ
+    // base : () → ℝ
+    // height: () → ℝ
+    // surface:() → ℝ
 }
 
 theory {

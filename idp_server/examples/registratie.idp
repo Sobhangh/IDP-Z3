@@ -9,43 +9,34 @@ vocabulary environment {
   type Resale constructed from {Less_Than_Three, Three_Or_More}
   type Seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
-  region : Location
+  region : () → Location
 
   // for Heritage
-  type_of_real_estate : Real_Estate_Type
-  monument
-  use : Destination
-  heritage_investment
-  heritage_plan
-  additional_terms
+  type_of_real_estate : () → Real_Estate_Type
+  use : () → Destination
+  monument, heritage_investment, heritage_plan, additional_terms : ()
 
   // for Social_Dwelling
-  buyer : Buyer_Type
-  seller : Seller
-  mortgage_loan_allowance
+  buyer : () → Buyer_Type
+  seller : () → Seller
+  mortgage_loan_allowance : ()
 
   // For Professional_Purchase
-  professional_buyer
-  professional_declaration_filed
-  guarantee_satisfied
-  additional_security_required
-  additional_security_satisfied
-  resale : Resale
-  transaction_type : Transaction
-  certification_date_sale : Date
+  professional_buyer, professional_declaration_filed, guarantee_satisfied : ()
+  additional_security_required, additional_security_satisfied : ()
+  resale : () → Resale
+  transaction_type : () → Transaction
+  certification_date_sale : () → Date
 
   // For Energy_Efficient_Dwelling
-  domicile_established
-  clean_purchase
-  first_ownership
-  causal_connection
-  energy_renovation_planned
-  term_energy_renovation : Date
-  certification_date : Date
+  domicile_established, clean_purchase, first_ownership : ()
+  causal_connection, energy_renovation_planned : ()
+  term_energy_renovation : () → Date
+  certification_date : () → Date
 
   // For Dwelling_For_Social_Renting
-  start_dt_dwelling_for_social_rent : Date
-  duration_of_agreement : Agreement_Dwelling_For_Social_Renting
+  start_dt_dwelling_for_social_rent : () → Date
+  duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
 
 }
 
@@ -55,8 +46,8 @@ vocabulary decision {
   type Registration_type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
   type Tax_Rate = {1; 2; 4; 6; 7; 10; 12}
 
-  tax : Tax_Rate
-  registration_type : Registration_type
+  tax : () → Tax_Rate
+  registration_type : () → Registration_type
 }
 
 theory environment:environment {

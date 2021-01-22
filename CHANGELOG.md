@@ -8,9 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [unreleased]
 
 ### API
+* (breaking) IEP 03: use math notation for signature of predicate and functions
 * More verbose error messages + line and col numbers (issue #64)
 * support for 'not in' operator
 * IEP 09 Unicode: allow 𝔹, ℤ, ℝ symbols for types, and '←' in definitions
+* IEP 11: allow multi-symbol declarations in vocabulary
 
 ### GUI
 * fix #59: "Explain" not working in SimpleRegistration

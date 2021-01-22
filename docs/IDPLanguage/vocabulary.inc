@@ -47,11 +47,14 @@ For the above example, the constructors of ```Symbols`` are : ```red``, ```blue`
 Functions
 +++++++++
 
-A function with name ``MyFunc``, input types ``T1``, ``T2``, ``T3`` and output type ``T``, is declared by:
+The functions with name ``MyFunc1``, ``MyFunc2``, input types ``T1``, ``T2``, ``T3`` and output type ``T``, are declared by:
 
 .. code::
 
-    MyFunc(T1, T2, T3) : T
+    myFunc1, myFunc2 : (T1, T2, T3) → T
+
+Their name should not start with a capital letter, by convention.
+The ASCII equivalent of ``→`` is ``->``.
 
 IDP-Z3 does not support partial functions.
 
@@ -61,11 +64,13 @@ IDP-Z3 does not support partial functions.
 Predicates
 ++++++++++
 
-A predicate with name ``MyPred`` and argument types ``T1``, ``T2``, ``T3`` is declared by:
+The predicates with name ``myPred1``, ``myPred2`` and argument types ``T1``, ``T2``, ``T3`` are declared by:
 
 .. code::
 
-    MyPred(T1, T2, T3)
+    myPred1, myPred2 : (T1, T2, T3)
+
+Their name should not start with a capital letter, by convention.
 
 .. _constant:
 .. index:: constant, proposition
@@ -77,8 +82,8 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
 
 .. code::
 
-    MyProposition
-    MyConstant: Int
+    MyProposition : ()
+    MyConstant: () → Int
 
 
 .. _extern:
