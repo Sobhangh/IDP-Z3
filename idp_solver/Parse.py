@@ -1047,7 +1047,7 @@ class Display(object):
                         msg = (f"arg '{symbol.name}' of {constraint.name}'"
                                f" must begin with a tick '`'")
                         raise constraint.create_error(msg)
-                    if symbol.name[1:] not in self.voc.symbols_decls:
+                    if symbol.name[1:] not in self.voc.symbol_decls:
                         msg = (f"argument '{symbol.name}' of "
                                f" '{constraint.name} must be a symbol")
                         raise constraint.create_error(msg)
