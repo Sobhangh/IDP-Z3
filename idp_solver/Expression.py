@@ -227,6 +227,13 @@ class Expression(object):
         self.collect(questions)
         return questions
 
+    def generate_constructors(self, constructors: dict):
+        """ fills the list `constructors` with all constructors belonging to
+        open types.
+        """
+        for e in self.sub_exprs:
+            e.generate_constructors(constructors)
+
     def unknown_symbols(self, co_constraints=True):
         """ returns the list of symbol declarations in self, ignoring type constraints
 
@@ -801,6 +808,10 @@ class AppliedSymbol(Expression):
                  self.translate() )
         return self._reified
 
+    def generate_constructors(self, constructors: dict):
+        if self.name == 'unit' or self.name == 'category':
+            constructor = Constructor(name=self.sub_exprs[0].name)
+            constructors[self.name].append(constructor)
 
 class Arguments(object):
     def __init__(self, **kwargs):

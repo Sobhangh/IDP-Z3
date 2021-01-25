@@ -341,6 +341,12 @@ class SymbolDeclaration(object):
         typeConstraints (List[Expression]):
             the type constraint on the ranges of the symbol
             applied to each possible tuple of arguments
+
+        unit (str):
+            the unit of the symbol, such as m (meters)
+
+        category (str):
+            the category that the symbol should belong to
     """
 
     def __init__(self, **kwargs):
@@ -354,6 +360,8 @@ class SymbolDeclaration(object):
         self.function = (self.out.name != BOOL)
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
+        self.unit: str = None
+        self.category: str = None
 
         self.typeConstraints = []
         self.translated = None
@@ -954,12 +962,32 @@ class Display(object):
     def annotate(self, idp):
         self.voc = idp.vocabulary
 
-        #add display predicates
+        # add display predicates
 
         viewType = ConstructedTypeDeclaration(name='View',
             constructors=[Constructor(name='normal'),
                           Constructor(name='expanded')])
         viewType.annotate(self.voc)
+
+        # Check the AST for any constructors that belong to open types.
+        # For now, the only open types are `unit` and `category`.
+        open_constructors = {'unit': [], 'category': []}
+        for constraint in self.constraints:
+            constraint.generate_constructors(open_constructors)
+
+        # Next, we convert the list of constructors to actual types.
+        open_types = {}
+        for name, constructors in open_constructors.items():
+            # If no constructors were found, then the type is not used.
+            if not constructors:
+                open_types[name] = None
+                continue
+
+            type_name = name.capitalize()  # e.g. type Unit (not unit)
+            open_type = ConstructedTypeDeclaration(name=type_name,
+                                                   constructors=constructors)
+            open_type.annotate(self.voc)
+            open_types[name] = Sort(name=type_name)
 
         for name, out in [
             ('goal', None),
@@ -968,11 +996,13 @@ class Display(object):
             ('hide', None),
             ('view', Sort(name='View')),
             ('moveSymbols', None),
-            ('optionalPropagation', None)
+            ('optionalPropagation', None),
+            ('unit', open_types['unit']),
+            ('category', open_types['category'])
         ]:
             symbol_decl = SymbolDeclaration(annotations='',
                                             name=Symbol(name=name),
-                sorts=[], out=out)
+                                            sorts=[], out=out)
             symbol_decl.annotate(self.voc)
             symbol_decl.translate()
 
@@ -982,16 +1012,25 @@ class Display(object):
 
     def run(self, idp):
         for constraint in self.constraints:
-            if type(constraint)==AppliedSymbol:
+            if type(constraint) == AppliedSymbol:
                 symbols = []
-                for symbol in constraint.sub_exprs:
-                    assert isinstance(symbol, Constructor), f"argument '{str(symbol)}' of '{constraint.name}' should be a Constructor, not a {type(symbol)}"
-                    assert symbol.name.startswith('`'), f"argument '{symbol.name}' of '{constraint.name}' must start with a tick '`'"
-                    assert symbol.name[1:] in self.voc.symbol_decls, f"argument '{symbol.name}' of '{constraint.name}' must be a symbol'"
+                # All arguments should be symbols, except for the first
+                # argument of 'unit' and 'category'.
+                for i, symbol in enumerate(constraint.sub_exprs):
+                    if constraint.name in ['unit', 'category'] and i == 0:
+                        continue
+                    if not symbol.name.startswith('`'):
+                        msg = (f"arg '{symbol.name}' of {constraint.name}'"
+                               f" must begin with a tick '`'")
+                        raise constraint.create_error(msg)
+                    if symbol.name[1:] not in self.voc.symbol_decls:
+                        msg = (f"argument '{symbol.name}' of "
+                               f" '{constraint.name} must be a symbol")
+                        raise constraint.create_error(msg)
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if constraint.name == 'goal':  #e.g.,  goal(Prime)
-                    assert len(constraint.sub_exprs)==1, f'goal can have only one argument'
+                if constraint.name == 'goal':  # e.g.,  goal(Prime)
+                    assert len(constraint.sub_exprs) == 1, f'goal can have only one argument'
                     goal = Goal(name=constraint.sub_exprs[0].name[1:])
                     goal.annotate(idp)
                     idp.goal = goal
@@ -1009,17 +1048,24 @@ class Display(object):
                         constraint.block = self
                         constraint = constraint.interpret(idp.theory)
                         idp.theory.constraints.append(constraint)
-            elif type(constraint)==AComparison:  # e.g. view = normal
+                elif constraint.name == 'unit':  # e.g. unit('m', `length):
+                    for symbol in symbols:
+                        symbol.unit = str(constraint.sub_exprs[0])
+                elif constraint.name == 'category':
+                    # e.g. category('Shape', `type).
+                    for symbol in symbols:
+                        symbol.category = str(constraint.sub_exprs[0])
+            elif type(constraint) == AComparison:  # e.g. view = normal
                 assert constraint.is_assignment()
                 if constraint.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
-                            if type(s)==SymbolDeclaration and s.view == ViewType.NORMAL:
+                            if type(s) == SymbolDeclaration and s.view == ViewType.NORMAL:
                                 s.view = ViewType.EXPANDED  # don't change hidden symbols
                     else:
-                        assert constraint.sub_exprs[1].name == 'normal', f"unknown display contraint: {constraint}"
+                        assert constraint.sub_exprs[1].name == 'normal', f"unknown display constraint: {constraint}"
                 else:
-                    raise IDPZ3Error(f"unknown display contraint: {constraint}")
+                    raise IDPZ3Error(f"unknown display constraint: {constraint}")
             elif type(constraint) == UnappliedSymbol:
                 if constraint.name == "moveSymbols":
                     self.moveSymbols = True
@@ -1030,7 +1076,6 @@ class Display(object):
                                      f"{constraint}")
             else:
                 raise IDPZ3Error(f"unknown display contraint: {constraint}")
-
 
 
 ################################ Main  ##################################
