@@ -378,7 +378,8 @@ class Problem(object):
             conditions = join_set_conditions(conditions)
             return [c for c in conditions if c.sentence != TRUE]+[goal]
 
-    def decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True):
+    def decision_table(self, goal_string="", timeout=20, max_rows=50,
+                       first_hit=True, verify=False):
         """returns a decision table for `goal_string`, given `self`.
 
         Args:
@@ -386,17 +387,20 @@ class Problem(object):
             timeout (int, optional): maximum duration in seconds. Defaults to 20.
             max_rows (int, optional): maximum number of rows. Defaults to 50.
             first_hit (bool, optional): requested hit-policy. Defaults to True.
+            verify (bool, optional): request verification of table completeness.  Defaults to False
 
         Returns:
             list(list(Assignment)): the non-empty cells of the decision table
         """
+        max_time = time.time()+timeout  # 20 seconds max
+
         if goal_string:
-            # add (goal | ~goal) to self.constraints
+            # add (goal | ~goal) to self.constraints, so that it is a question
             assert goal_string in self.assignments, (
                 f"Unrecognized goal string: {goal_string}")
             temp = self.assignments[goal_string].sentence
             temp = ADisjunction.make('∨', [temp, AUnary.make('¬', temp)])
-            temp = temp.interpret(self)
+            temp = temp.interpret(self)  # add definition of the goal, if any
             self.constraints.append(temp)
 
         # ignore type constraints
@@ -417,8 +421,7 @@ class Problem(object):
 
         known = And([ass.translate() for ass in self.assignments.values()
                         if ass.status != Status.UNKNOWN]
-                    + [q.reified()==q.translate()
-                        for q in questions
+                    + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
         theory = self.formula().translate()
@@ -426,12 +429,13 @@ class Problem(object):
         solver.add(theory)
         solver.add(known)
 
-        max_time = time.time()+timeout # 20 seconds max
-        goal, models, count = None, [], 0
-        while solver.check() == sat and count < max_rows and time.time()<max_time: # for each parametric model
+        models, count = [], 0
+        while (solver.check() == sat  # for each parametric model
+               and count < max_rows and time.time() < max_time):
             # find the interpretation of all atoms in the model
-            assignments = [] # [Assignment]
+            assignments = []  # [Assignment]
             model = solver.model()
+            goal = None
             for atom in questions.values():
                 assignment = self.assignments[atom.code]
                 if assignment.value is None and atom.type == BOOL:
@@ -449,6 +453,9 @@ class Problem(object):
                         goal = ass
                     elif ass.value is not None:
                         assignments.append(ass)
+            if verify:
+                assert not goal_string or goal.value is not None, \
+                    "The goal is not always determined by the theory"
             # start with negations !
             assignments.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
             assignments.append(goal if goal_string else
@@ -464,12 +471,33 @@ class Problem(object):
 
             count +=1
 
+        if verify:
+            def verify_models(known, models, goal_string):
+                """verify that the models cover the universe
+
+                Args:
+                    known ([type]): [description]
+                    models ([type]): [description]
+                    goal_string ([type]): [description]
+                """
+                known2 = known
+                for model in models:
+                    condition = [l.translate() for l in model
+                                    if l.value is not None
+                                    and l.sentence.code != goal_string]
+                    known2 = And(known2, Not(And(condition)))
+                solver = Solver()
+                solver.add(known2)
+                assert solver.check() == unsat, \
+                    "The DMN table does not cover the full domain"
+            verify_models(known, models, goal_string)
+
         models.sort(key=len)
 
         if first_hit:
             known2 = known
             models1, last_model = [], []
-            while models:
+            while models and time.time() < max_time:
                 if len(models) == 1:
                     models1.append(models[0])
                     break
@@ -479,20 +507,21 @@ class Problem(object):
                                 and l.sentence.code != goal_string]
                 if condition:
                     possible = Not(And(condition))
-                    solver = Solver()
-                    solver.add(known2)
-                    solver.add(possible)
-                    result = solver.check()
-                    if result == sat: # condition is satisfiable
-                        known2 = And(known2, possible)
-                        models1.append(model)
-                        models = [self._generalize(m, known2, theory)
-                            for m in models]
-                        models = [m for m in models if m] # ignore impossible models
-                        models = list(dict([(",".join([str(c) for c in m]), m)
-                                            for m in models]).values())
-                        models.sort(key=len)
-                    # else: unsatisfiable --> ignore
+                    if verify:
+                        solver = Solver()
+                        solver.add(known2)
+                        solver.add(possible)
+                        result = solver.check()
+                        assert result == sat, \
+                            "A row has become impossible to trigger"
+                    known2 = And(known2, possible)
+                    models1.append(model)
+                    models = [self._generalize(m, known2, theory)
+                        for m in models]
+                    models = [m for m in models if m] # ignore impossible models
+                    models = list(dict([(",".join([str(c) for c in m]), m)
+                                        for m in models]).values())
+                    models.sort(key=len)
                 else: # when not deterministic
                     last_model += [model]
             models = models1 + last_model
@@ -532,6 +561,9 @@ class Problem(object):
                         new = new[0].negate()
                         models[i-1] = [new, models[i-1][1]]
                         del models[i]
+            if verify:
+                verify_models(known, models, goal_string)
+
         return models
 
 Done = True

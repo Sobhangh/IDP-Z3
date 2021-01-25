@@ -428,10 +428,20 @@ class SymbolDeclaration(object):
 class Sort(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+        self.name = (BOOL if self.name == '𝔹' else
+                     INT if self.name == 'ℤ' else
+                     REAL if self.name == 'ℝ' else
+                     self.name
+        )
         self.code = sys.intern(self.name)
         self.decl = None
 
-    def __str__(self): return self.code
+    def __str__(self):
+        return ('𝔹' if self.name == BOOL else
+                'ℤ' if self.name == INT else
+                'ℝ' if self.name == REAL else
+                self.name
+        )
 
     def annotate(self, voc):
         self.decl = voc.symbol_decls[self.name]

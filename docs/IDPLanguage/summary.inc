@@ -13,7 +13,7 @@ The equivalent ASCII-only encoding is shown on the right.
         type T constructed from {c1, c2}
         type T = {1;2;3}
         type T = {1..3}
-        // built-in types: Bool, Int, Real, `Symbols
+        // built-in types: 𝔹, ℤ, ℝ, `Symbols      Bool, Int, Real, `Symbols
 
         p
         p(T)
@@ -44,9 +44,9 @@ The equivalent ASCII-only encoding is shown on the right.
         p(5) is not enumerated.
 
         { p(1).
-          ∀x: p1(x) <- p2(x).                     !x: p1(x) <- p2(x).
+          ∀x[T]: p1(x) ← p2(x).                   !x[T]: p1(x) <- p2(x).
           f(1)=1.
-          ∀x: f(x)=1 <- p(x).                     !x: f(x)=1 <- p(x).
+          ∀x: f(x)=1 ← p(x).                      !x: f(x)=1 <- p(x).
         }
 
         [this is the intended meaning of the rule]

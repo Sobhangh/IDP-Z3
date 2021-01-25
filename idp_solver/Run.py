@@ -55,14 +55,27 @@ def model_propagate(theories, structures=None):
 
 
 def decision_table(theories, structures=None, goal_string="",
-                timeout=20, max_rows=50, first_hit=True):
-    """ output: a list of rows for a decision table"""
+                timeout=20, max_rows=50, first_hit=True, verify=False):
+    """returns a decision table for `goal_string`, given `theories` and `structures`.
+
+    Args:
+        goal_string (str, optional): the last column of the table.
+        timeout (int, optional): maximum duration in seconds. Defaults to 20.
+        max_rows (int, optional): maximum number of rows. Defaults to 50.
+        first_hit (bool, optional): requested hit-policy. Defaults to True.
+        verify (bool, optional): request verification of table completeness.  Defaults to False
+
+    Yields:
+        str: a textual representation of each rule
+    """
     problem = Problem.make(theories, structures)
-    for model in problem.decision_table(goal_string, timeout, max_rows, first_hit):
+    for model in problem.decision_table(goal_string, timeout, max_rows,
+                                        first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model
             if a.sentence.code != goal_string)
+        has_goal = model[-1].sentence.code == goal_string
         yield((f"{(f'  {row}{NEWL}') if row else ''}"
-              f"⇒ {str(model[-1]) if model[-1].sentence.code == goal_string else '?'}"))
+              f"⇒ {str(model[-1]) if has_goal else '?'}"))
         yield("")
     yield "end of decision table"
 

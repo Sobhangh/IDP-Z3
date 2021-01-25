@@ -19,19 +19,19 @@ vocabulary decision {
 theory environment:environment {
     // theory of possible situations
 
-    social_habitat => low_rent.
+    social_habitat ⇒ low_rent.
 }
 
 theory decision:decision {
     // legislation
 
-    { tax_rate = 1  <- registration_Type = Social.
-      tax_rate = 7  <- registration_Type = Modest.
-      tax_rate = 10 <- registration_Type = Other.
+    { tax_rate = 1  ← registration_Type = Social.
+      tax_rate = 7  ← registration_Type = Modest.
+      tax_rate = 10 ← registration_Type = Other.
     }
 
-    registration_Type = Social => licensed_seller & social_habitat.
-    registration_Type = Modest => low_rent.
+    registration_Type = Social ⇒ licensed_seller ∧ social_habitat.
+    registration_Type = Modest ⇒ low_rent.
 
 }
 
