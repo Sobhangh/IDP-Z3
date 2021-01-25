@@ -1,10 +1,15 @@
 {
   "dirty": false,
-  "raw": "v0.5.1-89-g3265cd4",
-  "hash": "g3265cd4",
-  "distance": 89,
+  "raw": "v0.5.1-92-ga6020f5",
+  "hash": "ga6020f5",
+  "distance": 92,
   "tag": "v0.5.1",
   "semver": {
+    "options": {
+      "loose": false,
+      "includePrerelease": false
+    },
+    "loose": false,
     "raw": "v0.5.1",
     "major": 0,
     "minor": 5,
@@ -13,6 +18,6 @@
     "build": [],
     "version": "0.5.1"
   },
-  "suffix": "89-g3265cd4",
-  "semverString": "0.5.1+89.g3265cd4"
+  "suffix": "92-ga6020f5",
+  "semverString": "0.5.1+92.ga6020f5"
 }
