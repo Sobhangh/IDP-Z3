@@ -49,9 +49,9 @@ def query_user(query, default="y", get=False):
 update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
 if update_statics:
     # Verify we are on main branch.
-    # branch = get('git rev-parse --abbrev-ref HEAD')
-    # assert branch == b'main\n', \
-    #     "Cannot deploy: IDP-Z3 not in main branch !"
+    branch = get('git rev-parse --abbrev-ref HEAD')
+    assert branch == b'main\n', \
+        "Cannot deploy: IDP-Z3 not in main branch !"
 
     # Check if web-IDP-Z3 is on latest version and clean.
     branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
@@ -60,9 +60,9 @@ if update_statics:
     require_clean_work_tree("../web-IDP-Z3")
 
     # Generate static and commit.
-    # run('npm run -script build', cwd='../web-IDP-Z3', check=True)
-    # print("Copying to static folder ...")
-    # copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
+    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
+    print("Copying to static folder ...")
+    copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
 
     # Create new version tag.
     new_tag = query_user("Create new tag? (Y/n) ")
@@ -73,6 +73,7 @@ if update_statics:
         major, minor, patch = current_tag.split('.')
         release_type = query_user("(M)ajor, (m)inor or (p)atch release? ",
                                   get=True)
+        # Create new tag and tag both projects.
         if release_type == "M":
             tag_version = f"{int(major)+1}.0.0"
         elif release_type == "m":
@@ -82,6 +83,7 @@ if update_statics:
         else:
             raise IOError("Incorrect release type")
         run(f"git tag {tag_version}")
+        run(f"git -C ../web-IDP-Z3 tag {tag_version}")
 
         # We also need to modify the pyproject.toml.
         with open("./pyproject.toml", "r") as fp:
@@ -92,12 +94,16 @@ if update_statics:
         with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
-    # add and commit
+    # Add and commit.
     run("git add -A")
     run("git commit")
     run("git push origin main")
 
     if new_tag:
+        # Push tags.
+        run(f"git push origin {tag_version}")
+        run(f"git -C ../web-IDP-Z3 push origin {tag_version}")
+
         # Publish new version on Pypi.
         run("poetry install")
         run("poetry build")
