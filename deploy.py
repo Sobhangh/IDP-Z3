@@ -44,14 +44,14 @@ def query_user(query, default="y", get=False):
         return input(query) in "Nn"
 
 
-run('python3 test.py generate')
+# run('python3 test.py generate')
 
 update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
 if update_statics:
     # Verify we are on main branch.
-    branch = get('git rev-parse --abbrev-ref HEAD')
-    assert branch == b'main\n', \
-        "Cannot deploy: IDP-Z3 not in main branch !"
+    # branch = get('git rev-parse --abbrev-ref HEAD')
+    # assert branch == b'main\n', \
+    #     "Cannot deploy: IDP-Z3 not in main branch !"
 
     # Check if web-IDP-Z3 is on latest version and clean.
     branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
@@ -60,14 +60,27 @@ if update_statics:
     require_clean_work_tree("../web-IDP-Z3")
 
     # Generate static and commit.
-    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
-    print("Copying to static folder ...")
-    copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
+    # run('npm run -script build', cwd='../web-IDP-Z3', check=True)
+    # print("Copying to static folder ...")
+    # copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
 
     # Create new version tag.
     new_tag = query_user("Create new tag? (Y/n) ")
     if new_tag:
-        tag_version = query_user("New tag: ", get=True)
+        # Find old tag.
+        current_tag = (get("git describe --tags --abbrev=0")
+                       .decode("utf-8").strip())  # Strip newline
+        major, minor, patch = current_tag.split('.')
+        release_type = query_user("(M)ajor, (m)inor or (p)atch release? ",
+                                  get=True)
+        if release_type == "M":
+            tag_version = f"{int(major)+1}.0.0"
+        elif release_type == "m":
+            tag_version = f"{major}.{int(minor)+1}.0"
+        elif release_type == "p":
+            tag_version = f"{major}.{minor}.{int(patch)+1}"
+        else:
+            raise IOError("Incorrect release type")
         run(f"git tag {tag_version}")
 
         # We also need to modify the pyproject.toml.
