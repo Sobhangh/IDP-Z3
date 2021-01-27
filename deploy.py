@@ -44,7 +44,7 @@ def query_user(query, default="y", get=False):
         return input(query) in "Nn"
 
 
-# run('python3 test.py generate')
+run('python3 test.py generate')
 
 update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
 if update_statics:
