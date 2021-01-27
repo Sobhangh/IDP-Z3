@@ -67,8 +67,23 @@ if update_statics:
     # Create new version tag.
     new_tag = query_user("Create new tag? (Y/n) ")
     if new_tag:
-        tag_version = query_user("New tag: ", get=True)
+        # Find old tag.
+        current_tag = (get("git describe --tags --abbrev=0")
+                       .decode("utf-8").strip())  # Strip newline
+        major, minor, patch = current_tag.split('.')
+        release_type = query_user("(M)ajor, (m)inor or (p)atch release? ",
+                                  get=True)
+        # Create new tag and tag both projects.
+        if release_type == "M":
+            tag_version = f"{int(major)+1}.0.0"
+        elif release_type == "m":
+            tag_version = f"{major}.{int(minor)+1}.0"
+        elif release_type == "p":
+            tag_version = f"{major}.{minor}.{int(patch)+1}"
+        else:
+            raise IOError("Incorrect release type")
         run(f"git tag {tag_version}")
+        run(f"git -C ../web-IDP-Z3 tag {tag_version}")
 
         # We also need to modify the pyproject.toml.
         with open("./pyproject.toml", "r") as fp:
@@ -79,12 +94,16 @@ if update_statics:
         with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
-    # add and commit
+    # Add and commit.
     run("git add -A")
     run("git commit")
     run("git push origin main")
 
     if new_tag:
+        # Push tags.
+        run(f"git push origin {tag_version}")
+        run(f"git -C ../web-IDP-Z3 push origin {tag_version}")
+
         # Publish new version on Pypi.
         run("poetry install")
         run("poetry build")
