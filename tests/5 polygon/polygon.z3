@@ -128,7 +128,10 @@ structure {
 
 display {
     view = expanded.
+    unit('m', `Length, `Perimeter).
+    unit('degrees', `Angle).
 }
+
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
@@ -154,12 +157,14 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'm',
               'view': 'expanded'},
              {'environmental': False,
               'idpname': 'Angle',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'degrees',
               'view': 'expanded'},
              {'environmental': False,
               'idpname': 'Subtype',
@@ -184,6 +189,7 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'm',
               'view': 'expanded'},
              {'environmental': False,
               'idpname': 'Large',

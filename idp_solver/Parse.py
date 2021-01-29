@@ -911,6 +911,8 @@ class Enumeration(object):
                     out)
             return out
 
+class FunctionEnum(Enumeration):
+    pass
 
 class Tuple(object):
     def __init__(self, **kwargs):
@@ -1183,7 +1185,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AppliedSymbol, UnappliedSymbol,
                                          Number, Brackets, Arguments,
 
-                                         Structure, SymbolInterpretation, Enumeration,
+                                         Structure, SymbolInterpretation,
+                                         Enumeration, FunctionEnum,
                                          Tuple, Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])
