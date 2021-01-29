@@ -931,6 +931,14 @@ class Tuple(object):
     def translate(self):
         return [arg.translate() for arg in self.args]
 
+class FunctionTuple(Tuple):
+    def __init__(self, **kwargs):
+        self.args = kwargs.pop('args')
+        if not isinstance(self.args, list):
+            self.args = [self.args]
+        self.value = kwargs.pop('value')
+        self.args.append(self.value)
+        self.code = sys.intern(",".join([str(a) for a in self.args]))
 
 ################################ Goal, View  ###############################
 
@@ -1187,6 +1195,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum,
-                                         Tuple, Goal, View, Display,
+                                         Tuple, FunctionTuple, Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

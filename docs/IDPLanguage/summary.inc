@@ -56,8 +56,8 @@ The equivalent ASCII-only encoding is shown on the right.
 
     structure S:V {
         p = {1;2;3}
-        f = {1,1; 2,2}
-        f = {1,1} else 2
+        f = {1→1, 2→2}                            f = {1->1, 2->2}
+        f = {(1,2)→3} else 2                      f = {(1,2)->3} else 2
         f=1.
     }
 
