@@ -25,9 +25,9 @@ A structure is a set of enumerations, having one of the following forms:
 
         \}
 
-    F = \{~&el_1^1, el_1^2,... el_1^n, el_1;
+    F = \{~&(el_1^1, el_1^2,... el_1^n) → el_1,
 
-          &el_2^1, el_2^2,... el_2^n, el_2;
+          &e(l_2^1, el_2^2,... el_2^n) -> el_2,
 
           &..
 

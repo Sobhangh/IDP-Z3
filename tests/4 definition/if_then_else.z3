@@ -1,14 +1,15 @@
 
 Model 1
 ==========
-p:={->true}
+p:={->false}
 q:={->true}
 r:={->true}
-Color:={->blue}
+Color:={->green}
 
 Model 2
 ==========
 p:={->false}
+q:={->false}
 r:={->true}
 Color:={->green}
 
@@ -16,7 +17,6 @@ Model 3
 ==========
 p:={->true}
 q:={->true}
-r:={->false}
 Color:={->blue}
 
 No more models.

@@ -3,11 +3,11 @@
 // https://dmcommunity.org/challenge/challenge-july-2018/
 
 vocabulary {
-	type Bus_t constructed from { Big, Small } 
-	type Size_t = { 30..40 } 
-	type Price_t = { 0..4000 } 
-	type Kid_t = { 0..300 } 
-	type Amount_t = { 0..10 } 
+	type Bus_t constructed from { Big, Small }
+	type Size_t = { 30..40 }
+	type Price_t = { 0..4000 }
+	type Kid_t = { 0..300 }
+	type Amount_t = { 0..10 }
 	Price(Bus_t): Price_t
 	Size(Bus_t): Size_t
 	Amount(Bus_t): Amount_t
@@ -33,8 +33,8 @@ theory {
 
 
 structure {
-	Price = {Big, 500; Small, 400; } else 400 
-	Size = {Big, 40; Small, 30; } else 30 
+	Price = { Big → 500, Small → 400 } else 400
+	Size = { Big → 40, Small → 30 } else 30
 }
 
 -- meta -------------------------------------
