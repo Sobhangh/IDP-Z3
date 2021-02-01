@@ -93,12 +93,15 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
       Brackets: annotations=Annotations '(' f=Expression ')';
 
 
-Structure: 'structure' (name=ID)? (':' vocab_name=ID)? '{' interpretations*=SymbolInterpretation '}';
-  SymbolInterpretation: name=Symbol '=' ( default=Base '.'
+Structure: 'structure' (name=ID)? (':' vocab_name=ID)?
+           '{' interpretations*=SymbolInterpretation '}';
+  SymbolInterpretation: name=Symbol '='
+                        ( default=Base '.'?
                         | enumeration=FunctionEnum ('else' default=Base)?
                         | enumeration=Enumeration);
   FunctionEnum : '{' tuples+=FunctionTuple[','] '}';
-  FunctionTuple : ( args=Base | '(' args*=Base[','] ')' ) ('->' | '→') value=Base;
+  FunctionTuple : ( args=Base | '(' args*=Base[','] ')' )?
+                  ('->' | '→') value=Base;
   Enumeration : '{' tuples+=Tuple[','] '}';
   Tuple :  ( args=Base | '(' args*=Base[','] ')' );
 
