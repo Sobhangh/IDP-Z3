@@ -16,7 +16,10 @@ theory {
 
 
 structure {
-	Country_borders_Country = {Belgium,France;Belgium,Luxembourg;Belgium,Netherlands;Belgium,Germany;Netherlands,Germany;Germany,France;Germany,Denmark;Germany,Luxembourg;France,Luxembourg;}
+	Country_borders_Country = {(Belgium,France), (Belgium,Luxembourg),
+	(Belgium,Netherlands), (Belgium,Germany), (Netherlands,Germany),
+	(Germany,France), (Germany,Denmark), (Germany,Luxembourg),
+	(France,Luxembourg)}
 }
 
 -- meta -------------------------------------
