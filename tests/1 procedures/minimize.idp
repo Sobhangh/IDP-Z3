@@ -104,7 +104,7 @@ theory T:V {
 }
 
 structure S:V {
-    Sides=3.
+    Sides:=3.
 }
 
 procedure main () {

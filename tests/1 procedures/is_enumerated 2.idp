@@ -9,8 +9,8 @@ vocabulary V {
 }
 
 structure S:V {
-    opposite = {(red, green), (green, green)}
-    f = {(A,A) -> A, (A,B) -> A, (B,A) -> B}
+    opposite := {(red, green), (green, green)}
+    f := {(A,A) -> A, (A,B) -> A, (B,A) -> B}
 }
 
 theory T3:V {

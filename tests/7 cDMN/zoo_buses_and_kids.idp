@@ -31,6 +31,6 @@ theory {
 
 
 structure {
-	Price = { Big → 500, Small → 400 } else 400
-	Size = { Big → 40, Small → 30 } else 30
+	Price := { Big → 500, Small → 400 } else 400
+	Size := { Big → 40, Small → 30 } else 30
 }

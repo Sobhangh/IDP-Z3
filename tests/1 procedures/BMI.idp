@@ -47,8 +47,8 @@ theory T:V {
 
 
 structure {
-    weight = {-> 80}
-    length = {->179}
+    weight := {-> 80}
+    length := {->179}
 }
 
 procedure main() {

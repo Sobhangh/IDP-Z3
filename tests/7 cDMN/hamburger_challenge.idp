@@ -33,8 +33,8 @@ theory {
 
 
 structure {
-	Sodium = {Beef_Patty → 50, Bun → 330, Cheese → 310, Onions → 1, Pickles → 260, Lettuce → 3, Ketchup → 160, Tomato → 3 } else 3
-	Fat = {Beef_Patty → 17, Bun → 9, Cheese → 6, Onions → 2, Pickles → 0, Lettuce → 0, Ketchup → 0, Tomato → 0 } else 0
-	Calories = {Beef_Patty → 220, Bun → 260, Cheese → 70, Onions → 10, Pickles → 5, Lettuce → 4, Ketchup → 20, Tomato → 9 } else 9
-	Cost = {Beef_Patty → 25, Bun → 15, Cheese → 10, Onions → 9, Pickles → 3, Lettuce → 4, Ketchup → 2, Tomato → 4 } else 4
+	Sodium := {Beef_Patty → 50, Bun → 330, Cheese → 310, Onions → 1, Pickles → 260, Lettuce → 3, Ketchup → 160, Tomato → 3 } else 3
+	Fat := {Beef_Patty → 17, Bun → 9, Cheese → 6, Onions → 2, Pickles → 0, Lettuce → 0, Ketchup → 0, Tomato → 0 } else 0
+	Calories := {Beef_Patty → 220, Bun → 260, Cheese → 70, Onions → 10, Pickles → 5, Lettuce → 4, Ketchup → 20, Tomato → 9 } else 9
+	Cost := {Beef_Patty → 25, Bun → 15, Cheese → 10, Onions → 9, Pickles → 3, Lettuce → 4, Ketchup → 2, Tomato → 4 } else 4
 }
