@@ -57,6 +57,10 @@ The equivalent ASCII-only encoding is shown on the right.
         p := false
         p := {1,2,3}
         p := {1,2), (3,4)}
+        p := {
+        1 2
+        3 4
+        }
 
         f := 1
         f := {→1}                                 f := {-> 1}

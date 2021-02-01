@@ -790,7 +790,7 @@ class SymbolInterpretation(object):
                             (0 < count and count == len(self.decl.instances)))
 
         # set default value
-        if type(self.enumeration) == Enumeration and self.enumeration.tuples:
+        if type(self.enumeration) != FunctionEnum and self.enumeration.tuples:
             self.default = FALSE
         if len(self.decl.instances) == 0:  # infinite domain
             assert self.default is None, \
@@ -888,6 +888,9 @@ class Enumeration(object):
 class FunctionEnum(Enumeration):
     pass
 
+class CSVEnumeration(Enumeration):
+    pass
+
 class Tuple(object):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
@@ -913,6 +916,9 @@ class FunctionTuple(Tuple):
         self.value = kwargs.pop('value')
         self.args.append(self.value)
         self.code = sys.intern(",".join([str(a) for a in self.args]))
+
+class CSVTuple(Tuple):
+    pass
 
 ################################ Goal, View  ###############################
 
@@ -1168,7 +1174,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Number, Brackets, Arguments,
 
                                          Structure, SymbolInterpretation,
-                                         Enumeration, FunctionEnum,
-                                         Tuple, FunctionTuple, Goal, View, Display,
+                                         Enumeration, FunctionEnum, CSVEnumeration,
+                                         Tuple, FunctionTuple, CSVTuple,
+                                         Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])
