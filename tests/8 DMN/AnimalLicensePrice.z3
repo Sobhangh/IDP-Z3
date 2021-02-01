@@ -7,8 +7,8 @@ vocabulary {
 	Total: ()→Real
 	Age: ()→Int
 	Animal: ()→Animalt_t
-	ViciousDog:()
-	Sterilized:()
+	ViciousDog:() → Bool
+	Sterilized:() → Bool
 }
 theory {
 	//Animal License Price

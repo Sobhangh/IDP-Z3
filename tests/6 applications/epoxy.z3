@@ -7,7 +7,7 @@ vocabulary {
     type t_safe_high_storage_t = {10; 25; 38}
 
 
-    KnownCost, KnownHighStorageT, KnownLowStorageT:()
+    KnownCost, KnownHighStorageT, KnownLowStorageT:() → Bool
 
     Epoxy: ()→t_epoxy
 

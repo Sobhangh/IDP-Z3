@@ -9,7 +9,7 @@ vocabulary {
 	Length: ()→Int
 	Capacity: ()→Int
 	Cargo: ()→Int
-	Enter:()
+	Enter:() → Bool
 }
 theory {
 	//Ship Clearance

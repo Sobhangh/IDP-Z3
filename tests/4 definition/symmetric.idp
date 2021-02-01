@@ -1,7 +1,7 @@
 vocabulary {
 	type node constructed from {a,b,c}
-	edge: (node, node)
-	symmetric: (`Symbols)
+	edge: (node, node) → Bool
+	symmetric: (`Symbols) → Bool
     Start: ()→node
 }
 theory {

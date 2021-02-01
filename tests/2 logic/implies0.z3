@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    p, q, r, s: ()
+    p, q, r, s: () → Bool
 }
 theory {
     p => q & (r|s).

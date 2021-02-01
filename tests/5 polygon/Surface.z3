@@ -22,10 +22,10 @@ vocabulary {
         , irregular}
     Subtype : ()→subtype
 
-    Convex, Equilateral:()
+    Convex, Equilateral:() → Bool
     Perimeter:()→Real
 
-    Large:(side)
+    Large:(side) → Bool
     Base : ()→Real
     Height: ()→Real
     Surface:()→Real

@@ -1,12 +1,12 @@
 vocabulary V {
     type Color constructed from {red, blue, green, yellow}
     c: ()→Color
-    p:()
+    p:() → Bool
 }
 
 theory T:V {
-    { p() <- c() in {red; blue}.
-      p() <- c() not in {blue;green}.}
+    { p() <- c() in {red, blue}.
+      p() <- c() not in {blue,green}.}
 }
 
 procedure main() {

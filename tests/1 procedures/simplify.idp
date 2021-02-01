@@ -1,6 +1,6 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    p, q, r: ()
+    p, q, r: () → Bool
 }
 
 theory T:V {

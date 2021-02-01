@@ -3,14 +3,14 @@
 
 
 vocabulary {
-	K:()
-	O:()
-	L:()
-	Q:()
-	R:()
-	M:()
-	N:()
-	P:()
+	K:() → Bool
+	O:() → Bool
+	L:() → Bool
+	Q:() → Bool
+	R:() → Bool
+	M:() → Bool
+	N:() → Bool
+	P:() → Bool
 }
 theory {
 	//AND C

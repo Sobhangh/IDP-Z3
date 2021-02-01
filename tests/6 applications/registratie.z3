@@ -37,38 +37,38 @@ Seller : ()→seller
 Buyer : ()→buyerType
 Use : ()→destination
 
-Domicile_Established:()
-First_Ownership:()
-Monument:()
+Domicile_Established:() → Bool
+First_Ownership:() → Bool
+Monument:() → Bool
 
 Resale : ()→resale
 Transaction_Type : ()→transaction
 Duration_Of_Agreement : ()→agreementDwellingForSocialRenting
 
-Core_City:()
+Core_City:() → Bool
 
 //SocialSeller
-Mortgage_Loan_Allowance:()
-Clean_Purchase:()
-Causal_Connection:()
+Mortgage_Loan_Allowance:() → Bool
+Clean_Purchase:() → Bool
+Causal_Connection:() → Bool
 
 
-Energy_Renovation_Planned:()
+Energy_Renovation_Planned:() → Bool
 
 //SocialRentingAgreement
-Heritage_Investment:()
-Heritage_Plan:()
+Heritage_Investment:() → Bool
+Heritage_Plan:() → Bool
 //AdditionalConditions
 
-Professional_Declaration_Filed:()
-Guarantee_Satisfied:()
-Additional_Security_Required:()
-Additional_Security_Satisfied:()
+Professional_Declaration_Filed:() → Bool
+Guarantee_Satisfied:() → Bool
+Additional_Security_Required:() → Bool
+Additional_Security_Satisfied:() → Bool
 
 //TaxableBase : ()→calculationBase
 //PermittedBase : ()→baseLimit
 
-Additional_Terms:()
+Additional_Terms:() → Bool
 
 
 Start_Dt_Dwelling_For_Social_Rent : ()→date
@@ -80,7 +80,7 @@ Certification_Date_Sale : ()→date
 //DomicileDate : ()→date
 
 //IsDiscount: ()→DiscountType
-Professional_Buyer:()
+Professional_Buyer:() → Bool
 }
 
 vocabulary decision {

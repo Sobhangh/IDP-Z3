@@ -2,7 +2,7 @@ vocabulary V {
     type color constructed from {red, blue, green}
     Color: () → color
     opposite: (color) → color
-    is_color: (color)
+    is_color: (color)→Bool
 
     type AB constructed from {A, B}
     f: (AB,AB)→AB

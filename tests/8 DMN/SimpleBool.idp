@@ -1,10 +1,10 @@
 
 
 vocabulary {
-	Output_AND:()
-	Output_OR:()
-	A:()
-	B:()
+	Output_AND:() → Bool
+	Output_OR:() → Bool
+	A:() → Bool
+	B:() → Bool
 }
 theory {
 	//AND

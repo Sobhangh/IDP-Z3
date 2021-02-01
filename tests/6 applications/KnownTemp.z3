@@ -4,7 +4,7 @@ vocabulary environment {
     type material constructed from {e1, e2, e3}
     _MinT:(material)→ Int // physical
     _MaxT:(material)→ Int
-    _O:(material)         // observed
+    _O:(material) → Bool         // observed
     OMinT:(material)→ Int // observations
     OMaxT:(material)→ Int
 
@@ -15,7 +15,7 @@ vocabulary decision {
 
     T: ()→Int
     M: ()→material
-    Guaranteed:()
+    Guaranteed:() → Bool
 }
 
 theory environment:environment {

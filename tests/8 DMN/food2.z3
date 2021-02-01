@@ -10,7 +10,7 @@ vocabulary {
 	guestCount: ()→Int
 	beverages: ()→beveragest_t
 	desiredDish: ()→desiredDisht_t
-	guestsWithChildren:()
+	guestsWithChildren:() → Bool
 }
 theory {
 	//Beverages

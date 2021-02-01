@@ -18,10 +18,10 @@ vocabulary V {
         , irregular}
     Subtype : () →subtype
 
-    Convex, Equilateral: ()
+    Convex, Equilateral: () → Bool
     Perimeter: () → Real
 
-    Large, Wide : (side)
+    Large, Wide : (side) → Bool
     Base, Height, Surface : () → Real
 }
 

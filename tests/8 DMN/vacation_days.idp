@@ -4,9 +4,9 @@ vocabulary {
 	Years_of_Service: ()→Int
 	Age: ()→Int
 	vacationdays: ()→Int
-	extra5:()
-	extra3:()
-	extra2:()
+	extra5:() → Bool
+	extra3:() → Bool
+	extra2:() → Bool
 }
 theory {
 	//Extra 5 Days

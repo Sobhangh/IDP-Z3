@@ -5,7 +5,7 @@ vocabulary {
 	Credit_Score: ()→Int
 	Application_Risk_Score: ()→Int
 	Post_Bureau_Risk_Category: ()→Post_Bureau_Risk_Categoryt_t
-	Existing_Customer:()
+	Existing_Customer:() → Bool
 }
 theory {
 	//Post Bureau

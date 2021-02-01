@@ -957,7 +957,7 @@ class Goal(object):
         # define reserved symbol
         if '__relevant' not in voc.symbol_decls:
             relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
-                                    sorts=[], out=None)
+                                    sorts=[], out=Sort(name=BOOL))
             relevants.block = self
             relevants.annotate(voc)
 
@@ -1025,13 +1025,13 @@ class Display(object):
             open_types[name] = Sort(name=type_name)
 
         for name, out in [
-            ('goal', None),
-            ('expand', None),
-            ('relevant', None),
-            ('hide', None),
+            ('goal', Sort(name=BOOL)),
+            ('expand', Sort(name=BOOL)),
+            ('relevant', Sort(name=BOOL)),
+            ('hide', Sort(name=BOOL)),
             ('view', Sort(name='View')),
-            ('moveSymbols', None),
-            ('optionalPropagation', None),
+            ('moveSymbols', Sort(name=BOOL)),
+            ('optionalPropagation', Sort(name=BOOL)),
             ('unit', open_types['unit']),
             ('category', open_types['category'])
         ]:

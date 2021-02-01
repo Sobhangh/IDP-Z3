@@ -20,7 +20,7 @@ vocabulary {
         , irregular}
     Subtype : ()→subtype
 
-    Equilateral:()
+    Equilateral:() → Bool
 }
 
 theory {

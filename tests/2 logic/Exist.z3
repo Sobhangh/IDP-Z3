@@ -2,8 +2,8 @@
 -- original ---------------------------------
 vocabulary {
     type color constructed from {red, blue, green}
-    p: ()
-    q: (color)
+    p: () → Bool
+    q: (color) → Bool
 }
 theory {
     p <=> (?c[color]: c~=red).

@@ -5,7 +5,7 @@
 vocabulary {
 	price: ()→Real
 	age: ()→Real
-	priority:()
+	priority:() → Bool
 }
 theory {
 	//Calculate Price Decision

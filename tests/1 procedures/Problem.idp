@@ -1,6 +1,6 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    p, q: ()
+    p, q: () → Bool
     i: () → Int
     r: () → Real
     type color constructed from {red, blue, green}

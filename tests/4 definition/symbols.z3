@@ -1,8 +1,8 @@
 
 -- original ---------------------------------
 vocabulary {
-    p, q: ()
-    important: (`Symbols)
+    p, q: () → Bool
+    important: (`Symbols) → Bool
 }
 theory {
   ~p()|q.
