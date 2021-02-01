@@ -345,8 +345,6 @@ class SymbolDeclaration(object):
 
         arity (int): the number of arguments
 
-        function (bool): `True` if the symbol is a function
-
         domain (List): the list of possible tuples of arguments
 
         instances (Dict[string, Expression]):
@@ -379,7 +377,6 @@ class SymbolDeclaration(object):
         if self.out is None:
             self.out = Sort(name=BOOL)
 
-        self.function = (self.out.name != BOOL)
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         self.unit: str = None
@@ -712,7 +709,7 @@ class Rule(object):
             out = out.instantiate(old, new)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
-        if self.symbol.decl.function:  # a function
+        if self.symbol.decl.type != BOOL:  # a function
             out = out.instantiate(self.args[-1], instance)
         else:
             out = AEquivalence.make('⇔', [instance, out])
