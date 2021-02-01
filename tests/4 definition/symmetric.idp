@@ -7,7 +7,7 @@ vocabulary {
 theory {
     edge(a,b).
     !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
-	symmetric = {`edge}
+	symmetric := {`edge}
 }
 display {
 	expand(`edge).

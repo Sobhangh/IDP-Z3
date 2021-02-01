@@ -95,7 +95,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
 Structure: 'structure' (name=ID)? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
-  SymbolInterpretation: name=Symbol '='
+  SymbolInterpretation: name=Symbol ':='
                         ( default=Base '.'?
                         | enumeration=FunctionEnum ('else' default=Base)?
                         | enumeration=Enumeration);

@@ -30,7 +30,7 @@ theory T:isa {
 }
 
 structure isa:isa {
-    isa = {(regular_triangle, '1tri angle'), (right_triangle, '1tri angle'),
+    isa := {(regular_triangle, '1tri angle'), (right_triangle, '1tri angle'),
            (rectangle, quadrilateral), (square, quadrilateral)}
 }
 -- meta -------------------------------------

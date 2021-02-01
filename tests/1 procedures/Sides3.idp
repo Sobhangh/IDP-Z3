@@ -119,11 +119,11 @@ theory T:V {
 }
 
 structure S1:V {
-    Sides=3.
+    Sides:=3.
 }
 
 structure S:V {
-    Base=3. Surface=4.5.
+    Base:=3. Surface:=4.5.
 }
 
 procedure main() {

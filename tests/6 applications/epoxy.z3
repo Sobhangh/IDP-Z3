@@ -49,14 +49,14 @@ theory {
 }
 
 structure {
-    ECost = {e1 -> 0.539} else -1
-    ELowest_Storage_T = {e1 -> 16, e2-> 0, e3-> 15} else -900
-    EHighest_Storage_T = {e1-> 38, e2-> 10, e3-> 25} else -900
+    ECost := {e1 -> 0.539} else -1
+    ELowest_Storage_T := {e1 -> 16, e2-> 0, e3-> 15} else -900
+    EHighest_Storage_T := {e1-> 38, e2-> 10, e3-> 25} else -900
 
 }
 
 structure default {
-    Max_Storage_T = {23} // room temperature
+    Max_Storage_T := 23 // room temperature
 }
 
 display {

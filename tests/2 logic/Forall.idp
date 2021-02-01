@@ -7,7 +7,7 @@ vocabulary V {
 }
 theory T:V {
     p <=> (∀c[Color]: c=red).
-    q = {red, blue}
+    q := {red, blue}
     (∀c[Color]: ~q(c) => c=color()).
 }
 procedure main() {

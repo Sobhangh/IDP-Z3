@@ -17,7 +17,7 @@ A structure is a set of enumerations, having one of the following forms:
 
 .. math::
 
-    P = \{~&(el_1^1, el_1^2,... el_1^n),
+    P := \{~&(el_1^1, el_1^2,... el_1^n),
 
           &(el_2^1, el_2^2,... el_2^n),
 
@@ -25,7 +25,7 @@ A structure is a set of enumerations, having one of the following forms:
 
         \}
 
-    F = \{~&(el_1^1, el_1^2,... el_1^n) → el_1,
+    F := \{~&(el_1^1, el_1^2,... el_1^n) → el_1,
 
           &e(l_2^1, el_2^2,... el_2^n) -> el_2,
 
@@ -33,7 +33,7 @@ A structure is a set of enumerations, having one of the following forms:
 
         \}~&else ~el
 
-    Z = el.
+    Z := el
 
 where :math:`P` is a predicate of arity :math:`n`, :math:`F` is a function of arity :math:`n`,
 and :math:`el_i^j` are constructor_\ s or numeric literals.
