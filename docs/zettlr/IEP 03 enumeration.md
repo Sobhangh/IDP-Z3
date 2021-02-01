@@ -9,4 +9,4 @@ Todo to change the notation of enumeration
 - [x] docs
 - [x] allow enumerations in theory
 - [n/a] disable constants in structure ?
-- [ ] support CSV enumerations
+- [x] support CSV enumerations
