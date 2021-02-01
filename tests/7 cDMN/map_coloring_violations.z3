@@ -8,7 +8,7 @@ vocabulary {
 	type Number_t = { 0..10000 }
 	Color:(Country_t)→ Color_t
 	Violations: ()→Number_t
-	Country_borders_Country:(Country_t, Country_t) → Bool
+	Country_borders_Country:(Country_t ⨯ Country_t) → Bool
 }
 theory {
 	//Coloring

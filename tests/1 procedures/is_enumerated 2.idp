@@ -5,7 +5,7 @@ vocabulary V {
     is_color: (color)→Bool
 
     type AB constructed from {A, B}
-    f: (AB,AB)→AB
+    f: (AB*AB)→AB
 }
 
 structure S:V {

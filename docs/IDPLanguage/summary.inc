@@ -16,9 +16,9 @@ The equivalent ASCII-only encoding is shown on the right.
         // built-in types: 𝔹, ℤ, ℝ, `Symbols      Bool, Int, Real, `Symbols
 
         p : () → 𝔹                                p: () -> Bool
-        p1, p2 : (T) → 𝔹                          p1, p2: (T) -> Bool
-        f: (T) → T                                f: (T) -> T
-        f1, f2: (T) → T                           f1, f2: (T) -> T
+        p1, p2 : T1 ⨯ T2 → 𝔹                      p1, p2: T1*T2 -> Bool
+        f: T → T                                  f: T -> T
+        f1, f2: T → T                             f1, f2: T -> T
 
         [this is the intended meaning of p]
         p : () → 𝔹

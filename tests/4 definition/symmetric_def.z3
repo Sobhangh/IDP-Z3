@@ -2,7 +2,7 @@
 -- original ---------------------------------
 vocabulary {
 	type node constructed from {a,b,c}
-	edge: (node, node) → Bool
+	edge: (node ⨯ node) → Bool
 	symmetric: (`Symbols) → Bool
 }
 theory {

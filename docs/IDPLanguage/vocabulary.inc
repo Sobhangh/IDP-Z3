@@ -51,10 +51,10 @@ The functions with name ``MyFunc1``, ``MyFunc2``, input types ``T1``, ``T2``, ``
 
 .. code::
 
-    myFunc1, myFunc2 : (T1, T2, T3) → T
+    myFunc1, myFunc2 : T1 ⨯ T2 ⨯ T3 → T
 
 Their name should not start with a capital letter, by convention.
-The ASCII equivalent of ``→`` is ``->``.
+The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
 
 IDP-Z3 does not support partial functions.
 
@@ -68,7 +68,7 @@ The predicates with name ``myPred1``, ``myPred2`` and argument types ``T1``, ``T
 
 .. code::
 
-    myPred1, myPred2 : (T1, T2, T3) → 𝔹
+    myPred1, myPred2 : T1 ⨯ T2 ⨯ T3 → 𝔹
 
 Their name should not start with a capital letter, by convention.
 The ASCII equivalent of ``→`` is ``->``, and of ``𝔹`` is ``Bool``.
