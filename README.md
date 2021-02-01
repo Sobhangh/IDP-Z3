@@ -1,4 +1,4 @@
-The IDP-Z3 tools implement a knowledge base system combining the Microsoft Z3 solver and a grounder developed in-house, supporting the IDP language.  See the presentation at [www.IDP-Z3.be](www.IDP-Z3.be).
+The IDP-Z3 tools implement a knowledge base system combining the Microsoft Z3 solver and a grounder developed in-house, supporting the IDP language.  See the presentation at [www.IDP-Z3.be](https://www.IDP-Z3.be).
 
 It is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium, and made available under the [GNU LGPL v3 License](https://www.gnu.org/licenses/lgpl-3.0.txt).
 
