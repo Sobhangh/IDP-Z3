@@ -68,9 +68,10 @@ The predicates with name ``myPred1``, ``myPred2`` and argument types ``T1``, ``T
 
 .. code::
 
-    myPred1, myPred2 : (T1, T2, T3)
+    myPred1, myPred2 : (T1, T2, T3) → 𝔹
 
 Their name should not start with a capital letter, by convention.
+The ASCII equivalent of ``→`` is ``->``, and of ``𝔹`` is ``Bool``.
 
 .. _constant:
 .. index:: constant, proposition
@@ -82,7 +83,7 @@ A proposition is a predicate of arity 0; a constant is a function of arity 0.
 
 .. code::
 
-    MyProposition : ()
+    MyProposition : () → 𝔹
     MyConstant: () → Int
 
 

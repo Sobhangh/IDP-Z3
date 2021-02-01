@@ -15,8 +15,8 @@ The equivalent ASCII-only encoding is shown on the right.
         type T = {1..3}
         // built-in types: 𝔹, ℤ, ℝ, `Symbols      Bool, Int, Real, `Symbols
 
-        p : ()
-        p1, p2 : (T)
+        p : () → 𝔹                                p: () -> Bool
+        p1, p2 : (T)→ 𝔹                           p1, p2: (T) -> Bool
         f: (T) → T                                f: (T) -> T
         f1, f2: (T) → T                           f1, f2: (T) -> T
 
