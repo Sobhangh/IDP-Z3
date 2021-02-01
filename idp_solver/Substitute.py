@@ -38,6 +38,7 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
                     ADisjunction, AConjunction,  AAggregate, AUnary, \
                     AComparison, AppliedSymbol, UnappliedSymbol, Number, \
                     Variable, TRUE
+from idp_solver.utils import BOOL
 
 
 # class Expression  ###########################################################
@@ -208,7 +209,7 @@ def interpret(self, problem):
     sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
     simpler, co_constraint = None, None
     if self.is_enumerated:
-        assert self.decl.function, \
+        assert self.decl.type != BOOL, \
             f"Can't use 'is enumerated' with predicate {self.name}."
         if self.name in problem.interpretations:
             interpretation = problem.interpretations[self.name]

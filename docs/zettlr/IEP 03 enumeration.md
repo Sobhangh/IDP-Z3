@@ -5,8 +5,8 @@ Todo to change the notation of enumeration
     - [x] use arrow for FunctionEnum; (), "," for tuples; fix test cases
     - [x] use (), "," for predicate enumerations
 - [x] use ":=", 
-- [ ] set .function based on syntax
-- [ ] docs
+- [x] set .function based on syntax
+- [x] docs
 - [x] allow enumerations in theory
-- [ ] disable constants in structure ?
+- [n/a] disable constants in structure ?
 - [ ] support CSV enumerations
