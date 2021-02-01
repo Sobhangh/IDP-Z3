@@ -1,7 +1,7 @@
 vocabulary environment {
-    social_habitat : ()
-    licensed_seller : ()
-    low_rent : ()
+    social_habitat : () → 𝔹
+    licensed_seller : () → 𝔹
+    low_rent : () → 𝔹
 
 }
 

@@ -18,7 +18,7 @@ vocabulary {
         , irregular}
     subtype : () → Subtype
 
-    convex, equilateral : ()
+    convex, equilateral : () → 𝔹
     perimeter: () → ℝ
 
     // base : () → ℝ

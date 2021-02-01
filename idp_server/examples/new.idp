@@ -1,5 +1,5 @@
 vocabulary {
-    p : ()
+    p : () → 𝔹
 }
 
 theory {
