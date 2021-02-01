@@ -33,13 +33,13 @@ The equivalent ASCII-only encoding is shown on the right.
         ∀x[T]: p(x).                              !x[T]: p(x).
         ∃x: p(x).                                 ?x: p(x).
 
-        f() in {1;2;3}.
+        f() in {1,2,3}.
         f() = #{x[T]: p(x)}.
         f() = sum{x[T]: p(x): f(x)}.
         if p1 then p2 else p3.
         f1() = if p then f2() else f3().
 
-        p = {1;2;3}
+        p := {1,2,3}
         p(1) is enumerated.
         p(5) is not enumerated.
 

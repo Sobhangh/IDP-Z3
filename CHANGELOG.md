@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * More verbose error messages + line and col numbers (issue #64)
 * support for 'not in' operator
 * IEP 09 Unicode: allow 𝔹, ℤ, ℝ symbols for types, and '←' in definitions
-* IEP 03: mathematical syntax for Enumerations
+* IEP 03: mathematical and CSV syntax for Enumerations
 
 ### GUI
 * fix #23: functionality for showing units in the interface
