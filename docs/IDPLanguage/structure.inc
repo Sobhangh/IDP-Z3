@@ -17,9 +17,9 @@ A structure is a set of enumerations, having one of the following forms:
 
 .. math::
 
-    P = \{~&el_1^1, el_1^2,... el_1^n;
+    P = \{~&(el_1^1, el_1^2,... el_1^n),
 
-          &el_2^1, el_2^2,... el_2^n;
+          &(el_2^1, el_2^2,... el_2^n),
 
           &..
 
@@ -39,6 +39,7 @@ where :math:`P` is a predicate of arity :math:`n`, :math:`F` is a function of ar
 and :math:`el_i^j` are constructor_\ s or numeric literals.
 
 The first statement enumerates the tuples of terms that make the predicate :math:`P` true.
+Parentheses can be omitted when the arity is 1.
 
 The second statement specifies the value :math:`el_i^n` for the function :math:`F` applied to the tuple of :math:`el_i^j` arguments.
 The element after :math:`else` specifies the function value for the non-enumerated tuples of arguments.

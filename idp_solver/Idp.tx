@@ -99,8 +99,8 @@ Structure: 'structure' (name=ID)? (':' vocab_name=ID)? '{' interpretations*=Symb
                         | enumeration=Enumeration);
   FunctionEnum : '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple : ( args=Base | '(' args*=Base[','] ')' ) ('->' | '→') value=Base;
-  Enumeration : '{' tuples+=Tuple[';'] '}';
-  Tuple : args*=Base[','];
+  Enumeration : '{' tuples+=Tuple[','] '}';
+  Tuple :  ( args=Base | '(' args*=Base[','] ')' );
 
 Goal: 'goal' name=ID;
 
