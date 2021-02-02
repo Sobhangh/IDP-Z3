@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-	type node constructed from {a,b,c}
+	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
 	symmetric: (`Symbols) → Bool
 }

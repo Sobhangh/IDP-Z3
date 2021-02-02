@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary  {
-    type date = {2015; 2016}
+    type date := {2015, 2016}
     Start_Dt_Dwelling_For_Social_Rent : ()→date
 }
 theory {

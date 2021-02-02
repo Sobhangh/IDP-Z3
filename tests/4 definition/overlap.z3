@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-	type num constructed from {Jan, Piet}
+	type num := {Jan, Piet}
     t:()→num
     t0: ()→num
     t1: ()→num

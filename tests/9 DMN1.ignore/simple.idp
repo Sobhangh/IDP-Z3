@@ -1,5 +1,5 @@
 vocabulary V {
-    type Security constructed from {BE001}
+    type Security := {BE001}
     A:() → Bool
     B:() → Bool
     C:() → Bool

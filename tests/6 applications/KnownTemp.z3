@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary environment {
-    type material constructed from {e1, e2, e3}
+    type material := {e1, e2, e3}
     _MinT:(material)→ Int // physical
     _MaxT:(material)→ Int
     _O:(material) → Bool         // observed

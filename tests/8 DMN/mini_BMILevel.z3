@@ -3,9 +3,9 @@
 
 
 vocabulary {
-	type sext_t constructed from { Female, Male }
-	type BMILevelt_t constructed from { Severely_Underweight, Normal, Extreme_Obesity, Underweight, Obese_II, Overweight, Obese_I }
-	type riskLevelt_t constructed from { Extremely_High, High, Low, Increased, Very_High }
+	type sext_t := { Female, Male }
+	type BMILevelt_t := { Severely_Underweight, Normal, Extreme_Obesity, Underweight, Obese_II, Overweight, Obese_I }
+	type riskLevelt_t := { Extremely_High, High, Low, Increased, Very_High }
 	sex: () →sext_t
 	waist: () →Real
 	bmi: () →Real

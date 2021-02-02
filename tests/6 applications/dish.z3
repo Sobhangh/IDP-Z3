@@ -3,9 +3,9 @@
 
 
 vocabulary {
-	type desiredDish_t constructed from { Stew, Spareribs, Beans_salad, Steak, Light_salad, Pasta }
-	type season_t constructed from { Spring, Winter, Summer }
-	type dayType_t constructed from { Weekday, Holiday, Weekend }
+	type desiredDish_t := { Stew, Spareribs, Beans_salad, Steak, Light_salad, Pasta }
+	type season_t := { Spring, Winter, Summer }
+	type dayType_t := { Weekday, Holiday, Weekend }
 	temperature: ()→Real
 	desiredDish: ()→desiredDish_t
 	season: ()→season_t

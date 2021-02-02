@@ -1,10 +1,10 @@
 vocabulary V {
-    type color constructed from {red, blue, green}
+    type color := {red, blue, green}
     Color: () → color
     opposite: (color) → color
     is_color: (color) → Bool
 
-    type AB constructed from {A, B}
+    type AB := {A, B}
     f: AB ⨯ AB → AB
 }
 

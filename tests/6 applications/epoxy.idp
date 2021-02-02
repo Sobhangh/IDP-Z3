@@ -1,8 +1,8 @@
 vocabulary {
-    type t_epoxy constructed from {e1, e2, e3}
-    type t_cost = {0.539; -1}
-    type t_safe_low_storage_t = {0; 15; 16}
-    type t_safe_high_storage_t = {10; 25; 38}
+    type t_epoxy := {e1, e2, e3}
+    type t_cost := {0.539, -1}
+    type t_safe_low_storage_t := {0, 15, 16}
+    type t_safe_high_storage_t := {10, 25, 38}
 
 
     KnownCost, KnownHighStorageT, KnownLowStorageT:() → Bool

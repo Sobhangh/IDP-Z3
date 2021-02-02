@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    type num constructed from { Piet, Jan}
+    type num := { Piet, Jan}
     same: (num) → num
     negated: (num) → num
 }

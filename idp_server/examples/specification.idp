@@ -1,16 +1,16 @@
 vocabulary {
 
-    type Nr_of_sides = {3..4}
+    type Nr_of_sides := {3..4}
     nr_of_sides, nr_of_vertices: () → Nr_of_sides
 
 
-    type Type constructed from {triangle, quadrilateral}
+    type Type := {triangle, quadrilateral}
     type : () → Type
 
-    type Side_Nr = {1..4}
+    type Side_Nr := {1..4}
     length, angle : (Side_Nr) → ℝ
 
-    type Subtype constructed from
+    type Subtype :=
         { regular_triangle
         , right_triangle
         , rectangle

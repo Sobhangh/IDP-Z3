@@ -6,7 +6,7 @@ vocabulary environment {
 vocabulary decision {
     extern vocabulary environment
 
-    type csid constructed from {b, c, d, e, f}
+    type csid := {b, c, d, e, f}
     cSID : ()→csid
 }
 theory environment:environment {}

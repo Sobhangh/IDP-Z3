@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    type color constructed from {red, blue, green}
+    type color := {red, blue, green}
     p: () → Bool
     q: (color) → Bool
 }

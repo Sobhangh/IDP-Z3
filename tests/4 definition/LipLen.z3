@@ -1,8 +1,8 @@
 
 -- original ---------------------------------
 vocabulary {
-    type lipLen constructed from {Short, Standard}
-    type jaDes constructed from {Design_230, Design_400HP}
+    type lipLen := {Short, Standard}
+    type jaDes := {Design_230, Design_400HP}
     LipLen: () →lipLen
     JacketDesign: ()→jaDes
 }

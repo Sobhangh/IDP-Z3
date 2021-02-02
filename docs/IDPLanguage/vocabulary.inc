@@ -33,8 +33,8 @@ Their name should be capitalized, by convention.
 
 .. code::
 
-    type Side = {1..4}
-    type Color constructed from {red, blue, green}
+    type Side := {1..4}
+    type Color := {red, blue, green}
 
 The type ```Symbols`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````

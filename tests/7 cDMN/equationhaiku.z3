@@ -3,10 +3,10 @@
 
 
 vocabulary {
-	type Line_t constructed from { First, Second, Third }
-	type Digit_t = { 0..9 }
-	type Number_t = { 0..1000 }
-	type Syllables_t = { 0..7 }
+	type Line_t := { First, Second, Third }
+	type Digit_t := { 0..9 }
+	type Number_t := { 0..1000 }
+	type Syllables_t := { 0..7 }
 	Allowed_Syllables: (Line_t)→ Syllables_t
 	Syllables_for_Hundreds:(Digit_t)→ Syllables_t
 	Syllables_for_Tens:(Digit_t)→ Syllables_t
