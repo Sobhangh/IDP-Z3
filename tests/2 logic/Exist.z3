@@ -6,11 +6,11 @@ vocabulary {
     q: (color) → Bool
 }
 theory {
-    p <=> (?c[color]: c~=red).
+    p() <=> (?c[color]: c~=red).
     ?c[color]: q(c).
 }
 display {
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

@@ -19,11 +19,11 @@ theory T:V {
         !s: Eligible(s) <- ~NotEligible(s).
     }
     {
-        !s: NotEligible(s) <- B & C.
+        !s: NotEligible(s) <- B() & C().
         !s: NotEligible(s) <- ~Eligible1(s).
     }
     {
-        Eligible1(BE001) <- B & E & F.
+        Eligible1(BE001) <- B() & E() & F().
     }
 }
 

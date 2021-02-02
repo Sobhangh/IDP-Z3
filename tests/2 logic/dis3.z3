@@ -4,12 +4,12 @@ vocabulary {
     p, q, r, s, t:() → Bool
 }
 theory {
-    p.
-    ~p|q.
-    ~q|r.
+    p().
+    ~p()|q().
+    ~q()|r().
 }
 display {
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

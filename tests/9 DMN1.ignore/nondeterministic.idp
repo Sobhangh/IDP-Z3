@@ -13,8 +13,8 @@ vocabulary V {
 }
 
 theory T:V {
-    B & C => Eligible(BE001).
-    B & E & F => Eligible(BE001).
+    B() & C() => Eligible(BE001).
+    B() & E() & F() => Eligible(BE001).
 }
 
 procedure main() {

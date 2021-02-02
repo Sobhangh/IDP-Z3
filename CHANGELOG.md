@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 * (breaking) IEP 03: use math notation for signature of predicate and functions
 * (breaking) IEP 03: mathematical and CSV syntax for Enumerations
+* (breaking) IEP 03: require `()` after constants and propositions
 * More verbose error messages + line and col numbers (issue #64)
 * support for 'not in' operator
 * IEP 09 Unicode: allow 𝔹, ℤ, ℝ symbols for types, and '←' in definitions

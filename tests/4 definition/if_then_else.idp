@@ -4,8 +4,8 @@ vocabulary {
     Color: () →color
 }
 theory {
-    if p then q else r.
-    Color() = (if p then blue else green).
+    if p() then q() else r().
+    Color() = (if p() then blue else green).
 }
 
 procedure main() {

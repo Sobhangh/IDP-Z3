@@ -4,10 +4,10 @@ vocabulary {
     p, l, r, rd, i: () → Bool
 }
 theory {
-  { i <- rd.}
-  { p <- l | r.}
-  { r <- rd.}
-  r.
+  { i() <- rd().}
+  { p() <- l() | r().}
+  { r() <- rd().}
+  r().
 }
 display {
   goal(`p).

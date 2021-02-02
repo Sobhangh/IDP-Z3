@@ -15,7 +15,7 @@ theory {
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

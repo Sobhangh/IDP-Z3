@@ -11,7 +11,7 @@ theory {
     //Calculate Gross Income
     {
         Adjusted_Gross_Income() = 0 <- ~(Eligible()).
-        Adjusted_Gross_Income() = Wages_Salaries_Tips + Taxable_Interest + Unemployment_Comp <- Eligible().
+        Adjusted_Gross_Income() = Wages_Salaries_Tips() + Taxable_Interest() + Unemployment_Comp() <- Eligible().
     }
 
 }

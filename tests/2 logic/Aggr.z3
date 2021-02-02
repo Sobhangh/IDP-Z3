@@ -5,11 +5,11 @@ vocabulary {
     p: () → Bool
 }
 theory {
-    p <=> sum{c[color] : true : 1} = 3.
+    p() <=> sum{c[color] : true : 1} = 3.
 }
 display {
-    view = expanded.
-    moveSymbols.
+    view() = expanded.
+    moveSymbols().
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

@@ -5,13 +5,13 @@ vocabulary {
 }
 
 theory {
-    { p <- q | r. }
-    p|s.
-    q.
+    { p() <- q() | r(). }
+    p()|s().
+    q().
 }
 display {
     goal(`b).
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

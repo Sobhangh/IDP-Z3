@@ -12,7 +12,7 @@ The following predicates and functions are available:
 .. index:: expanded view
 
 expand
-    :math:`expand(s_1, .., s_n)` specifies that :ref:`symbols<symbol>` :math:`s_1, .., s_n` are shown expanded, 
+    :math:`expand(s_1, .., s_n)` specifies that :ref:`symbols<symbol>` :math:`s_1, .., s_n` are shown expanded,
     i.e., that all sub-sentences of the theory where they occur are shown on the screen.
 
     For example, ``expand(`Length).`` will force the Interactive Consultant to show all sub-sentences containing `Length`.
@@ -22,10 +22,10 @@ hide
 
     For example, ``hide(`Length).`` will force the Interactive Consultant to not display the box containing `Length` information.
 
-view
-    ``view = normal.`` (default) specifies that symbols are displayed in normal mode.
+view()
+    ``view() = normal.`` (default) specifies that symbols are displayed in normal mode.
 
-    ``view = expanded.`` specifies that symbols are displayed expand_\ ed.
+    ``view() = expanded.`` specifies that symbols are displayed expand_\ ed.
 
 relevant
     :math:`relevant(s_1, .., s_n)` specifies that symbols :math:`s_1, .., s_n` are relevant, i.e. that they should never be greyed out.

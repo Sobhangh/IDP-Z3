@@ -849,10 +849,10 @@ class UnappliedSymbol(Expression):
             return voc.symbol_decls[self.name]
         if self.name in q_vars:
             return q_vars[self.name]
-        elif self.name in voc.symbol_decls:  # in symbol_decls
-            out = AppliedSymbol(s=self.s,
-                                args=Arguments(sub_exprs=self.sub_exprs))
-            return out.annotate(voc, q_vars)
+        # elif self.name in voc.symbol_decls:  # in symbol_decls
+        #     out = AppliedSymbol(s=self.s,
+        #                         args=Arguments(sub_exprs=self.sub_exprs))
+        #     return out.annotate(voc, q_vars)
         # If this code is reached, an undefined symbol was present.
         raise self.create_error(f"Symbol not in vocabulary: {self}")
 

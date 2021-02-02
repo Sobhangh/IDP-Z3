@@ -5,7 +5,7 @@ vocabulary {
 
 theory {
     // here comes the definitions and constraints
-    p.
+    p().
 }
 
 structure {

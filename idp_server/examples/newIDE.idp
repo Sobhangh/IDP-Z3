@@ -3,7 +3,7 @@ vocabulary V {
 }
 
 theory T:V {
-    p.
+    p().
 }
 
 structure S:V {

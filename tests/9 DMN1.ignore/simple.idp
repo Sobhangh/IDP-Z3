@@ -14,8 +14,8 @@ vocabulary V {
 
 theory T:V {
     {
-        !s: Eligible(s) <- B & C.
-        Eligible(BE001) <- B & E & F.
+        !s: Eligible(s) <- B() & C().
+        Eligible(BE001) <- B() & E() & F().
     }
 }
 

@@ -11,7 +11,7 @@ theory {
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }
 
 -- meta -------------------------------------

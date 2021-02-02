@@ -8,12 +8,12 @@ vocabulary {
 }
 
 theory {
-    { !cl: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
+    { !cl: ! cd[code]: codeOf(cl)=cd <- (cl=c() & cd=a) | (cl~=c() & cd=b). }
     codeOf(red)=b.
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }
 
 -- meta -------------------------------------

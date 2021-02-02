@@ -5,11 +5,11 @@ vocabulary V {
 
 theory T1:V {
     // here comes the definitions and constraints
-    p.
+    p().
 }
 theory T2:V {
     // here comes the definitions and constraints
-    {p <- q.}
+    {p() <- q().}
 }
 
 

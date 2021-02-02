@@ -11,12 +11,12 @@ structure S:V {
 }
 
 theory T:V {
-    opposite(Color) is enumerated.
+    opposite(Color()) is enumerated.
 }
 
 
 display {
-  view = expanded.
+  view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

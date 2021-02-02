@@ -13,26 +13,26 @@ vocabulary {
 theory {
 	//dishDecisionTable
 	{
-		desiredDish = Spareribs <- season = Winter & guestCount =< 08.
-		desiredDish = Pasta <- season = Winter & guestCount > 08.
-		desiredDish = Light_salad <- season = Summer & guestCount > 10.
-		desiredDish = Beans_salad <- season = Summer & guestCount =< 10.
-		desiredDish = Stew <- season = Spring & guestCount < 10.
-		desiredDish = Steak <- season = Spring & guestCount >= 10.
+		desiredDish() = Spareribs <- season() = Winter & guestCount() =< 08.
+		desiredDish() = Pasta <- season() = Winter & guestCount() > 08.
+		desiredDish() = Light_salad <- season() = Summer & guestCount() > 10.
+		desiredDish() = Beans_salad <- season() = Summer & guestCount() =< 10.
+		desiredDish() = Stew <- season() = Spring & guestCount() < 10.
+		desiredDish() = Steak <- season() = Spring & guestCount() >= 10.
 	}
 
 	//seasonDecisionTable
 	{
-		season = Summer <- temperature > 30.
-		season = Winter <- temperature < 10.
-		season = Spring <- 10 =< temperature & temperature =< 30.
+		season() = Summer <- temperature() > 30.
+		season() = Winter <- temperature() < 10.
+		season() = Spring <- 10 =< temperature() & temperature() =< 30.
 	}
 
 	//guestCountDecisionTable
 	{
-		guestCount = 04 <- dayType = Weekday.
-		guestCount = 10 <- dayType = Holiday.
-		guestCount = 15 <- dayType = Weekend.
+		guestCount() = 04 <- dayType() = Weekday.
+		guestCount() = 10 <- dayType() = Holiday.
+		guestCount() = 15 <- dayType() = Weekend.
 	}
 
 }

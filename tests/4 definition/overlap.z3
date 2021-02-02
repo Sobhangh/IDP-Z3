@@ -8,8 +8,8 @@ vocabulary {
 }
 
 theory {
-    { t=t0. t=t1.}
-    t0=Piet.
+    { t()=t0(). t()=t1().}
+    t0()=Piet.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

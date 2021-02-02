@@ -5,7 +5,7 @@ vocabulary {
 }
 
 theory {
-    p => Color() in {red, blue}.
+    p() => Color() in {red, blue}.
 }
 
 procedure main() {

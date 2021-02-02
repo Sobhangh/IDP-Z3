@@ -24,18 +24,18 @@ vocabulary {
 }
 
 theory {
-    Sides=3.
+    Sides()=3.
 
-    Subtype=rectangle => Length(3)=Length(1).
+    Subtype()=rectangle => Length(3)=Length(1).
 
-    Equilateral <=> (∀n[side]: Length(n)=Length(1) | Sides < n).
+    Equilateral() <=> (∀n[side]: Length(n)=Length(1) | Sides() < n).
 
-    Subtype=rectangle <=> Sides=4.
+    Subtype()=rectangle <=> Sides()=4.
 
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

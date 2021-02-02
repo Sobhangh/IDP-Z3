@@ -6,7 +6,7 @@ vocabulary V {
     r:() → Bool
 }
 theory T:V {
-    p <=> (∀c[Color]: c=red).
+    p() <=> (∀c[Color]: c=red).
     q := {red, blue}
     (∀c[Color]: ~q(c) => c=color()).
 }

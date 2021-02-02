@@ -3,8 +3,8 @@ vocabulary V {
 }
 
 theory T:V {
-   p=>q.
-   q=>r.
+   p()=>q().
+   q()=>r().
 }
 
 procedure main() {

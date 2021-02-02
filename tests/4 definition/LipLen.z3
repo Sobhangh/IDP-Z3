@@ -9,8 +9,8 @@ vocabulary {
 
 theory {
     {
-        LipLen = Short <- JacketDesign = Design_230.
-        LipLen = Standard <- JacketDesign = Design_400HP.
+        LipLen() = Short <- JacketDesign() = Design_230.
+        LipLen() = Standard <- JacketDesign() = Design_400HP.
     }
 }
 -- meta -------------------------------------

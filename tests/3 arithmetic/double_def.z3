@@ -8,7 +8,7 @@ vocabulary {
 theory {
     {!x[Real]: double(x)= x+x. }
     X()=3.
-    y=double(X()).
+    y()=double(X()).
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

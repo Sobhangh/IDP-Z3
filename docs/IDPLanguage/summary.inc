@@ -27,7 +27,7 @@ The equivalent ASCII-only encoding is shown on the right.
     }
 
     theory T:V {
-        (¬p1∧p2 ∨ p3 ⇒ p4 ⇔ p5) ⇐ p6.             (~p1&p2 | p3 => p4 <=> p5) <= p6.
+        (¬p1()∧p2() ∨ p3() ⇒ p4() ⇔ p5()) ⇐ p6(). (~p1()&p2() | p3() => p4() <=> p5()) <= p6().
         p(f1(f2())).
         f1() < f2() ≤ f3() = f4() ≥ f5() > f6().  f1() < f2() =< f3() = f4() >= f5() > f6().
         f() ≠ c.                                  f() ~= c.
@@ -37,8 +37,8 @@ The equivalent ASCII-only encoding is shown on the right.
         f() in {1,2,3}.
         f() = #{x[T]: p(x)}.
         f() = sum{x[T]: p(x): f(x)}.
-        if p1 then p2 else p3.
-        f1() = if p then f2() else f3().
+        if p1() then p2() else p3().
+        f1() = if p() then f2() else f3().
 
         p := {1,2,3}
         p(1) is enumerated.
@@ -51,7 +51,7 @@ The equivalent ASCII-only encoding is shown on the right.
         }
 
         [this is the intended meaning of the rule]
-        (p).
+        (p()).
     }
 
     structure S:V {
@@ -72,7 +72,7 @@ The equivalent ASCII-only encoding is shown on the right.
     display {
         expand(`p).
         hide(`p).
-        view = expanded.
+        view() = expanded.
         relevant(`p1, `p2).
         goal(`p).
         optionalPropagation.

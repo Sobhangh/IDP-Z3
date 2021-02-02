@@ -21,15 +21,15 @@ structure S2:V {
 theory T:V {
     opposite(red) is enumerated.
     opposite(blue) is not enumerated => opposite(blue)=blue.
-    opposite(Color) is not enumerated.
+    opposite(Color()) is not enumerated.
 }
 theory T2:V {
     opposite(blue)=green.
-    opposite(Color)=Color.
+    opposite(Color())=Color().
     f(A,B) is enumerated.
 }
 theory T4:V {
-    Color = blue.
+    Color() = blue.
     (f(B,B) is enumerated).
 }
 

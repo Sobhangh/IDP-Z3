@@ -7,13 +7,13 @@
 
 theory T:V {
     // here comes the definitions and constraints
-    q => p.
+    q() => p().
     f(red).
 }
 
 theory T2:V {
     // here comes the interpretation of some symbols
-    { q. }
+    { q(). }
 }
 
 procedure main () {

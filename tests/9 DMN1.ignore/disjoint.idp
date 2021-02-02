@@ -3,7 +3,7 @@ vocabulary V {
 }
 
 theory T:V {
-   r=>p. q.
+   r()=>p(). q().
 }
 
 procedure main() {

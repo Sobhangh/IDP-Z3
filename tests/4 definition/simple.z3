@@ -7,14 +7,14 @@ vocabulary {
 }
 
 theory {
-    { p <- q | r. }
-    { a=red <- p. }
-    { b=red <- a=red. }
-    { c=red. }
+    { p() <- q() | r(). }
+    { a()=red <- p(). }
+    { b()=red <- a()=red. }
+    { c()=red. }
 }
 display {
     goal(`b).
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,
