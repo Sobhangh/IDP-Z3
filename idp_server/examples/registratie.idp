@@ -53,7 +53,7 @@ vocabulary decision {
   extern vocabulary environment
 
   type Registration_type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
-  type Tax_Rate = {1; 2; 4; 6; 7; 10; 12}
+  type Tax_Rate = {1, 2, 4, 6, 7, 10, 12}
 
   tax : Tax_Rate
   registration_type : Registration_type

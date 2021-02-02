@@ -21,7 +21,7 @@ Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
     Extern: 'extern' 'vocabulary' (name=ID);
     ConstructedTypeDeclaration: 'type' name=ID 'constructed' 'from' '{' constructors*=Constructor[','] '}';
       Constructor: name=/[^\d\W]\w*\b|'(\.|[^'])*'/;
-    RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[';'] '}';
+    RangeDeclaration: 'type' name=ID '=' '{' elements*=RangeElement[','] '}';
       RangeElement: fromI=Number ('..' toI=Number)?;
 
     SymbolDeclaration: annotations=Annotations name=Symbol ('(' sorts*=Sort[','] ')')? (':' out=Sort)?;

@@ -8,9 +8,9 @@ type real_Estate_Type constructed from {Residential, Residential_Building_Land, 
 type destination constructed from {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
 type buyerType constructed from {Natural_Person, Legal_Person, Mixed}
 
-type calculationBase = {190; 200; 210; 220; 225}
-type baseLimit = {200; 220}
-//type DiscountType = {56; 48; 0}
+type calculationBase = {190, 200, 210, 220, 225}
+type baseLimit = {200, 220}
+//type DiscountType = {56, 48, 0}
 
 type date = {2015..2025}
 
@@ -87,7 +87,7 @@ vocabulary decision {
     extern vocabulary environment
 
     type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
-    type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
+    type tax_Rate = {1, 2, 4, 7, 6, 10, 12}
 
     Registration_Type : registration_Type
     Tax : tax_Rate
@@ -114,7 +114,7 @@ Tax = 1 =>
     & Region = Flemish_Region
 ).
 
-Tax = 2 => // correct amount is 1; 5
+Tax = 2 => // correct amount is 1,5
     Registration_Type = Social_Dwelling
     & Region = Flemish_Region
 .

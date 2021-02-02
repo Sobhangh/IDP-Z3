@@ -2,7 +2,7 @@
 -- original ---------------------------------
 vocabulary {
     Works(ℝ)
-    type temp = {0; 1; 2}
+    type temp = {0, 1, 2}
     p q
 }
 theory {
