@@ -3,9 +3,9 @@
 // https://dmcommunity.wordpress.com/challenge/challenge-nov-2015/
 
 vocabulary {
-	type Monkey_t constructed from { Anna, Sam, Harriet, Mike } 
-	type Place_t constructed from { Grass, Rock, Branch, Stream } 
-	type Fruit_t constructed from { Apple, Pear, Banana, Orange } 
+	type Monkey_t := { Anna, Sam, Harriet, Mike }
+	type Place_t := { Grass, Rock, Branch, Stream }
+	type Fruit_t := { Apple, Pear, Banana, Orange }
 	Place(Monkey_t): Place_t
 	Fruit(Monkey_t): Fruit_t
 }

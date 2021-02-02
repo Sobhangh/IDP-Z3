@@ -1,11 +1,11 @@
 
 -- original ---------------------------------
 vocabulary isa {
-    type type constructed from {'1tri angle', 'quadrilateral'}
+    type type := {'1tri angle', 'quadrilateral'}
     Type : type
 
 
-    type subtype constructed from
+    type subtype :=
         { regular_triangle
         , right_triangle
         , rectangle

@@ -1,13 +1,13 @@
 vocabulary environment {
-  type Location constructed from {Flemish_Region, Walloon_Region, Brussels_Region}
-  type Real_Estate_Type constructed from {Residential, Residential_Building_Land, Other_Real_Estate}
-  type Destination constructed from {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
-  type Buyer_Type constructed from {Natural_Person, Legal_Person, Mixed}
-  type Date = {2015..2025}
-  type Agreement_Dwelling_For_Social_Renting constructed from {Less_Than_9_years, More_than_9_Or_9_years}
-  type Transaction constructed from {Public_Sale, Out_Hand, Public_Sale_Community}
-  type Resale constructed from {Less_Than_Three, Three_Or_More}
-  type Seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
+  type Location := {Flemish_Region, Walloon_Region, Brussels_Region}
+  type Real_Estate_Type := {Residential, Residential_Building_Land, Other_Real_Estate}
+  type Destination := {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
+  type Buyer_Type := {Natural_Person, Legal_Person, Mixed}
+  type Date := {2015..2025}
+  type Agreement_Dwelling_For_Social_Renting := {Less_Than_9_years, More_than_9_Or_9_years}
+  type Transaction := {Public_Sale, Out_Hand, Public_Sale_Community}
+  type Resale := {Less_Than_Three, Three_Or_More}
+  type Seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
   region : Location
 
@@ -52,8 +52,8 @@ vocabulary environment {
 vocabulary decision {
   extern vocabulary environment
 
-  type Registration_type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
-  type Tax_Rate = {1, 2, 4, 6, 7, 10, 12}
+  type Registration_type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
+  type Tax_Rate := {1, 2, 4, 6, 7, 10, 12}
 
   tax : Tax_Rate
   registration_type : Registration_type

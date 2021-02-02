@@ -1,7 +1,7 @@
 vocabulary V {
     // here comes the specification of the vocabulary
     p q
-    type color constructed from {red, blue, green}
+    type color := {red, blue, green}
     f(color)
 }
 

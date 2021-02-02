@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    type num = {1..4}
+    type num := {1..4}
     Prime(num)
 }
 

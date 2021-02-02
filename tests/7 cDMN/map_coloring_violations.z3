@@ -3,9 +3,9 @@
 // https://dmcommunity.org/challenge-june-2019/
 
 vocabulary {
-	type Country_t constructed from { Belgium, France, Luxembourg, Netherlands, Germany, Denmark }
-	type Color_t constructed from { Green, Red, Yellow }
-	type Number_t = { 0..10000 }
+	type Country_t := { Belgium, France, Luxembourg, Netherlands, Germany, Denmark }
+	type Color_t := { Green, Red, Yellow }
+	type Number_t := { 0..10000 }
 	Color(Country_t): Color_t
 	Violations: Number_t
 	Country_borders_Country(Country_t, Country_t)

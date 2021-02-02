@@ -1,17 +1,17 @@
 
 -- original ---------------------------------
 vocabulary {
-    type color constructed from {red, blue}
-    type code constructed from {a,b}
+    type color := {red, blue}
+    type code := {a,b}
     codeOf(color): code
     c:color
-} 
+}
 
 theory {
     { !cl: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
     codeOf(red)=b.
 }
- 
+
 display {
     view = expanded.
 }

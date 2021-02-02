@@ -1,7 +1,7 @@
 vocabulary V {
-    type Security constructed from {BE001}
-    type IssuerType constructed from {Sovereign, Corporate, Supra, Issuer1}
-    type CountryType constructed from {	Aus		,
+    type Security := {BE001}
+    type IssuerType := {Sovereign, Corporate, Supra, Issuer1}
+    type CountryType := {	Aus		,
 Bel		,
 Can		,
 Den		,
@@ -31,7 +31,7 @@ country1,
 country2
 
 }
-    type Issuers constructed from {
+    type Issuers := {
 	Austria		,
 	Belgium		,
 	Canada		,
@@ -122,7 +122,7 @@ CAC40	,
  KOSPI100
 
 }
-    type AssetSubClasses constructed from {Bond, Convertible, Share, Warrant, Option, MBS, ABS, CDO, IRS, Eurobond}
+    type AssetSubClasses := {Bond, Convertible, Share, Warrant, Option, MBS, ABS, CDO, IRS, Eurobond}
 
     AssetSubClass(Security) : AssetSubClasses
 	HasRating(Security) : Int

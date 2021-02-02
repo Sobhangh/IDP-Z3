@@ -2,17 +2,17 @@
 -- original ---------------------------------
 vocabulary {
 
-    type sides = {3..4}
+    type sides := {3..4}
     Sides: sides
 
 
-    type type constructed from {triangle, quadrilateral}
+    type type := {triangle, quadrilateral}
     Type : type
 
-    type side = {1..4}
+    type side := {1..4}
     Length(side):Real
 
-    type subtype constructed from
+    type subtype :=
         { regular_triangle
         , right_triangle
         , rectangle

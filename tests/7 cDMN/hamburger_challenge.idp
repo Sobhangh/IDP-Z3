@@ -1,8 +1,8 @@
 // https://dmcommunity.wordpress.com/challenge/make-a-good-burger/
 
 vocabulary {
-	type Item_t constructed from {  Beef_Patty, Bun, Cheese, Onions, Pickles, Lettuce, Ketchup, Tomato }
-	type Nat_t = { 0..10000 }
+	type Item_t := {  Beef_Patty, Bun, Cheese, Onions, Pickles, Lettuce, Ketchup, Tomato }
+	type Nat_t := { 0..10000 }
 	Sodium(Item_t): Nat_t
 	Fat(Item_t): Nat_t
 	Calories(Item_t): Nat_t

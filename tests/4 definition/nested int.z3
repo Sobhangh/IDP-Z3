@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-    type num = {-1, 0, 1}
+    type num := {-1, 0, 1}
     same(num) : num
     negated(num) : num
 }
