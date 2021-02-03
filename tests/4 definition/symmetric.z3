@@ -1,7 +1,7 @@
 
 -- original ---------------------------------
 vocabulary {
-	type node constructed from {a,b,c}
+	type node := {a,b,c}
 	edge(node, node)
 	symmetric(`Symbols)
     Start: node
@@ -9,7 +9,7 @@ vocabulary {
 theory {
     edge(a,b).
     !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
-	symmetric = {`edge}
+	symmetric := {`edge}
 }
 display {
 	expand(`edge).

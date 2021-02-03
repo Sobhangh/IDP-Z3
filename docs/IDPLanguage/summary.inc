@@ -10,9 +10,9 @@ The equivalent ASCII-only encoding is shown on the right.
 .. code::
 
     vocabulary V {
-        type T constructed from {c1, c2}
-        type T = {1;2;3}
-        type T = {1..3}
+        type T := {c1, c2}
+        type T := {1,2,3}
+        type T := {1..3}
         // built-in types: 𝔹, ℤ, ℝ, `Symbols      Bool, Int, Real, `Symbols
 
         p
@@ -33,13 +33,13 @@ The equivalent ASCII-only encoding is shown on the right.
         ∀x[T]: p(x).                              !x[T]: p(x).
         ∃x: p(x).                                 ?x: p(x).
 
-        f() in {1;2;3}.
+        f() in {1,2,3}.
         f() = #{x[T]: p(x)}.
         f() = sum{x[T]: p(x): f(x)}.
         if p1 then p2 else p3.
         f1() = if p then f2() else f3().
 
-        p = {1;2;3}
+        p := {1,2,3}
         p(1) is enumerated.
         p(5) is not enumerated.
 
@@ -54,10 +54,18 @@ The equivalent ASCII-only encoding is shown on the right.
     }
 
     structure S:V {
-        p = {1;2;3}
-        f = {1,1; 2,2}
-        f = {1,1} else 2
-        f=1.
+        p := false
+        p := {1,2,3}
+        p := {1,2), (3,4)}
+        p := {
+        1 2
+        3 4
+        }
+
+        f := 1
+        f := {→1}                                 f := {-> 1}
+        f := {1→1, 2→2}                           f := {1->1, 2->2}
+        f := {(1,2)→3} else 2                     f := {(1,2)->3} else 2
     }
 
     display {

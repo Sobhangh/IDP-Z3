@@ -1,29 +1,29 @@
 vocabulary environment {
-type location constructed from {Flemish_Region, Walloon_Region, Brussels_Region}
+type location := {Flemish_Region, Walloon_Region, Brussels_Region}
 
-type real_Estate_Type constructed from {Residential, Residential_Building_Land, Other_Real_Estate}
+type real_Estate_Type := {Residential, Residential_Building_Land, Other_Real_Estate}
 
-type destination constructed from {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
-type buyerType constructed from {Natural_Person, Legal_Person, Mixed}
+type destination := {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
+type buyerType := {Natural_Person, Legal_Person, Mixed}
 
-type calculationBase = {190; 200; 210; 220; 225}
-type baseLimit = {200; 220}
-//type DiscountType = {56; 48; 0}
+type calculationBase := {190, 200, 210, 220, 225}
+type baseLimit := {200, 220}
+//type DiscountType := {56, 48, 0}
 
-type date = {2015..2025}
+type date := {2015..2025}
 
-type agreementDwellingForSocialRenting constructed from {Less_Than_9_years, More_than_9_Or_9_years}
+type agreementDwellingForSocialRenting := {Less_Than_9_years, More_than_9_Or_9_years}
 
-type transaction constructed from {Public_Sale, Out_Hand, Public_Sale_Community}
-
-
-
-type municipality constructed from {other_Municipal, Aalst, Antwerpen, Boom, Brugge, Dendermonde, Genk, Gent, Hasselt, Kortrijk, Leuven, Mechelen, Oostende, Roeselare, SintNiklaas, Turnhout, Vilvoorde, Affligem, Asse, Beersel, Bever, Dilbeek, Drogenbos, Galmaarden, Gooik, Grimbergen, Halle, Herne, Hoeilaart, Kampenhout, KapelleopdenBos, Kraainem, Lennik, Liedekerke, Linkebeek, Londerzeel, Machelen, Meise, Merchtem, Opwijk, Overijse, Pepingen, Roosdaal, SintGenesiusRode, SintPietersLeeuw, Steenokkerzeel, Ternat, Wemmel, WezembeekOppem, Zaventem, Zemst, Bertem, Huldenberg, Kortenberg, Tervuren}
-
-type resale constructed from {Less_Than_Three, Three_Or_More}
+type transaction := {Public_Sale, Out_Hand, Public_Sale_Community}
 
 
-type seller constructed from {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
+
+type municipality := {other_Municipal, Aalst, Antwerpen, Boom, Brugge, Dendermonde, Genk, Gent, Hasselt, Kortrijk, Leuven, Mechelen, Oostende, Roeselare, SintNiklaas, Turnhout, Vilvoorde, Affligem, Asse, Beersel, Bever, Dilbeek, Drogenbos, Galmaarden, Gooik, Grimbergen, Halle, Herne, Hoeilaart, Kampenhout, KapelleopdenBos, Kraainem, Lennik, Liedekerke, Linkebeek, Londerzeel, Machelen, Meise, Merchtem, Opwijk, Overijse, Pepingen, Roosdaal, SintGenesiusRode, SintPietersLeeuw, Steenokkerzeel, Ternat, Wemmel, WezembeekOppem, Zaventem, Zemst, Bertem, Huldenberg, Kortenberg, Tervuren}
+
+type resale := {Less_Than_Three, Three_Or_More}
+
+
+type seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
 
 ////////////////////////
@@ -84,8 +84,8 @@ Professional_Buyer
 vocabulary decision {
     extern vocabulary environment
 
-    type registration_Type constructed from {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
-    type tax_Rate = {1; 2; 4; 7; 6; 10; 12}
+    type registration_Type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
+    type tax_Rate := {1, 2, 4, 7, 6, 10, 12}
 
     Registration_Type : registration_Type
     Tax : tax_Rate
@@ -110,7 +110,7 @@ Tax = 1 =>
     & Region = Flemish_Region
 ).
 
-Tax = 2 => // correct amount is 1; 5
+Tax = 2 => // correct amount is 1,5
     Registration_Type = Social_Dwelling
     & Region = Flemish_Region
 .

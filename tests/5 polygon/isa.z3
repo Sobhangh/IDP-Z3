@@ -1,11 +1,11 @@
 
 -- original ---------------------------------
 vocabulary isa {
-    type type constructed from {'1tri angle', 'quadrilateral'}
+    type type := {'1tri angle', 'quadrilateral'}
     Type : type
 
 
-    type subtype constructed from
+    type subtype :=
         { regular_triangle
         , right_triangle
         , rectangle
@@ -30,8 +30,8 @@ theory T:isa {
 }
 
 structure isa:isa {
-    isa = {regular_triangle, '1tri angle'; right_triangle, '1tri angle';
-           rectangle, quadrilateral; square, quadrilateral}
+    isa := {(regular_triangle, '1tri angle'), (right_triangle, '1tri angle'),
+           (rectangle, quadrilateral), (square, quadrilateral)}
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

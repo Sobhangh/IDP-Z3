@@ -8,8 +8,8 @@ vocabulary environment {
 vocabulary decision {
     extern vocabulary environment
 
-    type Registration_Type constructed from {Social, Modest, Other}
-    type Tax_Rate = {1; 7; 10}
+    type Registration_Type := {Social, Modest, Other}
+    type Tax_Rate := {1, 7, 10}
 
     tax_rate : Tax_Rate
     registration_Type : Registration_Type

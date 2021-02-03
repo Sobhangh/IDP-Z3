@@ -1,10 +1,10 @@
 
 -- original ---------------------------------
 vocabulary {
-    type t_epoxy constructed from {e1, e2, e3}
-    type t_cost = {0.539; -1}
-    type t_safe_low_storage_t = {0; 15; 16}
-    type t_safe_high_storage_t = {10; 25; 38}
+    type t_epoxy := {e1, e2, e3}
+    type t_cost := {0.539, -1}
+    type t_safe_low_storage_t := {0, 15, 16}
+    type t_safe_high_storage_t := {10, 25, 38}
 
 
     KnownCost
@@ -49,18 +49,22 @@ theory {
 }
 
 structure {
-    ECost = {e1, 0.539} else -1
-    ELowest_Storage_T = {e1, 16; e2, 0; e3, 15} else -900
-    EHighest_Storage_T = {e1, 38; e2, 10; e3, 25} else -900
+    ECost := {e1 -> 0.539} else -1
+    ELowest_Storage_T := {e1 -> 16, e2-> 0, e3-> 15} else -900
+    EHighest_Storage_T := {e1-> 38, e2-> 10, e3-> 25} else -900
 
 }
 
 structure default {
-    Max_Storage_T = {23} // room temperature
+    Max_Storage_T := 23 // room temperature
 }
 
 display {
     hide(`Max_Storage_T, `Min_Storage_T).
+    unit('eur', `ECost, `Min_Cost, `Max_Cost, `Cost).
+    unit('degrees', `Min_Storage_T, `Max_Storage_T, `ELowest_Storage_T, `EHighest_Storage_T, `Safe_Low_Storage_T, `Safe_High_Storage_T).
+
+
 }
 
 -- meta -------------------------------------
@@ -94,18 +98,21 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'eur',
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'Min_Cost',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'eur',
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'Max_Cost',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'eur',
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'Cost',
@@ -116,30 +123,35 @@ display {
                          'upper_bound': '1',
                          'upper_symbol': 'Max_Cost'},
               'type': 'function',
+              'unit': 'eur',
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'Min_Storage_T',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'degrees',
               'view': 'hidden'},
              {'environmental': False,
               'idpname': 'Max_Storage_T',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'degrees',
               'view': 'hidden'},
              {'environmental': False,
               'idpname': 'ELowest_Storage_T',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'degrees',
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'EHighest_Storage_T',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'degrees',
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'Safe_Low_Storage_T',
@@ -150,6 +162,7 @@ display {
                          'upper_bound': '25',
                          'upper_symbol': ''},
               'type': 'function',
+              'unit': 'degrees',
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'Safe_High_Storage_T',
@@ -160,6 +173,7 @@ display {
                          'upper_bound': '25',
                          'upper_symbol': 'Max_Storage_T'},
               'type': 'function',
+              'unit': 'degrees',
               'view': 'normal'}],
  'title': 'Interactive Consultant'}
 

@@ -3,9 +3,9 @@ vocabulary V {
     p q
     i: Int
     r: Real
-    type color constructed from {red, blue, green}
+    type color := {red, blue, green}
     c: color
-    type range = {0..5}
+    type range := {0..5}
     ra: range
 }
 
@@ -14,7 +14,7 @@ theory T:V {
     p => q & c=blue & i=1 & r=2.0 & ra=3.
 }
 structure S:V {
-    p = true.
+    p := true.
 }
 
 procedure main () {

@@ -748,7 +748,7 @@ class SymbolInterpretation(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.enumeration = kwargs.pop('enumeration')
-        self.default = kwargs.pop('default')  # later set to false for predicates
+        self.default = kwargs.pop('default')
 
         if not self.enumeration:
             self.enumeration = Enumeration(tuples=[])
@@ -765,10 +765,6 @@ class SymbolInterpretation(object):
         """
         voc = struct.voc
         self.decl = voc.symbol_decls[self.name]
-        if not self.decl.function and self.enumeration.tuples:
-            assert self.default is None, \
-                f"Enumeration for predicate '{self.name}' cannot have a default value: {self.default}"
-            self.default = FALSE
 
         self.enumeration.annotate(voc)
 
@@ -779,7 +775,7 @@ class SymbolInterpretation(object):
         for t in self.enumeration.tuples:
             assert all(a.as_rigid() is not None for a in t.args), \
                     f"Tuple for '{self.name}' must be ground : ({t})"
-            if self.decl.function:
+            if type(self.enumeration) == FunctionEnum:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
                 assert expr.code not in struct.assignments, \
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
@@ -790,10 +786,12 @@ class SymbolInterpretation(object):
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 struct.assignments.assert_(expr, TRUE, status, False)
             count += 1
-        self.is_complete = (not self.decl.function or
+        self.is_complete = (not type(self.enumeration) == FunctionEnum or
                             (0 < count and count == len(self.decl.instances)))
 
         # set default value
+        if type(self.enumeration) != FunctionEnum and self.enumeration.tuples:
+            self.default = FALSE
         if len(self.decl.instances) == 0:  # infinite domain
             assert self.default is None, \
                 f"Can't use default value for '{self.name}' on infinite domain."
@@ -811,7 +809,7 @@ class SymbolInterpretation(object):
         """ returns the interpretation of self applied to args """
         tuples = self.enumeration.tuples if tuples == None else tuples
         if rank == self.decl.arity:  # valid tuple -> return a value
-            if not self.decl.function:
+            if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:
                 assert len(tuples) <= 1, \
@@ -887,6 +885,11 @@ class Enumeration(object):
                     out)
             return out
 
+class FunctionEnum(Enumeration):
+    pass
+
+class CSVEnumeration(Enumeration):
+    pass
 
 class Tuple(object):
     def __init__(self, **kwargs):
@@ -905,6 +908,17 @@ class Tuple(object):
     def translate(self):
         return [arg.translate() for arg in self.args]
 
+class FunctionTuple(Tuple):
+    def __init__(self, **kwargs):
+        self.args = kwargs.pop('args')
+        if not isinstance(self.args, list):
+            self.args = [self.args]
+        self.value = kwargs.pop('value')
+        self.args.append(self.value)
+        self.code = sys.intern(",".join([str(a) for a in self.args]))
+
+class CSVTuple(Tuple):
+    pass
 
 ################################ Goal, View  ###############################
 
@@ -1159,7 +1173,9 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AppliedSymbol, UnappliedSymbol,
                                          Number, Brackets, Arguments,
 
-                                         Structure, SymbolInterpretation, Enumeration,
-                                         Tuple, Goal, View, Display,
+                                         Structure, SymbolInterpretation,
+                                         Enumeration, FunctionEnum, CSVEnumeration,
+                                         Tuple, FunctionTuple, CSVTuple,
+                                         Goal, View, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

@@ -1,8 +1,8 @@
 vocabulary {
-    type t_epoxy constructed from {e1, e2, e3}
-    type t_cost = {0.539; -1}
-    type t_safe_low_storage_t = {0; 15; 16}
-    type t_safe_high_storage_t = {10; 25; 38}
+    type t_epoxy := {e1, e2, e3}
+    type t_cost := {0.539, -1}
+    type t_safe_low_storage_t := {0, 15, 16}
+    type t_safe_high_storage_t := {10, 25, 38}
 
 
     KnownCost
@@ -47,14 +47,14 @@ theory {
 }
 
 structure {
-    ECost = {e1, 0.539} else -1
-    ELowest_Storage_T = {e1, 16; e2, 0; e3, 15} else -900
-    EHighest_Storage_T = {e1, 38; e2, 10; e3, 25} else -900
+    ECost := {e1 -> 0.539} else -1
+    ELowest_Storage_T := {e1 -> 16, e2-> 0, e3-> 15} else -900
+    EHighest_Storage_T := {e1-> 38, e2-> 10, e3-> 25} else -900
 
 }
 
 structure default {
-    Max_Storage_T = {23} // room temperature
+    Max_Storage_T := 23 // room temperature
 }
 
 display {

@@ -2,19 +2,19 @@
 -- original ---------------------------------
 vocabulary {
 
-    type sides = {3..4}
+    type sides := {3..4}
     Sides: sides
     Vertices: sides
 
 
-    type type constructed from {triangle, quadrilateral}
+    type type := {triangle, quadrilateral}
     Type : type
 
-    type side = {1..4}
+    type side := {1..4}
     Length(side):Real
     Angle(side):Real
 
-    type subtype constructed from
+    type subtype :=
         { regular_triangle
         , right_triangle
         , rectangle
@@ -124,12 +124,15 @@ theory {
     ~(Length(Sides) is enumerated) => Length(Sides)=4.
 }
 structure {
-    Length = {1,1; 2,2; 3,3}
+    Length := {1->1, 2->2, 3->3}
 }
 
 display {
     view = expanded.
+    unit('m', `Length, `Perimeter).
+    unit('degrees', `Angle).
 }
+
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
@@ -155,12 +158,14 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'm',
               'view': 'expanded'},
              {'environmental': False,
               'idpname': 'Angle',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'degrees',
               'view': 'expanded'},
              {'environmental': False,
               'idpname': 'Subtype',
@@ -185,6 +190,7 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'unit': 'm',
               'view': 'expanded'},
              {'environmental': False,
               'idpname': 'Large',

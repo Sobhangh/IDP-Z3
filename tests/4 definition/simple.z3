@@ -4,11 +4,11 @@ vocabulary {
     p
     q
     r
-    type color constructed from {red, blue}
+    type color := {red, blue}
     a : color
     b : color
     c : color
-} 
+}
 
 theory {
     { p <- q | r. }

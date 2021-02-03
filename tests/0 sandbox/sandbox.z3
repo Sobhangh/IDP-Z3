@@ -1,13 +1,13 @@
 
 -- original ---------------------------------
 vocabulary V {
-    type color constructed from {red, blue, green}
+    type color := {red, blue, green}
     Color: color
     opposite(color): color
 }
 
 structure S:V {
-    opposite = {red, green; green, red}
+    opposite := {red-> green, green-> red}
 }
 
 theory T:V {

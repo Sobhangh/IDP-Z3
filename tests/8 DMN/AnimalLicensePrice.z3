@@ -3,7 +3,7 @@
 
 
 vocabulary {
-	type Animalt_t constructed from { Dog }
+	type Animalt_t := { Dog }
 	Total: Real
 	Age: Int
 	Animal: Animalt_t

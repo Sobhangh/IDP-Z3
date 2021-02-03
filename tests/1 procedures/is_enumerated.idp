@@ -1,21 +1,21 @@
 vocabulary V {
-    type color constructed from {red, blue, green}
+    type color := {red, blue, green}
     Color: color
     opposite(color): color
     is_color(color)
 
-    type AB constructed from {A, B}
+    type AB := {A, B}
     f(AB,AB):AB
 }
 
 structure S:V {
-    opposite = {red, green; green, green}
-    f = {A,A, A; A,B, A; B,A, B}
+    opposite := {red→ green, green→ green}
+    f := { (A,A)→ A, (A,B)→ A, (B,A)→ B }
 }
 
 structure S2:V {
-    opposite = {red, green; green, red} else blue
-    f = {A,A, A; A,B, A; B,A, B} else B
+    opposite := {red→ green, green→ red} else blue
+    f := { (A,A)→ A, (A,B)→ A, (B,A)→ B } else B
 }
 
 theory T:V {
