@@ -28,10 +28,10 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
-    FALSE
-from .Parse import Structure, Theory, str_to_IDP
+    FALSE, AppliedSymbol
+from .Parse import Structure, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
 from .Simplify import join_set_conditions
-from .utils import OrderedSet, NEWL, BOOL
+from .utils import OrderedSet, NEWL, BOOL, INT, REAL
 
 class Problem(object):
     """A collection of theory and structure blocks.
@@ -68,6 +68,7 @@ class Problem(object):
         self.assignments = Assignments()
         self.def_constraints = {}
         self.interpretations = {}
+        self.name = ''
 
         self._formula = None  # the problem expressed in one logic formula
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)

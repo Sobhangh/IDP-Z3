@@ -50,6 +50,11 @@ def log(action):
     start = time.process_time()
 
 
+class IDPZ3Error(Exception):
+    """ raised whenever an error occurs in the conversion from AST to Z3 """
+    pass
+
+
 def unquote(s):
     if s[0] == "'" and s[-1] == "'":
         return s[1:-1]
