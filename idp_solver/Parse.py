@@ -788,8 +788,6 @@ class SymbolInterpretation(ASTNode):
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
                 block.assignments.assert_(expr, TRUE, status, False)
             count += 1
-        self.is_complete = (not type(self.enumeration) == FunctionEnum or
-                            (0 < count and count == len(self.decl.instances)))
 
         # set default value
         if type(self.enumeration) != FunctionEnum and self.enumeration.tuples:
@@ -798,7 +796,6 @@ class SymbolInterpretation(ASTNode):
             assert self.default is None, \
                 f"Can't use default value for '{self.name}' on infinite domain."
         elif self.default is not None:
-            self.is_complete = True
             self.default = self.default.annotate(voc, {})
             assert self.default.as_rigid() is not None, \
                 f"Default value for '{self.name}' must be ground: {self.default}"

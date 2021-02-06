@@ -213,7 +213,7 @@ def interpret(self, problem):
             f"Can't use 'is enumerated' with predicate {self.name}."
         if self.name in problem.interpretations:
             interpretation = problem.interpretations[self.name]
-            if interpretation.is_complete:
+            if interpretation.default is not None:
                 simpler = TRUE
             else:
                 simpler = interpretation.enumeration.contains(sub_exprs, True)
