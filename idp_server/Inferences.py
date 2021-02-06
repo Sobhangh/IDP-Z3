@@ -22,7 +22,7 @@ that are specific for the Interactive Consultant.
 
 from itertools import chain
 import time
-from z3 import Solver, Implies,  Not
+from z3 import Solver, Implies, Not
 
 from idp_solver.Expression import AComparison, AUnary, AppliedSymbol, TRUE
 from idp_solver.Assignments import Status, Assignment
