@@ -250,20 +250,9 @@ class ConstructedTypeDeclaration(ASTNode):
         self.map = {}  # {String: constructor}
         self.type = None
 
-        # use Constructor in self.constructors; create self.interpretation
-        if enumeration:
-            for i, c in enumerate(enumeration.tuples):
-                self.check(len(c.args) == 1,
-                           f"incorrect arity in {self.name} type enumeration")
-                constr = Constructor(name=c.args[0].name)
-                if self.name != BOOL:
-                    constr.py_value = i  # to allow comparisons
-                self.constructors.append(constr)
-            self.interpretation = SymbolInterpretation(
-                    name=Symbol(name=self.name),
-                    enumeration=enumeration, default=None)
-        else:
-            self.interpretation = None
+        self.interpretation = (None if not enumeration else
+            SymbolInterpretation(name=Symbol(name=self.name),
+                                 enumeration=enumeration, default=None))
 
     def __str__(self):
         return (f"type {self.name} := "
@@ -806,8 +795,22 @@ class SymbolInterpretation(ASTNode):
         voc = block.voc
         self.symbol = Symbol(name=self.name).annotate(voc, {})
 
-        self.enumeration.annotate(voc)
+        # create constructors if it is a type enumeration
         self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
+        if self.is_type_enumeration:
+            for i, c in enumerate(self.enumeration.tuples):
+                self.check(len(c.args) == 1,
+                           f"incorrect arity in {self.name} type enumeration")
+                constr = Constructor(name=c.args[0].name)
+                constr.type = self.name
+                if self.name != BOOL:
+                    constr.py_value = i  # to allow comparisons
+                self.symbol.decl.constructors.append(constr)
+                self.check(constr.name not in voc.symbol_decls or self.name == '`Symbols',
+                        f"duplicate constructor in vocabulary: {constr.name}")
+                voc.symbol_decls[constr.name] = constr
+
+        self.enumeration.annotate(voc)
 
         # predicate enumeration have FALSE default
         if type(self.enumeration) != FunctionEnum and self.default is None:

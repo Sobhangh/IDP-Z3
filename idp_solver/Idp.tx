@@ -15,12 +15,14 @@ Comment:
 
 Shebang: '#!' /.*$/;
 
-Vocabulary: 'vocabulary' (name=ID)? '{' (declarations=Declaration)* '}';
+Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
   Declaration: Extern | RangeDeclaration | ConstructedTypeDeclaration | SymbolDeclaration;
 
     Extern: 'extern' 'vocabulary' (name=ID);
-    ConstructedTypeDeclaration: 'type' name=ID ':=' enumeration=Enumeration;
-    RangeDeclaration: 'type' name=ID ':=' '{' elements*=RangeElement[','] '}';
+
+    ConstructedTypeDeclaration: /type[ \t]/ name=ID (':=' enumeration=Enumeration)?;
+
+    RangeDeclaration: /type[ \t]/ name=ID ':=' '{' elements*=RangeElement[','] '}';
       RangeElement: fromI=Number ('..' toI=Number)?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
@@ -94,18 +96,18 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
       Brackets: annotations=Annotations '(' f=Expression ')';
 
 
-Structure: 'structure' (name=ID)? (':' vocab_name=ID)?
+Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
   SymbolInterpretation: name=Symbol ':='
                         ( default=Identifier '.'?
                         | enumeration=FunctionEnum ('else' default=Identifier)?
                         | enumeration=Enumeration
                         | enumeration=CSVEnumeration);
-  FunctionEnum : '{' tuples+=FunctionTuple[','] '}';
-  FunctionTuple : ( args=Base | '(' args*=Identifier[','] ')' )?
+  FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
+  FunctionTuple: ( args=Base | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Base;
-  Enumeration : '{' tuples+=Tuple[','] '}';
-  Tuple :  ( args=Identifier | '(' args*=Identifier[','] ')' );
+  Enumeration: '{' tuples+=Tuple[','] '}';
+  Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples+=CSVTuple[/\n/] / */ '}';
   CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
   Identifier: UnappliedSymbol | Number;
@@ -120,11 +122,11 @@ Display: 'display' '{' (constraints=Expression '.')* '}';
 Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
 
   PyStatement: Call1 | PyAssignment ;
-  Call1 : name=ID '(' args*=Call0[','] (',' kwargs+=PyAssignment[','])? ')' ('.' post=PyExpr)?;
-  Call0 : !PyAssignment pyExpr=PyExpr;
-  PyExpr : Call1 | String | Number | ID | PyList;
+  Call1: name=ID '(' args*=Call0[','] (',' kwargs+=PyAssignment[','])? ')' ('.' post=PyExpr)?;
+  Call0: !PyAssignment pyExpr=PyExpr;
+  PyExpr: Call1 | String | Number | ID | PyList;
   String: literal=/"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 
-  PyAssignment : var=ID '=' val=Call0;
+  PyAssignment: var=ID '=' val=Call0;
 

@@ -1,0 +1,25 @@
+vocabulary V {
+    type color
+    Color: () -> color
+    opposite: color → color
+}
+
+structure S:V {
+    color := {red, blue, green}
+    opposite := {red-> green, green-> red}
+}
+
+theory T:V {
+    opposite(Color()) is enumerated.
+}
+
+structure S2:V {
+    color := {A, B, C}
+    opposite := {A-> C, C-> A}
+}
+
+
+procedure main() {
+  print(model_expand(T, S))
+  print(model_expand(T, S2))
+}

@@ -10,6 +10,7 @@ The equivalent ASCII-only encoding is shown on the right.
 .. code::
 
     vocabulary V {
+        type T
         type T := {c1, c2}
         type T := {1,2,3}
         type T := {1..3}

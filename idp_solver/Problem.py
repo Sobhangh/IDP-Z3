@@ -116,7 +116,9 @@ class Problem(object):
                 assert False, f"Can't add declaration for {name} in {block.name}: duplicate"
             self.declarations[name] = decl
         for decl in self.declarations.values():
-            decl.translated = None  # reset the translation of declarations
+            if type(decl) == ConstructedTypeDeclaration:
+                decl.translated = None  # reset the translation of declarations
+                decl.interpretation = None
 
         # process block.interpretations
         status = Status.STRUCTURE if block.name != 'default' else Status.GIVEN
@@ -126,8 +128,9 @@ class Problem(object):
                     continue # nothing to do
                 assert False, f"Can't add enumeration for {name} in {block.name}: duplicate"
             self.interpretations[name] = interpret
-            # update self.assignments with data from enumeration
-            if not interpret.is_type_enumeration:
+            if interpret.is_type_enumeration:  # add enumeration to type
+                interpret.symbol.interpretation = interpret
+            else:  # update self.assignments with data from enumeration
                 for t in interpret.enumeration.tuples:
                     if type(interpret.enumeration) == FunctionEnum:
                         expr = AppliedSymbol.make(interpret.symbol, t.args[:-1])
