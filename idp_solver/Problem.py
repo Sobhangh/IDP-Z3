@@ -37,6 +37,8 @@ class Problem(object):
     """A collection of theory and structure blocks.
 
     Attributes:
+        declarations (dict[str, Type]): the list of type and symbol declarations
+
         constraints (OrderedSet): a set of assertions.
 
         assignments (Assignment): the set of assignments.
@@ -63,6 +65,7 @@ class Problem(object):
         co_constraints (OrderedSet): the set of co_constraints in the problem.
     """
     def __init__(self, *blocks):
+        self.declarations = {}
         self.clark = {}  # {Declaration: Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
@@ -104,7 +107,46 @@ class Problem(object):
 
     def add(self, block):
         self._formula = None  # need to reapply the definitions
-        self.interpretations.update(block.interpretations) #TODO detect conflicts
+
+        for name, decl in block.declarations.items():
+            if name in self.declarations:
+                if (self.declarations[name] == block.declarations[name]
+                    or name in [BOOL, INT, REAL, '`Symbols']):
+                    continue # nothing to do
+                assert False, f"Can't add declaration for {name} in {block.name}: duplicate"
+            self.declarations[name] = decl
+        for decl in self.declarations.values():
+            decl.translated = None  # reset the translation of declarations
+
+        # process block.interpretations
+        status = Status.STRUCTURE if block.name != 'default' else Status.GIVEN
+        for name, interpret in block.interpretations.items():
+            if name in self.interpretations:
+                if self.interpretations[name] == block.interpretations[name]:
+                    continue # nothing to do
+                assert False, f"Can't add enumeration for {name} in {block.name}: duplicate"
+            self.interpretations[name] = interpret
+            # update self.assignments with data from enumeration
+            if not interpret.is_type_enumeration:
+                for t in interpret.enumeration.tuples:
+                    if type(interpret.enumeration) == FunctionEnum:
+                        expr = AppliedSymbol.make(interpret.symbol, t.args[:-1])
+                        interpret.check(expr.code not in self.assignments
+                            or self.assignments[expr.code].status == Status.UNKNOWN,
+                            f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
+                        self.assignments.assert_(expr, t.args[-1], status, False)
+                    else:
+                        expr = AppliedSymbol.make(interpret.symbol, t.args)
+                        interpret.check(expr.code not in self.assignments
+                            or self.assignments[expr.code].status == Status.UNKNOWN,
+                            f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
+                        self.assignments.assert_(expr, TRUE, status, False)
+                if interpret.default is not None:
+                    for code, expr in interpret.symbol.decl.instances.items():
+                        if (code not in self.assignments
+                            or self.assignments[code].status != status):
+                            self.assignments.assert_(expr, interpret.default, status, False)
+
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
         elif isinstance(block, Theory) or isinstance(block, Problem):

@@ -13,17 +13,31 @@
 
 ## type enumerations in theory/structure:
 
+Design principles:
+* move all translations to Idp_to_Z3.py
+* interpret() re-translate the types, functions at every call
+* translate quantified variables when translating quantifier
+    * it is not possible to compare the extension of Z3's Sort.
+* type enumerations are saved in block.interpretations; SymbolDeclaration in block.declarations
+    * beware that multiple blocks can have the same vocabulary → detect duplication (use namedObjects ?)
+
 - [x] use `:=` instead of `=` to give interpretation of a symbol
 - [x] allow predicate enumerations in theory → with copy
 - [ ] rename Constructor into Identifier
-- [ ] use Identifier in Enumerations
-- [ ] use enumerations for constructedFrom
+- [x] use Identifier in Enumerations
+- [x] use SymbolInterpretation for constructedFrom
 - [ ] allow enumeration of type extension in theory/structure
-    - [ ] store type enumeration to vocabulary.interpretations, using enumeration
-    - [ ] copy type enumerations from vocabulary to Problem in theory/structure annotate
+    - [x] copy type enumerations from vocabulary to Problem in theory/structure annotate
     - [ ] use type enumeration in Problem to expand quantifier
-    - [ ] move creation of EnumSort to Problem._interpret
+    - [x] delay translation of quantified variables
+    - [ ] move translation of functions, predicates to Problem._interpret
+    - [ ] move translation of types to Problem._interpret
+    - [ ] delay construction of `Symbols`
+    - [x] move creation of assignments to Problem._interpret
+    - [x] move is_complete to where it's used
+    - [ ] test a change of enumeration → re-translate functions that depend on it ?
     - [ ] remove dead code in constructedFrom
+- [ ] allow range enumeration in theory/structure
 
 ## Binary quantifications
 - [ ] update syntax of quantification over type

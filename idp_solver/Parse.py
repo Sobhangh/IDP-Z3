@@ -193,6 +193,25 @@ class Vocabulary(ASTNode):
                 f"{NEWL.join(str(i) for i in self.declarations)}"
                 f"{NEWL}}}{NEWL}")
 
+    def add_voc_to_block(self, block):
+        """adds the enumerations in a vocabulary to a theory or structure block
+
+        Args:
+            block (Problem): the block to be updated
+        """
+        for s in self.declarations:
+            block.check(s.name not in block.declarations,
+                        f"Duplicate declaration of {self.name} "
+                        f"in vocabulary and block {block.name}")
+            block.declarations[s.name] = s
+            if (type(s) == ConstructedTypeDeclaration
+                and s.interpretation
+                and self.name != BOOL):
+                block.check(s.name not in block.interpretations,
+                            f"Duplicate enumeration of {self.name} "
+                            f"in vocabulary and block {block.name}")
+                block.interpretations[s.name] = s.interpretation
+
 
 class Extern(ASTNode):
     def __init__(self, **kwargs):
@@ -223,13 +242,28 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.constructors = kwargs.pop('constructors')
-        self.range = self.constructors  # functional constructors are expanded
+        self.constructors = ([] if 'constructors' not in kwargs else
+                             kwargs.pop('constructors'))
+        enumeration = (None if 'enumeration' not in kwargs else
+                            kwargs.pop('enumeration'))
         self.translated = None
         self.map = {}  # {String: constructor}
-        self.type = None
+
+        # use Constructor in self.constructors; create self.interpretation
+        if enumeration:
+            for c in enumeration.tuples:
+                self.check(len(c.args) == 1,
+                           f"incorrect arity in {self.name} type enumeration")
+                self.constructors.append(Constructor(name=c.args[0].name))
+            self.interpretation = SymbolInterpretation(
+                    name=Symbol(name=self.name),
+                    enumeration=enumeration, default=None)
+        else:
+            self.interpretation = None
+        self.range = self.constructors
 
         self.translate()
+        self.type = None
 
     def __str__(self):
         return (f"type {self.name} := "
@@ -245,6 +279,8 @@ class ConstructedTypeDeclaration(ASTNode):
                        f"duplicate constructor in vocabulary: {c.name}")
             voc.symbol_decls[c.name] = c
         self.range = self.constructors  # TODO constructor functions
+        if self.interpretation:
+            self.interpretation.annotate(voc)
 
     def check_bounds(self, var):
         if self.name == BOOL:
@@ -490,7 +526,8 @@ class Theory(ASTNode):
         self.voc = idp.vocabularies[self.vocab_name]
 
         for i in self.interpretations.values():
-            i.annotate(self)  # this updates self.assignments
+            i.annotate(self)
+        self.voc.add_voc_to_block(self)
 
         self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol declaration
@@ -725,7 +762,8 @@ class Structure(ASTNode):
             raise IDPZ3Error(f"Unknown vocabulary: {self.vocab_name}")
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
-            i.annotate(self)  # this updates self.assignments
+            i.annotate(self)
+        self.voc.add_voc_to_block(self)
 
     def __str__(self):
         return self.name
@@ -766,48 +804,27 @@ class SymbolInterpretation(ASTNode):
         :returns None:
         """
         voc = block.voc
-        self.decl = voc.symbol_decls[self.name]
+        self.symbol = Symbol(name=self.name).annotate(voc, {})
 
         self.enumeration.annotate(voc)
+        self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
 
-        # Update structure.assignments, set status to STRUCTURE or to GIVEN.
-        status = Status.STRUCTURE if block.name != 'default' \
-            else Status.GIVEN
-        count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
-        for t in self.enumeration.tuples:
-            assert all(a.as_rigid() is not None for a in t.args), \
-                    f"Tuple for '{self.name}' must be ground : ({t})"
-            if type(self.enumeration) == FunctionEnum:
-                expr = AppliedSymbol.make(symbol, t.args[:-1])
-                assert expr.code not in block.assignments, \
-                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                block.assignments.assert_(expr, t.args[-1], status, False)
-            else:
-                expr = AppliedSymbol.make(symbol, t.args)
-                assert expr.code not in block.assignments, \
-                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                block.assignments.assert_(expr, TRUE, status, False)
-            count += 1
-
-        # set default value
-        if type(self.enumeration) != FunctionEnum and self.enumeration.tuples:
+        # predicate enumeration have FALSE default
+        if type(self.enumeration) != FunctionEnum and self.default is None:
             self.default = FALSE
-        if len(self.decl.instances) == 0:  # infinite domain
-            assert self.default is None, \
-                f"Can't use default value for '{self.name}' on infinite domain."
-        elif self.default is not None:
+        self.check(self.is_type_enumeration
+                   or len(self.symbol.decl.instances) != 0  # finite domain
+                   or self.default is None,
+            f"Can't use default value for '{self.name}' on infinite domain.")
+        if self.default is not None:
             self.default = self.default.annotate(voc, {})
-            assert self.default.as_rigid() is not None, \
-                f"Default value for '{self.name}' must be ground: {self.default}"
-            for code, expr in self.decl.instances.items():
-                if code not in block.assignments:
-                    block.assignments.assert_(expr, self.default,
-                                               status, False)
+            self.check(self.default.as_rigid() is not None,
+                f"Default value for '{self.name}' must be ground: {self.default}")
 
     def interpret(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
         tuples = self.enumeration.tuples if tuples == None else tuples
-        if rank == self.decl.arity:  # valid tuple -> return a value
+        if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:
@@ -1163,7 +1180,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Vocabulary, Extern,
                                          ConstructedTypeDeclaration,
-                                         Constructor, RangeDeclaration,
+                                         RangeDeclaration,
                                          SymbolDeclaration, Symbol, Sort,
 
                                          Theory, Definition, Rule, IfExpr,

@@ -149,7 +149,7 @@ def interpret(self, problem):
                     new_f = f.instantiate(var, val)
                     out.append(new_f)
             forms = [f.interpret(problem) for f in out]
-        else:
+        else: # infinite domain !
             new_vars[name] = var
     self.q_vars = new_vars
 

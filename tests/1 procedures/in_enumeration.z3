@@ -3,19 +3,25 @@ No more consequences.
 
 Model 1
 ==========
-Color:={->blue}
+Color:={->red}
 p:={->true}
 
 Model 2
 ==========
-Color:={->blue}
+Color:={->red}
 p:={->false}
 
 Model 3
 ==========
-Color:={->red}
+Color:={->blue}
+p:={->false}
 
 Model 4
+==========
+Color:={->blue}
+p:={->true}
+
+Model 5
 ==========
 Color:={->green}
 p:={->false}
