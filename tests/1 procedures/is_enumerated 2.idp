@@ -19,5 +19,5 @@ theory T3:V {
 
 procedure main() {
     print("T3, S")
-    print(model_expand(T3, S))
+    print(model_expand(T3, S, sort=True))
 }

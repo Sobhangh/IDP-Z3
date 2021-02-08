@@ -9,7 +9,7 @@ theory {
 }
 
 procedure main() {
-    print(model_propagate(T))
+    print(model_propagate(T, sort=True))
     print(Problem(T).formula())
-    print(model_expand(T))
+    print(model_expand(T, sort=True))
 }
