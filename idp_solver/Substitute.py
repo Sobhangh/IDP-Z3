@@ -125,6 +125,13 @@ def interpret(self, problem) -> Expression:
 Expression.interpret = interpret
 
 
+# Class Constructor  ######################################################
+
+def instantiate(self, e0, e1):
+    return self
+Constructor.instantiate = instantiate
+
+
 # Class AQuantification  ######################################################
 
 def interpret(self, problem):
@@ -311,6 +318,11 @@ def substitute(self, e0, e1, assignments, todo=None):
 Variable.substitute = substitute
 
 
+# Class Number  ######################################################
+
+def instantiate(self, e0, e1):
+    return self
+Number.instantiate = instantiate
 
 
 

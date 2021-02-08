@@ -30,8 +30,8 @@ Design principles:
     - [x] copy type enumerations from vocabulary to Problem in theory/structure annotate
     - [ ] use type enumeration in Problem to expand quantifier
     - [x] delay translation of quantified variables
-    - [ ] move translation of functions, predicates to Problem._interpret
-    - [ ] move translation of types to Problem._interpret
+    - [x] move translation of functions, predicates to Problem._interpret
+    - [x] move translation of types to Problem._interpret
     - [ ] delay construction of `Symbols`
     - [x] move creation of assignments to Problem._interpret
     - [x] move is_complete to where it's used

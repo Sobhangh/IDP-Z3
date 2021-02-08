@@ -29,7 +29,7 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
     FALSE, AppliedSymbol
-from .Parse import Structure, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
+from .Parse import ConstructedTypeDeclaration, Structure, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
 from .Simplify import join_set_conditions
 from .utils import OrderedSet, NEWL, BOOL, INT, REAL
 
@@ -171,6 +171,9 @@ class Problem(object):
     def _interpret(self):
         """ re-apply the definitions to the constraints """
         if self.questions is None:
+            for decl in self.declarations.values():
+                if type(decl) == ConstructedTypeDeclaration:
+                    decl.translate()
             self.co_constraints, self.questions = OrderedSet(), OrderedSet()
             for c in self.constraints:
                 c.interpret(self)

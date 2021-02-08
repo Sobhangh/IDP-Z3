@@ -248,22 +248,22 @@ class ConstructedTypeDeclaration(ASTNode):
                             kwargs.pop('enumeration'))
         self.translated = None
         self.map = {}  # {String: constructor}
+        self.type = None
 
         # use Constructor in self.constructors; create self.interpretation
         if enumeration:
-            for c in enumeration.tuples:
+            for i, c in enumerate(enumeration.tuples):
                 self.check(len(c.args) == 1,
                            f"incorrect arity in {self.name} type enumeration")
-                self.constructors.append(Constructor(name=c.args[0].name))
+                constr = Constructor(name=c.args[0].name)
+                if self.name != BOOL:
+                    constr.py_value = i  # to allow comparisons
+                self.constructors.append(constr)
             self.interpretation = SymbolInterpretation(
                     name=Symbol(name=self.name),
                     enumeration=enumeration, default=None)
         else:
             self.interpretation = None
-        self.range = self.constructors
-
-        self.translate()
-        self.type = None
 
     def __str__(self):
         return (f"type {self.name} := "

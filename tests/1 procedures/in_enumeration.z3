@@ -18,12 +18,12 @@ p:={->false}
 
 Model 4
 ==========
-Color:={->blue}
-p:={->true}
+Color:={->green}
+p:={->false}
 
 Model 5
 ==========
-Color:={->green}
-p:={->false}
+Color:={->blue}
+p:={->true}
 
 No more models.
