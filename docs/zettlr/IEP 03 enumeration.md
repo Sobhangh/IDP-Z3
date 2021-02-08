@@ -15,7 +15,7 @@
 
 Design principles:
 * move all translations to Idp_to_Z3.py
-* interpret() re-translate the types, functions at every call
+* interpret() re-translate the types, functions at every call → declaration.interpret()
 * translate quantified variables when translating quantifier
     * it is not possible to compare the extension of Z3's Sort.
 * type enumerations are saved in block.interpretations; SymbolDeclaration in block.declarations
@@ -38,6 +38,7 @@ Design principles:
     - [ ] test a change of enumeration → re-translate functions that depend on it ?
     - [ ] remove dead code in constructedFrom
 - [ ] allow range enumeration in theory/structure
+
 
 ## Binary quantifications
 - [ ] update syntax of quantification over type

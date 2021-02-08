@@ -430,21 +430,19 @@ class SymbolDeclaration(ASTNode):
                 expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
                 expr.annotate(voc, {})
                 self.instances[expr.code] = expr
+        return self
 
-        # determine typeConstraints
-        self.typeConstraints = []
-        if self.out.decl.name != BOOL and self.range:
+    def interpret(self, problem):
+
+        # add type constraints to problem.constraints
+        if self.out.decl.name != BOOL:
             for inst in self.instances.values():
-                domain = self.out.decl.check_bounds(inst)
+                domain = self.out.decl.check_bounds(inst.copy())
                 if domain is not None:
                     domain.block = self.block
                     domain.is_type_constraint_for = self.name
                     domain.annotations['reading'] = "Possible values for " + str(inst)
-                    self.typeConstraints.append(domain)
-        return self
-
-    def interpret(self, problem):
-        pass
+                    problem.constraints.append(domain)
 
 
 class Sort(ASTNode):
@@ -550,10 +548,6 @@ class Theory(ASTNode):
         for s in self.voc.terms.values():
             if not s.code.startswith('_'):
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
-
-        for decl in self.voc.symbol_decls.values():
-            if type(decl) == SymbolDeclaration:
-                self.constraints.extend(decl.typeConstraints)
 
     def translate(self):
         out = []
