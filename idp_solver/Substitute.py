@@ -238,9 +238,8 @@ def interpret(self, problem):
             and any(s.name == '`Symbols' for s in self.decl.sorts)):
         # apply enumeration of predicate over symbols to allow simplification
         # do not do it otherwise, for performance reasons
-        simpler = (problem.interpretations[self.name].interpret)(problem, 0,
-                                                                self,
-                                                                sub_exprs)
+        simpler = (problem.interpretations[self.name].interpret_application) (
+                        problem, 0, self, sub_exprs)
     if self.decl in problem.clark:  # has a definition
         #TODO need to quantify the co_constraints for the fresh_vars
         assert not self.fresh_vars, (

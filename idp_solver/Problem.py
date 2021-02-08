@@ -29,7 +29,7 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
     FALSE, AppliedSymbol
-from .Parse import ConstructedTypeDeclaration, Structure, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
+from .Parse import ConstructedTypeDeclaration, Structure, Symbol, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
 from .Simplify import join_set_conditions
 from .utils import OrderedSet, NEWL, BOOL, INT, REAL
 
@@ -121,34 +121,12 @@ class Problem(object):
                 decl.interpretation = None
 
         # process block.interpretations
-        status = Status.STRUCTURE if block.name != 'default' else Status.GIVEN
         for name, interpret in block.interpretations.items():
             if name in self.interpretations:
                 if self.interpretations[name] == block.interpretations[name]:
                     continue # nothing to do
                 assert False, f"Can't add enumeration for {name} in {block.name}: duplicate"
             self.interpretations[name] = interpret
-            if interpret.is_type_enumeration:  # add enumeration to type
-                interpret.symbol.interpretation = interpret
-            else:  # update self.assignments with data from enumeration
-                for t in interpret.enumeration.tuples:
-                    if type(interpret.enumeration) == FunctionEnum:
-                        expr = AppliedSymbol.make(interpret.symbol, t.args[:-1])
-                        interpret.check(expr.code not in self.assignments
-                            or self.assignments[expr.code].status == Status.UNKNOWN,
-                            f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
-                        self.assignments.assert_(expr, t.args[-1], status, False)
-                    else:
-                        expr = AppliedSymbol.make(interpret.symbol, t.args)
-                        interpret.check(expr.code not in self.assignments
-                            or self.assignments[expr.code].status == Status.UNKNOWN,
-                            f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
-                        self.assignments.assert_(expr, TRUE, status, False)
-                if interpret.default is not None:
-                    for code, expr in interpret.symbol.decl.instances.items():
-                        if (code not in self.assignments
-                            or self.assignments[code].status != status):
-                            self.assignments.assert_(expr, interpret.default, status, False)
 
         if type(block) == Structure:
             self.assignments.extend(block.assignments)
@@ -175,8 +153,36 @@ class Problem(object):
         """ re-apply the definitions to the constraints """
         if self.questions is None:
             for decl in self.declarations.values():
-                if type(decl) == ConstructedTypeDeclaration:
-                    decl.translate()
+                if type(decl) != SymbolDeclaration: # interpret types first
+                    decl.interpret(self)
+            for decl in self.declarations.values():
+                if type(decl) == SymbolDeclaration:
+                    decl.interpret(self)
+
+            for name, interpret in self.interpretations.items():
+                status = Status.STRUCTURE if interpret.block.name != 'default' else Status.GIVEN
+                if interpret.is_type_enumeration:  # add enumeration to type
+                    interpret.symbol.interpretation = interpret
+                else:  # update self.assignments with data from enumeration
+                    for t in interpret.enumeration.tuples:
+                        if type(interpret.enumeration) == FunctionEnum:
+                            expr = AppliedSymbol.make(interpret.symbol, t.args[:-1])
+                            interpret.check(expr.code not in self.assignments
+                                or self.assignments[expr.code].status == Status.UNKNOWN,
+                                f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
+                            self.assignments.assert_(expr, t.args[-1], status, False)
+                        else:
+                            expr = AppliedSymbol.make(interpret.symbol, t.args)
+                            interpret.check(expr.code not in self.assignments
+                                or self.assignments[expr.code].status == Status.UNKNOWN,
+                                f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
+                            self.assignments.assert_(expr, TRUE, status, False)
+                    if interpret.default is not None:
+                        for code, expr in interpret.symbol.decl.instances.items():
+                            if (code not in self.assignments
+                                or self.assignments[code].status != status):
+                                self.assignments.assert_(expr, interpret.default, status, False)
+
             self.co_constraints, self.questions = OrderedSet(), OrderedSet()
             for c in self.constraints:
                 c.interpret(self)

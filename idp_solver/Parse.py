@@ -224,6 +224,9 @@ class Extern(ASTNode):
         other = voc.idp.vocabularies[self.name]
         voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls}  #TODO merge while respecting order
 
+    def interpret(self, problem):
+        pass
+
 
 class ConstructedTypeDeclaration(ASTNode):
     """AST node to represent `type <symbol> := <enumeration>`
@@ -271,6 +274,9 @@ class ConstructedTypeDeclaration(ASTNode):
         if self.interpretation:
             self.interpretation.annotate(voc)
 
+    def interpret(self, problem):
+        self.translate()
+
     def check_bounds(self, var):
         if self.name == BOOL:
             out = [var, AUnary.make('¬', var)]
@@ -309,6 +315,9 @@ class RangeDeclaration(ASTNode):
         self.check(self.name not in voc.symbol_decls,
                    f"duplicate declaration in vocabulary: {self.name}")
         voc.symbol_decls[self.name] = self
+
+    def interpret(self, problem):
+        pass
 
     def check_bounds(self, var):
         if not self.elements:
@@ -359,10 +368,6 @@ class SymbolDeclaration(ASTNode):
 
         range (List[Expression]): the list of possible values
 
-        typeConstraints (List[Expression]):
-            the type constraint on the ranges of the symbol
-            applied to each possible tuple of arguments
-
         unit (str):
             the unit of the symbol, such as m (meters)
 
@@ -388,7 +393,6 @@ class SymbolDeclaration(ASTNode):
         self.unit: str = None
         self.category: str = None
 
-        self.typeConstraints = None
         self.translated = None
 
         self.type = None  # a string
@@ -405,6 +409,7 @@ class SymbolDeclaration(ASTNode):
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
     def annotate(self, voc, vocabulary=True):
+        self.voc = voc
         self.check(self.name is not None, "Internal error")
         if vocabulary:
             self.check(self.name not in voc.symbol_decls,
@@ -437,6 +442,9 @@ class SymbolDeclaration(ASTNode):
                     domain.annotations['reading'] = "Possible values for " + str(inst)
                     self.typeConstraints.append(domain)
         return self
+
+    def interpret(self, problem):
+        pass
 
 
 class Sort(ASTNode):
@@ -539,13 +547,13 @@ class Theory(ASTNode):
         self.constraints = OrderedSet([e.interpret(self)
                                        for e in self.constraints])
 
-        for decl in self.voc.symbol_decls.values():
-            if type(decl) == SymbolDeclaration:
-                self.constraints.extend(decl.typeConstraints)
-
         for s in self.voc.terms.values():
             if not s.code.startswith('_'):
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
+
+        for decl in self.voc.symbol_decls.values():
+            if type(decl) == SymbolDeclaration:
+                self.constraints.extend(decl.typeConstraints)
 
     def translate(self):
         out = []
@@ -793,6 +801,7 @@ class SymbolInterpretation(ASTNode):
         :returns None:
         """
         voc = block.voc
+        self.block = block
         self.symbol = Symbol(name=self.name).annotate(voc, {})
 
         # create constructors if it is a type enumeration
@@ -824,7 +833,7 @@ class SymbolInterpretation(ASTNode):
             self.check(self.default.as_rigid() is not None,
                 f"Default value for '{self.name}' must be ground: {self.default}")
 
-    def interpret(self, theory, rank, applied, args, tuples=None):
+    def interpret_application(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
         tuples = self.enumeration.tuples if tuples == None else tuples
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
@@ -843,14 +852,14 @@ class SymbolInterpretation(ASTNode):
             if type(args[rank]) in [Constructor, Number]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret(theory, rank+1, applied, args,
+                        out = self.interpret_application(theory, rank+1, applied, args,
                                              list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = IfExpr.make(
                         AComparison.make('=', [args[rank], tuples[0].args[rank]]),
-                        self.interpret(theory, rank+1, applied, args, tuples),
+                        self.interpret_application(theory, rank+1, applied, args, tuples),
                         out)
             return out
 
