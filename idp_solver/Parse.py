@@ -411,13 +411,6 @@ class SymbolDeclaration(ASTNode):
 
         self.domain = list(product(*[s.decl.range for s in self.sorts]))
         self.range = self.out.decl.range
-
-        # create instances
-        self.instances = {}
-        for arg in self.domain:
-            expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
-            expr.annotate(voc, {})
-            self.instances[expr.code] = expr
         return self
 
     def interpret(self, problem):

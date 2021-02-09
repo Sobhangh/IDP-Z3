@@ -68,7 +68,7 @@ def substitute(self, e0, e1, assignments, todo=None):
 Expression.substitute = substitute
 
 
-def instantiate(self, e0, e1):
+def instantiate(self, e0, e1, problem=None):
     """
     recursively substitute Variable e0 by e1 in self
 
@@ -79,14 +79,14 @@ def instantiate(self, e0, e1):
     out.annotations = copy.copy(out.annotations)
 
     # instantiate expressions, with simplification
-    out = out.update_exprs(e.instantiate(e0, e1) for e
+    out = out.update_exprs(e.instantiate(e0, e1, problem) for e
                            in out.sub_exprs)
 
     simpler, co_constraint = None, None
     if out.simpler is not None:
-        simpler = out.simpler.instantiate(e0, e1)
+        simpler = out.simpler.instantiate(e0, e1, problem)
     if out.co_constraint is not None:
-        co_constraint = out.co_constraint.instantiate(e0, e1)
+        co_constraint = out.co_constraint.instantiate(e0, e1, problem)
     out._change(simpler=simpler, co_constraint=co_constraint)
 
     if out.value is not None:  # replace by new value
@@ -127,7 +127,7 @@ Expression.interpret = interpret
 
 # Class Constructor  ######################################################
 
-def instantiate(self, e0, e1):
+def instantiate(self, e0, e1, problem=None):
     return self
 Constructor.instantiate = instantiate
 
@@ -153,7 +153,7 @@ def interpret(self, problem):
             out = []
             for f in forms:
                 for val in var.sort.decl.range:
-                    new_f = f.instantiate(var, val)
+                    new_f = f.instantiate(var, val, problem)
                     out.append(new_f)
             forms = [f.interpret(problem) for f in out]
         else: # infinite domain !
@@ -198,7 +198,7 @@ def interpret(self, problem):
             out = []
             for f in forms:
                 for val in var.sort.decl.range:
-                    new_f = f.instantiate(var, val)
+                    new_f = f.instantiate(var, val, problem)
                     out.append(new_f)
             forms = [f.interpret(problem) for f in out]
         else:
@@ -278,14 +278,10 @@ def substitute(self, e0, e1, assignments, todo=None):
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
 
-def instantiate(self, e0, e1):
+def instantiate(self, e0, e1, problem=None):
     if self.name == e0.code:
         if type(self) == AppliedSymbol and self.decl.name == '`Symbols':
-            if (isinstance(e1, Constructor)
-               and len(self.sub_exprs) == len(e1.symbol.decl.sorts)):
-                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
-                return out
-            elif isinstance(e1, Variable):  # replacing variable in a definition
+            if isinstance(e1, Variable):  # replacing variable in a definition
                 out = copy.copy(self)
                 out.code = out.code.replace(e0.code, e1.code)
                 out.str = out.code.replace(e0.code, e1.code)
@@ -293,17 +289,28 @@ def instantiate(self, e0, e1):
                 out.s.name = e1.code
                 return out
             else:
-                return list(e1.symbol.decl.instances.values())[0]  # should be "unknown"
+                self.check(len(self.sub_exprs) == len(e1.symbol.decl.sorts),
+                           f"Incorrect arity for {e1.code}")
+                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
+                return out
         elif len(self.sub_exprs) == 0:
             return e1
-    out = Expression.instantiate(self, e0, e1)
+    out = Expression.instantiate(self, e0, e1, problem)
+    if (problem and self.name in problem.interpretations
+        and any(s.name == '`Symbols' for s in out.decl.sorts)):
+        # apply enumeration of predicate over symbols to allow simplification
+        # do not do it otherwise, for performance reasons
+        simpler = (problem.interpretations[self.name].interpret_application) (
+                        problem, 0, self, out.sub_exprs)
+        out = out._change(simpler=simpler)
+        out.original = simpler.copy()
     return out
 AppliedSymbol .instantiate = instantiate
 
 
 # Class Variable  #######################################################
 
-def instantiate(self, e0, e1):
+def instantiate(self, e0, e1, problem=None):
     return e1 if self.code == e0.code else self
 Variable.instantiate = instantiate
 
@@ -319,7 +326,7 @@ Variable.substitute = substitute
 
 # Class Number  ######################################################
 
-def instantiate(self, e0, e1):
+def instantiate(self, e0, e1, problem=None):
     return self
 Number.instantiate = instantiate
 
