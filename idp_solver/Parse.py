@@ -24,7 +24,7 @@ __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
            "SymbolDeclaration", "Sort", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
-           "Goal", "Display", "Procedure", "idpparser", ]
+           "Display", "Procedure", "idpparser", ]
 
 from copy import copy
 from enum import Enum
@@ -162,6 +162,8 @@ class Vocabulary(ASTNode):
                 constructors=[Constructor(name=f"`{s.name}")
                               for s in self.declarations
                               if type(s) == SymbolDeclaration]),
+            SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
+                                    sorts=[], out=Sort(name=BOOL)),
             ] + self.declarations
 
     def annotate(self, idp):
@@ -962,30 +964,6 @@ class FunctionTuple(Tuple):
 class CSVTuple(Tuple):
     pass
 
-################################ Goal, View  ###############################
-
-class Goal(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.decl = None
-
-    def __str__(self):
-        return self.name
-
-    def annotate(self, idp):
-        voc = idp.vocabulary
-
-        assert self.name in voc.symbol_decls, \
-            IDPZ3Error(f"Unknown goal: {self.name}")
-        self.decl = voc.symbol_decls[self.name]
-        self.decl.view = ViewType.EXPANDED  # the goal is always expanded
-        self.check(self.decl.instances, "goals must be instantiable.")
-        goal = Symbol(name='__relevant').annotate(voc, {})
-        constraint = AppliedSymbol.make(goal, self.decl.instances.values())
-        constraint.block = self
-        constraint = constraint.interpret(idp.theory) # for defined goals
-        idp.theory.constraints.append(constraint)
-
 
 ################################ Display  ###############################
 
@@ -998,13 +976,6 @@ class Display(ASTNode):
 
     def annotate(self, idp):
         self.voc = idp.vocabulary
-
-        # define reserved symbol
-        if '__relevant' not in self.voc.symbol_decls:
-            relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
-                                    sorts=[], out=Sort(name=BOOL))
-            relevants.block = self
-            relevants.annotate(self.voc)
 
         # add display predicates
 
@@ -1073,12 +1044,7 @@ class Display(ASTNode):
                 if constraint.name == 'goal':  # e.g.,  goal(Prime)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
-
-                    self.check(len(symbols) == 1,
-                               f'goal can have only one argument')
-                    goal = Goal(name=constraint.sub_exprs[0].name[1:])
-                    goal.annotate(idp)
-                    idp.goal = goal
+                        s.view = ViewType.EXPANDED  # the goal is always expanded
                 elif constraint.name == 'expand':  # e.g. expand(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
@@ -1088,15 +1054,6 @@ class Display(ASTNode):
                 elif constraint.name == 'relevant':  # e.g. relevant(Tax)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
-
-                    for symbol in symbols:
-                        self.check(symbol.instances,
-                                   "relevant symbols must be instantiable.")
-                        goal = Symbol(name='__relevant').annotate(self.voc, {})
-                        constraint = AppliedSymbol.make(goal, symbol.instances.values())
-                        constraint.block = self
-                        constraint = constraint.interpret(idp.theory)
-                        idp.theory.constraints.append(constraint)
                 elif constraint.name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
@@ -1188,7 +1145,7 @@ class PyAssignment(ASTNode):
 
 ########################################################################
 
-Block = Union[Vocabulary, Theory, Goal, Structure, Display]
+Block = Union[Vocabulary, Theory, Structure, Display]
 
 dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 
@@ -1212,6 +1169,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
-                                         Goal, Display,
+                                         Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

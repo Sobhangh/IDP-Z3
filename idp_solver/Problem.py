@@ -115,7 +115,7 @@ class Problem(object):
         for name, decl in block.declarations.items():
             if name in self.declarations:
                 if (self.declarations[name] == block.declarations[name]
-                    or name in [BOOL, INT, REAL, '`Symbols']):
+                    or name in [BOOL, INT, REAL, '`Symbols', '__relevant']):
                     continue # nothing to do
                 assert False, f"Can't add declaration for {name} in {block.name}: duplicate"
             self.declarations[name] = decl
@@ -149,7 +149,7 @@ class Problem(object):
         return self
 
     def _interpret(self):
-        """ re-apply the definitions to the constraints """
+        """ apply the enumerations and definitions """
         if self.questions is None:
             for decl in self.declarations.values():
                 if type(decl) != SymbolDeclaration: # interpret types first
@@ -160,6 +160,14 @@ class Problem(object):
 
             for symbol_interpretation in self.interpretations.values():
                 symbol_interpretation.interpret(self)
+
+            # expand goals
+            for s in self.goals.values():
+                assert s.instances, "goals must be instantiable."
+                relevant = Symbol(name='__relevant')
+                relevant.decl = self.declarations['__relevant']
+                constraint = AppliedSymbol.make(relevant, s.instances.values())
+                self.constraints.append(constraint)
 
             self.co_constraints, self.questions = OrderedSet(), OrderedSet()
             for c in self.constraints:
