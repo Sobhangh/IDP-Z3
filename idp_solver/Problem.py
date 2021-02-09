@@ -128,9 +128,7 @@ class Problem(object):
                 assert False, f"Can't add enumeration for {name} in {block.name}: duplicate"
             self.interpretations[name] = interpret
 
-        if type(block) == Structure:
-            self.assignments.extend(block.assignments)
-        elif isinstance(block, Theory) or isinstance(block, Problem):
+        if isinstance(block, Theory) or isinstance(block, Problem):
             self.co_constraints, self.questions = None, None
             for decl, rule in block.clark.items():
                 new_rule = copy(rule)
@@ -141,13 +139,7 @@ class Problem(object):
             self.constraints.extend(v.copy() for v in block.constraints)
             self.def_constraints.update(
                 {k:v.copy() for k,v in block.def_constraints.items()})
-            self.assignments.extend(block.assignments)
-        else:
-            assert False, "Cannot add to Problem"
         return self
-
-    def add_assignments(self, assignments):
-        self.assignments.extend(assignments)
 
     def _interpret(self):
         """ re-apply the definitions to the constraints """
@@ -159,29 +151,8 @@ class Problem(object):
                 if type(decl) == SymbolDeclaration:
                     decl.interpret(self)
 
-            for name, interpret in self.interpretations.items():
-                status = Status.STRUCTURE if interpret.block.name != 'default' else Status.GIVEN
-                if interpret.is_type_enumeration:  # add enumeration to type
-                    interpret.symbol.interpretation = interpret
-                else:  # update self.assignments with data from enumeration
-                    for t in interpret.enumeration.tuples:
-                        if type(interpret.enumeration) == FunctionEnum:
-                            expr = AppliedSymbol.make(interpret.symbol, t.args[:-1])
-                            interpret.check(expr.code not in self.assignments
-                                or self.assignments[expr.code].status == Status.UNKNOWN,
-                                f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
-                            self.assignments.assert_(expr, t.args[-1], status, False)
-                        else:
-                            expr = AppliedSymbol.make(interpret.symbol, t.args)
-                            interpret.check(expr.code not in self.assignments
-                                or self.assignments[expr.code].status == Status.UNKNOWN,
-                                f"Duplicate entry in structure for '{interpret.name}': {str(expr)}")
-                            self.assignments.assert_(expr, TRUE, status, False)
-                    if interpret.default is not None:
-                        for code, expr in interpret.symbol.decl.instances.items():
-                            if (code not in self.assignments
-                                or self.assignments[code].status != status):
-                                self.assignments.assert_(expr, interpret.default, status, False)
+            for symbol_interpretation in self.interpretations.values():
+                symbol_interpretation.interpret(self)
 
             self.co_constraints, self.questions = OrderedSet(), OrderedSet()
             for c in self.constraints:
@@ -273,11 +244,10 @@ class Problem(object):
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False, extended=False):
-        assert term in self.assignments, "Internal error"
-        s = self.assignments[term].sentence.translate()
-
         solver = Optimize()
         solver.add(self.formula().translate())
+        assert term in self.assignments, "Internal error"
+        s = self.assignments[term].sentence.translate()
         if minimize:
             solver.minimize(s)
         else:

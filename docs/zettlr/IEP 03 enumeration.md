@@ -21,6 +21,14 @@ Design principles:
 * type enumerations are saved in block.interpretations; SymbolDeclaration in block.declarations
     * beware that multiple blocks can have the same vocabulary → detect duplication (use namedObjects ?)
 
+Objects to recompute:
+- [ ] goal, relevant atoms
+- [ ] else part of an enumeration
+- [ ] quantifications
+- [ ] assignments of instances
+- [ ] symbol instances
+- [ ] Symbols
+
 - [x] use `:=` instead of `=` to give interpretation of a symbol
 - [x] allow predicate enumerations in theory → with copy
 - [ ] rename Constructor into Identifier

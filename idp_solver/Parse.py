@@ -138,9 +138,7 @@ class Vocabulary(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
-        self.terms = {}  # {string: Constructor or AppliedSymbol}
         self.idp = None  # parent object
-        self.translated = []
         self.symbol_decls: Dict[str, Type] = {}
 
         self.name = 'V' if not self.name else self.name
@@ -183,10 +181,6 @@ class Vocabulary(ASTNode):
         for constructor in self.symbol_decls['`Symbols'].constructors:
             constructor.symbol = (Symbol(name=constructor.name[1:])
                                   .annotate(self, {}))
-
-        for v in self.symbol_decls.values():
-            if type(v) == SymbolDeclaration:
-                self.terms.update(v.instances)
 
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
@@ -408,31 +402,37 @@ class SymbolDeclaration(ASTNode):
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
-    def annotate(self, voc, vocabulary=True):
+    def annotate(self, voc):
         self.voc = voc
         self.check(self.name is not None, "Internal error")
-        if vocabulary:
-            self.check(self.name not in voc.symbol_decls,
-                       f"duplicate declaration in vocabulary: {self.name}")
-            voc.symbol_decls[self.name] = self
+        self.check(self.name not in voc.symbol_decls,
+                    f"duplicate declaration in vocabulary: {self.name}")
+        voc.symbol_decls[self.name] = self
         for s in self.sorts:
             s.annotate(voc)
         self.out.annotate(voc)
-        self.domain = list(product(*[s.decl.range for s in self.sorts]))
-
         self.type = self.out.decl.name
+
+        self.domain = list(product(*[s.decl.range for s in self.sorts]))
         self.range = self.out.decl.range
 
         # create instances
         self.instances = {}
-        if vocabulary:
-            for arg in self.domain:
-                expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
-                expr.annotate(voc, {})
-                self.instances[expr.code] = expr
+        for arg in self.domain:
+            expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
+            expr.annotate(voc, {})
+            self.instances[expr.code] = expr
         return self
 
     def interpret(self, problem):
+        # create instances
+        self.instances = {}
+        for arg in self.domain:
+            expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
+            expr.annotate(self.voc, {})
+            self.instances[expr.code] = expr
+            if not expr.code.startswith('_'):
+                problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
 
         # add type constraints to problem.constraints
         if self.out.decl.name != BOOL:
@@ -544,10 +544,6 @@ class Theory(ASTNode):
                                        for e in self.constraints])
         self.constraints = OrderedSet([e.interpret(self)
                                        for e in self.constraints])
-
-        for s in self.voc.terms.values():
-            if not s.code.startswith('_'):
-                self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
     def translate(self):
         out = []
@@ -819,13 +815,38 @@ class SymbolInterpretation(ASTNode):
         if type(self.enumeration) != FunctionEnum and self.default is None:
             self.default = FALSE
         self.check(self.is_type_enumeration
-                   or len(self.symbol.decl.instances) != 0  # finite domain
+                   or all(s.name not in [INT, REAL]  # finite domain
+                          for s in self.symbol.decl.sorts)
                    or self.default is None,
             f"Can't use default value for '{self.name}' on infinite domain.")
         if self.default is not None:
             self.default = self.default.annotate(voc, {})
             self.check(self.default.as_rigid() is not None,
                 f"Default value for '{self.name}' must be ground: {self.default}")
+
+    def interpret(self, problem):
+        status = Status.STRUCTURE if self.block.name != 'default' else Status.GIVEN
+        if self.is_type_enumeration:  # add enumeration to type
+            self.symbol.interpretation = self
+        else:  # update problem.assignments with data from enumeration
+            for t in self.enumeration.tuples:
+                if type(self.enumeration) == FunctionEnum:
+                    expr = AppliedSymbol.make(self.symbol, t.args[:-1])
+                    self.check(expr.code not in problem.assignments
+                        or problem.assignments[expr.code].status == Status.UNKNOWN,
+                        f"Duplicate entry in structure for '{self.name}': {str(expr)}")
+                    problem.assignments.assert_(expr, t.args[-1], status, False)
+                else:
+                    expr = AppliedSymbol.make(self.symbol, t.args)
+                    self.check(expr.code not in problem.assignments
+                        or problem.assignments[expr.code].status == Status.UNKNOWN,
+                        f"Duplicate entry in structure for '{self.name}': {str(expr)}")
+                    problem.assignments.assert_(expr, TRUE, status, False)
+            if self.default is not None:
+                for code, expr in self.symbol.decl.instances.items():
+                    if (code not in problem.assignments
+                        or problem.assignments[code].status != status):
+                        problem.assignments.assert_(expr, self.default, status, False)
 
     def interpret_application(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """

@@ -48,6 +48,7 @@ Date: TODO
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
+- [ ] do not generate comparison atoms for symbols defined by structures or hidden (to reduce work for propagation)
 - [ ] incremental propagate: use dependency graph (+ block) to propagate selectively
 - [ ] full propagate: should have only one expansion per unknown subtence
 - [ ] relevance-based optimal propagate (do not propagate irrelevant subtences)
