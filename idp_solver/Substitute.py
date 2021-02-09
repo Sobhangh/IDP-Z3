@@ -235,7 +235,8 @@ def interpret(self, problem):
             simpler = AUnary.make('¬', simpler)
         simpler.annotations = self.annotations
     elif (self.name in problem.interpretations
-            and any(s.name == '`Symbols' for s in self.decl.sorts)):
+          and any(s.name == '`Symbols' for s in self.decl.sorts)
+          and all(a.as_rigid() is not None for a in sub_exprs)):
         # apply enumeration of predicate over symbols to allow simplification
         # do not do it otherwise, for performance reasons
         simpler = (problem.interpretations[self.name].interpret_application) (
@@ -297,9 +298,7 @@ def instantiate(self, e0, e1, problem=None):
             return e1
     out = Expression.instantiate(self, e0, e1, problem)
     if (problem and self.name in problem.interpretations
-        and any(s.name == '`Symbols' for s in out.decl.sorts)):
-        # apply enumeration of predicate over symbols to allow simplification
-        # do not do it otherwise, for performance reasons
+        and all(a.as_rigid() is not None for a in out.sub_exprs)):
         simpler = (problem.interpretations[self.name].interpret_application) (
                         problem, 0, self, out.sub_exprs)
         out = out._change(simpler=simpler)
