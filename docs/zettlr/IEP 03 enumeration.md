@@ -22,7 +22,7 @@ Design principles:
     * beware that multiple blocks can have the same vocabulary → detect duplication (use namedObjects ?)
 
 Objects to recompute:
-- [ ] goal, relevant atoms
+- [ ] goal, relevant atoms (instances must be interpreted → part of Problem specs)
 - [ ] else part of an enumeration
 - [ ] quantifications
 - [ ] assignments of instances

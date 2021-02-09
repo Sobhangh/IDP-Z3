@@ -55,6 +55,9 @@ class Problem(object):
         interpretations (dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
+        goals (dict[string, SymbolDeclaration]):
+            A set of goal symbols
+
         _formula (Expression, optional): the logic formula that represents
             the problem.
 
@@ -71,6 +74,7 @@ class Problem(object):
         self.assignments = Assignments()
         self.def_constraints = {}
         self.interpretations = {}
+        self.goals = {}
         self.name = ''
 
         self._formula = None  # the problem expressed in one logic formula
@@ -98,7 +102,7 @@ class Problem(object):
     def copy(self):
         out = copy(self)
         out.assignments = self.assignments.copy()
-        out.constraints = [c.copy() for c in self.constraints]
+        out.constraints = OrderedSet(c.copy() for c in self.constraints)
         out.def_constraints = self.def_constraints.copy()
         # copy() is called before making substitutions => invalidate derived fields
         out._formula = None
@@ -139,6 +143,9 @@ class Problem(object):
             self.constraints.extend(v.copy() for v in block.constraints)
             self.def_constraints.update(
                 {k:v.copy() for k,v in block.def_constraints.items()})
+
+        for name, s in block.goals.items():
+            self.goals[name] = s
         return self
 
     def _interpret(self):

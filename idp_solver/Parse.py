@@ -497,6 +497,7 @@ class Theory(ASTNode):
         self.constraints = OrderedSet(kwargs.pop('constraints'))
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
+        self.goals = {}
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -728,6 +729,7 @@ class Structure(ASTNode):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
+        self.goals = {}
 
         self.name = 'S' if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -1087,7 +1089,10 @@ class Display(ASTNode):
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
                 if constraint.name == 'goal':  # e.g.,  goal(Prime)
-                    self.check(len(constraint.sub_exprs) == 1,
+                    for s in symbols:
+                        idp.theory.goals[s.name] = s
+
+                    self.check(len(symbols) == 1,
                                f'goal can have only one argument')
                     goal = Goal(name=constraint.sub_exprs[0].name[1:])
                     goal.annotate(idp)
@@ -1099,6 +1104,9 @@ class Display(ASTNode):
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif constraint.name == 'relevant':  # e.g. relevant(Tax)
+                    for s in symbols:
+                        idp.theory.goals[s.name] = s
+
                     for symbol in symbols:
                         self.check(symbol.instances,
                                    "relevant symbols must be instantiable.")
