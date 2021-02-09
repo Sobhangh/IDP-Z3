@@ -24,7 +24,7 @@ __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
            "SymbolDeclaration", "Sort", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
-           "Goal", "View", "Display", "Procedure", "idpparser", ]
+           "Goal", "Display", "Procedure", "idpparser", ]
 
 from copy import copy
 from enum import Enum
@@ -76,8 +76,6 @@ class Idp(ASTNode):
         self.vocabularies = self.dedup_nodes(kwargs, 'vocabularies')
         self.theories = self.dedup_nodes(kwargs, 'theories')
         self.structures = self.dedup_nodes(kwargs, 'structures')
-        self.goal = kwargs.pop('goal')
-        self.view = kwargs.pop('view')
         self.display = kwargs.pop('display')
         self.procedures = self.dedup_nodes(kwargs, 'procedures')
 
@@ -91,10 +89,6 @@ class Idp(ASTNode):
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
         self.theory = next(iter(self.theories    .values()))
-        if self.goal is None:
-            self.goal = Goal(name="")
-        if self.view is None:
-            self.view = View(viewType='normal')
         if self.display is None:
             self.display = Display(constraints=[])
 
@@ -981,35 +975,16 @@ class Goal(ASTNode):
     def annotate(self, idp):
         voc = idp.vocabulary
 
-        # define reserved symbol
-        if '__relevant' not in voc.symbol_decls:
-            relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
-                                    sorts=[], out=Sort(name=BOOL))
-            relevants.block = self
-            relevants.annotate(voc)
-
-        if self.name in voc.symbol_decls:
-            self.decl = voc.symbol_decls[self.name]
-            self.decl.view = ViewType.EXPANDED  # the goal is always expanded
-            self.check(self.decl.instances, "goals must be instantiable.")
-            goal = Symbol(name='__relevant').annotate(voc, {})
-            constraint = AppliedSymbol.make(goal, self.decl.instances.values())
-            constraint.block = self
-            constraint = constraint.interpret(idp.theory) # for defined goals
-            idp.theory.constraints.append(constraint)
-        elif self.name not in [None, '']:
-            raise IDPZ3Error(f"Unknown goal: {self.name}")
-
-
-class View(ASTNode):
-    def __init__(self, **kwargs):
-        self.viewType = kwargs.pop('viewType')
-
-    def annotate(self, idp):
-        if self.viewType == 'expanded':
-            for s in idp.vocabulary.symbol_decls.values():
-                s.expanded = True
-
+        assert self.name in voc.symbol_decls, \
+            IDPZ3Error(f"Unknown goal: {self.name}")
+        self.decl = voc.symbol_decls[self.name]
+        self.decl.view = ViewType.EXPANDED  # the goal is always expanded
+        self.check(self.decl.instances, "goals must be instantiable.")
+        goal = Symbol(name='__relevant').annotate(voc, {})
+        constraint = AppliedSymbol.make(goal, self.decl.instances.values())
+        constraint.block = self
+        constraint = constraint.interpret(idp.theory) # for defined goals
+        idp.theory.constraints.append(constraint)
 
 
 ################################ Display  ###############################
@@ -1023,6 +998,13 @@ class Display(ASTNode):
 
     def annotate(self, idp):
         self.voc = idp.vocabulary
+
+        # define reserved symbol
+        if '__relevant' not in self.voc.symbol_decls:
+            relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
+                                    sorts=[], out=Sort(name=BOOL))
+            relevants.block = self
+            relevants.annotate(self.voc)
 
         # add display predicates
 
@@ -1230,6 +1212,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
-                                         Goal, View, Display,
+                                         Goal, Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

@@ -4,8 +4,6 @@ Idp:
     | theories=Theory
     | structures=Structure
     | procedures=Procedure) *
-    goal=Goal?
-    view=View?
     display=Display?
 ;
 

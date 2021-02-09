@@ -53,8 +53,6 @@ class State(Problem):
             idp.theory.definitions.extend(idp.theories['environment'].definitions)
             idp.theory.def_constraints.update(idp.theories['environment'].def_constraints)
             idp.theory.assignments.extend(idp.theories['environment'].assignments)
-        idp.goal.annotate(idp)
-        idp.view.annotate(idp)
         idp.display.annotate(idp)
         idp.display.run(idp)
         self.idp = idp  # Idp vocabulary and theory
