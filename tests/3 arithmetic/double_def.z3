@@ -6,7 +6,7 @@ vocabulary {
     y: ()→Real
 }
 theory {
-    {!x[Real]: double(x)= x+x. }
+    {!x in Real: double(x)= x+x. }
     X()=3.
     y()=double(X()).
 }

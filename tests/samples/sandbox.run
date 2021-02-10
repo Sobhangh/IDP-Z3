@@ -1,8 +1,8 @@
-vocabulary V { 
+vocabulary V {
 	type Security constructed from {
 		BE001
 	}
-type AppliedRating_List constructed from { 
+type AppliedRating_List constructed from {
 AAA_52,
 AAXX_PlUs_XX_53,
 AA_54,
@@ -34,7 +34,7 @@ NR_79,
 NR_ST_80
 }
 
-type CountryOfRisk_List constructed from { 
+type CountryOfRisk_List constructed from {
 Argentina_91,
 Australia_94,
 Austria_95,
@@ -110,8 +110,8 @@ NonEligible(Security)
 
 theory T: V {
 {
-!s[Security]: Eligible(s)    <- CountryOfRisk_20(s) in {Argentina_91;Austria_95}  & ~NonEligible(s).
-!s[Security]: NonEligible(s) <- CountryOfRisk_20(s) in {Argentina_91}.
+!s in Security: Eligible(s)    <- CountryOfRisk_20(s) in {Argentina_91;Austria_95}  & ~NonEligible(s).
+!s in Security: NonEligible(s) <- CountryOfRisk_20(s) in {Argentina_91}.
 }
 }
 procedure main() {

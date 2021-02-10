@@ -8,7 +8,7 @@ theory {
   ~p()|q().
   { important(`p). }
 
-  { !`x[`Symbols]: important(`x) <- `x(). }
+  { !`x in `Symbols: important(`x) <- `x(). }
 }
 display {
   relevant(`p).

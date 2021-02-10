@@ -31,12 +31,12 @@ The equivalent ASCII-only encoding is shown on the right.
         p(f1(f2())).
         f1() < f2() ≤ f3() = f4() ≥ f5() > f6().  f1() < f2() =< f3() = f4() >= f5() > f6().
         f() ≠ c.                                  f() ~= c.
-        ∀x[T]: p(x).                              !x[T]: p(x).
+        ∀x ∈ T: p(x).                             !x in T: p(x).
         ∃x: p(x).                                 ?x: p(x).
 
         f() in {1,2,3}.
-        f() = #{x[T]: p(x)}.
-        f() = sum{x[T]: p(x): f(x)}.
+        f() = #{x∈T: p(x)}.                       f() = #{x in T: p(x)}.
+        f() = sum{x∈T: p(x): f(x)}.               f() = sum{x in T: p(x): f(x)}.
         if p1() then p2() else p3().
         f1() = if p() then f2() else f3().
 
@@ -45,7 +45,7 @@ The equivalent ASCII-only encoding is shown on the right.
         p(5) is not enumerated.
 
         { p(1).
-          ∀x[T]: p1(x) ← p2(x).                   !x[T]: p1(x) <- p2(x).
+          ∀x∈T: p1(x) ← p2(x).                    !x in T: p1(x) <- p2(x).
           f(1)=1.
           ∀x: f(x)=1 ← p(x).                      !x: f(x)=1 <- p(x).
         }

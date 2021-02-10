@@ -11,20 +11,20 @@ vocabulary {
 }
 theory {
 	//Monkey Constraints
-	!Monkey[Monkey_t]: Monkey = Sam => Place(Monkey) = Grass & Fruit(Monkey) ~= Banana.
+	!Monkey in Monkey_t: Monkey = Sam => Place(Monkey) = Grass & Fruit(Monkey) ~= Banana.
 
-	!Monkey[Monkey_t]: Place(Monkey) = Rock => Fruit(Monkey) = Apple.
+	!Monkey in Monkey_t: Place(Monkey) = Rock => Fruit(Monkey) = Apple.
 
-	!Monkey[Monkey_t]: Fruit(Monkey) = Pear => Place(Monkey) ~= Branch.
+	!Monkey in Monkey_t: Fruit(Monkey) = Pear => Place(Monkey) ~= Branch.
 
-	!Monkey[Monkey_t]: Monkey = Anna => Place(Monkey) = Stream & Fruit(Monkey) ~= Pear.
+	!Monkey in Monkey_t: Monkey = Anna => Place(Monkey) = Stream & Fruit(Monkey) ~= Pear.
 
-	!Monkey[Monkey_t]: Monkey = Harriet => Place(Monkey) ~= Branch.
+	!Monkey in Monkey_t: Monkey = Harriet => Place(Monkey) ~= Branch.
 
-	!Monkey[Monkey_t]: Monkey = Mike => Fruit(Monkey) ~= Orange.
+	!Monkey in Monkey_t: Monkey = Mike => Fruit(Monkey) ~= Orange.
 
 	//Different Preferences
-	!m1[Monkey_t]: !m2[Monkey_t]: m2 ~= m1 => Place(m1) ~= Place(m2) & Fruit(m1) ~= Fruit(m2).
+	!m1 in Monkey_t: !m2 in Monkey_t: m2 ~= m1 => Place(m1) ~= Place(m2) & Fruit(m1) ~= Fruit(m2).
 
 }
 

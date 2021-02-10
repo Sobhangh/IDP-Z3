@@ -8,7 +8,7 @@ vocabulary {
 }
 theory {
     edge(a,b).
-    !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
+    !`p in `Symbols: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
 	symmetric := {`edge}
 }
 display {
