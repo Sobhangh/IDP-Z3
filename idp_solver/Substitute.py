@@ -254,7 +254,7 @@ def interpret(self, problem):
         simpler = (problem.interpretations[self.name].interpret_application) (
                         problem, 0, self, sub_exprs)
     if self.decl in problem.clark:  # has a definition
-        #TODO need to quantify the co_constraints for the fresh_vars
+        #TODO need to instantiate the co_constraints for the fresh_vars
         assert not self.fresh_vars, (
             f"The following variable(s) has not been quantified: "
             f"{','.join([str(v) for v in self.fresh_vars])}")

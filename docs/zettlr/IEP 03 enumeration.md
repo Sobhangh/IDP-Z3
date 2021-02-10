@@ -23,7 +23,7 @@ Design principles:
 
 Objects to recompute:
 - [ ] goal, relevant atoms (instances must be interpreted → part of Problem specs)
-- [ ] whole-domain constraint for definition
+- [x] whole-domain constraint for definition
 - [ ] else part of an enumeration
 - [ ] quantifications
 - [ ] assignments of instances

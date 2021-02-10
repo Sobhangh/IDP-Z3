@@ -527,10 +527,6 @@ class Theory(ASTNode):
                 else:
                     self.clark[decl] = rule
 
-        for decl, rule in self.clark.items():
-            if type(decl) == SymbolDeclaration and decl.domain:
-                self.def_constraints[decl] = rule.expanded
-
         self.constraints = OrderedSet([e.annotate(self.voc, {})
                                        for e in self.constraints])
         self.constraints = OrderedSet([e.interpret(self)
@@ -576,10 +572,6 @@ class Definition(ASTNode):
             exprs = sum(([rule.body] for rule in rules), [])
             rules[0].body = ADisjunction.make('∨', exprs)
             self.clarks[decl] = rules[0]
-
-        # expand quantifiers and interpret symbols with structure
-        for decl, rule in self.clarks.items():
-            self.clarks[decl] = rule.interpret(theory)
 
         return self
 
@@ -847,20 +839,22 @@ class SymbolInterpretation(ASTNode):
                 return (self.default if not t else  # enumeration of constant
                         t[0].args[rank])
         else:  # constructs If-then-else recursively
-            out = self.default if self.default is not None else applied.original
+            out = (self.default if self.default is not None else
+                   applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if type(args[rank]) in [Constructor, Number]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret_application(theory, rank+1, applied, args,
-                                             list(tuples2))
+                        out = self.interpret_application(theory, rank+1,
+                                        applied, args, list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = IfExpr.make(
                         AComparison.make('=', [args[rank], tuples[0].args[rank]]),
-                        self.interpret_application(theory, rank+1, applied, args, tuples),
+                        self.interpret_application(theory, rank+1,
+                                                   applied, args, tuples),
                         out)
             return out
 
