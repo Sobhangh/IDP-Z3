@@ -663,6 +663,10 @@ class Rule(ASTNode):
             # don't expand macros, to avoid arity and type errors
             # will be done later with optimized binary quantification
             self.expanded = TRUE
+        # elif self.symbol.decl.domain:  # only if definition is constructive !
+        #     out = [self.instantiate_definition(args, theory, recursive=False)
+        #            for args in self.symbol.decl.domain]
+        #     self.expanded = AConjunction.make('∧', out)
         else:
             if self.out:
                 expr = AppliedSymbol.make(self.symbol, self.args[:-1])
@@ -671,7 +675,8 @@ class Rule(ASTNode):
                 expr = AppliedSymbol.make(self.symbol, self.args)
             expr = AEquivalence.make('⇔', [expr, self.body])
             expr = AQuantification.make('∀', {**self.q_vars}, expr)
-            self.expanded = expr.interpret(theory)
+            # expand the quantification only -> not recursive
+            self.expanded = expr.interpret(theory, recursive=False)
         self.expanded.block = self.block
         return self
 

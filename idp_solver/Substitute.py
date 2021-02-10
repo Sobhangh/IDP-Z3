@@ -134,7 +134,16 @@ Constructor.instantiate = instantiate
 
 # Class AQuantification  ######################################################
 
-def interpret(self, problem):
+def interpret(self, problem, recursive=True):
+    """apply information in the problem and its vocabulary
+
+    Args:
+        problem (Problem): the problem to be applied
+        recursive (bool, optional): Do not interpret the body if False. Defaults to True.
+
+    Returns:
+        Expression: the expanded quantifier expression
+    """
     inferred = self.sub_exprs[0].type_inference()
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
@@ -155,9 +164,11 @@ def interpret(self, problem):
                 for val in var.sort.decl.range:
                     new_f = f.instantiate(var, val, problem)
                     out.append(new_f)
-            forms = [f.interpret(problem) for f in out]
+            forms = out
         else: # infinite domain !
             new_vars[name] = var
+    forms = (forms if not recursive else
+             [f.interpret(problem) for f in forms])
     self.q_vars = new_vars
 
     if not self.q_vars:
@@ -200,9 +211,10 @@ def interpret(self, problem):
                 for val in var.sort.decl.range:
                     new_f = f.instantiate(var, val, problem)
                     out.append(new_f)
-            forms = [f.interpret(problem) for f in out]
+            forms = out
         else:
             raise Exception('Can only quantify aggregates over finite domains')
+    forms = [f.interpret(problem) for f in forms]
     self.q_vars = {}
     self.vars = None  # flag to indicate changes
     self.quantifier_is_expanded = True
