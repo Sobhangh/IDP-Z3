@@ -410,10 +410,11 @@ class SymbolDeclaration(ASTNode):
         self.type = self.out.decl.name
 
         self.domain = list(product(*[s.decl.range for s in self.sorts]))
-        self.range = self.out.decl.range
         return self
 
     def interpret(self, problem):
+        self.range = self.out.decl.range
+
         # create instances
         self.instances = {}
         for arg in self.domain:
@@ -517,7 +518,7 @@ class Theory(ASTNode):
         self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol declaration
         for d in self.definitions:
-            for decl, rule in d.clark.items():
+            for decl, rule in d.clarks.items():
                 if decl in self.clark:
                     new_rule = copy(rule)  # not elegant, but rare
                     new_rule.body = AConjunction.make('∧', [self.clark[decl].body, rule.body])
@@ -535,19 +536,12 @@ class Theory(ASTNode):
         self.constraints = OrderedSet([e.interpret(self)
                                        for e in self.constraints])
 
-    def translate(self):
-        out = []
-        for i in self.constraints:
-            out.append(i.translate())
-        for d in self.def_constraints.values():
-            out.append(d.translate())
-        return out
 
 
 class Definition(ASTNode):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
-        self.clark = None  # {Declaration: Transformed Rule}
+        self.clarks = None  # {Declaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
 
     def __str__(self):
@@ -555,7 +549,7 @@ class Definition(ASTNode):
 
     def __repr__(self):
         out = []
-        for rule in self.clark.values():
+        for rule in self.clarks.values():
             out.append(repr(rule))
         return NEWL.join(out)
 
@@ -563,7 +557,7 @@ class Definition(ASTNode):
         self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
         # create common variables, and rename vars in rule
-        self.clark = {}
+        self.clarks = {}
         for r in self.rules:
             decl = voc.symbol_decls[r.symbol.name]
             if decl.name not in self.def_vars:
@@ -575,17 +569,17 @@ class Definition(ASTNode):
                     q_v[name] = Variable(name, decl.out)
                 self.def_vars[decl.name] = q_v
             new_rule = r.rename_args(self.def_vars[decl.name])
-            self.clark.setdefault(decl, []).append(new_rule)
+            self.clarks.setdefault(decl, []).append(new_rule)
 
         # join the bodies of rules
-        for decl, rules in self.clark.items():
+        for decl, rules in self.clarks.items():
             exprs = sum(([rule.body] for rule in rules), [])
             rules[0].body = ADisjunction.make('∨', exprs)
-            self.clark[decl] = rules[0]
+            self.clarks[decl] = rules[0]
 
         # expand quantifiers and interpret symbols with structure
-        for decl, rule in self.clark.items():
-            self.clark[decl] = rule.compute(theory)
+        for decl, rule in self.clarks.items():
+            self.clarks[decl] = rule.interpret(theory)
 
         return self
 
@@ -638,9 +632,8 @@ class Rule(ASTNode):
     def rename_args(self, new_vars):
         """ for Clark's completion
             input : '!v: f(args) <- body(args)'
-            output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
+            output: '!nv: f(nv) <- nv=args & body(args)' """
 
-        # TODO proper unification: https://eli.thegreenplace.net/2018/unification/
         self.check(len(self.args) == len(new_vars), "Internal error")
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
@@ -660,7 +653,7 @@ class Rule(ASTNode):
         self.q_vars = new_vars
         return self
 
-    def compute(self, theory):
+    def interpret(self, theory):
         """ expand quantifiers and interpret """
 
         # compute self.expanded, by expanding:
@@ -679,10 +672,6 @@ class Rule(ASTNode):
             expr = AEquivalence.make('⇔', [expr, self.body])
             expr = AQuantification.make('∀', {**self.q_vars}, expr)
             self.expanded = expr.interpret(theory)
-
-        # interpret structures
-        self.body     = self.body    .interpret(theory)
-        self.expanded = self.expanded.interpret(theory) # definition constraint, expanded
         self.expanded.block = self.block
         return self
 
@@ -846,11 +835,12 @@ class SymbolInterpretation(ASTNode):
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:
-                self.check(len(tuples) <= 1,
-                    f"Duplicate values in structure for {str(self.name)}{str(tuples[0])}")
-                if not tuples:  # enumeration of constant
-                    return self.default
-                return tuples[0].args[rank]
+                t = list(tuples)
+                self.check(len(t) <= 1,
+                           f"Duplicate values in structure "
+                           f"for {str(self.name)}{str(t[0])}")
+                return (self.default if not t else  # enumeration of constant
+                        t[0].args[rank])
         else:  # constructs If-then-else recursively
             out = self.default if self.default is not None else applied.original
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))

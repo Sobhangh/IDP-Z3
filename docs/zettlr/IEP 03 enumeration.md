@@ -23,6 +23,7 @@ Design principles:
 
 Objects to recompute:
 - [ ] goal, relevant atoms (instances must be interpreted → part of Problem specs)
+- [ ] whole-domain constraint for definition
 - [ ] else part of an enumeration
 - [ ] quantifications
 - [ ] assignments of instances
@@ -47,6 +48,9 @@ Objects to recompute:
     - [ ] remove dead code in constructedFrom
 - [ ] allow range enumeration in theory/structure
 
+problem with rule.interpret(problem):
+* just repeating it in theory annotate makes it run in 14 sec
+* need to avoid recursivity in Rule.interpret()
 
 ## Binary quantifications
 - [ ] update syntax of quantification over type
