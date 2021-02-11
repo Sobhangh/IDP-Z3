@@ -194,7 +194,8 @@ class Problem(object):
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
             for ass in self.assignments.values():
-                ass.sentence.original = ass.sentence.copy()
+                ass.sentence = ass.sentence.copy()
+                ass.sentence.original = ass.sentence
 
     def formula(self):
         """ the formula encoding the knowledge base """
@@ -451,16 +452,15 @@ class Problem(object):
             list(list(Assignment)): the non-empty cells of the decision table
         """
         max_time = time.time()+timeout  # 20 seconds max
-        self._interpret()
 
         if goal_string:
-            # add (goal | ~goal) to self.constraints, so that it is a question
-            assert goal_string in self.assignments, (
+            goal_pred = goal_string.split("(")[0]
+            assert goal_pred in self.declarations, (
                 f"Unrecognized goal string: {goal_string}")
-            temp = self.assignments[goal_string].sentence
-            temp = ADisjunction.make('∨', [temp, AUnary.make('¬', temp)])
-            temp = temp.interpret(self)  # add definition of the goal, if any
-            self.constraints.append(temp)
+            self.goals[goal_pred] = self.declarations[goal_pred]
+            self._formula = None
+        formula = self.formula()
+        theory = formula.translate()
 
         # ignore type constraints
         questions = OrderedSet()
@@ -483,7 +483,6 @@ class Problem(object):
                     + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
-        theory = self.formula().translate()
         solver = Solver()
         solver.add(theory)
         solver.add(known)

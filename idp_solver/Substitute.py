@@ -91,8 +91,6 @@ def instantiate(self, e0, e1, problem=None):
 
     if out.value is not None:  # replace by new value
         out = out.value
-    else:
-        out.original = out
 
     if e0.name in out.fresh_vars:
         out.fresh_vars.discard(e0.name)
@@ -257,8 +255,6 @@ def interpret(self, problem):
     if self.decl in problem.clark and not self.fresh_vars:  # has a definition
         co_constraint = problem.clark[self.decl].instantiate_definition(sub_exprs, problem)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
-    if simpler is not None:
-        out.original = simpler.copy()  # so that translated assignment is correct
     return out
 AppliedSymbol.interpret = interpret
 
@@ -313,7 +309,6 @@ def instantiate(self, e0, e1, problem=None):
         simpler = (problem.interpretations[self.name].interpret_application) (
                         problem, 0, self, out.sub_exprs)
         out = out._change(simpler=simpler)
-        out.original = simpler.copy()
     return out
 AppliedSymbol .instantiate = instantiate
 

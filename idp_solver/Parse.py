@@ -664,9 +664,9 @@ class Rule(ASTNode):
                 expr = AComparison.make('=', [expr, self.args[-1]])
             else:
                 expr = AppliedSymbol.make(self.symbol, self.args)
-            expr = AEquivalence.make('⇔', [expr, self.body])
+            expr = AEquivalence.make('⇔', [expr, self.body.interpret(theory)])
             expr = AQuantification.make('∀', {**self.q_vars}, expr)
-            # expand the quantification only -> not recursive
+            # do not interpret the head -> not recursive
             self.expanded = expr.interpret(theory, recursive=False)
         self.expanded.block = self.block
         return self

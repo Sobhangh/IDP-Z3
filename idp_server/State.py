@@ -100,6 +100,7 @@ class State(Problem):
         :rtype: State
         """
         out = self.copy()
+        out._interpret()
         if out.environment:
             out.environment = out.environment.copy()
             _ = json_to_literals(out.environment, jsonstr)

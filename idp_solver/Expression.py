@@ -132,7 +132,7 @@ class Expression(ASTNode):
             giving the intended meaning of the expression (in English).
 
         original (Expression):
-            The original expression, before transformation.
+            The original expression, before propagation and simplification.
 
         fresh_vars (Set(string)):
             The set of names of the variables in the expression.

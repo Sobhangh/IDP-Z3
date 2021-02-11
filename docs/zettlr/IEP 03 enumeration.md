@@ -49,8 +49,8 @@ Objects to recompute:
     - [ ] remove dead code in constructedFrom
 - [ ] allow range enumeration in theory/structure
 
-problem with sum:
-* sum is properly updated in constraints, but not in assignments !  Because assignment translate takes the original !
+problem with decision_table:
+* problem.constraints is ok, but not problem.def_constraints.
 
 ## Binary quantifications
 - [ ] update syntax of quantification over type
