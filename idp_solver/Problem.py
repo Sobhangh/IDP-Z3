@@ -151,6 +151,16 @@ class Problem(object):
     def _interpret(self):
         """ apply the enumerations and definitions """
         if self.questions is None:
+            self.assignments = Assignments()
+
+            for symbol_interpretation in self.interpretations.values():
+                if symbol_interpretation.is_type_enumeration:  # add enumeration to type
+                    symbol = symbol_interpretation.symbol
+                    symbol.decl.interpretation = self
+                    symbol.decl.constructors = [t.args[0]
+                        for t in symbol_interpretation.enumeration.tuples.values()]
+                    symbol.decl.range = symbol.decl.constructors
+
             for decl in self.declarations.values():
                 if type(decl) != SymbolDeclaration: # interpret types first
                     decl.interpret(self)
@@ -182,6 +192,9 @@ class Problem(object):
             for s in list(self.questions.values()):
                 if s.is_reified():
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
+
+            for ass in self.assignments.values():
+                ass.sentence.original = ass.sentence.copy()
 
     def formula(self):
         """ the formula encoding the knowledge base """
@@ -438,6 +451,7 @@ class Problem(object):
             list(list(Assignment)): the non-empty cells of the decision table
         """
         max_time = time.time()+timeout  # 20 seconds max
+        self._interpret()
 
         if goal_string:
             # add (goal | ~goal) to self.constraints, so that it is a question

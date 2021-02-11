@@ -408,11 +408,10 @@ class SymbolDeclaration(ASTNode):
             s.annotate(voc)
         self.out.annotate(voc)
         self.type = self.out.decl.name
-
-        self.domain = list(product(*[s.decl.range for s in self.sorts]))
         return self
 
     def interpret(self, problem):
+        self.domain = list(product(*[s.decl.range for s in self.sorts])) #
         self.range = self.out.decl.range
 
         # create instances
@@ -781,7 +780,6 @@ class SymbolInterpretation(ASTNode):
                 constr.type = self.name
                 if self.name != BOOL:
                     constr.py_value = i  # to allow comparisons
-                self.symbol.decl.constructors.append(constr)
                 self.check(constr.name not in voc.symbol_decls or self.name == '`Symbols',
                         f"duplicate constructor in vocabulary: {constr.name}")
                 voc.symbol_decls[constr.name] = constr

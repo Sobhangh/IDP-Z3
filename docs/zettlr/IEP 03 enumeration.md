@@ -22,12 +22,13 @@ Design principles:
     * beware that multiple blocks can have the same vocabulary → detect duplication (use namedObjects ?)
 
 Objects to recompute:
-- [ ] goal, relevant atoms (instances must be interpreted → part of Problem specs)
+- [x] goal, relevant atoms (instances must be interpreted → part of Problem specs)
 - [x] whole-domain constraint for definition
-- [ ] else part of an enumeration
+- [x] else part of an enumeration
+- [x] constructors
 - [ ] quantifications
-- [ ] assignments of instances
-- [ ] symbol instances
+- [x] assignments of instances + .original
+- [x] symbol instances
 - [ ] Symbols
 
 - [x] use `:=` instead of `=` to give interpretation of a symbol
@@ -48,9 +49,8 @@ Objects to recompute:
     - [ ] remove dead code in constructedFrom
 - [ ] allow range enumeration in theory/structure
 
-problem with rule.interpret(problem):
-* just repeating it in theory annotate makes it run in 14 sec
-* need to avoid recursivity in Rule.interpret()
+problem with sum:
+* sum is properly updated in constraints, but not in assignments !  Because assignment translate takes the original !
 
 ## Binary quantifications
 - [ ] update syntax of quantification over type

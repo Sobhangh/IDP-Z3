@@ -200,25 +200,26 @@ def interpret(self, problem):
         assert v not in self.q_vars or self.q_vars[v].sort.decl == s.decl, \
             f"Inconsistent types for {v} in {self}"
 
-    forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
-             then_f=Number(number='1') if self.out is None else
-                    self.sub_exprs[AAggregate.OUT],
-             else_f=Number(number='0'))]
-    for name, var in self.q_vars.items():
-        if var.sort.decl.range:
+    if all(var.sort.decl.range for var in self.q_vars.values()):
+        # no unknown domain --> ok to expand it
+        forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
+                then_f=Number(number='1') if self.out is None else
+                        self.sub_exprs[AAggregate.OUT],
+                else_f=Number(number='0'))]
+        new_vars = {}
+        for name, var in self.q_vars.items():
             out = []
             for f in forms:
                 for val in var.sort.decl.range:
                     new_f = f.instantiate(var, val, problem)
                     out.append(new_f)
             forms = out
-        else:
-            raise Exception('Can only quantify aggregates over finite domains')
-    forms = [f.interpret(problem) for f in forms]
-    self.q_vars = {}
-    self.vars = None  # flag to indicate changes
-    self.quantifier_is_expanded = True
-    return self.update_exprs(forms)
+        forms = [f.interpret(problem) for f in forms]
+        self.q_vars = new_vars
+        self.vars = None  # flag to indicate changes
+        self.quantifier_is_expanded = True
+        return self.update_exprs(forms)
+    return self
 AAggregate.interpret = interpret
 
 
@@ -253,11 +254,7 @@ def interpret(self, problem):
         # do not do it otherwise, for performance reasons
         simpler = (problem.interpretations[self.name].interpret_application) (
                         problem, 0, self, sub_exprs)
-    if self.decl in problem.clark:  # has a definition
-        #TODO need to instantiate the co_constraints for the fresh_vars
-        assert not self.fresh_vars, (
-            f"The following variable(s) has not been quantified: "
-            f"{','.join([str(v) for v in self.fresh_vars])}")
+    if self.decl in problem.clark and not self.fresh_vars:  # has a definition
         co_constraint = problem.clark[self.decl].instantiate_definition(sub_exprs, problem)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     if simpler is not None:
@@ -292,6 +289,8 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 
 def instantiate(self, e0, e1, problem=None):
+    if self.value:
+        return self
     if self.name == e0.code:
         if type(self) == AppliedSymbol and self.decl.name == '`Symbols':
             if isinstance(e1, Variable):  # replacing variable in a definition
