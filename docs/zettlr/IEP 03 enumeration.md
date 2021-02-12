@@ -29,7 +29,7 @@
 - [ ] update syntax of quantification over type
 - [ ] rewrite Quantification.interpret using generator of cross-product → quant, aggregate
 - [ ] allow several variables in quantification
-- [ ] allow quantification over unary predicate 
+- [ ] allow quantification over unary predicate
     - [ ] type inference on the predicate
     - [ ] transform AQuantification
 - [ ] allow quantification over n-ary predicates

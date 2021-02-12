@@ -1,10 +1,10 @@
 vocabulary V {
-    p q r
+    p, q, r:() → Bool
 }
 
 theory T:V {
-   p=>q.
-   q=>r.
+   p()=>q().
+   q()=>r().
 }
 
 procedure main() {

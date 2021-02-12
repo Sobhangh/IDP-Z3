@@ -1,11 +1,11 @@
 vocabulary {
     // here comes the specification of the vocabulary
-    p
+    p: () → Bool
 }
 
 theory {
     // here comes the definitions and constraints
-    p.
+    p().
 }
 
 structure {

@@ -1,9 +1,9 @@
 vocabulary V {
-    p q r
+    p, q, r:() → Bool
 }
 
 theory T:V {
-   r=>p. q.
+   r()=>p(). q().
 }
 
 procedure main() {

@@ -1,15 +1,15 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    p q
+    p, q: () → Bool
 }
 
 theory T1:V {
     // here comes the definitions and constraints
-    p.
+    p().
 }
 theory T2:V {
     // here comes the definitions and constraints
-    {p <- q.}
+    {p() <- q().}
 }
 
 

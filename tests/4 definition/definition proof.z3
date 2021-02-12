@@ -3,17 +3,17 @@
 vocabulary {
     type color := {red, blue}
     type code := {a,b}
-    codeOf(color): code
-    c:color
+    codeOf: (color) → code
+    c: ()→color
 }
 
 theory {
-    { !cl: ! cd[code]: codeOf(cl)=cd <- (cl=c & cd=a) | (cl~=c & cd=b). }
+    { !cl: ! cd[code]: codeOf(cl)=cd <- (cl=c() & cd=a) | (cl~=c() & cd=b). }
     codeOf(red)=b.
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }
 
 -- meta -------------------------------------

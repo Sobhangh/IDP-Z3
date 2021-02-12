@@ -1,13 +1,13 @@
 
 -- original ---------------------------------
 vocabulary {
-    f(Int):Int
+    f:(Int)→Int
 }
 
 theory {
     f(1)>=2.
 }
-display { view = expanded. }
+display { view() = expanded. }
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,

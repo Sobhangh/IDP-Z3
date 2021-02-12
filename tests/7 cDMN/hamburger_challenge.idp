@@ -3,15 +3,15 @@
 vocabulary {
 	type Item_t := {  Beef_Patty, Bun, Cheese, Onions, Pickles, Lettuce, Ketchup, Tomato }
 	type Nat_t := { 0..10000 }
-	Sodium(Item_t): Nat_t
-	Fat(Item_t): Nat_t
-	Calories(Item_t): Nat_t
-	Cost(Item_t): Nat_t
-	Number(Item_t): Nat_t
-	Total_Sodium: Nat_t
-	Total_Fat: Nat_t
-	Total_Calories: Nat_t
-	Total_Cost: Nat_t
+	Sodium:(Item_t)→ Nat_t
+	Fat:(Item_t)→ Nat_t
+	Calories:(Item_t)→ Nat_t
+	Cost:(Item_t)→ Nat_t
+	Number:(Item_t)→ Nat_t
+	Total_Sodium: ()→Nat_t
+	Total_Fat: ()→Nat_t
+	Total_Calories: ()→Nat_t
+	Total_Cost: ()→Nat_t
 }
 theory {
 	//NumberConstraint

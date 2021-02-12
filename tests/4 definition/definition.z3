@@ -3,7 +3,7 @@
 vocabulary {
     type color := {red, blue}
     type code := {a,b}
-    codeOf(color): code
+    codeOf: (color)→ code
 }
 
 theory {
@@ -11,7 +11,7 @@ theory {
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }
 
 -- meta -------------------------------------

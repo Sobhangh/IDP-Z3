@@ -1,11 +1,11 @@
 
 -- original ---------------------------------
 vocabulary {
-    p q
-    important(`Symbols)
+    p, q: () → Bool
+    important: (`Symbols) → Bool
 }
 theory {
-  ~p()|q.
+  ~p()|q().
   { important(`p). }
 
   { !`x[`Symbols]: important(`x) <- `x(). }
@@ -15,7 +15,7 @@ display {
   expand(`q).
   hide(`important).
   goal(`p).
-  view = normal.
+  view() = normal.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

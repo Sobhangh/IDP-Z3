@@ -1,20 +1,16 @@
 vocabulary {
-    p
-    q
-    r
+    p, q, r: () → Bool
     type color := {red, blue}
-    a : color
-    b : color
-    c : color
+    a, b, c : ()→color
 }
 
 theory {
-    { p <- q | r. }
-    { a=red <- p. }
-    { b=red <- a=red. }
-    { c=red. }
+    { p() <- q() | r(). }
+    { a()=red <- p(). }
+    { b()=red <- a()=red. }
+    { c()=red. }
 }
 display {
     goal(`b).
-    view = expanded.
+    view() = expanded.
 }

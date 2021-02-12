@@ -1,13 +1,13 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    p q
+    p, q: () → Bool
     type color := {red, blue, green}
-    f(color)
+    f: (color) → Bool
 }
 
 theory T:V {
     // here comes the definitions and constraints
-    p.
+    p().
     f(red).
 }
 

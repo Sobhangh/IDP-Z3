@@ -2,14 +2,14 @@
 -- original ---------------------------------
 vocabulary {
 	type num := {Jan, Piet}
-    t:num
-    t0: num
-    t1: num
+    t:()→num
+    t0: ()→num
+    t1: ()→num
 }
 
 theory {
-    { t=t0. t=t1.}
-    t0=Piet.
+    { t()=t0(). t()=t1().}
+    t0()=Piet.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

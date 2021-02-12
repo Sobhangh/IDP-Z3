@@ -1,11 +1,11 @@
 vocabulary {
     type color := {red, blue, green}
-    Color: color
-    p
+    Color: () -> color
+    p: ()→Bool
 }
 
 theory {
-    p => Color() in {red, blue}.
+    p() => Color() in {red, blue}.
 }
 
 procedure main() {

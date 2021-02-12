@@ -2,9 +2,9 @@
 -- original ---------------------------------
 vocabulary {
 	type node := {a,b,c}
-	edge(node, node)
-	symmetric(`Symbols)
-    Start: node
+	edge: (node ⨯ node) → Bool
+	symmetric: (`Symbols) → Bool
+    Start: ()→node
 }
 theory {
     edge(a,b).

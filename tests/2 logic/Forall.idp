@@ -1,12 +1,12 @@
 vocabulary V {
     type Color := {red, blue, green}
-    p
-    q(Color)
-    color(): Color
-    r
+    p: () → Bool
+    q:(Color) → Bool
+    color: ()→ Color
+    r:() → Bool
 }
 theory T:V {
-    p <=> (∀c[Color]: c=red).
+    p() <=> (∀c[Color]: c=red).
     q := {red, blue}
     (∀c[Color]: ~q(c) => c=color()).
 }

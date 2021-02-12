@@ -1,14 +1,14 @@
 
 -- original ---------------------------------
 vocabulary {
-p q r s
-x:Int
+p, q, r, s: () → Bool
+x:()→Int
 }
 
 theory {
-    {p <- ~q.}
-    p => s.
-   x=1.
+    {p() <- ~q().}
+    p() => s().
+   x()=1.
 
 }
 

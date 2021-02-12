@@ -5,15 +5,15 @@ vocabulary {
 	type Digit_t := { 0..9 }
 	type Number_t := { 0..1000 }
 	type Syllables_t := { 0..7 }
-	Allowed_Syllables(Line_t): Syllables_t
-	Syllables_for_Hundreds(Digit_t): Syllables_t
-	Syllables_for_Tens(Digit_t): Syllables_t
-	Syllables_for_Units(Digit_t): Syllables_t
-	Syllables(Line_t): Syllables_t
-	Solution(Line_t): Number_t
-	Hundreds(Line_t): Digit_t
-	Tens(Line_t): Digit_t
-	Units(Line_t): Digit_t
+	Allowed_Syllables: (Line_t)→ Syllables_t
+	Syllables_for_Hundreds:(Digit_t)→ Syllables_t
+	Syllables_for_Tens:(Digit_t)→ Syllables_t
+	Syllables_for_Units:(Digit_t)→ Syllables_t
+	Syllables:(Line_t)→ Syllables_t
+	Solution:(Line_t)→ Number_t
+	Hundreds:(Line_t)→ Digit_t
+	Tens:(Line_t)→ Digit_t
+	Units:(Line_t)→ Digit_t
 }
 theory {
 	//Syllables for every Line

@@ -2,7 +2,7 @@
 -- original ---------------------------------
 vocabulary isa {
     type type := {'1tri angle', 'quadrilateral'}
-    Type : type
+    Type : ()→type
 
 
     type subtype :=
@@ -10,22 +10,22 @@ vocabulary isa {
         , right_triangle
         , rectangle
         , square}
-    Subtype : subtype
+    Subtype : ()→subtype
 
-    isa(subtype, type)
+    isa: (subtype ⨯ type) → Bool
 
     [ASI]
         [short:this is a short info]
         [long:long, this is a long info]
-    asi(type, subtype)
-    typeOf(subtype): type
+    asi: (type ⨯ subtype) → Bool
+    typeOf: (subtype)→ type
 }
 
 theory T:isa {
     !t[type] st[subtype]: isa(st,t) <=> asi(t, st).
     !t[type] st[subtype]: typeOf(st) = t <=> isa(st, t).
     !st[subtype]: isa(st, typeOf(st)).
-    Type = typeOf(Subtype).
+    Type() = typeOf(Subtype()).
     isa(regular_triangle, '1tri angle').
 }
 

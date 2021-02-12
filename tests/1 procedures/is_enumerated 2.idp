@@ -1,11 +1,11 @@
 vocabulary V {
     type color := {red, blue, green}
-    Color: color
-    opposite(color): color
-    is_color(color)
+    Color: () → color
+    opposite: (color) → color
+    is_color: (color)→Bool
 
     type AB := {A, B}
-    f(AB,AB):AB
+    f: (AB*AB)→AB
 }
 
 structure S:V {

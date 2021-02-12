@@ -2,20 +2,20 @@
 -- original ---------------------------------
 vocabulary environment {
     type material := {e1, e2, e3}
-    _MinT(material): Int // physical
-    _MaxT(material): Int
-    _O(material)         // observed
-    OMinT(material): Int // observations
-    OMaxT(material): Int
+    _MinT:(material)→ Int // physical
+    _MaxT:(material)→ Int
+    _O:(material) → Bool         // observed
+    OMinT:(material)→ Int // observations
+    OMaxT:(material)→ Int
 
 }
 
 vocabulary decision {
     extern vocabulary environment
 
-    T: Int
-    M: material
-    Guaranteed
+    T: ()→Int
+    M: ()→material
+    Guaranteed:() → Bool
 }
 
 theory environment:environment {
@@ -36,17 +36,17 @@ theory environment:environment {
 
 theory decision:decision {
     [T must be within acceptable range]
-    (_MinT(M) =< T =< _MaxT(M)).
+    (_MinT(M()) =< T() =< _MaxT(M())).
 
     [A guarantee requires an observation for M]
-    (Guaranteed <=> _O(M)).
+    (Guaranteed() <=> _O(M())).
 
-    M=e1 | M=e2 | M=e3.
+    M()=e1 | M()=e2 | M()=e3.
 }
 
 display {
     goal(`M).
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

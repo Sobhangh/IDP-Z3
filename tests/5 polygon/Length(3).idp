@@ -1,14 +1,14 @@
 vocabulary {
 
     type sides := {3..4}
-    Sides: sides
+    Sides: ()→sides
 
 
     type type := {triangle, quadrilateral}
-    Type : type
+    Type : ()→type
 
     type side := {1..4}
-    Length(side):Real
+    Length: (side)→Real
 
     type subtype :=
         { regular_triangle
@@ -16,22 +16,22 @@ vocabulary {
         , rectangle
         , square
         , irregular}
-    Subtype : subtype
+    Subtype : ()→subtype
 
-    Equilateral
+    Equilateral:() → Bool
 }
 
 theory {
-    Sides=3.
+    Sides()=3.
 
-    Subtype=rectangle => Length(3)=Length(1).
+    Subtype()=rectangle => Length(3)=Length(1).
 
-    Equilateral <=> (∀n[side]: Length(n)=Length(1) | Sides < n).
+    Equilateral() <=> (∀n[side]: Length(n)=Length(1) | Sides() < n).
 
-    Subtype=rectangle <=> Sides=4.
+    Subtype()=rectangle <=> Sides()=4.
 
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }

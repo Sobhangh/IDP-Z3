@@ -1,22 +1,21 @@
+  Not p
+∧ Color = ( if   p then blue else green)
+∧ r
+∧ true
+⇒ ?
 
-Model 1
-==========
-p:={->true}
-q:={->true}
-r:={->true}
-Color:={->blue}
+  Color = ( if   p then blue else green)
+∧ p
+∧ q
+∧ r
+∧ true
+⇒ ?
 
-Model 2
-==========
-p:={->false}
-r:={->true}
-Color:={->green}
+  Not r
+∧ Color = ( if   p then blue else green)
+∧ p
+∧ q
+∧ true
+⇒ ?
 
-Model 3
-==========
-p:={->true}
-q:={->true}
-r:={->false}
-Color:={->blue}
-
-No more models.
+end of decision table

@@ -1,7 +1,7 @@
 vocabulary V {
     type Color := {red, blue, green, yellow}
-    c: Color
-    p
+    c: ()→Color
+    p:() → Bool
 }
 
 theory T:V {

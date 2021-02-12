@@ -1,21 +1,17 @@
 
 -- original ---------------------------------
 vocabulary {
-    p
-    q
-    r
-    s
-    b
-} 
+    p, q, r, s, b: () → Bool
+}
 
 theory {
-    { p <- q | r. }
-    p|s.
-    q.
+    { p() <- q() | r(). }
+    p()|s().
+    q().
 }
 display {
     goal(`b).
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

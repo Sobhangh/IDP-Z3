@@ -8,12 +8,12 @@ vocabulary {
 	type Price_t := { 0..4000 }
 	type Kid_t := { 0..300 }
 	type Amount_t := { 0..10 }
-	Price(Bus_t): Price_t
-	Size(Bus_t): Size_t
-	Amount(Bus_t): Amount_t
-	Kids(Bus_t): Kid_t
-	TotalPrice: Price_t
-	Kids_amount: Kid_t
+	Price:(Bus_t)→ Price_t
+	Size:(Bus_t)→ Size_t
+	Amount:(Bus_t)→ Amount_t
+	Kids:(Bus_t)→ Kid_t
+	TotalPrice: ()→Price_t
+	Kids_amount: ()→Kid_t
 }
 theory {
 	//Amount of Kids

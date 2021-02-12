@@ -1,24 +1,24 @@
 vocabulary V {
     type Security := {BE001}
-    A
-    B
-    C
-    D
-    E
-    F
-    G
-    H
-    I
-    Eligible(Security)
+    A:() → Bool
+    B:() → Bool
+    C:() → Bool
+    D:() → Bool
+    E:() → Bool
+    F:() → Bool
+    G:() → Bool
+    H:() → Bool
+    I:() → Bool
+    Eligible:(Security) → Bool
 }
 
 theory T:V {
     {
-        !s: Eligible(s) <- B & (C|D).
-        Eligible(BE001) <- B & E & F.
-        Eligible(BE001) <- B & E & G & ~H.
+        !s: Eligible(s) <- B() & (C()|D()).
+        Eligible(BE001) <- B() & E() & F().
+        Eligible(BE001) <- B() & E() & G() & ~H().
     }
-    A => ~Eligible(BE001).
+    A() => ~Eligible(BE001).
 }
 
 procedure main() {

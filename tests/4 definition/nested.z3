@@ -2,8 +2,8 @@
 -- original ---------------------------------
 vocabulary {
     type num := { Piet, Jan}
-    same(num) : num
-    negated(num) : num
+    same: (num) → num
+    negated: (num) → num
 }
 
 theory {
@@ -15,7 +15,7 @@ theory {
 }
 
 display {
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

@@ -1,11 +1,11 @@
 
 -- original ---------------------------------
 vocabulary {
-    p q r s
+    p, q, r, s: () → Bool
 }
 theory {
-    p => q & (r|s).
-    p.
+    p() => q() & (r()|s()).
+    p().
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

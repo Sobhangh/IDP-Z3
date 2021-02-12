@@ -2,7 +2,7 @@
 -- original ---------------------------------
 vocabulary {
     type num := {1..4}
-    Prime(num)
+    Prime: (num) → Bool
 }
 
 theory {

@@ -144,6 +144,19 @@ class Vocabulary(object):
 
         self.name = 'V' if not self.name else self.name
 
+        # expand multi-symbol declarations
+        temp = []
+        for decl in self.declarations:
+            if not isinstance(decl, SymbolDeclaration):
+                temp.append(decl)
+            else:
+                for symbol in decl.symbols:
+                    new = copy(decl)  # shallow copy !
+                    new.name = sys.intern(symbol.name)
+                    new.symbols = None
+                    temp.append(new)
+        self.declarations = temp
+
         # define reserved symbols
         self.symbol_decls: Dict[str, Type] \
             = {INT: RangeDeclaration(name=INT, elements=[]),
@@ -310,7 +323,9 @@ class RangeDeclaration(object):
 
 class SymbolDeclaration(object):
     """The class of AST nodes representing an entry in the vocabulary,
-    declaring a symbol.
+    declaring one or more symbols.
+    Multi-symbols declaration are replaced by single-symbol declarations
+    before the annotate() stage.
 
     Attributes:
         annotations : the annotations given by the expert.
@@ -318,7 +333,9 @@ class SymbolDeclaration(object):
             `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
-        name (string): the identifier of the symbol
+        symbols ([Symbol]): the symbols beind defined, before expansion
+
+        name (string): the identifier of the symbol, after expansion of the node
 
         sorts (List[Sort]): the types of the arguments
 
@@ -327,8 +344,6 @@ class SymbolDeclaration(object):
         type (string): the name of the type of the symbol
 
         arity (int): the number of arguments
-
-        function (bool): `True` if the symbol is a function
 
         domain (List): the list of possible tuples of arguments
 
@@ -351,19 +366,23 @@ class SymbolDeclaration(object):
 
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
-        self.name = sys.intern(kwargs.pop('name').name)  # a string, not a Symbol
+        if 'symbols' in kwargs:
+            self.symbols = kwargs.pop('symbols')
+            self.name = None
+        else:
+            self.name = sys.intern(kwargs.pop('name').name)
+            self.symbols = None
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
             self.out = Sort(name=BOOL)
 
-        self.function = (self.out.name != BOOL)
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         self.unit: str = None
         self.category: str = None
 
-        self.typeConstraints = []
+        self.typeConstraints = None
         self.translated = None
 
         self.type = None  # a string
@@ -380,6 +399,7 @@ class SymbolDeclaration(object):
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
     def annotate(self, voc, vocabulary=True):
+        assert self.name is not None, "Internal error"
         if vocabulary:
             assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
             voc.symbol_decls[self.name] = self
@@ -400,6 +420,7 @@ class SymbolDeclaration(object):
                 self.instances[expr.code] = expr
 
         # determine typeConstraints
+        self.typeConstraints = []
         if self.out.decl.name != BOOL and self.range:
             for inst in self.instances.values():
                 domain = self.out.decl.check_bounds(inst)
@@ -688,7 +709,7 @@ class Rule(object):
             out = out.instantiate(old, new)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
-        if self.symbol.decl.function:  # a function
+        if self.symbol.decl.type != BOOL:  # a function
             out = out.instantiate(self.args[-1], instance)
         else:
             out = AEquivalence.make('⇔', [instance, out])
@@ -936,7 +957,7 @@ class Goal(object):
         # define reserved symbol
         if '__relevant' not in voc.symbol_decls:
             relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
-                                    sorts=[], out=None)
+                                    sorts=[], out=Sort(name=BOOL))
             relevants.block = self
             relevants.annotate(voc)
 
@@ -1004,13 +1025,13 @@ class Display(object):
             open_types[name] = Sort(name=type_name)
 
         for name, out in [
-            ('goal', None),
-            ('expand', None),
-            ('relevant', None),
-            ('hide', None),
+            ('goal', Sort(name=BOOL)),
+            ('expand', Sort(name=BOOL)),
+            ('relevant', Sort(name=BOOL)),
+            ('hide', Sort(name=BOOL)),
             ('view', Sort(name='View')),
-            ('moveSymbols', None),
-            ('optionalPropagation', None),
+            ('moveSymbols', Sort(name=BOOL)),
+            ('optionalPropagation', Sort(name=BOOL)),
             ('unit', open_types['unit']),
             ('category', open_types['category'])
         ]:

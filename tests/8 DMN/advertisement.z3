@@ -4,8 +4,8 @@
 
 vocabulary {
 	type Advertised_Objectst_t := { Toys, Cars, Videogames }
-	Advertised_Objects: Advertised_Objectst_t
-	Age: Int
+	Advertised_Objects: ()→Advertised_Objectst_t
+	Age: ()→Int
 }
 theory {
 	//Advertisement Decision

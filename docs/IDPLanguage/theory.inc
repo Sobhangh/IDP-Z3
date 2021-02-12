@@ -37,9 +37,6 @@ Numeric literal
 Constructor
     Each constructor of a type_ is a term having that type.
 
-Constant
-    a constant_ is a term whose type_ is derived from its declaration in the vocabulary_.
-
 Variable
     a variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).
 
@@ -49,6 +46,7 @@ Function application
     :math:`F(t_1, t_2,.., t_n)` is a term, when :math:`F` is a function_ symbol of arity |n|, and |t1,tn| are terms.
     Each term must be of the appropriate type_, as defined in the function declaration in the vocabulary.
     The resulting type of the function application is also defined in the function declaration.
+    If the arity of :math:`F` is 0, i.e., if :math:`F` is a constant_, then :math:`F()` is a term.
 
 Negation
     -|t| is a numerical term, when |t| is a numerical term.
@@ -93,7 +91,7 @@ true and false
 Predicate application
     :math:`P(t_1, t_2,.., t_n)` is a sentence, when :math:`P` is a predicate_ symbol of arity |n|, and |t1,tn| are terms.
     Each term must be of the appropriate type_, as defined in the predicate declaration.
-    If the arity of :math:`P` is 0, i.e., if :math:`P` is a proposition, then :math:`P` and :math:`P()` are sentences.
+    If the arity of :math:`P` is 0, i.e., if :math:`P` is a proposition, then :math:`P()` is a sentence.
 
 Comparison
     :math:`t_1 ꕕ t_2` is a sentence, when |t1|, |t2| are two numerical terms and :math:`ꕕ` is one of the following comparison operators :math:`<, ≤, =, ≥, >, ≠` (or,  using ascii characters: :math:`=<, >=, \sim=`).

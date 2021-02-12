@@ -5,8 +5,8 @@
 vocabulary {
 	type Country_t := { Belgium, France, Luxembourg, Netherlands, Germany, Denmark }
 	type Color_t := { Green, Red, Yellow, Orange }
-	Color(Country_t): Color_t
-	Country_borders_Country(Country_t, Country_t)
+	Color:(Country_t)→ Color_t
+	Country_borders_Country:(Country_t ⨯ Country_t) → Bool
 }
 theory {
 	//Bordering countries can’t share colors

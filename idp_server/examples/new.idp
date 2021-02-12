@@ -1,12 +1,12 @@
 vocabulary {
-    p
+    p : () → 𝔹
 }
 
 theory {
-    p.
+    p().
 }
 
 display {
-    
+
 }
 

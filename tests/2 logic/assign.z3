@@ -1,15 +1,14 @@
 
 -- original ---------------------------------
 vocabulary {
-    x:Int
-    y:Int
+    x, y:()→Int
 }
 theory {
-    x=0.
-    ~(x=0)|(x=0).
+    x()=0.
+    ~(x()=0)|(x()=0).
 }
 display {
-    view = expanded.
+    view() = expanded.
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,

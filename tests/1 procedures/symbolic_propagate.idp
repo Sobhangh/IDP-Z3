@@ -1,17 +1,17 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    p q
-    i: Int
-    r: Real
+    p, q: () → Bool
+    i: () → Int
+    r: ()→Real
     type color := {red, blue, green}
-    c: color
+    c: ()→color
     type range := {0..5}
-    ra: range
+    ra: ()→range
 }
 
 theory T:V {
     // here comes the definitions and constraints
-    q & c=blue & i=1 & r=2.0 & ra=3 & (?x[range]: x=ra).
+    q() & c()=blue & i()=1 & r()=2.0 & ra()=3 & (?x[range]: x=ra()).
 }
 
 procedure main () {

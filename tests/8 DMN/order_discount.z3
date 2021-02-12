@@ -3,8 +3,8 @@
 
 
 vocabulary {
-	amount: Int
-	discount: Int
+	amount: ()→Int
+	discount: ()→Int
 }
 theory {
 	//Order Discount

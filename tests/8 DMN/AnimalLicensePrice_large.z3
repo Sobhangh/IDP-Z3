@@ -5,18 +5,18 @@
 vocabulary {
 	type Animal_Typet_t := { Dog }
 	type Interaction_Reasont_t := { Register }
-	Animal_Type: Animal_Typet_t
-	Total: Int
-	Interaction_Reason: Interaction_Reasont_t
-	Age: Int
-	Sterilized
-	Half_Price_Reg
-	Free_Renewal
-	ViciousDog
-	Sterilization_Applicable
-	Vet_Certificate
-	Microchipped
-	Fee_Discount_for_Sterilization
+	Animal_Type: ()→Animal_Typet_t
+	Total: ()→Int
+	Interaction_Reason: ()→Interaction_Reasont_t
+	Age: ()→Int
+	Sterilized:() → Bool
+	Half_Price_Reg:() → Bool
+	Free_Renewal:() → Bool
+	ViciousDog:() → Bool
+	Sterilization_Applicable:() → Bool
+	Vet_Certificate:() → Bool
+	Microchipped:() → Bool
+	Fee_Discount_for_Sterilization:() → Bool
 }
 theory {
 	//DogLicensePrice

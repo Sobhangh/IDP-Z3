@@ -1,17 +1,17 @@
 vocabulary V {
     type Security := {BE001}
-    A
-    B
-    C
-    D
-    E
-    F
-    G
-    H
-    I
-    Eligible(Security)
-    NotEligible(Security)
-    Eligible1(Security)
+    A:() → Bool
+    B:() → Bool
+    C:() → Bool
+    D:() → Bool
+    E:() → Bool
+    F:() → Bool
+    G:() → Bool
+    H:() → Bool
+    I:() → Bool
+    Eligible:(Security) → Bool
+    NotEligible:(Security) → Bool
+    Eligible1:(Security) → Bool
 }
 
 theory T:V {
@@ -19,11 +19,11 @@ theory T:V {
         !s: Eligible(s) <- ~NotEligible(s).
     }
     {
-        !s: NotEligible(s) <- B & C.
+        !s: NotEligible(s) <- B() & C().
         !s: NotEligible(s) <- ~Eligible1(s).
     }
     {
-        Eligible1(BE001) <- B & E & F.
+        Eligible1(BE001) <- B() & E() & F().
     }
 }
 

@@ -3,14 +3,14 @@
 vocabulary {
     type lipLen := {Short, Standard}
     type jaDes := {Design_230, Design_400HP}
-    LipLen: lipLen
-    JacketDesign: jaDes
+    LipLen: () →lipLen
+    JacketDesign: ()→jaDes
 }
 
 theory {
     {
-        LipLen = Short <- JacketDesign = Design_230.
-        LipLen = Standard <- JacketDesign = Design_400HP.
+        LipLen() = Short <- JacketDesign() = Design_230.
+        LipLen() = Standard <- JacketDesign() = Design_400HP.
     }
 }
 -- meta -------------------------------------

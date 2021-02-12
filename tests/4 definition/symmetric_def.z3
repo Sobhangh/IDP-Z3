@@ -2,8 +2,8 @@
 -- original ---------------------------------
 vocabulary {
 	type node := {a,b,c}
-	edge(node, node)
-	symmetric(`Symbols)
+	edge: (node ⨯ node) → Bool
+	symmetric: (`Symbols) → Bool
 }
 theory {
     edge(a,b).
