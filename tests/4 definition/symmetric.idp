@@ -1,12 +1,12 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric: (`Symbols) → Bool
+	symmetric: (Symbol) → Bool
     Start: ()→node
 }
 theory {
     edge(a,b).
-    !`p in `Symbols: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
+    !`p in Symbol: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
 	symmetric := {`edge}
 }
 display {

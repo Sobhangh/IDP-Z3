@@ -25,7 +25,7 @@ Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 Types
 +++++
 
-IDP-Z3 has the following built-in types:  ``𝔹``, ``ℤ``, ``ℝ``, ```Symbols``.
+IDP-Z3 has the following built-in types:  ``𝔹``, ``ℤ``, ``ℝ``, ``Symbol``.
 The equivalent ASCII symbols are ``Bool``, ``Int``, and ``Real``.
 
 Custom types can be defined by specifying a range of numeric literals, or a list of constructors (of arity 0).
@@ -36,9 +36,9 @@ Their name should be capitalized, by convention.
     type Side := {1..4}
     type Color := {red, blue, green}
 
-The type ```Symbols`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
+The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
-For the above example, the constructors of ```Symbols`` are : ```red``, ```blue``, ```green``.
+For the above example, the constructors of ``Symbol`` are : ```red``, ```blue``, ```green``.
 
 
 .. _function:

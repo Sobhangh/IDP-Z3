@@ -35,7 +35,7 @@ import sys
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, IDPZ3Error
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, SYMBOL, IDPZ3Error
 
 
 class ASTNode(object):
@@ -381,7 +381,7 @@ class Constructor(Expression):
 
         super().__init__()
         self.fresh_vars = set()
-        self.symbol = None  # set only for `Symbols constructors
+        self.symbol = None  # set only for SYMBOL constructors
         self.translated: Any = None
 
     def __str1__(self): return self.name
@@ -782,12 +782,12 @@ class AppliedSymbol(Expression):
         self.type = (BOOL if self.is_enumerated or self.in_enumeration else
                      self.decl.type if self.decl else None)
         out = super().annotate1()
-        if out.decl and out.decl.name == "`Symbols":  # a symbol variable
+        if out.decl and out.decl.name == SYMBOL:  # a symbol variable
             out.fresh_vars.add(self.s.name)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.name != "`Symbols" and self.name != '__relevant':
+        if self.decl.name != SYMBOL and self.name != '__relevant':
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
@@ -803,7 +803,7 @@ class AppliedSymbol(Expression):
         try:
             out = {}
             for i, e in enumerate(self.sub_exprs):
-                if self.decl.name != '`Symbols' and isinstance(e, Variable):
+                if self.decl.name != SYMBOL and isinstance(e, Variable):
                     out[e.name] = self.decl.sorts[i]
                 else:
                     out.update(e.type_inference())
