@@ -38,7 +38,6 @@ Their name should be capitalized, by convention.
 
 The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
-For the above example, the constructors of ``Symbol`` are : ```red``, ```blue``, ```green``.
 
 
 .. _function:
