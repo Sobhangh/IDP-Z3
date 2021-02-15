@@ -31,7 +31,7 @@ from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
     FALSE, AppliedSymbol
 from .Parse import ConstructedTypeDeclaration, Structure, Symbol, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
 from .Simplify import join_set_conditions
-from .utils import OrderedSet, NEWL, BOOL, INT, REAL
+from .utils import OrderedSet, NEWL, BOOL, INT, REAL, SYMBOL
 
 class Problem(object):
     """A collection of theory and structure blocks.
@@ -114,7 +114,7 @@ class Problem(object):
         for name, decl in block.declarations.items():
             if name in self.declarations:
                 if (self.declarations[name] == block.declarations[name]
-                    or name in [BOOL, INT, REAL, '`Symbols', '__relevant']):
+                    or name in [BOOL, INT, REAL, SYMBOL, '__relevant']):
                     continue # nothing to do
                 assert False, f"Can't add declaration for {name} in {block.name}: duplicate"
             self.declarations[name] = decl

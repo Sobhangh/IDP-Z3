@@ -3,11 +3,11 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric: (`Symbols) → Bool
+	symmetric: (Symbol) → Bool
 }
 theory {
     edge(a,b).
-    { !`p[`Symbols]: symmetric(`p) <- !x y : `p(x,y) => `p(y,x). }
+    { !`p in Symbol: symmetric(`p) <- !x, y : `p(x,y) => `p(y,x). }
 	symmetric(`edge).
 }
 display {

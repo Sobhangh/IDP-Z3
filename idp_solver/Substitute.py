@@ -38,7 +38,7 @@ from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantificati
                     ADisjunction, AConjunction,  AAggregate, AUnary, \
                     AComparison, AppliedSymbol, UnappliedSymbol, Number, \
                     Variable, TRUE
-from idp_solver.utils import BOOL
+from idp_solver.utils import BOOL, SYMBOL
 
 
 # class Expression  ###########################################################
@@ -246,7 +246,7 @@ def interpret(self, problem):
             simpler = AUnary.make('¬', simpler)
         simpler.annotations = self.annotations
     elif (self.name in problem.interpretations
-          and any(s.name == '`Symbols' for s in self.decl.sorts)
+          and any(s.name == SYMBOL for s in self.decl.sorts)
           and all(a.as_rigid() is not None for a in sub_exprs)):
         # apply enumeration of predicate over symbols to allow simplification
         # do not do it otherwise, for performance reasons
@@ -288,7 +288,7 @@ def instantiate(self, e0, e1, problem=None):
     if self.value:
         return self
     if self.name == e0.code:
-        if type(self) == AppliedSymbol and self.decl.name == '`Symbols':
+        if type(self) == AppliedSymbol and self.decl.name == SYMBOL:
             if isinstance(e1, Variable):  # replacing variable in a definition
                 out = copy.copy(self)
                 out.code = out.code.replace(e0.code, e1.code)

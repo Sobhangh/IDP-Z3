@@ -6,8 +6,8 @@ vocabulary {
     q: (color) → Bool
 }
 theory {
-    p() <=> (?c[color]: c~=red).
-    ?c[color]: q(c).
+    p() <=> (?c in color: c~=red).
+    ?c in color: q(c).
 }
 display {
     view() = expanded.

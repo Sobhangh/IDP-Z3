@@ -18,8 +18,8 @@ vocabulary decision {
 
 theory environment:environment {
     [Observations are accurate]
-    ( (! m[material]: _O(m) => OMinT(m)=_MinT(m))
-    & (! m[material]: _O(m) => OMaxT(m)=_MaxT(m))
+    ( (! m in material: _O(m) => OMinT(m)=_MinT(m))
+    & (! m in material: _O(m) => OMaxT(m)=_MaxT(m))
     ).
 
     [Observation for e1]

@@ -35,9 +35,9 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations
-        (('!'|'∀') quantees=Quantee+ ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)?
+        (('!'|'∀') quantees+=Quantee[','] ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: var=/`?[^\d\W]\w*\b/ ('[' sort=Sort ']')? ;
+      Quantee: var=/`?[^\d\W]\w*\b/ ( ('in' | '∈') sort=Sort)? ;
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
@@ -56,7 +56,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     Aggregate:      AAggregate      | Base;
 
 
-    AQuantification: q=Quantor quantees=Quantee+ ':' f=Expression;
+    AQuantification: q=Quantor quantees+=Quantee[','] ':' f=Expression;
       Quantor: '∀' | '!' | '∃' | '?' ;
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
     AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
@@ -68,7 +68,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
     AUnary: !INT !IDPFLOAT               (operator=UnaryOperator  f=Aggregate);
-    AAggregate: aggtype=AggType '{' quantees=Quantee*  ':' f=Expression (':'  out=Expression)? '}';
+    AAggregate: aggtype=AggType '{' quantees*=Quantee[',']  ':' f=Expression (':'  out=Expression)? '}';
       AggType: '#' | 'card' | 'sum';
 
     RImplicationOp: '<=' | '⇐';

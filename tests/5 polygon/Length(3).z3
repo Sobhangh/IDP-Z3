@@ -28,7 +28,7 @@ theory {
 
     Subtype()=rectangle => Length(3)=Length(1).
 
-    Equilateral() <=> (∀n[side]: Length(n)=Length(1) | Sides() < n).
+    Equilateral() <=> (∀n in side: Length(n)=Length(1) | Sides() < n).
 
     Subtype()=rectangle <=> Sides()=4.
 

@@ -138,11 +138,11 @@ CAC40	,
 theory T:V {
 
     {
-        !s[Security]: Eligible(s) <- Issuer_Type(s) = Sovereign
+        !s in Security: Eligible(s) <- Issuer_Type(s) = Sovereign
             & Country(s) in {Aus, Bel, Can,Den,Est,Fin,Fra,Ger,Hon,Ire,Isr,Ita,Jap,Lux,Net,New,Nor,Por,Sin,Slo,Sou,Spa,Swe,Swi,UniK,UniS}
             & HasRating(s) =< 77.
 
-       !s[Security]: Eligible(s) <- Issuer_Type(s) = Supra
+       !s in Security: Eligible(s) <- Issuer_Type(s) = Supra
             & Issuer(s) in {AfricanDevelopmentBank,
                 BankForInternationalSettlements, CaribbeanDevelopmentBank,
                 CouncilOfEuropeDevelopmentBank,

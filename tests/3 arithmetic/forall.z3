@@ -6,9 +6,9 @@ vocabulary {
     p, q:() → Bool
 }
 theory {
-   p() <=> (!t[temp]: 1 < t < 3 => 0 < t < 3).
-   q() <=> (!t[ℝ]: 1 < t < 3 => 0 < t < 3).
-   ?x[Real]: Works(x).
+   p() <=> (!t ∈ temp: 1 < t < 3 => 0 < t < 3).
+   q() <=> (!tintin in ℝ: 1 < tintin < 3 => 0 < tintin < 3).
+   ?x in Real: Works(x).
 }
 display {
     view() = expanded.

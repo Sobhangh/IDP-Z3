@@ -44,7 +44,7 @@ from .Expression import (ASTNode, Constructor, IfExpr, AQuantification,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Arguments,
                          Variable, TRUE, FALSE)
-from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL, IDPZ3Error)
+from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL, SYMBOL, IDPZ3Error)
 
 
 def str_to_IDP(atom, val_string):
@@ -158,7 +158,7 @@ class Vocabulary(ASTNode):
             RangeDeclaration(name=INT, elements=[]),
             RangeDeclaration(name=REAL, elements=[]),
             ConstructedTypeDeclaration(
-                name='`Symbols',
+                name=SYMBOL,
                 constructors=[Constructor(name=f"`{s.name}")
                               for s in self.declarations
                               if type(s) == SymbolDeclaration]),
@@ -174,7 +174,7 @@ class Vocabulary(ASTNode):
             s.block = self
             s.annotate(self)  # updates self.symbol_decls
 
-        for constructor in self.symbol_decls['`Symbols'].constructors:
+        for constructor in self.symbol_decls[SYMBOL].constructors:
             constructor.symbol = (Symbol(name=constructor.name[1:])
                                   .annotate(self, {}))
 
@@ -257,7 +257,7 @@ class ConstructedTypeDeclaration(ASTNode):
         voc.symbol_decls[self.name] = self
         for c in self.constructors:
             c.type = self.name
-            self.check(c.name not in voc.symbol_decls or self.name == '`Symbols',
+            self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
                        f"duplicate constructor in vocabulary: {c.name}")
             voc.symbol_decls[c.name] = c
         self.range = self.constructors  # TODO constructor functions
@@ -650,7 +650,7 @@ class Rule(ASTNode):
         # compute self.expanded, by expanding:
         # ∀ v: f(v)=out <=> body
         # (after joining the rules of the same symbols)
-        if any(s.name =="`Symbols" for s in self.sorts):
+        if any(s.name ==SYMBOL for s in self.sorts):
             # don't expand macros, to avoid arity and type errors
             # will be done later with optimized binary quantification
             self.expanded = TRUE
@@ -780,7 +780,7 @@ class SymbolInterpretation(ASTNode):
                 constr.type = self.name
                 if self.name != BOOL:
                     constr.py_value = i  # to allow comparisons
-                self.check(constr.name not in voc.symbol_decls or self.name == '`Symbols',
+                self.check(constr.name not in voc.symbol_decls or self.name == SYMBOL,
                         f"duplicate constructor in vocabulary: {constr.name}")
                 voc.symbol_decls[constr.name] = constr
 

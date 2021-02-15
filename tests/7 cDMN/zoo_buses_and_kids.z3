@@ -25,10 +25,10 @@ theory {
 	true => TotalPrice() = Amount(Big) * Price(Big) + Amount(Small) * Price(Small).
 
 	//Calculate amount of bus
-	!Bus[Bus_t]: true => Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01)%Size(Bus))/Size(Bus) + 01.
+	!Bus in Bus_t: true => Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01)%Size(Bus))/Size(Bus) + 01.
 
 	//Every kid needs a bus
-	Kids_amount() = sum{ Bus[Bus_t] : true: Kids(Bus) }.
+	Kids_amount() = sum{ Bus in Bus_t : true: Kids(Bus) }.
 }
 
 

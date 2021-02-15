@@ -20,21 +20,21 @@ vocabulary {
 theory {
 	//Syllables for every Line
 	{
-		!Line[Line_t]: Allowed_Syllables(Line) = 5 <- Line = First.
-		!Line[Line_t]: Allowed_Syllables(Line) = 6 <- Line = Second.
-		!Line[Line_t]: Allowed_Syllables(Line) = 3 <- Line = Third.
+		!Line in Line_t: Allowed_Syllables(Line) = 5 <- Line = First.
+		!Line in Line_t: Allowed_Syllables(Line) = 6 <- Line = Second.
+		!Line in Line_t: Allowed_Syllables(Line) = 3 <- Line = Third.
 	}
 
 	//Every line needs specific amount of syllables
-	!Line[Line_t]: true => Syllables(Line) = Allowed_Syllables(Line).
+	!Line in Line_t: true => Syllables(Line) = Allowed_Syllables(Line).
 
 	//Calculate the lines
-	!Line[Line_t]: Solution(Line)  = sum{ : Line = Line: Hundreds(Line) * 100 }+sum{ : Line = Line: Tens(Line) * 10 }+sum{ : Line = Line: Units(Line) }.
+	!Line in Line_t: Solution(Line)  = sum{ : Line = Line: Hundreds(Line) * 100 }+sum{ : Line = Line: Tens(Line) * 10 }+sum{ : Line = Line: Units(Line) }.
 	//Solutions need to add up
 	true => Solution(Third) = Solution(First) + Solution(Second).
 
 	//Calculate syllables of line
-	!Line[Line_t]: Syllables(Line)  = sum{ : Line = Line: Syllables_for_Hundreds(Hundreds(Line)) }+sum{ : Line = Line: Syllables_for_Tens(Tens(Line)) }+sum{ : Line = Line: Syllables_for_Units(Units(Line)) }.
+	!Line in Line_t: Syllables(Line)  = sum{ : Line = Line: Syllables_for_Hundreds(Hundreds(Line)) }+sum{ : Line = Line: Syllables_for_Tens(Tens(Line)) }+sum{ : Line = Line: Syllables_for_Units(Units(Line)) }.
 }
 
 

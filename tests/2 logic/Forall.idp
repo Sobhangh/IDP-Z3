@@ -6,9 +6,9 @@ vocabulary V {
     r:() → Bool
 }
 theory T:V {
-    p() <=> (∀c[Color]: c=red).
+    p() <=> (∀c in Color: c=red).
     q := {red, blue}
-    (∀c[Color]: ~q(c) => c=color()).
+    (∀c in Color: ~q(c) => c=color()).
 }
 procedure main() {
     print(str(Problem(T).formula()))

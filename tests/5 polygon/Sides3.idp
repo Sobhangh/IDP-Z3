@@ -47,11 +47,11 @@ theory {
 
     [Definition of Convex]
     (Convex() <=> [All angles are below 180°]
-                (∀n[side]: Angle(n)<180)).
+                (∀n in side: Angle(n)<180)).
 
     [Definition of Equilateral]
     (Equilateral() <=> [All sides have the same length]
-                     (∀n[side]: Length(n)=Length(1) | Sides() < n)).
+                     (∀n in side: Length(n)=Length(1) | Sides() < n)).
 
     [A triangle is regular, right, or irregular]
     ( Subtype()=right_triangle | Subtype()=regular_triangle | Subtype()=irregular <= Sides()=3).
@@ -62,15 +62,15 @@ theory {
 
     [A regular triangle is a triangle where all angles are 60°]
     (Subtype()=regular_triangle <=> Sides()=3 & [All angles are 60°]
-                                            (!n[side]: Angle(n)=60 | Sides() < n)).
+                                            (!n in side: Angle(n)=60 | Sides() < n)).
 
     [A right triangle is a triangle with a 90° angle]
     (Subtype()=right_triangle   <=> Sides()=3 & [One angle is 90°]
-                                           (?n[side]: Angle(n)=90)).
+                                           (?n in side: Angle(n)=90)).
 
     [All angles are 90° in squares and rectangles]
     (Subtype()=square | Subtype()=rectangle <=> Sides()=4 & [All angles are 90°]
-                                                     (!n[side]: Angle(n)=90 | Sides ()< n)).
+                                                     (!n in side: Angle(n)=90 | Sides ()< n)).
 
     [In a rectangle, opposite side have the same length, and adjacent sides have different lengths]
     (Subtype()=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2)).
@@ -86,25 +86,25 @@ theory {
     // General constraints
 
     [The perimeter is the sum of the lengths of the sides]
-    (Perimeter() = sum{n[side] : true : Length(n)}).
+    (Perimeter() = sum{n in side : true : Length(n)}).
 
     [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
-    (sum{n[side] : true : Angle(n)} = (Sides()-2)*180).
+    (sum{n in side : true : Angle(n)} = (Sides()-2)*180).
 
     [Lengths are positive numbers]
-    (!x[side]: 0 =< Length(x)).
+    (!x in side: 0 =< Length(x)).
 
     [Angles are positive numbers]
-    (!x[side]: 0 =< Angle(x)).
+    (!x in side: 0 =< Angle(x)).
 
     [Angles cannot be 180°]
-    (!x[side]: Angle(x) ~= 180).
+    (!x in side: Angle(x) ~= 180).
 
     [A polygon with N vertices has N angles]
-    (!n[side]: Angle(n)=0 <=> Vertices()<n ).
+    (!n in side: Angle(n)=0 <=> Vertices()<n ).
 
     [A polygon with N sides has N lengths]
-    (!n[side]: Length(n)=0 <=> Sides()<n).
+    (!n in side: Length(n)=0 <=> Sides()<n).
 
 
 
@@ -114,7 +114,7 @@ theory {
     Subtype()=irregular & Sides() = 4 => Surface() = -1.
     0 =< Base().
     0 =< Height().
-    ?n[side]: n=<Sides() & Length(n)=Base().
+    ?n in side: n=<Sides() & Length(n)=Base().
 }
 
 display {

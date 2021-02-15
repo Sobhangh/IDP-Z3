@@ -7,8 +7,8 @@ vocabulary {
     y: ()→Real
 }
 theory {
-    {!x[Real]: double(x)= x+x. }
-    {!x[Real]: quad(x)= double(double(x)). }
+    {!x in Real: double(x)= x+x. }
+    {!x in Real: quad(x)= double(double(x)). }
     X()=3.
     y()=quad(X()).
 }
