@@ -50,9 +50,18 @@ Objects to recompute:
 - [ ] allow range enumeration in theory/structure
 
 problems:
-* lower speed of test: because of body.interpret() → do not add co_constraint when finite domain
-* abstract models for polygons
-* environmental theories
+- [ ] lower speed of test: because of body.interpret() → do not add co_constraint when finite domain
+- [ ]  abstract models for polygon
+- [x]   environmental theories
+
+problem with speed:
+* original : 8 sec but DMN, abstract fail
+* add body.interpret(theory) + fix decision_table → 9+ sec, but DMN OK, (abstract fails ?)
+* quad in double_def: original ok !  How ?  no def_constraints ,but instantiate_def
+* So, maybe I can fix DMN + abstract without body.interpret(theory)
+* Options: test on decl.domain in AppliedSymbol.interpret to create co_constraint
+    * faster, but DMN missing conditions (collect is incomplete)
+    - [ ] option: use def_constraint to cache all co_constraints ?  -> no impact on relevance
 
 ## Binary quantifications
 - [ ] update syntax of quantification over type

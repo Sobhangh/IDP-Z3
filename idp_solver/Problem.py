@@ -194,8 +194,8 @@ class Problem(object):
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
             for ass in self.assignments.values():
-                ass.sentence = ass.sentence.copy()
-                ass.sentence.original = ass.sentence
+                ass.sentence = ass.sentence
+                ass.sentence.original = ass.sentence.copy()
 
     def formula(self):
         """ the formula encoding the knowledge base """
