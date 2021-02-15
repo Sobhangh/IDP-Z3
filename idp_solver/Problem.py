@@ -106,7 +106,6 @@ class Problem(object):
         out.def_constraints = self.def_constraints.copy()
         # copy() is called before making substitutions => invalidate derived fields
         out._formula = None
-        out.co_constraints, out.questions = None, None
         return out
 
     def add(self, block):

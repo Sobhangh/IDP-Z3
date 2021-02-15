@@ -1,4 +1,4 @@
-  Not c in {blue, green, red}
+  Not c in {red, blue, green}
 ⇒ Not p
 
 ⇒ p

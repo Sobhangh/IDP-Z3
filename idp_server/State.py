@@ -72,6 +72,7 @@ class State(Problem):
             for name, struct in idp.structures.items():
                 if name != "default":
                     self.add(struct)
+        self._interpret()
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
@@ -100,7 +101,6 @@ class State(Problem):
         :rtype: State
         """
         out = self.copy()
-        out._interpret()
         if out.environment:
             out.environment = out.environment.copy()
             _ = json_to_literals(out.environment, jsonstr)
