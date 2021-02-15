@@ -49,8 +49,10 @@ Objects to recompute:
     - [ ] remove dead code in constructedFrom
 - [ ] allow range enumeration in theory/structure
 
-problem with decision_table:
-* problem.constraints is ok, but not problem.def_constraints.
+problems:
+* lower speed of test: because of body.interpret() → do not add co_constraint when finite domain
+* abstract models for polygons
+* environmental theories
 
 ## Binary quantifications
 - [ ] update syntax of quantification over type
