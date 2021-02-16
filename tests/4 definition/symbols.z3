@@ -2,13 +2,13 @@
 -- original ---------------------------------
 vocabulary {
     p, q: () → Bool
-    important: (`Symbols) → Bool
+    important: (Symbol) → Bool
 }
 theory {
   ~p()|q().
   { important(`p). }
 
-  { !`x[`Symbols]: important(`x) <- `x(). }
+  { !`x in Symbol: important(`x) <- `x(). }
 }
 display {
   relevant(`p).

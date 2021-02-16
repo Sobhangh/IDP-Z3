@@ -11,7 +11,7 @@ vocabulary V {
 
 theory T:V {
     // here comes the definitions and constraints
-    q() & c()=blue & i()=1 & r()=2.0 & ra()=3 & (?x[range]: x=ra()).
+    q() & c()=blue & i()=1 & r()=2.0 & ra()=3 & (?x in range: x=ra()).
 }
 
 procedure main () {

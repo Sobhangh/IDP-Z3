@@ -60,12 +60,12 @@ Parenthesis
     (|t|) is a term, when |t| is a term
 
 Cardinality aggregate
-    :math:`\#\{v_1[typeOfV_1] .. v_n[typeOfV_n] : \phi\}` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
+    :math:`\#\{v_1 in typeOfV_1, .., v_n in typeOfV_n : \phi\}` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
 
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
 Arithmetic aggregate
-    :math:`ꕕ\{v_1[typeOfV_1] .. v_n[typeOfV_n] : \phi : t\}` is a numerical term when :math:`ꕕ` is :math:`sum`, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
+    :math:`ꕕ\{v_1 in typeOfV_1, .., v_n in typeOfV_n : \phi : t\}` is a numerical term when :math:`ꕕ` is :math:`sum`, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
 
     The term denotes the sum of |t| for each distinct tuple of values for |v1,vn| which make |phi| true.
 
@@ -120,22 +120,22 @@ Quantified formulas
 
     .. math::
 
-        \exists v_1[typeOfV_1] .. v_n[typeOfV_n]: \phi
+        \exists v_1 in typeOfV_1, .., v_n in typeOfV_n: \phi
 
-        \forall v_1[typeOfV_1] .. v_n[typeOfV_n]: \phi
+        \forall v_1 in typeOfV_1, .., v_n in typeOfV_n: \phi
 
     Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
-    For example, ``!x[Int] y[Int]: f(x,y)=f(y,x).``
+    For example, ``!x in Int, y in Int: f(x,y)=f(y,x).``
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
 
-    When quantifying a formula of type ```Symbols``,
+    When quantifying a formula of type ``Symbol``,
     the expression must contain a "guard" to prevent arity or type error.
-    A guard is a predicate over ```Symbols`` that is defined by an enumeration in the same theory block.
+    A guard is a predicate over ``Symbol`` that is defined by an enumeration in the same theory block.
     In the following example, ``symmetric`` must be defined by enumeration.
 
     .. code::
 
-        !`p[`Symbols]: symmetric(`p) => (!x y : `p(x,y) => `p(y,x)).
+        !`p in Symbol: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
 
 "is (not) enumerated"
     :math:`f(a,b)\ is\ enumerated` and :math:`f(a,b)\ is\ not\ enumerated` are sentences,

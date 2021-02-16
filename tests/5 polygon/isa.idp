@@ -20,9 +20,9 @@ vocabulary isa {
 }
 
 theory T:isa {
-    !t[type] st[subtype]: isa(st,t) <=> asi(t, st).
-    !t[type] st[subtype]: typeOf(st) = t <=> isa(st, t).
-    !st[subtype]: isa(st, typeOf(st)).
+    !t in type, st in subtype: isa(st,t) <=> asi(t, st).
+    !t in type, st in subtype: typeOf(st) = t <=> isa(st, t).
+    !st in subtype: isa(st, typeOf(st)).
     Type() = typeOf(Subtype()).
     isa(regular_triangle, '1tri angle').
 }

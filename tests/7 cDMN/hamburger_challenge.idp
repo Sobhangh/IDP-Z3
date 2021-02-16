@@ -15,17 +15,17 @@ vocabulary {
 }
 theory {
 	//NumberConstraint
-	!Item[Item_t]: true => 01 =< Number(Item) & Number(Item) =< 05.
+	!Item in Item_t: true => 01 =< Number(Item) & Number(Item) =< 05.
 
-	!Item[Item_t]: Item = Lettuce => Number(Item) = Number(Ketchup).
+	!Item in Item_t: Item = Lettuce => Number(Item) = Number(Ketchup).
 
-	!Item[Item_t]: Item = Pickles => Number(Item) = Number(Tomato).
+	!Item in Item_t: Item = Pickles => Number(Item) = Number(Tomato).
 
 	//Determine Nutrition
-	Total_Sodium() = sum{ Item[Item_t] : true: Number(Item) * Sodium(Item) }.
-	Total_Fat() = sum{ Item[Item_t] : true: Number(Item) * Fat(Item) }.
-	Total_Calories() = sum{ Item[Item_t] : true: Number(Item) * Calories(Item) }.
-	Total_Cost() = sum{ Item[Item_t] : true: Number(Item) * Cost(Item) }.
+	Total_Sodium() = sum{ Item in Item_t : true: Number(Item) * Sodium(Item) }.
+	Total_Fat() = sum{ Item in Item_t : true: Number(Item) * Fat(Item) }.
+	Total_Calories() = sum{ Item in Item_t : true: Number(Item) * Calories(Item) }.
+	Total_Cost() = sum{ Item in Item_t : true: Number(Item) * Cost(Item) }.
 	//Nutrition Constraints
 	true => Total_Sodium() < 3000 & Total_Fat() < 150 & Total_Calories() < 3000.
 

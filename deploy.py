@@ -46,23 +46,24 @@ def query_user(query, default="y", get=False):
 
 run('python3 test.py generate')
 
+# Check if web-IDP-Z3 is on latest version and clean.
+branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
+assert branch == b'main\n', \
+    "Cannot create static: web-IDP-Z3 not in main branch !"
+
 update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
 if update_statics:
-    # Verify we are on main branch.
-    branch = get('git rev-parse --abbrev-ref HEAD')
-    assert branch == b'main\n', \
-        "Cannot deploy: IDP-Z3 not in main branch !"
-
-    # Check if web-IDP-Z3 is on latest version and clean.
-    branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
-    assert branch == b'main\n', \
-        "Cannot deploy: web-IDP-Z3 not in main branch !"
     require_clean_work_tree("../web-IDP-Z3")
 
     # Generate static and commit.
     run('npm run -script build', cwd='../web-IDP-Z3', check=True)
     print("Copying to static folder ...")
     copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
+
+    # Verify we are on main branch.
+    branch = get('git rev-parse --abbrev-ref HEAD')
+    assert branch == b'main\n', \
+        "Cannot deploy: IDP-Z3 not in main branch !"
 
     # Create new version tag.
     new_tag = query_user("Create new tag? (Y/n) ")
