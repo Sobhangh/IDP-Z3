@@ -5,7 +5,9 @@ flask_cors
 gunicorn
 pycallgraph2
 pyyaml
-recommonmark
-sphinxcontrib-mermaid
+Sphinx==3.1.1
+sphinxcontrib-mermaid==0.5.0
+sphinx-rtd-theme==0.5.0
+recommonmark=0.6.0
 textx
 z3-solver
