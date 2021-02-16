@@ -36,7 +36,7 @@ extensions = [
         "sphinx.ext.doctest",
         "sphinx.ext.viewcode",
         "sphinx.ext.napoleon",
-        # "sphinxcontrib.mermaid",
+        "sphinxcontrib.mermaid",
         "recommonmark"
 ]
 

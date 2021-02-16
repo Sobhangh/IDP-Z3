@@ -9,7 +9,7 @@ pyyaml
 recommonmark
 sphinx-autobuild
 sphinx_bootstrap_theme
-sphinxcontrib-mermaid
+sphinxcontrib-mermaid==0.5.0
 sphinx_rtd_theme
 textx==2.3
 z3-solver
