@@ -12,9 +12,9 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "IDP-Z3/idp_solver/Run.py", line 88, in decision_table
     for model in problem.decision_table(goal_string, timeout, max_rows,
-  File "IDP-Z3/idp_solver/Problem.py", line 550, in decision_table
+  File "IDP-Z3/idp_solver/Problem.py", line 545, in decision_table
     verify_models(known, models, goal_string)
-  File "IDP-Z3/idp_solver/Problem.py", line 548, in verify_models
+  File "IDP-Z3/idp_solver/Problem.py", line 543, in verify_models
     assert solver.check() == unsat, \
 AssertionError: The DMN table does not cover the full domain
 

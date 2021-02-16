@@ -28,7 +28,7 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "IDP-Z3/idp_solver/Run.py", line 88, in decision_table
     for model in problem.decision_table(goal_string, timeout, max_rows,
-  File "IDP-Z3/idp_solver/Problem.py", line 514, in decision_table
+  File "IDP-Z3/idp_solver/Problem.py", line 509, in decision_table
     assert not goal_string or goal.value is not None, \
 AssertionError: The goal is not always determined by the theory
 

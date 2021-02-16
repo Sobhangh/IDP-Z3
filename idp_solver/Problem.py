@@ -112,11 +112,10 @@ class Problem(object):
         self._formula = None  # need to reapply the definitions
 
         for name, decl in block.declarations.items():
-            if name in self.declarations:
-                if (self.declarations[name] == block.declarations[name]
-                    or name in [BOOL, INT, REAL, SYMBOL, '__relevant']):
-                    continue # nothing to do
-                assert False, f"Can't add declaration for {name} in {block.name}: duplicate"
+            assert (name not in self.declarations
+                    or self.declarations[name] == block.declarations[name]
+                    or name in [BOOL, INT, REAL, SYMBOL, '__relevant']), \
+                    f"Can't add declaration for {name} in {block.name}: duplicate"
             self.declarations[name] = decl
         for decl in self.declarations.values():
             if type(decl) == ConstructedTypeDeclaration:
@@ -125,10 +124,9 @@ class Problem(object):
 
         # process block.interpretations
         for name, interpret in block.interpretations.items():
-            if name in self.interpretations:
-                if self.interpretations[name] == block.interpretations[name]:
-                    continue # nothing to do
-                assert False, f"Can't add enumeration for {name} in {block.name}: duplicate"
+            assert (name not in self.interpretations
+                    or self.interpretations[name] == block.interpretations[name]), \
+                     f"Can't add enumeration for {name} in {block.name}: duplicate"
             self.interpretations[name] = interpret
 
         if isinstance(block, Theory) or isinstance(block, Problem):
@@ -154,11 +152,7 @@ class Problem(object):
 
             for symbol_interpretation in self.interpretations.values():
                 if symbol_interpretation.is_type_enumeration:  # add enumeration to type
-                    symbol = symbol_interpretation.symbol
-                    symbol.decl.interpretation = self
-                    symbol.decl.constructors = [t.args[0]
-                        for t in symbol_interpretation.enumeration.tuples.values()]
-                    symbol.decl.range = symbol.decl.constructors
+                    symbol_interpretation.interpret(self)
 
             for decl in self.declarations.values():
                 if type(decl) != SymbolDeclaration: # interpret types first
@@ -168,7 +162,8 @@ class Problem(object):
                     decl.interpret(self)
 
             for symbol_interpretation in self.interpretations.values():
-                symbol_interpretation.interpret(self)
+                if not symbol_interpretation.is_type_enumeration:  # add enumeration to type
+                    symbol_interpretation.interpret(self)
 
             # expand goals
             for s in self.goals.values():

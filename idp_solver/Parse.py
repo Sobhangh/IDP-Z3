@@ -781,7 +781,7 @@ class SymbolInterpretation(ASTNode):
                 constr.type = self.name
                 if self.name != BOOL:
                     constr.py_value = i  # to allow comparisons
-                self.check(constr.name not in voc.symbol_decls or self.name == SYMBOL,
+                self.check(constr.name not in voc.symbol_decls,
                         f"duplicate constructor in vocabulary: {constr.name}")
                 voc.symbol_decls[constr.name] = constr
 
@@ -801,42 +801,43 @@ class SymbolInterpretation(ASTNode):
                 f"Default value for '{self.name}' must be ground: {self.default}")
 
     def interpret(self, problem):
-        status = Status.STRUCTURE if self.block.name != 'default' else Status.GIVEN
-        if self.is_type_enumeration:  # add enumeration to type
-            self.symbol.interpretation = self
-        else:  # update problem.assignments with data from enumeration
+        status = (Status.STRUCTURE if self.block.name != 'default' else
+                  Status.GIVEN)
+        if self.is_type_enumeration:
+            symbol = self.symbol
+            symbol.decl.constructors = [t.args[0]
+                for t in self.enumeration.tuples.values()]
+            symbol.decl.range = symbol.decl.constructors
+        else: # update problem.assignments with data from enumeration
             for t in self.enumeration.tuples:
                 if type(self.enumeration) == FunctionEnum:
-                    expr = AppliedSymbol.make(self.symbol, t.args[:-1])
-                    self.check(expr.code not in problem.assignments
-                        or problem.assignments[expr.code].status == Status.UNKNOWN,
-                        f"Duplicate entry in structure for '{self.name}': {str(expr)}")
-                    problem.assignments.assert_(expr, t.args[-1], status, False)
+                    args, value = t.args[:-1], t.args[-1]
                 else:
-                    expr = AppliedSymbol.make(self.symbol, t.args)
-                    self.check(expr.code not in problem.assignments
-                        or problem.assignments[expr.code].status == Status.UNKNOWN,
-                        f"Duplicate entry in structure for '{self.name}': {str(expr)}")
-                    problem.assignments.assert_(expr, TRUE, status, False)
+                    args, value = t.args, TRUE
+                expr = AppliedSymbol.make(self.symbol, args)
+                self.check(expr.code not in problem.assignments
+                    or problem.assignments[expr.code].status == Status.UNKNOWN,
+                    f"Duplicate entry in structure for '{self.name}': {str(expr)}")
+                problem.assignments.assert_(expr, value, status, False)
             if self.default is not None:
                 for code, expr in self.symbol.decl.instances.items():
                     if (code not in problem.assignments
                         or problem.assignments[code].status != status):
-                        problem.assignments.assert_(expr, self.default, status, False)
+                        problem.assignments.assert_(expr, self.default, status,
+                                                    False)
 
     def interpret_application(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
-        tuples = self.enumeration.tuples if tuples == None else tuples
+        tuples = self.enumeration.tuples if tuples == None else list(tuples)
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:
-                t = list(tuples)
-                self.check(len(t) <= 1,
+                self.check(len(tuples) <= 1,
                            f"Duplicate values in structure "
-                           f"for {str(self.name)}{str(t[0])}")
-                return (self.default if not t else  # enumeration of constant
-                        t[0].args[rank])
+                           f"for {str(self.name)}{str(tuples[0])}")
+                return (self.default if not tuples else  # enumeration of constant
+                        tuples[0].args[rank])
         else:  # constructs If-then-else recursively
             out = (self.default if self.default is not None else
                    applied._change(sub_exprs=args))

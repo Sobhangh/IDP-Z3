@@ -164,7 +164,7 @@ def interpret(self, problem):
             forms = out
         else: # infinite domain !
             new_vars[name] = var
-    forms = [f.interpret(problem) for f in forms]
+    forms = [f.interpret(problem) if problem else f for f in forms]
     self.q_vars = new_vars
 
     if not self.q_vars:
@@ -210,7 +210,7 @@ def interpret(self, problem):
                     new_f = f.instantiate(var, val, problem)
                     out.append(new_f)
             forms = out
-        forms = [f.interpret(problem) for f in forms]
+        forms = [f.interpret(problem) if problem else f for f in forms]
         self.q_vars = new_vars
         self.vars = None  # flag to indicate changes
         self.quantifier_is_expanded = True
@@ -286,21 +286,19 @@ def instantiate(self, e0, e1, problem=None):
     if self.value:
         return self
     if self.name == e0.code:
-        if type(self) == AppliedSymbol and self.decl.name == SYMBOL:
-            if isinstance(e1, Variable):  # replacing variable in a definition
-                out = copy.copy(self)
-                out.code = out.code.replace(e0.code, e1.code)
-                out.str = out.code.replace(e0.code, e1.code)
-                out.name = e1.code
-                out.s.name = e1.code
-                return out
-            else:
-                self.check(len(self.sub_exprs) == len(e1.symbol.decl.sorts),
-                           f"Incorrect arity for {e1.code}")
-                out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
-                return out
-        elif len(self.sub_exprs) == 0:
-            return e1
+        assert self.decl.name == SYMBOL, "Internal error"
+        if isinstance(e1, Variable):  # replacing variable in a definition
+            out = copy.copy(self)
+            out.code = out.code.replace(e0.code, e1.code)
+            out.str = out.code.replace(e0.code, e1.code)
+            out.name = e1.code
+            out.s.name = e1.code
+            return out
+        else:
+            self.check(len(self.sub_exprs) == len(e1.symbol.decl.sorts),
+                        f"Incorrect arity for {e1.code}")
+            out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
+            return out
     out = Expression.instantiate(self, e0, e1, problem)
     if (problem and self.name in problem.interpretations
         and all(a.as_rigid() is not None for a in out.sub_exprs)):
