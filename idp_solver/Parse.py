@@ -28,31 +28,30 @@ __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
 
 from copy import copy
 from enum import Enum
-import itertools
-import os
-import re
-import sys
+from itertools import product, groupby
+from os import path
+from re import findall
+from sys import intern
+from textx import metamodel_from_file
 from typing import Dict, Union, Optional
 
-from textx import metamodel_from_file
-from z3 import (IntSort, BoolSort, RealSort, Const, Function, EnumSort,
-                BoolVal)
 
 from .Assignments import Status, Assignments
-from .Expression import (Constructor, IfExpr, AQuantification,
+from .Expression import (ASTNode, Constructor, IfExpr, AQuantification,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Arguments,
-                         Variable, TRUE, FALSE, IDPZ3Error)
-from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL)
+                         Variable, TRUE, FALSE)
+from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL, IDPZ3Error)
 
 
 def str_to_IDP(atom, val_string):
     if atom.type == BOOL:
-        assert val_string in ['True', 'False'], \
-            f"{atom.annotations['reading']} is not defined, and assumed false"
+        if val_string not in ['True', 'False']:
+            raise IDPZ3Error(
+                f"{atom.annotations['reading']} is not defined, and assumed false")
         out = (TRUE if val_string == 'True' else
                FALSE)
     elif (atom.type in [REAL, INT] or
@@ -69,18 +68,18 @@ class ViewType(Enum):
     EXPANDED = "expanded"
 
 
-class Idp(object):
+class Idp(ASTNode):
     """The class of AST nodes representing an IDP-Z3 program.
     """
     def __init__(self, **kwargs):
         # log("parsing done")
-        self.vocabularies = {v.name: v for v in kwargs.pop('vocabularies')}
-        self.theories = {t.name: t for t in kwargs.pop('theories')}
-        self.structures = {s.name: s for s in kwargs.pop('structures')}
+        self.vocabularies = self.dedup_nodes(kwargs, 'vocabularies')
+        self.theories = self.dedup_nodes(kwargs, 'theories')
+        self.structures = self.dedup_nodes(kwargs, 'structures')
         self.goal = kwargs.pop('goal')
         self.view = kwargs.pop('view')
         self.display = kwargs.pop('display')
-        self.procedures = {p.name: p for p in kwargs.pop('procedures')}
+        self.procedures = self.dedup_nodes(kwargs, 'procedures')
 
         for voc in self.vocabularies.values():
             voc.annotate(self)
@@ -99,10 +98,11 @@ class Idp(object):
         if self.display is None:
             self.display = Display(constraints=[])
 
+
 ################################ Vocabulary  ##############################
 
 
-class Annotations(object):
+class Annotations(ASTNode):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
 
@@ -114,7 +114,7 @@ class Annotations(object):
                     # The format of p[1] is as follows:
                     # (lower_sym, upper_sym): (lower_bound, upper_bound)
                     pat = r"\(((.*?), (.*?))\)"
-                    arg = re.findall(pat, p[1])
+                    arg = findall(pat, p[1])
                     l_symb = arg[0][1]
                     u_symb = arg[0][2]
                     l_bound = arg[1][1]
@@ -132,7 +132,7 @@ class Annotations(object):
         self.annotations = dict((pair(t) for t in self.annotations))
 
 
-class Vocabulary(object):
+class Vocabulary(ASTNode):
     """The class of AST nodes representing a vocabulary block.
     """
     def __init__(self, **kwargs):
@@ -141,8 +141,10 @@ class Vocabulary(object):
         self.terms = {}  # {string: Constructor or AppliedSymbol}
         self.idp = None  # parent object
         self.translated = []
+        self.symbol_decls: Dict[str, Type] = {}
 
         self.name = 'V' if not self.name else self.name
+        self.voc = self
 
         # expand multi-symbol declarations
         temp = []
@@ -152,23 +154,23 @@ class Vocabulary(object):
             else:
                 for symbol in decl.symbols:
                     new = copy(decl)  # shallow copy !
-                    new.name = sys.intern(symbol.name)
+                    new.name = intern(symbol.name)
                     new.symbols = None
                     temp.append(new)
         self.declarations = temp
 
-        # define reserved symbols
-        self.symbol_decls: Dict[str, Type] \
-            = {INT: RangeDeclaration(name=INT, elements=[]),
-               REAL: RangeDeclaration(name=REAL, elements=[])
-               }
-        for name, constructors in [
-            (BOOL,      [TRUE, FALSE]),
-            ('`Symbols', [Constructor(name=f"`{s.name}") for s in
-                          self.declarations if type(s) == SymbolDeclaration]),
-        ]:
-            ConstructedTypeDeclaration(name=name, constructors=constructors) \
-                .annotate(self)  # add it to symbol_decls
+        # define built-in types: Bool, Int, Real, Symbols
+        self.declarations = [
+            ConstructedTypeDeclaration(
+                name=BOOL, constructors=[TRUE, FALSE]),
+            RangeDeclaration(name=INT, elements=[]),
+            RangeDeclaration(name=REAL, elements=[]),
+            ConstructedTypeDeclaration(
+                name='`Symbols',
+                constructors=[Constructor(name=f"`{s.name}")
+                              for s in self.declarations
+                              if type(s) == SymbolDeclaration]),
+            ] + self.declarations
 
     def annotate(self, idp):
         self.idp = idp
@@ -192,7 +194,7 @@ class Vocabulary(object):
                 f"{NEWL}}}{NEWL}")
 
 
-class Extern(object):
+class Extern(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
 
@@ -204,8 +206,20 @@ class Extern(object):
         voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls}  #TODO merge while respecting order
 
 
-class ConstructedTypeDeclaration(object):
-    COUNT = -1
+class ConstructedTypeDeclaration(ASTNode):
+    """AST node to represent `type <symbol> := <enumeration>`
+
+    Args:
+        name (string): name of the type
+
+        constructors ([Constructor]): list of constructors in the enumeration
+
+        interpretation (SymbolInterpretation): the symbol interpretation
+
+        translated (Z3): the translation of the type in Z3
+
+        map (Dict[string, Constructor]): a mapping from code to Expression
+    """
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
@@ -213,39 +227,22 @@ class ConstructedTypeDeclaration(object):
         self.range = self.constructors  # functional constructors are expanded
         self.translated = None
         self.map = {}  # {String: constructor}
-
-        if self.name == BOOL:
-            self.translated = BoolSort()
-            self.constructors[0].type = BOOL
-            self.constructors[1].type = BOOL
-            self.constructors[0].translated = BoolVal(True)
-            self.constructors[1].translated = BoolVal(False)
-            self.constructors[0].py_value = True
-            self.constructors[1].py_value = False
-        else:
-            self.translated, cstrs = EnumSort(self.name, [c.name for c in
-                                                          self.constructors])
-            assert len(self.constructors) == len(cstrs), "Internal error"
-            for c, c3 in zip(self.constructors, cstrs):
-                c.translated = c3
-                c.py_value = c3
-                c.index = ConstructedTypeDeclaration.COUNT
-                ConstructedTypeDeclaration.COUNT -= 1
-                self.map[str(c)] = c
-
         self.type = None
 
+        self.translate()
+
     def __str__(self):
-        return (f"type {self.name} constructed from "
+        return (f"type {self.name} := "
                 f"{{{','.join(map(str, self.constructors))}}}")
 
     def annotate(self, voc):
-        assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
+        self.check(self.name not in voc.symbol_decls,
+                   f"duplicate declaration in vocabulary: {self.name}")
         voc.symbol_decls[self.name] = self
         for c in self.constructors:
             c.type = self.name
-            assert c.name not in voc.symbol_decls or self.name == '`Symbols', \
-                "duplicate constructor in vocabulary: " + c.name
+            self.check(c.name not in voc.symbol_decls or self.name == '`Symbols',
+                       f"duplicate constructor in vocabulary: {c.name}")
             voc.symbol_decls[c.name] = c
         self.range = self.constructors  # TODO constructor functions
 
@@ -257,35 +254,26 @@ class ConstructedTypeDeclaration(object):
         out = ADisjunction.make('∨', out)
         return out
 
-    def translate(self):
-        return self.translated
 
-
-class RangeDeclaration(object):
+class RangeDeclaration(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')  # maybe INT, REAL
         self.elements = kwargs.pop('elements')
         self.translated = None
         self.constructors = None  # not used
 
-        self.type = INT
+        self.type = REAL if self.name == REAL else INT
         self.range = []
         for x in self.elements:
             if x.toI is None:
                 self.range.append(x.fromI)
-                if type(x.fromI.translated) != int:
+                if x.fromI.type != INT:
                     self.type = REAL
             elif x.fromI.type == INT and x.toI.type == INT:
-                for i in range(x.fromI.translated, x.toI.translated + 1):
+                for i in range(x.fromI.py_value, x.toI.py_value + 1):
                     self.range.append(Number(number=str(i)))
             else:
-                assert False, "Can't have a range over reals: " + self.name
-
-        if self.name == INT:
-            self.translated = IntSort()
-        elif self.name == REAL:
-            self.translated = RealSort()
-            self.type = REAL
+                self.check(False, f"Can't have a range over reals: {self.name}")
 
     def __str__(self):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." +
@@ -293,7 +281,8 @@ class RangeDeclaration(object):
         return f"type {self.name} = {{{elements}}}"
 
     def annotate(self, voc):
-        assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
+        self.check(self.name not in voc.symbol_decls,
+                   f"duplicate declaration in vocabulary: {self.name}")
         voc.symbol_decls[self.name] = self
 
     def check_bounds(self, var):
@@ -312,16 +301,8 @@ class RangeDeclaration(object):
             sub_exprs.append(e)
         return ADisjunction.make('∨', sub_exprs)
 
-    def translate(self):
-        if self.translated is None:
-            if self.type == INT:
-                self.translated = IntSort()
-            else:
-                self.translated = RealSort()
-        return self.translated
 
-
-class SymbolDeclaration(object):
+class SymbolDeclaration(ASTNode):
     """The class of AST nodes representing an entry in the vocabulary,
     declaring one or more symbols.
     Multi-symbols declaration are replaced by single-symbol declarations
@@ -370,7 +351,7 @@ class SymbolDeclaration(object):
             self.symbols = kwargs.pop('symbols')
             self.name = None
         else:
-            self.name = sys.intern(kwargs.pop('name').name)
+            self.name = intern(kwargs.pop('name').name)
             self.symbols = None
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
@@ -399,14 +380,15 @@ class SymbolDeclaration(object):
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
     def annotate(self, voc, vocabulary=True):
-        assert self.name is not None, "Internal error"
+        self.check(self.name is not None, "Internal error")
         if vocabulary:
-            assert self.name not in voc.symbol_decls, "duplicate declaration in vocabulary: " + self.name
+            self.check(self.name not in voc.symbol_decls,
+                       f"duplicate declaration in vocabulary: {self.name}")
             voc.symbol_decls[self.name] = self
         for s in self.sorts:
             s.annotate(voc)
         self.out.annotate(voc)
-        self.domain = list(itertools.product(*[s.decl.range for s in self.sorts]))
+        self.domain = list(product(*[s.decl.range for s in self.sorts]))
 
         self.type = self.out.decl.name
         self.range = self.out.decl.range
@@ -431,22 +413,8 @@ class SymbolDeclaration(object):
                     self.typeConstraints.append(domain)
         return self
 
-    def translate(self):
-        if self.translated is None:
-            if len(self.sorts) == 0:
-                self.translated = Const(self.name, self.out.translate())
-            else:
 
-                if self.out.name == BOOL:
-                    types = [x.translate() for x in self.sorts]
-                    self.translated = Function(self.name, types + [BoolSort()])
-                else:
-                    types = [x.translate() for x in self.sorts] + [self.out.translate()]
-                    self.translated = Function(self.name, types)
-        return self.translated
-
-
-class Sort(object):
+class Sort(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.name = (BOOL if self.name == '𝔹' else
@@ -454,7 +422,7 @@ class Sort(object):
                      REAL if self.name == 'ℝ' else
                      self.name
         )
-        self.code = sys.intern(self.name)
+        self.code = intern(self.name)
         self.decl = None
 
     def __str__(self):
@@ -471,7 +439,7 @@ class Sort(object):
         return self.decl.translate()
 
 
-class Symbol(object):
+class Symbol(ASTNode):
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
 
@@ -489,7 +457,7 @@ Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
 ################################ Theory  ###############################
 
 
-class Theory(object):
+class Theory(ASTNode):
     """ The class of AST nodes representing a theory block.
     """
     def __init__(self, **kwargs):
@@ -497,11 +465,12 @@ class Theory(object):
         self.vocab_name = kwargs.pop('vocab_name')
         self.constraints = OrderedSet(kwargs.pop('constraints'))
         self.definitions = kwargs.pop('definitions')
-        self.interpretations = {i.name: i for i in kwargs.pop('interpretations')}
+        self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
+        self.declarations = {}
         self.clark = {}  # {Declaration: Rule}
         self.def_constraints = {}  # {Declaration: Expression}
         self.assignments = Assignments()
@@ -516,7 +485,8 @@ class Theory(object):
         return self.name
 
     def annotate(self, idp):
-        assert self.vocab_name in idp.vocabularies, "Unknown vocabulary: " + self.vocab_name
+        self.check(self.vocab_name in idp.vocabularies,
+                   f"Unknown vocabulary: {self.vocab_name}")
         self.voc = idp.vocabularies[self.vocab_name]
 
         for i in self.interpretations.values():
@@ -560,7 +530,7 @@ class Theory(object):
         return out
 
 
-class Definition(object):
+class Definition(ASTNode):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
         self.clark = None  # {Declaration: Transformed Rule}
@@ -606,7 +576,7 @@ class Definition(object):
         return self
 
 
-class Rule(object):
+class Rule(ASTNode):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
         self.quantees = kwargs.pop('quantees')
@@ -623,7 +593,7 @@ class Rule(object):
             self.sorts.append(q.sort)
         self.annotations = self.annotations.annotations if self.annotations else {}
 
-        assert len(self.vars) == len(self.sorts), "Internal error"
+        self.check(len(self.vars) == len(self.sorts), "Internal error")
         self.q_vars = {}  # {string: Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
@@ -638,7 +608,7 @@ class Rule(object):
 
     def annotate(self, voc, q_vars):
         # create head variables
-        assert len(self.vars) == len(self.sorts), "Internal error"
+        self.check(len(self.vars) == len(self.sorts), "Internal error")
         for v, s in zip(self.vars, self.sorts):
             if s:
                 s.annotate(voc)
@@ -657,7 +627,7 @@ class Rule(object):
             output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
 
         # TODO proper unification: https://eli.thegreenplace.net/2018/unification/
-        assert len(self.args) == len(new_vars), "Internal error"
+        self.check(len(self.args) == len(new_vars), "Internal error")
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
             if type(arg) == Variable \
@@ -704,7 +674,8 @@ class Rule(object):
 
     def instantiate_definition(self, new_args, theory):
         out = self.body.copy() # in case there is no arguments
-        assert len(new_args) == len(self.args) or len(new_args)+1 == len(self.args), "Internal error"
+        self.check(len(new_args) == len(self.args)
+                   or len(new_args)+1 == len(self.args), "Internal error")
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new)
         out = out.interpret(theory)  # add justification recursively
@@ -721,7 +692,7 @@ class Rule(object):
 
 ################################ Structure  ###############################
 
-class Structure(object):
+class Structure(ASTNode):
     """
     The class of AST nodes representing an structure block.
     """
@@ -732,12 +703,13 @@ class Structure(object):
         """
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
-        self.interpretations = {i.name: i for i in kwargs.pop('interpretations')}
+        self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
 
         self.name = 'S' if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.voc = None
+        self.declarations = {}
         self.assignments = Assignments()
 
     def annotate(self, idp):
@@ -759,12 +731,21 @@ class Structure(object):
         return self.name
 
 
-class SymbolInterpretation(object):
+class SymbolInterpretation(ASTNode):
     """
-    Pythonic representation of the interpretation of an IDP symbol,
-    such as a predicate or function.
-    This object is first created by the textx parser, after which it is
-    annotated by the structure.
+    AST node representing `<symbol> := { <identifiers*> } else <default>`
+
+    Attributes:
+        name (string): name of the symbol being enumerated.
+
+        symbol (Symbol): symbol being enumerated
+
+        enumeration ([Enumeration]): enumeration.
+
+        default (Expression): default value (for function enumeration).
+
+        is_type_enumeration (Bool): True if the enumeration is for a type symbol.
+
     """
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
@@ -774,23 +755,23 @@ class SymbolInterpretation(object):
         if not self.enumeration:
             self.enumeration = Enumeration(tuples=[])
 
-        self.decl = None  # symbol declaration
-        self.is_complete = None  # is the function enumeration complete ?
+        self.symbol = None
+        self.is_type_enumeration = None
 
-    def annotate(self, struct):
+    def annotate(self, block):
         """
         Annotate the symbol.
 
-        :arg struct: a Structure object
+        :arg block: a Structure object
         :returns None:
         """
-        voc = struct.voc
+        voc = block.voc
         self.decl = voc.symbol_decls[self.name]
 
         self.enumeration.annotate(voc)
 
         # Update structure.assignments, set status to STRUCTURE or to GIVEN.
-        status = Status.STRUCTURE if struct.name != 'default' \
+        status = Status.STRUCTURE if block.name != 'default' \
             else Status.GIVEN
         count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
         for t in self.enumeration.tuples:
@@ -798,17 +779,15 @@ class SymbolInterpretation(object):
                     f"Tuple for '{self.name}' must be ground : ({t})"
             if type(self.enumeration) == FunctionEnum:
                 expr = AppliedSymbol.make(symbol, t.args[:-1])
-                assert expr.code not in struct.assignments, \
+                assert expr.code not in block.assignments, \
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                struct.assignments.assert_(expr, t.args[-1], status, False)
+                block.assignments.assert_(expr, t.args[-1], status, False)
             else:
                 expr = AppliedSymbol.make(symbol, t.args)
-                assert expr.code not in struct.assignments, \
+                assert expr.code not in block.assignments, \
                     f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                struct.assignments.assert_(expr, TRUE, status, False)
+                block.assignments.assert_(expr, TRUE, status, False)
             count += 1
-        self.is_complete = (not type(self.enumeration) == FunctionEnum or
-                            (0 < count and count == len(self.decl.instances)))
 
         # set default value
         if type(self.enumeration) != FunctionEnum and self.enumeration.tuples:
@@ -817,13 +796,12 @@ class SymbolInterpretation(object):
             assert self.default is None, \
                 f"Can't use default value for '{self.name}' on infinite domain."
         elif self.default is not None:
-            self.is_complete = True
             self.default = self.default.annotate(voc, {})
             assert self.default.as_rigid() is not None, \
                 f"Default value for '{self.name}' must be ground: {self.default}"
             for code, expr in self.decl.instances.items():
-                if code not in struct.assignments:
-                    struct.assignments.assert_(expr, self.default,
+                if code not in block.assignments:
+                    block.assignments.assert_(expr, self.default,
                                                status, False)
 
     def interpret(self, theory, rank, applied, args, tuples=None):
@@ -833,14 +811,14 @@ class SymbolInterpretation(object):
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:
-                assert len(tuples) <= 1, \
-                    f"Duplicate values in structure for {str(self.name)}{str(tuples[0])}"
+                self.check(len(tuples) <= 1,
+                    f"Duplicate values in structure for {str(self.name)}{str(tuples[0])}")
                 if not tuples:  # enumeration of constant
                     return self.default
                 return tuples[0].args[rank]
         else:  # constructs If-then-else recursively
             out = self.default if self.default is not None else applied.original
-            groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
+            groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if type(args[rank]) in [Constructor, Number]:
                 for val, tuples2 in groups:  # try to resolve
@@ -857,11 +835,11 @@ class SymbolInterpretation(object):
             return out
 
 
-class Enumeration(object):
+class Enumeration(ASTNode):
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
         if not isinstance(self.tuples, OrderedSet):
-            self.tuples.sort(key=lambda t: t.code)
+            # self.tuples.sort(key=lambda t: t.code)
             self.tuples = OrderedSet(self.tuples)
 
     def __repr__(self):
@@ -880,11 +858,12 @@ class Enumeration(object):
             return TRUE
         if tuples is None:
             tuples = self.tuples
-            assert all(len(t.args)==arity+(1 if function else 0) for t in tuples), \
-                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'."
+            self.check(all(len(t.args)==arity+(1 if function else 0)
+                           for t in tuples),
+                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'.")
 
         # constructs If-then-else recursively
-        groups = itertools.groupby(tuples, key=lambda t: str(t.args[rank]))
+        groups = groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].as_rigid() is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
@@ -912,10 +891,10 @@ class FunctionEnum(Enumeration):
 class CSVEnumeration(Enumeration):
     pass
 
-class Tuple(object):
+class Tuple(ASTNode):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
-        self.code = sys.intern(",".join([str(a) for a in self.args]))
+        self.code = intern(",".join([str(a) for a in self.args]))
 
     def __str__(self):
         return self.code
@@ -925,6 +904,8 @@ class Tuple(object):
 
     def annotate(self, voc):
         self.args = [arg.annotate(voc, {}) for arg in self.args]
+        self.check(all(a.as_rigid() is not None for a in self.args),
+                    f"Tuple must be ground : ({self})")
 
     def translate(self):
         return [arg.translate() for arg in self.args]
@@ -936,14 +917,14 @@ class FunctionTuple(Tuple):
             self.args = [self.args]
         self.value = kwargs.pop('value')
         self.args.append(self.value)
-        self.code = sys.intern(",".join([str(a) for a in self.args]))
+        self.code = intern(",".join([str(a) for a in self.args]))
 
 class CSVTuple(Tuple):
     pass
 
 ################################ Goal, View  ###############################
 
-class Goal(object):
+class Goal(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.decl = None
@@ -964,7 +945,7 @@ class Goal(object):
         if self.name in voc.symbol_decls:
             self.decl = voc.symbol_decls[self.name]
             self.decl.view = ViewType.EXPANDED  # the goal is always expanded
-            assert self.decl.instances, "goals must be instantiable."
+            self.check(self.decl.instances, "goals must be instantiable.")
             goal = Symbol(name='__relevant').annotate(voc, {})
             constraint = AppliedSymbol.make(goal, self.decl.instances.values())
             constraint.block = self
@@ -974,7 +955,7 @@ class Goal(object):
             raise IDPZ3Error(f"Unknown goal: {self.name}")
 
 
-class View(object):
+class View(ASTNode):
     def __init__(self, **kwargs):
         self.viewType = kwargs.pop('viewType')
 
@@ -987,7 +968,7 @@ class View(object):
 
 ################################ Display  ###############################
 
-class Display(object):
+class Display(ASTNode):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
         self.moveSymbols = False
@@ -1039,7 +1020,6 @@ class Display(object):
                                             name=Symbol(name=name),
                                             sorts=[], out=out)
             symbol_decl.annotate(self.voc)
-            symbol_decl.translate()
 
         # annotate constraints
         for constraint in self.constraints:
@@ -1054,18 +1034,17 @@ class Display(object):
                 for i, symbol in enumerate(constraint.sub_exprs):
                     if constraint.name in ['unit', 'category'] and i == 0:
                         continue
-                    if not symbol.name.startswith('`'):
-                        msg = (f"arg '{symbol.name}' of {constraint.name}'"
-                               f" must begin with a tick '`'")
-                        raise constraint.create_error(msg)
-                    if symbol.name[1:] not in self.voc.symbol_decls:
-                        msg = (f"argument '{symbol.name}' of "
-                               f" '{constraint.name} must be a symbol")
-                        raise constraint.create_error(msg)
+                    self.check(symbol.name.startswith('`'),
+                        f"arg '{symbol.name}' of {constraint.name}'"
+                        f" must begin with a tick '`'")
+                    self.check(symbol.name[1:] in self.voc.symbol_decls,
+                        f"argument '{symbol.name}' of '{constraint.name}'"
+                        f" must be a symbol")
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
                 if constraint.name == 'goal':  # e.g.,  goal(Prime)
-                    assert len(constraint.sub_exprs) == 1, f'goal can have only one argument'
+                    self.check(len(constraint.sub_exprs) == 1,
+                               f'goal can have only one argument')
                     goal = Goal(name=constraint.sub_exprs[0].name[1:])
                     goal.annotate(idp)
                     idp.goal = goal
@@ -1077,7 +1056,8 @@ class Display(object):
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif constraint.name == 'relevant':  # e.g. relevant(Tax)
                     for symbol in symbols:
-                        assert symbol.instances, "relevant symbols must be instantiable."
+                        self.check(symbol.instances,
+                                   "relevant symbols must be instantiable.")
                         goal = Symbol(name='__relevant').annotate(self.voc, {})
                         constraint = AppliedSymbol.make(goal, symbol.instances.values())
                         constraint.block = self
@@ -1091,14 +1071,15 @@ class Display(object):
                     for symbol in symbols:
                         symbol.category = str(constraint.sub_exprs[0])
             elif type(constraint) == AComparison:  # e.g. view = normal
-                assert constraint.is_assignment()
+                self.check(constraint.is_assignment(), "Internal error")
                 if constraint.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
                             if type(s) == SymbolDeclaration and s.view == ViewType.NORMAL:
                                 s.view = ViewType.EXPANDED  # don't change hidden symbols
                     else:
-                        assert constraint.sub_exprs[1].name == 'normal', f"unknown display constraint: {constraint}"
+                        self.check(constraint.sub_exprs[1].name == 'normal',
+                                   f"unknown display constraint: {constraint}")
                 else:
                     raise IDPZ3Error(f"unknown display constraint: {constraint}")
             elif type(constraint) == UnappliedSymbol:
@@ -1115,7 +1096,7 @@ class Display(object):
 
 ################################ Main  ##################################
 
-class Procedure(object):
+class Procedure(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.args = kwargs.pop('args')
@@ -1125,7 +1106,7 @@ class Procedure(object):
         return f"{NEWL.join(str(s) for s in self.pystatements)}"
 
 
-class Call1(object):
+class Call1(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.args = kwargs.pop('args')
@@ -1138,7 +1119,7 @@ class Call1(object):
                  f"{'' if self.post is None else '.'+str(self.post)}")
 
 
-class Call0(object):
+class Call0(ASTNode):
     def __init__(self, **kwargs):
         self.pyExpr = kwargs.pop('pyExpr')
 
@@ -1146,7 +1127,7 @@ class Call0(object):
         return str(self.pyExpr)
 
 
-class String(object):
+class String(ASTNode):
     def __init__(self, **kwargs):
         self.literal = kwargs.pop('literal')
 
@@ -1154,7 +1135,7 @@ class String(object):
         return f'{self.literal}'
 
 
-class PyList(object):
+class PyList(ASTNode):
     def __init__(self, **kwargs):
         self.elements = kwargs.pop('elements')
 
@@ -1162,7 +1143,7 @@ class PyList(object):
         return f"[{','.join(str(e) for e in self.elements)}]"
 
 
-class PyAssignment(object):
+class PyAssignment(ASTNode):
     def __init__(self, **kwargs):
         self.var = kwargs.pop('var')
         self.val = kwargs.pop('val')
@@ -1175,7 +1156,7 @@ class PyAssignment(object):
 
 Block = Union[Vocabulary, Theory, Goal, Structure, Display]
 
-dslFile = os.path.join(os.path.dirname(__file__), 'Idp.tx')
+dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[Idp, Annotations,

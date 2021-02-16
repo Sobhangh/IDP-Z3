@@ -32,27 +32,56 @@ import copy
 from collections import ChainMap
 from fractions import Fraction
 import sys
+from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from z3 import DatatypeRef, Q, Const, BoolSort, FreshConst
-
-from .utils import unquote, OrderedSet, BOOL, INT, REAL
-from textx import get_location
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, IDPZ3Error
 
 
-class DSLException(Exception):
-    def __init__(self, message):
-        self.message = message
+class ASTNode(object):
+    """superclass of all AST nodes
+    """
 
-    def __str__(self):
-        return self.message
+    def check(self, condition, msg):
+        """raises an exception if `condition` is not True
+
+        Args:
+            condition (Bool): condition to be satisfied
+            msg (str): error message
+
+        Raises:
+            IDPZ3Error: when `condition` is not met
+        """
+        if not condition:
+            location = get_location(self)
+            line = location['line']
+            col = location['col']
+            raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
+
+    def dedup_nodes(self, kwargs, arg_name):
+        """pops `arg_name` from kwargs as a list of named items
+        and returns a mapping from name to items
+
+        Args:
+            kwargs (Dict[str, ASTNode])
+            arg_name (str): name of the kwargs argument, e.g. "interpretations"
+
+        Returns:
+            Dict[str, ASTNode]: mapping from `name` to AST nodes
+
+        Raises:
+            AssertionError: in case of duplicate name
+        """
+        ast_nodes = kwargs.pop(arg_name)
+        out = {}
+        for i in ast_nodes:
+            # can't get location here
+            assert i.name not in out, f"Duplicate '{i.name}' in {arg_name}"
+            out[i.name] = i
+        return out
 
 
-class IDPZ3Error(Exception):
-    """ raised whenever an error occurs in the conversion from AST to Z3 """
-    pass
-
-class Expression(object):
+class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
 
     Attributes:
@@ -139,7 +168,7 @@ class Expression(object):
 
     def copy(self):
         " create a deep copy (except for Constructor and Number) "
-        if type(self) in [Constructor, Number]:
+        if type(self) in [Constructor, Number, Variable]:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -173,7 +202,7 @@ class Expression(object):
     def __repr__(self): return str(self)
 
     def __str__(self):
-        assert self.value is not self
+        self.check(self.value is not self, "Internal error")
         if self.value is not None:
             return str(self.value)
         if self.simpler is not None:
@@ -273,12 +302,6 @@ class Expression(object):
         """
         return False
 
-    def reified(self) -> DatatypeRef:
-        if self._reified is None:
-            self._reified = Const(b'*'+self.code.encode(), BoolSort())
-            Expression.COUNT += 1
-        return self._reified
-
     def has_decision(self):
         # returns true if it contains a variable declared in decision
         # vocabulary
@@ -293,7 +316,7 @@ class Expression(object):
                 msg = f"Incorrect arity for {self}"
             else:
                 msg = f"Unknown error for {self}"
-            raise self.create_error(msg)
+            self.check(False, msg)
 
     def __str1__(self) -> str:
         return ''  # monkey-patched
@@ -335,6 +358,9 @@ class Expression(object):
     def translate(self):
         pass  # monkey-patched
 
+    def reified(self):
+        pass  # monkey-patched
+
     def translate1(self):
         pass  # monkey-patched
 
@@ -346,19 +372,12 @@ class Expression(object):
         """
         return (None, None, None)
 
-    def create_error(self, msg):
-        location = get_location(self)
-        line = location['line']
-        col = location['col']
-        return IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
-
 class Constructor(Expression):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
         self.sub_exprs = []
-        self.index = None  # int
 
         super().__init__()
         self.fresh_vars = set()
@@ -442,7 +461,7 @@ class AQuantification(Expression):
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            assert len(self.vars) == len(self.sorts), "Internal error"
+            self.check(len(self.vars) == len(self.sorts), "Internal error")
             vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
@@ -451,12 +470,10 @@ class AQuantification(Expression):
     def annotate(self, voc, q_vars):
         # First we check for some common errors.
         for v in self.vars:
-            if v in voc.symbol_decls:
-                raise self.create_error(f"the quantified variable '{v}'"
-                                        f" cannot have the same name as"
-                                        f" another symbol")
-        if len(self.vars) != len(self.sorts):
-            raise self.create_error("Internal error")
+            self.check(v not in voc.symbol_decls,
+                f"the quantified variable '{v}' cannot have"
+                f" the same name as another symbol")
+        self.check(len(self.vars) == len(self.sorts), "Internal error")
 
         self.q_vars = {}
         for v, s in zip(self.vars, self.sorts):
@@ -521,8 +538,8 @@ class BinaryOperator(Expression):
         return temp
 
     def annotate1(self):
-        assert not (self.operator[0] == '⇒' and 2 < len(self.sub_exprs)), \
-                "Implication is not associative.  Please use parenthesis."
+        self.check(not (self.operator[0] == '⇒' and 2 < len(self.sub_exprs)),
+                "Implication is not associative.  Please use parenthesis.")
         if self.type is None:
             self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
                    else INT if any(e.type == INT for e in self.sub_exprs) \
@@ -657,7 +674,7 @@ class AAggregate(Expression):
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            assert len(self.vars) == len(self.sorts), "Internal error"
+            self.check(len(self.vars) == len(self.sorts), "Internal error")
             vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = (f"{self.aggtype}{{{vars} : "
@@ -671,8 +688,9 @@ class AAggregate(Expression):
 
     def annotate(self, voc, q_vars):
         for v in self.vars:
-            assert v not in voc.symbol_decls, f"the quantifier variable '{v}' cannot have the same name as another symbol."
-        assert len(self.vars) == len(self.sorts), "Internal error"
+            self.check(v not in voc.symbol_decls,
+                f"the quantifier variable '{v}' cannot have the same name as another symbol.")
+        self.check(len(self.vars) == len(self.sorts), "Internal error")
         self.q_vars = {}
         for v, s in zip(self.vars, self.sorts):
             if s:
@@ -742,7 +760,7 @@ class AppliedSymbol(Expression):
             self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
                 else voc.symbol_decls[self.s.name]
         except KeyError:
-            raise self.create_error(f"Unknown symbol {self}")
+            self.check(False, f"Unknown symbol {self}")
         self.s.decl = self.decl
         if self.in_enumeration:
             self.in_enumeration.annotate(voc)
@@ -777,7 +795,7 @@ class AppliedSymbol(Expression):
             self.co_constraint.collect(questions, all_, co_constraints)
 
     def has_decision(self):
-        assert self.decl.block is not None
+        self.check(self.decl.block is not None, "Internal error")
         return not self.decl.block.name == 'environment' \
             or any(e.has_decision() for e in self.sub_exprs)
 
@@ -796,7 +814,7 @@ class AppliedSymbol(Expression):
                 msg = f"Unexpected arity for symbol {self}"
             else:
                 msg = f"Unknown error for symbol {self}"
-            raise self.create_error(msg)
+            self.check(False, msg)
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
@@ -854,13 +872,15 @@ class UnappliedSymbol(Expression):
         #                         args=Arguments(sub_exprs=self.sub_exprs))
         #     return out.annotate(voc, q_vars)
         # If this code is reached, an undefined symbol was present.
-        raise self.create_error(f"Symbol not in vocabulary: {self}")
+        self.check(False, f"Symbol not in vocabulary: {self}")
 
     def collect(self, questions, all_=True, co_constraints=True):
-        raise self.create_error(f"Internal error: {self}")
+        self.check(False, f"Internal error: {self}")
 
 
 class Variable(Expression):
+    """AST node for a variable in a quantification or aggregate
+    """
     PRECEDENCE = 200
 
     def __init__(self, name, sort):
@@ -871,8 +891,7 @@ class Variable(Expression):
 
         self.type = sort.name if sort else ''
         self.sub_exprs = []
-        self.translated = (FreshConst(sort.decl.translate()) if sort else
-                           None)
+        self.translated = None
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name
@@ -889,24 +908,8 @@ class Number(Expression):
         self.sub_exprs = []
         self.fresh_vars = set()
 
-        ops = self.number.split("/")
-        if len(ops) == 2:  # possible with str_to_IDP on Z3 value
-            self.py_value = Fraction(self.number)
-            self.translated = Q(self.py_value.numerator, self.py_value.denominator)
-            self.type = REAL
-        elif '.' in self.number:
-            v = self.number if not self.number.endswith('?') else self.number[:-1]
-            if "e" in v:
-                self.py_value = float(eval(v))
-                self.translated = self.py_value
-            else:
-                self.py_value = Fraction(v)
-                self.translated = Q(self.py_value.numerator, self.py_value.denominator)
-            self.type = REAL
-        else:
-            self.py_value = int(self.number)
-            self.translated = self.py_value
-            self.type = INT
+        self.translated = None
+        self.translate()  # also sets self.type
 
     def __str__(self): return self.number
 
@@ -947,4 +950,3 @@ class Brackets(Expression):
             self.sub_exprs[0].annotations = self.annotations
         self.fresh_vars = self.sub_exprs[0].fresh_vars
         return self
-

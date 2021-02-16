@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * support for 'not in' operator
 * IEP 09 Unicode: allow 𝔹, ℤ, ℝ symbols for types, and '←' in definitions
 * IEP 11: allow multi-symbol declarations in vocabulary
+* detect duplicate declarations
 
 ### GUI
 * fix #23: functionality for showing units in the interface
