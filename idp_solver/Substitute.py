@@ -132,12 +132,11 @@ Constructor.instantiate = instantiate
 
 # Class AQuantification  ######################################################
 
-def interpret(self, problem, recursive=True):
+def interpret(self, problem):
     """apply information in the problem and its vocabulary
 
     Args:
         problem (Problem): the problem to be applied
-        recursive (bool, optional): Do not interpret the body if False. Defaults to True.
 
     Returns:
         Expression: the expanded quantifier expression
@@ -165,8 +164,7 @@ def interpret(self, problem, recursive=True):
             forms = out
         else: # infinite domain !
             new_vars[name] = var
-    forms = (forms if not recursive else
-             [f.interpret(problem) for f in forms])
+    forms = [f.interpret(problem) for f in forms]
     self.q_vars = new_vars
 
     if not self.q_vars:
@@ -252,7 +250,7 @@ def interpret(self, problem):
         # do not do it otherwise, for performance reasons
         simpler = (problem.interpretations[self.name].interpret_application) (
                         problem, 0, self, sub_exprs)
-    if self.decl in problem.clark and not self.fresh_vars:  # has a definition
+    if not self.in_head and self.decl in problem.clark and not self.fresh_vars:  # has a definition
         co_constraint = problem.clark[self.decl].instantiate_definition(sub_exprs, problem)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     return out

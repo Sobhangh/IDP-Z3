@@ -735,6 +735,7 @@ class AppliedSymbol(Expression):
 
         self.decl = None
         self.name = self.s.name
+        self.in_head = False
 
     @classmethod
     def make(cls, symbol, args, **kwargs):

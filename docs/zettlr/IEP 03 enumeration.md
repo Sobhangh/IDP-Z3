@@ -50,7 +50,7 @@ Objects to recompute:
 - [ ] allow range enumeration in theory/structure
 
 problems:
-- [ ] lower speed of test: because of body.interpret() 
+- [x] lower speed of test: because of body.interpret() 
 - [x]  abstract models for polygon
 - [x]   environmental theories
 - [x]   DMN

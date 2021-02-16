@@ -655,19 +655,20 @@ class Rule(ASTNode):
             # will be done later with optimized binary quantification
             self.expanded = TRUE
         # elif self.symbol.decl.domain:  # only if definition is constructive !
-        #     out = [self.instantiate_definition(args, theory, recursive=False)
+        #     out = [self.instantiate_definition(args, theory)
         #            for args in self.symbol.decl.domain]
         #     self.expanded = AConjunction.make('∧', out)
         else:
             if self.out:
                 expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+                expr.in_head = True
                 expr = AComparison.make('=', [expr, self.args[-1]])
             else:
                 expr = AppliedSymbol.make(self.symbol, self.args)
-            expr = AEquivalence.make('⇔', [expr, self.body.interpret(theory)])
+                expr.in_head = True
+            expr = AEquivalence.make('⇔', [expr, self.body])
             expr = AQuantification.make('∀', {**self.q_vars}, expr)
-            # do not interpret the head -> not recursive
-            self.expanded = expr.interpret(theory, recursive=False)
+            self.expanded = expr.interpret(theory)
         self.expanded.block = self.block
         return self
 
