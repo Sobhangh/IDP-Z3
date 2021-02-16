@@ -46,7 +46,6 @@ Structure
     (see also `IEP 04 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-04-Incomplete-enumerations>`_)
 
 Type
-    Type enumerations must be done in the vocabulary block (not in the structure block).
     IDP-Z3 does not support type hierarchies.
 
 To improve performance, do not quantify over the value of a function.
