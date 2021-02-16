@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased yet]
 
 
-## [0.7.1] - 2021-02-16
+## [0.7.2] - 2021-02-16
 
 ### API
 * (breaking) IEP 03: use math notation for signature of predicate and functions
