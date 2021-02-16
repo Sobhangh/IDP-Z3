@@ -12,16 +12,16 @@ Appendix: IDP-Z3 developer reference
 
 The components of IDP-Z3 are shown below.
 
-.. mermaid::
+.. .. mermaid::
 
-   graph TD
-      webIDE_client --> IDP-Z3_server
-      Interactive_consultant_client --> IDP-Z3_server
-      Read_the_docs
-      Homepage
-      IDP-Z3_server --> IDP-Z3_solver
-      IDP-Z3_command_line --> IDP-Z3_solver
-      IDP-Z3_solver --> Z3
+..    graph TD
+..       webIDE_client --> IDP-Z3_server
+..       Interactive_consultant_client --> IDP-Z3_server
+..       Read_the_docs
+..       Homepage
+..       IDP-Z3_server --> IDP-Z3_solver
+..       IDP-Z3_command_line --> IDP-Z3_solver
+..       IDP-Z3_solver --> Z3
 
 * `webIDE <https://interactive-consultant.idp-z3.be/IDE>`_  client: browser-based application to edit and run IDP-Z3 programs
 * `Interactive Consultant <https://interactive-consultant.idp-z3.be/>`_  client: browser-based user-friendly decision support application
