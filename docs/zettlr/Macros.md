@@ -3,6 +3,7 @@ title: Macros
 tags: #analysis
 Date: 20200523062416
 –-
+[Intensional logic : from philosophy to technology](https://billwadge.wordpress.com/2021/02/21/intensional-logic-in-context-from-philosophy-to-technology/).
 
 ## Part 1: `` `Symbols`` type
 - [x] the `` `Symbols`` type is the set of symbols defined in the vocabulary.
