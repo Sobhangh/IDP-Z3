@@ -3,6 +3,13 @@ title: Anonymize
 tags: #hosting
 Date: 20200901104252
 –-
+Steps to push on heroku:
+* git checkout main
+* git merge -s ours Anonymous
+* git checkout Anonymous
+* git merge main
+* git push heroku Anonymous
+
 
 Steps to release an anonymized version of the code:
 * delete autconfigz3/bin, /lib, /lib64, _pycache_
