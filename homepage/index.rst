@@ -1,8 +1,10 @@
 Introduction
 ============
 
-The IDP-Z3 tools implement a knowledge base system combining the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ and a grounder developed in-house, supporting the IDP language.
-It is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium.
+The IDP-Z3 suite implements a knowledge base system in which knowledge is represented using the FO(.) language.
+FO(.) is First Order logic extended with definitions, making it very expressive.
+Its inference engine is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium.
+It uses the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ as back-end.
 
 Projects
 --------

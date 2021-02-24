@@ -2,7 +2,8 @@
 Introduction
 ============
 
-IDP-Z3 is a collection of software components implementing the Knowledge Base paradigm using the IDP language and a Z3 SMT solver.
+IDP-Z3 is a collection of software components implementing the Knowledge Base paradigm using the FO(.) language.
+FO(.) is First Order logic, extended with definitions, types, arithmetic and aggregates.
 
 In the Knowledge Base paradigm, the knowledge about a particular problem domain is encoded using a declarative language, and later used to solve particular problems by applying the appropriate type of reasoning, or "inference".
 The inferences include:
