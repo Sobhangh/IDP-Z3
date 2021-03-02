@@ -9,7 +9,7 @@ vocabulary V {
 }
 
 structure S:V {
-    opposite := {red→ green, green→ green}
+    opposite := {red→ green, (green)→ green}
     f := { (A,A)→ A, (A,B)→ A, (B,A)→ B }
     is_color := {}
 }

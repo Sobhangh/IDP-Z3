@@ -102,8 +102,8 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
                         | enumeration=Enumeration
                         | enumeration=CSVEnumeration);
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
-  FunctionTuple: ( args=Base | '(' args*=Identifier[','] ')' )?
-                  ('->' | '→') value=Base;
+  FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
+                  ('->' | '→') value=Identifier;
   Enumeration: '{' tuples*=Tuple[','] '}';
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
