@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased yet]
 
+### API
+* fix #70: Double unary symbol should be parsed
 
 ## [0.7.2] - 2021-02-16
 
