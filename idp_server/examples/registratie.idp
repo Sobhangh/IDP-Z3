@@ -9,6 +9,7 @@ vocabulary environment {
   type Resale := {Less_Than_Three, Three_Or_More}
   type Seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
+  value: () → ℝ
   region : () → Location
 
   // for Heritage
@@ -38,6 +39,7 @@ vocabulary environment {
   start_dt_dwelling_for_social_rent : () → Date
   duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
 
+
 }
 
 vocabulary decision {
@@ -46,8 +48,9 @@ vocabulary decision {
   type Registration_type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
   type Tax_Rate := {1, 2, 4, 6, 7, 10, 12}
 
-  tax : () → Tax_Rate
+  tax_rate : () → Tax_Rate
   registration_type : () → Registration_type
+  tax_amount : () → ℝ
 }
 
 theory environment:environment {
@@ -62,34 +65,34 @@ theory environment:environment {
 
 theory decision:decision {
 
-  { tax() = 1 ←
+  { tax_rate() = 1 ←
       registration_type() = Heritage
       ∧ region() = Flemish_Region.
 
-    tax() = 2 ← // correct amount is 1.5
+    tax_rate() = 2 ← // correct amount is 1.5
       registration_type() = Social_Dwelling
       ∧ region() = Flemish_Region.
 
-    tax() = 4 ←
+    tax_rate() = 4 ←
       registration_type() = Professional_Purchase
       ∧ region() = Flemish_Region.
 
-    tax() = 6 ←
+    tax_rate() = 6 ←
       (registration_type() = Energy_Efficient_Dwelling
       ∨ registration_type() = Social_Purpose
       ∨ registration_type() = Exchange_Unbuilt_Ground)
       ∧ region() = Flemish_Region.
 
-    tax() = 7 ←
+    tax_rate() = 7 ←
       (registration_type() = Family_Dwelling
       ∨ registration_type() = Dwelling_For_Social_Renting)
       ∧ region() = Flemish_Region.
 
-    tax() = 10 ←
+    tax_rate() = 10 ←
       region() = Flemish_Region
       ∧ registration_type() = Other.
 
-    tax() = 12 ←
+    tax_rate() = 12 ←
       region() = Brussels_Region
       ∨ region() = Walloon_Region.
   }
@@ -171,11 +174,13 @@ theory decision:decision {
       ∧ registration_type() ≠ Exchange_Unbuilt_Ground
   .
 
+  tax_amount() = value() * tax_rate() / 100.
+
 }
 
 display {
-    relevant(`tax, `registration_type).
-    goal(`tax).
+    goal(`tax_amount).
+    relevant(`tax_rate, `registration_type, `tax_amount).
     view() = normal.
-    expand(`registration_type, `tax).
+    expand(`registration_type, `tax_rate).
 }
