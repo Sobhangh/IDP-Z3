@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 * (breaking) remove `Goal`, `View` as top level statements
 * IEP 03: allow enumeration of constructed types in theory/structure block
+* Fix #72: Empty predicate in structure should be allowed
 
 
 ## [0.7.2] - 2021-02-16
