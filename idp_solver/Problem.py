@@ -29,14 +29,16 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
     FALSE, AppliedSymbol
-from .Parse import Structure, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
+from .Parse import ConstructedTypeDeclaration, Structure, Symbol, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
 from .Simplify import join_set_conditions
-from .utils import OrderedSet, NEWL, BOOL, INT, REAL
+from .utils import OrderedSet, NEWL, BOOL, INT, REAL, SYMBOL
 
 class Problem(object):
     """A collection of theory and structure blocks.
 
     Attributes:
+        declarations (dict[str, Type]): the list of type and symbol declarations
+
         constraints (OrderedSet): a set of assertions.
 
         assignments (Assignment): the set of assignments.
@@ -53,6 +55,9 @@ class Problem(object):
         interpretations (dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
+        goals (dict[string, SymbolDeclaration]):
+            A set of goal symbols
+
         _formula (Expression, optional): the logic formula that represents
             the problem.
 
@@ -63,11 +68,13 @@ class Problem(object):
         co_constraints (OrderedSet): the set of co_constraints in the problem.
     """
     def __init__(self, *blocks):
+        self.declarations = {}
         self.clark = {}  # {Declaration: Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.def_constraints = {}
         self.interpretations = {}
+        self.goals = {}
         self.name = ''
 
         self._formula = None  # the problem expressed in one logic formula
@@ -95,19 +102,34 @@ class Problem(object):
     def copy(self):
         out = copy(self)
         out.assignments = self.assignments.copy()
-        out.constraints = [c.copy() for c in self.constraints]
+        out.constraints = OrderedSet(c.copy() for c in self.constraints)
         out.def_constraints = self.def_constraints.copy()
         # copy() is called before making substitutions => invalidate derived fields
         out._formula = None
-        out.co_constraints, out.questions = None, None
         return out
 
     def add(self, block):
         self._formula = None  # need to reapply the definitions
-        self.interpretations.update(block.interpretations) #TODO detect conflicts
-        if type(block) == Structure:
-            self.assignments.extend(block.assignments)
-        elif isinstance(block, Theory) or isinstance(block, Problem):
+
+        for name, decl in block.declarations.items():
+            assert (name not in self.declarations
+                    or self.declarations[name] == block.declarations[name]
+                    or name in [BOOL, INT, REAL, SYMBOL, '__relevant']), \
+                    f"Can't add declaration for {name} in {block.name}: duplicate"
+            self.declarations[name] = decl
+        for decl in self.declarations.values():
+            if type(decl) == ConstructedTypeDeclaration:
+                decl.translated = None  # reset the translation of declarations
+                decl.interpretation = None
+
+        # process block.interpretations
+        for name, interpret in block.interpretations.items():
+            assert (name not in self.interpretations
+                    or self.interpretations[name] == block.interpretations[name]), \
+                     f"Can't add enumeration for {name} in {block.name}: duplicate"
+            self.interpretations[name] = interpret
+
+        if isinstance(block, Theory) or isinstance(block, Problem):
             self.co_constraints, self.questions = None, None
             for decl, rule in block.clark.items():
                 new_rule = copy(rule)
@@ -118,17 +140,44 @@ class Problem(object):
             self.constraints.extend(v.copy() for v in block.constraints)
             self.def_constraints.update(
                 {k:v.copy() for k,v in block.def_constraints.items()})
-            self.assignments.extend(block.assignments)
-        else:
-            assert False, "Cannot add to Problem"
+
+        for name, s in block.goals.items():
+            self.goals[name] = s
         return self
 
-    def add_assignments(self, assignments):
-        self.assignments.extend(assignments)
-
     def _interpret(self):
-        """ re-apply the definitions to the constraints """
+        """ apply the enumerations and definitions """
         if self.questions is None:
+            self.assignments = Assignments()
+
+            for symbol_interpretation in self.interpretations.values():
+                if symbol_interpretation.is_type_enumeration:  # add enumeration to type
+                    symbol_interpretation.interpret(self)
+
+            for decl in self.declarations.values():
+                if type(decl) != SymbolDeclaration: # interpret types first
+                    decl.interpret(self)
+            for decl in self.declarations.values():
+                if type(decl) == SymbolDeclaration:
+                    decl.interpret(self)
+
+            for symbol_interpretation in self.interpretations.values():
+                if not symbol_interpretation.is_type_enumeration:  # add enumeration to type
+                    symbol_interpretation.interpret(self)
+
+            # expand goals
+            for s in self.goals.values():
+                assert s.instances, "goals must be instantiable."
+                relevant = Symbol(name='__relevant')
+                relevant.decl = self.declarations['__relevant']
+                constraint = AppliedSymbol.make(relevant, s.instances.values())
+                self.constraints.append(constraint)
+
+            # expand whole-domain definitions
+            for decl, rule in self.clark.items():
+                if decl.domain:
+                    self.def_constraints[decl] = rule.interpret(self).expanded
+
             self.co_constraints, self.questions = OrderedSet(), OrderedSet()
             for c in self.constraints:
                 c.interpret(self)
@@ -137,6 +186,10 @@ class Problem(object):
             for s in list(self.questions.values()):
                 if s.is_reified():
                     self.assignments.assert_(s, None, Status.UNKNOWN, False)
+
+            for ass in self.assignments.values():
+                ass.sentence = ass.sentence
+                ass.sentence.original = ass.sentence.copy()
 
     def formula(self):
         """ the formula encoding the knowledge base """
@@ -219,11 +272,10 @@ class Problem(object):
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False, extended=False):
-        assert term in self.assignments, "Internal error"
-        s = self.assignments[term].sentence.translate()
-
         solver = Optimize()
         solver.add(self.formula().translate())
+        assert term in self.assignments, "Internal error"
+        s = self.assignments[term].sentence.translate()
         if minimize:
             solver.minimize(s)
         else:
@@ -396,13 +448,13 @@ class Problem(object):
         max_time = time.time()+timeout  # 20 seconds max
 
         if goal_string:
-            # add (goal | ~goal) to self.constraints, so that it is a question
-            assert goal_string in self.assignments, (
+            goal_pred = goal_string.split("(")[0]
+            assert goal_pred in self.declarations, (
                 f"Unrecognized goal string: {goal_string}")
-            temp = self.assignments[goal_string].sentence
-            temp = ADisjunction.make('∨', [temp, AUnary.make('¬', temp)])
-            temp = temp.interpret(self)  # add definition of the goal, if any
-            self.constraints.append(temp)
+            self.goals[goal_pred] = self.declarations[goal_pred]
+            self._formula = None
+        formula = self.formula()
+        theory = formula.translate()
 
         # ignore type constraints
         questions = OrderedSet()
@@ -425,7 +477,6 @@ class Problem(object):
                     + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
-        theory = self.formula().translate()
         solver = Solver()
         solver.add(theory)
         solver.add(known)

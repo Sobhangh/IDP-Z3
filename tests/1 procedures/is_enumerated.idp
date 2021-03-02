@@ -35,13 +35,13 @@ theory T4:V {
 
 procedure main() {
     print("T, S")
-    print(model_expand(T, S))
+    print(model_expand(T, S, sort=True))
     print("propagate")
     print(str(Problem(T,S).propagate().simplify().formula().translate()))
     print("T, S2")
-    print(model_expand(T, S2))
+    print(model_expand(T, S2, sort=True))
     print("T2, S")
-    print(model_expand(T2, S))
+    print(model_expand(T2, S, sort=True))
     print("T4, S2")
-    print(model_expand(T4, S2))
+    print(model_expand(T4, S2, sort=True))
 }

@@ -49,12 +49,6 @@ class State(Problem):
 
             idp.vocabulary = idp.vocabularies['decision']
             idp.theory     = idp.theories    ['decision']
-            idp.theory.constraints.extend(idp.theories['environment'].constraints)
-            idp.theory.definitions.extend(idp.theories['environment'].definitions)
-            idp.theory.def_constraints.update(idp.theories['environment'].def_constraints)
-            idp.theory.assignments.extend(idp.theories['environment'].assignments)
-        idp.goal.annotate(idp)
-        idp.view.annotate(idp)
         idp.display.annotate(idp)
         idp.display.run(idp)
         self.idp = idp  # Idp vocabulary and theory
@@ -78,6 +72,7 @@ class State(Problem):
             for name, struct in idp.structures.items():
                 if name != "default":
                     self.add(struct)
+        self._interpret()
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
@@ -108,8 +103,6 @@ class State(Problem):
         out = self.copy()
         if out.environment:
             out.environment = out.environment.copy()
-
-        if out.environment is not None:
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
 

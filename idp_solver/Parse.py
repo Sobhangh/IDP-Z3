@@ -24,7 +24,7 @@ __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
            "SymbolDeclaration", "Sort", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
-           "Goal", "View", "Display", "Procedure", "idpparser", ]
+           "Display", "Procedure", "idpparser", ]
 
 from copy import copy
 from enum import Enum
@@ -76,8 +76,6 @@ class Idp(ASTNode):
         self.vocabularies = self.dedup_nodes(kwargs, 'vocabularies')
         self.theories = self.dedup_nodes(kwargs, 'theories')
         self.structures = self.dedup_nodes(kwargs, 'structures')
-        self.goal = kwargs.pop('goal')
-        self.view = kwargs.pop('view')
         self.display = kwargs.pop('display')
         self.procedures = self.dedup_nodes(kwargs, 'procedures')
 
@@ -91,10 +89,6 @@ class Idp(ASTNode):
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
         self.theory = next(iter(self.theories    .values()))
-        if self.goal is None:
-            self.goal = Goal(name="")
-        if self.view is None:
-            self.view = View(viewType='normal')
         if self.display is None:
             self.display = Display(constraints=[])
 
@@ -138,9 +132,7 @@ class Vocabulary(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
-        self.terms = {}  # {string: Constructor or AppliedSymbol}
         self.idp = None  # parent object
-        self.translated = []
         self.symbol_decls: Dict[str, Type] = {}
 
         self.name = 'V' if not self.name else self.name
@@ -170,6 +162,8 @@ class Vocabulary(ASTNode):
                 constructors=[Constructor(name=f"`{s.name}")
                               for s in self.declarations
                               if type(s) == SymbolDeclaration]),
+            SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
+                                    sorts=[], out=Sort(name=BOOL)),
             ] + self.declarations
 
     def annotate(self, idp):
@@ -184,14 +178,29 @@ class Vocabulary(ASTNode):
             constructor.symbol = (Symbol(name=constructor.name[1:])
                                   .annotate(self, {}))
 
-        for v in self.symbol_decls.values():
-            if type(v) == SymbolDeclaration:
-                self.terms.update(v.instances)
-
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
                 f"{NEWL.join(str(i) for i in self.declarations)}"
                 f"{NEWL}}}{NEWL}")
+
+    def add_voc_to_block(self, block):
+        """adds the enumerations in a vocabulary to a theory or structure block
+
+        Args:
+            block (Problem): the block to be updated
+        """
+        for s in self.declarations:
+            block.check(s.name not in block.declarations,
+                        f"Duplicate declaration of {self.name} "
+                        f"in vocabulary and block {block.name}")
+            block.declarations[s.name] = s
+            if (type(s) == ConstructedTypeDeclaration
+                and s.interpretation
+                and self.name != BOOL):
+                block.check(s.name not in block.interpretations,
+                            f"Duplicate enumeration of {self.name} "
+                            f"in vocabulary and block {block.name}")
+                block.interpretations[s.name] = s.interpretation
 
 
 class Extern(ASTNode):
@@ -204,6 +213,9 @@ class Extern(ASTNode):
     def annotate(self, voc):
         other = voc.idp.vocabularies[self.name]
         voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls}  #TODO merge while respecting order
+
+    def interpret(self, problem):
+        pass
 
 
 class ConstructedTypeDeclaration(ASTNode):
@@ -223,13 +235,17 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.constructors = kwargs.pop('constructors')
-        self.range = self.constructors  # functional constructors are expanded
+        self.constructors = ([] if 'constructors' not in kwargs else
+                             kwargs.pop('constructors'))
+        enumeration = (None if 'enumeration' not in kwargs else
+                            kwargs.pop('enumeration'))
         self.translated = None
         self.map = {}  # {String: constructor}
         self.type = None
 
-        self.translate()
+        self.interpretation = (None if not enumeration else
+            SymbolInterpretation(name=Symbol(name=self.name),
+                                 enumeration=enumeration, default=None))
 
     def __str__(self):
         return (f"type {self.name} := "
@@ -245,6 +261,11 @@ class ConstructedTypeDeclaration(ASTNode):
                        f"duplicate constructor in vocabulary: {c.name}")
             voc.symbol_decls[c.name] = c
         self.range = self.constructors  # TODO constructor functions
+        if self.interpretation:
+            self.interpretation.annotate(voc)
+
+    def interpret(self, problem):
+        self.translate()
 
     def check_bounds(self, var):
         if self.name == BOOL:
@@ -284,6 +305,9 @@ class RangeDeclaration(ASTNode):
         self.check(self.name not in voc.symbol_decls,
                    f"duplicate declaration in vocabulary: {self.name}")
         voc.symbol_decls[self.name] = self
+
+    def interpret(self, problem):
+        pass
 
     def check_bounds(self, var):
         if not self.elements:
@@ -334,10 +358,6 @@ class SymbolDeclaration(ASTNode):
 
         range (List[Expression]): the list of possible values
 
-        typeConstraints (List[Expression]):
-            the type constraint on the ranges of the symbol
-            applied to each possible tuple of arguments
-
         unit (str):
             the unit of the symbol, such as m (meters)
 
@@ -363,7 +383,6 @@ class SymbolDeclaration(ASTNode):
         self.unit: str = None
         self.category: str = None
 
-        self.typeConstraints = None
         self.translated = None
 
         self.type = None  # a string
@@ -379,39 +398,40 @@ class SymbolDeclaration(ASTNode):
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
-    def annotate(self, voc, vocabulary=True):
+    def annotate(self, voc):
+        self.voc = voc
         self.check(self.name is not None, "Internal error")
-        if vocabulary:
-            self.check(self.name not in voc.symbol_decls,
-                       f"duplicate declaration in vocabulary: {self.name}")
-            voc.symbol_decls[self.name] = self
+        self.check(self.name not in voc.symbol_decls,
+                    f"duplicate declaration in vocabulary: {self.name}")
+        voc.symbol_decls[self.name] = self
         for s in self.sorts:
             s.annotate(voc)
         self.out.annotate(voc)
-        self.domain = list(product(*[s.decl.range for s in self.sorts]))
-
         self.type = self.out.decl.name
+        return self
+
+    def interpret(self, problem):
+        self.domain = list(product(*[s.decl.range for s in self.sorts])) #
         self.range = self.out.decl.range
 
         # create instances
         self.instances = {}
-        if vocabulary:
-            for arg in self.domain:
-                expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
-                expr.annotate(voc, {})
-                self.instances[expr.code] = expr
+        for arg in self.domain:
+            expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
+            expr.annotate(self.voc, {})
+            self.instances[expr.code] = expr
+            if not expr.code.startswith('_'):
+                problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
 
-        # determine typeConstraints
-        self.typeConstraints = []
-        if self.out.decl.name != BOOL and self.range:
+        # add type constraints to problem.constraints
+        if self.out.decl.name != BOOL:
             for inst in self.instances.values():
-                domain = self.out.decl.check_bounds(inst)
+                domain = self.out.decl.check_bounds(inst.copy())
                 if domain is not None:
                     domain.block = self.block
                     domain.is_type_constraint_for = self.name
                     domain.annotations['reading'] = "Possible values for " + str(inst)
-                    self.typeConstraints.append(domain)
-        return self
+                    problem.constraints.append(domain)
 
 
 class Sort(ASTNode):
@@ -466,6 +486,7 @@ class Theory(ASTNode):
         self.constraints = OrderedSet(kwargs.pop('constraints'))
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
+        self.goals = {}
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -490,12 +511,13 @@ class Theory(ASTNode):
         self.voc = idp.vocabularies[self.vocab_name]
 
         for i in self.interpretations.values():
-            i.annotate(self)  # this updates self.assignments
+            i.annotate(self)
+        self.voc.add_voc_to_block(self)
 
         self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
         # squash multiple definitions of same symbol declaration
         for d in self.definitions:
-            for decl, rule in d.clark.items():
+            for decl, rule in d.clarks.items():
                 if decl in self.clark:
                     new_rule = copy(rule)  # not elegant, but rare
                     new_rule.body = AConjunction.make('∧', [self.clark[decl].body, rule.body])
@@ -504,36 +526,17 @@ class Theory(ASTNode):
                 else:
                     self.clark[decl] = rule
 
-        for decl, rule in self.clark.items():
-            if type(decl) == SymbolDeclaration and decl.domain:
-                self.def_constraints[decl] = rule.expanded
-
         self.constraints = OrderedSet([e.annotate(self.voc, {})
                                        for e in self.constraints])
         self.constraints = OrderedSet([e.interpret(self)
                                        for e in self.constraints])
 
-        for decl in self.voc.symbol_decls.values():
-            if type(decl) == SymbolDeclaration:
-                self.constraints.extend(decl.typeConstraints)
-
-        for s in self.voc.terms.values():
-            if not s.code.startswith('_'):
-                self.assignments.assert_(s, None, Status.UNKNOWN, False)
-
-    def translate(self):
-        out = []
-        for i in self.constraints:
-            out.append(i.translate())
-        for d in self.def_constraints.values():
-            out.append(d.translate())
-        return out
 
 
 class Definition(ASTNode):
     def __init__(self, **kwargs):
         self.rules = kwargs.pop('rules')
-        self.clark = None  # {Declaration: Transformed Rule}
+        self.clarks = None  # {Declaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
 
     def __str__(self):
@@ -541,7 +544,7 @@ class Definition(ASTNode):
 
     def __repr__(self):
         out = []
-        for rule in self.clark.values():
+        for rule in self.clarks.values():
             out.append(repr(rule))
         return NEWL.join(out)
 
@@ -549,7 +552,7 @@ class Definition(ASTNode):
         self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
         # create common variables, and rename vars in rule
-        self.clark = {}
+        self.clarks = {}
         for r in self.rules:
             decl = voc.symbol_decls[r.symbol.name]
             if decl.name not in self.def_vars:
@@ -561,17 +564,13 @@ class Definition(ASTNode):
                     q_v[name] = Variable(name, decl.out)
                 self.def_vars[decl.name] = q_v
             new_rule = r.rename_args(self.def_vars[decl.name])
-            self.clark.setdefault(decl, []).append(new_rule)
+            self.clarks.setdefault(decl, []).append(new_rule)
 
         # join the bodies of rules
-        for decl, rules in self.clark.items():
+        for decl, rules in self.clarks.items():
             exprs = sum(([rule.body] for rule in rules), [])
             rules[0].body = ADisjunction.make('∨', exprs)
-            self.clark[decl] = rules[0]
-
-        # expand quantifiers and interpret symbols with structure
-        for decl, rule in self.clark.items():
-            self.clark[decl] = rule.compute(theory)
+            self.clarks[decl] = rules[0]
 
         return self
 
@@ -624,9 +623,8 @@ class Rule(ASTNode):
     def rename_args(self, new_vars):
         """ for Clark's completion
             input : '!v: f(args) <- body(args)'
-            output: '!nv: f(nv) <- ?v: nv=args & body(args)' """
+            output: '!nv: f(nv) <- nv=args & body(args)' """
 
-        # TODO proper unification: https://eli.thegreenplace.net/2018/unification/
         self.check(len(self.args) == len(new_vars), "Internal error")
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
@@ -646,7 +644,7 @@ class Rule(ASTNode):
         self.q_vars = new_vars
         return self
 
-    def compute(self, theory):
+    def interpret(self, theory):
         """ expand quantifiers and interpret """
 
         # compute self.expanded, by expanding:
@@ -656,19 +654,21 @@ class Rule(ASTNode):
             # don't expand macros, to avoid arity and type errors
             # will be done later with optimized binary quantification
             self.expanded = TRUE
+        # elif self.symbol.decl.domain:  # only if definition is constructive !
+        #     out = [self.instantiate_definition(args, theory)
+        #            for args in self.symbol.decl.domain]
+        #     self.expanded = AConjunction.make('∧', out)
         else:
             if self.out:
                 expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+                expr.in_head = True
                 expr = AComparison.make('=', [expr, self.args[-1]])
             else:
                 expr = AppliedSymbol.make(self.symbol, self.args)
+                expr.in_head = True
             expr = AEquivalence.make('⇔', [expr, self.body])
             expr = AQuantification.make('∀', {**self.q_vars}, expr)
             self.expanded = expr.interpret(theory)
-
-        # interpret structures
-        self.body     = self.body    .interpret(theory)
-        self.expanded = self.expanded.interpret(theory) # definition constraint, expanded
         self.expanded.block = self.block
         return self
 
@@ -704,6 +704,7 @@ class Structure(ASTNode):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
+        self.goals = {}
 
         self.name = 'S' if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -725,7 +726,8 @@ class Structure(ASTNode):
             raise IDPZ3Error(f"Unknown vocabulary: {self.vocab_name}")
         self.voc = idp.vocabularies[self.vocab_name]
         for i in self.interpretations.values():
-            i.annotate(self)  # this updates self.assignments
+            i.annotate(self)
+        self.voc.add_voc_to_block(self)
 
     def __str__(self):
         return self.name
@@ -766,71 +768,93 @@ class SymbolInterpretation(ASTNode):
         :returns None:
         """
         voc = block.voc
-        self.decl = voc.symbol_decls[self.name]
+        self.block = block
+        self.symbol = Symbol(name=self.name).annotate(voc, {})
+
+        # create constructors if it is a type enumeration
+        self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
+        if self.is_type_enumeration:
+            for i, c in enumerate(self.enumeration.tuples):
+                self.check(len(c.args) == 1,
+                           f"incorrect arity in {self.name} type enumeration")
+                constr = Constructor(name=c.args[0].name)
+                constr.type = self.name
+                if self.name != BOOL:
+                    constr.py_value = i  # to allow comparisons
+                self.check(constr.name not in voc.symbol_decls,
+                        f"duplicate constructor in vocabulary: {constr.name}")
+                voc.symbol_decls[constr.name] = constr
 
         self.enumeration.annotate(voc)
 
-        # Update structure.assignments, set status to STRUCTURE or to GIVEN.
-        status = Status.STRUCTURE if block.name != 'default' \
-            else Status.GIVEN
-        count, symbol = 0, Symbol(name=self.name).annotate(voc, {})
-        for t in self.enumeration.tuples:
-            assert all(a.as_rigid() is not None for a in t.args), \
-                    f"Tuple for '{self.name}' must be ground : ({t})"
-            if type(self.enumeration) == FunctionEnum:
-                expr = AppliedSymbol.make(symbol, t.args[:-1])
-                assert expr.code not in block.assignments, \
-                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                block.assignments.assert_(expr, t.args[-1], status, False)
-            else:
-                expr = AppliedSymbol.make(symbol, t.args)
-                assert expr.code not in block.assignments, \
-                    f"Duplicate entry in structure for '{self.name}': {str(expr)}"
-                block.assignments.assert_(expr, TRUE, status, False)
-            count += 1
-
-        # set default value
-        if type(self.enumeration) != FunctionEnum and self.enumeration.tuples:
+        # predicate enumeration have FALSE default
+        if type(self.enumeration) != FunctionEnum and self.default is None:
             self.default = FALSE
-        if len(self.decl.instances) == 0:  # infinite domain
-            assert self.default is None, \
-                f"Can't use default value for '{self.name}' on infinite domain."
-        elif self.default is not None:
+        self.check(self.is_type_enumeration
+                   or all(s.name not in [INT, REAL]  # finite domain
+                          for s in self.symbol.decl.sorts)
+                   or self.default is None,
+            f"Can't use default value for '{self.name}' on infinite domain.")
+        if self.default is not None:
             self.default = self.default.annotate(voc, {})
-            assert self.default.as_rigid() is not None, \
-                f"Default value for '{self.name}' must be ground: {self.default}"
-            for code, expr in self.decl.instances.items():
-                if code not in block.assignments:
-                    block.assignments.assert_(expr, self.default,
-                                               status, False)
+            self.check(self.default.as_rigid() is not None,
+                f"Default value for '{self.name}' must be ground: {self.default}")
 
-    def interpret(self, theory, rank, applied, args, tuples=None):
+    def interpret(self, problem):
+        status = (Status.STRUCTURE if self.block.name != 'default' else
+                  Status.GIVEN)
+        if self.is_type_enumeration:
+            symbol = self.symbol
+            symbol.decl.constructors = [t.args[0]
+                for t in self.enumeration.tuples.values()]
+            symbol.decl.range = symbol.decl.constructors
+        else: # update problem.assignments with data from enumeration
+            for t in self.enumeration.tuples:
+                if type(self.enumeration) == FunctionEnum:
+                    args, value = t.args[:-1], t.args[-1]
+                else:
+                    args, value = t.args, TRUE
+                expr = AppliedSymbol.make(self.symbol, args)
+                self.check(expr.code not in problem.assignments
+                    or problem.assignments[expr.code].status == Status.UNKNOWN,
+                    f"Duplicate entry in structure for '{self.name}': {str(expr)}")
+                problem.assignments.assert_(expr, value, status, False)
+            if self.default is not None:
+                for code, expr in self.symbol.decl.instances.items():
+                    if (code not in problem.assignments
+                        or problem.assignments[code].status != status):
+                        problem.assignments.assert_(expr, self.default, status,
+                                                    False)
+
+    def interpret_application(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
-        tuples = self.enumeration.tuples if tuples == None else tuples
-        if rank == self.decl.arity:  # valid tuple -> return a value
+        tuples = self.enumeration.tuples if tuples == None else list(tuples)
+        if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:
                 self.check(len(tuples) <= 1,
-                    f"Duplicate values in structure for {str(self.name)}{str(tuples[0])}")
-                if not tuples:  # enumeration of constant
-                    return self.default
-                return tuples[0].args[rank]
+                           f"Duplicate values in structure "
+                           f"for {str(self.name)}{str(tuples[0])}")
+                return (self.default if not tuples else  # enumeration of constant
+                        tuples[0].args[rank])
         else:  # constructs If-then-else recursively
-            out = self.default if self.default is not None else applied.original
+            out = (self.default if self.default is not None else
+                   applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if type(args[rank]) in [Constructor, Number]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret(theory, rank+1, applied, args,
-                                             list(tuples2))
+                        out = self.interpret_application(theory, rank+1,
+                                        applied, args, list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = IfExpr.make(
                         AComparison.make('=', [args[rank], tuples[0].args[rank]]),
-                        self.interpret(theory, rank+1, applied, args, tuples),
+                        self.interpret_application(theory, rank+1,
+                                                   applied, args, tuples),
                         out)
             return out
 
@@ -922,49 +946,6 @@ class FunctionTuple(Tuple):
 class CSVTuple(Tuple):
     pass
 
-################################ Goal, View  ###############################
-
-class Goal(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.decl = None
-
-    def __str__(self):
-        return self.name
-
-    def annotate(self, idp):
-        voc = idp.vocabulary
-
-        # define reserved symbol
-        if '__relevant' not in voc.symbol_decls:
-            relevants = SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
-                                    sorts=[], out=Sort(name=BOOL))
-            relevants.block = self
-            relevants.annotate(voc)
-
-        if self.name in voc.symbol_decls:
-            self.decl = voc.symbol_decls[self.name]
-            self.decl.view = ViewType.EXPANDED  # the goal is always expanded
-            self.check(self.decl.instances, "goals must be instantiable.")
-            goal = Symbol(name='__relevant').annotate(voc, {})
-            constraint = AppliedSymbol.make(goal, self.decl.instances.values())
-            constraint.block = self
-            constraint = constraint.interpret(idp.theory) # for defined goals
-            idp.theory.constraints.append(constraint)
-        elif self.name not in [None, '']:
-            raise IDPZ3Error(f"Unknown goal: {self.name}")
-
-
-class View(ASTNode):
-    def __init__(self, **kwargs):
-        self.viewType = kwargs.pop('viewType')
-
-    def annotate(self, idp):
-        if self.viewType == 'expanded':
-            for s in idp.vocabulary.symbol_decls.values():
-                s.expanded = True
-
-
 
 ################################ Display  ###############################
 
@@ -1043,11 +1024,9 @@ class Display(ASTNode):
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
                 if constraint.name == 'goal':  # e.g.,  goal(Prime)
-                    self.check(len(constraint.sub_exprs) == 1,
-                               f'goal can have only one argument')
-                    goal = Goal(name=constraint.sub_exprs[0].name[1:])
-                    goal.annotate(idp)
-                    idp.goal = goal
+                    for s in symbols:
+                        idp.theory.goals[s.name] = s
+                        s.view = ViewType.EXPANDED  # the goal is always expanded
                 elif constraint.name == 'expand':  # e.g. expand(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
@@ -1055,14 +1034,8 @@ class Display(ASTNode):
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif constraint.name == 'relevant':  # e.g. relevant(Tax)
-                    for symbol in symbols:
-                        self.check(symbol.instances,
-                                   "relevant symbols must be instantiable.")
-                        goal = Symbol(name='__relevant').annotate(self.voc, {})
-                        constraint = AppliedSymbol.make(goal, symbol.instances.values())
-                        constraint.block = self
-                        constraint = constraint.interpret(idp.theory)
-                        idp.theory.constraints.append(constraint)
+                    for s in symbols:
+                        idp.theory.goals[s.name] = s
                 elif constraint.name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
@@ -1154,7 +1127,7 @@ class PyAssignment(ASTNode):
 
 ########################################################################
 
-Block = Union[Vocabulary, Theory, Goal, Structure, Display]
+Block = Union[Vocabulary, Theory, Structure, Display]
 
 dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 
@@ -1163,7 +1136,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Vocabulary, Extern,
                                          ConstructedTypeDeclaration,
-                                         Constructor, RangeDeclaration,
+                                         RangeDeclaration,
                                          SymbolDeclaration, Symbol, Sort,
 
                                          Theory, Definition, Rule, IfExpr,
@@ -1178,6 +1151,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
-                                         Goal, View, Display,
+                                         Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

@@ -2,13 +2,15 @@
 -- original ---------------------------------
 vocabulary {
     double: (Real)→ Real
+    quad: Real -> Real
     X: ()→Real
     y: ()→Real
 }
 theory {
     {!x in Real: double(x)= x+x. }
+    {!x in Real: quad(x)= double(double(x)). }
     X()=3.
-    y()=double(X()).
+    y()=quad(X()).
 }
 -- meta -------------------------------------
 {'optionalPropagation': False,
@@ -20,6 +22,12 @@ theory {
               'view': 'normal'},
              {'environmental': False,
               'idpname': 'y',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
+             {'environmental': False,
+              'idpname': 'quad',
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
@@ -59,7 +67,24 @@ theory {
                                   'relevant': True,
                                   'status': 'UNIVERSAL',
                                   'typ': 'Bool',
-                                  'value': True}},
+                                  'value': True},
+            'double(double(X)) = double(X) + double(X)': {'environmental': False,
+                                                          'is_assignment': False,
+                                                          'normal': False,
+                                                          'reading': 'double(double(X)) = double(X) + double(X)',
+                                                          'relevant': True,
+                                                          'status': 'UNIVERSAL',
+                                                          'typ': 'Bool',
+                                                          'value': True}},
+ 'quad': {'__rank': 1,
+          'quad(X) = double(double(X))': {'environmental': False,
+                                          'is_assignment': False,
+                                          'normal': False,
+                                          'reading': 'quad(X) = double(double(X))',
+                                          'relevant': True,
+                                          'status': 'UNIVERSAL',
+                                          'typ': 'Bool',
+                                          'value': True}},
  'y': {'__rank': 1,
        'y': {'environmental': False,
              'is_assignment': True,
@@ -68,12 +93,12 @@ theory {
              'relevant': True,
              'status': 'CONSEQUENCE',
              'typ': 'Real',
-             'value': '6'},
-       'y = double(X)': {'environmental': False,
-                         'is_assignment': False,
-                         'normal': False,
-                         'reading': 'y = double(X)',
-                         'relevant': True,
-                         'status': 'UNIVERSAL',
-                         'typ': 'Bool',
-                         'value': True}}}
+             'value': '12'},
+       'y = quad(X)': {'environmental': False,
+                       'is_assignment': False,
+                       'normal': False,
+                       'reading': 'y = quad(X)',
+                       'relevant': True,
+                       'status': 'UNIVERSAL',
+                       'typ': 'Bool',
+                       'value': True}}}
