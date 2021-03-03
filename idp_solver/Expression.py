@@ -83,6 +83,9 @@ class ASTNode(object):
     def annotate(self, idp):
         return  # monkey-patched
 
+    def annotate1(self, idp):
+        return  # monkey-patched
+
 
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
@@ -217,23 +220,6 @@ class Expression(ASTNode):
                 'code': self.code,
                 'str': self.str,
                 'co_constraint': self.co_constraint}
-
-    def annotate(self, voc, q_vars):
-        " annotate tree after parsing "
-        self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-        return self.annotate1()
-
-    def annotate1(self):
-        " annotations that are common to __init__ and make() "
-        self.fresh_vars = set()
-        if self.value is not None:
-            pass
-        if self.simpler is not None:
-            self.fresh_vars = self.simpler.fresh_vars
-        else:
-            for e in self.sub_exprs:
-                self.fresh_vars.update(e.fresh_vars)
-        return self
 
     def collect(self, questions, all_=True, co_constraints=True):
         """collects the questions in self.
@@ -423,10 +409,6 @@ class IfExpr(Expression):
                 f" then {self.sub_exprs[IfExpr.THEN].str}"
                 f" else {self.sub_exprs[IfExpr.ELSE].str}")
 
-    def annotate1(self):
-        self.type = self.sub_exprs[IfExpr.THEN].type
-        return super().annotate1()
-
 
 class Quantee(object):
     def __init__(self, var, sort):
@@ -470,29 +452,6 @@ class AQuantification(Expression):
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
             return self.sub_exprs[0].str
-
-    def annotate(self, voc, q_vars):
-        # First we check for some common errors.
-        for v in self.vars:
-            self.check(v not in voc.symbol_decls,
-                f"the quantified variable '{v}' cannot have"
-                f" the same name as another symbol")
-        self.check(len(self.vars) == len(self.sorts), "Internal error")
-
-        self.q_vars = {}
-        for v, s in zip(self.vars, self.sorts):
-            if s:
-                s.annotate(voc)
-            self.q_vars[v] = Variable(v, s)
-        q_v = {**q_vars, **self.q_vars}  # merge
-        self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-        return self.annotate1()
-
-    def annotate1(self):
-        super().annotate1()
-        # remove q_vars
-        self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
-        return self
 
     def collect(self, questions, all_=True, co_constraints=True):
         questions.append(self)
@@ -541,15 +500,6 @@ class BinaryOperator(Expression):
             temp += f" {self.operator[i-1]} {parenthesis(precedence, self.sub_exprs[i])}"
         return temp
 
-    def annotate1(self):
-        self.check(not (self.operator[0] == '⇒' and 2 < len(self.sub_exprs)),
-                "Implication is not associative.  Please use parenthesis.")
-        if self.type is None:
-            self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
-                   else INT if any(e.type == INT for e in self.sub_exprs) \
-                   else self.sub_exprs[0].type  # constructed type, without arithmetic
-        return super().annotate1()
-
     def collect(self, questions, all_=True, co_constraints=True):
         if self.operator[0] in '=<>≤≥≠':
             questions.append(self)
@@ -567,16 +517,6 @@ class AEquivalence(BinaryOperator):
 
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
-
-    def annotate(self, voc, q_vars):
-        # reverse the implication
-        self.sub_exprs.reverse()
-        out = AImplication(sub_exprs=self.sub_exprs,
-                           operator=['⇒']*len(self.operator))
-        if hasattr(self, "block"):
-            out.block = self.block
-        return out.annotate(voc, q_vars)
-
 
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
@@ -596,13 +536,6 @@ class AComparison(BinaryOperator):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    def annotate(self, voc, q_vars):
-        out = super().annotate(voc, q_vars)
-        # a≠b --> Not(a=b)
-        if len(self.sub_exprs) == 2 and self.operator == ['≠']:
-            out = AUnary.make('¬', AComparison.make('=', self.sub_exprs))
-        return out
 
     def is_assignment(self):
         # f(x)=y
@@ -645,10 +578,6 @@ class AUnary(Expression):
     def __str1__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
-    def annotate1(self):
-        self.type = self.sub_exprs[0].type
-        return super().annotate1()
-
 
 class AAggregate(Expression):
     PRECEDENCE = 130
@@ -690,23 +619,6 @@ class AAggregate(Expression):
                    f"}}")
         return out
 
-    def annotate(self, voc, q_vars):
-        for v in self.vars:
-            self.check(v not in voc.symbol_decls,
-                f"the quantifier variable '{v}' cannot have the same name as another symbol.")
-        self.check(len(self.vars) == len(self.sorts), "Internal error")
-        self.q_vars = {}
-        for v, s in zip(self.vars, self.sorts):
-            if s:
-                s.annotate(voc)
-            self.q_vars[v] = Variable(v, s)
-        q_v = {**q_vars, **self.q_vars}  # merge
-        self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-        self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
-        self = self.annotate1()
-        # remove q_vars after annotate1
-        self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
-        return self
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.sorts) == 0:
@@ -758,38 +670,6 @@ class AppliedSymbol(Expression):
         return (f"{out}"
                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
-
-    def annotate(self, voc, q_vars):
-        self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-        try:
-            self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
-                else voc.symbol_decls[self.s.name]
-        except KeyError:
-            self.check(False, f"Unknown symbol {self}")
-        self.s.decl = self.decl
-        if self.in_enumeration:
-            self.in_enumeration.annotate(voc)
-        # move the negation out
-        if 'not' in self.is_enumerated:
-            out = AppliedSymbol.make(self.s, self.sub_exprs,
-                                     is_enumerated='is enumerated')
-            out = AUnary.make('¬', out)
-        elif 'not' in self.is_enumeration:
-            out = AppliedSymbol.make(self.s, self.sub_exprs,
-                                     is_enumeration='in',
-                                     in_enumeration=self.in_enumeration)
-            out = AUnary.make('¬', out)
-        else:
-            out = self.annotate1()
-        return out
-
-    def annotate1(self):
-        self.type = (BOOL if self.is_enumerated or self.in_enumeration else
-                     self.decl.type if self.decl else None)
-        out = super().annotate1()
-        if out.decl and out.decl.name == SYMBOL:  # a symbol variable
-            out.fresh_vars.add(self.s.name)
-        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl.name != SYMBOL and self.name != '__relevant':
@@ -867,18 +747,6 @@ class UnappliedSymbol(Expression):
 
     def __str1__(self): return self.name
 
-    def annotate(self, voc, q_vars):
-        if self.name in voc.symbol_decls and type(voc.symbol_decls[self.name]) == Constructor:
-            return voc.symbol_decls[self.name]
-        if self.name in q_vars:
-            return q_vars[self.name]
-        # elif self.name in voc.symbol_decls:  # in symbol_decls
-        #     out = AppliedSymbol(s=self.s,
-        #                         args=Arguments(sub_exprs=self.sub_exprs))
-        #     return out.annotate(voc, q_vars)
-        # If this code is reached, an undefined symbol was present.
-        self.check(False, f"Symbol not in vocabulary: {self}")
-
     def collect(self, questions, all_=True, co_constraints=True):
         self.check(False, f"Internal error: {self}")
 
@@ -949,9 +817,3 @@ class Brackets(Expression):
     def as_rigid(self):
         return self.sub_exprs[0].as_rigid()
 
-    def annotate1(self):
-        self.type = self.sub_exprs[0].type
-        if self.annotations['reading']:
-            self.sub_exprs[0].annotations = self.annotations
-        self.fresh_vars = self.sub_exprs[0].fresh_vars
-        return self
