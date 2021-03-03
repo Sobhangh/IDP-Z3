@@ -17,7 +17,7 @@
 
 """
 
-Classes to parse and annotate an IDP-Z3 theory.
+Classes to parse an IDP-Z3 theory.
 
 """
 __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
@@ -28,7 +28,7 @@ __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
 
 from copy import copy
 from enum import Enum
-from itertools import product, groupby
+from itertools import groupby
 from os import path
 from re import findall
 from sys import intern
@@ -36,7 +36,7 @@ from textx import metamodel_from_file
 from typing import Dict, Union, Optional
 
 
-from .Assignments import Status, Assignments
+from .Assignments import Assignments
 from .Expression import (ASTNode, Constructor, IfExpr, AQuantification,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
@@ -198,9 +198,6 @@ class Extern(ASTNode):
     def __str__(self):
         return f"extern vocabulary {self.name}"
 
-    def interpret(self, problem):
-        pass
-
 
 class ConstructedTypeDeclaration(ASTNode):
     """AST node to represent `type <symbol> := <enumeration>`
@@ -235,9 +232,6 @@ class ConstructedTypeDeclaration(ASTNode):
         return (f"type {self.name} := "
                 f"{{{','.join(map(str, self.constructors))}}}")
 
-    def interpret(self, problem):
-        self.translate()
-
     def check_bounds(self, var):
         if self.name == BOOL:
             out = [var, AUnary.make('¬', var)]
@@ -271,9 +265,6 @@ class RangeDeclaration(ASTNode):
         elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." +
                                              str(x.toI)) for x in self.elements])
         return f"type {self.name} = {{{elements}}}"
-
-    def interpret(self, problem):
-        pass
 
     def check_bounds(self, var):
         if not self.elements:
@@ -363,29 +354,6 @@ class SymbolDeclaration(ASTNode):
         return (f"{self.name}"
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
-
-    def interpret(self, problem):
-        self.domain = list(product(*[s.decl.range for s in self.sorts])) #
-        self.range = self.out.decl.range
-
-        # create instances
-        self.instances = {}
-        for arg in self.domain:
-            expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
-            expr.annotate(self.voc, {})
-            self.instances[expr.code] = expr
-            if not expr.code.startswith('_'):
-                problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
-
-        # add type constraints to problem.constraints
-        if self.out.decl.name != BOOL:
-            for inst in self.instances.values():
-                domain = self.out.decl.check_bounds(inst.copy())
-                if domain is not None:
-                    domain.block = self.block
-                    domain.is_type_constraint_for = self.name
-                    domain.annotations['reading'] = "Possible values for " + str(inst)
-                    problem.constraints.append(domain)
 
 
 class Sort(ASTNode):
@@ -522,34 +490,6 @@ class Rule(ASTNode):
         self.q_vars = new_vars
         return self
 
-    def interpret(self, theory):
-        """ expand quantifiers and interpret """
-
-        # compute self.expanded, by expanding:
-        # ∀ v: f(v)=out <=> body
-        # (after joining the rules of the same symbols)
-        if any(s.name ==SYMBOL for s in self.sorts):
-            # don't expand macros, to avoid arity and type errors
-            # will be done later with optimized binary quantification
-            self.expanded = TRUE
-        # elif self.symbol.decl.domain:  # only if definition is constructive !
-        #     out = [self.instantiate_definition(args, theory)
-        #            for args in self.symbol.decl.domain]
-        #     self.expanded = AConjunction.make('∧', out)
-        else:
-            if self.out:
-                expr = AppliedSymbol.make(self.symbol, self.args[:-1])
-                expr.in_head = True
-                expr = AComparison.make('=', [expr, self.args[-1]])
-            else:
-                expr = AppliedSymbol.make(self.symbol, self.args)
-                expr.in_head = True
-            expr = AEquivalence.make('⇔', [expr, self.body])
-            expr = AQuantification.make('∀', {**self.q_vars}, expr)
-            self.expanded = expr.interpret(theory)
-        self.expanded.block = self.block
-        return self
-
     def instantiate_definition(self, new_args, theory):
         out = self.body.copy() # in case there is no arguments
         self.check(len(new_args) == len(self.args)
@@ -621,32 +561,6 @@ class SymbolInterpretation(ASTNode):
 
         self.symbol = None
         self.is_type_enumeration = None
-
-    def interpret(self, problem):
-        status = (Status.STRUCTURE if self.block.name != 'default' else
-                  Status.GIVEN)
-        if self.is_type_enumeration:
-            symbol = self.symbol
-            symbol.decl.constructors = [t.args[0]
-                for t in self.enumeration.tuples.values()]
-            symbol.decl.range = symbol.decl.constructors
-        else: # update problem.assignments with data from enumeration
-            for t in self.enumeration.tuples:
-                if type(self.enumeration) == FunctionEnum:
-                    args, value = t.args[:-1], t.args[-1]
-                else:
-                    args, value = t.args, TRUE
-                expr = AppliedSymbol.make(self.symbol, args)
-                self.check(expr.code not in problem.assignments
-                    or problem.assignments[expr.code].status == Status.UNKNOWN,
-                    f"Duplicate entry in structure for '{self.name}': {str(expr)}")
-                problem.assignments.assert_(expr, value, status, False)
-            if self.default is not None:
-                for code, expr in self.symbol.decl.instances.items():
-                    if (code not in problem.assignments
-                        or problem.assignments[code].status != status):
-                        problem.assignments.assert_(expr, self.default, status,
-                                                    False)
 
     def interpret_application(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """

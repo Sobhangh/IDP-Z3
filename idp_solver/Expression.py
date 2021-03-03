@@ -21,7 +21,7 @@
 (They are monkey-patched by other modules)
 
 """
-__all__ = ["Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
+__all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
            "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
@@ -30,12 +30,11 @@ __all__ = ["Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
 
 import copy
 from collections import ChainMap
-from fractions import Fraction
 import sys
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, SYMBOL, IDPZ3Error
+from .utils import unquote, OrderedSet, BOOL, SYMBOL, IDPZ3Error
 
 
 class ASTNode(object):
@@ -85,6 +84,9 @@ class ASTNode(object):
 
     def annotate1(self, idp):
         return  # monkey-patched
+
+    def interpret(self, problem: Any) -> "Expression":
+        return self  # monkey-patched
 
 
 class Expression(ASTNode):
@@ -328,9 +330,6 @@ class Expression(ASTNode):
                     e1: "Expression",
                     problem: "Problem"=None
                     ) -> "Expression":
-        return self  # monkey-patched
-
-    def interpret(self, problem: Any) -> "Expression":
         return self  # monkey-patched
 
     def symbolic_propagate(self,

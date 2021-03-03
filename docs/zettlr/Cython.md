@@ -14,7 +14,7 @@ Done:
 * [HTML annotation](https://cython.readthedocs.io/en/latest/src/tutorial/cython_tutorial.html?highlight=html#primes): cython -a idp_solver/Substitute.pyx
     * need to add a setup.py with cythonize(xxx, annotate=True, language_level=3)
     * pyThreadState error
-* Substitute.py → Substitute.pyx : compilation done (where ?), but no gains
+* Interpret.py → Interpret.pyx : compilation done (where ?), but no gains
     * → test.py unchanged at 3.9 sec
     * → Djordje's abstract : 0.8, 2.0, 2.0
 

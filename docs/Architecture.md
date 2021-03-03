@@ -72,7 +72,7 @@ The conversion to the Z3 format is performed by the following passes over the AS
 
 The graph of calls is outlined in `/docs/zettlr/Call graph.md`.
 
-The code is organised by steps, not by classes:  for example, all methods to substitute an expression by another are grouped in [Substitute.py](/code_modules/solver_substitute.html).  We use [monkey-patching](https://www.geeksforgeeks.org/monkey-patching-in-python-dynamic-behavior/) to attach methods to the classes declared in another module.
+The code is organised by steps, not by classes:  for example, all methods to annotate an expression by another are grouped in [Annotate.py](/code_modules/solver_annotate.html).  We use [monkey-patching](https://www.geeksforgeeks.org/monkey-patching-in-python-dynamic-behavior/) to attach methods to the classes declared in another module.
 
 Important classes of the IDP-Z3 solver are: [Expression](/code_modules/solver_expression.html#idp_solver.Expression.Expression), [Assignment](/code_modules/solver_assignments.html#idp_solver.Assignments.Assignment), [Problem](/code_modules/solver_problem.html#idp_solver.Problem.Problem).
 
