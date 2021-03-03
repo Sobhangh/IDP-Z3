@@ -5,8 +5,8 @@ vocabulary V {
 
 theory T:V {
     // here comes the definitions and constraints
-    p()|q().
-    p()&r().
+    ~~p()|q().
+    ~~~(~p())&r().
 }
 
 structure S:V {
