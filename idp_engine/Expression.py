@@ -564,14 +564,18 @@ class AUnary(Expression):
 
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        self.operator = kwargs.pop('operator').replace('~', '¬')
+        self.operators = kwargs.pop('operators')
+        self.operators = ['¬' if c == '~' else c for c in self.operators]
+        self.operator = self.operators[0]
+        self.check(all([c == self.operator for c in self.operators]),
+                   "Incorrect mix of unary operators")
 
         self.sub_exprs = [self.f]
         super().__init__()
 
     @classmethod
     def make(cls, op, expr):
-        out = AUnary(operator=op, f=expr)
+        out = AUnary(operators=[op], f=expr)
         return out.annotate1().simplify1()
 
     def __str1__(self):

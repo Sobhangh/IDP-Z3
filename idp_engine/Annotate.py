@@ -432,6 +432,8 @@ AComparison.annotate = annotate
 # Class AUnary  #######################################################
 
 def annotate1(self):
+    if len(self.operators) % 2 == 0: # negation of negation
+        return self.sub_exprs[0]
     self.type = self.sub_exprs[0].type
     return Expression.annotate1(self)
 AUnary.annotate1 = annotate1
