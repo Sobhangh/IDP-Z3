@@ -102,11 +102,11 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
                         | enumeration=Enumeration
                         | enumeration=CSVEnumeration);
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
-  FunctionTuple: ( args=Base | '(' args*=Identifier[','] ')' )?
-                  ('->' | '→') value=Base;
-  Enumeration: '{' tuples+=Tuple[','] '}';
+  FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
+                  ('->' | '→') value=Identifier;
+  Enumeration: '{' tuples*=Tuple[','] '}';
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
-  CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples+=CSVTuple[/\n/] / */ '}';
+  CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
   CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
   Identifier: UnappliedSymbol | Number;
 
