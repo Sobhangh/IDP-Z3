@@ -1,7 +1,7 @@
 .. _solver_interpret:
 
-idp_solver.Interpret
+idp_engine.Interpret
 =========================
 
-.. automodule:: idp_solver.Interpret
+.. automodule:: idp_engine.Interpret
    :members:

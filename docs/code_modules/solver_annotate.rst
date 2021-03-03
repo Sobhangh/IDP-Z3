@@ -1,7 +1,7 @@
 .. _solver_annotate:
 
-idp_solver.Annotate
+idp_engine.Annotate
 =========================
 
-.. automodule:: idp_solver.Annotate
+.. automodule:: idp_engine.Annotate
    :members:

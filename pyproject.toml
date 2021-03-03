@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "idp-solver"
+name = "idp-engine"
 version = "0.7.2"
 description = "IDP-Z3 is a collection of software components implementing the Knowledge Base paradigm using the IDP language and a Z3 SMT solver."
 authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
@@ -10,7 +10,7 @@ repository = "https://gitlab.com/krr/IDP-Z3"
 documentation = "https://docs.idp-z3.be"
 
 [tool.poetry.scripts]
-idp-solver = "idp_solver.IDP_Z3:cli"
+idp-engine = "idp_engine.IDP_Z3:cli"
 
 [tool.poetry.dependencies]
 python = "^3.7"

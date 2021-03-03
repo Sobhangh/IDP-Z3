@@ -1,4 +1,4 @@
-``idp_solver`` module
+``idp_engine`` module
 =====================
 
 .. toctree::

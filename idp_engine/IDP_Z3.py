@@ -26,7 +26,7 @@ import argparse
 import os
 import sys
 
-from idp_solver import idpparser
+from idp_engine import idpparser
 
 
 def cli(args=None):

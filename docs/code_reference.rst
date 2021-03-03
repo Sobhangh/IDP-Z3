@@ -41,6 +41,6 @@ You may want to check the `Development and deployment guide <https://gitlab.com/
    :caption: Contents:
 
    Architecture.md
-   idp_solver.rst
+   idp_engine.rst
    idp_server.rst
 
