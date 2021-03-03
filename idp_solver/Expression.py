@@ -80,6 +80,9 @@ class ASTNode(object):
             out[i.name] = i
         return out
 
+    def annotate(self, idp):
+        return  # monkey-patched
+
 
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.

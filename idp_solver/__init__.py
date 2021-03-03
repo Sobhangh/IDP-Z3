@@ -1,5 +1,6 @@
 from .Parse      import *
 
+from .Annotate import Done
 from .Simplify import Done
 from .Substitute import Done
 from .Propagate import Done
