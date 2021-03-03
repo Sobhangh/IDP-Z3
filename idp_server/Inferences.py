@@ -95,13 +95,7 @@ def get_relevant_subtences(self):
         constraint.collect(constraint.questions,
                            all_=True, co_constraints=False)
 
-        # add goals in constraint.original to constraint.questions
         # only keep questions in self.assignments
-        qs = OrderedSet()
-        constraint.original.collect(qs, all_=True, co_constraints=False)
-        for q in qs:
-            if q in reachable:  # a goal
-                constraint.questions.append(q)
         constraint.questions = OrderedSet([q for q in constraint.questions
                                            if q.code in self.assignments])
 
@@ -195,9 +189,8 @@ def explain(state, question):
         todo = chain(state.constraints, state.def_constraints.values())
         for constraint in todo:
             p = constraint.reified()
-            constraint.original = constraint.original.interpret(state)
             ps[p] = constraint.original.translate()
-            s.add(Implies(p, constraint.original.translate()))
+            s.add(Implies(p, ps[p]))
 
         s.add(Not(to_explain.translate()))
         s.check(list(ps.keys()))

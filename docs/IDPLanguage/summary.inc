@@ -3,13 +3,14 @@
 Syntax summary
 --------------
 
-The following code illustrates the syntax of IDP.
+The following code illustrates the syntax of IDP-Z3.
 T denotes a type, c a constructor, p a proposition or predicate, f a constant or function.
 The equivalent ASCII-only encoding is shown on the right.
 
 .. code::
 
     vocabulary V {
+        type T
         type T := {c1, c2}
         type T := {1,2,3}
         type T := {1..3}

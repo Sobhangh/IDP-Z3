@@ -132,7 +132,7 @@ class Expression(ASTNode):
             giving the intended meaning of the expression (in English).
 
         original (Expression):
-            The original expression, before transformation.
+            The original expression, before propagation and simplification.
 
         fresh_vars (Set(string)):
             The set of names of the variables in the expression.
@@ -336,7 +336,8 @@ class Expression(ASTNode):
 
     def instantiate(self,
                     e0: "Expression",
-                    e1: "Expression"
+                    e1: "Expression",
+                    problem: "Problem"=None
                     ) -> "Expression":
         return self  # monkey-patched
 
@@ -740,6 +741,7 @@ class AppliedSymbol(Expression):
 
         self.decl = None
         self.name = self.s.name
+        self.in_head = False
 
     @classmethod
     def make(cls, symbol, args, **kwargs):

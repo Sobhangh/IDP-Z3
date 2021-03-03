@@ -14,6 +14,6 @@ theory T2:V {
 
 
 procedure main () {
-    print(model_expand([T1, T2]))
-    print(model_expand(T1))
+    print(model_expand([T1, T2], sort=True))
+    print(model_expand(T1, sort=True))
 }

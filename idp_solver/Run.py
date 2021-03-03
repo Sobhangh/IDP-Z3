@@ -42,16 +42,32 @@ def model_check(theories, structures=None):
 
 
 def model_expand(theories, structures=None, max=10, complete=False,
-                 extended=False):
+                 extended=False, sort=False):
     """ output: a list of Assignments, ending with a string """
     problem = Problem.make(theories, structures)
-    yield from problem.expand(max=max, complete=complete, extended=extended)
+    if sort:
+        ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
+        ms = sorted(ms[:-1]) + [ms[-1]]
+        out = ""
+        for i, m in enumerate(ms[:-1]):
+            out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
+        yield out + f"{ms[-1]}"
+    else:
+        yield from problem.expand(max=max, complete=complete, extended=extended)
 
 
-def model_propagate(theories, structures=None):
+def model_propagate(theories, structures=None, sort=False):
     """ output: a list of Assignment """
     problem = Problem.make(theories, structures)
-    yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
+    if sort:
+        ms = [str(m) for m in problem._propagate(tag=Status.CONSEQUENCE, extended=False)]
+        ms = sorted(ms[:-1]) + [ms[-1]]
+        out = ""
+        for i, m in enumerate(ms[:-1]):
+            out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
+        yield out + f"{ms[-1]}"
+    else:
+        yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
 
 
 def decision_table(theories, structures=None, goal_string="",

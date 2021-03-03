@@ -9,13 +9,15 @@ vocabulary V {
 }
 
 structure S:V {
-    opposite := {red→ green, green→ green}
+    opposite := {red→ green, (green)→ green}
     f := { (A,A)→ A, (A,B)→ A, (B,A)→ B }
+    is_color := {}
 }
 
 structure S2:V {
     opposite := {red→ green, green→ red} else blue
     f := { (A,A)→ A, (A,B)→ A, (B,A)→ B } else B
+    is_color := {red}
 }
 
 theory T:V {
@@ -35,13 +37,13 @@ theory T4:V {
 
 procedure main() {
     print("T, S")
-    print(model_expand(T, S))
+    print(model_expand(T, S, sort=True))
     print("propagate")
     print(str(Problem(T,S).propagate().simplify().formula().translate()))
     print("T, S2")
-    print(model_expand(T, S2))
+    print(model_expand(T, S2, sort=True))
     print("T2, S")
-    print(model_expand(T2, S))
+    print(model_expand(T2, S, sort=True))
     print("T4, S2")
-    print(model_expand(T4, S2))
+    print(model_expand(T4, S2, sort=True))
 }

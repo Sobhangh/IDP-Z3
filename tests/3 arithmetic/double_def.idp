@@ -1,10 +1,12 @@
 vocabulary {
     double: (Real)→ Real
+    quad: Real -> Real
     X: ()→Real
     y: ()→Real
 }
 theory {
     {!x in Real: double(x)= x+x. }
+    {!x in Real: quad(x)= double(double(x)). }
     X()=3.
-    y()=double(X()).
+    y()=quad(X()).
 }

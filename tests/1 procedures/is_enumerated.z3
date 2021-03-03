@@ -4,12 +4,14 @@ Model 1
 ==========
 Color:={->blue}
 opposite:={(red)->green; (blue)->blue; (green)->green}
+is_color:={(red)->false; (blue)->false; (green)->false}
 f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->A}
 
 Model 2
 ==========
 Color:={->blue}
 opposite:={(red)->green; (blue)->blue; (green)->green}
+is_color:={(red)->false; (blue)->false; (green)->false}
 f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 
 No more models.
@@ -18,6 +20,9 @@ And(Color == blue,
     opposite(red) == green,
     opposite(blue) == blue,
     opposite(green) == green,
+    Not(is_color(red)),
+    Not(is_color(blue)),
+    Not(is_color(green)),
     f(A, A) == A,
     f(A, B) == A,
     f(B, A) == B,
@@ -41,12 +46,14 @@ Model 1
 ==========
 Color:={->green}
 opposite:={(red)->green; (blue)->green; (green)->green}
+is_color:={(red)->false; (blue)->false; (green)->false}
 f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->A}
 
 Model 2
 ==========
 Color:={->green}
 opposite:={(red)->green; (blue)->green; (green)->green}
+is_color:={(red)->false; (blue)->false; (green)->false}
 f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 
 No more models.
@@ -56,6 +63,7 @@ Model 1
 ==========
 Color:={->blue}
 opposite:={(red)->green; (blue)->blue; (green)->red}
+is_color:={(red)->true; (blue)->false; (green)->false}
 f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 
 No more models.

@@ -1,11 +1,11 @@
   Not HasRating(BE001) ≤ 77
 ⇒ Not Eligible(BE001)
 
-  Not Issuer(BE001) in {ALBERTA, BRITISHCOLUMBIA, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, GovernmentNationalMortgageAssociation, MANITOBA, NEWBRUNSWICK, NEWBRUNsELEC, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, QUEBEC, SASKATCHEWAN, TORONTO}
-∧ Not Issuer_Type(BE001) in {Sovereign, Supra}
+  Not Issuer(BE001) in {GovernmentNationalMortgageAssociation, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, BRITISHCOLUMBIA, TORONTO, MANITOBA, NEWBRUNsELEC, NEWBRUNSWICK, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, ALBERTA, QUEBEC, SASKATCHEWAN}
+∧ Not Issuer_Type(BE001) in {Supra, Sovereign}
 ⇒ Not Eligible(BE001)
 
-  Not Issuer(BE001) in {ALBERTA, AfricanDevelopmentBank, BRITISHCOLUMBIA, BankForInternationalSettlements, CaribbeanDevelopmentBank, CouncilOfEuropeDevelopmentBank, EuropeanBankForReconstructionAndDevelopment, EuropeanCentralBank, EuropeanInvestmentBank, EuropeanInvestmentFund, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, GovernmentNationalMortgageAssociation, InterAmericanDevelopmentBank, InternationalBankForReconstructionAndDevelopment, InternationalFinanceCorporation, InternationalMonetaryFund, MANITOBA, MultilateralInvestmentGuaranteeAgency, NEWBRUNSWICK, NEWBRUNsELEC, NEWFOUNDLAND, NOVASCOTIA, NordicInvestmentBank, ONTARIO, PRINCEEDWARDISLD, QUEBEC, SASKATCHEWAN, TORONTO}
+  Not Issuer(BE001) in {GovernmentNationalMortgageAssociation, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, BRITISHCOLUMBIA, TORONTO, MANITOBA, NEWBRUNsELEC, NEWBRUNSWICK, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, ALBERTA, QUEBEC, SASKATCHEWAN, AfricanDevelopmentBank, BankForInternationalSettlements, CaribbeanDevelopmentBank, CouncilOfEuropeDevelopmentBank, EuropeanBankForReconstructionAndDevelopment, EuropeanCentralBank, EuropeanInvestmentBank, EuropeanInvestmentFund, InterAmericanDevelopmentBank, InternationalBankForReconstructionAndDevelopment, InternationalFinanceCorporation, InternationalMonetaryFund, MultilateralInvestmentGuaranteeAgency, NordicInvestmentBank}
 ∧ Issuer_Type(BE001) = Supra
 ⇒ Not Eligible(BE001)
 
@@ -14,18 +14,18 @@
 ⇒ Eligible(BE001)
 
   Not AssetSubClass(BE001) = ABS
-∧ Issuer(BE001) in {ALBERTA, BRITISHCOLUMBIA, MANITOBA, NEWBRUNSWICK, NEWBRUNsELEC, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, QUEBEC, SASKATCHEWAN, TORONTO}
+∧ Issuer(BE001) in {BRITISHCOLUMBIA, TORONTO, MANITOBA, NEWBRUNsELEC, NEWBRUNSWICK, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, ALBERTA, QUEBEC, SASKATCHEWAN}
 ⇒ Eligible(BE001)
 
-  Issuer(BE001) in {ALBERTA, BRITISHCOLUMBIA, MANITOBA, NEWBRUNSWICK, NEWBRUNsELEC, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, QUEBEC, SASKATCHEWAN, TORONTO}
+  Issuer(BE001) in {BRITISHCOLUMBIA, TORONTO, MANITOBA, NEWBRUNsELEC, NEWBRUNSWICK, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, ALBERTA, QUEBEC, SASKATCHEWAN}
 ⇒ Not Eligible(BE001)
 
-  Not AssetSubClass(BE001) = ABS
-∧ Issuer(BE001) in {FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, GovernmentNationalMortgageAssociation}
+  Issuer(BE001) in {AfricanDevelopmentBank, BankForInternationalSettlements, CaribbeanDevelopmentBank, CouncilOfEuropeDevelopmentBank, EuropeanBankForReconstructionAndDevelopment, EuropeanCentralBank, EuropeanInvestmentBank, EuropeanInvestmentFund, InterAmericanDevelopmentBank, InternationalBankForReconstructionAndDevelopment, InternationalFinanceCorporation, InternationalMonetaryFund, MultilateralInvestmentGuaranteeAgency, NordicInvestmentBank}
+∧ Issuer_Type(BE001) = Supra
 ⇒ Eligible(BE001)
 
-  Not Issuer(BE001) in {FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, GovernmentNationalMortgageAssociation}
-∧ Not Issuer_Type(BE001) = Sovereign
+  Not AssetSubClass(BE001) = ABS
+∧ Issuer(BE001) in {GovernmentNationalMortgageAssociation, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, BRITISHCOLUMBIA, TORONTO, MANITOBA, NEWBRUNsELEC, NEWBRUNSWICK, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, ALBERTA, QUEBEC, SASKATCHEWAN}
 ⇒ Eligible(BE001)
 
 ⇒ Not Eligible(BE001)
