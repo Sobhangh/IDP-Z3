@@ -5,7 +5,7 @@ ready.
 It does the following things:
     * add a tag in git;
     * update version in pyproject.toml;
-    * deploy idp-solver module to pypi;
+    * deploy idp-engine module to pypi;
     * deploy IDP-Z3 to GAE;
     * add version in versions.json.
 

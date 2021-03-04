@@ -42,8 +42,8 @@ import re
 
 from idp_server.State import State, make_state
 from idp_server.IO import Output, metaJSON
-from idp_solver import idpparser
-from idp_solver.utils import start, log, NEWL
+from idp_engine import idpparser
+from idp_engine.utils import start, log, NEWL
 
 z3lock = threading.Lock()
 
@@ -80,7 +80,7 @@ def generateZ3(theory):
 
 
 def generate():
-    # optional patch Log on idp_solver.Substitute  ####################################
+    # optional patch Log on idp_engine.Interpret  ####################################
 
     # for i in [Expression, AppliedSymbol, Variable]:
     #     i.substitute = log_calls(i.substitute)

@@ -1,7 +1,7 @@
 .. _solver_run:
 
-idp_solver.Run
+idp_engine.Run
 =========================
 
-.. automodule:: idp_solver.Run
+.. automodule:: idp_engine.Run
    :members:

@@ -24,9 +24,9 @@ from itertools import chain
 import time
 from z3 import Solver, Implies, Not
 
-from idp_solver.Expression import AComparison, AUnary, AppliedSymbol, TRUE
-from idp_solver.Assignments import Status, Assignment
-from idp_solver.utils import OrderedSet, BOOL
+from idp_engine.Expression import AComparison, AUnary, AppliedSymbol, TRUE
+from idp_engine.Assignments import Status, Assignment
+from idp_engine.utils import OrderedSet, BOOL
 from .IO import Output
 
 

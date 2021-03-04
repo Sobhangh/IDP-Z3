@@ -1,7 +1,7 @@
 .. _solver_problem:
 
-idp_solver.Problem
+idp_engine.Problem
 =========================
 
-.. automodule:: idp_solver.Problem
+.. automodule:: idp_engine.Problem
    :members:

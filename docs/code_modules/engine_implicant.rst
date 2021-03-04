@@ -1,7 +1,7 @@
 .. _solver_implicant:
 
-idp_solver.Propagate
+idp_engine.Propagate
 =========================
 
-.. automodule:: idp_solver.Propagate
+.. automodule:: idp_engine.Propagate
    :members:

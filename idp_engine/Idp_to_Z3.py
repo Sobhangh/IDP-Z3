@@ -29,14 +29,14 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
                 EnumSort, BoolVal)
 
-from idp_solver.Parse import ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration
-from idp_solver.Expression import (Constructor, Expression, IfExpr,
+from idp_engine.Parse import ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration
+from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AQuantification, BinaryOperator,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Brackets,
                                    Variable, TRUE)
-from idp_solver.utils import BOOL, INT, REAL
+from idp_engine.utils import BOOL, INT, REAL
 
 
 # class ConstructedTypeDeclaration  ###########################################################

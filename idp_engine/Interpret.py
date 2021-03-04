@@ -19,29 +19,167 @@
 
 """
 
-Methods to
+Methods to interpret a theory in a data structure
 
 * substitute a constant by its value in an expression
 * replace symbols interpreted in a structure by their interpretation
-* instantiate an expresion, i.e. replace a variable by a value
 * expand quantifiers
 
-This module monkey-patches the Expression class and sub-classes.
+This module also includes methods to:
+
+* substitute an node by another in an AST tree
+* instantiate an expresion, i.e. replace a variable by a value
+
+This module monkey-patches the ASTNode class and sub-classes.
 
 ( see docs/zettlr/Substitute.md )
 
 """
 
 import copy
+from itertools import product
 
-from idp_solver.Expression import Constructor, Expression, IfExpr, AQuantification, \
-                    ADisjunction, AConjunction,  AAggregate, AUnary, \
-                    AComparison, AppliedSymbol, UnappliedSymbol, Number, \
-                    Variable, TRUE
-from idp_solver.utils import BOOL, SYMBOL
+from .Assignments import Status
+from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
+                   SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
+                   FunctionEnum)
+from .Expression import (Constructor, Expression, IfExpr, AQuantification,
+                    ADisjunction, AConjunction,  AEquivalence, AAggregate,
+                    AComparison, AUnary, AppliedSymbol, Number,
+                    Arguments, Variable, TRUE)
+from .utils import BOOL, SYMBOL
+
+
+# class Extern  ###########################################################
+
+def interpret(self, problem):
+    pass
+Extern.interpret = interpret
+
+
+# class ConstructedTypeDeclaration  ###########################################################
+
+def interpret(self, problem):
+    self.translate()
+ConstructedTypeDeclaration.interpret = interpret
+
+
+# class RangeDeclaration  ###########################################################
+
+def interpret(self, problem):
+    pass
+RangeDeclaration.interpret = interpret
+
+
+# class SymbolDeclaration  ###########################################################
+
+def interpret(self, problem):
+    self.domain = list(product(*[s.decl.range for s in self.sorts])) #
+    self.range = self.out.decl.range
+
+    # create instances
+    self.instances = {}
+    for arg in self.domain:
+        expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
+        expr.annotate(self.voc, {})
+        self.instances[expr.code] = expr
+        if not expr.code.startswith('_'):
+            problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
+
+    # add type constraints to problem.constraints
+    if self.out.decl.name != BOOL:
+        for inst in self.instances.values():
+            domain = self.out.decl.check_bounds(inst.copy())
+            if domain is not None:
+                domain.block = self.block
+                domain.is_type_constraint_for = self.name
+                domain.annotations['reading'] = "Possible values for " + str(inst)
+                problem.constraints.append(domain)
+SymbolDeclaration.interpret = interpret
+
+
+# class Rule  ###########################################################
+
+def interpret(self, theory):
+    """ expand quantifiers and interpret """
+
+    # compute self.expanded, by expanding:
+    # ∀ v: f(v)=out <=> body
+    # (after joining the rules of the same symbols)
+    if any(s.name ==SYMBOL for s in self.sorts):
+        # don't expand macros, to avoid arity and type errors
+        # will be done later with optimized binary quantification
+        self.expanded = TRUE
+    # elif self.symbol.decl.domain:  # only if definition is constructive !
+    #     out = [self.instantiate_definition(args, theory)
+    #            for args in self.symbol.decl.domain]
+    #     self.expanded = AConjunction.make('∧', out)
+    else:
+        if self.out:
+            expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+            expr.in_head = True
+            expr = AComparison.make('=', [expr, self.args[-1]])
+        else:
+            expr = AppliedSymbol.make(self.symbol, self.args)
+            expr.in_head = True
+        expr = AEquivalence.make('⇔', [expr, self.body])
+        expr = AQuantification.make('∀', {**self.q_vars}, expr)
+        self.expanded = expr.interpret(theory)
+    self.expanded.block = self.block
+    return self
+Rule.interpret = interpret
+
+
+# class SymbolInterpretation  ###########################################################
+
+def interpret(self, problem):
+    status = (Status.STRUCTURE if self.block.name != 'default' else
+                Status.GIVEN)
+    if self.is_type_enumeration:
+        symbol = self.symbol
+        symbol.decl.constructors = [t.args[0]
+            for t in self.enumeration.tuples.values()]
+        symbol.decl.range = symbol.decl.constructors
+    else: # update problem.assignments with data from enumeration
+        for t in self.enumeration.tuples:
+            if type(self.enumeration) == FunctionEnum:
+                args, value = t.args[:-1], t.args[-1]
+            else:
+                args, value = t.args, TRUE
+            expr = AppliedSymbol.make(self.symbol, args)
+            self.check(expr.code not in problem.assignments
+                or problem.assignments[expr.code].status == Status.UNKNOWN,
+                f"Duplicate entry in structure for '{self.name}': {str(expr)}")
+            problem.assignments.assert_(expr, value, status, False)
+        if self.default is not None:
+            for code, expr in self.symbol.decl.instances.items():
+                if (code not in problem.assignments
+                    or problem.assignments[code].status != status):
+                    problem.assignments.assert_(expr, self.default, status,
+                                                False)
+
+SymbolInterpretation.interpret = interpret
 
 
 # class Expression  ###########################################################
+
+def interpret(self, problem) -> Expression:
+    """ uses information in the problem and its vocabulary to:
+    - expand quantifiers in the expression
+    - simplify the expression using known assignments
+    - instantiate definitions
+
+    Args:
+        problem (Problem): the Problem to apply
+
+    Returns:
+        Expression: the resulting expression
+    """
+    if self.is_type_constraint_for:  # do not interpret typeConstraints
+        return self
+    out = self.update_exprs(e.interpret(problem) for e in self.sub_exprs)
+    return out
+Expression.interpret = interpret
 
 
 # @log  # decorator patched in by tests/main.py
@@ -102,25 +240,6 @@ def instantiate(self, e0, e1, problem=None):
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate = instantiate
-
-
-def interpret(self, problem) -> Expression:
-    """ uses information in the problem and its vocabulary to:
-    - expand quantifiers in the expression
-    - simplify the expression using known assignments
-    - instantiate definitions
-
-    Args:
-        problem (Problem): the Problem to apply
-
-    Returns:
-        Expression: the resulting expression
-    """
-    if self.is_type_constraint_for:  # do not interpret typeConstraints
-        return self
-    out = self.update_exprs(e.interpret(problem) for e in self.sub_exprs)
-    return out
-Expression.interpret = interpret
 
 
 # Class Constructor  ######################################################
