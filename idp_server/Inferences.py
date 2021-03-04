@@ -253,7 +253,7 @@ def abstract(state, given_json):
                             and not l.relevant)
 
     out["models"] = ("" if len(models) < max_rows and time.time()<max_time else
-        "Time out or more than {max_rows} models...Showing partial results")
+        f"Time out or more than {max_rows} models...Showing partial results")
     out["variable"] = [[ [symb] for symb in table.keys()
                         if symb in active_symbol ]]
     for i in range(len(models)):
