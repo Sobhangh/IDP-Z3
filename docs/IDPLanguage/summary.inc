@@ -14,7 +14,7 @@ The equivalent ASCII-only encoding is shown on the right.
         type T := {c1, c2}
         type T := {1,2,3}
         type T := {1..3}
-        // built-in types: 𝔹, ℤ, ℝ, Symbol        Bool, Int, Real, Symbol
+        // built-in types: 𝔹, ℤ, ℝ, Date, Symbol  Bool, Int, Real, Date, Symbol
 
         p : () → 𝔹                                p: () -> Bool
         p1, p2 : T1 ⨯ T2 → 𝔹                      p1, p2: T1*T2 -> Bool

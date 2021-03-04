@@ -30,6 +30,7 @@ __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuanti
 
 import copy
 from collections import ChainMap
+from datetime import date
 import sys
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
@@ -795,6 +796,28 @@ class Number(Expression):
 
 ZERO = Number(number='0')
 ONE = Number(number='1')
+
+
+class Date(Expression):
+    PRECEDENCE = 200
+
+    def __init__(self, **kwargs):
+        self.iso = kwargs.pop('iso')
+        self.date = (date.today() if self.iso == '#TODAY' else
+                     date.fromisoformat(self.iso[1:]))
+
+        super().__init__()
+
+        self.sub_exprs = []
+        self.fresh_vars = set()
+
+        self.translated = None
+        self.translate()  # also sets self.type
+
+    def __str__(self): return f"#{self.date.isoformat()}"
+
+    def as_rigid(self): return self
+    def is_reified(self): return False
 
 
 class Brackets(Expression):

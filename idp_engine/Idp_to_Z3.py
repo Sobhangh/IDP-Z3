@@ -34,7 +34,7 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AQuantification, BinaryOperator,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
-                                   UnappliedSymbol, Number, Brackets,
+                                   UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
 from idp_engine.utils import BOOL, INT, REAL
 
@@ -321,6 +321,16 @@ def translate(self):
             self.type = INT
     return self.translated
 Number.translate = translate
+
+
+# Class Date  #######################################################
+
+def translate(self):
+    if self.translated is None:
+        self.translated = self.date.toordinal()
+        self.py_value = self.translated
+    return self.translated
+Date.translate = translate
 
 
 # Class Brackets  #######################################################

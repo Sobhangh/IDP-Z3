@@ -25,8 +25,18 @@ Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 Types
 +++++
 
-IDP-Z3 has the following built-in types:  ``𝔹``, ``ℤ``, ``ℝ``, ``Symbol``.
+IDP-Z3 supports built-in and custom types.
+
+The built-in types are:  ``𝔹``, ``ℤ``, ``ℝ``, ``Date``, and ``Symbol``.
 The equivalent ASCII symbols are ``Bool``, ``Int``, and ``Real``.
+
+Boolean literals are ``true`` and ``false``.
+Number literals follow Python's conventions.
+Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``).
+``#TODAY`` is also a Date literal.
+
+The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
+The constructors are the names of the symbol, prefixed with `````
 
 Custom types can be defined by specifying a range of numeric literals, or a list of constructors (of arity 0).
 Their name should be singular and capitalized, by convention.
@@ -39,9 +49,6 @@ The enumeration can be given in a theory or structure block.
     type Color := {Red, Blue, Green}
 
 For the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
-
-The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
-The constructors are the names of the symbol, prefixed with `````
 
 
 .. _function:

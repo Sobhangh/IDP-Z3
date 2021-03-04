@@ -32,7 +32,7 @@ from .Expression import (
     BinaryOperator, AEquivalence, AImplication, ADisjunction, \
     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
     AUnary, AAggregate, AppliedSymbol, UnappliedSymbol, \
-    Number, Brackets, Variable, TRUE, FALSE)
+    Number, Date, Brackets, Variable, TRUE, FALSE)
 from .Parse import Enumeration, Tuple
 from .Assignments import Status, Assignment
 from .utils import INT
@@ -60,7 +60,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         else:
             self.simpler = simpler
     assert self.value is None or type(self.value) in [Constructor,
-                                                      Number]
+                                                      Number, Date]
     assert self.value is not self  # avoid infinite loops
 
     # reset derived attributes

@@ -68,7 +68,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
     AUnary: !INT !IDPFLOAT               (operators+=UnaryOperator  f=Aggregate);
-    AAggregate: aggtype=AggType '{' quantees*=Quantee[',']  ':' f=Expression (':'  out=Expression)? '}';
+    AAggregate: !Date aggtype=AggType '{' quantees*=Quantee[',']  ':' f=Expression (':'  out=Expression)? '}';
       AggType: '#' | 'card' | 'sum';
 
     RImplicationOp: '<=' | '⇐';
@@ -82,7 +82,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     UnaryOperator:   '-' | '~' | '¬';
 
 
-    Base:  AppliedSymbol | UnappliedSymbol | Number | Brackets;
+    Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
       AppliedSymbol: s=Symbol args=Arguments
               ( is_enumerated=/is\s+(not\s+)?enumerated/
@@ -91,6 +91,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
+      Date: iso=/#\d{4}-\d{2}-\d{2}/ | iso='#TODAY';
       Brackets: annotations=Annotations '(' f=Expression ')';
 
 
@@ -108,7 +109,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
   CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
-  Identifier: UnappliedSymbol | Number;
+  Identifier: UnappliedSymbol | Number | Date;
 
 Goal: 'goal' name=ID;
 
