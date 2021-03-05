@@ -42,8 +42,8 @@ The equivalent ASCII-only encoding is shown on the right.
         f1() = if p() then f2() else f3().
 
         p := {1,2,3}
-        p(1) is enumerated.
-        p(5) is not enumerated.
+        p(#2020-01-01) is enumerated.
+        p(#TODAY) is not enumerated.
 
         { p(1).
           ∀x∈T: p1(x) ← p2(x).                    !x in T: p1(x) <- p2(x).
