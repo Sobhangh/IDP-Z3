@@ -3,7 +3,7 @@ vocabulary environment {
   type Real_Estate_Type := {Residential, Residential_Building_Land, Other_Real_Estate}
   type Destination := {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
   type Buyer_Type := {Natural_Person, Legal_Person, Mixed}
-  type Date := {2015..2025}
+  type Year := {2015..2025}
   type Agreement_Dwelling_For_Social_Renting := {Less_Than_9_years, More_than_9_Or_9_years}
   type Transaction := {Public_Sale, Out_Hand, Public_Sale_Community}
   type Resale := {Less_Than_Three, Three_Or_More}
@@ -27,16 +27,16 @@ vocabulary environment {
   additional_security_required, additional_security_satisfied : () → 𝔹
   resale : () → Resale
   transaction_type : () → Transaction
-  certification_date_sale : () → Date
+  certification_date_sale : () → Year
 
   // For Energy_Efficient_Dwelling
   domicile_established, clean_purchase, first_ownership : () → 𝔹
   causal_connection, energy_renovation_planned : () → 𝔹
-  term_energy_renovation : () → Date
-  certification_date : () → Date
+  term_energy_renovation : () → Year
+  certification_date : () → Year
 
   // For Dwelling_For_Social_Renting
-  start_dt_dwelling_for_social_rent : () → Date
+  start_dt_dwelling_for_social_rent : () → Year
   duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
 
 

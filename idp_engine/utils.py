@@ -28,6 +28,7 @@ indented = "\n  "
 BOOL = "Bool"
 INT = "Int"
 REAL = "Real"
+DATE = "Date"
 SYMBOL = "Symbol"
 
 """ Module that monkey-patches json module when it's imported so

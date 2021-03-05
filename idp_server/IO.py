@@ -25,7 +25,7 @@ import ast
 from idp_engine.Expression import (TRUE, FALSE, AComparison, Number)
 from idp_engine.Parse import str_to_IDP
 from idp_engine.Assignments import Assignments, Status
-from idp_engine.utils import BOOL, INT, REAL
+from idp_engine.utils import BOOL, INT, REAL, DATE
 
 def metaJSON(state):
     """
@@ -180,7 +180,7 @@ class Output(object):
                            symb.out.decl.type)
                     symbol = {"typ": typ, "value": ""  #TODO
                               , "values": [str(v) for v in symb.range]}
-                elif typ in [REAL, INT]:
+                elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": typ, "value": ""}  # default
                 else:
                     assert False, "dead code"
@@ -197,7 +197,7 @@ class Output(object):
                     symbol['reading'] = reading
                     symbol['normal'] = not atom.is_reified()
                     symbol['environmental'] = symb.block.name == 'environment'
-                    symbol['is_assignment'] = symbol['typ'] != 'Bool' \
+                    symbol['is_assignment'] = symbol['typ'] != BOOL \
                         or bool(ass.sentence.is_assignment())
                     s.setdefault(key, symbol)
                     s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
@@ -237,7 +237,8 @@ class Output(object):
                             s[key]["value"] = str(eval(str(value).replace('?', '')))
                         else:
                             s[key]["value"] = True if value.same_as(TRUE) else \
-                                             False if value.same_as(FALSE) else str(value)
+                                             False if value.same_as(FALSE) else \
+                                             str(value)
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading']

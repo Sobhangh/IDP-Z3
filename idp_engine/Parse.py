@@ -27,6 +27,7 @@ __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
            "Display", "Procedure", "idpparser", ]
 
 from copy import copy
+from datetime import date
 from enum import Enum
 from itertools import groupby
 from os import path
@@ -42,9 +43,10 @@ from .Expression import (ASTNode, Constructor, IfExpr, AQuantification,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
-                         Number, Brackets, Arguments,
+                         Number, Brackets, Date, Arguments,
                          Variable, TRUE, FALSE)
-from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL, SYMBOL, IDPZ3Error)
+from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
+                    IDPZ3Error)
 
 
 def str_to_IDP(atom, val_string):
@@ -54,6 +56,10 @@ def str_to_IDP(atom, val_string):
                 f"{atom.annotations['reading']} is not defined, and assumed false")
         out = (TRUE if val_string == 'True' else
                FALSE)
+    elif atom.type == DATE:
+        d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
+             date.fromisoformat(val_string[1:]))
+        out = Date(iso=f"#{d.isoformat()}")
     elif (atom.type in [REAL, INT] or
             type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
         out = Number(number=str(eval(val_string.replace('?', ''))))
@@ -157,6 +163,7 @@ class Vocabulary(ASTNode):
                 name=BOOL, constructors=[TRUE, FALSE]),
             RangeDeclaration(name=INT, elements=[]),
             RangeDeclaration(name=REAL, elements=[]),
+            RangeDeclaration(name=DATE, elements=[]),
             ConstructedTypeDeclaration(
                 name=SYMBOL,
                 constructors=[Constructor(name=f"`{s.name}")
@@ -823,7 +830,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,
-                                         Number, Brackets, Arguments,
+                                         Number, Brackets, Date, Arguments,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,

@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### API
 * (breaking) renamed `idp-solver` to `idp-engine`
+* (breaking) Issue #45: partial support for dates.  Introduces new Date type, which may conflict with Date type in some vocabularies.
 * (breaking) remove `Goal`, `View` as top level statements
 * IEP 03: allow enumeration of constructed types in theory/structure block
 * fix #70: Double unary symbol should be parsed

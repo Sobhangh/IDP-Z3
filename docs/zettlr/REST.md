@@ -32,7 +32,7 @@ POST result:
     - title: string           // title of the page
     - symbols : [ {           // list of predicates/functions, each one corresponding to a box on the page
         - idpname : string    // name of the predicate/function in the FO(ID) vocabulary
-        - type : string       // "Bool" | "Int" | "Real" | <custom type>
+        - type : string       // "Bool" | "Int" | "Real" | "Date" | <custom type>
         - priority : string   // (not used)
         - reading  : string   // English reading of the symbol
         - shortinfo: string   // short description of the symbol

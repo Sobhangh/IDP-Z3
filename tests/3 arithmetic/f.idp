@@ -1,8 +1,10 @@
 vocabulary {
-    f:(Int)→Int
+    f:(Int)→Date
 }
 
 theory {
     f(1)>=2.
+    f(0) = #TODAY.
+    #2000-01-01 < f(0).
 }
 display { view() = expanded. }
