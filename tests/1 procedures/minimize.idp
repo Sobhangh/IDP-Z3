@@ -2,6 +2,7 @@ vocabulary V {
 
     type sides := {3..4}
     Sides, Vertices: () → sides
+    f:(sides)→Date
 
 
     type type := {triangle, quadrilateral}
@@ -26,6 +27,9 @@ vocabulary V {
 }
 
 theory T:V {
+
+    Convex() => f(3) = #TODAY.
+    #2000-01-01 < f(3).
 
     [Definition of triangle]
     (Type()=triangle      <=> Sides()=3).
@@ -109,4 +113,5 @@ structure S:V {
 
 procedure main () {
     print(Problem(T, S).optimize("Length(1)").assignments)
+    print(Problem(T,S).expand(max=1, complete=True))
 }

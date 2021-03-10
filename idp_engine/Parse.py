@@ -773,7 +773,8 @@ class Call1(ASTNode):
         self.post = kwargs.pop('post')
 
     def __str__(self):
-        kwargs = "" if len(self.kwargs)==0 else f",{','.join(str(a) for a in self.kwargs)}"
+        kwargs = ("" if len(self.kwargs)==0 else
+                  f"{',' if self.args else ''}{','.join(str(a) for a in self.kwargs)}")
         return ( f"{self.name}({','.join(str(a) for a in self.args)}{kwargs})"
                  f"{'' if self.post is None else '.'+str(self.post)}")
 
