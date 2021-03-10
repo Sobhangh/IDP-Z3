@@ -33,7 +33,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          TRUE, FALSE)
 
-from .utils import BOOL, INT, REAL, SYMBOL, OrderedSet, IDPZ3Error
+from .utils import BOOL, INT, REAL, SYMBOL, ARITY, OrderedSet, IDPZ3Error
 
 
 # Class Vocabulary  #######################################################
@@ -494,6 +494,8 @@ def annotate1(self):
     out = Expression.annotate1(self)
     if out.decl and out.decl.name == SYMBOL:  # a symbol variable
         out.fresh_vars.add(self.s.name)
+    if self.s.name in [ARITY]:
+        return out.simplify1()
     return out
 AppliedSymbol.annotate1 = annotate1
 

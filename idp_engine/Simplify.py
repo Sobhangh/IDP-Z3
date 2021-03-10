@@ -35,7 +35,7 @@ from .Expression import (
     Number, Date, Brackets, Variable, TRUE, FALSE)
 from .Parse import Enumeration, Tuple
 from .Assignments import Status, Assignment
-from .utils import INT
+from .utils import INT, SYMBOL, ARITY
 
 
 # class Expression  ###########################################################
@@ -329,6 +329,19 @@ AAggregate.update_exprs = update_exprs
 
 
 # Class AppliedSymbol  #######################################################
+
+def update_exprs(self, new_exprs):
+    new_exprs = list(new_exprs)
+    if self.name in [ARITY]:
+        self.check(len(new_exprs) == 1,
+                   f"Incorrect number of arguments for 'arity': {len(new_exprs)}")
+        self.check(new_exprs[0].type == SYMBOL,
+                   f"Argument of 'arity' must be a Symbol: {new_exprs[0]}")
+        if isinstance(new_exprs[0], Constructor):
+            value = Number(number=str(new_exprs[0].symbol.decl.arity))
+            return self._change(value=value, sub_exprs=new_exprs)
+    return self._change(sub_exprs=new_exprs)
+AppliedSymbol.update_exprs = update_exprs
 
 def as_set_condition(self):
     # determine core after substitutions

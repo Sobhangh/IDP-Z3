@@ -36,7 +36,7 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
-from idp_engine.utils import BOOL, INT, REAL
+from idp_engine.utils import BOOL, INT, REAL, ARITY
 
 
 # class ConstructedTypeDeclaration  ###########################################################
@@ -259,6 +259,8 @@ AAggregate.translate1 = translate1
 def translate1(self):
     if self.s.name == '__relevant':
         return TRUE.translated
+    assert (self.s.name not in [ARITY],
+            f"Can't resolve argument of arity: {self}")
     if self.s.name == 'abs':
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)

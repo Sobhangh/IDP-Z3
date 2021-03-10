@@ -35,7 +35,7 @@ import sys
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from .utils import unquote, OrderedSet, BOOL, SYMBOL, IDPZ3Error
+from .utils import unquote, OrderedSet, BOOL, SYMBOL, ARITY, IDPZ3Error
 
 
 class ASTNode(object):
@@ -676,7 +676,7 @@ class AppliedSymbol(Expression):
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.name != SYMBOL and self.name != '__relevant':
+        if self.decl.name != SYMBOL and self.name not in ['__relevant', ARITY]:
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)

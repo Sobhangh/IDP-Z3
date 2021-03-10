@@ -5,6 +5,7 @@ type Real = {}
 type Date = {}
 type Symbol := {`p}
 __relevant
+arity(Symbol) : Int
 p
 }
 
