@@ -176,8 +176,7 @@ class Output(object):
                 if typ == BOOL:
                     symbol = {"typ": typ}
                 elif 0 < len(symb.range):
-                    typ = (typ if symb.out.decl.type is None else
-                           symb.out.decl.type)
+                    typ = symb.out.decl.type
                     symbol = {"typ": typ, "value": ""  #TODO
                               , "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:

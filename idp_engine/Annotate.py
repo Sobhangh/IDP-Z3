@@ -46,7 +46,7 @@ def annotate(self, idp):
         s.block = self
         s.annotate(self)  # updates self.symbol_decls
 
-    for constructor in self.symbol_decls[SYMBOL].constructors:
+    for constructor in self.symbol_decls[SYMBOL].domain:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
 Vocabulary.annotate = annotate
@@ -67,12 +67,15 @@ def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
-    for c in self.constructors:
+    for s in self.sorts:
+        s.annotate(voc)
+    self.out.annotate(voc)
+    for c in self.domain:
         c.type = self.name
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
                     f"duplicate constructor in vocabulary: {c.name}")
         voc.symbol_decls[c.name] = c
-    self.range = self.constructors  # TODO constructor functions
+    self.range = self.domain  # TODO constructor functions
     if self.interpretation:
         self.interpretation.annotate(voc)
 ConstructedTypeDeclaration.annotate = annotate
@@ -84,6 +87,9 @@ def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
+    for s in self.sorts:
+        s.annotate(voc)
+    self.out.annotate(voc)
 RangeDeclaration.annotate = annotate
 
 

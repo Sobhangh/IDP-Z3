@@ -217,7 +217,13 @@ class ConstructedTypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        constructors ([Constructor]): list of constructors in the enumeration
+        sorts (List[Sort]): the types of the arguments
+
+        out (Sort): Boolean Sort
+
+        type (string): Z3 type of an element of the type; same as `name`
+
+        domain ([Constructor]): list of constructors in the enumeration
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
@@ -228,15 +234,18 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.constructors = ([] if 'constructors' not in kwargs else
+        self.domain = ([] if 'constructors' not in kwargs else
                              kwargs.pop('constructors'))
         enumeration = (None if 'enumeration' not in kwargs else
                             kwargs.pop('enumeration'))
 
         self.arity = 1
+        self.sorts = [Sort(name=self.name)]
+        self.out = Sort(name=BOOL)
+        self.type = self.name
+
         self.translated = None
         self.map = {}  # {String: constructor}
-        self.type = None
 
         self.interpretation = (None if not enumeration else
             SymbolInterpretation(name=Symbol(name=self.name),
@@ -244,13 +253,13 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __str__(self):
         return (f"type {self.name} := "
-                f"{{{','.join(map(str, self.constructors))}}}")
+                f"{{{','.join(map(str, self.domain))}}}")
 
     def check_bounds(self, var):
         if self.name == BOOL:
             out = [var, AUnary.make('¬', var)]
         else:
-            out = [AComparison.make('=', [var, c]) for c in self.constructors]
+            out = [AComparison.make('=', [var, c]) for c in self.domain]
         out = ADisjunction.make('∨', out)
         return out
 
@@ -261,7 +270,9 @@ class RangeDeclaration(ASTNode):
         self.elements = kwargs.pop('elements')
         self.arity = 1
         self.translated = None
-        self.constructors = None  # not used
+        self.domain = None  # not used
+        self.sorts = [Sort(name=self.name)]
+        self.out = Sort(name=BOOL)
 
         self.type = REAL if self.name == REAL else INT
         self.range = []
@@ -314,13 +325,13 @@ class SymbolDeclaration(ASTNode):
 
         name (string): the identifier of the symbol, after expansion of the node
 
+        arity (int): the number of arguments
+
         sorts (List[Sort]): the types of the arguments
 
-        out : the type of the symbol
+        out (Sort): the type of the symbol
 
-        type (string): the name of the type of the symbol
-
-        arity (int): the number of arguments
+        type (string): name of the Z3 type of an instance of the symbol
 
         domain (List): the list of possible tuples of arguments
 

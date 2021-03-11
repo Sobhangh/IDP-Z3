@@ -11,9 +11,9 @@ Traceback (most recent call last):
     obj.__init__(**attrs)
   File "IDP-Z3/idp_engine/Parse.py", line 91, in __init__
     t.annotate(self)
-  File "IDP-Z3/idp_engine/Annotate.py", line 147, in annotate
+  File "IDP-Z3/idp_engine/Annotate.py", line 153, in annotate
     self.constraints = OrderedSet([e.interpret(self)
-  File "IDP-Z3/idp_engine/Annotate.py", line 147, in <listcomp>
+  File "IDP-Z3/idp_engine/Annotate.py", line 153, in <listcomp>
     self.constraints = OrderedSet([e.interpret(self)
   File "IDP-Z3/idp_engine/Interpret.py", line 347, in interpret
     assert self.decl.type != BOOL, \
