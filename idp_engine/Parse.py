@@ -168,7 +168,8 @@ class Vocabulary(ASTNode):
                 name=SYMBOL,
                 constructors=[Constructor(name=f"`{s.name}")
                               for s in self.declarations
-                              if type(s) == SymbolDeclaration]),
+                              if type(s) == SymbolDeclaration
+                              or type(s) in Type.__args__]),
             SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
                                 sorts=[], out=Sort(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
@@ -214,6 +215,8 @@ class ConstructedTypeDeclaration(ASTNode):
     Args:
         name (string): name of the type
 
+        arity (int): the number of arguments
+
         constructors ([Constructor]): list of constructors in the enumeration
 
         interpretation (SymbolInterpretation): the symbol interpretation
@@ -229,6 +232,8 @@ class ConstructedTypeDeclaration(ASTNode):
                              kwargs.pop('constructors'))
         enumeration = (None if 'enumeration' not in kwargs else
                             kwargs.pop('enumeration'))
+
+        self.arity = 1
         self.translated = None
         self.map = {}  # {String: constructor}
         self.type = None
@@ -254,6 +259,7 @@ class RangeDeclaration(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')  # maybe INT, REAL
         self.elements = kwargs.pop('elements')
+        self.arity = 1
         self.translated = None
         self.constructors = None  # not used
 
