@@ -8,7 +8,7 @@
 - [x] new AST node: SymbolExpr
 - [ ] merge class SymbolExpr and Sort
 - [ ] substitue in `$x()` too
-- [ ] better error message for `constant` without parentheses
+- [x] better error message for `constant` without parentheses
 - [ ] implement `input_domain`, `output_domain`
 - [ ] implement equality of intensional symbols
 - [ ] verify that defined symbols propagate (symmetric example)

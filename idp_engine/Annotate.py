@@ -501,8 +501,10 @@ AppliedSymbol.annotate1 = annotate1
 # Class UnappliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars):
-    if self.name in voc.symbol_decls and type(voc.symbol_decls[self.name]) == Constructor:
-        return voc.symbol_decls[self.name]
+    if self.name in voc.symbol_decls:
+        if type(voc.symbol_decls[self.name]) == Constructor:
+            return voc.symbol_decls[self.name]
+        self.check(False, f"{self} should be applied to arguments (or prefixed with a back-tick)")
     if self.name in q_vars:
         return q_vars[self.name]
     # elif self.name in voc.symbol_decls:  # in symbol_decls
