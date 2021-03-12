@@ -38,7 +38,7 @@ from typing import Dict, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, Symbol, Sort,
+from .Expression import (ASTNode, Constructor, Symbol, Sort, SymbolExpr,
                          IfExpr, AQuantification,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
@@ -684,47 +684,48 @@ class Display(ASTNode):
     def run(self, idp):
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
-                self.check(type(constraint.s) == Symbol,
+                self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
                            f"Invalid syntax: {constraint}")
+                name = constraint.symbol.sub_exprs[0].name
                 symbols = []
                 # All arguments should be symbols, except for the first
                 # argument of 'unit' and 'category'.
                 for i, symbol in enumerate(constraint.sub_exprs):
-                    if constraint.s.name in ['unit', 'category'] and i == 0:
+                    if name in ['unit', 'category'] and i == 0:
                         continue
                     self.check(symbol.name.startswith('`'),
-                        f"arg '{symbol.name}' of {constraint.s.name}'"
+                        f"arg '{symbol.name}' of {name}'"
                         f" must begin with a tick '`'")
                     self.check(symbol.name[1:] in self.voc.symbol_decls,
-                        f"argument '{symbol.name}' of '{constraint.s.name}'"
+                        f"argument '{symbol.name}' of '{name}'"
                         f" must be a symbol")
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if constraint.s.name == 'goal':  # e.g.,  goal(Prime)
+                if name == 'goal':  # e.g.,  goal(Prime)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
                         s.view = ViewType.EXPANDED  # the goal is always expanded
-                elif constraint.s.name == 'expand':  # e.g. expand(Length, Angle)
+                elif name == 'expand':  # e.g. expand(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
-                elif constraint.s.name == 'hide':  # e.g. hide(Length, Angle)
+                elif name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
-                elif constraint.s.name == 'relevant':  # e.g. relevant(Tax)
+                elif name == 'relevant':  # e.g. relevant(Tax)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
-                elif constraint.s.name == 'unit':  # e.g. unit('m', `length):
+                elif name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
-                elif constraint.s.name == 'category':
+                elif name == 'category':
                     # e.g. category('Shape', `type).
                     for symbol in symbols:
                         symbol.category = str(constraint.sub_exprs[0])
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
-                self.check(type(constraint.sub_exprs[0].s) == Symbol,
+                self.check(type(constraint.sub_exprs[0].symbol.sub_exprs[0]) == Symbol,
                            f"Invalid syntax: {constraint}")
-                if constraint.sub_exprs[0].s.name == 'view':
+                if constraint.sub_exprs[0].symbol.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
                             if type(s) == SymbolDeclaration and s.view == ViewType.NORMAL:
@@ -818,6 +819,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          ConstructedTypeDeclaration,
                                          RangeDeclaration,
                                          SymbolDeclaration, Symbol, Sort,
+                                         SymbolExpr,
 
                                          Theory, Definition, Rule, IfExpr,
                                          AQuantification, ARImplication,

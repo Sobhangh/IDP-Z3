@@ -43,7 +43,7 @@ from .Assignments import Status
 from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
                    FunctionEnum)
-from .Expression import (Constructor, Expression, IfExpr, AQuantification,
+from .Expression import (Constructor, SymbolExpr, Expression, IfExpr, AQuantification,
                     ADisjunction, AConjunction,  AEquivalence, AAggregate,
                     AComparison, AUnary, AppliedSymbol, Number,
                     Arguments, Variable, TRUE)
@@ -80,7 +80,7 @@ def interpret(self, problem):
     # create instances
     self.instances = {}
     for arg in self.domain:
-        expr = AppliedSymbol(s=Symbol(name=self.name), args=Arguments(sub_exprs=arg))
+        expr = AppliedSymbol.make(Symbol(name=self.name), arg)
         expr.annotate(self.voc, {})
         self.instances[expr.code] = expr
         if not expr.code.startswith('_'):
@@ -349,7 +349,7 @@ AAggregate.interpret = interpret
 # Class AppliedSymbol  ##############################################
 
 def interpret(self, problem):
-    self.s = self.s.interpret(problem)
+    self.symbol = self.symbol.interpret(problem)
     sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
     simpler, co_constraint = None, None
     if self.decl:
@@ -367,7 +367,7 @@ def interpret(self, problem):
                 simpler.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
-            core = AppliedSymbol.make(self.s, sub_exprs).copy()
+            core = AppliedSymbol.make(self.symbol.sub_exprs[0], sub_exprs).copy()
             simpler = self.in_enumeration.contains([core], False)
             if 'not' in self.is_enumeration:
                 simpler = AUnary.make('¬', simpler)
@@ -415,14 +415,12 @@ def instantiate(self, e0, e1, problem=None):
     if self.value:
         return self
     out = Expression.instantiate(self, e0, e1, problem)
-    if self.eval:
-        out.s = out.s.instantiate(e0, e1, problem)
-        symbol = out.s.as_rigid()
-        if symbol:
-            assert type(symbol) == Constructor, "Internal error"
-            self.check(len(self.sub_exprs) == len(symbol.symbol.decl.sorts),
+    if out.symbol.as_rigid() is None:
+        out.symbol = out.symbol.instantiate(e0, e1, problem)
+        if type(out.symbol) == Symbol:
+            self.check(len(self.sub_exprs) == len(out.symbol.decl.sorts),
                         f"Incorrect arity for {e1.code}")
-            out = AppliedSymbol.make(symbol.symbol, self.sub_exprs)
+            out = AppliedSymbol.make(out.symbol, self.sub_exprs)
     if (problem and out.decl and out.decl.name in problem.interpretations
         and all(a.as_rigid() is not None for a in out.sub_exprs)):
         simpler = (problem.interpretations[out.decl.name].interpret_application) (
@@ -430,6 +428,19 @@ def instantiate(self, e0, e1, problem=None):
         out = out._change(simpler=simpler)
     return out
 AppliedSymbol .instantiate = instantiate
+
+
+# class SymbolExpr ###########################################################
+
+def instantiate(self, e0, e1, problem=None):
+    out = Expression.instantiate(self, e0, e1, problem)
+    if out.eval:
+        symbol = out.sub_exprs[0].as_rigid()
+        if symbol:
+            assert type(symbol) == Constructor, "Internal error"
+            return symbol.symbol
+    return out
+SymbolExpr.instantiate = instantiate
 
 
 # Class Variable  #######################################################

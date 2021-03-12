@@ -257,7 +257,7 @@ AAggregate.translate1 = translate1
 # Class AppliedSymbol  #######################################################
 
 def translate1(self):
-    self.check(self.decl, f"Unknown symbol: {self.s}")
+    self.check(self.decl, f"Unknown symbol: {self.symbol}")
     if self.decl.name == '__relevant':
         return TRUE.translated
     assert (self.decl.name not in [ARITY],

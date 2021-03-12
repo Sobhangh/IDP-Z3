@@ -84,9 +84,10 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
     Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
-      AppliedSymbol: (s=Symbol | eval='$' s=Base ) args=Arguments
+      AppliedSymbol: symbol=SymbolExpr args=Arguments
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | is_enumeration=/(not\s+)?in/ in_enumeration=Enumeration)?;
+        SymbolExpr: s=Symbol | eval='$' s=Base;
         Arguments: '(' sub_exprs*=Expression[','] ')';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;

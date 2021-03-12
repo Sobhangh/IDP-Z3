@@ -31,7 +31,7 @@ from .Expression import (
     Constructor, Expression, IfExpr, AQuantification, \
     BinaryOperator, AEquivalence, AImplication, ADisjunction, \
     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
-    AUnary, AAggregate, AppliedSymbol, UnappliedSymbol, \
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, \
     Number, Date, Brackets, Variable, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status, Assignment
@@ -67,7 +67,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
     self.str = sys.intern(str(self))
 
     return self
-
 Expression._change = _change
 
 
@@ -78,7 +77,7 @@ def update_exprs(self, new_exprs):
 
 
 # Expression.update_exprs = update_exprs
-for i in [Constructor, AppliedSymbol, UnappliedSymbol, Variable, Number]:
+for i in [Constructor, SymbolExpr, AppliedSymbol, UnappliedSymbol]:
     i.update_exprs = update_exprs
 
 
@@ -333,7 +332,7 @@ AAggregate.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     new_exprs = list(new_exprs)
     if not self.decl:
-        symbol = self.s.as_rigid()
+        symbol = self.symbol.sub_exprs[0].as_rigid()
         if symbol:
             assert type(symbol) == Symbol, "Internal error"
             self.decl = symbol.decl
@@ -352,7 +351,7 @@ AppliedSymbol.update_exprs = update_exprs
 
 def as_set_condition(self):
     # determine core after substitutions
-    core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
+    core = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs).copy()
 
     return ((None, None, None) if not self.in_enumeration else
             (core, 'not' not in self.is_enumeration, self.in_enumeration))

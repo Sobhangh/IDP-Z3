@@ -31,9 +31,9 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification,
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         TRUE, FALSE)
+                         FALSE)
 
-from .utils import BOOL, INT, REAL, SYMBOL, ARITY, OrderedSet, IDPZ3Error
+from .utils import BOOL, INT, REAL, SYMBOL, OrderedSet, IDPZ3Error
 
 
 # Class Vocabulary  #######################################################
@@ -472,19 +472,20 @@ AAggregate.annotate = annotate
 # Class AppliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars):
-    self.s = self.s.annotate(voc, q_vars)
+    self.symbol = self.symbol.annotate(voc, q_vars)
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)
     self = self.annotate1()
 
     # move the negation out
+    # TODO
     if 'not' in self.is_enumerated:
-        out = AppliedSymbol.make(self.s, self.sub_exprs,
+        out = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs,
                                     is_enumerated='is enumerated')
         out = AUnary.make('¬', out)
     elif 'not' in self.is_enumeration:
-        out = AppliedSymbol.make(self.s, self.sub_exprs,
+        out = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs,
                                     is_enumeration='in',
                                     in_enumeration=self.in_enumeration)
         out = AUnary.make('¬', out)
@@ -495,8 +496,8 @@ AppliedSymbol.annotate = annotate
 
 def annotate1(self):
     out = Expression.annotate1(self)
-    if out.decl and out.decl.name == SYMBOL:  # a symbol variable
-        out.fresh_vars.add(self.s.name)
+    out.symbol = out.symbol.annotate1()
+    out.fresh_vars.update(out.symbol.fresh_vars)
     return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
 
@@ -509,9 +510,8 @@ def annotate(self, voc, q_vars):
     if self.name in q_vars:
         return q_vars[self.name]
     # elif self.name in voc.symbol_decls:  # in symbol_decls
-    #     out = AppliedSymbol(s=self.s,
-    #                         args=Arguments(sub_exprs=self.sub_exprs))
-    #     return out.annotate(voc, q_vars)
+    #     out = AppliedSymbol.make(self.s, self.sub_exprs)
+    #     # return out.annotate(voc, q_vars)
     # If this code is reached, an undefined symbol was present.
     self.check(False, f"Symbol not in vocabulary: {self}")
 UnappliedSymbol.annotate = annotate

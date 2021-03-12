@@ -391,6 +391,7 @@ class Symbol(Expression):
         self.sub_exprs = []
         self.decl = None
         super().__init__()
+        self.fresh_vars = set()
 
     def __str__(self): return self.name
 
@@ -687,9 +688,7 @@ class AppliedSymbol(Expression):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
-        self.eval = (kwargs.pop('eval') if 'eval' in kwargs
-                     else '')
-        self.s = kwargs.pop('s')
+        self.symbol = kwargs.pop('symbol')
         self.args = kwargs.pop('args')
         if 'is_enumerated' in kwargs:
             self.is_enumerated = kwargs.pop('is_enumerated')
@@ -712,7 +711,8 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        out = cls(s=symbol, args=Arguments(sub_exprs=args), **kwargs)
+        s = SymbolExpr(eval='', s=symbol)
+        out = cls(symbol=s, args=Arguments(sub_exprs=args), **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
@@ -720,9 +720,9 @@ class AppliedSymbol(Expression):
 
     def __str1__(self):
         if len(self.sub_exprs) == 0:
-            out = f"{str(self.s)}"
+            out = f"{self.symbol}"
         else:
-            out = f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
+            out = f"{self.symbol}({','.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return (f"{out}"
@@ -770,9 +770,24 @@ class AppliedSymbol(Expression):
         return self._reified
 
     def generate_constructors(self, constructors: dict):
-        if hasattr(self.s, 'name') and self.s.name in ['unit', 'category']:
+        symbol = self.symbol.sub_exprs[0]
+        if hasattr(symbol, 'name') and symbol.name in ['unit', 'category']:
             constructor = Constructor(name=self.sub_exprs[0].name)
-            constructors[self.s.name].append(constructor)
+            constructors[symbol.name].append(constructor)
+
+
+class SymbolExpr(Expression):
+    def __init__(self, **kwargs):
+        self.eval = (kwargs.pop('eval') if 'eval' in kwargs else
+                     '')
+        self.sub_exprs = [kwargs.pop('s')]
+        self.decl = None
+        super().__init__()
+
+    def __str__(self):
+        return (f"${self.sub_exprs[0]}" if self.eval else
+                f"{self.sub_exprs[0]}")
+
 
 class Arguments(object):
     def __init__(self, **kwargs):
