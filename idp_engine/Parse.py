@@ -38,14 +38,15 @@ from typing import Dict, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, IfExpr, AQuantification,
+from .Expression import (ASTNode, Constructor, Symbol, Sort,
+                         IfExpr, AQuantification,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Arguments,
                          Variable, TRUE, FALSE)
-from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
+from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
                     ARITY, IDPZ3Error)
 
 
@@ -382,35 +383,6 @@ class SymbolDeclaration(ASTNode):
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
 
-class Sort(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.name = (BOOL if self.name == '𝔹' else
-                     INT if self.name == 'ℤ' else
-                     REAL if self.name == 'ℝ' else
-                     self.name
-        )
-        self.code = intern(self.name)
-        self.decl = None
-
-    def __str__(self):
-        return ('𝔹' if self.name == BOOL else
-                'ℤ' if self.name == INT else
-                'ℝ' if self.name == REAL else
-                self.name
-        )
-
-    def translate(self):
-        return self.decl.translate()
-
-
-class Symbol(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = unquote(kwargs.pop('name'))
-
-    def __str__(self): return self.name
-
-
 Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
 
 
@@ -712,43 +684,47 @@ class Display(ASTNode):
     def run(self, idp):
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
+                self.check(type(constraint.s) == Symbol,
+                           f"Invalid syntax: {constraint}")
                 symbols = []
                 # All arguments should be symbols, except for the first
                 # argument of 'unit' and 'category'.
                 for i, symbol in enumerate(constraint.sub_exprs):
-                    if constraint.name in ['unit', 'category'] and i == 0:
+                    if constraint.s.name in ['unit', 'category'] and i == 0:
                         continue
                     self.check(symbol.name.startswith('`'),
-                        f"arg '{symbol.name}' of {constraint.name}'"
+                        f"arg '{symbol.name}' of {constraint.s.name}'"
                         f" must begin with a tick '`'")
                     self.check(symbol.name[1:] in self.voc.symbol_decls,
-                        f"argument '{symbol.name}' of '{constraint.name}'"
+                        f"argument '{symbol.name}' of '{constraint.s.name}'"
                         f" must be a symbol")
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if constraint.name == 'goal':  # e.g.,  goal(Prime)
+                if constraint.s.name == 'goal':  # e.g.,  goal(Prime)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
                         s.view = ViewType.EXPANDED  # the goal is always expanded
-                elif constraint.name == 'expand':  # e.g. expand(Length, Angle)
+                elif constraint.s.name == 'expand':  # e.g. expand(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
-                elif constraint.name == 'hide':  # e.g. hide(Length, Angle)
+                elif constraint.s.name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
-                elif constraint.name == 'relevant':  # e.g. relevant(Tax)
+                elif constraint.s.name == 'relevant':  # e.g. relevant(Tax)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
-                elif constraint.name == 'unit':  # e.g. unit('m', `length):
+                elif constraint.s.name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
-                elif constraint.name == 'category':
+                elif constraint.s.name == 'category':
                     # e.g. category('Shape', `type).
                     for symbol in symbols:
                         symbol.category = str(constraint.sub_exprs[0])
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
-                if constraint.sub_exprs[0].name == 'view':
+                self.check(type(constraint.sub_exprs[0].s) == Symbol,
+                           f"Invalid syntax: {constraint}")
+                if constraint.sub_exprs[0].s.name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
                             if type(s) == SymbolDeclaration and s.view == ViewType.NORMAL:
@@ -759,9 +735,9 @@ class Display(ASTNode):
                 else:
                     raise IDPZ3Error(f"unknown display constraint: {constraint}")
             elif type(constraint) == UnappliedSymbol:
-                if constraint.name == "moveSymbols":
+                if constraint.s.name == "moveSymbols":
                     self.moveSymbols = True
-                elif constraint.name == "optionalPropagation":
+                elif constraint.s.name == "optionalPropagation":
                     self.optionalPropagation = True
                 else:
                     raise IDPZ3Error(f"unknown display contraint:"

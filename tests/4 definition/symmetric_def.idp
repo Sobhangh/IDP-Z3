@@ -5,7 +5,7 @@ vocabulary {
 }
 theory {
     edge(a,b).
-    { !`p in Symbol: symmetric(`p) <- !x, y : `p(x,y) => `p(y,x). }
+    { !`p in Symbol: symmetric(`p) <- !x, y : $(`p)(x,y) => $(`p)(y,x). }
 	symmetric(`edge).
 }
 display {

@@ -161,6 +161,13 @@ def interpret(self, problem):
 SymbolInterpretation.interpret = interpret
 
 
+# class Symbol ###########################################################
+
+def instantiate(self, e0, e1, problem=None):
+    return self
+Symbol.instantiate = instantiate
+
+
 # class Expression  ###########################################################
 
 def interpret(self, problem) -> Expression:
@@ -227,8 +234,9 @@ def instantiate(self, e0, e1, problem=None):
         co_constraint = out.co_constraint.instantiate(e0, e1, problem)
     out._change(simpler=simpler, co_constraint=co_constraint)
 
-    if out.value is not None:  # replace by new value
-        out = out.value
+    rigid = out.as_rigid()
+    if rigid is not None:  # replace by new value
+        out = rigid
 
     if e0.name in out.fresh_vars:
         out.fresh_vars.discard(e0.name)
@@ -341,36 +349,38 @@ AAggregate.interpret = interpret
 # Class AppliedSymbol  ##############################################
 
 def interpret(self, problem):
+    self.s = self.s.interpret(problem)
     sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
     simpler, co_constraint = None, None
-    if self.is_enumerated:
-        assert self.decl.type != BOOL, \
-            f"Can't use 'is enumerated' with predicate {self.name}."
-        if self.name in problem.interpretations:
-            interpretation = problem.interpretations[self.name]
-            if interpretation.default is not None:
-                simpler = TRUE
-            else:
-                simpler = interpretation.enumeration.contains(sub_exprs, True)
-            if 'not' in self.is_enumerated:
+    if self.decl:
+        if self.is_enumerated:
+            assert self.decl.type != BOOL, \
+                f"Can't use 'is enumerated' with predicate {self.decl.name}."
+            if self.decl.name in problem.interpretations:
+                interpretation = problem.interpretations[self.decl.name]
+                if interpretation.default is not None:
+                    simpler = TRUE
+                else:
+                    simpler = interpretation.enumeration.contains(sub_exprs, True)
+                if 'not' in self.is_enumerated:
+                    simpler = AUnary.make('¬', simpler)
+                simpler.annotations = self.annotations
+        elif self.in_enumeration:
+            # re-create original Applied Symbol
+            core = AppliedSymbol.make(self.s, sub_exprs).copy()
+            simpler = self.in_enumeration.contains([core], False)
+            if 'not' in self.is_enumeration:
                 simpler = AUnary.make('¬', simpler)
             simpler.annotations = self.annotations
-    elif self.in_enumeration:
-        # re-create original Applied Symbol
-        core = AppliedSymbol.make(self.s, sub_exprs).copy()
-        simpler = self.in_enumeration.contains([core], False)
-        if 'not' in self.is_enumeration:
-            simpler = AUnary.make('¬', simpler)
-        simpler.annotations = self.annotations
-    elif (self.name in problem.interpretations
-          and any(s.name == SYMBOL for s in self.decl.sorts)
-          and all(a.as_rigid() is not None for a in sub_exprs)):
-        # apply enumeration of predicate over symbols to allow simplification
-        # do not do it otherwise, for performance reasons
-        simpler = (problem.interpretations[self.name].interpret_application) (
-                        problem, 0, self, sub_exprs)
-    if not self.in_head and self.decl in problem.clark and not self.fresh_vars:  # has a definition
-        co_constraint = problem.clark[self.decl].instantiate_definition(sub_exprs, problem)
+        elif (self.decl.name in problem.interpretations
+            and any(s.decl.name == SYMBOL for s in self.decl.sorts)
+            and all(a.as_rigid() is not None for a in sub_exprs)):
+            # apply enumeration of predicate over symbols to allow simplification
+            # do not do it otherwise, for performance reasons
+            simpler = (problem.interpretations[self.decl.name].interpret_application) (
+                            problem, 0, self, sub_exprs)
+        if not self.in_head and self.decl in problem.clark and not self.fresh_vars:  # has a definition
+            co_constraint = problem.clark[self.decl].instantiate_definition(sub_exprs, problem)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
     return out
 AppliedSymbol.interpret = interpret
@@ -404,24 +414,18 @@ AppliedSymbol .substitute = substitute
 def instantiate(self, e0, e1, problem=None):
     if self.value:
         return self
-    if self.name == e0.code:
-        assert self.decl.name == SYMBOL, "Internal error"
-        if isinstance(e1, Variable):  # replacing variable in a definition
-            out = copy.copy(self)
-            out.code = out.code.replace(e0.code, e1.code)
-            out.str = out.code.replace(e0.code, e1.code)
-            out.name = e1.code
-            out.s.name = e1.code
-            return out
-        else:
-            self.check(len(self.sub_exprs) == len(e1.symbol.decl.sorts),
-                        f"Incorrect arity for {e1.code}")
-            out = AppliedSymbol.make(e1.symbol, self.sub_exprs)
-            return out
     out = Expression.instantiate(self, e0, e1, problem)
-    if (problem and self.name in problem.interpretations
+    if self.eval:
+        out.s = out.s.instantiate(e0, e1, problem)
+        symbol = out.s.as_rigid()
+        if symbol:
+            assert type(symbol) == Constructor, "Internal error"
+            self.check(len(self.sub_exprs) == len(symbol.symbol.decl.sorts),
+                        f"Incorrect arity for {e1.code}")
+            out = AppliedSymbol.make(symbol.symbol, self.sub_exprs)
+    if (problem and out.decl and out.decl.name in problem.interpretations
         and all(a.as_rigid() is not None for a in out.sub_exprs)):
-        simpler = (problem.interpretations[self.name].interpret_application) (
+        simpler = (problem.interpretations[out.decl.name].interpret_application) (
                         problem, 0, self, out.sub_exprs)
         out = out._change(simpler=simpler)
     return out

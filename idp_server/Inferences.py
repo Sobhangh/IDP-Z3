@@ -73,7 +73,7 @@ def get_relevant_subtences(self):
     reachable = OrderedSet()
     for constraint in constraints:
         if type(constraint) == AppliedSymbol and \
-           constraint.name == '__relevant':
+           constraint.decl.name == '__relevant':
             for e in constraint.sub_exprs:
                 assert e.code in self.assignments, \
                     f"Invalid expression in relevant: {e.code}"

@@ -119,6 +119,8 @@ Sort.annotate = annotate
 # Class Symbol  #######################################################
 
 def annotate(self, voc, q_vars):
+    if self.name in q_vars:
+        return q_vars[self.name]
     self.decl = voc.symbol_decls[self.name]
     self.type = self.decl.type
     return self
@@ -470,15 +472,12 @@ AAggregate.annotate = annotate
 # Class AppliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars):
+    self.s = self.s.annotate(voc, q_vars)
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    try:
-        self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
-            else voc.symbol_decls[self.s.name]
-    except KeyError:
-        self.check(False, f"Unknown symbol {self}")
-    self.s.decl = self.decl
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)
+    self = self.annotate1()
+
     # move the negation out
     if 'not' in self.is_enumerated:
         out = AppliedSymbol.make(self.s, self.sub_exprs,
@@ -490,19 +489,15 @@ def annotate(self, voc, q_vars):
                                     in_enumeration=self.in_enumeration)
         out = AUnary.make('¬', out)
     else:
-        out = self.annotate1()
+        out = self
     return out
 AppliedSymbol.annotate = annotate
 
 def annotate1(self):
-    self.type = (BOOL if self.is_enumerated or self.in_enumeration else
-                    self.decl.type if self.decl else None)
     out = Expression.annotate1(self)
     if out.decl and out.decl.name == SYMBOL:  # a symbol variable
         out.fresh_vars.add(self.s.name)
-    if self.s.name in [ARITY]:
-        return out.simplify1()
-    return out
+    return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
 
 

@@ -9,13 +9,13 @@ Traceback (most recent call last):
     _end_model_construction(m)
   File "/home/pcarbonn/.cache/pypoetry/virtualenvs/idp-engine-jObFWZdg-py3.8/lib/python3.8/site-packages/textx/model.py", line 928, in _end_model_construction
     obj.__init__(**attrs)
-  File "IDP-Z3/idp_engine/Parse.py", line 91, in __init__
+  File "IDP-Z3/idp_engine/Parse.py", line 92, in __init__
     t.annotate(self)
-  File "IDP-Z3/idp_engine/Annotate.py", line 153, in annotate
+  File "IDP-Z3/idp_engine/Annotate.py", line 155, in annotate
     self.constraints = OrderedSet([e.interpret(self)
-  File "IDP-Z3/idp_engine/Annotate.py", line 153, in <listcomp>
+  File "IDP-Z3/idp_engine/Annotate.py", line 155, in <listcomp>
     self.constraints = OrderedSet([e.interpret(self)
-  File "IDP-Z3/idp_engine/Interpret.py", line 347, in interpret
+  File "IDP-Z3/idp_engine/Interpret.py", line 357, in interpret
     assert self.decl.type != BOOL, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

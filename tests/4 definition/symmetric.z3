@@ -8,7 +8,7 @@ vocabulary {
 }
 theory {
     edge(a,b).
-    !`p in Symbol: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
+    !`p in Symbol: symmetric(`p) => (!x, y : $(`p)(x,y) => $(`p)(y,x)).
 	symmetric := {`edge}
 }
 display {
@@ -135,15 +135,16 @@ display {
                         'relevant': True,
                         'status': 'UNKNOWN',
                         'typ': 'Bool'},
-          '∀`p[Symbol] : symmetric(`p) ⇒ (∀x[None]y[None] : `p(x,y) ⇒ `p(y,x))': {'environmental': False,
-                                                                                  'is_assignment': False,
-                                                                                  'normal': False,
-                                                                                  'reading': '∀`p[Symbol] : '
-                                                                                             'symmetric(`p) ⇒ '
-                                                                                             '(∀x[None]y[None] : '
-                                                                                             '`p(x,y) ⇒ `p(y,x))',
-                                                                                  'relevant': True,
-                                                                                  'status': 'UNIVERSAL',
-                                                                                  'typ': 'Bool',
-                                                                                  'value': True}},
+          '∀`p[Symbol] : symmetric(`p) ⇒ (∀x[None]y[None] : (`p)(x,y) ⇒ (`p)(y,x))': {'environmental': False,
+                                                                                      'is_assignment': False,
+                                                                                      'normal': False,
+                                                                                      'reading': '∀`p[Symbol] : '
+                                                                                                 'symmetric(`p) ⇒ '
+                                                                                                 '(∀x[None]y[None] : '
+                                                                                                 '(`p)(x,y) ⇒ '
+                                                                                                 '(`p)(y,x))',
+                                                                                      'relevant': True,
+                                                                                      'status': 'UNIVERSAL',
+                                                                                      'typ': 'Bool',
+                                                                                      'value': True}},
  'symmetric': {}}

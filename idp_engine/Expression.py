@@ -31,11 +31,11 @@ __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuanti
 import copy
 from collections import ChainMap
 from datetime import date
-import sys
+from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from .utils import unquote, OrderedSet, BOOL, SYMBOL, ARITY, IDPZ3Error
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, ARITY, IDPZ3Error
 
 
 class ASTNode(object):
@@ -159,7 +159,7 @@ class Expression(ASTNode):
         self.simpler: Optional["Expression"] = None
         self.value: Optional["Expression"] = None
 
-        self.code: str = sys.intern(str(self))
+        self.code: str = intern(str(self))
         self.annotations: Dict[str, str] = {'reading': self.code}
         self.original: Expression = self
 
@@ -383,6 +383,40 @@ class Constructor(Expression):
 
 TRUE = Constructor(name='true')
 FALSE = Constructor(name='false')
+
+
+class Symbol(Expression):
+    def __init__(self, **kwargs):
+        self.name = unquote(kwargs.pop('name'))
+        self.sub_exprs = []
+        self.decl = None
+        super().__init__()
+
+    def __str__(self): return self.name
+
+    def as_rigid(self): return self
+
+
+class Sort(ASTNode):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.name = (BOOL if self.name == '𝔹' else
+                     INT if self.name == 'ℤ' else
+                     REAL if self.name == 'ℝ' else
+                     self.name
+        )
+        self.code = intern(self.name)
+        self.decl = None
+
+    def __str__(self):
+        return ('𝔹' if self.name == BOOL else
+                'ℤ' if self.name == INT else
+                'ℝ' if self.name == REAL else
+                self.name
+        )
+
+    def translate(self):
+        return self.decl.translate()
 
 
 class IfExpr(Expression):
@@ -631,9 +665,30 @@ class AAggregate(Expression):
 
 
 class AppliedSymbol(Expression):
+    """Represents a symbol applied to arguments
+
+    Args:
+        eval (string): '$' if the symbol must be evaluated, else ''
+
+        s (Expression): the symbol to be applied to arguments
+
+        args ([Expression]): the list of arguments
+
+        is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
+
+        is_enumeration (string): '' or 'in' or 'not in'
+
+        in_enumeration (Enumeration): the enumeration following 'in'
+
+        decl (Declaration): the declaration of the symbol, if known
+
+        in_head (Bool): True if the AppliedSymbol occurs in the head of a rule
+    """
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
+        self.eval = (kwargs.pop('eval') if 'eval' in kwargs
+                     else '')
         self.s = kwargs.pop('s')
         self.args = kwargs.pop('args')
         if 'is_enumerated' in kwargs:
@@ -653,7 +708,6 @@ class AppliedSymbol(Expression):
         super().__init__()
 
         self.decl = None
-        self.name = self.s.name
         self.in_head = False
 
     @classmethod
@@ -676,7 +730,7 @@ class AppliedSymbol(Expression):
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.name != SYMBOL and self.name not in ['__relevant', ARITY]:
+        if self.decl and self.decl.name not in ['__relevant', ARITY]:
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
@@ -692,7 +746,7 @@ class AppliedSymbol(Expression):
         try:
             out = {}
             for i, e in enumerate(self.sub_exprs):
-                if self.decl.name != SYMBOL and isinstance(e, Variable):
+                if self.decl and isinstance(e, Variable):
                     out[e.name] = self.decl.sorts[i]
                 else:
                     out.update(e.type_inference())
@@ -716,9 +770,9 @@ class AppliedSymbol(Expression):
         return self._reified
 
     def generate_constructors(self, constructors: dict):
-        if self.name == 'unit' or self.name == 'category':
+        if hasattr(self.s, 'name') and self.s.name in ['unit', 'category']:
             constructor = Constructor(name=self.sub_exprs[0].name)
-            constructors[self.name].append(constructor)
+            constructors[self.s.name].append(constructor)
 
 class Arguments(object):
     def __init__(self, **kwargs):

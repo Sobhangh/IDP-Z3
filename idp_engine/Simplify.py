@@ -33,9 +33,9 @@ from .Expression import (
     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
     AUnary, AAggregate, AppliedSymbol, UnappliedSymbol, \
     Number, Date, Brackets, Variable, TRUE, FALSE)
-from .Parse import Enumeration, Tuple
+from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status, Assignment
-from .utils import INT, SYMBOL, ARITY
+from .utils import BOOL, INT, SYMBOL, ARITY
 
 
 # class Expression  ###########################################################
@@ -332,7 +332,14 @@ AAggregate.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     new_exprs = list(new_exprs)
-    if self.name in [ARITY]:
+    if not self.decl:
+        symbol = self.s.as_rigid()
+        if symbol:
+            assert type(symbol) == Symbol, "Internal error"
+            self.decl = symbol.decl
+            self.type = (BOOL if self.is_enumerated or self.in_enumeration else
+                    self.decl.type if self.decl else None)
+    elif self.decl.name in [ARITY]:
         self.check(len(new_exprs) == 1,
                    f"Incorrect number of arguments for 'arity': {len(new_exprs)}")
         self.check(new_exprs[0].type == SYMBOL,
