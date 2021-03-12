@@ -479,16 +479,12 @@ def annotate(self, voc, q_vars):
     self = self.annotate1()
 
     # move the negation out
-    # TODO
     if 'not' in self.is_enumerated:
-        out = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs,
-                                    is_enumerated='is enumerated')
-        out = AUnary.make('¬', out)
+        self.is_enumerated = 'is enumerated'
+        out = AUnary.make('¬', self)
     elif 'not' in self.is_enumeration:
-        out = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs,
-                                    is_enumeration='in',
-                                    in_enumeration=self.in_enumeration)
-        out = AUnary.make('¬', out)
+        self.is_enumeration = 'in'
+        out = AUnary.make('¬', self)
     else:
         out = self
     return out

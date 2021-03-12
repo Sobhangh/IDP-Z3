@@ -4,7 +4,7 @@
 - [x] implement `arity`
 - [x] create extension predicate for each type, and add them to Symbol
 - [x] implement `$`(=val) function
-- [ ] implement `$x() is enumerated`
+- [x] implement `$x() is enumerated`
 - [x] new AST node: SymbolExpr
 - [ ] merge class SymbolExpr and Sort
 - [ ] substitue in `$x()` too
