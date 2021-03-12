@@ -46,11 +46,12 @@ from .Expression import (ASTNode, Constructor, Symbol, Sort, SymbolExpr,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Arguments,
                          Variable, TRUE, FALSE)
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    ARITY, IDPZ3Error)
+from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, SYMBOL,
+                    RELEVANT, ARITY, OUTPUT_DOMAIN, IDPZ3Error)
 
 
 def str_to_IDP(atom, val_string):
+    assert atom.type, "Internal error"
     if atom.type == BOOL:
         if val_string not in ['True', 'False']:
             raise IDPZ3Error(
@@ -171,10 +172,12 @@ class Vocabulary(ASTNode):
                               for s in self.declarations
                               if type(s) == SymbolDeclaration
                               or type(s) in Type.__args__]),
-            SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
+            SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
                                 sorts=[], out=Sort(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Sort(name=SYMBOL)], out=Sort(name=INT))
+                                sorts=[Sort(name=SYMBOL)], out=Sort(name=INT)),
+            SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
+                                sorts=[Sort(name=SYMBOL)], out=Sort(name=SYMBOL))
             ] + self.declarations
 
     def __str__(self):

@@ -8,7 +8,7 @@ theory {
   ~p()|q().
   { important(`p). }
 
-  { !`x in Symbol: important(`x) <- `x(). }
+  { !`x in Symbol: important(`x) <- $(`x)(). }
   arity(`important) = 1.
 }
 display {

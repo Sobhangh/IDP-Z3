@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification,
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE)
+                         FALSE, SymbolExpr)
 
 from .utils import BOOL, INT, REAL, SYMBOL, OrderedSet, IDPZ3Error
 
@@ -493,6 +493,10 @@ AppliedSymbol.annotate = annotate
 def annotate1(self):
     out = Expression.annotate1(self)
     out.symbol = out.symbol.annotate1()
+    if not out.decl and not out.symbol.eval:
+        out.decl = out.symbol.sub_exprs[0].decl
+    out.type = (BOOL if out.is_enumerated or out.in_enumeration else
+                out.decl.type if out.decl else None)
     out.fresh_vars.update(out.symbol.fresh_vars)
     return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
@@ -509,7 +513,7 @@ def annotate(self, voc, q_vars):
         return q_vars[self.name]
     # elif self.name in voc.symbol_decls:  # in symbol_decls
     #     out = AppliedSymbol.make(self.s, self.sub_exprs)
-    #     # return out.annotate(voc, q_vars)
+    #     return out.annotate(voc, q_vars)
     # If this code is reached, an undefined symbol was present.
     self.check(False, f"Symbol not in vocabulary: {self}")
 UnappliedSymbol.annotate = annotate

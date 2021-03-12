@@ -6,6 +6,7 @@ type Date = {}
 type Symbol := {`p}
 __relevant
 arity(Symbol) : Int
+output_domain(Symbol) : Symbol
 p
 }
 

@@ -47,7 +47,7 @@ from .Expression import (Constructor, SymbolExpr, Expression, IfExpr, AQuantific
                     ADisjunction, AConjunction,  AEquivalence, AAggregate,
                     AComparison, AUnary, AppliedSymbol, Number,
                     Arguments, Variable, TRUE)
-from .utils import BOOL, SYMBOL
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL
 
 
 # class Extern  ###########################################################
@@ -78,16 +78,17 @@ def interpret(self, problem):
     self.range = self.out.decl.range
 
     # create instances
-    self.instances = {}
-    for arg in self.domain:
-        expr = AppliedSymbol.make(Symbol(name=self.name), arg)
-        expr.annotate(self.voc, {})
-        self.instances[expr.code] = expr
-        if not expr.code.startswith('_'):
-            problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
+    if self.name not in RESERVED_SYMBOLS:
+        self.instances = {}
+        for arg in self.domain:
+            expr = AppliedSymbol.make(Symbol(name=self.name), arg)
+            expr.annotate(self.voc, {})
+            self.instances[expr.code] = expr
+            if not expr.code.startswith('_'):
+                problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
 
     # add type constraints to problem.constraints
-    if self.out.decl.name != BOOL:
+    if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
         for inst in self.instances.values():
             domain = self.out.decl.check_bounds(inst.copy())
             if domain is not None:
