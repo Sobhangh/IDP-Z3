@@ -139,7 +139,7 @@ def interpret(self, problem):
     if self.is_type_enumeration:
         symbol = self.symbol
         symbol.decl.domain = [t.args[0]
-            for t in self.enumeration.tuples.values()]
+                              for t in self.enumeration.tuples.values()]
         symbol.decl.range = symbol.decl.domain
     else: # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
@@ -160,13 +160,6 @@ def interpret(self, problem):
                                                 False)
 
 SymbolInterpretation.interpret = interpret
-
-
-# class Symbol ###########################################################
-
-def instantiate(self, e0, e1, problem=None):
-    return self
-Symbol.instantiate = instantiate
 
 
 # class Expression  ###########################################################
@@ -255,6 +248,13 @@ Expression.instantiate = instantiate
 def instantiate(self, e0, e1, problem=None):
     return self
 Constructor.instantiate = instantiate
+
+
+# class Symbol ###########################################################
+
+def instantiate(self, e0, e1, problem=None):
+    return self
+Symbol.instantiate = instantiate
 
 
 # Class AQuantification  ######################################################
