@@ -235,9 +235,8 @@ def instantiate(self, e0, e1, problem=None):
         co_constraint = out.co_constraint.instantiate(e0, e1, problem)
     out._change(simpler=simpler, co_constraint=co_constraint)
 
-    rigid = out.as_rigid()
-    if rigid is not None:  # replace by new value
-        out = rigid
+    if out.value is not None:  # replace by new value
+        out = out.value
 
     if e0.name in out.fresh_vars:
         out.fresh_vars.discard(e0.name)
