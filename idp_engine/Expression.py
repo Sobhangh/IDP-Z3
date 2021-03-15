@@ -301,7 +301,7 @@ class Expression(ASTNode):
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-        # returns a dictionary {Variable : Sort}
+        # returns a dictionary {Variable : Symbol}
         try:
             return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
         except AttributeError as e:
@@ -389,26 +389,15 @@ FALSE = Constructor(name='false')
 class Symbol(Expression):
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
-        self.sub_exprs = []
-        self.decl = None
-        super().__init__()
-        self.fresh_vars = set()
-
-    def __str__(self): return self.name
-
-    def as_rigid(self): return self
-
-
-class Sort(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
         self.name = (BOOL if self.name == '𝔹' else
                      INT if self.name == 'ℤ' else
                      REAL if self.name == 'ℝ' else
                      self.name
         )
-        self.code = intern(self.name)
+        self.sub_exprs = []
         self.decl = None
+        super().__init__()
+        self.fresh_vars = set()
 
     def __str__(self):
         return ('𝔹' if self.name == BOOL else
@@ -416,6 +405,8 @@ class Sort(ASTNode):
                 'ℝ' if self.name == REAL else
                 self.name
         )
+
+    def as_rigid(self): return self
 
     def translate(self):
         return self.decl.translate()

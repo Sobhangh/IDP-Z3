@@ -6,7 +6,7 @@
 - [x] implement `$`(=val) function
 - [x] implement `$x() is enumerated`
 - [x] new AST node: SymbolExpr
-- [ ] merge class SymbolExpr and Sort
+- [x] merge class Symbol and Sort
 - [ ] substitue in `$x()` too
 - [x] better error message for `constant` without parentheses
 - [ ] implement `input_domain`, `output_domain`

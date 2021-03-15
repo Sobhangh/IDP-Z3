@@ -23,7 +23,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 from copy import copy
 
 from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
-                    RangeDeclaration, SymbolDeclaration, Sort, Symbol,
+                    RangeDeclaration, SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, Display)
@@ -68,8 +68,8 @@ def annotate(self, voc):
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
     for s in self.sorts:
-        s.annotate(voc)
-    self.out.annotate(voc)
+        s.annotate(voc, {})
+    self.out.annotate(voc, {})
     for c in self.domain:
         c.type = self.name
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
@@ -88,8 +88,8 @@ def annotate(self, voc):
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
     for s in self.sorts:
-        s.annotate(voc)
-    self.out.annotate(voc)
+        s.annotate(voc, {})
+    self.out.annotate(voc, {})
 RangeDeclaration.annotate = annotate
 
 
@@ -102,18 +102,11 @@ def annotate(self, voc):
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
     for s in self.sorts:
-        s.annotate(voc)
-    self.out.annotate(voc)
+        s.annotate(voc, {})
+    self.out.annotate(voc, {})
     self.type = self.out.decl.name
     return self
 SymbolDeclaration.annotate = annotate
-
-
-# Class Sort  #######################################################
-
-def annotate(self, voc):
-    self.decl = voc.symbol_decls[self.name]
-Sort.annotate = annotate
 
 
 # Class Symbol  #######################################################
@@ -193,7 +186,7 @@ def annotate(self, voc, q_vars):
     self.check(len(self.vars) == len(self.sorts), "Internal error")
     for v, s in zip(self.vars, self.sorts):
         if s:
-            s.annotate(voc)
+            s.annotate(voc, {})
         self.q_vars[v] = Variable(v,s)
     q_v = {**q_vars, **self.q_vars}  # merge
 
@@ -316,16 +309,16 @@ def annotate(self, idp):
         open_type = ConstructedTypeDeclaration(name=type_name,
                                                 constructors=constructors)
         open_type.annotate(self.voc)
-        open_types[name] = Sort(name=type_name)
+        open_types[name] = Symbol(name=type_name)
 
     for name, out in [
-        ('goal', Sort(name=BOOL)),
-        ('expand', Sort(name=BOOL)),
-        ('relevant', Sort(name=BOOL)),
-        ('hide', Sort(name=BOOL)),
-        ('view', Sort(name='View')),
-        ('moveSymbols', Sort(name=BOOL)),
-        ('optionalPropagation', Sort(name=BOOL)),
+        ('goal', Symbol(name=BOOL)),
+        ('expand', Symbol(name=BOOL)),
+        ('relevant', Symbol(name=BOOL)),
+        ('hide', Symbol(name=BOOL)),
+        ('view', Symbol(name='View')),
+        ('moveSymbols', Symbol(name=BOOL)),
+        ('optionalPropagation', Symbol(name=BOOL)),
         ('unit', open_types['unit']),
         ('category', open_types['category'])
     ]:
@@ -384,7 +377,7 @@ def annotate(self, voc, q_vars):
     self.q_vars = {}
     for v, s in zip(self.vars, self.sorts):
         if s:
-            s.annotate(voc)
+            s.annotate(voc, {})
         self.q_vars[v] = Variable(v, s)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
@@ -457,7 +450,7 @@ def annotate(self, voc, q_vars):
     self.q_vars = {}
     for v, s in zip(self.vars, self.sorts):
         if s:
-            s.annotate(voc)
+            s.annotate(voc, {})
         self.q_vars[v] = Variable(v, s)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]

@@ -22,7 +22,7 @@ Classes to parse an IDP-Z3 theory.
 """
 __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
-           "SymbolDeclaration", "Sort", "Symbol", "Theory", "Definition",
+           "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", "idpparser", ]
 
@@ -38,7 +38,7 @@ from typing import Dict, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, Symbol, Sort, SymbolExpr,
+from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
                          IfExpr, AQuantification,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
@@ -173,11 +173,11 @@ class Vocabulary(ASTNode):
                               if type(s) == SymbolDeclaration
                               or type(s) in Type.__args__]),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                                sorts=[], out=Sort(name=BOOL)),
+                                sorts=[], out=Symbol(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Sort(name=SYMBOL)], out=Sort(name=INT)),
+                                sorts=[Symbol(name=SYMBOL)], out=Symbol(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Sort(name=SYMBOL)], out=Sort(name=SYMBOL))
+                                sorts=[Symbol(name=SYMBOL)], out=Symbol(name=SYMBOL))
             ] + self.declarations
 
     def __str__(self):
@@ -221,9 +221,9 @@ class ConstructedTypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Sort]): the types of the arguments
+        sorts (List[Symbol]): the types of the arguments
 
-        out (Sort): Boolean Sort
+        out (Symbol): Boolean Symbol
 
         type (string): Z3 type of an element of the type; same as `name`
 
@@ -244,8 +244,8 @@ class ConstructedTypeDeclaration(ASTNode):
                             kwargs.pop('enumeration'))
 
         self.arity = 1
-        self.sorts = [Sort(name=self.name)]
-        self.out = Sort(name=BOOL)
+        self.sorts = [Symbol(name=self.name)]
+        self.out = Symbol(name=BOOL)
         self.type = self.name
 
         self.translated = None
@@ -275,8 +275,8 @@ class RangeDeclaration(ASTNode):
         self.arity = 1
         self.translated = None
         self.domain = None  # not used
-        self.sorts = [Sort(name=self.name)]
-        self.out = Sort(name=BOOL)
+        self.sorts = [Symbol(name=self.name)]
+        self.out = Symbol(name=BOOL)
 
         self.type = REAL if self.name == REAL else INT
         self.range = []
@@ -331,9 +331,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Sort]): the types of the arguments
+        sorts (List[Symbol]): the types of the arguments
 
-        out (Sort): the type of the symbol
+        out (Symbol): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
 
@@ -363,7 +363,7 @@ class SymbolDeclaration(ASTNode):
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
-            self.out = Sort(name=BOOL)
+            self.out = Symbol(name=BOOL)
 
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
@@ -821,7 +821,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Vocabulary, Extern,
                                          ConstructedTypeDeclaration,
                                          RangeDeclaration,
-                                         SymbolDeclaration, Symbol, Sort,
+                                         SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
                                          Theory, Definition, Rule, IfExpr,
