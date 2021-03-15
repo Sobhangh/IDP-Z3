@@ -703,8 +703,9 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        s = SymbolExpr(eval='', s=symbol)
-        out = cls(symbol=s, args=Arguments(sub_exprs=args), **kwargs)
+        if type(symbol) != SymbolExpr:
+            symbol = SymbolExpr(eval='', s=symbol)
+        out = cls(symbol=symbol, args=Arguments(sub_exprs=args), **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
