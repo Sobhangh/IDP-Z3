@@ -47,7 +47,7 @@ from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
                          Number, Brackets, Date, Arguments,
                          Variable, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, SYMBOL,
-                    RELEVANT, ARITY, OUTPUT_DOMAIN, IDPZ3Error)
+                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
 
 
 def str_to_IDP(atom, val_string):
@@ -177,9 +177,14 @@ class Vocabulary(ASTNode):
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
                                 sorts=[], out=Symbol(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Symbol(name=SYMBOL)], out=Symbol(name=INT)),
+                                sorts=[Symbol(name=SYMBOL)],
+                                out=Symbol(name=INT)),
+            SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
+                                sorts=[Symbol(name=SYMBOL), Symbol(name=INT)],
+                                out=Symbol(name=SYMBOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Symbol(name=SYMBOL)], out=Symbol(name=SYMBOL))
+                                sorts=[Symbol(name=SYMBOL)],
+                                out=Symbol(name=SYMBOL))
             ] + self.declarations
 
     def __str__(self):

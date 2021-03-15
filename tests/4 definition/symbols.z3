@@ -14,6 +14,8 @@ theory {
   arity(`important) = 1.
   output_domain(`opposite) = `color.
   output_domain(`opposite) ~= `Date.
+  input_domain(`opposite, 1) = `color.
+  input_domain(`opposite, 1) ~= `Date.
 }
 display {
   relevant(`p).

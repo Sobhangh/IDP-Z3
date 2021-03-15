@@ -346,6 +346,19 @@ def update_exprs(self, new_exprs):
         if isinstance(new_exprs[0], Constructor):
             value = Number(number=str(new_exprs[0].symbol.decl.arity))
             return self._change(value=value, sub_exprs=new_exprs)
+    elif self.decl.name == INPUT_DOMAIN:
+        self.check(len(new_exprs) == 2,
+                   f"Incorrect number of arguments for '{INPUT_DOMAIN}': {len(new_exprs)}")
+        self.check(new_exprs[0].type == SYMBOL,
+                   f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
+        self.check(new_exprs[1].type == INT,
+                   f"Second argument of '{INPUT_DOMAIN}' must be a Int: {new_exprs[1]}")
+        if (isinstance(new_exprs[0], Constructor)
+            and isinstance(new_exprs[1], Number)):
+            # find the Symbol for the input domain
+            symbol_string = f"`{new_exprs[0].symbol.decl.sorts[new_exprs[1].py_value - 1]}"
+            value = self.decl.out.decl.map[symbol_string]
+            return self._change(value=value, sub_exprs=new_exprs)
     elif self.decl.name == OUTPUT_DOMAIN:
         self.check(len(new_exprs) == 1,
                    f"Incorrect number of arguments for '{OUTPUT_DOMAIN}': {len(new_exprs)}")
