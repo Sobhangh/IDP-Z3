@@ -489,10 +489,6 @@ AppliedSymbol.annotate = annotate
 def annotate1(self):
     out = Expression.annotate1(self)
     out.symbol = out.symbol.annotate1()
-    if not out.decl and not out.symbol.eval:
-        out.decl = out.symbol.sub_exprs[0].decl
-    out.type = (BOOL if out.is_enumerated or out.in_enumeration else
-                out.decl.type if out.decl else None)
     out.fresh_vars.update(out.symbol.fresh_vars)
     return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
