@@ -3,7 +3,7 @@ type Bool := {true,false}
 type Int = {}
 type Real = {}
 type Date = {}
-type Symbol := {`p}
+type Symbol := {`Date,`p}
 __relevant
 arity(Symbol) : Int
 output_domain(Symbol) : Symbol

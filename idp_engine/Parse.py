@@ -168,10 +168,12 @@ class Vocabulary(ASTNode):
             RangeDeclaration(name=DATE, elements=[]),
             ConstructedTypeDeclaration(
                 name=SYMBOL,
-                constructors=[Constructor(name=f"`{s.name}")
-                              for s in self.declarations
-                              if type(s) == SymbolDeclaration
-                              or type(s) in Type.__args__]),
+                constructors=([Constructor(name=f"`{s}")
+                               for s in [DATE,]]  # TODO '𝔹', 'ℤ', 'ℝ',
+                             +[Constructor(name=f"`{s.name}")
+                                for s in self.declarations
+                                if type(s) == SymbolDeclaration
+                                or type(s) in Type.__args__])),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
                                 sorts=[], out=Symbol(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),

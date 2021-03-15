@@ -10,5 +10,6 @@
 - [ ] substitue in `$x()` too
 - [x] better error message for `constant` without parentheses
 - [ ] implement `input_domain`, `output_domain`
+- [ ] support for '𝔹', 'ℤ', 'ℝ' symbols (e.g. in output domain)
 - [ ] implement equality of intensional symbols
 - [ ] verify that defined symbols propagate (symmetric example)

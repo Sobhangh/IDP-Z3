@@ -1,6 +1,8 @@
 vocabulary {
+    type color := {red, blue, green}
     p, q: () → Bool
     important: (Symbol) → Bool
+    opposite: color → color
 }
 theory {
   ~p()|q().
@@ -8,6 +10,8 @@ theory {
 
   { !`x in Symbol: important(`x) <- $(`x)(). }
   arity(`important) = 1.
+  output_domain(`opposite) = `color.
+  output_domain(`opposite) ~= `Date.
 }
 display {
   relevant(`p).
