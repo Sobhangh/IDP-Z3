@@ -470,7 +470,6 @@ def annotate(self, voc, q_vars):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)
-    self = self.annotate1()
 
     # move the negation out
     if 'not' in self.is_enumerated:
