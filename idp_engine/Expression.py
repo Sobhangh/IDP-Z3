@@ -778,7 +778,7 @@ class SymbolExpr(Expression):
         super().__init__()
 
     def __str__(self):
-        return (f"${self.sub_exprs[0]}" if self.eval else
+        return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
 
 

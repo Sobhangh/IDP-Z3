@@ -10,8 +10,9 @@ theory {
   ~p()|q().
   { important(`p). }
 
-  { !`x in Symbol: important(`x) <- $(`x)(). }
+  { !x in Symbol: important(x) <- $(x)(). }
   arity(`important) = 1.
+  !x in Symbol: arity(x)<2.
   output_domain(`opposite) = `color.
   output_domain(`opposite) ~= `Date.
   input_domain(`opposite, 1) = `color.

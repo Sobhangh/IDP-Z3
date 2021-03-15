@@ -415,17 +415,18 @@ def instantiate(self, e0, e1, problem=None):
     if self.value:
         return self
     out = Expression.instantiate(self, e0, e1, problem)
-    if out.symbol.as_rigid() is None:
-        out.symbol = out.symbol.instantiate(e0, e1, problem)
-        if type(out.symbol) == Symbol:
-            self.check(len(self.sub_exprs) == len(out.symbol.decl.sorts),
-                        f"Incorrect arity for {e1.code}")
-            out = AppliedSymbol.make(out.symbol, self.sub_exprs)
-    if (problem and out.decl and out.decl.name in problem.interpretations
-        and all(a.as_rigid() is not None for a in out.sub_exprs)):
-        simpler = (problem.interpretations[out.decl.name].interpret_application) (
-                        problem, 0, self, out.sub_exprs)
-        out = out._change(simpler=simpler)
+    if type(out) == AppliedSymbol:  # might be a number after instantiation
+        if out.symbol.eval and out.symbol.as_rigid() is None:  # $(x)()
+            out.symbol = out.symbol.instantiate(e0, e1, problem)
+            if type(out.symbol) == Symbol:  # found $(x)
+                self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
+                            f"Incorrect arity for {e1.code}")
+                out = AppliedSymbol.make(out.symbol, out.sub_exprs)
+        if (problem and out.decl and out.decl.name in problem.interpretations
+            and all(a.as_rigid() is not None for a in out.sub_exprs)):
+            f = problem.interpretations[out.decl.name].interpret_application
+            simpler = f(problem, 0, self, out.sub_exprs)  # do not use out, to avoid infinite loop
+            out = out._change(simpler=simpler)
     return out
 AppliedSymbol .instantiate = instantiate
 
@@ -434,11 +435,11 @@ AppliedSymbol .instantiate = instantiate
 
 def instantiate(self, e0, e1, problem=None):
     out = Expression.instantiate(self, e0, e1, problem)
-    if out.eval:
-        symbol = out.sub_exprs[0].as_rigid()
-        if symbol:
-            assert type(symbol) == Constructor, "Internal error"
-            return symbol.symbol
+    if out.eval:  # $(x)
+        constructor = out.sub_exprs[0].as_rigid()
+        if constructor:
+            assert type(constructor) == Constructor, "Internal error"
+            return constructor.symbol  # if x is `p, return $(x), i.e., p
     return out
 SymbolExpr.instantiate = instantiate
 

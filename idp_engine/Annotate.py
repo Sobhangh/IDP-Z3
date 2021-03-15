@@ -49,7 +49,7 @@ def annotate(self, idp):
     for constructor in self.symbol_decls[SYMBOL].domain:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
-    self.symbol_decls[SYMBOL].translate()
+    self.symbol_decls[SYMBOL].translate()  # to populate .map
 Vocabulary.annotate = annotate
 
 

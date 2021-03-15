@@ -86,7 +86,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
       AppliedSymbol: symbol=SymbolExpr args=Arguments
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | is_enumeration=/(not\s+)?in/ in_enumeration=Enumeration)?;
-        SymbolExpr: s=Symbol | eval='$' s=Base;
+        SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
         Arguments: '(' sub_exprs*=Expression[','] ')';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
