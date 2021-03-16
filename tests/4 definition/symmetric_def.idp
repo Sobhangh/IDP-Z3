@@ -1,11 +1,14 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
+	symmetric_symbol: Symbol -> Bool
 	symmetric: (Symbol) → Bool
 }
 theory {
     edge(a,b).
-    { !`p in Symbol: symmetric(`p) <- !x, y : $(`p)(x,y) => $(`p)(y,x). }
+	{! s in Symbol: symmetric_symbol(s) ← arity(s)=2 ∧ input_domain(s,1) = input_domain(s,2). }
+
+    { !`p in Symbol: symmetric(`p) <- symmetric_symbol(`p) & (!x, y : $(`p)(x,y) => $(`p)(y,x)). }
 	symmetric(`edge).
 }
 display {

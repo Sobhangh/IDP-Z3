@@ -452,7 +452,7 @@ class Rule(ASTNode):
         self.args = kwargs.pop('args')  # later augmented with self.out, if any
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
-        self.expanded = None  # Expression
+        self.whole_domain = None  # Expression or False
         self.block = None  # theory where it occurs
 
         self.vars, self.sorts = [], []

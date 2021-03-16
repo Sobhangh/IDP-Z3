@@ -104,17 +104,19 @@ SymbolDeclaration.interpret = interpret
 def interpret(self, theory):
     """ expand quantifiers and interpret """
 
-    # compute self.expanded, by expanding:
+    # compute self.whole_domain, by expanding:
     # ∀ v: f(v)=out <=> body
     # (after joining the rules of the same symbols)
-    if any(s.name ==SYMBOL for s in self.sorts):
+    if (not self.symbol.decl.domain
+        or any(s.name ==SYMBOL for s in self.sorts)):
+        # don't expand infinite domains
         # don't expand macros, to avoid arity and type errors
         # will be done later with optimized binary quantification
-        self.expanded = TRUE
+        self.whole_domain = False
     # elif self.symbol.decl.domain:  # only if definition is constructive !
     #     out = [self.instantiate_definition(args, theory)
     #            for args in self.symbol.decl.domain]
-    #     self.expanded = AConjunction.make('∧', out)
+    #     self.whole_domain = AConjunction.make('∧', out)
     else:
         if self.out:
             expr = AppliedSymbol.make(self.symbol, self.args[:-1])
@@ -125,8 +127,8 @@ def interpret(self, theory):
             expr.in_head = True
         expr = AEquivalence.make('⇔', [expr, self.body])
         expr = AQuantification.make('∀', {**self.q_vars}, expr)
-        self.expanded = expr.interpret(theory)
-    self.expanded.block = self.block
+        self.whole_domain = expr.interpret(theory)
+        self.whole_domain.block = self.block
     return self
 Rule.interpret = interpret
 

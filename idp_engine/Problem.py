@@ -176,8 +176,9 @@ class Problem(object):
 
             # expand whole-domain definitions
             for decl, rule in self.clark.items():
-                if decl.domain:
-                    self.def_constraints[decl] = rule.interpret(self).expanded
+                wd = rule.interpret(self).whole_domain
+                if wd:
+                    self.def_constraints[decl] = wd
 
             self.co_constraints, self.questions = OrderedSet(), OrderedSet()
             for c in self.constraints:

@@ -3,11 +3,14 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
+	symmetric_symbol: Symbol -> Bool
 	symmetric: (Symbol) → Bool
 }
 theory {
     edge(a,b).
-    { !`p in Symbol: symmetric(`p) <- !x, y : $(`p)(x,y) => $(`p)(y,x). }
+	{! s in Symbol: symmetric_symbol(s) ← arity(s)=2 ∧ input_domain(s,1) = input_domain(s,2). }
+
+    { !`p in Symbol: symmetric(`p) <- symmetric_symbol(`p) & (!x, y : $(`p)(x,y) => $(`p)(y,x)). }
 	symmetric(`edge).
 }
 display {
@@ -21,6 +24,12 @@ display {
               'showOptimize': True,
               'type': 'function',
               'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 'symmetric_symbol',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'},
              {'environmental': False,
               'idpname': 'symmetric',
               'priority': 'core',
@@ -134,4 +143,48 @@ display {
                                          'reading': 'symmetric(`symmetric)',
                                          'relevant': False,
                                          'status': 'UNKNOWN',
-                                         'typ': 'Bool'}}}
+                                         'typ': 'Bool'},
+               'symmetric(`symmetric_symbol)': {'environmental': False,
+                                                'is_assignment': False,
+                                                'normal': True,
+                                                'reading': 'symmetric(`symmetric_symbol)',
+                                                'relevant': False,
+                                                'status': 'UNKNOWN',
+                                                'typ': 'Bool'}},
+ 'symmetric_symbol': {'__rank': 1,
+                      'symmetric_symbol(`Date)': {'environmental': False,
+                                                  'is_assignment': False,
+                                                  'normal': True,
+                                                  'reading': 'symmetric_symbol(`Date)',
+                                                  'relevant': False,
+                                                  'status': 'UNKNOWN',
+                                                  'typ': 'Bool'},
+                      'symmetric_symbol(`edge)': {'environmental': False,
+                                                  'is_assignment': False,
+                                                  'normal': True,
+                                                  'reading': 'symmetric_symbol(`edge)',
+                                                  'relevant': True,
+                                                  'status': 'UNIVERSAL',
+                                                  'typ': 'Bool',
+                                                  'value': True},
+                      'symmetric_symbol(`node)': {'environmental': False,
+                                                  'is_assignment': False,
+                                                  'normal': True,
+                                                  'reading': 'symmetric_symbol(`node)',
+                                                  'relevant': False,
+                                                  'status': 'UNKNOWN',
+                                                  'typ': 'Bool'},
+                      'symmetric_symbol(`symmetric)': {'environmental': False,
+                                                       'is_assignment': False,
+                                                       'normal': True,
+                                                       'reading': 'symmetric_symbol(`symmetric)',
+                                                       'relevant': False,
+                                                       'status': 'UNKNOWN',
+                                                       'typ': 'Bool'},
+                      'symmetric_symbol(`symmetric_symbol)': {'environmental': False,
+                                                              'is_assignment': False,
+                                                              'normal': True,
+                                                              'reading': 'symmetric_symbol(`symmetric_symbol)',
+                                                              'relevant': False,
+                                                              'status': 'UNKNOWN',
+                                                              'typ': 'Bool'}}}
