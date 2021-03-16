@@ -423,12 +423,12 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     new_tuples = list(new_tuples.values())
 
                     out = AppliedSymbol.make(
-                        symbol=x.s, args=x.sub_exprs,
+                        symbol=x.symbol, args=x.sub_exprs,
                         is_enumeration='in',
                         in_enumeration=Enumeration(tuples=new_tuples)
                     )
 
-                    core = AppliedSymbol.make(out.s, out.sub_exprs).copy()
+                    core = AppliedSymbol.make(out.symbol, out.sub_exprs).copy()
                     out.simpler = out.in_enumeration.contains([core], False)
 
                     out = Assignment(out,
