@@ -191,6 +191,8 @@ class Expression(ASTNode):
         return out
 
     def same_as(self, other):
+        if id(self) == id(other):
+            return True
         if self.value is not None:
             return self.value  .same_as(other)
         if self.simpler is not None:

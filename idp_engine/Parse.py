@@ -452,8 +452,10 @@ class Rule(ASTNode):
         self.args = kwargs.pop('args')  # later augmented with self.out, if any
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
-        self.whole_domain = None  # Expression or False
+        self.is_whole_domain = None  # Bool
+        self.whole_domain = None  # Expression
         self.block = None  # theory where it occurs
+        self.cache = {}
 
         self.vars, self.sorts = [], []
         for q in self.quantees:
@@ -499,18 +501,24 @@ class Rule(ASTNode):
         return self
 
     def instantiate_definition(self, new_args, theory):
+        hash = str(new_args)
+        if hash in self.cache:
+            return self.cache[hash]
+        # assert self.is_whole_domain == False
         out = self.body.copy() # in case there is no arguments
         self.check(len(new_args) == len(self.args)
-                   or len(new_args)+1 == len(self.args), "Internal error")
+                or len(new_args)+1 == len(self.args), "Internal error")
         for old, new in zip(self.args, new_args):
-            out = out.instantiate(old, new)
+            out = out.instantiate(old, new, theory)
         out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
+        instance.in_head = True
         if self.symbol.decl.type != BOOL:  # a function
             out = out.instantiate(self.args[-1], instance)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block
+        self.cache[hash] = out
         return out
 
 
@@ -572,7 +580,7 @@ class SymbolInterpretation(ASTNode):
 
     def interpret_application(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
-        tuples = self.enumeration.tuples if tuples == None else list(tuples)
+        tuples = list(self.enumeration.tuples) if tuples == None else tuples
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default

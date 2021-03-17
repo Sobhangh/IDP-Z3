@@ -33,7 +33,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr)
 
-from .utils import BOOL, INT, REAL, SYMBOL, OrderedSet, IDPZ3Error
+from .utils import BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error
 
 
 # Class Vocabulary  #######################################################
@@ -195,6 +195,9 @@ def annotate(self, voc, q_vars):
     self.args = [arg.annotate(voc, q_v) for arg in self.args]
     self.out = self.out.annotate(voc, q_v) if self.out else self.out
     self.body = self.body.annotate(voc, q_v)
+
+    self.is_whole_domain = all(s.name not in [INT, REAL, DATE, SYMBOL]
+                                for s in self.symbol.decl.sorts)
     return self
 Rule.annotate = annotate
 

@@ -107,28 +107,19 @@ def interpret(self, theory):
     # compute self.whole_domain, by expanding:
     # ∀ v: f(v)=out <=> body
     # (after joining the rules of the same symbols)
-    if (not self.symbol.decl.domain
-        or any(s.name ==SYMBOL for s in self.sorts)):
-        # don't expand infinite domains
-        # don't expand macros, to avoid arity and type errors
-        # will be done later with optimized binary quantification
-        self.whole_domain = False
-    # elif self.symbol.decl.domain:  # only if definition is constructive !
-    #     out = [self.instantiate_definition(args, theory)
-    #            for args in self.symbol.decl.domain]
-    #     self.whole_domain = AConjunction.make('∧', out)
+    assert self.is_whole_domain
+    self.cache = {}  # reset the cache
+    if self.out:
+        expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+        expr.in_head = True
+        expr = AComparison.make('=', [expr, self.args[-1]])
     else:
-        if self.out:
-            expr = AppliedSymbol.make(self.symbol, self.args[:-1])
-            expr.in_head = True
-            expr = AComparison.make('=', [expr, self.args[-1]])
-        else:
-            expr = AppliedSymbol.make(self.symbol, self.args)
-            expr.in_head = True
-        expr = AEquivalence.make('⇔', [expr, self.body])
-        expr = AQuantification.make('∀', {**self.q_vars}, expr)
-        self.whole_domain = expr.interpret(theory)
-        self.whole_domain.block = self.block
+        expr = AppliedSymbol.make(self.symbol, self.args)
+        expr.in_head = True
+    expr = AEquivalence.make('⇔', [expr, self.body])
+    expr = AQuantification.make('∀', {**self.q_vars}, expr)
+    self.whole_domain = expr.interpret(theory)
+    self.whole_domain.block = self.block
     return self
 Rule.interpret = interpret
 
@@ -379,11 +370,14 @@ def interpret(self, problem):
             and all(a.as_rigid() is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
-            simpler = (problem.interpretations[self.decl.name].interpret_application) (
-                            problem, 0, self, sub_exprs)
-        if not self.in_head and self.decl in problem.clark and not self.fresh_vars:  # has a definition
-            co_constraint = problem.clark[self.decl].instantiate_definition(sub_exprs, problem)
-    out = self._change(sub_exprs=sub_exprs, simpler=simpler, co_constraint=co_constraint)
+            f = problem.interpretations[self.decl.name].interpret_application
+            simpler = f(problem, 0, self, sub_exprs)
+        if (not self.in_head and not self.fresh_vars
+            and self.decl in problem.clark):  # has a definition
+            clark = problem.clark[self.decl]
+            co_constraint = clark.instantiate_definition(sub_exprs, problem)
+    out = self._change(sub_exprs=sub_exprs, simpler=simpler,
+                       co_constraint=co_constraint)
     return out
 AppliedSymbol.interpret = interpret
 
@@ -424,11 +418,17 @@ def instantiate(self, e0, e1, problem=None):
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
                             f"Incorrect arity for {e1.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
-        if (problem and out.decl and out.decl.name in problem.interpretations
+        if problem and out.decl:
+            simpler, co_constraint = None, None
+            if (not out.in_head and not out.fresh_vars
+                and out.decl in problem.clark):  # has a definition
+                clark = problem.clark[out.decl]
+                co_constraint = clark.instantiate_definition(out.sub_exprs, problem)
+            if (out.decl.name in problem.interpretations
             and all(a.as_rigid() is not None for a in out.sub_exprs)):
-            f = problem.interpretations[out.decl.name].interpret_application
-            simpler = f(problem, 0, self, out.sub_exprs)  # do not use out, to avoid infinite loop
-            out = out._change(simpler=simpler)
+                f = problem.interpretations[out.decl.name].interpret_application
+                simpler = f(problem, 0, self, out.sub_exprs)  # do not use out, to avoid infinite loop
+            out = out._change(simpler=simpler, co_constraint=co_constraint)
     return out
 AppliedSymbol .instantiate = instantiate
 
