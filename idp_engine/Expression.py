@@ -439,10 +439,15 @@ class IfExpr(Expression):
                 f" else {self.sub_exprs[IfExpr.ELSE].str}")
 
 
-class Quantee(object):
-    def __init__(self, var, sort):
-        self.var = var
-        self.sort = sort
+class Quantee(ASTNode):
+    def __init__(self, **kwargs):
+        self.var = kwargs.pop('var')
+        self.sort = kwargs.pop('sort')
+
+    @classmethod
+    def make(cls, var, sort):
+        out = (cls) (var=var, sort=sort)
+        return out
 
 
 class AQuantification(Expression):
@@ -469,7 +474,7 @@ class AQuantification(Expression):
     @classmethod
     def make(cls, q, q_vars, f):
         "make and annotate a quantified formula"
-        quantees = [Quantee(v.name, v.sort) for v in q_vars.values()]
+        quantees = [Quantee.make(v.name, v.sort) for v in q_vars.values()]
         out = cls(q=q, quantees=quantees, f=f)
         out.q_vars = q_vars
         return out.annotate1()

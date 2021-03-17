@@ -39,7 +39,7 @@ from typing import Dict, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
-                         IfExpr, AQuantification,
+                         IfExpr, AQuantification, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -840,7 +840,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          SymbolExpr,
 
                                          Theory, Definition, Rule, IfExpr,
-                                         AQuantification, ARImplication,
+                                         AQuantification, Quantee, ARImplication,
                                          AEquivalence, AImplication,
                                          ADisjunction, AConjunction,
                                          AComparison, ASumMinus, AMultDiv,

@@ -21,6 +21,7 @@ The following diagram is a simplification of the full graph of calls performed t
 
         rename_args --> instantiate;
         interpret --> instantiate_definition;
+        instantiate_definition --> interpret;
         interpret --> instantiate;
         instantiate --> interpret;
         instantiate --> instantiate_definition;
