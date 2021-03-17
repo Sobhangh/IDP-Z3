@@ -510,6 +510,7 @@ class Rule(ASTNode):
                 or len(new_args)+1 == len(self.args), "Internal error")
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new, theory)
+        out = out.interpret(theory)
         instance = AppliedSymbol.make(self.symbol, new_args)
         instance.in_head = True
         if self.symbol.decl.type != BOOL:  # a function
