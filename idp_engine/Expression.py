@@ -482,7 +482,7 @@ class AQuantification(Expression):
     def __str1__(self):
         if not self.quantifier_is_expanded:
             self.check(len(self.vars) == len(self.sorts), "Internal error")
-            vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+            vars = ','.join([f"{v} ∈ {s}" for v, s in zip(self.vars, self.sorts)])
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
             return self.sub_exprs[0].str
