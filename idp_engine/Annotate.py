@@ -184,11 +184,10 @@ Definition.annotate = annotate
 
 def annotate(self, voc, q_vars):
     # create head variables
-    self.check(len(self.vars) == len(self.sorts), "Internal error")
-    for v, s in zip(self.vars, self.sorts):
-        if s:
-            s.annotate(voc, {})
-        self.q_vars[v] = Variable(v,s)
+    for q in self.quantees:
+        if q.sort:
+            q.sort.annotate(voc, {})
+        self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
 
     self.symbol = self.symbol.annotate(voc, q_v)
@@ -371,18 +370,14 @@ IfExpr.annotate1 = annotate1
 # Class AQuantification  #######################################################
 
 def annotate(self, voc, q_vars):
-    # First we check for some common errors.
-    for v in self.vars:
-        self.check(v not in voc.symbol_decls,
-            f"the quantified variable '{v}' cannot have"
-            f" the same name as another symbol")
-    self.check(len(self.vars) == len(self.sorts), "Internal error")
-
     self.q_vars = {}
-    for v, s in zip(self.vars, self.sorts):
-        if s:
-            s.annotate(voc, {})
-        self.q_vars[v] = Variable(v, s)
+    for q in self.quantees:
+        self.check(q.var not in voc.symbol_decls,
+            f"the quantified variable '{q.var}' cannot have"
+            f" the same name as another symbol")
+        if q.sort:
+            q.sort.annotate(voc, {})
+        self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
@@ -447,15 +442,13 @@ AUnary.annotate1 = annotate1
 # Class AAggregate  #######################################################
 
 def annotate(self, voc, q_vars):
-    for v in self.vars:
-        self.check(v not in voc.symbol_decls,
-            f"the quantifier variable '{v}' cannot have the same name as another symbol.")
-    self.check(len(self.vars) == len(self.sorts), "Internal error")
     self.q_vars = {}
-    for v, s in zip(self.vars, self.sorts):
-        if s:
-            s.annotate(voc, {})
-        self.q_vars[v] = Variable(v, s)
+    for q in self.quantees:
+        self.check(q.var not in voc.symbol_decls,
+            f"the quantifier variable '{q.var}' cannot have the same name as another symbol.")
+        if q.sort:
+            q.sort.annotate(voc, {})
+        self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT

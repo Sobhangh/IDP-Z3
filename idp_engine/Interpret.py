@@ -342,7 +342,6 @@ def interpret(self, problem):
             forms = out
         forms = [f.interpret(problem) if problem else f for f in forms]
         self.q_vars = new_vars
-        self.vars = None  # flag to indicate changes
         self.quantifier_is_expanded = True
         return self.update_exprs(forms)
     return self

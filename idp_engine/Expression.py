@@ -459,11 +459,6 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
-        self.vars, self.sorts = [], []
-        for q in self.quantees:
-            self.vars.append(q.var)
-            self.sorts.append(q.sort)
-
         self.sub_exprs = [self.f]
         self.quantifier_is_expanded = False
         super().__init__()
@@ -481,8 +476,7 @@ class AQuantification(Expression):
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            self.check(len(self.vars) == len(self.sorts), "Internal error")
-            vars = ','.join([f"{v} ∈ {s}" for v, s in zip(self.vars, self.sorts)])
+            vars = ','.join([f"{q.var} ∈ {q.sort}" for q in self.quantees])
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
             return self.sub_exprs[0].str
@@ -628,10 +622,6 @@ class AAggregate(Expression):
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
-        self.vars, self.sorts = [], []
-        for q in self.quantees:
-            self.vars.append(q.var)
-            self.sorts.append(q.sort)
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
         self.quantifier_is_expanded = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
@@ -645,8 +635,7 @@ class AAggregate(Expression):
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            self.check(len(self.vars) == len(self.sorts), "Internal error")
-            vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+            vars = "".join([f"{q.var} ∈ {q.sort}" for q in self.quantees])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = (f"{self.aggtype}{{{vars} : "
                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
@@ -659,7 +648,7 @@ class AAggregate(Expression):
 
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if all_ or len(self.sorts) == 0:
+        if all_ or len(self.quantees) == 0:
             for e in self.sub_exprs:
                 e.collect(questions, all_, co_constraints)
 

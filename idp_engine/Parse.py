@@ -463,7 +463,6 @@ class Rule(ASTNode):
             self.sorts.append(q.sort)
         self.annotations = self.annotations.annotations if self.annotations else {}
 
-        self.check(len(self.vars) == len(self.sorts), "Internal error")
         self.q_vars = {}  # {string: Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
@@ -472,7 +471,7 @@ class Rule(ASTNode):
             self.body = TRUE
 
     def __repr__(self):
-        return (f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
+        return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
                 f"{self.symbol}({','.join(str(e) for e in self.args)}) "
                 f"⇔{str(self.body)}")
 
@@ -495,8 +494,7 @@ class Rule(ASTNode):
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         self.args = list(new_vars.values())
-        self.vars = list(new_vars.keys())
-        self.sorts = [v.sort for v in new_vars.values()]
+        self.quantees = [Quantee.make(v,s) for v,s in new_vars.items()]
         self.q_vars = new_vars
         return self
 
