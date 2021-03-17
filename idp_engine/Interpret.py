@@ -261,6 +261,8 @@ def interpret(self, problem):
     Returns:
         Expression: the expanded quantifier expression
     """
+    if self.quantifier_is_expanded:
+        return Expression.interpret(self, problem)
     inferred = self.sub_exprs[0].type_inference()
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
@@ -296,6 +298,14 @@ def interpret(self, problem):
         return self._change(sub_exprs=[out])
     return self._change(sub_exprs=forms)
 AQuantification.interpret = interpret
+
+
+def instantiate(self, e0, e1, problem=None):
+    out = Expression.instantiate(self, e0, e1, problem)
+    if e0.type == SYMBOL:
+        out.interpret(problem)  # to perform type inference
+    return out
+AQuantification.instantiate = instantiate
 
 
 # Class AAggregate  ######################################################
@@ -337,6 +347,14 @@ def interpret(self, problem):
         return self.update_exprs(forms)
     return self
 AAggregate.interpret = interpret
+
+
+def instantiate(self, e0, e1, problem=None):
+    out = Expression.instantiate(self, e0, e1, problem)
+    if e0.type == SYMBOL:
+        out.interpret(problem)  # to perform type inference
+    return out
+AAggregate.instantiate = instantiate
 
 
 # Class AppliedSymbol  ##############################################

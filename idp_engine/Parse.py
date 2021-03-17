@@ -510,11 +510,10 @@ class Rule(ASTNode):
                 or len(new_args)+1 == len(self.args), "Internal error")
         for old, new in zip(self.args, new_args):
             out = out.instantiate(old, new, theory)
-        out = out.interpret(theory)  # add justification recursively
         instance = AppliedSymbol.make(self.symbol, new_args)
         instance.in_head = True
         if self.symbol.decl.type != BOOL:  # a function
-            out = out.instantiate(self.args[-1], instance)
+            out = out.instantiate(self.args[-1], instance, theory)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block

@@ -20,11 +20,11 @@ The following diagram is a simplification of the full graph of calls performed t
         Annotate --> rename_args;
 
         rename_args --> instantiate;
-        instantiate_definition --> interpret;
         interpret --> instantiate_definition;
         interpret --> instantiate;
-        instantiate_definition --> instantiate;
+        instantiate --> interpret;
         instantiate --> instantiate_definition;
+        instantiate_definition --> instantiate;
         interpret --> update_exprs;
 
         update_exprs -.-> make;
