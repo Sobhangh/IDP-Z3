@@ -9,7 +9,6 @@ theory {
   { important(`p). }
 
   { !x in Symbol: important(x) <- $(x)(). }
-  $(`p)().
   arity(`important) = 1.
   !x in Symbol: arity(x)<2.
   output_domain(`opposite) = `color.

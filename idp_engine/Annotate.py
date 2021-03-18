@@ -195,7 +195,7 @@ def annotate(self, voc, q_vars):
     self.out = self.out.annotate(voc, q_v) if self.out else self.out
     self.body = self.body.annotate(voc, q_v)
 
-    self.is_whole_domain = all(s.name not in [INT, REAL, DATE, SYMBOL]
+    self.is_whole_domain = all(s.name not in [INT, REAL, DATE]
                                 for s in self.symbol.decl.sorts)
     return self
 Rule.annotate = annotate
