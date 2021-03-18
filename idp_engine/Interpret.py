@@ -466,6 +466,8 @@ SymbolExpr.instantiate = instantiate
 # Class Variable  #######################################################
 
 def instantiate(self, e0, e1, problem=None):
+    if self.sort:
+        self.sort = self.sort.instantiate(e0, e1, problem)
     return e1 if self.code == e0.code else self
 Variable.instantiate = instantiate
 
@@ -475,6 +477,8 @@ Variable.interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
 def substitute(self, e0, e1, assignments, todo=None):
+    if self.sort:
+        self.sort = self.sort.substitute(e0,e1, assignments, todo)
     return e1 if self.code == e0.code else self
 Variable.substitute = substitute
 

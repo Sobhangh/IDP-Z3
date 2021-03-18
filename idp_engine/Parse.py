@@ -457,10 +457,6 @@ class Rule(ASTNode):
         self.block = None  # theory where it occurs
         self.cache = {}
 
-        self.vars, self.sorts = [], []
-        for q in self.quantees:
-            self.vars.append(q.var)
-            self.sorts.append(q.sort)
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         self.q_vars = {}  # {string: Variable}
@@ -481,10 +477,11 @@ class Rule(ASTNode):
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
         self.check(len(self.args) == len(new_vars), "Internal error")
+        vars = [q.var for q in self.quantees]
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
             if type(arg) == Variable \
-            and arg.name in self.vars and arg.name not in new_vars:
+            and arg.name in vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
                 self.out = self.out.instantiate(arg, nv) if self.out else self.out
                 for j in range(i, len(self.args)):

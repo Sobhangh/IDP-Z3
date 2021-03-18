@@ -27,7 +27,7 @@ from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, Display)
-from .Expression import (Expression, Constructor, IfExpr, AQuantification,
+from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
@@ -186,7 +186,7 @@ def annotate(self, voc, q_vars):
     # create head variables
     for q in self.quantees:
         if q.sort:
-            q.sort.annotate(voc, {})
+            q.annotate(voc, q_vars)
         self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
 
@@ -367,6 +367,15 @@ def annotate1(self):
 IfExpr.annotate1 = annotate1
 
 
+# Class Quantee  #######################################################
+
+def annotate(self, voc, q_vars):
+    if self.sort:
+        self.sort = self.sort.annotate(voc, q_vars).simplify1()
+    return self.simplify1()
+Quantee.annotate = annotate
+
+
 # Class AQuantification  #######################################################
 
 def annotate(self, voc, q_vars):
@@ -375,8 +384,7 @@ def annotate(self, voc, q_vars):
         self.check(q.var not in voc.symbol_decls,
             f"the quantified variable '{q.var}' cannot have"
             f" the same name as another symbol")
-        if q.sort:
-            q.sort.annotate(voc, {})
+        q.annotate(voc, q_vars)
         self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
@@ -446,8 +454,7 @@ def annotate(self, voc, q_vars):
     for q in self.quantees:
         self.check(q.var not in voc.symbol_decls,
             f"the quantifier variable '{q.var}' cannot have the same name as another symbol.")
-        if q.sort:
-            q.sort.annotate(voc, {})
+        q.annotate(voc, q_vars)
         self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
@@ -488,6 +495,14 @@ def annotate1(self):
     out.fresh_vars.update(out.symbol.fresh_vars)
     return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
+
+
+# Class Variable  #######################################################
+
+def annotate(self, voc, q_vars):
+    self.type = self.sort.decl.name if self.sort and self.sort.decl else ''
+    return self
+Variable.annotate = annotate
 
 
 # Class UnappliedSymbol  #######################################################

@@ -11,6 +11,7 @@ theory {
   { important(`p). }
 
   { !x in Symbol: important(x) <- $(x)(). }
+  $(`p)().
   arity(`important) = 1.
   !x in Symbol: arity(x)<2.
   output_domain(`opposite) = `color.
@@ -197,13 +198,15 @@ display {
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}},
+             'status': 'CONSEQUENCE',
+             'typ': 'Bool',
+             'value': True}},
  'q': {'__rank': 2,
        'q': {'environmental': False,
              'is_assignment': False,
              'normal': True,
              'reading': 'q',
              'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}}}
+             'status': 'CONSEQUENCE',
+             'typ': 'Bool',
+             'value': True}}}

@@ -9,7 +9,7 @@ vocabulary {
 theory {
     edge(a,b).
     !`p in Symbol: symmetric(`p) & arity(`p)=2 & input_domain(`p,1)=input_domain(`p,1)
-				=> (!x, y : $(`p)(x,y) => $(`p)(y,x)).
+				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
 	symmetric := {`edge}
 }
 display {
@@ -136,34 +136,36 @@ display {
                         'relevant': True,
                         'status': 'UNKNOWN',
                         'typ': 'Bool'},
-          '∀`p ∈ Symbol : symmetric(`p) ∧ arity(`p) = 2 ∧ input_domain(`p,1) = input_domain(`p,1) ⇒ (∀x ∈ None,y ∈ None : $(`p)(x,y) ⇒ $(`p)(y,x))': {'environmental': False,
-                                                                                                                                                      'is_assignment': False,
-                                                                                                                                                      'normal': False,
-                                                                                                                                                      'reading': '∀`p '
-                                                                                                                                                                 '∈ '
-                                                                                                                                                                 'Symbol '
-                                                                                                                                                                 ': '
-                                                                                                                                                                 'symmetric(`p) '
-                                                                                                                                                                 '∧ '
-                                                                                                                                                                 'arity(`p) '
-                                                                                                                                                                 '= '
-                                                                                                                                                                 '2 '
-                                                                                                                                                                 '∧ '
-                                                                                                                                                                 'input_domain(`p,1) '
-                                                                                                                                                                 '= '
-                                                                                                                                                                 'input_domain(`p,1) '
-                                                                                                                                                                 '⇒ '
-                                                                                                                                                                 '(∀x '
-                                                                                                                                                                 '∈ '
-                                                                                                                                                                 'None,y '
-                                                                                                                                                                 '∈ '
-                                                                                                                                                                 'None '
-                                                                                                                                                                 ': '
-                                                                                                                                                                 '$(`p)(x,y) '
-                                                                                                                                                                 '⇒ '
-                                                                                                                                                                 '$(`p)(y,x))',
-                                                                                                                                                      'relevant': True,
-                                                                                                                                                      'status': 'UNIVERSAL',
-                                                                                                                                                      'typ': 'Bool',
-                                                                                                                                                      'value': True}},
+          '∀`p ∈ Symbol : symmetric(`p) ∧ arity(`p) = 2 ∧ input_domain(`p,1) = input_domain(`p,1) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p,2)) : $(`p)(x,y) ⇒ $(`p)(y,x))': {'environmental': False,
+                                                                                                                                                                          'is_assignment': False,
+                                                                                                                                                                          'normal': False,
+                                                                                                                                                                          'reading': '∀`p '
+                                                                                                                                                                                     '∈ '
+                                                                                                                                                                                     'Symbol '
+                                                                                                                                                                                     ': '
+                                                                                                                                                                                     'symmetric(`p) '
+                                                                                                                                                                                     '∧ '
+                                                                                                                                                                                     'arity(`p) '
+                                                                                                                                                                                     '= '
+                                                                                                                                                                                     '2 '
+                                                                                                                                                                                     '∧ '
+                                                                                                                                                                                     'input_domain(`p,1) '
+                                                                                                                                                                                     '= '
+                                                                                                                                                                                     'input_domain(`p,1) '
+                                                                                                                                                                                     '⇒ '
+                                                                                                                                                                                     '(∀x '
+                                                                                                                                                                                     '∈ '
+                                                                                                                                                                                     'None '
+                                                                                                                                                                                     ': '
+                                                                                                                                                                                     '∀y '
+                                                                                                                                                                                     '∈ '
+                                                                                                                                                                                     '$(input_domain(`p,2)) '
+                                                                                                                                                                                     ': '
+                                                                                                                                                                                     '$(`p)(x,y) '
+                                                                                                                                                                                     '⇒ '
+                                                                                                                                                                                     '$(`p)(y,x))',
+                                                                                                                                                                          'relevant': True,
+                                                                                                                                                                          'status': 'UNIVERSAL',
+                                                                                                                                                                          'typ': 'Bool',
+                                                                                                                                                                          'value': True}},
  'symmetric': {}}

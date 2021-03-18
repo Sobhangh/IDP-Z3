@@ -439,15 +439,25 @@ class IfExpr(Expression):
                 f" else {self.sub_exprs[IfExpr.ELSE].str}")
 
 
-class Quantee(ASTNode):
+class Quantee(Expression):
     def __init__(self, **kwargs):
         self.var = kwargs.pop('var')
         self.sort = kwargs.pop('sort')
 
+        self.sub_exprs = []
+        super().__init__()
+        self.decl = None
+
     @classmethod
     def make(cls, var, sort):
+        if type(sort) != SymbolExpr:
+            sort = SymbolExpr(eval='', s=sort)
         out = (cls) (var=var, sort=sort)
-        return out
+        out.decl = sort.decl
+        return out.annotate1()
+
+    def __str1__(self):
+        return f"{self.var} ∈ {self.sort}"
 
 
 class AQuantification(Expression):
@@ -476,7 +486,7 @@ class AQuantification(Expression):
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            vars = ','.join([f"{q.var} ∈ {q.sort}" for q in self.quantees])
+            vars = ','.join([f"{q}" for q in self.quantees])
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
             return self.sub_exprs[0].str
@@ -635,7 +645,7 @@ class AAggregate(Expression):
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            vars = "".join([f"{q.var} ∈ {q.sort}" for q in self.quantees])
+            vars = "".join([f"{q}" for q in self.quantees])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = (f"{self.aggtype}{{{vars} : "
                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
@@ -824,7 +834,7 @@ class Variable(Expression):
 
         super().__init__()
 
-        self.type = sort.name if sort else ''
+        self.type = sort.decl.name if sort and sort.decl else ''
         self.sub_exprs = []
         self.translated = None
         self.fresh_vars = set([self.name])

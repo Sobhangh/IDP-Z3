@@ -28,7 +28,7 @@ import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, IfExpr, AQuantification, \
+    Constructor, Expression, IfExpr, AQuantification, Quantee,\
     BinaryOperator, AEquivalence, AImplication, ADisjunction, \
     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, \
@@ -108,6 +108,20 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
 
+
+# Class Quantee  #######################################################
+
+def update_exprs(self, new_exprs):
+    if not self.decl and self.sort:
+        symbol = self.sort.sub_exprs[0].as_rigid()
+        if symbol:
+            if type(symbol) == Symbol:
+                self.decl = symbol.decl
+            else:
+                assert type(symbol) == Constructor, "Internal error"
+                self.decl = symbol.symbol.decl
+            self.sort.decl = self.decl
+Quantee.update_exprs = update_exprs
 
 
 # Class AQuantification  ######################################################
@@ -206,7 +220,6 @@ def update_exprs(self, new_exprs):
         simpler = other[0]
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
-
 
 
 # Class AComparison  #######################################################
@@ -334,8 +347,11 @@ def update_exprs(self, new_exprs):
     if not self.decl:
         symbol = self.symbol.sub_exprs[0].as_rigid()
         if symbol:
-            assert type(symbol) == Symbol, "Internal error"
-            self.decl = symbol.decl
+            if type(symbol) == Symbol:
+                self.decl = symbol.decl
+            else:
+                assert type(symbol) == Constructor, "Internal error"
+                self.decl = symbol.symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
     if self.decl:
