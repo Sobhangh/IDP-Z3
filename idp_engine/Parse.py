@@ -274,6 +274,9 @@ class ConstructedTypeDeclaration(ASTNode):
         out = ADisjunction.make('∨', out)
         return out
 
+    def is_subset_of(self, other):
+        return self == other
+
 
 class RangeDeclaration(ASTNode):
     def __init__(self, **kwargs):
@@ -318,6 +321,9 @@ class RangeDeclaration(ASTNode):
                 e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
         return ADisjunction.make('∨', sub_exprs)
+
+    def is_subset_of(self, other):
+        return self == other
 
 
 class SymbolDeclaration(ASTNode):
@@ -391,6 +397,10 @@ class SymbolDeclaration(ASTNode):
         return (f"{self.name}"
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
+
+    def is_subset_of(self, other):
+        return (self.arity == 1 and self.type == BOOL
+                and self.sorts[0].decl == other)
 
 
 Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]

@@ -319,7 +319,7 @@ display {
                         'normal': True,
                         'reading': 'Large(1)',
                         'relevant': True,
-                        'status': 'UNIVERSAL',
+                        'status': 'CONSEQUENCE',
                         'typ': 'Bool',
                         'value': False},
            'Large(2)': {'environmental': False,

@@ -11,6 +11,7 @@ theory T:V {
     (∀c in Color: ~q(c) => c=color()).
     ∀c in Color: Color(c).
     ∀c in $(`Color): Color(c).
+    ∀c in q: Color(c).
 }
 procedure main() {
     print(str(Problem(T).formula()))

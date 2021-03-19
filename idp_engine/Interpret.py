@@ -271,16 +271,24 @@ def interpret(self, problem):
             self.q_vars[q] = new_var
 
     for v, s in inferred.items():
-        assert v not in self.q_vars or self.q_vars[v].sort.decl == s.decl, \
+        assert (v not in self.q_vars
+                or self.q_vars[v].sort.decl.is_subset_of(s.decl)), \
             f"Inconsistent types for {v} in {self}"
 
     forms = [self.sub_exprs[0]]
     new_vars = {}
     for name, var in self.q_vars.items():
-        if var.sort and var.sort.decl.range:
+        range = None
+        if var.sort:
+            if var.sort.decl.range:
+                range = var.sort.decl.range
+            elif var.sort.code in problem.interpretations:
+                enumeration = problem.interpretations[var.sort.code].enumeration
+                range = [t.args[0] for t in enumeration.tuples.values()]
+        if range is not None:
             out = []
             for f in forms:
-                for val in var.sort.decl.range:
+                for val in range:
                     new_f = f.instantiate(var, val, problem)
                     out.append(new_f)
             forms = out
@@ -442,6 +450,7 @@ def instantiate(self, e0, e1, problem=None):
                 clark = problem.clark[out.decl]
                 co_constraint = clark.instantiate_definition(out.sub_exprs, problem)
             if (out.decl.name in problem.interpretations
+            and any(s.decl.name == SYMBOL for s in self.decl.sorts)
             and all(a.as_rigid() is not None for a in out.sub_exprs)):
                 f = problem.interpretations[out.decl.name].interpret_application
                 simpler = f(problem, 0, self, out.sub_exprs)  # do not use out, to avoid infinite loop
