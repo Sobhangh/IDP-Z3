@@ -59,7 +59,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
             self.value = simpler.value
         else:
             self.simpler = simpler
-    assert self.value is None or type(self.value) in [Constructor,
+    assert self.value is None or type(self.value) in [Constructor, Symbol,
                                                       Number, Date]
     assert self.value is not self  # avoid infinite loops
 
@@ -77,7 +77,7 @@ def update_exprs(self, new_exprs):
 
 
 # Expression.update_exprs = update_exprs
-for i in [Constructor, SymbolExpr, AppliedSymbol, UnappliedSymbol]:
+for i in [Constructor, AppliedSymbol, UnappliedSymbol]:
     i.update_exprs = update_exprs
 
 
@@ -113,13 +113,9 @@ IfExpr.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     if not self.decl and self.sort:
-        symbol = self.sort.sub_exprs[0].as_rigid()
+        symbol = self.sort.as_rigid()
         if symbol:
-            if type(symbol) == Symbol:
-                self.decl = symbol.decl
-            else:
-                assert type(symbol) == Constructor, "Internal error"
-                self.decl = symbol.symbol.decl
+            self.decl = symbol.decl
             self.sort.decl = self.decl
 Quantee.update_exprs = update_exprs
 
@@ -345,13 +341,9 @@ AAggregate.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     new_exprs = list(new_exprs)
     if not self.decl:
-        symbol = self.symbol.sub_exprs[0].as_rigid()
+        symbol = self.symbol.as_rigid()
         if symbol:
-            if type(symbol) == Symbol:
-                self.decl = symbol.decl
-            else:
-                assert type(symbol) == Constructor, "Internal error"
-                self.decl = symbol.symbol.decl
+            self.decl = symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
     if self.decl:
@@ -396,6 +388,17 @@ def as_set_condition(self):
     return ((None, None, None) if not self.in_enumeration else
             (core, 'not' not in self.is_enumeration, self.in_enumeration))
 AppliedSymbol.as_set_condition = as_set_condition
+
+
+# Class SymbolExpr  #######################################################
+
+def update_exprs(self, new_exprs):
+    symbol = list(new_exprs)[0]
+    value = (symbol if self.eval == '' else
+             symbol.symbol if type(symbol) == Constructor else
+             None)
+    return self._change(sub_exprs=[symbol], value=value)
+SymbolExpr.update_exprs = update_exprs
 
 
 # Class Brackets  #######################################################

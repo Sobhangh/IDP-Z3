@@ -709,8 +709,6 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        if type(symbol) != SymbolExpr:
-            symbol = SymbolExpr(eval='', s=symbol)
         out = cls(symbol=symbol, args=Arguments(sub_exprs=args), **kwargs)
         out.sub_exprs = args
         # annotate
@@ -783,7 +781,7 @@ class SymbolExpr(Expression):
         self.decl = None
         super().__init__()
 
-    def __str__(self):
+    def __str1__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
 

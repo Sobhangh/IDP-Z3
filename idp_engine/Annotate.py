@@ -497,6 +497,14 @@ def annotate1(self):
 AppliedSymbol.annotate1 = annotate1
 
 
+# Class SymbolExpr  #######################################################
+
+def annotate(self, voc, q_vars):
+    out = Expression.annotate(self, voc, q_vars)
+    return out.simplify1()
+SymbolExpr.annotate = annotate
+
+
 # Class Variable  #######################################################
 
 def annotate(self, voc, q_vars):
