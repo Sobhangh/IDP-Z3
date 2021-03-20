@@ -3,7 +3,7 @@ vocabulary V {
     p: () → Bool
     q:(Color) → Bool
     color: ()→ Color
-    r:() → Bool
+    r:(Color) → Bool
 }
 theory T:V {
     p() <=> (∀c in Color: c=red).
@@ -12,6 +12,7 @@ theory T:V {
     ∀c in Color: Color(c).
     ∀c in $(`Color): Color(c).
     ∀c in q: Color(c).
+    ∀c in r: Color(c).
 }
 procedure main() {
     print(str(Problem(T).formula()))

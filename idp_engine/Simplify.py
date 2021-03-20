@@ -132,6 +132,8 @@ AQuantification.update_exprs = update_exprs
 # Class AImplication  #######################################################
 
 def update_exprs(self, new_exprs):
+    if type(new_exprs) == list:
+        new_exprs = iter(new_exprs)
     exprs0 = next(new_exprs)
     value, simpler = None, None
     if exprs0.same_as(FALSE):  # (false => p) is true
