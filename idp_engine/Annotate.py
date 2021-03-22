@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr)
+                         FALSE, SymbolExpr, Number)
 
 from .utils import BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error
 
@@ -459,6 +459,13 @@ def annotate(self, voc, q_vars):
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
+
+    assert not self.using_if
+    self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
+            then_f=Number(number='1') if self.out is None else
+                    self.sub_exprs[AAggregate.OUT],
+            else_f=Number(number='0'))]
+    self.using_if = True
     self = self.annotate1()
     # remove q_vars after annotate1
     self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))

@@ -470,7 +470,6 @@ class AQuantification(Expression):
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
         self.sub_exprs = [self.f]
-        self.quantifier_is_expanded = False
         super().__init__()
 
         self.q_vars = {}  # dict[String, Variable]
@@ -485,7 +484,7 @@ class AQuantification(Expression):
         return out.annotate1()
 
     def __str1__(self):
-        if not self.quantifier_is_expanded:
+        if self.quantees:  #TODO this is not correct in case of partial expansion
             vars = ','.join([f"{q}" for q in self.quantees])
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
@@ -633,7 +632,7 @@ class AAggregate(Expression):
         self.out = kwargs.pop('out')
 
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
-        self.quantifier_is_expanded = False  # cannot test q_vars, because aggregate may not have quantee
+        self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
         self.q_vars = {}
@@ -644,7 +643,7 @@ class AAggregate(Expression):
             raise Exception("Can't have output variable for  #")
 
     def __str1__(self):
-        if not self.quantifier_is_expanded:
+        if not self.using_if:
             vars = "".join([f"{q}" for q in self.quantees])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = (f"{self.aggtype}{{{vars} : "

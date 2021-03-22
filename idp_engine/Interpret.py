@@ -261,7 +261,7 @@ def interpret(self, problem):
     Returns:
         Expression: the expanded quantifier expression
     """
-    if self.quantifier_is_expanded:
+    if not self.q_vars:
         return Expression.interpret(self, problem)
     inferred = self.sub_exprs[0].type_inference()
     for q in self.q_vars:
@@ -277,7 +277,7 @@ def interpret(self, problem):
                 or self.q_vars[v].sort.decl.is_subset_of(s.decl)), \
             f"Inconsistent types for {v} in {self}"
 
-    forms = [self.sub_exprs[0]]
+    forms = self.sub_exprs
     new_vars = {}
     for name, var in self.q_vars.items():
         range = None
@@ -319,7 +319,7 @@ def interpret(self, problem):
     self.q_vars = new_vars
 
     if not self.q_vars:
-        self.quantifier_is_expanded = True
+        self.quantees = []
         if self.q == '∀':
             out = AConjunction.make('∧', forms)
         else:
@@ -340,7 +340,8 @@ AQuantification.instantiate = instantiate
 # Class AAggregate  ######################################################
 
 def interpret(self, problem):
-    if self.quantifier_is_expanded:
+    assert self.using_if
+    if not self.q_vars:
         return Expression.interpret(self, problem)
     inferred = self.sub_exprs[0].type_inference()
     if 1 < len(self.sub_exprs):
@@ -357,10 +358,7 @@ def interpret(self, problem):
 
     if all(var.sort.decl.range for var in self.q_vars.values()):
         # no unknown domain --> ok to expand it
-        forms = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
-                then_f=Number(number='1') if self.out is None else
-                        self.sub_exprs[AAggregate.OUT],
-                else_f=Number(number='0'))]
+        forms = self.sub_exprs
         new_vars = {}
         for name, var in self.q_vars.items():
             out = []
@@ -371,7 +369,6 @@ def interpret(self, problem):
             forms = out
         forms = [f.interpret(problem) if problem else f for f in forms]
         self.q_vars = new_vars
-        self.quantifier_is_expanded = True
         return self.update_exprs(forms)
     return self
 AAggregate.interpret = interpret

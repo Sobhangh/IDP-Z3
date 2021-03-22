@@ -323,13 +323,12 @@ AUnary.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    if self.quantifier_is_expanded:
+    if self.using_if and not self.q_vars:
         operands1 = [e.as_rigid() for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
             out = Number(number=str(out))
             return self._change(value=out, sub_exprs=operands)
-
     return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
 
