@@ -203,7 +203,7 @@ Expression.substitute = substitute
 def instantiate(self, e0, e1, problem=None):
     """
     Recursively substitute Variable e0 by e1 in a copy of self, and update fresh_vars.
-    Interpret appliedSymbols immediately if grounded.
+    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
 
     Do nothing if e0 does not occur in self.
     """
@@ -219,7 +219,7 @@ Expression.instantiate = instantiate
 def instantiate1(self, e0, e1, problem=None):
     """
     recursively substitute Variable e0 by e1 in self, and update fresh_vars.
-    Interpret appliedSymbols immediately if grounded.
+    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     """
 
     # instantiate expressions, with simplification

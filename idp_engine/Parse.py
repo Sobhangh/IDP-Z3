@@ -506,6 +506,15 @@ class Rule(ASTNode):
         return self
 
     def instantiate_definition(self, new_args, theory):
+        """Create an instance of the definition for new_args, and interpret it for theory.
+
+        Args:
+            new_args ([Expression]): tuple of arguments to be applied to the defined symbol
+            theory (Problem): the context for the interpretation
+
+        Returns:
+            Expression: a boolean expression
+        """
         hash = str(new_args)
         if hash in self.cache:
             return self.cache[hash]
