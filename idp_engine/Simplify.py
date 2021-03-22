@@ -362,7 +362,9 @@ def update_exprs(self, new_exprs):
         elif self.decl.name == INPUT_DOMAIN:
             self.check(len(new_exprs) == 2,
                     f"Incorrect number of arguments for '{INPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL,
+            self.check(new_exprs[0].type == SYMBOL
+                       or (new_exprs[0].sort.decl.arity == 1
+                           and new_exprs[0].sort.decl.type == BOOL),
                     f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
             self.check(new_exprs[1].type == INT,
                     f"Second argument of '{INPUT_DOMAIN}' must be a Int: {new_exprs[1]}")
