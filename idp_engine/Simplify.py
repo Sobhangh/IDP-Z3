@@ -74,11 +74,7 @@ def update_exprs(self, new_exprs):
     """ change sub_exprs and simplify, while keeping relevant info. """
     #  default implementation, without simplification
     return self._change(sub_exprs=list(new_exprs))
-
-
-# Expression.update_exprs = update_exprs
-for i in [Constructor, AppliedSymbol, UnappliedSymbol]:
-    i.update_exprs = update_exprs
+Expression.update_exprs = update_exprs
 
 
 def simplify1(self):
