@@ -120,8 +120,14 @@ Quantee.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
-    simpler = exprs[0] if not self.q_vars else None
-    return self._change(simpler=simpler, sub_exprs=exprs)
+    if not self.q_vars:
+        self.quantees = []
+        if self.q == '∀':
+            simpler = AConjunction.make('∧', exprs)
+        else:
+            simpler = ADisjunction.make('∨', exprs)
+        return self._change(simpler=simpler, sub_exprs=[simpler])
+    return self._change(sub_exprs=exprs)
 AQuantification.update_exprs = update_exprs
 
 

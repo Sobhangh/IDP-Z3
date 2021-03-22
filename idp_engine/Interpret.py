@@ -264,6 +264,8 @@ def interpret(self, problem):
     if not self.q_vars:
         return Expression.interpret(self, problem)
     inferred = self.sub_exprs[0].type_inference()
+    if 1 < len(self.sub_exprs):
+        inferred = {**inferred, **self.sub_exprs[1].type_inference()}
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
             new_var = Variable(q, inferred[q])
@@ -317,15 +319,7 @@ def interpret(self, problem):
             new_vars[name] = var
     forms = [f.interpret(problem) if problem else f for f in forms]
     self.q_vars = new_vars
-
-    if not self.q_vars:
-        self.quantees = []
-        if self.q == '∀':
-            out = AConjunction.make('∧', forms)
-        else:
-            out = ADisjunction.make('∨', forms)
-        return self._change(sub_exprs=[out])
-    return self._change(sub_exprs=forms)
+    return self.update_exprs(forms)
 AQuantification.interpret = interpret
 
 
@@ -351,26 +345,55 @@ def interpret(self, problem):
             new_var = Variable(q, inferred[q])
             self.sub_exprs[0].substitute(new_var, new_var, {})
             self.q_vars[q] = new_var
+        elif self.q_vars[q].sort:
+            self.q_vars[q].sort = self.q_vars[q].sort.interpret(problem)
 
     for v, s in inferred.items():
-        assert v not in self.q_vars or self.q_vars[v].sort.decl == s.decl, \
+        assert (v not in self.q_vars
+                or self.q_vars[v].sort.decl.is_subset_of(s.decl)), \
             f"Inconsistent types for {v} in {self}"
 
-    if all(var.sort.decl.range for var in self.q_vars.values()):
-        # no unknown domain --> ok to expand it
-        forms = self.sub_exprs
-        new_vars = {}
-        for name, var in self.q_vars.items():
+    forms = self.sub_exprs
+    new_vars = {}
+    for name, var in self.q_vars.items():
+        range = None
+        if var.sort:
+            if var.sort.decl.range:
+                range = var.sort.decl.range
+                guard = lambda x,y: y
+            elif var.sort.code in problem.interpretations:
+                self.check(var.sort.decl.arity == 1,
+                           f"Incorrect arity of {var.sort}")
+                self.check(var.sort.decl.out.type == BOOL,
+                           f"{var.sort} is not a predicate")
+                enumeration = problem.interpretations[var.sort.code].enumeration
+                range = [t.args[0] for t in enumeration.tuples.values()]
+                guard = lambda x,y: y
+            elif name in inferred:
+                sort = inferred[name].decl
+                if sort.name in problem.interpretations:
+                    enumeration = problem.interpretations[sort.name].enumeration
+                    range = [t.args[0] for t in enumeration.tuples.values()]
+                    symbol = var.sort.as_rigid()
+                    def guard(val, expr):
+                        applied = AppliedSymbol.make(symbol, [val])
+                        if self.q == '∀':
+                            out = AImplication.make('⇒', [applied, expr])
+                        else:
+                            out = AConjunction.make('∧', [applied, expr])
+                        return out
+        if range is not None:
             out = []
             for f in forms:
-                for val in var.sort.decl.range:
-                    new_f = f.instantiate(var, val, problem)
+                for val in range:
+                    new_f = guard(val, f.instantiate(var, val, problem))
                     out.append(new_f)
             forms = out
-        forms = [f.interpret(problem) if problem else f for f in forms]
-        self.q_vars = new_vars
-        return self.update_exprs(forms)
-    return self
+        else: # infinite domain !
+            new_vars[name] = var
+    forms = [f.interpret(problem) if problem else f for f in forms]
+    self.q_vars = new_vars
+    return self.update_exprs(forms)
 AAggregate.interpret = interpret
 
 
