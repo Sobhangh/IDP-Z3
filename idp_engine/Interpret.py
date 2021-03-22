@@ -369,7 +369,7 @@ def interpret(self, problem):
                 simpler.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
-            core = AppliedSymbol.make(self.symbol.sub_exprs[0], sub_exprs).copy()
+            core = AppliedSymbol.make(self.symbol, sub_exprs).copy()
             simpler = self.in_enumeration.contains([core], False)
             if 'not' in self.is_enumeration:
                 simpler = AUnary.make('¬', simpler)

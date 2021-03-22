@@ -386,7 +386,7 @@ AppliedSymbol.update_exprs = update_exprs
 
 def as_set_condition(self):
     # determine core after substitutions
-    core = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs).copy()
+    core = AppliedSymbol.make(self.symbol, self.sub_exprs).copy()
 
     return ((None, None, None) if not self.in_enumeration else
             (core, 'not' not in self.is_enumeration, self.in_enumeration))
