@@ -336,6 +336,13 @@ class Expression(ASTNode):
                     ) -> "Expression":
         return self  # monkey-patched
 
+    def instantiate1(self,
+                    e0: "Expression",
+                    e1: "Expression",
+                    problem: "Problem"=None
+                    ) -> "Expression":
+        return self  # monkey-patched
+
     def symbolic_propagate(self,
                            assignments: "Assignments",
                            truth: Optional["Constructor"] = None

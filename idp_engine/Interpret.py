@@ -46,7 +46,7 @@ from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
 from .Expression import (Constructor, SymbolExpr, Expression, IfExpr, AQuantification,
                     AImplication, ADisjunction, AConjunction,  AEquivalence, AAggregate,
                     AComparison, AUnary, AppliedSymbol, Number,
-                    Arguments, Variable, TRUE)
+                    Arguments, Variable, TRUE, Quantee)
 from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL
 
 
@@ -202,14 +202,19 @@ Expression.substitute = substitute
 
 def instantiate(self, e0, e1, problem=None):
     """
-    recursively substitute Variable e0 by e1 in self
-
-    instantiating e0=`x by e1=`f in self=`x(y) returns f(y)
-    (or any instance of f if arities don't match)
+    recursively substitute Variable e0 by e1 in a copy of self.
+    Do nothing if e0 does not occur in self.
     """
     assert type(e0) == Variable
     if e0.name not in self.fresh_vars:
         return self
+    return self.instantiate1(e0, e1, problem)
+Expression.instantiate = instantiate
+
+def instantiate1(self, e0, e1, problem=None):
+    """
+    recursively substitute Variable e0 by e1 in a copy of self.
+    """
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
     out.fresh_vars = copy.copy(out.fresh_vars)
@@ -237,7 +242,7 @@ def instantiate(self, e0, e1, problem=None):
     out.code = str(out)
     out.annotations['reading'] = out.code
     return out
-Expression.instantiate = instantiate
+Expression.instantiate1 = instantiate1
 
 
 # Class Constructor  ######################################################
@@ -328,15 +333,15 @@ def interpret(self, problem):
 AQuantification.interpret = interpret
 
 
-def instantiate(self, e0, e1, problem=None):
-    out = Expression.instantiate(self, e0, e1, problem)
+def instantiate1(self, e0, e1, problem=None):
+    out = Expression.instantiate1(self, e0, e1, problem)
     for name, var in self.q_vars.items():
         if var.sort:
             self.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
     if e0.type == SYMBOL:
         out.interpret(problem)  # to perform type inference
     return out
-AQuantification.instantiate = instantiate
+AQuantification.instantiate1 = instantiate1
 
 
 # Class AAggregate  ######################################################
@@ -346,8 +351,7 @@ def interpret(self, problem):
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 
-
-AAggregate.instantiate = instantiate  # from AQuantification
+AAggregate.instantiate1 = instantiate1  # from AQuantification
 
 
 # Class AppliedSymbol  ##############################################
@@ -418,10 +422,10 @@ def substitute(self, e0, e1, assignments, todo=None):
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
 
-def instantiate(self, e0, e1, problem=None):
+def instantiate1(self, e0, e1, problem=None):
     if self.value:
         return self
-    out = Expression.instantiate(self, e0, e1, problem)
+    out = Expression.instantiate1(self, e0, e1, problem)
     if type(out) == AppliedSymbol:  # might be a number after instantiation
         if type(out.symbol) == SymbolExpr and out.symbol.value is None:  # $(x)()
             out.symbol = out.symbol.instantiate(e0, e1, problem)
@@ -442,16 +446,16 @@ def instantiate(self, e0, e1, problem=None):
                 simpler = f(problem, 0, self, out.sub_exprs)  # do not use out, to avoid infinite loop
             out = out._change(simpler=simpler, co_constraint=co_constraint)
     return out
-AppliedSymbol .instantiate = instantiate
+AppliedSymbol .instantiate1 = instantiate1
 
 
 # Class Variable  #######################################################
 
-def instantiate(self, e0, e1, problem=None):
+def instantiate1(self, e0, e1, problem=None):
     if self.sort:
         self.sort = self.sort.instantiate(e0, e1, problem)
     return e1 if self.code == e0.code else self
-Variable.instantiate = instantiate
+Variable.instantiate1 = instantiate1
 
 def interpret(self, problem):
     return self
