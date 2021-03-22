@@ -15,7 +15,7 @@ Traceback (most recent call last):
     self.constraints = OrderedSet([e.interpret(self)
   File "IDP-Z3/idp_engine/Annotate.py", line 149, in <listcomp>
     self.constraints = OrderedSet([e.interpret(self)
-  File "IDP-Z3/idp_engine/Interpret.py", line 365, in interpret
+  File "IDP-Z3/idp_engine/Interpret.py", line 363, in interpret
     assert self.decl.type != BOOL, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

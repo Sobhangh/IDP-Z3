@@ -202,7 +202,9 @@ Expression.substitute = substitute
 
 def instantiate(self, e0, e1, problem=None):
     """
-    recursively substitute Variable e0 by e1 in a copy of self, and update fresh_vars.
+    Recursively substitute Variable e0 by e1 in a copy of self, and update fresh_vars.
+    Interpret appliedSymbols immediately if grounded.
+
     Do nothing if e0 does not occur in self.
     """
     assert type(e0) == Variable
@@ -217,29 +219,24 @@ Expression.instantiate = instantiate
 def instantiate1(self, e0, e1, problem=None):
     """
     recursively substitute Variable e0 by e1 in self, and update fresh_vars.
+    Interpret appliedSymbols immediately if grounded.
     """
 
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem) for e
                             in self.sub_exprs)
 
-    simpler, co_constraint = None, None
-    if out.simpler is not None:
-        simpler = out.simpler.instantiate(e0, e1, problem)
     if out.co_constraint is not None:
         co_constraint = out.co_constraint.instantiate(e0, e1, problem)
-    out._change(simpler=simpler, co_constraint=co_constraint)
+        out._change(co_constraint=co_constraint)
 
     if out.value is not None:  # replace by new value
         out = out.value
-
-    if e0.name in out.fresh_vars:
+    elif e0.name in out.fresh_vars:
         out.fresh_vars.discard(e0.name)
         if type(e1) == Variable:
             out.fresh_vars.add(e1.name)
-        if isinstance(out, AComparison):
-            out.annotate1()
-    out.code = str(out)
+        out.code = str(out)
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate1 = instantiate1
@@ -327,7 +324,8 @@ def interpret(self, problem):
             forms = out
         else: # infinite domain !
             new_vars[name] = var
-    forms = [f.interpret(problem) if problem else f for f in forms]
+    if new_vars:
+        forms = [f.interpret(problem) if problem else f for f in forms]
     self.q_vars = new_vars
     return self.update_exprs(forms)
 AQuantification.interpret = interpret
@@ -431,18 +429,8 @@ def instantiate1(self, e0, e1, problem=None):
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
                             f"Incorrect arity for {e1.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
-        if problem and out.decl:
-            simpler, co_constraint = None, None
-            if (not out.in_head and not out.fresh_vars
-                and out.decl in problem.clark):  # has a definition
-                clark = problem.clark[out.decl]
-                co_constraint = clark.instantiate_definition(out.sub_exprs, problem)
-            if (out.decl.name in problem.interpretations
-            and any(s.decl.name == SYMBOL for s in self.decl.sorts)
-            and all(a.as_rigid() is not None for a in out.sub_exprs)):
-                f = problem.interpretations[out.decl.name].interpret_application
-                simpler = f(problem, 0, self, out.sub_exprs)  # do not use out, to avoid infinite loop
-            out = out._change(simpler=simpler, co_constraint=co_constraint)
+        if problem and not self.fresh_vars:
+            return out.interpret(problem)
     return out
 AppliedSymbol .instantiate1 = instantiate1
 
