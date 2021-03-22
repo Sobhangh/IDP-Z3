@@ -43,10 +43,10 @@ from .Assignments import Status
 from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
                    FunctionEnum)
-from .Expression import (Constructor, SymbolExpr, Expression, IfExpr, AQuantification,
-                    AImplication, ADisjunction, AConjunction,  AEquivalence, AAggregate,
+from .Expression import (Constructor, SymbolExpr, Expression, AQuantification,
+                    AImplication, AConjunction,  AEquivalence, AAggregate,
                     AComparison, AUnary, AppliedSymbol, Number,
-                    Arguments, Variable, TRUE, Quantee)
+                    Variable, TRUE)
 from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL
 
 

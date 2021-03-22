@@ -36,7 +36,7 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
-from idp_engine.utils import BOOL, INT, REAL, RELEVANT, ARITY, RESERVED_SYMBOLS
+from idp_engine.utils import BOOL, INT, REAL, RELEVANT, RESERVED_SYMBOLS
 
 
 # class ConstructedTypeDeclaration  ###########################################################

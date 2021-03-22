@@ -46,7 +46,7 @@ from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Arguments,
                          Variable, TRUE, FALSE)
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, SYMBOL,
+from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
                     RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
 
 

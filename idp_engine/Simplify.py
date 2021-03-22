@@ -28,11 +28,11 @@ import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, IfExpr, AQuantification, Quantee,\
-    BinaryOperator, AEquivalence, AImplication, ADisjunction, \
-    AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, \
-    Number, Date, Brackets, Variable, TRUE, FALSE)
+    Constructor, Expression, IfExpr, AQuantification, Quantee,
+    BinaryOperator, AEquivalence, AImplication, ADisjunction,
+    AConjunction, AComparison, ASumMinus, AMultDiv, APower,
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol,
+    Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status, Assignment
 from .utils import BOOL, INT, SYMBOL, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN

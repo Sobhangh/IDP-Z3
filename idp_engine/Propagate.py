@@ -26,9 +26,9 @@ This module monkey-patches the Expression class and sub-classes.
 
 from typing import List, Tuple, Optional
 
-from idp_engine.Expression import Constructor, Expression, AQuantification, \
-                    ADisjunction, AConjunction, \
-                    AComparison, AUnary, Brackets, TRUE, FALSE
+from idp_engine.Expression import (Constructor, Expression, AQuantification,
+                    ADisjunction, AConjunction,
+                    AComparison, AUnary, Brackets, TRUE, FALSE)
 from idp_engine.Assignments import Assignments
 
 
