@@ -202,26 +202,26 @@ Expression.substitute = substitute
 
 def instantiate(self, e0, e1, problem=None):
     """
-    recursively substitute Variable e0 by e1 in a copy of self.
+    recursively substitute Variable e0 by e1 in a copy of self, and update fresh_vars.
     Do nothing if e0 does not occur in self.
     """
     assert type(e0) == Variable
-    if e0.name not in self.fresh_vars:
+    if self.value or e0.name not in self.fresh_vars:
         return self
-    return self.instantiate1(e0, e1, problem)
+    out = copy.copy(self)  # shallow copy !
+    out.annotations = copy.copy(out.annotations)
+    out.fresh_vars = copy.copy(out.fresh_vars)
+    return out.instantiate1(e0, e1, problem)
 Expression.instantiate = instantiate
 
 def instantiate1(self, e0, e1, problem=None):
     """
-    recursively substitute Variable e0 by e1 in a copy of self.
+    recursively substitute Variable e0 by e1 in self, and update fresh_vars.
     """
-    out = copy.copy(self)
-    out.annotations = copy.copy(out.annotations)
-    out.fresh_vars = copy.copy(out.fresh_vars)
 
     # instantiate expressions, with simplification
-    out = out.update_exprs(e.instantiate(e0, e1, problem) for e
-                           in out.sub_exprs)
+    out = self.update_exprs(e.instantiate(e0, e1, problem) for e
+                            in self.sub_exprs)
 
     simpler, co_constraint = None, None
     if out.simpler is not None:
@@ -334,7 +334,7 @@ AQuantification.interpret = interpret
 
 
 def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)
+    out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
     for name, var in self.q_vars.items():
         if var.sort:
             self.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
@@ -423,9 +423,7 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 
 def instantiate1(self, e0, e1, problem=None):
-    if self.value:
-        return self
-    out = Expression.instantiate1(self, e0, e1, problem)
+    out = Expression.instantiate1(self, e0, e1, problem)  # update fresh_vars
     if type(out) == AppliedSymbol:  # might be a number after instantiation
         if type(out.symbol) == SymbolExpr and out.symbol.value is None:  # $(x)()
             out.symbol = out.symbol.instantiate(e0, e1, problem)
@@ -451,12 +449,6 @@ AppliedSymbol .instantiate1 = instantiate1
 
 # Class Variable  #######################################################
 
-def instantiate1(self, e0, e1, problem=None):
-    if self.sort:
-        self.sort = self.sort.instantiate(e0, e1, problem)
-    return e1 if self.code == e0.code else self
-Variable.instantiate1 = instantiate1
-
 def interpret(self, problem):
     return self
 Variable.interpret = interpret
@@ -467,6 +459,12 @@ def substitute(self, e0, e1, assignments, todo=None):
         self.sort = self.sort.substitute(e0,e1, assignments, todo)
     return e1 if self.code == e0.code else self
 Variable.substitute = substitute
+
+def instantiate1(self, e0, e1, problem=None):
+    if self.sort:
+        self.sort = self.sort.instantiate(e0, e1, problem)
+    return e1 if self.code == e0.code else self
+Variable.instantiate1 = instantiate1
 
 
 # Class Number  ######################################################

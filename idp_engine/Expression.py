@@ -182,6 +182,7 @@ class Expression(ASTNode):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
+        out.fresh_vars = copy.copy(out.fresh_vars)
         out.value = None if out.value is None else out.value.copy()
         out.simpler = None if out.simpler is None else out.simpler.copy()
         out.co_constraint = (None if out.co_constraint is None
@@ -466,6 +467,11 @@ class Quantee(Expression):
     def __str1__(self):
         return f"{self.var} ∈ {self.sort}"
 
+    def copy(self):
+        out = Expression.copy(self)
+        out.sort = out.sort.copy()
+        return out
+
 
 class AQuantification(Expression):
     PRECEDENCE = 20
@@ -731,6 +737,11 @@ class AppliedSymbol(Expression):
         return (f"{out}"
                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
+
+    def copy(self):
+        out = Expression.copy(self)
+        out.symbol = out.symbol.copy()
+        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl and self.decl.name not in RESERVED_SYMBOLS:
