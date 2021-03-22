@@ -372,7 +372,10 @@ IfExpr.annotate1 = annotate1
 def annotate(self, voc, q_vars):
     if self.sort:
         self.sort = self.sort.annotate(voc, q_vars).simplify1()
-    return Expression.annotate1(self.simplify1())
+    out = Expression.annotate1(self.simplify1())
+    if out.sort:
+        out.fresh_vars.update(out.sort.fresh_vars)
+    return out
 Quantee.annotate = annotate
 
 

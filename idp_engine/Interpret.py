@@ -330,6 +330,9 @@ AQuantification.interpret = interpret
 
 def instantiate(self, e0, e1, problem=None):
     out = Expression.instantiate(self, e0, e1, problem)
+    for name, var in self.q_vars.items():
+        if var.sort:
+            self.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
     if e0.type == SYMBOL:
         out.interpret(problem)  # to perform type inference
     return out
@@ -344,12 +347,7 @@ def interpret(self, problem):
 AAggregate.interpret = interpret
 
 
-def instantiate(self, e0, e1, problem=None):
-    out = Expression.instantiate(self, e0, e1, problem)
-    if e0.type == SYMBOL:
-        out.interpret(problem)  # to perform type inference
-    return out
-AAggregate.instantiate = instantiate
+AAggregate.instantiate = instantiate  # from AQuantification
 
 
 # Class AppliedSymbol  ##############################################
