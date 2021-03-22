@@ -113,6 +113,7 @@ def update_exprs(self, new_exprs):
         if symbol:
             self.decl = symbol.decl
             self.sort.decl = self.decl
+    return self
 Quantee.update_exprs = update_exprs
 
 

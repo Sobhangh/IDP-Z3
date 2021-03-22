@@ -207,8 +207,12 @@ def instantiate(self, e0, e1, problem=None):
     instantiating e0=`x by e1=`f in self=`x(y) returns f(y)
     (or any instance of f if arities don't match)
     """
+    assert type(e0) == Variable
+    if e0.name not in self.fresh_vars:
+        return self
     out = copy.copy(self)
     out.annotations = copy.copy(out.annotations)
+    out.fresh_vars = copy.copy(out.fresh_vars)
 
     # instantiate expressions, with simplification
     out = out.update_exprs(e.instantiate(e0, e1, problem) for e
