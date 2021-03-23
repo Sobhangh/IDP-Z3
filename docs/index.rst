@@ -12,6 +12,7 @@ Welcome to IDP-Z3's documentation!
 
    introduction
    IDPLanguage
+   API
    CLI
    interactive_consultant
    code_reference

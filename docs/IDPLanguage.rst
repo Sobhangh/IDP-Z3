@@ -1,3 +1,6 @@
+.. _IDP:
+
+
 The IDP Language
 ================
 
