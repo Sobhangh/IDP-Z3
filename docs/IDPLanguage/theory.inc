@@ -1,12 +1,11 @@
-.. |n|      replace:: :math:`n`
-.. |not|    replace:: :math:`\lnot`
-.. |phi|    replace:: :math:`\phi`
-.. |t|      replace:: :math:`t`
-.. |t1|     replace:: :math:`t_1`
-.. |t2|     replace:: :math:`t_2`
-.. |t3|     replace:: :math:`t_3`
-.. |t1,tn|  replace:: :math:`t_1, t_2,.., t_n`
-.. |v1,vn|  replace:: :math:`v_1  v_2 .. v_n`
+.. |n|      replace:: ``n``
+.. |phi|    replace:: ``ϕ``
+.. |t|      replace:: ``t``
+.. |t1|     replace:: ``t_1``
+.. |t2|     replace:: ``t_2``
+.. |t3|     replace:: ``t_3``
+.. |t1,tn|  replace:: ``t_1, t_2,.., t_n``
+.. |v1,vn|  replace:: ``v_1  v_2 .. v_n``
 
 .. index:: theory
 
@@ -43,34 +42,36 @@ Variable
 .. _function application:
 
 Function application
-    :math:`F(t_1, t_2,.., t_n)` is a term, when :math:`F` is a function_ symbol of arity |n|, and |t1,tn| are terms.
+    ``F(t_1, t_2,.., t_n)`` is a term, when ``F`` is a function_ symbol of arity |n|, and |t1,tn| are terms.
     Each term must be of the appropriate type_, as defined in the function declaration in the vocabulary.
     The resulting type of the function application is also defined in the function declaration.
-    If the arity of :math:`F` is 0, i.e., if :math:`F` is a constant_, then :math:`F()` is a term.
+    If the arity of ``F`` is 0, i.e., if ``F`` is a constant_, then ``F()`` is a term.
+
+    ``$(s)(t_1, t_2,.., t_n)`` is a term, when ``s`` is an expression of type Symbol that denotes a function of arity |n|, and |t1,tn| are terms.
 
 Negation
     -|t| is a numerical term, when |t| is a numerical term.
 
 Arithmetic
-    :math:`t_1 ꕕ t_2` is a numerical term, when |t1|, |t2| are two numerical terms, and :math:`ꕕ` is one of the following math operators :math:`+, -, *, /, \hat{}, \%`.
-    Mathematical operators can be chained as customary (e.g. :math:`x+y+z`).
+    ``t_1 ꕕ t_2`` is a numerical term, when |t1|, |t2| are two numerical terms, and ``ꕕ`` is one of the following math operators ``+, -, *, /, ^, %``.
+    Mathematical operators can be chained as customary (e.g. ``x+y+z``).
     The usual order of binding is used.
 
 Parenthesis
     (|t|) is a term, when |t| is a term
 
 Cardinality aggregate
-    :math:`\#\{v_1 in typeOfV_1, .., v_n in typeOfV_n : \phi\}` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
+    ``#{v_1 in typeOfV_1, .., v_n in typeOfV_n : ϕ}`` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
 
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
 Arithmetic aggregate
-    :math:`ꕕ\{v_1 in typeOfV_1, .., v_n in typeOfV_n : \phi : t\}` is a numerical term when :math:`ꕕ` is :math:`sum`, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
+    ``ꕕ{v_1 in typeOfV_1, .., v_n in typeOfV_n : ϕ : t}`` is a numerical term when ``ꕕ`` is ``sum``, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
 
     The term denotes the sum of |t| for each distinct tuple of values for |v1,vn| which make |phi| true.
 
 (if .. then .. else ..)
-    :math:`(if\ t_1\ then\ t_2\ else\ t_3)` is a term when |t1| is a sentence, |t2| and |t3| are terms of the same type.
+    ``(if\ t_1\ then\ t_2\ else\ t_3)`` is a term when |t1| is a sentence, |t2| and |t3| are terms of the same type.
 
 
 .. _sentence:
@@ -89,19 +90,21 @@ true and false
 .. _predicate application:
 
 Predicate application
-    :math:`P(t_1, t_2,.., t_n)` is a sentence, when :math:`P` is a predicate_ symbol of arity |n|, and |t1,tn| are terms.
+    ``P(t_1, t_2,.., t_n)`` is a sentence, when ``P`` is a predicate_ symbol of arity |n|, and |t1,tn| are terms.
     Each term must be of the appropriate type_, as defined in the predicate declaration.
-    If the arity of :math:`P` is 0, i.e., if :math:`P` is a proposition, then :math:`P()` is a sentence.
+    If the arity of ``P`` is 0, i.e., if ``P`` is a proposition, then ``P()`` is a sentence.
+
+    ``$(s)(t_1, t_2,.., t_n)`` is a sentence, when ``s`` is an expression of type Symbol that denotes a predicate of arity |n|, and |t1,tn| are terms.
 
 Comparison
-    :math:`t_1 ꕕ t_2` is a sentence, when |t1|, |t2| are two numerical terms and :math:`ꕕ` is one of the following comparison operators :math:`<, ≤, =, ≥, >, ≠` (or,  using ascii characters: :math:`=<, >=, \sim=`).
+    ``t_1 ꕕ t_2`` is a sentence, when |t1|, |t2| are two numerical terms and ``ꕕ`` is one of the following comparison operators ``<, ≤, =, ≥, >, ≠`` (or,  using ascii characters: ``=<, >=, ~=``).
     Comparison operators can be chained as customary.
 
 Negation
-    |not| |phi| is a sentence (or, using ascii characters: :math:`\sim \phi`) when |phi| is a sentence.
+    ``¬ϕ`` is a sentence (or, using ascii characters: ``~ϕ``) when |phi| is a sentence.
 
 Logic connectives
-    :math:`\phi_1 ꕕ \phi_2` is a sentence when :math:`\phi_1, \phi_2` are two sentences and :math:`ꕕ` is one of the following logic connectives :math:`\lor, \land, \Rightarrow, \Leftarrow, \Leftrightarrow` (or using ascii characters: :math:`|, \&, =>, <=, <=>` respectively).
+    ``ϕ_1 ꕕ ϕ_2`` is a sentence when ``ϕ_1, ϕ_2`` are two sentences and ``ꕕ`` is one of the following logic connectives ``∨,∧,⇒,⇐,⇔`` (or using ascii characters: ``|, \&, =>, <=, <=>`` respectively).
     Logic connectives can be chained as customary.
 
 Parenthesis
@@ -116,13 +119,13 @@ Enumeration
 
 Quantified formulas
     *Quantified formulas* are sentences.
-    They have one of these two forms, where :math:`v_1, .., v_n` are variables and |phi| is a sentence:
+    They have one of these two forms, where ``v_1, .., v_n`` are variables and |phi| is a sentence:
 
-    .. math::
+    .. code::
 
-        \exists v_1 in typeOfV_1, .., v_n in typeOfV_n: \phi
+        ∀ v_1 ∈ T_1, v_n ∈ T_n: ϕ.
 
-        \forall v_1 in typeOfV_1, .., v_n in typeOfV_n: \phi
+        ∃ v_1 ∈ T_1, v_n ∈ T_n: ϕ.
 
     Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
     For example, ``!x in Int, y in Int: f(x,y)=f(y,x).``
@@ -138,18 +141,18 @@ Quantified formulas
         !`p in Symbol: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
 
 "is (not) enumerated"
-    :math:`f(a,b)\ is\ enumerated` and :math:`f(a,b)\ is\ not\ enumerated` are sentences,
-    where :math:`f` is a function defined by an enumeration and applied to arguments :math:`a` and :math:`b`.
-    Its truth value reflects whether :math:`(a,b)` is enumerated in :math:`f`'s enumeration.
+    ``f(a,b) is enumerated`` and ``f(a,b) is not enumerated`` are sentences,
+    where ``f`` is a function defined by an enumeration and applied to arguments ``a`` and ``b``.
+    Its truth value reflects whether ``(a,b)`` is enumerated in ``f``'s enumeration.
     If the enumeration has a default value, every tuple of arguments is enumerated.
 
 "(not) in {1,2,3,4}"
-    :math:`f(args)\ in\ enum` and :math:`f(args)\ not\ in\ enum` are sentences, where
-    :math:`f` is a function applied to arguments :math:`args`
-    and :math:`enum` is an enumeration.
+    ``f(args) in enum`` and ``f(args) not in enum`` are sentences, where
+    ``f`` is a function applied to arguments ``args``
+    and ``enum`` is an enumeration.
 
 if .. then .. else ..
-    :math:`if\ t_1\ then\ t_2\ else\ t_3` is a sentence when |t1|, |t2| and |t3| are sentences.
+    ``if t_1 then t_2 else t_3`` is a sentence when |t1|, |t2| and |t3| are sentences.
 
 
 .. _definition:
@@ -165,15 +168,15 @@ A definition consists of a set of rules, enclosed by ``{`` and ``}``.
 
 *Rules* have one of the following forms:
 
-.. math::
+.. code::
 
-    &\forall v_1[typeOfV_1] .. v_n[typeOfV_n] : P(t_1, .., t_n) \leftarrow \phi.
+    ∀ v_1 ∈ T_1, v_n ∈ T_n: P(t_1, .., t_n) ← |phi|.
 
-    &\forall v_1[typeOfV_1] .. v_n[typeOfV_n] : F(t_1, .., t_n)=t \leftarrow \phi.
+    ∀ v_1 ∈ T_1, v_n ∈ T_n: F(t_1, .., t_n) = t ← |phi|.
 
 where P is a predicate_ symbol, F is a function_ symbol, |t|, |t1,tn| are terms that may contain the variables |v1,vn| and |phi| is a formula that may contain these variables.
-:math:`P(t_1, t_2,.., t_n)` is called the *head* of the rule and |phi| the *body*.
-``<-`` can be used instead of ':math:`\leftarrow`'.
+``P(t_1, t_2,.., t_n)`` is called the *head* of the rule and |phi| the *body*.
+``<-`` can be used instead of ``←``.
 If the body is ``true``, the left arrow and body of the rule can be omitted.
 
 

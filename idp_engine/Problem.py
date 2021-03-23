@@ -31,7 +31,7 @@ from .Expression import TRUE, AConjunction, Expression, ADisjunction, AUnary, \
     FALSE, AppliedSymbol
 from .Parse import ConstructedTypeDeclaration, Structure, Symbol, SymbolDeclaration, Theory, FunctionEnum, str_to_IDP
 from .Simplify import join_set_conditions
-from .utils import OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL
+from .utils import OrderedSet, NEWL, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, SYMBOL, RELEVANT
 
 class Problem(object):
     """A collection of theory and structure blocks.
@@ -114,7 +114,8 @@ class Problem(object):
         for name, decl in block.declarations.items():
             assert (name not in self.declarations
                     or self.declarations[name] == block.declarations[name]
-                    or name in [BOOL, INT, REAL, DATE, SYMBOL, '__relevant']), \
+                    or name in [BOOL, INT, REAL, DATE, SYMBOL]
+                    or name in RESERVED_SYMBOLS), \
                     f"Can't add declaration for {name} in {block.name}: duplicate"
             self.declarations[name] = decl
         for decl in self.declarations.values():
@@ -168,15 +169,15 @@ class Problem(object):
             # expand goals
             for s in self.goals.values():
                 assert s.instances, "goals must be instantiable."
-                relevant = Symbol(name='__relevant')
-                relevant.decl = self.declarations['__relevant']
+                relevant = Symbol(name=RELEVANT)
+                relevant.decl = self.declarations[RELEVANT]
                 constraint = AppliedSymbol.make(relevant, s.instances.values())
                 self.constraints.append(constraint)
 
             # expand whole-domain definitions
             for decl, rule in self.clark.items():
-                if decl.domain:
-                    self.def_constraints[decl] = rule.interpret(self).expanded
+                if rule.is_whole_domain:
+                    self.def_constraints[decl] = rule.interpret(self).whole_domain
 
             self.co_constraints, self.questions = OrderedSet(), OrderedSet()
             for c in self.constraints:

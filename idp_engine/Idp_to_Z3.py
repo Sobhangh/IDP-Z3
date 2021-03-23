@@ -36,7 +36,7 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
-from idp_engine.utils import BOOL, INT, REAL
+from idp_engine.utils import BOOL, INT, REAL, RELEVANT, ARITY, RESERVED_SYMBOLS
 
 
 # class ConstructedTypeDeclaration  ###########################################################
@@ -45,17 +45,17 @@ def translate(self):
     if self.translated is None:
         if self.name == BOOL:
             self.translated = BoolSort()
-            self.constructors[0].type = BOOL
-            self.constructors[1].type = BOOL
-            self.constructors[0].translated = BoolVal(True)
-            self.constructors[1].translated = BoolVal(False)
-            self.constructors[0].py_value = True
-            self.constructors[1].py_value = False
+            self.domain[0].type = BOOL
+            self.domain[1].type = BOOL
+            self.domain[0].translated = BoolVal(True)
+            self.domain[1].translated = BoolVal(False)
+            self.domain[0].py_value = True
+            self.domain[1].py_value = False
         else:
             self.translated, cstrs = EnumSort(self.name, [c.name for c in
-                                                        self.constructors])
-            self.check(len(self.constructors) == len(cstrs), "Internal error")
-            for c, c3 in zip(self.constructors, cstrs):
+                                                        self.domain])
+            self.check(len(self.domain) == len(cstrs), "Internal error")
+            for c, c3 in zip(self.domain, cstrs):
                 c.translated = c3
                 c.py_value = c3
                 self.map[str(c)] = c
@@ -257,9 +257,12 @@ AAggregate.translate1 = translate1
 # Class AppliedSymbol  #######################################################
 
 def translate1(self):
-    if self.s.name == '__relevant':
+    self.check(self.decl, f"Unknown symbol: {self.symbol}")
+    if self.decl.name == RELEVANT:
         return TRUE.translated
-    if self.s.name == 'abs':
+    assert self.decl.name not in RESERVED_SYMBOLS, \
+               f"Can't resolve argument of built-in symbols: {self}"
+    if self.decl.name == 'abs':
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
     else:

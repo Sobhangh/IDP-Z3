@@ -3606,44 +3606,46 @@ structure {
                                                                        'typ': 'Bool',
                                                                        'value': True},
               '__rank': 1,
-              '∀Line[Line_t] : Solution(Line) = sum{ : Line = Line : Hundreds(Line) * 100} + sum{ : Line = Line : Tens(Line) * 10} + sum{ : Line = Line : Units(Line)}': {'environmental': False,
-                                                                                                                                                                          'is_assignment': False,
-                                                                                                                                                                          'normal': False,
-                                                                                                                                                                          'reading': '∀Line[Line_t] '
-                                                                                                                                                                                     ': '
-                                                                                                                                                                                     'Solution(Line) '
-                                                                                                                                                                                     '= '
-                                                                                                                                                                                     'sum{ '
-                                                                                                                                                                                     ': '
-                                                                                                                                                                                     'Line '
-                                                                                                                                                                                     '= '
-                                                                                                                                                                                     'Line '
-                                                                                                                                                                                     ': '
-                                                                                                                                                                                     'Hundreds(Line) '
-                                                                                                                                                                                     '* '
-                                                                                                                                                                                     '100} '
-                                                                                                                                                                                     '+ '
-                                                                                                                                                                                     'sum{ '
-                                                                                                                                                                                     ': '
-                                                                                                                                                                                     'Line '
-                                                                                                                                                                                     '= '
-                                                                                                                                                                                     'Line '
-                                                                                                                                                                                     ': '
-                                                                                                                                                                                     'Tens(Line) '
-                                                                                                                                                                                     '* '
-                                                                                                                                                                                     '10} '
-                                                                                                                                                                                     '+ '
-                                                                                                                                                                                     'sum{ '
-                                                                                                                                                                                     ': '
-                                                                                                                                                                                     'Line '
-                                                                                                                                                                                     '= '
-                                                                                                                                                                                     'Line '
-                                                                                                                                                                                     ': '
-                                                                                                                                                                                     'Units(Line)}',
-                                                                                                                                                                          'relevant': True,
-                                                                                                                                                                          'status': 'UNIVERSAL',
-                                                                                                                                                                          'typ': 'Bool',
-                                                                                                                                                                          'value': True}},
+              '∀Line ∈ Line_t : Solution(Line) = sum{ : Line = Line : Hundreds(Line) * 100} + sum{ : Line = Line : Tens(Line) * 10} + sum{ : Line = Line : Units(Line)}': {'environmental': False,
+                                                                                                                                                                           'is_assignment': False,
+                                                                                                                                                                           'normal': False,
+                                                                                                                                                                           'reading': '∀Line '
+                                                                                                                                                                                      '∈ '
+                                                                                                                                                                                      'Line_t '
+                                                                                                                                                                                      ': '
+                                                                                                                                                                                      'Solution(Line) '
+                                                                                                                                                                                      '= '
+                                                                                                                                                                                      'sum{ '
+                                                                                                                                                                                      ': '
+                                                                                                                                                                                      'Line '
+                                                                                                                                                                                      '= '
+                                                                                                                                                                                      'Line '
+                                                                                                                                                                                      ': '
+                                                                                                                                                                                      'Hundreds(Line) '
+                                                                                                                                                                                      '* '
+                                                                                                                                                                                      '100} '
+                                                                                                                                                                                      '+ '
+                                                                                                                                                                                      'sum{ '
+                                                                                                                                                                                      ': '
+                                                                                                                                                                                      'Line '
+                                                                                                                                                                                      '= '
+                                                                                                                                                                                      'Line '
+                                                                                                                                                                                      ': '
+                                                                                                                                                                                      'Tens(Line) '
+                                                                                                                                                                                      '* '
+                                                                                                                                                                                      '10} '
+                                                                                                                                                                                      '+ '
+                                                                                                                                                                                      'sum{ '
+                                                                                                                                                                                      ': '
+                                                                                                                                                                                      'Line '
+                                                                                                                                                                                      '= '
+                                                                                                                                                                                      'Line '
+                                                                                                                                                                                      ': '
+                                                                                                                                                                                      'Units(Line)}',
+                                                                                                                                                                           'relevant': True,
+                                                                                                                                                                           'status': 'UNIVERSAL',
+                                                                                                                                                                           'typ': 'Bool',
+                                                                                                                                                                           'value': True}},
  'Syllables': {'Syllables(First)': {'environmental': False,
                                     'is_assignment': True,
                                     'normal': True,
@@ -3864,50 +3866,52 @@ structure {
                                         'typ': 'Bool',
                                         'value': False},
                '__rank': 1,
-               '∀Line[Line_t] : Syllables(Line) = sum{ : Line = Line : Syllables_for_Hundreds(Hundreds(Line))} + sum{ : Line = Line : Syllables_for_Tens(Tens(Line))} + sum{ : Line = Line : Syllables_for_Units(Units(Line))}': {'environmental': False,
-                                                                                                                                                                                                                                  'is_assignment': False,
-                                                                                                                                                                                                                                  'normal': False,
-                                                                                                                                                                                                                                  'reading': '∀Line[Line_t] '
-                                                                                                                                                                                                                                             ': '
-                                                                                                                                                                                                                                             'Syllables(Line) '
-                                                                                                                                                                                                                                             '= '
-                                                                                                                                                                                                                                             'sum{ '
-                                                                                                                                                                                                                                             ': '
-                                                                                                                                                                                                                                             'Line '
-                                                                                                                                                                                                                                             '= '
-                                                                                                                                                                                                                                             'Line '
-                                                                                                                                                                                                                                             ': '
-                                                                                                                                                                                                                                             'Syllables_for_Hundreds(Hundreds(Line))} '
-                                                                                                                                                                                                                                             '+ '
-                                                                                                                                                                                                                                             'sum{ '
-                                                                                                                                                                                                                                             ': '
-                                                                                                                                                                                                                                             'Line '
-                                                                                                                                                                                                                                             '= '
-                                                                                                                                                                                                                                             'Line '
-                                                                                                                                                                                                                                             ': '
-                                                                                                                                                                                                                                             'Syllables_for_Tens(Tens(Line))} '
-                                                                                                                                                                                                                                             '+ '
-                                                                                                                                                                                                                                             'sum{ '
-                                                                                                                                                                                                                                             ': '
-                                                                                                                                                                                                                                             'Line '
-                                                                                                                                                                                                                                             '= '
-                                                                                                                                                                                                                                             'Line '
-                                                                                                                                                                                                                                             ': '
-                                                                                                                                                                                                                                             'Syllables_for_Units(Units(Line))}',
-                                                                                                                                                                                                                                  'relevant': True,
-                                                                                                                                                                                                                                  'status': 'UNIVERSAL',
-                                                                                                                                                                                                                                  'typ': 'Bool',
-                                                                                                                                                                                                                                  'value': True},
-               '∀Line[Line_t] : true ⇒ Syllables(Line) = Allowed_Syllables(Line)': {'environmental': False,
-                                                                                    'is_assignment': False,
-                                                                                    'normal': False,
-                                                                                    'reading': '∀Line[Line_t] : true ⇒ '
-                                                                                               'Syllables(Line) = '
-                                                                                               'Allowed_Syllables(Line)',
-                                                                                    'relevant': True,
-                                                                                    'status': 'UNIVERSAL',
-                                                                                    'typ': 'Bool',
-                                                                                    'value': True}},
+               '∀Line ∈ Line_t : Syllables(Line) = sum{ : Line = Line : Syllables_for_Hundreds(Hundreds(Line))} + sum{ : Line = Line : Syllables_for_Tens(Tens(Line))} + sum{ : Line = Line : Syllables_for_Units(Units(Line))}': {'environmental': False,
+                                                                                                                                                                                                                                   'is_assignment': False,
+                                                                                                                                                                                                                                   'normal': False,
+                                                                                                                                                                                                                                   'reading': '∀Line '
+                                                                                                                                                                                                                                              '∈ '
+                                                                                                                                                                                                                                              'Line_t '
+                                                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                                                              'Syllables(Line) '
+                                                                                                                                                                                                                                              '= '
+                                                                                                                                                                                                                                              'sum{ '
+                                                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                                                              'Line '
+                                                                                                                                                                                                                                              '= '
+                                                                                                                                                                                                                                              'Line '
+                                                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                                                              'Syllables_for_Hundreds(Hundreds(Line))} '
+                                                                                                                                                                                                                                              '+ '
+                                                                                                                                                                                                                                              'sum{ '
+                                                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                                                              'Line '
+                                                                                                                                                                                                                                              '= '
+                                                                                                                                                                                                                                              'Line '
+                                                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                                                              'Syllables_for_Tens(Tens(Line))} '
+                                                                                                                                                                                                                                              '+ '
+                                                                                                                                                                                                                                              'sum{ '
+                                                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                                                              'Line '
+                                                                                                                                                                                                                                              '= '
+                                                                                                                                                                                                                                              'Line '
+                                                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                                                              'Syllables_for_Units(Units(Line))}',
+                                                                                                                                                                                                                                   'relevant': True,
+                                                                                                                                                                                                                                   'status': 'UNIVERSAL',
+                                                                                                                                                                                                                                   'typ': 'Bool',
+                                                                                                                                                                                                                                   'value': True},
+               '∀Line ∈ Line_t : true ⇒ Syllables(Line) = Allowed_Syllables(Line)': {'environmental': False,
+                                                                                     'is_assignment': False,
+                                                                                     'normal': False,
+                                                                                     'reading': '∀Line ∈ Line_t : true '
+                                                                                                '⇒ Syllables(Line) = '
+                                                                                                'Allowed_Syllables(Line)',
+                                                                                     'relevant': True,
+                                                                                     'status': 'UNIVERSAL',
+                                                                                     'typ': 'Bool',
+                                                                                     'value': True}},
  'Syllables_for_Hundreds': {},
  'Syllables_for_Tens': {},
  'Syllables_for_Units': {},

@@ -23,17 +23,17 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 from copy import copy
 
 from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
-                    RangeDeclaration, SymbolDeclaration, Sort, Symbol,
+                    RangeDeclaration, SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, Display)
-from .Expression import (Expression, Constructor, IfExpr, AQuantification,
+from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         TRUE, FALSE)
+                         FALSE, SymbolExpr)
 
-from .utils import BOOL, INT, REAL, SYMBOL, OrderedSet, IDPZ3Error
+from .utils import BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error
 
 
 # Class Vocabulary  #######################################################
@@ -46,9 +46,10 @@ def annotate(self, idp):
         s.block = self
         s.annotate(self)  # updates self.symbol_decls
 
-    for constructor in self.symbol_decls[SYMBOL].constructors:
+    for constructor in self.symbol_decls[SYMBOL].domain:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
+    self.symbol_decls[SYMBOL].translate()  # to populate .map
 Vocabulary.annotate = annotate
 
 
@@ -67,12 +68,15 @@ def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
-    for c in self.constructors:
+    for s in self.sorts:
+        s.annotate(voc, {})
+    self.out.annotate(voc, {})
+    for c in self.domain:
         c.type = self.name
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
                     f"duplicate constructor in vocabulary: {c.name}")
         voc.symbol_decls[c.name] = c
-    self.range = self.constructors  # TODO constructor functions
+    self.range = self.domain  # TODO constructor functions
     if self.interpretation:
         self.interpretation.annotate(voc)
 ConstructedTypeDeclaration.annotate = annotate
@@ -84,6 +88,9 @@ def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
+    for s in self.sorts:
+        s.annotate(voc, {})
+    self.out.annotate(voc, {})
 RangeDeclaration.annotate = annotate
 
 
@@ -96,23 +103,18 @@ def annotate(self, voc):
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
     for s in self.sorts:
-        s.annotate(voc)
-    self.out.annotate(voc)
+        s.annotate(voc, {})
+    self.out.annotate(voc, {})
     self.type = self.out.decl.name
     return self
 SymbolDeclaration.annotate = annotate
 
 
-# Class Sort  #######################################################
-
-def annotate(self, voc):
-    self.decl = voc.symbol_decls[self.name]
-Sort.annotate = annotate
-
-
 # Class Symbol  #######################################################
 
 def annotate(self, voc, q_vars):
+    if self.name in q_vars:
+        return q_vars[self.name]
     self.decl = voc.symbol_decls[self.name]
     self.type = self.decl.type
     return self
@@ -182,17 +184,19 @@ Definition.annotate = annotate
 
 def annotate(self, voc, q_vars):
     # create head variables
-    self.check(len(self.vars) == len(self.sorts), "Internal error")
-    for v, s in zip(self.vars, self.sorts):
-        if s:
-            s.annotate(voc)
-        self.q_vars[v] = Variable(v,s)
+    for q in self.quantees:
+        if q.sort:
+            q.annotate(voc, q_vars)
+        self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
 
     self.symbol = self.symbol.annotate(voc, q_v)
     self.args = [arg.annotate(voc, q_v) for arg in self.args]
     self.out = self.out.annotate(voc, q_v) if self.out else self.out
     self.body = self.body.annotate(voc, q_v)
+
+    self.is_whole_domain = all(s.name not in [INT, REAL, DATE]
+                                for s in self.symbol.decl.sorts)
     return self
 Rule.annotate = annotate
 
@@ -308,16 +312,16 @@ def annotate(self, idp):
         open_type = ConstructedTypeDeclaration(name=type_name,
                                                 constructors=constructors)
         open_type.annotate(self.voc)
-        open_types[name] = Sort(name=type_name)
+        open_types[name] = Symbol(name=type_name)
 
     for name, out in [
-        ('goal', Sort(name=BOOL)),
-        ('expand', Sort(name=BOOL)),
-        ('relevant', Sort(name=BOOL)),
-        ('hide', Sort(name=BOOL)),
-        ('view', Sort(name='View')),
-        ('moveSymbols', Sort(name=BOOL)),
-        ('optionalPropagation', Sort(name=BOOL)),
+        ('goal', Symbol(name=BOOL)),
+        ('expand', Symbol(name=BOOL)),
+        ('relevant', Symbol(name=BOOL)),
+        ('hide', Symbol(name=BOOL)),
+        ('view', Symbol(name='View')),
+        ('moveSymbols', Symbol(name=BOOL)),
+        ('optionalPropagation', Symbol(name=BOOL)),
         ('unit', open_types['unit']),
         ('category', open_types['category'])
     ]:
@@ -363,21 +367,25 @@ def annotate1(self):
 IfExpr.annotate1 = annotate1
 
 
+# Class Quantee  #######################################################
+
+def annotate(self, voc, q_vars):
+    if self.sort:
+        self.sort = self.sort.annotate(voc, q_vars).simplify1()
+    return self.simplify1()
+Quantee.annotate = annotate
+
+
 # Class AQuantification  #######################################################
 
 def annotate(self, voc, q_vars):
-    # First we check for some common errors.
-    for v in self.vars:
-        self.check(v not in voc.symbol_decls,
-            f"the quantified variable '{v}' cannot have"
-            f" the same name as another symbol")
-    self.check(len(self.vars) == len(self.sorts), "Internal error")
-
     self.q_vars = {}
-    for v, s in zip(self.vars, self.sorts):
-        if s:
-            s.annotate(voc)
-        self.q_vars[v] = Variable(v, s)
+    for q in self.quantees:
+        self.check(q.var not in voc.symbol_decls,
+            f"the quantified variable '{q.var}' cannot have"
+            f" the same name as another symbol")
+        q.annotate(voc, q_vars)
+        self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
@@ -442,15 +450,12 @@ AUnary.annotate1 = annotate1
 # Class AAggregate  #######################################################
 
 def annotate(self, voc, q_vars):
-    for v in self.vars:
-        self.check(v not in voc.symbol_decls,
-            f"the quantifier variable '{v}' cannot have the same name as another symbol.")
-    self.check(len(self.vars) == len(self.sorts), "Internal error")
     self.q_vars = {}
-    for v, s in zip(self.vars, self.sorts):
-        if s:
-            s.annotate(voc)
-        self.q_vars[v] = Variable(v, s)
+    for q in self.quantees:
+        self.check(q.var not in voc.symbol_decls,
+            f"the quantifier variable '{q.var}' cannot have the same name as another symbol.")
+        q.annotate(voc, q_vars)
+        self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
@@ -464,22 +469,18 @@ AAggregate.annotate = annotate
 # Class AppliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars):
+    self.symbol = self.symbol.annotate(voc, q_vars)
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    try:
-        self.decl = q_vars[self.s.name].sort.decl if self.s.name in q_vars\
-            else voc.symbol_decls[self.s.name]
-    except KeyError:
-        self.check(False, f"Unknown symbol {self}")
-    self.s.decl = self.decl
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)
+
     # move the negation out
     if 'not' in self.is_enumerated:
-        out = AppliedSymbol.make(self.s, self.sub_exprs,
+        out = AppliedSymbol.make(self.symbol, self.sub_exprs,
                                     is_enumerated='is enumerated')
         out = AUnary.make('¬', out)
     elif 'not' in self.is_enumeration:
-        out = AppliedSymbol.make(self.s, self.sub_exprs,
+        out = AppliedSymbol.make(self.symbol, self.sub_exprs,
                                     is_enumeration='in',
                                     in_enumeration=self.in_enumeration)
         out = AUnary.make('¬', out)
@@ -489,25 +490,32 @@ def annotate(self, voc, q_vars):
 AppliedSymbol.annotate = annotate
 
 def annotate1(self):
-    self.type = (BOOL if self.is_enumerated or self.in_enumeration else
-                    self.decl.type if self.decl else None)
     out = Expression.annotate1(self)
-    if out.decl and out.decl.name == SYMBOL:  # a symbol variable
-        out.fresh_vars.add(self.s.name)
-    return out
+    out.symbol = out.symbol.annotate1()
+    out.fresh_vars.update(out.symbol.fresh_vars)
+    return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
+
+
+# Class Variable  #######################################################
+
+def annotate(self, voc, q_vars):
+    self.type = self.sort.decl.name if self.sort and self.sort.decl else ''
+    return self
+Variable.annotate = annotate
 
 
 # Class UnappliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars):
-    if self.name in voc.symbol_decls and type(voc.symbol_decls[self.name]) == Constructor:
-        return voc.symbol_decls[self.name]
+    if self.name in voc.symbol_decls:
+        if type(voc.symbol_decls[self.name]) == Constructor:
+            return voc.symbol_decls[self.name]
+        self.check(False, f"{self} should be applied to arguments (or prefixed with a back-tick)")
     if self.name in q_vars:
         return q_vars[self.name]
     # elif self.name in voc.symbol_decls:  # in symbol_decls
-    #     out = AppliedSymbol(s=self.s,
-    #                         args=Arguments(sub_exprs=self.sub_exprs))
+    #     out = AppliedSymbol.make(self.s, self.sub_exprs)
     #     return out.annotate(voc, q_vars)
     # If this code is reached, an undefined symbol was present.
     self.check(False, f"Symbol not in vocabulary: {self}")

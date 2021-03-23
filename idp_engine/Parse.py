@@ -22,7 +22,7 @@ Classes to parse an IDP-Z3 theory.
 """
 __all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
-           "SymbolDeclaration", "Sort", "Symbol", "Theory", "Definition",
+           "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", "idpparser", ]
 
@@ -38,18 +38,20 @@ from typing import Dict, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, IfExpr, AQuantification,
+from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
+                         IfExpr, AQuantification, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Arguments,
                          Variable, TRUE, FALSE)
-from .utils import (unquote, OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    IDPZ3Error)
+from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, SYMBOL,
+                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
 
 
 def str_to_IDP(atom, val_string):
+    assert atom.type, "Internal error"
     if atom.type == BOOL:
         if val_string not in ['True', 'False']:
             raise IDPZ3Error(
@@ -166,11 +168,23 @@ class Vocabulary(ASTNode):
             RangeDeclaration(name=DATE, elements=[]),
             ConstructedTypeDeclaration(
                 name=SYMBOL,
-                constructors=[Constructor(name=f"`{s.name}")
-                              for s in self.declarations
-                              if type(s) == SymbolDeclaration]),
-            SymbolDeclaration(annotations='', name=Symbol(name='__relevant'),
-                                    sorts=[], out=Sort(name=BOOL)),
+                constructors=([Constructor(name=f"`{s}")
+                               for s in [DATE,]]  # TODO '𝔹', 'ℤ', 'ℝ',
+                             +[Constructor(name=f"`{s.name}")
+                                for s in self.declarations
+                                if type(s) == SymbolDeclaration
+                                or type(s) in Type.__args__])),
+            SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
+                                sorts=[], out=Symbol(name=BOOL)),
+            SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
+                                sorts=[Symbol(name=SYMBOL)],
+                                out=Symbol(name=INT)),
+            SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
+                                sorts=[Symbol(name=SYMBOL), Symbol(name=INT)],
+                                out=Symbol(name=SYMBOL)),
+            SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
+                                sorts=[Symbol(name=SYMBOL)],
+                                out=Symbol(name=SYMBOL))
             ] + self.declarations
 
     def __str__(self):
@@ -212,7 +226,15 @@ class ConstructedTypeDeclaration(ASTNode):
     Args:
         name (string): name of the type
 
-        constructors ([Constructor]): list of constructors in the enumeration
+        arity (int): the number of arguments
+
+        sorts (List[Symbol]): the types of the arguments
+
+        out (Symbol): Boolean Symbol
+
+        type (string): Z3 type of an element of the type; same as `name`
+
+        domain ([Constructor]): list of constructors in the enumeration
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
@@ -223,13 +245,18 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.constructors = ([] if 'constructors' not in kwargs else
+        self.domain = ([] if 'constructors' not in kwargs else
                              kwargs.pop('constructors'))
         enumeration = (None if 'enumeration' not in kwargs else
                             kwargs.pop('enumeration'))
+
+        self.arity = 1
+        self.sorts = [Symbol(name=self.name)]
+        self.out = Symbol(name=BOOL)
+        self.type = self.name
+
         self.translated = None
         self.map = {}  # {String: constructor}
-        self.type = None
 
         self.interpretation = (None if not enumeration else
             SymbolInterpretation(name=Symbol(name=self.name),
@@ -237,13 +264,13 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __str__(self):
         return (f"type {self.name} := "
-                f"{{{','.join(map(str, self.constructors))}}}")
+                f"{{{','.join(map(str, self.domain))}}}")
 
     def check_bounds(self, var):
         if self.name == BOOL:
             out = [var, AUnary.make('¬', var)]
         else:
-            out = [AComparison.make('=', [var, c]) for c in self.constructors]
+            out = [AComparison.make('=', [var, c]) for c in self.domain]
         out = ADisjunction.make('∨', out)
         return out
 
@@ -252,8 +279,11 @@ class RangeDeclaration(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')  # maybe INT, REAL
         self.elements = kwargs.pop('elements')
+        self.arity = 1
         self.translated = None
-        self.constructors = None  # not used
+        self.domain = None  # not used
+        self.sorts = [Symbol(name=self.name)]
+        self.out = Symbol(name=BOOL)
 
         self.type = REAL if self.name == REAL else INT
         self.range = []
@@ -306,13 +336,13 @@ class SymbolDeclaration(ASTNode):
 
         name (string): the identifier of the symbol, after expansion of the node
 
-        sorts (List[Sort]): the types of the arguments
-
-        out : the type of the symbol
-
-        type (string): the name of the type of the symbol
-
         arity (int): the number of arguments
+
+        sorts (List[Symbol]): the types of the arguments
+
+        out (Symbol): the type of the symbol
+
+        type (string): name of the Z3 type of an instance of the symbol
 
         domain (List): the list of possible tuples of arguments
 
@@ -340,7 +370,7 @@ class SymbolDeclaration(ASTNode):
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
-            self.out = Sort(name=BOOL)
+            self.out = Symbol(name=BOOL)
 
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
@@ -361,35 +391,6 @@ class SymbolDeclaration(ASTNode):
         return (f"{self.name}"
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
-
-
-class Sort(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.name = (BOOL if self.name == '𝔹' else
-                     INT if self.name == 'ℤ' else
-                     REAL if self.name == 'ℝ' else
-                     self.name
-        )
-        self.code = intern(self.name)
-        self.decl = None
-
-    def __str__(self):
-        return ('𝔹' if self.name == BOOL else
-                'ℤ' if self.name == INT else
-                'ℝ' if self.name == REAL else
-                self.name
-        )
-
-    def translate(self):
-        return self.decl.translate()
-
-
-class Symbol(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = unquote(kwargs.pop('name'))
-
-    def __str__(self): return self.name
 
 
 Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
@@ -451,16 +452,13 @@ class Rule(ASTNode):
         self.args = kwargs.pop('args')  # later augmented with self.out, if any
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
-        self.expanded = None  # Expression
+        self.is_whole_domain = None  # Bool
+        self.whole_domain = None  # Expression
         self.block = None  # theory where it occurs
+        self.cache = {}
 
-        self.vars, self.sorts = [], []
-        for q in self.quantees:
-            self.vars.append(q.var)
-            self.sorts.append(q.sort)
         self.annotations = self.annotations.annotations if self.annotations else {}
 
-        self.check(len(self.vars) == len(self.sorts), "Internal error")
         self.q_vars = {}  # {string: Variable}
         self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
@@ -469,7 +467,7 @@ class Rule(ASTNode):
             self.body = TRUE
 
     def __repr__(self):
-        return (f"Rule:∀{','.join(f'{str(v)}[{str(s)}]' for v, s in zip(self.vars,self.sorts))}: "
+        return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
                 f"{self.symbol}({','.join(str(e) for e in self.args)}) "
                 f"⇔{str(self.body)}")
 
@@ -479,10 +477,11 @@ class Rule(ASTNode):
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
         self.check(len(self.args) == len(new_vars), "Internal error")
+        vars = [q.var for q in self.quantees]
         for i in range(len(self.args)):
             arg, nv = self.args[i],  list(new_vars.values())[i]
             if type(arg) == Variable \
-            and arg.name in self.vars and arg.name not in new_vars:
+            and arg.name in vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
                 self.out = self.out.instantiate(arg, nv) if self.out else self.out
                 for j in range(i, len(self.args)):
@@ -492,24 +491,29 @@ class Rule(ASTNode):
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         self.args = list(new_vars.values())
-        self.vars = list(new_vars.keys())
-        self.sorts = [v.sort for v in new_vars.values()]
+        self.quantees = [Quantee.make(v,s) for v,s in new_vars.items()]
         self.q_vars = new_vars
         return self
 
     def instantiate_definition(self, new_args, theory):
+        hash = str(new_args)
+        if hash in self.cache:
+            return self.cache[hash]
+        # assert self.is_whole_domain == False
         out = self.body.copy() # in case there is no arguments
         self.check(len(new_args) == len(self.args)
-                   or len(new_args)+1 == len(self.args), "Internal error")
+                or len(new_args)+1 == len(self.args), "Internal error")
         for old, new in zip(self.args, new_args):
-            out = out.instantiate(old, new)
-        out = out.interpret(theory)  # add justification recursively
+            out = out.instantiate(old, new, theory)
+        out = out.interpret(theory)
         instance = AppliedSymbol.make(self.symbol, new_args)
+        instance.in_head = True
         if self.symbol.decl.type != BOOL:  # a function
-            out = out.instantiate(self.args[-1], instance)
+            out = out.instantiate(self.args[-1], instance, theory)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block
+        self.cache[hash] = out
         return out
 
 
@@ -571,7 +575,7 @@ class SymbolInterpretation(ASTNode):
 
     def interpret_application(self, theory, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
-        tuples = self.enumeration.tuples if tuples == None else list(tuples)
+        tuples = list(self.enumeration.tuples) if tuples == None else tuples
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -693,43 +697,48 @@ class Display(ASTNode):
     def run(self, idp):
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
+                self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
+                           f"Invalid syntax: {constraint}")
+                name = constraint.symbol.sub_exprs[0].name
                 symbols = []
                 # All arguments should be symbols, except for the first
                 # argument of 'unit' and 'category'.
                 for i, symbol in enumerate(constraint.sub_exprs):
-                    if constraint.name in ['unit', 'category'] and i == 0:
+                    if name in ['unit', 'category'] and i == 0:
                         continue
                     self.check(symbol.name.startswith('`'),
-                        f"arg '{symbol.name}' of {constraint.name}'"
+                        f"arg '{symbol.name}' of {name}'"
                         f" must begin with a tick '`'")
                     self.check(symbol.name[1:] in self.voc.symbol_decls,
-                        f"argument '{symbol.name}' of '{constraint.name}'"
+                        f"argument '{symbol.name}' of '{name}'"
                         f" must be a symbol")
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if constraint.name == 'goal':  # e.g.,  goal(Prime)
+                if name == 'goal':  # e.g.,  goal(Prime)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
                         s.view = ViewType.EXPANDED  # the goal is always expanded
-                elif constraint.name == 'expand':  # e.g. expand(Length, Angle)
+                elif name == 'expand':  # e.g. expand(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
-                elif constraint.name == 'hide':  # e.g. hide(Length, Angle)
+                elif name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
-                elif constraint.name == 'relevant':  # e.g. relevant(Tax)
+                elif name == 'relevant':  # e.g. relevant(Tax)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
-                elif constraint.name == 'unit':  # e.g. unit('m', `length):
+                elif name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
-                elif constraint.name == 'category':
+                elif name == 'category':
                     # e.g. category('Shape', `type).
                     for symbol in symbols:
                         symbol.category = str(constraint.sub_exprs[0])
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
-                if constraint.sub_exprs[0].name == 'view':
+                self.check(type(constraint.sub_exprs[0].symbol.sub_exprs[0]) == Symbol,
+                           f"Invalid syntax: {constraint}")
+                if constraint.sub_exprs[0].symbol.sub_exprs[0].name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
                             if type(s) == SymbolDeclaration and s.view == ViewType.NORMAL:
@@ -740,9 +749,9 @@ class Display(ASTNode):
                 else:
                     raise IDPZ3Error(f"unknown display constraint: {constraint}")
             elif type(constraint) == UnappliedSymbol:
-                if constraint.name == "moveSymbols":
+                if constraint.s.name == "moveSymbols":
                     self.moveSymbols = True
-                elif constraint.name == "optionalPropagation":
+                elif constraint.s.name == "optionalPropagation":
                     self.optionalPropagation = True
                 else:
                     raise IDPZ3Error(f"unknown display contraint:"
@@ -771,7 +780,8 @@ class Call1(ASTNode):
         self.post = kwargs.pop('post')
 
     def __str__(self):
-        kwargs = "" if len(self.kwargs)==0 else f",{','.join(str(a) for a in self.kwargs)}"
+        kwargs = ("" if len(self.kwargs)==0 else
+                  f"{',' if self.args else ''}{','.join(str(a) for a in self.kwargs)}")
         return ( f"{self.name}({','.join(str(a) for a in self.args)}{kwargs})"
                  f"{'' if self.post is None else '.'+str(self.post)}")
 
@@ -821,10 +831,11 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Vocabulary, Extern,
                                          ConstructedTypeDeclaration,
                                          RangeDeclaration,
-                                         SymbolDeclaration, Symbol, Sort,
+                                         SymbolDeclaration, Symbol,
+                                         SymbolExpr,
 
                                          Theory, Definition, Rule, IfExpr,
-                                         AQuantification, ARImplication,
+                                         AQuantification, Quantee, ARImplication,
                                          AEquivalence, AImplication,
                                          ADisjunction, AConjunction,
                                          AComparison, ASumMinus, AMultDiv,

@@ -28,14 +28,14 @@ import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, IfExpr, AQuantification, \
+    Constructor, Expression, IfExpr, AQuantification, Quantee,\
     BinaryOperator, AEquivalence, AImplication, ADisjunction, \
     AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
-    AUnary, AAggregate, AppliedSymbol, UnappliedSymbol, \
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, \
     Number, Date, Brackets, Variable, TRUE, FALSE)
-from .Parse import Enumeration, Tuple
+from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status, Assignment
-from .utils import INT
+from .utils import BOOL, INT, SYMBOL, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
 
 
 # class Expression  ###########################################################
@@ -67,7 +67,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
     self.str = sys.intern(str(self))
 
     return self
-
 Expression._change = _change
 
 
@@ -78,7 +77,7 @@ def update_exprs(self, new_exprs):
 
 
 # Expression.update_exprs = update_exprs
-for i in [Constructor, AppliedSymbol, UnappliedSymbol, Variable, Number]:
+for i in [Constructor, SymbolExpr, AppliedSymbol, UnappliedSymbol]:
     i.update_exprs = update_exprs
 
 
@@ -109,6 +108,20 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
 
+
+# Class Quantee  #######################################################
+
+def update_exprs(self, new_exprs):
+    if not self.decl and self.sort:
+        symbol = self.sort.sub_exprs[0].as_rigid()
+        if symbol:
+            if type(symbol) == Symbol:
+                self.decl = symbol.decl
+            else:
+                assert type(symbol) == Constructor, "Internal error"
+                self.decl = symbol.symbol.decl
+            self.sort.decl = self.decl
+Quantee.update_exprs = update_exprs
 
 
 # Class AQuantification  ######################################################
@@ -207,7 +220,6 @@ def update_exprs(self, new_exprs):
         simpler = other[0]
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
-
 
 
 # Class AComparison  #######################################################
@@ -330,9 +342,56 @@ AAggregate.update_exprs = update_exprs
 
 # Class AppliedSymbol  #######################################################
 
+def update_exprs(self, new_exprs):
+    new_exprs = list(new_exprs)
+    if not self.decl:
+        symbol = self.symbol.sub_exprs[0].as_rigid()
+        if symbol:
+            if type(symbol) == Symbol:
+                self.decl = symbol.decl
+            else:
+                assert type(symbol) == Constructor, "Internal error"
+                self.decl = symbol.symbol.decl
+    self.type = (BOOL if self.is_enumerated or self.in_enumeration else
+            self.decl.type if self.decl else None)
+    if self.decl:
+        if self.decl.name == ARITY:
+            self.check(len(new_exprs) == 1,
+                    f"Incorrect number of arguments for '{ARITY}': {len(new_exprs)}")
+            self.check(new_exprs[0].type == SYMBOL,
+                    f"Argument of '{ARITY}' must be a Symbol: {new_exprs[0]}")
+            if isinstance(new_exprs[0], Constructor):
+                value = Number(number=str(new_exprs[0].symbol.decl.arity))
+                return self._change(value=value, sub_exprs=new_exprs)
+        elif self.decl.name == INPUT_DOMAIN:
+            self.check(len(new_exprs) == 2,
+                    f"Incorrect number of arguments for '{INPUT_DOMAIN}': {len(new_exprs)}")
+            self.check(new_exprs[0].type == SYMBOL,
+                    f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
+            self.check(new_exprs[1].type == INT,
+                    f"Second argument of '{INPUT_DOMAIN}' must be a Int: {new_exprs[1]}")
+            if (isinstance(new_exprs[0], Constructor)
+                and isinstance(new_exprs[1], Number)):
+                # find the Symbol for the input domain
+                symbol_string = f"`{new_exprs[0].symbol.decl.sorts[new_exprs[1].py_value - 1]}"
+                value = self.decl.out.decl.map[symbol_string]
+                return self._change(value=value, sub_exprs=new_exprs)
+        elif self.decl.name == OUTPUT_DOMAIN:
+            self.check(len(new_exprs) == 1,
+                    f"Incorrect number of arguments for '{OUTPUT_DOMAIN}': {len(new_exprs)}")
+            self.check(new_exprs[0].type == SYMBOL,
+                    f"Argument of '{OUTPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
+            if isinstance(new_exprs[0], Constructor):
+                # find the Symbol for the output domain of the argument
+                symbol_string = f"`{new_exprs[0].symbol.decl.out}"
+                value = self.decl.out.decl.map[symbol_string]
+                return self._change(value=value, sub_exprs=new_exprs)
+    return self._change(sub_exprs=new_exprs)
+AppliedSymbol.update_exprs = update_exprs
+
 def as_set_condition(self):
     # determine core after substitutions
-    core = AppliedSymbol.make(self.s, self.sub_exprs).copy()
+    core = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs).copy()
 
     return ((None, None, None) if not self.in_enumeration else
             (core, 'not' not in self.is_enumeration, self.in_enumeration))
@@ -380,12 +439,12 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     new_tuples = list(new_tuples.values())
 
                     out = AppliedSymbol.make(
-                        symbol=x.s, args=x.sub_exprs,
+                        symbol=x.symbol, args=x.sub_exprs,
                         is_enumeration='in',
                         in_enumeration=Enumeration(tuples=new_tuples)
                     )
 
-                    core = AppliedSymbol.make(out.s, out.sub_exprs).copy()
+                    core = AppliedSymbol.make(out.symbol, out.sub_exprs).copy()
                     out.simpler = out.in_enumeration.contains([core], False)
 
                     out = Assignment(out,

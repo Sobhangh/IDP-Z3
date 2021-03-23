@@ -31,11 +31,12 @@ __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuanti
 import copy
 from collections import ChainMap
 from datetime import date
-import sys
+from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from .utils import unquote, OrderedSet, BOOL, SYMBOL, IDPZ3Error
+from .utils import (unquote, OrderedSet, BOOL, INT, REAL,
+                    RESERVED_SYMBOLS, IDPZ3Error)
 
 
 class ASTNode(object):
@@ -159,7 +160,7 @@ class Expression(ASTNode):
         self.simpler: Optional["Expression"] = None
         self.value: Optional["Expression"] = None
 
-        self.code: str = sys.intern(str(self))
+        self.code: str = intern(str(self))
         self.annotations: Dict[str, str] = {'reading': self.code}
         self.original: Expression = self
 
@@ -190,6 +191,8 @@ class Expression(ASTNode):
         return out
 
     def same_as(self, other):
+        if id(self) == id(other):
+            return True
         if self.value is not None:
             return self.value  .same_as(other)
         if self.simpler is not None:
@@ -300,7 +303,7 @@ class Expression(ASTNode):
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
-        # returns a dictionary {Variable : Sort}
+        # returns a dictionary {Variable : Symbol}
         try:
             return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
         except AttributeError as e:
@@ -385,6 +388,32 @@ TRUE = Constructor(name='true')
 FALSE = Constructor(name='false')
 
 
+class Symbol(Expression):
+    def __init__(self, **kwargs):
+        self.name = unquote(kwargs.pop('name'))
+        self.name = (BOOL if self.name == '𝔹' else
+                     INT if self.name == 'ℤ' else
+                     REAL if self.name == 'ℝ' else
+                     self.name
+        )
+        self.sub_exprs = []
+        self.decl = None
+        super().__init__()
+        self.fresh_vars = set()
+
+    def __str__(self):
+        return ('𝔹' if self.name == BOOL else
+                'ℤ' if self.name == INT else
+                'ℝ' if self.name == REAL else
+                self.name
+        )
+
+    def as_rigid(self): return self
+
+    def translate(self):
+        return self.decl.translate()
+
+
 class IfExpr(Expression):
     PRECEDENCE = 10
     IF = 0
@@ -410,10 +439,25 @@ class IfExpr(Expression):
                 f" else {self.sub_exprs[IfExpr.ELSE].str}")
 
 
-class Quantee(object):
-    def __init__(self, var, sort):
-        self.var = var
-        self.sort = sort
+class Quantee(Expression):
+    def __init__(self, **kwargs):
+        self.var = kwargs.pop('var')
+        self.sort = kwargs.pop('sort')
+
+        self.sub_exprs = []
+        super().__init__()
+        self.decl = None
+
+    @classmethod
+    def make(cls, var, sort):
+        if type(sort) != SymbolExpr:
+            sort = SymbolExpr(eval='', s=sort)
+        out = (cls) (var=var, sort=sort)
+        out.decl = sort.decl
+        return out.annotate1()
+
+    def __str1__(self):
+        return f"{self.var} ∈ {self.sort}"
 
 
 class AQuantification(Expression):
@@ -425,11 +469,6 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
-        self.vars, self.sorts = [], []
-        for q in self.quantees:
-            self.vars.append(q.var)
-            self.sorts.append(q.sort)
-
         self.sub_exprs = [self.f]
         self.quantifier_is_expanded = False
         super().__init__()
@@ -440,15 +479,14 @@ class AQuantification(Expression):
     @classmethod
     def make(cls, q, q_vars, f):
         "make and annotate a quantified formula"
-        quantees = [Quantee(v.name, v.sort) for v in q_vars.values()]
+        quantees = [Quantee.make(v.name, v.sort) for v in q_vars.values()]
         out = cls(q=q, quantees=quantees, f=f)
         out.q_vars = q_vars
         return out.annotate1()
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            self.check(len(self.vars) == len(self.sorts), "Internal error")
-            vars = ''.join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+            vars = ','.join([f"{q}" for q in self.quantees])
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
             return self.sub_exprs[0].str
@@ -594,10 +632,6 @@ class AAggregate(Expression):
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
 
-        self.vars, self.sorts = [], []
-        for q in self.quantees:
-            self.vars.append(q.var)
-            self.sorts.append(q.sort)
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
         self.quantifier_is_expanded = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
@@ -611,8 +645,7 @@ class AAggregate(Expression):
 
     def __str1__(self):
         if not self.quantifier_is_expanded:
-            self.check(len(self.vars) == len(self.sorts), "Internal error")
-            vars = "".join([f"{v}[{s}]" for v, s in zip(self.vars, self.sorts)])
+            vars = "".join([f"{q}" for q in self.quantees])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = (f"{self.aggtype}{{{vars} : "
                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
@@ -625,16 +658,35 @@ class AAggregate(Expression):
 
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if all_ or len(self.sorts) == 0:
+        if all_ or len(self.quantees) == 0:
             for e in self.sub_exprs:
                 e.collect(questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
+    """Represents a symbol applied to arguments
+
+    Args:
+        eval (string): '$' if the symbol must be evaluated, else ''
+
+        s (Expression): the symbol to be applied to arguments
+
+        args ([Expression]): the list of arguments
+
+        is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
+
+        is_enumeration (string): '' or 'in' or 'not in'
+
+        in_enumeration (Enumeration): the enumeration following 'in'
+
+        decl (Declaration): the declaration of the symbol, if known
+
+        in_head (Bool): True if the AppliedSymbol occurs in the head of a rule
+    """
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
-        self.s = kwargs.pop('s')
+        self.symbol = kwargs.pop('symbol')
         self.args = kwargs.pop('args')
         if 'is_enumerated' in kwargs:
             self.is_enumerated = kwargs.pop('is_enumerated')
@@ -653,12 +705,13 @@ class AppliedSymbol(Expression):
         super().__init__()
 
         self.decl = None
-        self.name = self.s.name
         self.in_head = False
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        out = cls(s=symbol, args=Arguments(sub_exprs=args), **kwargs)
+        if type(symbol) != SymbolExpr:
+            symbol = SymbolExpr(eval='', s=symbol)
+        out = cls(symbol=symbol, args=Arguments(sub_exprs=args), **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
@@ -666,9 +719,9 @@ class AppliedSymbol(Expression):
 
     def __str1__(self):
         if len(self.sub_exprs) == 0:
-            out = f"{str(self.s)}"
+            out = f"{self.symbol}"
         else:
-            out = f"{str(self.s)}({','.join([x.str for x in self.sub_exprs])})"
+            out = f"{self.symbol}({','.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return (f"{out}"
@@ -676,7 +729,7 @@ class AppliedSymbol(Expression):
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
     def collect(self, questions, all_=True, co_constraints=True):
-        if self.decl.name != SYMBOL and self.name != '__relevant':
+        if self.decl and self.decl.name not in RESERVED_SYMBOLS:
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
@@ -692,7 +745,7 @@ class AppliedSymbol(Expression):
         try:
             out = {}
             for i, e in enumerate(self.sub_exprs):
-                if self.decl.name != SYMBOL and isinstance(e, Variable):
+                if self.decl and isinstance(e, Variable):
                     out[e.name] = self.decl.sorts[i]
                 else:
                     out.update(e.type_inference())
@@ -716,9 +769,24 @@ class AppliedSymbol(Expression):
         return self._reified
 
     def generate_constructors(self, constructors: dict):
-        if self.name == 'unit' or self.name == 'category':
+        symbol = self.symbol.sub_exprs[0]
+        if hasattr(symbol, 'name') and symbol.name in ['unit', 'category']:
             constructor = Constructor(name=self.sub_exprs[0].name)
-            constructors[self.name].append(constructor)
+            constructors[symbol.name].append(constructor)
+
+
+class SymbolExpr(Expression):
+    def __init__(self, **kwargs):
+        self.eval = (kwargs.pop('eval') if 'eval' in kwargs else
+                     '')
+        self.sub_exprs = [kwargs.pop('s')]
+        self.decl = None
+        super().__init__()
+
+    def __str__(self):
+        return (f"$({self.sub_exprs[0]})" if self.eval else
+                f"{self.sub_exprs[0]}")
+
 
 class Arguments(object):
     def __init__(self, **kwargs):
@@ -766,7 +834,7 @@ class Variable(Expression):
 
         super().__init__()
 
-        self.type = sort.name if sort else ''
+        self.type = sort.decl.name if sort and sort.decl else ''
         self.sub_exprs = []
         self.translated = None
         self.fresh_vars = set([self.name])

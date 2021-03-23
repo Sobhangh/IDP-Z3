@@ -34,6 +34,9 @@ The equivalent ASCII-only encoding is shown on the right.
         f() ≠ c.                                  f() ~= c.
         ∀x ∈ T: p(x).                             !x in T: p(x).
         ∃x: p(x).                                 ?x: p(x).
+        ∃x ∈ Symbol: arity(x)=0 ∧ $(x)().         ?x in Symbol: arity(x)=0 & $(x)().
+        ∃x ∈ $(input_domain(`p,1)): p(x).         ?x in $(input_domain(`p,1)): p(x).
+
 
         f() in {1,2,3}.
         f() = #{x∈T: p(x)}.                       f() = #{x in T: p(x)}.

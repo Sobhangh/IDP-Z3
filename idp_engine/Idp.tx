@@ -24,10 +24,9 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
       RangeElement: fromI=Number ('..' toI=Number)?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
-          ( '(' sorts*=Sort[/[*⨯]/] ')' | sorts*=Sort[/[*⨯]/] )
-          ('->' | '→') out=Sort;
-      Symbol: name=/`?[^\d\W]\w*\b|'(\.|[^'])*'/;
-      Sort: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ/;
+          ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
+          ('->' | '→') out=Symbol;
+      Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
@@ -37,7 +36,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
   Rule: annotations=Annotations
         (('!'|'∀') quantees+=Quantee[','] ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: var=/`?[^\d\W]\w*\b/ ( ('in' | '∈') sort=Sort)? ;
+      Quantee: var=/`?[^\d\W]\w*\b/ ( ('in' | '∈') sort=SymbolExpr)? ;
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
@@ -84,9 +83,10 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
     Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
-      AppliedSymbol: s=Symbol args=Arguments
+      AppliedSymbol: symbol=SymbolExpr args=Arguments
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | is_enumeration=/(not\s+)?in/ in_enumeration=Enumeration)?;
+        SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
         Arguments: '(' sub_exprs*=Expression[','] ')';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
@@ -121,7 +121,9 @@ Display: 'display' '{' (constraints=Expression '.')* '}';
 Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
 
   PyStatement: Call1 | PyAssignment ;
-  Call1: name=ID '(' args*=Call0[','] (',' kwargs+=PyAssignment[','])? ')' ('.' post=PyExpr)?;
+  Call1: name=ID '(' ( args+=Call0[','] (',' kwargs+=PyAssignment[','])?
+                     | kwargs*=PyAssignment[',']) ')'
+        ('.' post=PyExpr)?;
   Call0: !PyAssignment pyExpr=PyExpr;
   PyExpr: Call1 | String | Number | ID | PyList;
   String: literal=/"(\.|[^"])*"/;

@@ -6,7 +6,8 @@ vocabulary {
 }
 theory {
     edge(a,b).
-    !`p in Symbol: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
+    !`p in Symbol: symmetric(`p) & arity(`p)=2 & input_domain(`p,1)=input_domain(`p,1)
+				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
 	symmetric := {`edge}
 }
 display {

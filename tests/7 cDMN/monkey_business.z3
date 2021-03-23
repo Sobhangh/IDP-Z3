@@ -215,25 +215,25 @@ structure {
                                  'typ': 'Bool',
                                  'value': True},
            '__rank': 1,
-           '∀Monkey[Monkey_t] : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
-                                                                                 'is_assignment': False,
-                                                                                 'normal': False,
-                                                                                 'reading': '∀Monkey[Monkey_t] : '
-                                                                                            'Fruit(Monkey) = Pear ⇒ '
-                                                                                            'Place(Monkey) ≠ Branch',
-                                                                                 'relevant': True,
-                                                                                 'status': 'UNIVERSAL',
-                                                                                 'typ': 'Bool',
-                                                                                 'value': True},
-           '∀Monkey[Monkey_t] : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange': {'environmental': False,
-                                                                          'is_assignment': False,
-                                                                          'normal': False,
-                                                                          'reading': '∀Monkey[Monkey_t] : Monkey = '
-                                                                                     'Mike ⇒ Fruit(Monkey) ≠ Orange',
-                                                                          'relevant': True,
-                                                                          'status': 'UNIVERSAL',
-                                                                          'typ': 'Bool',
-                                                                          'value': True}},
+           '∀Monkey ∈ Monkey_t : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
+                                                                                  'is_assignment': False,
+                                                                                  'normal': False,
+                                                                                  'reading': '∀Monkey ∈ Monkey_t : '
+                                                                                             'Fruit(Monkey) = Pear ⇒ '
+                                                                                             'Place(Monkey) ≠ Branch',
+                                                                                  'relevant': True,
+                                                                                  'status': 'UNIVERSAL',
+                                                                                  'typ': 'Bool',
+                                                                                  'value': True},
+           '∀Monkey ∈ Monkey_t : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange': {'environmental': False,
+                                                                           'is_assignment': False,
+                                                                           'normal': False,
+                                                                           'reading': '∀Monkey ∈ Monkey_t : Monkey = '
+                                                                                      'Mike ⇒ Fruit(Monkey) ≠ Orange',
+                                                                           'relevant': True,
+                                                                           'status': 'UNIVERSAL',
+                                                                           'typ': 'Bool',
+                                                                           'value': True}},
  'Place': {'Place(Anna)': {'environmental': False,
                            'is_assignment': True,
                            'normal': True,
@@ -399,74 +399,83 @@ structure {
                                    'typ': 'Bool',
                                    'value': False},
            '__rank': 1,
-           '∀Monkey[Monkey_t] : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear': {'environmental': False,
-                                                                                                 'is_assignment': False,
-                                                                                                 'normal': False,
-                                                                                                 'reading': '∀Monkey[Monkey_t] '
-                                                                                                            ': Monkey '
-                                                                                                            '= Anna ⇒ '
-                                                                                                            'Place(Monkey) '
-                                                                                                            '= Stream '
-                                                                                                            '∧ '
-                                                                                                            'Fruit(Monkey) '
-                                                                                                            '≠ Pear',
-                                                                                                 'relevant': True,
-                                                                                                 'status': 'UNIVERSAL',
-                                                                                                 'typ': 'Bool',
-                                                                                                 'value': True},
-           '∀Monkey[Monkey_t] : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
-                                                                             'is_assignment': False,
-                                                                             'normal': False,
-                                                                             'reading': '∀Monkey[Monkey_t] : Monkey = '
-                                                                                        'Harriet ⇒ Place(Monkey) ≠ '
-                                                                                        'Branch',
-                                                                             'relevant': True,
-                                                                             'status': 'UNIVERSAL',
-                                                                             'typ': 'Bool',
-                                                                             'value': True},
-           '∀Monkey[Monkey_t] : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana': {'environmental': False,
-                                                                                                 'is_assignment': False,
-                                                                                                 'normal': False,
-                                                                                                 'reading': '∀Monkey[Monkey_t] '
-                                                                                                            ': Monkey '
-                                                                                                            '= Sam ⇒ '
-                                                                                                            'Place(Monkey) '
-                                                                                                            '= Grass ∧ '
-                                                                                                            'Fruit(Monkey) '
-                                                                                                            '≠ Banana',
-                                                                                                 'relevant': True,
-                                                                                                 'status': 'UNIVERSAL',
-                                                                                                 'typ': 'Bool',
-                                                                                                 'value': True},
-           '∀Monkey[Monkey_t] : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple': {'environmental': False,
-                                                                                'is_assignment': False,
-                                                                                'normal': False,
-                                                                                'reading': '∀Monkey[Monkey_t] : '
-                                                                                           'Place(Monkey) = Rock ⇒ '
-                                                                                           'Fruit(Monkey) = Apple',
-                                                                                'relevant': True,
-                                                                                'status': 'UNIVERSAL',
-                                                                                'typ': 'Bool',
-                                                                                'value': True},
-           '∀m1[Monkey_t] : ∀m2[Monkey_t] : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)': {'environmental': False,
-                                                                                                       'is_assignment': False,
-                                                                                                       'normal': False,
-                                                                                                       'reading': '∀m1[Monkey_t] '
-                                                                                                                  ': '
-                                                                                                                  '∀m2[Monkey_t] '
-                                                                                                                  ': '
-                                                                                                                  'm2 '
-                                                                                                                  '≠ '
-                                                                                                                  'm1 '
-                                                                                                                  '⇒ '
-                                                                                                                  'Place(m1) '
-                                                                                                                  '≠ '
-                                                                                                                  'Place(m2) '
-                                                                                                                  '∧ '
-                                                                                                                  'Fruit(m1) '
-                                                                                                                  '≠ '
-                                                                                                                  'Fruit(m2)',
-                                                                                                       'relevant': True,
-                                                                                                       'status': 'UNIVERSAL',
-                                                                                                       'typ': 'Bool',
-                                                                                                       'value': True}}}
+           '∀Monkey ∈ Monkey_t : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear': {'environmental': False,
+                                                                                                  'is_assignment': False,
+                                                                                                  'normal': False,
+                                                                                                  'reading': '∀Monkey '
+                                                                                                             '∈ '
+                                                                                                             'Monkey_t '
+                                                                                                             ': Monkey '
+                                                                                                             '= Anna ⇒ '
+                                                                                                             'Place(Monkey) '
+                                                                                                             '= Stream '
+                                                                                                             '∧ '
+                                                                                                             'Fruit(Monkey) '
+                                                                                                             '≠ Pear',
+                                                                                                  'relevant': True,
+                                                                                                  'status': 'UNIVERSAL',
+                                                                                                  'typ': 'Bool',
+                                                                                                  'value': True},
+           '∀Monkey ∈ Monkey_t : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
+                                                                              'is_assignment': False,
+                                                                              'normal': False,
+                                                                              'reading': '∀Monkey ∈ Monkey_t : Monkey '
+                                                                                         '= Harriet ⇒ Place(Monkey) ≠ '
+                                                                                         'Branch',
+                                                                              'relevant': True,
+                                                                              'status': 'UNIVERSAL',
+                                                                              'typ': 'Bool',
+                                                                              'value': True},
+           '∀Monkey ∈ Monkey_t : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana': {'environmental': False,
+                                                                                                  'is_assignment': False,
+                                                                                                  'normal': False,
+                                                                                                  'reading': '∀Monkey '
+                                                                                                             '∈ '
+                                                                                                             'Monkey_t '
+                                                                                                             ': Monkey '
+                                                                                                             '= Sam ⇒ '
+                                                                                                             'Place(Monkey) '
+                                                                                                             '= Grass '
+                                                                                                             '∧ '
+                                                                                                             'Fruit(Monkey) '
+                                                                                                             '≠ Banana',
+                                                                                                  'relevant': True,
+                                                                                                  'status': 'UNIVERSAL',
+                                                                                                  'typ': 'Bool',
+                                                                                                  'value': True},
+           '∀Monkey ∈ Monkey_t : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple': {'environmental': False,
+                                                                                 'is_assignment': False,
+                                                                                 'normal': False,
+                                                                                 'reading': '∀Monkey ∈ Monkey_t : '
+                                                                                            'Place(Monkey) = Rock ⇒ '
+                                                                                            'Fruit(Monkey) = Apple',
+                                                                                 'relevant': True,
+                                                                                 'status': 'UNIVERSAL',
+                                                                                 'typ': 'Bool',
+                                                                                 'value': True},
+           '∀m1 ∈ Monkey_t : ∀m2 ∈ Monkey_t : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)': {'environmental': False,
+                                                                                                         'is_assignment': False,
+                                                                                                         'normal': False,
+                                                                                                         'reading': '∀m1 '
+                                                                                                                    '∈ '
+                                                                                                                    'Monkey_t '
+                                                                                                                    ': '
+                                                                                                                    '∀m2 '
+                                                                                                                    '∈ '
+                                                                                                                    'Monkey_t '
+                                                                                                                    ': '
+                                                                                                                    'm2 '
+                                                                                                                    '≠ '
+                                                                                                                    'm1 '
+                                                                                                                    '⇒ '
+                                                                                                                    'Place(m1) '
+                                                                                                                    '≠ '
+                                                                                                                    'Place(m2) '
+                                                                                                                    '∧ '
+                                                                                                                    'Fruit(m1) '
+                                                                                                                    '≠ '
+                                                                                                                    'Fruit(m2)',
+                                                                                                         'relevant': True,
+                                                                                                         'status': 'UNIVERSAL',
+                                                                                                         'typ': 'Bool',
+                                                                                                         'value': True}}}

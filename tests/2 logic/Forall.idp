@@ -9,6 +9,8 @@ theory T:V {
     p() <=> (∀c in Color: c=red).
     q := {red, blue}
     (∀c in Color: ~q(c) => c=color()).
+    ∀c in Color: Color(c).
+    ∀c in $(`Color): Color(c).
 }
 procedure main() {
     print(str(Problem(T).formula()))

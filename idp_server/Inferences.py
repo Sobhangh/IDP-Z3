@@ -26,7 +26,7 @@ from z3 import Solver, Implies, Not
 
 from idp_engine.Expression import AComparison, AUnary, AppliedSymbol, TRUE
 from idp_engine.Assignments import Status, Assignment
-from idp_engine.utils import OrderedSet, BOOL
+from idp_engine.utils import OrderedSet, BOOL, RELEVANT
 from .IO import Output
 
 
@@ -73,7 +73,7 @@ def get_relevant_subtences(self):
     reachable = OrderedSet()
     for constraint in constraints:
         if type(constraint) == AppliedSymbol and \
-           constraint.name == '__relevant':
+           constraint.decl.name == RELEVANT:
             for e in constraint.sub_exprs:
                 assert e.code in self.assignments, \
                     f"Invalid expression in relevant: {e.code}"

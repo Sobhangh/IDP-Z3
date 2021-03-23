@@ -262,32 +262,34 @@ structure {
                                   'typ': 'Bool',
                                   'value': False},
             '__rank': 1,
-            '∀Bus[Bus_t] : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01': {'environmental': False,
-                                                                                                                      'is_assignment': False,
-                                                                                                                      'normal': False,
-                                                                                                                      'reading': '∀Bus[Bus_t] '
-                                                                                                                                 ': '
-                                                                                                                                 'true '
-                                                                                                                                 '⇒ '
-                                                                                                                                 'Amount(Bus) '
-                                                                                                                                 '= '
-                                                                                                                                 '((Kids(Bus) '
-                                                                                                                                 '- '
-                                                                                                                                 '01) '
-                                                                                                                                 '- '
-                                                                                                                                 '(Kids(Bus) '
-                                                                                                                                 '- '
-                                                                                                                                 '01) '
-                                                                                                                                 '% '
-                                                                                                                                 'Size(Bus)) '
-                                                                                                                                 '/ '
-                                                                                                                                 'Size(Bus) '
-                                                                                                                                 '+ '
-                                                                                                                                 '01',
-                                                                                                                      'relevant': True,
-                                                                                                                      'status': 'UNIVERSAL',
-                                                                                                                      'typ': 'Bool',
-                                                                                                                      'value': True}},
+            '∀Bus ∈ Bus_t : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01': {'environmental': False,
+                                                                                                                       'is_assignment': False,
+                                                                                                                       'normal': False,
+                                                                                                                       'reading': '∀Bus '
+                                                                                                                                  '∈ '
+                                                                                                                                  'Bus_t '
+                                                                                                                                  ': '
+                                                                                                                                  'true '
+                                                                                                                                  '⇒ '
+                                                                                                                                  'Amount(Bus) '
+                                                                                                                                  '= '
+                                                                                                                                  '((Kids(Bus) '
+                                                                                                                                  '- '
+                                                                                                                                  '01) '
+                                                                                                                                  '- '
+                                                                                                                                  '(Kids(Bus) '
+                                                                                                                                  '- '
+                                                                                                                                  '01) '
+                                                                                                                                  '% '
+                                                                                                                                  'Size(Bus)) '
+                                                                                                                                  '/ '
+                                                                                                                                  'Size(Bus) '
+                                                                                                                                  '+ '
+                                                                                                                                  '01',
+                                                                                                                       'relevant': True,
+                                                                                                                       'status': 'UNIVERSAL',
+                                                                                                                       'typ': 'Bool',
+                                                                                                                       'value': True}},
  'Kids': {'Kids(Big)': {'environmental': False,
                         'is_assignment': True,
                         'normal': True,
@@ -1224,15 +1226,15 @@ structure {
                                        'status': 'UNIVERSAL',
                                        'typ': 'Bool',
                                        'value': True},
-                 'Kids_amount = sum{Bus[Bus_t] : true : Kids(Bus)}': {'environmental': False,
-                                                                      'is_assignment': False,
-                                                                      'normal': False,
-                                                                      'reading': 'Kids_amount = sum{Bus[Bus_t] : true '
-                                                                                 ': Kids(Bus)}',
-                                                                      'relevant': True,
-                                                                      'status': 'UNIVERSAL',
-                                                                      'typ': 'Bool',
-                                                                      'value': True},
+                 'Kids_amount = sum{Bus ∈ Bus_t : true : Kids(Bus)}': {'environmental': False,
+                                                                       'is_assignment': False,
+                                                                       'normal': False,
+                                                                       'reading': 'Kids_amount = sum{Bus ∈ Bus_t : '
+                                                                                  'true : Kids(Bus)}',
+                                                                       'relevant': True,
+                                                                       'status': 'UNIVERSAL',
+                                                                       'typ': 'Bool',
+                                                                       'value': True},
                  '__rank': 1},
  'Price': {},
  'Size': {},
