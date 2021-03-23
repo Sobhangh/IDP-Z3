@@ -197,12 +197,13 @@ theory {
 }
 structure {}
 
-display {
-
+procedure main() {
+    print("ok")
 }
 """
     kb = IDP.parse(test)
     T, S = kb.get_blocks("T, S")
+    kb.execute()
     for model in model_expand(T,S):
         print(model)
 

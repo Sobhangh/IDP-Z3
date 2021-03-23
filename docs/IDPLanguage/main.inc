@@ -13,7 +13,7 @@ It takes the following form:
         // here comes the python-like code to be executed
     }
 
-The vocabularies, theories and structures defined in other blocks of the IDP program are available through variables of the same name.
+The vocabularies, theories and structures defined in other blocks of the IDP source file are available through variables of the same name.
 
 The following functions are available:
 

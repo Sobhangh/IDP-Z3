@@ -24,9 +24,12 @@ IDP class
 The ``IDP`` class exposes the following methods:
 
 parse(file_or_string)
-    This class method parses the :ref:`IDP program<IDP>` in the file or string.
+    This class method parses the :ref:`IDP source file<IDP>` in the file or string.
 
 get_blocks(names)
     This instance method returns the list of blocks whose names are given in a comma-separated string.
+
+execute()
+    This instance methods executes the `main()` procedure block in the IDP source file.
 
 
