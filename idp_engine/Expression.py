@@ -182,6 +182,7 @@ class Expression(ASTNode):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
+        out.fresh_vars = copy.copy(out.fresh_vars)
         out.value = None if out.value is None else out.value.copy()
         out.simpler = None if out.simpler is None else out.simpler.copy()
         out.co_constraint = (None if out.co_constraint is None
@@ -336,6 +337,13 @@ class Expression(ASTNode):
                     ) -> "Expression":
         return self  # monkey-patched
 
+    def instantiate1(self,
+                    e0: "Expression",
+                    e1: "Expression",
+                    problem: "Problem"=None
+                    ) -> "Expression":
+        return self  # monkey-patched
+
     def symbolic_propagate(self,
                            assignments: "Assignments",
                            truth: Optional["Constructor"] = None
@@ -459,6 +467,11 @@ class Quantee(Expression):
     def __str1__(self):
         return f"{self.var} ∈ {self.sort}"
 
+    def copy(self):
+        out = Expression.copy(self)
+        out.sort = out.sort.copy()
+        return out
+
 
 class AQuantification(Expression):
     PRECEDENCE = 20
@@ -470,7 +483,6 @@ class AQuantification(Expression):
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
         self.sub_exprs = [self.f]
-        self.quantifier_is_expanded = False
         super().__init__()
 
         self.q_vars = {}  # dict[String, Variable]
@@ -485,7 +497,7 @@ class AQuantification(Expression):
         return out.annotate1()
 
     def __str1__(self):
-        if not self.quantifier_is_expanded:
+        if self.quantees:  #TODO this is not correct in case of partial expansion
             vars = ','.join([f"{q}" for q in self.quantees])
             return f"{self.q}{vars} : {self.sub_exprs[0].str}"
         else:
@@ -633,7 +645,7 @@ class AAggregate(Expression):
         self.out = kwargs.pop('out')
 
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
-        self.quantifier_is_expanded = False  # cannot test q_vars, because aggregate may not have quantee
+        self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
         self.q_vars = {}
@@ -644,7 +656,7 @@ class AAggregate(Expression):
             raise Exception("Can't have output variable for  #")
 
     def __str1__(self):
-        if not self.quantifier_is_expanded:
+        if not self.using_if:
             vars = "".join([f"{q}" for q in self.quantees])
             output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
             out = (f"{self.aggtype}{{{vars} : "
@@ -709,8 +721,6 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        if type(symbol) != SymbolExpr:
-            symbol = SymbolExpr(eval='', s=symbol)
         out = cls(symbol=symbol, args=Arguments(sub_exprs=args), **kwargs)
         out.sub_exprs = args
         # annotate
@@ -727,6 +737,11 @@ class AppliedSymbol(Expression):
         return (f"{out}"
                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
+
+    def copy(self):
+        out = Expression.copy(self)
+        out.symbol = out.symbol.copy()
+        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl and self.decl.name not in RESERVED_SYMBOLS:
@@ -783,7 +798,7 @@ class SymbolExpr(Expression):
         self.decl = None
         super().__init__()
 
-    def __str__(self):
+    def __str1__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
 

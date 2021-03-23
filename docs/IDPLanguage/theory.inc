@@ -119,13 +119,15 @@ Enumeration
 
 Quantified formulas
     *Quantified formulas* are sentences.
-    They have one of these two forms, where ``v_1, .., v_n`` are variables and |phi| is a sentence:
+    They have one of these two forms, where ``v_1, .., v_n`` are variables,
+    ``p_1, .., p_n`` are types or unary predicates,
+    and |phi| is a sentence:
 
     .. code::
 
-        ∀ v_1 ∈ T_1, v_n ∈ T_n: ϕ.
+        ∀ v_1 ∈ p_1, v_n ∈ p_n: ϕ.
 
-        ∃ v_1 ∈ T_1, v_n ∈ T_n: ϕ.
+        ∃ v_1 ∈ p_1, v_n ∈ p_n: ϕ.
 
     Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
     For example, ``!x in Int, y in Int: f(x,y)=f(y,x).``
@@ -133,12 +135,21 @@ Quantified formulas
 
     When quantifying a formula of type ``Symbol``,
     the expression must contain a "guard" to prevent arity or type error.
-    A guard is a predicate over ``Symbol`` that is defined by an enumeration in the same theory block.
+    A guard is a condition that can be resolved using the available enumerations.
     In the following example, ``symmetric`` must be defined by enumeration.
 
     .. code::
 
-        !`p in Symbol: symmetric(`p) => (!x, y : `p(x,y) => `p(y,x)).
+        symmetric := {`edge}
+        ∀s ∈ Symbol: symmetric(s) => (∀x, y : $(s)(x,y) ⇒ $(s)(y,x)).
+
+    An alternative is to use the introspection functions ``arity, input_domain, output_domain``:
+
+    .. code::
+
+        ∀s ∈ Symbol: arity(s)=2 ∧ input_domain(s,1)=input_domain(s,2)
+            ⇒ (∀x ∈ $(input_domain(s,1)), y ∈ $(input_domain(s,2)) : $(s)(x,y) ⇒ $(s)(y,x)).
+
 
 "is (not) enumerated"
     ``f(a,b) is enumerated`` and ``f(a,b) is not enumerated`` are sentences,

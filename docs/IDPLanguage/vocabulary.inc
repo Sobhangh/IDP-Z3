@@ -69,7 +69,7 @@ The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
 IDP-Z3 does not support partial functions.
 
 
-The following functions are built-ins:
+The following introspection functions are built-ins:
 
 * ``arity: Symbol → Symbol`` yields the arity of a symbol;
 * ``input_domain : Symbol ⨯ ℤ → Symbol`` yields the n-th input-domain of a symbol;

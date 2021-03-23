@@ -28,11 +28,11 @@ import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, IfExpr, AQuantification, Quantee,\
-    BinaryOperator, AEquivalence, AImplication, ADisjunction, \
-    AConjunction, AComparison, ASumMinus, AMultDiv, APower, \
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, \
-    Number, Date, Brackets, Variable, TRUE, FALSE)
+    Constructor, Expression, IfExpr, AQuantification, Quantee,
+    BinaryOperator, AEquivalence, AImplication, ADisjunction,
+    AConjunction, AComparison, ASumMinus, AMultDiv, APower,
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol,
+    Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status, Assignment
 from .utils import BOOL, INT, SYMBOL, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
@@ -59,7 +59,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
             self.value = simpler.value
         else:
             self.simpler = simpler
-    assert self.value is None or type(self.value) in [Constructor,
+    assert self.value is None or type(self.value) in [Constructor, Symbol,
                                                       Number, Date]
     assert self.value is not self  # avoid infinite loops
 
@@ -74,11 +74,7 @@ def update_exprs(self, new_exprs):
     """ change sub_exprs and simplify, while keeping relevant info. """
     #  default implementation, without simplification
     return self._change(sub_exprs=list(new_exprs))
-
-
-# Expression.update_exprs = update_exprs
-for i in [Constructor, SymbolExpr, AppliedSymbol, UnappliedSymbol]:
-    i.update_exprs = update_exprs
+Expression.update_exprs = update_exprs
 
 
 def simplify1(self):
@@ -113,14 +109,11 @@ IfExpr.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     if not self.decl and self.sort:
-        symbol = self.sort.sub_exprs[0].as_rigid()
+        symbol = self.sort.as_rigid()
         if symbol:
-            if type(symbol) == Symbol:
-                self.decl = symbol.decl
-            else:
-                assert type(symbol) == Constructor, "Internal error"
-                self.decl = symbol.symbol.decl
+            self.decl = symbol.decl
             self.sort.decl = self.decl
+    return self
 Quantee.update_exprs = update_exprs
 
 
@@ -128,14 +121,22 @@ Quantee.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
-    simpler = exprs[0] if not self.q_vars else None
-    return self._change(simpler=simpler, sub_exprs=exprs)
+    if not self.q_vars:
+        self.quantees = []
+        if self.q == '∀':
+            simpler = AConjunction.make('∧', exprs)
+        else:
+            simpler = ADisjunction.make('∨', exprs)
+        return self._change(simpler=simpler, sub_exprs=[simpler])
+    return self._change(sub_exprs=exprs)
 AQuantification.update_exprs = update_exprs
 
 
 # Class AImplication  #######################################################
 
 def update_exprs(self, new_exprs):
+    if type(new_exprs) == list:
+        new_exprs = iter(new_exprs)
     exprs0 = next(new_exprs)
     value, simpler = None, None
     if exprs0.same_as(FALSE):  # (false => p) is true
@@ -329,13 +330,12 @@ AUnary.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    if self.quantifier_is_expanded:
+    if self.using_if and not self.q_vars:
         operands1 = [e.as_rigid() for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
             out = Number(number=str(out))
             return self._change(value=out, sub_exprs=operands)
-
     return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
 
@@ -345,13 +345,9 @@ AAggregate.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     new_exprs = list(new_exprs)
     if not self.decl:
-        symbol = self.symbol.sub_exprs[0].as_rigid()
+        symbol = self.symbol.as_rigid()
         if symbol:
-            if type(symbol) == Symbol:
-                self.decl = symbol.decl
-            else:
-                assert type(symbol) == Constructor, "Internal error"
-                self.decl = symbol.symbol.decl
+            self.decl = symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
     if self.decl:
@@ -366,7 +362,9 @@ def update_exprs(self, new_exprs):
         elif self.decl.name == INPUT_DOMAIN:
             self.check(len(new_exprs) == 2,
                     f"Incorrect number of arguments for '{INPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL,
+            self.check(new_exprs[0].type == SYMBOL
+                       or (new_exprs[0].sort.decl.arity == 1
+                           and new_exprs[0].sort.decl.type == BOOL),
                     f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
             self.check(new_exprs[1].type == INT,
                     f"Second argument of '{INPUT_DOMAIN}' must be a Int: {new_exprs[1]}")
@@ -391,11 +389,22 @@ AppliedSymbol.update_exprs = update_exprs
 
 def as_set_condition(self):
     # determine core after substitutions
-    core = AppliedSymbol.make(self.symbol.sub_exprs[0], self.sub_exprs).copy()
+    core = AppliedSymbol.make(self.symbol, self.sub_exprs).copy()
 
     return ((None, None, None) if not self.in_enumeration else
             (core, 'not' not in self.is_enumeration, self.in_enumeration))
 AppliedSymbol.as_set_condition = as_set_condition
+
+
+# Class SymbolExpr  #######################################################
+
+def update_exprs(self, new_exprs):
+    symbol = list(new_exprs)[0]
+    value = (symbol if self.eval == '' else
+             symbol.symbol if type(symbol) == Constructor else
+             None)
+    return self._change(sub_exprs=[symbol], value=value)
+SymbolExpr.update_exprs = update_exprs
 
 
 # Class Brackets  #######################################################

@@ -1,4 +1,4 @@
-# IEP 03 enumeration
+# IEP 03 Quick syntax changes
 ## change the notation of enumeration
 - [x] distinguish predicate and function enumerations
     - [x] create 2 identical enumerations: FunctionEnum, PredicateEnum
@@ -66,11 +66,11 @@ problem with speed:
     - [ ] option: use def_constraint to cache all co_constraints ?  -> no impact on relevance
 
 ## Binary quantifications
-- [ ] update syntax of quantification over type
+- [x] update syntax of quantification over type
+- [x] allow quantification over unary predicate
+    - [x] type inference on the predicate
+    - [x] transform AQuantification
 - [ ] rewrite Quantification.interpret using generator of cross-product → quant, aggregate
 - [ ] allow several variables in quantification
-- [ ] allow quantification over unary predicate
-    - [ ] type inference on the predicate
-    - [ ] transform AQuantification
 - [ ] allow quantification over n-ary predicates
 - [ ] allow quantification over expression

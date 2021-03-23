@@ -46,7 +46,7 @@ from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Arguments,
                          Variable, TRUE, FALSE)
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, SYMBOL,
+from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
                     RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
 
 
@@ -274,6 +274,9 @@ class ConstructedTypeDeclaration(ASTNode):
         out = ADisjunction.make('∨', out)
         return out
 
+    def is_subset_of(self, other):
+        return self == other
+
 
 class RangeDeclaration(ASTNode):
     def __init__(self, **kwargs):
@@ -318,6 +321,9 @@ class RangeDeclaration(ASTNode):
                 e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
         return ADisjunction.make('∨', sub_exprs)
+
+    def is_subset_of(self, other):
+        return self == other
 
 
 class SymbolDeclaration(ASTNode):
@@ -391,6 +397,10 @@ class SymbolDeclaration(ASTNode):
         return (f"{self.name}"
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
+
+    def is_subset_of(self, other):
+        return (self.arity == 1 and self.type == BOOL
+                and self.sorts[0].decl == other)
 
 
 Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
@@ -496,6 +506,15 @@ class Rule(ASTNode):
         return self
 
     def instantiate_definition(self, new_args, theory):
+        """Create an instance of the definition for new_args, and interpret it for theory.
+
+        Args:
+            new_args ([Expression]): tuple of arguments to be applied to the defined symbol
+            theory (Problem): the context for the interpretation
+
+        Returns:
+            Expression: a boolean expression
+        """
         hash = str(new_args)
         if hash in self.cache:
             return self.cache[hash]

@@ -36,7 +36,7 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
-from idp_engine.utils import BOOL, INT, REAL, RELEVANT, ARITY, RESERVED_SYMBOLS
+from idp_engine.utils import BOOL, INT, REAL, RELEVANT, RESERVED_SYMBOLS
 
 
 # class ConstructedTypeDeclaration  ###########################################################
@@ -249,7 +249,7 @@ AUnary.translate1 = translate1
 # Class AAggregate  #######################################################
 
 def translate1(self):
-    assert self.quantifier_is_expanded, f"Cannot expand {self.code}"
+    assert self.using_if and not self.q_vars, f"Cannot expand {self.code}"
     return Sum([f.translate() for f in self.sub_exprs])
 AAggregate.translate1 = translate1
 
