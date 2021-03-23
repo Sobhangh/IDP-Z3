@@ -42,7 +42,8 @@ import re
 
 from idp_server.State import State, make_state
 from idp_server.IO import Output, metaJSON
-from idp_engine import idpparser
+from idp_engine import Idp, Problem, model_expand
+from idp_engine.Parse import idpparser
 from idp_engine.utils import start, log, NEWL
 
 z3lock = threading.Lock()
@@ -185,6 +186,25 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the tests')
     parser.add_argument('TEST', nargs='*', default=["generate"])
     args = parser.parse_args()
+
+    test = """
+vocabulary {
+    p : () → 𝔹
+}
+
+theory {
+    p().
+}
+structure {}
+
+display {
+
+}
+"""
+    kb = Idp.parse(test)
+    T, S = kb.get_blocks("T, S")
+    for model in model_expand(T,S):
+        print(model)
 
     error = 0
     if "generate" in args.TEST:

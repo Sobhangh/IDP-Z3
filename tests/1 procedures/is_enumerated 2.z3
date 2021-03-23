@@ -1,5 +1,5 @@
 Traceback (most recent call last):
-  File "test.py", line 61, in generateZ3
+  File "test.py", line 62, in generateZ3
     idp = idpparser.model_from_str(theory)
   File "/home/pcarbonn/.cache/pypoetry/virtualenvs/idp-engine-jObFWZdg-py3.8/lib/python3.8/site-packages/textx/metamodel.py", line 615, in model_from_str
     model = self._parser_blueprint.clone().get_model_from_str(

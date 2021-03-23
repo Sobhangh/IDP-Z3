@@ -100,6 +100,26 @@ class Idp(ASTNode):
         if self.display is None:
             self.display = Display(constraints=[])
 
+    @classmethod
+    def parse(cls, file_or_string):
+        if type(file_or_string) is str:
+            return idpparser.model_from_str(file_or_string)
+        else:
+            return idpparser.model_from_file(file_or_string)
+
+    def get_blocks(self, blocks):
+        names = blocks.split(",") if type(blocks) is str else blocks
+        out = []
+        for name in names:
+            name = name.strip()  # remove spaces
+            out.append(self.vocabularies[name] if name in self.vocabularies else
+                       self.theories[name] if name in self.theories else
+                       self.structures[name] if name in self.structures else
+                       self.procedures[name] if name in self.procedures else
+                       self.display if name == "Display" else
+                       "")
+        return out
+
 
 ################################ Vocabulary  ##############################
 
