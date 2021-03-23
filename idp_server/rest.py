@@ -31,7 +31,8 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
-from idp_engine import Idp, idpparser
+from idp_engine import IDP
+from idp_engine.Parse import idpparser
 from idp_engine.utils import log
 from .State import make_state
 from .Inferences import explain, abstract
@@ -81,18 +82,18 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
-idps: Dict[str, Idp] = {}  # {code_string : idp}
+idps: Dict[str, IDP] = {}  # {code_string : idp}
 
 
 def idpOf(code):
     """
-    Function to retrieve an Idp object for IDP code.
+    Function to retrieve an IDP object for IDP code.
     If the object doesn't exist yet, we create it.
-    `idps` is a dict which contains an Idp object for each IDP code.
+    `idps` is a dict which contains an IDP object for each IDP code.
     This way, easy caching can be achieved.
 
     :arg code: the IDP code.
-    :returns Idp: the Idp object.
+    :returns IDP: the IDP object.
     """
     global idps
     if code in idps:

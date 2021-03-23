@@ -10,18 +10,18 @@ The following code illustrates how to invoke it.
 
 .. code-block:: python
 
-    from idp_engine import Idp, model_expand
-    kb = Idp.parse("path/to/file.idp")
+    from idp_engine import IDP, model_expand
+    kb = IDP.parse("path/to/file.idp")
     T, S = kb.get_blocks("T, S")
     for model in model_expand(T,S):
         print(model)
 
-Besides the methods and class available in the :ref:`main block<main>`, ``idp_engine exposes`` the ``Idp class``, described below.
+Besides the methods and class available in the :ref:`main block<main>`, ``idp_engine`` exposes the ``IDP class``, described below.
 
-Idp class
+IDP class
 +++++++++
 
-The ``Idp`` class exposes the following methods:
+The ``IDP`` class exposes the following methods:
 
 parse(file_or_string)
     This class method parses the :ref:`IDP program<IDP>` in the file or string.

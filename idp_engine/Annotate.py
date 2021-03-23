@@ -209,7 +209,7 @@ def annotate(self, idp):
     Every enumeration is converted into an assignment, which is added to
     `self.assignments`.
 
-    :arg idp: a `Parse.Idp` object.
+    :arg idp: a `Parse.IDP` object.
     :returns None:
     """
     if self.vocab_name not in idp.vocabularies:

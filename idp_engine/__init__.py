@@ -1,4 +1,4 @@
-from .Parse      import Idp
+from .Parse      import IDP
 
 from .Annotate import Done
 from .Interpret import Done

@@ -20,7 +20,7 @@
 Classes to parse an IDP-Z3 theory.
 
 """
-__all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
+__all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
            "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
@@ -76,7 +76,7 @@ class ViewType(Enum):
     EXPANDED = "expanded"
 
 
-class Idp(ASTNode):
+class IDP(ASTNode):
     """The class of AST nodes representing an IDP-Z3 program.
     """
     def __init__(self, **kwargs):
@@ -865,7 +865,7 @@ Block = Union[Vocabulary, Theory, Structure, Display]
 dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True,
-                                classes=[Idp, Annotations,
+                                classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
                                          ConstructedTypeDeclaration,

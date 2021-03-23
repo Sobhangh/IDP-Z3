@@ -42,7 +42,7 @@ import re
 
 from idp_server.State import State, make_state
 from idp_server.IO import Output, metaJSON
-from idp_engine import Idp, Problem, model_expand
+from idp_engine import IDP, Problem, model_expand
 from idp_engine.Parse import idpparser
 from idp_engine.utils import start, log, NEWL
 
@@ -201,7 +201,7 @@ display {
 
 }
 """
-    kb = Idp.parse(test)
+    kb = IDP.parse(test)
     T, S = kb.get_blocks("T, S")
     for model in model_expand(T,S):
         print(model)
