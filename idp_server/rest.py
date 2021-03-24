@@ -32,7 +32,6 @@ from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
-from idp_engine.Parse import idpparser
 from idp_engine.utils import log
 from .State import make_state
 from .Inferences import explain, abstract
@@ -99,7 +98,7 @@ def idpOf(code):
     if code in idps:
         return idps[code]
     else:
-        idp = idpparser.model_from_str(code)
+        idp = IDP.parse(code)
         if 20 < len(idps):
             # remove oldest entry, to prevent memory overflow
             idps = {k: v for k, v in list(idps.items())[1:]}
@@ -215,12 +214,12 @@ class eval(Resource):
                     out = Output(state).fill(state)
                 if method == "abstract":
                     if args['symbol'] != "":  # theory to explain ?
-                        newTheory = (str(idpparser.model_from_str(args['code']).vocabulary)
+                        newTheory = (str(IDP.parse(args['code']).vocabulary)
                                      + "theory {\n"
                                      + args['symbol']
                                      + "\n}\n"
                                      )
-                        idpModel = idpparser.model_from_str(newTheory)
+                        idpModel = IDP.parse(newTheory)
                         expanded = {}
                         # for expr in idpModel.subtences.values():
                         #     expanded.update(expr.unknown_symbols())

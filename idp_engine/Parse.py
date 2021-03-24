@@ -24,7 +24,7 @@ __all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
            "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
-           "Display", "Procedure", "idpparser", ]
+           "Display", "Procedure", ]
 
 from copy import copy
 from datetime import date

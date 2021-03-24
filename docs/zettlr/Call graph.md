@@ -4,7 +4,7 @@ The following diagram is a simplification of the full graph of calls performed t
 
 ```mermaid
     graph TD
-        IDP-Z3 --> idpparser
+        IDP-Z3 --> parse
         IDP-Z3 --> execute
 
         execute -.-> symbolic_propagate;
@@ -15,7 +15,7 @@ The following diagram is a simplification of the full graph of calls performed t
         execute -.-> formula
         formula --> interpret
 
-        idpparser --> Annotate
+        parse --> Annotate
         Annotate --> interpret;
         Annotate --> rename_args;
 
