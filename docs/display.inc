@@ -12,13 +12,13 @@ The following predicates and functions are available:
 .. index:: expanded view
 
 expand
-    :math:`expand(s_1, .., s_n)` specifies that :ref:`symbols<symbol>` :math:`s_1, .., s_n` are shown expanded,
+    ``expand(s1, .., sn)`` specifies that :ref:`symbols<symbol>` ``s1, .., sn`` are shown expanded,
     i.e., that all sub-sentences of the theory where they occur are shown on the screen.
 
     For example, ``expand(`Length).`` will force the Interactive Consultant to show all sub-sentences containing `Length`.
 
 hide
-    :math:`hide(s_1, .., s_n)` specifies that symbols :math:`s_1, .., s_n` are not shown on the screen.
+    ``hide(s1, .., sn)`` specifies that symbols ``s1, .., sn`` are not shown on the screen.
 
     For example, ``hide(`Length).`` will force the Interactive Consultant to not display the box containing `Length` information.
 
@@ -28,12 +28,12 @@ view()
     ``view() = expanded.`` specifies that symbols are displayed expand_\ ed.
 
 relevant
-    :math:`relevant(s_1, .., s_n)` specifies that symbols :math:`s_1, .., s_n` are relevant, i.e. that they should never be greyed out.
+    ``relevant(s1, .., sn)`` specifies that symbols ``s1, .., sn`` are relevant, i.e. that they should never be greyed out.
 
     Irrelevant symbols and sub-sentences, i.e. symbols whose interpretation do not constrain the interpretation of the relevant symbols, are greyed out by the Interactive Consultant.
 
 goal
-    :math:`goal(s)` specifies that symbols :math:`s` is a goal, i.e. that it is relevant and shown expanded.
+    ``goal(s)`` specifies that symbols ``s`` is a goal, i.e. that it is relevant and shown expanded.
 
 moveSymbols
     When the *display block* contains ``moveSymbols.``, the Interactive Consultant is allowed to change the layout of symbols on the screen, so that relevant symbols come first.
@@ -46,6 +46,14 @@ optionalPropagation
     By default, this button is not present.
 
 unit
-    :math:`unit(unitstr, s_1, ..., s_n)` specifies the unit of one or more symbols. This unit will then show up in the symbol's header in the Interactive Consultant. The :math:`unitstr` should be surrounded by single quotes.
+    ``unit('unitstr', s1, ..., sn)`` specifies the unit of one or more symbols.
+    This unit will then show up in the symbol's header in the Interactive Consultant.
+    ``unitstr`` may not be a symbol declared in the vocabulary.
 
     For example: ``unit('m', length, perimeter).``
+
+category
+    Experimental: this feature is likely to change in the future.
+
+    ``category('label', `p1, ..., `pn)`` will force the display of the ```p1, ..., `pn`` symbols under a heading called ``label``.
+    ``label`` may not be a symbol declared in the vocabulary.
