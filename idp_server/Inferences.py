@@ -239,7 +239,7 @@ def abstract(state, given_json):
                 table[ass.symbol_decl.name][i].append(ass)
 
     # build table of models
-    out = {} # {category : [Assignment]}
+    out = {} # {heading : [Assignment]}
 
     out["universal"] = list(l for l in state.assignments.values()
                             if l.status == Status.UNIVERSAL)

@@ -785,7 +785,7 @@ class AppliedSymbol(Expression):
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
-        if hasattr(symbol, 'name') and symbol.name in ['unit', 'category']:
+        if hasattr(symbol, 'name') and symbol.name in ['unit', 'heading']:
             constructor = Constructor(name=self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
 
