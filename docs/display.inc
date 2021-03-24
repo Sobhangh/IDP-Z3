@@ -52,8 +52,8 @@ unit
 
     For example: ``unit('m', length, perimeter).``
 
-category
+heading
     Experimental: this feature is likely to change in the future.
 
-    ``category('label', `p1, ..., `pn)`` will force the display of the ```p1, ..., `pn`` symbols under a heading called ``label``.
+    ``heading('label', `p1, ..., `pn)`` will force the display of the ```p1, ..., `pn`` symbols under a heading called ``label``.
     ``label`` may not be a symbol declared in the vocabulary.

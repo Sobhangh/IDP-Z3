@@ -361,8 +361,8 @@ class SymbolDeclaration(ASTNode):
         unit (str):
             the unit of the symbol, such as m (meters)
 
-        category (str):
-            the category that the symbol should belong to
+        heading (str):
+            the heading that the symbol should belong to
     """
 
     def __init__(self, **kwargs):
@@ -381,7 +381,7 @@ class SymbolDeclaration(ASTNode):
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         self.unit: str = None
-        self.category: str = None
+        self.heading: str = None
 
         self.translated = None
 
@@ -721,9 +721,9 @@ class Display(ASTNode):
                 name = constraint.symbol.sub_exprs[0].name
                 symbols = []
                 # All arguments should be symbols, except for the first
-                # argument of 'unit' and 'category'.
+                # argument of 'unit' and 'heading'.
                 for i, symbol in enumerate(constraint.sub_exprs):
-                    if name in ['unit', 'category'] and i == 0:
+                    if name in ['unit', 'heading'] and i == 0:
                         continue
                     self.check(symbol.name.startswith('`'),
                         f"arg '{symbol.name}' of {name}'"
@@ -749,10 +749,10 @@ class Display(ASTNode):
                 elif name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
-                elif name == 'category':
-                    # e.g. category('Shape', `type).
+                elif name == 'heading':
+                    # e.g. heading('Shape', `type).
                     for symbol in symbols:
-                        symbol.category = str(constraint.sub_exprs[0])
+                        symbol.heading = str(constraint.sub_exprs[0])
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
                 self.check(type(constraint.sub_exprs[0].symbol.sub_exprs[0]) == Symbol,

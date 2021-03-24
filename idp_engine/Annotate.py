@@ -295,8 +295,8 @@ def annotate(self, idp):
     viewType.annotate(self.voc)
 
     # Check the AST for any constructors that belong to open types.
-    # For now, the only open types are `unit` and `category`.
-    open_constructors = {'unit': [], 'category': []}
+    # For now, the only open types are `unit` and `heading`.
+    open_constructors = {'unit': [], 'heading': []}
     for constraint in self.constraints:
         constraint.generate_constructors(open_constructors)
 
@@ -323,7 +323,7 @@ def annotate(self, idp):
         ('moveSymbols', Symbol(name=BOOL)),
         ('optionalPropagation', Symbol(name=BOOL)),
         ('unit', open_types['unit']),
-        ('category', open_types['category'])
+        ('heading', open_types['heading'])
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=Symbol(name=name),

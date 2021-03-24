@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * Fix #72: Empty predicate in structure should be allowed
 
 ### Interactive Consultant
-* experimental: allow grouping of symbols under category heading
+* experimental: allow grouping of symbols under headings
 * improve Unicode buttons
 
 
