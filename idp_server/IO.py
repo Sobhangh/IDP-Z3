@@ -49,8 +49,8 @@ def metaJSON(state):
         }
         if decl.unit:
             d["unit"] = decl.unit
-        if decl.category:
-            d["category"] = decl.category
+        if decl.heading:
+            d["category"] = decl.heading
         if decl.annotations is not None:
             if 'reading' in decl.annotations:
                 d['guiname'] = decl.annotations['reading']

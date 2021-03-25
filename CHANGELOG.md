@@ -17,6 +17,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #70: Double unary symbol should be parsed
 * Fix #72: Empty predicate in structure should be allowed
 
+### Interactive Consultant
+* experimental: allow grouping of symbols under headings
+* improve Unicode buttons
+
 
 ## [0.7.2] - 2021-02-16
 
