@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased yet]
 
+*
+
+## [0.8.0] - 2021-03-25
+
 ### API
 * (breaking) renamed `idp-solver` to `idp-engine`
 * (breaking) Issue #45: partial support for dates.  Introduces new Date type, which may conflict with Date type in some vocabularies.
