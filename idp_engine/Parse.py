@@ -20,11 +20,11 @@
 Classes to parse an IDP-Z3 theory.
 
 """
-__all__ = ["Idp", "Vocabulary", "Annotations", "Extern",
+__all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
            "ConstructedTypeDeclaration", "RangeDeclaration",
            "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
-           "Display", "Procedure", "idpparser", ]
+           "Display", "Procedure", ]
 
 from copy import copy
 from datetime import date
@@ -76,7 +76,7 @@ class ViewType(Enum):
     EXPANDED = "expanded"
 
 
-class Idp(ASTNode):
+class IDP(ASTNode):
     """The class of AST nodes representing an IDP-Z3 program.
     """
     def __init__(self, **kwargs):
@@ -99,6 +99,26 @@ class Idp(ASTNode):
         self.theory = next(iter(self.theories    .values()))
         if self.display is None:
             self.display = Display(constraints=[])
+
+    @classmethod
+    def parse(cls, file_or_string):
+        if path.exists(file_or_string):
+            return idpparser.model_from_file(file_or_string)
+        else:
+            return idpparser.model_from_str(file_or_string)
+
+    def get_blocks(self, blocks):
+        names = blocks.split(",") if type(blocks) is str else blocks
+        out = []
+        for name in names:
+            name = name.strip()  # remove spaces
+            out.append(self.vocabularies[name] if name in self.vocabularies else
+                       self.theories[name] if name in self.theories else
+                       self.structures[name] if name in self.structures else
+                       self.procedures[name] if name in self.procedures else
+                       self.display if name == "Display" else
+                       "")
+        return out
 
 
 ################################ Vocabulary  ##############################
@@ -845,7 +865,7 @@ Block = Union[Vocabulary, Theory, Structure, Display]
 dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 
 idpparser = metamodel_from_file(dslFile, memoization=True,
-                                classes=[Idp, Annotations,
+                                classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
                                          ConstructedTypeDeclaration,

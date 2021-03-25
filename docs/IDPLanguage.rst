@@ -1,3 +1,6 @@
+.. _IDP:
+
+
 The IDP Language
 ================
 
@@ -5,7 +8,7 @@ Overview
 ------------
 
 The IDP language is used to create knowledge bases.
-An IDP program is made of the following blocks of code:
+An IDP source file is made of the following blocks of code:
 
 vocabulary
     specify the types, predicates, functions and constants used to describe the problem domain.

@@ -42,7 +42,7 @@ import re
 
 from idp_server.State import State, make_state
 from idp_server.IO import Output, metaJSON
-from idp_engine import idpparser
+from idp_engine import IDP, Problem, model_expand
 from idp_engine.utils import start, log, NEWL
 
 z3lock = threading.Lock()
@@ -58,7 +58,7 @@ def generateZ3(theory):
     # capture stdout, print()
     with io.StringIO() as buf, redirect_stdout(buf):
         try:
-            idp = idpparser.model_from_str(theory)
+            idp = IDP.parse(theory)
             if 'main' in idp.procedures:
                 idp.execute()
             else:
@@ -159,7 +159,7 @@ def pipeline():
                     log(f"start /eval {file_name}")
                     with open(file_name, "r") as fp:
 
-                        idp = idpparser.model_from_str(fp.read())
+                        idp = IDP.parse(fp.read())
                         given_json = ""
 
                         if idp.procedures == {}:
@@ -185,6 +185,26 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the tests')
     parser.add_argument('TEST', nargs='*', default=["generate"])
     args = parser.parse_args()
+
+    test = """
+vocabulary {
+    p : () → 𝔹
+}
+
+theory {
+    p().
+}
+structure {}
+
+procedure main() {
+    print("ok")
+}
+"""
+    kb = IDP.parse(test)
+    T, S = kb.get_blocks("T, S")
+    kb.execute()
+    for model in model_expand(T,S):
+        print(model)
 
     error = 0
     if "generate" in args.TEST:

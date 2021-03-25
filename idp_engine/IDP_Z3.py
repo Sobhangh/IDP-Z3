@@ -26,7 +26,7 @@ import argparse
 import os
 import sys
 
-from idp_engine import idpparser
+from idp_engine import IDP
 
 
 def cli(args=None):
@@ -41,7 +41,7 @@ def cli(args=None):
         with open(file, "r") as f:
             theory = f.read()
 
-        idp = idpparser.model_from_str(theory)
+        idp = IDP.parse(theory)
         idp.execute()
 
     sys.exit(error)

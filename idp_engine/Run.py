@@ -24,7 +24,7 @@ Classes to execute the main block of an IDP program
 import types
 from z3 import Solver
 
-from .Parse import Idp
+from .Parse import IDP
 from .Problem import Problem
 from .Assignments import Status, Assignments
 from .utils import NEWL
@@ -121,7 +121,7 @@ def execute(self):
 
     exec(main, mybuiltins, mylocals)
 
-Idp.execute = execute
+IDP.execute = execute
 
 
 

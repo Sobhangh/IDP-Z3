@@ -26,15 +26,15 @@ from .IO import json_to_literals, Status
 from .Inferences import get_relevant_subtences
 
 # Types
-from idp_engine import Idp
+from idp_engine import IDP
 from typing import Dict, Tuple
 
 
 class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[Idp, str], 'State'] = {}
+    cache: Dict[Tuple[IDP, str], 'State'] = {}
 
-    def __init__(self, idp: Idp):
+    def __init__(self, idp: IDP):
 
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
@@ -51,7 +51,7 @@ class State(Problem):
             idp.theory     = idp.theories    ['decision']
         idp.display.annotate(idp)
         idp.display.run(idp)
-        self.idp = idp  # Idp vocabulary and theory
+        self.idp = idp  # IDP vocabulary and theory
 
         super().__init__()
         self.given = None  # Assignments from the user interface
@@ -131,11 +131,11 @@ class State(Problem):
                 )
 
 
-def make_state(idp: Idp, jsonstr: str) -> State:
+def make_state(idp: IDP, jsonstr: str) -> State:
     """
     Manages the cache of States.
 
-    :arg idp: IDP code parsed into Idp object
+    :arg idp: IDP code parsed into IDP object
     :arg jsonstr: the user's assignments in json
     :returns: the complete state of the system
     :rtype: State
