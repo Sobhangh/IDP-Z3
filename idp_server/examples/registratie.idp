@@ -183,4 +183,15 @@ display {
     relevant(`tax_rate, `registration_type, `tax_amount).
     view() = normal.
     expand(`registration_type, `tax_rate).
+    heading(Building, `region, `type_of_real_estate, `monument).
+    heading(Buyer, `buyer, `domicile_established, `first_ownership,
+      `causal_connection, `professional_buyer, `professional_declaration_filed,
+      `guarantee_satisfied, `additional_security_required,
+      `additional_security_satisfied).
+    heading('Sales Transaction', `seller, `value, `transaction_type, `use, `resale,
+      `heritage_investment, `heritage_plan, `additional_terms,
+      `mortgage_loan_allowance, `certification_date, `certification_date_sale, `clean_purchase,
+      `energy_renovation_planned, `term_energy_renovation, `start_dt_dwelling_for_social_rent,
+      `duration_of_agreement).
+    heading(Registration, `registration_type, `tax_rate, `tax_amount).
 }
