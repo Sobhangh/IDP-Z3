@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 *
 
+## [0.8.1] - 2021-03-29
+
+* update video tutorial
+
 ## [0.8.0] - 2021-03-25
 
 ### API
