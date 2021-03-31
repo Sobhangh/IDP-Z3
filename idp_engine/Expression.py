@@ -178,7 +178,7 @@ class Expression(ASTNode):
 
     def copy(self):
         " create a deep copy (except for Constructor and Number) "
-        if type(self) in [Constructor, Number, Variable]:
+        if type(self) in [Constructor, UnappliedSymbol, Number, Variable]:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -392,8 +392,8 @@ class Constructor(Expression):
     def is_reified(self): return False
 
 
-TRUE = Constructor(name='true')
-FALSE = Constructor(name='false')
+TRUEC = Constructor(name='true')
+FALSEC = Constructor(name='false')
 
 
 class Symbol(Expression):
@@ -832,11 +832,22 @@ class UnappliedSymbol(Expression):
         self.is_enumeration = None
         self.in_enumeration = None
 
+    @classmethod
+    def make(cls, constructor):
+        out = (cls)(s=Symbol(name=constructor.name))
+        out.decl = constructor
+        out.fresh_vars = {}
+        return out
+
     def __str1__(self): return self.name
 
-    def collect(self, questions, all_=True, co_constraints=True):
-        self.check(False, f"Internal error: {self}")
+    def as_rigid(self): return self.decl
 
+    def is_reified(self): return False
+
+
+TRUE = UnappliedSymbol.make(TRUEC)
+FALSE = UnappliedSymbol.make(FALSEC)
 
 class Variable(Expression):
     """AST node for a variable in a quantification or aggregate

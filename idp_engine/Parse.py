@@ -45,7 +45,7 @@ from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Arguments,
-                         Variable, TRUE, FALSE)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
                     RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
 
@@ -182,7 +182,7 @@ class Vocabulary(ASTNode):
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
             ConstructedTypeDeclaration(
-                name=BOOL, constructors=[TRUE, FALSE]),
+                name=BOOL, constructors=[TRUEC, FALSEC]),
             RangeDeclaration(name=INT, elements=[]),
             RangeDeclaration(name=REAL, elements=[]),
             RangeDeclaration(name=DATE, elements=[]),
@@ -629,7 +629,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if type(args[rank]) in [Constructor, Number]:
+            if type(args[rank]) in [Constructor, UnappliedSymbol, Number]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(theory, rank+1,

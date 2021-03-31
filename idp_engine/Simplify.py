@@ -31,7 +31,7 @@ from .Expression import (
     Constructor, Expression, IfExpr, AQuantification, Quantee,
     BinaryOperator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol,
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status, Assignment
@@ -53,13 +53,13 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
     if value is not None:
         self.value = value
     elif simpler is not None:
-        if type(simpler) in [Constructor, Number]:
+        if type(simpler) in [Constructor, UnappliedSymbol, Number]:
             self.value = simpler
         elif simpler.value is not None:  # example: prime.idp
             self.value = simpler.value
         else:
             self.simpler = simpler
-    assert self.value is None or type(self.value) in [Constructor, Symbol,
+    assert self.value is None or type(self.value) in [Constructor, UnappliedSymbol, Symbol,
                                                       Number, Date]
     assert self.value is not self  # avoid infinite loops
 

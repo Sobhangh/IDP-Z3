@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number)
+                         TRUE, FALSE, SymbolExpr, Number)
 
 from .utils import BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error
 
@@ -527,6 +527,10 @@ Variable.annotate = annotate
 
 def annotate(self, voc, q_vars):
     if self.name in voc.symbol_decls:
+        if self.same_as(TRUE) or self.same_as(FALSE):
+            self.decl = voc.symbol_decls[self.name]
+            self.fresh_vars = {}
+            return self
         if type(voc.symbol_decls[self.name]) == Constructor:
             return voc.symbol_decls[self.name]
         self.check(False, f"{self} should be applied to arguments (or prefixed with a back-tick)")

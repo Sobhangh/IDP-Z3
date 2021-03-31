@@ -259,7 +259,7 @@ AAggregate.translate1 = translate1
 def translate1(self):
     self.check(self.decl, f"Unknown symbol: {self.symbol}")
     if self.decl.name == RELEVANT:
-        return TRUE.translated
+        return TRUE.translate()
     assert self.decl.name not in RESERVED_SYMBOLS, \
                f"Can't resolve argument of built-in symbols: {self}"
     if self.decl.name == 'abs':
@@ -289,8 +289,8 @@ AppliedSymbol.translate1 = translate1
 # Class UnappliedSymbol  #######################################################
 
 def translate1(self):
-    assert False, "Internal error"
-UnappliedSymbol.translate1 = translate
+    return self.decl.translated
+UnappliedSymbol.translate1 = translate1
 
 
 # Class Variable  #######################################################
