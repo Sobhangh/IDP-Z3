@@ -242,8 +242,6 @@ def annotate(self, block):
                         f"incorrect arity in {self.name} type enumeration")
             constr = Constructor(name=c.args[0].name)
             constr.type = self.name
-            if self.name != BOOL:
-                constr.py_value = i  # to allow comparisons
             self.check(constr.name not in voc.symbol_decls,
                     f"duplicate constructor in vocabulary: {constr.name}")
             voc.symbol_decls[constr.name] = constr
@@ -257,7 +255,7 @@ def annotate(self, block):
                 or all(s.name not in [INT, REAL]  # finite domain
                         for s in self.symbol.decl.sorts)
                 or self.default is None,
-        f"Can't use default value for '{self.name}' on infinite domain.")
+        f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
         self.check(self.default.as_rigid() is not None,
@@ -527,13 +525,11 @@ Variable.annotate = annotate
 
 def annotate(self, voc, q_vars):
     if self.name in voc.symbol_decls:
-        if self.same_as(TRUE) or self.same_as(FALSE) or self.name.startswith("`"):
-            self.decl = voc.symbol_decls[self.name]
-            self.fresh_vars = {}
-            return self
-        if type(voc.symbol_decls[self.name]) == Constructor:
-            return voc.symbol_decls[self.name]
-        self.check(False, f"{self} should be applied to arguments (or prefixed with a back-tick)")
+        self.check(type(voc.symbol_decls[self.name]) == Constructor,
+                   f"{self} should be applied to arguments (or prefixed with a back-tick)")
+        self.decl = voc.symbol_decls[self.name]
+        self.fresh_vars = {}
+        return self
     if self.name in q_vars:
         return q_vars[self.name]
     # elif self.name in voc.symbol_decls:  # in symbol_decls

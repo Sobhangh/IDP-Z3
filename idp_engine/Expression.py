@@ -373,23 +373,28 @@ class Expression(ASTNode):
         """
         return (None, None, None)
 
-class Constructor(Expression):
+class Constructor(ASTNode):
+    """Constructor declaration
+
+    Attributes:
+        name (string): name of the constructor
+
+        symbol (Symbol): only for Symbol constructors
+
+        py_value (DataTypeRef): the value in Z3
+
+        translated (DataTypeRef): the value in Z3
+    """
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
-        self.sub_exprs = []
 
-        super().__init__()
-        self.fresh_vars = set()
-        self.symbol = None  # set only for SYMBOL constructors
+        self.symbol = None
+        self.py_value = None
         self.translated: Any = None
 
-    def __str1__(self): return self.name
-
-    def as_rigid(self): return self
-
-    def is_reified(self): return False
+    def __str__(self): return self.name
 
 
 TRUEC = Constructor(name='true')
@@ -811,11 +816,9 @@ class Arguments(object):
 
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.
-    Can be a constructor, a quantified variable,
-    or a symbol application without arguments (by abuse of notation, e.g. 'p').
-    (The parsing of numbers result directly in Number nodes)
+    Can be a constructor or a quantified variable.
 
-    Converted to the proper AST class by annotate().
+    Variables are converted to Variable() by annotate().
     """
     PRECEDENCE = 200
 
@@ -841,7 +844,7 @@ class UnappliedSymbol(Expression):
 
     def __str1__(self): return self.name
 
-    def as_rigid(self): return self.decl
+    def as_rigid(self): return self
 
     def is_reified(self): return False
 

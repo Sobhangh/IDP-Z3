@@ -131,9 +131,9 @@ def interpret(self, problem):
                 Status.GIVEN)
     if self.is_type_enumeration:
         symbol = self.symbol
-        symbol.decl.domain = [t.args[0]
+        symbol.decl.range = [t.args[0]
                               for t in self.enumeration.tuples.values()]
-        symbol.decl.range = symbol.decl.domain
+        symbol.decl.domain = [us.decl for us in symbol.decl.range]
     else: # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
             if type(self.enumeration) == FunctionEnum:

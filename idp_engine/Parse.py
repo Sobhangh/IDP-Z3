@@ -250,13 +250,13 @@ class ConstructedTypeDeclaration(ASTNode):
 
         sorts (List[Symbol]): the types of the arguments
 
-        out (Symbol): Boolean Symbol
+        out (Symbol): the Boolean Symbol
 
         type (string): Z3 type of an element of the type; same as `name`
 
         domain ([Constructor]): list of constructors in the enumeration
 
-        range ([UnappliedSymbol]): list of expressions in the enumeration
+        range ([Expression]): list of expressions of that type
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
@@ -292,7 +292,7 @@ class ConstructedTypeDeclaration(ASTNode):
         if self.name == BOOL:
             out = [var, AUnary.make('¬', var)]
         else:
-            out = [AComparison.make('=', [var, c]) for c in self.domain]
+            out = [AComparison.make('=', [var, c]) for c in self.range]
         out = ADisjunction.make('∨', out)
         return out
 
@@ -306,7 +306,7 @@ class RangeDeclaration(ASTNode):
         self.elements = kwargs.pop('elements')
         self.arity = 1
         self.translated = None
-        self.domain = None  # not used
+        self.domain = []
         self.sorts = [Symbol(name=self.name)]
         self.out = Symbol(name=BOOL)
 

@@ -232,7 +232,10 @@ def update_exprs(self, new_exprs):
         acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
-            if not (BinaryOperator.MAP[op]) (acc1.py_value, expr1.py_value):
+            if op == "=" and type(acc1) == UnappliedSymbol == type(expr1):
+                if not acc1.decl == expr1.decl:  # compare constructors
+                    return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+            elif not (BinaryOperator.MAP[op]) (acc1.py_value, expr1.py_value):
                 return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             acc, acc1 = expr, expr1
         return self._change(value=TRUE, sub_exprs=operands)
