@@ -112,13 +112,6 @@ def reified(self) -> DatatypeRef:
 Expression.reified = reified
 
 
-# class Constructor  ##########################################################
-
-def translate(self):
-    return self.translated
-Constructor.translate = translate
-
-
 # Class IfExpr  ###############################################################
 
 def translate1(self):

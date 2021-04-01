@@ -262,7 +262,7 @@ class ConstructedTypeDeclaration(ASTNode):
 
         translated (Z3): the translation of the type in Z3
 
-        map (Dict[string, Constructor]): a mapping from code to Expression
+        map (Dict[string, Expression]): a mapping from code to Expression in range
     """
 
     def __init__(self, **kwargs):
@@ -631,7 +631,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if type(args[rank]) in [Constructor, UnappliedSymbol, Number]:
+            if type(args[rank]) in [UnappliedSymbol, Number]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(theory, rank+1,

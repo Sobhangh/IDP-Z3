@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         TRUE, FALSE, SymbolExpr, Number)
+                         FALSE, SymbolExpr, Number)
 
 from .utils import BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error
 
@@ -237,7 +237,8 @@ def annotate(self, block):
     # create constructors if it is a type enumeration
     self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
     if self.is_type_enumeration:
-        for i, c in enumerate(self.enumeration.tuples):
+        # create Constructors before annotating the tuples
+        for c in self.enumeration.tuples:
             self.check(len(c.args) == 1,
                         f"incorrect arity in {self.name} type enumeration")
             constr = Constructor(name=c.args[0].name)

@@ -177,8 +177,8 @@ class Expression(ASTNode):
         self.block: Any = None
 
     def copy(self):
-        " create a deep copy (except for Constructor and Number) "
-        if type(self) in [Constructor, UnappliedSymbol, Number, Variable]:
+        " create a deep copy (except for UnappliedSymbol and Number) "
+        if type(self) in [UnappliedSymbol, Number, Variable]:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -240,7 +240,7 @@ class Expression(ASTNode):
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for Constructor, IfExpr, AUnary, Variable,
+        default implementation for UnappliedSymbol, IfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
 
@@ -285,7 +285,7 @@ class Expression(ASTNode):
             e.co_constraints(co_constraints)
 
     def as_rigid(self):
-        " returns a Number or Constructor, or None "
+        " returns a Number or UnappliedSymbol, or None "
         return self.value
 
     def is_reified(self): return True
@@ -346,8 +346,8 @@ class Expression(ASTNode):
 
     def symbolic_propagate(self,
                            assignments: "Assignments",
-                           truth: Optional["Constructor"] = None
-                           ) -> List[Tuple["Expression", "Constructor"]]:
+                           truth: Optional["Expression"] = None
+                           ) -> List[Tuple["Expression"]]:
         return []  # monkey-patched
 
     def propagate1(self,

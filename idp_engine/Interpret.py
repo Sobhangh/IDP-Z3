@@ -43,7 +43,7 @@ from .Assignments import Status
 from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
                    FunctionEnum)
-from .Expression import (Constructor, SymbolExpr, Expression, AQuantification,
+from .Expression import (SymbolExpr, Expression, AQuantification,
                     AImplication, AConjunction,  AEquivalence, AAggregate,
                     AComparison, AUnary, AppliedSymbol, Number,
                     Variable, TRUE)
@@ -191,7 +191,7 @@ def substitute(self, e0, e1, assignments, todo=None):
     if self.code == e0.code:
         if self.code == e1.code:
             return self  # to avoid infinite loops
-        return self._change(value=e1)  # e1 is Constructor or Number
+        return self._change(value=e1)  # e1 is UnappliedSymbol or Number
     else:
         # will update self.simpler
         out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
@@ -240,13 +240,6 @@ def instantiate1(self, e0, e1, problem=None):
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate1 = instantiate1
-
-
-# Class Constructor  ######################################################
-
-def instantiate(self, e0, e1, problem=None):
-    return self
-Constructor.instantiate = instantiate
 
 
 # class Symbol ###########################################################

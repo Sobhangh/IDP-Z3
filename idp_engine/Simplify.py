@@ -28,7 +28,7 @@ import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, IfExpr, AQuantification, Quantee,
+    Expression, IfExpr, AQuantification, Quantee,
     BinaryOperator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
@@ -53,13 +53,13 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
     if value is not None:
         self.value = value
     elif simpler is not None:
-        if type(simpler) in [Constructor, UnappliedSymbol, Number]:
+        if type(simpler) in [UnappliedSymbol, Number]:
             self.value = simpler
         elif simpler.value is not None:  # example: prime.idp
             self.value = simpler.value
         else:
             self.simpler = simpler
-    assert self.value is None or type(self.value) in [Constructor, UnappliedSymbol, Symbol,
+    assert self.value is None or type(self.value) in [UnappliedSymbol, Symbol,
                                                       Number, Date]
     assert self.value is not self  # avoid infinite loops
 
@@ -401,9 +401,7 @@ AppliedSymbol.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     symbol = list(new_exprs)[0]
-    #TODO1 assert type(symbol) != Constructor
     value = (symbol if self.eval == '' else
-             symbol.symbol if type(symbol) == Constructor else
              symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
              None)
     return self._change(sub_exprs=[symbol], value=value)
