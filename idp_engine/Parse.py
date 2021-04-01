@@ -254,7 +254,7 @@ class ConstructedTypeDeclaration(ASTNode):
 
         type (string): Z3 type of an element of the type; same as `name`
 
-        domain ([Constructor]): list of constructors in the enumeration
+        constructors ([Constructor]): list of constructors in the enumeration
 
         range ([Expression]): list of expressions of that type
 
@@ -267,7 +267,7 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.domain = ([] if 'constructors' not in kwargs else
+        self.constructors = ([] if 'constructors' not in kwargs else
                              kwargs.pop('constructors'))
         enumeration = (None if 'enumeration' not in kwargs else
                             kwargs.pop('enumeration'))
@@ -286,7 +286,7 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __str__(self):
         return (f"type {self.name} := "
-                f"{{{','.join(map(str, self.domain))}}}")
+                f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
         if self.name == BOOL:
@@ -306,7 +306,6 @@ class RangeDeclaration(ASTNode):
         self.elements = kwargs.pop('elements')
         self.arity = 1
         self.translated = None
-        self.domain = []
         self.sorts = [Symbol(name=self.name)]
         self.out = Symbol(name=BOOL)
 
