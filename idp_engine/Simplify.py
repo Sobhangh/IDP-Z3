@@ -350,40 +350,38 @@ def update_exprs(self, new_exprs):
             self.decl = symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
-    if self.decl:
+    if (self.decl and new_exprs
+        and type(new_exprs[0]) == UnappliedSymbol and new_exprs[0].decl):
         if self.decl.name == ARITY:
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{ARITY}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL,
+            self.check(new_exprs[0].decl.type == SYMBOL,
                     f"Argument of '{ARITY}' must be a Symbol: {new_exprs[0]}")
-            if isinstance(new_exprs[0], Constructor):
-                value = Number(number=str(new_exprs[0].symbol.decl.arity))
-                return self._change(value=value, sub_exprs=new_exprs)
+            value = Number(number=str(new_exprs[0].decl.symbol.decl.arity))
+            return self._change(value=value, sub_exprs=new_exprs)
         elif self.decl.name == INPUT_DOMAIN:
             self.check(len(new_exprs) == 2,
                     f"Incorrect number of arguments for '{INPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL
-                       or (new_exprs[0].sort.decl.arity == 1
-                           and new_exprs[0].sort.decl.type == BOOL),
+            self.check(new_exprs[0].decl.type == SYMBOL
+                       or (new_exprs[0].decl.sort.decl.arity == 1
+                           and new_exprs[0].decl.sort.decl.type == BOOL),
                     f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
             self.check(new_exprs[1].type == INT,
                     f"Second argument of '{INPUT_DOMAIN}' must be a Int: {new_exprs[1]}")
-            if (isinstance(new_exprs[0], Constructor)
-                and isinstance(new_exprs[1], Number)):
+            if isinstance(new_exprs[1], Number):
                 # find the Symbol for the input domain
-                symbol_string = f"`{new_exprs[0].symbol.decl.sorts[new_exprs[1].py_value - 1]}"
+                symbol_string = f"`{new_exprs[0].decl.symbol.decl.sorts[new_exprs[1].py_value - 1]}"
                 value = self.decl.out.decl.map[symbol_string]
                 return self._change(value=value, sub_exprs=new_exprs)
         elif self.decl.name == OUTPUT_DOMAIN:
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{OUTPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL,
+            self.check(new_exprs[0].decl.type == SYMBOL,
                     f"Argument of '{OUTPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
-            if isinstance(new_exprs[0], Constructor):
-                # find the Symbol for the output domain of the argument
-                symbol_string = f"`{new_exprs[0].symbol.decl.out}"
-                value = self.decl.out.decl.map[symbol_string]
-                return self._change(value=value, sub_exprs=new_exprs)
+            # find the Symbol for the output domain of the argument
+            symbol_string = f"`{new_exprs[0].decl.symbol.decl.out}"
+            value = self.decl.out.decl.map[symbol_string]
+            return self._change(value=value, sub_exprs=new_exprs)
     return self._change(sub_exprs=new_exprs)
 AppliedSymbol.update_exprs = update_exprs
 
@@ -400,8 +398,10 @@ AppliedSymbol.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     symbol = list(new_exprs)[0]
+    #TODO1 assert type(symbol) != Constructor
     value = (symbol if self.eval == '' else
              symbol.symbol if type(symbol) == Constructor else
+             symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
              None)
     return self._change(sub_exprs=[symbol], value=value)
 SymbolExpr.update_exprs = update_exprs

@@ -256,6 +256,8 @@ class ConstructedTypeDeclaration(ASTNode):
 
         domain ([Constructor]): list of constructors in the enumeration
 
+        range ([UnappliedSymbol]): list of expressions in the enumeration
+
         interpretation (SymbolInterpretation): the symbol interpretation
 
         translated (Z3): the translation of the type in Z3

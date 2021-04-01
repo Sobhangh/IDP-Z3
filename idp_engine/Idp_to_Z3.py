@@ -58,7 +58,7 @@ def translate(self):
             for c, c3 in zip(self.domain, cstrs):
                 c.translated = c3
                 c.py_value = c3
-                self.map[str(c)] = c
+                self.map[str(c)] = c #TODO1 UnappliedSymbol.make(c)
     return self.translated
 ConstructedTypeDeclaration.translate = translate
 
