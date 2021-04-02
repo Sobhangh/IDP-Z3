@@ -289,7 +289,7 @@ def annotate(self, idp):
 
     # add display predicates
 
-    viewType = ConstructedTypeDeclaration(name='View',
+    viewType = ConstructedTypeDeclaration(name='_ViewType',
         constructors=[Constructor(name='normal'),
                         Constructor(name='expanded')])
     viewType.annotate(self.voc)
@@ -319,7 +319,7 @@ def annotate(self, idp):
         ('expand', Symbol(name=BOOL)),
         ('relevant', Symbol(name=BOOL)),
         ('hide', Symbol(name=BOOL)),
-        ('view', Symbol(name='View')),
+        ('view', Symbol(name='_ViewType')),
         ('moveSymbols', Symbol(name=BOOL)),
         ('optionalPropagation', Symbol(name=BOOL)),
         ('unit', open_types['unit']),

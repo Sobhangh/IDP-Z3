@@ -160,7 +160,7 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
-                    state = make_state(idp, "{}")
+                    state = make_state(idp, "{}", with_default=True)
                     out = metaJSON(state)
                     out["propagated"] = Output(state).fill(state)
                     return out

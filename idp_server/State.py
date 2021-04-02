@@ -34,7 +34,7 @@ class State(Problem):
     """ Contains a state of problem solving """
     cache: Dict[Tuple[IDP, str], 'State'] = {}
 
-    def __init__(self, idp: IDP):
+    def __init__(self, idp: IDP, with_default = False):
 
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
@@ -49,8 +49,9 @@ class State(Problem):
 
             idp.vocabulary = idp.vocabularies['decision']
             idp.theory     = idp.theories    ['decision']
-        idp.display.annotate(idp)
-        idp.display.run(idp)
+        if "_ViewType" not in idp.vocabulary.symbol_decls:
+            idp.display.annotate(idp)
+            idp.display.run(idp)
         self.idp = idp  # IDP vocabulary and theory
 
         super().__init__()
@@ -70,7 +71,7 @@ class State(Problem):
             self.environment = None
             self.add(next(iter(idp.theories.values())))
             for name, struct in idp.structures.items():
-                if name != "default":
+                if name != "default" or with_default:
                     self.add(struct)
         self._interpret()
         self.symbolic_propagate(tag=Status.UNIVERSAL)
@@ -88,7 +89,6 @@ class State(Problem):
         # Set the values of the default structure.
         if 'default' in out.idp.structures:
             out.add(out.idp.structures['default'])
-
         return out
 
     def add_given(self, jsonstr: str):
@@ -131,30 +131,27 @@ class State(Problem):
                 )
 
 
-def make_state(idp: IDP, jsonstr: str) -> State:
-    """
-    Manages the cache of States.
+def make_state(idp: IDP, jsonstr: str, with_default=False) -> State:
+    """Manage the cache of State
 
-    :arg idp: IDP code parsed into IDP object
-    :arg jsonstr: the user's assignments in json
-    :returns: the complete state of the system
-    :rtype: State
-    """
-    if (idp, jsonstr) in State.cache:
-        # If reset was pressed, we still need to run add_given.
-        if jsonstr == "{}":
-            return State.cache[(idp, jsonstr)].add_given("{}")
-        else:
-            return State.cache[(idp, jsonstr)]
+    Args:
+        idp (IDP): idp source code
+        jsonstr (str): input from client
+        with_default (bool, optional): True if default structure must be loaded. Defaults to False.
 
-    if (idp, "{}") not in State.cache:
-        # We add the default assignments to the 'base' state.
-        State.cache[(idp, "{}")] = State(idp).add_default()
-    state = State.cache[(idp, "{}")].add_given(jsonstr)
+    Returns:
+        State: a State
+    """
+    if jsonstr == "{}":
+        with_default = True
+
+    if (idp, jsonstr, with_default) in State.cache:
+        return State.cache[(idp, jsonstr, with_default)]
 
     if 100 < len(State.cache):
         # remove oldest entry, to prevent memory overflow
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
-    if jsonstr != "{}":
-        State.cache[(idp, jsonstr)] = state
+
+    state = State(idp, with_default).add_given(jsonstr)
+    State.cache[(idp, jsonstr, with_default)] = state
     return state
