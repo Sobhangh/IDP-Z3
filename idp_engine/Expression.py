@@ -381,8 +381,6 @@ class Constructor(ASTNode):
 
         symbol (Symbol): only for Symbol constructors
 
-        py_value (DataTypeRef): the value in Z3
-
         translated (DataTypeRef): the value in Z3
     """
     PRECEDENCE = 200
@@ -395,7 +393,6 @@ class Constructor(ASTNode):
                      self.name)
 
         self.symbol = None
-        self.py_value = None
         self.translated: Any = None
 
     def __str__(self): return self.name
@@ -836,7 +833,9 @@ class UnappliedSymbol(Expression):
         self.in_enumeration = None
 
     @classmethod
-    def make(cls, constructor):
+    def construct(cls, constructor: Constructor):
+        """Create an UnappliedSymbol from a constructor
+        """
         out = (cls)(s=Symbol(name=constructor.name))
         out.decl = constructor
         out.fresh_vars = {}
@@ -852,8 +851,8 @@ class UnappliedSymbol(Expression):
 TRUEC = Constructor(name='true')
 FALSEC = Constructor(name='false')
 
-TRUE = UnappliedSymbol.make(TRUEC)
-FALSE = UnappliedSymbol.make(FALSEC)
+TRUE = UnappliedSymbol.construct(TRUEC)
+FALSE = UnappliedSymbol.construct(FALSEC)
 
 class Variable(Expression):
     """AST node for a variable in a quantification or aggregate

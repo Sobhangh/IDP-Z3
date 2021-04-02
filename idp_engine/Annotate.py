@@ -76,7 +76,7 @@ def annotate(self, voc):
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
                     f"duplicate constructor in vocabulary: {c.name}")
         voc.symbol_decls[c.name] = c
-    self.range = [UnappliedSymbol.make(c) for c in self.constructors]  # TODO constructor functions
+    self.range = [UnappliedSymbol.construct(c) for c in self.constructors]  # TODO constructor functions
     if self.interpretation:
         self.interpretation.annotate(voc)
 ConstructedTypeDeclaration.annotate = annotate

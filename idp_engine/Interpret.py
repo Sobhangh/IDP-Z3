@@ -167,7 +167,7 @@ Enumeration.interpret = interpret
 def interpret(self, problem):
     self.tuples = OrderedSet()
     for c in self.constructors:
-        self.tuples.append(Tuple(args=[UnappliedSymbol.make(c)]))
+        self.tuples.append(Tuple(args=[UnappliedSymbol.construct(c)]))
 ConstructedFrom.interpret = interpret
 
 

@@ -59,7 +59,7 @@ def translate(self):
                 assert type(c) == Constructor
                 c.translated = c3
                 c.py_value = c3
-                self.map[str(c)] = UnappliedSymbol.make(c)
+                self.map[str(c)] = UnappliedSymbol.construct(c)
     return self.translated
 ConstructedTypeDeclaration.translate = translate
 
