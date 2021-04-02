@@ -1,0 +1,19 @@
+vocabulary V {
+    type color
+    Color: () -> color
+    opposite: color → color
+}
+
+theory T:V {
+    opposite(Color()) is enumerated.
+}
+
+structure S:V {
+    color := constructed from {red, blue, green}
+    opposite := {red-> green, green-> red}
+}
+
+procedure main() {
+  print(Problem(T, S).formula())
+  print(Problem(T,S).expand())
+}

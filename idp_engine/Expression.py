@@ -388,17 +388,17 @@ class Constructor(ASTNode):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
-        self.name = unquote(kwargs.pop('name'))
+        self.name = kwargs.pop('name')
+        self.args = kwargs.pop('args') if 'args' in kwargs else []
+
+        self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
+                     self.name)
 
         self.symbol = None
         self.py_value = None
         self.translated: Any = None
 
     def __str__(self): return self.name
-
-
-TRUEC = Constructor(name='true')
-FALSEC = Constructor(name='false')
 
 
 class Symbol(Expression):
@@ -848,6 +848,9 @@ class UnappliedSymbol(Expression):
 
     def is_reified(self): return False
 
+
+TRUEC = Constructor(name='true')
+FALSEC = Constructor(name='false')
 
 TRUE = UnappliedSymbol.make(TRUEC)
 FALSE = UnappliedSymbol.make(FALSEC)

@@ -698,6 +698,14 @@ class FunctionEnum(Enumeration):
 class CSVEnumeration(Enumeration):
     pass
 
+class ConstructedFrom(Enumeration):
+    def __init__(self, **kwargs):
+        self.constructed = kwargs.pop('constructed')
+        self.constructors = kwargs.pop('constructors')
+        self.tuples = [Tuple(args=[UnappliedSymbol.make(c)])
+                       for c in self.constructors]
+        self.tuples = OrderedSet(self.tuples)
+
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
@@ -886,6 +894,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
+                                         ConstructedFrom, Constructor,
                                          Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

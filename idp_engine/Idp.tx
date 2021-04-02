@@ -18,7 +18,10 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
     Extern: 'extern' 'vocabulary' (name=ID);
 
-    ConstructedTypeDeclaration: /type[ \t]/ name=ID (':=' enumeration=Enumeration)?;
+    ConstructedTypeDeclaration:
+      /type[ \t]/
+      name=ID
+      (':=' (enumeration=Enumeration | enumeration=ConstructedFrom))?;
 
     RangeDeclaration: /type[ \t]/ name=ID ':=' '{' elements*=RangeElement[','] '}';
       RangeElement: fromI=Number ('..' toI=Number)?;
@@ -98,10 +101,11 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
   SymbolInterpretation: name=Symbol ':='
-                        ( default=Identifier '.'?
-                        | enumeration=FunctionEnum ('else' default=Identifier)?
+                        ( enumeration=FunctionEnum ('else' default=Identifier)?
                         | enumeration=Enumeration
-                        | enumeration=CSVEnumeration);
+                        | enumeration=CSVEnumeration
+                        | enumeration=ConstructedFrom
+                        | default=Identifier '.'?);
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
@@ -109,6 +113,11 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
   CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
+
+  ConstructedFrom: constructed=/constructed\s+from/?
+                   '{' constructors*=Constructor[',']  '}';
+    Constructor: name=UnappliedSymbol ('(' args+=UnappliedSymbol[','] ')' )?;
+
   Identifier: UnappliedSymbol | Number | Date;
 
 Goal: 'goal' name=ID;
