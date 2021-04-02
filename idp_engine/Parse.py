@@ -647,11 +647,25 @@ class SymbolInterpretation(ASTNode):
 
 
 class Enumeration(ASTNode):
+    """Represents an enumeration of tuples of expressions.
+    Used for predicates, or types without n-ary constructors.
+
+    Attributes:
+        tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
+
+        constructors (List[Constructor], optional): List of Constructor
+    """
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
         if not isinstance(self.tuples, OrderedSet):
             # self.tuples.sort(key=lambda t: t.code)
             self.tuples = OrderedSet(self.tuples)
+        if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
+               for c in self.tuples):
+            self.constructors = [Constructor(name=c.args[0].name)
+                                 for c in self.tuples]
+        else:
+            self.constructors = None
 
     def __repr__(self):
         return ", ".join([repr(t) for t in self.tuples])
@@ -699,12 +713,17 @@ class CSVEnumeration(Enumeration):
     pass
 
 class ConstructedFrom(Enumeration):
+    """Represents a 'constructed from' enumeration of constructors
+
+    Attributes:
+        tuples (OrderedSet[Tuple]): OrderedSet of tuples of Expression
+
+        constructors (List[Constructor]): List of Constructor
+    """
     def __init__(self, **kwargs):
         self.constructed = kwargs.pop('constructed')
         self.constructors = kwargs.pop('constructors')
-        self.tuples = [Tuple(args=[UnappliedSymbol.make(c)])
-                       for c in self.constructors]
-        self.tuples = OrderedSet(self.tuples)
+        self.tuples = None
 
 class Tuple(ASTNode):
     def __init__(self, **kwargs):

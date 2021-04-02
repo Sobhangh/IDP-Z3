@@ -26,7 +26,7 @@ from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
                     RangeDeclaration, SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-                    Tuple, Display)
+                    Tuple, ConstructedFrom, Display)
 from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
@@ -238,14 +238,11 @@ def annotate(self, block):
     self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
     if self.is_type_enumeration:
         # create Constructors before annotating the tuples
-        for c in self.enumeration.tuples:
-            self.check(len(c.args) == 1,
-                        f"incorrect arity in {self.name} type enumeration")
-            constr = Constructor(name=c.args[0].name)
-            constr.type = self.name
-            self.check(constr.name not in voc.symbol_decls,
-                    f"duplicate constructor in vocabulary: {constr.name}")
-            voc.symbol_decls[constr.name] = constr
+        for c in self.enumeration.constructors:
+            c.type = self.name
+            self.check(c.name not in voc.symbol_decls,
+                    f"duplicate constructor in vocabulary: {c.name}")
+            voc.symbol_decls[c.name] = c
 
     self.enumeration.annotate(voc)
 
@@ -279,6 +276,13 @@ def annotate(self, voc):
     self.check(all(a.as_rigid() is not None for a in self.args),
                 f"Tuple must be ground : ({self})")
 Tuple.annotate = annotate
+
+
+# Class ConstructedFrom  #######################################################
+
+def annotate(self, voc):
+    pass
+ConstructedFrom.annotate = annotate
 
 
 # Class Display  #######################################################

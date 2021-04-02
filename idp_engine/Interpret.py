@@ -42,12 +42,12 @@ from itertools import product
 from .Assignments import Status
 from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
-                   FunctionEnum)
+                   FunctionEnum, Enumeration, Tuple, ConstructedFrom)
 from .Expression import (SymbolExpr, Expression, AQuantification,
                     AImplication, AConjunction,  AEquivalence, AAggregate,
-                    AComparison, AUnary, AppliedSymbol, Number,
+                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol, Number,
                     Variable, TRUE)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet
 
 
 # class Extern  ###########################################################
@@ -131,6 +131,7 @@ def interpret(self, problem):
                 Status.GIVEN)
     if self.is_type_enumeration:
         symbol = self.symbol
+        self.enumeration.interpret(problem)
         symbol.decl.range = [t.args[0]
                               for t in self.enumeration.tuples.values()]
         symbol.decl.constructors = [us.decl for us in symbol.decl.range]
@@ -151,8 +152,23 @@ def interpret(self, problem):
                     or problem.assignments[code].status != status):
                     problem.assignments.assert_(expr, self.default, status,
                                                 False)
-
 SymbolInterpretation.interpret = interpret
+
+
+# class Enumeration  ###########################################################
+
+def interpret(self, problem):
+    pass
+Enumeration.interpret = interpret
+
+
+# class ConstructedFrom  ###########################################################
+
+def interpret(self, problem):
+    self.tuples = OrderedSet()
+    for c in self.constructors:
+        self.tuples.append(Tuple(args=[UnappliedSymbol.make(c)]))
+ConstructedFrom.interpret = interpret
 
 
 # class Expression  ###########################################################
