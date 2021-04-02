@@ -131,7 +131,7 @@ class State(Problem):
                 )
 
 
-def make_state(idp: IDP, jsonstr: str, with_default=False) -> State:
+def make_state(idp: IDP, jsonstr: str) -> State:
     """Manage the cache of State
 
     Args:
@@ -142,8 +142,7 @@ def make_state(idp: IDP, jsonstr: str, with_default=False) -> State:
     Returns:
         State: a State
     """
-    if jsonstr == "{}":
-        with_default = True
+    with_default = jsonstr == "{}"
 
     if (idp, jsonstr, with_default) in State.cache:
         return State.cache[(idp, jsonstr, with_default)]
