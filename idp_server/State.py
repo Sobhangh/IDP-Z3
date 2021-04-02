@@ -124,7 +124,6 @@ def make_state(idp: IDP, jsonstr: str) -> State:
     Args:
         idp (IDP): idp source code
         jsonstr (str): input from client
-        with_default (bool, optional): True if default structure must be loaded. Defaults to False.
 
     Returns:
         State: a State
