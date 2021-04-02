@@ -144,13 +144,18 @@ def interpret(self, problem):
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == Status.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
-            problem.assignments.assert_(expr, value, status, False)
+            e = problem.assignments.assert_(expr, value, status, False)
+            if (type(self.enumeration) == FunctionEnum
+                and type(self.symbol.decl.out.decl) == ConstructedTypeDeclaration):
+                problem.assignments.assert_(e.formula(), TRUE, status, False)
         if self.default is not None:
             for code, expr in self.symbol.decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
-                    problem.assignments.assert_(expr, self.default, status,
+                    e = problem.assignments.assert_(expr, self.default, status,
                                                 False)
+                    if type(self.symbol.decl.out.decl) == ConstructedTypeDeclaration:
+                        problem.assignments.assert_(e.formula(), TRUE, status, False)
 
 SymbolInterpretation.interpret = interpret
 

@@ -92,7 +92,7 @@ class State(Problem):
             out.environment = out.environment.copy()
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
-
+        out._interpret()
         return out._finalize()
 
     def _finalize(self):
