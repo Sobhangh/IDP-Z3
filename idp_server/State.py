@@ -78,19 +78,6 @@ class State(Problem):
 
         self._finalize()
 
-    def add_default(self):
-        """
-        Add the values of the default structure without propagating.
-
-        :returns: the state with the default values added
-        :rtype: State
-        """
-        out = self.copy()
-        # Set the values of the default structure.
-        if 'default' in out.idp.structures:
-            out.add(out.idp.structures['default'])
-        return out
-
     def add_given(self, jsonstr: str):
         """
         Add the assignments that the user gave through the interface.
