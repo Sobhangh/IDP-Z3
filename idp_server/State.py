@@ -129,7 +129,6 @@ def make_state(idp: IDP, jsonstr: str) -> State:
     Returns:
         State: a State
     """
-    with_default = jsonstr == "{}"
 
     if (idp, jsonstr) in State.cache:
         return State.cache[(idp, jsonstr)]
@@ -138,6 +137,6 @@ def make_state(idp: IDP, jsonstr: str) -> State:
         # remove oldest entry, to prevent memory overflow
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
-    state = State(idp, with_default).add_given(jsonstr)
+    state = State(idp, with_default=(jsonstr == "{}")).add_given(jsonstr)
     State.cache[(idp, jsonstr)] = state
     return state
