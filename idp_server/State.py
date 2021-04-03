@@ -27,12 +27,12 @@ from .Inferences import get_relevant_subtences
 
 # Types
 from idp_engine import IDP
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
 
 
 class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[IDP, str], 'State'] = {}
+    cache: Dict[Tuple[IDP, Union[str, bool]], 'State'] = {}
 
     def __init__(self, idp: IDP, with_default = False):
 
@@ -136,6 +136,12 @@ def make_state(idp: IDP, jsonstr: str) -> State:
         # remove oldest entry, to prevent memory overflow
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
-    state = State(idp, with_default=(jsonstr == "{}")).add_given(jsonstr)
+    with_default = (jsonstr == "{}")
+    empty = (State.cache[(idp, with_default)]
+             if (idp, with_default) in State.cache else
+             State(idp, with_default=with_default))
+    State.cache[(idp, with_default)] = empty
+
+    state = empty.add_given(jsonstr)
     State.cache[(idp, jsonstr)] = state
     return state
