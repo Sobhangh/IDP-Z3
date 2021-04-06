@@ -735,6 +735,7 @@ class Display(ASTNode):
 
     def run(self, idp):
         for constraint in self.constraints:
+            print(constraint, type(constraint))
             if type(constraint) == AppliedSymbol:
                 self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
                            f"Invalid syntax: {constraint}")
@@ -773,6 +774,13 @@ class Display(ASTNode):
                     # e.g. heading('Shape', `type).
                     for symbol in symbols:
                         symbol.heading = str(constraint.sub_exprs[0])
+                elif name == "moveSymbols":
+                    self.moveSymbols = True
+                elif name == "optionalPropagation":
+                    self.optionalPropagation = True
+                else:
+                    raise IDPZ3Error(f"unknown display constraint:"
+                                     f" {constraint}")
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
                 self.check(type(constraint.sub_exprs[0].symbol.sub_exprs[0]) == Symbol,
@@ -785,16 +793,6 @@ class Display(ASTNode):
                     else:
                         self.check(constraint.sub_exprs[1].name == 'normal',
                                    f"unknown display constraint: {constraint}")
-                else:
-                    raise IDPZ3Error(f"unknown display constraint: {constraint}")
-            elif type(constraint) == UnappliedSymbol:
-                if constraint.s.name == "moveSymbols":
-                    self.moveSymbols = True
-                elif constraint.s.name == "optionalPropagation":
-                    self.optionalPropagation = True
-                else:
-                    raise IDPZ3Error(f"unknown display contraint:"
-                                     f"{constraint}")
             else:
                 raise IDPZ3Error(f"unknown display contraint: {constraint}")
 
