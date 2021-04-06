@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Interactive Consultant
 
+* fix #76: optionalPropagation and moveSymbols no longer working
 * fix #75: default structure seems broken
 * update video tutorial
 
