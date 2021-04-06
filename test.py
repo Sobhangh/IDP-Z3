@@ -101,6 +101,7 @@ def generate():
             output = generateZ3(theory)
 
             # Remove absolute paths from output.
+            output = re.sub(r'(/.*)(?=site-packages/)', '', output)
             output = re.sub(r'(/.*)(?=IDP-Z3/)', '', output)
             output = re.sub(r'(/.*)(?=web-IDP-Z3/)', '', output)
 
