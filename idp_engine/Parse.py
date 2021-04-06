@@ -735,7 +735,6 @@ class Display(ASTNode):
 
     def run(self, idp):
         for constraint in self.constraints:
-            print(constraint, type(constraint))
             if type(constraint) == AppliedSymbol:
                 self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
                            f"Invalid syntax: {constraint}")
