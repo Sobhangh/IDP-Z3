@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased yet]
 
+### Interactive Consultant
+
+* fix #75: default structure seems broken
 * update video tutorial
 
 ## [0.8.0] - 2021-03-25

@@ -154,8 +154,7 @@ def get_relevant_subtences(self):
                         for q in constraint.questions)):
                 constraint.relevant = True
                 to_add.extend(constraint.questions)
-    if not hasGiven or self.idp.display.moveSymbols:
-        self.relevant_symbols = relevants
+    self.relevant_symbols = relevants
 
 
 def explain(state, question):
