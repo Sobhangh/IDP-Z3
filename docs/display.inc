@@ -36,12 +36,12 @@ goal
     ``goal(s)`` specifies that symbols ``s`` is a goal, i.e. that it is relevant and shown expanded.
 
 moveSymbols
-    When the *display block* contains ``moveSymbols.``, the Interactive Consultant is allowed to change the layout of symbols on the screen, so that relevant symbols come first.
+    When the *display block* contains ``moveSymbols()``, the Interactive Consultant is allowed to change the layout of symbols on the screen, so that relevant symbols come first.
 
     By default, the symbols do not move.
 
 optionalPropagation
-    When the *display block* contains ``optionalPropagation``, a toggle button will be available in the interface which allows toggling immediate propagation on and off.
+    When the *display block* contains ``optionalPropagation()``, a toggle button will be available in the interface which allows toggling immediate propagation on and off.
 
     By default, this button is not present.
 
