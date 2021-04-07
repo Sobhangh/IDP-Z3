@@ -1,0 +1,21 @@
+vocabulary V {
+    type location_t := {stem, static}
+    type design_t := {Top, null}
+    Location: () -> location_t
+    BackupDesign: () -> design_t
+}
+
+theory T:V {
+    {
+        BackupDesign() = null <- Location() in {static, stem}.
+    }
+    Location()=static.
+}
+
+structure S:V {
+
+}
+
+procedure main() {
+    print(model_expand(T, S))
+}
