@@ -167,7 +167,7 @@ SymbolInterpretation.interpret = interpret
 def interpret(self, problem) -> Expression:
     """ uses information in the problem and its vocabulary to:
     - expand quantifiers in the expression
-    - simplify the expression using known assignments
+    - simplify the expression using known assignments and enumerations
     - instantiate definitions
 
     Args:
@@ -208,11 +208,10 @@ Expression.substitute = substitute
 
 
 def instantiate(self, e0, e1, problem=None):
-    """
-    Recursively substitute Variable e0 by e1 in a copy of self, and update fresh_vars.
-    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
+    """Recursively substitute Variable e0 by e1 in a copy of self.
 
-    Do nothing if e0 does not occur in self.
+    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
+    Update fresh_vars.
     """
     assert type(e0) == Variable
     if self.value:
@@ -226,18 +225,14 @@ def instantiate(self, e0, e1, problem=None):
 Expression.instantiate = instantiate
 
 def instantiate1(self, e0, e1, problem=None):
-    """
-    recursively substitute Variable e0 by e1 in self, and update fresh_vars.
+    """Recursively substitute Variable e0 by e1 in self.
+
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     """
 
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem) for e
                             in self.sub_exprs)
-
-    if out.co_constraint is not None:
-        co_constraint = out.co_constraint.instantiate(e0, e1, problem)
-        out._change(co_constraint=co_constraint)
 
     if out.value is not None:  # replace by new value
         out = out.value
