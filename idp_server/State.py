@@ -27,14 +27,14 @@ from .Inferences import get_relevant_subtences
 
 # Types
 from idp_engine import IDP
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
 
 
 class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[IDP, str], 'State'] = {}
+    cache: Dict[Tuple[IDP, Union[str, bool]], 'State'] = {}
 
-    def __init__(self, idp: IDP):
+    def __init__(self, idp: IDP, with_default = False):
 
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
@@ -49,8 +49,9 @@ class State(Problem):
 
             idp.vocabulary = idp.vocabularies['decision']
             idp.theory     = idp.theories    ['decision']
-        idp.display.annotate(idp)
-        idp.display.run(idp)
+        if "_ViewType" not in idp.vocabulary.symbol_decls:
+            idp.display.annotate(idp)
+            idp.display.run(idp)
         self.idp = idp  # IDP vocabulary and theory
 
         super().__init__()
@@ -70,26 +71,12 @@ class State(Problem):
             self.environment = None
             self.add(next(iter(idp.theories.values())))
             for name, struct in idp.structures.items():
-                if name != "default":
+                if name != "default" or with_default:
                     self.add(struct)
         self._interpret()
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
-
-    def add_default(self):
-        """
-        Add the values of the default structure without propagating.
-
-        :returns: the state with the default values added
-        :rtype: State
-        """
-        out = self.copy()
-        # Set the values of the default structure.
-        if 'default' in out.idp.structures:
-            out.add(out.idp.structures['default'])
-
-        return out
 
     def add_given(self, jsonstr: str):
         """
@@ -105,7 +92,7 @@ class State(Problem):
             out.environment = out.environment.copy()
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
-
+        out._interpret()
         return out._finalize()
 
     def _finalize(self):
@@ -132,29 +119,29 @@ class State(Problem):
 
 
 def make_state(idp: IDP, jsonstr: str) -> State:
-    """
-    Manages the cache of States.
+    """Manage the cache of State
 
-    :arg idp: IDP code parsed into IDP object
-    :arg jsonstr: the user's assignments in json
-    :returns: the complete state of the system
-    :rtype: State
+    Args:
+        idp (IDP): idp source code
+        jsonstr (str): input from client
+
+    Returns:
+        State: a State
     """
+
     if (idp, jsonstr) in State.cache:
-        # If reset was pressed, we still need to run add_given.
-        if jsonstr == "{}":
-            return State.cache[(idp, jsonstr)].add_given("{}")
-        else:
-            return State.cache[(idp, jsonstr)]
-
-    if (idp, "{}") not in State.cache:
-        # We add the default assignments to the 'base' state.
-        State.cache[(idp, "{}")] = State(idp).add_default()
-    state = State.cache[(idp, "{}")].add_given(jsonstr)
+        return State.cache[(idp, jsonstr)]
 
     if 100 < len(State.cache):
         # remove oldest entry, to prevent memory overflow
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
-    if jsonstr != "{}":
-        State.cache[(idp, jsonstr)] = state
+
+    with_default = (jsonstr == "{}")
+    empty = (State.cache[(idp, with_default)]
+             if (idp, with_default) in State.cache else
+             State(idp, with_default=with_default))
+    State.cache[(idp, with_default)] = empty
+
+    state = empty.add_given(jsonstr)
+    State.cache[(idp, jsonstr)] = state
     return state

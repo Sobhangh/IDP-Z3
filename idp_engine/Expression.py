@@ -505,6 +505,11 @@ class AQuantification(Expression):
         else:
             return self.sub_exprs[0].str
 
+    def copy(self):
+        out = Expression.copy(self)
+        out.q_vars = copy.copy(out.q_vars)
+        return out
+
     def collect(self, questions, all_=True, co_constraints=True):
         questions.append(self)
         if all_:
@@ -670,6 +675,10 @@ class AAggregate(Expression):
                    f"}}")
         return out
 
+    def copy(self):
+        out = Expression.copy(self)
+        out.q_vars = copy.copy(out.q_vars)
+        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:

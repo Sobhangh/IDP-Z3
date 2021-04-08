@@ -122,17 +122,9 @@ def json_to_literals(state, jsonstr: str):
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence
 
-                    # If a checkmark of the form "symbol = value" is checked
-                    # in the interface and the symbol has not been given a
-                    # value in the dropdown, we need to unset the value of the
-                    # symbol to avoid errors.
-                    if (atom.startswith(f'{symbol} =') and
-                       symbol not in json_data[symbol]):
-                        state.assignments[symbol].unset()
-
                     # If the atom is unknown, set its value as normal.
-                    if json_atom["value"] != '' and\
-                            state.assignments[atom].status == Status.UNKNOWN:
+                    if (json_atom["value"] != ''
+                        and state.assignments[atom].status == Status.UNKNOWN):
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
                         state.assignments.assert_(idp_atom, value,
                                                   Status.GIVEN, False)
