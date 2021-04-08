@@ -228,6 +228,7 @@ def instantiate1(self, e0, e1, problem=None):
     """Recursively substitute Variable e0 by e1 in self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
+    Update fresh_vars.
     """
 
     # instantiate expressions, with simplification
@@ -340,7 +341,7 @@ def instantiate1(self, e0, e1, problem=None):
     for name, var in out.q_vars.items():  # for !x in $(output_domain(s,1))
         if var.sort:
             out.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
-    if not self.fresh_vars:  # expand quantifier if no variables left
+    if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out
 AQuantification.instantiate1 = instantiate1
