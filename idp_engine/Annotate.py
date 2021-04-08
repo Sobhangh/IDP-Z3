@@ -280,7 +280,8 @@ Tuple.annotate = annotate
 # Class ConstructedFrom  #######################################################
 
 def annotate(self, voc):
-    pass  #TODO1 annotate types
+    for c in self.constructors:
+        c.annotate(voc)
 ConstructedFrom.annotate = annotate
 
 
@@ -359,6 +360,17 @@ def annotate1(self):
             self.fresh_vars.update(e.fresh_vars)
     return self
 Expression.annotate1 = annotate1
+
+
+# Class Constructor  #######################################################
+
+def annotate(self, voc):
+    for c in self.args:
+        self.check(c.name in voc.symbol_decls,
+                   f"Unknown type: {c.name}" )
+        c.decl = voc.symbol_decls[c.name]
+        c.fresh_vars = {}
+Constructor.annotate = annotate
 
 
 # Class IfExpr  #######################################################

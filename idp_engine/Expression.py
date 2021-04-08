@@ -396,7 +396,9 @@ class Constructor(ASTNode):
         self.symbol = None
         self.translated: Any = None
 
-    def __str__(self): return self.name  #TODO1
+    def __str__(self):
+        return (self.name if not self.args else
+                f"{self.name}({','.join(str(self.args))}" )
 
 
 class Symbol(Expression):
