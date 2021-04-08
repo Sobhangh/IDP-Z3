@@ -60,7 +60,10 @@ Extern.interpret = interpret
 # class ConstructedTypeDeclaration  ###########################################################
 
 def interpret(self, problem):
+    if self.interpretation:
+        self.constructors = self.interpretation.enumeration.constructors
     self.translate()
+    self.range = [UnappliedSymbol.construct(c) for c in self.constructors]  #TODO1 constructor functions
 ConstructedTypeDeclaration.interpret = interpret
 
 
@@ -74,7 +77,7 @@ RangeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    self.domain = list(product(*[s.decl.range for s in self.sorts])) #
+    self.domain = list(product(*[s.decl.range for s in self.sorts]))
     self.range = self.out.decl.range
 
     # create instances
@@ -130,11 +133,8 @@ def interpret(self, problem):
     status = (Status.STRUCTURE if self.block.name != 'default' else
                 Status.GIVEN)
     if self.is_type_enumeration:
-        symbol = self.symbol
         self.enumeration.interpret(problem)
-        symbol.decl.range = [t.args[0] #TODO1
-                              for t in self.enumeration.tuples.values()]
-        symbol.decl.constructors = [us.decl for us in symbol.decl.range]
+        self.symbol.decl.interpretation = self
     else: # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
             if type(self.enumeration) == FunctionEnum:
@@ -171,7 +171,11 @@ Enumeration.interpret = interpret
 def interpret(self, problem):
     self.tuples = OrderedSet()
     for c in self.constructors: #TODO1
-        self.tuples.append(Tuple(args=[UnappliedSymbol.construct(c)]))
+        if not c.args:
+            self.tuples.append(Tuple(args=[UnappliedSymbol.construct(c)]))
+        # else:
+        #     for e in product(*[c.decl.range for s in c.args]):
+        #         self.tuples.append(Tuple(args=[AppliedSymbol.construct(c, e)]))
 ConstructedFrom.interpret = interpret
 
 
@@ -302,7 +306,7 @@ def interpret(self, problem):
     for name, var in self.q_vars.items():
         range = None
         if var.sort:
-            if var.sort.decl.range:
+            if var.sort.decl and var.sort.decl.range:
                 range = var.sort.decl.range
                 guard = lambda x,y: y
             elif var.sort.code in problem.interpretations:

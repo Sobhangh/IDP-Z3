@@ -76,7 +76,6 @@ def annotate(self, voc):
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
                     f"duplicate constructor in vocabulary: {c.name}")
         voc.symbol_decls[c.name] = c
-    self.range = [UnappliedSymbol.construct(c) for c in self.constructors]  #TODO1 constructor functions
     if self.interpretation:
         self.interpretation.annotate(voc)
 ConstructedTypeDeclaration.annotate = annotate
@@ -146,7 +145,7 @@ def annotate(self, idp):
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
-    self.constraints = OrderedSet([e.interpret(self)
+    self.constraints = OrderedSet([e.interpret(self) #TODO why is this needed ?
                                     for e in self.constraints])
 Theory.annotate = annotate
 

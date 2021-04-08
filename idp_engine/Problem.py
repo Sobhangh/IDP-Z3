@@ -164,7 +164,7 @@ class Problem(object):
                     decl.interpret(self)
 
             for symbol_interpretation in self.interpretations.values():
-                if not symbol_interpretation.is_type_enumeration:  # add enumeration to type
+                if not symbol_interpretation.is_type_enumeration:
                     symbol_interpretation.interpret(self)
 
             # expand goals

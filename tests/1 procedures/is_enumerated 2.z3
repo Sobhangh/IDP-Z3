@@ -13,11 +13,11 @@ Traceback (most recent call last):
     obj.__init__(**attrs)
   File "IDP-Z3/idp_engine/Parse.py", line 93, in __init__
     t.annotate(self)
-  File "IDP-Z3/idp_engine/Annotate.py", line 149, in annotate
-    self.constraints = OrderedSet([e.interpret(self)
-  File "IDP-Z3/idp_engine/Annotate.py", line 149, in <listcomp>
-    self.constraints = OrderedSet([e.interpret(self)
-  File "IDP-Z3/idp_engine/Interpret.py", line 374, in interpret
+  File "IDP-Z3/idp_engine/Annotate.py", line 148, in annotate
+    self.constraints = OrderedSet([e.interpret(self) #TODO why is this needed ?
+  File "IDP-Z3/idp_engine/Annotate.py", line 148, in <listcomp>
+    self.constraints = OrderedSet([e.interpret(self) #TODO why is this needed ?
+  File "IDP-Z3/idp_engine/Interpret.py", line 378, in interpret
     assert self.decl.type != BOOL, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 

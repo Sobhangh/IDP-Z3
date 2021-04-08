@@ -278,6 +278,7 @@ class ConstructedTypeDeclaration(ASTNode):
         self.type = self.name
 
         self.translated = None
+        self.range = None
         self.map = {}  # {String: constructor}
 
         self.interpretation = (None if not enumeration else
