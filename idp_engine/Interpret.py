@@ -217,6 +217,8 @@ def instantiate(self, e0, e1, problem=None):
     assert type(e0) == Variable
     if self.value:
         return self
+    if problem and e0.name not in self.fresh_vars:
+        return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
     out.fresh_vars = copy.copy(out.fresh_vars)
