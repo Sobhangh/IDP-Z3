@@ -373,6 +373,7 @@ class Expression(ASTNode):
         """
         return (None, None, None)
 
+
 class Constructor(ASTNode):
     """Constructor declaration
 
@@ -395,7 +396,7 @@ class Constructor(ASTNode):
         self.symbol = None
         self.translated: Any = None
 
-    def __str__(self): return self.name
+    def __str__(self): return self.name  #TODO1
 
 
 class Symbol(Expression):

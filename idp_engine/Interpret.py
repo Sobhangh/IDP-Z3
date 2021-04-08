@@ -132,7 +132,7 @@ def interpret(self, problem):
     if self.is_type_enumeration:
         symbol = self.symbol
         self.enumeration.interpret(problem)
-        symbol.decl.range = [t.args[0]
+        symbol.decl.range = [t.args[0] #TODO1
                               for t in self.enumeration.tuples.values()]
         symbol.decl.constructors = [us.decl for us in symbol.decl.range]
     else: # update problem.assignments with data from enumeration
@@ -170,7 +170,7 @@ Enumeration.interpret = interpret
 
 def interpret(self, problem):
     self.tuples = OrderedSet()
-    for c in self.constructors:
+    for c in self.constructors: #TODO1
         self.tuples.append(Tuple(args=[UnappliedSymbol.construct(c)]))
 ConstructedFrom.interpret = interpret
 

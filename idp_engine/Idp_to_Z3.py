@@ -51,7 +51,7 @@ def translate(self):
             self.constructors[1].translated = BoolVal(False)
             self.constructors[0].py_value = True
             self.constructors[1].py_value = False
-        else:
+        else: #TODO1
             self.translated, cstrs = EnumSort(self.name, [c.name for c in
                                                         self.constructors])
             self.check(len(self.constructors) == len(cstrs), "Internal error")

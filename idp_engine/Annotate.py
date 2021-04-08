@@ -76,7 +76,7 @@ def annotate(self, voc):
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
                     f"duplicate constructor in vocabulary: {c.name}")
         voc.symbol_decls[c.name] = c
-    self.range = [UnappliedSymbol.construct(c) for c in self.constructors]  # TODO constructor functions
+    self.range = [UnappliedSymbol.construct(c) for c in self.constructors]  #TODO1 constructor functions
     if self.interpretation:
         self.interpretation.annotate(voc)
 ConstructedTypeDeclaration.annotate = annotate
@@ -281,7 +281,7 @@ Tuple.annotate = annotate
 # Class ConstructedFrom  #######################################################
 
 def annotate(self, voc):
-    pass
+    pass  #TODO1 annotate types
 ConstructedFrom.annotate = annotate
 
 
@@ -530,10 +530,10 @@ Variable.annotate = annotate
 
 def annotate(self, voc, q_vars):
     if self.name in voc.symbol_decls:
-        self.check(type(voc.symbol_decls[self.name]) == Constructor,
-                   f"{self} should be applied to arguments (or prefixed with a back-tick)")
         self.decl = voc.symbol_decls[self.name]
         self.fresh_vars = {}
+        self.check(type(self.decl) == Constructor,
+                   f"{self} should be applied to arguments (or prefixed with a back-tick)")
         return self
     if self.name in q_vars:
         return q_vars[self.name]
