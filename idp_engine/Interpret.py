@@ -215,7 +215,7 @@ def instantiate(self, e0, e1, problem=None):
     Do nothing if e0 does not occur in self.
     """
     assert type(e0) == Variable
-    if self.value or e0.name not in self.fresh_vars:
+    if self.value:
         return self
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
@@ -340,11 +340,11 @@ AQuantification.interpret = interpret
 
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
-    for name, var in self.q_vars.items():
+    for name, var in out.q_vars.items():  # for !x in $(output_domain(s,1))
         if var.sort:
-            self.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
-    if e0.type == SYMBOL:
-        out.interpret(problem)  # to perform type inference
+            out.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
+    if not self.fresh_vars:  # expand quantifier if no variables left
+        out = out.interpret(problem)
     return out
 AQuantification.instantiate1 = instantiate1
 
