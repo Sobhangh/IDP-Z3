@@ -234,7 +234,7 @@ display {
                         'typ': 'Real',
                         'value': '90'},
            '__rank': 1,
-           'sum{n ∈ side : true : Angle(n)} = (Sides - 2) * 180': {'environmental': False,
+           'sum{n ∈ side : true : Angle(n)} = (Sides - 2) ⨯ 180': {'environmental': False,
                                                                    'is_assignment': False,
                                                                    'normal': False,
                                                                    'reading': 'The sum of the angles is 180° for a '

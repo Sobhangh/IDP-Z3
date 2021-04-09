@@ -5247,13 +5247,13 @@ structure {
                                           '3998',
                                           '3999',
                                           '4000']},
-                'TotalPrice = Amount(Big) * Price(Big) + Amount(Small) * Price(Small)': {'environmental': False,
+                'TotalPrice = Amount(Big) ⨯ Price(Big) + Amount(Small) ⨯ Price(Small)': {'environmental': False,
                                                                                          'is_assignment': False,
                                                                                          'normal': False,
                                                                                          'reading': 'TotalPrice = '
-                                                                                                    'Amount(Big) * '
+                                                                                                    'Amount(Big) ⨯ '
                                                                                                     'Price(Big) + '
-                                                                                                    'Amount(Small) * '
+                                                                                                    'Amount(Small) ⨯ '
                                                                                                     'Price(Small)',
                                                                                          'relevant': True,
                                                                                          'status': 'UNIVERSAL',

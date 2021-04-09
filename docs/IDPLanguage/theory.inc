@@ -53,7 +53,7 @@ Negation
     -|t| is a numerical term, when |t| is a numerical term.
 
 Arithmetic
-    ``t_1 ꕕ t_2`` is a numerical term, when |t1|, |t2| are two numerical terms, and ``ꕕ`` is one of the following math operators ``+, -, *, /, ^, %``.
+    ``t_1 ꕕ t_2`` is a numerical term, when |t1|, |t2| are two numerical terms, and ``ꕕ`` is one of the following math operators ``+, -, ⨯, *, /, ^, %``.
     Mathematical operators can be chained as customary (e.g. ``x+y+z``).
     The usual order of binding is used.
 

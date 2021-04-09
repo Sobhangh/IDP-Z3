@@ -526,7 +526,7 @@ class BinaryOperator(Expression):
         self.operator = list(map(
             lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
-                "∨" if op == "|" else "∧" if op == "&" else op
+                "∨" if op == "|" else "∧" if op == "&" else "⨯" if op == "*" else op
             , self.operator))
 
         super().__init__()

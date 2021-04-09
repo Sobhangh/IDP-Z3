@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased yet]
 
+### API
+* IEP 09 Unicode: allow `⨯` for arithmetic product
+
 ### Interactive Consultant
 
 * fix #77: `in` operator does not work in some definitions

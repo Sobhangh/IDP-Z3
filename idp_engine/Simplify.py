@@ -284,7 +284,7 @@ def update_exprs(self, new_exprs):
             return self._change(value=Number(number=str(out)), sub_exprs=operands)
         else:
             return self._change(sub_exprs=operands)
-    return update_arith(self, '*', operands)
+    return update_arith(self, '⨯', operands)
 AMultDiv.update_exprs = update_exprs
 
 
