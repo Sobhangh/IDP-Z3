@@ -1,5 +1,6 @@
 vocabulary V {
     type color
+    type byte := {1,2}
     Color: () -> color
     opposite: color → color
 }
@@ -9,11 +10,11 @@ theory T:V {
 }
 
 structure S:V {
-    color := constructed from {red, blue, green}
+    color := constructed from {red, blue, green, rgb(byte)}
     opposite := {red-> green, green-> red}
 }
 
 procedure main() {
   print(Problem(T, S).formula())
-  print(Problem(T,S).expand())
+  print(Problem(T,S).expand(max=1))
 }

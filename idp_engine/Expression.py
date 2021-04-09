@@ -378,7 +378,11 @@ class Constructor(ASTNode):
     """Constructor declaration
 
     Attributes:
-        name (string): name of the constructor
+        name (UnappliedSymbol): name of the constructor
+
+        args (List[UnappliedSymbol]): types of the arguments of the constructor
+
+        arity (Int): number of arguments of the constructor
 
         symbol (Symbol): only for Symbol constructors
 
@@ -392,6 +396,7 @@ class Constructor(ASTNode):
 
         self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
                      self.name)
+        self.arity = len(self.args)
 
         self.symbol = None
         self.translated: Any = None
@@ -740,6 +745,13 @@ class AppliedSymbol(Expression):
         # annotate
         out.decl = symbol.decl
         return out.annotate1()
+
+    @classmethod
+    def construct(cls, constructor, args):
+        out= cls.make(Symbol(name=constructor.name), args)
+        out.decl = constructor
+        out.fresh_vars = {}
+        return out
 
     def __str1__(self):
         if len(self.sub_exprs) == 0:

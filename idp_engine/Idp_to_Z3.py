@@ -25,9 +25,10 @@ TODO: vocabulary
 
 
 from fractions import Fraction
+from itertools import product
 from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
-                EnumSort, BoolVal)
+                BoolVal, Datatype)
 
 from idp_engine.Parse import ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
@@ -51,15 +52,22 @@ def translate(self):
             self.constructors[1].translated = BoolVal(False)
             self.constructors[0].py_value = True
             self.constructors[1].py_value = False
-        else: #TODO1
-            self.translated, cstrs = EnumSort(self.name, [c.name for c in
-                                                        self.constructors])
-            self.check(len(self.constructors) == len(cstrs), "Internal error")
-            for c, c3 in zip(self.constructors, cstrs):
-                assert type(c) == Constructor
-                c.translated = c3
-                c.py_value = c3
-                self.map[str(c)] = UnappliedSymbol.construct(c)
+        else:
+            sort = Datatype(self.name)
+            for c in self.constructors:
+                sort.declare(c.name,
+                             *[("x", a.decl.translate()) for a in c.args])
+            self.translated = sort.create()
+
+            for c in self.constructors:
+                c.translated = self.translated.__dict__[c.name]
+                c.py_value = c.translated
+                if not c.args:
+                    self.map[str(c)] = UnappliedSymbol.construct(c)
+                else:
+                    for a in product(*[s.decl.range for s in c.args]):
+                        e = AppliedSymbol.construct(c, a) #TODO1 duplicate with Constructor.interpret()
+                        self.map[str(e)] = e
     return self.translated
 ConstructedTypeDeclaration.translate = translate
 
@@ -110,6 +118,13 @@ def reified(self) -> DatatypeRef:
         Expression.COUNT += 1
     return self._reified
 Expression.reified = reified
+
+
+# class Constructor  ###########################################################
+
+def translate(self):
+    return self.translated
+Constructor.translate = translate
 
 
 # Class IfExpr  ###############################################################
