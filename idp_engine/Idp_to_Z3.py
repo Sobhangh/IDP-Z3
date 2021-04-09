@@ -65,8 +65,7 @@ def translate(self):
                 if not c.args:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
                 else:
-                    for a in product(*[s.decl.range for s in c.args]):
-                        e = AppliedSymbol.construct(c, a) #TODO1 duplicate with Constructor.interpret()
+                    for e in c.range:
                         self.map[str(e)] = e
     return self.translated
 ConstructedTypeDeclaration.translate = translate
