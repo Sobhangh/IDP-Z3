@@ -38,17 +38,23 @@ Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``)
 The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
 
-Custom types can be defined by specifying a range of numeric literals, or a list of constructors (of arity 0).
+Custom types can be defined by specifying:
+
+* a list of (ranges of) numeric literals,
+* a list of nullary constructors,
+* a list of n-ary constructors; in that case, the enumeration must be preceded by ``constructed from``.
+
 Their name should be singular and capitalized, by convention.
 The enumeration can be given in a theory or structure block.
 
 .. code::
 
     type Person
-    type Side := {1..4}
+    type SomeNumbers := {1..4, 10..12, 15}
     type Color := {Red, Blue, Green}
+    type Color2 := constructed from {Red, Blue, Green, RGB(Byte, Byte, Byte)}
 
-For the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
+In the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
 
 
 .. _function:

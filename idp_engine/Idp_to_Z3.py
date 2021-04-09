@@ -56,7 +56,8 @@ def translate(self):
             sort = Datatype(self.name)
             for c in self.constructors:
                 sort.declare(c.name,
-                             *[("x", a.decl.translate()) for a in c.args])
+                             *[(f"{self.name}_{i}", a.decl.translate())
+                               for i, a in enumerate(c.args)])
             self.translated = sort.create()
 
             for c in self.constructors:

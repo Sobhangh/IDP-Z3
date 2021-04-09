@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased yet]
 
+## API
+* IEP 06: support for N-ary constructors
+
 ### Interactive Consultant
 
 * fix #77: `in` operator does not work in some definitions
