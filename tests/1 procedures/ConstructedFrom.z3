@@ -2,28 +2,28 @@ opposite(red) = green ∧ opposite(green) = red ∧ Color in {red,green, green,r
 
 Model 1
 ==========
-Color:={->red}
-opposite:={(red)->green; (blue)->red; (green)->red}
+Color:={->green}
+opposite:={(red)->green; (blue)->green; (green)->red}
 
 Model 2
 ==========
-Color:={->green}
-opposite:={(red)->green; (blue)->red; (green)->red}
+Color:={->red}
+opposite:={(red)->green; (blue)->green; (green)->red}
 
 Model 3
 ==========
-Color:={->green}
-opposite:={(red)->green; (blue)->blue; (green)->red}
+Color:={->red}
+opposite:={(red)->green; (blue)->red; (green)->red}
 
 Model 4
 ==========
 Color:={->green}
-opposite:={(red)->green; (blue)->green; (green)->red}
+opposite:={(red)->green; (blue)->red; (green)->red}
 
 Model 5
 ==========
-Color:={->red}
-opposite:={(red)->green; (blue)->green; (green)->red}
+Color:={->green}
+opposite:={(red)->green; (blue)->blue; (green)->red}
 
 Model 6
 ==========

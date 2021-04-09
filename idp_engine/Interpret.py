@@ -305,40 +305,41 @@ def interpret(self, problem):
     new_vars = {}
     for name, var in self.q_vars.items():
         range = None
-        if var.sort:
-            if var.sort.decl and var.sort.decl.range:
-                range = var.sort.decl.range
-                guard = lambda x,y: y
-            elif var.sort.code in problem.interpretations:
-                self.check(var.sort.decl.arity == 1,
-                           f"Incorrect arity of {var.sort}")
-                self.check(var.sort.decl.out.type == BOOL,
-                           f"{var.sort} is not a predicate")
+        if var.sort and var.sort.decl:
+            self.check(var.sort.decl.arity == 1,
+                        f"Incorrect arity of {var.sort}")
+            self.check(var.sort.decl.out.type == BOOL,
+                        f"{var.sort} is not a type or predicate")
+
+            if var.sort.code in problem.interpretations:
                 enumeration = problem.interpretations[var.sort.code].enumeration
                 range = [t.args[0] for t in enumeration.tuples.values()]
-                guard = lambda x,y: y
-            elif name in inferred:
-                sort = inferred[name].decl
-                if sort.name in problem.interpretations:
-                    enumeration = problem.interpretations[sort.name].enumeration
-                    range = [t.args[0] for t in enumeration.tuples.values()]
-                    symbol = var.sort.as_rigid()
-                    def guard(val, expr):
-                        applied = AppliedSymbol.make(symbol, [val])
-                        if self.q == '∀':
-                            out = AImplication.make('⇒', [applied, expr])
-                        else:
-                            out = AConjunction.make('∧', [applied, expr])
-                        return out
+                guard = None
+            elif type(var.sort.decl) == SymbolDeclaration:
+                self.check(var.sort.decl.domain,
+                           f"Symbol {var.sort} must have a finite domain")
+                range = [t[0] for t in var.sort.decl.domain]
+                guard = var.sort.as_rigid()
+            elif var.sort.decl.range:
+                range = var.sort.decl.range
+                guard = None
+
         if range is not None:
             out = []
             for f in forms:
                 for val in range:
-                    new_f = guard(val, f.instantiate(var, val, problem))
+                    new_f = f.instantiate(var, val, problem)
+                    if guard:
+                        applied = AppliedSymbol.make(guard, [val])
+                        if self.q == '∀':
+                            new_f = AImplication.make('⇒', [applied, new_f])
+                        else:
+                            new_f = AConjunction.make('∧', [applied, new_f])
                     out.append(new_f)
             forms = out
         else: # infinite domain !
             new_vars[name] = var
+
     if new_vars:
         forms = [f.interpret(problem) if problem else f for f in forms]
     self.q_vars = new_vars

@@ -145,8 +145,6 @@ def annotate(self, idp):
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
-    self.constraints = OrderedSet([e.interpret(self) #TODO why is this needed ?
-                                    for e in self.constraints])
 Theory.annotate = annotate
 
 
