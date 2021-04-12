@@ -9,18 +9,17 @@ vocabulary environment {
   type Resale := {Less_Than_Three, Three_Or_More}
   type Seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
 
-  value: () → ℝ
   region : () → Location
-
-  // for Heritage
-  type_of_real_estate : () → Real_Estate_Type
-  use : () → Destination
-  monument, heritage_investment, heritage_plan, additional_terms : () → 𝔹
 
   // for Social_Dwelling
   buyer : () → Buyer_Type
   seller : () → Seller
   mortgage_loan_allowance : () → 𝔹
+
+  // for Heritage
+  type_of_real_estate : () → Real_Estate_Type
+  use : () → Destination
+  monument, heritage_investment, heritage_plan, additional_terms : () → 𝔹
 
   // For Professional_Purchase
   professional_buyer, professional_declaration_filed, guarantee_satisfied : () → 𝔹
@@ -39,6 +38,7 @@ vocabulary environment {
   start_dt_dwelling_for_social_rent : () → Year
   duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
 
+  value: () → ℝ
 
 }
 
