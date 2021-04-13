@@ -631,7 +631,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if type(args[rank]) in [UnappliedSymbol, Number]:
+            if type(args[rank]) in [UnappliedSymbol, Number, Date]:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(theory, rank+1,

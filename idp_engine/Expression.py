@@ -234,7 +234,7 @@ class Expression(ASTNode):
 
     def copy(self):
         " create a deep copy (except for UnappliedSymbol and Number) "
-        if type(self) in [UnappliedSymbol, Number, Variable]:
+        if type(self) in [UnappliedSymbol, Number, Date, Variable]:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]

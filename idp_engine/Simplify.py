@@ -53,7 +53,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
     if value is not None:
         self.value = value
     elif simpler is not None:
-        if type(simpler) in [UnappliedSymbol, Number]:
+        if type(simpler) in [UnappliedSymbol, Number, Date]:
             self.value = simpler
         elif simpler.value is not None:  # example: prime.idp
             self.value = simpler.value
