@@ -279,6 +279,9 @@ Tuple.annotate = annotate
 
 def annotate(self, voc):
     for c in self.constructors:
+        for i, ts in enumerate(c.sorts):
+            if ts.accessor is None:
+                ts.accessor = Symbol(name=f"{self.parent.name}_{i}")
         c.annotate(voc)
 ConstructedFrom.annotate = annotate
 
@@ -286,11 +289,13 @@ ConstructedFrom.annotate = annotate
 # Class Constructor  #######################################################
 
 def annotate(self, voc):
-    for c in self.args:
-        self.check(c.name in voc.symbol_decls,
-                   f"Unknown type: {c.name}" )
-        c.decl = voc.symbol_decls[c.name]
-        c.fresh_vars = {}
+    for a in self.sorts:
+        self.check(a.type in voc.symbol_decls,
+                   f"Unknown type: {a.type}" )
+        a.decl = SymbolDeclaration(annotations='', name=a.accessor,
+                                sorts=[Symbol(name=self.type)],
+                                out=Symbol(name=a.type))
+        a.decl.annotate(voc)
 Constructor.annotate = annotate
 
 

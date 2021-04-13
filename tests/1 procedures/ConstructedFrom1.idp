@@ -1,0 +1,16 @@
+vocabulary V {
+    type byte := {1,2}
+    type color := constructed from {red, blue, green, rgb(R: byte, byte)}
+}
+
+theory T:V {
+    R(rgb(1,2)) = 1.
+}
+
+structure S:V {
+}
+
+procedure main() {
+  print(Problem(T, S).formula())
+  print(Problem(T,S).expand(max=1))
+}

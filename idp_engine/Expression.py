@@ -95,9 +95,9 @@ class Constructor(ASTNode):
     """Constructor declaration
 
     Attributes:
-        name (UnappliedSymbol): name of the constructor
+        name (string): name of the constructor
 
-        args (List[UnappliedSymbol]): types of the arguments of the constructor
+        sorts (List[Symbol]): types of the arguments of the constructor
 
         arity (Int): number of arguments of the constructor
 
@@ -105,22 +105,41 @@ class Constructor(ASTNode):
 
         translated (DataTypeRef): the value in Z3
     """
-    PRECEDENCE = 200
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.args = kwargs.pop('args') if 'args' in kwargs else []
+        self.sorts = kwargs.pop('args') if 'args' in kwargs else []
 
         self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
                      self.name)
-        self.arity = len(self.args)
+        self.arity = len(self.sorts)
 
         self.symbol = None
         self.translated: Any = None
 
     def __str__(self):
-        return (self.name if not self.args else
-                f"{self.name}({','.join(str(self.args))}" )
+        return (self.name if not self.sorts else
+                f"{self.name}({','.join((str(a) for a in self.sorts))}" )
+
+
+class Accessor(ASTNode):
+    """represents an accessor and a type
+
+    Attributes:
+        accessor (Symbol, Optional): name of accessor function
+
+        type (string): name of the type
+
+        decl (SymbolDeclaration): declaration of the accessor function
+    """
+    def __init__(self, **kwargs):
+        self.accessor = kwargs.pop('accessor') if 'accessor' in kwargs else None
+        self.type = kwargs.pop('type').name
+
+    def __str__(self):
+        return (self.type if not self.accessor else
+                f"{self.accessor}: {self.type}" )
+
 
 
 class Expression(ASTNode):
@@ -757,7 +776,7 @@ class AppliedSymbol(Expression):
         if len(self.sub_exprs) == 0:
             out = f"{self.symbol}"
         else:
-            out = f"{self.symbol}({','.join([x.str for x in self.sub_exprs])})"
+            out = f"{self.symbol}({', '.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return (f"{out}"

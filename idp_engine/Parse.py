@@ -38,7 +38,7 @@ from typing import Dict, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
+from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          IfExpr, AQuantification, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
@@ -894,7 +894,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         ConstructedTypeDeclaration,
+                                         ConstructedTypeDeclaration, Accessor,
                                          RangeDeclaration,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,

@@ -56,14 +56,16 @@ def translate(self):
             sort = Datatype(self.name)
             for c in self.constructors:
                 sort.declare(c.name,
-                             *[(f"{self.name}_{i}", a.decl.translate())
-                               for i, a in enumerate(c.args)])
+                             *[(a.decl.name, a.decl.out.translate())
+                               for a in c.sorts])
             self.translated = sort.create()
 
             for c in self.constructors:
                 c.translated = self.translated.__dict__[c.name]
+                for a in c.sorts:
+                    a.decl.translated = self.translated.__dict__[a.accessor.name]
                 c.py_value = c.translated
-                if not c.args:
+                if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
                 else:
                     for e in c.range:

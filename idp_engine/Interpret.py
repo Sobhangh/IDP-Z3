@@ -180,11 +180,11 @@ ConstructedFrom.interpret = interpret
 
 def interpret(self, problem):
     self.range = []
-    if not self.args:
+    if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
     else:
         self.range = [AppliedSymbol.construct(self, e)
-                      for e in product(*[s.decl.range for s in self.args])]
+                      for e in product(*[s.decl.out.decl.range for s in self.sorts])]
     return self
 Constructor.interpret = interpret
 
