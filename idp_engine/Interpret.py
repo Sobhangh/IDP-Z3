@@ -170,7 +170,7 @@ Enumeration.interpret = interpret
 
 def interpret(self, problem):
     self.tuples = OrderedSet()
-    for c in self.constructors: #TODO1
+    for c in self.constructors:
         c.interpret(problem)
         self.tuples.extend([Tuple(args=[e]) for e in c.range])
 ConstructedFrom.interpret = interpret
@@ -339,7 +339,7 @@ def interpret(self, problem):
             for f in forms:
                 for val in range:
                     new_f = f.instantiate(var, val, problem)
-                    if guard:
+                    if guard:  # adds `guard(val) =>` in front of expression
                         applied = AppliedSymbol.make(guard, [val])
                         if self.q == '∀':
                             new_f = AImplication.make('⇒', [applied, new_f])

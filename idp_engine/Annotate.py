@@ -283,6 +283,17 @@ def annotate(self, voc):
 ConstructedFrom.annotate = annotate
 
 
+# Class Constructor  #######################################################
+
+def annotate(self, voc):
+    for c in self.args:
+        self.check(c.name in voc.symbol_decls,
+                   f"Unknown type: {c.name}" )
+        c.decl = voc.symbol_decls[c.name]
+        c.fresh_vars = {}
+Constructor.annotate = annotate
+
+
 # Class Display  #######################################################
 
 def annotate(self, idp):
@@ -358,17 +369,6 @@ def annotate1(self):
             self.fresh_vars.update(e.fresh_vars)
     return self
 Expression.annotate1 = annotate1
-
-
-# Class Constructor  #######################################################
-
-def annotate(self, voc):
-    for c in self.args:
-        self.check(c.name in voc.symbol_decls,
-                   f"Unknown type: {c.name}" )
-        c.decl = voc.symbol_decls[c.name]
-        c.fresh_vars = {}
-Constructor.annotate = annotate
 
 
 # Class IfExpr  #######################################################

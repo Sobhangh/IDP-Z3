@@ -102,6 +102,13 @@ def translate(self):
 SymbolDeclaration.translate = translate
 
 
+# class Constructor  ###########################################################
+
+def translate(self):
+    return self.translated
+Constructor.translate = translate
+
+
 # class Expression  ###########################################################
 
 def translate(self):
@@ -118,13 +125,6 @@ def reified(self) -> DatatypeRef:
         Expression.COUNT += 1
     return self._reified
 Expression.reified = reified
-
-
-# class Constructor  ###########################################################
-
-def translate(self):
-    return self.translated
-Constructor.translate = translate
 
 
 # Class IfExpr  ###############################################################

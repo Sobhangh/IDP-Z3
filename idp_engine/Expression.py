@@ -91,6 +91,38 @@ class ASTNode(object):
         return self  # monkey-patched
 
 
+class Constructor(ASTNode):
+    """Constructor declaration
+
+    Attributes:
+        name (UnappliedSymbol): name of the constructor
+
+        args (List[UnappliedSymbol]): types of the arguments of the constructor
+
+        arity (Int): number of arguments of the constructor
+
+        symbol (Symbol): only for Symbol constructors
+
+        translated (DataTypeRef): the value in Z3
+    """
+    PRECEDENCE = 200
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.args = kwargs.pop('args') if 'args' in kwargs else []
+
+        self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
+                     self.name)
+        self.arity = len(self.args)
+
+        self.symbol = None
+        self.translated: Any = None
+
+    def __str__(self):
+        return (self.name if not self.args else
+                f"{self.name}({','.join(str(self.args))}" )
+
+
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
 
@@ -372,38 +404,6 @@ class Expression(ASTNode):
             Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "expr is (not) in enumeration"
         """
         return (None, None, None)
-
-
-class Constructor(ASTNode):
-    """Constructor declaration
-
-    Attributes:
-        name (UnappliedSymbol): name of the constructor
-
-        args (List[UnappliedSymbol]): types of the arguments of the constructor
-
-        arity (Int): number of arguments of the constructor
-
-        symbol (Symbol): only for Symbol constructors
-
-        translated (DataTypeRef): the value in Z3
-    """
-    PRECEDENCE = 200
-
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.args = kwargs.pop('args') if 'args' in kwargs else []
-
-        self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
-                     self.name)
-        self.arity = len(self.args)
-
-        self.symbol = None
-        self.translated: Any = None
-
-    def __str__(self):
-        return (self.name if not self.args else
-                f"{self.name}({','.join(str(self.args))}" )
 
 
 class Symbol(Expression):
