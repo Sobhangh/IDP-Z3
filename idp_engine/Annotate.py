@@ -296,6 +296,11 @@ def annotate(self, voc):
                                 sorts=[Symbol(name=self.type)],
                                 out=Symbol(name=a.type))
         a.decl.annotate(voc)
+    self.tester = SymbolDeclaration(annotations='',
+                                    name=Symbol(name=f"is_{self.name}"),
+                            sorts=[Symbol(name=self.type)],
+                            out=Symbol(name=BOOL))
+    self.tester.annotate(voc)
 Constructor.annotate = annotate
 
 

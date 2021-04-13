@@ -99,7 +99,11 @@ class Constructor(ASTNode):
 
         sorts (List[Symbol]): types of the arguments of the constructor
 
+        type (string): name of the type that contains this constructor
+
         arity (Int): number of arguments of the constructor
+
+        tester (SymbolDeclaration): function to test if the
 
         symbol (Symbol): only for Symbol constructors
 
@@ -115,6 +119,7 @@ class Constructor(ASTNode):
         self.arity = len(self.sorts)
 
         self.symbol = None
+        self.tester = None
         self.translated: Any = None
 
     def __str__(self):
@@ -128,7 +133,7 @@ class Accessor(ASTNode):
     Attributes:
         accessor (Symbol, Optional): name of accessor function
 
-        type (string): name of the type
+        type (string): name of the type of the accessor
 
         decl (SymbolDeclaration): declaration of the accessor function
     """

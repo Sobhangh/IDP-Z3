@@ -62,6 +62,8 @@ def translate(self):
 
             for c in self.constructors:
                 c.translated = self.translated.__dict__[c.name]
+                if c.tester:
+                    c.tester.translated = self.translated.__dict__[f"is_{c.name}"]
                 for a in c.sorts:
                     a.decl.translated = self.translated.__dict__[a.accessor.name]
                 c.py_value = c.translated
