@@ -434,13 +434,14 @@ class Symbol(Expression):
     Attributes:
         name (string): name of the symbol
     """
+    TO = {'𝔹': BOOL, 'ℤ': INT, 'ℝ': REAL,
+          '`𝔹': '`'+BOOL, '`ℤ': '`'+INT, '`ℝ': '`'+REAL,}
+    FROM = {BOOL: '𝔹', INT: 'ℤ', REAL: 'ℝ',
+            '`'+BOOL: '`𝔹', '`'+INT: '`ℤ', '`'+REAL: '`ℝ',}
+
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
-        self.name = (BOOL if self.name == '𝔹' else
-                     INT if self.name == 'ℤ' else
-                     REAL if self.name == 'ℝ' else
-                     self.name
-        )
+        self.name = Symbol.TO.get(self.name, self.name)
         self.sub_exprs = []
         self.decl = None
         super().__init__()
@@ -448,11 +449,7 @@ class Symbol(Expression):
         self.value = self
 
     def __str__(self):
-        return ('𝔹' if self.name == BOOL else
-                'ℤ' if self.name == INT else
-                'ℝ' if self.name == REAL else
-                self.name
-        )
+        return Symbol.FROM.get(self.name, self.name)
 
     def translate(self):
         return self.decl.translate()
