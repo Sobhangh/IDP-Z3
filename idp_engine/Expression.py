@@ -493,12 +493,12 @@ class Quantee(Expression):
     def make(cls, var, sort):
         if type(sort) != SymbolExpr:
             sort = SymbolExpr(eval='', s=sort)
-        out = (cls) (var=var, sort=sort)
+        out = (cls) (var=[var], sort=sort)
         out.decl = sort.decl
         return out.annotate1()
 
     def __str1__(self):
-        return f"{self.var} ∈ {self.sort}"
+        return f"{','.join(self.var)} ∈ {self.sort}"
 
     def copy(self):
         out = Expression.copy(self)

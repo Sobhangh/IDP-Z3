@@ -497,7 +497,7 @@ class Rule(ASTNode):
             self.body = TRUE
 
     def __repr__(self):
-        return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
+        return (f"Rule:∀{','.join(str(q) for q in self.quantees)}: "
                 f"{self.definiendum} "
                 f"⇔{str(self.body)}")
 
@@ -507,7 +507,7 @@ class Rule(ASTNode):
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
         self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
-        vars = [q.var for q in self.quantees]
+        vars = [var for q in self.quantees for var in q.var]
         for i in range(len(self.definiendum.sub_exprs)):
             arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \

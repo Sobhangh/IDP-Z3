@@ -184,7 +184,8 @@ def annotate(self, voc, q_vars):
     for q in self.quantees:
         if q.sort:
             q.annotate(voc, q_vars)
-        self.q_vars[q.var] = Variable(q.var, q.sort)
+        for var in q.var:
+            self.q_vars[var] = Variable(var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
 
     self.definiendum = self.definiendum.annotate(voc, q_v)
@@ -404,11 +405,12 @@ Quantee.annotate = annotate
 def annotate(self, voc, q_vars):
     self.q_vars = {}
     for q in self.quantees:
-        self.check(q.var not in voc.symbol_decls,
-            f"the quantified variable '{q.var}' cannot have"
-            f" the same name as another symbol")
         q.annotate(voc, q_vars)
-        self.q_vars[q.var] = Variable(q.var, q.sort)
+        for var in q.var:
+            self.check(var not in voc.symbol_decls,
+                f"the quantified variable '{var}' cannot have"
+                f" the same name as another symbol")
+            self.q_vars[var] = Variable(var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
@@ -475,10 +477,11 @@ AUnary.annotate1 = annotate1
 def annotate(self, voc, q_vars):
     self.q_vars = {}
     for q in self.quantees:
-        self.check(q.var not in voc.symbol_decls,
-            f"the quantifier variable '{q.var}' cannot have the same name as another symbol.")
         q.annotate(voc, q_vars)
-        self.q_vars[q.var] = Variable(q.var, q.sort)
+        for var in q.var:
+            self.check(var not in voc.symbol_decls,
+                f"the quantifier variable '{var}' cannot have the same name as another symbol.")
+            self.q_vars[var] = Variable(var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT

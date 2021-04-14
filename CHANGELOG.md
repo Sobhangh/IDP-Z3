@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased yet]
 
 ## API
+* IEP 03: improve binary quantification
 * IEP 06: support for N-ary constructors
 
 ### Interactive Consultant
