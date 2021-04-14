@@ -58,13 +58,12 @@ The enumeration can be given in a theory or structure block.
 In the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
 
 The constructors of ```Color2`` are : ``Red``, ``Blue``, ``Green`` and ``RGB``.
-Each constructor have an associated function (e.g., ``is_red``, or ``is_RGB``) to test if a Color2 term was created with that constructor.
-The ``RGB``constructor takes 3 arguments of type ``Byte``.
+Each constructor have an associated function (e.g., ``is_Red``, or ``is_RGB``) to test if a Color2 term was created with that constructor.
+The ``RGB`` constructor takes 3 arguments of type ``Byte``.
 ``R``, ``G`` and ``B`` are accessor functions: when given a Color2 term constructed with RGB, they return the associated Byte.
 
 .. _function:
 .. index:: function
-
 Functions
 +++++++++
 
