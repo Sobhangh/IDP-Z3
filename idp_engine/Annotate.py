@@ -322,7 +322,7 @@ def annotate(self, idp):
         ('view', Symbol(name='_ViewType')),
         ('moveSymbols', Symbol(name=BOOL)),
         ('optionalPropagation', Symbol(name=BOOL)),
-        ('manPropagation', Symbol(name=BOOL)),
+        ('manualPropagation', Symbol(name=BOOL)),
         ('unit', open_types['unit']),
         ('heading', open_types['heading'])
     ]:
