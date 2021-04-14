@@ -631,7 +631,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if args[rank].as_rigid() is not None:
+            if args[rank].value is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(theory, rank+1,
@@ -686,7 +686,7 @@ class Enumeration(ASTNode):
 
         # constructs If-then-else recursively
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
-        if args[rank].as_rigid() is not None:
+        if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
                     return self.contains(args, function, arity, rank+1, list(tuples2))

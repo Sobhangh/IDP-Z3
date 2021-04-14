@@ -406,7 +406,7 @@ def interpret(self, problem):
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
             and any(s.decl.name == SYMBOL for s in self.decl.sorts)
-            and all(a.as_rigid() is not None for a in sub_exprs)):
+            and all(a.value is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
             f = problem.interpretations[self.decl.name].interpret_application

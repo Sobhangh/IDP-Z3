@@ -253,7 +253,7 @@ def annotate(self, block):
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
-        self.check(self.default.as_rigid() is not None,
+        self.check(self.default.value is not None,
             f"Default value for '{self.name}' must be ground: {self.default}")
 SymbolInterpretation.annotate = annotate
 
@@ -270,7 +270,7 @@ Enumeration.annotate = annotate
 
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
-    self.check(all(a.as_rigid() is not None for a in self.args),
+    self.check(all(a.value is not None for a in self.args),
                 f"Tuple must be ground : ({self})")
 Tuple.annotate = annotate
 

@@ -343,10 +343,6 @@ class Expression(ASTNode):
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
-    def as_rigid(self):
-        " returns a Number or UnappliedSymbol, or None "
-        return self.value
-
     def is_reified(self): return True
 
     def is_assignment(self) -> bool:
@@ -633,9 +629,9 @@ class AComparison(BinaryOperator):
         return len(self.sub_exprs) == 2 and \
                 self.operator in [['='], ['≠']] \
                 and isinstance(self.sub_exprs[0], AppliedSymbol) \
-                and all(e.as_rigid() is not None
+                and all(e.value is not None
                         for e in self.sub_exprs[0].sub_exprs) \
-                and self.sub_exprs[1].as_rigid() is not None
+                and self.sub_exprs[1].value is not None
 
 
 class ASumMinus(BinaryOperator):

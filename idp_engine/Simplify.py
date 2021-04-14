@@ -109,7 +109,7 @@ IfExpr.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     if not self.decl and self.sort:
-        symbol = self.sort.as_rigid()
+        symbol = self.sort.value
         if symbol:
             self.decl = symbol.decl
             self.sort.decl = self.decl
@@ -227,7 +227,7 @@ AConjunction.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    operands1 = [e.as_rigid() for e in operands]
+    operands1 = [e.value for e in operands]
     if all(e is not None for e in operands1):
         acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
@@ -252,7 +252,7 @@ AComparison.as_set_condition = as_set_condition
 
 def update_arith(self, family, operands):
     operands = list(operands)
-    operands1 = [e.as_rigid() for e in operands]
+    operands1 = [e.value for e in operands]
     if all(e is not None for e in operands1):
         out = operands1[0].py_value
 
@@ -280,7 +280,7 @@ ASumMinus.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     if any(op == '%' for op in self.operator):  # special case !
-        operands1 = [e.as_rigid() for e in operands]
+        operands1 = [e.value for e in operands]
         if len(operands) == 2 \
            and all(e is not None for e in operands1):
             out = operands1[0].py_value % operands1[1].py_value
@@ -295,7 +295,7 @@ AMultDiv.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    operands1 = [e.as_rigid() for e in operands]
+    operands1 = [e.value for e in operands]
     if len(operands) == 2 \
        and all(e is not None for e in operands1):
         out = operands1[0].py_value ** operands1[1].py_value
@@ -315,7 +315,7 @@ def update_exprs(self, new_exprs):
         if operand.same_as(FALSE):
             return self._change(value=TRUE, sub_exprs=[operand])
     else:  # '-'
-        a = operand.as_rigid()
+        a = operand.value
         if a is not None:
             if type(a) == Number:
                 return self._change(value=Number(number=str(- a.translate())), sub_exprs=[operand])
@@ -334,7 +334,7 @@ AUnary.as_set_condition = as_set_condition
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     if self.using_if and not self.q_vars:
-        operands1 = [e.as_rigid() for e in operands]
+        operands1 = [e.value for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
             out = Number(number=str(out))
@@ -348,13 +348,13 @@ AAggregate.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     new_exprs = list(new_exprs)
     if not self.decl:
-        symbol = self.symbol.as_rigid()
+        symbol = self.symbol.value
         if symbol:
             self.decl = symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
     if self.decl and type(self.decl) == Constructor:
-        if all(e.as_rigid() is not None for e in new_exprs):
+        if all(e.value is not None for e in new_exprs):
             return self._change(sub_exprs=new_exprs, value = self)
     if (self.decl and new_exprs
         and type(new_exprs[0]) == UnappliedSymbol and new_exprs[0].decl):
