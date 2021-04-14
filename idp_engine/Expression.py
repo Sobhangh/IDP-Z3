@@ -115,7 +115,7 @@ class Constructor(ASTNode):
         self.name = kwargs.pop('name')
         self.sorts = kwargs.pop('args') if 'args' in kwargs else []
 
-        self.name = (self.name.name if type(self.name) == UnappliedSymbol else
+        self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
                      self.name)
         self.arity = len(self.sorts)
 
@@ -429,6 +429,11 @@ class Expression(ASTNode):
 
 
 class Symbol(Expression):
+    """Represents a Symbol.  Handles synonyms.
+
+    Attributes:
+        name (string): name of the symbol
+    """
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
         self.name = (BOOL if self.name == '𝔹' else
@@ -856,7 +861,8 @@ class UnappliedSymbol(Expression):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
-        self.name = unquote(kwargs.pop('name'))
+        self.s = kwargs.pop('s')
+        self.name = self.s.name
 
         Expression.__init__(self)
 
@@ -872,7 +878,7 @@ class UnappliedSymbol(Expression):
     def construct(cls, constructor: Constructor):
         """Create an UnappliedSymbol from a constructor
         """
-        out = (cls)(name=constructor.name)
+        out = (cls)(s=Symbol(name=constructor.name))
         out.decl = constructor
         out.fresh_vars = {}
         return out
