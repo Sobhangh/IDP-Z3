@@ -497,10 +497,13 @@ class Rule(ASTNode):
             self.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
+        self.definiendum = AppliedSymbol(symbol=self.symbol,
+                                         sub_exprs=self.sub_exprs)
+        self.sub_exprs, self.symbol = None, None
 
     def __repr__(self):
         return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
-                f"{self.symbol}({','.join(str(e) for e in self.sub_exprs)}) "
+                f"{self.definiendum} "
                 f"⇔{str(self.body)}")
 
     def rename_args(self, new_vars):
@@ -508,21 +511,23 @@ class Rule(ASTNode):
             input : '!v: f(args) <- body(args)'
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
-        self.check(len(self.sub_exprs) == len(new_vars), "Internal error")
+        self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
         vars = [q.var for q in self.quantees]
-        for i in range(len(self.sub_exprs)):
-            arg, nv = self.sub_exprs[i],  list(new_vars.values())[i]
+        for i in range(len(self.definiendum.sub_exprs)):
+            arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
-                self.out = self.out.instantiate(arg, nv) if self.out else self.out
-                for j in range(i, len(self.sub_exprs)):
-                    self.sub_exprs[j] = self.sub_exprs[j].instantiate(arg, nv)
+                self.out = (self.out.instantiate(arg, nv) if self.out else
+                            self.out)
+                for j in range(i, len(self.definiendum.sub_exprs)):
+                    self.definiendum.sub_exprs[j] = \
+                        self.definiendum.sub_exprs[j].instantiate(arg, nv)
             else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
 
-        self.sub_exprs = list(new_vars.values())
+        self.definiendum.sub_exprs = list(new_vars.values())
         self.quantees = [Quantee.make(v,s) for v,s in new_vars.items()]
         self.q_vars = new_vars
         return self
@@ -542,15 +547,15 @@ class Rule(ASTNode):
             return self.cache[hash]
         # assert self.is_whole_domain == False
         out = self.body.copy() # in case there is no arguments
-        self.check(len(new_args) == len(self.sub_exprs)
-                or len(new_args)+1 == len(self.sub_exprs), "Internal error")
-        for old, new in zip(self.sub_exprs, new_args):
+        self.check(len(new_args) == len(self.definiendum.sub_exprs)
+                or len(new_args)+1 == len(self.definiendum.sub_exprs), "Internal error")
+        for old, new in zip(self.definiendum.sub_exprs, new_args):
             out = out.instantiate(old, new, theory)
         out = out.interpret(theory)
-        instance = AppliedSymbol.make(self.symbol, new_args)
+        instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
-        if self.symbol.decl.type != BOOL:  # a function
-            out = out.instantiate(self.sub_exprs[-1], instance, theory)
+        if self.definiendum.symbol.decl.type != BOOL:  # a function
+            out = out.instantiate(self.definiendum.sub_exprs[-1], instance, theory)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block

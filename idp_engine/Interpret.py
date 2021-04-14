@@ -113,11 +113,13 @@ def interpret(self, theory):
     assert self.is_whole_domain
     self.cache = {}  # reset the cache
     if self.out:
-        expr = AppliedSymbol.make(self.symbol, self.sub_exprs[:-1])
+        expr = AppliedSymbol.make(self.definiendum.symbol,
+                                  self.definiendum.sub_exprs[:-1])
         expr.in_head = True
-        expr = AComparison.make('=', [expr, self.sub_exprs[-1]])
+        expr = AComparison.make('=', [expr, self.definiendum.sub_exprs[-1]])
     else:
-        expr = AppliedSymbol.make(self.symbol, self.sub_exprs)
+        expr = AppliedSymbol.make(self.definiendum.symbol,
+                                  self.definiendum.sub_exprs)
         expr.in_head = True
     expr = AEquivalence.make('⇔', [expr, self.body])
     expr = AQuantification.make('∀', {**self.q_vars}, expr)
