@@ -258,7 +258,7 @@ class Expression(ASTNode):
             return self.value  .same_as(other)
         if self.simpler is not None:
             return self.simpler.same_as(other)
-        if other.value is not None:
+        if other.value is not None and other.value is not other:
             return self.same_as(other.value)
         if other.simpler is not None:
             return self.same_as(other.simpler)
@@ -445,6 +445,7 @@ class Symbol(Expression):
         self.decl = None
         super().__init__()
         self.fresh_vars = set()
+        self.value = self
 
     def __str__(self):
         return ('𝔹' if self.name == BOOL else
@@ -452,8 +453,6 @@ class Symbol(Expression):
                 'ℝ' if self.name == REAL else
                 self.name
         )
-
-    def as_rigid(self): return self
 
     def translate(self):
         return self.decl.translate()
@@ -881,6 +880,7 @@ class UnappliedSymbol(Expression):
         self.is_enumerated = None
         self.is_enumeration = None
         self.in_enumeration = None
+        self.value = self
 
     @classmethod
     def construct(cls, constructor: Constructor):
@@ -892,8 +892,6 @@ class UnappliedSymbol(Expression):
         return out
 
     def __str1__(self): return self.name
-
-    def as_rigid(self): return self
 
     def is_reified(self): return False
 
@@ -933,13 +931,13 @@ class Number(Expression):
 
         self.sub_exprs = []
         self.fresh_vars = set()
+        self.value = self
 
         self.translated = None
         self.translate()  # also sets self.type
 
     def __str__(self): return self.number
 
-    def as_rigid(self): return self
     def is_reified(self): return False
 
 
@@ -959,13 +957,13 @@ class Date(Expression):
 
         self.sub_exprs = []
         self.fresh_vars = set()
+        self.value = self
 
         self.translated = None
         self.translate()  # also sets self.type
 
     def __str__(self): return f"#{self.date.isoformat()}"
 
-    def as_rigid(self): return self
     def is_reified(self): return False
 
 
@@ -988,7 +986,4 @@ class Brackets(Expression):
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
     def __str1__(self): return str(self)
-
-    def as_rigid(self):
-        return self.sub_exprs[0].as_rigid()
 
