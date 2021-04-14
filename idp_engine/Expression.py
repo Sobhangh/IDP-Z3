@@ -234,7 +234,8 @@ class Expression(ASTNode):
 
     def copy(self):
         " create a deep copy (except for UnappliedSymbol and Number) "
-        if type(self) in [UnappliedSymbol, Number, Date, Variable]:
+        if (type(self) in [UnappliedSymbol, Number, Date, Variable]
+            or self.value == self):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -250,7 +251,7 @@ class Expression(ASTNode):
     def same_as(self, other):
         if id(self) == id(other):
             return True
-        if self.value is not None:
+        if self.value is not None and self.value is not self:
             return self.value  .same_as(other)
         if self.simpler is not None:
             return self.simpler.same_as(other)
@@ -271,8 +272,7 @@ class Expression(ASTNode):
     def __repr__(self): return str(self)
 
     def __str__(self):
-        self.check(self.value is not self, "Internal error")
-        if self.value is not None:
+        if self.value is not None and self.value is not self:
             return str(self.value)
         if self.simpler is not None:
             return str(self.simpler)

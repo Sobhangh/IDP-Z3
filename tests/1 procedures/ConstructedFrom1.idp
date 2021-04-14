@@ -8,6 +8,7 @@ theory T:V {
     is_rgb(rgb(1,2)).
     ~is_rgb(red).
     ~is_red(blue).
+    rgb(1,2) ~= red.
 }
 
 structure S:V {

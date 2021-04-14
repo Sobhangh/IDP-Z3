@@ -116,7 +116,7 @@ Constructor.translate = translate
 # class Expression  ###########################################################
 
 def translate(self):
-    if self.value is not None:
+    if self.value is not None and self.value is not self:
         return self.value.translate()
     if self.simpler is not None:
         return self.simpler.translate()

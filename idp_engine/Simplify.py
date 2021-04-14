@@ -28,7 +28,7 @@ import sys
 from typing import List
 
 from .Expression import (
-    Expression, IfExpr, AQuantification, Quantee,
+    Constructor, Expression, IfExpr, AQuantification, Quantee,
     BinaryOperator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
@@ -59,9 +59,9 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
             self.value = simpler.value
         else:
             self.simpler = simpler
-    assert self.value is None or type(self.value) in [UnappliedSymbol, Symbol,
-                                                      Number, Date]
-    assert self.value is not self  # avoid infinite loops
+    assert (self.value is None
+            or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
+                                    Number, Date])
 
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -232,8 +232,8 @@ def update_exprs(self, new_exprs):
         acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
-            if op == "=" and type(acc1) == UnappliedSymbol == type(expr1): #TODO1
-                if not acc1.decl == expr1.decl:  # compare constructors
+            if op == "=":
+                if not acc1.same_as(expr1):
                     return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             elif not (BinaryOperator.MAP[op]) (acc1.py_value, expr1.py_value):
                 return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
@@ -353,6 +353,9 @@ def update_exprs(self, new_exprs):
             self.decl = symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
+    if self.decl and type(self.decl) == Constructor:
+        if all(e.as_rigid() is not None for e in new_exprs):
+            return self._change(sub_exprs=new_exprs, value = self)
     if (self.decl and new_exprs
         and type(new_exprs[0]) == UnappliedSymbol and new_exprs[0].decl):
         if self.decl.name == ARITY:
