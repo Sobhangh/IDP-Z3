@@ -293,13 +293,13 @@ def annotate(self, voc):
         self.check(a.type in voc.symbol_decls,
                    f"Unknown type: {a.type}" )
         a.decl = SymbolDeclaration(annotations='', name=a.accessor,
-                                sorts=[Symbol(name=self.type)],
-                                out=Symbol(name=a.type))
+                                   sorts=[Symbol(name=self.type)],
+                                   out=Symbol(name=a.type))
         a.decl.annotate(voc)
     self.tester = SymbolDeclaration(annotations='',
                                     name=Symbol(name=f"is_{self.name}"),
-                            sorts=[Symbol(name=self.type)],
-                            out=Symbol(name=BOOL))
+                                    sorts=[Symbol(name=self.type)],
+                                    out=Symbol(name=BOOL))
     self.tester.annotate(voc)
 Constructor.annotate = annotate
 

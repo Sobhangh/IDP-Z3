@@ -103,7 +103,8 @@ class Constructor(ASTNode):
 
         arity (Int): number of arguments of the constructor
 
-        tester (SymbolDeclaration): function to test if the
+        tester (SymbolDeclaration): function to test if the constructor
+        has been applied to some arguments (e.g., is_rgb)
 
         symbol (Symbol): only for Symbol constructors
 
@@ -118,6 +119,7 @@ class Constructor(ASTNode):
                      self.name)
         self.arity = len(self.sorts)
 
+        self.type = None
         self.symbol = None
         self.tester = None
         self.translated: Any = None
@@ -133,13 +135,14 @@ class Accessor(ASTNode):
     Attributes:
         accessor (Symbol, Optional): name of accessor function
 
-        type (string): name of the type of the accessor
+        type (string): name of the output type of the accessor
 
         decl (SymbolDeclaration): declaration of the accessor function
     """
     def __init__(self, **kwargs):
         self.accessor = kwargs.pop('accessor') if 'accessor' in kwargs else None
         self.type = kwargs.pop('type').name
+        self.decl = None
 
     def __str__(self):
         return (self.type if not self.accessor else

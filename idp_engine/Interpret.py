@@ -329,7 +329,7 @@ def interpret(self, problem):
                 self.check(var.sort.decl.domain,
                            f"Symbol {var.sort} must have a finite domain")
                 range = [t[0] for t in var.sort.decl.domain]
-                guard = var.sort.as_rigid()
+                guard = var.sort
             elif var.sort.decl.range:
                 range = var.sort.decl.range
                 guard = None
