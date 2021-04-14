@@ -25,7 +25,7 @@ __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuanti
            "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
-           "Arguments", "UnappliedSymbol", "Variable",
+           "UnappliedSymbol", "Variable",
            "Number", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
 
 import copy
@@ -724,8 +724,6 @@ class AppliedSymbol(Expression):
 
         s (Expression): the symbol to be applied to arguments
 
-        args ([Expression]): the list of arguments
-
         is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
 
         is_enumeration (string): '' or 'in' or 'not in'
@@ -740,7 +738,7 @@ class AppliedSymbol(Expression):
 
     def __init__(self, **kwargs):
         self.symbol = kwargs.pop('symbol')
-        self.args = kwargs.pop('args')
+        self.sub_exprs = kwargs.pop('sub_exprs')
         if 'is_enumerated' in kwargs:
             self.is_enumerated = kwargs.pop('is_enumerated')
         else:
@@ -754,7 +752,6 @@ class AppliedSymbol(Expression):
         else:
             self.in_enumeration = None
 
-        self.sub_exprs = self.args.sub_exprs
         super().__init__()
 
         self.decl = None
@@ -762,7 +759,7 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        out = cls(symbol=symbol, args=Arguments(sub_exprs=args), **kwargs)
+        out = cls(symbol=symbol, sub_exprs=args, **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
@@ -849,12 +846,6 @@ class SymbolExpr(Expression):
     def __str1__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
-
-
-class Arguments(object):
-    def __init__(self, **kwargs):
-        self.sub_exprs = kwargs.pop('sub_exprs')
-        super().__init__()
 
 
 class UnappliedSymbol(Expression):

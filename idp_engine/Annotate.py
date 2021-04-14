@@ -188,7 +188,7 @@ def annotate(self, voc, q_vars):
     q_v = {**q_vars, **self.q_vars}  # merge
 
     self.symbol = self.symbol.annotate(voc, q_v)
-    self.args = [arg.annotate(voc, q_v) for arg in self.args]
+    self.sub_exprs = [arg.annotate(voc, q_v) for arg in self.sub_exprs]
     self.out = self.out.annotate(voc, q_v) if self.out else self.out
     self.body = self.body.annotate(voc, q_v)
 

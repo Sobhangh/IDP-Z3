@@ -37,7 +37,10 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations
-        (('!'|'∀') quantees+=Quantee[','] ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)?
+        (('!'|'∀') quantees+=Quantee[','] ':' )*
+        symbol=Symbol
+        '(' sub_exprs*=Expression[','] ')'
+        ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
       Quantee: var=/`?[^\d\W]\w*\b/ ( ('in' | '∈') sort=SymbolExpr)? ;
 
@@ -86,7 +89,8 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
     Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
-      AppliedSymbol: symbol=SymbolExpr args=Arguments
+      AppliedSymbol: symbol=SymbolExpr
+              '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | is_enumeration=/(not\s+)?in/ in_enumeration=Enumeration)?;
         SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
