@@ -480,8 +480,7 @@ class Rule(ASTNode):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
         self.quantees = kwargs.pop('quantees')
-        self.symbol = kwargs.pop('symbol')
-        self.sub_exprs = kwargs.pop('sub_exprs')
+        self.definiendum = kwargs.pop('definiendum')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
         self.is_whole_domain = None  # Bool
@@ -492,14 +491,10 @@ class Rule(ASTNode):
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         self.q_vars = {}  # {string: Variable}
-        self.sub_exprs = [] if self.sub_exprs is None else self.sub_exprs
         if self.out is not None:
-            self.sub_exprs.append(self.out)
+            self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
-        self.definiendum = AppliedSymbol(symbol=self.symbol,
-                                         sub_exprs=self.sub_exprs)
-        self.sub_exprs, self.symbol = None, None
 
     def __repr__(self):
         return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
@@ -554,7 +549,7 @@ class Rule(ASTNode):
         out = out.interpret(theory)
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
-        if self.definiendum.symbol.decl.type != BOOL:  # a function
+        if self.definiendum.decl.type != BOOL:  # a function
             out = out.instantiate(self.definiendum.sub_exprs[-1], instance, theory)
         else:
             out = AEquivalence.make('⇔', [instance, out])

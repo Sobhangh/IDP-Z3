@@ -156,7 +156,7 @@ def annotate(self, theory, voc, q_vars):
     # create common variables, and rename vars in rule
     self.clarks = {}
     for r in self.rules:
-        decl = voc.symbol_decls[r.definiendum.symbol.name]
+        decl = voc.symbol_decls[r.definiendum.decl.name]
         if decl.name not in self.def_vars:
             name = f"${decl.name}$"
             q_v = {f"${decl.name}!{str(i)}$":
