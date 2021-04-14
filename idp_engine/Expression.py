@@ -236,9 +236,8 @@ class Expression(ASTNode):
         self.block: Any = None
 
     def copy(self):
-        " create a deep copy (except for UnappliedSymbol and Number) "
-        if (type(self) in [UnappliedSymbol, Number, Date, Variable]
-            or self.value == self):
+        " create a deep copy (except for rigid terms and variables) "
+        if self.value == self:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -906,6 +905,8 @@ class Variable(Expression):
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name
+
+    def copy(self): return self
 
 
 class Number(Expression):
