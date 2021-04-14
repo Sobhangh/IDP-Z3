@@ -131,14 +131,9 @@ Quantified formulas
 
         ∀ v_1 ∈ p_1, v_n ∈ p_n: ϕ(v_1, v_n).
 
-        ∃ v_1, v_n: ϕ(v_1, v_n).
-
-        ∃ v_1, v_n ∈ p: ϕ(v_1, v_n).
-
-        ∃ v_1 ∈ p_1, v_n ∈ p_n: ϕ(v_1, v_n).
-
-    Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
-    For example, ``!x, y in Int: f(x,y)=f(y,x).``
+    Alternatively, the existential quantifier, ``∃``, can be used.
+    Ascii characters can also be used: ``?``, ``!``, respectively.
+    For example, ``! x, y in Int: f(x,y)=f(y,x).``
 
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
     In the first form above, the type of each variable is inferred from their use in |phi|.
