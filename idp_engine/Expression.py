@@ -491,10 +491,10 @@ class Quantee(Expression):
 
     @classmethod
     def make(cls, var, sort):
-        if type(sort) != SymbolExpr:
+        if sort and type(sort) != SymbolExpr:
             sort = SymbolExpr(eval='', s=sort)
         out = (cls) (var=[var], sort=sort)
-        out.decl = sort.decl
+        out.decl = sort.decl if sort else None
         return out.annotate1()
 
     def __str1__(self):
@@ -515,6 +515,11 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
+        if self.quantees and self.quantees[-1].sort is None:
+            q = self.quantees.pop()
+            for var in q.var:
+                self.quantees.append(Quantee.make(var, None))
+
         self.sub_exprs = [self.f]
         super().__init__()
 

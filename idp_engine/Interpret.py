@@ -300,8 +300,7 @@ def interpret(self, problem):
     if not self.q_vars:
         return Expression.interpret(self, problem)
     inferred = self.sub_exprs[0].type_inference()
-    if 1 < len(self.sub_exprs):
-        inferred = {**inferred, **self.sub_exprs[1].type_inference()}
+    self.check(len(self.sub_exprs) == 1, "Internal error")
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
             new_var = Variable(q, inferred[q])
@@ -317,42 +316,44 @@ def interpret(self, problem):
 
     forms = self.sub_exprs
     new_vars = {}
-    for name, var in self.q_vars.items():
-        range = None
-        if var.sort and var.sort.decl:
-            self.check(var.sort.decl.arity == 1,
-                        f"Incorrect arity of {var.sort}")
-            self.check(var.sort.decl.out.type == BOOL,
-                        f"{var.sort} is not a type or predicate")
+    for q in self.quantees:
+        for name in q.var:
+            var = self.q_vars[name]
+            range = None
+            if var.sort and var.sort.decl:
+                self.check(var.sort.decl.arity == 1,
+                            f"Incorrect arity of {var.sort}")
+                self.check(var.sort.decl.out.type == BOOL,
+                            f"{var.sort} is not a type or predicate")
 
-            if var.sort.code in problem.interpretations:
-                enumeration = problem.interpretations[var.sort.code].enumeration
-                range = [t.args[0] for t in enumeration.tuples.values()]
-                guard = None
-            elif type(var.sort.decl) == SymbolDeclaration:
-                self.check(var.sort.decl.domain,
-                           f"Symbol {var.sort} must have a finite domain")
-                range = [t[0] for t in var.sort.decl.domain]
-                guard = var.sort
-            elif var.sort.decl.range:
-                range = var.sort.decl.range
-                guard = None
+                if var.sort.code in problem.interpretations:
+                    enumeration = problem.interpretations[var.sort.code].enumeration
+                    range = [t.args[0] for t in enumeration.tuples.values()]
+                    guard = None
+                elif type(var.sort.decl) == SymbolDeclaration:
+                    self.check(var.sort.decl.domain,
+                            f"Symbol {var.sort} must have a finite domain")
+                    range = [t[0] for t in var.sort.decl.domain]
+                    guard = var.sort
+                elif var.sort.decl.range:
+                    range = var.sort.decl.range
+                    guard = None
 
-        if range is not None:
-            out = []
-            for f in forms:
-                for val in range:
-                    new_f = f.instantiate([var], [val], problem)
-                    if guard:  # adds `guard(val) =>` in front of expression
-                        applied = AppliedSymbol.make(guard, [val])
-                        if self.q == '∀':
-                            new_f = AImplication.make('⇒', [applied, new_f])
-                        else:
-                            new_f = AConjunction.make('∧', [applied, new_f])
-                    out.append(new_f)
-            forms = out
-        else: # infinite domain !
-            new_vars[name] = var
+            if range is not None:
+                out = []
+                for f in forms:
+                    for val in range:
+                        new_f = f.instantiate([var], [val], problem)
+                        if guard:  # adds `guard(val) =>` in front of expression
+                            applied = AppliedSymbol.make(guard, [val])
+                            if self.q == '∀':
+                                new_f = AImplication.make('⇒', [applied, new_f])
+                            else:
+                                new_f = AConjunction.make('∧', [applied, new_f])
+                        out.append(new_f)
+                forms = out
+            else: # infinite domain !
+                new_vars[name] = var
 
     if new_vars:
         forms = [f.interpret(problem) if problem else f for f in forms]
@@ -451,7 +452,6 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 
 def instantiate1(self, e0, e1, problem=None):
-    #TODO instantiate self.symbol
     out = Expression.instantiate1(self, e0, e1, problem)  # update fresh_vars
     if type(out) == AppliedSymbol:  # might be a number after instantiation
         if type(out.symbol) == SymbolExpr and out.symbol.value is None:  # $(x)()
@@ -487,13 +487,6 @@ def instantiate1(self, e0, e1, problem=None):
             return n
     return self
 Variable.instantiate1 = instantiate1
-
-
-# Class Number  ######################################################
-
-def instantiate(self, e0, e1, problem=None):
-    return self
-Number.instantiate = instantiate
 
 
 

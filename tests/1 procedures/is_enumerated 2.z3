@@ -17,7 +17,7 @@ Traceback (most recent call last):
     self._interpret()
   File "IDP-Z3/idp_engine/Problem.py", line 185, in _interpret
     c.interpret(self)
-  File "IDP-Z3/idp_engine/Interpret.py", line 393, in interpret
+  File "IDP-Z3/idp_engine/Interpret.py", line 394, in interpret
     assert self.decl.type != BOOL, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 
