@@ -542,18 +542,20 @@ class Rule(ASTNode):
             return self.cache[hash]
         # assert self.is_whole_domain == False
         out = self.body.copy() # in case there is no arguments
-        self.check(len(new_args) == len(self.definiendum.sub_exprs)
-                or len(new_args)+1 == len(self.definiendum.sub_exprs), "Internal error")
-        for old, new in zip(self.definiendum.sub_exprs, new_args):
-            out = out.instantiate([old], [new], theory) #TODO1
-        out = out.interpret(theory) #TODO1 later ?
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
-        if self.definiendum.decl.type != BOOL:  # a function
-            out = out.instantiate([self.definiendum.sub_exprs[-1]], [instance], theory)
-        else:
+        if self.definiendum.decl.type == BOOL:  # a predicate
+            self.check(len(self.definiendum.sub_exprs) == len(new_args),
+                       "Internal error")
+            out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
             out = AEquivalence.make('⇔', [instance, out])
+        else:
+            self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
+                       "Internal error")
+            out = out.instantiate(self.definiendum.sub_exprs,
+                                  new_args+[instance], theory)
         out.block = self.block
+        out = out.interpret(theory)
         self.cache[hash] = out
         return out
 
