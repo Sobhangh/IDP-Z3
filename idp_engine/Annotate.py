@@ -160,10 +160,10 @@ def annotate(self, theory, voc, q_vars):
         if decl.name not in self.def_vars:
             name = f"${decl.name}$"
             q_v = {f"${decl.name}!{str(i)}$":
-                    Variable(f"${decl.name}!{str(i)}$", sort)
+                    Variable(name=f"${decl.name}!{str(i)}$", sort=sort)
                     for i, sort in enumerate(decl.sorts)}
             if decl.out.name != BOOL:
-                q_v[name] = Variable(name, decl.out)
+                q_v[name] = Variable(name=name, sort=decl.out)
             self.def_vars[decl.name] = q_v
         new_rule = r.rename_args(self.def_vars[decl.name])
         self.clarks.setdefault(decl, []).append(new_rule)
@@ -185,7 +185,8 @@ def annotate(self, voc, q_vars):
         if q.sort:
             q.annotate(voc, q_vars)
         for var in q.var:
-            self.q_vars[var] = Variable(var, q.sort)
+            var.sort = q.sort
+            self.q_vars[var.name] = var
     q_v = {**q_vars, **self.q_vars}  # merge
 
     self.definiendum = self.definiendum.annotate(voc, q_v)
@@ -408,10 +409,11 @@ def annotate(self, voc, q_vars):
     for q in self.quantees:
         q.annotate(voc, q_vars)
         for var in q.var:
-            self.check(var not in voc.symbol_decls,
-                f"the quantified variable '{var}' cannot have"
+            self.check(var.name not in voc.symbol_decls,
+                f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
-            self.q_vars[var] = Variable(var, q.sort)
+            var.sort = q.sort
+            self.q_vars[var.name] = var
     q_v = {**q_vars, **self.q_vars}  # merge
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()

@@ -507,7 +507,7 @@ class Rule(ASTNode):
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
         self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
-        vars = [var for q in self.quantees for var in q.var]
+        vars = [var.name for q in self.quantees for var in q.var]
         for i in range(len(self.definiendum.sub_exprs)):
             arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \
@@ -523,7 +523,7 @@ class Rule(ASTNode):
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         self.definiendum.sub_exprs = list(new_vars.values())
-        self.quantees = [Quantee.make(v,s) for v,s in new_vars.items()]
+        self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
         self.q_vars = new_vars
         return self
 
@@ -908,7 +908,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,
-                                         Number, Brackets, Date,
+                                         Number, Brackets, Date, Variable,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,

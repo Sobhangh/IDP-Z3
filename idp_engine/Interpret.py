@@ -303,7 +303,7 @@ def interpret(self, problem):
     self.check(len(self.sub_exprs) == 1, "Internal error")
     for q in self.q_vars:
         if not self.q_vars[q].sort and q in inferred:
-            new_var = Variable(q, inferred[q])
+            new_var = Variable(name=q, sort=inferred[q])
             self.sub_exprs[0].substitute(new_var, new_var, {})
             self.q_vars[q] = new_var
         elif self.q_vars[q].sort:
@@ -317,8 +317,9 @@ def interpret(self, problem):
     forms = self.sub_exprs
     new_vars = {}
     for q in self.quantees:
-        for name in q.var:
-            var = self.q_vars[name]
+        for var in q.var:
+            if var.sort is None and var.name in inferred:
+                var.sort = inferred[var.name]
             range = None
             if var.sort and var.sort.decl:
                 self.check(var.sort.decl.arity == 1,
@@ -353,7 +354,7 @@ def interpret(self, problem):
                         out.append(new_f)
                 forms = out
             else: # infinite domain !
-                new_vars[name] = var
+                new_vars[var.name] = var
 
     if new_vars:
         forms = [f.interpret(problem) if problem else f for f in forms]

@@ -498,7 +498,7 @@ class Quantee(Expression):
         return out.annotate1()
 
     def __str1__(self):
-        return f"{','.join(self.var)} ∈ {self.sort}"
+        return f"{','.join(str(v) for v in self.var)} ∈ {self.sort}"
 
     def copy(self):
         out = Expression.copy(self)
@@ -529,7 +529,7 @@ class AQuantification(Expression):
     @classmethod
     def make(cls, q, q_vars, f):
         "make and annotate a quantified formula"
-        quantees = [Quantee.make(v.name, v.sort) for v in q_vars.values()]
+        quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
         out = cls(q=q, quantees=quantees, f=f)
         out.q_vars = q_vars
         return out.annotate1()
@@ -901,8 +901,9 @@ class Variable(Expression):
     """
     PRECEDENCE = 200
 
-    def __init__(self, name, sort):
-        self.name = name
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        sort = kwargs.pop('sort') if 'sort' in kwargs else None
         self.sort = sort
 
         super().__init__()
