@@ -512,12 +512,12 @@ class Rule(ASTNode):
             arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:
-                self.body = self.body.instantiate(arg, nv)
-                self.out = (self.out.instantiate(arg, nv) if self.out else
+                self.body = self.body.instantiate([arg], [nv])
+                self.out = (self.out.instantiate([arg], [nv]) if self.out else
                             self.out)
                 for j in range(i, len(self.definiendum.sub_exprs)):
                     self.definiendum.sub_exprs[j] = \
-                        self.definiendum.sub_exprs[j].instantiate(arg, nv)
+                        self.definiendum.sub_exprs[j].instantiate([arg], [nv])
             else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
@@ -545,12 +545,12 @@ class Rule(ASTNode):
         self.check(len(new_args) == len(self.definiendum.sub_exprs)
                 or len(new_args)+1 == len(self.definiendum.sub_exprs), "Internal error")
         for old, new in zip(self.definiendum.sub_exprs, new_args):
-            out = out.instantiate(old, new, theory)
-        out = out.interpret(theory)
+            out = out.instantiate([old], [new], theory) #TODO1
+        out = out.interpret(theory) #TODO1 later ?
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
         if self.definiendum.decl.type != BOOL:  # a function
-            out = out.instantiate(self.definiendum.sub_exprs[-1], instance, theory)
+            out = out.instantiate([self.definiendum.sub_exprs[-1]], [instance], theory)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block

@@ -237,15 +237,15 @@ Expression.substitute = substitute
 
 
 def instantiate(self, e0, e1, problem=None):
-    """Recursively substitute Variable e0 by e1 in a copy of self.
+    """Recursively substitute Variable in e0 by e1 in a copy of self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
-    assert type(e0) == Variable
+    assert all(type(e) == Variable for e in e0)
     if self.value:
         return self
-    if problem and e0.name not in self.fresh_vars:
+    if problem and all(e.name not in self.fresh_vars for e in e0):
         return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
@@ -254,23 +254,25 @@ def instantiate(self, e0, e1, problem=None):
 Expression.instantiate = instantiate
 
 def instantiate1(self, e0, e1, problem=None):
-    """Recursively substitute Variable e0 by e1 in self.
+    """Recursively substitute Variable in e0 by e1 in self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
 
     # instantiate expressions, with simplification
-    out = self.update_exprs(e.instantiate(e0, e1, problem) for e
-                            in self.sub_exprs)
+    out = self.update_exprs(e.instantiate(e0, e1, problem)
+                            for e in self.sub_exprs)
 
     if out.value is not None:  # replace by new value
         out = out.value
-    elif e0.name in out.fresh_vars:
-        out.fresh_vars.discard(e0.name)
-        if type(e1) == Variable:
-            out.fresh_vars.add(e1.name)
-        out.code = str(out)
+    else:
+        for o, n in zip(e0, e1):
+            if o.name in out.fresh_vars:
+                out.fresh_vars.discard(o.name)
+                if type(n) == Variable:
+                    out.fresh_vars.add(n.name)
+            out.code = str(out)
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate1 = instantiate1
@@ -340,7 +342,7 @@ def interpret(self, problem):
             out = []
             for f in forms:
                 for val in range:
-                    new_f = f.instantiate(var, val, problem)
+                    new_f = f.instantiate([var], [val], problem)
                     if guard:  # adds `guard(val) =>` in front of expression
                         applied = AppliedSymbol.make(guard, [val])
                         if self.q == '∀':
@@ -449,13 +451,14 @@ def substitute(self, e0, e1, assignments, todo=None):
 AppliedSymbol .substitute = substitute
 
 def instantiate1(self, e0, e1, problem=None):
+    #TODO instantiate self.symbol
     out = Expression.instantiate1(self, e0, e1, problem)  # update fresh_vars
     if type(out) == AppliedSymbol:  # might be a number after instantiation
         if type(out.symbol) == SymbolExpr and out.symbol.value is None:  # $(x)()
             out.symbol = out.symbol.instantiate(e0, e1, problem)
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
-                            f"Incorrect arity for {e1.code}")
+                            f"Incorrect arity for {out.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
         if problem and not self.fresh_vars:
             return out.interpret(problem)
@@ -479,7 +482,10 @@ Variable.substitute = substitute
 def instantiate1(self, e0, e1, problem=None):
     if self.sort:
         self.sort = self.sort.instantiate(e0, e1, problem)
-    return e1 if self.code == e0.code else self
+    for o, n in zip(e0, e1):
+        if self.code == o.code:
+            return n
+    return self
 Variable.instantiate1 = instantiate1
 
 

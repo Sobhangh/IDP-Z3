@@ -385,8 +385,8 @@ class Expression(ASTNode):
         return self  # monkey-patched
 
     def instantiate(self,
-                    e0: "Expression",
-                    e1: "Expression",
+                    e0: List["Expression"],
+                    e1: List["Expression"],
                     problem: "Problem"=None
                     ) -> "Expression":
         return self  # monkey-patched
