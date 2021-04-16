@@ -516,6 +516,7 @@ class AQuantification(Expression):
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
         if self.quantees and self.quantees[-1].sort is None:
+            # separate untyped variables, so that they can be typed separately
             q = self.quantees.pop()
             for var in q.var:
                 self.quantees.append(Quantee.make(var, None))

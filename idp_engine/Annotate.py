@@ -479,6 +479,7 @@ AUnary.annotate1 = annotate1
 
 def annotate(self, voc, q_vars):
     self = AQuantification.annotate(self, voc, q_vars)
+    self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
 
     assert not self.using_if
     self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
