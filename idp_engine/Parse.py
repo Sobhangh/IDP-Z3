@@ -506,7 +506,7 @@ class Rule(ASTNode):
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
         self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
-        vars = [var.name for q in self.quantees for var in q.var]
+        vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
         for i in range(len(self.definiendum.sub_exprs)):
             arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \

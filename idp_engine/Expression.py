@@ -484,14 +484,14 @@ class Quantee(Expression):
     """represents the description of quantification, e.g., `x in T` or `(x,y) in P`
 
     Attributes:
-        var (Union[List[str], List[VarTuple]): the variables being quantified
+        vars (List[List[Variable]): the (tuples of) variables being quantified
 
         sort (SymbolExpr, Optional): the type or predicate to quantify over
 
         arity (int): the length of the tuple of variable
     """
     def __init__(self, **kwargs):
-        self.var = kwargs.pop('var')
+        self.vars = [kwargs.pop('vars')]
         self.sort = kwargs.pop('sort')
 
         self.sub_exprs = []
@@ -502,12 +502,12 @@ class Quantee(Expression):
     def make(cls, var, sort):
         if sort and type(sort) != SymbolExpr:
             sort = SymbolExpr(eval='', s=sort)
-        out = (cls) (var=[var], sort=sort)
+        out = (cls) (vars=[var], sort=sort)
         out.decl = sort.decl if sort else None
         return out.annotate1()
 
     def __str1__(self):
-        return f"{','.join(str(v) for v in self.var)} ∈ {self.sort}"
+        return f"{','.join(str(v) for vs in self.vars for v in vs)} ∈ {self.sort}"
 
     def copy(self):
         out = Expression.copy(self)
@@ -527,8 +527,9 @@ class AQuantification(Expression):
         if self.quantees and self.quantees[-1].sort is None:
             # separate untyped variables, so that they can be typed separately
             q = self.quantees.pop()
-            for var in q.var:
-                self.quantees.append(Quantee.make(var, None))
+            for vars in q.vars:
+                for var in vars:
+                    self.quantees.append(Quantee.make(var, None))
 
         self.sub_exprs = [self.f]
         super().__init__()

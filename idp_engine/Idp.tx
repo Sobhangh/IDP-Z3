@@ -41,7 +41,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
         definiendum=AppliedSymbol
         ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: var+=Variable[','] ( ('in' | '∈') sort=SymbolExpr)?;
+      Quantee: vars+=Variable[','] ( ('in' | '∈') sort=SymbolExpr)?;
       Variable: name=/`?[^\d\W]\w*\b/;
 
   Expression: IfExpr | Quantification;

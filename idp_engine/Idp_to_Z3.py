@@ -149,9 +149,10 @@ def translate1(self):
     else:
         finalvars = []
         for q in self.quantees:
-            for v in q.var:
-               v.translated = FreshConst(v.sort.decl.translate())
-               finalvars.append(v.translated)
+            for vars in q.vars:
+                for v in vars:
+                    v.translated = FreshConst(v.sort.decl.translate())
+                    finalvars.append(v.translated)
         forms = [f.translate() for f in self.sub_exprs]
 
         if self.q == '∀':

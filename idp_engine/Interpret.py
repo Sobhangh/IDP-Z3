@@ -302,18 +302,19 @@ def interpret(self, problem):
     self.check(len(self.sub_exprs) == 1, "Internal error")
     inferred = self.sub_exprs[0].type_inference()
     for q in self.quantees:
-        for var in q.var:
-            if var.sort is None:
-                self.check(var.name in inferred,
-                           f"can't infer type of {var.name}")
-                var.sort = inferred[var.name]
-                q.sort = var.sort
-            else:
-                self.check(var.name not in inferred
-                           or var.sort.decl.is_subset_of(inferred[var.name].decl),
-                           f"Inconsistent type for {var.name} in {self}")
-                var.sort = var.sort.interpret(problem)
-                q.sort = var.sort  #TODO1 n-ary
+        for vars in q.vars:
+            for var in vars:
+                if var.sort is None:
+                    self.check(var.name in inferred,
+                            f"can't infer type of {var.name}")
+                    var.sort = inferred[var.name]
+                    q.sort = var.sort
+                else:
+                    self.check(var.name not in inferred
+                            or var.sort.decl.is_subset_of(inferred[var.name].decl),
+                            f"Inconsistent type for {var.name} in {self}")
+                    var.sort = var.sort.interpret(problem)
+                    q.sort = var.sort  #TODO1 n-ary
 
     forms = self.sub_exprs
     new_quantees = []
@@ -339,19 +340,20 @@ def interpret(self, problem):
                 range = q.sort.decl.range
                 guard = None
 
-            for var in q.var:
-                out = []
-                for f in forms:
-                    for val in range:
-                        new_f = f.instantiate([var], [val], problem)
-                        if guard:  # adds `guard(val) =>` in front of expression
-                            applied = AppliedSymbol.make(guard, [val])
-                            if self.q == '∀':
-                                new_f = AImplication.make('⇒', [applied, new_f])
-                            else:
-                                new_f = AConjunction.make('∧', [applied, new_f])
-                        out.append(new_f)
-                forms = out
+            for vars in q.vars:
+                for var in vars:
+                    out = []
+                    for f in forms:
+                        for val in range:
+                            new_f = f.instantiate([var], [val], problem)
+                            if guard:  # adds `guard(val) =>` in front of expression
+                                applied = AppliedSymbol.make(guard, [val])
+                                if self.q == '∀':
+                                    new_f = AImplication.make('⇒', [applied, new_f])
+                                else:
+                                    new_f = AConjunction.make('∧', [applied, new_f])
+                            out.append(new_f)
+                    forms = out
 
     if new_quantees:
         forms = [f.interpret(problem) if problem else f for f in forms]
@@ -363,9 +365,10 @@ AQuantification.interpret = interpret
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
     for q in self.quantees: # for !x in $(output_domain(s,1))
-        for var in q.var:
-            if var.sort:
-                var.sort = var.sort.instantiate(e0, e1, problem)
+        for vars in q.vars:
+            for var in vars:
+                if var.sort:
+                    var.sort = var.sort.instantiate(e0, e1, problem)
     if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out
