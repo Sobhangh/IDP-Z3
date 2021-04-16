@@ -122,7 +122,7 @@ def interpret(self, theory):
                                   self.definiendum.sub_exprs)
         expr.in_head = True
     expr = AEquivalence.make('⇔', [expr, self.body])
-    expr = AQuantification.make('∀', {**self.q_vars}, expr)
+    expr = AQuantification.make('∀', self.quantees, expr)
     self.whole_domain = expr.interpret(theory)
     self.whole_domain.block = self.block
     return self
@@ -312,9 +312,8 @@ def interpret(self, problem):
                 self.check(var.name not in inferred
                            or var.sort.decl.is_subset_of(inferred[var.name].decl),
                            f"Inconsistent type for {var.name} in {self}")
-                self.q_vars[var.name].sort = self.q_vars[var.name].sort.interpret(problem)
+                var.sort = var.sort.interpret(problem)
                 q.sort = var.sort  #TODO1 n-ary
-            self.q_vars[var.name] = var
 
     forms = self.sub_exprs
     new_vars, new_quantees = {}, []
@@ -360,7 +359,6 @@ def interpret(self, problem):
 
     if new_quantees:
         forms = [f.interpret(problem) if problem else f for f in forms]
-    self.q_vars = new_vars
     self.quantees = new_quantees
     return self.update_exprs(forms)
 AQuantification.interpret = interpret
@@ -368,9 +366,10 @@ AQuantification.interpret = interpret
 
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
-    for name, var in out.q_vars.items():  # for !x in $(output_domain(s,1))
-        if var.sort:
-            out.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
+    for q in self.quantees: # for !x in $(output_domain(s,1))
+        for var in q.var:
+            if var.sort:
+                var.sort = var.sort.instantiate(e0, e1, problem)
     if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out

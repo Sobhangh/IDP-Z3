@@ -523,15 +523,12 @@ class AQuantification(Expression):
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.q_vars = {}  # dict[String, Variable]
         self.type = BOOL
 
     @classmethod
-    def make(cls, q, q_vars, f):
+    def make(cls, q, quantees, f):
         "make and annotate a quantified formula"
-        quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
         out = cls(q=q, quantees=quantees, f=f)
-        out.q_vars = q_vars
         return out.annotate1()
 
     def __str1__(self):
@@ -544,7 +541,6 @@ class AQuantification(Expression):
     def copy(self):
         # also called by AAgregate
         out = Expression.copy(self)
-        out.q_vars = copy.copy(out.q_vars)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -690,8 +686,6 @@ class AAggregate(Expression):
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
         self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
-
-        self.q_vars = {}
 
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")

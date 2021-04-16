@@ -181,13 +181,13 @@ Definition.annotate = annotate
 
 def annotate(self, voc, q_vars):
     # create head variables
+    q_v = {**q_vars}  # copy
     for q in self.quantees:
         if q.sort:
             q.annotate(voc, q_vars)
         for var in q.var:
             var.sort = q.sort
-            self.q_vars[var.name] = var
-    q_v = {**q_vars, **self.q_vars}  # merge
+            q_v[var.name] = var
 
     self.definiendum = self.definiendum.annotate(voc, q_v)
     self.body = self.body.annotate(voc, q_v)
@@ -405,7 +405,7 @@ Quantee.annotate = annotate
 
 def annotate(self, voc, q_vars):
     # also called by AAgregate.annotate
-    self.q_vars = {}
+    q_v = {**q_vars}  # copy
     for q in self.quantees:
         q.annotate(voc, q_vars)
         for var in q.var:
@@ -413,16 +413,16 @@ def annotate(self, voc, q_vars):
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
             var.sort = q.sort
-            self.q_vars[var.name] = var
-    q_v = {**q_vars, **self.q_vars}  # merge
+            q_v[var.name] = var
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
 AQuantification.annotate = annotate
 
 def annotate1(self):
     Expression.annotate1(self)
-    # remove q_vars
-    self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
+    for q in self.quantees:
+        for v in q.var:
+            self.fresh_vars.discard(v.name)
     return self
 AQuantification.annotate1 = annotate1
 

@@ -490,7 +490,6 @@ class Rule(ASTNode):
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
-        self.q_vars = {}  # {string: Variable}
         if self.out is not None:
             self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
@@ -524,7 +523,6 @@ class Rule(ASTNode):
 
         self.definiendum.sub_exprs = list(new_vars.values())
         self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
-        self.q_vars = new_vars
         return self
 
     def instantiate_definition(self, new_args, theory):
