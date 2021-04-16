@@ -82,7 +82,7 @@ Expression.propagate1 = propagate1
 
 def symbolic_propagate(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
-    if not self.q_vars:  # expanded
+    if not self.quantees:  # expanded
         return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
     return out
 AQuantification.symbolic_propagate = symbolic_propagate

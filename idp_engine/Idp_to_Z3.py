@@ -144,12 +144,14 @@ IfExpr.translate1 = translate1
 
 
 def translate1(self):
-    if not self.q_vars:
+    if not self.quantees:
         return self.sub_exprs[0].translate()
     else:
-        for v in self.q_vars.values():
-            v.translated = FreshConst(v.sort.decl.translate())
-        finalvars = [v.translated for v in self.q_vars.values()]
+        finalvars = []
+        for q in self.quantees:
+            for v in q.var:
+               v.translated = FreshConst(v.sort.decl.translate())
+               finalvars.append(v.translated)
         forms = [f.translate() for f in self.sub_exprs]
 
         if self.q == '∀':
@@ -262,7 +264,7 @@ AUnary.translate1 = translate1
 # Class AAggregate  #######################################################
 
 def translate1(self):
-    assert self.using_if and not self.q_vars, f"Cannot expand {self.code}"
+    assert self.using_if and not self.quantees, f"Cannot expand {self.code}"
     return Sum([f.translate() for f in self.sub_exprs])
 AAggregate.translate1 = translate1
 

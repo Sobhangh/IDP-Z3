@@ -297,68 +297,71 @@ def interpret(self, problem):
         Expression: the expanded quantifier expression
     """
     # This method is called by AAggregate.interpret !
-    if not self.q_vars:
+    if not self.quantees:
         return Expression.interpret(self, problem)
-    inferred = self.sub_exprs[0].type_inference()
     self.check(len(self.sub_exprs) == 1, "Internal error")
-    for q in self.q_vars:
-        if not self.q_vars[q].sort and q in inferred:
-            new_var = Variable(name=q, sort=inferred[q])
-            self.sub_exprs[0].substitute(new_var, new_var, {})
-            self.q_vars[q] = new_var
-        elif self.q_vars[q].sort:
-            self.q_vars[q].sort = self.q_vars[q].sort.interpret(problem)
-
-    for v, s in inferred.items():
-        assert (v not in self.q_vars
-                or self.q_vars[v].sort.decl.is_subset_of(s.decl)), \
-            f"Inconsistent types for {v} in {self}"
-
-    forms = self.sub_exprs
-    new_vars = {}
+    inferred = self.sub_exprs[0].type_inference()
     for q in self.quantees:
         for var in q.var:
-            if var.sort is None and var.name in inferred:
+            if var.sort is None:
+                self.check(var.name in inferred,
+                           f"can't infer type of {var.name}")
                 var.sort = inferred[var.name]
-            range = None
-            if var.sort and var.sort.decl:
-                self.check(var.sort.decl.arity == 1,
-                            f"Incorrect arity of {var.sort}")
-                self.check(var.sort.decl.out.type == BOOL,
-                            f"{var.sort} is not a type or predicate")
+                q.sort = var.sort
+            else:
+                self.check(var.name not in inferred
+                           or var.sort.decl.is_subset_of(inferred[var.name].decl),
+                           f"Inconsistent type for {var.name} in {self}")
+                self.q_vars[var.name].sort = self.q_vars[var.name].sort.interpret(problem)
+                q.sort = var.sort  #TODO1 n-ary
+            self.q_vars[var.name] = var
 
-                if var.sort.code in problem.interpretations:
-                    enumeration = problem.interpretations[var.sort.code].enumeration
-                    range = [t.args[0] for t in enumeration.tuples.values()]
-                    guard = None
-                elif type(var.sort.decl) == SymbolDeclaration:
-                    self.check(var.sort.decl.domain,
-                            f"Symbol {var.sort} must have a finite domain")
-                    range = [t[0] for t in var.sort.decl.domain]
-                    guard = var.sort
-                elif var.sort.decl.range:
-                    range = var.sort.decl.range
-                    guard = None
+    forms = self.sub_exprs
+    new_vars, new_quantees = {}, []
+    for q in self.quantees:
+        if not q.sort.decl.range:
+            new_quantees.append(q)
+            new_vars[var.name] = var
+        else:
+            for var in q.var:
+                range = None
+                if var.sort and var.sort.decl:
+                    self.check(var.sort.decl.arity == 1,
+                                f"Incorrect arity of {var.sort}")
+                    self.check(var.sort.decl.out.type == BOOL,
+                                f"{var.sort} is not a type or predicate")
 
-            if range is not None:
-                out = []
-                for f in forms:
-                    for val in range:
-                        new_f = f.instantiate([var], [val], problem)
-                        if guard:  # adds `guard(val) =>` in front of expression
-                            applied = AppliedSymbol.make(guard, [val])
-                            if self.q == '∀':
-                                new_f = AImplication.make('⇒', [applied, new_f])
-                            else:
-                                new_f = AConjunction.make('∧', [applied, new_f])
-                        out.append(new_f)
-                forms = out
-            else: # infinite domain !
-                new_vars[var.name] = var
+                    if var.sort.code in problem.interpretations:
+                        enumeration = problem.interpretations[var.sort.code].enumeration
+                        range = [t.args[0] for t in enumeration.tuples.values()]
+                        guard = None
+                    elif type(var.sort.decl) == SymbolDeclaration:
+                        self.check(var.sort.decl.domain,
+                                f"Symbol {var.sort} must have a finite domain")
+                        range = [t[0] for t in var.sort.decl.domain]
+                        guard = var.sort
+                    elif var.sort.decl.range:
+                        range = var.sort.decl.range
+                        guard = None
 
-    if new_vars:
+                if range is not None:
+                    out = []
+                    for f in forms:
+                        for val in range:
+                            new_f = f.instantiate([var], [val], problem)
+                            if guard:  # adds `guard(val) =>` in front of expression
+                                applied = AppliedSymbol.make(guard, [val])
+                                if self.q == '∀':
+                                    new_f = AImplication.make('⇒', [applied, new_f])
+                                else:
+                                    new_f = AConjunction.make('∧', [applied, new_f])
+                            out.append(new_f)
+                    forms = out
+
+    if new_quantees:
         forms = [f.interpret(problem) if problem else f for f in forms]
     self.q_vars = new_vars
+    self.quantees = new_quantees
     return self.update_exprs(forms)
 AQuantification.interpret = interpret
 

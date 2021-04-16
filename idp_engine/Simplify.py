@@ -119,8 +119,7 @@ Quantee.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
-    if not self.q_vars:
-        self.quantees = []
+    if not self.quantees:
         if self.q == '∀':
             simpler = AConjunction.make('∧', exprs)
         else:
@@ -331,7 +330,7 @@ AUnary.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    if self.using_if and not self.q_vars:
+    if self.using_if and not self.quantees:
         operands1 = [e.value for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)

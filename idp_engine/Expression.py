@@ -263,10 +263,10 @@ class Expression(ASTNode):
             return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification) and len(self.q_vars) == 0)):
+           or (isinstance(self, AQuantification) and len(self.quantees) == 0)):
             return self.sub_exprs[0].same_as(other)
         if (isinstance(other, Brackets)
-           or (isinstance(other, AQuantification) and len(other.q_vars) == 0)):
+           or (isinstance(other, AQuantification) and len(other.quantees) == 0)):
             return self.same_as(other.sub_exprs[0])
 
         return self.str == other.str and type(self) == type(other)
@@ -542,15 +542,15 @@ class AQuantification(Expression):
             return self.sub_exprs[0].str
 
     def copy(self):
+        # also called by AAgregate
         out = Expression.copy(self)
         out.q_vars = copy.copy(out.q_vars)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         questions.append(self)
-        if all_:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+        if all_:  #TODO1 and not self.quantees ?
+            Expression.collect(self, questions, all_, co_constraints)
 
 
 class BinaryOperator(Expression):
@@ -712,14 +712,11 @@ class AAggregate(Expression):
         return out
 
     def copy(self):
-        out = Expression.copy(self)
-        out.q_vars = copy.copy(out.q_vars)
-        return out
+        return AQuantification.copy(self)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+            Expression.collect(self, questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
