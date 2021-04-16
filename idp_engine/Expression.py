@@ -481,6 +481,15 @@ class IfExpr(Expression):
 
 
 class Quantee(Expression):
+    """represents the description of quantification, e.g., `x in T` or `(x,y) in P`
+
+    Attributes:
+        var (Union[List[str], List[VarTuple]): the variables being quantified
+
+        sort (SymbolExpr, Optional): the type or predicate to quantify over
+
+        arity (int): the length of the tuple of variable
+    """
     def __init__(self, **kwargs):
         self.var = kwargs.pop('var')
         self.sort = kwargs.pop('sort')

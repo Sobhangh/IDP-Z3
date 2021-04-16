@@ -316,11 +316,10 @@ def interpret(self, problem):
                 q.sort = var.sort  #TODO1 n-ary
 
     forms = self.sub_exprs
-    new_vars, new_quantees = {}, []
+    new_quantees = []
     for q in self.quantees:
         if not q.sort.decl.range:
             new_quantees.append(q)
-            new_vars[var.name] = var
         else:
             values = []
             for var in q.var:
