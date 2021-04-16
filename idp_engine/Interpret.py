@@ -37,7 +37,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 """
 
 import copy
-from itertools import product
+from itertools import product, repeat
 
 from .Assignments import Status
 from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
@@ -318,40 +318,34 @@ def interpret(self, problem):
     forms = self.sub_exprs
     new_quantees = []
     for q in self.quantees:
+        self.check(q.sort.decl.out.type == BOOL,
+                    f"{q.sort} is not a type or predicate")
         if not q.sort.decl.range:
             new_quantees.append(q)
         else:
-            values = []
+            self.check(q.sort.decl.arity == 1,
+                        f"Incorrect arity of {q.sort}")
+
+            if q.sort.code in problem.interpretations:
+                enumeration = problem.interpretations[q.sort.code].enumeration
+                range = [t.args[0] for t in enumeration.tuples.values()]
+                guard = None
+            elif type(q.sort.decl) == SymbolDeclaration:
+                self.check(q.sort.decl.domain,
+                        f"Symbol {q.sort} must have a finite domain")
+                range = [t[0] for t in q.sort.decl.domain]
+                guard = q.sort
+            else:
+                range = q.sort.decl.range
+                guard = None
+
             for var in q.var:
-                if var.sort and var.sort.decl:
-                    self.check(var.sort.decl.arity == 1,
-                                f"Incorrect arity of {var.sort}")
-                    self.check(var.sort.decl.out.type == BOOL,
-                                f"{var.sort} is not a type or predicate")
-
-                    if var.sort.code in problem.interpretations:
-                        enumeration = problem.interpretations[var.sort.code].enumeration
-                        values.append(t.args[0] for t in enumeration.tuples.values())
-                        guard = None
-                    elif type(var.sort.decl) == SymbolDeclaration:
-                        self.check(var.sort.decl.domain,
-                                f"Symbol {var.sort} must have a finite domain")
-                        values.append(t[0] for t in var.sort.decl.domain)
-                        guard = var.sort
-                    elif var.sort.decl.range:
-                        values.append(var.sort.decl.range)
-                        guard = None
-                    else:
-                        assert False
-
-            if values is not None:
-                range = product(*values)
                 out = []
-                for val in range:
-                    for f in forms:
-                        new_f = f.instantiate(q.var, val, problem)
+                for f in forms:
+                    for val in range:
+                        new_f = f.instantiate([var], [val], problem)
                         if guard:  # adds `guard(val) =>` in front of expression
-                            applied = AppliedSymbol.make(guard, val)
+                            applied = AppliedSymbol.make(guard, [val])
                             if self.q == '∀':
                                 new_f = AImplication.make('⇒', [applied, new_f])
                             else:
