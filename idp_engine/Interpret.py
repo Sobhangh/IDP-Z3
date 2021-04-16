@@ -324,36 +324,35 @@ def interpret(self, problem):
         if not q.sort.decl.range:
             new_quantees.append(q)
         else:
-            self.check(q.sort.decl.arity == 1,
-                        f"Incorrect arity of {q.sort}")
 
             if q.sort.code in problem.interpretations:
                 enumeration = problem.interpretations[q.sort.code].enumeration
-                range = [t.args[0] for t in enumeration.tuples.values()]
+                range = [t.args for t in enumeration.tuples.values()]
                 guard = None
             elif type(q.sort.decl) == SymbolDeclaration:
                 self.check(q.sort.decl.domain,
                         f"Symbol {q.sort} must have a finite domain")
-                range = [t[0] for t in q.sort.decl.domain]
+                range = q.sort.decl.domain
                 guard = q.sort
             else:
-                range = q.sort.decl.range
+                range = [[t] for t in q.sort.decl.range]
                 guard = None
 
             for vars in q.vars:
-                for var in vars:
-                    out = []
-                    for f in forms:
-                        for val in range:
-                            new_f = f.instantiate([var], [val], problem)
-                            if guard:  # adds `guard(val) =>` in front of expression
-                                applied = AppliedSymbol.make(guard, [val])
-                                if self.q == '∀':
-                                    new_f = AImplication.make('⇒', [applied, new_f])
-                                else:
-                                    new_f = AConjunction.make('∧', [applied, new_f])
-                            out.append(new_f)
-                    forms = out
+                self.check(q.sort.decl.arity == len(vars),
+                            f"Incorrect arity of {q.sort}")
+                out = []
+                for f in forms:
+                    for val in range:
+                        new_f = f.instantiate(vars, val, problem)
+                        if guard:  # adds `guard(val) =>` in front of expression
+                            applied = AppliedSymbol.make(guard, val)
+                            if self.q == '∀':
+                                new_f = AImplication.make('⇒', [applied, new_f])
+                            else:
+                                new_f = AConjunction.make('∧', [applied, new_f])
+                        out.append(new_f)
+                forms = out
 
     if new_quantees:
         forms = [f.interpret(problem) if problem else f for f in forms]

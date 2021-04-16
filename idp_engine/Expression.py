@@ -491,8 +491,16 @@ class Quantee(Expression):
         arity (int): the length of the tuple of variable
     """
     def __init__(self, **kwargs):
-        self.vars = [kwargs.pop('vars')]
+        self.vars = kwargs.pop('vars')
         self.sort = kwargs.pop('sort')
+
+        self.arity = None
+        for i, v in enumerate(self.vars):
+            if hasattr(v, 'vars'):  # varTuple
+                self.vars[i] = v.vars
+                self.arity = len(v.vars) if self.arity == None else self.arity
+            else:
+                self.vars[i] = [v]
 
         self.sub_exprs = []
         super().__init__()
