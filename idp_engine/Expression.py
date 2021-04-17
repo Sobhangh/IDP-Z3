@@ -501,17 +501,20 @@ class Quantee(Expression):
                 self.arity = len(v.vars) if self.arity == None else self.arity
             else:
                 self.vars[i] = [v]
+                self.arity = 1 if self.arity == None else self.arity
 
         self.sub_exprs = []
         super().__init__()
         self.decl = None
+
+        self.check(all(len(v) == self.arity for v in self.vars),
+                    f"Inconsistent tuples in {self}")
 
     @classmethod
     def make(cls, var, sort):
         if sort and type(sort) != SymbolExpr:
             sort = SymbolExpr(eval='', s=sort)
         out = (cls) (vars=[var], sort=sort)
-        out.decl = sort.decl if sort else None
         return out.annotate1()
 
     def __str1__(self):
@@ -856,7 +859,7 @@ class SymbolExpr(Expression):
         self.eval = (kwargs.pop('eval') if 'eval' in kwargs else
                      '')
         self.sub_exprs = [kwargs.pop('s')]
-        self.decl = None
+        self.decl = self.sub_exprs[0].decl if not self.eval else None
         super().__init__()
 
     def __str1__(self):

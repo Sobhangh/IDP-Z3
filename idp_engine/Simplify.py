@@ -404,6 +404,7 @@ def update_exprs(self, new_exprs):
     value = (symbol if self.eval == '' else
              symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
              None)
+    self.decl = value.decl if value else None
     return self._change(sub_exprs=[symbol], value=value)
 SymbolExpr.update_exprs = update_exprs
 

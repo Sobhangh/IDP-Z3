@@ -300,21 +300,16 @@ def interpret(self, problem):
     if not self.quantees:
         return Expression.interpret(self, problem)
     self.check(len(self.sub_exprs) == 1, "Internal error")
+
+    # type inference
     inferred = self.sub_exprs[0].type_inference()
     for q in self.quantees:
-        for vars in q.vars:
-            for var in vars:
-                if var.sort is None:
-                    self.check(var.name in inferred,
-                            f"can't infer type of {var.name}")
-                    var.sort = inferred[var.name]
-                    q.sort = var.sort
-                else:
-                    self.check(var.name not in inferred
-                            or var.sort.decl.is_subset_of(inferred[var.name].decl),
-                            f"Inconsistent type for {var.name} in {self}")
-                    var.sort = var.sort.interpret(problem)
-                    q.sort = var.sort  #TODO1 n-ary
+        if q.sort is None:
+            assert len(q.vars) == 1 and q.arity == 1
+            var = q.vars[0][0]
+            self.check(var.name in inferred,
+                        f"can't infer type of {var.name}")
+            q.sort = inferred[var.name]
 
     forms = self.sub_exprs
     new_quantees = []
@@ -324,14 +319,11 @@ def interpret(self, problem):
         if not q.sort.decl.range:
             new_quantees.append(q)
         else:
-
             if q.sort.code in problem.interpretations:
                 enumeration = problem.interpretations[q.sort.code].enumeration
                 range = [t.args for t in enumeration.tuples.values()]
                 guard = None
             elif type(q.sort.decl) == SymbolDeclaration:
-                self.check(q.sort.decl.domain,
-                        f"Symbol {q.sort} must have a finite domain")
                 range = q.sort.decl.domain
                 guard = q.sort
             else:
@@ -364,10 +356,8 @@ AQuantification.interpret = interpret
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
     for q in self.quantees: # for !x in $(output_domain(s,1))
-        for vars in q.vars:
-            for var in vars:
-                if var.sort:
-                    var.sort = var.sort.instantiate(e0, e1, problem)
+        if q.sort:
+            q.sort = q.sort.instantiate(e0, e1, problem)
     if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out
