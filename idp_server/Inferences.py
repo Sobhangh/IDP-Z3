@@ -188,7 +188,7 @@ def explain(state, question):
         todo = chain(state.constraints, state.def_constraints.values())
         for constraint in todo:
             p = constraint.reified()
-            ps[p] = constraint.original.translate()
+            ps[p] = constraint.original.interpret(state).translate()
             s.add(Implies(p, ps[p]))
 
         s.add(Not(to_explain.translate()))
@@ -216,7 +216,7 @@ def explain(state, question):
             for a1 in chain(state.def_constraints.values(), state.constraints):
                 #TODO find the rule
                 for a2 in unsatcore:
-                    if str(a1.original.translate()) == str(ps[a2]):
+                    if str(a1.original.interpret(state).translate()) == str(ps[a2]):
                         out.m["*laws*"].append(a1.annotations['reading'])
     return out.m
 
