@@ -120,7 +120,7 @@ Enumeration
 Quantified formulas
     *Quantified formulas* are sentences.
     They have one of the following forms, where ``v_1, .., v_n`` are variables,
-    ``p, p_1, .., p_n`` are types or unary predicates,
+    ``p, p_1, .., p_n`` are types or predicates,
     and |phi| is a sentence involving those variables:
 
     .. code::
@@ -128,6 +128,8 @@ Quantified formulas
         ∀ v_1, v_n: ϕ(v_1, v_n).
 
         ∀ v_1, v_n ∈ p: ϕ(v_1, v_n).
+
+        ∀ (v_1, v_n) ∈ p: ϕ(v_1, v_n).
 
         ∀ v_1 ∈ p_1, v_n ∈ p_n: ϕ(v_1, v_n).
 

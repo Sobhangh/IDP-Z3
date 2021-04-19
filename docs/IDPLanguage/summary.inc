@@ -34,7 +34,7 @@ The equivalent ASCII-only encoding is shown on the right.
         f1() < f2() ≤ f3() = f4() ≥ f5() > f6().  f1() < f2() =< f3() = f4() >= f5() > f6().
         f() ≠ c.                                  f() ~= c.
         ∀x,y ∈ T: p(x,y).                         !x,y in T: p(x,y).
-        ∀x ∈ p: q(x).                             !x in p: q(x).
+        ∀x ∈ p, (y,z) ∈ q: p(x) | q(y,z).         !x in p: p(x) | q(y,z).
         ∃x ∈ Symbol: arity(x)=0 ∧ $(x)().         ?x in Symbol: arity(x)=0 & $(x)().
         ∃x ∈ $(input_domain(`p,1)): p(x).         ?x in $(input_domain(`p,1)): p(x).
         ∃x: p(x).                                 ?x: p(x).
