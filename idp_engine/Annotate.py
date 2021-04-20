@@ -281,7 +281,7 @@ def annotate(self, voc):
     for c in self.constructors:
         for i, ts in enumerate(c.sorts):
             if ts.accessor is None:
-                ts.accessor = Symbol(name=f"{self.parent.name}_{i}")
+                ts.accessor = Symbol(name=f"{c.name}_{i}")
         c.annotate(voc)
 ConstructedFrom.annotate = annotate
 
