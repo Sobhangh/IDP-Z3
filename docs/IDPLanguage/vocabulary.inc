@@ -61,6 +61,7 @@ The constructors of ```Color2`` are : ``Red``, ``Blue``, ``Green`` and ``RGB``.
 Each constructor have an associated function (e.g., ``is_Red``, or ``is_RGB``) to test if a Color2 term was created with that constructor.
 The ``RGB`` constructor takes 3 arguments of type ``Byte``.
 ``R``, ``G`` and ``B`` are accessor functions: when given a Color2 term constructed with RGB, they return the associated Byte.
+(When given a Color2 not constructed with RGB, they may raise an error)
 
 .. _function:
 .. index:: function
