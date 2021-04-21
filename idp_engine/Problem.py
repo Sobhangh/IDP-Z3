@@ -152,16 +152,8 @@ class Problem(object):
         if self.questions is None:
             self.assignments = Assignments()
 
-            for symbol_interpretation in self.interpretations.values():
-                if symbol_interpretation.is_type_enumeration:  # add enumeration to type
-                    symbol_interpretation.interpret(self)
-
             for decl in self.declarations.values():
-                if type(decl) != SymbolDeclaration: # interpret types first
-                    decl.interpret(self)
-            for decl in self.declarations.values():
-                if type(decl) == SymbolDeclaration:
-                    decl.interpret(self)
+                decl.interpret(self)
 
             for symbol_interpretation in self.interpretations.values():
                 if not symbol_interpretation.is_type_enumeration:

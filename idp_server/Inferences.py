@@ -188,7 +188,7 @@ def explain(state, question):
         todo = chain(state.constraints, state.def_constraints.values())
         for constraint in todo:
             p = constraint.reified()
-            ps[p] = constraint.original.translate()
+            ps[p] = constraint.original.interpret(state).translate()
             s.add(Implies(p, ps[p]))
 
         s.add(Not(to_explain.translate()))

@@ -11,11 +11,11 @@ Traceback (most recent call last):
     ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
   File "IDP-Z3/idp_engine/Run.py", line 49, in <listcomp>
     ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
-  File "IDP-Z3/idp_engine/Problem.py", line 244, in expand
+  File "IDP-Z3/idp_engine/Problem.py", line 236, in expand
     z3_formula = self.formula().translate()
-  File "IDP-Z3/idp_engine/Problem.py", line 199, in formula
+  File "IDP-Z3/idp_engine/Problem.py", line 191, in formula
     self._interpret()
-  File "IDP-Z3/idp_engine/Problem.py", line 185, in _interpret
+  File "IDP-Z3/idp_engine/Problem.py", line 177, in _interpret
     c.interpret(self)
   File "IDP-Z3/idp_engine/Interpret.py", line 391, in interpret
     assert self.decl.type != BOOL, \

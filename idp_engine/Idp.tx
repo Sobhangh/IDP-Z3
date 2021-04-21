@@ -121,7 +121,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
     Constructor: name=UnappliedSymbol ('(' args+=Accessor[','] ')' )?;
     Accessor: (accessor=UnappliedSymbol ':')? type=UnappliedSymbol;
 
-  Identifier: UnappliedSymbol | Number | Date;
+  Identifier: AppliedSymbol | UnappliedSymbol | Number | Date;
 
 Goal: 'goal' name=ID;
 
