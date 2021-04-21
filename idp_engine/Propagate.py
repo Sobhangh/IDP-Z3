@@ -26,7 +26,7 @@ This module monkey-patches the Expression class and sub-classes.
 
 from typing import List, Tuple, Optional
 
-from idp_engine.Expression import (Constructor, Expression, AQuantification,
+from idp_engine.Expression import (Expression, AQuantification,
                     ADisjunction, AConjunction,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from idp_engine.Assignments import Assignments
@@ -40,8 +40,8 @@ def _not(truth):
 
 def symbolic_propagate(self,
                        assignments: "Assignments",
-                       truth: Optional[Constructor] = TRUE
-                       ) -> List[Tuple[Expression, Constructor]]:
+                       truth: Optional[Expression] = TRUE
+                       ) -> List[Tuple[Expression]]:
     """returns the consequences of `self=truth` that are in assignments.
 
     The consequences are obtained by symbolic processing (no calls to Z3).
@@ -50,7 +50,7 @@ def symbolic_propagate(self,
         assignments (Assignments):
             The set of questions to chose from. Their value is ignored.
 
-        truth (Constructor, optional):
+        truth (Expression, optional):
             The truth value of the expression `self`. Defaults to TRUE.
 
     Returns:
@@ -76,13 +76,6 @@ def propagate1(self, assignments, truth):
 
 
 Expression.propagate1 = propagate1
-
-
-# class Constructor  ##########################################################
-
-def symbolic_propagate(self, assignments, truth=TRUE):  # dead code
-    return []  # true or false
-Constructor.symbolic_propagate = symbolic_propagate
 
 
 # class AQuantification  ######################################################

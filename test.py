@@ -187,6 +187,13 @@ if __name__ == "__main__":
     parser.add_argument('TEST', nargs='*', default=["generate"])
     args = parser.parse_args()
 
+    error = 0
+    if "generate" in args.TEST:
+        error = generate()
+    if "pipeline" in args.TEST:
+        p_error = pipeline()
+        error = max(error, p_error)
+
     test = """
 vocabulary {
     p : () → 𝔹
@@ -206,12 +213,5 @@ procedure main() {
     kb.execute()
     for model in model_expand(T,S):
         print(model)
-
-    error = 0
-    if "generate" in args.TEST:
-        error = generate()
-    if "pipeline" in args.TEST:
-        p_error = pipeline()
-        error = max(error, p_error)
 
     sys.exit(error)

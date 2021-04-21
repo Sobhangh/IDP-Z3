@@ -16,7 +16,6 @@ The following diagram is a simplification of the full graph of calls performed t
         formula --> interpret
 
         parse --> Annotate
-        Annotate --> interpret;
         Annotate --> rename_args;
 
         rename_args --> instantiate;

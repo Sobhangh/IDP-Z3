@@ -38,22 +38,33 @@ Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``)
 The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
 
-Custom types can be defined by specifying a range of numeric literals, or a list of constructors (of arity 0).
+Custom types can be defined by specifying:
+
+* a list of (ranges of) numeric literals,
+* a list of nullary constructors,
+* a list of n-ary constructors; in that case, the enumeration must be preceded by ``constructed from``.
+
 Their name should be singular and capitalized, by convention.
 The enumeration can be given in a theory or structure block.
 
 .. code::
 
     type Person
-    type Side := {1..4}
+    type SomeNumbers := {1..4, 10..12, 15}
+    type Byte := {0..255}
     type Color := {Red, Blue, Green}
+    type Color2 := constructed from {Red, Blue, Green, RGB(R: Byte, G: Byte, B: Byte)}
 
-For the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
+In the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
 
+The constructors of ```Color2`` are : ``Red``, ``Blue``, ``Green`` and ``RGB``.
+Each constructor have an associated function (e.g., ``is_Red``, or ``is_RGB``) to test if a Color2 term was created with that constructor.
+The ``RGB`` constructor takes 3 arguments of type ``Byte``.
+``R``, ``G`` and ``B`` are accessor functions: when given a Color2 term constructed with RGB, they return the associated Byte.
+(When given a Color2 not constructed with RGB, they may raise an error)
 
 .. _function:
 .. index:: function
-
 Functions
 +++++++++
 

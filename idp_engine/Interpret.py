@@ -42,12 +42,12 @@ from itertools import product
 from .Assignments import Status
 from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
-                   FunctionEnum)
-from .Expression import (Constructor, SymbolExpr, Expression, AQuantification,
+                   FunctionEnum, Enumeration, Tuple, ConstructedFrom)
+from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction,  AEquivalence, AAggregate,
-                    AComparison, AUnary, AppliedSymbol, Number,
+                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol, Number,
                     Variable, TRUE)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet
 
 
 # class Extern  ###########################################################
@@ -60,7 +60,12 @@ Extern.interpret = interpret
 # class ConstructedTypeDeclaration  ###########################################################
 
 def interpret(self, problem):
+    if self.name in problem.interpretations:
+        problem.interpretations[self.name].interpret(problem)
+    if self.interpretation:
+        self.constructors = self.interpretation.enumeration.constructors
     self.translate()
+    self.range = sum([c.interpret(problem).range for c in self.constructors], [])
 ConstructedTypeDeclaration.interpret = interpret
 
 
@@ -74,7 +79,7 @@ RangeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    self.domain = list(product(*[s.decl.range for s in self.sorts])) #
+    self.domain = list(product(*[s.decl.range for s in self.sorts]))
     self.range = self.out.decl.range
 
     # create instances
@@ -130,10 +135,8 @@ def interpret(self, problem):
     status = (Status.STRUCTURE if self.block.name != 'default' else
                 Status.GIVEN)
     if self.is_type_enumeration:
-        symbol = self.symbol
-        symbol.decl.domain = [t.args[0]
-                              for t in self.enumeration.tuples.values()]
-        symbol.decl.range = symbol.decl.domain
+        self.enumeration.interpret(problem)
+        self.symbol.decl.interpretation = self
     else: # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
             if type(self.enumeration) == FunctionEnum:
@@ -155,11 +158,37 @@ def interpret(self, problem):
                     or problem.assignments[code].status != status):
                     e = problem.assignments.assert_(expr, self.default, status,
                                                 False)
-                    if (self.block.name == 'default'
-                        and type(self.symbol.decl.out.decl) == ConstructedTypeDeclaration):
-                        problem.assignments.assert_(e.formula(), TRUE, status, False)
-
 SymbolInterpretation.interpret = interpret
+
+
+# class Enumeration  ###########################################################
+
+def interpret(self, problem):
+    pass
+Enumeration.interpret = interpret
+
+
+# class ConstructedFrom  ###########################################################
+
+def interpret(self, problem):
+    self.tuples = OrderedSet()
+    for c in self.constructors:
+        c.interpret(problem)
+        self.tuples.extend([Tuple(args=[e]) for e in c.range])
+ConstructedFrom.interpret = interpret
+
+
+# class Constructor  ###########################################################
+
+def interpret(self, problem):
+    self.range = []
+    if not self.sorts:
+        self.range = [UnappliedSymbol.construct(self)]
+    else:
+        self.range = [AppliedSymbol.construct(self, e)
+                      for e in product(*[s.decl.out.decl.range for s in self.sorts])]
+    return self
+Constructor.interpret = interpret
 
 
 # class Expression  ###########################################################
@@ -198,7 +227,7 @@ def substitute(self, e0, e1, assignments, todo=None):
     if self.code == e0.code:
         if self.code == e1.code:
             return self  # to avoid infinite loops
-        return self._change(value=e1)  # e1 is Constructor or Number
+        return self._change(value=e1)  # e1 is UnappliedSymbol or Number
     else:
         # will update self.simpler
         out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
@@ -247,13 +276,6 @@ def instantiate1(self, e0, e1, problem=None):
 Expression.instantiate1 = instantiate1
 
 
-# Class Constructor  ######################################################
-
-def instantiate(self, e0, e1, problem=None):
-    return self
-Constructor.instantiate = instantiate
-
-
 # class Symbol ###########################################################
 
 def instantiate(self, e0, e1, problem=None):
@@ -295,40 +317,41 @@ def interpret(self, problem):
     new_vars = {}
     for name, var in self.q_vars.items():
         range = None
-        if var.sort:
-            if var.sort.decl.range:
-                range = var.sort.decl.range
-                guard = lambda x,y: y
-            elif var.sort.code in problem.interpretations:
-                self.check(var.sort.decl.arity == 1,
-                           f"Incorrect arity of {var.sort}")
-                self.check(var.sort.decl.out.type == BOOL,
-                           f"{var.sort} is not a predicate")
+        if var.sort and var.sort.decl:
+            self.check(var.sort.decl.arity == 1,
+                        f"Incorrect arity of {var.sort}")
+            self.check(var.sort.decl.out.type == BOOL,
+                        f"{var.sort} is not a type or predicate")
+
+            if var.sort.code in problem.interpretations:
                 enumeration = problem.interpretations[var.sort.code].enumeration
                 range = [t.args[0] for t in enumeration.tuples.values()]
-                guard = lambda x,y: y
-            elif name in inferred:
-                sort = inferred[name].decl
-                if sort.name in problem.interpretations:
-                    enumeration = problem.interpretations[sort.name].enumeration
-                    range = [t.args[0] for t in enumeration.tuples.values()]
-                    symbol = var.sort.as_rigid()
-                    def guard(val, expr):
-                        applied = AppliedSymbol.make(symbol, [val])
-                        if self.q == '∀':
-                            out = AImplication.make('⇒', [applied, expr])
-                        else:
-                            out = AConjunction.make('∧', [applied, expr])
-                        return out
+                guard = None
+            elif type(var.sort.decl) == SymbolDeclaration:
+                self.check(var.sort.decl.domain,
+                           f"Symbol {var.sort} must have a finite domain")
+                range = [t[0] for t in var.sort.decl.domain]
+                guard = var.sort
+            elif var.sort.decl.range:
+                range = var.sort.decl.range
+                guard = None
+
         if range is not None:
             out = []
             for f in forms:
                 for val in range:
-                    new_f = guard(val, f.instantiate(var, val, problem))
+                    new_f = f.instantiate(var, val, problem)
+                    if guard:  # adds `guard(val) =>` in front of expression
+                        applied = AppliedSymbol.make(guard, [val])
+                        if self.q == '∀':
+                            new_f = AImplication.make('⇒', [applied, new_f])
+                        else:
+                            new_f = AConjunction.make('∧', [applied, new_f])
                     out.append(new_f)
             forms = out
         else: # infinite domain !
             new_vars[name] = var
+
     if new_vars:
         forms = [f.interpret(problem) if problem else f for f in forms]
     self.q_vars = new_vars

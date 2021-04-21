@@ -25,9 +25,10 @@ TODO: vocabulary
 
 
 from fractions import Fraction
+from itertools import product
 from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
-                EnumSort, BoolVal)
+                BoolVal, Datatype)
 
 from idp_engine.Parse import ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
@@ -45,20 +46,32 @@ def translate(self):
     if self.translated is None:
         if self.name == BOOL:
             self.translated = BoolSort()
-            self.domain[0].type = BOOL
-            self.domain[1].type = BOOL
-            self.domain[0].translated = BoolVal(True)
-            self.domain[1].translated = BoolVal(False)
-            self.domain[0].py_value = True
-            self.domain[1].py_value = False
+            self.constructors[0].type = BOOL
+            self.constructors[1].type = BOOL
+            self.constructors[0].translated = BoolVal(True)
+            self.constructors[1].translated = BoolVal(False)
+            self.constructors[0].py_value = True
+            self.constructors[1].py_value = False
         else:
-            self.translated, cstrs = EnumSort(self.name, [c.name for c in
-                                                        self.domain])
-            self.check(len(self.domain) == len(cstrs), "Internal error")
-            for c, c3 in zip(self.domain, cstrs):
-                c.translated = c3
-                c.py_value = c3
-                self.map[str(c)] = c
+            sort = Datatype(self.name)
+            for c in self.constructors:
+                sort.declare(c.name,
+                             *[(a.decl.name, a.decl.out.translate())
+                               for a in c.sorts])
+            self.translated = sort.create()
+
+            for c in self.constructors:
+                c.translated = self.translated.__dict__[c.name]
+                if c.tester:
+                    c.tester.translated = self.translated.__dict__[f"is_{c.name}"]
+                for a in c.sorts:
+                    a.decl.translated = self.translated.__dict__[a.accessor.name]
+                c.py_value = c.translated
+                if not c.sorts:
+                    self.map[str(c)] = UnappliedSymbol.construct(c)
+                else:
+                    for e in c.range:
+                        self.map[str(e)] = e
     return self.translated
 ConstructedTypeDeclaration.translate = translate
 
@@ -93,10 +106,17 @@ def translate(self):
 SymbolDeclaration.translate = translate
 
 
+# class Constructor  ###########################################################
+
+def translate(self):
+    return self.translated
+Constructor.translate = translate
+
+
 # class Expression  ###########################################################
 
 def translate(self):
-    if self.value is not None:
+    if self.value is not None and self.value is not self:
         return self.value.translate()
     if self.simpler is not None:
         return self.simpler.translate()
@@ -109,13 +129,6 @@ def reified(self) -> DatatypeRef:
         Expression.COUNT += 1
     return self._reified
 Expression.reified = reified
-
-
-# class Constructor  ##########################################################
-
-def translate(self):
-    return self.translated
-Constructor.translate = translate
 
 
 # Class IfExpr  ###############################################################
@@ -259,7 +272,7 @@ AAggregate.translate1 = translate1
 def translate1(self):
     self.check(self.decl, f"Unknown symbol: {self.symbol}")
     if self.decl.name == RELEVANT:
-        return TRUE.translated
+        return TRUE.translate()
     assert self.decl.name not in RESERVED_SYMBOLS, \
                f"Can't resolve argument of built-in symbols: {self}"
     if self.decl.name == 'abs':
@@ -289,8 +302,8 @@ AppliedSymbol.translate1 = translate1
 # Class UnappliedSymbol  #######################################################
 
 def translate1(self):
-    assert False, "Internal error"
-UnappliedSymbol.translate1 = translate
+    return self.decl.translated
+UnappliedSymbol.translate1 = translate1
 
 
 # Class Variable  #######################################################

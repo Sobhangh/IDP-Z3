@@ -26,7 +26,7 @@ from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
                     RangeDeclaration, SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-                    Tuple, Display)
+                    Tuple, ConstructedFrom, Display)
 from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AConjunction, ADisjunction,
                          BinaryOperator, AComparison, AUnary, AAggregate,
@@ -46,7 +46,7 @@ def annotate(self, idp):
         s.block = self
         s.annotate(self)  # updates self.symbol_decls
 
-    for constructor in self.symbol_decls[SYMBOL].domain:
+    for constructor in self.symbol_decls[SYMBOL].constructors:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
     self.symbol_decls[SYMBOL].translate()  # to populate .map
@@ -71,12 +71,11 @@ def annotate(self, voc):
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
-    for c in self.domain:
+    for c in self.constructors:
         c.type = self.name
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
                     f"duplicate constructor in vocabulary: {c.name}")
         voc.symbol_decls[c.name] = c
-    self.range = self.domain  # TODO constructor functions
     if self.interpretation:
         self.interpretation.annotate(voc)
 ConstructedTypeDeclaration.annotate = annotate
@@ -145,8 +144,6 @@ def annotate(self, idp):
                 self.clark[decl] = rule
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
-                                    for e in self.constraints])
-    self.constraints = OrderedSet([e.interpret(self)
                                     for e in self.constraints])
 Theory.annotate = annotate
 
@@ -237,16 +234,12 @@ def annotate(self, block):
     # create constructors if it is a type enumeration
     self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
     if self.is_type_enumeration:
-        for i, c in enumerate(self.enumeration.tuples):
-            self.check(len(c.args) == 1,
-                        f"incorrect arity in {self.name} type enumeration")
-            constr = Constructor(name=c.args[0].name)
-            constr.type = self.name
-            if self.name != BOOL:
-                constr.py_value = i  # to allow comparisons
-            self.check(constr.name not in voc.symbol_decls,
-                    f"duplicate constructor in vocabulary: {constr.name}")
-            voc.symbol_decls[constr.name] = constr
+        # create Constructors before annotating the tuples
+        for c in self.enumeration.constructors:
+            c.type = self.name
+            self.check(c.name not in voc.symbol_decls,
+                    f"duplicate constructor in vocabulary: {c.name}")
+            voc.symbol_decls[c.name] = c
 
     self.enumeration.annotate(voc)
 
@@ -257,7 +250,7 @@ def annotate(self, block):
                 or all(s.name not in [INT, REAL]  # finite domain
                         for s in self.symbol.decl.sorts)
                 or self.default is None,
-        f"Can't use default value for '{self.name}' on infinite domain.")
+        f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
         self.check(self.default.as_rigid() is not None,
@@ -280,6 +273,35 @@ def annotate(self, voc):
     self.check(all(a.as_rigid() is not None for a in self.args),
                 f"Tuple must be ground : ({self})")
 Tuple.annotate = annotate
+
+
+# Class ConstructedFrom  #######################################################
+
+def annotate(self, voc):
+    for c in self.constructors:
+        for i, ts in enumerate(c.sorts):
+            if ts.accessor is None:
+                ts.accessor = Symbol(name=f"{c.name}_{i}")
+        c.annotate(voc)
+ConstructedFrom.annotate = annotate
+
+
+# Class Constructor  #######################################################
+
+def annotate(self, voc):
+    for a in self.sorts:
+        self.check(a.type in voc.symbol_decls,
+                   f"Unknown type: {a.type}" )
+        a.decl = SymbolDeclaration(annotations='', name=a.accessor,
+                                   sorts=[Symbol(name=self.type)],
+                                   out=Symbol(name=a.type))
+        a.decl.annotate(voc)
+    self.tester = SymbolDeclaration(annotations='',
+                                    name=Symbol(name=f"is_{self.name}"),
+                                    sorts=[Symbol(name=self.type)],
+                                    out=Symbol(name=BOOL))
+    self.tester.annotate(voc)
+Constructor.annotate = annotate
 
 
 # Class Display  #######################################################
@@ -527,9 +549,11 @@ Variable.annotate = annotate
 
 def annotate(self, voc, q_vars):
     if self.name in voc.symbol_decls:
-        if type(voc.symbol_decls[self.name]) == Constructor:
-            return voc.symbol_decls[self.name]
-        self.check(False, f"{self} should be applied to arguments (or prefixed with a back-tick)")
+        self.decl = voc.symbol_decls[self.name]
+        self.fresh_vars = {}
+        self.check(type(self.decl) == Constructor,
+                   f"{self} should be applied to arguments (or prefixed with a back-tick)")
+        return self
     if self.name in q_vars:
         return q_vars[self.name]
     # elif self.name in voc.symbol_decls:  # in symbol_decls

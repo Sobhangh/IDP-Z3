@@ -38,14 +38,14 @@ from typing import Dict, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
+from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          IfExpr, AQuantification, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Arguments,
-                         Variable, TRUE, FALSE)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
                     RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
 
@@ -182,7 +182,7 @@ class Vocabulary(ASTNode):
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
             ConstructedTypeDeclaration(
-                name=BOOL, constructors=[TRUE, FALSE]),
+                name=BOOL, constructors=[TRUEC, FALSEC]),
             RangeDeclaration(name=INT, elements=[]),
             RangeDeclaration(name=REAL, elements=[]),
             RangeDeclaration(name=DATE, elements=[]),
@@ -250,22 +250,24 @@ class ConstructedTypeDeclaration(ASTNode):
 
         sorts (List[Symbol]): the types of the arguments
 
-        out (Symbol): Boolean Symbol
+        out (Symbol): the Boolean Symbol
 
         type (string): Z3 type of an element of the type; same as `name`
 
-        domain ([Constructor]): list of constructors in the enumeration
+        constructors ([Constructor]): list of constructors in the enumeration
+
+        range ([Expression]): list of expressions of that type
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
         translated (Z3): the translation of the type in Z3
 
-        map (Dict[string, Constructor]): a mapping from code to Expression
+        map (Dict[string, Expression]): a mapping from code to Expression in range
     """
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.domain = ([] if 'constructors' not in kwargs else
+        self.constructors = ([] if 'constructors' not in kwargs else
                              kwargs.pop('constructors'))
         enumeration = (None if 'enumeration' not in kwargs else
                             kwargs.pop('enumeration'))
@@ -276,6 +278,7 @@ class ConstructedTypeDeclaration(ASTNode):
         self.type = self.name
 
         self.translated = None
+        self.range = None
         self.map = {}  # {String: constructor}
 
         self.interpretation = (None if not enumeration else
@@ -284,13 +287,13 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def __str__(self):
         return (f"type {self.name} := "
-                f"{{{','.join(map(str, self.domain))}}}")
+                f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
         if self.name == BOOL:
             out = [var, AUnary.make('¬', var)]
         else:
-            out = [AComparison.make('=', [var, c]) for c in self.domain]
+            out = [AComparison.make('=', [var, c]) for c in self.range]
         out = ADisjunction.make('∨', out)
         return out
 
@@ -304,7 +307,6 @@ class RangeDeclaration(ASTNode):
         self.elements = kwargs.pop('elements')
         self.arity = 1
         self.translated = None
-        self.domain = None  # not used
         self.sorts = [Symbol(name=self.name)]
         self.out = Symbol(name=BOOL)
 
@@ -629,7 +631,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if type(args[rank]) in [Constructor, Number]:
+            if args[rank].as_rigid() is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(theory, rank+1,
@@ -646,11 +648,25 @@ class SymbolInterpretation(ASTNode):
 
 
 class Enumeration(ASTNode):
+    """Represents an enumeration of tuples of expressions.
+    Used for predicates, or types without n-ary constructors.
+
+    Attributes:
+        tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
+
+        constructors (List[Constructor], optional): List of Constructor
+    """
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
         if not isinstance(self.tuples, OrderedSet):
             # self.tuples.sort(key=lambda t: t.code)
             self.tuples = OrderedSet(self.tuples)
+        if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
+               for c in self.tuples):
+            self.constructors = [Constructor(name=c.args[0].name)
+                                 for c in self.tuples]
+        else:
+            self.constructors = None
 
     def __repr__(self):
         return ", ".join([repr(t) for t in self.tuples])
@@ -696,6 +712,19 @@ class FunctionEnum(Enumeration):
 
 class CSVEnumeration(Enumeration):
     pass
+
+class ConstructedFrom(Enumeration):
+    """Represents a 'constructed from' enumeration of constructors
+
+    Attributes:
+        tuples (OrderedSet[Tuple]): OrderedSet of tuples of Expression
+
+        constructors (List[Constructor]): List of Constructor
+    """
+    def __init__(self, **kwargs):
+        self.constructed = kwargs.pop('constructed')
+        self.constructors = kwargs.pop('constructors')
+        self.tuples = None
 
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
@@ -865,7 +894,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         ConstructedTypeDeclaration,
+                                         ConstructedTypeDeclaration, Accessor,
                                          RangeDeclaration,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
@@ -882,6 +911,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
+                                         ConstructedFrom, Constructor,
                                          Display,
 
                                          Procedure, Call1, Call0, String, PyList, PyAssignment])

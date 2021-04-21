@@ -1,0 +1,20 @@
+vocabulary V {
+    type byte := {t,u}
+    type color := constructed from {red, blue, green, rgb(R: byte, byte)}
+}
+
+theory T:V {
+    R(rgb(t,u)) = t.
+    is_rgb(rgb(t,u)).
+    ~is_rgb(red).
+    ~is_red(blue).
+    rgb(t,u) ~= red.
+}
+
+structure S:V {
+}
+
+procedure main() {
+  print(Problem(T, S).formula())
+  print(Problem(T,S).expand(max=1))
+}

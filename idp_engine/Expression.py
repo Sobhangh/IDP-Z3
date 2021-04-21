@@ -91,6 +91,65 @@ class ASTNode(object):
         return self  # monkey-patched
 
 
+class Constructor(ASTNode):
+    """Constructor declaration
+
+    Attributes:
+        name (string): name of the constructor
+
+        sorts (List[Symbol]): types of the arguments of the constructor
+
+        type (string): name of the type that contains this constructor
+
+        arity (Int): number of arguments of the constructor
+
+        tester (SymbolDeclaration): function to test if the constructor
+        has been applied to some arguments (e.g., is_rgb)
+
+        symbol (Symbol): only for Symbol constructors
+
+        translated (DataTypeRef): the value in Z3
+    """
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.sorts = kwargs.pop('args') if 'args' in kwargs else []
+
+        self.name = (self.name.name if type(self.name) == UnappliedSymbol else
+                     self.name)
+        self.arity = len(self.sorts)
+
+        self.type = None
+        self.symbol = None
+        self.tester = None
+        self.translated: Any = None
+
+    def __str__(self):
+        return (self.name if not self.sorts else
+                f"{self.name}({','.join((str(a) for a in self.sorts))}" )
+
+
+class Accessor(ASTNode):
+    """represents an accessor and a type
+
+    Attributes:
+        accessor (Symbol, Optional): name of accessor function
+
+        type (string): name of the output type of the accessor
+
+        decl (SymbolDeclaration): declaration of the accessor function
+    """
+    def __init__(self, **kwargs):
+        self.accessor = kwargs.pop('accessor') if 'accessor' in kwargs else None
+        self.type = kwargs.pop('type').name
+        self.decl = None
+
+    def __str__(self):
+        return (self.type if not self.accessor else
+                f"{self.accessor}: {self.type}" )
+
+
+
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
 
@@ -177,8 +236,9 @@ class Expression(ASTNode):
         self.block: Any = None
 
     def copy(self):
-        " create a deep copy (except for Constructor and Number) "
-        if type(self) in [Constructor, Number, Variable]:
+        " create a deep copy (except for UnappliedSymbol and Number) "
+        if (type(self) in [UnappliedSymbol, Number, Date, Variable]
+            or self.value == self):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -194,7 +254,7 @@ class Expression(ASTNode):
     def same_as(self, other):
         if id(self) == id(other):
             return True
-        if self.value is not None:
+        if self.value is not None and self.value is not self:
             return self.value  .same_as(other)
         if self.simpler is not None:
             return self.simpler.same_as(other)
@@ -215,8 +275,7 @@ class Expression(ASTNode):
     def __repr__(self): return str(self)
 
     def __str__(self):
-        self.check(self.value is not self, "Internal error")
-        if self.value is not None:
+        if self.value is not None and self.value is not self:
             return str(self.value)
         if self.simpler is not None:
             return str(self.simpler)
@@ -240,7 +299,7 @@ class Expression(ASTNode):
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for Constructor, IfExpr, AUnary, Variable,
+        default implementation for UnappliedSymbol, IfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
 
@@ -285,7 +344,7 @@ class Expression(ASTNode):
             e.co_constraints(co_constraints)
 
     def as_rigid(self):
-        " returns a Number or Constructor, or None "
+        " returns a Number or UnappliedSymbol, or None "
         return self.value
 
     def is_reified(self): return True
@@ -346,8 +405,8 @@ class Expression(ASTNode):
 
     def symbolic_propagate(self,
                            assignments: "Assignments",
-                           truth: Optional["Constructor"] = None
-                           ) -> List[Tuple["Expression", "Constructor"]]:
+                           truth: Optional["Expression"] = None
+                           ) -> List[Tuple["Expression"]]:
         return []  # monkey-patched
 
     def propagate1(self,
@@ -372,28 +431,6 @@ class Expression(ASTNode):
             Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "expr is (not) in enumeration"
         """
         return (None, None, None)
-
-class Constructor(Expression):
-    PRECEDENCE = 200
-
-    def __init__(self, **kwargs):
-        self.name = unquote(kwargs.pop('name'))
-        self.sub_exprs = []
-
-        super().__init__()
-        self.fresh_vars = set()
-        self.symbol = None  # set only for SYMBOL constructors
-        self.translated: Any = None
-
-    def __str1__(self): return self.name
-
-    def as_rigid(self): return self
-
-    def is_reified(self): return False
-
-
-TRUE = Constructor(name='true')
-FALSE = Constructor(name='false')
 
 
 class Symbol(Expression):
@@ -736,11 +773,18 @@ class AppliedSymbol(Expression):
         out.decl = symbol.decl
         return out.annotate1()
 
+    @classmethod
+    def construct(cls, constructor, args):
+        out= cls.make(Symbol(name=constructor.name), args)
+        out.decl = constructor
+        out.fresh_vars = {}
+        return out
+
     def __str1__(self):
         if len(self.sub_exprs) == 0:
             out = f"{self.symbol}"
         else:
-            out = f"{self.symbol}({','.join([x.str for x in self.sub_exprs])})"
+            out = f"{self.symbol}({', '.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return (f"{out}"
@@ -820,17 +864,14 @@ class Arguments(object):
 
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.
-    Can be a constructor, a quantified variable,
-    or a symbol application without arguments (by abuse of notation, e.g. 'p').
-    (The parsing of numbers result directly in Number nodes)
+    Can be a constructor or a quantified variable.
 
-    Converted to the proper AST class by annotate().
+    Variables are converted to Variable() by annotate().
     """
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
-        self.s = kwargs.pop('s')
-        self.name = self.s.name
+        self.name = unquote(kwargs.pop('name'))
 
         Expression.__init__(self)
 
@@ -841,11 +882,27 @@ class UnappliedSymbol(Expression):
         self.is_enumeration = None
         self.in_enumeration = None
 
+    @classmethod
+    def construct(cls, constructor: Constructor):
+        """Create an UnappliedSymbol from a constructor
+        """
+        out = (cls)(name=constructor.name)
+        out.decl = constructor
+        out.fresh_vars = {}
+        return out
+
     def __str1__(self): return self.name
 
-    def collect(self, questions, all_=True, co_constraints=True):
-        self.check(False, f"Internal error: {self}")
+    def as_rigid(self): return self
 
+    def is_reified(self): return False
+
+
+TRUEC = Constructor(name='true')
+FALSEC = Constructor(name='false')
+
+TRUE = UnappliedSymbol.construct(TRUEC)
+FALSE = UnappliedSymbol.construct(FALSEC)
 
 class Variable(Expression):
     """AST node for a variable in a quantification or aggregate
