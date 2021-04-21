@@ -60,6 +60,8 @@ Extern.interpret = interpret
 # class ConstructedTypeDeclaration  ###########################################################
 
 def interpret(self, problem):
+    if self.name in problem.interpretations:
+        problem.interpretations[self.name].interpret(problem)
     if self.interpretation:
         self.constructors = self.interpretation.enumeration.constructors
     self.translate()
