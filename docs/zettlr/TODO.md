@@ -65,8 +65,7 @@ Date: TODO
 - [ ] #Perf
 
 #### other NTH (refactoring)
-- [ ] replace .as_rigid() by .value
-- [ ] merge Symbol into UnappliedSymbol
+- [ ] use new rename_var in rename_args
 - [ ] use [macropy](https://macropy3.readthedocs.io/en/latest/): smartAsserts, pattern matching
 - [ ] simplify the generation of Output
 

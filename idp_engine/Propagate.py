@@ -121,7 +121,7 @@ def propagate1(self, assignments, truth=TRUE):
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one
         # a consequence, not a universal
-        operands1 = [e.as_rigid() for e in self.sub_exprs]
+        operands1 = [e.value for e in self.sub_exprs]
         if   operands1[1] is not None:
             return [(self.sub_exprs[0], operands1[1])]
         elif operands1[0] is not None:

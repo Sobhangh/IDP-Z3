@@ -115,11 +115,13 @@ def interpret(self, theory):
     assert self.is_whole_domain
     self.cache = {}  # reset the cache
     if self.out:
-        expr = AppliedSymbol.make(self.symbol, self.args[:-1])
+        expr = AppliedSymbol.make(self.definiendum.symbol,
+                                  self.definiendum.sub_exprs[:-1])
         expr.in_head = True
-        expr = AComparison.make('=', [expr, self.args[-1]])
+        expr = AComparison.make('=', [expr, self.definiendum.sub_exprs[-1]])
     else:
-        expr = AppliedSymbol.make(self.symbol, self.args)
+        expr = AppliedSymbol.make(self.definiendum.symbol,
+                                  self.definiendum.sub_exprs)
         expr.in_head = True
     expr = AEquivalence.make('⇔', [expr, self.body])
     expr = AQuantification.make('∀', {**self.q_vars}, expr)
@@ -408,7 +410,7 @@ def interpret(self, problem):
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
             and any(s.decl.name == SYMBOL for s in self.decl.sorts)
-            and all(a.as_rigid() is not None for a in sub_exprs)):
+            and all(a.value is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
             f = problem.interpretations[self.decl.name].interpret_application

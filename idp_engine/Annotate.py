@@ -156,7 +156,7 @@ def annotate(self, theory, voc, q_vars):
     # create common variables, and rename vars in rule
     self.clarks = {}
     for r in self.rules:
-        decl = voc.symbol_decls[r.symbol.name]
+        decl = voc.symbol_decls[r.definiendum.decl.name]
         if decl.name not in self.def_vars:
             name = f"${decl.name}$"
             q_v = {f"${decl.name}!{str(i)}$":
@@ -187,13 +187,11 @@ def annotate(self, voc, q_vars):
         self.q_vars[q.var] = Variable(q.var, q.sort)
     q_v = {**q_vars, **self.q_vars}  # merge
 
-    self.symbol = self.symbol.annotate(voc, q_v)
-    self.args = [arg.annotate(voc, q_v) for arg in self.args]
-    self.out = self.out.annotate(voc, q_v) if self.out else self.out
+    self.definiendum = self.definiendum.annotate(voc, q_v)
     self.body = self.body.annotate(voc, q_v)
 
     self.is_whole_domain = all(s.name not in [INT, REAL, DATE]
-                                for s in self.symbol.decl.sorts)
+                               for s in self.definiendum.decl.sorts)
     return self
 Rule.annotate = annotate
 
@@ -253,7 +251,7 @@ def annotate(self, block):
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
-        self.check(self.default.as_rigid() is not None,
+        self.check(self.default.value is not None,
             f"Default value for '{self.name}' must be ground: {self.default}")
 SymbolInterpretation.annotate = annotate
 
@@ -270,7 +268,7 @@ Enumeration.annotate = annotate
 
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
-    self.check(all(a.as_rigid() is not None for a in self.args),
+    self.check(all(a.value is not None for a in self.args),
                 f"Tuple must be ground : ({self})")
 Tuple.annotate = annotate
 
@@ -505,19 +503,18 @@ def annotate(self, voc, q_vars):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)
+    out = self.annotate1()
 
     # move the negation out
     if 'not' in self.is_enumerated:
-        out = AppliedSymbol.make(self.symbol, self.sub_exprs,
-                                    is_enumerated='is enumerated')
+        out = AppliedSymbol.make(out.symbol, out.sub_exprs,
+                                 is_enumerated='is enumerated')
         out = AUnary.make('¬', out)
     elif 'not' in self.is_enumeration:
-        out = AppliedSymbol.make(self.symbol, self.sub_exprs,
-                                    is_enumeration='in',
-                                    in_enumeration=self.in_enumeration)
+        out = AppliedSymbol.make(out.symbol, out.sub_exprs,
+                                 is_enumeration='in',
+                                 in_enumeration=out.in_enumeration)
         out = AUnary.make('¬', out)
-    else:
-        out = self.annotate1()
     return out
 AppliedSymbol.annotate = annotate
 

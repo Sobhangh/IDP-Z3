@@ -44,7 +44,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
-                         Number, Brackets, Date, Arguments,
+                         Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
                     RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
@@ -480,8 +480,7 @@ class Rule(ASTNode):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
         self.quantees = kwargs.pop('quantees')
-        self.symbol = kwargs.pop('symbol')
-        self.args = kwargs.pop('args')  # later augmented with self.out, if any
+        self.definiendum = kwargs.pop('definiendum')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
         self.is_whole_domain = None  # Bool
@@ -492,15 +491,14 @@ class Rule(ASTNode):
         self.annotations = self.annotations.annotations if self.annotations else {}
 
         self.q_vars = {}  # {string: Variable}
-        self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
-            self.args.append(self.out)
+            self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
 
     def __repr__(self):
         return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
-                f"{self.symbol}({','.join(str(e) for e in self.args)}) "
+                f"{self.definiendum} "
                 f"⇔{str(self.body)}")
 
     def rename_args(self, new_vars):
@@ -508,21 +506,23 @@ class Rule(ASTNode):
             input : '!v: f(args) <- body(args)'
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
-        self.check(len(self.args) == len(new_vars), "Internal error")
+        self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
         vars = [q.var for q in self.quantees]
-        for i in range(len(self.args)):
-            arg, nv = self.args[i],  list(new_vars.values())[i]
+        for i in range(len(self.definiendum.sub_exprs)):
+            arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:
                 self.body = self.body.instantiate(arg, nv)
-                self.out = self.out.instantiate(arg, nv) if self.out else self.out
-                for j in range(i, len(self.args)):
-                    self.args[j] = self.args[j].instantiate(arg, nv)
+                self.out = (self.out.instantiate(arg, nv) if self.out else
+                            self.out)
+                for j in range(i, len(self.definiendum.sub_exprs)):
+                    self.definiendum.sub_exprs[j] = \
+                        self.definiendum.sub_exprs[j].instantiate(arg, nv)
             else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
 
-        self.args = list(new_vars.values())
+        self.definiendum.sub_exprs = list(new_vars.values())
         self.quantees = [Quantee.make(v,s) for v,s in new_vars.items()]
         self.q_vars = new_vars
         return self
@@ -542,15 +542,15 @@ class Rule(ASTNode):
             return self.cache[hash]
         # assert self.is_whole_domain == False
         out = self.body.copy() # in case there is no arguments
-        self.check(len(new_args) == len(self.args)
-                or len(new_args)+1 == len(self.args), "Internal error")
-        for old, new in zip(self.args, new_args):
+        self.check(len(new_args) == len(self.definiendum.sub_exprs)
+                or len(new_args)+1 == len(self.definiendum.sub_exprs), "Internal error")
+        for old, new in zip(self.definiendum.sub_exprs, new_args):
             out = out.instantiate(old, new, theory)
         out = out.interpret(theory)
-        instance = AppliedSymbol.make(self.symbol, new_args)
+        instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
-        if self.symbol.decl.type != BOOL:  # a function
-            out = out.instantiate(self.args[-1], instance, theory)
+        if self.definiendum.decl.type != BOOL:  # a function
+            out = out.instantiate(self.definiendum.sub_exprs[-1], instance, theory)
         else:
             out = AEquivalence.make('⇔', [instance, out])
         out.block = self.block
@@ -631,7 +631,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if args[rank].as_rigid() is not None:
+            if args[rank].value is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(theory, rank+1,
@@ -686,7 +686,7 @@ class Enumeration(ASTNode):
 
         # constructs If-then-else recursively
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
-        if args[rank].as_rigid() is not None:
+        if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
                     return self.contains(args, function, arity, rank+1, list(tuples2))
@@ -906,7 +906,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,
-                                         Number, Brackets, Date, Arguments,
+                                         Number, Brackets, Date,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,

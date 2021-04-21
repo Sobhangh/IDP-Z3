@@ -37,7 +37,9 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations
-        (('!'|'∀') quantees+=Quantee[','] ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)?
+        (('!'|'∀') quantees+=Quantee[','] ':' )*
+        definiendum=AppliedSymbol
+        ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
       Quantee: var=/`?[^\d\W]\w*\b/ ( ('in' | '∈') sort=SymbolExpr)? ;
 
@@ -86,12 +88,12 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
     Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
-      AppliedSymbol: symbol=SymbolExpr args=Arguments
+      AppliedSymbol: symbol=SymbolExpr
+              '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | is_enumeration=/(not\s+)?in/ in_enumeration=Enumeration)?;
         SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
-        Arguments: '(' sub_exprs*=Expression[','] ')';
-      UnappliedSymbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+      UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Date: iso=/#\d{4}-\d{2}-\d{2}/ | iso='#TODAY';
