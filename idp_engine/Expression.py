@@ -263,10 +263,10 @@ class Expression(ASTNode):
             return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification) and len(self.q_vars) == 0)):
+           or (isinstance(self, AQuantification) and len(self.quantees) == 0)):
             return self.sub_exprs[0].same_as(other)
         if (isinstance(other, Brackets)
-           or (isinstance(other, AQuantification) and len(other.q_vars) == 0)):
+           or (isinstance(other, AQuantification) and len(other.quantees) == 0)):
             return self.same_as(other.sub_exprs[0])
 
         return self.str == other.str and type(self) == type(other)
@@ -385,8 +385,8 @@ class Expression(ASTNode):
         return self  # monkey-patched
 
     def instantiate(self,
-                    e0: "Expression",
-                    e1: "Expression",
+                    e0: List["Expression"],
+                    e1: List["Expression"],
                     problem: "Problem"=None
                     ) -> "Expression":
         return self  # monkey-patched
@@ -481,24 +481,44 @@ class IfExpr(Expression):
 
 
 class Quantee(Expression):
+    """represents the description of quantification, e.g., `x in T` or `(x,y) in P`
+
+    Attributes:
+        vars (List[List[Variable]): the (tuples of) variables being quantified
+
+        sort (SymbolExpr, Optional): the type or predicate to quantify over
+
+        arity (int): the length of the tuple of variable
+    """
     def __init__(self, **kwargs):
-        self.var = kwargs.pop('var')
+        self.vars = kwargs.pop('vars')
         self.sort = kwargs.pop('sort')
+
+        self.arity = None
+        for i, v in enumerate(self.vars):
+            if hasattr(v, 'vars'):  # varTuple
+                self.vars[i] = v.vars
+                self.arity = len(v.vars) if self.arity == None else self.arity
+            else:
+                self.vars[i] = [v]
+                self.arity = 1 if self.arity == None else self.arity
 
         self.sub_exprs = []
         super().__init__()
         self.decl = None
 
+        self.check(all(len(v) == self.arity for v in self.vars),
+                    f"Inconsistent tuples in {self}")
+
     @classmethod
     def make(cls, var, sort):
-        if type(sort) != SymbolExpr:
+        if sort and type(sort) != SymbolExpr:
             sort = SymbolExpr(eval='', s=sort)
-        out = (cls) (var=var, sort=sort)
-        out.decl = sort.decl
+        out = (cls) (vars=[var], sort=sort)
         return out.annotate1()
 
     def __str1__(self):
-        return f"{self.var} ∈ {self.sort}"
+        return f"{','.join(str(v) for vs in self.vars for v in vs)} ∈ {self.sort}"
 
     def copy(self):
         out = Expression.copy(self)
@@ -515,18 +535,22 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
+        if self.quantees and self.quantees[-1].sort is None:
+            # separate untyped variables, so that they can be typed separately
+            q = self.quantees.pop()
+            for vars in q.vars:
+                for var in vars:
+                    self.quantees.append(Quantee.make(var, None))
+
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.q_vars = {}  # dict[String, Variable]
         self.type = BOOL
 
     @classmethod
-    def make(cls, q, q_vars, f):
+    def make(cls, q, quantees, f):
         "make and annotate a quantified formula"
-        quantees = [Quantee.make(v.name, v.sort) for v in q_vars.values()]
         out = cls(q=q, quantees=quantees, f=f)
-        out.q_vars = q_vars
         return out.annotate1()
 
     def __str1__(self):
@@ -537,15 +561,14 @@ class AQuantification(Expression):
             return self.sub_exprs[0].str
 
     def copy(self):
+        # also called by AAgregate
         out = Expression.copy(self)
-        out.q_vars = copy.copy(out.q_vars)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         questions.append(self)
-        if all_:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+        if all_:  #TODO1 and not self.quantees ?
+            Expression.collect(self, questions, all_, co_constraints)
 
 
 class BinaryOperator(Expression):
@@ -686,8 +709,6 @@ class AAggregate(Expression):
         self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
-        self.q_vars = {}
-
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
         if self.aggtype != "sum" and self.out is not None:
@@ -707,14 +728,11 @@ class AAggregate(Expression):
         return out
 
     def copy(self):
-        out = Expression.copy(self)
-        out.q_vars = copy.copy(out.q_vars)
-        return out
+        return AQuantification.copy(self)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+            Expression.collect(self, questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
@@ -841,7 +859,7 @@ class SymbolExpr(Expression):
         self.eval = (kwargs.pop('eval') if 'eval' in kwargs else
                      '')
         self.sub_exprs = [kwargs.pop('s')]
-        self.decl = None
+        self.decl = self.sub_exprs[0].decl if not self.eval else None
         super().__init__()
 
     def __str1__(self):
@@ -896,8 +914,9 @@ class Variable(Expression):
     """
     PRECEDENCE = 200
 
-    def __init__(self, name, sort):
-        self.name = name
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        sort = kwargs.pop('sort') if 'sort' in kwargs else None
         self.sort = sort
 
         super().__init__()

@@ -160,10 +160,10 @@ def annotate(self, theory, voc, q_vars):
         if decl.name not in self.def_vars:
             name = f"${decl.name}$"
             q_v = {f"${decl.name}!{str(i)}$":
-                    Variable(f"${decl.name}!{str(i)}$", sort)
+                    Variable(name=f"${decl.name}!{str(i)}$", sort=sort)
                     for i, sort in enumerate(decl.sorts)}
             if decl.out.name != BOOL:
-                q_v[name] = Variable(name, decl.out)
+                q_v[name] = Variable(name=name, sort=decl.out)
             self.def_vars[decl.name] = q_v
         new_rule = r.rename_args(self.def_vars[decl.name])
         self.clarks.setdefault(decl, []).append(new_rule)
@@ -181,11 +181,14 @@ Definition.annotate = annotate
 
 def annotate(self, voc, q_vars):
     # create head variables
+    q_v = {**q_vars}  # copy
     for q in self.quantees:
         if q.sort:
             q.annotate(voc, q_vars)
-        self.q_vars[q.var] = Variable(q.var, q.sort)
-    q_v = {**q_vars, **self.q_vars}  # merge
+        for vars in q.vars:
+            for var in vars:
+                var.sort = q.sort
+                q_v[var.name] = var
 
     self.definiendum = self.definiendum.annotate(voc, q_v)
     self.body = self.body.annotate(voc, q_v)
@@ -402,22 +405,27 @@ Quantee.annotate = annotate
 # Class AQuantification  #######################################################
 
 def annotate(self, voc, q_vars):
-    self.q_vars = {}
+    # also called by AAgregate.annotate
+    q_v = {**q_vars}  # copy
     for q in self.quantees:
-        self.check(q.var not in voc.symbol_decls,
-            f"the quantified variable '{q.var}' cannot have"
-            f" the same name as another symbol")
         q.annotate(voc, q_vars)
-        self.q_vars[q.var] = Variable(q.var, q.sort)
-    q_v = {**q_vars, **self.q_vars}  # merge
+        for vars in q.vars:
+            for var in vars:
+                self.check(var.name not in voc.symbol_decls,
+                    f"the quantified variable '{var.name}' cannot have"
+                    f" the same name as another symbol")
+                var.sort = q.sort
+                q_v[var.name] = var
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
 AQuantification.annotate = annotate
 
 def annotate1(self):
     Expression.annotate1(self)
-    # remove q_vars
-    self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
+    for q in self.quantees:
+        for vs in q.vars:
+            for v in vs:
+                self.fresh_vars.discard(v.name)
     return self
 AQuantification.annotate1 = annotate1
 
@@ -473,14 +481,7 @@ AUnary.annotate1 = annotate1
 # Class AAggregate  #######################################################
 
 def annotate(self, voc, q_vars):
-    self.q_vars = {}
-    for q in self.quantees:
-        self.check(q.var not in voc.symbol_decls,
-            f"the quantifier variable '{q.var}' cannot have the same name as another symbol.")
-        q.annotate(voc, q_vars)
-        self.q_vars[q.var] = Variable(q.var, q.sort)
-    q_v = {**q_vars, **self.q_vars}  # merge
-    self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
+    self = AQuantification.annotate(self, voc, q_vars)
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
 
     assert not self.using_if
@@ -489,9 +490,6 @@ def annotate(self, voc, q_vars):
                     self.sub_exprs[AAggregate.OUT],
             else_f=Number(number='0'))]
     self.using_if = True
-    self = self.annotate1()
-    # remove q_vars after annotate1
-    self.fresh_vars = self.fresh_vars.difference(set(self.q_vars.keys()))
     return self
 AAggregate.annotate = annotate
 

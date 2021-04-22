@@ -37,7 +37,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 """
 
 import copy
-from itertools import product
+from itertools import product, repeat
 
 from .Assignments import Status
 from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
@@ -124,7 +124,7 @@ def interpret(self, theory):
                                   self.definiendum.sub_exprs)
         expr.in_head = True
     expr = AEquivalence.make('⇔', [expr, self.body])
-    expr = AQuantification.make('∀', {**self.q_vars}, expr)
+    expr = AQuantification.make('∀', self.quantees, expr)
     self.whole_domain = expr.interpret(theory)
     self.whole_domain.block = self.block
     return self
@@ -239,15 +239,15 @@ Expression.substitute = substitute
 
 
 def instantiate(self, e0, e1, problem=None):
-    """Recursively substitute Variable e0 by e1 in a copy of self.
+    """Recursively substitute Variable in e0 by e1 in a copy of self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
-    assert type(e0) == Variable
+    assert all(type(e) == Variable for e in e0)
     if self.value:
         return self
-    if problem and e0.name not in self.fresh_vars:
+    if problem and all(e.name not in self.fresh_vars for e in e0):
         return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
@@ -256,23 +256,25 @@ def instantiate(self, e0, e1, problem=None):
 Expression.instantiate = instantiate
 
 def instantiate1(self, e0, e1, problem=None):
-    """Recursively substitute Variable e0 by e1 in self.
+    """Recursively substitute Variable in e0 by e1 in self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
 
     # instantiate expressions, with simplification
-    out = self.update_exprs(e.instantiate(e0, e1, problem) for e
-                            in self.sub_exprs)
+    out = self.update_exprs(e.instantiate(e0, e1, problem)
+                            for e in self.sub_exprs)
 
     if out.value is not None:  # replace by new value
         out = out.value
-    elif e0.name in out.fresh_vars:
-        out.fresh_vars.discard(e0.name)
-        if type(e1) == Variable:
-            out.fresh_vars.add(e1.name)
-        out.code = str(out)
+    else:
+        for o, n in zip(e0, e1):
+            if o.name in out.fresh_vars:
+                out.fresh_vars.discard(o.name)
+                if type(n) == Variable:
+                    out.fresh_vars.add(n.name)
+            out.code = str(out)
     out.annotations['reading'] = out.code
     return out
 Expression.instantiate1 = instantiate1
@@ -297,75 +299,67 @@ def interpret(self, problem):
         Expression: the expanded quantifier expression
     """
     # This method is called by AAggregate.interpret !
-    if not self.q_vars:
+    if not self.quantees:
         return Expression.interpret(self, problem)
-    inferred = self.sub_exprs[0].type_inference()
-    if 1 < len(self.sub_exprs):
-        inferred = {**inferred, **self.sub_exprs[1].type_inference()}
-    for q in self.q_vars:
-        if not self.q_vars[q].sort and q in inferred:
-            new_var = Variable(q, inferred[q])
-            self.sub_exprs[0].substitute(new_var, new_var, {})
-            self.q_vars[q] = new_var
-        elif self.q_vars[q].sort:
-            self.q_vars[q].sort = self.q_vars[q].sort.interpret(problem)
+    self.check(len(self.sub_exprs) == 1, "Internal error")
 
-    for v, s in inferred.items():
-        assert (v not in self.q_vars
-                or self.q_vars[v].sort.decl.is_subset_of(s.decl)), \
-            f"Inconsistent types for {v} in {self}"
+    # type inference
+    inferred = self.sub_exprs[0].type_inference()
+    for q in self.quantees:
+        if q.sort is None:
+            assert len(q.vars) == 1 and q.arity == 1
+            var = q.vars[0][0]
+            self.check(var.name in inferred,
+                        f"can't infer type of {var.name}")
+            q.sort = inferred[var.name]
 
     forms = self.sub_exprs
-    new_vars = {}
-    for name, var in self.q_vars.items():
-        range = None
-        if var.sort and var.sort.decl:
-            self.check(var.sort.decl.arity == 1,
-                        f"Incorrect arity of {var.sort}")
-            self.check(var.sort.decl.out.type == BOOL,
-                        f"{var.sort} is not a type or predicate")
-
-            if var.sort.code in problem.interpretations:
-                enumeration = problem.interpretations[var.sort.code].enumeration
-                range = [t.args[0] for t in enumeration.tuples.values()]
+    new_quantees = []
+    for q in self.quantees:
+        self.check(q.sort.decl.out.type == BOOL,
+                    f"{q.sort} is not a type or predicate")
+        if not q.sort.decl.range:
+            new_quantees.append(q)
+        else:
+            if q.sort.code in problem.interpretations:
+                enumeration = problem.interpretations[q.sort.code].enumeration
+                range = [t.args for t in enumeration.tuples.values()]
                 guard = None
-            elif type(var.sort.decl) == SymbolDeclaration:
-                self.check(var.sort.decl.domain,
-                           f"Symbol {var.sort} must have a finite domain")
-                range = [t[0] for t in var.sort.decl.domain]
-                guard = var.sort
-            elif var.sort.decl.range:
-                range = var.sort.decl.range
+            elif type(q.sort.decl) == SymbolDeclaration:
+                range = q.sort.decl.domain
+                guard = q.sort
+            else:
+                range = [[t] for t in q.sort.decl.range]
                 guard = None
 
-        if range is not None:
-            out = []
-            for f in forms:
-                for val in range:
-                    new_f = f.instantiate(var, val, problem)
-                    if guard:  # adds `guard(val) =>` in front of expression
-                        applied = AppliedSymbol.make(guard, [val])
-                        if self.q == '∀':
-                            new_f = AImplication.make('⇒', [applied, new_f])
-                        else:
-                            new_f = AConjunction.make('∧', [applied, new_f])
-                    out.append(new_f)
-            forms = out
-        else: # infinite domain !
-            new_vars[name] = var
+            for vars in q.vars:
+                self.check(q.sort.decl.arity == len(vars),
+                            f"Incorrect arity of {q.sort}")
+                out = []
+                for f in forms:
+                    for val in range:
+                        new_f = f.instantiate(vars, val, problem)
+                        if guard:  # adds `guard(val) =>` in front of expression
+                            applied = AppliedSymbol.make(guard, val)
+                            if self.q == '∀':
+                                new_f = AImplication.make('⇒', [applied, new_f])
+                            else:
+                                new_f = AConjunction.make('∧', [applied, new_f])
+                        out.append(new_f)
+                forms = out
 
-    if new_vars:
+    if new_quantees:
         forms = [f.interpret(problem) if problem else f for f in forms]
-    self.q_vars = new_vars
+    self.quantees = new_quantees
     return self.update_exprs(forms)
 AQuantification.interpret = interpret
 
 
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
-    for name, var in out.q_vars.items():  # for !x in $(output_domain(s,1))
-        if var.sort:
-            out.q_vars[name].sort = var.sort.instantiate(e0, e1, problem)
+    for q in self.quantees: # for !x in $(output_domain(s,1))
+        if q.sort:
+            q.sort = q.sort.instantiate(e0, e1, problem)
     if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out
@@ -457,7 +451,7 @@ def instantiate1(self, e0, e1, problem=None):
             out.symbol = out.symbol.instantiate(e0, e1, problem)
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
-                            f"Incorrect arity for {e1.code}")
+                            f"Incorrect arity for {out.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
         if problem and not self.fresh_vars:
             return out.interpret(problem)
@@ -481,15 +475,11 @@ Variable.substitute = substitute
 def instantiate1(self, e0, e1, problem=None):
     if self.sort:
         self.sort = self.sort.instantiate(e0, e1, problem)
-    return e1 if self.code == e0.code else self
-Variable.instantiate1 = instantiate1
-
-
-# Class Number  ######################################################
-
-def instantiate(self, e0, e1, problem=None):
+    for o, n in zip(e0, e1):
+        if self.code == o.code:
+            return n
     return self
-Number.instantiate = instantiate
+Variable.instantiate1 = instantiate1
 
 
 

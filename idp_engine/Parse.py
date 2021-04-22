@@ -490,14 +490,13 @@ class Rule(ASTNode):
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
-        self.q_vars = {}  # {string: Variable}
         if self.out is not None:
             self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
 
     def __repr__(self):
-        return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
+        return (f"Rule:∀{','.join(str(q) for q in self.quantees)}: "
                 f"{self.definiendum} "
                 f"⇔{str(self.body)}")
 
@@ -507,24 +506,23 @@ class Rule(ASTNode):
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
         self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
-        vars = [q.var for q in self.quantees]
+        vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
         for i in range(len(self.definiendum.sub_exprs)):
             arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:
-                self.body = self.body.instantiate(arg, nv)
-                self.out = (self.out.instantiate(arg, nv) if self.out else
+                self.body = self.body.instantiate([arg], [nv])
+                self.out = (self.out.instantiate([arg], [nv]) if self.out else
                             self.out)
                 for j in range(i, len(self.definiendum.sub_exprs)):
                     self.definiendum.sub_exprs[j] = \
-                        self.definiendum.sub_exprs[j].instantiate(arg, nv)
+                        self.definiendum.sub_exprs[j].instantiate([arg], [nv])
             else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
 
         self.definiendum.sub_exprs = list(new_vars.values())
-        self.quantees = [Quantee.make(v,s) for v,s in new_vars.items()]
-        self.q_vars = new_vars
+        self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
         return self
 
     def instantiate_definition(self, new_args, theory):
@@ -537,24 +535,27 @@ class Rule(ASTNode):
         Returns:
             Expression: a boolean expression
         """
-        hash = str(new_args)
-        if hash in self.cache:
-            return self.cache[hash]
+        key = str(new_args)
+        if key in self.cache:
+            return self.cache[key]
+        self.cache[key] = None # avoid recursive loops
         # assert self.is_whole_domain == False
-        out = self.body.copy() # in case there is no arguments
-        self.check(len(new_args) == len(self.definiendum.sub_exprs)
-                or len(new_args)+1 == len(self.definiendum.sub_exprs), "Internal error")
-        for old, new in zip(self.definiendum.sub_exprs, new_args):
-            out = out.instantiate(old, new, theory)
-        out = out.interpret(theory)
+        out = self.body.copy()  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
-        if self.definiendum.decl.type != BOOL:  # a function
-            out = out.instantiate(self.definiendum.sub_exprs[-1], instance, theory)
-        else:
+        if self.definiendum.decl.type == BOOL:  # a predicate
+            self.check(len(self.definiendum.sub_exprs) == len(new_args),
+                       "Internal error")
+            out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
             out = AEquivalence.make('⇔', [instance, out])
+        else:
+            self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
+                       "Internal error")
+            out = out.instantiate(self.definiendum.sub_exprs,
+                                  new_args+[instance], theory)
         out.block = self.block
-        self.cache[hash] = out
+        out = out.interpret(theory)
+        self.cache[key] = out
         return out
 
 
@@ -906,7 +907,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,
-                                         Number, Brackets, Date,
+                                         Number, Brackets, Date, Variable,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,

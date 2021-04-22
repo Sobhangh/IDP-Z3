@@ -33,8 +33,8 @@ The equivalent ASCII-only encoding is shown on the right.
         p(f1(f2())).
         f1() < f2() ≤ f3() = f4() ≥ f5() > f6().  f1() < f2() =< f3() = f4() >= f5() > f6().
         f() ≠ c.                                  f() ~= c.
-        ∀x ∈ T: p(x).                             !x in T: p(x).
-        ∀x ∈ p: q(x).                             !x in p: q(x).
+        ∀x,y ∈ T: p(x,y).                         !x,y in T: p(x,y).
+        ∀x ∈ p, (y,z) ∈ q: q(x,x) ∨ p(y) ∨ p(z).  !x in p, (y,z) in q: q(x,x) | p(y) | p(z).
         ∃x ∈ Symbol: arity(x)=0 ∧ $(x)().         ?x in Symbol: arity(x)=0 & $(x)().
         ∃x ∈ $(input_domain(`p,1)): p(x).         ?x in $(input_domain(`p,1)): p(x).
         ∃x: p(x).                                 ?x: p(x).
@@ -63,7 +63,7 @@ The equivalent ASCII-only encoding is shown on the right.
     structure S:V {
         p := false
         p := {1,2,3}
-        p := {1,2), (3,4)}
+        p := {(1,2), (3,4)}
         p := {
         1 2
         3 4
