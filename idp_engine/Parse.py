@@ -535,11 +535,12 @@ class Rule(ASTNode):
         Returns:
             Expression: a boolean expression
         """
-        hash = str(new_args)
-        if hash in self.cache:
-            return self.cache[hash]
+        key = str(new_args)
+        if key in self.cache:
+            return self.cache[key]
+        self.cache[key] = None # avoid recursive loops
         # assert self.is_whole_domain == False
-        out = self.body.copy() # in case there is no arguments
+        out = self.body.copy()  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
         if self.definiendum.decl.type == BOOL:  # a predicate
@@ -554,7 +555,7 @@ class Rule(ASTNode):
                                   new_args+[instance], theory)
         out.block = self.block
         out = out.interpret(theory)
-        self.cache[hash] = out
+        self.cache[key] = out
         return out
 
 
