@@ -525,6 +525,7 @@ class Rule(ASTNode):
         self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
         return self
 
+    inst_def_level = 0
     def instantiate_definition(self, new_args, theory):
         """Create an instance of the definition for new_args, and interpret it for theory.
 
@@ -538,7 +539,12 @@ class Rule(ASTNode):
         key = str(new_args)
         if key in self.cache:
             return self.cache[key]
-        self.cache[key] = None # avoid recursive loops
+
+        self.inst_def_level += 1
+        if self.inst_def_level > 3:  # TODO: magic constant, should be a modifiable parameter?
+            return None
+
+        self.cache[key] = None  # avoid recursive loops
         # assert self.is_whole_domain == False
         out = self.body.copy()  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
@@ -556,6 +562,7 @@ class Rule(ASTNode):
         out.block = self.block
         out = out.interpret(theory)
         self.cache[key] = out
+        self.inst_def_level -= 1
         return out
 
 
