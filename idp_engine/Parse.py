@@ -446,7 +446,7 @@ class Theory(ASTNode):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.declarations = {}
-        self.clark = {}  # {Declaration: Rule}
+        self.clark = {}  # {(Declaration, Definition): Rule}
         self.def_constraints = {}  # {Declaration: Expression}
         self.assignments = Assignments()
 
@@ -461,13 +461,17 @@ class Theory(ASTNode):
 
 
 class Definition(ASTNode):
+    definition_id = 0  # intentional static variable so that no two definitions get the same ID
+
     def __init__(self, **kwargs):
+        Definition.definition_id += 1
+        self.id = Definition.definition_id
         self.rules = kwargs.pop('rules')
-        self.clarks = None  # {Declaration: Transformed Rule}
+        self.clarks = {}  # {Declaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
 
     def __str__(self):
-        return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
+        return "Definition(s) of " + ",".join([k.name for k in self.clarks.keys()])
 
     def __repr__(self):
         out = []
@@ -475,6 +479,11 @@ class Definition(ASTNode):
             out.append(repr(rule))
         return NEWL.join(out)
 
+    def __eq__(self, another):
+        return self.id == another.id
+
+    def __hash__(self):
+        return hash(self.id)
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
@@ -487,6 +496,7 @@ class Rule(ASTNode):
         self.whole_domain = None  # Expression
         self.block = None  # theory where it occurs
         self.cache = {}
+        self.inst_def_level = 0
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
@@ -525,7 +535,6 @@ class Rule(ASTNode):
         self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
         return self
 
-    inst_def_level = 0
     def instantiate_definition(self, new_args, theory):
         """Create an instance of the definition for new_args, and interpret it for theory.
 

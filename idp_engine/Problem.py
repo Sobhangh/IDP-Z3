@@ -70,7 +70,7 @@ class Problem(object):
     """
     def __init__(self, *blocks):
         self.declarations = {}
-        self.clark = {}  # {Declaration: Rule}
+        self.clark = {}  # {(Declaration, Definition): Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.def_constraints = {}
@@ -133,12 +133,9 @@ class Problem(object):
 
         if isinstance(block, Theory) or isinstance(block, Problem):
             self.co_constraints, self.questions = None, None
-            for decl, rule in block.clark.items():
-                new_rule = copy(rule)
-                if decl in self.clark:
-                    new_rule.body = AConjunction.make('∧',
-                        [self.clark[decl].body, new_rule.body])
-                self.clark[decl] = new_rule
+            for (decl, defin), rule in block.clark.items():
+                if not (decl, defin) in self.clark:
+                    self.clark[(decl, defin)] = rule
             self.constraints.extend(v.copy() for v in block.constraints)
             self.def_constraints.update(
                 {k:v.copy() for k,v in block.def_constraints.items()})
@@ -168,7 +165,7 @@ class Problem(object):
                 self.constraints.append(constraint)
 
             # expand whole-domain definitions
-            for decl, rule in self.clark.items():
+            for (decl, _), rule in self.clark.items():
                 if rule.is_whole_domain:
                     self.def_constraints[decl] = rule.interpret(self).whole_domain
 
@@ -459,7 +456,7 @@ class Problem(object):
         qs = OrderedSet()
         for q in questions.values():
             if ( goal_string == q.code
-            or any(s not in self.clark
+            or any(s not in {decl for (decl, defin) in self.clark.keys()}
                     for s in q.unknown_symbols(co_constraints=False).values())):
                         qs.append(q)
         questions = qs

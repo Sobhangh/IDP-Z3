@@ -409,10 +409,15 @@ def interpret(self, problem):
             # do not do it otherwise, for performance reasons
             f = problem.interpretations[self.decl.name].interpret_application
             simpler = f(problem, 0, self, sub_exprs)
-        if (not self.in_head and not self.fresh_vars
-            and self.decl in problem.clark):  # has a definition
-            clark = problem.clark[self.decl]
-            co_constraint = clark.instantiate_definition(sub_exprs, problem)
+        if (not self.in_head and not self.fresh_vars):
+            instantiations = []
+            for (decl, _), rule in problem.clark.items():
+                if self.decl == decl:
+                    instantiations += [rule.instantiate_definition(sub_exprs, problem)]
+            if len(instantiations) == 1:
+                co_constraint = instantiations[0]
+            elif len(instantiations) > 1:
+                co_constraint = AConjunction.make('∧', instantiations)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler,
                        co_constraint=co_constraint)
     return out

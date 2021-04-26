@@ -132,16 +132,11 @@ def annotate(self, idp):
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
-    # squash multiple definitions of same symbol declaration
+    # collect multiple definitions of same symbol declaration
     for d in self.definitions:
         for decl, rule in d.clarks.items():
-            if decl in self.clark:
-                new_rule = copy(rule)  # not elegant, but rare
-                new_rule.body = AConjunction.make('∧', [self.clark[decl].body, rule.body])
-                new_rule.block = rule.block
-                self.clark[decl] = new_rule
-            else:
-                self.clark[decl] = rule
+            if not (decl, d) in self.clark:
+                self.clark[(decl, d)] = rule
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
