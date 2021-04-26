@@ -461,6 +461,15 @@ class Theory(ASTNode):
 
 
 class Definition(ASTNode):
+    """ The class of AST nodes representing an inductive definition.
+        id (num): unique identifier for each definition
+
+        rules ([Rule]): set of rules for the definition
+
+        clarks ({Declaration: Transformed Rule}): normalized rule for each defined symbol (used to be Clark completion)
+
+        def_vars ({String: {String: Variable}}): Fresh variables for arguments and result
+    """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
     def __init__(self, **kwargs):
@@ -468,7 +477,7 @@ class Definition(ASTNode):
         self.id = Definition.definition_id
         self.rules = kwargs.pop('rules')
         self.clarks = {}  # {Declaration: Transformed Rule}
-        self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
+        self.def_vars = {}  # {String: {String: Variable}}
 
     def __str__(self):
         return "Definition(s) of " + ",".join([k.name for k in self.clarks.keys()])

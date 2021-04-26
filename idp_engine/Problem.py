@@ -46,7 +46,7 @@ class Problem(object):
             The assignments are updated by the different steps of the problem
             resolution.
 
-        clark (dict[SymbolDeclaration, Rule]):
+        clark (dict[(SymbolDeclaration, Definition), Rule]):
             A mapping of defined symbol to the rule that defines it.
 
         def_constraints (dict[SymbolDeclaration], Expression):
