@@ -1,0 +1,28 @@
+vocabulary V {
+    p : () → 𝔹
+    q : () → 𝔹
+    r : () → 𝔹
+}
+
+theory T:V {    
+    {
+      p() <- q().
+    }
+    { 
+      p() <- r().
+    }
+    {
+      p() <- r().
+    }
+    ~p().
+    ~q().
+    r().
+}
+
+structure S:V {
+    
+}
+
+procedure main() {
+    print(model_expand(T, S))
+}

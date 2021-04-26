@@ -1,214 +1,27 @@
+Traceback (most recent call last):
+  File "test.py", line 65, in generateZ3
+    state = State(idp)
+  File "IDP-Z3/idp_server/State.py", line 76, in __init__
+    self._interpret()
+  File "IDP-Z3/idp_engine/Problem.py", line 170, in _interpret
+    self.def_constraints[decl] = rule.interpret(self).whole_domain
+  File "IDP-Z3/idp_engine/Interpret.py", line 128, in interpret
+    self.whole_domain = expr.interpret(theory)
+  File "IDP-Z3/idp_engine/Interpret.py", line 341, in interpret
+    new_f = f.instantiate(vars, val, problem)
+  File "IDP-Z3/idp_engine/Interpret.py", line 255, in instantiate
+    return out.instantiate1(e0, e1, problem)
+  File "IDP-Z3/idp_engine/Interpret.py", line 266, in instantiate1
+    out = self.update_exprs(e.instantiate(e0, e1, problem)
+  File "IDP-Z3/idp_engine/Simplify.py", line 162, in update_exprs
+    exprs = list(new_exprs)
+  File "IDP-Z3/idp_engine/Interpret.py", line 266, in <genexpr>
+    out = self.update_exprs(e.instantiate(e0, e1, problem)
+  File "IDP-Z3/idp_engine/Interpret.py", line 255, in instantiate
+    return out.instantiate1(e0, e1, problem)
+  File "IDP-Z3/idp_engine/Interpret.py", line 458, in instantiate1
+    self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
+  File "IDP-Z3/idp_engine/Expression.py", line 60, in check
+    raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
+idp_engine.utils.IDPZ3Error: Error on line 11, col 35: Incorrect arity for $($important!0$)
 
--- original ---------------------------------
-vocabulary {
-    type color := {red, blue, green}
-    p, q: () → Bool
-    important: (Symbol) → Bool
-    opposite: color → color
-}
-theory {
-  ~p()|q().
-  { important(`p). }
-
-  { !x in Symbol: important(x) <- $(x)(). }
-  arity(`important) = 1.
-  !x in Symbol: arity(x)<2.
-  output_domain(`opposite) = `color.
-  output_domain(`opposite) ~= `Date.
-  input_domain(`opposite, 1) = `color.
-  input_domain(`opposite, 1) ~= `Date.
-  `opposite = `opposite.
-  `opposite ~= `color.
-}
-display {
-  relevant(`p).
-  expand(`q).
-  hide(`important).
-  goal(`p).
-  view() = normal.
-}
--- meta -------------------------------------
-{'optionalPropagation': False,
- 'symbols': [{'environmental': False,
-              'idpname': 'p',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'proposition',
-              'view': 'expanded'},
-             {'environmental': False,
-              'idpname': 'q',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'proposition',
-              'view': 'expanded'},
-             {'environmental': False,
-              'idpname': 'important',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'function',
-              'view': 'hidden'},
-             {'environmental': False,
-              'idpname': 'opposite',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'function',
-              'view': 'normal'}],
- 'title': 'Interactive Consultant'}
-
--- propagation ------------------------------
-{' Global': {'env_dec': False},
- 'important': {'__rank': 9999,
-               'important(`Date)': {'environmental': False,
-                                    'is_assignment': False,
-                                    'normal': True,
-                                    'reading': 'important(`Date)',
-                                    'relevant': False,
-                                    'status': 'CONSEQUENCE',
-                                    'typ': 'Bool',
-                                    'value': False},
-               'important(`color)': {'environmental': False,
-                                     'is_assignment': False,
-                                     'normal': True,
-                                     'reading': 'important(`color)',
-                                     'relevant': False,
-                                     'status': 'CONSEQUENCE',
-                                     'typ': 'Bool',
-                                     'value': False},
-               'important(`important)': {'environmental': False,
-                                         'is_assignment': False,
-                                         'normal': True,
-                                         'reading': 'important(`important)',
-                                         'relevant': False,
-                                         'status': 'CONSEQUENCE',
-                                         'typ': 'Bool',
-                                         'value': False},
-               'important(`opposite)': {'environmental': False,
-                                        'is_assignment': False,
-                                        'normal': True,
-                                        'reading': 'important(`opposite)',
-                                        'relevant': False,
-                                        'status': 'CONSEQUENCE',
-                                        'typ': 'Bool',
-                                        'value': False},
-               'important(`p)': {'environmental': False,
-                                 'is_assignment': False,
-                                 'normal': True,
-                                 'reading': 'important(`p)',
-                                 'relevant': False,
-                                 'status': 'UNKNOWN',
-                                 'typ': 'Bool'},
-               'important(`q)': {'environmental': False,
-                                 'is_assignment': False,
-                                 'normal': True,
-                                 'reading': 'important(`q)',
-                                 'relevant': False,
-                                 'status': 'CONSEQUENCE',
-                                 'typ': 'Bool',
-                                 'value': False}},
- 'opposite': {'__rank': 9999,
-              'opposite(blue)': {'environmental': False,
-                                 'is_assignment': True,
-                                 'normal': True,
-                                 'reading': 'opposite(blue)',
-                                 'relevant': False,
-                                 'status': 'UNKNOWN',
-                                 'typ': 'color',
-                                 'value': '',
-                                 'values': ['red', 'blue', 'green']},
-              'opposite(blue) = blue': {'environmental': False,
-                                        'is_assignment': True,
-                                        'normal': False,
-                                        'reading': 'opposite(blue) = blue',
-                                        'relevant': False,
-                                        'status': 'UNKNOWN',
-                                        'typ': 'Bool'},
-              'opposite(blue) = green': {'environmental': False,
-                                         'is_assignment': True,
-                                         'normal': False,
-                                         'reading': 'opposite(blue) = green',
-                                         'relevant': False,
-                                         'status': 'UNKNOWN',
-                                         'typ': 'Bool'},
-              'opposite(blue) = red': {'environmental': False,
-                                       'is_assignment': True,
-                                       'normal': False,
-                                       'reading': 'opposite(blue) = red',
-                                       'relevant': False,
-                                       'status': 'UNKNOWN',
-                                       'typ': 'Bool'},
-              'opposite(green)': {'environmental': False,
-                                  'is_assignment': True,
-                                  'normal': True,
-                                  'reading': 'opposite(green)',
-                                  'relevant': False,
-                                  'status': 'UNKNOWN',
-                                  'typ': 'color',
-                                  'value': '',
-                                  'values': ['red', 'blue', 'green']},
-              'opposite(green) = blue': {'environmental': False,
-                                         'is_assignment': True,
-                                         'normal': False,
-                                         'reading': 'opposite(green) = blue',
-                                         'relevant': False,
-                                         'status': 'UNKNOWN',
-                                         'typ': 'Bool'},
-              'opposite(green) = green': {'environmental': False,
-                                          'is_assignment': True,
-                                          'normal': False,
-                                          'reading': 'opposite(green) = green',
-                                          'relevant': False,
-                                          'status': 'UNKNOWN',
-                                          'typ': 'Bool'},
-              'opposite(green) = red': {'environmental': False,
-                                        'is_assignment': True,
-                                        'normal': False,
-                                        'reading': 'opposite(green) = red',
-                                        'relevant': False,
-                                        'status': 'UNKNOWN',
-                                        'typ': 'Bool'},
-              'opposite(red)': {'environmental': False,
-                                'is_assignment': True,
-                                'normal': True,
-                                'reading': 'opposite(red)',
-                                'relevant': False,
-                                'status': 'UNKNOWN',
-                                'typ': 'color',
-                                'value': '',
-                                'values': ['red', 'blue', 'green']},
-              'opposite(red) = blue': {'environmental': False,
-                                       'is_assignment': True,
-                                       'normal': False,
-                                       'reading': 'opposite(red) = blue',
-                                       'relevant': False,
-                                       'status': 'UNKNOWN',
-                                       'typ': 'Bool'},
-              'opposite(red) = green': {'environmental': False,
-                                        'is_assignment': True,
-                                        'normal': False,
-                                        'reading': 'opposite(red) = green',
-                                        'relevant': False,
-                                        'status': 'UNKNOWN',
-                                        'typ': 'Bool'},
-              'opposite(red) = red': {'environmental': False,
-                                      'is_assignment': True,
-                                      'normal': False,
-                                      'reading': 'opposite(red) = red',
-                                      'relevant': False,
-                                      'status': 'UNKNOWN',
-                                      'typ': 'Bool'}},
- 'p': {'__rank': 1,
-       'p': {'environmental': False,
-             'is_assignment': False,
-             'normal': True,
-             'reading': 'p',
-             'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}},
- 'q': {'__rank': 2,
-       'q': {'environmental': False,
-             'is_assignment': False,
-             'normal': True,
-             'reading': 'q',
-             'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}}}
