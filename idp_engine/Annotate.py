@@ -234,7 +234,7 @@ def annotate(self, block):
 
     # create constructors if it is a type enumeration
     self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
-    if self.is_type_enumeration:
+    if self.is_type_enumeration and self.enumeration.constructors:
         # create Constructors before annotating the tuples
         for c in self.enumeration.constructors:
             c.type = self.name

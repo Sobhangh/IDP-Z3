@@ -65,7 +65,11 @@ def interpret(self, problem):
     if self.interpretation:
         self.constructors = self.interpretation.enumeration.constructors
     self.translate()
-    self.range = sum([c.interpret(problem).range for c in self.constructors], [])
+    if self.constructors:
+        self.range = sum([c.interpret(problem).range for c in self.constructors], [])
+    elif self.interpretation.enumeration:  # range declaration
+        self.range = [t.args[0] for t in self.interpretation.enumeration.tuples]
+
 ConstructedTypeDeclaration.interpret = interpret
 
 

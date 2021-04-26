@@ -52,7 +52,7 @@ def translate(self):
             self.constructors[1].translated = BoolVal(False)
             self.constructors[0].py_value = True
             self.constructors[1].py_value = False
-        else:
+        elif self.constructors:
             sort = Datatype(self.name)
             for c in self.constructors:
                 sort.declare(c.name,
@@ -72,6 +72,8 @@ def translate(self):
                 else:
                     for e in c.range:
                         self.map[str(e)] = e
+        else: # list of integers
+            self.translated = IntSort()
     return self.translated
 ConstructedTypeDeclaration.translate = translate
 
