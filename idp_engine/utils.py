@@ -37,6 +37,8 @@ INPUT_DOMAIN = "input_domain"
 OUTPUT_DOMAIN = "output_domain"
 RESERVED_SYMBOLS = [RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
 
+param_co_constr_recursion_depth = 3
+
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"
 method and uses it to encode the object if found.

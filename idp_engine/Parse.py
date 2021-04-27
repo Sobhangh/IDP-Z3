@@ -47,7 +47,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
+                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error, param_co_constr_recursion_depth)
 
 
 def str_to_IDP(atom, val_string):
@@ -559,7 +559,7 @@ class Rule(ASTNode):
             return self.cache[key]
 
         self.inst_def_level += 1
-        if self.inst_def_level > 3:  # TODO: magic constant, should be a modifiable parameter?
+        if self.inst_def_level > param_co_constr_recursion_depth:
             return None
 
         self.cache[key] = None  # avoid recursive loops
