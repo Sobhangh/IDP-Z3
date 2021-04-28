@@ -62,11 +62,11 @@ def str_to_IDP(atom, val_string):
         d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
              date.fromisoformat(val_string[1:]))
         out = Date(iso=f"#{d.isoformat()}")
-    elif (atom.type in [REAL, INT] or
-            type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
-        out = Number(number=str(eval(val_string.replace('?', ''))))
-    else:  # constructor
+    elif (hasattr(atom.decl.out.decl, 'map')
+          and val_string in atom.decl.out.decl.map):  # constructor
         out = atom.decl.out.decl.map[val_string]
+    else:  # could be fraction
+        out = Number(number=str(eval(val_string.replace('?', ''))))
     return out
 
 
@@ -275,7 +275,8 @@ class ConstructedTypeDeclaration(ASTNode):
         self.arity = 1
         self.sorts = [Symbol(name=self.name)]
         self.out = Symbol(name=BOOL)
-        self.type = self.name
+        self.type = (self.name if type(enumeration) != Ranges else
+                     enumeration.type)  # INT or REAL
 
         self.translated = None
         self.range = None
@@ -748,6 +749,40 @@ class FunctionTuple(Tuple):
 class CSVTuple(Tuple):
     pass
 
+class Ranges(Enumeration):
+    def __init__(self, **kwargs):
+        self.elements = kwargs.pop('elements')
+
+        tuples = []
+        self.type = INT
+        for x in self.elements:
+            if x.toI is None:
+                tuples.append(Tuple(args=[x.fromI]))
+                if x.fromI.type != INT:
+                    self.type = REAL
+            elif x.fromI.type == INT and x.toI.type == INT:
+                for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                    tuples.append(Tuple(args=[Number(number=str(i))]))
+            else:
+                self.check(False, f"Can't have a range over reals: {self.name}")
+        Enumeration.__init__(self, tuples=tuples)
+
+    def contains(self, args, function, arity=None, rank=0, tuples=None):
+        var = args[0]
+        if not self.elements:
+            return None
+        if self.tuples and len(self.tuples) < 20:
+            es = [AComparison.make('=', [var, c.args[0]]) for c in self.tuples]
+            e = ADisjunction.make('∨', es)
+            return e
+        sub_exprs = []
+        for x in self.elements:
+            if x.toI is None:
+                e = AComparison.make('=', [var, x.fromI])
+            else:
+                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
+            sub_exprs.append(e)
+        return ADisjunction.make('∨', sub_exprs)
 
 ################################ Display  ###############################
 
@@ -907,7 +942,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
-                                         ConstructedFrom, Constructor,
+                                         ConstructedFrom, Constructor, Ranges,
                                          Display,
 
-                                         Procedure, Call1, Call0, String, PyList, PyAssignment])
+                                         Procedure, Call1, Call0, String,
+                                         PyList, PyAssignment])

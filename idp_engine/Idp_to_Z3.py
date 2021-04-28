@@ -73,7 +73,10 @@ def translate(self):
                     for e in c.range:
                         self.map[str(e)] = e
         else: # list of integers
-            self.translated = IntSort()
+            if self.enumeration.type == INT:
+                self.translated = IntSort()
+            else:
+                self.translated = RealSort()
     return self.translated
 ConstructedTypeDeclaration.translate = translate
 

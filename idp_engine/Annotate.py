@@ -240,7 +240,7 @@ def annotate(self, block):
             c.type = self.name
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate constructor in vocabulary: {c.name}")
-            voc.symbol_decls[c.name] = c
+            voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
 
     self.enumeration.annotate(voc)
 
