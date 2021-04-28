@@ -40,7 +40,7 @@ import copy
 from itertools import product, repeat
 
 from .Assignments import Status
-from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
+from .Parse import(Extern, ConstructedTypeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
                    FunctionEnum, Enumeration, Tuple, ConstructedFrom)
 from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
@@ -71,13 +71,6 @@ def interpret(self, problem):
         self.range = [t.args[0] for t in self.interpretation.enumeration.tuples]
 
 ConstructedTypeDeclaration.interpret = interpret
-
-
-# class RangeDeclaration  ###########################################################
-
-def interpret(self, problem):
-    pass
-RangeDeclaration.interpret = interpret
 
 
 # class SymbolDeclaration  ###########################################################

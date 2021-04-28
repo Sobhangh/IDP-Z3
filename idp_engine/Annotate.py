@@ -23,7 +23,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 from copy import copy
 
 from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
-                    RangeDeclaration, SymbolDeclaration, Symbol,
+                    SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
@@ -79,18 +79,6 @@ def annotate(self, voc):
     if self.interpretation:
         self.interpretation.annotate(voc)
 ConstructedTypeDeclaration.annotate = annotate
-
-
-# Class RangeDeclaration  #######################################################
-
-def annotate(self, voc):
-    self.check(self.name not in voc.symbol_decls,
-                f"duplicate declaration in vocabulary: {self.name}")
-    voc.symbol_decls[self.name] = self
-    for s in self.sorts:
-        s.annotate(voc, {})
-    self.out.annotate(voc, {})
-RangeDeclaration.annotate = annotate
 
 
 # Class SymbolDeclaration  #######################################################

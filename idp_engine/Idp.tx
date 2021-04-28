@@ -14,7 +14,7 @@ Comment:
 Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
-  Declaration: Extern | ConstructedTypeDeclaration | RangeDeclaration | SymbolDeclaration;
+  Declaration: Extern | ConstructedTypeDeclaration | SymbolDeclaration;
 
     Extern: 'extern' 'vocabulary' (name=ID);
 
@@ -24,9 +24,6 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
       (':=' ( enumeration=Ranges
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
-
-    RangeDeclaration: /type[ \t]/ name=ID ':=' '{' elements*=RangeElement[','] '}';
-      RangeElement: fromI=Number ('..' toI=Number)?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
           ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
@@ -122,6 +119,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
   CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
   Ranges: '{' elements*=RangeElement[','] '}';
+      RangeElement: fromI=Number ('..' toI=Number)?;
 
   ConstructedFrom: constructed=/constructed\s+from/?
                    '{' constructors*=Constructor[',']  '}';

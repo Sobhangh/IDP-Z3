@@ -21,7 +21,7 @@ Classes to parse an IDP-Z3 theory.
 
 """
 __all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
-           "ConstructedTypeDeclaration", "RangeDeclaration",
+           "ConstructedTypeDeclaration",
            "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", ]
@@ -183,9 +183,9 @@ class Vocabulary(ASTNode):
         self.declarations = [
             ConstructedTypeDeclaration(
                 name=BOOL, constructors=[TRUEC, FALSEC]),
-            RangeDeclaration(name=INT, elements=[]),
-            RangeDeclaration(name=REAL, elements=[]),
-            RangeDeclaration(name=DATE, elements=[]),
+            ConstructedTypeDeclaration(name=INT, enumeration=IntRange()),
+            ConstructedTypeDeclaration(name=REAL, enumeration=RealRange()),
+            ConstructedTypeDeclaration(name=DATE, enumeration=DateRange()),
             ConstructedTypeDeclaration(
                 name=SYMBOL,
                 constructors=([Constructor(name=f"`{s}")
@@ -282,7 +282,7 @@ class ConstructedTypeDeclaration(ASTNode):
         self.range = None
         self.map = {}  # {String: constructor}
 
-        self.interpretation = (None if not enumeration else
+        self.interpretation = (None if enumeration is None else
             SymbolInterpretation(name=Symbol(name=self.name),
                                  enumeration=enumeration, default=None))
 
@@ -292,53 +292,6 @@ class ConstructedTypeDeclaration(ASTNode):
 
     def check_bounds(self, var):
         return self.interpretation.enumeration.contains([var], False)
-
-    def is_subset_of(self, other):
-        return self == other
-
-
-class RangeDeclaration(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')  # maybe INT, REAL
-        self.elements = kwargs.pop('elements')
-        self.arity = 1
-        self.translated = None
-        self.sorts = [Symbol(name=self.name)]
-        self.out = Symbol(name=BOOL)
-
-        self.type = REAL if self.name == REAL else INT
-        self.range = []
-        for x in self.elements:
-            if x.toI is None:
-                self.range.append(x.fromI)
-                if x.fromI.type != INT:
-                    self.type = REAL
-            elif x.fromI.type == INT and x.toI.type == INT:
-                for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                    self.range.append(Number(number=str(i)))
-            else:
-                self.check(False, f"Can't have a range over reals: {self.name}")
-
-    def __str__(self):
-        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." +
-                                             str(x.toI)) for x in self.elements])
-        return f"type {self.name} = {{{elements}}}"
-
-    def check_bounds(self, var):
-        if not self.elements:
-            return None
-        if self.range and len(self.range) < 20:
-            es = [AComparison.make('=', [var, c]) for c in self.range]
-            e = ADisjunction.make('∨', es)
-            return e
-        sub_exprs = []
-        for x in self.elements:
-            if x.toI is None:
-                e = AComparison.make('=', [var, x.fromI])
-            else:
-                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
-            sub_exprs.append(e)
-        return ADisjunction.make('∨', sub_exprs)
 
     def is_subset_of(self, other):
         return self == other
@@ -421,7 +374,7 @@ class SymbolDeclaration(ASTNode):
                 and self.sorts[0].decl == other)
 
 
-Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
+Type = Union[ConstructedTypeDeclaration, SymbolDeclaration]
 
 
 ################################ Theory  ###############################
@@ -784,6 +737,21 @@ class Ranges(Enumeration):
             sub_exprs.append(e)
         return ADisjunction.make('∨', sub_exprs)
 
+class IntRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = INT
+
+class RealRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = REAL
+
+class DateRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = DATE
+
 ################################ Display  ###############################
 
 class Display(ASTNode):
@@ -926,7 +894,6 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Vocabulary, Extern,
                                          ConstructedTypeDeclaration, Accessor,
-                                         RangeDeclaration,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 

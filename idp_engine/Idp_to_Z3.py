@@ -30,7 +30,7 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
                 BoolVal, Datatype)
 
-from idp_engine.Parse import ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration
+from idp_engine.Parse import ConstructedTypeDeclaration, SymbolDeclaration
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AQuantification, BinaryOperator,
                                    ADisjunction, AConjunction, AComparison,
@@ -72,25 +72,13 @@ def translate(self):
                 else:
                     for e in c.range:
                         self.map[str(e)] = e
-        else: # list of integers
-            if self.enumeration.type == INT:
+        else: # list of numbers
+            if self.interpretation.enumeration.type == INT:
                 self.translated = IntSort()
             else:
                 self.translated = RealSort()
     return self.translated
 ConstructedTypeDeclaration.translate = translate
-
-
-# class RangeDeclaration  ###########################################################
-
-def translate(self):
-    if self.translated is None:
-        if self.type == INT:
-            self.translated = IntSort()
-        else:
-            self.translated = RealSort()
-    return self.translated
-RangeDeclaration.translate = translate
 
 
 # class SymbolDeclaration  ###########################################################
