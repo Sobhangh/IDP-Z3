@@ -276,7 +276,7 @@ class TypeDeclaration(ASTNode):
         self.sorts = [Symbol(name=self.name)]
         self.out = Symbol(name=BOOL)
         self.type = (self.name if type(enumeration) != Ranges else
-                     enumeration.type)  # INT or REAL
+                     enumeration.type)  # INT or REAL or DATE
 
         self.translated = None
         self.range = None
@@ -707,17 +707,20 @@ class Ranges(Enumeration):
         self.elements = kwargs.pop('elements')
 
         tuples = []
-        self.type = INT
+        self.type = None
         for x in self.elements:
+            if self.type == None:
+                self.type = x.fromI.type
             if x.toI is None:
                 tuples.append(Tuple(args=[x.fromI]))
-                if x.fromI.type != INT:
-                    self.type = REAL
             elif x.fromI.type == INT and x.toI.type == INT:
                 for i in range(x.fromI.py_value, x.toI.py_value + 1):
                     tuples.append(Tuple(args=[Number(number=str(i))]))
+            elif x.fromI.type == DATE and x.toI.type == DATE:
+                for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                    tuples.append(Tuple(args=[Number(number=str(i))])) #TODO1
             else:
-                self.check(False, f"Can't have a range over reals: {self.name}")
+                self.check(False, f"Can't have a range over reals")
         Enumeration.__init__(self, tuples=tuples)
 
     def contains(self, args, function, arity=None, rank=0, tuples=None):

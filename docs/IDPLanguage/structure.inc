@@ -20,12 +20,16 @@ for nullary predicates (propositions)
     ``true`` or ``false``
 
 for non-numeric types and unary predicates:
-    a set of rigid terms (numbers, identifiers, or constructors applied to rigid terms),
+    a set of rigid terms (numbers, dates, identifiers, or constructors applied to rigid terms),
     e.g., ``{red, blue, green}``.
 
 for numeric types and unary predicates:
     a set of numeric literals and ranges,
     e.g., ``{0,1,2}``, ``{0..255}`` or ``{0..9, 90..99}``
+
+for date types and unary predicates:
+    a set of date literals and ranges,
+    e.g., ``{#2021-01-01, #2022-01-01}`` or ``{#2021-01-01 .. #2022-01-01}``
 
 for types:
     a set of n-ary constructors, preceded by ``constructed from``,
@@ -36,7 +40,7 @@ for n-ary predicates:
     a set of tuples of rigid terms, e.g., ``{(a,b), (a,c)}``.
 
 for nullary functions:
-    a rigid term, e.g. ``5`` or ``red`` or ``rgb(0,0,0)``
+    a rigid term, e.g. ``5`` or ``#2021-01-01``, or ``red`` or ``rgb(0,0,0)``
 
 for n-ary functions:
     a set of tuples and their associated values,

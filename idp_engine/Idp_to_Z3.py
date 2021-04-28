@@ -37,7 +37,7 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
-from idp_engine.utils import BOOL, INT, REAL, RELEVANT, RESERVED_SYMBOLS
+from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
 
 
 # class TypeDeclaration  ###########################################################
@@ -341,6 +341,7 @@ def translate(self):
     if self.translated is None:
         self.translated = self.date.toordinal()
         self.py_value = self.translated
+        self.type = DATE
     return self.translated
 Date.translate = translate
 

@@ -1,0 +1,15 @@
+vocabulary {
+    type dates
+    date: () -> dates
+}
+
+theory {
+    date() < #TODAY.
+}
+
+structure {
+    dates := {#2021-01-01..#2021-01-10}
+}
+procedure main() {
+    print(Problem(T,S).formula())
+}

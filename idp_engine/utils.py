@@ -71,7 +71,7 @@ def unquote(s):
 
 def in_list(q, ls):
     if not ls:
-        return True  # e.g. for INT, REAL
+        return True  # e.g. for INT, REAL, DATE
     if len(ls) == 1:
         return q == ls[0]
     return Or([q == i for i in ls])

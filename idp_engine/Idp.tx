@@ -115,7 +115,8 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
   Ranges: '{' elements*=RangeElement[','] '}';
-      RangeElement: fromI=Number ('..' toI=Number)?;
+      RangeElement:   (fromI=Number ('..' toI=Number)?)
+                    | (fromI=Date   ('..' toI=Date  )?) ;
   Enumeration: '{' tuples*=Tuple[','] '}';
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';

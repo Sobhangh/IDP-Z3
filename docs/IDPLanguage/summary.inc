@@ -64,6 +64,7 @@ The equivalent ASCII-only encoding is shown on the right.
         p := false
         p := {1,2,3}
         p := {0..9, 100}
+        p := {#2021-01-01}
         p := {(1,2), (3,4)}
         p := {
         1 2

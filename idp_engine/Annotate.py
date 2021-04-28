@@ -236,7 +236,7 @@ def annotate(self, block):
     if type(self.enumeration) != FunctionEnum and self.default is None:
         self.default = FALSE
     self.check(self.is_type_enumeration
-                or all(s.name not in [INT, REAL]  # finite domain
+                or all(s.name not in [INT, REAL, DATE]  # finite domain
                         for s in self.symbol.decl.sorts)
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
