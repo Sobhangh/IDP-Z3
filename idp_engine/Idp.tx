@@ -114,12 +114,12 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
+  Ranges: '{' elements*=RangeElement[','] '}';
+      RangeElement: fromI=Number ('..' toI=Number)?;
   Enumeration: '{' tuples*=Tuple[','] '}';
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
   CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
-  Ranges: '{' elements*=RangeElement[','] '}';
-      RangeElement: fromI=Number ('..' toI=Number)?;
 
   ConstructedFrom: constructed=/constructed\s+from/?
                    '{' constructors*=Constructor[',']  '}';

@@ -321,7 +321,7 @@ def annotate(self, idp):
 
         type_name = name.capitalize()  # e.g. type Unit (not unit)
         open_type = TypeDeclaration(name=type_name,
-                                                constructors=constructors)
+                                    constructors=constructors)
         open_type.annotate(self.voc)
         open_types[name] = Symbol(name=type_name)
 
