@@ -10,40 +10,54 @@ Structure
         // here comes the structure named S, for vocabulary named V
     }
 
-A *structure* specifies the interpretation of some predicate_\ s and function_\ s, by enumeration.
+A *structure* specifies the interpretation of some type_, predicate_\ s and function_\ s, by enumeration.
 If the names are omitted, the structure is named S, for vocabulary V.
 
-A structure is a set of enumerations, having one of the following forms:
+A structure is a set of statement of the form ``<symbol> := <enumeration>``,
+e.g., ``P := {1..9}``, where the enumeration can be:
+
+for nullary predicates (propositions)
+    ``true`` or ``false``
+
+for non-numeric types and unary predicates:
+    a set of rigid terms (numbers, identifiers, or constructors applied to rigid terms),
+    e.g., ``{red, blue, green}``.
+
+for numeric types and unary predicates:
+    a set of numeric literals and ranges,
+    e.g., ``{0,1,2}``, ``{0..255}`` or ``{0..9, 90..99}``
+
+for types:
+    a set of n-ary constructors, preceded by ``constructed from``,
+    e.g., ``constructed from {Red, Blue, Green, RGB(R: Byte, G: Byte, B: Byte)}``
+    (see more details in type_\ s)
+
+for n-ary predicates:
+    a set of tuples of rigid terms, e.g., ``{(a,b), (a,c)}``.
+
+for nullary functions:
+    a rigid term, e.g. ``5`` or ``red`` or ``rgb(0,0,0)``
+
+for n-ary functions:
+    a set of tuples and their associated values,
+    e.g., ``{ (1,2)->3, (4, 5)->6 }``
+
+Additional  notes:
+
+* the enumeration for a predicate specifies the tuples that make the predicate true; any other tuple make it false.
+
+* the enumeration for a function may be followed by ``else <default>``, where ``<default>`` is a default value (a rigid term), i.e., a value for the non-enumerated tuples, if any.
+
+* parenthesis around a tuple can be omitted when the arity is 1, e.g., ``{1-2, 3->4}``
+
+* a predicate may be enumerated using a CSV format, with one tuple per line, e.g., :
 
 .. code::
 
-    P := { (el_1^1, el_1^2,... el_1^n),
-           (el_2^1, el_2^2,... el_2^n),
-          ..
-        }
-
     P := {
-    el_1^1 el_1^2 ... el_1^n
-    el_2^1 el_2^2 ... el_2^n
+    1 2
+    3 4
+    5 6
     }
 
-    F := { (el_1^1, el_1^2,... el_1^n) → el_1,
-           (el_2^1, el_2^2,... el_2^n) -> el_2,
-           ..
-         } else el
-    Z := el
-
-where :math:`P` is a predicate of arity :math:`n`, :math:`F` is a function of arity :math:`n`,
-and :math:`el_i^j` are constructor_\ s or numeric literals.
-
-The first statement enumerates the tuples of terms that make the predicate :math:`P` true.
-Parentheses can be omitted when the arity is 1.
-
-The second statement enumerates :math:`P` using tab-delimited format: one row per line.
-
-The third statement specifies the value :math:`el_i^n` for the function :math:`F` applied to the tuple of :math:`el_i^j` arguments.
-The element after :math:`else` specifies the function value for the non-enumerated tuples of arguments.
-This default value is optional; when omitted, the value of the function for the non-enumerated tuples, if any, is unspecified.
-
-The fourth statement assigns the value :math:`el` to the symbol :math:`Z` (of arity 0).
 

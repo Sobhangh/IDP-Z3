@@ -63,6 +63,7 @@ The equivalent ASCII-only encoding is shown on the right.
     structure S:V {
         p := false
         p := {1,2,3}
+        p := {0..9, 100}
         p := {(1,2), (3,4)}
         p := {
         1 2
