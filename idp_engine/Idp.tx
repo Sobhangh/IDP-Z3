@@ -14,11 +14,11 @@ Comment:
 Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
-  Declaration: Extern | ConstructedTypeDeclaration | SymbolDeclaration;
+  Declaration: Extern | TypeDeclaration | SymbolDeclaration;
 
     Extern: 'extern' 'vocabulary' (name=ID);
 
-    ConstructedTypeDeclaration:
+    TypeDeclaration:
       /type[ \t]/
       name=ID
       (':=' ( enumeration=Ranges

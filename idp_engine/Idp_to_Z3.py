@@ -30,7 +30,7 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
                 BoolVal, Datatype)
 
-from idp_engine.Parse import ConstructedTypeDeclaration, SymbolDeclaration
+from idp_engine.Parse import TypeDeclaration, SymbolDeclaration
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AQuantification, BinaryOperator,
                                    ADisjunction, AConjunction, AComparison,
@@ -40,7 +40,7 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
 from idp_engine.utils import BOOL, INT, REAL, RELEVANT, RESERVED_SYMBOLS
 
 
-# class ConstructedTypeDeclaration  ###########################################################
+# class TypeDeclaration  ###########################################################
 
 def translate(self):
     if self.translated is None:
@@ -78,7 +78,7 @@ def translate(self):
             else:
                 self.translated = RealSort()
     return self.translated
-ConstructedTypeDeclaration.translate = translate
+TypeDeclaration.translate = translate
 
 
 # class SymbolDeclaration  ###########################################################

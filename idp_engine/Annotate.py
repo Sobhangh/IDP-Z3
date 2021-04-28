@@ -22,7 +22,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 
-from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
+from .Parse import (Vocabulary, Extern, TypeDeclaration,
                     SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
@@ -62,7 +62,7 @@ def annotate(self, voc):
 Extern.annotate = annotate
 
 
-# Class ConstructedTypeDeclaration  #######################################################
+# Class TypeDeclaration  #######################################################
 
 def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
@@ -78,7 +78,7 @@ def annotate(self, voc):
         voc.symbol_decls[c.name] = c
     if self.interpretation:
         self.interpretation.annotate(voc)
-ConstructedTypeDeclaration.annotate = annotate
+TypeDeclaration.annotate = annotate
 
 
 # Class SymbolDeclaration  #######################################################
@@ -300,7 +300,7 @@ def annotate(self, idp):
 
     # add display predicates
 
-    viewType = ConstructedTypeDeclaration(name='_ViewType',
+    viewType = TypeDeclaration(name='_ViewType',
         constructors=[Constructor(name='normal'),
                         Constructor(name='expanded')])
     viewType.annotate(self.voc)
@@ -320,7 +320,7 @@ def annotate(self, idp):
             continue
 
         type_name = name.capitalize()  # e.g. type Unit (not unit)
-        open_type = ConstructedTypeDeclaration(name=type_name,
+        open_type = TypeDeclaration(name=type_name,
                                                 constructors=constructors)
         open_type.annotate(self.voc)
         open_types[name] = Symbol(name=type_name)

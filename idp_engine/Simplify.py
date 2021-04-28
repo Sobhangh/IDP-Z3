@@ -447,7 +447,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     else:
                         new_tuples = y.tuples | y1.tuples # union
                     # sort again
-                    new_tuples = list(new_tuples.values())
+                    new_tuples = list(new_tuples.values())  #TODO1 Tuple(args=)
 
                     out = AppliedSymbol.make(
                         symbol=x.symbol, args=x.sub_exprs,

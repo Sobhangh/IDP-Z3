@@ -21,7 +21,7 @@ Classes to parse an IDP-Z3 theory.
 
 """
 __all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
-           "ConstructedTypeDeclaration",
+           "TypeDeclaration",
            "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", ]
@@ -181,12 +181,12 @@ class Vocabulary(ASTNode):
 
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
-            ConstructedTypeDeclaration(
+            TypeDeclaration(
                 name=BOOL, constructors=[TRUEC, FALSEC]),
-            ConstructedTypeDeclaration(name=INT, enumeration=IntRange()),
-            ConstructedTypeDeclaration(name=REAL, enumeration=RealRange()),
-            ConstructedTypeDeclaration(name=DATE, enumeration=DateRange()),
-            ConstructedTypeDeclaration(
+            TypeDeclaration(name=INT, enumeration=IntRange()),
+            TypeDeclaration(name=REAL, enumeration=RealRange()),
+            TypeDeclaration(name=DATE, enumeration=DateRange()),
+            TypeDeclaration(
                 name=SYMBOL,
                 constructors=([Constructor(name=f"`{s}")
                                for s in [DATE,]]  # TODO '𝔹', 'ℤ', 'ℝ',
@@ -223,7 +223,7 @@ class Vocabulary(ASTNode):
                         f"Duplicate declaration of {self.name} "
                         f"in vocabulary and block {block.name}")
             block.declarations[s.name] = s
-            if (type(s) == ConstructedTypeDeclaration
+            if (type(s) == TypeDeclaration
                 and s.interpretation
                 and self.name != BOOL):
                 block.check(s.name not in block.interpretations,
@@ -240,7 +240,7 @@ class Extern(ASTNode):
         return f"extern vocabulary {self.name}"
 
 
-class ConstructedTypeDeclaration(ASTNode):
+class TypeDeclaration(ASTNode):
     """AST node to represent `type <symbol> := <enumeration>`
 
     Args:
@@ -374,7 +374,7 @@ class SymbolDeclaration(ASTNode):
                 and self.sorts[0].decl == other)
 
 
-Type = Union[ConstructedTypeDeclaration, SymbolDeclaration]
+Type = Union[TypeDeclaration, SymbolDeclaration]
 
 
 ################################ Theory  ###############################
@@ -893,7 +893,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         ConstructedTypeDeclaration, Accessor,
+                                         TypeDeclaration, Accessor,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
