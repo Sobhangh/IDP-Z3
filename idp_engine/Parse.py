@@ -290,12 +290,7 @@ class ConstructedTypeDeclaration(ASTNode):
                 f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
-        if self.name == BOOL:
-            out = [var, AUnary.make('¬', var)]
-        else:
-            out = [AComparison.make('=', [var, c]) for c in self.range]
-        out = ADisjunction.make('∨', out)
-        return out
+        return self.interpretation.enumeration.contains([var], False)
 
     def is_subset_of(self, other):
         return self == other
