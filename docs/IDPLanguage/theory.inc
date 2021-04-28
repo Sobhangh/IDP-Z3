@@ -114,7 +114,7 @@ Parenthesis
 .. index:: quantifier expression
 
 Enumeration
-    An enumeration (e.g. ``p = {1;2;3}``) is a sentence.
+    An enumeration (e.g. ``p := {1;2;3}``) is a sentence.
     Enumerations follow the syntax described in `structure`_.
 
 Quantified formulas
