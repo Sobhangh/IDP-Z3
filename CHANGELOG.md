@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## API
 * IEP 03: improve binary quantification
 * IEP 06: support for N-ary constructors
-* fix #82: allow number ranges in structures
+* fix #82: allow number and date ranges in structures
 
 ### Interactive Consultant
 
