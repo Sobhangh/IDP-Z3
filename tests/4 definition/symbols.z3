@@ -7,10 +7,10 @@ vocabulary {
     opposite: color → color
 }
 theory {
-  ~p()|q().
-  { important(`p). }
+  ~p() | q().
+  important(`p).
 
-  { !x in Symbol: important(x) <- $(x)(). }
+  { !x in Symbol: important(x) <- arity(x)=0 & ~(x=`q) & $(x)(). }
   arity(`important) = 1.
   !x in Symbol: arity(x)<2.
   output_domain(`opposite) = `color.
@@ -27,6 +27,7 @@ display {
   goal(`p).
   view() = normal.
 }
+
 -- meta -------------------------------------
 {'optionalPropagation': False,
  'symbols': [{'environmental': False,
@@ -57,7 +58,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'important': {'__rank': 9999,
+ 'important': {'__rank': 2,
                'important(`Date)': {'environmental': False,
                                     'is_assignment': False,
                                     'normal': True,
@@ -94,9 +95,10 @@ display {
                                  'is_assignment': False,
                                  'normal': True,
                                  'reading': 'important(`p)',
-                                 'relevant': False,
-                                 'status': 'UNKNOWN',
-                                 'typ': 'Bool'},
+                                 'relevant': True,
+                                 'status': 'UNIVERSAL',
+                                 'typ': 'Bool',
+                                 'value': True},
                'important(`q)': {'environmental': False,
                                  'is_assignment': False,
                                  'normal': True,
@@ -202,13 +204,15 @@ display {
              'normal': True,
              'reading': 'p',
              'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}},
+             'status': 'CONSEQUENCE',
+             'typ': 'Bool',
+             'value': True}},
  'q': {'__rank': 2,
        'q': {'environmental': False,
              'is_assignment': False,
              'normal': True,
              'reading': 'q',
              'relevant': True,
-             'status': 'UNKNOWN',
-             'typ': 'Bool'}}}
+             'status': 'CONSEQUENCE',
+             'typ': 'Bool',
+             'value': True}}}

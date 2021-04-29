@@ -48,7 +48,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
                     RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
-                    MAX_QUANTIFIER_EXPANSION)
+                    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
 def str_to_IDP(atom, val_string):
@@ -396,7 +396,7 @@ class Theory(ASTNode):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.declarations = {}
-        self.clark = {}  # {Declaration: Rule}
+        self.clark = {}  # {(Declaration, Definition): Rule}
         self.def_constraints = {}  # {Declaration: Expression}
         self.assignments = Assignments()
 
@@ -411,13 +411,26 @@ class Theory(ASTNode):
 
 
 class Definition(ASTNode):
+    """ The class of AST nodes representing an inductive definition.
+        id (num): unique identifier for each definition
+
+        rules ([Rule]): set of rules for the definition
+
+        clarks ({Declaration: Transformed Rule}): normalized rule for each defined symbol (used to be Clark completion)
+
+        def_vars ({String: {String: Variable}}): Fresh variables for arguments and result
+    """
+    definition_id = 0  # intentional static variable so that no two definitions get the same ID
+
     def __init__(self, **kwargs):
+        Definition.definition_id += 1
+        self.id = Definition.definition_id
         self.rules = kwargs.pop('rules')
-        self.clarks = None  # {Declaration: Transformed Rule}
-        self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
+        self.clarks = {}  # {Declaration: Transformed Rule}
+        self.def_vars = {}  # {String: {String: Variable}}
 
     def __str__(self):
-        return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
+        return "Definition(s) of " + ",".join([k.name for k in self.clarks.keys()])
 
     def __repr__(self):
         out = []
@@ -425,6 +438,11 @@ class Definition(ASTNode):
             out.append(repr(rule))
         return NEWL.join(out)
 
+    def __eq__(self, another):
+        return self.id == another.id
+
+    def __hash__(self):
+        return hash(self.id)
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
@@ -437,6 +455,7 @@ class Rule(ASTNode):
         self.whole_domain = None  # Expression
         self.block = None  # theory where it occurs
         self.cache = {}
+        self.inst_def_level = 0
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
@@ -488,7 +507,12 @@ class Rule(ASTNode):
         key = str(new_args)
         if key in self.cache:
             return self.cache[key]
-        self.cache[key] = None # avoid recursive loops
+
+        self.inst_def_level += 1
+        if self.inst_def_level > CO_CONSTR_RECURSION_DEPTH:
+            return None
+
+        self.cache[key] = None  # avoid recursive loops
         # assert self.is_whole_domain == False
         out = self.body.copy()  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
@@ -506,6 +530,7 @@ class Rule(ASTNode):
         out.block = self.block
         out = out.interpret(theory)
         self.cache[key] = out
+        self.inst_def_level -= 1
         return out
 
 

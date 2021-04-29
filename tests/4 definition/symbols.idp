@@ -5,10 +5,10 @@ vocabulary {
     opposite: color → color
 }
 theory {
-  ~p()|q().
-  { important(`p). }
+  ~p() | q().
+  important(`p).
 
-  { !x in Symbol: important(x) <- $(x)(). }
+  { !x in Symbol: important(x) <- arity(x)=0 & ~(x=`q) & $(x)(). }
   arity(`important) = 1.
   !x in Symbol: arity(x)<2.
   output_domain(`opposite) = `color.
