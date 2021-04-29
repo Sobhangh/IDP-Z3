@@ -102,7 +102,7 @@ def myprint(x=""):
         for f in facts:
             print(str(f))
         for l in laws:
-            print(l)
+            print(l.annotations['reading'])
     elif isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
             if isinstance(xi, Assignments):
