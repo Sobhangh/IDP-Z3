@@ -54,7 +54,10 @@ class ASTNode(object):
             IDPZ3Error: when `condition` is not met
         """
         if not condition:
-            location = get_location(self)
+            try:
+                location = get_location(self)
+            except:
+                raise IDPZ3Error(f"{msg}")
             line = location['line']
             col = location['col']
             raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
