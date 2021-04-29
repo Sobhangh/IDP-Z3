@@ -47,7 +47,8 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
+                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    MAX_QUANTIFIER_EXPANSION)
 
 
 def str_to_IDP(atom, val_string):
@@ -727,7 +728,7 @@ class Ranges(Enumeration):
         var = args[0]
         if not self.elements:
             return None
-        if self.tuples and len(self.tuples) < 20:
+        if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
             es = [AComparison.make('=', [var, c.args[0]]) for c in self.tuples]
             e = ADisjunction.make('∨', es)
             return e

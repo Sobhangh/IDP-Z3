@@ -23,6 +23,8 @@ from collections import ChainMap, Iterable
 from json import JSONEncoder
 import time
 
+MAX_QUANTIFIER_EXPANSION = 20
+
 NEWL = "\n"
 indented = "\n  "
 BOOL = "Bool"
