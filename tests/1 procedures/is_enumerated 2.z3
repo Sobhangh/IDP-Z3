@@ -2,10 +2,10 @@ T3, S
 Traceback (most recent call last):
   File "test.py", line 63, in generateZ3
     idp.execute()
-  File "IDP-Z3/idp_engine/Run.py", line 122, in execute
+  File "IDP-Z3/idp_engine/Run.py", line 128, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 2, in <module>
-  File "IDP-Z3/idp_engine/Run.py", line 101, in myprint
+  File "IDP-Z3/idp_engine/Run.py", line 107, in myprint
     for i, xi in enumerate(x):
   File "IDP-Z3/idp_engine/Run.py", line 49, in model_expand
     ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
