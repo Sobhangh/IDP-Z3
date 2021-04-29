@@ -91,6 +91,12 @@ propagate(self)
     Returns the problem with its ``assignments`` property updated with values for all terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
     Terms and propositions starting with '_' are ignored.
 
+explain(self, consequence)
+    Returns the facts and laws to explain a consequence in the Problem.
+
+    The string ``consequence`` must be a key in the ``assignments`` property of the Problem.
+    The facts are a list of Assignment, and the laws are a list of Expression.
+
 simplify(self)
     Returns the problem with a simplified formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.
 

@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #82: allow number and date ranges in structures
 * fix #83: same symbol defined in multiple definitions
 * fix #84: infinite loop when instantiating co_constraint
+* add `Problem.explain()` to API
 
 ### Interactive Consultant
 

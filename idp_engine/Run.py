@@ -97,7 +97,13 @@ def decision_table(theories, structures=None, goal_string="",
 
 
 def myprint(x=""):
-    if isinstance(x, types.GeneratorType):
+    if type(x) is tuple and len(x)==2: # result of Problem.explain()
+        facts, laws = x
+        for f in facts:
+            print(str(f))
+        for l in laws:
+            print(l)
+    elif isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
             if isinstance(xi, Assignments):
                 print(f"{NEWL}Model {i+1}{NEWL}==========")
