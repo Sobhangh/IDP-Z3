@@ -48,8 +48,8 @@ decision_table(theories, structures=None, goal_string="", timeout=20, max_rows=5
     Experimental.  Returns the rows for a decision table that defines ``goal_string``.
     ``goal_string`` must be a predicate application defined in the theory.
 
-print(...)
-    Prints the arguments on stdout
+pretty_print(...)
+    Prints its argument on stdout, in a readable form.
 
 
 Problem class

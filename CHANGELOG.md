@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix 80: infinite loop for recursive definitions
 * fix 83: same symbol defined in multiple definitions
 * fix 84: infinite loop when instantiating co_constraint
+* fix #85: use `pretty_print( )` in `procedure main()` block
 
 ### Interactive Consultant
 
