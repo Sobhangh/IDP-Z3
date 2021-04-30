@@ -363,7 +363,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [Status.GIVEN, Status.STRUCTURE, Status.UNIVERSAL]
+        reasons = [Status.GIVEN, Status.STRUCTURE]
 
         negated = consequence.replace('~', '¬').startswith('¬')
         consequence = consequence[1:] if negated else consequence
@@ -407,7 +407,10 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            facts.append(a1)
+                            if a1.status == Status.GIVEN:
+                                facts.append(a1)
+                            else:
+                                laws.append(a1.formula())
 
             for a1 in chain(self.def_constraints.values(), self.constraints):
                 #TODO find the rule
