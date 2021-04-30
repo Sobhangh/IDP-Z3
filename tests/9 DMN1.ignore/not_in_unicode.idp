@@ -1,0 +1,14 @@
+vocabulary V {
+    type Color := {red, blue, green, yellow}
+    c: ()→Color
+    p:() → Bool
+}
+
+theory T:V {
+    { p() <- c() ∈ {red, blue}.
+      p() <- c() ∉ {blue,green}.}
+}
+
+procedure main() {
+	print(decision_table(T, goal_string="p", verify=True))
+}
