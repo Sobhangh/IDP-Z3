@@ -2,16 +2,16 @@ vocabulary V {
     p : () → 𝔹
 }
 
-theory T:V {    
+theory T:V {
     {
       p() <- p().
     }
 }
 
 structure S:V {
-    
+
 }
 
 procedure main() {
-    print(model_expand(T, S))
+    pretty_print(model_expand(T, S))
 }

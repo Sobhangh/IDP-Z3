@@ -9,5 +9,5 @@ theory {
 }
 
 procedure main() {
-    print(decision_table(T, first_hit=False))
+    pretty_print(decision_table(T, first_hit=False))
 }

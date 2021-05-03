@@ -20,6 +20,6 @@ structure S2:V {
 
 
 procedure main() {
-  print(model_expand(T, S, sort=True))
-  print(model_expand(T, S2, sort=True))
+  pretty_print(model_expand(T, S, sort=True))
+  pretty_print(model_expand(T, S2, sort=True))
 }

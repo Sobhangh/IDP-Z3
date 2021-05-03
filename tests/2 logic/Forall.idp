@@ -33,9 +33,9 @@ theory T5:V {
     ! (x,y) in compatible: r(x) => r(y).
 }
 procedure main() {
-    print(str(Problem(T1).formula()))
-    print(str(Problem(T2).formula()))
-    print(str(Problem(T3).formula()))
-    print(str(Problem(T4).formula()))
-    print(str(Problem(T5).formula()))
+    pretty_print(str(Problem(T1).formula()))
+    pretty_print(str(Problem(T2).formula()))
+    pretty_print(str(Problem(T3).formula()))
+    pretty_print(str(Problem(T4).formula()))
+    pretty_print(str(Problem(T5).formula()))
 }

@@ -18,6 +18,6 @@ theory T:V {
 }
 
 procedure main() {
-	print(decision_table(T, goal_string="Eligible(BE001)"))
-	print(decision_table(T, goal_string="Eligible(BE001)", verify=True))
+	pretty_print(decision_table(T, goal_string="Eligible(BE001)"))
+	pretty_print(decision_table(T, goal_string="Eligible(BE001)", verify=True))
 }

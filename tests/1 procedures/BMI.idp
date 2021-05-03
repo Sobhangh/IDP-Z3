@@ -54,5 +54,5 @@ structure {
 procedure main() {
     pretty_print(model_propagate(T))
     print()
-    print(model_propagate(T, S))
+    pretty_print(model_propagate(T, S))
 }
