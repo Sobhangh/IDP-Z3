@@ -7,12 +7,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased yet]
 
 ## API
+* (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
 * IEP 03: improve binary quantification
 * IEP 06: support for N-ary constructors
 * fix 80: infinite loop for recursive definitions
 * fix 83: same symbol defined in multiple definitions
 * fix 84: infinite loop when instantiating co_constraint
-* fix #85: use `pretty_print( )` in `procedure main()` block
 
 ### Interactive Consultant
 
