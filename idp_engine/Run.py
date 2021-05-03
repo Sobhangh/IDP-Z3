@@ -111,7 +111,7 @@ def pretty_print(x=""):
 def execute(self):
     """ Execute the IDP program """
     main = str(self.procedures['main'])
-    mybuiltins = {'pretty_print': pretty_print}
+    mybuiltins = {}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
