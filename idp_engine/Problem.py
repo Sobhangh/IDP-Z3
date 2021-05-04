@@ -23,11 +23,13 @@ Class to represent a collection of theory and structure blocks.
 
 import time
 from copy import copy
+from itertools import chain
 from typing import Iterable, List
 from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status, Assignment, Assignments
-from .Expression import TRUE, AConjunction, Expression, FALSE, AppliedSymbol
+from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
+                         AComparison, AUnary)
 from .Parse import (TypeDeclaration, Symbol, SymbolDeclaration,
                     Theory, str_to_IDP)
 from .Simplify import join_set_conditions
@@ -349,6 +351,73 @@ class Problem(object):
         out = list(self._propagate(tag, extended))
         assert out[0] != "Not satisfiable.", "Not satisfiable."
         return self
+
+    def explain(self, consequence):
+        """returns the facts and laws that justify 'consequence in the 'self Problem
+
+        Args:
+            self (Problem): the problem state
+            consequence (string): the code of the sentence to be explained.  Must be a key in self.assignments
+
+        Returns:
+            (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
+        """
+        facts, laws = [], []
+        reasons = [Status.GIVEN, Status.STRUCTURE]
+
+        negated = consequence.replace('~', '¬').startswith('¬')
+        consequence = consequence[1:] if negated else consequence
+        assert consequence in self.assignments, \
+            f"Can't find this sentence: {consequence}"
+
+        to_explain = self.assignments[consequence].sentence
+
+        # rules used in justification
+        if to_explain.type != BOOL:  # determine numeric value
+            val = self.assignments[consequence].value
+            if val is None:  # can't explain an expanded value
+                return ([], [])
+            to_explain = AComparison.make("=", [to_explain, val])
+        if negated:
+            to_explain = AUnary.make('¬', to_explain)
+
+        s = Solver()
+        s.set(':core.minimize', True)
+        ps = {}  # {reified: constraint}
+
+        for ass in self.assignments.values():
+            if ass.status in reasons:
+                p = ass.translate()
+                ps[p] = ass
+                #TODO use assert_and_track ?
+                s.add(Implies(p, p))
+        todo = chain(self.constraints, self.def_constraints.values())
+        for constraint in todo:
+            p = constraint.reified()
+            ps[p] = constraint.original.interpret(self).translate()
+            s.add(Implies(p, ps[p]))
+
+        s.add(Not(to_explain.translate()))
+        s.check(list(ps.keys()))
+        unsatcore = s.unsat_core()
+
+        if unsatcore:
+            for k, a1 in self.assignments.items():
+                if a1.status in reasons:
+                    for a2 in unsatcore:
+                        if type(ps[a2]) == Assignment \
+                        and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
+                            if a1.status == Status.GIVEN:
+                                facts.append(a1)
+                            else:
+                                laws.append(a1.formula())
+
+            for a1 in chain(self.def_constraints.values(), self.constraints):
+                #TODO find the rule
+                for a2 in unsatcore:
+                    if str(a1.original.interpret(self).translate()) == str(ps[a2]):
+                        laws.append(a1)
+        return (facts, laws)
 
     def simplify(self):
         """ simplify constraints using known assignments """
