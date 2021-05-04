@@ -38,22 +38,18 @@ Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``)
 The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
 
-Custom types can be defined by specifying:
-
-* a list of (ranges of) numeric literals,
-* a list of nullary constructors,
-* a list of n-ary constructors; in that case, the enumeration must be preceded by ``constructed from``.
-
+Custom types are declared using the keyword ``type``, e.g., ``type color``.
 Their name should be singular and capitalized, by convention.
-The enumeration can be given in a theory or structure block.
 
-.. code::
+Their extension can be defined in a structure_, or directly in the vocabulary, by specifying:
 
-    type Person
-    type SomeNumbers := {1..4, 10..12, 15}
-    type Byte := {0..255}
-    type Color := {Red, Blue, Green}
-    type Color2 := constructed from {Red, Blue, Green, RGB(R: Byte, G: Byte, B: Byte)}
+* a list of (ranges of) numeric literals, e.g., ``type someNumbers := {0,1,2}`` or ``type byte := {0..255}``
+
+* a list of (ranges of) dates, e.g., ``type dates := {#2021-01-01, #2022-01-01}`` or ``type dates := {#2021-01-01 .. #2022-01-01}``
+
+* a list of nullary constructors, e.g., ``type Color := {Red, Blue, Green}``
+
+* a list of n-ary constructors; in that case, the enumeration must be preceded by ``constructed from``, e.g., ``type Color2 := constructed from {Red, Blue, Green, RGB(R: Byte, G: Byte, B: Byte)}``
 
 In the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
 

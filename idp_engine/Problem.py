@@ -28,7 +28,7 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status, Assignment, Assignments
 from .Expression import TRUE, AConjunction, Expression, FALSE, AppliedSymbol
-from .Parse import (ConstructedTypeDeclaration, Symbol, SymbolDeclaration,
+from .Parse import (TypeDeclaration, Symbol, SymbolDeclaration,
                     Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
@@ -120,13 +120,16 @@ class Problem(object):
                     f"Can't add declaration for {name} in {block.name}: duplicate"
             self.declarations[name] = decl
         for decl in self.declarations.values():
-            if type(decl) == ConstructedTypeDeclaration:
+            if type(decl) == TypeDeclaration:
                 decl.translated = None  # reset the translation of declarations
-                decl.interpretation = None
+                decl.interpretation = (  #TODO side-effects ? issue #81
+                    None if decl.name not in [INT, REAL, DATE, SYMBOL] else
+                    decl.interpretation)
 
         # process block.interpretations
         for name, interpret in block.interpretations.items():
             assert (name not in self.interpretations
+                    or name in [INT, REAL, DATE, SYMBOL]
                     or self.interpretations[name] == block.interpretations[name]), \
                      f"Can't add enumeration for {name} in {block.name}: duplicate"
             self.interpretations[name] = interpret

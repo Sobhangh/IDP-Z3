@@ -22,8 +22,8 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 
-from .Parse import (Vocabulary, Extern, ConstructedTypeDeclaration,
-                    RangeDeclaration, SymbolDeclaration, Symbol,
+from .Parse import (Vocabulary, Extern, TypeDeclaration,
+                    SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
@@ -62,7 +62,7 @@ def annotate(self, voc):
 Extern.annotate = annotate
 
 
-# Class ConstructedTypeDeclaration  #######################################################
+# Class TypeDeclaration  #######################################################
 
 def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
@@ -74,23 +74,11 @@ def annotate(self, voc):
     for c in self.constructors:
         c.type = self.name
         self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
-                    f"duplicate constructor in vocabulary: {c.name}")
+                    f"duplicate '{c.name}' constructor for '{self.name}' type")
         voc.symbol_decls[c.name] = c
     if self.interpretation:
         self.interpretation.annotate(voc)
-ConstructedTypeDeclaration.annotate = annotate
-
-
-# Class RangeDeclaration  #######################################################
-
-def annotate(self, voc):
-    self.check(self.name not in voc.symbol_decls,
-                f"duplicate declaration in vocabulary: {self.name}")
-    voc.symbol_decls[self.name] = self
-    for s in self.sorts:
-        s.annotate(voc, {})
-    self.out.annotate(voc, {})
-RangeDeclaration.annotate = annotate
+TypeDeclaration.annotate = annotate
 
 
 # Class SymbolDeclaration  #######################################################
@@ -229,13 +217,13 @@ def annotate(self, block):
 
     # create constructors if it is a type enumeration
     self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
-    if self.is_type_enumeration:
+    if self.is_type_enumeration and self.enumeration.constructors:
         # create Constructors before annotating the tuples
         for c in self.enumeration.constructors:
             c.type = self.name
             self.check(c.name not in voc.symbol_decls,
-                    f"duplicate constructor in vocabulary: {c.name}")
-            voc.symbol_decls[c.name] = c
+                    f"duplicate '{c.name}' constructor for '{self.name}' symbol")
+            voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
 
     self.enumeration.annotate(voc)
 
@@ -243,7 +231,7 @@ def annotate(self, block):
     if type(self.enumeration) != FunctionEnum and self.default is None:
         self.default = FALSE
     self.check(self.is_type_enumeration
-                or all(s.name not in [INT, REAL]  # finite domain
+                or all(s.name not in [INT, REAL, DATE]  # finite domain
                         for s in self.symbol.decl.sorts)
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
@@ -307,7 +295,7 @@ def annotate(self, idp):
 
     # add display predicates
 
-    viewType = ConstructedTypeDeclaration(name='_ViewType',
+    viewType = TypeDeclaration(name='_ViewType',
         constructors=[Constructor(name='normal'),
                         Constructor(name='expanded')])
     viewType.annotate(self.voc)
@@ -327,8 +315,8 @@ def annotate(self, idp):
             continue
 
         type_name = name.capitalize()  # e.g. type Unit (not unit)
-        open_type = ConstructedTypeDeclaration(name=type_name,
-                                                constructors=constructors)
+        open_type = TypeDeclaration(name=type_name,
+                                    constructors=constructors)
         open_type.annotate(self.voc)
         open_types[name] = Symbol(name=type_name)
 

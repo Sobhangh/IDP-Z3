@@ -9,9 +9,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## API
 * IEP 03: improve binary quantification
 * IEP 06: support for N-ary constructors
-* fix 80: infinite loop for recursive definitions
-* fix 83: same symbol defined in multiple definitions
-* fix 84: infinite loop when instantiating co_constraint
+* fix #80: infinite loop for recursive definitions
+* fix #82: allow number and date ranges in structures
+* fix #83: same symbol defined in multiple definitions
+* fix #84: infinite loop when instantiating co_constraint
 
 ### Interactive Consultant
 
