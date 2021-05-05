@@ -4,11 +4,11 @@ vocabulary V {
     r : () → 𝔹
 }
 
-theory T:V {    
+theory T:V {
     {
       p() <- q().
     }
-    { 
+    {
       p() <- r().
     }
     {
@@ -20,9 +20,9 @@ theory T:V {
 }
 
 structure S:V {
-    
+
 }
 
 procedure main() {
-    print(model_expand(T, S))
+    pretty_print(model_expand(T, S))
 }

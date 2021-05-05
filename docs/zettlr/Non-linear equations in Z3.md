@@ -9,6 +9,8 @@ General principles / assumptions:
 * the solver does not need to be restarted when unknown is found
 * however, quantification of non-linear equations over infinite range should be avoided \[\[Issue 28\]\]
 
+[Z3 user propagator](http://theory.stanford.edu/~nikolaj/z3navigate.html) section 7 External theories ([paper](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.225.5239&rep=rep1&type=pdf))
+
 # version 4.8.8.0
 solver.check() returns `unknown` when there is a non-linearity, e.g. in `tests/5 polygon/Sides3.idp`, `/5 polygon/triangle.idp`, `8 DMN/BMI.idp`. The solver has to be restarted to propage other values (e.g. for `Sides3`).  It returns `sat` as soon as a value is given that removes the non-linearity.
 Except in [[Issue 28]], because of quantification over range in def_constraints !?

@@ -53,9 +53,9 @@ structure {
 }
 
 procedure main() {
-    print(model_propagate(T))
+    pretty_print(model_propagate(T))
     print()
-    print(model_propagate(T, S))
+    pretty_print(model_propagate(T, S))
     print()
-    print(Problem(T,S).propagate().explain("riskLevel"))
+    pretty_print(Problem(T,S).propagate().explain("riskLevel"))
 }

@@ -112,6 +112,6 @@ structure S:V {
 }
 
 procedure main () {
-    print(Problem(T, S).optimize("Length(1)").assignments)
-    print(Problem(T,S).expand(max=1, complete=True))
+    pretty_print(Problem(T, S).optimize("Length(1)").assignments)
+    pretty_print(Problem(T,S).expand(max=1, complete=True))
 }

@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased yet]
 
 ## API
+* (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
 * Merge !70: improve binary quantification (IEP 03)
 * Merge !68: support for N-ary constructors (IEP 06)
 * fix #77: `in` operator does not work in some definitions
