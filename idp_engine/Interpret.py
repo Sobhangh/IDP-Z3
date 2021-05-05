@@ -40,7 +40,7 @@ import copy
 from itertools import product, repeat
 
 from .Assignments import Status
-from .Parse import(Extern, ConstructedTypeDeclaration, RangeDeclaration,
+from .Parse import(Extern, TypeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
                    FunctionEnum, Enumeration, Tuple, ConstructedFrom)
 from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
@@ -57,7 +57,7 @@ def interpret(self, problem):
 Extern.interpret = interpret
 
 
-# class ConstructedTypeDeclaration  ###########################################################
+# class TypeDeclaration  ###########################################################
 
 def interpret(self, problem):
     if self.name in problem.interpretations:
@@ -65,15 +65,12 @@ def interpret(self, problem):
     if self.interpretation:
         self.constructors = self.interpretation.enumeration.constructors
     self.translate()
-    self.range = sum([c.interpret(problem).range for c in self.constructors], [])
-ConstructedTypeDeclaration.interpret = interpret
+    if self.constructors:
+        self.range = sum([c.interpret(problem).range for c in self.constructors], [])
+    elif self.interpretation.enumeration:  # range declaration
+        self.range = [t.args[0] for t in self.interpretation.enumeration.tuples]
 
-
-# class RangeDeclaration  ###########################################################
-
-def interpret(self, problem):
-    pass
-RangeDeclaration.interpret = interpret
+TypeDeclaration.interpret = interpret
 
 
 # class SymbolDeclaration  ###########################################################
@@ -152,7 +149,7 @@ def interpret(self, problem):
             e = problem.assignments.assert_(expr, value, status, False)
             if (self.block.name == 'default'
                 and type(self.enumeration) == FunctionEnum
-                and type(self.symbol.decl.out.decl) == ConstructedTypeDeclaration):
+                and type(self.symbol.decl.out.decl) == TypeDeclaration):
                 problem.assignments.assert_(e.formula(), TRUE, status, False)
         if self.default is not None:
             for code, expr in self.symbol.decl.instances.items():
@@ -328,8 +325,8 @@ def interpret(self, problem):
             elif type(q.sort.decl) == SymbolDeclaration:
                 range = q.sort.decl.domain
                 guard = q.sort
-            else:
-                range = [[t] for t in q.sort.decl.range]
+            else:  # type declaration
+                range = [[t] for t in q.sort.decl.range] #TODO1 decl.enumeration.tuples
                 guard = None
 
             for vars in q.vars:

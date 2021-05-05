@@ -8,15 +8,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## API
 * (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
-* IEP 03: improve binary quantification
-* IEP 06: support for N-ary constructors
-* fix 80: infinite loop for recursive definitions
-* fix 83: same symbol defined in multiple definitions
-* fix 84: infinite loop when instantiating co_constraint
+* Merge !70: improve binary quantification (IEP 03)
+* Merge !68: support for N-ary constructors (IEP 06)
+* fix #77: `in` operator does not work in some definitions
+* fix #80: infinite loop for recursive definitions
+* fix #82: allow number and date ranges in structures
+* fix #83: same symbol defined in multiple definitions
+* fix #84: infinite loop when instantiating co_constraint
+* add `Problem.explain()` to API
 
 ### Interactive Consultant
 
-* fix #77: `in` operator does not work in some definitions
 * fix #76: optionalPropagation and moveSymbols no longer working
 * fix #75: default structure seems broken
 * update video tutorial

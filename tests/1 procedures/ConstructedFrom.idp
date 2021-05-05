@@ -1,6 +1,6 @@
 vocabulary V {
-    type color
     type byte := {1,2}
+    type color
     Color: () -> color
     opposite: color → color
 }

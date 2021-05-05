@@ -1,8 +1,8 @@
 vocabulary {
 type Bool := {true,false}
-type Int = {}
-type Real = {}
-type Date = {}
+type Int := {}
+type Real := {}
+type Date := {}
 type Symbol := {`Date,`p}
 __relevant
 arity(Symbol) : Int

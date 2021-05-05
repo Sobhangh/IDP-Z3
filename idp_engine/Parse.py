@@ -21,7 +21,7 @@ Classes to parse an IDP-Z3 theory.
 
 """
 __all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
-           "ConstructedTypeDeclaration", "RangeDeclaration",
+           "TypeDeclaration",
            "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", ]
@@ -47,7 +47,8 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error, CO_CONSTR_RECURSION_DEPTH)
+                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
 def str_to_IDP(atom, val_string):
@@ -62,11 +63,11 @@ def str_to_IDP(atom, val_string):
         d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
              date.fromisoformat(val_string[1:]))
         out = Date(iso=f"#{d.isoformat()}")
-    elif (atom.type in [REAL, INT] or
-            type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
-        out = Number(number=str(eval(val_string.replace('?', ''))))
-    else:  # constructor
+    elif (hasattr(atom.decl.out.decl, 'map')
+          and val_string in atom.decl.out.decl.map):  # constructor
         out = atom.decl.out.decl.map[val_string]
+    else:  # could be fraction
+        out = Number(number=str(eval(val_string.replace('?', ''))))
     return out
 
 
@@ -181,12 +182,12 @@ class Vocabulary(ASTNode):
 
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
-            ConstructedTypeDeclaration(
+            TypeDeclaration(
                 name=BOOL, constructors=[TRUEC, FALSEC]),
-            RangeDeclaration(name=INT, elements=[]),
-            RangeDeclaration(name=REAL, elements=[]),
-            RangeDeclaration(name=DATE, elements=[]),
-            ConstructedTypeDeclaration(
+            TypeDeclaration(name=INT, enumeration=IntRange()),
+            TypeDeclaration(name=REAL, enumeration=RealRange()),
+            TypeDeclaration(name=DATE, enumeration=DateRange()),
+            TypeDeclaration(
                 name=SYMBOL,
                 constructors=([Constructor(name=f"`{s}")
                                for s in [DATE,]]  # TODO '𝔹', 'ℤ', 'ℝ',
@@ -223,7 +224,7 @@ class Vocabulary(ASTNode):
                         f"Duplicate declaration of {self.name} "
                         f"in vocabulary and block {block.name}")
             block.declarations[s.name] = s
-            if (type(s) == ConstructedTypeDeclaration
+            if (type(s) == TypeDeclaration
                 and s.interpretation
                 and self.name != BOOL):
                 block.check(s.name not in block.interpretations,
@@ -240,7 +241,7 @@ class Extern(ASTNode):
         return f"extern vocabulary {self.name}"
 
 
-class ConstructedTypeDeclaration(ASTNode):
+class TypeDeclaration(ASTNode):
     """AST node to represent `type <symbol> := <enumeration>`
 
     Args:
@@ -275,13 +276,14 @@ class ConstructedTypeDeclaration(ASTNode):
         self.arity = 1
         self.sorts = [Symbol(name=self.name)]
         self.out = Symbol(name=BOOL)
-        self.type = self.name
+        self.type = (self.name if type(enumeration) != Ranges else
+                     enumeration.type)  # INT or REAL or DATE
 
         self.translated = None
         self.range = None
         self.map = {}  # {String: constructor}
 
-        self.interpretation = (None if not enumeration else
+        self.interpretation = (None if enumeration is None else
             SymbolInterpretation(name=Symbol(name=self.name),
                                  enumeration=enumeration, default=None))
 
@@ -290,59 +292,7 @@ class ConstructedTypeDeclaration(ASTNode):
                 f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
-        if self.name == BOOL:
-            out = [var, AUnary.make('¬', var)]
-        else:
-            out = [AComparison.make('=', [var, c]) for c in self.range]
-        out = ADisjunction.make('∨', out)
-        return out
-
-    def is_subset_of(self, other):
-        return self == other
-
-
-class RangeDeclaration(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')  # maybe INT, REAL
-        self.elements = kwargs.pop('elements')
-        self.arity = 1
-        self.translated = None
-        self.sorts = [Symbol(name=self.name)]
-        self.out = Symbol(name=BOOL)
-
-        self.type = REAL if self.name == REAL else INT
-        self.range = []
-        for x in self.elements:
-            if x.toI is None:
-                self.range.append(x.fromI)
-                if x.fromI.type != INT:
-                    self.type = REAL
-            elif x.fromI.type == INT and x.toI.type == INT:
-                for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                    self.range.append(Number(number=str(i)))
-            else:
-                self.check(False, f"Can't have a range over reals: {self.name}")
-
-    def __str__(self):
-        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." +
-                                             str(x.toI)) for x in self.elements])
-        return f"type {self.name} = {{{elements}}}"
-
-    def check_bounds(self, var):
-        if not self.elements:
-            return None
-        if self.range and len(self.range) < 20:
-            es = [AComparison.make('=', [var, c]) for c in self.range]
-            e = ADisjunction.make('∨', es)
-            return e
-        sub_exprs = []
-        for x in self.elements:
-            if x.toI is None:
-                e = AComparison.make('=', [var, x.fromI])
-            else:
-                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
-            sub_exprs.append(e)
-        return ADisjunction.make('∨', sub_exprs)
+        return self.interpretation.enumeration.contains([var], False)
 
     def is_subset_of(self, other):
         return self == other
@@ -425,7 +375,7 @@ class SymbolDeclaration(ASTNode):
                 and self.sorts[0].decl == other)
 
 
-Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
+Type = Union[TypeDeclaration, SymbolDeclaration]
 
 
 ################################ Theory  ###############################
@@ -778,6 +728,58 @@ class FunctionTuple(Tuple):
 class CSVTuple(Tuple):
     pass
 
+class Ranges(Enumeration):
+    def __init__(self, **kwargs):
+        self.elements = kwargs.pop('elements')
+
+        tuples = []
+        self.type = None
+        for x in self.elements:
+            if self.type == None:
+                self.type = x.fromI.type
+            if x.toI is None:
+                tuples.append(Tuple(args=[x.fromI]))
+            elif x.fromI.type == INT and x.toI.type == INT:
+                for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                    tuples.append(Tuple(args=[Number(number=str(i))]))
+            elif x.fromI.type == DATE and x.toI.type == DATE:
+                for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                    tuples.append(Tuple(args=[Number(number=str(i))])) #TODO1
+            else:
+                self.check(False, f"Can't have a range over reals")
+        Enumeration.__init__(self, tuples=tuples)
+
+    def contains(self, args, function, arity=None, rank=0, tuples=None):
+        var = args[0]
+        if not self.elements:
+            return None
+        if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
+            es = [AComparison.make('=', [var, c.args[0]]) for c in self.tuples]
+            e = ADisjunction.make('∨', es)
+            return e
+        sub_exprs = []
+        for x in self.elements:
+            if x.toI is None:
+                e = AComparison.make('=', [var, x.fromI])
+            else:
+                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
+            sub_exprs.append(e)
+        return ADisjunction.make('∨', sub_exprs)
+
+class IntRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = INT
+
+class RealRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = REAL
+
+class DateRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = DATE
 
 ################################ Display  ###############################
 
@@ -920,8 +922,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         ConstructedTypeDeclaration, Accessor,
-                                         RangeDeclaration,
+                                         TypeDeclaration, Accessor,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
@@ -937,7 +938,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
-                                         ConstructedFrom, Constructor,
+                                         ConstructedFrom, Constructor, Ranges,
                                          Display,
 
-                                         Procedure, Call1, Call0, String, PyList, PyAssignment])
+                                         Procedure, Call1, Call0, String,
+                                         PyList, PyAssignment])

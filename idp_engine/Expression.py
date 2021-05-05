@@ -54,7 +54,10 @@ class ASTNode(object):
             IDPZ3Error: when `condition` is not met
         """
         if not condition:
-            location = get_location(self)
+            try:
+                location = get_location(self)
+            except:
+                raise IDPZ3Error(f"{msg}")
             line = location['line']
             col = location['col']
             raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
@@ -810,6 +813,9 @@ class AppliedSymbol(Expression):
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl and self.decl.name not in RESERVED_SYMBOLS:
             questions.append(self)
+            if self.is_enumerated or self.in_enumeration:
+                app = AppliedSymbol.make(self.symbol, self.sub_exprs)
+                questions.append(app)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
         if co_constraints and self.co_constraint is not None:

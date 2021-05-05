@@ -30,17 +30,17 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
                 BoolVal, Datatype)
 
-from idp_engine.Parse import ConstructedTypeDeclaration, RangeDeclaration, SymbolDeclaration
+from idp_engine.Parse import TypeDeclaration, SymbolDeclaration
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AQuantification, BinaryOperator,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
-from idp_engine.utils import BOOL, INT, REAL, RELEVANT, RESERVED_SYMBOLS
+from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
 
 
-# class ConstructedTypeDeclaration  ###########################################################
+# class TypeDeclaration  ###########################################################
 
 def translate(self):
     if self.translated is None:
@@ -52,7 +52,7 @@ def translate(self):
             self.constructors[1].translated = BoolVal(False)
             self.constructors[0].py_value = True
             self.constructors[1].py_value = False
-        else:
+        elif self.constructors:
             sort = Datatype(self.name)
             for c in self.constructors:
                 sort.declare(c.name,
@@ -72,20 +72,13 @@ def translate(self):
                 else:
                     for e in c.range:
                         self.map[str(e)] = e
+        else: # list of numbers
+            if self.interpretation.enumeration.type == INT:
+                self.translated = IntSort()
+            else:
+                self.translated = RealSort()
     return self.translated
-ConstructedTypeDeclaration.translate = translate
-
-
-# class RangeDeclaration  ###########################################################
-
-def translate(self):
-    if self.translated is None:
-        if self.type == INT:
-            self.translated = IntSort()
-        else:
-            self.translated = RealSort()
-    return self.translated
-RangeDeclaration.translate = translate
+TypeDeclaration.translate = translate
 
 
 # class SymbolDeclaration  ###########################################################
@@ -348,6 +341,7 @@ def translate(self):
     if self.translated is None:
         self.translated = self.date.toordinal()
         self.py_value = self.translated
+        self.type = DATE
     return self.translated
 Date.translate = translate
 

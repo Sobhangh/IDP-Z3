@@ -14,17 +14,16 @@ Comment:
 Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
-  Declaration: Extern | RangeDeclaration | ConstructedTypeDeclaration | SymbolDeclaration;
+  Declaration: Extern | TypeDeclaration | SymbolDeclaration;
 
     Extern: 'extern' 'vocabulary' (name=ID);
 
-    ConstructedTypeDeclaration:
+    TypeDeclaration:
       /type[ \t]/
       name=ID
-      (':=' (enumeration=Enumeration | enumeration=ConstructedFrom))?;
-
-    RangeDeclaration: /type[ \t]/ name=ID ':=' '{' elements*=RangeElement[','] '}';
-      RangeElement: fromI=Number ('..' toI=Number)?;
+      (':=' ( enumeration=Ranges
+            | enumeration=Enumeration
+            | enumeration=ConstructedFrom))?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
           ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
@@ -107,6 +106,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
   SymbolInterpretation: name=UnappliedSymbol ':='
                         ( enumeration=FunctionEnum ('else' default=Identifier)?
+                        | enumeration=Ranges
                         | enumeration=Enumeration
                         | enumeration=CSVEnumeration
                         | enumeration=ConstructedFrom
@@ -114,6 +114,9 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
+  Ranges: '{' elements*=RangeElement[','] '}';
+      RangeElement:   (fromI=Number ('..' toI=Number)?)
+                    | (fromI=Date   ('..' toI=Date  )?) ;
   Enumeration: '{' tuples*=Tuple[','] '}';
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
