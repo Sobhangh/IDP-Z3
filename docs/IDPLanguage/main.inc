@@ -66,6 +66,9 @@ __init__(self, \*blocks)
 add(self, block)
     Adds a theory or structure block to the problem.
 
+assert_(self, code: str, value: Any)
+    Asserts that an expression has a value, e.g. `problem.assert_("p()", True)`.
+
 copy(self)
     Returns an independent copy of a problem.
 

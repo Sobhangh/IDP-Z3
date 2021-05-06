@@ -42,7 +42,7 @@ import re
 
 from idp_server.State import State, make_state
 from idp_server.IO import Output, metaJSON
-from idp_engine import IDP, Problem, model_expand
+from idp_engine import IDP, Problem, model_expand, Status
 from idp_engine.utils import start, log, NEWL
 
 z3lock = threading.Lock()
@@ -195,23 +195,26 @@ if __name__ == "__main__":
         error = max(error, p_error)
 
     test = """
-vocabulary {
-    p : () → 𝔹
-}
+        vocabulary {
+            p, q : () → 𝔹
+        }
 
-theory {
-    p().
-}
-structure {}
+        theory {
+            p() => q().
+        }
+        structure {}
 
-procedure main() {
-    print("ok")
-}
-"""
+        procedure main() {
+            print("ok")
+        }
+    """
     kb = IDP.parse(test)
     T, S = kb.get_blocks("T, S")
     kb.execute()
     for model in model_expand(T,S):
         print(model)
-
+        print()
+    problem = Problem(T)
+    problem.assert_("p()", True, Status.GIVEN)
+    print(problem.propagate().assignments)
     sys.exit(error)

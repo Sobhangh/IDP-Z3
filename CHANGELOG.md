@@ -9,14 +9,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## API
 * (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
 * (breaking) Merge !77: consistently represent propositions and constants with `()` in Python API
-* Merge !70: improve binary quantification (IEP 03)
 * Merge !68: support for N-ary constructors (IEP 06)
+* Merge !70: improve binary quantification (IEP 03)
+* Merge !75: add `Problem.explain()` to API
+* Merge !78: add `assert_(code, value)` to Problem API
 * fix #77: `in` operator does not work in some definitions
 * fix #80: infinite loop for recursive definitions
 * fix #82: allow number and date ranges in structures
 * fix #83: same symbol defined in multiple definitions
 * fix #84: infinite loop when instantiating co_constraint
-* add `Problem.explain()` to API
 
 ### Interactive Consultant
 
