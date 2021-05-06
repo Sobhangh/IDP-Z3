@@ -795,10 +795,7 @@ class AppliedSymbol(Expression):
         return out
 
     def __str1__(self):
-        if len(self.sub_exprs) == 0:
-            out = f"{self.symbol}"
-        else:
-            out = f"{self.symbol}({', '.join([x.str for x in self.sub_exprs])})"
+        out = f"{self.symbol}({', '.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return (f"{out}"
