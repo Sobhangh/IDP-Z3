@@ -1,11 +1,11 @@
-  Not B
+  Not B()
 ⇒ Not Eligible(BE001)
 
-  C
+  C()
 ⇒ Eligible(BE001)
 
-  E
-∧ F
+  E()
+∧ F()
 ⇒ Eligible(BE001)
 
 ⇒ Not Eligible(BE001)
