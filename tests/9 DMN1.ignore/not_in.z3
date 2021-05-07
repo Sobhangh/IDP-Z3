@@ -1,6 +1,6 @@
-  Not c in {green}
-⇒ p
+  Not c() in {green}
+⇒ p()
 
-⇒ Not p
+⇒ Not p()
 
 end of decision table
