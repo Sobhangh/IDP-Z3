@@ -3606,7 +3606,7 @@ structure {
                                                                        'typ': 'Bool',
                                                                        'value': True},
               '__rank': 1,
-              '∀Line ∈ Line_t : Solution(Line) = sum{ : Line = Line : Hundreds(Line) * 100} + sum{ : Line = Line : Tens(Line) * 10} + sum{ : Line = Line : Units(Line)}': {'environmental': False,
+              '∀Line ∈ Line_t : Solution(Line) = sum{ : Line = Line : Hundreds(Line) ⨯ 100} + sum{ : Line = Line : Tens(Line) ⨯ 10} + sum{ : Line = Line : Units(Line)}': {'environmental': False,
                                                                                                                                                                            'is_assignment': False,
                                                                                                                                                                            'normal': False,
                                                                                                                                                                            'reading': '∀Line '
@@ -3622,7 +3622,7 @@ structure {
                                                                                                                                                                                       'Line '
                                                                                                                                                                                       ': '
                                                                                                                                                                                       'Hundreds(Line) '
-                                                                                                                                                                                      '* '
+                                                                                                                                                                                      '⨯ '
                                                                                                                                                                                       '100} '
                                                                                                                                                                                       '+ '
                                                                                                                                                                                       'sum{ '
@@ -3632,7 +3632,7 @@ structure {
                                                                                                                                                                                       'Line '
                                                                                                                                                                                       ': '
                                                                                                                                                                                       'Tens(Line) '
-                                                                                                                                                                                      '* '
+                                                                                                                                                                                      '⨯ '
                                                                                                                                                                                       '10} '
                                                                                                                                                                                       '+ '
                                                                                                                                                                                       'sum{ '
