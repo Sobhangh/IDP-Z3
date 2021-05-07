@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### API
 * (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
+* (breaking) Merge !77: consistently represent propositions and constants with `()` in Python API
 * Merge !66: allow `⨯` for arithmetic product (IEP 09)
 * Merge !70: improve binary quantification (IEP 03)
 * Merge !68: support for N-ary constructors (IEP 06)

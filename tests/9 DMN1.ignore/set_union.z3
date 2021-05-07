@@ -1,6 +1,6 @@
-  c in {red, blue, green}
-⇒ p
+  c() in {red, blue, green}
+⇒ p()
 
-⇒ Not p
+⇒ Not p()
 
 end of decision table
