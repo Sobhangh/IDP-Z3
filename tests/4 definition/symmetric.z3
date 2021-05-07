@@ -73,7 +73,7 @@ display {
                            'status': 'UNKNOWN',
                            'typ': 'Bool'},
            '__rank': 9999},
- 'edge': {'__rank': 1,
+ 'edge': {'__rank': 9999,
           'edge(a, a)': {'environmental': False,
                          'is_assignment': False,
                          'normal': True,

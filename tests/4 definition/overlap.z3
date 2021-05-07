@@ -61,7 +61,7 @@ theory {
                       'status': 'CONSEQUENCE',
                       'typ': 'Bool',
                       'value': True}},
- 't0': {'__rank': 1,
+ 't0': {'__rank': 9999,
         't0()': {'environmental': False,
                  'is_assignment': True,
                  'normal': True,
