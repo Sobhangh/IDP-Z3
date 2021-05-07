@@ -1,0 +1,20 @@
+vocabulary V {
+    p : (𝔹) → 𝔹
+    f : (𝔹) → 𝔹
+}
+
+theory T:V {
+    {
+      !x in Bool: p(x) <- p(f(x)).
+    }
+    !x: ~p(x).
+    !x: f(x)=x.
+}
+
+structure S:V {
+
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}

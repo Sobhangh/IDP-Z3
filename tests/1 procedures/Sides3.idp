@@ -126,9 +126,9 @@ structure S:V {
 }
 
 procedure main() {
-    print(model_propagate(T))
+    pretty_print(model_propagate(T))
     print()
-    print(model_propagate(T, S1))
+    pretty_print(model_propagate(T, S1))
     print()
-    print(model_propagate(T, S))
+    pretty_print(model_propagate(T, S))
 }

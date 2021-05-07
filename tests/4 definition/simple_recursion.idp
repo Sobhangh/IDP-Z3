@@ -3,7 +3,9 @@ vocabulary V {
 }
 
 theory T:V {
-    p().
+    {
+      p() <- p().
+    }
 }
 
 structure S:V {
@@ -13,4 +15,3 @@ structure S:V {
 procedure main() {
     pretty_print(model_expand(T, S))
 }
-

@@ -65,6 +65,7 @@ Date: TODO
 - [ ] #Perf
 
 #### other NTH (refactoring)
+- [ ] use new rename_var in rename_args
 - [ ] use [macropy](https://macropy3.readthedocs.io/en/latest/): smartAsserts, pattern matching
 - [ ] simplify the generation of Output
 

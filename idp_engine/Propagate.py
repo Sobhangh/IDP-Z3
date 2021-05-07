@@ -26,7 +26,7 @@ This module monkey-patches the Expression class and sub-classes.
 
 from typing import List, Tuple, Optional
 
-from idp_engine.Expression import (Constructor, Expression, AQuantification,
+from idp_engine.Expression import (Expression, AQuantification,
                     ADisjunction, AConjunction,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from idp_engine.Assignments import Assignments
@@ -40,8 +40,8 @@ def _not(truth):
 
 def symbolic_propagate(self,
                        assignments: "Assignments",
-                       truth: Optional[Constructor] = TRUE
-                       ) -> List[Tuple[Expression, Constructor]]:
+                       truth: Optional[Expression] = TRUE
+                       ) -> List[Tuple[Expression]]:
     """returns the consequences of `self=truth` that are in assignments.
 
     The consequences are obtained by symbolic processing (no calls to Z3).
@@ -50,7 +50,7 @@ def symbolic_propagate(self,
         assignments (Assignments):
             The set of questions to chose from. Their value is ignored.
 
-        truth (Constructor, optional):
+        truth (Expression, optional):
             The truth value of the expression `self`. Defaults to TRUE.
 
     Returns:
@@ -78,18 +78,11 @@ def propagate1(self, assignments, truth):
 Expression.propagate1 = propagate1
 
 
-# class Constructor  ##########################################################
-
-def symbolic_propagate(self, assignments, truth=TRUE):  # dead code
-    return []  # true or false
-Constructor.symbolic_propagate = symbolic_propagate
-
-
 # class AQuantification  ######################################################
 
 def symbolic_propagate(self, assignments, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
-    if not self.q_vars:  # expanded
+    if not self.quantees:  # expanded
         return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
     return out
 AQuantification.symbolic_propagate = symbolic_propagate
@@ -128,7 +121,7 @@ def propagate1(self, assignments, truth=TRUE):
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one
         # a consequence, not a universal
-        operands1 = [e.as_rigid() for e in self.sub_exprs]
+        operands1 = [e.value for e in self.sub_exprs]
         if   operands1[1] is not None:
             return [(self.sub_exprs[0], operands1[1])]
         elif operands1[0] is not None:

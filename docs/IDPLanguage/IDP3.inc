@@ -25,10 +25,6 @@ LTC
 Namespaces
     IDP-Z3 does not support namespaces.
 
-N-ary constructors
-    IDP-Z3 does not support n-ary constructors, e.g., ``RGB(Int, Int, Int)``.
-    See `IEP 06 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-06-n-ary-constructors>`_
-
 Partial functions
     IDP-Z3 does not support partial functions.
     The handling of division by 0 may differ.

@@ -17,5 +17,5 @@ structure S:V {
 }
 
 procedure main () {
-    print(model_check(T, S))
+    pretty_print(model_check(T, S))
 }

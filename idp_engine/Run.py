@@ -96,8 +96,14 @@ def decision_table(theories, structures=None, goal_string="",
     yield "end of decision table"
 
 
-def myprint(x=""):
-    if isinstance(x, types.GeneratorType):
+def pretty_print(x=""):
+    if type(x) is tuple and len(x)==2: # result of Problem.explain()
+        facts, laws = x
+        for f in facts:
+            print(str(f))
+        for l in laws:
+            print(l.annotations['reading'])
+    elif isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
             if isinstance(xi, Assignments):
                 print(f"{NEWL}Model {i+1}{NEWL}==========")
@@ -111,12 +117,13 @@ def myprint(x=""):
 def execute(self):
     """ Execute the IDP program """
     main = str(self.procedures['main'])
-    mybuiltins = {'print': myprint}
+    mybuiltins = {}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate
     mylocals['decision_table'] = decision_table
+    mylocals['pretty_print'] = pretty_print
     mylocals['Problem'] = Problem
 
     exec(main, mybuiltins, mylocals)

@@ -114,24 +114,31 @@ Parenthesis
 .. index:: quantifier expression
 
 Enumeration
-    An enumeration (e.g. ``p = {1;2;3}``) is a sentence.
+    An enumeration (e.g. ``p := {1;2;3}``) is a sentence.
     Enumerations follow the syntax described in `structure`_.
 
 Quantified formulas
     *Quantified formulas* are sentences.
-    They have one of these two forms, where ``v_1, .., v_n`` are variables,
-    ``p_1, .., p_n`` are types or unary predicates,
-    and |phi| is a sentence:
+    They have one of the following forms, where ``v_1, .., v_n`` are variables,
+    ``p, p_1, .., p_n`` are types or predicates,
+    and |phi| is a sentence involving those variables:
 
     .. code::
 
-        ∀ v_1 ∈ p_1, v_n ∈ p_n: ϕ.
+        ∀ v_1, v_n: ϕ(v_1, v_n).
 
-        ∃ v_1 ∈ p_1, v_n ∈ p_n: ϕ.
+        ∀ v_1, v_n ∈ p: ϕ(v_1, v_n).
 
-    Alternatively, ascii characters can be used: ``?``, ``!``, respectively.
-    For example, ``!x in Int, y in Int: f(x,y)=f(y,x).``
+        ∀ (v_1, v_n) ∈ p: ϕ(v_1, v_n).
+
+        ∀ v_1 ∈ p_1, v_n ∈ p_n: ϕ(v_1, v_n).
+
+    Alternatively, the existential quantifier, ``∃``, can be used.
+    Ascii characters can also be used: ``?``, ``!``, respectively.
+    For example, ``! x, y in Int: f(x,y)=f(y,x).``
+
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
+    In the first form above, the type of each variable is inferred from their use in |phi|.
 
     When quantifying a formula of type ``Symbol``,
     the expression must contain a "guard" to prevent arity or type error.

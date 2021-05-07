@@ -21,7 +21,7 @@ Classes to parse an IDP-Z3 theory.
 
 """
 __all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
-           "ConstructedTypeDeclaration", "RangeDeclaration",
+           "TypeDeclaration",
            "SymbolDeclaration", "Symbol", "Theory", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", ]
@@ -38,16 +38,17 @@ from typing import Dict, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, Symbol, SymbolExpr,
+from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          IfExpr, AQuantification, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
-                         Number, Brackets, Date, Arguments,
-                         Variable, TRUE, FALSE)
+                         Number, Brackets, Date,
+                         Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error)
+                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
 def str_to_IDP(atom, val_string):
@@ -62,11 +63,11 @@ def str_to_IDP(atom, val_string):
         d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
              date.fromisoformat(val_string[1:]))
         out = Date(iso=f"#{d.isoformat()}")
-    elif (atom.type in [REAL, INT] or
-            type(atom.decl.out.decl) == RangeDeclaration):  # could be fraction
-        out = Number(number=str(eval(val_string.replace('?', ''))))
-    else:  # constructor
+    elif (hasattr(atom.decl.out.decl, 'map')
+          and val_string in atom.decl.out.decl.map):  # constructor
         out = atom.decl.out.decl.map[val_string]
+    else:  # could be fraction
+        out = Number(number=str(eval(val_string.replace('?', ''))))
     return out
 
 
@@ -181,12 +182,12 @@ class Vocabulary(ASTNode):
 
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
-            ConstructedTypeDeclaration(
-                name=BOOL, constructors=[TRUE, FALSE]),
-            RangeDeclaration(name=INT, elements=[]),
-            RangeDeclaration(name=REAL, elements=[]),
-            RangeDeclaration(name=DATE, elements=[]),
-            ConstructedTypeDeclaration(
+            TypeDeclaration(
+                name=BOOL, constructors=[TRUEC, FALSEC]),
+            TypeDeclaration(name=INT, enumeration=IntRange()),
+            TypeDeclaration(name=REAL, enumeration=RealRange()),
+            TypeDeclaration(name=DATE, enumeration=DateRange()),
+            TypeDeclaration(
                 name=SYMBOL,
                 constructors=([Constructor(name=f"`{s}")
                                for s in [DATE,]]  # TODO '𝔹', 'ℤ', 'ℝ',
@@ -223,7 +224,7 @@ class Vocabulary(ASTNode):
                         f"Duplicate declaration of {self.name} "
                         f"in vocabulary and block {block.name}")
             block.declarations[s.name] = s
-            if (type(s) == ConstructedTypeDeclaration
+            if (type(s) == TypeDeclaration
                 and s.interpretation
                 and self.name != BOOL):
                 block.check(s.name not in block.interpretations,
@@ -240,7 +241,7 @@ class Extern(ASTNode):
         return f"extern vocabulary {self.name}"
 
 
-class ConstructedTypeDeclaration(ASTNode):
+class TypeDeclaration(ASTNode):
     """AST node to represent `type <symbol> := <enumeration>`
 
     Args:
@@ -250,22 +251,24 @@ class ConstructedTypeDeclaration(ASTNode):
 
         sorts (List[Symbol]): the types of the arguments
 
-        out (Symbol): Boolean Symbol
+        out (Symbol): the Boolean Symbol
 
         type (string): Z3 type of an element of the type; same as `name`
 
-        domain ([Constructor]): list of constructors in the enumeration
+        constructors ([Constructor]): list of constructors in the enumeration
+
+        range ([Expression]): list of expressions of that type
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
         translated (Z3): the translation of the type in Z3
 
-        map (Dict[string, Constructor]): a mapping from code to Expression
+        map (Dict[string, Expression]): a mapping from code to Expression in range
     """
 
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
-        self.domain = ([] if 'constructors' not in kwargs else
+        self.constructors = ([] if 'constructors' not in kwargs else
                              kwargs.pop('constructors'))
         enumeration = (None if 'enumeration' not in kwargs else
                             kwargs.pop('enumeration'))
@@ -273,74 +276,23 @@ class ConstructedTypeDeclaration(ASTNode):
         self.arity = 1
         self.sorts = [Symbol(name=self.name)]
         self.out = Symbol(name=BOOL)
-        self.type = self.name
+        self.type = (self.name if type(enumeration) != Ranges else
+                     enumeration.type)  # INT or REAL or DATE
 
         self.translated = None
+        self.range = None
         self.map = {}  # {String: constructor}
 
-        self.interpretation = (None if not enumeration else
+        self.interpretation = (None if enumeration is None else
             SymbolInterpretation(name=Symbol(name=self.name),
                                  enumeration=enumeration, default=None))
 
     def __str__(self):
         return (f"type {self.name} := "
-                f"{{{','.join(map(str, self.domain))}}}")
+                f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
-        if self.name == BOOL:
-            out = [var, AUnary.make('¬', var)]
-        else:
-            out = [AComparison.make('=', [var, c]) for c in self.domain]
-        out = ADisjunction.make('∨', out)
-        return out
-
-    def is_subset_of(self, other):
-        return self == other
-
-
-class RangeDeclaration(ASTNode):
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')  # maybe INT, REAL
-        self.elements = kwargs.pop('elements')
-        self.arity = 1
-        self.translated = None
-        self.domain = None  # not used
-        self.sorts = [Symbol(name=self.name)]
-        self.out = Symbol(name=BOOL)
-
-        self.type = REAL if self.name == REAL else INT
-        self.range = []
-        for x in self.elements:
-            if x.toI is None:
-                self.range.append(x.fromI)
-                if x.fromI.type != INT:
-                    self.type = REAL
-            elif x.fromI.type == INT and x.toI.type == INT:
-                for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                    self.range.append(Number(number=str(i)))
-            else:
-                self.check(False, f"Can't have a range over reals: {self.name}")
-
-    def __str__(self):
-        elements = ";".join([str(x.fromI) + ("" if x.toI is None else ".." +
-                                             str(x.toI)) for x in self.elements])
-        return f"type {self.name} = {{{elements}}}"
-
-    def check_bounds(self, var):
-        if not self.elements:
-            return None
-        if self.range and len(self.range) < 20:
-            es = [AComparison.make('=', [var, c]) for c in self.range]
-            e = ADisjunction.make('∨', es)
-            return e
-        sub_exprs = []
-        for x in self.elements:
-            if x.toI is None:
-                e = AComparison.make('=', [var, x.fromI])
-            else:
-                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
-            sub_exprs.append(e)
-        return ADisjunction.make('∨', sub_exprs)
+        return self.interpretation.enumeration.contains([var], False)
 
     def is_subset_of(self, other):
         return self == other
@@ -423,7 +375,7 @@ class SymbolDeclaration(ASTNode):
                 and self.sorts[0].decl == other)
 
 
-Type = Union[RangeDeclaration, ConstructedTypeDeclaration, SymbolDeclaration]
+Type = Union[TypeDeclaration, SymbolDeclaration]
 
 
 ################################ Theory  ###############################
@@ -444,7 +396,7 @@ class Theory(ASTNode):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.declarations = {}
-        self.clark = {}  # {Declaration: Rule}
+        self.clark = {}  # {(Declaration, Definition): Rule}
         self.def_constraints = {}  # {Declaration: Expression}
         self.assignments = Assignments()
 
@@ -459,13 +411,26 @@ class Theory(ASTNode):
 
 
 class Definition(ASTNode):
+    """ The class of AST nodes representing an inductive definition.
+        id (num): unique identifier for each definition
+
+        rules ([Rule]): set of rules for the definition
+
+        clarks ({Declaration: Transformed Rule}): normalized rule for each defined symbol (used to be Clark completion)
+
+        def_vars ({String: {String: Variable}}): Fresh variables for arguments and result
+    """
+    definition_id = 0  # intentional static variable so that no two definitions get the same ID
+
     def __init__(self, **kwargs):
+        Definition.definition_id += 1
+        self.id = Definition.definition_id
         self.rules = kwargs.pop('rules')
-        self.clarks = None  # {Declaration: Transformed Rule}
-        self.def_vars = {}  # {String: {String: Variable}} Fresh variables for arguments & result
+        self.clarks = {}  # {Declaration: Transformed Rule}
+        self.def_vars = {}  # {String: {String: Variable}}
 
     def __str__(self):
-        return "Definition(s) of " + ",".join([k.name for k in self.clark.keys()])
+        return "Definition(s) of " + ",".join([k.name for k in self.clarks.keys()])
 
     def __repr__(self):
         out = []
@@ -473,32 +438,35 @@ class Definition(ASTNode):
             out.append(repr(rule))
         return NEWL.join(out)
 
+    def __eq__(self, another):
+        return self.id == another.id
+
+    def __hash__(self):
+        return hash(self.id)
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
         self.quantees = kwargs.pop('quantees')
-        self.symbol = kwargs.pop('symbol')
-        self.args = kwargs.pop('args')  # later augmented with self.out, if any
+        self.definiendum = kwargs.pop('definiendum')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
         self.is_whole_domain = None  # Bool
         self.whole_domain = None  # Expression
         self.block = None  # theory where it occurs
         self.cache = {}
+        self.inst_def_level = 0
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
-        self.q_vars = {}  # {string: Variable}
-        self.args = [] if self.args is None else self.args.sub_exprs
         if self.out is not None:
-            self.args.append(self.out)
+            self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
 
     def __repr__(self):
-        return (f"Rule:∀{','.join(f'{q.var} ∈ {q.sort}' for q in self.quantees)}: "
-                f"{self.symbol}({','.join(str(e) for e in self.args)}) "
+        return (f"Rule:∀{','.join(str(q) for q in self.quantees)}: "
+                f"{self.definiendum} "
                 f"⇔{str(self.body)}")
 
     def rename_args(self, new_vars):
@@ -506,23 +474,24 @@ class Rule(ASTNode):
             input : '!v: f(args) <- body(args)'
             output: '!nv: f(nv) <- nv=args & body(args)' """
 
-        self.check(len(self.args) == len(new_vars), "Internal error")
-        vars = [q.var for q in self.quantees]
-        for i in range(len(self.args)):
-            arg, nv = self.args[i],  list(new_vars.values())[i]
+        self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
+        vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
+        for i in range(len(self.definiendum.sub_exprs)):
+            arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:
-                self.body = self.body.instantiate(arg, nv)
-                self.out = self.out.instantiate(arg, nv) if self.out else self.out
-                for j in range(i, len(self.args)):
-                    self.args[j] = self.args[j].instantiate(arg, nv)
+                self.body = self.body.instantiate([arg], [nv])
+                self.out = (self.out.instantiate([arg], [nv]) if self.out else
+                            self.out)
+                for j in range(i, len(self.definiendum.sub_exprs)):
+                    self.definiendum.sub_exprs[j] = \
+                        self.definiendum.sub_exprs[j].instantiate([arg], [nv])
             else:
                 eq = AComparison.make('=', [nv, arg])
                 self.body = AConjunction.make('∧', [eq, self.body])
 
-        self.args = list(new_vars.values())
-        self.quantees = [Quantee.make(v,s) for v,s in new_vars.items()]
-        self.q_vars = new_vars
+        self.definiendum.sub_exprs = list(new_vars.values())
+        self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
         return self
 
     def instantiate_definition(self, new_args, theory):
@@ -535,24 +504,33 @@ class Rule(ASTNode):
         Returns:
             Expression: a boolean expression
         """
-        hash = str(new_args)
-        if hash in self.cache:
-            return self.cache[hash]
+        key = str(new_args)
+        if key in self.cache:
+            return self.cache[key]
+
+        self.inst_def_level += 1
+        if self.inst_def_level > CO_CONSTR_RECURSION_DEPTH:
+            return None
+
+        self.cache[key] = None  # avoid recursive loops
         # assert self.is_whole_domain == False
-        out = self.body.copy() # in case there is no arguments
-        self.check(len(new_args) == len(self.args)
-                or len(new_args)+1 == len(self.args), "Internal error")
-        for old, new in zip(self.args, new_args):
-            out = out.instantiate(old, new, theory)
-        out = out.interpret(theory)
-        instance = AppliedSymbol.make(self.symbol, new_args)
+        out = self.body.copy()  # in case there are no arguments
+        instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
-        if self.symbol.decl.type != BOOL:  # a function
-            out = out.instantiate(self.args[-1], instance, theory)
-        else:
+        if self.definiendum.decl.type == BOOL:  # a predicate
+            self.check(len(self.definiendum.sub_exprs) == len(new_args),
+                       "Internal error")
+            out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
             out = AEquivalence.make('⇔', [instance, out])
+        else:
+            self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
+                       "Internal error")
+            out = out.instantiate(self.definiendum.sub_exprs,
+                                  new_args+[instance], theory)
         out.block = self.block
-        self.cache[hash] = out
+        out = out.interpret(theory)
+        self.cache[key] = out
+        self.inst_def_level -= 1
         return out
 
 
@@ -629,7 +607,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if type(args[rank]) in [Constructor, Number]:
+            if args[rank].value is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(theory, rank+1,
@@ -646,11 +624,25 @@ class SymbolInterpretation(ASTNode):
 
 
 class Enumeration(ASTNode):
+    """Represents an enumeration of tuples of expressions.
+    Used for predicates, or types without n-ary constructors.
+
+    Attributes:
+        tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
+
+        constructors (List[Constructor], optional): List of Constructor
+    """
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
         if not isinstance(self.tuples, OrderedSet):
             # self.tuples.sort(key=lambda t: t.code)
             self.tuples = OrderedSet(self.tuples)
+        if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
+               for c in self.tuples):
+            self.constructors = [Constructor(name=c.args[0].name)
+                                 for c in self.tuples]
+        else:
+            self.constructors = None
 
     def __repr__(self):
         return ", ".join([repr(t) for t in self.tuples])
@@ -670,7 +662,7 @@ class Enumeration(ASTNode):
 
         # constructs If-then-else recursively
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
-        if args[rank].as_rigid() is not None:
+        if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
                     return self.contains(args, function, arity, rank+1, list(tuples2))
@@ -696,6 +688,19 @@ class FunctionEnum(Enumeration):
 
 class CSVEnumeration(Enumeration):
     pass
+
+class ConstructedFrom(Enumeration):
+    """Represents a 'constructed from' enumeration of constructors
+
+    Attributes:
+        tuples (OrderedSet[Tuple]): OrderedSet of tuples of Expression
+
+        constructors (List[Constructor]): List of Constructor
+    """
+    def __init__(self, **kwargs):
+        self.constructed = kwargs.pop('constructed')
+        self.constructors = kwargs.pop('constructors')
+        self.tuples = None
 
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
@@ -723,6 +728,58 @@ class FunctionTuple(Tuple):
 class CSVTuple(Tuple):
     pass
 
+class Ranges(Enumeration):
+    def __init__(self, **kwargs):
+        self.elements = kwargs.pop('elements')
+
+        tuples = []
+        self.type = None
+        for x in self.elements:
+            if self.type == None:
+                self.type = x.fromI.type
+            if x.toI is None:
+                tuples.append(Tuple(args=[x.fromI]))
+            elif x.fromI.type == INT and x.toI.type == INT:
+                for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                    tuples.append(Tuple(args=[Number(number=str(i))]))
+            elif x.fromI.type == DATE and x.toI.type == DATE:
+                for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                    tuples.append(Tuple(args=[Number(number=str(i))])) #TODO1
+            else:
+                self.check(False, f"Can't have a range over reals")
+        Enumeration.__init__(self, tuples=tuples)
+
+    def contains(self, args, function, arity=None, rank=0, tuples=None):
+        var = args[0]
+        if not self.elements:
+            return None
+        if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
+            es = [AComparison.make('=', [var, c.args[0]]) for c in self.tuples]
+            e = ADisjunction.make('∨', es)
+            return e
+        sub_exprs = []
+        for x in self.elements:
+            if x.toI is None:
+                e = AComparison.make('=', [var, x.fromI])
+            else:
+                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
+            sub_exprs.append(e)
+        return ADisjunction.make('∨', sub_exprs)
+
+class IntRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = INT
+
+class RealRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = REAL
+
+class DateRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = DATE
 
 ################################ Display  ###############################
 
@@ -865,8 +922,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         ConstructedTypeDeclaration,
-                                         RangeDeclaration,
+                                         TypeDeclaration, Accessor,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
@@ -877,11 +933,13 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,
-                                         Number, Brackets, Date, Arguments,
+                                         Number, Brackets, Date, Variable,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          Tuple, FunctionTuple, CSVTuple,
+                                         ConstructedFrom, Constructor, Ranges,
                                          Display,
 
-                                         Procedure, Call1, Call0, String, PyList, PyAssignment])
+                                         Procedure, Call1, Call0, String,
+                                         PyList, PyAssignment])

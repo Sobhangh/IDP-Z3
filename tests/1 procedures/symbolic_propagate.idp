@@ -15,5 +15,5 @@ theory T:V {
 }
 
 procedure main () {
-    print(str(Problem(T).symbolic_propagate().simplify().formula()))
+    pretty_print(str(Problem(T).symbolic_propagate().simplify().formula()))
 }

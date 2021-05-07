@@ -31,7 +31,7 @@ from .Expression import (
     Constructor, Expression, IfExpr, AQuantification, Quantee,
     BinaryOperator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol,
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status, Assignment
@@ -53,15 +53,13 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
     if value is not None:
         self.value = value
     elif simpler is not None:
-        if type(simpler) in [Constructor, Number]:
-            self.value = simpler
-        elif simpler.value is not None:  # example: prime.idp
+        if simpler.value is not None:  # example: prime.idp
             self.value = simpler.value
         else:
             self.simpler = simpler
-    assert self.value is None or type(self.value) in [Constructor, Symbol,
-                                                      Number, Date]
-    assert self.value is not self  # avoid infinite loops
+    assert (self.value is None
+            or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
+                                    Number, Date])
 
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -109,7 +107,7 @@ IfExpr.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     if not self.decl and self.sort:
-        symbol = self.sort.as_rigid()
+        symbol = self.sort.value
         if symbol:
             self.decl = symbol.decl
             self.sort.decl = self.decl
@@ -121,8 +119,7 @@ Quantee.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
-    if not self.q_vars:
-        self.quantees = []
+    if not self.quantees:
         if self.q == '∀':
             simpler = AConjunction.make('∧', exprs)
         else:
@@ -227,12 +224,15 @@ AConjunction.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    operands1 = [e.as_rigid() for e in operands]
+    operands1 = [e.value for e in operands]
     if all(e is not None for e in operands1):
         acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
-            if not (BinaryOperator.MAP[op]) (acc1.py_value, expr1.py_value):
+            if op == "=":
+                if not acc1.same_as(expr1):
+                    return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+            elif not (BinaryOperator.MAP[op]) (acc1.py_value, expr1.py_value):
                 return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             acc, acc1 = expr, expr1
         return self._change(value=TRUE, sub_exprs=operands)
@@ -249,7 +249,7 @@ AComparison.as_set_condition = as_set_condition
 
 def update_arith(self, family, operands):
     operands = list(operands)
-    operands1 = [e.as_rigid() for e in operands]
+    operands1 = [e.value for e in operands]
     if all(e is not None for e in operands1):
         out = operands1[0].py_value
 
@@ -277,7 +277,7 @@ ASumMinus.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     if any(op == '%' for op in self.operator):  # special case !
-        operands1 = [e.as_rigid() for e in operands]
+        operands1 = [e.value for e in operands]
         if len(operands) == 2 \
            and all(e is not None for e in operands1):
             out = operands1[0].py_value % operands1[1].py_value
@@ -292,7 +292,7 @@ AMultDiv.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    operands1 = [e.as_rigid() for e in operands]
+    operands1 = [e.value for e in operands]
     if len(operands) == 2 \
        and all(e is not None for e in operands1):
         out = operands1[0].py_value ** operands1[1].py_value
@@ -312,7 +312,7 @@ def update_exprs(self, new_exprs):
         if operand.same_as(FALSE):
             return self._change(value=TRUE, sub_exprs=[operand])
     else:  # '-'
-        a = operand.as_rigid()
+        a = operand.value
         if a is not None:
             if type(a) == Number:
                 return self._change(value=Number(number=str(- a.translate())), sub_exprs=[operand])
@@ -330,8 +330,8 @@ AUnary.as_set_condition = as_set_condition
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    if self.using_if and not self.q_vars:
-        operands1 = [e.as_rigid() for e in operands]
+    if self.using_if and not self.quantees:
+        operands1 = [e.value for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
             out = Number(number=str(out))
@@ -345,45 +345,46 @@ AAggregate.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     new_exprs = list(new_exprs)
     if not self.decl:
-        symbol = self.symbol.as_rigid()
+        symbol = self.symbol.value
         if symbol:
             self.decl = symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
-    if self.decl:
+    if self.decl and type(self.decl) == Constructor:
+        if all(e.value is not None for e in new_exprs):
+            return self._change(sub_exprs=new_exprs, value = self)
+    if (self.decl and new_exprs
+        and type(new_exprs[0]) == UnappliedSymbol and new_exprs[0].decl):
         if self.decl.name == ARITY:
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{ARITY}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL,
+            self.check(new_exprs[0].decl.type == SYMBOL,
                     f"Argument of '{ARITY}' must be a Symbol: {new_exprs[0]}")
-            if isinstance(new_exprs[0], Constructor):
-                value = Number(number=str(new_exprs[0].symbol.decl.arity))
-                return self._change(value=value, sub_exprs=new_exprs)
+            value = Number(number=str(new_exprs[0].decl.symbol.decl.arity))
+            return self._change(value=value, sub_exprs=new_exprs)
         elif self.decl.name == INPUT_DOMAIN:
             self.check(len(new_exprs) == 2,
                     f"Incorrect number of arguments for '{INPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL
-                       or (new_exprs[0].sort.decl.arity == 1
-                           and new_exprs[0].sort.decl.type == BOOL),
+            self.check(new_exprs[0].decl.type == SYMBOL
+                       or (new_exprs[0].decl.sort.decl.arity == 1
+                           and new_exprs[0].decl.sort.decl.type == BOOL),
                     f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
             self.check(new_exprs[1].type == INT,
                     f"Second argument of '{INPUT_DOMAIN}' must be a Int: {new_exprs[1]}")
-            if (isinstance(new_exprs[0], Constructor)
-                and isinstance(new_exprs[1], Number)):
+            if isinstance(new_exprs[1], Number):
                 # find the Symbol for the input domain
-                symbol_string = f"`{new_exprs[0].symbol.decl.sorts[new_exprs[1].py_value - 1]}"
+                symbol_string = f"`{new_exprs[0].decl.symbol.decl.sorts[new_exprs[1].py_value - 1]}"
                 value = self.decl.out.decl.map[symbol_string]
                 return self._change(value=value, sub_exprs=new_exprs)
         elif self.decl.name == OUTPUT_DOMAIN:
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{OUTPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].type == SYMBOL,
+            self.check(new_exprs[0].decl.type == SYMBOL,
                     f"Argument of '{OUTPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
-            if isinstance(new_exprs[0], Constructor):
-                # find the Symbol for the output domain of the argument
-                symbol_string = f"`{new_exprs[0].symbol.decl.out}"
-                value = self.decl.out.decl.map[symbol_string]
-                return self._change(value=value, sub_exprs=new_exprs)
+            # find the Symbol for the output domain of the argument
+            symbol_string = f"`{new_exprs[0].decl.symbol.decl.out}"
+            value = self.decl.out.decl.map[symbol_string]
+            return self._change(value=value, sub_exprs=new_exprs)
     return self._change(sub_exprs=new_exprs)
 AppliedSymbol.update_exprs = update_exprs
 
@@ -401,8 +402,9 @@ AppliedSymbol.as_set_condition = as_set_condition
 def update_exprs(self, new_exprs):
     symbol = list(new_exprs)[0]
     value = (symbol if self.eval == '' else
-             symbol.symbol if type(symbol) == Constructor else
+             symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
              None)
+    self.decl = value.decl if value else None
     return self._change(sub_exprs=[symbol], value=value)
 SymbolExpr.update_exprs = update_exprs
 

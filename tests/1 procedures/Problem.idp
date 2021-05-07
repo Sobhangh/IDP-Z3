@@ -5,7 +5,7 @@ vocabulary V {
     r: () → Real
     type color := {red, blue, green}
     c: () → color
-    type range := {0..5}
+    type range
     ra: () → range
 }
 
@@ -15,8 +15,9 @@ theory T:V {
 }
 structure S:V {
     p := true.
+    range := {0..5}
 }
 
 procedure main () {
-    print(Problem(T, S).formula().translate())
+    pretty_print(Problem(T, S).formula().translate())
 }

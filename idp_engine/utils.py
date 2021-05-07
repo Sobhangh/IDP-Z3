@@ -23,6 +23,8 @@ from collections import ChainMap, Iterable
 from json import JSONEncoder
 import time
 
+MAX_QUANTIFIER_EXPANSION = 20
+
 NEWL = "\n"
 indented = "\n  "
 BOOL = "Bool"
@@ -36,6 +38,12 @@ ARITY = "arity"
 INPUT_DOMAIN = "input_domain"
 OUTPUT_DOMAIN = "output_domain"
 RESERVED_SYMBOLS = [RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
+
+"""
+    Parameters:
+"""
+
+CO_CONSTR_RECURSION_DEPTH = 3
 
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"
@@ -71,7 +79,7 @@ def unquote(s):
 
 def in_list(q, ls):
     if not ls:
-        return True  # e.g. for INT, REAL
+        return True  # e.g. for INT, REAL, DATE
     if len(ls) == 1:
         return q == ls[0]
     return Or([q == i for i in ls])

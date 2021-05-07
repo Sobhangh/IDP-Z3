@@ -48,8 +48,8 @@ decision_table(theories, structures=None, goal_string="", timeout=20, max_rows=5
     Experimental.  Returns the rows for a decision table that defines ``goal_string``.
     ``goal_string`` must be a predicate application defined in the theory.
 
-print(...)
-    Prints the arguments on stdout
+pretty_print(...)
+    Prints its argument on stdout, in a readable form.
 
 
 Problem class
@@ -90,6 +90,12 @@ symbolic_propagate(self)
 propagate(self)
     Returns the problem with its ``assignments`` property updated with values for all terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
     Terms and propositions starting with '_' are ignored.
+
+explain(self, consequence)
+    Returns the facts and laws to explain a consequence in the Problem.
+
+    The string ``consequence`` must be a key in the ``assignments`` property of the Problem.
+    The facts are a list of Assignment, and the laws are a list of Expression.
 
 simplify(self)
     Returns the problem with a simplified formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.
