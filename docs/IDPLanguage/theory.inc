@@ -168,6 +168,7 @@ Quantified formulas
     ``f(args) in enum`` and ``f(args) not in enum`` are sentences, where
     ``f`` is a function applied to arguments ``args``
     and ``enum`` is an enumeration.
+    This can also be written using Unicode: `f() ∈ {1,2,3}` or `f() ∉ {1,2,3}`.
 
 if .. then .. else ..
     ``if t_1 then t_2 else t_3`` is a sentence when |t1|, |t2| and |t3| are sentences.

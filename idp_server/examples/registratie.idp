@@ -13,6 +13,9 @@ vocabulary environment {
 
   // for Social_Dwelling
   buyer : () → Buyer_Type
+
+  value: () → ℝ
+
   seller : () → Seller
   mortgage_loan_allowance : () → 𝔹
 
@@ -37,8 +40,6 @@ vocabulary environment {
   // For Dwelling_For_Social_Renting
   start_dt_dwelling_for_social_rent : () → Year
   duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
-
-  value: () → ℝ
 
 }
 
