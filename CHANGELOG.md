@@ -23,6 +23,7 @@ Contributors (alphabetical):  Jo Devriendt, Matthias van der hallen, Pierre Carb
 
 ### Interactive Consultant
 
+* Merge !67: add manual propagation button to interface
 * Merge !66: add "toUnicode" button in editor
 * fix #76: optionalPropagation and moveSymbols no longer working
 * fix #75: default structure seems broken
