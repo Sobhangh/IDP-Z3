@@ -552,7 +552,8 @@ class Problem(object):
             model = solver.model()
             goal = None
             for atom in questions.values():
-                assignment = self.assignments[atom.code]
+                assignment = self.assignments.get(atom.code,
+                                        Assignment(atom, None, Status.UNKNOWN))
                 if assignment.value is None and atom.type == BOOL:
                     if not atom.is_reified():
                         val1 = model.eval(atom.translate())
