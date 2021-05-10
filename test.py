@@ -1,8 +1,9 @@
 """
 A testing file for the IDP-Z3 project.
-This file includes two tests:
+This file includes three tests:
     * generate
     * pipeline
+    * api
 
 The generation test creates a idp-z3 file for every .idp file in the tests
 directory. These files can be used to manually verify if everything is still in
@@ -14,7 +15,9 @@ also printed at the end. If during this any file returns with an error, the
 test will exit with code 1, so that it can be used in an automated testing
 pipeline.
 
-By default, the generate test is run.
+The api test will call the idp-engine API.
+
+By default, the generate and api tests are run.
 
 Authors: Pierre Carbonelle, Simon Vandevelde
 """
@@ -181,10 +184,43 @@ def pipeline():
         print("{: >60} {: >20}".format(k, v))
     return error
 
+def api():
+    # capture stdout, print()
+    with io.StringIO() as buf, redirect_stdout(buf):
+        try:
+            test = """
+                vocabulary {
+                    p, q : () → 𝔹
+                }
+
+                theory {
+                    p() => q().
+                }
+                structure {}
+
+                procedure main() {
+                    print("ok")
+                }
+            """
+            kb = IDP.parse(test)
+            T, S = kb.get_blocks("T, S")
+            kb.execute()
+            for model in model_expand(T,S):
+                print(model)
+                print()
+            problem = Problem(T)
+            problem.assert_("p()", True, Status.GIVEN)
+            print(problem.propagate().assignments)
+        except Exception as exc:
+            print(traceback.format_exc())
+        output = buf.getvalue()
+    with open(os.path.join("./tests/api.z3"), "w") as fp:
+        fp.write(output)
+    return 0
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the tests')
-    parser.add_argument('TEST', nargs='*', default=["generate"])
+    parser.add_argument('TEST', nargs='*', default=["generate", "api"])
     args = parser.parse_args()
 
     error = 0
@@ -193,28 +229,8 @@ if __name__ == "__main__":
     if "pipeline" in args.TEST:
         p_error = pipeline()
         error = max(error, p_error)
+    if "api" in args.TEST:
+        p_error = api()
+        error = max(error, p_error)
 
-    test = """
-        vocabulary {
-            p, q : () → 𝔹
-        }
-
-        theory {
-            p() => q().
-        }
-        structure {}
-
-        procedure main() {
-            print("ok")
-        }
-    """
-    kb = IDP.parse(test)
-    T, S = kb.get_blocks("T, S")
-    kb.execute()
-    for model in model_expand(T,S):
-        print(model)
-        print()
-    problem = Problem(T)
-    problem.assert_("p()", True, Status.GIVEN)
-    print(problem.propagate().assignments)
     sys.exit(error)
