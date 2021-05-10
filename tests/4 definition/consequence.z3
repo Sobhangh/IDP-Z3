@@ -14,7 +14,8 @@ display {
     view() = expanded.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'p',
               'priority': 'core',

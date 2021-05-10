@@ -13,7 +13,8 @@ theory {
     y()=quad(X()).
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'X',
               'priority': 'core',

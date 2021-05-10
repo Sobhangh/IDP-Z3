@@ -34,7 +34,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Credit_Score',
               'priority': 'core',

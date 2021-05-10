@@ -39,7 +39,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Years_of_Service',
               'priority': 'core',
