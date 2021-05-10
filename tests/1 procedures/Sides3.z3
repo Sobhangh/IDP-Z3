@@ -1,11 +1,11 @@
 No more consequences.
 
-Vertices -> 3
-Type -> triangle
+Vertices() -> 3
+Type() -> triangle
 Length(4) -> 0
 Angle(4) -> 0
-Convex
+Convex()
 No more consequences.
 
-Convex
+Convex()
 No more consequences.

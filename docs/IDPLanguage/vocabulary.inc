@@ -38,22 +38,29 @@ Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``)
 The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
 
-Custom types can be defined by specifying a range of numeric literals, or a list of constructors (of arity 0).
+Custom types are declared using the keyword ``type``, e.g., ``type color``.
 Their name should be singular and capitalized, by convention.
-The enumeration can be given in a theory or structure block.
 
-.. code::
+Their extension can be defined in a structure_, or directly in the vocabulary, by specifying:
 
-    type Person
-    type Side := {1..4}
-    type Color := {Red, Blue, Green}
+* a list of (ranges of) numeric literals, e.g., ``type someNumbers := {0,1,2}`` or ``type byte := {0..255}``
 
-For the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
+* a list of (ranges of) dates, e.g., ``type dates := {#2021-01-01, #2022-01-01}`` or ``type dates := {#2021-01-01 .. #2022-01-01}``
 
+* a list of nullary constructors, e.g., ``type Color := {Red, Blue, Green}``
+
+* a list of n-ary constructors; in that case, the enumeration must be preceded by ``constructed from``, e.g., ``type Color2 := constructed from {Red, Blue, Green, RGB(R: Byte, G: Byte, B: Byte)}``
+
+In the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
+
+The constructors of ```Color2`` are : ``Red``, ``Blue``, ``Green`` and ``RGB``.
+Each constructor have an associated function (e.g., ``is_Red``, or ``is_RGB``) to test if a Color2 term was created with that constructor.
+The ``RGB`` constructor takes 3 arguments of type ``Byte``.
+``R``, ``G`` and ``B`` are accessor functions: when given a Color2 term constructed with RGB, they return the associated Byte.
+(When given a Color2 not constructed with RGB, they may raise an error)
 
 .. _function:
 .. index:: function
-
 Functions
 +++++++++
 

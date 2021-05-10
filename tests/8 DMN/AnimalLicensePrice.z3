@@ -55,117 +55,117 @@ structure {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'Age': {'Age': {'environmental': False,
-                 'is_assignment': True,
-                 'normal': True,
-                 'reading': 'Age',
-                 'relevant': True,
-                 'status': 'UNKNOWN',
-                 'typ': 'Int',
-                 'value': ''},
-         'Age < 6': {'environmental': False,
-                     'is_assignment': False,
-                     'normal': False,
-                     'reading': 'Age < 6',
-                     'relevant': True,
-                     'status': 'UNKNOWN',
-                     'typ': 'Bool'},
-         'Age ≥ 6': {'environmental': False,
-                     'is_assignment': False,
-                     'normal': False,
-                     'reading': 'Age ≥ 6',
-                     'relevant': True,
-                     'status': 'UNKNOWN',
-                     'typ': 'Bool'},
-         '__rank': 1},
- 'Animal': {'Animal': {'environmental': False,
+ 'Age': {'Age()': {'environmental': False,
+                   'is_assignment': True,
+                   'normal': True,
+                   'reading': 'Age',
+                   'relevant': True,
+                   'status': 'UNKNOWN',
+                   'typ': 'Int',
+                   'value': ''},
+         'Age() < 6': {'environmental': False,
+                       'is_assignment': False,
+                       'normal': False,
+                       'reading': 'Age < 6',
+                       'relevant': True,
+                       'status': 'UNKNOWN',
+                       'typ': 'Bool'},
+         'Age() ≥ 6': {'environmental': False,
+                       'is_assignment': False,
+                       'normal': False,
+                       'reading': 'Age ≥ 6',
+                       'relevant': True,
+                       'status': 'UNKNOWN',
+                       'typ': 'Bool'},
+         '__rank': 9999},
+ 'Animal': {'Animal()': {'environmental': False,
+                         'is_assignment': True,
+                         'normal': True,
+                         'reading': 'Animal',
+                         'relevant': True,
+                         'status': 'UNIVERSAL',
+                         'typ': 'Animalt_t',
+                         'value': 'Dog',
+                         'values': ['Dog']},
+            'Animal() = Dog': {'environmental': False,
+                               'is_assignment': True,
+                               'normal': False,
+                               'reading': 'Animal = Dog',
+                               'relevant': True,
+                               'status': 'UNIVERSAL',
+                               'typ': 'Bool',
+                               'value': True},
+            '__rank': 9999},
+ 'Sterilized': {'Sterilized()': {'environmental': False,
+                                 'is_assignment': False,
+                                 'normal': True,
+                                 'reading': 'Sterilized',
+                                 'relevant': True,
+                                 'status': 'UNKNOWN',
+                                 'typ': 'Bool'},
+                '__rank': 9999},
+ 'Total': {'Total()': {'environmental': False,
                        'is_assignment': True,
                        'normal': True,
-                       'reading': 'Animal',
+                       'reading': 'Total',
                        'relevant': True,
-                       'status': 'UNIVERSAL',
-                       'typ': 'Animalt_t',
-                       'value': 'Dog',
-                       'values': ['Dog']},
-            'Animal = Dog': {'environmental': False,
-                             'is_assignment': True,
-                             'normal': False,
-                             'reading': 'Animal = Dog',
-                             'relevant': True,
-                             'status': 'UNIVERSAL',
-                             'typ': 'Bool',
-                             'value': True},
-            '__rank': 1},
- 'Sterilized': {'Sterilized': {'environmental': False,
-                               'is_assignment': False,
-                               'normal': True,
-                               'reading': 'Sterilized',
-                               'relevant': True,
-                               'status': 'UNKNOWN',
-                               'typ': 'Bool'},
-                '__rank': 1},
- 'Total': {'Total': {'environmental': False,
-                     'is_assignment': True,
-                     'normal': True,
-                     'reading': 'Total',
-                     'relevant': True,
-                     'status': 'UNKNOWN',
-                     'typ': 'Real',
-                     'value': ''},
-           'Total = sum{ : Age < 6 ∧ ¬((Sterilized)) : 20.0} + sum{ : Age ≥ 6 ∧ Sterilized : 20.0} + sum{ : Age ≥ 6 ∧ ¬((Sterilized)) : 40.0} + sum{ : Animal = Dog ∧ ViciousDog : 100.0}': {'environmental': False,
-                                                                                                                                                                                             'is_assignment': False,
-                                                                                                                                                                                             'normal': False,
-                                                                                                                                                                                             'reading': 'Total '
-                                                                                                                                                                                                        '= '
-                                                                                                                                                                                                        'sum{ '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        'Age '
-                                                                                                                                                                                                        '< '
-                                                                                                                                                                                                        '6 '
-                                                                                                                                                                                                        '∧ '
-                                                                                                                                                                                                        '¬((Sterilized)) '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        '20.0} '
-                                                                                                                                                                                                        '+ '
-                                                                                                                                                                                                        'sum{ '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        'Age '
-                                                                                                                                                                                                        '≥ '
-                                                                                                                                                                                                        '6 '
-                                                                                                                                                                                                        '∧ '
-                                                                                                                                                                                                        'Sterilized '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        '20.0} '
-                                                                                                                                                                                                        '+ '
-                                                                                                                                                                                                        'sum{ '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        'Age '
-                                                                                                                                                                                                        '≥ '
-                                                                                                                                                                                                        '6 '
-                                                                                                                                                                                                        '∧ '
-                                                                                                                                                                                                        '¬((Sterilized)) '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        '40.0} '
-                                                                                                                                                                                                        '+ '
-                                                                                                                                                                                                        'sum{ '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        'Animal '
-                                                                                                                                                                                                        '= '
-                                                                                                                                                                                                        'Dog '
-                                                                                                                                                                                                        '∧ '
-                                                                                                                                                                                                        'ViciousDog '
-                                                                                                                                                                                                        ': '
-                                                                                                                                                                                                        '100.0}',
-                                                                                                                                                                                             'relevant': True,
-                                                                                                                                                                                             'status': 'UNIVERSAL',
-                                                                                                                                                                                             'typ': 'Bool',
-                                                                                                                                                                                             'value': True},
-           '__rank': 1},
- 'ViciousDog': {'ViciousDog': {'environmental': False,
-                               'is_assignment': False,
-                               'normal': True,
-                               'reading': 'ViciousDog',
-                               'relevant': True,
-                               'status': 'UNKNOWN',
-                               'typ': 'Bool'},
-                '__rank': 1}}
+                       'status': 'UNKNOWN',
+                       'typ': 'Real',
+                       'value': ''},
+           'Total() = sum{ : Age() < 6 ∧ ¬((Sterilized())) : 20.0} + sum{ : Age() ≥ 6 ∧ Sterilized() : 20.0} + sum{ : Age() ≥ 6 ∧ ¬((Sterilized())) : 40.0} + sum{ : Animal() = Dog ∧ ViciousDog() : 100.0}': {'environmental': False,
+                                                                                                                                                                                                               'is_assignment': False,
+                                                                                                                                                                                                               'normal': False,
+                                                                                                                                                                                                               'reading': 'Total '
+                                                                                                                                                                                                                          '= '
+                                                                                                                                                                                                                          'sum{ '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          'Age '
+                                                                                                                                                                                                                          '< '
+                                                                                                                                                                                                                          '6 '
+                                                                                                                                                                                                                          '∧ '
+                                                                                                                                                                                                                          '¬((Sterilized)) '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          '20.0} '
+                                                                                                                                                                                                                          '+ '
+                                                                                                                                                                                                                          'sum{ '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          'Age '
+                                                                                                                                                                                                                          '≥ '
+                                                                                                                                                                                                                          '6 '
+                                                                                                                                                                                                                          '∧ '
+                                                                                                                                                                                                                          'Sterilized '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          '20.0} '
+                                                                                                                                                                                                                          '+ '
+                                                                                                                                                                                                                          'sum{ '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          'Age '
+                                                                                                                                                                                                                          '≥ '
+                                                                                                                                                                                                                          '6 '
+                                                                                                                                                                                                                          '∧ '
+                                                                                                                                                                                                                          '¬((Sterilized)) '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          '40.0} '
+                                                                                                                                                                                                                          '+ '
+                                                                                                                                                                                                                          'sum{ '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          'Animal '
+                                                                                                                                                                                                                          '= '
+                                                                                                                                                                                                                          'Dog '
+                                                                                                                                                                                                                          '∧ '
+                                                                                                                                                                                                                          'ViciousDog '
+                                                                                                                                                                                                                          ': '
+                                                                                                                                                                                                                          '100.0}',
+                                                                                                                                                                                                               'relevant': True,
+                                                                                                                                                                                                               'status': 'UNIVERSAL',
+                                                                                                                                                                                                               'typ': 'Bool',
+                                                                                                                                                                                                               'value': True},
+           '__rank': 9999},
+ 'ViciousDog': {'ViciousDog()': {'environmental': False,
+                                 'is_assignment': False,
+                                 'normal': True,
+                                 'reading': 'ViciousDog',
+                                 'relevant': True,
+                                 'status': 'UNKNOWN',
+                                 'typ': 'Bool'},
+                '__rank': 9999}}

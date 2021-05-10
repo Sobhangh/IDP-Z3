@@ -8,7 +8,7 @@ theory T:V {
 }
 
 procedure main() {
-	print(decision_table(T, goal_string="q"))
-	print(decision_table(T, goal_string="q", verify=True))
+	pretty_print(decision_table(T, goal_string="q()"))
+	pretty_print(decision_table(T, goal_string="q()", verify=True))
 }
 //TODO should distinguish between forward and backward reasoning

@@ -17,5 +17,5 @@ structure S:V {
 }
 
 procedure main() {
-    print(model_expand(T, S))
+    pretty_print(model_expand(T, S))
 }

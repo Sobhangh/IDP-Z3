@@ -1,7 +1,7 @@
 f(red)
 No more consequences.
 
-p
-q
+p()
+q()
 f(red)
 No more consequences.

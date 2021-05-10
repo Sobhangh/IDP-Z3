@@ -25,7 +25,7 @@ __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuanti
            "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
-           "Arguments", "UnappliedSymbol", "Variable",
+           "UnappliedSymbol", "Variable",
            "Number", "Brackets", "TRUE", "FALSE", "ZERO", "ONE"]
 
 import copy
@@ -54,7 +54,10 @@ class ASTNode(object):
             IDPZ3Error: when `condition` is not met
         """
         if not condition:
-            location = get_location(self)
+            try:
+                location = get_location(self)
+            except:
+                raise IDPZ3Error(f"{msg}")
             line = location['line']
             col = location['col']
             raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
@@ -89,6 +92,65 @@ class ASTNode(object):
 
     def interpret(self, problem: Any) -> "Expression":
         return self  # monkey-patched
+
+
+class Constructor(ASTNode):
+    """Constructor declaration
+
+    Attributes:
+        name (string): name of the constructor
+
+        sorts (List[Symbol]): types of the arguments of the constructor
+
+        type (string): name of the type that contains this constructor
+
+        arity (Int): number of arguments of the constructor
+
+        tester (SymbolDeclaration): function to test if the constructor
+        has been applied to some arguments (e.g., is_rgb)
+
+        symbol (Symbol): only for Symbol constructors
+
+        translated (DataTypeRef): the value in Z3
+    """
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.sorts = kwargs.pop('args') if 'args' in kwargs else []
+
+        self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
+                     self.name)
+        self.arity = len(self.sorts)
+
+        self.type = None
+        self.symbol = None
+        self.tester = None
+        self.translated: Any = None
+
+    def __str__(self):
+        return (self.name if not self.sorts else
+                f"{self.name}({','.join((str(a) for a in self.sorts))}" )
+
+
+class Accessor(ASTNode):
+    """represents an accessor and a type
+
+    Attributes:
+        accessor (Symbol, Optional): name of accessor function
+
+        type (string): name of the output type of the accessor
+
+        decl (SymbolDeclaration): declaration of the accessor function
+    """
+    def __init__(self, **kwargs):
+        self.accessor = kwargs.pop('accessor') if 'accessor' in kwargs else None
+        self.type = kwargs.pop('type').name
+        self.decl = None
+
+    def __str__(self):
+        return (self.type if not self.accessor else
+                f"{self.accessor}: {self.type}" )
+
 
 
 class Expression(ASTNode):
@@ -177,8 +239,8 @@ class Expression(ASTNode):
         self.block: Any = None
 
     def copy(self):
-        " create a deep copy (except for Constructor and Number) "
-        if type(self) in [Constructor, Number, Variable]:
+        " create a deep copy (except for rigid terms and variables) "
+        if self.value == self:
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
@@ -194,20 +256,20 @@ class Expression(ASTNode):
     def same_as(self, other):
         if id(self) == id(other):
             return True
-        if self.value is not None:
+        if self.value is not None and self.value is not self:
             return self.value  .same_as(other)
         if self.simpler is not None:
             return self.simpler.same_as(other)
-        if other.value is not None:
+        if other.value is not None and other.value is not other:
             return self.same_as(other.value)
         if other.simpler is not None:
             return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification) and len(self.q_vars) == 0)):
+           or (isinstance(self, AQuantification) and len(self.quantees) == 0)):
             return self.sub_exprs[0].same_as(other)
         if (isinstance(other, Brackets)
-           or (isinstance(other, AQuantification) and len(other.q_vars) == 0)):
+           or (isinstance(other, AQuantification) and len(other.quantees) == 0)):
             return self.same_as(other.sub_exprs[0])
 
         return self.str == other.str and type(self) == type(other)
@@ -215,8 +277,7 @@ class Expression(ASTNode):
     def __repr__(self): return str(self)
 
     def __str__(self):
-        self.check(self.value is not self, "Internal error")
-        if self.value is not None:
+        if self.value is not None and self.value is not self:
             return str(self.value)
         if self.simpler is not None:
             return str(self.simpler)
@@ -240,7 +301,7 @@ class Expression(ASTNode):
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for Constructor, IfExpr, AUnary, Variable,
+        default implementation for UnappliedSymbol, IfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
 
@@ -283,10 +344,6 @@ class Expression(ASTNode):
             self.co_constraint.co_constraints(co_constraints)
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
-
-    def as_rigid(self):
-        " returns a Number or Constructor, or None "
-        return self.value
 
     def is_reified(self): return True
 
@@ -331,8 +388,8 @@ class Expression(ASTNode):
         return self  # monkey-patched
 
     def instantiate(self,
-                    e0: "Expression",
-                    e1: "Expression",
+                    e0: List["Expression"],
+                    e1: List["Expression"],
                     problem: "Problem"=None
                     ) -> "Expression":
         return self  # monkey-patched
@@ -346,8 +403,8 @@ class Expression(ASTNode):
 
     def symbolic_propagate(self,
                            assignments: "Assignments",
-                           truth: Optional["Constructor"] = None
-                           ) -> List[Tuple["Expression", "Constructor"]]:
+                           truth: Optional["Expression"] = None
+                           ) -> List[Tuple["Expression"]]:
         return []  # monkey-patched
 
     def propagate1(self,
@@ -373,50 +430,29 @@ class Expression(ASTNode):
         """
         return (None, None, None)
 
-class Constructor(Expression):
-    PRECEDENCE = 200
-
-    def __init__(self, **kwargs):
-        self.name = unquote(kwargs.pop('name'))
-        self.sub_exprs = []
-
-        super().__init__()
-        self.fresh_vars = set()
-        self.symbol = None  # set only for SYMBOL constructors
-        self.translated: Any = None
-
-    def __str1__(self): return self.name
-
-    def as_rigid(self): return self
-
-    def is_reified(self): return False
-
-
-TRUE = Constructor(name='true')
-FALSE = Constructor(name='false')
-
 
 class Symbol(Expression):
+    """Represents a Symbol.  Handles synonyms.
+
+    Attributes:
+        name (string): name of the symbol
+    """
+    TO = {'𝔹': BOOL, 'ℤ': INT, 'ℝ': REAL,
+          '`𝔹': '`'+BOOL, '`ℤ': '`'+INT, '`ℝ': '`'+REAL,}
+    FROM = {BOOL: '𝔹', INT: 'ℤ', REAL: 'ℝ',
+            '`'+BOOL: '`𝔹', '`'+INT: '`ℤ', '`'+REAL: '`ℝ',}
+
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
-        self.name = (BOOL if self.name == '𝔹' else
-                     INT if self.name == 'ℤ' else
-                     REAL if self.name == 'ℝ' else
-                     self.name
-        )
+        self.name = Symbol.TO.get(self.name, self.name)
         self.sub_exprs = []
         self.decl = None
         super().__init__()
         self.fresh_vars = set()
+        self.value = self
 
     def __str__(self):
-        return ('𝔹' if self.name == BOOL else
-                'ℤ' if self.name == INT else
-                'ℝ' if self.name == REAL else
-                self.name
-        )
-
-    def as_rigid(self): return self
+        return Symbol.FROM.get(self.name, self.name)
 
     def translate(self):
         return self.decl.translate()
@@ -448,24 +484,44 @@ class IfExpr(Expression):
 
 
 class Quantee(Expression):
+    """represents the description of quantification, e.g., `x in T` or `(x,y) in P`
+
+    Attributes:
+        vars (List[List[Variable]): the (tuples of) variables being quantified
+
+        sort (SymbolExpr, Optional): the type or predicate to quantify over
+
+        arity (int): the length of the tuple of variable
+    """
     def __init__(self, **kwargs):
-        self.var = kwargs.pop('var')
+        self.vars = kwargs.pop('vars')
         self.sort = kwargs.pop('sort')
+
+        self.arity = None
+        for i, v in enumerate(self.vars):
+            if hasattr(v, 'vars'):  # varTuple
+                self.vars[i] = v.vars
+                self.arity = len(v.vars) if self.arity == None else self.arity
+            else:
+                self.vars[i] = [v]
+                self.arity = 1 if self.arity == None else self.arity
 
         self.sub_exprs = []
         super().__init__()
         self.decl = None
 
+        self.check(all(len(v) == self.arity for v in self.vars),
+                    f"Inconsistent tuples in {self}")
+
     @classmethod
     def make(cls, var, sort):
-        if type(sort) != SymbolExpr:
+        if sort and type(sort) != SymbolExpr:
             sort = SymbolExpr(eval='', s=sort)
-        out = (cls) (var=var, sort=sort)
-        out.decl = sort.decl
+        out = (cls) (vars=[var], sort=sort)
         return out.annotate1()
 
     def __str1__(self):
-        return f"{self.var} ∈ {self.sort}"
+        return f"{','.join(str(v) for vs in self.vars for v in vs)} ∈ {self.sort}"
 
     def copy(self):
         out = Expression.copy(self)
@@ -482,18 +538,22 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
+        if self.quantees and self.quantees[-1].sort is None:
+            # separate untyped variables, so that they can be typed separately
+            q = self.quantees.pop()
+            for vars in q.vars:
+                for var in vars:
+                    self.quantees.append(Quantee.make(var, None))
+
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.q_vars = {}  # dict[String, Variable]
         self.type = BOOL
 
     @classmethod
-    def make(cls, q, q_vars, f):
+    def make(cls, q, quantees, f):
         "make and annotate a quantified formula"
-        quantees = [Quantee.make(v.name, v.sort) for v in q_vars.values()]
         out = cls(q=q, quantees=quantees, f=f)
-        out.q_vars = q_vars
         return out.annotate1()
 
     def __str1__(self):
@@ -504,15 +564,14 @@ class AQuantification(Expression):
             return self.sub_exprs[0].str
 
     def copy(self):
+        # also called by AAgregate
         out = Expression.copy(self)
-        out.q_vars = copy.copy(out.q_vars)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         questions.append(self)
-        if all_:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+        if all_:  #TODO1 and not self.quantees ?
+            Expression.collect(self, questions, all_, co_constraints)
 
 
 class BinaryOperator(Expression):
@@ -526,7 +585,7 @@ class BinaryOperator(Expression):
         self.operator = list(map(
             lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
-                "∨" if op == "|" else "∧" if op == "&" else op
+                "∨" if op == "|" else "∧" if op == "&" else "⨯" if op == "*" else op
             , self.operator))
 
         super().__init__()
@@ -597,9 +656,9 @@ class AComparison(BinaryOperator):
         return len(self.sub_exprs) == 2 and \
                 self.operator in [['='], ['≠']] \
                 and isinstance(self.sub_exprs[0], AppliedSymbol) \
-                and all(e.as_rigid() is not None
+                and all(e.value is not None
                         for e in self.sub_exprs[0].sub_exprs) \
-                and self.sub_exprs[1].as_rigid() is not None
+                and self.sub_exprs[1].value is not None
 
 
 class ASumMinus(BinaryOperator):
@@ -653,8 +712,6 @@ class AAggregate(Expression):
         self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
-        self.q_vars = {}
-
         if self.aggtype == "sum" and self.out is None:
             raise Exception("Must have output variable for sum")
         if self.aggtype != "sum" and self.out is not None:
@@ -674,14 +731,11 @@ class AAggregate(Expression):
         return out
 
     def copy(self):
-        out = Expression.copy(self)
-        out.q_vars = copy.copy(out.q_vars)
-        return out
+        return AQuantification.copy(self)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
-            for e in self.sub_exprs:
-                e.collect(questions, all_, co_constraints)
+            Expression.collect(self, questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
@@ -691,8 +745,6 @@ class AppliedSymbol(Expression):
         eval (string): '$' if the symbol must be evaluated, else ''
 
         s (Expression): the symbol to be applied to arguments
-
-        args ([Expression]): the list of arguments
 
         is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
 
@@ -708,13 +760,15 @@ class AppliedSymbol(Expression):
 
     def __init__(self, **kwargs):
         self.symbol = kwargs.pop('symbol')
-        self.args = kwargs.pop('args')
+        self.sub_exprs = kwargs.pop('sub_exprs')
         if 'is_enumerated' in kwargs:
             self.is_enumerated = kwargs.pop('is_enumerated')
         else:
             self.is_enumerated = ''
         if 'is_enumeration' in kwargs:
             self.is_enumeration = kwargs.pop('is_enumeration')
+            if self.is_enumeration == '∉':
+                self.is_enumeration = 'not'
         else:
             self.is_enumeration = ''
         if 'in_enumeration' in kwargs:
@@ -722,7 +776,6 @@ class AppliedSymbol(Expression):
         else:
             self.in_enumeration = None
 
-        self.sub_exprs = self.args.sub_exprs
         super().__init__()
 
         self.decl = None
@@ -730,17 +783,21 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        out = cls(symbol=symbol, args=Arguments(sub_exprs=args), **kwargs)
+        out = cls(symbol=symbol, sub_exprs=args, **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
         return out.annotate1()
 
+    @classmethod
+    def construct(cls, constructor, args):
+        out= cls.make(Symbol(name=constructor.name), args)
+        out.decl = constructor
+        out.fresh_vars = {}
+        return out
+
     def __str1__(self):
-        if len(self.sub_exprs) == 0:
-            out = f"{self.symbol}"
-        else:
-            out = f"{self.symbol}({','.join([x.str for x in self.sub_exprs])})"
+        out = f"{self.symbol}({', '.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
         return (f"{out}"
@@ -755,6 +812,9 @@ class AppliedSymbol(Expression):
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl and self.decl.name not in RESERVED_SYMBOLS:
             questions.append(self)
+            if self.is_enumerated or self.in_enumeration:
+                app = AppliedSymbol.make(self.symbol, self.sub_exprs)
+                questions.append(app)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
         if co_constraints and self.co_constraint is not None:
@@ -804,7 +864,7 @@ class SymbolExpr(Expression):
         self.eval = (kwargs.pop('eval') if 'eval' in kwargs else
                      '')
         self.sub_exprs = [kwargs.pop('s')]
-        self.decl = None
+        self.decl = self.sub_exprs[0].decl if not self.eval else None
         super().__init__()
 
     def __str1__(self):
@@ -812,19 +872,11 @@ class SymbolExpr(Expression):
                 f"{self.sub_exprs[0]}")
 
 
-class Arguments(object):
-    def __init__(self, **kwargs):
-        self.sub_exprs = kwargs.pop('sub_exprs')
-        super().__init__()
-
-
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.
-    Can be a constructor, a quantified variable,
-    or a symbol application without arguments (by abuse of notation, e.g. 'p').
-    (The parsing of numbers result directly in Number nodes)
+    Can be a constructor or a quantified variable.
 
-    Converted to the proper AST class by annotate().
+    Variables are converted to Variable() by annotate().
     """
     PRECEDENCE = 200
 
@@ -840,20 +892,36 @@ class UnappliedSymbol(Expression):
         self.is_enumerated = None
         self.is_enumeration = None
         self.in_enumeration = None
+        self.value = self
+
+    @classmethod
+    def construct(cls, constructor: Constructor):
+        """Create an UnappliedSymbol from a constructor
+        """
+        out = (cls)(s=Symbol(name=constructor.name))
+        out.decl = constructor
+        out.fresh_vars = {}
+        return out
 
     def __str1__(self): return self.name
 
-    def collect(self, questions, all_=True, co_constraints=True):
-        self.check(False, f"Internal error: {self}")
+    def is_reified(self): return False
 
+
+TRUEC = Constructor(name='true')
+FALSEC = Constructor(name='false')
+
+TRUE = UnappliedSymbol.construct(TRUEC)
+FALSE = UnappliedSymbol.construct(FALSEC)
 
 class Variable(Expression):
     """AST node for a variable in a quantification or aggregate
     """
     PRECEDENCE = 200
 
-    def __init__(self, name, sort):
-        self.name = name
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        sort = kwargs.pop('sort') if 'sort' in kwargs else None
         self.sort = sort
 
         super().__init__()
@@ -864,6 +932,8 @@ class Variable(Expression):
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name
+
+    def copy(self): return self
 
 
 class Number(Expression):
@@ -876,13 +946,13 @@ class Number(Expression):
 
         self.sub_exprs = []
         self.fresh_vars = set()
+        self.value = self
 
         self.translated = None
         self.translate()  # also sets self.type
 
     def __str__(self): return self.number
 
-    def as_rigid(self): return self
     def is_reified(self): return False
 
 
@@ -902,13 +972,13 @@ class Date(Expression):
 
         self.sub_exprs = []
         self.fresh_vars = set()
+        self.value = self
 
         self.translated = None
         self.translate()  # also sets self.type
 
     def __str__(self): return f"#{self.date.isoformat()}"
 
-    def as_rigid(self): return self
     def is_reified(self): return False
 
 
@@ -931,7 +1001,4 @@ class Brackets(Expression):
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
     def __str1__(self): return str(self)
-
-    def as_rigid(self):
-        return self.sub_exprs[0].as_rigid()
 

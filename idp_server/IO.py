@@ -187,7 +187,7 @@ class Output(object):
                 if symbol:
                     symbol["status"] = ass.status.name
                     symbol["relevant"] = ass.relevant
-                    symbol['reading'] = reading
+                    symbol['reading'] = reading.replace("()","")
                     symbol['normal'] = not atom.is_reified()
                     symbol['environmental'] = symb.block.name == 'environment'
                     symbol['is_assignment'] = symbol['typ'] != BOOL \
@@ -213,7 +213,7 @@ class Output(object):
                     self.m[symb.name] = {}
 
     def fill(self, state):
-        for key, l in state.assignments.items():
+        for l in state.assignments.values():
             if l.value is not None:
                 self.addAtom(l.sentence, l.value, l.status)
         return self.m
@@ -234,5 +234,5 @@ class Output(object):
                                              str(value)
                     else:
                         s[key]["unknown"] = True
-                    s[key]['reading'] = atom.annotations['reading']
+                    s[key]['reading'] = atom.annotations['reading'].replace("()", "")
                     #s[key]["status"] = status.name  # for a click on Sides=3

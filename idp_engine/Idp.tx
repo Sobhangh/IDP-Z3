@@ -14,14 +14,16 @@ Comment:
 Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
-  Declaration: Extern | RangeDeclaration | ConstructedTypeDeclaration | SymbolDeclaration;
+  Declaration: Extern | TypeDeclaration | SymbolDeclaration;
 
     Extern: 'extern' 'vocabulary' (name=ID);
 
-    ConstructedTypeDeclaration: /type[ \t]/ name=ID (':=' enumeration=Enumeration)?;
-
-    RangeDeclaration: /type[ \t]/ name=ID ':=' '{' elements*=RangeElement[','] '}';
-      RangeElement: fromI=Number ('..' toI=Number)?;
+    TypeDeclaration:
+      /type[ \t]/
+      name=ID
+      (':=' ( enumeration=Ranges
+            | enumeration=Enumeration
+            | enumeration=ConstructedFrom))?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
           ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
@@ -34,9 +36,14 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
   Definition: '{' rules*=Rule '}';
   Rule: annotations=Annotations
-        (('!'|'∀') quantees+=Quantee[','] ':' )* symbol=Symbol args=Arguments? ('=' out=SumMinus)?
+        (('!'|'∀') quantees+=Quantee[','] ':' )*
+        definiendum=AppliedSymbol
+        ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: var=/`?[^\d\W]\w*\b/ ( ('in' | '∈') sort=SymbolExpr)? ;
+      Quantee: ( vars+=Variable[','] ( ('in' | '∈') sort=SymbolExpr)?
+               | vars+=VarTuple[','] ('in' | '∈') sort=SymbolExpr );
+          Variable: name=/`?[^\d\W]\w*\b/;
+          VarTuple: '(' vars+=Variable[','] ')';
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
@@ -77,17 +84,17 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     ConjunctionOp:   '&' | '∧';
     ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
     SumMinusOp:      '+' | '-';
-    MultDivOp:       '*' | '/' | '%';
+    MultDivOp:       '⨯' | '*' | '/' | '%';
     UnaryOperator:   '-' | '~' | '¬';
 
 
     Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
-      AppliedSymbol: symbol=SymbolExpr args=Arguments
+      AppliedSymbol: symbol=SymbolExpr
+              '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+(not\s+)?enumerated/
-              | is_enumeration=/(not\s+)?in/ in_enumeration=Enumeration)?;
+              | is_enumeration=/(not\s+)?in|∈|(∉)/ in_enumeration=Enumeration)?;
         SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
-        Arguments: '(' sub_exprs*=Expression[','] ')';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
@@ -97,19 +104,30 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
 
 Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
-  SymbolInterpretation: name=Symbol ':='
-                        ( default=Identifier '.'?
-                        | enumeration=FunctionEnum ('else' default=Identifier)?
+  SymbolInterpretation: name=UnappliedSymbol ':='
+                        ( enumeration=FunctionEnum ('else' default=Identifier)?
+                        | enumeration=Ranges
                         | enumeration=Enumeration
-                        | enumeration=CSVEnumeration);
+                        | enumeration=CSVEnumeration
+                        | enumeration=ConstructedFrom
+                        | default=Identifier '.'?);
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
+  Ranges: '{' elements*=RangeElement[','] '}';
+      RangeElement:   (fromI=Number ('..' toI=Number)?)
+                    | (fromI=Date   ('..' toI=Date  )?) ;
   Enumeration: '{' tuples*=Tuple[','] '}';
   Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
   CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
   CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
-  Identifier: UnappliedSymbol | Number | Date;
+
+  ConstructedFrom: constructed=/constructed\s+from/?
+                   '{' constructors*=Constructor[',']  '}';
+    Constructor: name=UnappliedSymbol ('(' args+=Accessor[','] ')' )?;
+    Accessor: (accessor=UnappliedSymbol ':')? type=UnappliedSymbol;
+
+  Identifier: AppliedSymbol | UnappliedSymbol | Number | Date;
 
 Goal: 'goal' name=ID;
 

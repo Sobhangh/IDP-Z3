@@ -25,6 +25,7 @@ theory T:V {
 
     //BMI
     {
+        [BMI computation rule]
         bmi() = weight()/(length() * length()) <- true.
     }
 
@@ -52,7 +53,9 @@ structure {
 }
 
 procedure main() {
-    print(model_propagate(T))
+    pretty_print(model_propagate(T))
     print()
-    print(model_propagate(T, S))
+    pretty_print(model_propagate(T, S))
+    print()
+    pretty_print(Problem(T,S).propagate().explain("riskLevel()"))
 }

@@ -1,3 +1,3 @@
-p ∧ (true) ∧ (r) ∧ true
+p() ∧ (true) ∧ (r()) ∧ true
 
-p ∧ r ∧ (true) ∧ (true) ∧ true
+p() ∧ r() ∧ (true) ∧ (true) ∧ true

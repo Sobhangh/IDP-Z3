@@ -20,13 +20,11 @@ This module contains the logic for inferences
 that are specific for the Interactive Consultant.
 """
 
-from itertools import chain
 import time
-from z3 import Solver, Implies, Not
 
-from idp_engine.Expression import AComparison, AUnary, AppliedSymbol, TRUE
-from idp_engine.Assignments import Status, Assignment
-from idp_engine.utils import OrderedSet, BOOL, RELEVANT
+from idp_engine.Assignments import Status
+from idp_engine.Expression import AppliedSymbol, TRUE
+from idp_engine.utils import OrderedSet, RELEVANT
 from .IO import Output
 
 
@@ -154,71 +152,27 @@ def get_relevant_subtences(self):
                         for q in constraint.questions)):
                 constraint.relevant = True
                 to_add.extend(constraint.questions)
-    self.relevant_symbols = relevants
+    self.relevant_symbols = (relevants if self.idp.display.moveSymbols else
+                             {})
 
 
-def explain(state, question):
+def explain(state, consequence):
+    (facts, laws) = state.explain(consequence)
     out = Output(state, state.given)
+    for ass in facts:
+        out.addAtom(ass.sentence, ass.value, ass.status)
+    out.m["*laws*"] = [l.annotations['reading'] for l in laws]
 
-    negated = question.replace('~', '¬').startswith('¬')
-    question = question[1:] if negated else question
-    if question in state.assignments:
-        to_explain = state.assignments[question].sentence
-
-        # rules used in justification
-        if to_explain.type != BOOL:  # recalculate numeric value
-            val = state.assignments[question].value
-            if val is None:  # can't explain an expanded value
-                return out.m
-            to_explain = AComparison.make("=", [to_explain, val])
-        if negated:
-            to_explain = AUnary.make('¬', to_explain)
-
-        s = Solver()
-        s.set(':core.minimize', True)
-        ps = {}  # {reified: constraint}
-
-        for ass in state.assignments.values():
-            if ass.status in [Status.GIVEN, Status.STRUCTURE,
-                              Status.UNIVERSAL]:
-                p = ass.translate()
-                ps[p] = ass
-                #TODO use assert_and_track ?
-                s.add(Implies(p, ass.translate()))
-        todo = chain(state.constraints, state.def_constraints.values())
-        for constraint in todo:
-            p = constraint.reified()
-            ps[p] = constraint.original.translate()
-            s.add(Implies(p, ps[p]))
-
-        s.add(Not(to_explain.translate()))
-        s.check(list(ps.keys()))
-        unsatcore = s.unsat_core()
-
-        if unsatcore:
-            for a1 in state.assignments.values():
-                if a1.status in [Status.GIVEN, Status.STRUCTURE,
-                                 Status.UNIVERSAL]:
-                    for a2 in unsatcore:
-                        if type(ps[a2]) == Assignment \
-                        and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            out.addAtom(a1.sentence, a1.value, a1.status)
-
-            # remove irrelevant atoms
-            for symb, dictionary in out.m.items():
-                out.m[symb] = {k: v for k, v in dictionary.items()
-                               if type(v) == dict and v['status'] in
-                               ['GIVEN', 'STRUCTURE', 'UNIVERSAL']
-                               and v.get('value', '') != ''}
-            out.m = {k: v for k, v in out.m.items() if v}
-
-            out.m["*laws*"] = []
-            for a1 in chain(state.def_constraints.values(), state.constraints):
-                #TODO find the rule
-                for a2 in unsatcore:
-                    if str(a1.original.translate()) == str(ps[a2]):
-                        out.m["*laws*"].append(a1.annotations['reading'])
+    # remove irrelevant atoms
+    for symb, dictionary in out.m.items():
+        if symb != "*laws*":
+            out.m[symb] = {k: v for k, v in dictionary.items()
+                            if type(v) == dict and v['status'] in
+                               ['GIVEN', 'STRUCTURE']
+                            and v.get('value', '') != ''}
+    out.m = {k: v for k, v in out.m.items() if v or k =="*laws*"}
     return out.m
+
 
 def abstract(state, given_json):
     timeout, max_rows = 20, 50
