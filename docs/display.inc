@@ -45,6 +45,9 @@ optionalPropagation
 
     By default, this button is not present.
 
+manualPropagation
+    If ``manualPropagation()`` is present in the *display block*, automatic propagation will be disabled in the interface. Instead, a button will be added to the header that allows propagation when clicked.
+
 unit
     ``unit('unitstr', s1, ..., sn)`` specifies the unit of one or more symbols.
     This unit will then show up in the symbol's header in the Interactive Consultant.
