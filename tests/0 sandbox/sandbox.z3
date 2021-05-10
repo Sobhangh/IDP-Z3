@@ -67,7 +67,7 @@ display {
                              'relevant': True,
                              'status': 'UNKNOWN',
                              'typ': 'Bool'},
-           '__rank': 1,
+           '__rank': 9999,
            'opposite(Color()) is enumerated': {'environmental': False,
                                                'is_assignment': False,
                                                'normal': False,

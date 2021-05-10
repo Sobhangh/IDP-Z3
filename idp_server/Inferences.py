@@ -152,7 +152,8 @@ def get_relevant_subtences(self):
                         for q in constraint.questions)):
                 constraint.relevant = True
                 to_add.extend(constraint.questions)
-    self.relevant_symbols = relevants
+    self.relevant_symbols = (relevants if self.idp.display.moveSymbols else
+                             {})
 
 
 def explain(state, consequence):
@@ -171,6 +172,7 @@ def explain(state, consequence):
                             and v.get('value', '') != ''}
     out.m = {k: v for k, v in out.m.items() if v or k =="*laws*"}
     return out.m
+
 
 def abstract(state, given_json):
     timeout, max_rows = 20, 50

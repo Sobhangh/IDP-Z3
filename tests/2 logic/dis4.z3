@@ -47,7 +47,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'p': {'__rank': 1,
+ 'p': {'__rank': 9999,
        'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -56,7 +56,7 @@ display {
                'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},
- 'q': {'__rank': 1,
+ 'q': {'__rank': 9999,
        'q()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -65,7 +65,7 @@ display {
                'status': 'CONSEQUENCE',
                'typ': 'Bool',
                'value': False}},
- 'r': {'__rank': 1,
+ 'r': {'__rank': 9999,
        'r()': {'environmental': False,
                'is_assignment': False,
                'normal': True,

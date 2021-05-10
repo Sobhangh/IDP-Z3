@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased yet]
 
+Contributors (alphabetical):  Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde
+
 ### API
 * (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
 * (breaking) Merge !77: consistently represent propositions and constants with `()` in Python API

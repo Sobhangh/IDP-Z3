@@ -261,7 +261,7 @@ structure {
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
-            '__rank': 1,
+            '__rank': 9999,
             '∀Bus ∈ Bus_t : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01': {'environmental': False,
                                                                                                                        'is_assignment': False,
                                                                                                                        'normal': False,
@@ -908,7 +908,7 @@ structure {
                                      '298',
                                      '299',
                                      '300']},
-          '__rank': 1},
+          '__rank': 9999},
  'Kids_amount': {'Kids_amount()': {'environmental': False,
                                    'is_assignment': True,
                                    'normal': True,
@@ -1235,7 +1235,7 @@ structure {
                                                                          'status': 'UNIVERSAL',
                                                                          'typ': 'Bool',
                                                                          'value': True},
-                 '__rank': 1},
+                 '__rank': 9999},
  'Price': {},
  'Size': {},
  'TotalPrice': {'TotalPrice()': {'environmental': False,
@@ -5259,4 +5259,4 @@ structure {
                                                                                            'status': 'UNIVERSAL',
                                                                                            'typ': 'Bool',
                                                                                            'value': True},
-                '__rank': 1}}
+                '__rank': 9999}}

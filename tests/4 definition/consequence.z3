@@ -49,7 +49,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'b': {'__rank': 1,
+ 'b': {'__rank': 9999,
        'b()': {'environmental': False,
                'is_assignment': False,
                'normal': True,

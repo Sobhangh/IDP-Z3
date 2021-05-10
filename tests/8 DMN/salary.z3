@@ -81,7 +81,7 @@ structure {
                                                                                                                                                                        'status': 'UNIVERSAL',
                                                                                                                                                                        'typ': 'Bool',
                                                                                                                                                                        'value': True},
-           '__rank': 1},
+           '__rank': 9999},
  'Years_of_Work': {'Years_of_Work()': {'environmental': False,
                                        'is_assignment': True,
                                        'normal': True,
@@ -118,4 +118,4 @@ structure {
                                            'relevant': True,
                                            'status': 'UNKNOWN',
                                            'typ': 'Bool'},
-                   '__rank': 1}}
+                   '__rank': 9999}}
