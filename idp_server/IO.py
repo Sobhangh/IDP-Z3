@@ -63,10 +63,12 @@ def metaJSON(state):
 
         symbols.append(d)
     optionalPropagation = state.idp.display.optionalPropagation
+    manualPropagation = state.idp.display.manualPropagation
 
     # Create the output dictionary.
     out = {"title": "Interactive Consultant", "symbols": symbols,
-           "optionalPropagation": optionalPropagation}
+           "optionalPropagation": optionalPropagation,
+           "manualPropagation": manualPropagation}
     return out
 
 

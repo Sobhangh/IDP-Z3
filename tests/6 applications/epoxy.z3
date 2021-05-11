@@ -66,7 +66,8 @@ display {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'KnownCost',
               'priority': 'core',
