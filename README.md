@@ -5,7 +5,7 @@ It is developed by the Knowledge Representation group at KU Leuven in Leuven, Be
 
 See more information at [www.IDP-Z3.be](https://www.IDP-Z3.be).
 
-Contributors (alphabetical):  Ingmar Dasseville, Jo Devriendt, Marc Denecker, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde
+Contributors (alphabetical):  Bram Aerts, Ingmar Dasseville, Jo Devriendt, Marc Denecker, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde
 
 # Installation
 
