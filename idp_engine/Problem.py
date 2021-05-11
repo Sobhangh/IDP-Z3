@@ -24,7 +24,7 @@ Class to represent a collection of theory and structure blocks.
 import time
 from copy import copy
 from itertools import chain
-from typing import Iterable, List
+from typing import Any, Iterable, List
 from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status, Assignment, Assignments
@@ -148,6 +148,29 @@ class Problem(object):
         for name, s in block.goals.items():
             self.goals[name] = s
         return self
+
+    def assert_(self, code: str, value: Any, status: Status = Status.GIVEN):
+        """asserts that an expression has a value
+
+        Args:
+            code (str): the code of the expression, e.g., "p()"
+            value (Any): a Python value, e.g., "True"
+            status (Status, Optional): how the value was obtained.  Default: Status.GIVEN
+        """
+        self._interpret()
+        code = str(code)
+        atom = self.assignments[code].sentence
+        if value is None:
+            self.assignments.assert_(atom, value, Status.UNKNOWN, False)
+        else:
+            val = str_to_IDP(atom, str(value))
+            self.assignments.assert_(atom, val, status, False)
+        # reset any consequences
+        for v in self.assignments.values():
+            if v.status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.EXPANDED]:
+                v.status = Status.UNKNOWN
+                v.value = None
+        self._formula = None
 
     def _interpret(self):
         """ apply the enumerations and definitions """

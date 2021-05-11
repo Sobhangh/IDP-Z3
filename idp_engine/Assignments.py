@@ -195,11 +195,7 @@ class Assignments(dict):
         if sentence.code in self:
             # needed for explain of irrelevant symbols
             out = copy(self[sentence.code])
-            # don't overwrite
-            if out.value is None:
-                out.value = value
-            else:
-                pass  # issue  #35 error will be caught later by Z3
+            out.value = value
             if out.status is None or out.status == Status.UNKNOWN:
                 out.status = status
             if relevant is not None:
