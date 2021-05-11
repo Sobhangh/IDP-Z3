@@ -50,7 +50,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Animal_Type',
               'priority': 'core',

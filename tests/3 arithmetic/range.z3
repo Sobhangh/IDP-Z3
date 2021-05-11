@@ -8,7 +8,8 @@ theory {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Start_Dt_Dwelling_For_Social_Rent',
               'priority': 'core',

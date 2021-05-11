@@ -22,7 +22,8 @@ structure {
 
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Wages_Salaries_Tips',
               'priority': 'core',

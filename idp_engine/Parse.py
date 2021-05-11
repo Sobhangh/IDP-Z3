@@ -788,6 +788,7 @@ class Display(ASTNode):
         self.constraints = kwargs.pop('constraints')
         self.moveSymbols = False
         self.optionalPropagation = False
+        self.manualPropagation = False
         self.name = "display"
 
     def run(self, idp):
@@ -834,6 +835,8 @@ class Display(ASTNode):
                     self.moveSymbols = True
                 elif name == "optionalPropagation":
                     self.optionalPropagation = True
+                elif name == "manualPropagation":
+                    self.manualPropagation = True
                 else:
                     raise IDPZ3Error(f"unknown display constraint:"
                                      f" {constraint}")
