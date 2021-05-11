@@ -4,20 +4,20 @@ No more consequences.
 Model 1
 ==========
 Color:={->blue}
+p:={->false}
 
 Model 2
 ==========
-Color:={->green}
-p:={->false}
+Color:={->blue}
+p:={->true}
 
 Model 3
 ==========
-Color:={->red}
+Color:={->green}
 p:={->false}
 
 Model 4
 ==========
 Color:={->red}
-p:={->true}
 
 No more models.
