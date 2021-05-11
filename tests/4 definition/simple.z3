@@ -17,7 +17,8 @@ display {
     view() = expanded.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'p',
               'priority': 'core',
@@ -58,7 +59,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'a': {'__rank': 2,
+ 'a': {'__rank': 9999,
        'a()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
@@ -84,7 +85,7 @@ display {
                      'status': 'UNIVERSAL',
                      'typ': 'Bool',
                      'value': True}},
- 'b': {'__rank': 1,
+ 'b': {'__rank': 9999,
        'b()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
@@ -136,7 +137,7 @@ display {
                      'status': 'CONSEQUENCE',
                      'typ': 'Bool',
                      'value': True}},
- 'p': {'__rank': 2,
+ 'p': {'__rank': 9999,
        'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -145,7 +146,7 @@ display {
                'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},
- 'q': {'__rank': 2,
+ 'q': {'__rank': 9999,
        'q()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -153,7 +154,7 @@ display {
                'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
- 'r': {'__rank': 2,
+ 'r': {'__rank': 9999,
        'r()': {'environmental': False,
                'is_assignment': False,
                'normal': True,

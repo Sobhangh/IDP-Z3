@@ -49,7 +49,8 @@ display {
     view() = expanded.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': True,
               'idpname': 'OMinT',
               'priority': 'core',
@@ -91,7 +92,7 @@ display {
                                  'relevant': True,
                                  'status': 'UNKNOWN',
                                  'typ': 'Bool'},
-                '__rank': 2},
+                '__rank': 9999},
  'M': {'M()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
@@ -130,7 +131,7 @@ display {
                                          'status': 'UNIVERSAL',
                                          'typ': 'Bool',
                                          'value': True},
-       '__rank': 1},
+       '__rank': 9999},
  'OMaxT': {'OMaxT(e1)': {'environmental': True,
                          'is_assignment': True,
                          'normal': True,
@@ -237,4 +238,4 @@ display {
                'status': 'UNKNOWN',
                'typ': 'Int',
                'value': ''},
-       '__rank': 2}}
+       '__rank': 9999}}

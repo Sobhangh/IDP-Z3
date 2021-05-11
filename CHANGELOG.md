@@ -6,9 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased yet]
 
-## API
+Contributors (alphabetical):  Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde
+
+### API
 * (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
 * (breaking) Merge !77: consistently represent propositions and constants with `()` in Python API
+* Merge !66: allow `⨯` for arithmetic product (IEP 09)
 * Merge !68: support for N-ary constructors (IEP 06)
 * Merge !70: improve binary quantification (IEP 03)
 * Merge !75: add `Problem.explain()` to API
@@ -21,6 +24,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Interactive Consultant
 
+* Merge !67: add manual propagation button to interface
+* Merge !66: add "toUnicode" button in editor
 * fix #76: optionalPropagation and moveSymbols no longer working
 * fix #75: default structure seems broken
 * update video tutorial

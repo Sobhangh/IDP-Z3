@@ -38,7 +38,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Price',
               'priority': 'core',
@@ -261,7 +262,7 @@ structure {
                                   'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': False},
-            '__rank': 1,
+            '__rank': 9999,
             '∀Bus ∈ Bus_t : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01': {'environmental': False,
                                                                                                                        'is_assignment': False,
                                                                                                                        'normal': False,
@@ -908,7 +909,7 @@ structure {
                                      '298',
                                      '299',
                                      '300']},
-          '__rank': 1},
+          '__rank': 9999},
  'Kids_amount': {'Kids_amount()': {'environmental': False,
                                    'is_assignment': True,
                                    'normal': True,
@@ -1235,7 +1236,7 @@ structure {
                                                                          'status': 'UNIVERSAL',
                                                                          'typ': 'Bool',
                                                                          'value': True},
-                 '__rank': 1},
+                 '__rank': 9999},
  'Price': {},
  'Size': {},
  'TotalPrice': {'TotalPrice()': {'environmental': False,
@@ -5247,16 +5248,16 @@ structure {
                                             '3998',
                                             '3999',
                                             '4000']},
-                'TotalPrice() = Amount(Big) * Price(Big) + Amount(Small) * Price(Small)': {'environmental': False,
+                'TotalPrice() = Amount(Big) ⨯ Price(Big) + Amount(Small) ⨯ Price(Small)': {'environmental': False,
                                                                                            'is_assignment': False,
                                                                                            'normal': False,
                                                                                            'reading': 'TotalPrice = '
-                                                                                                      'Amount(Big) * '
+                                                                                                      'Amount(Big) ⨯ '
                                                                                                       'Price(Big) + '
-                                                                                                      'Amount(Small) * '
+                                                                                                      'Amount(Small) ⨯ '
                                                                                                       'Price(Small)',
                                                                                            'relevant': True,
                                                                                            'status': 'UNIVERSAL',
                                                                                            'typ': 'Bool',
                                                                                            'value': True},
-                '__rank': 1}}
+                '__rank': 9999}}

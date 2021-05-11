@@ -19,7 +19,8 @@ display {
   view() = expanded.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Color',
               'priority': 'core',
@@ -67,7 +68,7 @@ display {
                              'relevant': True,
                              'status': 'UNKNOWN',
                              'typ': 'Bool'},
-           '__rank': 1,
+           '__rank': 9999,
            'opposite(Color()) is enumerated': {'environmental': False,
                                                'is_assignment': False,
                                                'normal': False,

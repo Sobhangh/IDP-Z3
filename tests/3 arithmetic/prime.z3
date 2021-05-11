@@ -12,7 +12,8 @@ display {
     goal(`Prime).
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Prime',
               'priority': 'core',
@@ -55,4 +56,4 @@ display {
                         'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': False},
-           '__rank': 1}}
+           '__rank': 9999}}

@@ -20,7 +20,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Total',
               'priority': 'core',
@@ -77,7 +78,7 @@ structure {
                        'relevant': True,
                        'status': 'UNKNOWN',
                        'typ': 'Bool'},
-         '__rank': 1},
+         '__rank': 9999},
  'Animal': {'Animal()': {'environmental': False,
                          'is_assignment': True,
                          'normal': True,
@@ -95,7 +96,7 @@ structure {
                                'status': 'UNIVERSAL',
                                'typ': 'Bool',
                                'value': True},
-            '__rank': 1},
+            '__rank': 9999},
  'Sterilized': {'Sterilized()': {'environmental': False,
                                  'is_assignment': False,
                                  'normal': True,
@@ -103,7 +104,7 @@ structure {
                                  'relevant': True,
                                  'status': 'UNKNOWN',
                                  'typ': 'Bool'},
-                '__rank': 1},
+                '__rank': 9999},
  'Total': {'Total()': {'environmental': False,
                        'is_assignment': True,
                        'normal': True,
@@ -160,7 +161,7 @@ structure {
                                                                                                                                                                                                                'status': 'UNIVERSAL',
                                                                                                                                                                                                                'typ': 'Bool',
                                                                                                                                                                                                                'value': True},
-           '__rank': 1},
+           '__rank': 9999},
  'ViciousDog': {'ViciousDog()': {'environmental': False,
                                  'is_assignment': False,
                                  'normal': True,
@@ -168,4 +169,4 @@ structure {
                                  'relevant': True,
                                  'status': 'UNKNOWN',
                                  'typ': 'Bool'},
-                '__rank': 1}}
+                '__rank': 9999}}

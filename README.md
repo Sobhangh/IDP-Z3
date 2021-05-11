@@ -5,6 +5,8 @@ It is developed by the Knowledge Representation group at KU Leuven in Leuven, Be
 
 See more information at [www.IDP-Z3.be](https://www.IDP-Z3.be).
 
+Contributors (alphabetical):  Ingmar Dasseville, Jo Devriendt, Marc Denecker, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde
+
 # Installation
 
 * Install [python3](https://www.python.org/downloads/) on your machine.

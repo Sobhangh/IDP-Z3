@@ -29,7 +29,8 @@ France	    Luxembourg }
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Color',
               'priority': 'core',
@@ -268,7 +269,7 @@ France	    Luxembourg }
                                            'relevant': True,
                                            'status': 'UNKNOWN',
                                            'typ': 'Bool'},
-           '__rank': 1,
+           '__rank': 9999,
            '∀c1 ∈ Country_t,c2 ∈ Country_t : Country_borders_Country(c1, c2) ⇒ Color(c1) ≠ Color(c2)': {'environmental': False,
                                                                                                         'is_assignment': False,
                                                                                                         'normal': False,

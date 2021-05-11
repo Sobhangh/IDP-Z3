@@ -13,7 +13,8 @@ display {
     view() = expanded.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'p',
               'priority': 'core',
@@ -30,7 +31,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'p': {'__rank': 1,
+ 'p': {'__rank': 9999,
        'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -39,7 +40,7 @@ display {
                'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},
- 'q': {'__rank': 1,
+ 'q': {'__rank': 9999,
        'q(blue)': {'environmental': False,
                    'is_assignment': False,
                    'normal': True,

@@ -11,7 +11,8 @@ display {
     view() = expanded.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'x',
               'priority': 'core',
@@ -28,7 +29,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'x': {'__rank': 1,
+ 'x': {'__rank': 9999,
        'x()': {'environmental': False,
                'is_assignment': True,
                'normal': True,

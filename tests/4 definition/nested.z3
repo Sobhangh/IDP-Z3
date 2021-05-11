@@ -18,7 +18,8 @@ display {
     view() = expanded.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'same',
               'priority': 'core',
@@ -35,7 +36,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'negated': {'__rank': 1,
+ 'negated': {'__rank': 9999,
              'negated(Jan)': {'environmental': False,
                               'is_assignment': True,
                               'normal': True,
@@ -102,7 +103,7 @@ display {
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': True}},
- 'same': {'__rank': 1,
+ 'same': {'__rank': 9999,
           'same(Jan)': {'environmental': False,
                         'is_assignment': True,
                         'normal': True,

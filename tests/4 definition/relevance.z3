@@ -13,7 +13,8 @@ display {
   goal(`p).
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'p',
               'priority': 'core',
@@ -65,7 +66,7 @@ display {
                'relevant': False,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
- 'p': {'__rank': 1,
+ 'p': {'__rank': 9999,
        'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -74,7 +75,7 @@ display {
                'status': 'CONSEQUENCE',
                'typ': 'Bool',
                'value': True}},
- 'r': {'__rank': 2,
+ 'r': {'__rank': 9999,
        'r()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -83,7 +84,7 @@ display {
                'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},
- 'rd': {'__rank': 2,
+ 'rd': {'__rank': 9999,
         'rd()': {'environmental': False,
                  'is_assignment': False,
                  'normal': True,

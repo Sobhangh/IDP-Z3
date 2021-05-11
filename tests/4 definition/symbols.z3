@@ -29,7 +29,8 @@ display {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'p',
               'priority': 'core',
@@ -58,7 +59,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'important': {'__rank': 2,
+ 'important': {'__rank': 9999,
                'important(`Date)': {'environmental': False,
                                     'is_assignment': False,
                                     'normal': True,
@@ -198,7 +199,7 @@ display {
                                       'relevant': False,
                                       'status': 'UNKNOWN',
                                       'typ': 'Bool'}},
- 'p': {'__rank': 1,
+ 'p': {'__rank': 9999,
        'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -207,7 +208,7 @@ display {
                'status': 'CONSEQUENCE',
                'typ': 'Bool',
                'value': True}},
- 'q': {'__rank': 2,
+ 'q': {'__rank': 9999,
        'q()': {'environmental': False,
                'is_assignment': False,
                'normal': True,

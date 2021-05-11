@@ -585,7 +585,7 @@ class BinaryOperator(Expression):
         self.operator = list(map(
             lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
                 "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
-                "∨" if op == "|" else "∧" if op == "&" else op
+                "∨" if op == "|" else "∧" if op == "&" else "⨯" if op == "*" else op
             , self.operator))
 
         super().__init__()
@@ -767,6 +767,8 @@ class AppliedSymbol(Expression):
             self.is_enumerated = ''
         if 'is_enumeration' in kwargs:
             self.is_enumeration = kwargs.pop('is_enumeration')
+            if self.is_enumeration == '∉':
+                self.is_enumeration = 'not'
         else:
             self.is_enumeration = ''
         if 'in_enumeration' in kwargs:

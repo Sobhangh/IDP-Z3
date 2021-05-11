@@ -12,7 +12,8 @@ theory {
     t0()=Piet.
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 't',
               'priority': 'core',
@@ -61,7 +62,7 @@ theory {
                       'status': 'CONSEQUENCE',
                       'typ': 'Bool',
                       'value': True}},
- 't0': {'__rank': 1,
+ 't0': {'__rank': 9999,
         't0()': {'environmental': False,
                  'is_assignment': True,
                  'normal': True,

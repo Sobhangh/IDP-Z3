@@ -17,7 +17,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'price',
               'priority': 'core',
@@ -47,7 +48,7 @@ structure {
                        'relevant': True,
                        'status': 'UNKNOWN',
                        'typ': 'Bool'},
-         '__rank': 1,
+         '__rank': 9999,
          'age()': {'environmental': False,
                    'is_assignment': True,
                    'normal': True,
@@ -77,7 +78,7 @@ structure {
                         'relevant': True,
                         'status': 'UNKNOWN',
                         'typ': 'Bool'}},
- 'price': {'__rank': 1,
+ 'price': {'__rank': 9999,
            'price()': {'environmental': False,
                        'is_assignment': True,
                        'normal': True,
@@ -128,7 +129,7 @@ structure {
                                                                                                                                          'status': 'UNIVERSAL',
                                                                                                                                          'typ': 'Bool',
                                                                                                                                          'value': True}},
- 'priority': {'__rank': 1,
+ 'priority': {'__rank': 9999,
               'priority()': {'environmental': False,
                              'is_assignment': False,
                              'normal': True,

@@ -17,7 +17,8 @@ display {
 	expand(`edge).
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'edge',
               'priority': 'core',
@@ -40,7 +41,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'edge': {'__rank': 1,
+ 'edge': {'__rank': 9999,
           'edge(a, a)': {'environmental': False,
                          'is_assignment': False,
                          'normal': True,
@@ -114,7 +115,7 @@ display {
                                                            'status': 'CONSEQUENCE',
                                                            'typ': 'Bool',
                                                            'value': True}},
- 'symmetric': {'__rank': 1,
+ 'symmetric': {'__rank': 9999,
                'symmetric(`Date)': {'environmental': False,
                                     'is_assignment': False,
                                     'normal': True,

@@ -24,7 +24,8 @@ display {
 
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': True,
               'idpname': 'Depth',
               'priority': 'core',
@@ -84,8 +85,8 @@ display {
                        'status': 'UNKNOWN',
                        'typ': 'Real',
                        'value': ''},
-           '__rank': 1},
- 'cSID': {'__rank': 1,
+           '__rank': 9999},
+ 'cSID': {'__rank': 9999,
           'cSID()': {'environmental': False,
                      'is_assignment': True,
                      'normal': True,

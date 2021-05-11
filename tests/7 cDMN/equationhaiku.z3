@@ -45,7 +45,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Allowed_Syllables',
               'priority': 'core',
@@ -323,7 +324,7 @@ structure {
                                                         'status': 'CONSEQUENCE',
                                                         'typ': 'Bool',
                                                         'value': False},
-                       '__rank': 1},
+                       '__rank': 9999},
  'Hundreds': {'Hundreds(First)': {'environmental': False,
                                   'is_assignment': True,
                                   'normal': True,
@@ -568,7 +569,7 @@ structure {
                                       'relevant': True,
                                       'status': 'UNKNOWN',
                                       'typ': 'Bool'},
-              '__rank': 1},
+              '__rank': 9999},
  'Solution': {'Solution(First)': {'environmental': False,
                                   'is_assignment': True,
                                   'normal': True,
@@ -3605,8 +3606,8 @@ structure {
                                                                        'status': 'UNIVERSAL',
                                                                        'typ': 'Bool',
                                                                        'value': True},
-              '__rank': 1,
-              '∀Line ∈ Line_t : Solution(Line) = sum{ : Line = Line : Hundreds(Line) * 100} + sum{ : Line = Line : Tens(Line) * 10} + sum{ : Line = Line : Units(Line)}': {'environmental': False,
+              '__rank': 9999,
+              '∀Line ∈ Line_t : Solution(Line) = sum{ : Line = Line : Hundreds(Line) ⨯ 100} + sum{ : Line = Line : Tens(Line) ⨯ 10} + sum{ : Line = Line : Units(Line)}': {'environmental': False,
                                                                                                                                                                            'is_assignment': False,
                                                                                                                                                                            'normal': False,
                                                                                                                                                                            'reading': '∀Line '
@@ -3622,7 +3623,7 @@ structure {
                                                                                                                                                                                       'Line '
                                                                                                                                                                                       ': '
                                                                                                                                                                                       'Hundreds(Line) '
-                                                                                                                                                                                      '* '
+                                                                                                                                                                                      '⨯ '
                                                                                                                                                                                       '100} '
                                                                                                                                                                                       '+ '
                                                                                                                                                                                       'sum{ '
@@ -3632,7 +3633,7 @@ structure {
                                                                                                                                                                                       'Line '
                                                                                                                                                                                       ': '
                                                                                                                                                                                       'Tens(Line) '
-                                                                                                                                                                                      '* '
+                                                                                                                                                                                      '⨯ '
                                                                                                                                                                                       '10} '
                                                                                                                                                                                       '+ '
                                                                                                                                                                                       'sum{ '
@@ -3865,7 +3866,7 @@ structure {
                                         'status': 'CONSEQUENCE',
                                         'typ': 'Bool',
                                         'value': False},
-               '__rank': 1,
+               '__rank': 9999,
                '∀Line ∈ Line_t : Syllables(Line) = sum{ : Line = Line : Syllables_for_Hundreds(Hundreds(Line))} + sum{ : Line = Line : Syllables_for_Tens(Tens(Line))} + sum{ : Line = Line : Syllables_for_Units(Units(Line))}': {'environmental': False,
                                                                                                                                                                                                                                    'is_assignment': False,
                                                                                                                                                                                                                                    'normal': False,
@@ -4167,7 +4168,7 @@ structure {
                               'status': 'CONSEQUENCE',
                               'typ': 'Bool',
                               'value': False},
-          '__rank': 1},
+          '__rank': 9999},
  'Units': {'Units(First)': {'environmental': False,
                             'is_assignment': True,
                             'normal': True,
@@ -4417,4 +4418,4 @@ structure {
                                 'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': False},
-           '__rank': 1}}
+           '__rank': 9999}}

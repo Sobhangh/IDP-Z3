@@ -9,7 +9,8 @@ theory {
 }
 display { view() = expanded. }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'f',
               'priority': 'core',
@@ -20,7 +21,7 @@ display { view() = expanded. }
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'f': {'__rank': 1,
+ 'f': {'__rank': 9999,
        'f(1) ≥ 2': {'environmental': False,
                     'is_assignment': False,
                     'normal': False,

@@ -13,7 +13,8 @@ theory {
     y()=quad(X()).
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'X',
               'priority': 'core',
@@ -58,8 +59,8 @@ theory {
                    'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True},
-       '__rank': 1},
- 'double': {'__rank': 1,
+       '__rank': 9999},
+ 'double': {'__rank': 9999,
             'double(X()) = X() + X()': {'environmental': False,
                                         'is_assignment': False,
                                         'normal': False,
@@ -76,7 +77,7 @@ theory {
                                                                 'status': 'UNIVERSAL',
                                                                 'typ': 'Bool',
                                                                 'value': True}},
- 'quad': {'__rank': 1,
+ 'quad': {'__rank': 9999,
           'quad(X()) = double(double(X()))': {'environmental': False,
                                               'is_assignment': False,
                                               'normal': False,
@@ -85,7 +86,7 @@ theory {
                                               'status': 'UNIVERSAL',
                                               'typ': 'Bool',
                                               'value': True}},
- 'y': {'__rank': 1,
+ 'y': {'__rank': 9999,
        'y()': {'environmental': False,
                'is_assignment': True,
                'normal': True,

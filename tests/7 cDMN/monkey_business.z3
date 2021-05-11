@@ -33,7 +33,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Place',
               'priority': 'core',
@@ -214,7 +215,7 @@ structure {
                                  'status': 'CONSEQUENCE',
                                  'typ': 'Bool',
                                  'value': True},
-           '__rank': 1,
+           '__rank': 9999,
            '∀Monkey ∈ Monkey_t : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
                                                                                   'is_assignment': False,
                                                                                   'normal': False,
@@ -398,7 +399,7 @@ structure {
                                    'status': 'CONSEQUENCE',
                                    'typ': 'Bool',
                                    'value': False},
-           '__rank': 1,
+           '__rank': 9999,
            '∀Monkey ∈ Monkey_t : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear': {'environmental': False,
                                                                                                   'is_assignment': False,
                                                                                                   'normal': False,

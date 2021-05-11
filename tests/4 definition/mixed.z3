@@ -13,7 +13,8 @@ theory {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'p',
               'priority': 'core',
@@ -48,7 +49,7 @@ theory {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'p': {'__rank': 1,
+ 'p': {'__rank': 9999,
        'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -56,7 +57,7 @@ theory {
                'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
- 'q': {'__rank': 1,
+ 'q': {'__rank': 9999,
        'q()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -72,7 +73,7 @@ theory {
                'relevant': False,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
- 's': {'__rank': 1,
+ 's': {'__rank': 9999,
        's()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -80,7 +81,7 @@ theory {
                'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
- 'x': {'__rank': 1,
+ 'x': {'__rank': 9999,
        'x()': {'environmental': False,
                'is_assignment': True,
                'normal': True,

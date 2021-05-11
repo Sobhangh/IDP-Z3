@@ -34,7 +34,8 @@ structure isa:isa {
            (rectangle, quadrilateral), (square, quadrilateral)}
 }
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'Type',
               'priority': 'core',
@@ -109,7 +110,7 @@ structure isa:isa {
                                     'relevant': True,
                                     'status': 'UNKNOWN',
                                     'typ': 'Bool'},
-             '__rank': 1},
+             '__rank': 9999},
  'Type': {'Type()': {'environmental': False,
                      'is_assignment': True,
                      'normal': True,
@@ -141,8 +142,8 @@ structure isa:isa {
                                          'status': 'UNIVERSAL',
                                          'typ': 'Bool',
                                          'value': True},
-          '__rank': 1},
- 'asi': {'__rank': 1,
+          '__rank': 9999},
+ 'asi': {'__rank': 9999,
          'asi(1tri angle, rectangle)': {'environmental': False,
                                         'is_assignment': False,
                                         'normal': True,
@@ -217,7 +218,7 @@ structure isa:isa {
                                                               'typ': 'Bool',
                                                               'value': True}},
  'isa': {},
- 'typeOf': {'__rank': 1,
+ 'typeOf': {'__rank': 9999,
             'typeOf(rectangle)': {'environmental': False,
                                   'is_assignment': True,
                                   'normal': True,

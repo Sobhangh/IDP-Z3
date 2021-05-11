@@ -32,7 +32,8 @@ structure {
 }
 
 -- meta -------------------------------------
-{'optionalPropagation': False,
+{'manualPropagation': False,
+ 'optionalPropagation': False,
  'symbols': [{'environmental': False,
               'idpname': 'TotalMoney',
               'priority': 'core',
@@ -1106,7 +1107,7 @@ structure {
                                           '998',
                                           '999',
                                           '1000']},
-               '__rank': 1},
+               '__rank': 9999},
  'FiveCent': {'FiveCent()': {'environmental': False,
                              'is_assignment': True,
                              'normal': True,
@@ -2116,7 +2117,7 @@ structure {
                                         '998',
                                         '999',
                                         '1000']},
-              '__rank': 1},
+              '__rank': 9999},
  'OneCent': {'OneCent()': {'environmental': False,
                            'is_assignment': True,
                            'normal': True,
@@ -3126,7 +3127,7 @@ structure {
                                       '998',
                                       '999',
                                       '1000']},
-             '__rank': 1},
+             '__rank': 9999},
  'OneEuro': {'OneEuro()': {'environmental': False,
                            'is_assignment': True,
                            'normal': True,
@@ -4136,7 +4137,7 @@ structure {
                                       '998',
                                       '999',
                                       '1000']},
-             '__rank': 1},
+             '__rank': 9999},
  'TenCent': {'TenCent()': {'environmental': False,
                            'is_assignment': True,
                            'normal': True,
@@ -5146,7 +5147,7 @@ structure {
                                       '998',
                                       '999',
                                       '1000']},
-             '__rank': 1},
+             '__rank': 9999},
  'TotalCoins': {'TotalCoins()': {'environmental': False,
                                  'is_assignment': True,
                                  'normal': True,
@@ -6212,7 +6213,7 @@ structure {
                                                                                                                                                                                                                                                                'status': 'UNIVERSAL',
                                                                                                                                                                                                                                                                'typ': 'Bool',
                                                                                                                                                                                                                                                                'value': True},
-                '__rank': 1},
+                '__rank': 9999},
  'TotalMoney': {'TotalMoney()': {'environmental': False,
                                  'is_assignment': True,
                                  'normal': True,
@@ -7230,7 +7231,7 @@ structure {
                                        'status': 'UNIVERSAL',
                                        'typ': 'Bool',
                                        'value': True},
-                'TotalMoney() = sum{ : true : OneCent() * 01} + sum{ : true : TwoCent() * 02} + sum{ : true : FiveCent() * 05} + sum{ : true : TenCent() * 10} + sum{ : true : TwentyCent() * 20} + sum{ : true : FiftyCent() * 50} + sum{ : true : OneEuro() * 100} + sum{ : true : TwoEuro() * 200}': {'environmental': False,
+                'TotalMoney() = sum{ : true : OneCent() ⨯ 01} + sum{ : true : TwoCent() ⨯ 02} + sum{ : true : FiveCent() ⨯ 05} + sum{ : true : TenCent() ⨯ 10} + sum{ : true : TwentyCent() ⨯ 20} + sum{ : true : FiftyCent() ⨯ 50} + sum{ : true : OneEuro() ⨯ 100} + sum{ : true : TwoEuro() ⨯ 200}': {'environmental': False,
                                                                                                                                                                                                                                                                                                          'is_assignment': False,
                                                                                                                                                                                                                                                                                                          'normal': False,
                                                                                                                                                                                                                                                                                                          'reading': 'TotalMoney '
@@ -7240,7 +7241,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'OneCent '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '01} '
                                                                                                                                                                                                                                                                                                                     '+ '
                                                                                                                                                                                                                                                                                                                     'sum{ '
@@ -7248,7 +7249,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'TwoCent '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '02} '
                                                                                                                                                                                                                                                                                                                     '+ '
                                                                                                                                                                                                                                                                                                                     'sum{ '
@@ -7256,7 +7257,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'FiveCent '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '05} '
                                                                                                                                                                                                                                                                                                                     '+ '
                                                                                                                                                                                                                                                                                                                     'sum{ '
@@ -7264,7 +7265,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'TenCent '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '10} '
                                                                                                                                                                                                                                                                                                                     '+ '
                                                                                                                                                                                                                                                                                                                     'sum{ '
@@ -7272,7 +7273,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'TwentyCent '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '20} '
                                                                                                                                                                                                                                                                                                                     '+ '
                                                                                                                                                                                                                                                                                                                     'sum{ '
@@ -7280,7 +7281,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'FiftyCent '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '50} '
                                                                                                                                                                                                                                                                                                                     '+ '
                                                                                                                                                                                                                                                                                                                     'sum{ '
@@ -7288,7 +7289,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'OneEuro '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '100} '
                                                                                                                                                                                                                                                                                                                     '+ '
                                                                                                                                                                                                                                                                                                                     'sum{ '
@@ -7296,13 +7297,13 @@ structure {
                                                                                                                                                                                                                                                                                                                     'true '
                                                                                                                                                                                                                                                                                                                     ': '
                                                                                                                                                                                                                                                                                                                     'TwoEuro '
-                                                                                                                                                                                                                                                                                                                    '* '
+                                                                                                                                                                                                                                                                                                                    '⨯ '
                                                                                                                                                                                                                                                                                                                     '200}',
                                                                                                                                                                                                                                                                                                          'relevant': True,
                                                                                                                                                                                                                                                                                                          'status': 'UNIVERSAL',
                                                                                                                                                                                                                                                                                                          'typ': 'Bool',
                                                                                                                                                                                                                                                                                                          'value': True},
-                '__rank': 1},
+                '__rank': 9999},
  'TwentyCent': {'TwentyCent()': {'environmental': False,
                                  'is_assignment': True,
                                  'normal': True,
@@ -8312,7 +8313,7 @@ structure {
                                             '998',
                                             '999',
                                             '1000']},
-                '__rank': 1},
+                '__rank': 9999},
  'TwoCent': {'TwoCent()': {'environmental': False,
                            'is_assignment': True,
                            'normal': True,
@@ -9322,7 +9323,7 @@ structure {
                                       '998',
                                       '999',
                                       '1000']},
-             '__rank': 1},
+             '__rank': 9999},
  'TwoEuro': {'TwoEuro()': {'environmental': False,
                            'is_assignment': True,
                            'normal': True,
@@ -10332,4 +10333,4 @@ structure {
                                       '998',
                                       '999',
                                       '1000']},
-             '__rank': 1}}
+             '__rank': 9999}}
