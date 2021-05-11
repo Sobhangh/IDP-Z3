@@ -1,22 +1,3 @@
-<<<<<<< HEAD
-  Not C
-∧ Not E
-⇒ ? Eligible(BE001)
-
-  Not B
-∧ C
-⇒ ? Eligible(BE001)
-
-  C
-⇒ Eligible(BE001)
-
-  Not B
-⇒ ? Eligible(BE001)
-
-  F
-⇒ Eligible(BE001)
-
-=======
   Not C()
 ∧ Not F()
 ⇒ ? Eligible(BE001)
@@ -42,7 +23,6 @@
   Not F()
 ⇒ ? Eligible(BE001)
 
->>>>>>> main
 ⇒ ? Eligible(BE001)
 
 end of decision table
@@ -56,11 +36,7 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "IDP-Z3/idp_engine/Run.py", line 88, in decision_table
     for model in problem.decision_table(goal_string, timeout, max_rows,
-<<<<<<< HEAD
-  File "IDP-Z3/idp_engine/Problem.py", line 511, in decision_table
-=======
-  File "IDP-Z3/idp_engine/Problem.py", line 587, in decision_table
->>>>>>> main
+  File "IDP-Z3/idp_engine/Problem.py", line 572, in decision_table
     assert not goal_string or goal.value is not None, \
 AssertionError: The goal is not always determined by the theory
 
