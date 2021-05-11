@@ -186,6 +186,7 @@ def pipeline():
 
 def api():
     # capture stdout, print()
+    error = 0
     with io.StringIO() as buf, redirect_stdout(buf):
         try:
             test = """
@@ -213,10 +214,11 @@ def api():
             print(problem.propagate().assignments)
         except Exception as exc:
             print(traceback.format_exc())
+            error = 1
         output = buf.getvalue()
     with open(os.path.join("./tests/api.z3"), "w") as fp:
         fp.write(output)
-    return 0
+    return error
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the tests')
