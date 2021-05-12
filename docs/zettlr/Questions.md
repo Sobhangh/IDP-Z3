@@ -3,12 +3,12 @@ title: Questions
 tags: #analysis
 Date: 20200504142301
 –-
-A question can be answered by giving it a value: it's a sub-formula or term, without quantified variables.
+A question can be answered by giving it a value: it's a sub-formula or term, without free variables.
 
 There are different types of assignments:
 * quantified formula: before or after quantifier expansion
 * free vs bound expressions (i.e. with quantified variable)
-* terms : ground terms vs nested terms (e.g. f(X), where X is a constant) 
+* terms : ground terms vs nested terms (e.g. f(X()), where X() is a constant) 
 * shown to user or not (depending on view, with or without underscore in front of name)
 * relevant or not
 * made by the program (.make()) or not, e.g. for definitions

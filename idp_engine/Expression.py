@@ -320,7 +320,7 @@ class Expression(ASTNode):
         for e in self.sub_exprs:
             e.generate_constructors(constructors)
 
-    def unknown_symbols(self, co_constraints=True):
+    def collect_symbols(self, co_constraints=True):
         """ returns the list of symbol declarations in self, ignoring type constraints
 
         returns Dict[name, Declaration]

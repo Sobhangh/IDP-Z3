@@ -552,7 +552,7 @@ class Problem(object):
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code
-            or any(s not in symbols for s in q.unknown_symbols(co_constraints=False).values())):
+            or any(s not in symbols for s in q.collect_symbols(co_constraints=False).values())):
                 qs.append(q)
         questions = qs
         assert not goal_string or goal_string in [a.code for a in questions], \

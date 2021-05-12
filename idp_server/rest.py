@@ -222,7 +222,7 @@ class eval(Resource):
                         idpModel = IDP.parse(newTheory)
                         expanded = {}
                         # for expr in idpModel.subtences.values():
-                        #     expanded.update(expr.unknown_symbols())
+                        #     expanded.update(expr.collect_symbols())
                         expanded = tuple(expanded.keys())
                         state = make_state(idpModel, "")
                     out = abstract(state, given_json)

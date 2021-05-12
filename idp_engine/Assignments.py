@@ -79,7 +79,7 @@ class Assignment(object):
 
         # first symbol in the sentence that does not start with '_'
         self.symbol_decl = None
-        self.symbols = sentence.unknown_symbols(co_constraints=False).values()
+        self.symbols = sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
             if not d.name.startswith('_'):
                 self.symbol_decl = d
