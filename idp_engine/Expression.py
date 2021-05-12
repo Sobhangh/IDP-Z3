@@ -571,8 +571,10 @@ class AQuantification(Expression):
 
     def collect(self, questions, all_=True, co_constraints=True):
         questions.append(self)
-        if all_:  #TODO1 and not self.quantees ?
+        if all_:
             Expression.collect(self, questions, all_, co_constraints)
+            for q in self.quantees:
+                q.collect(questions, all_, co_constraints)
 
 
 class BinaryOperator(Expression):
@@ -737,6 +739,8 @@ class AAggregate(Expression):
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
             Expression.collect(self, questions, all_, co_constraints)
+            for q in self.quantees:
+                q.collect(questions, all_, co_constraints)
 
 
 class AppliedSymbol(Expression):
@@ -816,6 +820,7 @@ class AppliedSymbol(Expression):
             if self.is_enumerated or self.in_enumeration:
                 app = AppliedSymbol.make(self.symbol, self.sub_exprs)
                 questions.append(app)
+        self.symbol.collect(questions, all_, co_constraints)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
         if co_constraints and self.co_constraint is not None:
