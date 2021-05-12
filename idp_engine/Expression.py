@@ -304,14 +304,8 @@ class Expression(ASTNode):
         default implementation for UnappliedSymbol, IfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
-
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
-
-    def _questions(self):  # for debugging
-        questions = OrderedSet()
-        self.collect(questions)
-        return questions
 
     def collect_symbols(self, symbols=None, co_constraints=True):
         """ returns the list of symbol declarations in self, ignoring type constraints
@@ -320,8 +314,9 @@ class Expression(ASTNode):
         """
         symbols = {} if symbols == None else symbols
         if self.is_type_constraint_for is None:  # ignore type constraints
-            if (hasattr(self, 'decl') and type(self.decl) != Constructor
-            and not self.decl.name in RESERVED_SYMBOLS):
+            if (hasattr(self, 'decl') and self.decl
+                and type(self.decl) != Constructor
+                and not self.decl.name in RESERVED_SYMBOLS):
                 symbols[self.decl.name] = self.decl
             for e in self.sub_exprs:
                 e.collect_symbols(symbols, co_constraints)
@@ -577,6 +572,12 @@ class AQuantification(Expression):
             for q in self.quantees:
                 q.collect(questions, all_, co_constraints)
 
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        for q in self.quantees:
+            q.collect_symbols(symbols, co_constraints)
+        return symbols
+
 
 class BinaryOperator(Expression):
     PRECEDENDE = 0  # monkey-patched
@@ -743,6 +744,9 @@ class AAggregate(Expression):
             for q in self.quantees:
                 q.collect(questions, all_, co_constraints)
 
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        return AQuantification.collect_symbols(self, symbols, co_constraints)
+
 
 class AppliedSymbol(Expression):
     """Represents a symbol applied to arguments
@@ -826,6 +830,11 @@ class AppliedSymbol(Expression):
             e.collect(questions, all_, co_constraints)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
 
     def has_decision(self):
         self.check(self.decl.block is not None, "Internal error")

@@ -117,7 +117,6 @@ class Problem(object):
         for name, decl in block.declarations.items():
             assert (name not in self.declarations
                     or self.declarations[name] == block.declarations[name]
-                    or name in [BOOL, INT, REAL, DATE, SYMBOL]
                     or name in RESERVED_SYMBOLS), \
                     f"Can't add declaration for {name} in {block.name}: duplicate"
             self.declarations[name] = decl
