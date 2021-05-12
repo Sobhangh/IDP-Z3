@@ -106,11 +106,11 @@ IfExpr.update_exprs = update_exprs
 # Class Quantee  #######################################################
 
 def update_exprs(self, new_exprs):
-    if not self.decl and self.sort:
-        symbol = self.sort.value
+    if not self.decl and self.sub_exprs:
+        symbol = self.sub_exprs[0].value
         if symbol:
             self.decl = symbol.decl
-            self.sort.decl = self.decl
+            self.sub_exprs[0].decl = self.decl
     return self
 Quantee.update_exprs = update_exprs
 

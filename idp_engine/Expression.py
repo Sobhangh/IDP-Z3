@@ -313,13 +313,6 @@ class Expression(ASTNode):
         self.collect(questions)
         return questions
 
-    def generate_constructors(self, constructors: dict):
-        """ fills the list `constructors` with all constructors belonging to
-        open types.
-        """
-        for e in self.sub_exprs:
-            e.generate_constructors(constructors)
-
     def collect_symbols(self, co_constraints=True):
         """ returns the list of symbol declarations in self, ignoring type constraints
 
@@ -332,6 +325,13 @@ class Expression(ASTNode):
         out = {e.decl.name: e.decl for e in questions.values()
                if hasattr(e, 'decl')}
         return out
+
+    def generate_constructors(self, constructors: dict):
+        """ fills the list `constructors` with all constructors belonging to
+        open types.
+        """
+        for e in self.sub_exprs:
+            e.generate_constructors(constructors)
 
     def co_constraints(self, co_constraints):
         """ collects the constraints attached to AST nodes, e.g. instantiated
@@ -489,13 +489,14 @@ class Quantee(Expression):
     Attributes:
         vars (List[List[Variable]): the (tuples of) variables being quantified
 
-        sort (SymbolExpr, Optional): the type or predicate to quantify over
+        sub_exprs (List[SymbolExpr], Optional): the type or predicate to quantify over
 
         arity (int): the length of the tuple of variable
     """
     def __init__(self, **kwargs):
         self.vars = kwargs.pop('vars')
-        self.sort = kwargs.pop('sort')
+        sort = kwargs.pop('sort')
+        self.sub_exprs = [sort] if sort else []
 
         self.arity = None
         for i, v in enumerate(self.vars):
@@ -506,7 +507,6 @@ class Quantee(Expression):
                 self.vars[i] = [v]
                 self.arity = 1 if self.arity == None else self.arity
 
-        self.sub_exprs = []
         super().__init__()
         self.decl = None
 
@@ -516,16 +516,17 @@ class Quantee(Expression):
     @classmethod
     def make(cls, var, sort):
         if sort and type(sort) != SymbolExpr:
-            sort = SymbolExpr(eval='', s=sort)
+            sort = SymbolExpr(eval='', s=sort).annotate1()
         out = (cls) (vars=[var], sort=sort)
         return out.annotate1()
 
     def __str1__(self):
-        return f"{','.join(str(v) for vs in self.vars for v in vs)} ∈ {self.sort}"
+        return (f"{','.join(str(v) for vs in self.vars for v in vs)} "
+                f"∈ {self.sub_exprs[0] if self.sub_exprs else None}")
 
     def copy(self):
         out = Expression.copy(self)
-        out.sort = out.sort.copy()
+        out.sub_exprs[0] = out.sub_exprs[0].copy()
         return out
 
 
@@ -538,7 +539,7 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
-        if self.quantees and self.quantees[-1].sort is None:
+        if self.quantees and not self.quantees[-1].sub_exprs:
             # separate untyped variables, so that they can be typed separately
             q = self.quantees.pop()
             for vars in q.vars:
