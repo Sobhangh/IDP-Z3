@@ -226,14 +226,14 @@ class Problem(object):
                 )
         return self._formula
 
-    def _todo(self, extended):
+    def _todo(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
             if a.value is None
             and a.symbol_decl is not None
             and (not a.sentence.is_reified() or self.extended))
 
-    def _from_model(self, solver, todo, complete, extended):
+    def _from_model(self, solver, todo, complete):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
@@ -257,10 +257,10 @@ class Problem(object):
                 ass.assert_(q, val, Status.EXPANDED, None)
         return ass
 
-    def expand(self, max=10, complete=False, extended=False):
+    def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.formula().translate()
-        todo = self._todo(extended)
+        todo = self._todo()
 
         solver = Solver()
         solver.add(z3_formula)
@@ -271,7 +271,7 @@ class Problem(object):
             if solver.check() == sat:
                 count += 1
                 model = solver.model()
-                ass = self._from_model(solver, todo, complete, extended)
+                ass = self._from_model(solver, todo, complete)
                 yield ass
 
                 # exclude this model
@@ -291,7 +291,7 @@ class Problem(object):
         else:
             yield "No models."
 
-    def optimize(self, term, minimize=True, complete=False, extended=False):
+    def optimize(self, term, minimize=True, complete=False):
         solver = Optimize()
         solver.add(self.formula().translate())
         assert term in self.assignments, "Internal error"
@@ -314,8 +314,7 @@ class Problem(object):
                 solver.pop()  # get the last good one
                 solver.check()
                 break
-        self.assignments = self._from_model(solver, self._todo(extended),
-            complete, extended)
+        self.assignments = self._from_model(solver, self._todo(), complete)
         return self
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
@@ -332,9 +331,9 @@ class Problem(object):
                     self.assignments.assert_(sentence, value, tag, False)
         return self
 
-    def _propagate(self, tag, extended):
+    def _propagate(self, tag):
         z3_formula = self.formula().translate()
-        todo = self._todo(extended)
+        todo = self._todo()
 
         solver = Solver()
         solver.add(z3_formula)
@@ -370,9 +369,9 @@ class Problem(object):
             yield "Unknown satisfiability."
             yield str(z3_formula)
 
-    def propagate(self, tag=Status.CONSEQUENCE, extended=False):
+    def propagate(self, tag=Status.CONSEQUENCE):
         """ determine all the consequences of the constraints """
-        out = list(self._propagate(tag, extended))
+        out = list(self._propagate(tag))
         assert out[0] != "Not satisfiable.", "Not satisfiable."
         return self
 

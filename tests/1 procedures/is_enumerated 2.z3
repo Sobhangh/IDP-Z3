@@ -8,9 +8,9 @@ Traceback (most recent call last):
   File "IDP-Z3/idp_engine/Run.py", line 107, in pretty_print
     for i, xi in enumerate(x):
   File "IDP-Z3/idp_engine/Run.py", line 49, in model_expand
-    ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
+    ms = [str(m) for m in problem.expand(max=max, complete=complete)]
   File "IDP-Z3/idp_engine/Run.py", line 49, in <listcomp>
-    ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
+    ms = [str(m) for m in problem.expand(max=max, complete=complete)]
   File "IDP-Z3/idp_engine/Problem.py", line 262, in expand
     z3_formula = self.formula().translate()
   File "IDP-Z3/idp_engine/Problem.py", line 217, in formula

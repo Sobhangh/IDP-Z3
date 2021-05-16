@@ -97,10 +97,10 @@ class State(Problem):
     def _finalize(self):
         # propagate universals
         if self.environment is not None:  # if there is a decision vocabulary
-            self.environment.propagate(tag=Status.ENV_CONSQ, extended=True)
+            self.environment.propagate(tag=Status.ENV_CONSQ)
             self.assignments.update(self.environment.assignments)
             self._formula = None
-        self.propagate(tag=Status.CONSEQUENCE, extended=True)
+        self.propagate(tag=Status.CONSEQUENCE)
         self.simplify()
         get_relevant_subtences(self)
         return self

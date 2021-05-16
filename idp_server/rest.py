@@ -202,15 +202,14 @@ class eval(Resource):
                 if method == "propagate":
                     out = Output(state).fill(state)
                 if method == "modelexpand":
-                    generator = state.expand(max=1, complete=False,
-                                             extended=True)
+                    generator = state.expand(max=1, complete=False)
                     state.assignments = list(generator)[0]
                     out = Output(state).fill(state)
                 if method == "explain":
                     out = explain(state, args['value'])
                 if method == "minimize":
                     state = state.optimize(args['symbol'], args['minimize'],
-                                           complete=False, extended=True)
+                                           complete=False)
                     out = Output(state).fill(state)
                 if method == "abstract":
                     if args['symbol'] != "":  # theory to explain ?
