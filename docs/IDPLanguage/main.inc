@@ -63,8 +63,8 @@ The class has the following methods:
 __init__(self, \*blocks)
     Creates an instance of ``Problem`` for the list of blocks, e.g., ``Problem(T,S)``
 
-add(self, block)
-    Adds a theory or structure block to the problem.
+add(self, \*blocks)
+    Adds a list of theory or structure blocks to the problem.
 
 assert_(self, code: str, value: Any)
     Asserts that an expression has a value, e.g. `problem.assert_("p()", True)`.

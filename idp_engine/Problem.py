@@ -84,8 +84,7 @@ class Problem(object):
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
         self.questions = None
 
-        for b in blocks:
-            self.add(b)
+        self.add(*blocks)
 
     @classmethod
     def make(cls, theories, structures):
@@ -111,41 +110,42 @@ class Problem(object):
         out._formula = None
         return out
 
-    def add(self, block):
-        self._formula = None  # need to reapply the definitions
+    def add(self, *blocks):
+        for block in blocks:
+            self._formula = None  # need to reapply the definitions
 
-        for name, decl in block.declarations.items():
-            assert (name not in self.declarations
-                    or self.declarations[name] == block.declarations[name]
-                    or name in RESERVED_SYMBOLS), \
-                    f"Can't add declaration for {name} in {block.name}: duplicate"
-            self.declarations[name] = decl
-        for decl in self.declarations.values():
-            if type(decl) == TypeDeclaration:
-                decl.translated = None  # reset the translation of declarations
-                decl.interpretation = (  #TODO side-effects ? issue #81
-                    None if decl.name not in [INT, REAL, DATE, SYMBOL] else
-                    decl.interpretation)
+            for name, decl in block.declarations.items():
+                assert (name not in self.declarations
+                        or self.declarations[name] == block.declarations[name]
+                        or name in RESERVED_SYMBOLS), \
+                        f"Can't add declaration for {name} in {block.name}: duplicate"
+                self.declarations[name] = decl
+            for decl in self.declarations.values():
+                if type(decl) == TypeDeclaration:
+                    decl.translated = None  # reset the translation of declarations
+                    decl.interpretation = (  #TODO side-effects ? issue #81
+                        None if decl.name not in [INT, REAL, DATE, SYMBOL] else
+                        decl.interpretation)
 
-        # process block.interpretations
-        for name, interpret in block.interpretations.items():
-            assert (name not in self.interpretations
-                    or name in [INT, REAL, DATE, SYMBOL]
-                    or self.interpretations[name] == block.interpretations[name]), \
-                     f"Can't add enumeration for {name} in {block.name}: duplicate"
-            self.interpretations[name] = interpret
+            # process block.interpretations
+            for name, interpret in block.interpretations.items():
+                assert (name not in self.interpretations
+                        or name in [INT, REAL, DATE, SYMBOL]
+                        or self.interpretations[name] == block.interpretations[name]), \
+                        f"Can't add enumeration for {name} in {block.name}: duplicate"
+                self.interpretations[name] = interpret
 
-        if isinstance(block, Theory) or isinstance(block, Problem):
-            self.co_constraints, self.questions = None, None
-            for (decl, defin), rule in block.clark.items():
-                if not (decl, defin) in self.clark:
-                    self.clark[(decl, defin)] = rule
-            self.constraints.extend(v.copy() for v in block.constraints)
-            self.def_constraints.update(
-                {k:v.copy() for k,v in block.def_constraints.items()})
+            if isinstance(block, Theory) or isinstance(block, Problem):
+                self.co_constraints, self.questions = None, None
+                for (decl, defin), rule in block.clark.items():
+                    if not (decl, defin) in self.clark:
+                        self.clark[(decl, defin)] = rule
+                self.constraints.extend(v.copy() for v in block.constraints)
+                self.def_constraints.update(
+                    {k:v.copy() for k,v in block.def_constraints.items()})
 
-        for name, s in block.goals.items():
-            self.goals[name] = s
+            for name, s in block.goals.items():
+                self.goals[name] = s
         return self
 
     def assert_(self, code: str, value: Any, status: Status = Status.GIVEN):
