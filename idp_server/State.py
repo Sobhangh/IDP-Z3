@@ -54,13 +54,13 @@ class State(Problem):
             idp.display.run(idp)
         self.idp = idp  # IDP vocabulary and theory
 
-        super().__init__()
+        super().__init__(extended=True)
         self.given = None  # Assignments from the user interface
 
         if len(idp.theories) == 2:
             self.environment = Problem(* [idp.theories['environment']]
                     + ([] if 'environment' not in idp.structures else
-                       idp.structures['environment']))
+                       idp.structures['environment']), extended=True)
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
 
             blocks = [self.environment, idp.theories['decision']]

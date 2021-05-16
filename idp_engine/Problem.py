@@ -70,7 +70,9 @@ class Problem(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
     """
-    def __init__(self, *blocks):
+    def __init__(self, *blocks, extended=False):
+        self.extended = extended
+
         self.declarations = {}
         self.clark = {}  # {(Declaration, Definition): Rule}
         self.constraints = OrderedSet()
@@ -87,11 +89,11 @@ class Problem(object):
         self.add(*blocks)
 
     @classmethod
-    def make(cls, theories, structures):
+    def make(cls, theories, structures, extended=False):
         """ polymorphic creation """
         problem = (theories if type(theories) == 'Problem' else
-                   cls(*theories) if isinstance(theories, Iterable) else
-                   cls(theories))
+                   cls(*theories, extended=extended) if isinstance(theories, Iterable) else
+                   cls(theories, extended=extended))
 
         structures = ([] if structures is None else
                       structures if isinstance(structures, Iterable) else
@@ -229,7 +231,7 @@ class Problem(object):
             a.sentence for a in self.assignments.values()
             if a.value is None
             and a.symbol_decl is not None
-            and (not a.sentence.is_reified() or extended))
+            and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete, extended):
         """ returns Assignments from model in solver """
@@ -239,7 +241,7 @@ class Problem(object):
                 val1 = solver.model().eval(
                     q.translate(),
                     model_completion=complete)
-            elif extended:
+            elif self.extended:
                 solver.push()  # in case todo contains complex formula
                 solver.add(q.reified() == q.translate())
                 res1 = solver.check()

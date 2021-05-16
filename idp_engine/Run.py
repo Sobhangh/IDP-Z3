@@ -44,7 +44,7 @@ def model_check(theories, structures=None):
 def model_expand(theories, structures=None, max=10, complete=False,
                  extended=False, sort=False):
     """ output: a list of Assignments, ending with a string """
-    problem = Problem.make(theories, structures)
+    problem = Problem.make(theories, structures, extended=extended)
     if sort:
         ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
         ms = sorted(ms[:-1]) + [ms[-1]]
