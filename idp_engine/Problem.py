@@ -91,17 +91,17 @@ class Problem(object):
     @classmethod
     def make(cls, theories, structures, extended=False):
         """ polymorphic creation """
-        problem = (theories if type(theories) == 'Problem' else
-                   cls(*theories, extended=extended) if isinstance(theories, Iterable) else
-                   cls(theories, extended=extended))
-
         structures = ([] if structures is None else
                       structures if isinstance(structures, Iterable) else
                       [structures])
-        for s in structures:
-            problem.add(s)
-
-        return problem
+        if type(theories) == 'Problem':
+            theories.add(*structures)
+            self = theories
+        elif isinstance(theories, Iterable):
+            self = cls(* theories + structures, extended= extended)
+        else:
+            self = cls(* [theories] + structures, extended=extended)
+        return self
 
     def copy(self):
         out = copy(self)
@@ -148,6 +148,45 @@ class Problem(object):
 
             for name, s in block.goals.items():
                 self.goals[name] = s
+
+        # apply the enumerations and definitions
+
+        self.assignments = Assignments()
+
+        for decl in self.declarations.values():
+            decl.interpret(self)
+
+        for symbol_interpretation in self.interpretations.values():
+            if not symbol_interpretation.is_type_enumeration:
+                symbol_interpretation.interpret(self)
+
+        # expand goals
+        for s in self.goals.values():
+            assert s.instances, "goals must be instantiable."
+            relevant = Symbol(name=RELEVANT)
+            relevant.decl = self.declarations[RELEVANT]
+            constraint = AppliedSymbol.make(relevant, s.instances.values())
+            self.constraints.append(constraint)
+
+        # expand whole-domain definitions
+        for (decl, _), rule in self.clark.items():
+            if rule.is_whole_domain:
+                self.def_constraints[decl] = rule.interpret(self).whole_domain
+
+        # initialize assignments, co_constraints, questions
+
+        self.co_constraints, self.questions = OrderedSet(), OrderedSet()
+        for c in self.constraints:
+            c.interpret(self)
+            c.co_constraints(self.co_constraints)
+            c.collect(self.questions, all_=False)
+        for s in list(self.questions.values()):
+            if s.is_reified():
+                self.assignments.assert_(s, None, Status.UNKNOWN, False)
+
+        for ass in self.assignments.values():
+            ass.sentence = ass.sentence
+            ass.sentence.original = ass.sentence.copy()
         return self
 
     def assert_(self, code: str, value: Any, status: Status = Status.GIVEN):
@@ -158,7 +197,6 @@ class Problem(object):
             value (Any): a Python value, e.g., "True"
             status (Status, Optional): how the value was obtained.  Default: Status.GIVEN
         """
-        self._interpret()
         code = str(code)
         atom = self.assignments[code].sentence
         if value is None:
@@ -173,48 +211,9 @@ class Problem(object):
                 v.value = None
         self._formula = None
 
-    def _interpret(self):
-        """ apply the enumerations and definitions """
-        if self.questions is None:
-            self.assignments = Assignments()
-
-            for decl in self.declarations.values():
-                decl.interpret(self)
-
-            for symbol_interpretation in self.interpretations.values():
-                if not symbol_interpretation.is_type_enumeration:
-                    symbol_interpretation.interpret(self)
-
-            # expand goals
-            for s in self.goals.values():
-                assert s.instances, "goals must be instantiable."
-                relevant = Symbol(name=RELEVANT)
-                relevant.decl = self.declarations[RELEVANT]
-                constraint = AppliedSymbol.make(relevant, s.instances.values())
-                self.constraints.append(constraint)
-
-            # expand whole-domain definitions
-            for (decl, _), rule in self.clark.items():
-                if rule.is_whole_domain:
-                    self.def_constraints[decl] = rule.interpret(self).whole_domain
-
-            self.co_constraints, self.questions = OrderedSet(), OrderedSet()
-            for c in self.constraints:
-                c.interpret(self)
-                c.co_constraints(self.co_constraints)
-                c.collect(self.questions, all_=False)
-            for s in list(self.questions.values()):
-                if s.is_reified():
-                    self.assignments.assert_(s, None, Status.UNKNOWN, False)
-
-            for ass in self.assignments.values():
-                ass.sentence = ass.sentence
-                ass.sentence.original = ass.sentence.copy()
-
     def formula(self):
         """ the formula encoding the knowledge base """
         if not self._formula:
-            self._interpret()
             self._formula = AConjunction.make(
                 '∧',
                 [a.formula() for a in self.assignments.values()
@@ -319,7 +318,6 @@ class Problem(object):
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
-        self._interpret()
         for c in self.constraints:
             # determine consequences, including from co-constraints
             consequences = []
@@ -444,7 +442,6 @@ class Problem(object):
 
     def simplify(self):
         """ simplify constraints using known assignments """
-        self._interpret()
 
         # annotate self.constraints with questions
         for e in self.constraints:

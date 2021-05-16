@@ -72,7 +72,6 @@ class State(Problem):
             if name != 'environment' and (name != "default" or with_default):
                 blocks.append(struct)
         self.add(*blocks)
-        self._interpret()
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
@@ -91,7 +90,6 @@ class State(Problem):
             out.environment = out.environment.copy()
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
-        out._interpret()
         return out._finalize()
 
     def _finalize(self):

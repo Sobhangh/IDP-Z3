@@ -7,15 +7,13 @@ Traceback (most recent call last):
   File "<string>", line 2, in <module>
   File "IDP-Z3/idp_engine/Run.py", line 107, in pretty_print
     for i, xi in enumerate(x):
-  File "IDP-Z3/idp_engine/Run.py", line 49, in model_expand
-    ms = [str(m) for m in problem.expand(max=max, complete=complete)]
-  File "IDP-Z3/idp_engine/Run.py", line 49, in <listcomp>
-    ms = [str(m) for m in problem.expand(max=max, complete=complete)]
-  File "IDP-Z3/idp_engine/Problem.py", line 262, in expand
-    z3_formula = self.formula().translate()
-  File "IDP-Z3/idp_engine/Problem.py", line 217, in formula
-    self._interpret()
-  File "IDP-Z3/idp_engine/Problem.py", line 203, in _interpret
+  File "IDP-Z3/idp_engine/Run.py", line 47, in model_expand
+    problem = Problem.make(theories, structures, extended=extended)
+  File "IDP-Z3/idp_engine/Problem.py", line 103, in make
+    self = cls(* [theories] + structures, extended=extended)
+  File "IDP-Z3/idp_engine/Problem.py", line 89, in __init__
+    self.add(*blocks)
+  File "IDP-Z3/idp_engine/Problem.py", line 180, in add
     c.interpret(self)
   File "IDP-Z3/idp_engine/Interpret.py", line 384, in interpret
     assert self.decl.type != BOOL, \
