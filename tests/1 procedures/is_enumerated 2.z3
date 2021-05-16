@@ -9,11 +9,11 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "IDP-Z3/idp_engine/Run.py", line 47, in model_expand
     problem = Problem.make(theories, structures, extended=extended)
-  File "IDP-Z3/idp_engine/Problem.py", line 103, in make
+  File "IDP-Z3/idp_engine/Problem.py", line 107, in make
     self = cls(* [theories] + structures, extended=extended)
-  File "IDP-Z3/idp_engine/Problem.py", line 89, in __init__
+  File "IDP-Z3/idp_engine/Problem.py", line 93, in __init__
     self.add(*blocks)
-  File "IDP-Z3/idp_engine/Problem.py", line 180, in add
+  File "IDP-Z3/idp_engine/Problem.py", line 184, in add
     c.interpret(self)
   File "IDP-Z3/idp_engine/Interpret.py", line 384, in interpret
     assert self.decl.type != BOOL, \

@@ -40,13 +40,17 @@ class Problem(object):
     """A collection of theory and structure blocks.
 
     Attributes:
+        extended (Bool): True when the truth value of inequalities
+            and quantified formula is of interest (e.g. in the Interactive Consultant)
+
         declarations (dict[str, Type]): the list of type and symbol declarations
 
         constraints (OrderedSet): a set of assertions.
 
         assignments (Assignment): the set of assignments.
             The assignments are updated by the different steps of the problem
-            resolution.
+            resolution.  Assignments include inequalities and quantified formula
+            when the problem is extended
 
         clark (dict[(SymbolDeclaration, Definition), Rule]):
             A mapping of defined symbol to the rule that defines it.
