@@ -529,22 +529,21 @@ class Problem(object):
         """
         max_time = time.time()+timeout  # 20 seconds max
 
+        # determine questions, using goal_string and self.constraints
+        questions = OrderedSet()
         if goal_string:
             goal_pred = goal_string.split("(")[0]
             assert goal_pred in self.declarations, (
                 f"Unrecognized goal string: {goal_string}")
-            self.goals[goal_pred] = self.declarations[goal_pred]
-            self._formula = None
-        formula = self.formula()
-        theory = formula.translate()
-
-        # ignore type constraints
-        questions = OrderedSet()
+            if self.declarations[goal_pred] in self.def_constraints:
+                self.def_constraints[self.declarations[goal_pred]].collect(
+                    questions, all_=True)
+            for q in questions:  # update assignments for defined goals
+                if q.code not in self.assignments:
+                    self.assignments.assert_(q, None, Status.UNKNOWN,False)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
-        if goal_string:
-            questions.append(self.assignments[goal_string].sentence)
         # ignore questions about defined symbols (except goal)
         symbols = {decl for (decl, defin) in self.clark.keys()}
         qs = OrderedSet()
@@ -553,12 +552,16 @@ class Problem(object):
             or any(s not in symbols for s in q.collect_symbols(co_constraints=False).values())):
                 qs.append(q)
         questions = qs
+        assert not goal_string or goal_string in [a.code for a in questions], \
+            f"Internal error"
 
         known = And([ass.translate() for ass in self.assignments.values()
                         if ass.status != Status.UNKNOWN]
                     + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
+        formula = self.formula()
+        theory = formula.translate()
         solver = Solver()
         solver.add(theory)
         solver.add(known)

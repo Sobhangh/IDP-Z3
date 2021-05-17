@@ -20,12 +20,12 @@
   Issuer(BE001) in {BRITISHCOLUMBIA, TORONTO, MANITOBA, NEWBRUNsELEC, NEWBRUNSWICK, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, ALBERTA, QUEBEC, SASKATCHEWAN}
 ⇒ Not Eligible(BE001)
 
-  Issuer(BE001) in {AfricanDevelopmentBank, BankForInternationalSettlements, CaribbeanDevelopmentBank, CouncilOfEuropeDevelopmentBank, EuropeanBankForReconstructionAndDevelopment, EuropeanCentralBank, EuropeanInvestmentBank, EuropeanInvestmentFund, InterAmericanDevelopmentBank, InternationalBankForReconstructionAndDevelopment, InternationalFinanceCorporation, InternationalMonetaryFund, MultilateralInvestmentGuaranteeAgency, NordicInvestmentBank}
-∧ Issuer_Type(BE001) = Supra
+  Not AssetSubClass(BE001) = ABS
+∧ Issuer(BE001) in {GovernmentNationalMortgageAssociation, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation}
 ⇒ Eligible(BE001)
 
-  Not AssetSubClass(BE001) = ABS
-∧ Issuer(BE001) in {GovernmentNationalMortgageAssociation, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation, BRITISHCOLUMBIA, TORONTO, MANITOBA, NEWBRUNsELEC, NEWBRUNSWICK, NEWFOUNDLAND, NOVASCOTIA, ONTARIO, PRINCEEDWARDISLD, ALBERTA, QUEBEC, SASKATCHEWAN}
+  Not Issuer(BE001) in {GovernmentNationalMortgageAssociation, FederalHomeLoanMortgageCorporation, FederalNationalMortgageAssociation}
+∧ Not Issuer_Type(BE001) = Sovereign
 ⇒ Eligible(BE001)
 
 ⇒ Not Eligible(BE001)
