@@ -393,10 +393,13 @@ AQuantification.annotate = annotate
 
 def annotate1(self):
     Expression.annotate1(self)
-    for q in self.quantees:
+    for q in self.quantees:  # remove declared variables
         for vs in q.vars:
             for v in vs:
                 self.fresh_vars.discard(v.name)
+    for q in self.quantees:  # add variables in sort expression
+        for sort in q.sub_exprs:
+            self.fresh_vars.update(sort.fresh_vars)
     return self
 AQuantification.annotate1 = annotate1
 
