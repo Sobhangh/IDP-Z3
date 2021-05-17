@@ -119,7 +119,6 @@ Expression.translate = translate
 def reified(self) -> DatatypeRef:
     if self._reified is None:
         self._reified = Const(b'*'+self.code.encode(), BoolSort())
-        Expression.COUNT += 1
     return self._reified
 Expression.reified = reified
 
@@ -293,6 +292,14 @@ def translate1(self):
             else:
                 raise AttributeError(e)
 AppliedSymbol.translate1 = translate1
+
+def reified(self) -> DatatypeRef:
+    if self._reified is None:
+        sort = (BoolSort() if self.in_enumeration or self.is_enumerated else
+                self.decl.out.decl.translate())
+        self._reified = Const(b'*'+self.code.encode(), sort)
+    return self._reified
+AppliedSymbol.reified = reified
 
 
 # Class UnappliedSymbol  #######################################################

@@ -215,8 +215,6 @@ class Expression(ASTNode):
                  '_reified', 'is_type_constraint_for', 'co_constraint',
                  'normal', 'questions', 'relevant')
 
-    COUNT = 0
-
     def __init__(self):
         self.sub_exprs: List["Expression"]
         self.simpler: Optional["Expression"] = None
@@ -860,7 +858,7 @@ class AppliedSymbol(Expression):
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
-                or any(e.is_reified() for e in self.sub_exprs))
+                or not all(e.value is not None for e in self.sub_exprs))
 
     def reified(self):
         if self._reified is None:

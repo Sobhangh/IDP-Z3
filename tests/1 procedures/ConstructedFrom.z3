@@ -2,7 +2,7 @@ opposite(red) = green ∧ opposite(green) = red ∧ Color() in {red,green, green
 
 Model 1
 ==========
-Color:={->green}
-opposite:={red->green; blue->rgb(2, 2); green->red; rgb(1, 1)->rgb(2, 2); rgb(1, 2)->blue; rgb(2, 1)->rgb(1, 1); rgb(2, 2)->rgb(2, 2)}
+Color:={->red}
+opposite:={red->green; blue->green; green->red; rgb(1, 1)->rgb(1, 2); rgb(1, 2)->red; rgb(2, 1)->rgb(1, 1); rgb(2, 2)->red}
 
 More models are available.

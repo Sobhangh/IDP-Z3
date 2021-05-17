@@ -180,7 +180,7 @@ class Problem(object):
             c.co_constraints(self.co_constraints)
             c.collect(questions, all_=False)
         for s in list(questions.values()):
-            if s.is_reified():
+            if s.code not in self.assignments:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
         for ass in self.assignments.values():
