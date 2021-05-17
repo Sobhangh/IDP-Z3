@@ -68,10 +68,6 @@ class Problem(object):
         _formula (Expression, optional): the logic formula that represents
             the problem.
 
-        questions (OrderedSet): the set of questions in the problem.
-            Questions include predicates and functions applied to arguments,
-            comparisons, and variable-free quantified expressions.
-
         co_constraints (OrderedSet): the set of co_constraints in the problem.
     """
     def __init__(self, *blocks, extended=False):
@@ -88,7 +84,6 @@ class Problem(object):
 
         self._formula = None  # the problem expressed in one logic formula
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
-        self.questions = None
 
         self.add(*blocks)
 
@@ -142,7 +137,7 @@ class Problem(object):
                 self.interpretations[name] = interpret
 
             if isinstance(block, Theory) or isinstance(block, Problem):
-                self.co_constraints, self.questions = None, None
+                self.co_constraints = None
                 for (decl, defin), rule in block.clark.items():
                     if not (decl, defin) in self.clark:
                         self.clark[(decl, defin)] = rule
@@ -179,12 +174,12 @@ class Problem(object):
 
         # initialize assignments, co_constraints, questions
 
-        self.co_constraints, self.questions = OrderedSet(), OrderedSet()
+        self.co_constraints, questions = OrderedSet(), OrderedSet()
         for c in self.constraints:
             c.interpret(self)
             c.co_constraints(self.co_constraints)
-            c.collect(self.questions, all_=False)
-        for s in list(self.questions.values()):
+            c.collect(questions, all_=False)
+        for s in list(questions.values()):
             if s.is_reified():
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
 
