@@ -518,11 +518,6 @@ class Quantee(Expression):
         return (f"{','.join(str(v) for vs in self.vars for v in vs)} "
                 f"∈ {self.sub_exprs[0] if self.sub_exprs else None}")
 
-    def copy(self):
-        out = Expression.copy(self)
-        out.sub_exprs[0] = out.sub_exprs[0].copy()
-        return out
-
 
 class AQuantification(Expression):
     PRECEDENCE = 20
@@ -561,6 +556,7 @@ class AQuantification(Expression):
     def copy(self):
         # also called by AAgregate
         out = Expression.copy(self)
+        out.quantees = [q.copy() for q in out.quantees]
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
