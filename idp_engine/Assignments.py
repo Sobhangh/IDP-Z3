@@ -81,7 +81,7 @@ class Assignment(object):
         self.symbol_decl = None
         self.symbols = sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
-            if not d.name.startswith('_'):
+            if not d.name.startswith('_') and d.block:  # ignore accessors and testers
                 self.symbol_decl = d
                 break
 
