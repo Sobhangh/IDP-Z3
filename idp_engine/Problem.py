@@ -543,6 +543,8 @@ class Problem(object):
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
+        if goal_string:
+            questions.append(self.assignments[goal_string].sentence)
         # ignore questions about defined symbols (except goal)
         symbols = {decl for (decl, defin) in self.clark.keys()}
         qs = OrderedSet()
@@ -551,8 +553,6 @@ class Problem(object):
             or any(s not in symbols for s in q.collect_symbols(co_constraints=False).values())):
                 qs.append(q)
         questions = qs
-        assert not goal_string or goal_string in [a.code for a in questions], \
-            f"Internal error"
 
         known = And([ass.translate() for ass in self.assignments.values()
                         if ass.status != Status.UNKNOWN]
