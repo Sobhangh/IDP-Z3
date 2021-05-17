@@ -212,7 +212,7 @@ class Assignments(dict):
         for a in self.values():
             if a.value is not None and not a.sentence.is_reified():
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
-                c = f"({c})" if c else c
+                c = f"({c})" if 1 < len(a.sentence.sub_exprs) else c
                 c = f"{c}->{str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
         return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"
