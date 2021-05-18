@@ -84,7 +84,7 @@ def decision_table(theories, structures=None, goal_string="",
     Yields:
         str: a textual representation of each rule
     """
-    problem = Problem.make(theories, structures)
+    problem = Problem.make(theories, structures, extended=True)
     for model in problem.decision_table(goal_string, timeout, max_rows,
                                         first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model

@@ -57,6 +57,8 @@ def get_relevant_subtences(self):
     removes irrelevant constraints in self.constraints
     """
     # self is a State
+    assert self.extended == True,\
+        "The problem must be created with 'extended=True' for relevance computations."
     for a in self.assignments.values():
         a.relevant = False
 

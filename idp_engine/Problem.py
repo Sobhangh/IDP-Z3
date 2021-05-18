@@ -528,6 +528,8 @@ class Problem(object):
             list(list(Assignment)): the non-empty cells of the decision table
         """
         max_time = time.time()+timeout  # 20 seconds max
+        assert self.extended == True, \
+            "The problem must be created with 'extended=True' for decision_table."
 
         # determine questions, using goal_string and self.constraints
         questions = OrderedSet()

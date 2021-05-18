@@ -108,3 +108,4 @@ simplify(self)
 decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
     Experimental.  Returns the rows for a decision table that defines ``goal_string``.
     ``goal_string`` must be a predicate application defined in the theory.
+    The problem must be created with ``extended=True``.
