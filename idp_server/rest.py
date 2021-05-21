@@ -67,6 +67,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('method', type=str, help='Method to execute')
 parser.add_argument('code', type=str, help='Code')
 parser.add_argument('active', type=str, help='Three-valued structure')
+parser.add_argument('previous_active', type=str, help='Previous input by user')
 parser.add_argument('expanded', type=str, action='append', help='list of expanded symbols')
 parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
 parser.add_argument('value', type=str, help='Value to explain')
@@ -160,7 +161,7 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
-                    state = make_state(idp, "{}")
+                    state = make_state(idp, "{}", "{}")
                     out = metaJSON(state)
                     out["propagated"] = Output(state).fill(state)
                     return out
@@ -194,9 +195,10 @@ class eval(Resource):
                 idp = idpOf(args['code'])
                 method = args['method']
                 given_json = args['active']
+                previous_active = args.get('previous_active', None)
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                state = make_state(idp, given_json)
+                state = make_state(idp, previous_active, given_json)
 
                 out = {}
                 if method == "propagate":

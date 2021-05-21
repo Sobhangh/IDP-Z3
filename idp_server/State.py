@@ -117,11 +117,12 @@ class State(Problem):
                 )
 
 
-def make_state(idp: IDP, jsonstr: str) -> State:
+def make_state(idp: IDP, previous_active: str, jsonstr: str) -> State:
     """Manage the cache of State
 
     Args:
         idp (IDP): idp source code
+        previous_active : previous input from client
         jsonstr (str): input from client
 
     Returns:
@@ -135,12 +136,13 @@ def make_state(idp: IDP, jsonstr: str) -> State:
         # remove oldest entry, to prevent memory overflow
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
-    with_default = (jsonstr == "{}")
-    empty = (State.cache[(idp.code, with_default)]
-             if (idp.code, with_default) in State.cache else
-             State(idp, with_default=with_default))
-    State.cache[(idp.code, with_default)] = empty
+    if jsonstr == "{}":  # init with default structure
+        state = State(idp, with_default=True)
+    else:
+        if (idp.code, "{}") not in State.cache:
+            State.cache[(idp.code, "{}")] = State(idp, with_default=True)
+        previous = State.cache[(idp.code, "{}")]
+        state = previous.add_given(jsonstr)
 
-    state = empty.add_given(jsonstr)
     State.cache[(idp.code, jsonstr)] = state
     return state
