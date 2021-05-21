@@ -20,7 +20,7 @@ display { view() = expanded. }
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'f': {'__rank': 9999,
        'f(1)': {'environmental': False,
                 'is_assignment': True,

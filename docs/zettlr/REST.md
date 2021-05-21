@@ -58,6 +58,14 @@ GET request :
                 }
             }
         }
+    - previous_active : {        // list of choices previously made by the user
+        - <symbol> : string {
+            - <atom/term> : string {
+                - typ : string   // "Bool" | "Int" | "Real" | <custom type>
+                - value: string  // value entered by the user
+                }
+            }
+        }
     - code : string              // source code in FO(ID)
     - method : string            // name of the inference to be made:
                                  //   "propagate"   find propagated values
@@ -74,6 +82,7 @@ GET response :
 
 ```json
     - ' Global' : {             // with a leading space to avoid conflict with symbols
+        - active: string        // list of entries made by the user
         - env_dec: Bool         // true if the theory separates environmental/decision variables
     }
     - <symbol> : string {

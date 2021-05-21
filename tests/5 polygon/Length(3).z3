@@ -73,7 +73,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'Equilateral': {'Equilateral()': {'environmental': False,
                                    'is_assignment': False,
                                    'normal': True,

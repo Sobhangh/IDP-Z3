@@ -58,7 +58,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'important': {'__rank': 9999,
                'important(`Date)': {'environmental': False,
                                     'is_assignment': False,

@@ -79,7 +79,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'dayType': {'__rank': 9999,
              'dayType()': {'environmental': False,
                            'is_assignment': True,

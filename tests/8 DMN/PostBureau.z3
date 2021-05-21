@@ -63,7 +63,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'Application_Risk_Score': {'Application_Risk_Score()': {'environmental': False,
                                                          'is_assignment': True,
                                                          'normal': True,

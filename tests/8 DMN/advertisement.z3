@@ -39,7 +39,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'Advertised_Objects': {'Advertised_Objects()': {'environmental': False,
                                                  'is_assignment': True,
                                                  'normal': True,

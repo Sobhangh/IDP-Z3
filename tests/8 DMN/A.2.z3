@@ -40,7 +40,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'age': {'3 ≤ age()': {'environmental': False,
                        'is_assignment': False,
                        'normal': False,

@@ -159,6 +159,7 @@ class Output(object):
 
         self.m[' Global'] = {}
         self.m[' Global']['env_dec'] = state.environment is not None
+        self.m[' Global']['active'] = state.active
 
         for key, ass in state.assignments.items():
             atom = ass.sentence

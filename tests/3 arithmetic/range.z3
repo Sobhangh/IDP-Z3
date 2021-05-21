@@ -19,7 +19,7 @@ theory {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'Start_Dt_Dwelling_For_Social_Rent': {'Start_Dt_Dwelling_For_Social_Rent()': {'environmental': False,
                                                                                'is_assignment': True,
                                                                                'normal': True,

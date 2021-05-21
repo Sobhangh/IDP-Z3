@@ -7,4 +7,4 @@ Today:
 
 Problem with cache:
 - [ ] why propagate twice in interactive consultant ?
-- [ ] delta propagation needs to know the previous data set → need change to the IC
+- [x] delta propagation needs to know the previous data set → need change to the IC

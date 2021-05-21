@@ -35,6 +35,7 @@ class State(Problem):
     cache: Dict[Tuple[IDP, Union[str, bool]], 'State'] = {}
 
     def __init__(self, idp: IDP, with_default = False):
+        self.active = "{}"
 
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
@@ -86,6 +87,7 @@ class State(Problem):
         :rtype: State
         """
         out = self.copy()
+        out.active = jsonstr
         if out.environment:
             out.environment = out.environment.copy()
             _ = json_to_literals(out.environment, jsonstr)
