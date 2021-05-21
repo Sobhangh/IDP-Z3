@@ -139,9 +139,9 @@ def make_state(idp: IDP, previous_active: str, jsonstr: str) -> State:
     if jsonstr == "{}":  # init with default structure
         state = State(idp, with_default=True)
     else:
-        if (idp.code, "{}") not in State.cache:
-            State.cache[(idp.code, "{}")] = State(idp, with_default=True)
-        previous = State.cache[(idp.code, "{}")]
+        if (idp.code, False) not in State.cache:  # without default structure !
+            State.cache[(idp.code, False)] = State(idp, with_default=False)
+        previous = State.cache[(idp.code, False)]
         state = previous.add_given(jsonstr)
 
     State.cache[(idp.code, jsonstr)] = state
