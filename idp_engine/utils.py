@@ -23,8 +23,6 @@ from collections import ChainMap, Iterable
 from json import JSONEncoder
 import time
 
-MAX_QUANTIFIER_EXPANSION = 20
-
 NEWL = "\n"
 indented = "\n  "
 BOOL = "Bool"
@@ -40,11 +38,14 @@ OUTPUT_DOMAIN = "output_domain"
 RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, SYMBOL,
                     RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
 
+DEFAULT = "default"
+
 """
     Parameters:
 """
 
 CO_CONSTR_RECURSION_DEPTH = 3
+MAX_QUANTIFIER_EXPANSION = 20
 
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"

@@ -21,7 +21,7 @@ Management of the State of problem solving with the Interactive Consultant.
 
 
 from idp_engine.Run import Problem
-from idp_engine.utils import OrderedSet, NEWL, indented
+from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
 from .IO import json_to_literals, Status
 from .Inferences import get_relevant_subtences
 
@@ -69,7 +69,7 @@ class State(Problem):
             blocks = [next(iter(idp.theories.values()))]
 
         for name, struct in idp.structures.items():
-            if name != 'environment' and (name != "default" or with_default):
+            if name != 'environment' and (name != DEFAULT or with_default):
                 blocks.append(struct)
         self.add(*blocks)
         self.symbolic_propagate(tag=Status.UNIVERSAL)
@@ -126,19 +126,19 @@ def make_state(idp: IDP, jsonstr: str) -> State:
         State: a State
     """
 
-    if (idp, jsonstr) in State.cache:
-        return State.cache[(idp, jsonstr)]
+    if (idp.code, jsonstr) in State.cache:
+        return State.cache[(idp.code, jsonstr)]
 
     if 100 < len(State.cache):
         # remove oldest entry, to prevent memory overflow
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
     with_default = (jsonstr == "{}")
-    empty = (State.cache[(idp, with_default)]
-             if (idp, with_default) in State.cache else
+    empty = (State.cache[(idp.code, with_default)]
+             if (idp.code, with_default) in State.cache else
              State(idp, with_default=with_default))
-    State.cache[(idp, with_default)] = empty
+    State.cache[(idp.code, with_default)] = empty
 
     state = empty.add_given(jsonstr)
-    State.cache[(idp, jsonstr)] = state
+    State.cache[(idp.code, jsonstr)] = state
     return state

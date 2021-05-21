@@ -47,7 +47,7 @@ from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction,  AEquivalence, AAggregate,
                     AComparison, AUnary, AppliedSymbol, UnappliedSymbol, Number,
                     Variable, TRUE)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT
 
 
 # class Extern  ###########################################################
@@ -131,7 +131,7 @@ Rule.interpret = interpret
 # class SymbolInterpretation  ###########################################################
 
 def interpret(self, problem):
-    status = (Status.STRUCTURE if self.block.name != 'default' else
+    status = (Status.STRUCTURE if self.block.name != DEFAULT else
                 Status.GIVEN)
     if self.is_type_enumeration:
         self.enumeration.interpret(problem)
@@ -147,7 +147,7 @@ def interpret(self, problem):
                 or problem.assignments[expr.code].status == Status.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
             e = problem.assignments.assert_(expr, value, status, False)
-            if (self.block.name == 'default'
+            if (self.block.name == DEFAULT
                 and type(self.enumeration) == FunctionEnum
                 and type(self.symbol.decl.out.decl) == TypeDeclaration):
                 problem.assignments.assert_(e.formula(), TRUE, status, False)

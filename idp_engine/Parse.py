@@ -34,7 +34,7 @@ from os import path
 from re import findall
 from sys import intern
 from textx import metamodel_from_file
-from typing import Dict, Union, Optional
+from typing import Dict, List, Union, Optional
 
 
 from .Assignments import Assignments
@@ -79,9 +79,23 @@ class ViewType(Enum):
 
 class IDP(ASTNode):
     """The class of AST nodes representing an IDP-Z3 program.
+
+    Args:
+        code (str): source code of the IDP program
+
+        vocabularies (dict[str, Vocabulary]): list of vocabulary blocks, by name
+
+        theories (dict[str, Theory]): list of theory blocks, by name
+
+        structures (dict[str, Structure]): list of structure blocks, by name
+
+        procedures (dict[str, Procedure]): list of procedure blocks, by name
+
+        display (Display, Optional): display block, if any
     """
     def __init__(self, **kwargs):
         # log("parsing done")
+        self.code = None
         self.vocabularies = self.dedup_nodes(kwargs, 'vocabularies')
         self.theories = self.dedup_nodes(kwargs, 'theories')
         self.structures = self.dedup_nodes(kwargs, 'structures')
@@ -102,13 +116,32 @@ class IDP(ASTNode):
             self.display = Display(constraints=[])
 
     @classmethod
-    def parse(cls, file_or_string):
-        if path.exists(file_or_string):
-            return idpparser.model_from_file(file_or_string)
-        else:
-            return idpparser.model_from_str(file_or_string)
+    def parse(cls, file_or_string: str) -> "IDP":
+        """parse an IDP program
 
-    def get_blocks(self, blocks):
+        Args:
+            file_or_string (str): path to the source file, or the source code itself
+
+        Returns:
+            IDP: the result of parsing the IDP program
+        """
+        code = file_or_string
+        if path.exists(file_or_string):
+            with open(file_or_string, "r") as source:
+                code = source.read()
+        out = idpparser.model_from_str(code)
+        out.code = code
+        return out
+
+    def get_blocks(self, blocks: List[str]):
+        """returns the AST nodes for the blocks whose names are given
+
+        Args:
+            blocks (List[str]): list of names of the blocks to retrieve
+
+        Returns:
+            List[Union[Vocabulary, Theory, Structure, Procedure, Display]]: list of AST nodes
+        """
         names = blocks.split(",") if type(blocks) is str else blocks
         out = []
         for name in names:
