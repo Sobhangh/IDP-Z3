@@ -167,7 +167,7 @@ def pipeline():
                         given_json = ""
 
                         if idp.procedures == {}:
-                            state = make_state(idp, given_json)
+                            state = make_state(idp, "{}", given_json)
                             generator = state.expand(max=1,complete=False)
                             list(generator)[0]  # ignore result
                             out = Output(state).fill(state)
