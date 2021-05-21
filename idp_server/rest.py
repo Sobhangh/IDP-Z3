@@ -17,6 +17,8 @@
 
 """
 This module implements the IDP-Z3 web server
+
+To profile it, remove `#pyinstrument ` from comments
 """
 
 with_png = False
@@ -27,7 +29,7 @@ import os
 import threading
 import traceback
 
-from flask import Flask, send_from_directory
+from flask import Flask, g, send_from_directory  # g is requierd for pyinstrument
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
