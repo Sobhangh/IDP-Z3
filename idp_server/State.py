@@ -34,7 +34,7 @@ class State(Problem):
     """ Contains a state of problem solving """
     cache: Dict[Tuple[IDP, Union[str, bool]], 'State'] = {}
 
-    def __init__(self, idp: IDP, with_default = False):
+    def __init__(self, idp: IDP):
         self.active = "{}"
 
         # determine default vocabulary, theory, before annotating display
@@ -61,8 +61,7 @@ class State(Problem):
         if len(idp.theories) == 2:
             blocks = [idp.theories['environment']]
             for name, struct in idp.structures.items():
-                if (struct.voc.name == 'environment'
-                    and (name != "default" or with_default)):
+                if struct.voc.name == 'environment':
                     blocks.append(struct)
             self.environment = Problem(* blocks, extended=True)
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
@@ -73,8 +72,7 @@ class State(Problem):
             blocks = [next(iter(idp.theories.values()))]
 
         for name, struct in idp.structures.items():
-            if (struct.voc.name != 'environment'
-                and (name != "default" or with_default)):
+            if struct.voc.name != 'environment':
                 blocks.append(struct)
         self.add(*blocks)
         self.symbolic_propagate(tag=Status.UNIVERSAL)
@@ -144,7 +142,7 @@ def make_state(idp: IDP, previous_active: str, jsonstr: str) -> State:
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
     if (idp.code, "{}") not in State.cache:  # without default structure !
-        State.cache[(idp.code, "{}")] = State(idp, with_default=True)
+        State.cache[(idp.code, "{}")] = State(idp)
     state = State.cache[(idp.code, "{}")]
 
     if jsonstr != "{}":
