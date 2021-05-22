@@ -78,7 +78,7 @@ def metaJSON(state):
 #################
 
 
-def json_to_literals(state, jsonstr: str):
+def load_json(state, jsonstr: str):
     """ Parse a json string and create assignments in a state accordingly.
     This function can also overwrite assignments that have already been set as
     a default assignment, effectively overriding the default.
@@ -88,8 +88,6 @@ def json_to_literals(state, jsonstr: str):
     :returns: the assignments
     :rtype: idp_engine.Assignments
     """
-    out = Assignments()
-
     if jsonstr:
         json_data = ast.literal_eval(jsonstr)
         assert json_data != {}, "Reset not expected here"
@@ -122,8 +120,6 @@ def json_to_literals(state, jsonstr: str):
 
                     else:
                         state.assignments[atom].value = None
-                    out[atom] = state.assignments[atom]
-    return out
 
 
 #################
@@ -133,7 +129,7 @@ def json_to_literals(state, jsonstr: str):
 
 
 class Output(object):
-    def __init__(self, state, structure={}):
+    def __init__(self, state):
         self.m = {}  # [symbol.name][atom.code][attribute name] -> attribute value
         self.state = state
 

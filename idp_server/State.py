@@ -22,7 +22,7 @@ Management of the State of problem solving with the Interactive Consultant.
 
 from idp_engine.Run import Problem
 from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
-from .IO import json_to_literals, Status
+from .IO import load_json, Status
 from .Inferences import get_relevant_subtences
 
 # Types
@@ -32,7 +32,7 @@ from typing import Dict, Tuple, Union
 
 class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[IDP, Union[str, bool]], 'State'] = {}
+    cache: Dict[Tuple[IDP, str], 'State'] = {}
 
     def __init__(self, idp: IDP):
         self.active = "{}"
@@ -56,7 +56,6 @@ class State(Problem):
         self.idp = idp  # IDP vocabulary and theory
 
         super().__init__(extended=True)
-        self.given = None
 
         if len(idp.theories) == 2:
             blocks = [idp.theories['environment']]
@@ -92,8 +91,8 @@ class State(Problem):
         out.active = jsonstr
         if out.environment:
             out.environment = out.environment.copy()
-            _ = json_to_literals(out.environment, jsonstr)
-        out.given = json_to_literals(out, jsonstr)
+            load_json(out.environment, jsonstr)
+        load_json(out, jsonstr)
         return out._finalize()
 
     def _finalize(self):

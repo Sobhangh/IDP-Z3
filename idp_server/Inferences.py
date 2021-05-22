@@ -164,7 +164,7 @@ def get_relevant_subtences(self):
 
 def explain(state, consequence):
     (facts, laws) = state.explain(consequence)
-    out = Output(state, state.given)
+    out = Output(state)
     for ass in facts:
         out.addAtom(ass.sentence, ass.value, ass.status)
     out.m["*laws*"] = [l.annotations['reading'] for l in laws]
