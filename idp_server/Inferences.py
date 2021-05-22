@@ -50,24 +50,23 @@ from .IO import Output
 #         if k in relevant_subtences and symbols and has_relevant_symbol:
 #             l.relevant = True
 
-def get_relevant_subtences(self):
+def get_relevant_subtences(self: "State"):
     """
     sets 'relevant in self.assignments
     sets rank of symbols in self.relevant_symbols
     removes irrelevant constraints in self.constraints
     """
 
-    self = self.simplify()  # creates a copy
+    out = self.simplify()  # creates a copy
 
-    # self is a State
-    assert self.extended == True,\
+    assert out.extended == True,\
         "The problem must be created with 'extended=True' for relevance computations."
-    for a in self.assignments.values():
+    for a in out.assignments.values():
         a.relevant = False
 
     # collect (co-)constraints
     constraints = OrderedSet()
-    for constraint in self.constraints:
+    for constraint in out.constraints:
         constraints.append(constraint)
         constraint.co_constraints(constraints)
 
@@ -78,19 +77,19 @@ def get_relevant_subtences(self):
         if type(constraint) == AppliedSymbol and \
            constraint.decl.name == RELEVANT:
             for e in constraint.sub_exprs:
-                assert e.code in self.assignments, \
+                assert e.code in out.assignments, \
                     f"Invalid expression in relevant: {e.code}"
                 reachable.append(e)
 
     # analyse given information
     given, hasGiven = OrderedSet(), False
-    for q in self.assignments.values():
+    for q in out.assignments.values():
         if q.status == Status.GIVEN:
             hasGiven = True
             if not q.sentence.has_decision():
                 given.append(q.sentence)
 
-    # constraints have set of questions in self.assignments
+    # constraints have set of questions in out.assignments
     # set constraint.relevant, constraint.questions
     for constraint in constraints:
         constraint.relevant = False
@@ -98,9 +97,9 @@ def get_relevant_subtences(self):
         constraint.collect(constraint.questions,
                            all_=True, co_constraints=False)
 
-        # only keep questions in self.assignments
+        # only keep questions in out.assignments
         constraint.questions = OrderedSet([q for q in constraint.questions
-                                           if q.code in self.assignments])
+                                           if q.code in out.assignments])
 
     # nothing relevant --> make every question in a constraint relevant
     if len(reachable) == 0:
@@ -120,7 +119,7 @@ def get_relevant_subtences(self):
     #         and question in constraint.questions):
     #             constraint.relevant = True
     #             for q in constraint.questions:
-    #                 self.assignments[q.code].relevant = True
+    #                 out.assignments[q.code].relevant = True
     #                 for s in q.collect_symbols(co_constraints=False):
     #                     if s not in relevants:
     #                         relevants[s] = rank
@@ -136,12 +135,12 @@ def get_relevant_subtences(self):
 
     # find relevant symbols by breadth-first propagation
     # input: reachable, given, constraints
-    # output: self.assignments[].relevant, constraints[].relevant, relevants[].rank
+    # output: out.assignments[].relevant, constraints[].relevant, relevants[].rank
     relevants = {}  # Dict[string: int]
     to_add, rank = reachable, 1
     while to_add:
         for q in to_add:
-            self.assignments[q.code].relevant = True
+            out.assignments[q.code].relevant = True
             for s in q.collect_symbols(co_constraints=False):
                 if s not in relevants:
                     relevants[s] = rank
@@ -157,9 +156,9 @@ def get_relevant_subtences(self):
                         for q in constraint.questions)):
                 constraint.relevant = True
                 to_add.extend(constraint.questions)
-    self.relevant_symbols = (relevants if self.idp.display.moveSymbols else
+    out.relevant_symbols = (relevants if out.idp.display.moveSymbols else
                              {})
-    return self
+    return out
 
 
 def explain(state, consequence):
