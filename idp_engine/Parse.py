@@ -56,7 +56,7 @@ def str_to_IDP(atom, val_string):
     if atom.type == BOOL:
         if val_string not in ['True', 'False']:
             raise IDPZ3Error(
-                f"{atom.annotations['reading']} is not defined, and assumed false")
+                f"{atom.annotations['reading']} has wrong value: {val_string}")
         out = (TRUE if val_string == 'True' else
                FALSE)
     elif atom.type == DATE:
