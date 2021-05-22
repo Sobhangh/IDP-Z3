@@ -58,10 +58,9 @@ class State(Problem):
         super().__init__(extended=True)
 
         if len(idp.theories) == 2:
-            blocks = [idp.theories['environment']]
-            for name, struct in idp.structures.items():
-                if struct.voc.name == 'environment':
-                    blocks.append(struct)
+            blocks = ([idp.theories['environment']]
+                      + [struct for struct in idp.structures.values()
+                         if struct.voc.name == 'environment'])
             self.environment = Problem(* blocks, extended=True)
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
 
@@ -70,9 +69,8 @@ class State(Problem):
             self.environment = None
             blocks = [next(iter(idp.theories.values()))]
 
-        for name, struct in idp.structures.items():
-            if struct.voc.name != 'environment':
-                blocks.append(struct)
+        blocks += [struct for struct in idp.structures.values()
+                   if struct.voc.name != 'environment']
         self.add(*blocks)
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
