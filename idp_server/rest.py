@@ -18,10 +18,11 @@
 """
 This module implements the IDP-Z3 web server
 
-To profile it, remove `#pyinstrument ` from comments
+To profile it, set with_profiling to True
 """
 
 with_png = False
+with_profiling = False
 
 from contextlib import redirect_stdout
 import io
@@ -29,7 +30,7 @@ import os
 import threading
 import traceback
 
-from flask import Flask, g, send_from_directory  # g is requierd for pyinstrument
+from flask import Flask, g, send_from_directory  # g is required for pyinstrument
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
@@ -41,17 +42,20 @@ from .IO import Output, metaJSON
 
 from typing import Dict
 
-#pyinstrument from pyinstrument import Profiler
-# library to generate call graph, for documentation purposes
-from pycallgraph2 import PyCallGraph
-from pycallgraph2.output import GraphvizOutput
-from pycallgraph2 import GlobbingFilter
-from pycallgraph2 import Config
-config = Config(max_depth=8)
-config.trace_filter = GlobbingFilter(
-    exclude=['arpeggio.*', 'ast.*', 'flask*', 'json.*', 'pycallgraph2.*',
-             'textx.*', 'werkzeug.*', 'z3.*']
-    )
+if with_profiling:
+    from pyinstrument import Profiler
+
+if with_png:
+    # library to generate call graph, for documentation purposes
+    from pycallgraph2 import PyCallGraph
+    from pycallgraph2.output import GraphvizOutput
+    from pycallgraph2 import GlobbingFilter
+    from pycallgraph2 import Config
+    config = Config(max_depth=8)
+    config.trace_filter = GlobbingFilter(
+        exclude=['arpeggio.*', 'ast.*', 'flask*', 'json.*', 'pycallgraph2.*',
+                'textx.*', 'werkzeug.*', 'z3.*']
+        )
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -188,8 +192,9 @@ class eval(Resource):
         log("start /eval")
         with z3lock:
             try:
-                #pyinstrument g.profiler = Profiler()
-                #pyinstrument g.profiler.start()
+                if with_profiling:
+                    g.profiler = Profiler()
+                    g.profiler.start()
 
                 args = parser.parse_args()
                 #print(args)
@@ -230,11 +235,13 @@ class eval(Resource):
                         state = make_state(idpModel, "")
                     out = abstract(state, given_json)
                 log("end /eval " + method)
-                #pyinstrument g.profiler.stop()
-                #pyinstrument print(g.profiler.output_text(unicode=True, color=True))
+                if with_profiling:
+                    g.profiler.stop()
+                    print(g.profiler.output_text(unicode=True, color=True))
                 return out
             except Exception as exc:
-                #pyinstrument g.profiler.stop()
+                if with_profiling:
+                    g.profiler.stop()
                 traceback.print_exc()
                 return str(exc)
 
