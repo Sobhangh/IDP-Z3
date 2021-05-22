@@ -56,12 +56,15 @@ class State(Problem):
         self.idp = idp  # IDP vocabulary and theory
 
         super().__init__(extended=True)
-        self.given = None  # Assignments from the user interface
+        self.given = None
 
         if len(idp.theories) == 2:
-            self.environment = Problem(* [idp.theories['environment']]
-                    + ([] if 'environment' not in idp.structures else
-                       idp.structures['environment']), extended=True)
+            blocks = [idp.theories['environment']]
+            for name, struct in idp.structures.items():
+                if (struct.voc.name == 'environment'
+                    and (name != "default" or with_default)):
+                    blocks.append(struct)
+            self.environment = Problem(* blocks, extended=True)
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
 
             blocks = [self.environment, idp.theories['decision']]
@@ -70,7 +73,8 @@ class State(Problem):
             blocks = [next(iter(idp.theories.values()))]
 
         for name, struct in idp.structures.items():
-            if name != 'environment' and (name != DEFAULT or with_default):
+            if (struct.voc.name != 'environment'
+                and (name != "default" or with_default)):
                 blocks.append(struct)
         self.add(*blocks)
         self.symbolic_propagate(tag=Status.UNIVERSAL)
