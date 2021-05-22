@@ -2,6 +2,10 @@ ok
 p:={->false}
 q:={->false}
 
+p:={->false}
+q:={->true}
+
+p:={->true}
 q:={->true}
 
 

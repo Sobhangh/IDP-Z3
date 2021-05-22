@@ -237,20 +237,15 @@ class Problem(object):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            if not q.is_reified():
-                val1 = solver.model().eval(
-                    q.translate(),
-                    model_completion=complete)
-            elif self.extended:
+            val1 = None
+            if not q.is_reified() or self.extended:
+                # evaluating q.translate() directly fails the pipeline on arithmetic/forall.idp
                 solver.push()  # in case todo contains complex formula
                 solver.add(q.reified() == q.translate())
                 res1 = solver.check()
                 if res1 == sat:
-                    val1 = solver.model().eval(
-                        q.reified(),
-                        model_completion=complete)
-                else:
-                    val1 = None  # dead code
+                    val1 = solver.model().eval(q.reified(),
+                                               model_completion=complete)
                 solver.pop()
             if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
