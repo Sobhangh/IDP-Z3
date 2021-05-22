@@ -92,34 +92,14 @@ def json_to_literals(state, jsonstr: str):
 
     if jsonstr:
         json_data = ast.literal_eval(jsonstr)
-        default = [x for x, v in state.assignments.items()
-                   if v.status == Status.GIVEN]
-        if json_data == {}:
-            # If json_data was empty (e.g. at beginning), we need to check if
-            # we can make more assertions.
-            for symbol in default:
-                idp_atom = state.assignments[symbol].sentence
-                # We do not need to create comparisons for all types.
-                if idp_atom.type in ["Real", "Bool", "Int"]:
-                    continue
-                value = state.assignments[symbol].value
-                idp_atom = AComparison.make('=', [idp_atom, value])
-                state.assignments.assert_(idp_atom, TRUE,
-                                          Status.GIVEN, False)
-            return out
-
-        for symbol in default:
-            # If a boolean is unset, it does not show up in the jsonstr.
-            # If it is not in jsonstr we unset the default value.
-            if symbol not in json_data:
-                state.assignments[symbol].unset()
+        assert json_data != {}, "Reset not expected here"
 
         for symbol in json_data:
-            # If no value was given for a default symbol we unset it.
-            if len(json_data[symbol]) == 0 and symbol in default:
-                state.assignments[symbol].unset()
-                continue
-
+            # reset all assignments for that atom
+            for atom in state.assignments.values():
+                if (atom.symbol_decl.name == symbol
+                    and atom.value):
+                    atom.unset()
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
                     idp_atom = state.assignments[atom].sentence

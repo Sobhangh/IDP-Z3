@@ -216,7 +216,8 @@ class Problem(object):
             self._formula = AConjunction.make(
                 '∧',
                 [a.formula() for a in self.assignments.values()
-                 if a.value is not None]
+                 if a.value is not None
+                 and a.status not in [Status.CONSEQUENCE, Status.ENV_CONSQ]]
                 + [s for s in self.constraints]
                 + [c for c in self.co_constraints]
                 + [s for s in self.def_constraints.values()]
@@ -227,7 +228,8 @@ class Problem(object):
     def _todo(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.value is None
+            if a.status not in [Status.GIVEN, Status.STRUCTURE,
+                                 Status.UNIVERSAL, Status.ENV_UNIV]
             and a.symbol_decl is not None
             and (not a.sentence.is_reified() or self.extended))
 
@@ -353,6 +355,8 @@ class Problem(object):
                             yield self.assignments.assert_(q, val, tag, True)
                         elif res2 == unknown:
                             res1 = unknown
+                        else:  # reset the value
+                            self.assignments.assert_(q, None, Status.UNKNOWN, False)
                 solver.pop()
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
@@ -440,7 +444,12 @@ class Problem(object):
         return (facts, laws)
 
     def simplify(self):
-        """ simplify constraints using known assignments """
+        """ returns a simpler copy of the Problem, using known assignments
+
+        Assignments obtained by propagation become fixed constraints.
+        """
+
+        self = self.copy()
 
         # annotate self.constraints with questions
         for e in self.constraints:
@@ -451,6 +460,10 @@ class Problem(object):
         for ass in self.assignments.values():
             old, new = ass.sentence, ass.value
             if new is not None:
+                # convert consequences to Universal
+                ass.status = (Status.UNIVERSAL if ass.status == Status.CONSEQUENCE else
+                              Status.ENV_UNIV if ass.status == Status.ENV_CONSQ else
+                              ass.status)
                 # simplify constraints
                 new_constraints: List[Expression] = []
                 for constraint in self.constraints:

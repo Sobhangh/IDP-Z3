@@ -107,7 +107,9 @@ theory {
     (∀n ∈ Side_Nr: length(n)=0 ⇔ nr_of_sides()<n).
 
 }
-
+structure default {
+    nr_of_sides:=3.
+}
 display {
     view() = expanded.
 }

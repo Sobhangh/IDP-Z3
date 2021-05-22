@@ -191,12 +191,11 @@ class Assignments(dict):
                 value: Optional[Expression],
                 status: Optional[Status],
                 relevant: Optional[bool]):
-        sentence = sentence.copy()
         if sentence.code in self:
-            # needed for explain of irrelevant symbols
-            out = copy(self[sentence.code])
+            out = self[sentence.code]
             out.value = value
-            if out.status is None or out.status == Status.UNKNOWN:
+            if not (out.status == Status.ENV_CONSQ and status == Status.CONSEQUENCE):
+                # do not change an env consequence to a decision consequence
                 out.status = status
             if relevant is not None:
                 out.relevant = relevant

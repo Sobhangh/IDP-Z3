@@ -105,8 +105,11 @@ class State(Problem):
             self.assignments.update(self.environment.assignments)
             self._formula = None
         self.propagate(tag=Status.CONSEQUENCE)
-        self.simplify()
-        get_relevant_subtences(self)
+        out = get_relevant_subtences(self)  # creates a copy of self
+        # copy relevant information
+        for k,v in out.assignments.items():
+            self.assignments[k].relevant = v.relevant
+        self.relevant_symbols = out.relevant_symbols
         return self
 
     def __str__(self) -> str:
@@ -140,13 +143,11 @@ def make_state(idp: IDP, previous_active: str, jsonstr: str) -> State:
         # remove oldest entry, to prevent memory overflow
         State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
-    if jsonstr == "{}":  # init with default structure
-        state = State(idp, with_default=True)
-    else:
-        if (idp.code, False) not in State.cache:  # without default structure !
-            State.cache[(idp.code, False)] = State(idp, with_default=False)
-        previous = State.cache[(idp.code, False)]
-        state = previous.add_given(jsonstr)
+    if (idp.code, "{}") not in State.cache:  # without default structure !
+        State.cache[(idp.code, "{}")] = State(idp, with_default=True)
+    state = State.cache[(idp.code, "{}")]
 
+    if jsonstr != "{}":
+        state = state.add_given(jsonstr)
     State.cache[(idp.code, jsonstr)] = state
     return state

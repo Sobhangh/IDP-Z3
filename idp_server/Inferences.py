@@ -56,6 +56,9 @@ def get_relevant_subtences(self):
     sets rank of symbols in self.relevant_symbols
     removes irrelevant constraints in self.constraints
     """
+
+    self = self.simplify()  # creates a copy
+
     # self is a State
     assert self.extended == True,\
         "The problem must be created with 'extended=True' for relevance computations."
@@ -156,6 +159,7 @@ def get_relevant_subtences(self):
                 to_add.extend(constraint.questions)
     self.relevant_symbols = (relevants if self.idp.display.moveSymbols else
                              {})
+    return self
 
 
 def explain(state, consequence):
