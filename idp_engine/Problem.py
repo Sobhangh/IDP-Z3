@@ -334,8 +334,8 @@ class Problem(object):
         result = solver.check()
         if result == sat:
             for q in todo:
-                solver.push()  # in case todo contains complex formula
-                solver.add(q.reified() == q.translate())
+                solver.push()  #  faster (~3%) with push than without
+                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
                 res1 = solver.check()
                 if res1 == sat:
                     val1 = solver.model().eval(q.reified())
