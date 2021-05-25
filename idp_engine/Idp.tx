@@ -143,7 +143,7 @@ Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}'
                      | kwargs*=PyAssignment[',']) ')'
                  )?
         ('.' post=PyExpr)?;
-  PyExpr: !PyAssignment (Call1 | String | Number | ID | PyList);
+  PyExpr: !PyAssignment (Call1 | String | Number | PyList);
   String: literal=/"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 
