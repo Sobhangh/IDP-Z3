@@ -36,7 +36,7 @@ from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
 from idp_engine.utils import log
-from .State import make_state
+from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
 
@@ -167,7 +167,7 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
-                    state = make_state(idp, "{}", "{}")
+                    state = State.make(idp, "{}", "{}")
                     out = metaJSON(state)
                     out["propagated"] = Output(state).fill(state)
                     return out
@@ -205,7 +205,7 @@ class eval(Resource):
                 previous_active = args.get('previous_active', None)
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                state = make_state(idp, previous_active, given_json)
+                state = State.make(idp, previous_active, given_json)
 
                 out = {}
                 if method == "propagate":
@@ -232,7 +232,7 @@ class eval(Resource):
                         # for expr in idpModel.subtences.values():
                         #     expanded.update(expr.collect_symbols())
                         expanded = tuple(expanded.keys())
-                        state = make_state(idpModel, "")
+                        state = State.make(idpModel, "")
                     out = abstract(state, given_json)
                 log("end /eval " + method)
                 if with_profiling:

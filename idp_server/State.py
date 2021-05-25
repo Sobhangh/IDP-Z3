@@ -34,6 +34,35 @@ class State(Problem):
     """ Contains a state of problem solving """
     cache: Dict[Tuple[IDP, str], 'State'] = {}
 
+    @classmethod
+    def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
+        """Manage the cache of State
+
+        Args:
+            idp (IDP): idp source code
+            previous_active : previous input from client
+            jsonstr (str): input from client
+
+        Returns:
+            State: a State
+        """
+
+        if (idp.code, jsonstr) in State.cache:
+            return State.cache[(idp.code, jsonstr)]
+
+        if 100 < len(State.cache):
+            # remove oldest entry, to prevent memory overflow
+            State.cache = {k: v for k, v in list(State.cache.items())[1:]}
+
+        if (idp.code, "{}") not in State.cache:  # without default structure !
+            State.cache[(idp.code, "{}")] = State(idp)
+        state = State.cache[(idp.code, "{}")]
+
+        if jsonstr != "{}":
+            state = state.add_given(jsonstr)
+        State.cache[(idp.code, jsonstr)] = state
+        return state
+
     def __init__(self, idp: IDP):
         self.active = "{}"
 
@@ -118,31 +147,3 @@ class State(Problem):
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
                 )
 
-
-def make_state(idp: IDP, previous_active: str, jsonstr: str) -> State:
-    """Manage the cache of State
-
-    Args:
-        idp (IDP): idp source code
-        previous_active : previous input from client
-        jsonstr (str): input from client
-
-    Returns:
-        State: a State
-    """
-
-    if (idp.code, jsonstr) in State.cache:
-        return State.cache[(idp.code, jsonstr)]
-
-    if 100 < len(State.cache):
-        # remove oldest entry, to prevent memory overflow
-        State.cache = {k: v for k, v in list(State.cache.items())[1:]}
-
-    if (idp.code, "{}") not in State.cache:  # without default structure !
-        State.cache[(idp.code, "{}")] = State(idp)
-    state = State.cache[(idp.code, "{}")]
-
-    if jsonstr != "{}":
-        state = state.add_given(jsonstr)
-    State.cache[(idp.code, jsonstr)] = state
-    return state
