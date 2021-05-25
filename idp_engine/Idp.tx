@@ -138,14 +138,14 @@ Display: 'display' '{' (constraints=Expression '.')* '}';
 
 Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
 
-  PyStatement: Call1 | PyAssignment ;
-  Call1: name=ID '(' ( args+=Call0[','] (',' kwargs+=PyAssignment[','])?
+  PyStatement: PyAssignment | Call1 ;
+  Call1: name=ID ( par='(' ( args+=PyExpr[','] (',' kwargs+=PyAssignment[','])?
                      | kwargs*=PyAssignment[',']) ')'
+                 )?
         ('.' post=PyExpr)?;
-  Call0: !PyAssignment pyExpr=PyExpr;
-  PyExpr: Call1 | String | Number | ID | PyList;
+  PyExpr: !PyAssignment (Call1 | String | Number | ID | PyList);
   String: literal=/"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 
-  PyAssignment: var=ID '=' val=Call0;
+  PyAssignment: var=ID '=' val=PyExpr;
 

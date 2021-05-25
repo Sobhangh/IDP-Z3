@@ -871,6 +871,7 @@ class Procedure(ASTNode):
 class Call1(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
+        self.par = kwargs.pop('par') if 'par' in kwargs else None
         self.args = kwargs.pop('args')
         self.kwargs = kwargs.pop('kwargs')
         self.post = kwargs.pop('post')
@@ -878,16 +879,10 @@ class Call1(ASTNode):
     def __str__(self):
         kwargs = ("" if len(self.kwargs)==0 else
                   f"{',' if self.args else ''}{','.join(str(a) for a in self.kwargs)}")
-        return ( f"{self.name}({','.join(str(a) for a in self.args)}{kwargs})"
+        args = ("" if not self.par else
+                f"({','.join(str(a) for a in self.args)}{kwargs})")
+        return ( f"{self.name}{args}"
                  f"{'' if self.post is None else '.'+str(self.post)}")
-
-
-class Call0(ASTNode):
-    def __init__(self, **kwargs):
-        self.pyExpr = kwargs.pop('pyExpr')
-
-    def __str__(self):
-        return str(self.pyExpr)
 
 
 class String(ASTNode):
@@ -944,5 +939,5 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          ConstructedFrom, Constructor, Ranges,
                                          Display,
 
-                                         Procedure, Call1, Call0, String,
+                                         Procedure, Call1, String,
                                          PyList, PyAssignment])
