@@ -371,6 +371,21 @@ class Problem(object):
         assert out[0] != "Not satisfiable.", "Not satisfiable."
         return self
 
+    def get_range(self, term: str):
+        assert term in self.assignments, f"Unknown term: {term}"
+        termE : Expression = self.assignments[term].sentence
+        assert type(termE) == AppliedSymbol, f"{term} is not a term"
+        range = termE.decl.range
+        assert range, f"Can't determine range on infinite domains"
+
+        out = self.copy()
+        for e in range:
+            sentence = Assignment(termE, e, Status.UNKNOWN).formula()
+            if sentence.code not in out.assignments:
+                out.assignments.assert_(sentence, None, Status.UNKNOWN)
+        out._propagate(Status.CONSEQUENCE)
+        return out
+
     def explain(self, consequence):
         """returns the facts and laws that justify 'consequence in the 'self Problem
 
