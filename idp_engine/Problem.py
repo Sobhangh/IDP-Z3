@@ -379,11 +379,11 @@ class Problem(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
-        out = self.copy()
+        out = copy(self)
+        out.assignments = Assignments()
         for e in range:
             sentence = Assignment(termE, e, Status.UNKNOWN).formula()
-            if sentence.code not in out.assignments:
-                out.assignments.assert_(sentence, None, Status.UNKNOWN)
+            out.assignments.assert_(sentence, None, Status.UNKNOWN, False)
         out._propagate(Status.CONSEQUENCE)
         return out
 
