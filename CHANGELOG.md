@@ -14,6 +14,7 @@ Contributors (alphabetical): Matthias van der hallen, Pierre Carbonnelle.
 
 ### Interactive Consultant
 * Merge #85: improve performance of IC (better use of cache)
+* Merge # 87: improve performance of IC (propagate dropdowns on request)
 * fix #75: default structure not working in Registration application
 * fix #89: `constructed from` types create error in IC
 * fix #93: incorrect parsing of `main()` block in IDE
