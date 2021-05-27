@@ -37,31 +37,32 @@ def metaJSON(state):
     """
     symbols = []
     for decl in state.assignments.symbols.values():
-        typ = decl.out.name
-        symbol_type = "proposition" if typ == BOOL and decl.sorts == [] else "function"
-        d = {
-            "idpname": str(decl.name),
-            "type": symbol_type,
-            "priority": "core",
-            "showOptimize": True,  # GUI is smart enough to show buttons appropriately
-            "view": decl.view.value,
-            "environmental": decl.block.name == 'environment',
-        }
-        if decl.unit:
-            d["unit"] = decl.unit
-        if decl.heading:
-            d["category"] = decl.heading
-        if decl.annotations is not None:
-            if 'reading' in decl.annotations:
-                d['guiname'] = decl.annotations['reading']
-            if 'short' in decl.annotations:
-                d['shortinfo'] = decl.annotations['short']
-            if 'long' in decl.annotations:
-                d['longinfo'] = decl.annotations['long']
-            if 'Slider' in decl.annotations:
-                d['slider'] = decl.annotations['Slider']
+        if not decl.name.startswith('_'):
+            typ = decl.out.name
+            symbol_type = "proposition" if typ == BOOL and decl.sorts == [] else "function"
+            d = {
+                "idpname": str(decl.name),
+                "type": symbol_type,
+                "priority": "core",
+                "showOptimize": True,  # GUI is smart enough to show buttons appropriately
+                "view": decl.view.value,
+                "environmental": decl.block.name == 'environment',
+            }
+            if decl.unit:
+                d["unit"] = decl.unit
+            if decl.heading:
+                d["category"] = decl.heading
+            if decl.annotations is not None:
+                if 'reading' in decl.annotations:
+                    d['guiname'] = decl.annotations['reading']
+                if 'short' in decl.annotations:
+                    d['shortinfo'] = decl.annotations['short']
+                if 'long' in decl.annotations:
+                    d['longinfo'] = decl.annotations['long']
+                if 'Slider' in decl.annotations:
+                    d['slider'] = decl.annotations['Slider']
 
-        symbols.append(d)
+            symbols.append(d)
     optionalPropagation = state.idp.display.optionalPropagation
     manualPropagation = state.idp.display.manualPropagation
 
@@ -140,7 +141,7 @@ class Output(object):
         for key, ass in state.assignments.items():
             atom = ass.sentence
             symb = state.assignments[key].symbol_decl
-            if symb is not None:
+            if symb is not None and not symb.name.startswith('_'):
                 s = self.m.setdefault(symb.name, {})
 
                 typ = atom.type
@@ -199,7 +200,7 @@ class Output(object):
         key = atom.code
         if key in self.state.assignments:
             symb = self.state.assignments[key].symbol_decl
-            if symb is not None:
+            if symb is not None and not symb.name.startswith('_'):
                 s = self.m.setdefault(symb.name, {})
                 if key in s:
                     if value is not None:
