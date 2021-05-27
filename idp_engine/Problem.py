@@ -231,7 +231,6 @@ class Problem(object):
             a.sentence for a in self.assignments.values()
             if a.status not in [Status.GIVEN, Status.STRUCTURE,
                                  Status.UNIVERSAL, Status.ENV_UNIV]
-            and a.symbol_decl is not None
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -383,12 +382,13 @@ class Problem(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
+        self.formula()  # to keep universals, given
         out = copy(self)
         out.assignments = Assignments()
         for e in range:
             sentence = Assignment(termE, e, Status.UNKNOWN).formula()
             out.assignments.assert_(sentence, None, Status.UNKNOWN, False)
-        out._propagate(Status.CONSEQUENCE)
+        _ = list(out._propagate(Status.CONSEQUENCE))  # run the generator
         return out
 
     def explain(self, consequence):

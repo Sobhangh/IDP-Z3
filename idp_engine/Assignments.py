@@ -201,9 +201,9 @@ class Assignments(dict):
                 out.relevant = relevant
         else:
             out = Assignment(sentence, value, status, relevant)
-            if out.symbol_decl:
-                self.symbols[out.symbol_decl.name] = out.symbol_decl
-        self[sentence.code] = out
+        if out.symbol_decl:  # ignore comparisons of constructors
+            self[sentence.code] = out
+            self.symbols[out.symbol_decl.name] = out.symbol_decl
         return out
 
     def __str__(self):
