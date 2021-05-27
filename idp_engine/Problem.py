@@ -373,6 +373,10 @@ class Problem(object):
         return self
 
     def get_range(self, term: str):
+        """ Returns a copy of the problem,
+            with its ``assignments`` property containing
+            a description of the possible values of the term.
+        """
         assert term in self.assignments, f"Unknown term: {term}"
         termE : Expression = self.assignments[term].sentence
         assert type(termE) == AppliedSymbol, f"{term} is not a term"
