@@ -203,7 +203,7 @@ class eval(Resource):
                 method = args['method']
                 given_json = args['active']
                 previous_active = args.get('previous_active', None)
-                expanded = tuple(args.get('expanded', []))
+                expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
                 value = args.get('value', None)
 
                 state = State.make(idp, previous_active, given_json)
