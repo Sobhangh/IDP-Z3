@@ -1,0 +1,17 @@
+vocabulary V {
+	type Doctor_t := { Fleming, Freud, Heimlich, Eustachi, Golgi }
+	type Time_t := { Early, Late, Night }
+	type Day_t := { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+	type Shiftnumber_t := { 0..21 }
+	doctor_assigned_to_Day_and_Time: Day_t * Time_t -> Doctor_t
+	nb_nights_of_Doctor: Doctor_t -> Shiftnumber_t
+}
+theory T: V{
+	//Count the number of night shifts for each doctor
+	!Doctor in Doctor_t: nb_nights_of_Doctor(Doctor)  =
+           sum{ Day in Day_t: doctor_assigned_to_Day_and_Time(Day, Night) = Doctor: 1 }.
+}
+
+procedure main(){
+pretty_print(model_propagate(T))
+}
