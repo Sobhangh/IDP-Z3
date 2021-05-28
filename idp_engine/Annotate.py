@@ -435,6 +435,7 @@ ARImplication.annotate = annotate
 
 def annotate(self, voc, q_vars):
     out = BinaryOperator.annotate(self, voc, q_vars)
+    out.type = BOOL
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
         out = AUnary.make('¬', AComparison.make('=', self.sub_exprs))
@@ -466,6 +467,7 @@ def annotate(self, voc, q_vars):
     self.using_if = True
     return self
 AAggregate.annotate = annotate
+AAggregate.annotate1 = AQuantification.annotate1
 
 
 # Class AppliedSymbol  #######################################################

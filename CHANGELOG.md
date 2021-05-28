@@ -10,6 +10,7 @@ Contributors (alphabetical): Matthias van der hallen, Pierre Carbonnelle.
 
 ### API
 * (breaking) Merge !82: Problem must be created with `extended=True` for `decision_table()` API
+* fix #90: error in `sum` aggregate
 
 ### Interactive Consultant
 * fix #89: `constructed from` types create error in IC
