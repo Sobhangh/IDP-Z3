@@ -17,9 +17,12 @@
 
 """
 This module implements the IDP-Z3 web server
+
+To profile it, set with_profiling to True
 """
 
 with_png = False
+with_profiling = False
 
 from contextlib import redirect_stdout
 import io
@@ -27,29 +30,32 @@ import os
 import threading
 import traceback
 
-from flask import Flask, send_from_directory
+from flask import Flask, g, send_from_directory  # g is required for pyinstrument
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
 from idp_engine.utils import log
-from .State import make_state
+from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
 
 from typing import Dict
 
-#pyinstrument from pyinstrument import Profiler
-# library to generate call graph, for documentation purposes
-from pycallgraph2 import PyCallGraph
-from pycallgraph2.output import GraphvizOutput
-from pycallgraph2 import GlobbingFilter
-from pycallgraph2 import Config
-config = Config(max_depth=8)
-config.trace_filter = GlobbingFilter(
-    exclude=['arpeggio.*', 'ast.*', 'flask*', 'json.*', 'pycallgraph2.*',
-             'textx.*', 'werkzeug.*', 'z3.*']
-    )
+if with_profiling:
+    from pyinstrument import Profiler
+
+if with_png:
+    # library to generate call graph, for documentation purposes
+    from pycallgraph2 import PyCallGraph
+    from pycallgraph2.output import GraphvizOutput
+    from pycallgraph2 import GlobbingFilter
+    from pycallgraph2 import Config
+    config = Config(max_depth=8)
+    config.trace_filter = GlobbingFilter(
+        exclude=['arpeggio.*', 'ast.*', 'flask*', 'json.*', 'pycallgraph2.*',
+                'textx.*', 'werkzeug.*', 'z3.*']
+        )
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -67,6 +73,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('method', type=str, help='Method to execute')
 parser.add_argument('code', type=str, help='Code')
 parser.add_argument('active', type=str, help='Three-valued structure')
+parser.add_argument('previous_active', type=str, help='Previous input by user')
 parser.add_argument('expanded', type=str, action='append', help='list of expanded symbols')
 parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
 parser.add_argument('value', type=str, help='Value to explain')
@@ -160,7 +167,7 @@ class meta(Resource):
                 args = parser.parse_args()
                 try:
                     idp = idpOf(args['code'])
-                    state = make_state(idp, "{}")
+                    state = State.make(idp, "{}", "{}")
                     out = metaJSON(state)
                     out["propagated"] = Output(state).fill(state)
                     return out
@@ -185,8 +192,9 @@ class eval(Resource):
         log("start /eval")
         with z3lock:
             try:
-                #pyinstrument g.profiler = Profiler()
-                #pyinstrument g.profiler.start()
+                if with_profiling:
+                    g.profiler = Profiler()
+                    g.profiler.start()
 
                 args = parser.parse_args()
                 #print(args)
@@ -194,9 +202,10 @@ class eval(Resource):
                 idp = idpOf(args['code'])
                 method = args['method']
                 given_json = args['active']
+                previous_active = args.get('previous_active', None)
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                state = make_state(idp, given_json)
+                state = State.make(idp, previous_active, given_json)
 
                 out = {}
                 if method == "propagate":
@@ -223,14 +232,16 @@ class eval(Resource):
                         # for expr in idpModel.subtences.values():
                         #     expanded.update(expr.collect_symbols())
                         expanded = tuple(expanded.keys())
-                        state = make_state(idpModel, "")
+                        state = State.make(idpModel, "")
                     out = abstract(state, given_json)
                 log("end /eval " + method)
-                #pyinstrument g.profiler.stop()
-                #pyinstrument print(g.profiler.output_text(unicode=True, color=True))
+                if with_profiling:
+                    g.profiler.stop()
+                    print(g.profiler.output_text(unicode=True, color=True))
                 return out
             except Exception as exc:
-                #pyinstrument g.profiler.stop()
+                if with_profiling:
+                    g.profiler.stop()
                 traceback.print_exc()
                 return str(exc)
 

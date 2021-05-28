@@ -72,7 +72,7 @@ structure isa:isa {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'Subtype': {'Subtype()': {'environmental': False,
                            'is_assignment': True,
                            'normal': True,

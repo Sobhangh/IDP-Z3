@@ -43,7 +43,7 @@ import re
 # import pyximport;
 # pyximport.install(language_level=3)
 
-from idp_server.State import State, make_state
+from idp_server.State import State
 from idp_server.IO import Output, metaJSON
 from idp_engine import IDP, Problem, model_expand, Status
 from idp_engine.utils import start, log, NEWL
@@ -167,7 +167,7 @@ def pipeline():
                         given_json = ""
 
                         if idp.procedures == {}:
-                            state = make_state(idp, given_json)
+                            state = State.make(idp, "{}", given_json)
                             generator = state.expand(max=1,complete=False)
                             list(generator)[0]  # ignore result
                             out = Output(state).fill(state)

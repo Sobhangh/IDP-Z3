@@ -75,7 +75,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'beverages': {'__rank': 9999,
                'beverages()': {'environmental': False,
                                'is_assignment': True,

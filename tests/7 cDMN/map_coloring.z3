@@ -46,7 +46,7 @@ France	    Luxembourg }
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'Color': {'Color(Belgium)': {'environmental': False,
                               'is_assignment': True,
                               'normal': True,

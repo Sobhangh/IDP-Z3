@@ -42,7 +42,7 @@ theory {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': False},
+{' Global': {'active': '{}', 'env_dec': False},
  'X': {'X()': {'environmental': False,
                'is_assignment': True,
                'normal': True,

@@ -178,7 +178,9 @@ theory decision:decision {
   tax_amount() = value() * tax_rate() / 100.
 
 }
-
+structure default:environment {
+  region:=Flemish_Region
+}
 display {
     goal(`tax_amount).
     relevant(`tax_rate, `registration_type, `tax_amount).

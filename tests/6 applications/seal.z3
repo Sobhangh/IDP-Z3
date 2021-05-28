@@ -41,7 +41,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'env_dec': True},
+{' Global': {'active': '{}', 'env_dec': True},
  'Depth': {'2.104 ≤ Depth() ≤ 2.476': {'environmental': True,
                                        'is_assignment': False,
                                        'normal': False,

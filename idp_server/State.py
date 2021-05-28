@@ -21,8 +21,8 @@ Management of the State of problem solving with the Interactive Consultant.
 
 
 from idp_engine.Run import Problem
-from idp_engine.utils import OrderedSet, NEWL, indented
-from .IO import json_to_literals, Status
+from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
+from .IO import load_json, Status
 from .Inferences import get_relevant_subtences
 
 # Types
@@ -32,9 +32,39 @@ from typing import Dict, Tuple, Union
 
 class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[IDP, Union[str, bool]], 'State'] = {}
+    cache: Dict[Tuple[IDP, str], 'State'] = {}
 
-    def __init__(self, idp: IDP, with_default = False):
+    @classmethod
+    def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
+        """Manage the cache of State
+
+        Args:
+            idp (IDP): idp source code
+            previous_active : previous input from client
+            jsonstr (str): input from client
+
+        Returns:
+            State: a State
+        """
+
+        if (idp.code, jsonstr) in State.cache:
+            return State.cache[(idp.code, jsonstr)]
+
+        if 100 < len(State.cache):
+            # remove oldest entry, to prevent memory overflow
+            State.cache = {k: v for k, v in list(State.cache.items())[1:]}
+
+        if (idp.code, "{}") not in State.cache:  # without default structure !
+            State.cache[(idp.code, "{}")] = State(idp)
+        state = State.cache[(idp.code, "{}")]
+
+        if jsonstr != "{}":
+            state = state.add_given(jsonstr)
+        State.cache[(idp.code, jsonstr)] = state
+        return state
+
+    def __init__(self, idp: IDP):
+        self.active = "{}"
 
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
@@ -55,12 +85,12 @@ class State(Problem):
         self.idp = idp  # IDP vocabulary and theory
 
         super().__init__(extended=True)
-        self.given = None  # Assignments from the user interface
 
         if len(idp.theories) == 2:
-            self.environment = Problem(* [idp.theories['environment']]
-                    + ([] if 'environment' not in idp.structures else
-                       idp.structures['environment']), extended=True)
+            blocks = ([idp.theories['environment']]
+                      + [struct for struct in idp.structures.values()
+                         if struct.voc.name == 'environment'])
+            self.environment = Problem(* blocks, extended=True)
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
 
             blocks = [self.environment, idp.theories['decision']]
@@ -68,9 +98,8 @@ class State(Problem):
             self.environment = None
             blocks = [next(iter(idp.theories.values()))]
 
-        for name, struct in idp.structures.items():
-            if name != 'environment' and (name != "default" or with_default):
-                blocks.append(struct)
+        blocks += [struct for struct in idp.structures.values()
+                   if struct.voc.name != 'environment']
         self.add(*blocks)
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
@@ -86,10 +115,11 @@ class State(Problem):
         :rtype: State
         """
         out = self.copy()
+        out.active = jsonstr
         if out.environment:
             out.environment = out.environment.copy()
-            _ = json_to_literals(out.environment, jsonstr)
-        out.given = json_to_literals(out, jsonstr)
+            load_json(out.environment, jsonstr)
+        load_json(out, jsonstr)
         return out._finalize()
 
     def _finalize(self):
@@ -99,8 +129,11 @@ class State(Problem):
             self.assignments.update(self.environment.assignments)
             self._formula = None
         self.propagate(tag=Status.CONSEQUENCE)
-        self.simplify()
-        get_relevant_subtences(self)
+        out = get_relevant_subtences(self)  # creates a copy of self
+        # copy relevant information
+        for k,v in out.assignments.items():
+            self.assignments[k].relevant = v.relevant
+        self.relevant_symbols = out.relevant_symbols
         return self
 
     def __str__(self) -> str:
@@ -114,31 +147,3 @@ class State(Problem):
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
                 )
 
-
-def make_state(idp: IDP, jsonstr: str) -> State:
-    """Manage the cache of State
-
-    Args:
-        idp (IDP): idp source code
-        jsonstr (str): input from client
-
-    Returns:
-        State: a State
-    """
-
-    if (idp, jsonstr) in State.cache:
-        return State.cache[(idp, jsonstr)]
-
-    if 100 < len(State.cache):
-        # remove oldest entry, to prevent memory overflow
-        State.cache = {k: v for k, v in list(State.cache.items())[1:]}
-
-    with_default = (jsonstr == "{}")
-    empty = (State.cache[(idp, with_default)]
-             if (idp, with_default) in State.cache else
-             State(idp, with_default=with_default))
-    State.cache[(idp, with_default)] = empty
-
-    state = empty.add_given(jsonstr)
-    State.cache[(idp, jsonstr)] = state
-    return state
