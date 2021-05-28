@@ -40,13 +40,17 @@ class Problem(object):
     """A collection of theory and structure blocks.
 
     Attributes:
+        extended (Bool): True when the truth value of inequalities
+            and quantified formula is of interest (e.g. in the Interactive Consultant)
+
         declarations (dict[str, Type]): the list of type and symbol declarations
 
         constraints (OrderedSet): a set of assertions.
 
         assignments (Assignment): the set of assignments.
             The assignments are updated by the different steps of the problem
-            resolution.
+            resolution.  Assignments include inequalities and quantified formula
+            when the problem is extended
 
         clark (dict[(SymbolDeclaration, Definition), Rule]):
             A mapping of defined symbol to the rule that defines it.
@@ -64,13 +68,11 @@ class Problem(object):
         _formula (Expression, optional): the logic formula that represents
             the problem.
 
-        questions (OrderedSet): the set of questions in the problem.
-            Questions include predicates and functions applied to arguments,
-            comparisons, and variable-free quantified expressions.
-
         co_constraints (OrderedSet): the set of co_constraints in the problem.
     """
-    def __init__(self, *blocks):
+    def __init__(self, *blocks, extended=False):
+        self.extended = extended
+
         self.declarations = {}
         self.clark = {}  # {(Declaration, Definition): Rule}
         self.constraints = OrderedSet()
@@ -82,25 +84,23 @@ class Problem(object):
 
         self._formula = None  # the problem expressed in one logic formula
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
-        self.questions = None
 
-        for b in blocks:
-            self.add(b)
+        self.add(*blocks)
 
     @classmethod
-    def make(cls, theories, structures):
+    def make(cls, theories, structures, extended=False):
         """ polymorphic creation """
-        problem = (theories if type(theories) == 'Problem' else
-                   cls(*theories) if isinstance(theories, Iterable) else
-                   cls(theories))
-
         structures = ([] if structures is None else
                       structures if isinstance(structures, Iterable) else
                       [structures])
-        for s in structures:
-            problem.add(s)
-
-        return problem
+        if type(theories) == 'Problem':
+            theories.add(*structures)
+            self = theories
+        elif isinstance(theories, Iterable):
+            self = cls(* theories + structures, extended= extended)
+        else:
+            self = cls(* [theories] + structures, extended=extended)
+        return self
 
     def copy(self):
         out = copy(self)
@@ -111,42 +111,81 @@ class Problem(object):
         out._formula = None
         return out
 
-    def add(self, block):
-        self._formula = None  # need to reapply the definitions
+    def add(self, *blocks):
+        for block in blocks:
+            self._formula = None  # need to reapply the definitions
 
-        for name, decl in block.declarations.items():
-            assert (name not in self.declarations
-                    or self.declarations[name] == block.declarations[name]
-                    or name in [BOOL, INT, REAL, DATE, SYMBOL]
-                    or name in RESERVED_SYMBOLS), \
-                    f"Can't add declaration for {name} in {block.name}: duplicate"
-            self.declarations[name] = decl
+            for name, decl in block.declarations.items():
+                assert (name not in self.declarations
+                        or self.declarations[name] == block.declarations[name]
+                        or name in RESERVED_SYMBOLS), \
+                        f"Can't add declaration for {name} in {block.name}: duplicate"
+                self.declarations[name] = decl
+            for decl in self.declarations.values():
+                if type(decl) == TypeDeclaration:
+                    decl.translated = None  # reset the translation of declarations
+                    decl.interpretation = (  #TODO side-effects ? issue #81
+                        None if decl.name not in [INT, REAL, DATE, SYMBOL] else
+                        decl.interpretation)
+
+            # process block.interpretations
+            for name, interpret in block.interpretations.items():
+                assert (name not in self.interpretations
+                        or name in [INT, REAL, DATE, SYMBOL]
+                        or self.interpretations[name] == block.interpretations[name]), \
+                        f"Can't add enumeration for {name} in {block.name}: duplicate"
+                self.interpretations[name] = interpret
+
+            if isinstance(block, Theory) or isinstance(block, Problem):
+                self.co_constraints = None
+                for (decl, defin), rule in block.clark.items():
+                    if not (decl, defin) in self.clark:
+                        self.clark[(decl, defin)] = rule
+                self.constraints.extend(v.copy() for v in block.constraints)
+                self.def_constraints.update(
+                    {k:v.copy() for k,v in block.def_constraints.items()})
+
+            for name, s in block.goals.items():
+                self.goals[name] = s
+
+        # apply the enumerations and definitions
+
+        self.assignments = Assignments()
+
         for decl in self.declarations.values():
-            if type(decl) == TypeDeclaration:
-                decl.translated = None  # reset the translation of declarations
-                decl.interpretation = (  #TODO side-effects ? issue #81
-                    None if decl.name not in [INT, REAL, DATE, SYMBOL] else
-                    decl.interpretation)
+            decl.interpret(self)
 
-        # process block.interpretations
-        for name, interpret in block.interpretations.items():
-            assert (name not in self.interpretations
-                    or name in [INT, REAL, DATE, SYMBOL]
-                    or self.interpretations[name] == block.interpretations[name]), \
-                     f"Can't add enumeration for {name} in {block.name}: duplicate"
-            self.interpretations[name] = interpret
+        for symbol_interpretation in self.interpretations.values():
+            if not symbol_interpretation.is_type_enumeration:
+                symbol_interpretation.interpret(self)
 
-        if isinstance(block, Theory) or isinstance(block, Problem):
-            self.co_constraints, self.questions = None, None
-            for (decl, defin), rule in block.clark.items():
-                if not (decl, defin) in self.clark:
-                    self.clark[(decl, defin)] = rule
-            self.constraints.extend(v.copy() for v in block.constraints)
-            self.def_constraints.update(
-                {k:v.copy() for k,v in block.def_constraints.items()})
+        # expand goals
+        for s in self.goals.values():
+            assert s.instances, "goals must be instantiable."
+            relevant = Symbol(name=RELEVANT)
+            relevant.decl = self.declarations[RELEVANT]
+            constraint = AppliedSymbol.make(relevant, s.instances.values())
+            self.constraints.append(constraint)
 
-        for name, s in block.goals.items():
-            self.goals[name] = s
+        # expand whole-domain definitions
+        for (decl, _), rule in self.clark.items():
+            if rule.is_whole_domain:
+                self.def_constraints[decl] = rule.interpret(self).whole_domain
+
+        # initialize assignments, co_constraints, questions
+
+        self.co_constraints, questions = OrderedSet(), OrderedSet()
+        for c in self.constraints:
+            c.interpret(self)
+            c.co_constraints(self.co_constraints)
+            c.collect(questions, all_=False)
+        for s in list(questions.values()):
+            if s.code not in self.assignments:
+                self.assignments.assert_(s, None, Status.UNKNOWN, False)
+
+        for ass in self.assignments.values():
+            ass.sentence = ass.sentence
+            ass.sentence.original = ass.sentence.copy()
         return self
 
     def assert_(self, code: str, value: Any, status: Status = Status.GIVEN):
@@ -157,7 +196,6 @@ class Problem(object):
             value (Any): a Python value, e.g., "True"
             status (Status, Optional): how the value was obtained.  Default: Status.GIVEN
         """
-        self._interpret()
         code = str(code)
         atom = self.assignments[code].sentence
         if value is None:
@@ -172,48 +210,9 @@ class Problem(object):
                 v.value = None
         self._formula = None
 
-    def _interpret(self):
-        """ apply the enumerations and definitions """
-        if self.questions is None:
-            self.assignments = Assignments()
-
-            for decl in self.declarations.values():
-                decl.interpret(self)
-
-            for symbol_interpretation in self.interpretations.values():
-                if not symbol_interpretation.is_type_enumeration:
-                    symbol_interpretation.interpret(self)
-
-            # expand goals
-            for s in self.goals.values():
-                assert s.instances, "goals must be instantiable."
-                relevant = Symbol(name=RELEVANT)
-                relevant.decl = self.declarations[RELEVANT]
-                constraint = AppliedSymbol.make(relevant, s.instances.values())
-                self.constraints.append(constraint)
-
-            # expand whole-domain definitions
-            for (decl, _), rule in self.clark.items():
-                if rule.is_whole_domain:
-                    self.def_constraints[decl] = rule.interpret(self).whole_domain
-
-            self.co_constraints, self.questions = OrderedSet(), OrderedSet()
-            for c in self.constraints:
-                c.interpret(self)
-                c.co_constraints(self.co_constraints)
-                c.collect(self.questions, all_=False)
-            for s in list(self.questions.values()):
-                if s.is_reified():
-                    self.assignments.assert_(s, None, Status.UNKNOWN, False)
-
-            for ass in self.assignments.values():
-                ass.sentence = ass.sentence
-                ass.sentence.original = ass.sentence.copy()
-
     def formula(self):
         """ the formula encoding the knowledge base """
         if not self._formula:
-            self._interpret()
             self._formula = AConjunction.make(
                 '∧',
                 [a.formula() for a in self.assignments.values()
@@ -225,14 +224,14 @@ class Problem(object):
                 )
         return self._formula
 
-    def _todo(self, extended):
+    def _todo(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
             if a.value is None
             and a.symbol_decl is not None
-            and (not a.sentence.is_reified() or extended))
+            and (not a.sentence.is_reified() or self.extended))
 
-    def _from_model(self, solver, todo, complete, extended):
+    def _from_model(self, solver, todo, complete):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
@@ -240,7 +239,7 @@ class Problem(object):
                 val1 = solver.model().eval(
                     q.translate(),
                     model_completion=complete)
-            elif extended:
+            elif self.extended:
                 solver.push()  # in case todo contains complex formula
                 solver.add(q.reified() == q.translate())
                 res1 = solver.check()
@@ -256,10 +255,10 @@ class Problem(object):
                 ass.assert_(q, val, Status.EXPANDED, None)
         return ass
 
-    def expand(self, max=10, complete=False, extended=False):
+    def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.formula().translate()
-        todo = self._todo(extended)
+        todo = self._todo()
 
         solver = Solver()
         solver.add(z3_formula)
@@ -270,7 +269,7 @@ class Problem(object):
             if solver.check() == sat:
                 count += 1
                 model = solver.model()
-                ass = self._from_model(solver, todo, complete, extended)
+                ass = self._from_model(solver, todo, complete)
                 yield ass
 
                 # exclude this model
@@ -290,7 +289,7 @@ class Problem(object):
         else:
             yield "No models."
 
-    def optimize(self, term, minimize=True, complete=False, extended=False):
+    def optimize(self, term, minimize=True, complete=False):
         solver = Optimize()
         solver.add(self.formula().translate())
         assert term in self.assignments, "Internal error"
@@ -313,13 +312,11 @@ class Problem(object):
                 solver.pop()  # get the last good one
                 solver.check()
                 break
-        self.assignments = self._from_model(solver, self._todo(extended),
-            complete, extended)
+        self.assignments = self._from_model(solver, self._todo(), complete)
         return self
 
     def symbolic_propagate(self, tag=Status.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
-        self._interpret()
         for c in self.constraints:
             # determine consequences, including from co-constraints
             consequences = []
@@ -331,9 +328,9 @@ class Problem(object):
                     self.assignments.assert_(sentence, value, tag, False)
         return self
 
-    def _propagate(self, tag, extended):
+    def _propagate(self, tag):
         z3_formula = self.formula().translate()
-        todo = self._todo(extended)
+        todo = self._todo()
 
         solver = Solver()
         solver.add(z3_formula)
@@ -369,9 +366,9 @@ class Problem(object):
             yield "Unknown satisfiability."
             yield str(z3_formula)
 
-    def propagate(self, tag=Status.CONSEQUENCE, extended=False):
+    def propagate(self, tag=Status.CONSEQUENCE):
         """ determine all the consequences of the constraints """
-        out = list(self._propagate(tag, extended))
+        out = list(self._propagate(tag))
         assert out[0] != "Not satisfiable.", "Not satisfiable."
         return self
 
@@ -444,7 +441,6 @@ class Problem(object):
 
     def simplify(self):
         """ simplify constraints using known assignments """
-        self._interpret()
 
         # annotate self.constraints with questions
         for e in self.constraints:
@@ -532,18 +528,21 @@ class Problem(object):
             list(list(Assignment)): the non-empty cells of the decision table
         """
         max_time = time.time()+timeout  # 20 seconds max
+        assert self.extended == True, \
+            "The problem must be created with 'extended=True' for decision_table."
 
+        # determine questions, using goal_string and self.constraints
+        questions = OrderedSet()
         if goal_string:
             goal_pred = goal_string.split("(")[0]
             assert goal_pred in self.declarations, (
                 f"Unrecognized goal string: {goal_string}")
-            self.goals[goal_pred] = self.declarations[goal_pred]
-            self._formula = None
-        formula = self.formula()
-        theory = formula.translate()
-
-        # ignore type constraints
-        questions = OrderedSet()
+            if self.declarations[goal_pred] in self.def_constraints:
+                self.def_constraints[self.declarations[goal_pred]].collect(
+                    questions, all_=True)
+            for q in questions:  # update assignments for defined goals
+                if q.code not in self.assignments:
+                    self.assignments.assert_(q, None, Status.UNKNOWN,False)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
@@ -552,7 +551,7 @@ class Problem(object):
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code
-            or any(s not in symbols for s in q.unknown_symbols(co_constraints=False).values())):
+            or any(s not in symbols for s in q.collect_symbols(co_constraints=False).values())):
                 qs.append(q)
         questions = qs
         assert not goal_string or goal_string in [a.code for a in questions], \
@@ -563,6 +562,8 @@ class Problem(object):
                     + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
+        formula = self.formula()
+        theory = formula.translate()
         solver = Solver()
         solver.add(theory)
         solver.add(known)

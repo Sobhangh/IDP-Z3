@@ -202,15 +202,14 @@ class eval(Resource):
                 if method == "propagate":
                     out = Output(state).fill(state)
                 if method == "modelexpand":
-                    generator = state.expand(max=1, complete=False,
-                                             extended=True)
+                    generator = state.expand(max=1, complete=False)
                     state.assignments = list(generator)[0]
                     out = Output(state).fill(state)
                 if method == "explain":
                     out = explain(state, args['value'])
                 if method == "minimize":
                     state = state.optimize(args['symbol'], args['minimize'],
-                                           complete=False, extended=True)
+                                           complete=False)
                     out = Output(state).fill(state)
                 if method == "abstract":
                     if args['symbol'] != "":  # theory to explain ?
@@ -222,7 +221,7 @@ class eval(Resource):
                         idpModel = IDP.parse(newTheory)
                         expanded = {}
                         # for expr in idpModel.subtences.values():
-                        #     expanded.update(expr.unknown_symbols())
+                        #     expanded.update(expr.collect_symbols())
                         expanded = tuple(expanded.keys())
                         state = make_state(idpModel, "")
                     out = abstract(state, given_json)

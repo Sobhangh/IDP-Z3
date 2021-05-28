@@ -166,11 +166,10 @@ def annotate(self, voc, q_vars):
     # create head variables
     q_v = {**q_vars}  # copy
     for q in self.quantees:
-        if q.sort:
-            q.annotate(voc, q_vars)
+        q.annotate(voc, q_vars)
         for vars in q.vars:
             for var in vars:
-                var.sort = q.sort
+                var.sort = q.sub_exprs[0] if q.sub_exprs else None
                 q_v[var.name] = var
 
     self.definiendum = self.definiendum.annotate(voc, q_v)
@@ -374,18 +373,6 @@ def annotate1(self):
 IfExpr.annotate1 = annotate1
 
 
-# Class Quantee  #######################################################
-
-def annotate(self, voc, q_vars):
-    if self.sort:
-        self.sort = self.sort.annotate(voc, q_vars).simplify1()
-    out = Expression.annotate1(self.simplify1())
-    if out.sort:
-        out.fresh_vars.update(out.sort.fresh_vars)
-    return out
-Quantee.annotate = annotate
-
-
 # Class AQuantification  #######################################################
 
 def annotate(self, voc, q_vars):
@@ -398,7 +385,7 @@ def annotate(self, voc, q_vars):
                 self.check(var.name not in voc.symbol_decls,
                     f"the quantified variable '{var.name}' cannot have"
                     f" the same name as another symbol")
-                var.sort = q.sort
+                var.sort = q.sub_exprs[0] if q.sub_exprs else None
                 q_v[var.name] = var
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
@@ -406,10 +393,13 @@ AQuantification.annotate = annotate
 
 def annotate1(self):
     Expression.annotate1(self)
-    for q in self.quantees:
+    for q in self.quantees:  # remove declared variables
         for vs in q.vars:
             for v in vs:
                 self.fresh_vars.discard(v.name)
+    for q in self.quantees:  # add variables in sort expression
+        for sort in q.sub_exprs:
+            self.fresh_vars.update(sort.fresh_vars)
     return self
 AQuantification.annotate1 = annotate1
 

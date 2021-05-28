@@ -215,8 +215,6 @@ class Expression(ASTNode):
                  '_reified', 'is_type_constraint_for', 'co_constraint',
                  'normal', 'questions', 'relevant')
 
-    COUNT = 0
-
     def __init__(self):
         self.sub_exprs: List["Expression"]
         self.simpler: Optional["Expression"] = None
@@ -304,14 +302,23 @@ class Expression(ASTNode):
         default implementation for UnappliedSymbol, IfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
-
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
 
-    def _questions(self):  # for debugging
-        questions = OrderedSet()
-        self.collect(questions)
-        return questions
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        """ returns the list of symbol declarations in self, ignoring type constraints
+
+        returns Dict[name, Declaration]
+        """
+        symbols = {} if symbols == None else symbols
+        if self.is_type_constraint_for is None:  # ignore type constraints
+            if (hasattr(self, 'decl') and self.decl
+                and type(self.decl) != Constructor
+                and not self.decl.name in RESERVED_SYMBOLS):
+                symbols[self.decl.name] = self.decl
+            for e in self.sub_exprs:
+                e.collect_symbols(symbols, co_constraints)
+        return symbols
 
     def generate_constructors(self, constructors: dict):
         """ fills the list `constructors` with all constructors belonging to
@@ -319,19 +326,6 @@ class Expression(ASTNode):
         """
         for e in self.sub_exprs:
             e.generate_constructors(constructors)
-
-    def unknown_symbols(self, co_constraints=True):
-        """ returns the list of symbol declarations in self, ignoring type constraints
-
-        returns Dict[name, Declaration]
-        """
-        if self.is_type_constraint_for is not None:  # ignore type constraints
-            return {}
-        questions = OrderedSet()
-        self.collect(questions, all_=True, co_constraints=co_constraints)
-        out = {e.decl.name: e.decl for e in questions.values()
-               if hasattr(e, 'decl')}
-        return out
 
     def co_constraints(self, co_constraints):
         """ collects the constraints attached to AST nodes, e.g. instantiated
@@ -489,13 +483,14 @@ class Quantee(Expression):
     Attributes:
         vars (List[List[Variable]): the (tuples of) variables being quantified
 
-        sort (SymbolExpr, Optional): the type or predicate to quantify over
+        sub_exprs (List[SymbolExpr], Optional): the type or predicate to quantify over
 
         arity (int): the length of the tuple of variable
     """
     def __init__(self, **kwargs):
         self.vars = kwargs.pop('vars')
-        self.sort = kwargs.pop('sort')
+        sort = kwargs.pop('sort')
+        self.sub_exprs = [sort] if sort else []
 
         self.arity = None
         for i, v in enumerate(self.vars):
@@ -506,7 +501,6 @@ class Quantee(Expression):
                 self.vars[i] = [v]
                 self.arity = 1 if self.arity == None else self.arity
 
-        self.sub_exprs = []
         super().__init__()
         self.decl = None
 
@@ -516,17 +510,13 @@ class Quantee(Expression):
     @classmethod
     def make(cls, var, sort):
         if sort and type(sort) != SymbolExpr:
-            sort = SymbolExpr(eval='', s=sort)
+            sort = SymbolExpr(eval='', s=sort).annotate1()
         out = (cls) (vars=[var], sort=sort)
         return out.annotate1()
 
     def __str1__(self):
-        return f"{','.join(str(v) for vs in self.vars for v in vs)} ∈ {self.sort}"
-
-    def copy(self):
-        out = Expression.copy(self)
-        out.sort = out.sort.copy()
-        return out
+        return (f"{','.join(str(v) for vs in self.vars for v in vs)} "
+                f"∈ {self.sub_exprs[0] if self.sub_exprs else None}")
 
 
 class AQuantification(Expression):
@@ -538,7 +528,7 @@ class AQuantification(Expression):
         self.f = kwargs.pop('f')
 
         self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
-        if self.quantees and self.quantees[-1].sort is None:
+        if self.quantees and not self.quantees[-1].sub_exprs:
             # separate untyped variables, so that they can be typed separately
             q = self.quantees.pop()
             for vars in q.vars:
@@ -566,12 +556,21 @@ class AQuantification(Expression):
     def copy(self):
         # also called by AAgregate
         out = Expression.copy(self)
+        out.quantees = [q.copy() for q in out.quantees]
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         questions.append(self)
-        if all_:  #TODO1 and not self.quantees ?
+        if all_:
             Expression.collect(self, questions, all_, co_constraints)
+            for q in self.quantees:
+                q.collect(questions, all_, co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        for q in self.quantees:
+            q.collect_symbols(symbols, co_constraints)
+        return symbols
 
 
 class BinaryOperator(Expression):
@@ -736,6 +735,11 @@ class AAggregate(Expression):
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
             Expression.collect(self, questions, all_, co_constraints)
+            for q in self.quantees:
+                q.collect(questions, all_, co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        return AQuantification.collect_symbols(self, symbols, co_constraints)
 
 
 class AppliedSymbol(Expression):
@@ -815,10 +819,16 @@ class AppliedSymbol(Expression):
             if self.is_enumerated or self.in_enumeration:
                 app = AppliedSymbol.make(self.symbol, self.sub_exprs)
                 questions.append(app)
+        self.symbol.collect(questions, all_, co_constraints)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
         if co_constraints and self.co_constraint is not None:
             self.co_constraint.collect(questions, all_, co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
 
     def has_decision(self):
         self.check(self.decl.block is not None, "Internal error")
@@ -844,7 +854,7 @@ class AppliedSymbol(Expression):
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
-                or any(e.is_reified() for e in self.sub_exprs))
+                or not all(e.value is not None for e in self.sub_exprs))
 
     def reified(self):
         if self._reified is None:

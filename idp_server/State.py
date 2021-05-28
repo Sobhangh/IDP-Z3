@@ -54,26 +54,24 @@ class State(Problem):
             idp.display.run(idp)
         self.idp = idp  # IDP vocabulary and theory
 
-        super().__init__()
+        super().__init__(extended=True)
         self.given = None  # Assignments from the user interface
 
         if len(idp.theories) == 2:
-            self.environment = Problem(idp.theories['environment'])
-            if 'environment' in idp.structures:
-                self.environment.add(idp.structures['environment'])
+            self.environment = Problem(* [idp.theories['environment']]
+                    + ([] if 'environment' not in idp.structures else
+                       idp.structures['environment']), extended=True)
             self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
 
-            self.add(self.environment)
-            self.add(idp.theories['decision'])
-            if 'decision' in idp.structures:
-                self.add(idp.structures['decision'])
-        else:  # take the first theory and structure
+            blocks = [self.environment, idp.theories['decision']]
+        else:  # take the first theory
             self.environment = None
-            self.add(next(iter(idp.theories.values())))
-            for name, struct in idp.structures.items():
-                if name != "default" or with_default:
-                    self.add(struct)
-        self._interpret()
+            blocks = [next(iter(idp.theories.values()))]
+
+        for name, struct in idp.structures.items():
+            if name != 'environment' and (name != "default" or with_default):
+                blocks.append(struct)
+        self.add(*blocks)
         self.symbolic_propagate(tag=Status.UNIVERSAL)
 
         self._finalize()
@@ -92,16 +90,15 @@ class State(Problem):
             out.environment = out.environment.copy()
             _ = json_to_literals(out.environment, jsonstr)
         out.given = json_to_literals(out, jsonstr)
-        out._interpret()
         return out._finalize()
 
     def _finalize(self):
         # propagate universals
         if self.environment is not None:  # if there is a decision vocabulary
-            self.environment.propagate(tag=Status.ENV_CONSQ, extended=True)
+            self.environment.propagate(tag=Status.ENV_CONSQ)
             self.assignments.update(self.environment.assignments)
             self._formula = None
-        self.propagate(tag=Status.CONSEQUENCE, extended=True)
+        self.propagate(tag=Status.CONSEQUENCE)
         self.simplify()
         get_relevant_subtences(self)
         return self

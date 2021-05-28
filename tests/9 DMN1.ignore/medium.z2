@@ -1,20 +1,20 @@
-  Not B
+  Not B()
 ⇒ Not Eligible(BE001)
 
-  C
+  C()
 ⇒ Eligible(BE001)
 
-  D
+  D()
 ⇒ Eligible(BE001)
 
-  Not E
+  Not E()
 ⇒ Not Eligible(BE001)
 
-  F
+  F()
 ⇒ Eligible(BE001)
 
-  Not H
-∧ G
+  Not H()
+∧ G()
 ⇒ Eligible(BE001)
 
 ⇒ Not Eligible(BE001)

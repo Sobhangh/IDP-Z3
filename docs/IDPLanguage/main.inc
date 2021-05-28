@@ -60,11 +60,13 @@ This is beneficial when several inferences must be made in a row (e.g., ``Proble
 Instances of the ``Problem`` class represent a collection of theory and structure blocks.
 The class has the following methods:
 
-__init__(self, \*blocks)
-    Creates an instance of ``Problem`` for the list of blocks, e.g., ``Problem(T,S)``
+__init__(self, \*blocks, extended=False)
+    Creates an instance of ``Problem`` for the list of blocks, e.g., ``Problem(T,S)``.
 
-add(self, block)
-    Adds a theory or structure block to the problem.
+    Use `extended=True` when the truth value of inequalities and quantified formula is of interest (e.g. for the Interactive Consultant).
+
+add(self, \*blocks)
+    Adds a list of theory or structure blocks to the problem.
 
 assert_(self, code: str, value: Any)
     Asserts that an expression has a value, e.g. `problem.assert_("p()", True)`.
@@ -106,3 +108,4 @@ simplify(self)
 decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
     Experimental.  Returns the rows for a decision table that defines ``goal_string``.
     ``goal_string`` must be a predicate application defined in the theory.
+    The problem must be created with ``extended=True``.

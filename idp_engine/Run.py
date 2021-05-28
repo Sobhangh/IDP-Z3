@@ -44,30 +44,30 @@ def model_check(theories, structures=None):
 def model_expand(theories, structures=None, max=10, complete=False,
                  extended=False, sort=False):
     """ output: a list of Assignments, ending with a string """
-    problem = Problem.make(theories, structures)
+    problem = Problem.make(theories, structures, extended=extended)
     if sort:
-        ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
+        ms = [str(m) for m in problem.expand(max=max, complete=complete)]
         ms = sorted(ms[:-1]) + [ms[-1]]
         out = ""
         for i, m in enumerate(ms[:-1]):
             out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
         yield out + f"{ms[-1]}"
     else:
-        yield from problem.expand(max=max, complete=complete, extended=extended)
+        yield from problem.expand(max=max, complete=complete)
 
 
 def model_propagate(theories, structures=None, sort=False):
     """ output: a list of Assignment """
     problem = Problem.make(theories, structures)
     if sort:
-        ms = [str(m) for m in problem._propagate(tag=Status.CONSEQUENCE, extended=False)]
+        ms = [str(m) for m in problem._propagate(tag=Status.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
         out = ""
         for i, m in enumerate(ms[:-1]):
             out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
         yield out + f"{ms[-1]}"
     else:
-        yield from problem._propagate(tag=Status.CONSEQUENCE, extended=False)
+        yield from problem._propagate(tag=Status.CONSEQUENCE)
 
 
 def decision_table(theories, structures=None, goal_string="",
@@ -84,7 +84,7 @@ def decision_table(theories, structures=None, goal_string="",
     Yields:
         str: a textual representation of each rule
     """
-    problem = Problem.make(theories, structures)
+    problem = Problem.make(theories, structures, extended=True)
     for model in problem.decision_table(goal_string, timeout, max_rows,
                                         first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model

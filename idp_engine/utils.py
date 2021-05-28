@@ -37,7 +37,8 @@ RELEVANT = "__relevant"
 ARITY = "arity"
 INPUT_DOMAIN = "input_domain"
 OUTPUT_DOMAIN = "output_domain"
-RESERVED_SYMBOLS = [RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
+RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, SYMBOL,
+                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
 
 """
     Parameters:

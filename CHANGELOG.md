@@ -6,11 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
-Contributors (alphabetical):
+Contributors (alphabetical): Matthias van der hallen, Pierre Carbonnelle.
 
 ### API
+* (breaking) Merge !82: Problem must be created with `extended=True` for `decision_table()` API
 
 ### Interactive Consultant
+* fix #89: `constructed from` types create error in IC
 
 
 ## [0.8.1] - 2021-05-11

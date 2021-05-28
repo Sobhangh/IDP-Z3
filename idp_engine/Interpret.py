@@ -303,35 +303,35 @@ def interpret(self, problem):
     # type inference
     inferred = self.sub_exprs[0].type_inference()
     for q in self.quantees:
-        if q.sort is None:
+        if not q.sub_exprs:
             assert len(q.vars) == 1 and q.arity == 1
             var = q.vars[0][0]
             self.check(var.name in inferred,
                         f"can't infer type of {var.name}")
-            q.sort = inferred[var.name]
+            q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
     new_quantees = []
     for q in self.quantees:
-        self.check(q.sort.decl.out.type == BOOL,
-                    f"{q.sort} is not a type or predicate")
-        if not q.sort.decl.range:
+        self.check(q.sub_exprs[0].decl.out.type == BOOL,
+                    f"{q.sub_exprs[0]} is not a type or predicate")
+        if not q.sub_exprs[0].decl.range:
             new_quantees.append(q)
         else:
-            if q.sort.code in problem.interpretations:
-                enumeration = problem.interpretations[q.sort.code].enumeration
+            if q.sub_exprs[0].code in problem.interpretations:
+                enumeration = problem.interpretations[q.sub_exprs[0].code].enumeration
                 range = [t.args for t in enumeration.tuples.values()]
                 guard = None
-            elif type(q.sort.decl) == SymbolDeclaration:
-                range = q.sort.decl.domain
-                guard = q.sort
+            elif type(q.sub_exprs[0].decl) == SymbolDeclaration:
+                range = q.sub_exprs[0].decl.domain
+                guard = q.sub_exprs[0]
             else:  # type declaration
-                range = [[t] for t in q.sort.decl.range] #TODO1 decl.enumeration.tuples
+                range = [[t] for t in q.sub_exprs[0].decl.range] #TODO1 decl.enumeration.tuples
                 guard = None
 
             for vars in q.vars:
-                self.check(q.sort.decl.arity == len(vars),
-                            f"Incorrect arity of {q.sort}")
+                self.check(q.sub_exprs[0].decl.arity == len(vars),
+                            f"Incorrect arity of {q.sub_exprs[0]}")
                 out = []
                 for f in forms:
                     for val in range:
@@ -355,8 +355,8 @@ AQuantification.interpret = interpret
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
     for q in self.quantees: # for !x in $(output_domain(s,1))
-        if q.sort:
-            q.sort = q.sort.instantiate(e0, e1, problem)
+        if q.sub_exprs:
+            q.sub_exprs[0] = q.sub_exprs[0].instantiate(e0, e1, problem)
     if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out

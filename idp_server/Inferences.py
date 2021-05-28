@@ -34,7 +34,7 @@ from .IO import Output
 #     constraints = ( self.constraints )
 
 #     # determine relevant symbols (including defined ones)
-#     relevant_symbols = mergeDicts( e.unknown_symbols() for e in constraints )
+#     relevant_symbols = mergeDicts( e.collect_symbols() for e in constraints )
 
 #     # remove irrelevant domain conditions
 #     self.constraints = list(filter(lambda e: e.is_type_constraint_for is None or e.is_type_constraint_for in relevant_symbols
@@ -45,7 +45,7 @@ from .IO import Output
 #     relevant_subtences.update(mergeDicts(s.instances for s in relevant_symbols.values()))
 
 #     for k, l in self.assignments.items():
-#         symbols = list(l.sentence.unknown_symbols().keys())
+#         symbols = list(l.sentence.collect_symbols().keys())
 #         has_relevant_symbol = any(s in relevant_symbols for s in symbols)
 #         if k in relevant_subtences and symbols and has_relevant_symbol:
 #             l.relevant = True
@@ -57,6 +57,8 @@ def get_relevant_subtences(self):
     removes irrelevant constraints in self.constraints
     """
     # self is a State
+    assert self.extended == True,\
+        "The problem must be created with 'extended=True' for relevance computations."
     for a in self.assignments.values():
         a.relevant = False
 
@@ -116,7 +118,7 @@ def get_relevant_subtences(self):
     #             constraint.relevant = True
     #             for q in constraint.questions:
     #                 self.assignments[q.code].relevant = True
-    #                 for s in q.unknown_symbols(co_constraints=False):
+    #                 for s in q.collect_symbols(co_constraints=False):
     #                     if s not in relevants:
     #                         relevants[s] = rank
     #                         rank = rank+1
@@ -137,7 +139,7 @@ def get_relevant_subtences(self):
     while to_add:
         for q in to_add:
             self.assignments[q.code].relevant = True
-            for s in q.unknown_symbols(co_constraints=False):
+            for s in q.collect_symbols(co_constraints=False):
                 if s not in relevants:
                     relevants[s] = rank
             if q not in given:

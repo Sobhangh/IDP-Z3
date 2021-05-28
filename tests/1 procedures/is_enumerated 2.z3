@@ -1,21 +1,19 @@
 T3, S
 Traceback (most recent call last):
-  File "test.py", line 66, in generateZ3
+  File "IDP-Z3/test.py", line 66, in generateZ3
     idp.execute()
   File "IDP-Z3/idp_engine/Run.py", line 129, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line 2, in <module>
   File "IDP-Z3/idp_engine/Run.py", line 107, in pretty_print
     for i, xi in enumerate(x):
-  File "IDP-Z3/idp_engine/Run.py", line 49, in model_expand
-    ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
-  File "IDP-Z3/idp_engine/Run.py", line 49, in <listcomp>
-    ms = [str(m) for m in problem.expand(max=max, complete=complete, extended=extended)]
-  File "IDP-Z3/idp_engine/Problem.py", line 261, in expand
-    z3_formula = self.formula().translate()
-  File "IDP-Z3/idp_engine/Problem.py", line 216, in formula
-    self._interpret()
-  File "IDP-Z3/idp_engine/Problem.py", line 202, in _interpret
+  File "IDP-Z3/idp_engine/Run.py", line 47, in model_expand
+    problem = Problem.make(theories, structures, extended=extended)
+  File "IDP-Z3/idp_engine/Problem.py", line 102, in make
+    self = cls(* [theories] + structures, extended=extended)
+  File "IDP-Z3/idp_engine/Problem.py", line 88, in __init__
+    self.add(*blocks)
+  File "IDP-Z3/idp_engine/Problem.py", line 179, in add
     c.interpret(self)
   File "IDP-Z3/idp_engine/Interpret.py", line 384, in interpret
     assert self.decl.type != BOOL, \

@@ -79,9 +79,9 @@ class Assignment(object):
 
         # first symbol in the sentence that does not start with '_'
         self.symbol_decl = None
-        self.symbols = sentence.unknown_symbols(co_constraints=False).values()
+        self.symbols = sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
-            if not d.name.startswith('_'):
+            if not d.name.startswith('_') and d.block:  # ignore accessors and testers
                 self.symbol_decl = d
                 break
 
@@ -212,7 +212,7 @@ class Assignments(dict):
         for a in self.values():
             if a.value is not None and not a.sentence.is_reified():
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
-                c = f"({c})" if c else c
+                c = f"({c})" if 1 < len(a.sentence.sub_exprs) else c
                 c = f"{c}->{str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
         return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"
