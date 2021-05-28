@@ -23,7 +23,7 @@ Management of the State of problem solving with the Interactive Consultant.
 from idp_engine.Run import Problem
 from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
 from .IO import load_json, Status
-from .Inferences import get_relevant_subtences
+from .Inferences import get_relevant_questions
 
 # Types
 from idp_engine import IDP
@@ -129,7 +129,7 @@ class State(Problem):
             self.assignments.update(self.environment.assignments)
             self._formula = None
         self.propagate(tag=Status.CONSEQUENCE)
-        out = get_relevant_subtences(self)  # creates a copy of self
+        out = get_relevant_questions(self)  # creates a copy of self
         # copy relevant information
         for k,v in out.assignments.items():
             self.assignments[k].relevant = v.relevant

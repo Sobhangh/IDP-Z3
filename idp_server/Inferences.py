@@ -28,7 +28,7 @@ from idp_engine.utils import OrderedSet, RELEVANT
 from .IO import Output
 
 
-# def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
+# def get_relevant_questions(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
 #     """ causal interpretation of relevance """
 #     #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
 #     constraints = ( self.constraints )
@@ -50,7 +50,7 @@ from .IO import Output
 #         if k in relevant_subtences and symbols and has_relevant_symbol:
 #             l.relevant = True
 
-def get_relevant_subtences(self: "State"):
+def get_relevant_questions(self: "State"):
     """
     sets 'relevant in self.assignments
     sets rank of symbols in self.relevant_symbols
@@ -70,7 +70,6 @@ def get_relevant_subtences(self: "State"):
         constraints.append(constraint)
         constraint.co_constraints(constraints)
 
-
     # initialize reachable with relevant, if any
     reachable = OrderedSet()
     for constraint in constraints:
@@ -82,10 +81,9 @@ def get_relevant_subtences(self: "State"):
                 reachable.append(e)
 
     # analyse given information
-    given, hasGiven = OrderedSet(), False
+    given = OrderedSet()
     for q in out.assignments.values():
         if q.status == Status.GIVEN:
-            hasGiven = True
             if not q.sentence.has_decision():
                 given.append(q.sentence)
 
@@ -96,10 +94,6 @@ def get_relevant_subtences(self: "State"):
         constraint.questions = OrderedSet()
         constraint.collect(constraint.questions,
                            all_=True, co_constraints=False)
-
-        # only keep questions in out.assignments
-        constraint.questions = OrderedSet([q for q in constraint.questions
-                                           if q.code in out.assignments])
 
     # nothing relevant --> make every question in a constraint relevant
     if len(reachable) == 0:
@@ -140,7 +134,8 @@ def get_relevant_subtences(self: "State"):
     to_add, rank = reachable, 1
     while to_add:
         for q in to_add:
-            out.assignments[q.code].relevant = True
+            if q.code in out.assignments:
+                out.assignments[q.code].relevant = True
             for s in q.collect_symbols(co_constraints=False):
                 if s not in relevants:
                     relevants[s] = rank
