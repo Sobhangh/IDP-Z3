@@ -61,7 +61,7 @@ def generateZ3(theory):
     # capture stdout, print()
     with io.StringIO() as buf, redirect_stdout(buf):
         try:
-            idp = IDP.parse(theory)
+            idp = IDP.from_str(theory)
             if 'main' in idp.procedures:
                 idp.execute()
             else:
@@ -171,7 +171,7 @@ def pipeline():
                     log(f"start /eval {file_name}")
                     with open(file_name, "r") as fp:
 
-                        idp = IDP.parse(fp.read())
+                        idp = IDP.from_str(fp.read())
                         given_json = ""
 
                         if idp.procedures == {}:
@@ -211,7 +211,7 @@ def api():
                     print("ok")
                 }
             """
-            kb = IDP.parse(test)
+            kb = IDP.from_str(test)
             T, S = kb.get_blocks("T, S")
             kb.execute()
             for model in model_expand(T,S):

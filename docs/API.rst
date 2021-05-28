@@ -11,7 +11,7 @@ The following code illustrates how to invoke it.
 .. code-block:: python
 
     from idp_engine import IDP, model_expand
-    kb = IDP.parse("path/to/file.idp")
+    kb = IDP.from_file("path/to/file.idp")
     T, S = kb.get_blocks("T, S")
     for model in model_expand(T,S):
         print(model)
@@ -23,8 +23,14 @@ IDP class
 
 The ``IDP`` class exposes the following methods:
 
+from_file(file_path: str)
+    This class method parses the :ref:`IDP source code<IDP>` in the file located at ``file_path``.
+
+from_str(code: str)
+    This class method parses the :ref:`IDP source code<IDP>` in the ``code`` string.
+
 parse(file_or_string)
-    This class method parses the :ref:`IDP source file<IDP>` in the file or string.
+    DEPRECATED: This class method parses the :ref:`IDP source code<IDP>` in the file or string.
 
 get_blocks(names)
     This instance method returns the list of blocks whose names are given in a comma-separated string.

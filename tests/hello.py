@@ -16,7 +16,7 @@ from z3 import Solver
 
 
 file = os.path.join(os.path.dirname(__file__), 'temp.idp')
-model: File = IDP.parse(file)
+model: File = IDP.from_file(file)
 
 log("parse")
 if False:
