@@ -23,7 +23,8 @@ that are specific for the Interactive Consultant.
 import time
 
 from idp_engine.Assignments import Status
-from idp_engine.Expression import AppliedSymbol, TRUE
+from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
+                                   AConjunction, Brackets)
 from idp_engine.utils import OrderedSet, RELEVANT
 from .IO import Output
 
@@ -50,6 +51,44 @@ from .IO import Output
 #         if k in relevant_subtences and symbols and has_relevant_symbol:
 #             l.relevant = True
 
+def split_constraints(constraints: OrderedSet) -> OrderedSet:
+    """replace [.., a ∧ b, ..] by [.., a, b, ..]
+
+    This is to avoid dependencies between a and b (see issue #95).
+
+    Args:
+        constraints (OrderedSet): set of constraints that may contain conjunctions
+
+    Returns:
+        OrderedSet: set of constraints without top-level conjunctions
+    """
+
+    def split(c: Expression, cs: OrderedSet):
+        """split constraint c and adds it to cs"""
+        if type(c) in [AConjunction, Brackets]:
+            for e in c.sub_exprs:
+                split(e, cs)
+        elif type(c) == AQuantification and c.q == '∀':
+            assert len(c.sub_exprs) == 1
+            conj = OrderedSet()
+            if c.simpler:
+                split(c.simpler, conj)
+            else:
+                split(c.sub_exprs[0], conj)
+            for e in conj:
+                out = AQuantification.make(c.q, c.quantees, e)
+                # out.code = c.code
+                out.annotations = c.annotations
+                cs.append(out)
+        else:
+            cs.append(c)
+
+    new_constraints = OrderedSet()
+    for c in constraints:
+        split(c, new_constraints)
+    return new_constraints
+
+
 def get_relevant_questions(self: "State"):
     """
     sets 'relevant in self.assignments
@@ -69,6 +108,8 @@ def get_relevant_questions(self: "State"):
     for constraint in out.constraints:
         constraints.append(constraint)
         constraint.co_constraints(constraints)
+    constraints = split_constraints(constraints)
+
 
     # initialize reachable with relevant, if any
     reachable = OrderedSet()

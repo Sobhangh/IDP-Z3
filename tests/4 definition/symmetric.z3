@@ -150,7 +150,7 @@ display {
                                                                                                                                                                           '⇒ '
                                                                                                                                                                           '$(`p)(y, '
                                                                                                                                                                           'x))',
-                                                                                                                                                               'relevant': True,
+                                                                                                                                                               'relevant': False,
                                                                                                                                                                'status': 'UNIVERSAL',
                                                                                                                                                                'typ': 'Bool',
                                                                                                                                                                'value': True},
@@ -177,7 +177,7 @@ display {
                                                                                                                               '⇒ '
                                                                                                                               '$(`p)(y, '
                                                                                                                               'x))',
-                                                                                                                   'relevant': True,
+                                                                                                                   'relevant': False,
                                                                                                                    'status': 'UNIVERSAL',
                                                                                                                    'typ': 'Bool',
                                                                                                                    'value': True},
@@ -195,7 +195,7 @@ display {
                                                                                                                'y) ⇒ '
                                                                                                                '$(`p)(y, '
                                                                                                                'x)',
-                                                                                                    'relevant': True,
+                                                                                                    'relevant': False,
                                                                                                     'status': 'UNIVERSAL',
                                                                                                     'typ': 'Bool',
                                                                                                     'value': True}},

@@ -3234,7 +3234,7 @@ structure {
                                                                                                                                                                                       'Line '
                                                                                                                                                                                       ': '
                                                                                                                                                                                       'Units(Line)}',
-                                                                                                                                                                           'relevant': True,
+                                                                                                                                                                           'relevant': False,
                                                                                                                                                                            'status': 'UNIVERSAL',
                                                                                                                                                                            'typ': 'Bool',
                                                                                                                                                                            'value': True}},
@@ -3298,7 +3298,7 @@ structure {
                                                                                                                                                                                                                                               'Line '
                                                                                                                                                                                                                                               ': '
                                                                                                                                                                                                                                               'Syllables_for_Units(Units(Line))}',
-                                                                                                                                                                                                                                   'relevant': True,
+                                                                                                                                                                                                                                   'relevant': False,
                                                                                                                                                                                                                                    'status': 'UNIVERSAL',
                                                                                                                                                                                                                                    'typ': 'Bool',
                                                                                                                                                                                                                                    'value': True},
@@ -3308,7 +3308,7 @@ structure {
                                                                                      'reading': '∀Line ∈ Line_t : true '
                                                                                                 '⇒ Syllables(Line) = '
                                                                                                 'Allowed_Syllables(Line)',
-                                                                                     'relevant': True,
+                                                                                     'relevant': False,
                                                                                      'status': 'UNIVERSAL',
                                                                                      'typ': 'Bool',
                                                                                      'value': True}},
