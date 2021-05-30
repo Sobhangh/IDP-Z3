@@ -86,12 +86,17 @@ TypeDeclaration.translate = translate
 def translate(self):
     if self.translated is None:
         if len(self.sorts) == 0:
-            self.translated = Const(self.name, self.out.translate())
+            if self.out.name == REAL:
+                self.translated = Const(self.name, RealSort())
+            else:
+                self.translated = Const(self.name, self.out.translate())
         else:
-
             if self.out.name == BOOL:
                 types = [x.translate() for x in self.sorts]
                 self.translated = Function(self.name, types + [BoolSort()])
+            elif self.out.name == REAL:
+                types = [x.translate() for x in self.sorts]
+                self.translated = Function(self.name, types + [RealSort()])
             else:
                 types = [x.translate() for x in self.sorts] + [self.out.translate()]
                 self.translated = Function(self.name, types)

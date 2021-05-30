@@ -423,8 +423,8 @@ class SymbolDeclaration(ASTNode):
 
     @classmethod
     def make(cls, strname, arity, sorts, out):
-        out = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
-        return out
+        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
+        return o
 
 
 Type = Union[TypeDeclaration, SymbolDeclaration]
@@ -478,9 +478,9 @@ class Definition(ASTNode):
         Definition.definition_id += 1
         self.id = Definition.definition_id
         self.rules = kwargs.pop('rules')
-        self.clarks = {}  # {Declaration: Transformed Rule}
+        self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}}
-        self.levelSymbols = {}  # {String: SymbolDeclaration} map of recursive symbols to level mapping symbols
+        self.levelSymbols = {}  # {SymbolDeclaration: Symbol} map of recursive symbols to level mapping symbols
 
     def __str__(self):
         return "Definition(s) " +str(self.id)+" of " + ",".join([k.name for k in self.clarks.keys()])
@@ -498,20 +498,18 @@ class Definition(ASTNode):
         return hash(self.id)
 
     def setRecursiveSymbols(self):
-        # TODO: keys should be a none-string that takes the arity into account
         symbs = set()
         for r in self.rules:
             r.body.gatherSymbols(symbs)
         for r in self.rules:
-            key = str(r.definiendum.symbol)
+            key = r.definiendum.symbol.decl
             if key not in symbs or key in self.levelSymbols:
                 continue
-            self.levelSymbols[key] = SymbolDeclaration.make(
-                "_lvl"+str(self.id)+"_"+r.definiendum.symbol.decl.name,
-                len(r.definiendum.sub_exprs),
-                [e.sort for e in r.definiendum.sub_exprs],
-                Symbol(name=REAL))
-        print(self.levelSymbols)
+            symbdec = SymbolDeclaration.make(
+                "_"+str(self.id)+"lvl_"+key.name,
+                key.arity, key.sorts, Symbol(name=REAL))
+            self.levelSymbols[key] = Symbol(name=symbdec.name)
+            self.levelSymbols[key].decl = symbdec
 
     def isRecursive(self):
         return len(self.levelSymbols) > 0
@@ -528,6 +526,7 @@ class Rule(ASTNode):
         self.block = None  # theory where it occurs
         self.cache = {}
         self.inst_def_level = 0
+        self.definition = None  # definition where it occurs
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 

@@ -120,8 +120,14 @@ def interpret(self, theory):
                                   self.definiendum.sub_exprs)
         expr.in_head = True
     expr = AEquivalence.make('⇔', [expr, self.body])
-    # print(expr)
+    # print(self.definition)
     expr = expr.splitEquivalences()
+    # ADD LEVEL MAPPING
+    expr.sub_exprs[0].sub_exprs[1] = expr.sub_exprs[0].sub_exprs[1].addLevelMapping(self.definition.levelSymbols,
+                                                                                    self.definiendum.symbol.decl, True, True)
+    expr.sub_exprs[1].sub_exprs[1] = expr.sub_exprs[1].sub_exprs[1].addLevelMapping(self.definition.levelSymbols,
+                                                                                    self.definiendum.symbol.decl, False, True)
+    # print(expr.sub_exprs)
     # print(expr)
     expr = AQuantification.make('∀', self.quantees, expr)
     self.whole_domain = expr.interpret(theory)

@@ -433,7 +433,12 @@ class Expression(ASTNode):
         return self
 
     def gatherSymbols(self, symbols):
-        for e in self.sub_exprs: e.gatherSymbols(symbols)
+        for e in self.sub_exprs:
+            e.gatherSymbols(symbols)
+
+    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
+        self.sub_exprs = [e.addLevelMapping(levelSymbols, head, positiveJustification, polarity) for e in self.sub_exprs]
+        return self
 
 
 class Symbol(Expression):
@@ -458,6 +463,9 @@ class Symbol(Expression):
 
     def __str__(self):
         return Symbol.FROM.get(self.name, self.name)
+
+    def __repr__(self):
+        return str(self)
 
     def translate(self):
         return self.decl.translate()
@@ -585,7 +593,7 @@ class AQuantification(Expression):
 
 
 class BinaryOperator(Expression):
-    PRECEDENDE = 0  # monkey-patched
+    PRECEDENCE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
 
     def __init__(self, **kwargs):
@@ -634,6 +642,11 @@ class BinaryOperator(Expression):
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
 
+    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(levelSymbols, head, positiveJustification, not polarity),
+                          self.sub_exprs[1].addLevelMapping(levelSymbols, head, positiveJustification, polarity)]
+        return self
+
 
 class AEquivalence(BinaryOperator):
     PRECEDENCE = 40
@@ -645,13 +658,19 @@ class AEquivalence(BinaryOperator):
         return AConjunction.make('∧',[posimpl,negimpl])
 
     def splitEquivalences(self):
-        self.sub_exprs[0]=self.sub_exprs[0].splitEquivalences()
-        self.sub_exprs[1]=self.sub_exprs[1].splitEquivalences()
+        self.sub_exprs[0] = self.sub_exprs[0].splitEquivalences()
+        self.sub_exprs[1] = self.sub_exprs[1].splitEquivalences()
         self.sub_exprs = [e.splitEquivalences() for e in self.sub_exprs]
         return self.split()
 
+# TODO: don't implications and reverse implications have the same precedence?
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
+
+    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(levelSymbols, head, positiveJustification, polarity),
+                          self.sub_exprs[1].addLevelMapping(levelSymbols, head, positiveJustification, not polarity)]
+        return self
 
 class ADisjunction(BinaryOperator):
     PRECEDENCE = 60
@@ -716,6 +735,11 @@ class AUnary(Expression):
 
     def __str1__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
+
+    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
+        self.sub_exprs = [e.addLevelMapping(levelSymbols, head, positiveJustification, not polarity if self.operator == '¬' else polarity)
+                          for e in self.sub_exprs]
+        return self
 
 
 class AAggregate(Expression):
@@ -891,7 +915,22 @@ class AppliedSymbol(Expression):
             constructors[symbol.name].append(constructor)
 
     def gatherSymbols(self, symbols):
-        symbols.add(str(self.symbol))
+        symbols.add(self.symbol.decl)
+
+    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
+        if self.symbol.decl not in levelSymbols:
+            return self
+        else:
+            op = ('>' if positiveJustification else '≥') if polarity else ('≤' if positiveJustification else '<')
+            comp = BinaryOperator.make(op, [
+                AppliedSymbol.make(levelSymbols[head], self.sub_exprs),
+                AppliedSymbol.make(levelSymbols[self.symbol.decl], self.sub_exprs)
+            ])
+            if polarity:
+                return AConjunction.make('∧', [comp, self])
+            else:
+                return ADisjunction.make('∨', [comp, self])
+
 
 class SymbolExpr(Expression):
     def __init__(self, **kwargs):
