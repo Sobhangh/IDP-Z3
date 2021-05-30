@@ -47,7 +47,7 @@ from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction,  AEquivalence, AAggregate,
                     AComparison, AUnary, AppliedSymbol, UnappliedSymbol, Number,
                     Variable, TRUE)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT, REAL
 
 
 # class Extern  ###########################################################
@@ -120,6 +120,9 @@ def interpret(self, theory):
                                   self.definiendum.sub_exprs)
         expr.in_head = True
     expr = AEquivalence.make('⇔', [expr, self.body])
+    # print(expr)
+    expr = expr.splitEquivalences()
+    # print(expr)
     expr = AQuantification.make('∀', self.quantees, expr)
     self.whole_domain = expr.interpret(theory)
     self.whole_domain.block = self.block

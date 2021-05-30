@@ -428,6 +428,13 @@ class Expression(ASTNode):
         """
         return (None, None, None)
 
+    def splitEquivalences(self):
+        self.sub_exprs = [e.splitEquivalences() for e in self.sub_exprs]
+        return self
+
+    def gatherSymbols(self, symbols):
+        for e in self.sub_exprs: e.gatherSymbols(symbols)
+
 
 class Symbol(Expression):
     """Represents a Symbol.  Handles synonyms.
@@ -631,6 +638,17 @@ class AImplication(BinaryOperator):
 class AEquivalence(BinaryOperator):
     PRECEDENCE = 40
 
+    # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
+    def split(self):
+        posimpl = AImplication.make('⇒', [self.sub_exprs[0], self.sub_exprs[1]])
+        negimpl = AImplication.make('⇒', [AUnary.make('¬',self.sub_exprs[0].copy()), AUnary.make('¬',self.sub_exprs[1].copy())])
+        return AConjunction.make('∧',[posimpl,negimpl])
+
+    def splitEquivalences(self):
+        self.sub_exprs[0]=self.sub_exprs[0].splitEquivalences()
+        self.sub_exprs[1]=self.sub_exprs[1].splitEquivalences()
+        self.sub_exprs = [e.splitEquivalences() for e in self.sub_exprs]
+        return self.split()
 
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
@@ -752,7 +770,7 @@ class AppliedSymbol(Expression):
     Args:
         eval (string): '$' if the symbol must be evaluated, else ''
 
-        s (Expression): the symbol to be applied to arguments
+        symbol (Expression): the symbol to be applied to arguments
 
         is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
 
@@ -872,6 +890,8 @@ class AppliedSymbol(Expression):
             constructor = Constructor(name=self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
 
+    def gatherSymbols(self, symbols):
+        symbols.add(str(self.symbol))
 
 class SymbolExpr(Expression):
     def __init__(self, **kwargs):

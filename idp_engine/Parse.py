@@ -348,7 +348,7 @@ class SymbolDeclaration(ASTNode):
             `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
-        symbols ([Symbol]): the symbols beind defined, before expansion
+        symbols ([Symbol]): the symbols being defined, before expansion
 
         name (string): the identifier of the symbol, after expansion of the node
 
@@ -383,8 +383,11 @@ class SymbolDeclaration(ASTNode):
             self.symbols = kwargs.pop('symbols')
             self.name = None
         else:
-            self.name = intern(kwargs.pop('name').name)
             self.symbols = None
+            if 'name' in kwargs:
+                self.name = intern(kwargs.pop('name').name)
+            else:
+                self.name = kwargs.pop('strname')
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
@@ -411,9 +414,17 @@ class SymbolDeclaration(ASTNode):
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
+    def __repr__(self):
+        return str(self)
+
     def is_subset_of(self, other):
         return (self.arity == 1 and self.type == BOOL
                 and self.sorts[0].decl == other)
+
+    @classmethod
+    def make(cls, strname, arity, sorts, out):
+        out = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
+        return out
 
 
 Type = Union[TypeDeclaration, SymbolDeclaration]
@@ -469,9 +480,10 @@ class Definition(ASTNode):
         self.rules = kwargs.pop('rules')
         self.clarks = {}  # {Declaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}}
+        self.levelSymbols = {}  # {String: SymbolDeclaration} map of recursive symbols to level mapping symbols
 
     def __str__(self):
-        return "Definition(s) of " + ",".join([k.name for k in self.clarks.keys()])
+        return "Definition(s) " +str(self.id)+" of " + ",".join([k.name for k in self.clarks.keys()])
 
     def __repr__(self):
         out = []
@@ -484,6 +496,25 @@ class Definition(ASTNode):
 
     def __hash__(self):
         return hash(self.id)
+
+    def setRecursiveSymbols(self):
+        # TODO: keys should be a none-string that takes the arity into account
+        symbs = set()
+        for r in self.rules:
+            r.body.gatherSymbols(symbs)
+        for r in self.rules:
+            key = str(r.definiendum.symbol)
+            if key not in symbs or key in self.levelSymbols:
+                continue
+            self.levelSymbols[key] = SymbolDeclaration.make(
+                "_lvl"+str(self.id)+"_"+r.definiendum.symbol.decl.name,
+                len(r.definiendum.sub_exprs),
+                [e.sort for e in r.definiendum.sub_exprs],
+                Symbol(name=REAL))
+        print(self.levelSymbols)
+
+    def isRecursive(self):
+        return len(self.levelSymbols) > 0
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
