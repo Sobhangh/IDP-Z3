@@ -331,7 +331,7 @@ class Expression(ASTNode):
         """ collects the constraints attached to AST nodes, e.g. instantiated
         definitions
 
-        `co_constraints is an OrderedSet of Expression
+        `co_constraints` is an OrderedSet of Expression
         """
         if self.co_constraint is not None:
             co_constraints.append(self.co_constraint)

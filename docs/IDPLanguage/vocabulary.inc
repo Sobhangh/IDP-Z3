@@ -77,7 +77,6 @@ The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
 IDP-Z3 does not support partial functions.
 
 .. _built-in functions:
-.. index:: built-in functions
 
 Built-in functions
 ++++++++++++++++++
