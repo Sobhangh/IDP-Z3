@@ -47,7 +47,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
@@ -234,6 +234,9 @@ class Vocabulary(ASTNode):
                                 sorts=[], out=Symbol(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
                                 sorts=[Symbol(name=SYMBOL)],
+                                out=Symbol(name=INT)),
+            SymbolDeclaration(annotations='', name=Symbol(name=ABS),
+                                sorts=[Symbol(name=INT)],
                                 out=Symbol(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
                                 sorts=[Symbol(name=SYMBOL), Symbol(name=INT)],

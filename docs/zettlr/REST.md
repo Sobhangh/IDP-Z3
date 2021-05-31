@@ -75,7 +75,11 @@ GET request :
                                  //   "abstract"    find abstract representations of all models
 
     - expanded : [string]        // list of symbols in expanded view
-    - value : string             // for explain: string of propagated value to be explained, preceded by '~' if negated
+    - value : string             // for explain: string of propagated atom to be explained,
+                                 //    preceded by '~' if negated
+    - field : string             // for propagate: string of the applied symbol
+                                 //    for which the user wants to know
+                                 //    the range of possible values
 ```
 
 GET response :

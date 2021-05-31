@@ -205,13 +205,14 @@ class eval(Resource):
                 previous_active = args.get('previous_active', None)
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
                 value = args.get('value', None)
+                field = args.get('field', None)
 
                 state = State.make(idp, previous_active, given_json)
 
                 out = {}
                 if method == "propagate":
-                    if value != '':  # value is the term for which a dropdown is open
-                        state = state.get_range(value)
+                    if field:  # field is the applied symbol for which a dropdown is open
+                        state = state.get_range(field)
                     out = Output(state).fill(state)
                 if method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
