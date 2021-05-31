@@ -430,7 +430,7 @@ class Theory(ASTNode):
 
         self.declarations = {}
         self.clark = {}  # {(Declaration, Definition): Rule}
-        self.def_constraints = {}  # {Declaration: Expression}
+        self.def_constraints = {}  # {(Declaration, Definition): Expression}
         self.assignments = Assignments()
 
         for constraint in self.constraints:
