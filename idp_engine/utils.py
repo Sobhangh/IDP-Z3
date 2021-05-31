@@ -30,6 +30,8 @@ import time
 
 CO_CONSTR_RECURSION_DEPTH = 3
 MAX_QUANTIFIER_EXPANSION = 20
+DEF_SEMANTICS_OPTIONS = ["completion", "stable", "well-founded", "co-induction"]
+DEF_SEMANTICS = "well-founded"
 
 """
     String constants

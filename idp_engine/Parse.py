@@ -480,7 +480,7 @@ class Definition(ASTNode):
         self.rules = kwargs.pop('rules')
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}}
-        self.levelSymbols = {}  # {SymbolDeclaration: Symbol} map of recursive symbols to level mapping symbols
+        self.level_symbols = {}  # {SymbolDeclaration: Symbol} map of recursive symbols to level mapping symbols
 
     def __str__(self):
         return "Definition(s) " +str(self.id)+" of " + ",".join([k.name for k in self.clarks.keys()])
@@ -503,16 +503,16 @@ class Definition(ASTNode):
             r.body.gatherSymbols(symbs)
         for r in self.rules:
             key = r.definiendum.symbol.decl
-            if key not in symbs or key in self.levelSymbols:
+            if key not in symbs or key in self.level_symbols:
                 continue
             symbdec = SymbolDeclaration.make(
                 "_"+str(self.id)+"lvl_"+key.name,
                 key.arity, key.sorts, Symbol(name=REAL))
-            self.levelSymbols[key] = Symbol(name=symbdec.name)
-            self.levelSymbols[key].decl = symbdec
+            self.level_symbols[key] = Symbol(name=symbdec.name)
+            self.level_symbols[key].decl = symbdec
 
     def isRecursive(self):
-        return len(self.levelSymbols) > 0
+        return len(self.level_symbols) > 0
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):

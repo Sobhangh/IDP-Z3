@@ -35,8 +35,7 @@ from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from .utils import (unquote, OrderedSet, BOOL, INT, REAL,
-                    RESERVED_SYMBOLS, IDPZ3Error)
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, RESERVED_SYMBOLS, IDPZ3Error, DEF_SEMANTICS
 
 
 class ASTNode(object):
@@ -436,8 +435,8 @@ class Expression(ASTNode):
         for e in self.sub_exprs:
             e.gatherSymbols(symbols)
 
-    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
-        self.sub_exprs = [e.addLevelMapping(levelSymbols, head, positiveJustification, polarity) for e in self.sub_exprs]
+    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [e.addLevelMapping(level_symbols, head, pos_justification, polarity) for e in self.sub_exprs]
         return self
 
 
@@ -642,9 +641,9 @@ class BinaryOperator(Expression):
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
 
-    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(levelSymbols, head, positiveJustification, not polarity),
-                          self.sub_exprs[1].addLevelMapping(levelSymbols, head, positiveJustification, polarity)]
+    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(level_symbols, head, pos_justification, not polarity),
+                          self.sub_exprs[1].addLevelMapping(level_symbols, head, pos_justification, polarity)]
         return self
 
 
@@ -654,8 +653,9 @@ class AEquivalence(BinaryOperator):
     # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
     def split(self):
         posimpl = AImplication.make('⇒', [self.sub_exprs[0], self.sub_exprs[1]])
-        negimpl = AImplication.make('⇒', [AUnary.make('¬',self.sub_exprs[0].copy()), AUnary.make('¬',self.sub_exprs[1].copy())])
-        return AConjunction.make('∧',[posimpl,negimpl])
+        negimpl = AImplication.make('⇒', [AUnary.make('¬', self.sub_exprs[0].copy()),
+                                          AUnary.make('¬', self.sub_exprs[1].copy())])
+        return AConjunction.make('∧', [posimpl, negimpl])
 
     def splitEquivalences(self):
         self.sub_exprs[0] = self.sub_exprs[0].splitEquivalences()
@@ -667,9 +667,9 @@ class AEquivalence(BinaryOperator):
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
 
-    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(levelSymbols, head, positiveJustification, polarity),
-                          self.sub_exprs[1].addLevelMapping(levelSymbols, head, positiveJustification, not polarity)]
+    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(level_symbols, head, pos_justification, polarity),
+                          self.sub_exprs[1].addLevelMapping(level_symbols, head, pos_justification, not polarity)]
         return self
 
 class ADisjunction(BinaryOperator):
@@ -736,8 +736,8 @@ class AUnary(Expression):
     def __str1__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
-    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
-        self.sub_exprs = [e.addLevelMapping(levelSymbols, head, positiveJustification, not polarity if self.operator == '¬' else polarity)
+    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [e.addLevelMapping(level_symbols, head, pos_justification, not polarity if self.operator == '¬' else polarity)
                           for e in self.sub_exprs]
         return self
 
@@ -917,14 +917,20 @@ class AppliedSymbol(Expression):
     def gatherSymbols(self, symbols):
         symbols.add(self.symbol.decl)
 
-    def addLevelMapping(self, levelSymbols, head, positiveJustification, polarity):
-        if self.symbol.decl not in levelSymbols:
+    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
+        if self.symbol.decl not in level_symbols:
             return self
         else:
-            op = ('>' if positiveJustification else '≥') if polarity else ('≤' if positiveJustification else '<')
+            if DEF_SEMANTICS == "well-founded":
+                op = ('>' if pos_justification else '≥') if polarity else ('≤' if pos_justification else '<')
+            elif DEF_SEMANTICS == "stable":
+                op = '≥' if polarity else '<'
+            else:
+                assert(DEF_SEMANTICS == "co-induction")
+                op = ('≥' if pos_justification else '>') if polarity else ('<' if pos_justification else '≤')
             comp = BinaryOperator.make(op, [
-                AppliedSymbol.make(levelSymbols[head], self.sub_exprs),
-                AppliedSymbol.make(levelSymbols[self.symbol.decl], self.sub_exprs)
+                AppliedSymbol.make(level_symbols[head], self.sub_exprs),
+                AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
             ])
             if polarity:
                 return AConjunction.make('∧', [comp, self])
