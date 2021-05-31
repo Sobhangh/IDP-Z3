@@ -61,6 +61,7 @@ The ``RGB`` constructor takes 3 arguments of type ``Byte``.
 
 .. _function:
 .. index:: function
+
 Functions
 +++++++++
 
@@ -75,8 +76,13 @@ The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
 
 IDP-Z3 does not support partial functions.
 
+.. _built-in functions:
+.. index:: built-in functions
 
-The following functions are built-ins:
+Built-in functions
+++++++++++++++++++
+
+The following functions are built-in:
 
 * ``abs: Int → Int`` (or ``abs: Float → Float``) yields the absolute value of an integer (or float) expression;
 * ``arity: Symbol → Symbol`` yields the arity of a symbol;

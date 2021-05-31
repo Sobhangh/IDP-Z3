@@ -91,3 +91,5 @@ The equivalent ASCII-only encoding is shown on the right.
         pretty_print(model_expand   (T,S))
         pretty_print(model_propagate(T,S))
     }
+
+See also the :ref:`built-in functions`.

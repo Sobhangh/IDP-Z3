@@ -37,7 +37,7 @@ def metaJSON(state):
     """
     symbols = []
     for decl in state.assignments.symbols.values():
-        if not decl.name.startswith('_'):
+        if not decl.private:
             typ = decl.out.name
             symbol_type = "proposition" if typ == BOOL and decl.sorts == [] else "function"
             d = {
@@ -141,7 +141,7 @@ class Output(object):
         for key, ass in state.assignments.items():
             atom = ass.sentence
             symb = state.assignments[key].symbol_decl
-            if symb is not None and not symb.name.startswith('_'):
+            if symb is not None and not symb.private:
                 s = self.m.setdefault(symb.name, {})
 
                 typ = atom.type
@@ -182,7 +182,7 @@ class Output(object):
                     for k, data in self.m[symb.name].items():
                         if k in self.state.assignments:
                             for s in self.state.assignments[k].symbols:
-                                if (not s.name.startswith('_')
+                                if (not s.private
                                    and s.name in self.m
                                    and s.name != symb.name):
                                     self.state.assignments[k].symbol_decl = s
@@ -200,7 +200,7 @@ class Output(object):
         key = atom.code
         if key in self.state.assignments:
             symb = self.state.assignments[key].symbol_decl
-            if symb is not None and not symb.name.startswith('_'):
+            if symb is not None and not symb.private:
                 s = self.m.setdefault(symb.name, {})
                 if key in s:
                     if value is not None:
