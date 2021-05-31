@@ -77,6 +77,7 @@ parser.add_argument('previous_active', type=str, help='Previous input by user')
 parser.add_argument('expanded', type=str, action='append', help='list of expanded symbols')
 parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
 parser.add_argument('value', type=str, help='Value to explain')
+parser.add_argument('field', type=str, help='Applied Symbol whose range must be determined')
 parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
 
 
