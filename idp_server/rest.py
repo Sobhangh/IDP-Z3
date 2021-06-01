@@ -197,14 +197,12 @@ class eval(Resource):
                     g.profiler.start()
 
                 args = parser.parse_args()
-                #print(args)
 
                 idp = idpOf(args['code'])
                 method = args['method']
                 given_json = args['active']
                 previous_active = args.get('previous_active', None)
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
-                value = args.get('value', None)
                 field = args.get('field', None)
 
                 state = State.make(idp, previous_active, given_json)
