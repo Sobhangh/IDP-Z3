@@ -34,6 +34,7 @@ from datetime import date
 from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
+from z3 import BoolSort, IntSort, RealSort
 
 from .utils import unquote, OrderedSet, BOOL, INT, REAL, RESERVED_SYMBOLS, IDPZ3Error, DEF_SEMANTICS
 
@@ -467,7 +468,14 @@ class Symbol(Expression):
         return str(self)
 
     def translate(self):
-        return self.decl.translate()
+        if self.name == BOOL:
+            return BoolSort()
+        elif self.name == INT:
+            return IntSort()
+        elif self.name == REAL:
+            return RealSort()
+        else:
+            return self.decl.translate()
 
 
 class IfExpr(Expression):
