@@ -209,6 +209,9 @@ class Expression(ASTNode):
         fresh_vars (Set(string)):
             The set of names of the variables in the expression.
 
+        translated (Optional[z3 ast]):
+            The translation of the expression to Z3 (cache)
+
     """
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code',
                  'annotations', 'original', 'str', 'fresh_vars', 'type',
