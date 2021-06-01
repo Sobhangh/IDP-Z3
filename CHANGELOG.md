@@ -22,6 +22,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #89: `constructed from` types create error in IC
 * fix #93: incorrect parsing of `main()` block in IDE
 * fix #94: incorrect relevance when symbol starts with underscore
+* fix #95: Incorrect relevance with quantified formula
 
 
 ## [0.8.1] - 2021-05-11

@@ -23,12 +23,13 @@ that are specific for the Interactive Consultant.
 import time
 
 from idp_engine.Assignments import Status
-from idp_engine.Expression import AppliedSymbol, TRUE
+from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
+                                   AConjunction, Brackets)
 from idp_engine.utils import OrderedSet, RELEVANT
 from .IO import Output
 
 
-# def get_relevant_subtences(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
+# def get_relevant_questions(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
 #     """ causal interpretation of relevance """
 #     #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
 #     constraints = ( self.constraints )
@@ -50,7 +51,45 @@ from .IO import Output
 #         if k in relevant_subtences and symbols and has_relevant_symbol:
 #             l.relevant = True
 
-def get_relevant_subtences(self: "State"):
+def split_constraints(constraints: OrderedSet) -> OrderedSet:
+    """replace [.., a ∧ b, ..] by [.., a, b, ..]
+
+    This is to avoid dependencies between a and b (see issue #95).
+
+    Args:
+        constraints (OrderedSet): set of constraints that may contain conjunctions
+
+    Returns:
+        OrderedSet: set of constraints without top-level conjunctions
+    """
+
+    def split(c: Expression, cs: OrderedSet):
+        """split constraint c and adds it to cs"""
+        if type(c) in [AConjunction, Brackets]:
+            for e in c.sub_exprs:
+                split(e, cs)
+        elif type(c) == AQuantification and c.q == '∀':
+            assert len(c.sub_exprs) == 1
+            conj = OrderedSet()
+            if c.simpler:
+                split(c.simpler, conj)
+            else:
+                split(c.sub_exprs[0], conj)
+            for e in conj:
+                out = AQuantification.make(c.q, c.quantees, e)
+                # out.code = c.code
+                out.annotations = c.annotations
+                cs.append(out)
+        else:
+            cs.append(c)
+
+    new_constraints = OrderedSet()
+    for c in constraints:
+        split(c, new_constraints)
+    return new_constraints
+
+
+def get_relevant_questions(self: "State"):
     """
     sets 'relevant in self.assignments
     sets rank of symbols in self.relevant_symbols
@@ -69,6 +108,7 @@ def get_relevant_subtences(self: "State"):
     for constraint in out.constraints:
         constraints.append(constraint)
         constraint.co_constraints(constraints)
+    constraints = split_constraints(constraints)
 
 
     # initialize reachable with relevant, if any
@@ -82,10 +122,9 @@ def get_relevant_subtences(self: "State"):
                 reachable.append(e)
 
     # analyse given information
-    given, hasGiven = OrderedSet(), False
+    given = OrderedSet()
     for q in out.assignments.values():
         if q.status == Status.GIVEN:
-            hasGiven = True
             if not q.sentence.has_decision():
                 given.append(q.sentence)
 
@@ -96,10 +135,6 @@ def get_relevant_subtences(self: "State"):
         constraint.questions = OrderedSet()
         constraint.collect(constraint.questions,
                            all_=True, co_constraints=False)
-
-        # only keep questions in out.assignments
-        constraint.questions = OrderedSet([q for q in constraint.questions
-                                           if q.code in out.assignments])
 
     # nothing relevant --> make every question in a constraint relevant
     if len(reachable) == 0:
@@ -140,7 +175,8 @@ def get_relevant_subtences(self: "State"):
     to_add, rank = reachable, 1
     while to_add:
         for q in to_add:
-            out.assignments[q.code].relevant = True
+            if q.code in out.assignments:
+                out.assignments[q.code].relevant = True
             for s in q.collect_symbols(co_constraints=False):
                 if s not in relevants:
                     relevants[s] = rank

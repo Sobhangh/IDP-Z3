@@ -55,7 +55,7 @@ structure {
                            'is_assignment': True,
                            'normal': True,
                            'reading': 'Fruit(Anna)',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Fruit_t',
                            'value': 'Orange',
@@ -64,7 +64,7 @@ structure {
                               'is_assignment': True,
                               'normal': True,
                               'reading': 'Fruit(Harriet)',
-                              'relevant': True,
+                              'relevant': False,
                               'status': 'CONSEQUENCE',
                               'typ': 'Fruit_t',
                               'value': 'Apple',
@@ -82,7 +82,7 @@ structure {
                           'is_assignment': True,
                           'normal': True,
                           'reading': 'Fruit(Sam)',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'CONSEQUENCE',
                           'typ': 'Fruit_t',
                           'value': 'Pear',
@@ -94,7 +94,7 @@ structure {
                                                                                   'reading': '∀Monkey ∈ Monkey_t : '
                                                                                              'Fruit(Monkey) = Pear ⇒ '
                                                                                              'Place(Monkey) ≠ Branch',
-                                                                                  'relevant': True,
+                                                                                  'relevant': False,
                                                                                   'status': 'UNIVERSAL',
                                                                                   'typ': 'Bool',
                                                                                   'value': True},
@@ -103,7 +103,7 @@ structure {
                                                                            'normal': False,
                                                                            'reading': '∀Monkey ∈ Monkey_t : Monkey = '
                                                                                       'Mike ⇒ Fruit(Monkey) ≠ Orange',
-                                                                           'relevant': True,
+                                                                           'relevant': False,
                                                                            'status': 'UNIVERSAL',
                                                                            'typ': 'Bool',
                                                                            'value': True}},
@@ -111,7 +111,7 @@ structure {
                            'is_assignment': True,
                            'normal': True,
                            'reading': 'Place(Anna)',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'UNIVERSAL',
                            'typ': 'Place_t',
                            'value': 'Stream',
@@ -129,7 +129,7 @@ structure {
                            'is_assignment': True,
                            'normal': True,
                            'reading': 'Place(Mike)',
-                           'relevant': True,
+                           'relevant': False,
                            'status': 'CONSEQUENCE',
                            'typ': 'Place_t',
                            'value': 'Branch',
@@ -138,7 +138,7 @@ structure {
                           'is_assignment': True,
                           'normal': True,
                           'reading': 'Place(Sam)',
-                          'relevant': True,
+                          'relevant': False,
                           'status': 'UNIVERSAL',
                           'typ': 'Place_t',
                           'value': 'Grass',
@@ -157,7 +157,7 @@ structure {
                                                                                                              '∧ '
                                                                                                              'Fruit(Monkey) '
                                                                                                              '≠ Pear',
-                                                                                                  'relevant': True,
+                                                                                                  'relevant': False,
                                                                                                   'status': 'UNIVERSAL',
                                                                                                   'typ': 'Bool',
                                                                                                   'value': True},
@@ -167,7 +167,7 @@ structure {
                                                                               'reading': '∀Monkey ∈ Monkey_t : Monkey '
                                                                                          '= Harriet ⇒ Place(Monkey) ≠ '
                                                                                          'Branch',
-                                                                              'relevant': True,
+                                                                              'relevant': False,
                                                                               'status': 'UNIVERSAL',
                                                                               'typ': 'Bool',
                                                                               'value': True},
@@ -184,7 +184,7 @@ structure {
                                                                                                              '∧ '
                                                                                                              'Fruit(Monkey) '
                                                                                                              '≠ Banana',
-                                                                                                  'relevant': True,
+                                                                                                  'relevant': False,
                                                                                                   'status': 'UNIVERSAL',
                                                                                                   'typ': 'Bool',
                                                                                                   'value': True},
@@ -194,7 +194,7 @@ structure {
                                                                                  'reading': '∀Monkey ∈ Monkey_t : '
                                                                                             'Place(Monkey) = Rock ⇒ '
                                                                                             'Fruit(Monkey) = Apple',
-                                                                                 'relevant': True,
+                                                                                 'relevant': False,
                                                                                  'status': 'UNIVERSAL',
                                                                                  'typ': 'Bool',
                                                                                  'value': True},
@@ -220,7 +220,7 @@ structure {
                                                                                                                     'Fruit(m1) '
                                                                                                                     '≠ '
                                                                                                                     'Fruit(m2)',
-                                                                                                         'relevant': True,
+                                                                                                         'relevant': False,
                                                                                                          'status': 'UNIVERSAL',
                                                                                                          'typ': 'Bool',
                                                                                                          'value': True}}}

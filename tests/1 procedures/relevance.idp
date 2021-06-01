@@ -1,0 +1,14 @@
+vocabulary {
+    type num := {1,2}
+    f : num → num
+    p: () -> Bool
+}
+
+theory {
+    !x in num: f(x)=f(x).
+    f(1)=1 => p().
+}
+
+display {
+    goal(`p).
+}

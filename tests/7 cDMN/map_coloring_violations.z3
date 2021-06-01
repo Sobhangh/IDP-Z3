@@ -150,7 +150,7 @@ structure {
                                                                                                                                                           'Color(c1) '
                                                                                                                                                           '≠ '
                                                                                                                                                           'Color(c2)',
-                                                                                                                                               'relevant': True,
+                                                                                                                                               'relevant': False,
                                                                                                                                                'status': 'UNIVERSAL',
                                                                                                                                                'typ': 'Bool',
                                                                                                                                                'value': True}},

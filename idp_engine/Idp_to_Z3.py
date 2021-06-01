@@ -136,6 +136,7 @@ IfExpr.translate1 = translate1
 
 
 def translate1(self):
+    assert len(self.sub_exprs) == 1
     if not self.quantees:
         return self.sub_exprs[0].translate()
     else:

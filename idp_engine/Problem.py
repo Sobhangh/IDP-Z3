@@ -30,8 +30,7 @@ from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 from .Assignments import Status, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
                          AComparison, AUnary)
-from .Parse import (TypeDeclaration, Symbol, SymbolDeclaration,
-                    Theory, str_to_IDP)
+from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, SYMBOL, RELEVANT)
