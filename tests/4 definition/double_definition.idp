@@ -1,0 +1,16 @@
+vocabulary {
+    p, q, r : () → 𝔹
+}
+
+theory {
+    { p() <- q().}
+    { p() <- r().}
+}
+
+structure S:V {
+    p:= true
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}

@@ -6,13 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
-Contributors (alphabetical): Matthias van der hallen, Pierre Carbonnelle.
+Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle.
 
 ### API
 * (breaking) Merge !82: Problem must be created with `extended=True` for `decision_table()` API
 * Merge #87: add `get_range` to Problem API
 * Merge #88: add `abs` built-in function
 * fix #90: error in `sum` aggregate
+* fix #74: Incorrect propagation when a symbol is defined twice
 
 ### Interactive Consultant
 * Merge #85: improve performance of IC (better use of cache)

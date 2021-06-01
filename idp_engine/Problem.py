@@ -55,7 +55,7 @@ class Problem(object):
         clark (dict[(SymbolDeclaration, Definition), Rule]):
             A mapping of defined symbol to the rule that defines it.
 
-        def_constraints (dict[SymbolDeclaration], Expression):
+        def_constraints (dict[SymbolDeclaration, Definition], Expression):
             A mapping of defined symbol to the whole-domain constraint
             equivalent to its definition.
 
@@ -77,7 +77,7 @@ class Problem(object):
         self.clark = {}  # {(Declaration, Definition): Rule}
         self.constraints = OrderedSet()
         self.assignments = Assignments()
-        self.def_constraints = {}
+        self.def_constraints = {}  # {(Declaration, Definition): Expression}
         self.interpretations = {}
         self.goals = {}
         self.name = ''
@@ -168,9 +168,9 @@ class Problem(object):
             self.constraints.append(constraint)
 
         # expand whole-domain definitions
-        for (decl, _), rule in self.clark.items():
+        for (decl, defin), rule in self.clark.items():
             if rule.is_whole_domain:
-                self.def_constraints[decl] = rule.interpret(self).whole_domain
+                self.def_constraints[decl, defin] = rule.interpret(self).whole_domain
 
         # initialize assignments, co_constraints, questions
 
@@ -565,9 +565,9 @@ class Problem(object):
             goal_pred = goal_string.split("(")[0]
             assert goal_pred in self.declarations, (
                 f"Unrecognized goal string: {goal_string}")
-            if self.declarations[goal_pred] in self.def_constraints:
-                self.def_constraints[self.declarations[goal_pred]].collect(
-                    questions, all_=True)
+            for (decl, _),e in self.def_constraints.items():
+                if decl != self.declarations[goal_pred]: continue
+                e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
                     self.assignments.assert_(q, None, Status.UNKNOWN,False)
@@ -575,7 +575,7 @@ class Problem(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        symbols = {decl for (decl, defin) in self.clark.keys()}
+        symbols = {decl for (decl, _) in self.clark.keys()}
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code
