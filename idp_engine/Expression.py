@@ -235,6 +235,7 @@ class Expression(ASTNode):
         self.questions: Optional[OrderedSet] = None
         self.relevant: Optional[bool] = None
         self.block: Any = None
+        self.translated = None
 
     def copy(self):
         " create a deep copy (except for rigid terms and variables) "

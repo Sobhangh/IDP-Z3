@@ -113,7 +113,11 @@ def translate(self):
         return self.value.translate()
     if self.simpler is not None:
         return self.simpler.translate()
-    return self.translate1()
+    if self.fresh_vars:
+        return self.translate1()
+    elif self.translated is None:
+        self.translated = self.translate1()
+    return self.translated
 Expression.translate = translate
 
 def reified(self) -> DatatypeRef:
