@@ -3,6 +3,6 @@ opposite(red) = green ∧ opposite(green) = red ∧ Color() in {red,green, green
 Model 1
 ==========
 Color:={->green}
-opposite:={red->green; blue->rgb(1, 1); green->red; rgb(1, 1)->rgb(2, 2); rgb(1, 2)->green; rgb(2, 1)->rgb(1, 1); rgb(2, 2)->rgb(2, 2)}
+opposite:={red->green; blue->rgb(1, 2); green->red; rgb(1, 1)->red; rgb(1, 2)->rgb(2, 2); rgb(2, 1)->red; rgb(2, 2)->rgb(2, 2)}
 
 More models are available.
