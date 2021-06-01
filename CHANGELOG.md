@@ -10,13 +10,17 @@ Contributors (alphabetical): Matthias van der hallen, Pierre Carbonnelle.
 
 ### API
 * (breaking) Merge !82: Problem must be created with `extended=True` for `decision_table()` API
+* Merge #87: add `get_range` to Problem API
+* Merge #88: add `abs` built-in function
 * fix #90: error in `sum` aggregate
 
 ### Interactive Consultant
 * Merge #85: improve performance of IC (better use of cache)
+* Merge #87: improve performance of IC (propagate dropdowns on request)
 * fix #75: default structure not working in Registration application
 * fix #89: `constructed from` types create error in IC
 * fix #93: incorrect parsing of `main()` block in IDE
+* fix #94: incorrect relevance when symbol starts with underscore
 
 
 ## [0.8.1] - 2021-05-11

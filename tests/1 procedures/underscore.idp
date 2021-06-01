@@ -1,0 +1,15 @@
+vocabulary V {
+    p, _q, r: () -> Bool
+}
+
+theory T:V {
+    p() => _q().
+    _q() => r().
+
+}
+
+
+display {
+    goal(`r).
+  view() = expanded.
+}

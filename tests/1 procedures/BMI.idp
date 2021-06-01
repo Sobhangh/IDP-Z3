@@ -54,6 +54,8 @@ structure {
 
 procedure main() {
     pretty_print(model_propagate(T))
+    print(Problem(T).get_range("sex()").assignments.get("sex() = Male", None))
+    print(Problem(T).get_range("sex()").assignments.get("sex() = Female", None))
     print()
     pretty_print(model_propagate(T, S))
     print()

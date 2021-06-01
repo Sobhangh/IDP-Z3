@@ -49,6 +49,8 @@ Function application
 
     ``$(s)(t_1, t_2,.., t_n)`` is a term, when ``s`` is an expression of type Symbol that denotes a function of arity |n|, and |t1,tn| are terms.
 
+    Please note that there are built-in function_\ s (see :ref:`built-in functions`).
+
 Negation
     -|t| is a numerical term, when |t| is a numerical term.
 

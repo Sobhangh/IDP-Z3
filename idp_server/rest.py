@@ -197,18 +197,20 @@ class eval(Resource):
                     g.profiler.start()
 
                 args = parser.parse_args()
-                #print(args)
 
                 idp = idpOf(args['code'])
                 method = args['method']
                 given_json = args['active']
                 previous_active = args.get('previous_active', None)
                 expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
+                field = args.get('field', None)
 
                 state = State.make(idp, previous_active, given_json)
 
                 out = {}
                 if method == "propagate":
+                    if field:  # field is the applied symbol for which a dropdown is open
+                        state = state.get_range(field)
                     out = Output(state).fill(state)
                 if method == "modelexpand":
                     generator = state.expand(max=1, complete=False)

@@ -1,4 +1,4 @@
-.. _solver_utils
+.. _solver_utils:
 
 idp_engine.utils
 =========================

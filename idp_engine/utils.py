@@ -44,11 +44,12 @@ DATE = "Date"
 SYMBOL = "Symbol"
 
 RELEVANT = "__relevant"
+ABS = "abs"
 ARITY = "arity"
 INPUT_DOMAIN = "input_domain"
 OUTPUT_DOMAIN = "output_domain"
 RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, SYMBOL,
-                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
+                    RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
 
 DEFAULT = "default"
 

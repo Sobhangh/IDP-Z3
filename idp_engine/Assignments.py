@@ -67,7 +67,7 @@ class Assignment(object):
         relevant (bool, optional): states whether the sentence is relevant
 
         symbol_decl (SymbolDeclaration): declaration of the symbol under which
-        it should be displayed.
+        it should be displayed in the IC.
     """
     def __init__(self, sentence: Expression, value: Optional[Expression],
                  status: Optional[Status],
@@ -77,13 +77,18 @@ class Assignment(object):
         self.status = status
         self.relevant = relevant
 
-        # first symbol in the sentence that does not start with '_'
-        self.symbol_decl = None
+        # first symbol in the sentence, preferably not starting with '_'
+        self.symbol_decl, default = None, None
         self.symbols = sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
-            if not d.name.startswith('_') and d.block:  # ignore accessors and testers
-                self.symbol_decl = d
-                break
+            if not d.private:
+                if d.block:  # ignore accessors and testers
+                    self.symbol_decl = d
+                    break
+            elif default is None:
+                default = d
+        if not self.symbol_decl:  # use the '_' symbol (to allow relevance computation)
+            self.symbol_decl = default
 
     def copy(self):
         out = copy(self)
@@ -201,9 +206,9 @@ class Assignments(dict):
                 out.relevant = relevant
         else:
             out = Assignment(sentence, value, status, relevant)
-            if out.symbol_decl:
-                self.symbols[out.symbol_decl.name] = out.symbol_decl
-        self[sentence.code] = out
+        if out.symbol_decl:  # ignore comparisons of constructors
+            self[sentence.code] = out
+            self.symbols[out.symbol_decl.name] = out.symbol_decl
         return out
 
     def __str__(self):

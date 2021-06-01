@@ -96,6 +96,10 @@ propagate(self)
     Returns the problem with its ``assignments`` property updated with values for all terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
     Terms and propositions starting with '_' are ignored.
 
+get_range(self, term:str)
+    Returns a copy of the problem, with its ``assignments`` property containing
+    a description of the possible values of the term.
+
 explain(self, consequence)
     Returns the facts and laws to explain a consequence in the Problem.
 
@@ -103,7 +107,8 @@ explain(self, consequence)
     The facts are a list of Assignment, and the laws are a list of Expression.
 
 simplify(self)
-    Returns the problem with a simplified formula of the problem, by substituting terms and atoms by their values specified in a structure or obtained by propagation.
+    Returns a simpler copy of the problem, with a simplified formula obtained
+    by substituting terms and atoms by their known values.
 
 decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
     Experimental.  Returns the rows for a decision table that defines ``goal_string``.

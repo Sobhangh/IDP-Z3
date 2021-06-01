@@ -86,8 +86,7 @@ def interpret(self, problem):
             expr = AppliedSymbol.make(Symbol(name=self.name), arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
-            if not expr.code.startswith('_'):
-                problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
+            problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
 
     # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:

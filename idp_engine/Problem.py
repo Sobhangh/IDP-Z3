@@ -178,7 +178,8 @@ class Problem(object):
         for c in self.constraints:
             c.interpret(self)
             c.co_constraints(self.co_constraints)
-            c.collect(questions, all_=False)
+            if not c.is_type_constraint_for:
+                c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
@@ -230,7 +231,6 @@ class Problem(object):
             a.sentence for a in self.assignments.values()
             if a.status not in [Status.GIVEN, Status.STRUCTURE,
                                  Status.UNIVERSAL, Status.ENV_UNIV]
-            and a.symbol_decl is not None
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -370,6 +370,26 @@ class Problem(object):
         out = list(self._propagate(tag))
         assert out[0] != "Not satisfiable.", "Not satisfiable."
         return self
+
+    def get_range(self, term: str):
+        """ Returns a copy of the problem,
+            with its ``assignments`` property containing
+            a description of the possible values of the term.
+        """
+        assert term in self.assignments, f"Unknown term: {term}"
+        termE : Expression = self.assignments[term].sentence
+        assert type(termE) == AppliedSymbol, f"{term} is not a term"
+        range = termE.decl.range
+        assert range, f"Can't determine range on infinite domains"
+
+        self.formula()  # to keep universals, given
+        out = copy(self)
+        out.assignments = Assignments()
+        for e in range:
+            sentence = Assignment(termE, e, Status.UNKNOWN).formula()
+            out.assignments.assert_(sentence, None, Status.UNKNOWN, False)
+        _ = list(out._propagate(Status.CONSEQUENCE))  # run the generator
+        return out
 
     def explain(self, consequence):
         """returns the facts and laws that justify 'consequence in the 'self Problem

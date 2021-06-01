@@ -268,29 +268,28 @@ def translate1(self):
     self.check(self.decl, f"Unknown symbol: {self.symbol}")
     if self.decl.name == RELEVANT:
         return TRUE.translate()
-    assert self.decl.name not in RESERVED_SYMBOLS, \
-               f"Can't resolve argument of built-in symbols: {self}"
     if self.decl.name == 'abs':
         arg = self.sub_exprs[0].translate()
         return If(arg >= 0, arg, -arg)
-    else:
-        try:
-            self.check(len(self.sub_exprs) == self.decl.arity,
-                       f"Incorrect number of arguments for {self}")
-            if len(self.sub_exprs) == 0:
-                return self.decl.translate()
-            else:
-                arg = [x.translate() for x in self.sub_exprs]
-                # assert  all(a != None for a in arg)
-                return (self.decl.translate())(arg)
-        except AttributeError as e:
-            # Using argument on symbol that has no arity.
-            if str(e) == "'RangeDeclaration' object has no attribute 'arity'":
-                self.check(False,
-                           f"Symbol {self} does not accept an argument")
-            # Unknown error.
-            else:
-                raise AttributeError(e)
+    assert self.decl.name not in RESERVED_SYMBOLS, \
+               f"Can't resolve argument of built-in symbols: {self}"
+    try:
+        self.check(len(self.sub_exprs) == self.decl.arity,
+                    f"Incorrect number of arguments for {self}")
+        if len(self.sub_exprs) == 0:
+            return self.decl.translate()
+        else:
+            arg = [x.translate() for x in self.sub_exprs]
+            # assert  all(a != None for a in arg)
+            return (self.decl.translate())(arg)
+    except AttributeError as e:
+        # Using argument on symbol that has no arity.
+        if str(e) == "'RangeDeclaration' object has no attribute 'arity'":
+            self.check(False,
+                        f"Symbol {self} does not accept an argument")
+        # Unknown error.
+        else:
+            raise AttributeError(e)
 AppliedSymbol.translate1 = translate1
 
 def reified(self) -> DatatypeRef:

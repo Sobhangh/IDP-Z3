@@ -47,7 +47,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
-                    RELEVANT, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
@@ -204,11 +204,13 @@ class Vocabulary(ASTNode):
         temp = []
         for decl in self.declarations:
             if not isinstance(decl, SymbolDeclaration):
+                decl.private = decl.name.startswith('_')
                 temp.append(decl)
             else:
                 for symbol in decl.symbols:
                     new = copy(decl)  # shallow copy !
                     new.name = intern(symbol.name)
+                    new.private = new.name.startswith('_')
                     new.symbols = None
                     temp.append(new)
         self.declarations = temp
@@ -232,6 +234,9 @@ class Vocabulary(ASTNode):
                                 sorts=[], out=Symbol(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
                                 sorts=[Symbol(name=SYMBOL)],
+                                out=Symbol(name=INT)),
+            SymbolDeclaration(annotations='', name=Symbol(name=ABS),
+                                sorts=[Symbol(name=INT)],
                                 out=Symbol(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
                                 sorts=[Symbol(name=SYMBOL), Symbol(name=INT)],
@@ -363,6 +368,8 @@ class SymbolDeclaration(ASTNode):
 
         range (List[Expression]): the list of possible values
 
+        private (Bool): True if the symbol name starts with '_' (for use in IC)
+
         unit (str):
             the unit of the symbol, such as m (meters)
 
@@ -385,6 +392,7 @@ class SymbolDeclaration(ASTNode):
 
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
+        self.private = None
         self.unit: str = None
         self.heading: str = None
 
