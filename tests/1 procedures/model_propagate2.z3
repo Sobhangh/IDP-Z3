@@ -1,0 +1,78 @@
+
+-- original ---------------------------------
+vocabulary  {
+    type T:={1..5}
+    p :  () → T
+}
+theory  {
+    p()<3.
+}
+-- meta -------------------------------------
+{'manualPropagation': False,
+ 'optionalPropagation': False,
+ 'symbols': [{'environmental': False,
+              'idpname': 'p',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'function',
+              'view': 'normal'}],
+ 'title': 'Interactive Consultant'}
+
+-- propagation ------------------------------
+{' Global': {'active': '{}', 'env_dec': False},
+ 'p': {'__rank': 9999,
+       'p()': {'environmental': False,
+               'is_assignment': True,
+               'normal': True,
+               'reading': 'p',
+               'relevant': True,
+               'status': 'UNKNOWN',
+               'typ': 'Int',
+               'value': '',
+               'values': ['1', '2', '3', '4', '5']},
+       'p() < 3': {'environmental': False,
+                   'is_assignment': False,
+                   'normal': False,
+                   'reading': 'p < 3',
+                   'relevant': True,
+                   'status': 'UNIVERSAL',
+                   'typ': 'Bool',
+                   'value': True},
+       'p() = 1': {'environmental': False,
+                   'is_assignment': True,
+                   'normal': False,
+                   'reading': 'p = 1',
+                   'relevant': True,
+                   'status': 'UNKNOWN',
+                   'typ': 'Bool'},
+       'p() = 2': {'environmental': False,
+                   'is_assignment': True,
+                   'normal': False,
+                   'reading': 'p = 2',
+                   'relevant': True,
+                   'status': 'UNKNOWN',
+                   'typ': 'Bool'},
+       'p() = 3': {'environmental': False,
+                   'is_assignment': True,
+                   'normal': False,
+                   'reading': 'p = 3',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': False},
+       'p() = 4': {'environmental': False,
+                   'is_assignment': True,
+                   'normal': False,
+                   'reading': 'p = 4',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': False},
+       'p() = 5': {'environmental': False,
+                   'is_assignment': True,
+                   'normal': False,
+                   'reading': 'p = 5',
+                   'relevant': True,
+                   'status': 'CONSEQUENCE',
+                   'typ': 'Bool',
+                   'value': False}}}

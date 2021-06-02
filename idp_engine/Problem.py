@@ -177,8 +177,7 @@ class Problem(object):
         for c in self.constraints:
             c.interpret(self)
             c.co_constraints(self.co_constraints)
-            if not c.is_type_constraint_for:
-                c.collect(questions, all_=False)
+            c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
