@@ -34,7 +34,7 @@ display {
                        'status': 'UNKNOWN',
                        'typ': 'color',
                        'value': '',
-                       'values': ['red', 'blue', 'green', 'rgb(t, t)', 'rgb(t, u)', 'rgb(u, t)', 'rgb(u, u)']},
+                       'values': []},
            'Color() = blue': {'environmental': False,
                               'is_assignment': True,
                               'normal': False,

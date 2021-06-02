@@ -48,7 +48,7 @@ structure {
                                                  'status': 'UNKNOWN',
                                                  'typ': 'Advertised_Objectst_t',
                                                  'value': '',
-                                                 'values': ['Toys', 'Cars', 'Videogames']},
+                                                 'values': []},
                         'Advertised_Objects() = Cars': {'environmental': False,
                                                         'is_assignment': True,
                                                         'normal': False,

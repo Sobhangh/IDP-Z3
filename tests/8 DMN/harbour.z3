@@ -129,7 +129,7 @@ structure {
                                    'status': 'UNKNOWN',
                                    'typ': 'Refuel_Areat_t',
                                    'value': '',
-                                   'values': ['NA', 'outdoor', 'indoor']},
+                                   'values': []},
                  'Refuel_Area() = NA': {'environmental': False,
                                         'is_assignment': True,
                                         'normal': False,

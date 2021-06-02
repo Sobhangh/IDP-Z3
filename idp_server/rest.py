@@ -225,9 +225,9 @@ class eval(Resource):
                 out = {}
                 method = args['method']
                 if method == "propagate":
-                    if args['field']:  # field is the applied symbol for which a dropdown is open
-                        state = state.get_range(args['field'])
                     out = Output(state).fill(state)
+                if method == 'get_range':
+                    out = state.get_range(args['field'])
                 if method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
                     state.assignments = list(generator)[0]

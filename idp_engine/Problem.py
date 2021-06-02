@@ -373,9 +373,7 @@ class Problem(object):
         return self
 
     def get_range(self, term: str):
-        """ Returns a copy of the problem,
-            with its ``assignments`` property containing
-            a description of the possible values of the term.
+        """ Returns a list of the possible values of the term.
         """
         assert term in self.assignments, f"Unknown term: {term}"
         termE : Expression = self.assignments[term].sentence
@@ -383,14 +381,27 @@ class Problem(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
-        self.formula()  # to keep universals, given
-        out = copy(self)
+        out = self.copy()
+        #  remove current assignments to same term
+        out.assignments.copy()
+        if out.assignments[term].value:
+            for a in out.assignments.values():
+                if a.sentence.is_assignment and a.sentence.code.startswith(term):
+                    out.assert_(a.sentence, None, Status.UNKNOWN)
+        out.formula()  # to keep universals and given, except self
+
+        # now consider every value in range
         out.assignments = Assignments()
         for e in range:
             sentence = Assignment(termE, e, Status.UNKNOWN).formula()
+            # use assignments.assert_ to create one if necessary
             out.assignments.assert_(sentence, None, Status.UNKNOWN, False)
         _ = list(out._propagate(Status.CONSEQUENCE))  # run the generator
-        return out
+        assert all(e.sentence.is_assignment()
+                   for e in out.assignments.values())
+        return [str(e.sentence.sub_exprs[1])
+                for e in out.assignments.values()
+                if e.value is None or e.value.same_as(TRUE)]
 
     def explain(self, consequence):
         """returns the facts and laws that justify 'consequence in the 'self Problem

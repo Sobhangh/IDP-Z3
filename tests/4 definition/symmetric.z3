@@ -51,7 +51,7 @@ display {
                        'status': 'UNKNOWN',
                        'typ': 'node',
                        'value': '',
-                       'values': ['a', 'b', 'c']},
+                       'values': []},
            'Start() = a': {'environmental': False,
                            'is_assignment': True,
                            'normal': False,

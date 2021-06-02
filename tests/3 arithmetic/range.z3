@@ -28,7 +28,7 @@ theory {
                                                                                'status': 'UNKNOWN',
                                                                                'typ': 'Int',
                                                                                'value': '',
-                                                                               'values': ['2015', '2016']},
+                                                                               'values': []},
                                        'Start_Dt_Dwelling_For_Social_Rent() = 2015': {'environmental': False,
                                                                                       'is_assignment': True,
                                                                                       'normal': False,

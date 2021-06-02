@@ -29,7 +29,7 @@ theory  {
                'status': 'UNKNOWN',
                'typ': 'Int',
                'value': '',
-               'values': ['1', '2', '3', '4', '5']},
+               'values': []},
        'p() < 3': {'environmental': False,
                    'is_assignment': False,
                    'normal': False,

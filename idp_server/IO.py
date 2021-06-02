@@ -150,7 +150,7 @@ class Output(object):
                 elif 0 < len(symb.range):
                     typ = symb.out.decl.type
                     symbol = {"typ": typ, "value": ""  #TODO
-                              , "values": [str(v) for v in symb.range]}
+                              , "values": []}
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": typ, "value": ""}  # default
                 else:
@@ -210,6 +210,9 @@ class Output(object):
                             s[key]["value"] = True if value.same_as(TRUE) else \
                                              False if value.same_as(FALSE) else \
                                              str(value)
+                        if 0 < len(symb.range) and atom.type != BOOL:
+                            # allow display of the value in drop box
+                            s[key]["values"] = [s[key]["value"]]
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading'].replace("()", "")

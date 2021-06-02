@@ -98,7 +98,7 @@ structure {
                                                                'status': 'UNKNOWN',
                                                                'typ': 'Post_Bureau_Risk_Categoryt_t',
                                                                'value': '',
-                                                               'values': ['LOW', 'HIGH', 'VERY_LOW', 'MEDIUM']},
+                                                               'values': []},
                                'Post_Bureau_Risk_Category() = HIGH': {'environmental': False,
                                                                       'is_assignment': True,
                                                                       'normal': False,

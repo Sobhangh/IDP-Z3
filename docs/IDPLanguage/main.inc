@@ -97,8 +97,7 @@ propagate(self)
     Terms and propositions starting with '_' are ignored.
 
 get_range(self, term:str)
-    Returns a copy of the problem, with its ``assignments`` property containing
-    a description of the possible values of the term.
+    Returns a list of the possible values of the term (as strings).
 
 explain(self, consequence)
     Returns the facts and laws to explain a consequence in the Problem.

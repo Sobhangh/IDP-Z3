@@ -6,13 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
-Contributors (alphabetical): .
+Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
 * MR !98: Improve performance for theories with large structures
+* (breaking) Merge !??: simplify `get_range` API
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions
+* Merge !??: improve performance of IC (propagate dropdowns on request)
 
 
 ## [0.8.2] - 2021-06-02
