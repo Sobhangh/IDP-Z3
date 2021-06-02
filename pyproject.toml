@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "idp-engine"
-version = "0.8.1"
+version = "0.8.2"
 description = "IDP-Z3 is a collection of software components implementing the Knowledge Base paradigm using the FO(.) language and a Z3 SMT solver."
 authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
 license = "GNU LGPL 3"

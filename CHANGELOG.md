@@ -6,18 +6,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
-Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle.
+Contributors (alphabetical): .
+
+
+
+## [0.8.2] - 2021-06-02
+
+Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle Simon Vandevelde.
 
 ### API
 * (breaking) Merge !82: Problem must be created with `extended=True` for `decision_table()` API
-* Merge #87: add `get_range` to Problem API
 * Merge #88: add `abs` built-in function
 * fix #90: error in `sum` aggregate
 * fix #74: Incorrect propagation when a symbol is defined twice
 
 ### Interactive Consultant
 * Merge #85: improve performance of IC (better use of cache)
-* Merge #87: improve performance of IC (propagate dropdowns on request)
 * fix #75: default structure not working in Registration application
 * fix #89: `constructed from` types create error in IC
 * fix #93: incorrect parsing of `main()` block in IDE
