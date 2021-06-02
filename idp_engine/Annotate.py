@@ -155,7 +155,7 @@ def annotate(self, theory, voc, q_vars):
 
     # join the bodies of rules
     for decl, rules in self.clarks.items():
-        exprs = sum(([rule.body] for rule in rules), [])
+        exprs = [rule.body for rule in rules]
         rules[0].body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = rules[0]
     return self
