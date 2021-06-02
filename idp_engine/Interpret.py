@@ -420,6 +420,7 @@ def interpret(self, problem):
             instantiations = [rule.instantiate_definition(sub_exprs, problem)
                               for (decl, _), rule in problem.clark.items()
                               if self.decl == decl]
+            instantiations = [x for x in instantiations if x]
             if len(instantiations) == 1:
                 co_constraint = instantiations[0]
             elif len(instantiations) > 1:
