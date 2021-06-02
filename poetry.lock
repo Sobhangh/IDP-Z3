@@ -726,7 +726,7 @@ watchdog = ["watchdog"]
 
 [[package]]
 name = "z3-solver"
-version = "4.8.9.0"
+version = "4.8.10.0"
 description = "an efficient SMT solver library"
 category = "main"
 optional = false
