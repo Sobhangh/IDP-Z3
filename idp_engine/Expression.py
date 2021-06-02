@@ -937,7 +937,7 @@ class AppliedSymbol(Expression):
                 assert(DEF_SEMANTICS == "co-induction")
                 op = ('≥' if pos_justification else '>') if polarity else ('<' if pos_justification else '≤')
             comp = BinaryOperator.make(op, [
-                AppliedSymbol.make(level_symbols[head], self.sub_exprs),
+                AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
                 AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
             ])
             if polarity:
