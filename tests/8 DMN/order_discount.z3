@@ -46,7 +46,7 @@ structure {
                          'is_assignment': True,
                          'normal': True,
                          'reading': 'amount',
-                         'relevant': False,
+                         'relevant': True,
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''}},
@@ -55,7 +55,7 @@ structure {
                              'is_assignment': True,
                              'normal': True,
                              'reading': 'discount',
-                             'relevant': False,
+                             'relevant': True,
                              'status': 'UNKNOWN',
                              'typ': 'Int',
                              'value': ''}}}

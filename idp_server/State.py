@@ -54,7 +54,7 @@ class State(Problem):
             # remove oldest entry, to prevent memory overflow
             State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
-        if (idp.code, "{}") not in State.cache:  # without default structure !
+        if (idp.code, "{}") not in State.cache:  # with default structure !
             State.cache[(idp.code, "{}")] = State(idp)
         state = State.cache[(idp.code, "{}")]
 

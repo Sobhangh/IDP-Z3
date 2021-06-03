@@ -142,6 +142,14 @@ def get_relevant_questions(self: "State"):
             if constraint.is_type_constraint_for is None:
                 for q in constraint.questions:
                     reachable.append(q)
+    # still nothing relevant --> make every question in def_constraints relevant
+    if len(reachable) == 0:
+        for def_constraint in out.def_constraints.values():
+            def_constraint.questions = OrderedSet()
+            def_constraint.collect(def_constraint.questions,
+                                   all_=True, co_constraints=True)
+            for q in def_constraint.questions:
+                reachable.append(q)
 
     # find relevant symbols by depth-first propagation
     # relevants, rank = {}, 1
