@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 Contributors (alphabetical): .
 
+### API
+
+### Interactive Constructors
+* fix #98: Incorrect relevance with definitions
+
 
 ## [0.8.2] - 2021-06-02
 
