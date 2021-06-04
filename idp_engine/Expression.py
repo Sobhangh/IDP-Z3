@@ -926,7 +926,7 @@ class AppliedSymbol(Expression):
         symbols.add(self.symbol.decl)
 
     def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
-        if self.symbol.decl not in level_symbols:
+        if head.symbol.decl not in level_symbols or self.symbol.decl not in level_symbols:
             return self
         else:
             if DEF_SEMANTICS == "well-founded":
