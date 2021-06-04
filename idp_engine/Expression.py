@@ -209,6 +209,9 @@ class Expression(ASTNode):
         fresh_vars (Set(string)):
             The set of names of the variables in the expression.
 
+        is_type_constraint_for (string):
+            name of the symbol for which the expression is a type constraint
+
         translated (Optional[z3 ast]):
             The translation of the expression to Z3 (cache)
 
