@@ -25,6 +25,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * Merge !93: improve speed by caching z3 translations
 * fix #90: error in `sum` aggregate
 * fix #74: Incorrect propagation when a symbol is defined twice
+* implement IEP 15 Inductive definitions
 
 ### Interactive Consultant
 * Merge !85: improve performance of IC (better use of cache)
