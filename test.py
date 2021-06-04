@@ -113,9 +113,9 @@ def generate():
             output = re.sub(r'(/.*)(?=web-IDP-Z3/)', '', output, flags=re.MULTILINE)
 
             # remove the folder
-            output = re.sub(r'site-packages', '', output, flags=re.MULTILINE)
-            output = re.sub(r'IDP-Z3', '', output, flags=re.MULTILINE)
-            output = re.sub(r'web-IDP-Z3', '', output, flags=re.MULTILINE)
+            output = re.sub(r'site-packages/', '', output, flags=re.MULTILINE)
+            output = re.sub(r'IDP-Z3/', '', output, flags=re.MULTILINE)
+            output = re.sub(r'web-IDP-Z3/', '', output, flags=re.MULTILINE)
 
             # remove line numbers in error messages
             output = re.sub(r'line \d+,', 'line ??,', output, flags=re.MULTILINE)
