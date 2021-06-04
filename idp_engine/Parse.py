@@ -498,9 +498,21 @@ class Definition(ASTNode):
         return hash(self.id)
 
     def setRecursiveSymbols(self):
-        symbs = set()
+        headToBody = set()
         for r in self.rules:
+            symbs = set()
             r.body.gatherSymbols(symbs)
+            for s in symbs:
+                headToBody.add((r.definiendum.symbol.decl, s))
+
+        while True:
+            new_relations = set((x, w) for x, y in headToBody for q, w in headToBody if q == y)
+            closure_until_now = headToBody | new_relations
+            if closure_until_now == headToBody:
+                break
+            headToBody = closure_until_now
+
+        symbs = {s for (s, ss) in headToBody if s == ss}
         for r in self.rules:
             key = r.definiendum.symbol.decl
             if key not in symbs or key in self.level_symbols:
