@@ -24,7 +24,7 @@ import ast
 
 from idp_engine.Expression import (TRUE, FALSE, AComparison, Number)
 from idp_engine.Parse import str_to_IDP
-from idp_engine.Assignments import Assignments, Status
+from idp_engine.Assignments import Status as S
 from idp_engine.utils import BOOL, INT, REAL, DATE
 
 def metaJSON(state):
@@ -105,14 +105,14 @@ def load_json(state, jsonstr: str):
 
                     # If the atom is unknown, set its value as normal.
                     if (json_atom["value"] != ''
-                        and state.assignments[atom].status == Status.UNKNOWN):
+                        and state.assignments[atom].status == S.UNKNOWN):
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
                         state.assignments.assert_(idp_atom, value,
-                                                  Status.GIVEN, False)
+                                                  S.GIVEN, False)
                         if json_atom["typ"] != "Bool":
                             idp_atom = AComparison.make('=', [idp_atom, value])
                             state.assignments.assert_(idp_atom, TRUE,
-                                                      Status.GIVEN, False)
+                                                      S.GIVEN, False)
 
                     # If the atom was already set in default struct, overwrite.
                     elif json_atom["value"] != '':
@@ -175,7 +175,7 @@ class Output(object):
 
         # Remove symbols that are in a structure.
         for key, l in state.assignments.items():
-            if l.status == Status.STRUCTURE:
+            if l.status == S.STRUCTURE:
                 symb = self.state.assignments[key].symbol_decl
                 if symb and symb.name in self.m:
                     # reassign sentences if possible
@@ -196,7 +196,7 @@ class Output(object):
                 self.addAtom(l.sentence, l.value, l.status)
         return self.m
 
-    def addAtom(self, atom, value, status: Status):
+    def addAtom(self, atom, value, status: S):
         key = atom.code
         if key in self.state.assignments:
             symb = self.state.assignments[key].symbol_decl

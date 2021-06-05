@@ -27,7 +27,7 @@ from itertools import chain
 from typing import Any, Iterable, List
 from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
 
-from .Assignments import Status, Assignment, Assignments
+from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
                          AComparison, AUnary)
 from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
@@ -183,32 +183,32 @@ class Problem(object):
                 c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
-                self.assignments.assert_(s, None, Status.UNKNOWN, False)
+                self.assignments.assert_(s, None, S.UNKNOWN, False)
 
         for ass in self.assignments.values():
             ass.sentence = ass.sentence
             ass.sentence.original = ass.sentence.copy()
         return self
 
-    def assert_(self, code: str, value: Any, status: Status = Status.GIVEN):
+    def assert_(self, code: str, value: Any, status: S = S.GIVEN):
         """asserts that an expression has a value
 
         Args:
             code (str): the code of the expression, e.g., "p()"
             value (Any): a Python value, e.g., "True"
-            status (Status, Optional): how the value was obtained.  Default: Status.GIVEN
+            status (Status, Optional): how the value was obtained.  Default: S.GIVEN
         """
         code = str(code)
         atom = self.assignments[code].sentence
         if value is None:
-            self.assignments.assert_(atom, value, Status.UNKNOWN, False)
+            self.assignments.assert_(atom, value, S.UNKNOWN, False)
         else:
             val = str_to_IDP(atom, str(value))
             self.assignments.assert_(atom, val, status, False)
         # reset any consequences
         for v in self.assignments.values():
-            if v.status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.EXPANDED]:
-                v.status = Status.UNKNOWN
+            if v.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.EXPANDED]:
+                v.status = S.UNKNOWN
                 v.value = None
         self._formula = None
 
@@ -219,8 +219,8 @@ class Problem(object):
                 '∧',
                 [a.formula() for a in self.assignments.values()
                  if a.value is not None
-                 and a.status not in [Status.CONSEQUENCE, Status.ENV_CONSQ]]
-                + [s for s in self.constraints]
+                 and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
+                + [s for s in self.constraints]  #perf could be pre-compiled
                 + [c for c in self.co_constraints]
                 + [s for s in self.def_constraints.values()]
                 + [TRUE]  # so that it is not empty
@@ -230,8 +230,7 @@ class Problem(object):
     def _todo(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.status not in [Status.GIVEN, Status.STRUCTURE,
-                                 Status.UNIVERSAL, Status.ENV_UNIV]
+            if a.status not in [S.GIVEN, S.STRUCTURE, S.UNIVERSAL, S.ENV_UNIV]
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -250,7 +249,7 @@ class Problem(object):
                 solver.pop()
             if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
-                ass.assert_(q, val, Status.EXPANDED, None)
+                ass.assert_(q, val, S.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False):
@@ -273,7 +272,7 @@ class Problem(object):
                 # exclude this model
                 different = []
                 for a in ass.values():
-                    if a.status == Status.EXPANDED:
+                    if a.status == S.EXPANDED:
                         q = a.sentence
                         different.append(q.translate() != a.value.translate())
                 solver.add(Or(different))
@@ -313,7 +312,7 @@ class Problem(object):
         self.assignments = self._from_model(solver, self._todo(), complete)
         return self
 
-    def symbolic_propagate(self, tag=Status.UNIVERSAL):
+    def symbolic_propagate(self, tag=S.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
@@ -352,7 +351,7 @@ class Problem(object):
                         elif res2 == unknown:
                             res1 = unknown
                         else:  # reset the value
-                            self.assignments.assert_(q, None, Status.UNKNOWN, False)
+                            self.assignments.assert_(q, None, S.UNKNOWN, False)
                 solver.pop()
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
@@ -366,7 +365,7 @@ class Problem(object):
             yield "Unknown satisfiability."
             yield str(z3_formula)
 
-    def propagate(self, tag=Status.CONSEQUENCE):
+    def propagate(self, tag=S.CONSEQUENCE):
         """ determine all the consequences of the constraints """
         out = list(self._propagate(tag))
         assert out[0] != "Not satisfiable.", "Not satisfiable."
@@ -387,9 +386,9 @@ class Problem(object):
         out = copy(self)
         out.assignments = Assignments()
         for e in range:
-            sentence = Assignment(termE, e, Status.UNKNOWN).formula()
-            out.assignments.assert_(sentence, None, Status.UNKNOWN, False)
-        _ = list(out._propagate(Status.CONSEQUENCE))  # run the generator
+            sentence = Assignment(termE, e, S.UNKNOWN).formula()
+            out.assignments.assert_(sentence, None, S.UNKNOWN, False)
+        _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
         return out
 
     def explain(self, consequence):
@@ -403,7 +402,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [Status.GIVEN, Status.STRUCTURE]
+        reasons = [S.GIVEN, S.STRUCTURE]
 
         negated = consequence.replace('~', '¬').startswith('¬')
         consequence = consequence[1:] if negated else consequence
@@ -447,7 +446,7 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status == Status.GIVEN:
+                            if a1.status == S.GIVEN:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())
@@ -477,8 +476,8 @@ class Problem(object):
             old, new = ass.sentence, ass.value
             if new is not None:
                 # convert consequences to Universal
-                ass.status = (Status.UNIVERSAL if ass.status == Status.CONSEQUENCE else
-                              Status.ENV_UNIV if ass.status == Status.ENV_CONSQ else
+                ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
+                              S.ENV_UNIV if ass.status == S.ENV_CONSQ else
                               ass.status)
                 # simplify constraints
                 new_constraints: List[Expression] = []
@@ -538,7 +537,7 @@ class Problem(object):
                     hypothesis = And(z3_formula, known, conditions_i)
                     solver.add(Not(Implies(hypothesis, goal.translate())))
                 if solver.check() == unsat:
-                    conditions[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+                    conditions[i] = Assignment(TRUE, TRUE, S.UNKNOWN)
             conditions = join_set_conditions(conditions)
             return [c for c in conditions if c.sentence != TRUE]+[goal]
 
@@ -571,7 +570,7 @@ class Problem(object):
                 e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
-                    self.assignments.assert_(q, None, Status.UNKNOWN,False)
+                    self.assignments.assert_(q, None, S.UNKNOWN, False)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
@@ -587,7 +586,7 @@ class Problem(object):
             f"Internal error"
 
         known = And([ass.translate() for ass in self.assignments.values()
-                        if ass.status != Status.UNKNOWN]
+                        if ass.status != S.UNKNOWN]
                     + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
@@ -612,11 +611,11 @@ class Problem(object):
                     else:
                         val1 = model.eval(atom.reified())
                     if val1 == True:
-                        ass = Assignment(atom, TRUE , Status.UNKNOWN)
+                        ass = Assignment(atom, TRUE , S.UNKNOWN)
                     elif val1 == False:
-                        ass = Assignment(atom, FALSE, Status.UNKNOWN)
+                        ass = Assignment(atom, FALSE, S.UNKNOWN)
                     else:
-                        ass = Assignment(atom, None, Status.UNKNOWN)
+                        ass = Assignment(atom, None, S.UNKNOWN)
                     if atom.code == goal_string:
                         goal = ass
                     elif ass.value is not None:
@@ -627,7 +626,7 @@ class Problem(object):
             # start with negations !
             assignments.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
             assignments.append(goal if goal_string else
-                                Assignment(TRUE, TRUE, Status.UNKNOWN))
+                                Assignment(TRUE, TRUE, S.UNKNOWN))
 
             assignments = self._generalize(assignments, known, theory)
             models.append(assignments)
