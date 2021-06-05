@@ -103,10 +103,22 @@ def generate():
             theory = f.read()
             output = generateZ3(theory)
 
+            # stabilize the output
+            if 'minimize.idp' in file:
+                output = re.sub(r'^f:=.*\n?', '', output, flags=re.MULTILINE)
+
             # Remove absolute paths from output.
-            output = re.sub(r'(/.*)(?=site-packages/)', '', output)
-            output = re.sub(r'(/.*)(?=IDP-Z3/)', '', output)
-            output = re.sub(r'(/.*)(?=web-IDP-Z3/)', '', output)
+            output = re.sub(r'(/.*)(?=site-packages/)', '', output, flags=re.MULTILINE)
+            output = re.sub(r'(/.*)(?=IDP-Z3/)', '', output, flags=re.MULTILINE)
+            output = re.sub(r'(/.*)(?=web-IDP-Z3/)', '', output, flags=re.MULTILINE)
+
+            # remove the folder
+            output = re.sub(r'site-packages/', '', output, flags=re.MULTILINE)
+            output = re.sub(r'IDP-Z3/', '', output, flags=re.MULTILINE)
+            output = re.sub(r'web-IDP-Z3/', '', output, flags=re.MULTILINE)
+
+            # remove line numbers in error messages
+            output = re.sub(r'line \d+,', 'line ??,', output, flags=re.MULTILINE)
 
             z3 = file.replace(".z3", ".z3z3")
             z3 = z3.replace(".idp", ".z*")
@@ -127,10 +139,6 @@ def generate():
 
     total = round(time.process_time()-start, 3)
     print("*** Total: ", total)
-
-    f = open(os.path.join(dir, "duration.txt"), "w")
-    f.write(str(total))
-    f.close()
 
     if out_dict:
         for k, v in out_dict.items():

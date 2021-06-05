@@ -149,6 +149,8 @@ class run(Resource):
                     print(g.profiler.output_text(unicode=True, color=True))
                 return out
             except Exception as exc:
+                if with_profiling:
+                    g.profiler.stop()
                 traceback.print_exc()
                 return str(exc)
 
@@ -185,6 +187,8 @@ class meta(Resource):
                     print(g.profiler.output_text(unicode=True, color=True))
                 return out
             except Exception as exc:
+                if with_profiling:
+                    g.profiler.stop()
                 traceback.print_exc()
                 return str(exc)
 
