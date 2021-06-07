@@ -94,10 +94,11 @@ def load_json(state, jsonstr: str):
         assert json_data != {}, "Reset not expected here"
 
         for symbol in json_data:
-            # reset all assignments for that atom
+            # reset some of the assignments for that atom
             for atom in state.assignments.values():
                 if (atom.symbol_decl.name == symbol
-                    and atom.value):
+                    and atom.value
+                    and atom.status in [Status.GIVEN, Status.CONSEQUENCE, Status.ENV_CONSQ]):
                     atom.unset()
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
