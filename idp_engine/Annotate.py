@@ -135,7 +135,7 @@ Theory.annotate = annotate
 
 def annotate(self, theory, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
-    self.setRecursiveSymbols()
+    self.set_level_symbols()
 
     # create common variables, and rename vars in rule
     self.clarks = {}

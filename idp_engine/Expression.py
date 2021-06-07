@@ -431,16 +431,34 @@ class Expression(ASTNode):
         """
         return (None, None, None)
 
-    def splitEquivalences(self):
-        self.sub_exprs = [e.splitEquivalences() for e in self.sub_exprs]
-        return self
+    def split_equivalences(self):
+        """Returns an equivalent expression where equivalences are replaced by
+        implications
 
-    def gatherSymbols(self, symbols):
-        for e in self.sub_exprs:
-            e.gatherSymbols(symbols)
+        Returns:
+            Expression
+        """
+        out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
+        return out
 
-    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [e.addLevelMapping(level_symbols, head, pos_justification, polarity) for e in self.sub_exprs]
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        """Returns an expression where level mapping atoms (e.g., lvl_p > lvl_q)
+         are added to atoms containing recursive symbols.
+
+        Arguments:
+            - level_symbols: the level mapping symbols as well as their
+              corresponding recursive symbols
+            - head: head of the rule we are adding level mapping symbols to.
+            - pos_justification: whether we are adding symbols to the direct
+              positive justification (e.g., head => body) or direct negative
+              justification (e.g., body => head) part of the rule.
+            - polarity: whether the current expression occurs under negation.
+
+        Returns:
+            Expression
+        """
+        self.sub_exprs = [e.add_level_mapping(level_symbols, head, pos_justification, polarity)
+                          for e in self.sub_exprs]
         return self
 
 
@@ -469,16 +487,6 @@ class Symbol(Expression):
 
     def __repr__(self):
         return str(self)
-
-    def translate(self):
-        if self.name == BOOL:
-            return BoolSort()
-        elif self.name == INT:
-            return IntSort()
-        elif self.name == REAL:
-            return RealSort()
-        else:
-            return self.decl.translate()
 
 
 class IfExpr(Expression):
@@ -652,9 +660,9 @@ class BinaryOperator(Expression):
 class AImplication(BinaryOperator):
     PRECEDENCE = 50
 
-    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(level_symbols, head, pos_justification, not polarity),
-                          self.sub_exprs[1].addLevelMapping(level_symbols, head, pos_justification, polarity)]
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity),
+                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
         return self
 
 
@@ -668,19 +676,18 @@ class AEquivalence(BinaryOperator):
                                           AUnary.make('¬', self.sub_exprs[1].copy())])
         return AConjunction.make('∧', [posimpl, negimpl])
 
-    def splitEquivalences(self):
-        self.sub_exprs[0] = self.sub_exprs[0].splitEquivalences()
-        self.sub_exprs[1] = self.sub_exprs[1].splitEquivalences()
-        self.sub_exprs = [e.splitEquivalences() for e in self.sub_exprs]
+    def split_equivalences(self):
+        self.sub_exprs[0] = self.sub_exprs[0].split_equivalences()
+        self.sub_exprs[1] = self.sub_exprs[1].split_equivalences()
+        self.sub_exprs = [e.split_equivalences() for e in self.sub_exprs]
         return self.split()
 
-# TODO: don't implications and reverse implications have the same precedence?
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
 
-    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].addLevelMapping(level_symbols, head, pos_justification, polarity),
-                          self.sub_exprs[1].addLevelMapping(level_symbols, head, pos_justification, not polarity)]
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity),
+                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
         return self
 
 class ADisjunction(BinaryOperator):
@@ -747,8 +754,11 @@ class AUnary(Expression):
     def __str1__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
-    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [e.addLevelMapping(level_symbols, head, pos_justification, not polarity if self.operator == '¬' else polarity)
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [e.add_level_mapping(level_symbols, head,
+                                              pos_justification,
+                                              not polarity
+                                              if self.operator == '¬' else polarity)
                           for e in self.sub_exprs]
         return self
 
@@ -925,20 +935,20 @@ class AppliedSymbol(Expression):
             constructor = Constructor(name=self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
 
-    def gatherSymbols(self, symbols):
-        symbols.add(self.symbol.decl)
-
-    def addLevelMapping(self, level_symbols, head, pos_justification, polarity):
-        if head.symbol.decl not in level_symbols or self.symbol.decl not in level_symbols:
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        assert(head.symbol.decl in level_symbols)
+        if self.symbol.decl not in level_symbols:
             return self
         else:
             if DEF_SEMANTICS == "well-founded":
-                op = ('>' if pos_justification else '≥') if polarity else ('≤' if pos_justification else '<')
+                op = ('>' if pos_justification else '≥') \
+                    if polarity else ('≤' if pos_justification else '<')
             elif DEF_SEMANTICS == "stable":
                 op = '≥' if polarity else '<'
             else:
                 assert(DEF_SEMANTICS == "co-induction")
-                op = ('≥' if pos_justification else '>') if polarity else ('<' if pos_justification else '≤')
+                op = ('≥' if pos_justification else '>') \
+                    if polarity else ('<' if pos_justification else '≤')
             comp = BinaryOperator.make(op, [
                 AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
                 AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)

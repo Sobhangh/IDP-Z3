@@ -31,7 +31,7 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 BoolVal, Datatype)
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration
-from idp_engine.Expression import (Constructor, Expression, IfExpr,
+from idp_engine.Expression import (Constructor, Expression, Symbol, IfExpr,
                                    AQuantification, BinaryOperator,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
@@ -120,6 +120,20 @@ def reified(self) -> DatatypeRef:
         self._reified = Const(b'*'+self.code.encode(), BoolSort())
     return self._reified
 Expression.reified = reified
+
+
+# class Symbol  ###############################################################
+
+def translate(self):
+    if self.name == BOOL:
+        return BoolSort()
+    elif self.name == INT:
+        return IntSort()
+    elif self.name == REAL:
+        return RealSort()
+    else:
+        return self.decl.translate()
+Symbol.translate=translate
 
 
 # Class IfExpr  ###############################################################

@@ -387,7 +387,7 @@ class SymbolDeclaration(ASTNode):
             if 'name' in kwargs:
                 self.name = intern(kwargs.pop('name').name)
             else:
-                self.name = kwargs.pop('strname')
+                self.name = intern(kwargs.pop('strname'))
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
@@ -471,6 +471,8 @@ class Definition(ASTNode):
         clarks ({Declaration: Transformed Rule}): normalized rule for each defined symbol (used to be Clark completion)
 
         def_vars ({String: {String: Variable}}): Fresh variables for arguments and result
+
+        level_symbols ({SymbolDeclaration: Symbol}): map of recursively defined symbols to level mapping symbols
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
@@ -480,10 +482,10 @@ class Definition(ASTNode):
         self.rules = kwargs.pop('rules')
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}}
-        self.level_symbols = {}  # {SymbolDeclaration: Symbol} map of recursive symbols to level mapping symbols
+        self.level_symbols = {}  # {SymbolDeclaration: Symbol}
 
     def __str__(self):
-        return "Definition(s) " +str(self.id)+" of " + ",".join([k.name for k in self.clarks.keys()])
+        return "Definition " +str(self.id)+" of " + ",".join([k.name for k in self.clarks.keys()])
 
     def __repr__(self):
         out = []
@@ -497,22 +499,27 @@ class Definition(ASTNode):
     def __hash__(self):
         return hash(self.id)
 
-    def setRecursiveSymbols(self):
-        headToBody = set()
+    def set_level_symbols(self):
+        """Calculates which symbols in the definition are recursively defined,
+           creates a corresponding level mapping symbol,
+           and stores these in self.level_symbols.
+        """
+        dependencies = set()
         for r in self.rules:
-            symbs = set()
-            r.body.gatherSymbols(symbs)
-            for s in symbs:
-                headToBody.add((r.definiendum.symbol.decl, s))
+            symbs = {}
+            r.body.collect_symbols(symbs)
+            for s in symbs.values():
+                dependencies.add((r.definiendum.symbol.decl, s))
 
         while True:
-            new_relations = set((x, w) for x, y in headToBody for q, w in headToBody if q == y)
-            closure_until_now = headToBody | new_relations
-            if closure_until_now == headToBody:
+            new_relations = set((x, w) for x, y in dependencies
+                                for q, w in dependencies if q == y)
+            closure_until_now = dependencies | new_relations
+            if len(closure_until_now) == len(dependencies):
                 break
-            headToBody = closure_until_now
+            dependencies = closure_until_now
 
-        symbs = {s for (s, ss) in headToBody if s == ss}
+        symbs = {s for (s, ss) in dependencies if s == ss}
         for r in self.rules:
             key = r.definiendum.symbol.decl
             if key not in symbs or key in self.level_symbols:
@@ -523,7 +530,16 @@ class Definition(ASTNode):
             self.level_symbols[key] = Symbol(name=symbdec.name)
             self.level_symbols[key].decl = symbdec
 
-    def isRecursive(self):
+        for decl in self.level_symbols.keys():
+            self.check(decl.out.name == BOOL,
+                       "Inductively defined functions are not supported yet.")
+
+
+    def is_recursive(self):
+        """Returns whether the definition is recursive, i.e., some symbols are recursively defined by themselves.
+
+        Returns: Boolean
+        """
         return len(self.level_symbols) > 0
 
 class Rule(ASTNode):
