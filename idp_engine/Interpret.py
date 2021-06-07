@@ -122,9 +122,9 @@ def interpret(self, theory):
     expr = AEquivalence.make('⇔', [expr, self.body])
     if not self.out and DEF_SEMANTICS != "completion":  # Add level mapping
         expr = expr.splitEquivalences()
-        expr.sub_exprs[0].sub_exprs[1] = expr.sub_exprs[0].sub_exprs[1].addLevelMapping(self.definition.level_symbols,
+        expr.sub_exprs[0].sub_exprs[1] = expr.sub_exprs[0].sub_exprs[1].addLevelMapping(self.parent.level_symbols,
                                                                                         self.definiendum, True, True)
-        expr.sub_exprs[1].sub_exprs[1] = expr.sub_exprs[1].sub_exprs[1].addLevelMapping(self.definition.level_symbols,
+        expr.sub_exprs[1].sub_exprs[1] = expr.sub_exprs[1].sub_exprs[1].addLevelMapping(self.parent.level_symbols,
                                                                                         self.definiendum, False, True)
         # print(expr.sub_exprs)
     expr = AQuantification.make('∀', self.quantees, expr)

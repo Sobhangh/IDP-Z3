@@ -151,7 +151,6 @@ def annotate(self, theory, voc, q_vars):
             self.def_vars[decl.name] = q_v
         new_rule = r.rename_args(self.def_vars[decl.name])
         self.clarks.setdefault(decl, []).append(new_rule)
-        r.definition = self
 
     # join the bodies of rules
     for decl, rules in self.clarks.items():

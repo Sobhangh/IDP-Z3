@@ -538,7 +538,6 @@ class Rule(ASTNode):
         self.block = None  # theory where it occurs
         self.cache = {}
         self.inst_def_level = 0
-        self.definition = None  # definition where it occurs
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
