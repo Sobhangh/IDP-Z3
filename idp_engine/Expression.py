@@ -677,10 +677,8 @@ class AEquivalence(BinaryOperator):
         return AConjunction.make('∧', [posimpl, negimpl])
 
     def split_equivalences(self):
-        self.sub_exprs[0] = self.sub_exprs[0].split_equivalences()
-        self.sub_exprs[1] = self.sub_exprs[1].split_equivalences()
-        self.sub_exprs = [e.split_equivalences() for e in self.sub_exprs]
-        return self.split()
+        out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
+        return out.split()
 
 class ARImplication(BinaryOperator):
     PRECEDENCE = 30
