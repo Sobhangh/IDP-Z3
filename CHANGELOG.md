@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): .
 
 ### API
+* MR !98: Improve performance for theories with large structures
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions

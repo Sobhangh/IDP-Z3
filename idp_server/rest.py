@@ -129,21 +129,28 @@ class run(Resource):
         log("start /run")
         with z3lock:
             try:
+                if with_profiling:
+                    g.profiler = Profiler()
+                    g.profiler.start()
+
                 args = parser.parse_args()
-                try:
-                    idp = idpOf(args['code'])
-                    # capture stdout, print()
-                    with io.StringIO() as buf, redirect_stdout(buf):
-                        try:
-                            idp.execute()
-                        except Exception as exc:
-                            print(exc)
-                        out = buf.getvalue()
-                    return out
-                except Exception as exc:
-                    traceback.print_exc()
-                    return str(exc)
+                idp = idpOf(args['code'])
+                # capture stdout, print()
+                with io.StringIO() as buf, redirect_stdout(buf):
+                    try:
+                        idp.execute()
+                    except Exception as exc:
+                        print(exc)
+                    out = buf.getvalue()
+
+                log("end /run ")
+                if with_profiling:
+                    g.profiler.stop()
+                    print(g.profiler.output_text(unicode=True, color=True))
+                return out
             except Exception as exc:
+                if with_profiling:
+                    g.profiler.stop()
                 traceback.print_exc()
                 return str(exc)
 
@@ -164,17 +171,24 @@ class meta(Resource):
         log("start /meta")
         with z3lock:
             try:
+                if with_profiling:
+                    g.profiler = Profiler()
+                    g.profiler.start()
+
                 args = parser.parse_args()
-                try:
-                    idp = idpOf(args['code'])
-                    state = State.make(idp, "{}", "{}")
-                    out = metaJSON(state)
-                    out["propagated"] = Output(state).fill(state)
-                    return out
-                except Exception as exc:
-                    traceback.print_exc()
-                    return str(exc)
+                idp = idpOf(args['code'])
+                state = State.make(idp, "{}", "{}")
+                out = metaJSON(state)
+                out["propagated"] = Output(state).fill(state)
+
+                log("end /meta ")
+                if with_profiling:
+                    g.profiler.stop()
+                    print(g.profiler.output_text(unicode=True, color=True))
+                return out
             except Exception as exc:
+                if with_profiling:
+                    g.profiler.stop()
                 traceback.print_exc()
                 return str(exc)
 
@@ -236,6 +250,7 @@ class eval(Resource):
                         expanded = tuple(expanded.keys())
                         state = State.make(idpModel, "")
                     out = abstract(state, given_json)
+
                 log("end /eval " + method)
                 if with_profiling:
                     g.profiler.stop()

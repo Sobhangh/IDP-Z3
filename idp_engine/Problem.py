@@ -177,7 +177,10 @@ class Problem(object):
         for c in self.constraints:
             c.interpret(self)
             c.co_constraints(self.co_constraints)
-            c.collect(questions, all_=False)
+            # don't collect questions from type constraint for enumerated symbols
+            symbol = c.is_type_constraint_for
+            if not(symbol and symbol in self.interpretations):
+                c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert_(s, None, Status.UNKNOWN, False)
