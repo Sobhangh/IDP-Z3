@@ -29,20 +29,4 @@ theory {
                                                                                'typ': 'Int',
                                                                                'value': '',
                                                                                'values': []},
-                                       'Start_Dt_Dwelling_For_Social_Rent() = 2015': {'environmental': False,
-                                                                                      'is_assignment': True,
-                                                                                      'normal': False,
-                                                                                      'reading': 'Start_Dt_Dwelling_For_Social_Rent '
-                                                                                                 '= 2015',
-                                                                                      'relevant': False,
-                                                                                      'status': 'UNKNOWN',
-                                                                                      'typ': 'Bool'},
-                                       'Start_Dt_Dwelling_For_Social_Rent() = 2016': {'environmental': False,
-                                                                                      'is_assignment': True,
-                                                                                      'normal': False,
-                                                                                      'reading': 'Start_Dt_Dwelling_For_Social_Rent '
-                                                                                                 '= 2016',
-                                                                                      'relevant': False,
-                                                                                      'status': 'UNKNOWN',
-                                                                                      'typ': 'Bool'},
                                        '__rank': 9999}}

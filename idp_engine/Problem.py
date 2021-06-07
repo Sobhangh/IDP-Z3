@@ -177,9 +177,8 @@ class Problem(object):
         for c in self.constraints:
             c.interpret(self)
             c.co_constraints(self.co_constraints)
-            # don't collect questions from type constraint for enumerated symbols
-            symbol = c.is_type_constraint_for
-            if not(symbol and symbol in self.interpretations):
+            # don't collect questions from type constraints
+            if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
