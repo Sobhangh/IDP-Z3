@@ -534,6 +534,15 @@ class Definition(ASTNode):
                        f"Inductively defined functions are not supported yet: "
                        f"{decl.name}.")
 
+        if len(self.level_symbols) > 0:  # check for nested recursive symbols
+            nested = set()
+            for r in self.rules:
+                r.body.collect_nested_symbols(nested, False)
+            for decl in self.level_symbols.keys():
+                self.check(decl not in nested,
+                           f"Inductively defined nested symbols are not supported yet: "
+                           f"{decl.name}.")
+
 class Rule(ASTNode):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')

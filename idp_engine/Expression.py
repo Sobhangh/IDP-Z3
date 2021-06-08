@@ -328,6 +328,23 @@ class Expression(ASTNode):
                 e.collect_symbols(symbols, co_constraints)
         return symbols
 
+    def collect_nested_symbols(self, symbols=None, is_nested=False):
+        """ returns the set of symbol declarations that occur (in)directly
+        under an aggregate or some nested term, where is_nested is flipped
+        to True the moment we reach such an expression
+
+        returns {SymbolDeclaration}
+        """
+        symbols = set() if symbols == None else symbols
+        if is_nested and self.is_type_constraint_for is None:
+            if (hasattr(self, 'decl') and self.decl
+                and type(self.decl) != Constructor
+                and not self.decl.name in RESERVED_SYMBOLS):
+                symbols.add(self.decl)
+        for e in self.sub_exprs:
+            e.collect_nested_symbols(symbols, is_nested)
+        return symbols
+
     def generate_constructors(self, constructors: dict):
         """ fills the list `constructors` with all constructors belonging to
         open types.
@@ -514,6 +531,9 @@ class IfExpr(Expression):
                 f" then {self.sub_exprs[IfExpr.THEN].str}"
                 f" else {self.sub_exprs[IfExpr.ELSE].str}")
 
+    def collect_nested_symbols(self, symbols, is_nested):
+        return Expression.collect_nested_symbols(self, symbols, True)
+
 
 class Quantee(Expression):
     """represents the description of quantification, e.g., `x in T` or `(x,y) in P`
@@ -656,6 +676,10 @@ class BinaryOperator(Expression):
             questions.append(self)
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
+
+    def collect_nested_symbols(self, symbols, is_nested):
+        return Expression.collect_nested_symbols(self, symbols,
+                is_nested if self.operator[0] in ['∧','∨','⇒','⇐','⇔'] else True)
 
 
 class AImplication(BinaryOperator):
@@ -806,6 +830,9 @@ class AAggregate(Expression):
     def collect_symbols(self, symbols=None, co_constraints=True):
         return AQuantification.collect_symbols(self, symbols, co_constraints)
 
+    def collect_nested_symbols(self, symbols, is_nested):
+        return Expression.collect_nested_symbols(self, symbols, True)
+
 
 class AppliedSymbol(Expression):
     """Represents a symbol applied to arguments
@@ -893,6 +920,17 @@ class AppliedSymbol(Expression):
     def collect_symbols(self, symbols=None, co_constraints=True):
         symbols = Expression.collect_symbols(self, symbols, co_constraints)
         self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
+
+    def collect_nested_symbols(self, symbols, is_nested):
+        symbols = set() if symbols == None else symbols
+        if is_nested and self.is_type_constraint_for is None:
+            if (hasattr(self, 'decl') and self.decl
+                    and type(self.decl) != Constructor
+                    and not self.decl.name in RESERVED_SYMBOLS):
+                symbols.add(self.decl)
+        for e in self.sub_exprs:
+            e.collect_nested_symbols(symbols, True)
         return symbols
 
     def has_decision(self):
