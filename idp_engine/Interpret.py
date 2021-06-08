@@ -44,10 +44,11 @@ from .Parse import(Extern, TypeDeclaration,
                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
                    FunctionEnum, Enumeration, Tuple, ConstructedFrom)
 from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
-                    AImplication, AConjunction,  AEquivalence, AAggregate,
-                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol, Number,
-                    Variable, TRUE)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT, DEF_SEMANTICS
+                    AImplication, AConjunction, ARImplication, AAggregate,
+                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
+                    Variable, TRUE, AEquivalence)
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT, \
+    DEF_SEMANTICS, Semantics
 
 
 # class Extern  ###########################################################
@@ -119,17 +120,23 @@ def interpret(self, theory):
         expr = AppliedSymbol.make(self.definiendum.symbol,
                                   self.definiendum.sub_exprs)
         expr.in_head = True
-    expr = AEquivalence.make('⇔', [expr, self.body])
-    if not self.out and DEF_SEMANTICS != "completion" and \
-            self.definiendum.symbol.decl in self.parent.level_symbols:
-        # Add level mapping
-        expr = expr.split_equivalences()
-        expr.sub_exprs[0].sub_exprs[1] = expr.sub_exprs[0].sub_exprs[1].\
-            add_level_mapping(self.parent.level_symbols, self.definiendum, True, True)
-        expr.sub_exprs[1].sub_exprs[1] = expr.sub_exprs[1].sub_exprs[1].\
-            add_level_mapping(self.parent.level_symbols, self.definiendum, False, True)
-    expr = AQuantification.make('∀', self.quantees, expr)
-    self.whole_domain = expr.interpret(theory)
+
+    if self.out or DEF_SEMANTICS == Semantics.COMPLETION or \
+            self.definiendum.symbol.decl not in self.parent.level_symbols:
+        self.whole_domain = AQuantification.make('∀', self.quantees,
+                            AEquivalence.make('⇔', [expr,self.body])).interpret(theory)
+    else:
+        body = self.body.split_equivalences().interpret(theory)
+        expr1 = AImplication.make('⇒', [expr.copy(),
+                                        body.copy().add_level_mapping(
+                                            self.parent.level_symbols,
+                                            self.definiendum, True, True)])
+        expr2 = ARImplication.make('⇐', [expr,
+                                        body.add_level_mapping(
+                                            self.parent.level_symbols,
+                                            self.definiendum, False, False)])
+        self.whole_domain = AQuantification.make('∀', self.quantees,
+                            AConjunction.make('∧', [expr1, expr2])).interpret(theory)
     self.whole_domain.block = self.block
     return self
 Rule.interpret = interpret

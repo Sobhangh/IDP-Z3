@@ -36,7 +36,8 @@ from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 from z3 import BoolSort, IntSort, RealSort
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, RESERVED_SYMBOLS, IDPZ3Error, DEF_SEMANTICS
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, RESERVED_SYMBOLS, \
+    IDPZ3Error, DEF_SEMANTICS, Semantics
 
 
 class ASTNode(object):
@@ -672,8 +673,7 @@ class AEquivalence(BinaryOperator):
     # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
     def split(self):
         posimpl = AImplication.make('⇒', [self.sub_exprs[0], self.sub_exprs[1]])
-        negimpl = AImplication.make('⇒', [AUnary.make('¬', self.sub_exprs[0].copy()),
-                                          AUnary.make('¬', self.sub_exprs[1].copy())])
+        negimpl = ARImplication.make('⇐', [self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
         return AConjunction.make('∧', [posimpl, negimpl])
 
     def split_equivalences(self):
@@ -935,16 +935,16 @@ class AppliedSymbol(Expression):
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
         assert(head.symbol.decl in level_symbols)
-        if self.symbol.decl not in level_symbols:
+        if self.symbol.decl not in level_symbols or self.in_head:
             return self
         else:
-            if DEF_SEMANTICS == "well-founded":
+            if DEF_SEMANTICS == Semantics.WELLFOUNDED:
                 op = ('>' if pos_justification else '≥') \
                     if polarity else ('≤' if pos_justification else '<')
-            elif DEF_SEMANTICS == "stable":
+            elif DEF_SEMANTICS == Semantics.STABLE:
                 op = '≥' if polarity else '<'
             else:
-                assert(DEF_SEMANTICS == "co-induction")
+                assert(DEF_SEMANTICS == Semantics.COINDUCTION)
                 op = ('≥' if pos_justification else '>') \
                     if polarity else ('<' if pos_justification else '≤')
             comp = BinaryOperator.make(op, [

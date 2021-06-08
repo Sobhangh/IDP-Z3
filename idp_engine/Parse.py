@@ -532,11 +532,12 @@ class Definition(ASTNode):
 
         for decl in self.level_symbols.keys():
             self.check(decl.out.name == BOOL,
-                       "Inductively defined functions are not supported yet.")
-
+                       f"Inductively defined functions are not supported yet: "
+                       f"{decl.name}.")
 
     def is_recursive(self):
-        """Returns whether the definition is recursive, i.e., some symbols are recursively defined by themselves.
+        """Returns whether the definition is recursive, i.e., some symbols are
+        recursively defined by themselves.
 
         Returns: Boolean
         """

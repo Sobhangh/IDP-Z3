@@ -22,6 +22,7 @@
 from collections import ChainMap, Iterable
 from json import JSONEncoder
 import time
+from enum import Enum, auto
 
 
 """
@@ -30,8 +31,15 @@ import time
 
 CO_CONSTR_RECURSION_DEPTH = 3
 MAX_QUANTIFIER_EXPANSION = 20
-DEF_SEMANTICS_OPTIONS = ["completion", "stable", "well-founded", "co-induction"]
-DEF_SEMANTICS = "well-founded"
+
+class Semantics(Enum):
+    """Semantics for inductive definitions"""
+    COMPLETION = auto()
+    STABLE = auto()
+    WELLFOUNDED = auto()
+    COINDUCTION = auto()
+
+DEF_SEMANTICS = Semantics.WELLFOUNDED
 
 """
     String constants
