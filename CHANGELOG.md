@@ -6,10 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
-Contributors (alphabetical): .
+Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
 * MR !98: Improve performance for theories with large structures
+* fix #104: implications, equivalences are binary connectives, not n-ary.
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions
