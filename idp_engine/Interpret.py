@@ -40,9 +40,10 @@ import copy
 from itertools import product, repeat
 
 from .Assignments import Status
-from .Parse import(Extern, TypeDeclaration,
-                   SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
-                   FunctionEnum, Enumeration, Tuple, ConstructedFrom)
+from .Parse import (Extern, TypeDeclaration,
+                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
+                    FunctionEnum, Enumeration, Tuple, ConstructedFrom,
+                    Definition)
 from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction, ARImplication, AAggregate,
                     AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
@@ -99,6 +100,16 @@ def interpret(self, problem):
                 domain.annotations['reading'] = "Possible values for " + str(inst)
                 problem.constraints.append(domain)
 SymbolDeclaration.interpret = interpret
+
+
+# class Definition  ###########################################################
+
+def interpret(self, problem):
+    for decl, rule in self.clarks.items():
+        if rule.is_whole_domain:
+            # rule.body = rule.body.interpret(problem)
+            rule.interpret(problem)
+Definition.interpret = interpret
 
 
 # class Rule  ###########################################################

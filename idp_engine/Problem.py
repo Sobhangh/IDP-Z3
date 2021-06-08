@@ -165,9 +165,10 @@ class Problem(object):
 
         # expand whole-domain definitions
         for defin in self.definitions:
+            defin.interpret(self)
             for decl, rule in defin.clarks.items():
                 if rule.is_whole_domain:
-                    self.def_constraints[decl, defin] = rule.interpret(self).whole_domain
+                    self.def_constraints[decl, defin] = rule.whole_domain
 
         # initialize assignments, co_constraints, questions
 
