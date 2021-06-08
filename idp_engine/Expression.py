@@ -22,7 +22,7 @@
 
 """
 __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
-           "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
+           "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
            "UnappliedSymbol", "Variable",
@@ -580,7 +580,7 @@ class AQuantification(Expression):
         return symbols
 
 
-class BinaryOperator(Expression):
+class Operator(Expression):
     PRECEDENDE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
 
@@ -627,18 +627,18 @@ class BinaryOperator(Expression):
             e.collect(questions, all_, co_constraints)
 
 
-class AImplication(BinaryOperator):
+class AImplication(Operator):
     PRECEDENCE = 50
 
 
-class AEquivalence(BinaryOperator):
+class AEquivalence(Operator):
     PRECEDENCE = 40
 
 
-class ARImplication(BinaryOperator):
+class ARImplication(Operator):
     PRECEDENCE = 30
 
-class ADisjunction(BinaryOperator):
+class ADisjunction(Operator):
     PRECEDENCE = 60
 
     def __str1__(self):
@@ -647,11 +647,11 @@ class ADisjunction(BinaryOperator):
         return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
 
 
-class AConjunction(BinaryOperator):
+class AConjunction(Operator):
     PRECEDENCE = 70
 
 
-class AComparison(BinaryOperator):
+class AComparison(Operator):
     PRECEDENCE = 80
 
     def __init__(self, **kwargs):
@@ -667,15 +667,15 @@ class AComparison(BinaryOperator):
                 and self.sub_exprs[1].value is not None
 
 
-class ASumMinus(BinaryOperator):
+class ASumMinus(Operator):
     PRECEDENCE = 90
 
 
-class AMultDiv(BinaryOperator):
+class AMultDiv(Operator):
     PRECEDENCE = 100
 
 
-class APower(BinaryOperator):
+class APower(Operator):
     PRECEDENCE = 110
 
 

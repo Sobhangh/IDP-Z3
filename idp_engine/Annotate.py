@@ -27,9 +27,9 @@ from .Parse import (Vocabulary, Extern, TypeDeclaration,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
-from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
-                         ARImplication, AImplication, AConjunction, ADisjunction,
-                         BinaryOperator, AComparison, AUnary, AAggregate,
+from .Expression import (Expression, Constructor, IfExpr, AQuantification,
+                         ARImplication, AImplication, AEquivalence, ADisjunction,
+                         Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number)
 
@@ -404,21 +404,37 @@ def annotate1(self):
 AQuantification.annotate1 = annotate1
 
 
-# Class BinaryOperator  #######################################################
+# Class Operator  #######################################################
 
 def annotate1(self):
-    self.check(not (self.operator[0] == '⇒' and 2 < len(self.sub_exprs)),
-            "Implication is not associative.  Please use parenthesis.")
     if self.type is None:
         self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
                 else INT if any(e.type == INT for e in self.sub_exprs) \
                 else self.sub_exprs[0].type  # constructed type, without arithmetic
     return Expression.annotate1(self)
-BinaryOperator.annotate1 = annotate1
+Operator.annotate1 = annotate1
 
+
+# Class AImplication  #######################################################
+
+def annotate1(self):
+    self.check(len(self.sub_exprs) == 2,
+               "Implication is not associative.  Please use parenthesis.")
+    self.type = BOOL
+    return Expression.annotate1(self)
+AImplication.annotate1 = annotate1
+
+
+# Class AImplication, AEquivalence  #######################################################
+
+def annotate1(self):
+    self.check(len(self.sub_exprs) == 2,
+               "Equivalence is not associative.  Please use parenthesis.")
+    self.type = BOOL
+    return Expression.annotate1(self)
+AEquivalence.annotate1 = annotate1
 
 # Class ARImplication  #######################################################
-
 
 def annotate(self, voc, q_vars):
     # reverse the implication
@@ -434,7 +450,7 @@ ARImplication.annotate = annotate
 # Class AComparison  #######################################################
 
 def annotate(self, voc, q_vars):
-    out = BinaryOperator.annotate(self, voc, q_vars)
+    out = Operator.annotate(self, voc, q_vars)
     out.type = BOOL
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
