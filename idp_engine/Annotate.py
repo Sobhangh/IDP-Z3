@@ -120,11 +120,6 @@ def annotate(self, idp):
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
-    # collect multiple definitions of same symbol declaration
-    for d in self.definitions:
-        for decl, rule in d.clarks.items():
-            if not (decl, d) in self.clark:
-                self.clark[(decl, d)] = rule
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])

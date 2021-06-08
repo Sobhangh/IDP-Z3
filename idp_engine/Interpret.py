@@ -425,7 +425,8 @@ def interpret(self, problem):
             simpler = f(problem, 0, self, sub_exprs)
         if (not self.in_head and not self.fresh_vars):
             instantiations = [rule.instantiate_definition(sub_exprs, problem)
-                              for (decl, _), rule in problem.clark.items()
+                              for defin in problem.definitions
+                              for decl, rule in defin.clarks.items()
                               if self.decl == decl]
             instantiations = [x for x in instantiations if x]
             if len(instantiations) == 1:

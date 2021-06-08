@@ -448,7 +448,6 @@ class Theory(ASTNode):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.declarations = {}
-        self.clark = {}  # {(Declaration, Definition): Rule}
         self.def_constraints = {}  # {(Declaration, Definition): Expression}
         self.assignments = Assignments()
 
@@ -534,14 +533,6 @@ class Definition(ASTNode):
             self.check(decl.out.name == BOOL,
                        f"Inductively defined functions are not supported yet: "
                        f"{decl.name}.")
-
-    def is_recursive(self):
-        """Returns whether the definition is recursive, i.e., some symbols are
-        recursively defined by themselves.
-
-        Returns: Boolean
-        """
-        return len(self.level_symbols) > 0
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
