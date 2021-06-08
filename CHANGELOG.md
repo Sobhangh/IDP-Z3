@@ -12,6 +12,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * MR !98: Improve performance for theories with large structures
 * (breaking) Merge !??: simplify `get_range` API
 * Merge !93: improve speed by caching z3 translations
+* Merge !103: support alternative "batch" propagation algorithm (not faster)
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions
