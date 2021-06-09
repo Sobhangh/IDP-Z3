@@ -10,10 +10,14 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 
 ### API
 * MR !98: Improve performance for theories with large structures
+* (breaking) Merge 101: simplify `get_range` API
+* Merge !93: improve speed by caching z3 translations
+* Merge !103: support alternative "batch" propagation algorithm (not faster)
 * fix #104: implications, equivalences are binary connectives, not n-ary.
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions
+* Merge 101: improve performance of IC (propagate dropdowns on request)
 
 
 ## [0.8.2] - 2021-06-02
@@ -24,7 +28,6 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * (breaking) Merge !82: Problem must be created with `extended=True` for `decision_table()` API
 * Merge !87: add `get_range` to Problem API
 * Merge !88: add `abs` built-in function
-* Merge !93: improve speed by caching z3 translations
 * fix #90: error in `sum` aggregate
 * fix #74: Incorrect propagation when a symbol is defined twice
 
