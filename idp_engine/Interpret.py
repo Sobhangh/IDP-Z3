@@ -478,7 +478,7 @@ AppliedSymbol .substitute = substitute
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # update fresh_vars
     if type(out) == AppliedSymbol:  # might be a number after instantiation
-        if type(out.symbol) == SymbolExpr and out.symbol.value is None:  # $(x)()
+        if type(out.symbol) == SymbolExpr and out.symbol.is_intentional():  # $(x)()
             out.symbol = out.symbol.instantiate(e0, e1, problem)
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),

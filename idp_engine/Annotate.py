@@ -159,6 +159,9 @@ Definition.annotate = annotate
 # Class Rule  #######################################################
 
 def annotate(self, voc, q_vars):
+    self.check(not self.definiendum.symbol.is_intentional(),
+                f"No support for intentional objects in the head of a rule: "
+                f"{self}")
     # create head variables
     q_v = {**q_vars}  # copy
     for q in self.quantees:

@@ -839,8 +839,6 @@ class AppliedSymbol(Expression):
     """Represents a symbol applied to arguments
 
     Args:
-        eval (string): '$' if the symbol must be evaluated, else ''
-
         symbol (Expression): the symbol to be applied to arguments
 
         is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
@@ -1006,6 +1004,8 @@ class SymbolExpr(Expression):
         return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
 
+    def is_intentional(self):
+        return self.eval
 
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.
