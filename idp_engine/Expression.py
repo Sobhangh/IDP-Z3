@@ -328,19 +328,17 @@ class Expression(ASTNode):
                 e.collect_symbols(symbols, co_constraints)
         return symbols
 
-    def collect_nested_symbols(self, symbols=None, is_nested=False):
+    def collect_nested_symbols(self, symbols, is_nested):
         """ returns the set of symbol declarations that occur (in)directly
         under an aggregate or some nested term, where is_nested is flipped
         to True the moment we reach such an expression
 
         returns {SymbolDeclaration}
         """
-        symbols = set() if symbols == None else symbols
-        if is_nested and self.is_type_constraint_for is None:
-            if (hasattr(self, 'decl') and self.decl
-                and type(self.decl) != Constructor
-                and not self.decl.name in RESERVED_SYMBOLS):
-                symbols.add(self.decl)
+        if is_nested and (hasattr(self, 'decl') and self.decl
+            and type(self.decl) != Constructor
+            and not self.decl.name in RESERVED_SYMBOLS):
+            symbols.add(self.decl)
         for e in self.sub_exprs:
             e.collect_nested_symbols(symbols, is_nested)
         return symbols
@@ -464,13 +462,15 @@ class Expression(ASTNode):
          are added to atoms containing recursive symbols.
 
         Arguments:
-            - level_symbols: the level mapping symbols as well as their
-              corresponding recursive symbols
-            - head: head of the rule we are adding level mapping symbols to.
-            - pos_justification: whether we are adding symbols to the direct
-              positive justification (e.g., head => body) or direct negative
-              justification (e.g., body => head) part of the rule.
-            - polarity: whether the current expression occurs under negation.
+            - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
+              symbols as well as their corresponding recursive symbols
+            - head (AppliedSymbol): head of the rule we are adding level mapping
+              symbols to.
+            - pos_justification (Bool): whether we are adding symbols to the
+              direct positive justification (e.g., head => body) or direct
+              negative justification (e.g., body => head) part of the rule.
+            - polarity (Bool): whether the current expression occurs under
+              negation.
 
         Returns:
             Expression
@@ -923,12 +923,10 @@ class AppliedSymbol(Expression):
         return symbols
 
     def collect_nested_symbols(self, symbols, is_nested):
-        symbols = set() if symbols == None else symbols
-        if is_nested and self.is_type_constraint_for is None:
-            if (hasattr(self, 'decl') and self.decl
-                    and type(self.decl) != Constructor
-                    and not self.decl.name in RESERVED_SYMBOLS):
-                symbols.add(self.decl)
+        if is_nested and (hasattr(self, 'decl') and self.decl
+            and type(self.decl) != Constructor
+            and not self.decl.name in RESERVED_SYMBOLS):
+            symbols.add(self.decl)
         for e in self.sub_exprs:
             e.collect_nested_symbols(symbols, True)
         return symbols

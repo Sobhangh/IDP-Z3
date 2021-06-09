@@ -467,11 +467,11 @@ class Definition(ASTNode):
 
         rules ([Rule]): set of rules for the definition
 
-        clarks ({Declaration: Transformed Rule}): normalized rule for each defined symbol (used to be Clark completion)
+        clarks (dict[Declaration, Transformed Rule]): normalized rule for each defined symbol (used to be Clark completion)
 
-        def_vars ({String: {String: Variable}}): Fresh variables for arguments and result
+        def_vars (dict[String, dict[String, Variable]]): Fresh variables for arguments and result
 
-        level_symbols ({SymbolDeclaration: Symbol}): map of recursively defined symbols to level mapping symbols
+        level_symbols (dict[SymbolDeclaration, Symbol]): map of recursively defined symbols to level mapping symbols
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
