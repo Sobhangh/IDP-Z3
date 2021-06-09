@@ -22,7 +22,7 @@
 
 """
 __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
-           "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
+           "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
            "UnappliedSymbol", "Variable",
@@ -631,7 +631,7 @@ class AQuantification(Expression):
         return symbols
 
 
-class BinaryOperator(Expression):
+class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
 
@@ -682,7 +682,7 @@ class BinaryOperator(Expression):
                 is_nested if self.operator[0] in ['∧','∨','⇒','⇐','⇔'] else True)
 
 
-class AImplication(BinaryOperator):
+class AImplication(Operator):
     PRECEDENCE = 50
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
@@ -691,7 +691,7 @@ class AImplication(BinaryOperator):
         return self
 
 
-class AEquivalence(BinaryOperator):
+class AEquivalence(Operator):
     PRECEDENCE = 40
 
     # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
@@ -704,7 +704,7 @@ class AEquivalence(BinaryOperator):
         out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
         return out.split()
 
-class ARImplication(BinaryOperator):
+class ARImplication(Operator):
     PRECEDENCE = 30
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
@@ -712,7 +712,8 @@ class ARImplication(BinaryOperator):
                           self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
         return self
 
-class ADisjunction(BinaryOperator):
+
+class ADisjunction(Operator):
     PRECEDENCE = 60
 
     def __str1__(self):
@@ -721,11 +722,11 @@ class ADisjunction(BinaryOperator):
         return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
 
 
-class AConjunction(BinaryOperator):
+class AConjunction(Operator):
     PRECEDENCE = 70
 
 
-class AComparison(BinaryOperator):
+class AComparison(Operator):
     PRECEDENCE = 80
 
     def __init__(self, **kwargs):
@@ -741,15 +742,15 @@ class AComparison(BinaryOperator):
                 and self.sub_exprs[1].value is not None
 
 
-class ASumMinus(BinaryOperator):
+class ASumMinus(Operator):
     PRECEDENCE = 90
 
 
-class AMultDiv(BinaryOperator):
+class AMultDiv(Operator):
     PRECEDENCE = 100
 
 
-class APower(BinaryOperator):
+class APower(Operator):
     PRECEDENCE = 110
 
 
@@ -983,7 +984,7 @@ class AppliedSymbol(Expression):
                 assert(DEF_SEMANTICS == Semantics.COINDUCTION)
                 op = ('≥' if pos_justification else '>') \
                     if polarity else ('<' if pos_justification else '≤')
-            comp = BinaryOperator.make(op, [
+            comp = Operator.make(op, [
                 AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
                 AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
             ])

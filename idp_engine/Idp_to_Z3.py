@@ -31,8 +31,8 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 BoolVal, Datatype)
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration
-from idp_engine.Expression import (Constructor, Expression, Symbol, IfExpr,
-                                   AQuantification, BinaryOperator,
+from idp_engine.Expression import (Constructor, Expression, IfExpr,
+                                   AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
@@ -171,9 +171,9 @@ def translate1(self):
 AQuantification.translate1 = translate1
 
 
-# Class BinaryOperator  #######################################################
+# Class Operator  #######################################################
 
-BinaryOperator.MAP = {'∧': lambda x, y: And(x, y),
+Operator.MAP = {'∧': lambda x, y: And(x, y),
                       '∨': lambda x, y: Or(x, y),
                       '⇒': lambda x, y: Or(Not(x), y),
                       '⇐': lambda x, y: Or(x, Not(y)),
@@ -197,13 +197,13 @@ def translate1(self):
     out = self.sub_exprs[0].translate()
 
     for i in range(1, len(self.sub_exprs)):
-        function = BinaryOperator.MAP[self.operator[i - 1]]
+        function = Operator.MAP[self.operator[i - 1]]
         try:
             out = function(out, self.sub_exprs[i].translate())
         except Exception as e:
             raise e
     return out
-BinaryOperator.translate1 = translate1
+Operator.translate1 = translate1
 
 
 # Class ADisjunction  #######################################################
@@ -237,7 +237,7 @@ def translate1(self):
     for i in range(1, len(self.sub_exprs)):
         x = self.sub_exprs[i-1].translate()
         assert x is not None
-        function = BinaryOperator.MAP[self.operator[i - 1]]
+        function = Operator.MAP[self.operator[i - 1]]
         y = self.sub_exprs[i].translate()
         assert y is not None
         try:

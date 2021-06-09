@@ -140,7 +140,8 @@ class IDP(ASTNode):
             blocks (List[str]): list of names of the blocks to retrieve
 
         Returns:
-            List[Union[Vocabulary, Theory, Structure, Procedure, Display]]: list of AST nodes
+            List[Union[Vocabulary, Theory, Structure, Procedure, Display]]:
+                list of AST nodes
         """
         names = blocks.split(",") if type(blocks) is str else blocks
         out = []
