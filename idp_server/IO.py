@@ -94,10 +94,11 @@ def load_json(state, jsonstr: str):
         assert json_data != {}, "Reset not expected here"
 
         for symbol in json_data:
-            # reset all assignments for that atom
+            # reset some of the assignments for that atom
             for atom in state.assignments.values():
                 if (atom.symbol_decl.name == symbol
-                    and atom.value):
+                    and atom.value
+                    and atom.status in [Status.GIVEN, Status.CONSEQUENCE, Status.ENV_CONSQ]):
                     atom.unset()
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
@@ -150,7 +151,7 @@ class Output(object):
                 elif 0 < len(symb.range):
                     typ = symb.out.decl.type
                     symbol = {"typ": typ, "value": ""  #TODO
-                              , "values": [str(v) for v in symb.range]}
+                              , "values": []}
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": typ, "value": ""}  # default
                 else:
@@ -210,6 +211,9 @@ class Output(object):
                             s[key]["value"] = True if value.same_as(TRUE) else \
                                              False if value.same_as(FALSE) else \
                                              str(value)
+                        if 0 < len(symb.range) and atom.type != BOOL:
+                            # allow display of the value in drop box
+                            s[key]["values"] = [s[key]["value"]]
                     else:
                         s[key]["unknown"] = True
                     s[key]['reading'] = atom.annotations['reading'].replace("()", "")
