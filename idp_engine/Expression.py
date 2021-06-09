@@ -335,10 +335,6 @@ class Expression(ASTNode):
 
         returns {SymbolDeclaration}
         """
-        if is_nested and (hasattr(self, 'decl') and self.decl
-            and type(self.decl) != Constructor
-            and not self.decl.name in RESERVED_SYMBOLS):
-            symbols.add(self.decl)
         for e in self.sub_exprs:
             e.collect_nested_symbols(symbols, is_nested)
         return symbols
