@@ -22,9 +22,9 @@ web client.
 
 import ast
 
-from idp_engine.Expression import (TRUE, FALSE, AComparison, Number)
+from idp_engine import Problem, Status
+from idp_engine.Expression import (TRUE, FALSE, Number)
 from idp_engine.Parse import str_to_IDP
-from idp_engine.Assignments import Assignments, Status
 from idp_engine.utils import BOOL, INT, REAL, DATE
 
 def metaJSON(state):
@@ -79,12 +79,10 @@ def metaJSON(state):
 #################
 
 
-def load_json(state, jsonstr: str):
-    """ Parse a json string and create assignments in a state accordingly.
-    This function can also overwrite assignments that have already been set as
-    a default assignment, effectively overriding the default.
+def load_json(state: Problem, jsonstr: str):
+    """ Parse a json string and update assignments in a state accordingly.
 
-    :arg state: a State object containing the concepts that appear in the json
+    :arg state: a Problem object containing the concepts that appear in the json
     :arg jsonstr: the user's assignments in json
     :returns: the assignments
     :rtype: idp_engine.Assignments
