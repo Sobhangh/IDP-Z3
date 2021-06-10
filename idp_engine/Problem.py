@@ -68,6 +68,12 @@ class Problem(object):
             the problem.
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
+
+        propagated (Bool): true if a propagation has been done
+
+        assigned (OrderedSet): set of questions asserted since last propagate
+
+        cleared (OrderedSet): set of questions unassigned since last propagate
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -187,6 +193,8 @@ class Problem(object):
         for ass in self.assignments.values():
             ass.sentence = ass.sentence
             ass.sentence.original = ass.sentence.copy()
+
+        self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
     def assert_(self, code: str, value: Any, status: Status = Status.GIVEN):
@@ -200,15 +208,16 @@ class Problem(object):
         code = str(code)
         atom = self.assignments[code].sentence
         if value is None:
+            if self.propagated:
+                self.cleared.append(atom)
+                self.assigned.pop(atom, None)
             self.assignments.assert_(atom, value, Status.UNKNOWN, False)
         else:
             val = str_to_IDP(atom, str(value))
+            if self.propagated:
+                self.assigned.append(atom)
+                self.cleared.pop(atom, None)
             self.assignments.assert_(atom, val, status, False)
-        # reset any consequences
-        for v in self.assignments.values():
-            if v.status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.EXPANDED]:
-                v.status = Status.UNKNOWN
-                v.value = None
         self._formula = None
 
     def formula(self):
@@ -218,7 +227,8 @@ class Problem(object):
                 '∧',
                 [a.formula() for a in self.assignments.values()
                  if a.value is not None
-                 and a.status not in [Status.CONSEQUENCE, Status.ENV_CONSQ]]
+                 and (a.status not in [Status.CONSEQUENCE, Status.ENV_CONSQ]
+                      or (self.propagated and not self.cleared))]
                 + [s for s in self.constraints]
                 + [c for c in self.co_constraints]
                 + [s for s in self.def_constraints.values()]
@@ -230,7 +240,7 @@ class Problem(object):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
             if a.status not in [Status.GIVEN, Status.STRUCTURE,
-                                 Status.UNIVERSAL, Status.ENV_UNIV]
+                                Status.UNIVERSAL, Status.ENV_UNIV]
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -326,44 +336,65 @@ class Problem(object):
         return self
 
     def _propagate(self, tag):
-        z3_formula = self.formula().translate()
-        todo = self._todo()
-
-        solver = Solver()
-        solver.add(z3_formula)
-        result = solver.check()
-        if result == sat:
-            for q in todo:
-                solver.push()  #  faster (~3%) with push than without
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
-                res1 = solver.check()
-                if res1 == sat:
-                    val1 = solver.model().eval(q.reified())
-                    if str(val1) != str(q.reified()):  # if not irrelevant
-                        solver.push()
-                        solver.add(Not(q.reified() == val1))
-                        res2 = solver.check()
-                        solver.pop()
-
-                        if res2 == unsat:
-                            val = str_to_IDP(q, str(val1))
-                            yield self.assignments.assert_(q, val, tag, True)
-                        elif res2 == unknown:
-                            res1 = unknown
-                        else:  # reset the value
-                            self.assignments.assert_(q, None, Status.UNKNOWN, False)
-                solver.pop()
-                if res1 == unknown:
-                    # yield(f"Unknown: {str(q)}")
-                    solver = Solver()  # restart the solver
-                    solver.add(z3_formula)
-            yield "No more consequences."
-        elif result == unsat:
-            yield "Not satisfiable."
-            yield str(z3_formula)
+        statuses = []
+        if self.propagated:
+            if self.assigned:
+                statuses.extend([Status.UNKNOWN, Status.EXPANDED])
+            if self.cleared:
+                statuses.extend([Status.CONSEQUENCE, Status.ENV_CONSQ])
         else:
-            yield "Unknown satisfiability."
-            yield str(z3_formula)
+            statuses = [Status.UNKNOWN, Status.EXPANDED,
+                        Status.CONSEQUENCE, Status.ENV_CONSQ]
+
+        if statuses:
+            todo = OrderedSet(
+                a.sentence for a in self.assignments.values()
+                if ((not a.sentence.is_reified() or self.extended)
+                    and a.status in statuses
+                    ))
+            z3_formula = self.formula().translate()
+
+            solver = Solver()
+            solver.add(z3_formula)
+            result = solver.check()
+            if result == sat:
+                for q in todo:
+                    solver.push()  #  faster (~3%) with push than without
+                    solver.add(q.reified() == q.translate())  # in case todo contains complex formula
+                    res1 = solver.check()
+                    if res1 == sat:
+                        val1 = solver.model().eval(q.reified())
+                        if str(val1) != str(q.reified()):  # if not irrelevant
+                            solver.push()
+                            solver.add(Not(q.reified() == val1))
+                            res2 = solver.check()
+                            solver.pop()
+
+                            if res2 == unsat:
+                                val = str_to_IDP(q, str(val1))
+                                yield self.assignments.assert_(q, val, tag, True)
+                            elif res2 == unknown:
+                                res1 = unknown
+                            else:  # reset the value
+                                self.assignments.assert_(q, None, Status.UNKNOWN, False)
+                    solver.pop()
+                    if res1 == unknown:
+                        # yield(f"Unknown: {str(q)}")
+                        solver = Solver()  # restart the solver
+                        solver.add(z3_formula)
+                yield "No more consequences."
+            elif result == unsat:
+                yield "Not satisfiable."
+                yield str(z3_formula)
+            else:
+                yield "Unknown satisfiability."
+                yield str(z3_formula)
+        else:
+            for a in self.assignments.values():
+                if a.status in [Status.CONSEQUENCE, Status.ENV_CONSQ]:
+                    yield a
+            yield "No more consequences."
+        self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 
     def propagate(self, tag=Status.CONSEQUENCE):
         """ determine all the consequences of the constraints """
