@@ -25,6 +25,7 @@ with_png = False
 with_profiling = False
 
 from contextlib import redirect_stdout
+from copy import copy
 import io
 import os
 import threading
@@ -230,14 +231,16 @@ class eval(Resource):
                     out = state.get_range(args['field'])
                 if method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
-                    state.assignments = list(generator)[0]
-                    out = Output(state).fill(state)
+                    out = copy(state)
+                    out.assignments = list(generator)[0]
+                    out = Output(out).fill(out)
                 if method == "explain":
                     out = explain(state, args['value'])
                 if method == "minimize":
-                    state = state.optimize(args['symbol'], args['minimize'],
+                    out = copy(state)
+                    out = out.optimize(args['symbol'], args['minimize'],
                                            complete=False)
-                    out = Output(state).fill(state)
+                    out = Output(out).fill(out)
                 if method == "abstract":
                     if args['symbol'] != "":  # theory to explain ?
                         newTheory = (str(IDP.parse(args['code']).vocabulary)
