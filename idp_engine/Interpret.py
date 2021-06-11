@@ -40,14 +40,16 @@ import copy
 from itertools import product, repeat
 
 from .Assignments import Status
-from .Parse import(Extern, TypeDeclaration,
-                   SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
-                   FunctionEnum, Enumeration, Tuple, ConstructedFrom)
+from .Parse import (Extern, TypeDeclaration,
+                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
+                    FunctionEnum, Enumeration, Tuple, ConstructedFrom,
+                    Definition)
 from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
-                    AImplication, AConjunction,  AEquivalence, AAggregate,
-                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol, Number,
-                    Variable, TRUE)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT
+                    AImplication, AConjunction, ARImplication, AAggregate,
+                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
+                    Variable, TRUE, AEquivalence)
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT, \
+    DEF_SEMANTICS, Semantics
 
 
 # class Extern  ###########################################################
@@ -100,6 +102,16 @@ def interpret(self, problem):
 SymbolDeclaration.interpret = interpret
 
 
+# class Definition  ###########################################################
+
+def interpret(self, problem):
+    for decl, rule in self.clarks.items():
+        if rule.is_whole_domain:
+            # rule.body = rule.body.interpret(problem)
+            rule.interpret(problem)
+Definition.interpret = interpret
+
+
 # class Rule  ###########################################################
 
 def interpret(self, theory):
@@ -119,9 +131,23 @@ def interpret(self, theory):
         expr = AppliedSymbol.make(self.definiendum.symbol,
                                   self.definiendum.sub_exprs)
         expr.in_head = True
-    expr = AEquivalence.make('⇔', [expr, self.body])
-    expr = AQuantification.make('∀', self.quantees, expr)
-    self.whole_domain = expr.interpret(theory)
+
+    if self.out or DEF_SEMANTICS == Semantics.COMPLETION or \
+            self.definiendum.symbol.decl not in self.parent.level_symbols:
+        self.whole_domain = AQuantification.make('∀', self.quantees,
+                            AEquivalence.make('⇔', [expr,self.body])).interpret(theory)
+    else:
+        body = self.body.split_equivalences().interpret(theory)
+        expr1 = AImplication.make('⇒', [expr.copy(),
+                                        body.copy().add_level_mapping(
+                                            self.parent.level_symbols,
+                                            self.definiendum, True, True)])
+        expr2 = ARImplication.make('⇐', [expr,
+                                        body.add_level_mapping(
+                                            self.parent.level_symbols,
+                                            self.definiendum, False, False)])
+        self.whole_domain = AQuantification.make('∀', self.quantees,
+                            AConjunction.make('∧', [expr1, expr2])).interpret(theory)
     self.whole_domain.block = self.block
     return self
 Rule.interpret = interpret
@@ -410,8 +436,10 @@ def interpret(self, problem):
             simpler = f(problem, 0, self, sub_exprs)
         if (not self.in_head and not self.fresh_vars):
             instantiations = [rule.instantiate_definition(sub_exprs, problem)
-                              for (decl, _), rule in problem.clark.items()
+                              for defin in problem.definitions
+                              for decl, rule in defin.clarks.items()
                               if self.decl == decl]
+            instantiations = [x for x in instantiations if x]
             if len(instantiations) == 1:
                 co_constraint = instantiations[0]
             elif len(instantiations) > 1:
@@ -450,7 +478,7 @@ AppliedSymbol .substitute = substitute
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # update fresh_vars
     if type(out) == AppliedSymbol:  # might be a number after instantiation
-        if type(out.symbol) == SymbolExpr and out.symbol.value is None:  # $(x)()
+        if type(out.symbol) == SymbolExpr and out.symbol.is_intentional():  # $(x)()
             out.symbol = out.symbol.instantiate(e0, e1, problem)
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),

@@ -183,6 +183,7 @@ Definitions
 +++++++++++
 
 A *definition* defines concepts, i.e. predicate_\ s or function_\ s, in terms of other concepts.
+If a predicate is inductively defined in terms of itself, the definition employs the *well-founded* semantics.
 A definition consists of a set of rules, enclosed by ``{`` and ``}``.
 
 .. index:: rule

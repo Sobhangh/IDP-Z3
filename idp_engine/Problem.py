@@ -57,8 +57,7 @@ class Problem(object):
             resolution.  Assignments include inequalities and quantified formula
             when the problem is extended
 
-        clark (dict[(SymbolDeclaration, Definition), Rule]):
-            A mapping of defined symbol to the rule that defines it.
+        definitions ([Definition]): a list of definitions in this problem
 
         def_constraints (dict[SymbolDeclaration, Definition], Expression):
             A mapping of defined symbol to the whole-domain constraint
@@ -79,7 +78,7 @@ class Problem(object):
         self.extended = extended
 
         self.declarations = {}
-        self.clark = {}  # {(Declaration, Definition): Rule}
+        self.definitions = []
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.def_constraints = {}  # {(Declaration, Definition): Expression}
@@ -143,9 +142,7 @@ class Problem(object):
 
             if isinstance(block, Theory) or isinstance(block, Problem):
                 self.co_constraints = None
-                for (decl, defin), rule in block.clark.items():
-                    if not (decl, defin) in self.clark:
-                        self.clark[(decl, defin)] = rule
+                self.definitions += block.definitions
                 self.constraints.extend(v.copy() for v in block.constraints)
                 self.def_constraints.update(
                     {k:v.copy() for k,v in block.def_constraints.items()})
@@ -173,9 +170,11 @@ class Problem(object):
             self.constraints.append(constraint)
 
         # expand whole-domain definitions
-        for (decl, defin), rule in self.clark.items():
-            if rule.is_whole_domain:
-                self.def_constraints[decl, defin] = rule.interpret(self).whole_domain
+        for defin in self.definitions:
+            defin.interpret(self)
+            for decl, rule in defin.clarks.items():
+                if rule.is_whole_domain:
+                    self.def_constraints[decl, defin] = rule.whole_domain
 
         # initialize assignments, co_constraints, questions
 
@@ -644,7 +643,7 @@ class Problem(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        symbols = {decl for (decl, _) in self.clark.keys()}
+        symbols = {decl for defin in self.definitions for decl in defin.clarks.keys()}
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code

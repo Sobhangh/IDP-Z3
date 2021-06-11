@@ -9,9 +9,6 @@ min/max aggregates
     IDP-Z3 does not support these aggregates (yet).
     See `IEP 05 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-05-Min-and-Max-aggregate>`_
 
-Inductive definitions
-    IDP-Z3 does not support inductive definitions.
-
 Infinite domains
     IDP-Z3 supports infinite domains: ``Int, Real``.
     However, quantifications over infinite domains is discouraged.

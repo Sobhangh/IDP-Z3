@@ -120,11 +120,6 @@ def annotate(self, idp):
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
-    # collect multiple definitions of same symbol declaration
-    for d in self.definitions:
-        for decl, rule in d.clarks.items():
-            if not (decl, d) in self.clark:
-                self.clark[(decl, d)] = rule
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
@@ -135,6 +130,7 @@ Theory.annotate = annotate
 
 def annotate(self, theory, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
+    self.set_level_symbols()
 
     # create common variables, and rename vars in rule
     self.clarks = {}
@@ -153,7 +149,7 @@ def annotate(self, theory, voc, q_vars):
 
     # join the bodies of rules
     for decl, rules in self.clarks.items():
-        exprs = sum(([rule.body] for rule in rules), [])
+        exprs = [rule.body for rule in rules]
         rules[0].body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = rules[0]
     return self
@@ -163,6 +159,9 @@ Definition.annotate = annotate
 # Class Rule  #######################################################
 
 def annotate(self, voc, q_vars):
+    self.check(not self.definiendum.symbol.is_intentional(),
+                f"No support for intentional objects in the head of a rule: "
+                f"{self}")
     # create head variables
     q_v = {**q_vars}  # copy
     for q in self.quantees:

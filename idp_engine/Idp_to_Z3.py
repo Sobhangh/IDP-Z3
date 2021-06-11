@@ -32,7 +32,7 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
-                                   AQuantification, Operator,
+                                   AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
@@ -88,13 +88,8 @@ def translate(self):
         if len(self.sorts) == 0:
             self.translated = Const(self.name, self.out.translate())
         else:
-
-            if self.out.name == BOOL:
-                types = [x.translate() for x in self.sorts]
-                self.translated = Function(self.name, types + [BoolSort()])
-            else:
-                types = [x.translate() for x in self.sorts] + [self.out.translate()]
-                self.translated = Function(self.name, types)
+            types = [x.translate() for x in self.sorts] + [self.out.translate()]
+            self.translated = Function(self.name, types)
     return self.translated
 SymbolDeclaration.translate = translate
 
@@ -125,6 +120,20 @@ def reified(self) -> DatatypeRef:
         self._reified = Const(b'*'+self.code.encode(), BoolSort())
     return self._reified
 Expression.reified = reified
+
+
+# class Symbol  ###############################################################
+
+def translate(self):
+    if self.name == BOOL:
+        return BoolSort()
+    elif self.name == INT:
+        return IntSort()
+    elif self.name == REAL:
+        return RealSort()
+    else:
+        return self.decl.translate()
+Symbol.translate=translate
 
 
 # Class IfExpr  ###############################################################
