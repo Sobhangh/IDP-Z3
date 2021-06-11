@@ -170,7 +170,8 @@ class IDP(ASTNode):
             blocks (List[str]): list of names of the blocks to retrieve
 
         Returns:
-            List[Union[Vocabulary, Theory, Structure, Procedure, Display]]: list of AST nodes
+            List[Union[Vocabulary, Theory, Structure, Procedure, Display]]:
+                list of AST nodes
         """
         names = blocks.split(",") if type(blocks) is str else blocks
         out = []
@@ -378,7 +379,7 @@ class SymbolDeclaration(ASTNode):
             `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
-        symbols ([Symbol]): the symbols beind defined, before expansion
+        symbols ([Symbol]): the symbols being defined, before expansion
 
         name (string): the identifier of the symbol, after expansion of the node
 
@@ -413,8 +414,11 @@ class SymbolDeclaration(ASTNode):
             self.symbols = kwargs.pop('symbols')
             self.name = None
         else:
-            self.name = intern(kwargs.pop('name').name)
             self.symbols = None
+            if 'name' in kwargs:
+                self.name = intern(kwargs.pop('name').name)
+            else:
+                self.name = intern(kwargs.pop('strname'))
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
@@ -441,9 +445,17 @@ class SymbolDeclaration(ASTNode):
                 f"{ '('+args+')' if args else ''}"
                 f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
 
+    def __repr__(self):
+        return str(self)
+
     def is_subset_of(self, other):
         return (self.arity == 1 and self.type == BOOL
                 and self.sorts[0].decl == other)
+
+    @classmethod
+    def make(cls, strname, arity, sorts, out):
+        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
+        return o
 
 
 Type = Union[TypeDeclaration, SymbolDeclaration]
@@ -467,7 +479,6 @@ class Theory(ASTNode):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.declarations = {}
-        self.clark = {}  # {(Declaration, Definition): Rule}
         self.def_constraints = {}  # {(Declaration, Definition): Expression}
         self.assignments = Assignments()
 
@@ -487,9 +498,11 @@ class Definition(ASTNode):
 
         rules ([Rule]): set of rules for the definition
 
-        clarks ({Declaration: Transformed Rule}): normalized rule for each defined symbol (used to be Clark completion)
+        clarks (dict[Declaration, Transformed Rule]): normalized rule for each defined symbol (used to be Clark completion)
 
-        def_vars ({String: {String: Variable}}): Fresh variables for arguments and result
+        def_vars (dict[String, dict[String, Variable]]): Fresh variables for arguments and result
+
+        level_symbols (dict[SymbolDeclaration, Symbol]): map of recursively defined symbols to level mapping symbols
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
@@ -497,11 +510,12 @@ class Definition(ASTNode):
         Definition.definition_id += 1
         self.id = Definition.definition_id
         self.rules = kwargs.pop('rules')
-        self.clarks = {}  # {Declaration: Transformed Rule}
+        self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.def_vars = {}  # {String: {String: Variable}}
+        self.level_symbols = {}  # {SymbolDeclaration: Symbol}
 
     def __str__(self):
-        return "Definition(s) of " + ",".join([k.name for k in self.clarks.keys()])
+        return "Definition " +str(self.id)+" of " + ",".join([k.name for k in self.clarks.keys()])
 
     def __repr__(self):
         out = []
@@ -514,6 +528,51 @@ class Definition(ASTNode):
 
     def __hash__(self):
         return hash(self.id)
+
+    def set_level_symbols(self):
+        """Calculates which symbols in the definition are recursively defined,
+           creates a corresponding level mapping symbol,
+           and stores these in self.level_symbols.
+        """
+        dependencies = set()
+        for r in self.rules:
+            symbs = {}
+            r.body.collect_symbols(symbs)
+            for s in symbs.values():
+                dependencies.add((r.definiendum.symbol.decl, s))
+
+        while True:
+            new_relations = set((x, w) for x, y in dependencies
+                                for q, w in dependencies if q == y)
+            closure_until_now = dependencies | new_relations
+            if len(closure_until_now) == len(dependencies):
+                break
+            dependencies = closure_until_now
+
+        symbs = {s for (s, ss) in dependencies if s == ss}
+        for r in self.rules:
+            key = r.definiendum.symbol.decl
+            if key not in symbs or key in self.level_symbols:
+                continue
+            symbdec = SymbolDeclaration.make(
+                "_"+str(self.id)+"lvl_"+key.name,
+                key.arity, key.sorts, Symbol(name=REAL))
+            self.level_symbols[key] = Symbol(name=symbdec.name)
+            self.level_symbols[key].decl = symbdec
+
+        for decl in self.level_symbols.keys():
+            self.check(decl.out.name == BOOL,
+                       f"Inductively defined functions are not supported yet: "
+                       f"{decl.name}.")
+
+        if len(self.level_symbols) > 0:  # check for nested recursive symbols
+            nested = set()
+            for r in self.rules:
+                r.body.collect_nested_symbols(nested, False)
+            for decl in self.level_symbols.keys():
+                self.check(decl not in nested,
+                           f"Inductively defined nested symbols are not supported yet: "
+                           f"{decl.name}.")
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):

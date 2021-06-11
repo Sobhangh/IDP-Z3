@@ -22,7 +22,7 @@
 
 """
 __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
-           "BinaryOperator", "AImplication", "AEquivalence", "ARImplication",
+           "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
            "UnappliedSymbol", "Variable",
@@ -34,9 +34,10 @@ from datetime import date
 from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
+from z3 import BoolSort, IntSort, RealSort
 
-from .utils import (unquote, OrderedSet, BOOL, INT, REAL,
-                    RESERVED_SYMBOLS, IDPZ3Error)
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, RESERVED_SYMBOLS, \
+    IDPZ3Error, DEF_SEMANTICS, Semantics
 
 
 class ASTNode(object):
@@ -327,6 +328,17 @@ class Expression(ASTNode):
                 e.collect_symbols(symbols, co_constraints)
         return symbols
 
+    def collect_nested_symbols(self, symbols, is_nested):
+        """ returns the set of symbol declarations that occur (in)directly
+        under an aggregate or some nested term, where is_nested is flipped
+        to True the moment we reach such an expression
+
+        returns {SymbolDeclaration}
+        """
+        for e in self.sub_exprs:
+            e.collect_nested_symbols(symbols, is_nested)
+        return symbols
+
     def generate_constructors(self, constructors: dict):
         """ fills the list `constructors` with all constructors belonging to
         open types.
@@ -431,6 +443,38 @@ class Expression(ASTNode):
         """
         return (None, None, None)
 
+    def split_equivalences(self):
+        """Returns an equivalent expression where equivalences are replaced by
+        implications
+
+        Returns:
+            Expression
+        """
+        out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
+        return out
+
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        """Returns an expression where level mapping atoms (e.g., lvl_p > lvl_q)
+         are added to atoms containing recursive symbols.
+
+        Arguments:
+            - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
+              symbols as well as their corresponding recursive symbols
+            - head (AppliedSymbol): head of the rule we are adding level mapping
+              symbols to.
+            - pos_justification (Bool): whether we are adding symbols to the
+              direct positive justification (e.g., head => body) or direct
+              negative justification (e.g., body => head) part of the rule.
+            - polarity (Bool): whether the current expression occurs under
+              negation.
+
+        Returns:
+            Expression
+        """
+        self.sub_exprs = [e.add_level_mapping(level_symbols, head, pos_justification, polarity)
+                          for e in self.sub_exprs]
+        return self
+
 
 class Symbol(Expression):
     """Represents a Symbol.  Handles synonyms.
@@ -455,8 +499,8 @@ class Symbol(Expression):
     def __str__(self):
         return Symbol.FROM.get(self.name, self.name)
 
-    def translate(self):
-        return self.decl.translate()
+    def __repr__(self):
+        return str(self)
 
 
 class IfExpr(Expression):
@@ -482,6 +526,9 @@ class IfExpr(Expression):
         return (f" if   {self.sub_exprs[IfExpr.IF  ].str}"
                 f" then {self.sub_exprs[IfExpr.THEN].str}"
                 f" else {self.sub_exprs[IfExpr.ELSE].str}")
+
+    def collect_nested_symbols(self, symbols, is_nested):
+        return Expression.collect_nested_symbols(self, symbols, True)
 
 
 class Quantee(Expression):
@@ -580,8 +627,8 @@ class AQuantification(Expression):
         return symbols
 
 
-class BinaryOperator(Expression):
-    PRECEDENDE = 0  # monkey-patched
+class Operator(Expression):
+    PRECEDENCE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
 
     def __init__(self, **kwargs):
@@ -626,19 +673,43 @@ class BinaryOperator(Expression):
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
 
+    def collect_nested_symbols(self, symbols, is_nested):
+        return Expression.collect_nested_symbols(self, symbols,
+                is_nested if self.operator[0] in ['∧','∨','⇒','⇐','⇔'] else True)
 
-class AImplication(BinaryOperator):
+
+class AImplication(Operator):
     PRECEDENCE = 50
 
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity),
+                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
+        return self
 
-class AEquivalence(BinaryOperator):
+
+class AEquivalence(Operator):
     PRECEDENCE = 40
 
+    # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
+    def split(self):
+        posimpl = AImplication.make('⇒', [self.sub_exprs[0], self.sub_exprs[1]])
+        negimpl = ARImplication.make('⇐', [self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
+        return AConjunction.make('∧', [posimpl, negimpl])
 
-class ARImplication(BinaryOperator):
+    def split_equivalences(self):
+        out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
+        return out.split()
+
+class ARImplication(Operator):
     PRECEDENCE = 30
 
-class ADisjunction(BinaryOperator):
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity),
+                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
+        return self
+
+
+class ADisjunction(Operator):
     PRECEDENCE = 60
 
     def __str1__(self):
@@ -647,11 +718,11 @@ class ADisjunction(BinaryOperator):
         return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
 
 
-class AConjunction(BinaryOperator):
+class AConjunction(Operator):
     PRECEDENCE = 70
 
 
-class AComparison(BinaryOperator):
+class AComparison(Operator):
     PRECEDENCE = 80
 
     def __init__(self, **kwargs):
@@ -667,15 +738,15 @@ class AComparison(BinaryOperator):
                 and self.sub_exprs[1].value is not None
 
 
-class ASumMinus(BinaryOperator):
+class ASumMinus(Operator):
     PRECEDENCE = 90
 
 
-class AMultDiv(BinaryOperator):
+class AMultDiv(Operator):
     PRECEDENCE = 100
 
 
-class APower(BinaryOperator):
+class APower(Operator):
     PRECEDENCE = 110
 
 
@@ -701,6 +772,14 @@ class AUnary(Expression):
 
     def __str1__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
+
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        self.sub_exprs = [e.add_level_mapping(level_symbols, head,
+                                              pos_justification,
+                                              not polarity
+                                              if self.operator == '¬' else polarity)
+                          for e in self.sub_exprs]
+        return self
 
 
 class AAggregate(Expression):
@@ -748,14 +827,15 @@ class AAggregate(Expression):
     def collect_symbols(self, symbols=None, co_constraints=True):
         return AQuantification.collect_symbols(self, symbols, co_constraints)
 
+    def collect_nested_symbols(self, symbols, is_nested):
+        return Expression.collect_nested_symbols(self, symbols, True)
+
 
 class AppliedSymbol(Expression):
     """Represents a symbol applied to arguments
 
     Args:
-        eval (string): '$' if the symbol must be evaluated, else ''
-
-        s (Expression): the symbol to be applied to arguments
+        symbol (Expression): the symbol to be applied to arguments
 
         is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
 
@@ -837,6 +917,15 @@ class AppliedSymbol(Expression):
         self.symbol.collect_symbols(symbols, co_constraints)
         return symbols
 
+    def collect_nested_symbols(self, symbols, is_nested):
+        if is_nested and (hasattr(self, 'decl') and self.decl
+            and type(self.decl) != Constructor
+            and not self.decl.name in RESERVED_SYMBOLS):
+            symbols.add(self.decl)
+        for e in self.sub_exprs:
+            e.collect_nested_symbols(symbols, True)
+        return symbols
+
     def has_decision(self):
         self.check(self.decl.block is not None, "Internal error")
         return not self.decl.block.name == 'environment' \
@@ -875,6 +964,29 @@ class AppliedSymbol(Expression):
             constructor = Constructor(name=self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
 
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+        assert(head.symbol.decl in level_symbols)
+        if self.symbol.decl not in level_symbols or self.in_head:
+            return self
+        else:
+            if DEF_SEMANTICS == Semantics.WELLFOUNDED:
+                op = ('>' if pos_justification else '≥') \
+                    if polarity else ('≤' if pos_justification else '<')
+            elif DEF_SEMANTICS == Semantics.STABLE:
+                op = '≥' if polarity else '<'
+            else:
+                assert(DEF_SEMANTICS == Semantics.COINDUCTION)
+                op = ('≥' if pos_justification else '>') \
+                    if polarity else ('<' if pos_justification else '≤')
+            comp = Operator.make(op, [
+                AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
+                AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
+            ])
+            if polarity:
+                return AConjunction.make('∧', [comp, self])
+            else:
+                return ADisjunction.make('∨', [comp, self])
+
 
 class SymbolExpr(Expression):
     def __init__(self, **kwargs):
@@ -888,6 +1000,8 @@ class SymbolExpr(Expression):
         return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
 
+    def is_intentional(self):
+        return self.eval
 
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.

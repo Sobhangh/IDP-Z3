@@ -1,6 +1,5 @@
 No more consequences.
-? sex() = Male
-? sex() = Female
+['Male', 'Female']
 
 bmi() -> 0.00249680097375238
 riskLevel() -> Low

@@ -23,9 +23,10 @@ Class to represent a collection of theory and structure blocks.
 
 import time
 from copy import copy
+from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies
+from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies, is_false
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -34,6 +35,11 @@ from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, SYMBOL, RELEVANT)
+
+class Propagation(Enum):
+    """Describe propagation method    """
+    DEFAULT = auto()  # checks each question to see if it can have only 1 value
+    BATCH = auto()  # finds a list of questions that has only 1 value
 
 class Problem(object):
     """A collection of theory and structure blocks.
@@ -51,8 +57,7 @@ class Problem(object):
             resolution.  Assignments include inequalities and quantified formula
             when the problem is extended
 
-        clark (dict[(SymbolDeclaration, Definition), Rule]):
-            A mapping of defined symbol to the rule that defines it.
+        definitions ([Definition]): a list of definitions in this problem
 
         def_constraints (dict[SymbolDeclaration, Definition], Expression):
             A mapping of defined symbol to the whole-domain constraint
@@ -73,7 +78,7 @@ class Problem(object):
         self.extended = extended
 
         self.declarations = {}
-        self.clark = {}  # {(Declaration, Definition): Rule}
+        self.definitions = []
         self.constraints = OrderedSet()
         self.assignments = Assignments()
         self.def_constraints = {}  # {(Declaration, Definition): Expression}
@@ -137,9 +142,7 @@ class Problem(object):
 
             if isinstance(block, Theory) or isinstance(block, Problem):
                 self.co_constraints = None
-                for (decl, defin), rule in block.clark.items():
-                    if not (decl, defin) in self.clark:
-                        self.clark[(decl, defin)] = rule
+                self.definitions += block.definitions
                 self.constraints.extend(v.copy() for v in block.constraints)
                 self.def_constraints.update(
                     {k:v.copy() for k,v in block.def_constraints.items()})
@@ -167,9 +170,11 @@ class Problem(object):
             self.constraints.append(constraint)
 
         # expand whole-domain definitions
-        for (decl, defin), rule in self.clark.items():
-            if rule.is_whole_domain:
-                self.def_constraints[decl, defin] = rule.interpret(self).whole_domain
+        for defin in self.definitions:
+            defin.interpret(self)
+            for decl, rule in defin.clarks.items():
+                if rule.is_whole_domain:
+                    self.def_constraints[decl, defin] = rule.whole_domain
 
         # initialize assignments, co_constraints, questions
 
@@ -177,9 +182,8 @@ class Problem(object):
         for c in self.constraints:
             c.interpret(self)
             c.co_constraints(self.co_constraints)
-            # don't collect questions from type constraint for enumerated symbols
-            symbol = c.is_type_constraint_for
-            if not(symbol and symbol in self.interpretations):
+            # don't collect questions from type constraints
+            if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
@@ -325,6 +329,55 @@ class Problem(object):
                     self.assignments.assert_(sentence, value, tag, False)
         return self
 
+    def _batch_propagate(self, tag=Status.CONSEQUENCE):
+        """ uses the method outlined in https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3/37061846#37061846
+        and in J. Wittocx paper : https://drive.google.com/file/d/19LT64T9oMoFKyuoZ_MWKMKf9tJwGVax-/view?usp=sharing
+
+        This method is not faster than _propagate(), and falls back to it in some cases
+        """
+        z3_formula = self.formula().translate()
+        todo = self._todo()
+
+        solver = Solver()
+        solver.add(z3_formula)
+        result = solver.check()
+        if result == sat:
+            lookup, tests = {}, []
+            for q in todo:
+                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
+                if solver.check() != sat:
+                    # print("Falling back !")
+                    yield from self._propagate(tag)
+                test = Not(q.reified() == solver.model().eval(q.reified()))
+                tests.append(test)
+                lookup[str(test)] = q
+            solver.push()
+            while True:
+                solver.add(Or(tests))
+                result = solver.check()
+                if result == sat:
+                    tests = [t for t in tests if is_false(solver.model().eval(t))]
+                elif result == unsat:
+                    solver.pop()
+                    solver.check()  # not sure why this is needed
+                    for test in tests:
+                        q = lookup[str(test)]
+                        val1 = solver.model().eval(q.reified())
+                        val = str_to_IDP(q, str(val1))
+                        yield self.assignments.assert_(q, val, tag, True)
+                    break
+                else:  # unknown
+                    # print("Falling back !!")
+                    yield from self._propagate(tag)
+                    break
+            yield "No more consequences."
+        elif result == unsat:
+            yield "Not satisfiable."
+            yield str(z3_formula)
+        else:
+            yield "Unknown satisfiability."
+            yield str(z3_formula)
+
     def _propagate(self, tag):
         z3_formula = self.formula().translate()
         todo = self._todo()
@@ -365,16 +418,17 @@ class Problem(object):
             yield "Unknown satisfiability."
             yield str(z3_formula)
 
-    def propagate(self, tag=S.CONSEQUENCE):
+    def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
-        out = list(self._propagate(tag))
+        if method == Propagation.BATCH:
+            out = list(self._batch_propagate(tag))
+        else:
+            out = list(self._propagate(tag))
         assert out[0] != "Not satisfiable.", "Not satisfiable."
         return self
 
     def get_range(self, term: str):
-        """ Returns a copy of the problem,
-            with its ``assignments`` property containing
-            a description of the possible values of the term.
+        """ Returns a list of the possible values of the term.
         """
         assert term in self.assignments, f"Unknown term: {term}"
         termE : Expression = self.assignments[term].sentence
@@ -382,14 +436,26 @@ class Problem(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
-        self.formula()  # to keep universals, given
-        out = copy(self)
+        out = self.copy()
+        #  remove current assignments to same term
+        out.assignments.copy()
+        if out.assignments[term].value:
+            for a in out.assignments.values():
+                if a.sentence.is_assignment and a.sentence.code.startswith(term):
+                    out.assert_(a.sentence, None, Status.UNKNOWN)
+        out.formula()  # to keep universals and given, except self
+
+        # now consider every value in range
         out.assignments = Assignments()
         for e in range:
             sentence = Assignment(termE, e, S.UNKNOWN).formula()
             out.assignments.assert_(sentence, None, S.UNKNOWN, False)
         _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
-        return out
+        assert all(e.sentence.is_assignment()
+                   for e in out.assignments.values())
+        return [str(e.sentence.sub_exprs[1])
+                for e in out.assignments.values()
+                if e.value is None or e.value.same_as(TRUE)]
 
     def explain(self, consequence):
         """returns the facts and laws that justify 'consequence in the 'self Problem
@@ -575,7 +641,7 @@ class Problem(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        symbols = {decl for (decl, _) in self.clark.keys()}
+        symbols = {decl for defin in self.definitions for decl in defin.clarks.keys()}
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code

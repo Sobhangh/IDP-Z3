@@ -27,9 +27,9 @@ from .Parse import (Vocabulary, Extern, TypeDeclaration,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
-from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
-                         ARImplication, AImplication, AConjunction, ADisjunction,
-                         BinaryOperator, AComparison, AUnary, AAggregate,
+from .Expression import (Expression, Constructor, IfExpr, AQuantification,
+                         ARImplication, AImplication, AEquivalence, ADisjunction,
+                         Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number)
 
@@ -120,11 +120,6 @@ def annotate(self, idp):
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
-    # collect multiple definitions of same symbol declaration
-    for d in self.definitions:
-        for decl, rule in d.clarks.items():
-            if not (decl, d) in self.clark:
-                self.clark[(decl, d)] = rule
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
@@ -135,6 +130,7 @@ Theory.annotate = annotate
 
 def annotate(self, theory, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
+    self.set_level_symbols()
 
     # create common variables, and rename vars in rule
     self.clarks = {}
@@ -153,7 +149,7 @@ def annotate(self, theory, voc, q_vars):
 
     # join the bodies of rules
     for decl, rules in self.clarks.items():
-        exprs = sum(([rule.body] for rule in rules), [])
+        exprs = [rule.body for rule in rules]
         rules[0].body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = rules[0]
     return self
@@ -163,6 +159,9 @@ Definition.annotate = annotate
 # Class Rule  #######################################################
 
 def annotate(self, voc, q_vars):
+    self.check(not self.definiendum.symbol.is_intentional(),
+                f"No support for intentional objects in the head of a rule: "
+                f"{self}")
     # create head variables
     q_v = {**q_vars}  # copy
     for q in self.quantees:
@@ -404,21 +403,37 @@ def annotate1(self):
 AQuantification.annotate1 = annotate1
 
 
-# Class BinaryOperator  #######################################################
+# Class Operator  #######################################################
 
 def annotate1(self):
-    self.check(not (self.operator[0] == '⇒' and 2 < len(self.sub_exprs)),
-            "Implication is not associative.  Please use parenthesis.")
     if self.type is None:
         self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
                 else INT if any(e.type == INT for e in self.sub_exprs) \
                 else self.sub_exprs[0].type  # constructed type, without arithmetic
     return Expression.annotate1(self)
-BinaryOperator.annotate1 = annotate1
+Operator.annotate1 = annotate1
 
+
+# Class AImplication  #######################################################
+
+def annotate1(self):
+    self.check(len(self.sub_exprs) == 2,
+               "Implication is not associative.  Please use parenthesis.")
+    self.type = BOOL
+    return Expression.annotate1(self)
+AImplication.annotate1 = annotate1
+
+
+# Class AImplication, AEquivalence  #######################################################
+
+def annotate1(self):
+    self.check(len(self.sub_exprs) == 2,
+               "Equivalence is not associative.  Please use parenthesis.")
+    self.type = BOOL
+    return Expression.annotate1(self)
+AEquivalence.annotate1 = annotate1
 
 # Class ARImplication  #######################################################
-
 
 def annotate(self, voc, q_vars):
     # reverse the implication
@@ -434,7 +449,7 @@ ARImplication.annotate = annotate
 # Class AComparison  #######################################################
 
 def annotate(self, voc, q_vars):
-    out = BinaryOperator.annotate(self, voc, q_vars)
+    out = Operator.annotate(self, voc, q_vars)
     out.type = BOOL
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:

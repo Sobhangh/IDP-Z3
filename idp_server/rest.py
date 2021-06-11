@@ -69,16 +69,6 @@ CORS(app)
 
 api = Api(app)
 
-parser = reqparse.RequestParser()
-parser.add_argument('method', type=str, help='Method to execute')
-parser.add_argument('code', type=str, help='Code')
-parser.add_argument('active', type=str, help='Three-valued structure')
-parser.add_argument('previous_active', type=str, help='Previous input by user')
-parser.add_argument('expanded', type=str, action='append', help='list of expanded symbols')
-parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
-parser.add_argument('value', type=str, help='Value to explain')
-parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
-
 
 class HelloWorld(Resource):
     def get(self):
@@ -133,6 +123,8 @@ class run(Resource):
                     g.profiler = Profiler()
                     g.profiler.start()
 
+                parser = reqparse.RequestParser()
+                parser.add_argument('code', type=str, help='Code')
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 # capture stdout, print()
@@ -175,6 +167,8 @@ class meta(Resource):
                     g.profiler = Profiler()
                     g.profiler.start()
 
+                parser = reqparse.RequestParser()
+                parser.add_argument('code', type=str, help='Code')
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 state = State.make(idp, "{}", "{}")
@@ -210,22 +204,30 @@ class eval(Resource):
                     g.profiler = Profiler()
                     g.profiler.start()
 
+                parser = reqparse.RequestParser()
+                parser.add_argument('method', type=str, help='Method to execute')
+                parser.add_argument('code', type=str, help='Code')
+                parser.add_argument('active', type=str, help='Three-valued structure')
+                parser.add_argument('previous_active', type=str, help='Previous input by user')
+                # parser.add_argument('expanded', type=str, action='append', help='list of expanded symbols')
+                parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
+                parser.add_argument('value', type=str, help='Value to explain')
+                parser.add_argument('field', type=str, help='Applied Symbol whose range must be determined')
+                parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
                 args = parser.parse_args()
+                #print(args)
+                # expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
 
-                idp = idpOf(args['code'])
-                method = args['method']
-                given_json = args['active']
-                previous_active = args.get('previous_active', None)
-                expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
-                field = args.get('field', None)
-
-                state = State.make(idp, previous_active, given_json)
+                state = State.make(idpOf(args['code']),
+                                   args.get('previous_active', None),
+                                   args['active'])
 
                 out = {}
+                method = args['method']
                 if method == "propagate":
-                    if field:  # field is the applied symbol for which a dropdown is open
-                        state = state.get_range(field)
                     out = Output(state).fill(state)
+                if method == 'get_range':
+                    out = state.get_range(args['field'])
                 if method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
                     state.assignments = list(generator)[0]
@@ -249,8 +251,7 @@ class eval(Resource):
                         #     expanded.update(expr.collect_symbols())
                         expanded = tuple(expanded.keys())
                         state = State.make(idpModel, "")
-                    out = abstract(state, given_json)
-
+                    out = abstract(state, args['active'])
                 log("end /eval " + method)
                 if with_profiling:
                     g.profiler.stop()
@@ -265,6 +266,8 @@ class eval(Resource):
 
 class evalWithGraph(eval):  # subcclass that generates call graphs
     def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('method', type=str, help='Method to execute')
         args = parser.parse_args()
         method = args['method']
 

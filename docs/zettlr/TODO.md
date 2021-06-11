@@ -5,15 +5,15 @@ Date: TODO
 –-
 
 - [ ] [[min, max aggregates]]
-- [ ] Support for [[Functional constructors]] (p.6 of the IDP3 manual)
-- [ ] support for [[Units of measure]]
+- [x] Support for [[Functional constructors]] (p.6 of the IDP3 manual)
+- [x] support for [[Units of measure]]
 - [ ] Explanations: inject values in message
 - [ ] Float ranges
 - [ ] avoid duplication of equalities in user interface (enumerated types)
-- [ ] [[Syntax changes]]
+- [x] [[Syntax changes]]
 
 - [ ] Lexicographic, Pareto and conditional optimization
-- [ ] Support for dates
+- [x] Support for dates
 - [ ] issues on GitLab
 
 
@@ -48,7 +48,7 @@ Date: TODO
         - join 2 disjuncts that differ only by the sign of one atom
 
 #### Performance
-- [ ] do not generate comparison atoms for symbols defined by structures or hidden (to reduce work for propagation)
+- [x] do not generate comparison atoms for symbols defined by structures or hidden (to reduce work for propagation)
 - [ ] incremental propagate: use dependency graph (+ block) to propagate selectively
 - [ ] full propagate: should have only one expansion per unknown subtence
 - [ ] relevance-based optimal propagate (do not propagate irrelevant subtences)

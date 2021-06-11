@@ -29,7 +29,7 @@ from typing import List
 
 from .Expression import (
     Constructor, Expression, IfExpr, AQuantification, Quantee,
-    BinaryOperator, AEquivalence, AImplication, ADisjunction,
+    Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
     Number, Date, Brackets, TRUE, FALSE)
@@ -232,7 +232,7 @@ def update_exprs(self, new_exprs):
             if op == "=":
                 if not acc1.same_as(expr1):
                     return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
-            elif not (BinaryOperator.MAP[op]) (acc1.py_value, expr1.py_value):
+            elif not (Operator.MAP[op]) (acc1.py_value, expr1.py_value):
                 return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             acc, acc1 = expr, expr1
         return self._change(value=TRUE, sub_exprs=operands)
@@ -254,7 +254,7 @@ def update_arith(self, family, operands):
         out = operands1[0].py_value
 
         for e, op in zip(operands1[1:], self.operator):
-            function = BinaryOperator.MAP[op]
+            function = Operator.MAP[op]
 
             if op == '/' and self.type == INT:  # integer division
                 out //= e.py_value

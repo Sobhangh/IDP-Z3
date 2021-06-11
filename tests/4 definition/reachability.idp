@@ -1,0 +1,25 @@
+vocabulary V {
+    type T
+    p : (T*T) → 𝔹
+    r : (T) → 𝔹
+    s : (T*T) → 𝔹
+}
+
+theory T:V {
+    {
+      !x, y in T: s(x,y) <- p(x,y).
+      !x, y in T: s(x,y) <- p(y,x).
+      !x, y in T: s(x,y) <- ?z in T: s(x,z) & s(z,y).
+      r(0).
+      !x in T: r(x) <- ?y in T: r(y) & s(y,x).
+    }
+}
+
+structure S:V {
+    T := {0,1,2,3}
+    p := {(0,1),(0,3)}
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}

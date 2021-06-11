@@ -6,15 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
-Contributors (alphabetical): .
+Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
 * Merge !90: add `IDP.from_file` and `IDP.from_str` to Python API
 * Merge !93: improve speed by caching z3 translations
 * Merge !98: Improve performance for theories with large structures
+* (breaking) Merge 101: simplify `get_range` API
+* Merge !103: support alternative "batch" propagation algorithm (not faster)
+* fix #104: implications, equivalences are binary connectives, not n-ary.
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions
+* Merge 101: improve performance of IC (propagate dropdowns on request)
 
 
 ## [0.8.2] - 2021-06-02
@@ -27,6 +31,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * Merge !88: add `abs` built-in function
 * fix #90: error in `sum` aggregate
 * fix #74: Incorrect propagation when a symbol is defined twice
+* Merge !99: implement IEP 15 Inductive definitions
 
 ### Interactive Consultant
 * Merge !85: improve performance of IC (better use of cache)

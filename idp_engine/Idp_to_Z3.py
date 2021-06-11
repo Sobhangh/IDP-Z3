@@ -32,7 +32,7 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
-                                   AQuantification, BinaryOperator,
+                                   AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
@@ -88,13 +88,8 @@ def translate(self):
         if len(self.sorts) == 0:
             self.translated = Const(self.name, self.out.translate())
         else:
-
-            if self.out.name == BOOL:
-                types = [x.translate() for x in self.sorts]
-                self.translated = Function(self.name, types + [BoolSort()])
-            else:
-                types = [x.translate() for x in self.sorts] + [self.out.translate()]
-                self.translated = Function(self.name, types)
+            types = [x.translate() for x in self.sorts] + [self.out.translate()]
+            self.translated = Function(self.name, types)
     return self.translated
 SymbolDeclaration.translate = translate
 
@@ -125,6 +120,20 @@ def reified(self) -> DatatypeRef:
         self._reified = Const(b'*'+self.code.encode(), BoolSort())
     return self._reified
 Expression.reified = reified
+
+
+# class Symbol  ###############################################################
+
+def translate(self):
+    if self.name == BOOL:
+        return BoolSort()
+    elif self.name == INT:
+        return IntSort()
+    elif self.name == REAL:
+        return RealSort()
+    else:
+        return self.decl.translate()
+Symbol.translate=translate
 
 
 # Class IfExpr  ###############################################################
@@ -162,9 +171,9 @@ def translate1(self):
 AQuantification.translate1 = translate1
 
 
-# Class BinaryOperator  #######################################################
+# Class Operator  #######################################################
 
-BinaryOperator.MAP = {'∧': lambda x, y: And(x, y),
+Operator.MAP = {'∧': lambda x, y: And(x, y),
                       '∨': lambda x, y: Or(x, y),
                       '⇒': lambda x, y: Or(Not(x), y),
                       '⇐': lambda x, y: Or(x, Not(y)),
@@ -188,13 +197,13 @@ def translate1(self):
     out = self.sub_exprs[0].translate()
 
     for i in range(1, len(self.sub_exprs)):
-        function = BinaryOperator.MAP[self.operator[i - 1]]
+        function = Operator.MAP[self.operator[i - 1]]
         try:
             out = function(out, self.sub_exprs[i].translate())
         except Exception as e:
             raise e
     return out
-BinaryOperator.translate1 = translate1
+Operator.translate1 = translate1
 
 
 # Class ADisjunction  #######################################################
@@ -228,7 +237,7 @@ def translate1(self):
     for i in range(1, len(self.sub_exprs)):
         x = self.sub_exprs[i-1].translate()
         assert x is not None
-        function = BinaryOperator.MAP[self.operator[i - 1]]
+        function = Operator.MAP[self.operator[i - 1]]
         y = self.sub_exprs[i].translate()
         assert y is not None
         try:
