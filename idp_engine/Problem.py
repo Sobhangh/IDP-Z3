@@ -26,7 +26,8 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies, is_false
+from z3 import (Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies,
+                is_false, is_true)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -397,6 +398,10 @@ class Problem(object):
                     result = solver.check()
                     if result == sat:
                         tests = [t for t in tests if is_false(solver.model().eval(t))]
+                        for t in tests:  # reset the other assignments
+                            if is_true(solver.model().eval(t)):
+                                q = lookup[str(test)]
+                                self.assignments.assert_(q, None, S.UNKNOWN, False)
                     elif result == unsat:
                         solver.pop()
                         solver.check()  # not sure why this is needed
