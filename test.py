@@ -45,7 +45,7 @@ import re
 
 from idp_server.State import State
 from idp_server.IO import Output, metaJSON
-from idp_engine import IDP, Problem, model_expand, Status
+from idp_engine import IDP, Problem, model_expand, Status as S
 from idp_engine.utils import start, log, NEWL
 
 z3lock = threading.Lock()
@@ -218,7 +218,7 @@ def api():
                 print(model)
                 print()
             problem = Problem(T)
-            problem.assert_("p()", True, Status.GIVEN)
+            problem.assert_("p()", True, S.GIVEN)
             print(problem.propagate().assignments)
         except Exception as exc:
             print(traceback.format_exc())

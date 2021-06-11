@@ -329,7 +329,7 @@ class Problem(object):
                     self.assignments.assert_(sentence, value, tag, False)
         return self
 
-    def _batch_propagate(self, tag=Status.CONSEQUENCE):
+    def _batch_propagate(self, tag=S.CONSEQUENCE):
         """ uses the method outlined in https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3/37061846#37061846
         and in J. Wittocx paper : https://drive.google.com/file/d/19LT64T9oMoFKyuoZ_MWKMKf9tJwGVax-/view?usp=sharing
 
@@ -442,7 +442,7 @@ class Problem(object):
         if out.assignments[term].value:
             for a in out.assignments.values():
                 if a.sentence.is_assignment and a.sentence.code.startswith(term):
-                    out.assert_(a.sentence, None, Status.UNKNOWN)
+                    out.assert_(a.sentence, None, S.UNKNOWN)
         out.formula()  # to keep universals and given, except self
 
         # now consider every value in range

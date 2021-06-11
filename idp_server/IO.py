@@ -98,7 +98,7 @@ def load_json(state, jsonstr: str):
             for atom in state.assignments.values():
                 if (atom.symbol_decl.name == symbol
                     and atom.value
-                    and atom.status in [Status.GIVEN, Status.CONSEQUENCE, Status.ENV_CONSQ]):
+                    and atom.status in [S.GIVEN, S.CONSEQUENCE, S.ENV_CONSQ]):
                     atom.unset()
             for atom, json_atom in json_data[symbol].items():
                 if atom in state.assignments:
