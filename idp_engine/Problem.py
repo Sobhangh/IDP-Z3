@@ -207,14 +207,17 @@ class Problem(object):
         """
         code = str(code)
         atom = self.assignments[code].sentence
+        old_value = self.assignments[code].value
         if value is None:
-            if self.propagated:
+            if self.propagated and old_value is not None:
+                print(f"cleared {atom}")
                 self.cleared.append(atom)
                 self.assigned.pop(atom, None)
             self.assignments.assert_(atom, value, Status.UNKNOWN, False)
         else:
             val = str_to_IDP(atom, str(value))
-            if self.propagated:
+            if self.propagated and not(old_value and old_value.same_as(val)):
+                print(f"assigned: {atom}")
                 self.assigned.append(atom)
                 self.cleared.pop(atom, None)
             self.assignments.assert_(atom, val, status, False)
@@ -353,6 +356,7 @@ class Problem(object):
                     and a.status in statuses
                     ))
             z3_formula = self.formula().translate()
+            print(len(todo), statuses)
 
             solver = Solver()
             solver.add(z3_formula)
@@ -413,7 +417,6 @@ class Problem(object):
 
         out = self.copy()
         #  remove current assignments to same term
-        out.assignments.copy()
         if out.assignments[term].value:
             for a in out.assignments.values():
                 if a.sentence.is_assignment and a.sentence.code.startswith(term):
@@ -426,6 +429,7 @@ class Problem(object):
             sentence = Assignment(termE, e, Status.UNKNOWN).formula()
             # use assignments.assert_ to create one if necessary
             out.assignments.assert_(sentence, None, Status.UNKNOWN, False)
+        out.assigned = True  # to force propagation of Unknowns
         _ = list(out._propagate(Status.CONSEQUENCE))  # run the generator
         assert all(e.sentence.is_assignment()
                    for e in out.assignments.values())

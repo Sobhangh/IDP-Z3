@@ -32,7 +32,7 @@ from typing import Dict, Tuple, Union
 
 class State(Problem):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[IDP, str], 'State'] = {}
+    cache: Dict[Tuple[str, str], 'State'] = {}
 
     @classmethod
     def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
@@ -40,7 +40,7 @@ class State(Problem):
 
         Args:
             idp (IDP): idp source code
-            previous_active : previous input from client
+            previous_active (str): previous input from client
             jsonstr (str): input from client
 
         Returns:
@@ -48,19 +48,25 @@ class State(Problem):
         """
 
         if (idp.code, jsonstr) in State.cache:
-            return State.cache[(idp.code, jsonstr)]
+            state = State.cache[(idp.code, jsonstr)]
+        else:
+            if 100 < len(State.cache):
+                # remove oldest entry, to prevent memory overflow
+                State.cache = {k: v for k, v in list(State.cache.items())[1:]}
 
-        if 100 < len(State.cache):
-            # remove oldest entry, to prevent memory overflow
-            State.cache = {k: v for k, v in list(State.cache.items())[1:]}
+            if jsonstr == "{}":  # reset, with default structure, not in cache yet
+                state = State(idp)
+            elif (idp.code, previous_active) in State.cache:  # update previous state
+                state = State.cache[(idp.code, previous_active)]
+                if jsonstr != previous_active:
+                    state = state.add_given(jsonstr)
+            else:  # restart from reset, e.g., after server restart  or when client is directed to new GAE server
+                if (idp.code, "{}") not in State.cache:  # with default structure !
+                    State.cache[(idp.code, "{}")] = State(idp)
+                state = State.cache[(idp.code, "{}")]
+                state = state.add_given(jsonstr)
 
-        if (idp.code, "{}") not in State.cache:  # with default structure !
-            State.cache[(idp.code, "{}")] = State(idp)
-        state = State.cache[(idp.code, "{}")]
-
-        if jsonstr != "{}":
-            state = state.add_given(jsonstr)
-        State.cache[(idp.code, jsonstr)] = state
+            State.cache[(idp.code, jsonstr)] = state
         return state
 
     def __init__(self, idp: IDP):
