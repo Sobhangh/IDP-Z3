@@ -572,8 +572,8 @@ class Rule(ASTNode):
     def rename_args(self, new_vars):
         """ for Clark's completion
             input : '!v: f(args) <- body(args)'
-            output: '!nv: f(nv) <- nv=args & body(args)' """
-
+            output: '!nv: f(nv) <- nv=args & body(args)'
+        """
         self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
         vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
         for i in range(len(self.definiendum.sub_exprs)):
