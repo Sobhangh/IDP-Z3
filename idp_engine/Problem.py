@@ -280,7 +280,7 @@ class Problem(object):
 
             if solver.check() == sat:
                 count += 1
-                model = solver.model()
+                _ = solver.model()
                 ass = self._from_model(solver, todo, complete)
                 yield ass
 
@@ -340,63 +340,12 @@ class Problem(object):
                     self.assignments.assert_(sentence, value, tag, False)
         return self
 
-    def _batch_propagate(self, tag=S.CONSEQUENCE):
-        """ generator of propagated assignments.  Update self.assignments too.
-
-        uses the method outlined in https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3/37061846#37061846
-        and in J. Wittocx paper : https://drive.google.com/file/d/19LT64T9oMoFKyuoZ_MWKMKf9tJwGVax-/view?usp=sharing
-
-        This method is not faster than _propagate(), and falls back to it in some cases
-        """
-        z3_formula = self.formula().translate()
-        todo = self._todo()
-
-        solver = Solver()
-        solver.add(z3_formula)
-        result = solver.check()
-        if result == sat:
-            lookup, tests = {}, []
-            for q in todo:
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
-                if solver.check() != sat:
-                    # print("Falling back !")
-                    yield from self._propagate(tag)
-                test = Not(q.reified() == solver.model().eval(q.reified()))
-                tests.append(test)
-                lookup[str(test)] = q
-            solver.push()
-            while True:
-                solver.add(Or(tests))
-                result = solver.check()
-                if result == sat:
-                    tests = [t for t in tests if is_false(solver.model().eval(t))]
-                elif result == unsat:
-                    solver.pop()
-                    solver.check()  # not sure why this is needed
-                    for test in tests:
-                        q = lookup[str(test)]
-                        val1 = solver.model().eval(q.reified())
-                        val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert_(q, val, tag, True)
-                    break
-                else:  # unknown
-                    # print("Falling back !!")
-                    yield from self._propagate(tag)
-                    break
-            yield "No more consequences."
-        elif result == unsat:
-            yield "Not satisfiable."
-            yield str(z3_formula)
-        else:
-            yield "Unknown satisfiability."
-            yield str(z3_formula)
-
-    def _propagate(self, tag):
-        """generator of new propagated assignments.  Update self.assignments too.
+    def _directional_todo(self):
+        """ computes the list of candidate atoms for a new propagation
 
         Takes into account assertions made via self.assert_ since the last propagation:
-        * new assignments force the re-propagation of Unknowns
-        * clearing of assignments force the re-propagation of previous consequences
+        * a new assignment forces the re-propagation of Unknowns
+        * a clearing of assignment forces the re-propagation of previous consequences
         """
         statuses = []
         if self.propagated:
@@ -413,6 +362,70 @@ class Problem(object):
                 if ((not a.sentence.is_reified() or self.extended)
                     and a.status in statuses
                     ))
+        else:
+            todo = OrderedSet()
+        return todo
+
+    def _batch_propagate(self, tag=S.CONSEQUENCE):
+        """ generator of propagated assignments.  Update self.assignments too.
+
+        uses the method outlined in https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3/37061846#37061846
+        and in J. Wittocx paper : https://drive.google.com/file/d/19LT64T9oMoFKyuoZ_MWKMKf9tJwGVax-/view?usp=sharing
+
+        This method is not faster than _propagate(), and falls back to it in some cases
+        """
+        todo = self._directional_todo()
+        if todo:
+            z3_formula = self.formula().translate()
+
+            solver = Solver()
+            solver.add(z3_formula)
+            result = solver.check()
+            if result == sat:
+                lookup, tests = {}, []
+                for q in todo:
+                    solver.add(q.reified() == q.translate())  # in case todo contains complex formula
+                    if solver.check() != sat:
+                        # print("Falling back !")
+                        yield from self._propagate(tag)
+                    test = Not(q.reified() == solver.model().eval(q.reified()))
+                    tests.append(test)
+                    lookup[str(test)] = q
+                solver.push()
+                while True:
+                    solver.add(Or(tests))
+                    result = solver.check()
+                    if result == sat:
+                        tests = [t for t in tests if is_false(solver.model().eval(t))]
+                    elif result == unsat:
+                        solver.pop()
+                        solver.check()  # not sure why this is needed
+                        for test in tests:
+                            q = lookup[str(test)]
+                            val1 = solver.model().eval(q.reified())
+                            val = str_to_IDP(q, str(val1))
+                            yield self.assignments.assert_(q, val, tag, True)
+                        break
+                    else:  # unknown
+                        # print("Falling back !!")
+                        yield from self._propagate(tag)
+                        break
+                yield "No more consequences."
+            elif result == unsat:
+                yield "Not satisfiable."
+                yield str(z3_formula)
+            else:
+                yield "Unknown satisfiability."
+                yield str(z3_formula)
+        else:
+            yield "No more consequences."
+        self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
+
+    def _propagate(self, tag):
+        """generator of new propagated assignments.  Update self.assignments too.
+        """
+        todo = self._directional_todo()
+        if todo:
             z3_formula = self.formula().translate()
 
             solver = Solver()
