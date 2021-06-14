@@ -460,8 +460,8 @@ def substitute(self, e0, e1, assignments, tag=None, todo=None):
     new_branch = None
     if self.co_constraint is not None:
         new_branch = self.co_constraint.substitute(e0, e1, assignments, tag, todo)
-        if todo is not None:
-            todo.extend(new_branch.symbolic_propagate(assignments, tag))
+        if tag is not None:
+            new_branch.symbolic_propagate(assignments, tag)
 
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)

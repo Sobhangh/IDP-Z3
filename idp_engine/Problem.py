@@ -324,10 +324,7 @@ class Problem(object):
             consequences = []
             new_constraint = c.substitute(TRUE, TRUE,
                 self.assignments, tag, consequences)
-            consequences.extend(new_constraint.symbolic_propagate(self.assignments, tag))
-            if consequences:
-                for sentence, value in consequences:
-                    self.assignments.assert__(sentence, value, tag, False)
+            new_constraint.symbolic_propagate(self.assignments, tag)
         return self
 
     def _batch_propagate(self, tag=Status.CONSEQUENCE):
@@ -554,7 +551,7 @@ class Problem(object):
                         self._formula = None  # invalidates the formula
                         consequences = []
                         new_constraint = constraint.substitute(old, new,
-                            self.assignments, consequences)
+                            self.assignments, ass.status, consequences)
                         del constraint.questions[old.code]
                         new_constraint.questions = constraint.questions
                         new_constraints.append(new_constraint)

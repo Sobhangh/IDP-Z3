@@ -24,9 +24,9 @@ if the expression is true (or false)
 This module monkey-patches the Expression class and sub-classes.
 """
 
-from typing import List, Tuple, Optional
+from typing import Optional
 
-from idp_engine.Expression import (Expression, AQuantification,
+from idp_engine.Expression import (AppliedSymbol, Expression, AQuantification,
                     ADisjunction, AConjunction,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from idp_engine.Assignments import Assignments
@@ -42,54 +42,42 @@ def symbolic_propagate(self,
                        assignments: "Assignments",
                        tag: "Status",
                        truth: Optional[Expression] = TRUE
-                       ) -> List[Tuple[Expression]]:
-    """returns the consequences of `self=truth` that are in assignments.
+                       ):
+    """updates assignments with the consequences of `self=truth`.
 
     The consequences are obtained by symbolic processing (no calls to Z3).
 
     Args:
         assignments (Assignments):
-            The set of questions to chose from. Their value is ignored.
+            The set of questions to chose from.
 
         truth (Expression, optional):
             The truth value of the expression `self`. Defaults to TRUE.
-
-    Returns:
-        A list of pairs (Expression, bool), descring the literals that
-        are consequences
     """
-    out = []
     if self.value is not None:
-        return out
+        return
     if self.code in assignments:
         assignments.assert__(self, truth, tag, False)
     if self.simpler is not None:
-        out = self.simpler.symbolic_propagate(assignments, tag, truth) + out
-        return out
-    out = self.propagate1(assignments, tag, truth) + out
-    return out
-
-
+        self.simpler.symbolic_propagate(assignments, tag, truth)
+        return
+    self.propagate1(assignments, tag, truth)
 Expression.symbolic_propagate = symbolic_propagate
 
 
 def propagate1(self, assignments, tag, truth):
     " returns the list of symbolic_propagate of self (default implementation) "
-    return []
-
-
+    return
 Expression.propagate1 = propagate1
 
 
 # class AQuantification  ######################################################
 
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
-    out = []
     if self.code in assignments:
         assignments.assert__(self, truth, tag, False)
     if not self.quantees:  # expanded
-        return self.sub_exprs[0].symbolic_propagate(assignments, tag, truth) + out
-    return out
+        self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 AQuantification.symbolic_propagate = symbolic_propagate
 
 
@@ -97,8 +85,8 @@ AQuantification.symbolic_propagate = symbolic_propagate
 
 def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(FALSE):
-        return sum( (e.symbolic_propagate(assignments, tag, truth) for e in self.sub_exprs), [])
-    return []
+        for e in self.sub_exprs:
+            e.symbolic_propagate(assignments, tag, truth)
 ADisjunction.propagate1 = propagate1
 
 
@@ -106,16 +94,16 @@ ADisjunction.propagate1 = propagate1
 
 def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(TRUE):
-        return sum( (e.symbolic_propagate(assignments, tag, truth) for e in self.sub_exprs), [])
-    return []
+        for e in self.sub_exprs:
+            e.symbolic_propagate(assignments, tag, truth)
 AConjunction.propagate1 = propagate1
 
 
 # class AUnary  ############################################################
 
 def propagate1(self, assignments, tag, truth=TRUE):
-    return ( [] if self.operator != '¬' else
-        self.sub_exprs[0].symbolic_propagate(assignments, tag, _not(truth)) )
+    if self.operator == '¬':
+        self.sub_exprs[0].symbolic_propagate(assignments, tag, _not(truth))
 AUnary.propagate1 = propagate1
 
 
@@ -127,13 +115,12 @@ def propagate1(self, assignments, tag, truth=TRUE):
         # generating only one from universals would make the second one
         # a consequence, not a universal
         operands1 = [e.value for e in self.sub_exprs]
-        if   operands1[1] is not None:
+        if (type(self.sub_exprs[0]) == AppliedSymbol
+        and operands1[1] is not None):
             assignments.assert__(self.sub_exprs[0], operands1[1], tag, False)
-            return []
-        elif operands1[0] is not None:
+        elif (type(self.sub_exprs[1]) == AppliedSymbol
+        and operands1[0] is not None):
             assignments.assert__(self.sub_exprs[1], operands1[0], tag, False)
-            return []
-    return []
 AComparison.propagate1 = propagate1
 
 
@@ -142,7 +129,7 @@ AComparison.propagate1 = propagate1
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
     if self.code in assignments:
         assignments.assert__(self, truth, tag, False)
-    return self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
+    self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 Brackets.symbolic_propagate = symbolic_propagate
 
 

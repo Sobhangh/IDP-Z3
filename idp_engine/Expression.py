@@ -419,15 +419,15 @@ class Expression(ASTNode):
                            assignments: "Assignments",
                            tag: "Status",
                            truth: Optional["Expression"] = None
-                           ) -> List[Tuple["Expression"]]:
-        return []  # monkey-patched
+                           ):
+        return  # monkey-patched
 
     def propagate1(self,
                    assignments: "Assignments",
                    tag: "Status",
                    truth: Optional["Expression"] = None
-                   ) -> List[Tuple["Expression", bool]]:
-        return []  # monkey-patched
+                   ):
+        return  # monkey-patched
 
     def translate(self):
         pass  # monkey-patched
