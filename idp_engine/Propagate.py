@@ -40,6 +40,7 @@ def _not(truth):
 
 def symbolic_propagate(self,
                        assignments: "Assignments",
+                       tag: "Status",
                        truth: Optional[Expression] = TRUE
                        ) -> List[Tuple[Expression]]:
     """returns the consequences of `self=truth` that are in assignments.
@@ -61,16 +62,16 @@ def symbolic_propagate(self,
         return []
     out = [(self, truth)] if self.code in assignments else []
     if self.simpler is not None:
-        out = self.simpler.symbolic_propagate(assignments, truth) + out
+        out = self.simpler.symbolic_propagate(assignments, tag, truth) + out
         return out
-    out = self.propagate1(assignments, truth) + out
+    out = self.propagate1(assignments, tag, truth) + out
     return out
 
 
 Expression.symbolic_propagate = symbolic_propagate
 
 
-def propagate1(self, assignments, truth):
+def propagate1(self, assignments, tag, truth):
     " returns the list of symbolic_propagate of self (default implementation) "
     return []
 
@@ -80,43 +81,43 @@ Expression.propagate1 = propagate1
 
 # class AQuantification  ######################################################
 
-def symbolic_propagate(self, assignments, truth=TRUE):
+def symbolic_propagate(self, assignments, tag, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
     if not self.quantees:  # expanded
-        return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
+        return self.sub_exprs[0].symbolic_propagate(assignments, tag, truth) + out
     return out
 AQuantification.symbolic_propagate = symbolic_propagate
 
 
 # class ADisjunction  #########################################################
 
-def propagate1(self, assignments, truth=TRUE):
+def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(FALSE):
-        return sum( (e.symbolic_propagate(assignments, truth) for e in self.sub_exprs), [])
+        return sum( (e.symbolic_propagate(assignments, tag, truth) for e in self.sub_exprs), [])
     return []
 ADisjunction.propagate1 = propagate1
 
 
 # class AConjunction  #########################################################
 
-def propagate1(self, assignments, truth=TRUE):
+def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(TRUE):
-        return sum( (e.symbolic_propagate(assignments, truth) for e in self.sub_exprs), [])
+        return sum( (e.symbolic_propagate(assignments, tag, truth) for e in self.sub_exprs), [])
     return []
 AConjunction.propagate1 = propagate1
 
 
 # class AUnary  ############################################################
 
-def propagate1(self, assignments, truth=TRUE):
+def propagate1(self, assignments, tag, truth=TRUE):
     return ( [] if self.operator != '¬' else
-        self.sub_exprs[0].symbolic_propagate(assignments, _not(truth)) )
+        self.sub_exprs[0].symbolic_propagate(assignments, tag, _not(truth)) )
 AUnary.propagate1 = propagate1
 
 
 # class AComparison  ##########################################################
 
-def propagate1(self, assignments, truth=TRUE):
+def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(TRUE) and len(self.sub_exprs) == 2 and self.operator == ['=']:
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one
@@ -132,9 +133,9 @@ AComparison.propagate1 = propagate1
 
 # class Brackets  ############################################################
 
-def symbolic_propagate(self, assignments, truth=TRUE):
+def symbolic_propagate(self, assignments, tag, truth=TRUE):
     out = [(self, truth)] if self.code in assignments else []
-    return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
+    return self.sub_exprs[0].symbolic_propagate(assignments, tag, truth) + out
 Brackets.symbolic_propagate = symbolic_propagate
 
 

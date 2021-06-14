@@ -323,8 +323,8 @@ class Problem(object):
             # determine consequences, including from co-constraints
             consequences = []
             new_constraint = c.substitute(TRUE, TRUE,
-                self.assignments, consequences)
-            consequences.extend(new_constraint.symbolic_propagate(self.assignments))
+                self.assignments, tag, consequences)
+            consequences.extend(new_constraint.symbolic_propagate(self.assignments, tag))
             if consequences:
                 for sentence, value in consequences:
                     self.assignments.assert__(sentence, value, tag, False)

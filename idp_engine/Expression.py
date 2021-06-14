@@ -397,6 +397,7 @@ class Expression(ASTNode):
                    e0: "Expression",
                    e1: "Expression",
                    assignments: "Assignments",
+                   tag=None,
                    todo=None) -> "Expression":
         return self  # monkey-patched
 
@@ -416,12 +417,14 @@ class Expression(ASTNode):
 
     def symbolic_propagate(self,
                            assignments: "Assignments",
+                           tag: "Status",
                            truth: Optional["Expression"] = None
                            ) -> List[Tuple["Expression"]]:
         return []  # monkey-patched
 
     def propagate1(self,
                    assignments: "Assignments",
+                   tag: "Status",
                    truth: Optional["Expression"] = None
                    ) -> List[Tuple["Expression", bool]]:
         return []  # monkey-patched
