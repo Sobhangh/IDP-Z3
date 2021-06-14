@@ -55,7 +55,7 @@ def symbolic_propagate(self,
 
     Returns:
         A list of pairs (Expression, bool), descring the literals that
-        are implicant
+        are consequences
     """
     if self.value is not None:
         return []

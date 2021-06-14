@@ -108,11 +108,11 @@ def load_json(state, jsonstr: str):
                     if (json_atom["value"] != ''
                         and state.assignments[atom].status == Status.UNKNOWN):
                         value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        state.assignments.assert_(idp_atom, value,
+                        state.assignments.assert__(idp_atom, value,
                                                   Status.GIVEN, False)
                         if json_atom["typ"] != "Bool":
                             idp_atom = AComparison.make('=', [idp_atom, value])
-                            state.assignments.assert_(idp_atom, TRUE,
+                            state.assignments.assert__(idp_atom, TRUE,
                                                       Status.GIVEN, False)
 
                     # If the atom was already set in default struct, overwrite.

@@ -192,7 +192,7 @@ class Assignments(dict):
         for v in more.values():
             self.assert_(v.sentence, v.value, v.status, v.relevant)
 
-    def assert_(self, sentence: Expression,
+    def assert__(self, sentence: Expression,
                 value: Optional[Expression],
                 status: Optional[Status],
                 relevant: Optional[bool]):

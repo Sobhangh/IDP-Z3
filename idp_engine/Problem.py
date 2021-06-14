@@ -187,7 +187,7 @@ class Problem(object):
                 c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
-                self.assignments.assert_(s, None, Status.UNKNOWN, False)
+                self.assignments.assert__(s, None, Status.UNKNOWN, False)
 
         for ass in self.assignments.values():
             ass.sentence = ass.sentence
@@ -205,10 +205,10 @@ class Problem(object):
         code = str(code)
         atom = self.assignments[code].sentence
         if value is None:
-            self.assignments.assert_(atom, value, Status.UNKNOWN, False)
+            self.assignments.assert__(atom, value, Status.UNKNOWN, False)
         else:
             val = str_to_IDP(atom, str(value))
-            self.assignments.assert_(atom, val, status, False)
+            self.assignments.assert__(atom, val, status, False)
         # reset any consequences
         for v in self.assignments.values():
             if v.status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.EXPANDED]:
@@ -254,7 +254,7 @@ class Problem(object):
                 solver.pop()
             if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
-                ass.assert_(q, val, Status.EXPANDED, None)
+                ass.assert__(q, val, Status.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False):
@@ -327,7 +327,7 @@ class Problem(object):
             consequences.extend(new_constraint.symbolic_propagate(self.assignments))
             if consequences:
                 for sentence, value in consequences:
-                    self.assignments.assert_(sentence, value, tag, False)
+                    self.assignments.assert__(sentence, value, tag, False)
         return self
 
     def _batch_propagate(self, tag=Status.CONSEQUENCE):
@@ -365,7 +365,7 @@ class Problem(object):
                         q = lookup[str(test)]
                         val1 = solver.model().eval(q.reified())
                         val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert_(q, val, tag, True)
+                        yield self.assignments.assert__(q, val, tag, True)
                     break
                 else:  # unknown
                     # print("Falling back !!")
@@ -401,11 +401,11 @@ class Problem(object):
 
                         if res2 == unsat:
                             val = str_to_IDP(q, str(val1))
-                            yield self.assignments.assert_(q, val, tag, True)
+                            yield self.assignments.assert__(q, val, tag, True)
                         elif res2 == unknown:
                             res1 = unknown
                         else:  # reset the value
-                            self.assignments.assert_(q, None, Status.UNKNOWN, False)
+                            self.assignments.assert__(q, None, Status.UNKNOWN, False)
                 solver.pop()
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
@@ -450,8 +450,8 @@ class Problem(object):
         out.assignments = Assignments()
         for e in range:
             sentence = Assignment(termE, e, Status.UNKNOWN).formula()
-            # use assignments.assert_ to create one if necessary
-            out.assignments.assert_(sentence, None, Status.UNKNOWN, False)
+            # use assignments.assert__ to create one if necessary
+            out.assignments.assert__(sentence, None, Status.UNKNOWN, False)
         _ = list(out._propagate(Status.CONSEQUENCE))  # run the generator
         assert all(e.sentence.is_assignment()
                    for e in out.assignments.values())
@@ -638,7 +638,7 @@ class Problem(object):
                 e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
-                    self.assignments.assert_(q, None, Status.UNKNOWN,False)
+                    self.assignments.assert__(q, None, Status.UNKNOWN,False)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)

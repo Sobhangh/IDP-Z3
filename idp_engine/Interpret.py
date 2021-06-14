@@ -88,7 +88,7 @@ def interpret(self, problem):
             expr = AppliedSymbol.make(Symbol(name=self.name), arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
-            problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
+            problem.assignments.assert__(expr, None, Status.UNKNOWN, False)
 
     # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
@@ -171,19 +171,19 @@ def interpret(self, problem):
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == Status.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
-            e = problem.assignments.assert_(expr, value, status, False)
+            e = problem.assignments.assert__(expr, value, status, False)
             if (status == Status.GIVEN  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
-                problem.assignments.assert_(e.formula(), TRUE, status, False)
+                problem.assignments.assert__(e.formula(), TRUE, status, False)
         if self.default is not None:
             for code, expr in self.symbol.decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
-                    e = problem.assignments.assert_(expr, self.default, status,
+                    e = problem.assignments.assert__(expr, self.default, status,
                                                 False)
                     if (status == Status.GIVEN  # for proper display in IC
                         and self.default.type != BOOL):
-                        problem.assignments.assert_(e.formula(), TRUE, status,
+                        problem.assignments.assert__(e.formula(), TRUE, status,
                                                     False)
 SymbolInterpretation.interpret = interpret
 
