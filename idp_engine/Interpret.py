@@ -37,7 +37,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 """
 
 import copy
-from itertools import product, repeat
+from itertools import product
 
 from .Assignments import Status
 from .Parse import (Extern, TypeDeclaration,
@@ -240,7 +240,7 @@ Expression.interpret = interpret
 
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, assignments, tag=None, todo=None):
+def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Variable)
 
     implementation for everything but AppliedSymbol, UnappliedSymbol and
@@ -257,7 +257,7 @@ def substitute(self, e0, e1, assignments, tag=None, todo=None):
         return self._change(value=e1)  # e1 is UnappliedSymbol or Number
     else:
         # will update self.simpler
-        out = self.update_exprs(e.substitute(e0, e1, assignments, tag, todo)
+        out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
                                 for e in self.sub_exprs)
         return out
 Expression.substitute = substitute
@@ -451,7 +451,7 @@ AppliedSymbol.interpret = interpret
 
 
 # @log_calls  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, assignments, tag=None, todo=None):
+def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self """
 
     assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
@@ -459,7 +459,7 @@ def substitute(self, e0, e1, assignments, tag=None, todo=None):
 
     new_branch = None
     if self.co_constraint is not None:
-        new_branch = self.co_constraint.substitute(e0, e1, assignments, tag, todo)
+        new_branch = self.co_constraint.substitute(e0, e1, assignments, tag)
         if tag is not None:
             new_branch.symbolic_propagate(assignments, tag)
 
@@ -467,10 +467,10 @@ def substitute(self, e0, e1, assignments, tag=None, todo=None):
         return self._change(value=e1, co_constraint=new_branch)
     elif self.simpler is not None:  # has an interpretation
         assert self.co_constraint is None
-        simpler = self.simpler.substitute(e0, e1, assignments, tag, todo)
+        simpler = self.simpler.substitute(e0, e1, assignments, tag)
         return self._change(simpler=simpler)
     else:
-        sub_exprs = [e.substitute(e0, e1, assignments, tag, todo)
+        sub_exprs = [e.substitute(e0, e1, assignments, tag)
                      for e in self.sub_exprs]  # no simplification here
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
@@ -497,9 +497,9 @@ def interpret(self, problem):
 Variable.interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, assignments, tag=None, todo=None):
+def substitute(self, e0, e1, assignments, tag=None):
     if self.sort:
-        self.sort = self.sort.substitute(e0,e1, assignments, tag, todo)
+        self.sort = self.sort.substitute(e0,e1, assignments, tag)
     return e1 if self.code == e0.code else self
 Variable.substitute = substitute
 

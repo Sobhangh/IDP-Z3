@@ -321,9 +321,7 @@ class Problem(object):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
-            consequences = []
-            new_constraint = c.substitute(TRUE, TRUE,
-                self.assignments, tag, consequences)
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, tag)
             new_constraint.symbolic_propagate(self.assignments, tag)
         return self
 
@@ -549,9 +547,8 @@ class Problem(object):
                 for constraint in self.constraints:
                     if old in constraint.questions:  # for performance
                         self._formula = None  # invalidates the formula
-                        consequences = []
                         new_constraint = constraint.substitute(old, new,
-                            self.assignments, ass.status, consequences)
+                            self.assignments, ass.status)
                         del constraint.questions[old.code]
                         new_constraint.questions = constraint.questions
                         new_constraints.append(new_constraint)
