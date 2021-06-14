@@ -538,9 +538,6 @@ class Problem(object):
         new_constraints: List[Expression] = []
         for constraint in out.constraints:
             new_constraint = constraint.simplify_with(out.assignments)
-
-            new_constraint.questions = OrderedSet()
-            new_constraint.collect(new_constraint.questions, all_=True)
             new_constraints.append(new_constraint)
         out.constraints = new_constraints
         out._formula = None
