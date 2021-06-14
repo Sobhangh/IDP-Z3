@@ -12,7 +12,9 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * MR !98: Improve performance for theories with large structures
 * (breaking) Merge 101: simplify `get_range` API
 * Merge !93: improve speed by caching z3 translations
+* Merge !99: implement IEP 15 Inductive definitions
 * Merge !103: support alternative "batch" propagation algorithm (not faster)
+* Merge !105: "directional propagation" to improve performance for a sequence of assert+propagate
 * fix #104: implications, equivalences are binary connectives, not n-ary.
 
 ### Interactive Constructors
