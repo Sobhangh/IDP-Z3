@@ -526,33 +526,25 @@ class Problem(object):
 
         Assignments obtained by propagation become fixed constraints.
         """
+        out = self.copy()
 
-        self = self.copy()
+        # convert consequences to Universal
+        for ass in out.assignments.values():
+            if ass.value:
+                ass.status = (Status.UNIVERSAL if ass.status == Status.CONSEQUENCE else
+                        Status.ENV_UNIV if ass.status == Status.ENV_CONSQ else
+                        ass.status)
 
         new_constraints: List[Expression] = []
-        for constraint in self.constraints:
-            # annotate self.constraints with questions
-            questions = OrderedSet()
-            constraint.collect(questions, all_=True)
+        for constraint in out.constraints:
+            new_constraint = constraint.simplify_with(out.assignments)
 
-            new_constraint = constraint
-            for ass in self.assignments.values():
-                old, new = ass.sentence, ass.value
-                if new is not None:
-                    # convert consequences to Universal
-                    ass.status = (Status.UNIVERSAL if ass.status == Status.CONSEQUENCE else
-                                Status.ENV_UNIV if ass.status == Status.ENV_CONSQ else
-                                ass.status)
-                    # simplify constraints
-                    if old in questions:  # for performance
-                        self._formula = None  # invalidates the formula
-                        new_constraint = new_constraint.substitute(old, new,
-                            self.assignments, ass.status)
-                        del questions[old.code]
-            new_constraint.questions = questions
+            new_constraint.questions = OrderedSet()
+            new_constraint.collect(new_constraint.questions, all_=True)
             new_constraints.append(new_constraint)
-        self.constraints = new_constraints
-        return self
+        out.constraints = new_constraints
+        out._formula = None
+        return out
 
     def _generalize(self,
                     conjuncts: List[Assignment],

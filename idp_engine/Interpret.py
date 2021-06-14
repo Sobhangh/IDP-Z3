@@ -248,7 +248,6 @@ def substitute(self, e0, e1, assignments, tag=None):
     implementation for everything but AppliedSymbol, UnappliedSymbol and
     Fresh_variable
     """
-
     assert not isinstance(e0, Variable) or isinstance(e1, Variable)  # should use instantiate instead
     assert self.co_constraint is None  # see AppliedSymbol instead
 
@@ -288,7 +287,6 @@ def instantiate1(self, e0, e1, problem=None):
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
-
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem)
                             for e in self.sub_exprs)

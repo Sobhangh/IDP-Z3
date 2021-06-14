@@ -414,6 +414,9 @@ class Expression(ASTNode):
                     ) -> "Expression":
         return self  # monkey-patched
 
+    def simplify_with(self, assignments: "Assignments") -> "Expression":
+        return self  # monkey-patched
+
     def symbolic_propagate(self,
                            assignments: "Assignments",
                            tag: "Status",
