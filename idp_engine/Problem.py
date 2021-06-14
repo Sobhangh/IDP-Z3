@@ -40,6 +40,8 @@ class Propagation(Enum):
     """Describe propagation method    """
     DEFAULT = auto()  # checks each question to see if it can have only 1 value
     BATCH = auto()  # finds a list of questions that has only 1 value
+    Z3 = auto()  # use Z3's consequences API (incomplete propagation)
+
 
 class Problem(object):
     """A collection of theory and structure blocks.
@@ -344,6 +346,8 @@ class Problem(object):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
             out = list(self._batch_propagate(tag))
+        if method == Propagation.Z3:
+            out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag))
         assert out[0] != "Not satisfiable.", "Not satisfiable."

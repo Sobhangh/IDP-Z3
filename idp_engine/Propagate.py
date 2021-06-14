@@ -29,7 +29,7 @@ This module monkey-patches the Expression and Problem classes and sub-classes.
 """
 
 from typing import List, Tuple, Optional
-from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true)
+from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true, is_not, is_eq)
 
 from .Assignments import Status as S, Assignments
 from .Expression import (Expression, AQuantification,
@@ -249,7 +249,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
 Problem._batch_propagate = _batch_propagate
 
 
-def _propagate(self, tag):
+def _propagate(self, tag=S.CONSEQUENCE):
     """generator of new propagated assignments.  Update self.assignments too.
     """
     todo = self._directional_todo()
@@ -295,6 +295,58 @@ def _propagate(self, tag):
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Problem._propagate = _propagate
+
+
+def _z3_propagate(self, tag=S.CONSEQUENCE):
+    """generator of new propagated assignments.  Update self.assignments too.
+
+    use z3's consequences API (incomplete propagation)
+    """
+    todo = self._directional_todo()
+    if todo:
+        z3_todo, unreify = [], {}
+        for q in todo:
+            z3_todo.append(q.reified())
+            unreify[q.reified()] = q
+
+        z3_formula = self.formula().translate()
+
+        solver = Solver()
+        solver.add(z3_formula)
+        result, consqs = solver.consequences([], z3_todo)
+        if result == sat:
+            for consq in consqs:
+                atom = consq.children()[1]
+                if is_not(consq):
+                    value, atom = FALSE, atom.arg(0)
+                else:
+                    value = TRUE
+                # try to unreify it
+                if atom in unreify:
+                    yield self.assignments.assert_(unreify[atom], value, tag, True)
+                elif is_eq(consq):
+                    assert value == TRUE
+                    term = consq.children()[0]
+                    if term in unreify:
+                        q = unreify[term]
+                        val = str_to_IDP(q, consq.children()[1])
+                        yield self.assignments.assert_(q, val, tag, True)
+                    else:
+                        print("???", str(consq))
+                else:
+                    print("???", str(consq))
+            yield "No more consequences."
+            #yield from self._propagate(tag)  # incomplete --> finish with normal propagation
+        elif result == unsat:
+            yield "Not satisfiable."
+            yield str(z3_formula)
+        else:
+            yield "Unknown satisfiability."
+            yield str(z3_formula)
+    else:
+        yield "No more consequences."
+    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
+Problem._z3_propagate = _z3_propagate
 
 
 Done = True
