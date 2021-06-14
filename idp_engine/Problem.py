@@ -26,9 +26,9 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, unknown, Optimize, Not, And, Or, Implies, is_false
+from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies, is_false
 
-from .Assignments import Status, Assignment, Assignments
+from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
                          AComparison, AUnary)
 from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
@@ -40,6 +40,8 @@ class Propagation(Enum):
     """Describe propagation method    """
     DEFAULT = auto()  # checks each question to see if it can have only 1 value
     BATCH = auto()  # finds a list of questions that has only 1 value
+    Z3 = auto()  # use Z3's consequences API (incomplete propagation)
+
 
 class Problem(object):
     """A collection of theory and structure blocks.
@@ -73,6 +75,12 @@ class Problem(object):
             the problem.
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
+
+        propagated (Bool): true if a propagation has been done
+
+        assigned (OrderedSet): set of questions asserted since last propagate
+
+        cleared (OrderedSet): set of questions unassigned since last propagate
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -187,33 +195,37 @@ class Problem(object):
                 c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
-                self.assignments.assert__(s, None, Status.UNKNOWN, False)
+                self.assignments.assert__(s, None, S.UNKNOWN, False)
 
         for ass in self.assignments.values():
             ass.sentence = ass.sentence
             ass.sentence.original = ass.sentence.copy()
+
+        self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
-    def assert_(self, code: str, value: Any, status: Status = Status.GIVEN):
-        """asserts that an expression has a value
+    def assert_(self, code: str, value: Any, status: S = S.GIVEN):
+        """asserts that an expression has a value (or not)
 
         Args:
             code (str): the code of the expression, e.g., "p()"
-            value (Any): a Python value, e.g., "True"
-            status (Status, Optional): how the value was obtained.  Default: Status.GIVEN
+            value (Any): a Python value, e.g., True
+            status (Status, Optional): how the value was obtained.  Default: S.GIVEN
         """
         code = str(code)
         atom = self.assignments[code].sentence
+        old_value = self.assignments[code].value
         if value is None:
-            self.assignments.assert__(atom, value, Status.UNKNOWN, False)
+            if self.propagated and old_value is not None:
+                self.cleared.append(atom)
+                self.assigned.pop(atom, None)
+            self.assignments.assert__(atom, value, S.UNKNOWN, False)
         else:
             val = str_to_IDP(atom, str(value))
+            if self.propagated and not(old_value and old_value.same_as(val)):
+                self.assigned.append(atom)
+                self.cleared.pop(atom, None)
             self.assignments.assert__(atom, val, status, False)
-        # reset any consequences
-        for v in self.assignments.values():
-            if v.status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.EXPANDED]:
-                v.status = Status.UNKNOWN
-                v.value = None
         self._formula = None
 
     def formula(self):
@@ -223,7 +235,8 @@ class Problem(object):
                 '∧',
                 [a.formula() for a in self.assignments.values()
                  if a.value is not None
-                 and a.status not in [Status.CONSEQUENCE, Status.ENV_CONSQ]]
+                 and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                      or (self.propagated and not self.cleared))]
                 + [s for s in self.constraints]
                 + [c for c in self.co_constraints]
                 + [s for s in self.def_constraints.values()]
@@ -234,8 +247,7 @@ class Problem(object):
     def _todo(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.status not in [Status.GIVEN, Status.STRUCTURE,
-                                 Status.UNIVERSAL, Status.ENV_UNIV]
+            if a.status not in [S.GIVEN, S.STRUCTURE, S.UNIVERSAL, S.ENV_UNIV]
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -254,7 +266,7 @@ class Problem(object):
                 solver.pop()
             if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
-                ass.assert__(q, val, Status.EXPANDED, None)
+                ass.assert__(q, val, S.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False):
@@ -270,14 +282,14 @@ class Problem(object):
 
             if solver.check() == sat:
                 count += 1
-                model = solver.model()
+                _ = solver.model()
                 ass = self._from_model(solver, todo, complete)
                 yield ass
 
                 # exclude this model
                 different = []
                 for a in ass.values():
-                    if a.status == Status.EXPANDED:
+                    if a.status == S.EXPANDED:
                         q = a.sentence
                         different.append(q.translate() != a.value.translate())
                 solver.add(Or(different))
@@ -317,7 +329,7 @@ class Problem(object):
         self.assignments = self._from_model(solver, self._todo(), complete)
         return self
 
-    def symbolic_propagate(self, tag=Status.UNIVERSAL):
+    def symbolic_propagate(self, tag=S.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
@@ -325,99 +337,12 @@ class Problem(object):
             new_constraint.symbolic_propagate(self.assignments, tag)
         return self
 
-    def _batch_propagate(self, tag=Status.CONSEQUENCE):
-        """ uses the method outlined in https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3/37061846#37061846
-        and in J. Wittocx paper : https://drive.google.com/file/d/19LT64T9oMoFKyuoZ_MWKMKf9tJwGVax-/view?usp=sharing
-
-        This method is not faster than _propagate(), and falls back to it in some cases
-        """
-        z3_formula = self.formula().translate()
-        todo = self._todo()
-
-        solver = Solver()
-        solver.add(z3_formula)
-        result = solver.check()
-        if result == sat:
-            lookup, tests = {}, []
-            for q in todo:
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
-                if solver.check() != sat:
-                    # print("Falling back !")
-                    yield from self._propagate(tag)
-                test = Not(q.reified() == solver.model().eval(q.reified()))
-                tests.append(test)
-                lookup[str(test)] = q
-            solver.push()
-            while True:
-                solver.add(Or(tests))
-                result = solver.check()
-                if result == sat:
-                    tests = [t for t in tests if is_false(solver.model().eval(t))]
-                elif result == unsat:
-                    solver.pop()
-                    solver.check()  # not sure why this is needed
-                    for test in tests:
-                        q = lookup[str(test)]
-                        val1 = solver.model().eval(q.reified())
-                        val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert__(q, val, tag, True)
-                    break
-                else:  # unknown
-                    # print("Falling back !!")
-                    yield from self._propagate(tag)
-                    break
-            yield "No more consequences."
-        elif result == unsat:
-            yield "Not satisfiable."
-            yield str(z3_formula)
-        else:
-            yield "Unknown satisfiability."
-            yield str(z3_formula)
-
-    def _propagate(self, tag):
-        z3_formula = self.formula().translate()
-        todo = self._todo()
-
-        solver = Solver()
-        solver.add(z3_formula)
-        result = solver.check()
-        if result == sat:
-            for q in todo:
-                solver.push()  #  faster (~3%) with push than without
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
-                res1 = solver.check()
-                if res1 == sat:
-                    val1 = solver.model().eval(q.reified())
-                    if str(val1) != str(q.reified()):  # if not irrelevant
-                        solver.push()
-                        solver.add(Not(q.reified() == val1))
-                        res2 = solver.check()
-                        solver.pop()
-
-                        if res2 == unsat:
-                            val = str_to_IDP(q, str(val1))
-                            yield self.assignments.assert__(q, val, tag, True)
-                        elif res2 == unknown:
-                            res1 = unknown
-                        else:  # reset the value
-                            self.assignments.assert__(q, None, Status.UNKNOWN, False)
-                solver.pop()
-                if res1 == unknown:
-                    # yield(f"Unknown: {str(q)}")
-                    solver = Solver()  # restart the solver
-                    solver.add(z3_formula)
-            yield "No more consequences."
-        elif result == unsat:
-            yield "Not satisfiable."
-            yield str(z3_formula)
-        else:
-            yield "Unknown satisfiability."
-            yield str(z3_formula)
-
-    def propagate(self, tag=Status.CONSEQUENCE, method=Propagation.DEFAULT):
+    def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
             out = list(self._batch_propagate(tag))
+        if method == Propagation.Z3:
+            out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag))
         assert out[0] != "Not satisfiable.", "Not satisfiable."
@@ -434,20 +359,20 @@ class Problem(object):
 
         out = self.copy()
         #  remove current assignments to same term
-        out.assignments.copy()
         if out.assignments[term].value:
             for a in out.assignments.values():
                 if a.sentence.is_assignment and a.sentence.code.startswith(term):
-                    out.assert_(a.sentence, None, Status.UNKNOWN)
+                    out.assert_(a.sentence, None, S.UNKNOWN)
         out.formula()  # to keep universals and given, except self
 
         # now consider every value in range
         out.assignments = Assignments()
         for e in range:
-            sentence = Assignment(termE, e, Status.UNKNOWN).formula()
-            # use assignments.assert__ to create one if necessary
-            out.assignments.assert__(sentence, None, Status.UNKNOWN, False)
-        _ = list(out._propagate(Status.CONSEQUENCE))  # run the generator
+            sentence = Assignment(termE, e, S.UNKNOWN).formula()
+            # use assignments.assert_ to create one if necessary
+            out.assignments.assert__(sentence, None, S.UNKNOWN, False)
+        out.assigned = True  # to force propagation of Unknowns
+        _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
         assert all(e.sentence.is_assignment()
                    for e in out.assignments.values())
         return [str(e.sentence.sub_exprs[1])
@@ -465,7 +390,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [Status.GIVEN, Status.STRUCTURE]
+        reasons = [S.GIVEN, S.STRUCTURE]
 
         negated = consequence.replace('~', '¬').startswith('¬')
         consequence = consequence[1:] if negated else consequence
@@ -509,7 +434,7 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status == Status.GIVEN:
+                            if a1.status == S.GIVEN:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())
@@ -531,8 +456,8 @@ class Problem(object):
         # convert consequences to Universal
         for ass in out.assignments.values():
             if ass.value:
-                ass.status = (Status.UNIVERSAL if ass.status == Status.CONSEQUENCE else
-                        Status.ENV_UNIV if ass.status == Status.ENV_CONSQ else
+                ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
+                        S.ENV_UNIV if ass.status == S.ENV_CONSQ else
                         ass.status)
 
         new_constraints: List[Expression] = []
@@ -585,7 +510,7 @@ class Problem(object):
                     hypothesis = And(z3_formula, known, conditions_i)
                     solver.add(Not(Implies(hypothesis, goal.translate())))
                 if solver.check() == unsat:
-                    conditions[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+                    conditions[i] = Assignment(TRUE, TRUE, S.UNKNOWN)
             conditions = join_set_conditions(conditions)
             return [c for c in conditions if c.sentence != TRUE]+[goal]
 
@@ -618,7 +543,7 @@ class Problem(object):
                 e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
-                    self.assignments.assert__(q, None, Status.UNKNOWN,False)
+                    self.assignments.assert__(q, None, S.UNKNOWN,False)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
@@ -634,7 +559,7 @@ class Problem(object):
             f"Internal error"
 
         known = And([ass.translate() for ass in self.assignments.values()
-                        if ass.status != Status.UNKNOWN]
+                        if ass.status != S.UNKNOWN]
                     + [q.reified()==q.translate() for q in questions
                         if q.is_reified()])
 
@@ -659,11 +584,11 @@ class Problem(object):
                     else:
                         val1 = model.eval(atom.reified())
                     if val1 == True:
-                        ass = Assignment(atom, TRUE , Status.UNKNOWN)
+                        ass = Assignment(atom, TRUE, S.UNKNOWN)
                     elif val1 == False:
-                        ass = Assignment(atom, FALSE, Status.UNKNOWN)
+                        ass = Assignment(atom, FALSE, S.UNKNOWN)
                     else:
-                        ass = Assignment(atom, None, Status.UNKNOWN)
+                        ass = Assignment(atom, None, S.UNKNOWN)
                     if atom.code == goal_string:
                         goal = ass
                     elif ass.value is not None:
@@ -674,7 +599,7 @@ class Problem(object):
             # start with negations !
             assignments.sort(key=lambda l: (l.value==TRUE, str(l.sentence)))
             assignments.append(goal if goal_string else
-                                Assignment(TRUE, TRUE, Status.UNKNOWN))
+                                Assignment(TRUE, TRUE, S.UNKNOWN))
 
             assignments = self._generalize(assignments, known, theory)
             models.append(assignments)

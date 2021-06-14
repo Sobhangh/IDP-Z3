@@ -655,7 +655,8 @@ class Operator(Expression):
     @classmethod
     def make(cls, ops, operands):
         """ creates a BinaryOp
-            beware: cls must be specific for ops !"""
+            beware: cls must be specific for ops !
+        """
         if len(operands) == 1:
             return operands[0]
         if isinstance(ops, str):
