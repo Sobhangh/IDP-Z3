@@ -58,9 +58,11 @@ def symbolic_propagate(self,
         A list of pairs (Expression, bool), descring the literals that
         are consequences
     """
+    out = []
     if self.value is not None:
-        return []
-    out = [(self, truth)] if self.code in assignments else []
+        return out
+    if self.code in assignments:
+        assignments.assert__(self, truth, tag, False)
     if self.simpler is not None:
         out = self.simpler.symbolic_propagate(assignments, tag, truth) + out
         return out
@@ -82,7 +84,9 @@ Expression.propagate1 = propagate1
 # class AQuantification  ######################################################
 
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
-    out = [(self, truth)] if self.code in assignments else []
+    out = []
+    if self.code in assignments:
+        assignments.assert__(self, truth, tag, False)
     if not self.quantees:  # expanded
         return self.sub_exprs[0].symbolic_propagate(assignments, tag, truth) + out
     return out
@@ -124,9 +128,11 @@ def propagate1(self, assignments, tag, truth=TRUE):
         # a consequence, not a universal
         operands1 = [e.value for e in self.sub_exprs]
         if   operands1[1] is not None:
-            return [(self.sub_exprs[0], operands1[1])]
+            assignments.assert__(self.sub_exprs[0], operands1[1], tag, False)
+            return []
         elif operands1[0] is not None:
-            return [(self.sub_exprs[1], operands1[0])]
+            assignments.assert__(self.sub_exprs[1], operands1[0], tag, False)
+            return []
     return []
 AComparison.propagate1 = propagate1
 
@@ -134,8 +140,9 @@ AComparison.propagate1 = propagate1
 # class Brackets  ############################################################
 
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
-    out = [(self, truth)] if self.code in assignments else []
-    return self.sub_exprs[0].symbolic_propagate(assignments, tag, truth) + out
+    if self.code in assignments:
+        assignments.assert__(self, truth, tag, False)
+    return self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 Brackets.symbolic_propagate = symbolic_propagate
 
 
