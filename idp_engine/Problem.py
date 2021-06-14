@@ -529,32 +529,29 @@ class Problem(object):
 
         self = self.copy()
 
-        # annotate self.constraints with questions
-        for e in self.constraints:
+        new_constraints: List[Expression] = []
+        for constraint in self.constraints:
+            # annotate self.constraints with questions
             questions = OrderedSet()
-            e.collect(questions, all_=True)
-            e.questions = questions
+            constraint.collect(questions, all_=True)
 
-        for ass in self.assignments.values():
-            old, new = ass.sentence, ass.value
-            if new is not None:
-                # convert consequences to Universal
-                ass.status = (Status.UNIVERSAL if ass.status == Status.CONSEQUENCE else
-                              Status.ENV_UNIV if ass.status == Status.ENV_CONSQ else
-                              ass.status)
-                # simplify constraints
-                new_constraints: List[Expression] = []
-                for constraint in self.constraints:
-                    if old in constraint.questions:  # for performance
+            new_constraint = constraint
+            for ass in self.assignments.values():
+                old, new = ass.sentence, ass.value
+                if new is not None:
+                    # convert consequences to Universal
+                    ass.status = (Status.UNIVERSAL if ass.status == Status.CONSEQUENCE else
+                                Status.ENV_UNIV if ass.status == Status.ENV_CONSQ else
+                                ass.status)
+                    # simplify constraints
+                    if old in questions:  # for performance
                         self._formula = None  # invalidates the formula
-                        new_constraint = constraint.substitute(old, new,
+                        new_constraint = new_constraint.substitute(old, new,
                             self.assignments, ass.status)
-                        del constraint.questions[old.code]
-                        new_constraint.questions = constraint.questions
-                        new_constraints.append(new_constraint)
-                    else:
-                        new_constraints.append(constraint)
-                self.constraints = new_constraints
+                        del questions[old.code]
+            new_constraint.questions = questions
+            new_constraints.append(new_constraint)
+        self.constraints = new_constraints
         return self
 
     def _generalize(self,

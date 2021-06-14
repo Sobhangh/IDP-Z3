@@ -243,6 +243,8 @@ Expression.interpret = interpret
 def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Variable)
 
+    if tag is present, updates assignments with symbolic propagation of co-constraints.
+
     implementation for everything but AppliedSymbol, UnappliedSymbol and
     Fresh_variable
     """

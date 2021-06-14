@@ -54,19 +54,18 @@ def symbolic_propagate(self,
         truth (Expression, optional):
             The truth value of the expression `self`. Defaults to TRUE.
     """
-    if self.value is not None:
-        return
-    if self.code in assignments:
-        assignments.assert__(self, truth, tag, False)
-    if self.simpler is not None:
-        self.simpler.symbolic_propagate(assignments, tag, truth)
-        return
-    self.propagate1(assignments, tag, truth)
+    if self.value is None:
+        if self.code in assignments:
+            assignments.assert__(self, truth, tag, False)
+        if self.simpler is not None:
+            self.simpler.symbolic_propagate(assignments, tag, truth)
+        else:
+            self.propagate1(assignments, tag, truth)
 Expression.symbolic_propagate = symbolic_propagate
 
 
 def propagate1(self, assignments, tag, truth):
-    " returns the list of symbolic_propagate of self (default implementation) "
+    " returns the list of symbolic_propagate of self, ignoring value and simpler "
     return
 Expression.propagate1 = propagate1
 
@@ -77,6 +76,7 @@ def symbolic_propagate(self, assignments, tag, truth=TRUE):
     if self.code in assignments:
         assignments.assert__(self, truth, tag, False)
     if not self.quantees:  # expanded
+        assert len(self.sub_exprs) == 1  # a conjunction or disjunction
         self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 AQuantification.symbolic_propagate = symbolic_propagate
 
@@ -127,8 +127,6 @@ AComparison.propagate1 = propagate1
 # class Brackets  ############################################################
 
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
-    if self.code in assignments:
-        assignments.assert__(self, truth, tag, False)
     self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 Brackets.symbolic_propagate = symbolic_propagate
 
