@@ -53,7 +53,7 @@ def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
         co_constraint = self.co_constraint.simplify_with(assignments)
     new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
     return self._change(sub_exprs=new_e, value=value, simpler=simpler,
-                              co_constraint=co_constraint).simplify1()
+                        co_constraint=co_constraint).simplify1()
 Expression.simplify_with = simplify_with
 
 
@@ -68,7 +68,7 @@ def symbolic_propagate(self,
 
     Args:
         assignments (Assignments):
-            The set of questions to chose from.
+            The set of assignments to update.
 
         truth (Expression, optional):
             The truth value of the expression `self`. Defaults to TRUE.
