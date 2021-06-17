@@ -132,7 +132,8 @@ def interpret(self, theory):
                                   self.definiendum.sub_exprs)
         expr.in_head = True
 
-    if self.out or self.definiendum.symbol.decl not in self.parent.level_symbols:
+    if self.out or DEF_SEMANTICS == Semantics.COMPLETION or \
+            self.definiendum.symbol.decl not in self.parent.level_symbols:
         self.whole_domain = AQuantification.make('∀', self.quantees,
                             AEquivalence.make('⇔', [expr,self.body])).interpret(theory)
     else:

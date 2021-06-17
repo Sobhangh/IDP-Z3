@@ -34,6 +34,7 @@ MAX_QUANTIFIER_EXPANSION = 20
 
 class Semantics(Enum):
     """Semantics for inductive definitions"""
+    COMPLETION = auto()
     KRIPKEKLEENE = auto()
     WELLFOUNDED = auto()
     COINDUCTION = auto()
