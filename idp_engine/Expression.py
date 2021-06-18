@@ -652,6 +652,12 @@ class Operator(Expression):
         """ creates a BinaryOp
             beware: cls must be specific for ops !
         """
+        if len(operands) == 0:
+            if cls == AConjunction:
+                return TRUE
+            if cls == ADisjunction:
+                return FALSE
+            raise "Internal error"
         if len(operands) == 1:
             return operands[0]
         if isinstance(ops, str):
