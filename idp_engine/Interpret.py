@@ -107,7 +107,6 @@ SymbolDeclaration.interpret = interpret
 def interpret(self, problem):
     for decl, rule in self.clarks.items():
         if rule.is_whole_domain:
-            # rule.body = rule.body.interpret(problem)
             rule.interpret(problem)
 Definition.interpret = interpret
 
