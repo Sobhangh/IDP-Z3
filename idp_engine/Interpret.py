@@ -108,6 +108,9 @@ def interpret(self, problem):
     for decl, rule in self.clarks.items():
         if rule.is_whole_domain:
             rule.interpret(problem)
+        else:
+            self.check(rule.definiendum.symbol.decl not in self.level_symbols,
+                       f"Cannot have inductive definitions on infinite domain")
 Definition.interpret = interpret
 
 
