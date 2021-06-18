@@ -499,6 +499,11 @@ class Definition(ASTNode):
     def __hash__(self):
         return hash(self.id)
 
+    def instantiate_definition(self, decl, new_args, theory):
+        rule = self.clarks.get(decl, None)
+        if rule:
+            return rule.instantiate_definition(new_args, theory)
+
     def set_level_symbols(self):
         """Calculates which symbols in the definition are recursively defined,
            creates a corresponding level mapping symbol,
