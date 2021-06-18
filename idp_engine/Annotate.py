@@ -553,6 +553,8 @@ UnappliedSymbol.annotate = annotate
 # Class Brackets  #######################################################
 
 def annotate1(self):
+    if not self.annotations:
+        return self.sub_exprs[0]  # remove the bracket
     self.type = self.sub_exprs[0].type
     if self.annotations['reading']:
         self.sub_exprs[0].annotations = self.annotations

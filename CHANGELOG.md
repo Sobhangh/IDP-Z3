@@ -16,6 +16,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * Merge !103: support alternative "batch" propagation algorithm (not faster)
 * Merge !105: "directional propagation" to improve performance for a sequence of assert+propagate
 * fix #104: implications, equivalences are binary connectives, not n-ary.
+* fix #111: Missing law in explanation when between brackets
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions
