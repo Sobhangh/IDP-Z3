@@ -18,6 +18,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * Merge !105: "directional propagation" to improve performance for a sequence of assert+propagate
 * Merge !106: improve performance of Problem.simplify()
 * fix #104: implications, equivalences are binary connectives, not n-ary.
+* fix #111: Missing law in explanation when between brackets
 
 ### Interactive Constructors
 * fix #98: Incorrect relevance with definitions

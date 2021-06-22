@@ -1131,7 +1131,7 @@ class Brackets(Expression):
         if type(annotations) == dict:
             self.annotations = annotations
         elif annotations is None:
-            self.annotations['reading'] = ''
+            self.annotations = None
         else:  # Annotations instance
             self.annotations = annotations.annotations
 
