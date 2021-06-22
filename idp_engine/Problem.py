@@ -237,7 +237,7 @@ class Problem(object):
                  if a.value is not None
                  and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
                       or (self.propagated and not self.cleared))]
-                + [s for s in self.constraints]
+                + [s for s in self.constraints]  #perf could be pre-compiled
                 + [c for c in self.co_constraints]
                 + [s for s in self.def_constraints.values()]
                 + [TRUE]  # so that it is not empty
@@ -563,7 +563,7 @@ class Problem(object):
                 e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
-                    self.assignments.assert_(q, None, S.UNKNOWN,False)
+                    self.assignments.assert_(q, None, S.UNKNOWN, False)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)

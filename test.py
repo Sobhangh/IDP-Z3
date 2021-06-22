@@ -45,7 +45,7 @@ import re
 
 from idp_server.State import State
 from idp_server.IO import Output, metaJSON
-from idp_engine import IDP, Problem, model_expand, Status
+from idp_engine import IDP, Problem, model_expand, Status as S
 from idp_engine.utils import start, log, NEWL
 
 z3lock = threading.Lock()
@@ -61,7 +61,7 @@ def generateZ3(theory):
     # capture stdout, print()
     with io.StringIO() as buf, redirect_stdout(buf):
         try:
-            idp = IDP.parse(theory)
+            idp = IDP.from_str(theory)
             if 'main' in idp.procedures:
                 idp.execute()
             else:
@@ -171,7 +171,7 @@ def pipeline():
                     log(f"start /eval {file_name}")
                     with open(file_name, "r") as fp:
 
-                        idp = IDP.parse(fp.read())
+                        idp = IDP.from_str(fp.read())
                         given_json = ""
 
                         if idp.procedures == {}:
@@ -211,14 +211,14 @@ def api():
                     print("ok")
                 }
             """
-            kb = IDP.parse(test)
+            kb = IDP.from_str(test)
             T, S = kb.get_blocks("T, S")
             kb.execute()
             for model in model_expand(T,S):
                 print(model)
                 print()
             problem = Problem(T)
-            problem.assert_("p()", True, Status.GIVEN)
+            problem.assert_("p()", True, S.GIVEN)
             print(problem.propagate().assignments)
         except Exception as exc:
             print(traceback.format_exc())

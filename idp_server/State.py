@@ -20,9 +20,10 @@ Management of the State of problem solving with the Interactive Consultant.
 """
 
 
+from idp_engine.Assignments import Status as S
 from idp_engine.Run import Problem
 from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
-from .IO import load_json, Status
+from .IO import load_json
 from .Inferences import get_relevant_questions
 
 # Types
@@ -97,7 +98,7 @@ class State(Problem):
                       + [struct for struct in idp.structures.values()
                          if struct.voc.name == 'environment'])
             self.environment = Problem(* blocks, extended=True)
-            self.environment.symbolic_propagate(tag=Status.ENV_UNIV)
+            self.environment.symbolic_propagate(tag=S.ENV_UNIV)
 
             blocks = [self.environment, idp.theories['decision']]
         else:  # take the first theory
@@ -107,7 +108,7 @@ class State(Problem):
         blocks += [struct for struct in idp.structures.values()
                    if struct.voc.name != 'environment']
         self.add(*blocks)
-        self.symbolic_propagate(tag=Status.UNIVERSAL)
+        self.symbolic_propagate(tag=S.UNIVERSAL)
 
         self._finalize()
 
@@ -131,10 +132,10 @@ class State(Problem):
     def _finalize(self):
         # propagate universals
         if self.environment is not None:  # if there is a decision vocabulary
-            self.environment.propagate(tag=Status.ENV_CONSQ)
+            self.environment.propagate(tag=S.ENV_CONSQ)
             self.assignments.update(self.environment.assignments)
             self._formula = None
-        self.propagate(tag=Status.CONSEQUENCE)
+        self.propagate(tag=S.CONSEQUENCE)
         out = get_relevant_questions(self)  # creates a copy of self
         # copy relevant information
         for k,v in out.assignments.items():
@@ -146,8 +147,8 @@ class State(Problem):
         self.co_constraints = OrderedSet()
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
-        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.UNIVERSAL, Status.ENV_UNIV])}{NEWL}"
-                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [Status.CONSEQUENCE, Status.ENV_CONSQ])}{NEWL}"
+        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.UNIVERSAL, S.ENV_UNIV])}{NEWL}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.CONSEQUENCE, S.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"

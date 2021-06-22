@@ -39,7 +39,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 import copy
 from itertools import product, repeat
 
-from .Assignments import Status
+from .Assignments import Status as S
 from .Parse import (Extern, TypeDeclaration,
                     SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
@@ -88,7 +88,7 @@ def interpret(self, problem):
             expr = AppliedSymbol.make(Symbol(name=self.name), arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
-            problem.assignments.assert_(expr, None, Status.UNKNOWN, False)
+            problem.assignments.assert_(expr, None, S.UNKNOWN, False)
 
     # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
@@ -156,8 +156,7 @@ Rule.interpret = interpret
 # class SymbolInterpretation  ###########################################################
 
 def interpret(self, problem):
-    status = (Status.STRUCTURE if self.block.name != DEFAULT else
-                Status.GIVEN)
+    status = S.STRUCTURE if self.block.name != DEFAULT else S.GIVEN
     if self.is_type_enumeration:
         self.enumeration.interpret(problem)
         self.symbol.decl.interpretation = self
@@ -169,10 +168,10 @@ def interpret(self, problem):
                 args, value = t.args, TRUE
             expr = AppliedSymbol.make(self.symbol, args)
             self.check(expr.code not in problem.assignments
-                or problem.assignments[expr.code].status == Status.UNKNOWN,
+                or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
             e = problem.assignments.assert_(expr, value, status, False)
-            if (status == Status.GIVEN  # for proper display in IC
+            if (status == S.GIVEN  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
                 problem.assignments.assert_(e.formula(), TRUE, status, False)
         if self.default is not None:
@@ -181,7 +180,7 @@ def interpret(self, problem):
                     or problem.assignments[code].status != status):
                     e = problem.assignments.assert_(expr, self.default, status,
                                                 False)
-                    if (status == Status.GIVEN  # for proper display in IC
+                    if (status == S.GIVEN  # for proper display in IC
                         and self.default.type != BOOL):
                         problem.assignments.assert_(e.formula(), TRUE, status,
                                                     False)

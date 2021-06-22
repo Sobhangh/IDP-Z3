@@ -25,6 +25,7 @@ import ast
 from idp_engine import Problem, Status
 from idp_engine.Expression import (TRUE, FALSE, Number)
 from idp_engine.Parse import str_to_IDP
+from idp_engine.Assignments import Status as S
 from idp_engine.utils import BOOL, INT, REAL, DATE
 
 def metaJSON(state):
@@ -95,7 +96,7 @@ def load_json(state: Problem, jsonstr: str):
             # tentative set of sentences to be cleared
             to_clear = set(atom.sentence for atom in state.assignments.values()
                            if (atom.symbol_decl.name == symbol
-                           and atom.status in [Status.GIVEN, Status.EXPANDED]))
+                           and atom.status in [S.GIVEN, S.EXPANDED]))
 
             # processed json_data
             for key, json_atom in json_data[symbol].items():
@@ -106,22 +107,22 @@ def load_json(state: Problem, jsonstr: str):
                     # If the atom is unknown, set its value as normal.
                     if json_atom["value"] != '':
                         to_clear.discard(sentence)
-                        if atom.status == Status.UNKNOWN:
+                        if atom.status == S.UNKNOWN:
                             value = str_to_IDP(sentence, str(json_atom["value"]))
-                            state.assert_(sentence.code, value, Status.GIVEN)
+                            state.assert_(sentence.code, value, S.GIVEN)
                             if json_atom["typ"] != "Bool":
                                 key2 = f"{sentence.code} = {str(value)}"
                                 if key2 in state.assignments:
-                                    state.assert_(key2, TRUE, Status.GIVEN)
+                                    state.assert_(key2, TRUE, S.GIVEN)
 
                         # If the atom was already set in default struct, overwrite.
                         else:
                             value = str_to_IDP(sentence, str(json_atom["value"]))
-                            state.assert_(sentence.code, value, Status.GIVEN)
+                            state.assert_(sentence.code, value, S.GIVEN)
 
             # clear the remaining sentences
             for sentence in to_clear:
-                state.assert_(sentence.code, None, Status.UNKNOWN)
+                state.assert_(sentence.code, None, S.UNKNOWN)
 
 
 #################
@@ -176,7 +177,7 @@ class Output(object):
 
         # Remove symbols that are in a structure.
         for key, l in state.assignments.items():
-            if l.status == Status.STRUCTURE:
+            if l.status == S.STRUCTURE:
                 symb = self.state.assignments[key].symbol_decl
                 if symb and symb.name in self.m:
                     # reassign sentences if possible
@@ -197,7 +198,7 @@ class Output(object):
                 self.addAtom(l.sentence, l.value, l.status)
         return self.m
 
-    def addAtom(self, atom, value, status: Status):
+    def addAtom(self, atom, value, status: S):
         key = atom.code
         if key in self.state.assignments:
             symb = self.state.assignments[key].symbol_decl
