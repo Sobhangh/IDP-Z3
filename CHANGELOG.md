@@ -12,8 +12,10 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * Merge !90: add `IDP.from_file` and `IDP.from_str` to Python API
 * Merge !93: improve speed by caching z3 translations
 * Merge !98: Improve performance for theories with large structures
+* Merge !99: implement IEP 15 Inductive definitions
 * (breaking) Merge 101: simplify `get_range` API
 * Merge !103: support alternative "batch" propagation algorithm (not faster)
+* Merge !105: "directional propagation" to improve performance for a sequence of assert+propagate
 * fix #104: implications, equivalences are binary connectives, not n-ary.
 
 ### Interactive Constructors

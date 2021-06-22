@@ -54,10 +54,10 @@ from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
 def str_to_IDP(atom, val_string):
     assert atom.type, "Internal error"
     if atom.type == BOOL:
-        if val_string not in ['True', 'False']:
+        if val_string not in ['True', 'False', 'true', 'false']:
             raise IDPZ3Error(
                 f"{atom.annotations['reading']} has wrong value: {val_string}")
-        out = (TRUE if val_string == 'True' else
+        out = (TRUE if val_string in ['True', 'true'] else
                FALSE)
     elif atom.type == DATE:
         d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
@@ -602,8 +602,8 @@ class Rule(ASTNode):
     def rename_args(self, new_vars):
         """ for Clark's completion
             input : '!v: f(args) <- body(args)'
-            output: '!nv: f(nv) <- nv=args & body(args)' """
-
+            output: '!nv: f(nv) <- nv=args & body(args)'
+        """
         self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
         vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
         for i in range(len(self.definiendum.sub_exprs)):

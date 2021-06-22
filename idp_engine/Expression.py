@@ -650,7 +650,8 @@ class Operator(Expression):
     @classmethod
     def make(cls, ops, operands):
         """ creates a BinaryOp
-            beware: cls must be specific for ops !"""
+            beware: cls must be specific for ops !
+        """
         if len(operands) == 1:
             return operands[0]
         if isinstance(ops, str):
@@ -972,8 +973,8 @@ class AppliedSymbol(Expression):
             if DEF_SEMANTICS == Semantics.WELLFOUNDED:
                 op = ('>' if pos_justification else '≥') \
                     if polarity else ('≤' if pos_justification else '<')
-            elif DEF_SEMANTICS == Semantics.STABLE:
-                op = '≥' if polarity else '<'
+            elif DEF_SEMANTICS == Semantics.KRIPKEKLEENE:
+                op = '>' if polarity else '≤'
             else:
                 assert(DEF_SEMANTICS == Semantics.COINDUCTION)
                 op = ('≥' if pos_justification else '>') \

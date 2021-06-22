@@ -22,7 +22,8 @@ web client.
 
 import ast
 
-from idp_engine.Expression import (TRUE, FALSE, AComparison, Number)
+from idp_engine import Problem, Status
+from idp_engine.Expression import (TRUE, FALSE, Number)
 from idp_engine.Parse import str_to_IDP
 from idp_engine.Assignments import Status as S
 from idp_engine.utils import BOOL, INT, REAL, DATE
@@ -79,12 +80,10 @@ def metaJSON(state):
 #################
 
 
-def load_json(state, jsonstr: str):
-    """ Parse a json string and create assignments in a state accordingly.
-    This function can also overwrite assignments that have already been set as
-    a default assignment, effectively overriding the default.
+def load_json(state: Problem, jsonstr: str):
+    """ Parse a json string and update assignments in a state accordingly.
 
-    :arg state: a State object containing the concepts that appear in the json
+    :arg state: a Problem object containing the concepts that appear in the json
     :arg jsonstr: the user's assignments in json
     :returns: the assignments
     :rtype: idp_engine.Assignments
@@ -94,34 +93,36 @@ def load_json(state, jsonstr: str):
         assert json_data != {}, "Reset not expected here"
 
         for symbol in json_data:
-            # reset some of the assignments for that atom
-            for atom in state.assignments.values():
-                if (atom.symbol_decl.name == symbol
-                    and atom.value
-                    and atom.status in [S.GIVEN, S.CONSEQUENCE, S.ENV_CONSQ]):
-                    atom.unset()
-            for atom, json_atom in json_data[symbol].items():
-                if atom in state.assignments:
-                    idp_atom = state.assignments[atom].sentence
+            # tentative set of sentences to be cleared
+            to_clear = set(atom.sentence for atom in state.assignments.values()
+                           if (atom.symbol_decl.name == symbol
+                           and atom.status in [S.GIVEN, S.EXPANDED]))
+
+            # processed json_data
+            for key, json_atom in json_data[symbol].items():
+                if key in state.assignments:
+                    atom = state.assignments[key]
+                    sentence = atom.sentence
 
                     # If the atom is unknown, set its value as normal.
-                    if (json_atom["value"] != ''
-                        and state.assignments[atom].status == S.UNKNOWN):
-                        value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        state.assignments.assert_(idp_atom, value,
-                                                  S.GIVEN, False)
-                        if json_atom["typ"] != "Bool":
-                            idp_atom = AComparison.make('=', [idp_atom, value])
-                            state.assignments.assert_(idp_atom, TRUE,
-                                                      S.GIVEN, False)
+                    if json_atom["value"] != '':
+                        to_clear.discard(sentence)
+                        if atom.status == S.UNKNOWN:
+                            value = str_to_IDP(sentence, str(json_atom["value"]))
+                            state.assert_(sentence.code, value, S.GIVEN)
+                            if json_atom["typ"] != "Bool":
+                                key2 = f"{sentence.code} = {str(value)}"
+                                if key2 in state.assignments:
+                                    state.assert_(key2, TRUE, S.GIVEN)
 
-                    # If the atom was already set in default struct, overwrite.
-                    elif json_atom["value"] != '':
-                        value = str_to_IDP(idp_atom, str(json_atom["value"]))
-                        state.assignments[atom].value = value
+                        # If the atom was already set in default struct, overwrite.
+                        else:
+                            value = str_to_IDP(sentence, str(json_atom["value"]))
+                            state.assert_(sentence.code, value, S.GIVEN)
 
-                    else:
-                        state.assignments[atom].value = None
+            # clear the remaining sentences
+            for sentence in to_clear:
+                state.assert_(sentence.code, None, S.UNKNOWN)
 
 
 #################
