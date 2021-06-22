@@ -84,7 +84,7 @@ display {
                                               'is_assignment': False,
                                               'normal': False,
                                               'reading': 'negated(negated(Piet)) = Jan',
-                                              'relevant': False,
+                                              'relevant': True,
                                               'status': 'CONSEQUENCE',
                                               'typ': 'Bool',
                                               'value': False},

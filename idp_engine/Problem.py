@@ -26,7 +26,7 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies
+from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies, is_false
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -195,7 +195,7 @@ class Problem(object):
                 c.collect(questions, all_=False)
         for s in list(questions.values()):
             if s.code not in self.assignments:
-                self.assignments.assert_(s, None, S.UNKNOWN, False)
+                self.assignments.assert__(s, None, S.UNKNOWN, False)
 
         for ass in self.assignments.values():
             ass.sentence = ass.sentence
@@ -219,13 +219,13 @@ class Problem(object):
             if self.propagated and old_value is not None:
                 self.cleared.append(atom)
                 self.assigned.pop(atom, None)
-            self.assignments.assert_(atom, value, S.UNKNOWN, False)
+            self.assignments.assert__(atom, value, S.UNKNOWN, False)
         else:
             val = str_to_IDP(atom, str(value))
             if self.propagated and not(old_value and old_value.same_as(val)):
                 self.assigned.append(atom)
                 self.cleared.pop(atom, None)
-            self.assignments.assert_(atom, val, status, False)
+            self.assignments.assert__(atom, val, status, False)
         self._formula = None
 
     def formula(self):
@@ -266,7 +266,7 @@ class Problem(object):
                 solver.pop()
             if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
                 val = str_to_IDP(q, str(val1))
-                ass.assert_(q, val, S.EXPANDED, None)
+                ass.assert__(q, val, S.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False):
@@ -333,13 +333,8 @@ class Problem(object):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
-            consequences = []
-            new_constraint = c.substitute(TRUE, TRUE,
-                self.assignments, consequences)
-            consequences.extend(new_constraint.symbolic_propagate(self.assignments))
-            if consequences:
-                for sentence, value in consequences:
-                    self.assignments.assert_(sentence, value, tag, False)
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, tag)
+            new_constraint.symbolic_propagate(self.assignments, tag)
         return self
 
     def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
@@ -375,7 +370,7 @@ class Problem(object):
         for e in range:
             sentence = Assignment(termE, e, S.UNKNOWN).formula()
             # use assignments.assert_ to create one if necessary
-            out.assignments.assert_(sentence, None, S.UNKNOWN, False)
+            out.assignments.assert__(sentence, None, S.UNKNOWN, False)
         out.assigned = True  # to force propagation of Unknowns
         _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
         assert all(e.sentence.is_assignment()
@@ -456,37 +451,22 @@ class Problem(object):
 
         Assignments obtained by propagation become fixed constraints.
         """
+        out = self.copy()
 
-        self = self.copy()
-
-        # annotate self.constraints with questions
-        for e in self.constraints:
-            questions = OrderedSet()
-            e.collect(questions, all_=True)
-            e.questions = questions
-
-        for ass in self.assignments.values():
-            old, new = ass.sentence, ass.value
-            if new is not None:
-                # convert consequences to Universal
+        # convert consequences to Universal
+        for ass in out.assignments.values():
+            if ass.value:
                 ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
-                              S.ENV_UNIV if ass.status == S.ENV_CONSQ else
-                              ass.status)
-                # simplify constraints
-                new_constraints: List[Expression] = []
-                for constraint in self.constraints:
-                    if old in constraint.questions:  # for performance
-                        self._formula = None  # invalidates the formula
-                        consequences = []
-                        new_constraint = constraint.substitute(old, new,
-                            self.assignments, consequences)
-                        del constraint.questions[old.code]
-                        new_constraint.questions = constraint.questions
-                        new_constraints.append(new_constraint)
-                    else:
-                        new_constraints.append(constraint)
-                self.constraints = new_constraints
-        return self
+                        S.ENV_UNIV if ass.status == S.ENV_CONSQ else
+                        ass.status)
+
+        new_constraints: List[Expression] = []
+        for constraint in out.constraints:
+            new_constraint = constraint.simplify_with(out.assignments)
+            new_constraints.append(new_constraint)
+        out.constraints = new_constraints
+        out._formula = None
+        return out
 
     def _generalize(self,
                     conjuncts: List[Assignment],
@@ -563,7 +543,7 @@ class Problem(object):
                 e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
-                    self.assignments.assert_(q, None, S.UNKNOWN, False)
+                    self.assignments.assert__(q, None, S.UNKNOWN,False)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)

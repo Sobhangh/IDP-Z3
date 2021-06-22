@@ -33,7 +33,7 @@ from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true, is_not,
 
 from .Assignments import Status as S, Assignments
 from .Expression import (Expression, AQuantification,
-                    ADisjunction, AConjunction,
+                    ADisjunction, AConjunction, AppliedSymbol,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Problem import Problem
@@ -49,106 +49,117 @@ from .utils import OrderedSet
 def _not(truth):
     return FALSE if truth.same_as(TRUE) else TRUE
 
-# class Expression  ###########################################################
+
+# class Expression ############################################################
+
+def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
+    """ simplify the expression using the assignments """
+    if self.value is not None:
+        return self
+    value, simpler, new_e, co_constraint = None, None, None, None
+    ass = assignments.get(self.code, None)
+    if ass and ass.value is not None:
+        value = ass.value
+    if self.simpler is not None:
+        simpler = self.simpler.simplify_with(assignments)
+    if self.co_constraint is not None:
+        co_constraint = self.co_constraint.simplify_with(assignments)
+    new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
+    return self._change(sub_exprs=new_e, value=value, simpler=simpler,
+                        co_constraint=co_constraint).simplify1()
+Expression.simplify_with = simplify_with
 
 
 def symbolic_propagate(self,
                        assignments: "Assignments",
+                       tag: "Status",
                        truth: Optional[Expression] = TRUE
-                       ) -> List[Tuple[Expression]]:
-    """returns the consequences of `self=truth` that are in assignments.
+                       ):
+    """updates assignments with the consequences of `self=truth`.
 
     The consequences are obtained by symbolic processing (no calls to Z3).
 
     Args:
         assignments (Assignments):
-            The set of questions to chose from. Their value is ignored.
+            The set of assignments to update.
 
         truth (Expression, optional):
             The truth value of the expression `self`. Defaults to TRUE.
-
-    Returns:
-        A list of pairs (Expression, bool), descring the literals that
-        are implicant
     """
-    if self.value is not None:
-        return []
-    out = [(self, truth)] if self.code in assignments else []
-    if self.simpler is not None:
-        out = self.simpler.symbolic_propagate(assignments, truth) + out
-        return out
-    out = self.propagate1(assignments, truth) + out
-    return out
-
-
+    if self.value is None:
+        if self.code in assignments:
+            assignments.assert__(self, truth, tag, False)
+        if self.simpler is not None:
+            self.simpler.symbolic_propagate(assignments, tag, truth)
+        else:
+            self.propagate1(assignments, tag, truth)
 Expression.symbolic_propagate = symbolic_propagate
 
 
-def propagate1(self, assignments, truth):
-    " returns the list of symbolic_propagate of self (default implementation) "
-    return []
-
-
+def propagate1(self, assignments, tag, truth):
+    " returns the list of symbolic_propagate of self, ignoring value and simpler "
+    return
 Expression.propagate1 = propagate1
 
 
 # class AQuantification  ######################################################
 
-def symbolic_propagate(self, assignments, truth=TRUE):
-    out = [(self, truth)] if self.code in assignments else []
+def symbolic_propagate(self, assignments, tag, truth=TRUE):
+    if self.code in assignments:
+        assignments.assert__(self, truth, tag, False)
     if not self.quantees:  # expanded
-        return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
-    return out
+        assert len(self.sub_exprs) == 1  # a conjunction or disjunction
+        self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 AQuantification.symbolic_propagate = symbolic_propagate
 
 
 # class ADisjunction  #########################################################
 
-def propagate1(self, assignments, truth=TRUE):
+def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(FALSE):
-        return sum( (e.symbolic_propagate(assignments, truth) for e in self.sub_exprs), [])
-    return []
+        for e in self.sub_exprs:
+            e.symbolic_propagate(assignments, tag, truth)
 ADisjunction.propagate1 = propagate1
 
 
 # class AConjunction  #########################################################
 
-def propagate1(self, assignments, truth=TRUE):
+def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(TRUE):
-        return sum( (e.symbolic_propagate(assignments, truth) for e in self.sub_exprs), [])
-    return []
+        for e in self.sub_exprs:
+            e.symbolic_propagate(assignments, tag, truth)
 AConjunction.propagate1 = propagate1
 
 
 # class AUnary  ############################################################
 
-def propagate1(self, assignments, truth=TRUE):
-    return ( [] if self.operator != '¬' else
-        self.sub_exprs[0].symbolic_propagate(assignments, _not(truth)) )
+def propagate1(self, assignments, tag, truth=TRUE):
+    if self.operator == '¬':
+        self.sub_exprs[0].symbolic_propagate(assignments, tag, _not(truth))
 AUnary.propagate1 = propagate1
 
 
 # class AComparison  ##########################################################
 
-def propagate1(self, assignments, truth=TRUE):
+def propagate1(self, assignments, tag, truth=TRUE):
     if truth.same_as(TRUE) and len(self.sub_exprs) == 2 and self.operator == ['=']:
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one
         # a consequence, not a universal
         operands1 = [e.value for e in self.sub_exprs]
-        if   operands1[1] is not None:
-            return [(self.sub_exprs[0], operands1[1])]
-        elif operands1[0] is not None:
-            return [(self.sub_exprs[1], operands1[0])]
-    return []
+        if (type(self.sub_exprs[0]) == AppliedSymbol
+        and operands1[1] is not None):
+            assignments.assert__(self.sub_exprs[0], operands1[1], tag, False)
+        elif (type(self.sub_exprs[1]) == AppliedSymbol
+        and operands1[0] is not None):
+            assignments.assert__(self.sub_exprs[1], operands1[0], tag, False)
 AComparison.propagate1 = propagate1
 
 
 # class Brackets  ############################################################
 
-def symbolic_propagate(self, assignments, truth=TRUE):
-    out = [(self, truth)] if self.code in assignments else []
-    return self.sub_exprs[0].symbolic_propagate(assignments, truth) + out
+def symbolic_propagate(self, assignments, tag, truth=TRUE):
+    self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 Brackets.symbolic_propagate = symbolic_propagate
 
 
@@ -222,7 +233,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                     for t in tests:  # reset the other assignments
                         if is_true(solver.model().eval(t)):
                             q = lookup[str(test)]
-                            self.assignments.assert_(q, None, S.UNKNOWN, False)
+                            self.assignments.assert__(q, None, S.UNKNOWN, False)
                 elif result == unsat:
                     solver.pop()
                     solver.check()  # not sure why this is needed
@@ -230,7 +241,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                         q = lookup[str(test)]
                         val1 = solver.model().eval(q.reified())
                         val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert_(q, val, tag, True)
+                        yield self.assignments.assert__(q, val, tag, True)
                     break
                 else:  # unknown
                     # print("Falling back !!")
@@ -274,11 +285,11 @@ def _propagate(self, tag=S.CONSEQUENCE):
 
                         if res2 == unsat:
                             val = str_to_IDP(q, str(val1))
-                            yield self.assignments.assert_(q, val, tag, True)
+                            yield self.assignments.assert__(q, val, tag, True)
                         elif res2 == unknown:
                             res1 = unknown
                         else:  # reset the value
-                            self.assignments.assert_(q, None, S.UNKNOWN, False)
+                            self.assignments.assert__(q, None, S.UNKNOWN, False)
                 solver.pop()
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
@@ -323,14 +334,14 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
                     value = TRUE
                 # try to unreify it
                 if atom in unreify:
-                    yield self.assignments.assert_(unreify[atom], value, tag, True)
+                    yield self.assignments.assert__(unreify[atom], value, tag, True)
                 elif is_eq(consq):
                     assert value == TRUE
                     term = consq.children()[0]
                     if term in unreify:
                         q = unreify[term]
                         val = str_to_IDP(q, consq.children()[1])
-                        yield self.assignments.assert_(q, val, tag, True)
+                        yield self.assignments.assert__(q, val, tag, True)
                     else:
                         print("???", str(consq))
                 else:

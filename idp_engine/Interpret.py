@@ -37,7 +37,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 """
 
 import copy
-from itertools import product, repeat
+from itertools import product
 
 from .Assignments import Status as S
 from .Parse import (Extern, TypeDeclaration,
@@ -88,7 +88,7 @@ def interpret(self, problem):
             expr = AppliedSymbol.make(Symbol(name=self.name), arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
-            problem.assignments.assert_(expr, None, S.UNKNOWN, False)
+            problem.assignments.assert__(expr, None, S.UNKNOWN, False)
 
     # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
@@ -170,19 +170,19 @@ def interpret(self, problem):
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
-            e = problem.assignments.assert_(expr, value, status, False)
+            e = problem.assignments.assert__(expr, value, status, False)
             if (status == S.GIVEN  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
-                problem.assignments.assert_(e.formula(), TRUE, status, False)
+                problem.assignments.assert__(e.formula(), TRUE, status, False)
         if self.default is not None:
             for code, expr in self.symbol.decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
-                    e = problem.assignments.assert_(expr, self.default, status,
+                    e = problem.assignments.assert__(expr, self.default, status,
                                                 False)
                     if (status == S.GIVEN  # for proper display in IC
                         and self.default.type != BOOL):
-                        problem.assignments.assert_(e.formula(), TRUE, status,
+                        problem.assignments.assert__(e.formula(), TRUE, status,
                                                     False)
 SymbolInterpretation.interpret = interpret
 
@@ -239,13 +239,14 @@ Expression.interpret = interpret
 
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, assignments, todo=None):
+def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Variable)
+
+    if tag is present, updates assignments with symbolic propagation of co-constraints.
 
     implementation for everything but AppliedSymbol, UnappliedSymbol and
     Fresh_variable
     """
-
     assert not isinstance(e0, Variable) or isinstance(e1, Variable)  # should use instantiate instead
     assert self.co_constraint is None  # see AppliedSymbol instead
 
@@ -256,7 +257,7 @@ def substitute(self, e0, e1, assignments, todo=None):
         return self._change(value=e1)  # e1 is UnappliedSymbol or Number
     else:
         # will update self.simpler
-        out = self.update_exprs(e.substitute(e0, e1, assignments, todo)
+        out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
                                 for e in self.sub_exprs)
         return out
 Expression.substitute = substitute
@@ -285,7 +286,6 @@ def instantiate1(self, e0, e1, problem=None):
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
-
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem)
                             for e in self.sub_exprs)
@@ -450,7 +450,7 @@ AppliedSymbol.interpret = interpret
 
 
 # @log_calls  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, assignments, todo=None):
+def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self """
 
     assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
@@ -458,18 +458,18 @@ def substitute(self, e0, e1, assignments, todo=None):
 
     new_branch = None
     if self.co_constraint is not None:
-        new_branch = self.co_constraint.substitute(e0, e1, assignments, todo)
-        if todo is not None:
-            todo.extend(new_branch.symbolic_propagate(assignments))
+        new_branch = self.co_constraint.substitute(e0, e1, assignments, tag)
+        if tag is not None:
+            new_branch.symbolic_propagate(assignments, tag)
 
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)
     elif self.simpler is not None:  # has an interpretation
         assert self.co_constraint is None
-        simpler = self.simpler.substitute(e0, e1, assignments, todo)
+        simpler = self.simpler.substitute(e0, e1, assignments, tag)
         return self._change(simpler=simpler)
     else:
-        sub_exprs = [e.substitute(e0, e1, assignments, todo)
+        sub_exprs = [e.substitute(e0, e1, assignments, tag)
                      for e in self.sub_exprs]  # no simplification here
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
@@ -496,9 +496,9 @@ def interpret(self, problem):
 Variable.interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
-def substitute(self, e0, e1, assignments, todo=None):
+def substitute(self, e0, e1, assignments, tag=None):
     if self.sort:
-        self.sort = self.sort.substitute(e0,e1, assignments, todo)
+        self.sort = self.sort.substitute(e0,e1, assignments, tag)
     return e1 if self.code == e0.code else self
 Variable.substitute = substitute
 
