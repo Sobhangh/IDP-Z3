@@ -20,10 +20,10 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #104: implications, equivalences are binary connectives, not n-ary.
 * fix #111: Missing law in explanation when between brackets
 
-### Interactive Constructors
+### Interactive Consultant
 * fix #98: Incorrect relevance with definitions
 * Merge 101: improve performance of IC (propagate dropdowns on request)
-
+* fix #112: Don't repeat the symbol name for symbol tiles with a header
 
 ## [0.8.2] - 2021-06-02
 
