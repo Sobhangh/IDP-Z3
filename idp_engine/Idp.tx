@@ -88,7 +88,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     UnaryOperator:   '-' | '~' | '¬';
 
 
-    Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
+    Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
       AppliedSymbol: symbol=SymbolExpr
               '(' sub_exprs*=Expression[','] ')'
