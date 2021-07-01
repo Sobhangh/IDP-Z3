@@ -128,28 +128,31 @@ def interpret(self, theory):
         expr = AppliedSymbol.make(self.definiendum.symbol,
                                   self.definiendum.sub_exprs[:-1])
         expr.in_head = True
-        expr = AComparison.make('=', [expr, self.definiendum.sub_exprs[-1]])
+        head = AComparison.make('=', [expr, self.definiendum.sub_exprs[-1]])
     else:
-        expr = AppliedSymbol.make(self.definiendum.symbol,
+        head = AppliedSymbol.make(self.definiendum.symbol,
                                   self.definiendum.sub_exprs)
-        expr.in_head = True
+        head.in_head = True
 
-    if self.out or DEF_SEMANTICS == Semantics.COMPLETION or \
-            self.definiendum.symbol.decl not in self.parent.level_symbols:
+    inductive = (not self.out and DEF_SEMANTICS != Semantics.COMPLETION
+        and self.definiendum.symbol.decl in self.parent.level_symbols)
+    if not inductive: #TODO and only 1 rule
         self.whole_domain = AQuantification.make('∀', self.quantees,
-                            AEquivalence.make('⇔', [expr,self.body])).interpret(theory)
+                            AEquivalence.make('⇔', [head,self.body]))
     else:
-        body = self.body.split_equivalences().interpret(theory)
-        expr1 = AImplication.make('⇒', [expr.copy(),
-                                        body.copy().add_level_mapping(
-                                            self.parent.level_symbols,
-                                            self.definiendum, True, True)])
-        expr2 = ARImplication.make('⇐', [expr,
-                                        body.add_level_mapping(
-                                            self.parent.level_symbols,
-                                            self.definiendum, False, False)])
-        self.whole_domain = AQuantification.make('∀', self.quantees,
-                            AConjunction.make('∧', [expr1, expr2])).interpret(theory)
+        body = self.body.split_equivalences()
+        body2 = body.copy()
+        if inductive:
+            body = body.add_level_mapping(self.parent.level_symbols,
+                                          self.definiendum, True, True)
+            body2 = body2.add_level_mapping(self.parent.level_symbols,
+                                            self.definiendum, False, False)
+        expr1 = AQuantification.make('∀', self.quantees,
+                            AImplication.make('⇒', [head.copy(), body]))
+        expr2 = AQuantification.make('∀', self.quantees,  #TODO one sentence per rule
+                            ARImplication.make('⇐', [head, body2]))
+        self.whole_domain = AConjunction.make('∧', [expr1, expr2])
+    self.whole_domain = self.whole_domain.interpret(theory)
     self.whole_domain.block = self.block
     return self
 Rule.interpret = interpret
