@@ -223,6 +223,9 @@ class eval(Resource):
                                    args.get('previous_active', None),
                                    args['active'])
 
+                if state.propagateFailed:
+                    return explain(state)
+
                 out = {}
                 method = args['method']
                 if method == "propagate":
@@ -233,10 +236,7 @@ class eval(Resource):
                     generator = state.expand(max=1, complete=False)
                     out = copy(state)
                     out.assignments = list(generator)[0]
-                    if out.assignments == "No models.":
-                        out = explain(state)
-                    else:
-                        out = Output(out).fill(out)
+                    out = Output(out).fill(out)
                 if method == "explain":
                     out = explain(state, args['value'])
                 if method == "minimize":
