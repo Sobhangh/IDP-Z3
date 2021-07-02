@@ -346,7 +346,7 @@ class Problem(object):
         else:
             out = list(self._propagate(tag))
         # assert out[0] != "Not satisfiable.", "Not satisfiable."
-        return self
+        return out
 
     def get_range(self, term: str):
         """ Returns a list of the possible values of the term.
