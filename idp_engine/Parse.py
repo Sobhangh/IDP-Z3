@@ -449,7 +449,7 @@ class Theory(ASTNode):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.declarations = {}
-        self.def_constraints = {}  # {(Declaration, Definition): Expression}
+        self.def_constraints = {}  # {(Declaration, Definition): list[Expression]}
         self.assignments = Assignments()
 
         for constraint in self.constraints:

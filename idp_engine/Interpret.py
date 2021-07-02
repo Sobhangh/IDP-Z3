@@ -147,7 +147,7 @@ def interpret(self, problem):
                 out = AConjunction.make('∧', [expr1, expr2])
             out = out.interpret(problem)
             out.block = rule.block
-            problem.def_constraints[decl, self] = out
+            problem.def_constraints[decl, self] = [out]
 Definition.interpret = interpret
 
 
