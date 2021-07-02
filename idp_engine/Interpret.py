@@ -48,8 +48,7 @@ from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction, ARImplication, AAggregate,
                     AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, AEquivalence)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT, \
-    DEF_SEMANTICS, Semantics
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT
 
 
 # class Extern  ###########################################################
@@ -112,39 +111,12 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
-    for decl, rule in self.clarks.items():
-        if not rule.is_whole_domain:
-            self.check(rule.definiendum.symbol.decl not in self.level_symbols,
-                       f"Cannot have inductive definitions on infinite domain")
-        else:
-            if rule.out:
-                expr = AppliedSymbol.make(rule.definiendum.symbol,
-                                        rule.definiendum.sub_exprs[:-1])
-                expr.in_head = True
-                head = AComparison.make('=', [expr, rule.definiendum.sub_exprs[-1]])
-            else:
-                head = AppliedSymbol.make(rule.definiendum.symbol,
-                                        rule.definiendum.sub_exprs)
-                head.in_head = True
-
-            inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
-                and rule.definiendum.symbol.decl in rule.parent.level_symbols)
-            if not inductive: #TODO and only 1 rule
-                out = [AEquivalence.make('⇔', [head,rule.body])]
-            else:
-                body = rule.body.split_equivalences()
-                body2 = body.copy()
-                if inductive:
-                    body = body.add_level_mapping(rule.parent.level_symbols,
-                                                rule.definiendum, True, True)
-                    body2 = body2.add_level_mapping(rule.parent.level_symbols,
-                                                    rule.definiendum, False, False)
-                out = [ AImplication.make('⇒', [head.copy(), body]),
-                       ARImplication.make('⇐', [head, body2])]
-            out = [AQuantification.make('∀', rule.quantees, e)
-                   .interpret(problem)
-                   for e in out]
-            problem.def_constraints[decl, self] = out
+    for decl, expr in self.instantiables.items():
+        quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
+        out = [AQuantification.make('∀', quantees, e)
+                .interpret(problem)
+                for e in self.instantiables[decl]]
+        problem.def_constraints[decl, self] = out
 Definition.interpret = interpret
 
 

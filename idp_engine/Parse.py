@@ -470,6 +470,8 @@ class Definition(ASTNode):
 
         canonicals (dict[Declaration, list[Rule]]): normalized rule for each defined symbol
 
+        instantiables (dict[Declaration], list[Expression]): list of instantiable expressions for each symbol
+
         clarks (dict[Declaration, Transformed Rule]): normalized rule for each defined symbol (used to be Clark completion)
 
         def_vars (dict[String, dict[String, Variable]]): Fresh variables for arguments and result
@@ -489,6 +491,7 @@ class Definition(ASTNode):
         self.rules = kwargs.pop('rules')
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
+        self.instantiables = {}
         self.def_vars = {}  # {String: {String: Variable}}
         self.level_symbols = {}  # {SymbolDeclaration: Symbol}
         self.cache = {}  # {decl, str: Expression}

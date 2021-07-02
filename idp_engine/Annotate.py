@@ -33,7 +33,8 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number)
 
-from .utils import BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error
+from .utils import (BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error,
+                    DEF_SEMANTICS, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -153,6 +154,38 @@ def annotate(self, theory, voc, q_vars):
         exprs = [rule.body for rule in rules]
         new_rule.body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = new_rule
+
+    # compute self.instantiables
+    for decl, rule in self.clarks.items():
+        if not rule.is_whole_domain:
+            self.check(rule.definiendum.symbol.decl not in self.level_symbols,
+                       f"Cannot have inductive definitions on infinite domain")
+        else:
+            if rule.out:
+                expr = AppliedSymbol.make(rule.definiendum.symbol,
+                                        rule.definiendum.sub_exprs[:-1])
+                expr.in_head = True
+                head = AComparison.make('=', [expr, rule.definiendum.sub_exprs[-1]])
+            else:
+                head = AppliedSymbol.make(rule.definiendum.symbol,
+                                        rule.definiendum.sub_exprs)
+                head.in_head = True
+
+            inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
+                and rule.definiendum.symbol.decl in rule.parent.level_symbols)
+            if not inductive: #TODO and only 1 rule
+                out = [AEquivalence.make('⇔', [head,rule.body])]
+            else:
+                body = rule.body.split_equivalences()
+                body2 = body.copy()
+                if inductive:
+                    body = body.add_level_mapping(rule.parent.level_symbols,
+                                                rule.definiendum, True, True)
+                    body2 = body2.add_level_mapping(rule.parent.level_symbols,
+                                                    rule.definiendum, False, False)
+                out = [ AImplication.make('⇒', [head.copy(), body]),
+                       ARImplication.make('⇐', [head, body2])]
+            self.instantiables[decl] = out
     return self
 Definition.annotate = annotate
 
