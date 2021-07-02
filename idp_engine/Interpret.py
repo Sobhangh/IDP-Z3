@@ -130,9 +130,7 @@ def interpret(self, problem):
             inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
                 and rule.definiendum.symbol.decl in rule.parent.level_symbols)
             if not inductive: #TODO and only 1 rule
-                out = AQuantification.make('∀', rule.quantees,
-                                    AEquivalence.make('⇔', [head,rule.body]))
-                out = [out.interpret(problem)]
+                out = [AEquivalence.make('⇔', [head,rule.body])]
             else:
                 body = rule.body.split_equivalences()
                 body2 = body.copy()
@@ -141,11 +139,11 @@ def interpret(self, problem):
                                                 rule.definiendum, True, True)
                     body2 = body2.add_level_mapping(rule.parent.level_symbols,
                                                     rule.definiendum, False, False)
-                expr1 = AQuantification.make('∀', rule.quantees,
-                                    AImplication.make('⇒', [head.copy(), body]))
-                expr2 = AQuantification.make('∀', rule.quantees,  #TODO one sentence per rule
-                                    ARImplication.make('⇐', [head, body2]))
-                out = [expr1.interpret(problem), expr2.interpret(problem)]
+                out = [ AImplication.make('⇒', [head.copy(), body]),
+                       ARImplication.make('⇐', [head, body2])]
+            out = [AQuantification.make('∀', rule.quantees, e)
+                   .interpret(problem)
+                   for e in out]
             problem.def_constraints[decl, self] = out
 Definition.interpret = interpret
 
