@@ -468,6 +468,8 @@ class Definition(ASTNode):
 
         rules ([Rule]): set of rules for the definition
 
+        canonicals (dict[Declaration, list[Rule]]): normalized rule for each defined symbol
+
         clarks (dict[Declaration, Transformed Rule]): normalized rule for each defined symbol (used to be Clark completion)
 
         def_vars (dict[String, dict[String, Variable]]): Fresh variables for arguments and result
@@ -481,17 +483,15 @@ class Definition(ASTNode):
         self.id = Definition.definition_id
         self.rules = kwargs.pop('rules')
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
+        self.canonicals = {}
         self.def_vars = {}  # {String: {String: Variable}}
         self.level_symbols = {}  # {SymbolDeclaration: Symbol}
 
     def __str__(self):
-        return "Definition " +str(self.id)+" of " + ",".join([k.name for k in self.clarks.keys()])
+        return "Definition " +str(self.id)+" of " + ",".join([k.name for k in self.canonicals.keys()])
 
     def __repr__(self):
-        out = []
-        for rule in self.clarks.values():
-            out.append(repr(rule))
-        return NEWL.join(out)
+        return str(self)
 
     def __eq__(self, another):
         return self.id == another.id
@@ -618,7 +618,7 @@ class Rule(ASTNode):
             return None
 
         self.cache[key] = None  # avoid recursive loops
-        # assert self.is_whole_domain == False
+        #TODO assert self.is_whole_domain == False
         out = self.body.copy()  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True

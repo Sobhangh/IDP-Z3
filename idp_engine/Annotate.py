@@ -133,7 +133,7 @@ def annotate(self, theory, voc, q_vars):
     self.set_level_symbols()
 
     # create common variables, and rename vars in rule
-    self.clarks, new_rules = {}, []
+    self.canonicals = {}
     for r in self.rules:
         decl = voc.symbol_decls[r.definiendum.decl.name]
         if decl.name not in self.def_vars:
@@ -145,12 +145,10 @@ def annotate(self, theory, voc, q_vars):
                 q_v[name] = Variable(name=name, sort=decl.out)
             self.def_vars[decl.name] = q_v
         new_rule = r.rename_args(self.def_vars[decl.name])
-        self.clarks.setdefault(decl, []).append(new_rule)
-        new_rules.append(new_rule)
-    self.rules = new_rules
+        self.canonicals.setdefault(decl, []).append(new_rule)
 
     # join the bodies of rules
-    for decl, rules in self.clarks.items():
+    for decl, rules in self.canonicals.items():
         new_rule = copy(rules[0])
         exprs = [rule.body for rule in rules]
         new_rule.body = ADisjunction.make('∨', exprs)

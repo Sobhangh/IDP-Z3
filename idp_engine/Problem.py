@@ -567,7 +567,7 @@ class Problem(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        symbols = {decl for defin in self.definitions for decl in defin.clarks.keys()}
+        symbols = {decl for defin in self.definitions for decl in defin.canonicals.keys()}
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code
