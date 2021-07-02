@@ -106,56 +106,45 @@ SymbolDeclaration.interpret = interpret
 
 def interpret(self, problem):
     for decl, rule in self.clarks.items():
-        if rule.is_whole_domain:
-            rule.interpret(problem)
-        else:
+        if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
+        else:
+            rule.cache = {}  # reset the cache
+            # compute rule.whole_domain, by expanding:
+            # ∀ v: f(v)=out <=> body
+            # (after joining the rules of the same symbols)
+            if rule.out:
+                expr = AppliedSymbol.make(rule.definiendum.symbol,
+                                        rule.definiendum.sub_exprs[:-1])
+                expr.in_head = True
+                head = AComparison.make('=', [expr, rule.definiendum.sub_exprs[-1]])
+            else:
+                head = AppliedSymbol.make(rule.definiendum.symbol,
+                                        rule.definiendum.sub_exprs)
+                head.in_head = True
+
+            inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
+                and rule.definiendum.symbol.decl in rule.parent.level_symbols)
+            if not inductive: #TODO and only 1 rule
+                rule.whole_domain = AQuantification.make('∀', rule.quantees,
+                                    AEquivalence.make('⇔', [head,rule.body]))
+            else:
+                body = rule.body.split_equivalences()
+                body2 = body.copy()
+                if inductive:
+                    body = body.add_level_mapping(rule.parent.level_symbols,
+                                                rule.definiendum, True, True)
+                    body2 = body2.add_level_mapping(rule.parent.level_symbols,
+                                                    rule.definiendum, False, False)
+                expr1 = AQuantification.make('∀', rule.quantees,
+                                    AImplication.make('⇒', [head.copy(), body]))
+                expr2 = AQuantification.make('∀', rule.quantees,  #TODO one sentence per rule
+                                    ARImplication.make('⇐', [head, body2]))
+                rule.whole_domain = AConjunction.make('∧', [expr1, expr2])
+            rule.whole_domain = rule.whole_domain.interpret(problem)
+            rule.whole_domain.block = rule.block
 Definition.interpret = interpret
-
-
-# class Rule  ###########################################################
-
-def interpret(self, theory):
-    """ expand quantifiers and interpret """
-
-    # compute self.whole_domain, by expanding:
-    # ∀ v: f(v)=out <=> body
-    # (after joining the rules of the same symbols)
-    assert self.is_whole_domain
-    self.cache = {}  # reset the cache
-    if self.out:
-        expr = AppliedSymbol.make(self.definiendum.symbol,
-                                  self.definiendum.sub_exprs[:-1])
-        expr.in_head = True
-        head = AComparison.make('=', [expr, self.definiendum.sub_exprs[-1]])
-    else:
-        head = AppliedSymbol.make(self.definiendum.symbol,
-                                  self.definiendum.sub_exprs)
-        head.in_head = True
-
-    inductive = (not self.out and DEF_SEMANTICS != Semantics.COMPLETION
-        and self.definiendum.symbol.decl in self.parent.level_symbols)
-    if not inductive: #TODO and only 1 rule
-        self.whole_domain = AQuantification.make('∀', self.quantees,
-                            AEquivalence.make('⇔', [head,self.body]))
-    else:
-        body = self.body.split_equivalences()
-        body2 = body.copy()
-        if inductive:
-            body = body.add_level_mapping(self.parent.level_symbols,
-                                          self.definiendum, True, True)
-            body2 = body2.add_level_mapping(self.parent.level_symbols,
-                                            self.definiendum, False, False)
-        expr1 = AQuantification.make('∀', self.quantees,
-                            AImplication.make('⇒', [head.copy(), body]))
-        expr2 = AQuantification.make('∀', self.quantees,  #TODO one sentence per rule
-                            ARImplication.make('⇐', [head, body2]))
-        self.whole_domain = AConjunction.make('∧', [expr1, expr2])
-    self.whole_domain = self.whole_domain.interpret(theory)
-    self.whole_domain.block = self.block
-    return self
-Rule.interpret = interpret
 
 
 # class SymbolInterpretation  ###########################################################

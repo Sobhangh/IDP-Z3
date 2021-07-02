@@ -151,9 +151,10 @@ def annotate(self, theory, voc, q_vars):
 
     # join the bodies of rules
     for decl, rules in self.clarks.items():
+        new_rule = copy(rules[0])
         exprs = [rule.body for rule in rules]
-        rules[0].body = ADisjunction.make('∨', exprs)
-        self.clarks[decl] = rules[0]
+        new_rule.body = ADisjunction.make('∨', exprs)
+        self.clarks[decl] = new_rule
     return self
 Definition.annotate = annotate
 
