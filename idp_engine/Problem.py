@@ -81,6 +81,8 @@ class Problem(object):
         assigned (OrderedSet): set of questions asserted since last propagate
 
         cleared (OrderedSet): set of questions unassigned since last propagate
+
+        propagate_success (Bool): whether the last propagate call failed or not
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -98,6 +100,7 @@ class Problem(object):
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
         self.add(*blocks)
+        self.propagate_success = True
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -345,8 +348,8 @@ class Problem(object):
             out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag))
-        # assert out[0] != "Not satisfiable.", "Not satisfiable."
-        return out
+        self.propagate_success = (out[0] != "Not satisfiable.")
+        return self
 
     def get_range(self, term: str):
         """ Returns a list of the possible values of the term.

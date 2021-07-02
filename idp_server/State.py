@@ -72,7 +72,6 @@ class State(Problem):
 
     def __init__(self, idp: IDP):
         self.active = "{}"
-        self.propagateFailed = False
 
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
@@ -136,8 +135,7 @@ class State(Problem):
             self.environment.propagate(tag=S.ENV_CONSQ)
             self.assignments.update(self.environment.assignments)
             self._formula = None
-        tmp = self.propagate(tag=S.CONSEQUENCE)
-        self.propagateFailed = tmp[0] == "Not satisfiable."
+        self.propagate(tag=S.CONSEQUENCE)
         out = get_relevant_questions(self)  # creates a copy of self
         # copy relevant information
         for k,v in out.assignments.items():

@@ -917,8 +917,8 @@ class Display(ASTNode):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
         self.moveSymbols = False
-        self.optionalPropagation = True
-        self.manualPropagation = True
+        self.optionalPropagation = False
+        self.manualPropagation = False
         self.name = "display"
 
     def run(self, idp):
