@@ -111,12 +111,12 @@ def interpret(self, problem):
         problem ([Problem]):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
+    self.cache = {}  # reset the cache
     for decl, rule in self.clarks.items():
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
         else:
-            rule.cache = {}  # reset the cache
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
                                         rule.definiendum.sub_exprs[:-1])

@@ -475,6 +475,11 @@ class Definition(ASTNode):
         def_vars (dict[String, dict[String, Variable]]): Fresh variables for arguments and result
 
         level_symbols (dict[SymbolDeclaration, Symbol]): map of recursively defined symbols to level mapping symbols
+
+        cache (dict[SymbolDeclaration, str, Expression]): cache of instantiation of the definition
+
+        inst_def_level (int): depth of recursion during instantiation
+
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
@@ -486,6 +491,8 @@ class Definition(ASTNode):
         self.canonicals = {}
         self.def_vars = {}  # {String: {String: Variable}}
         self.level_symbols = {}  # {SymbolDeclaration: Symbol}
+        self.cache = {}  # {decl, str: Expression}
+        self.inst_def_level = 0
 
     def __str__(self):
         return "Definition " +str(self.id)+" of " + ",".join([k.name for k in self.canonicals.keys()])
@@ -502,7 +509,20 @@ class Definition(ASTNode):
     def instantiate_definition(self, decl, new_args, theory):
         rule = self.clarks.get(decl, None)
         if rule:
-            return rule.instantiate_definition(new_args, theory)
+            key = str(new_args)
+            if (decl, key) in self.cache:
+                return self.cache[decl, key]
+
+            if self.inst_def_level + 1 > CO_CONSTR_RECURSION_DEPTH:
+                return None
+            self.inst_def_level += 1
+            self.cache[decl, key] = None
+
+            out = rule.instantiate_definition(new_args, theory)
+
+            self.cache[decl, key] = out
+            self.inst_def_level -= 1
+            return out
 
     def set_level_symbols(self):
         """Calculates which symbols in the definition are recursively defined,
@@ -558,8 +578,6 @@ class Rule(ASTNode):
         self.body = kwargs.pop('body')
         self.is_whole_domain = None  # Bool
         self.block = None  # theory where it occurs
-        self.cache = {}
-        self.inst_def_level = 0
 
         self.annotations = self.annotations.annotations if self.annotations else {}
 
@@ -608,15 +626,7 @@ class Rule(ASTNode):
         Returns:
             Expression: a boolean expression
         """
-        key = str(new_args)
-        if key in self.cache:
-            return self.cache[key]
 
-        self.inst_def_level += 1
-        if self.inst_def_level > CO_CONSTR_RECURSION_DEPTH:
-            return None
-
-        self.cache[key] = None  # avoid recursive loops
         #TODO assert self.is_whole_domain == False
         out = self.body.copy()  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
@@ -633,8 +643,6 @@ class Rule(ASTNode):
                                   new_args+[instance], theory)
         out.block = self.block
         out = out.interpret(theory)
-        self.cache[key] = out
-        self.inst_def_level -= 1
         return out
 
 
