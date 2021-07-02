@@ -557,7 +557,6 @@ class Rule(ASTNode):
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
         self.is_whole_domain = None  # Bool
-        self.whole_domain = None  # Expression
         self.block = None  # theory where it occurs
         self.cache = {}
         self.inst_def_level = 0

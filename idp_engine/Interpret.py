@@ -105,15 +105,18 @@ SymbolDeclaration.interpret = interpret
 # class Definition  ###########################################################
 
 def interpret(self, problem):
+    """updates problem.def_constraints, by expanding the definitions
+
+    Args:
+        problem ([Problem]):
+            containts the enumerations for the expansion; is updated with the expanded definitions
+    """
     for decl, rule in self.clarks.items():
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
         else:
             rule.cache = {}  # reset the cache
-            # compute rule.whole_domain, by expanding:
-            # ∀ v: f(v)=out <=> body
-            # (after joining the rules of the same symbols)
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
                                         rule.definiendum.sub_exprs[:-1])
@@ -127,7 +130,7 @@ def interpret(self, problem):
             inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
                 and rule.definiendum.symbol.decl in rule.parent.level_symbols)
             if not inductive: #TODO and only 1 rule
-                rule.whole_domain = AQuantification.make('∀', rule.quantees,
+                out = AQuantification.make('∀', rule.quantees,
                                     AEquivalence.make('⇔', [head,rule.body]))
             else:
                 body = rule.body.split_equivalences()
@@ -141,9 +144,10 @@ def interpret(self, problem):
                                     AImplication.make('⇒', [head.copy(), body]))
                 expr2 = AQuantification.make('∀', rule.quantees,  #TODO one sentence per rule
                                     ARImplication.make('⇐', [head, body2]))
-                rule.whole_domain = AConjunction.make('∧', [expr1, expr2])
-            rule.whole_domain = rule.whole_domain.interpret(problem)
-            rule.whole_domain.block = rule.block
+                out = AConjunction.make('∧', [expr1, expr2])
+            out = out.interpret(problem)
+            out.block = rule.block
+            problem.def_constraints[decl, self] = out
 Definition.interpret = interpret
 
 
