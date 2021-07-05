@@ -34,7 +34,7 @@ from .Expression import (
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
-from .Assignments import Status, Assignment
+from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, SYMBOL, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
 
 
@@ -459,11 +459,11 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     out.simpler = out.in_enumeration.contains([core], False)
 
                     out = Assignment(out,
-                                        TRUE if belongs else FALSE,
-                                        Status.UNKNOWN)
+                                     TRUE if belongs else FALSE,
+                                     S.UNKNOWN)
 
                     assignments[j] = out # keep the first one
-                    assignments[i] = Assignment(TRUE, TRUE, Status.UNKNOWN)
+                    assignments[i] = Assignment(TRUE, TRUE, S.UNKNOWN)
     return [c for c in assignments if c.sentence != TRUE]
 
 Done = True

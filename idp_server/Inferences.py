@@ -22,7 +22,7 @@ that are specific for the Interactive Consultant.
 
 import time
 
-from idp_engine.Assignments import Status
+from idp_engine.Assignments import Status as S
 from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
                                    AConjunction, Brackets)
 from idp_engine.utils import OrderedSet, RELEVANT
@@ -124,7 +124,7 @@ def get_relevant_questions(self: "State"):
     # analyse given information
     given = OrderedSet()
     for q in out.assignments.values():
-        if q.status == Status.GIVEN:
+        if q.status == S.GIVEN:
             if not q.sentence.has_decision():
                 given.append(q.sentence)
 
@@ -245,14 +245,13 @@ def abstract(state, given_json):
     out = {} # {heading : [Assignment]}
 
     out["universal"] = list(l for l in state.assignments.values()
-                            if l.status == Status.UNIVERSAL)
+                            if l.status == S.UNIVERSAL)
     out["given"    ] = list(l for l in state.assignments.values()
-                            if l.status == Status.GIVEN)
+                            if l.status == S.GIVEN)
     out["fixed"    ] = list(l for l in state.assignments.values()
-                            if l.status in [Status.ENV_CONSQ, Status.CONSEQUENCE])
+                            if l.status in [S.ENV_CONSQ, S.CONSEQUENCE])
     out["irrelevant"]= list(l for l in state.assignments.values()
-                            if l.status not in [Status.ENV_CONSQ,
-                                                Status.CONSEQUENCE]
+                            if l.status not in [S.ENV_CONSQ, S.CONSEQUENCE]
                             and not l.relevant)
 
     out["models"] = ("" if len(models) < max_rows and time.time()<max_time else

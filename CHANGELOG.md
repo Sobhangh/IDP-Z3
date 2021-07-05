@@ -9,19 +9,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
-* MR !98: Improve performance for theories with large structures
-* (breaking) Merge 101: simplify `get_range` API
+* Merge !90: add `IDP.from_file` and `IDP.from_str` to Python API
 * Merge !93: improve speed by caching z3 translations
+* Merge !98: Improve performance for theories with large structures
 * Merge !99: implement IEP 15 Inductive definitions
+* (breaking) Merge 101: simplify `get_range` API
 * Merge !103: support alternative "batch" propagation algorithm (not faster)
 * Merge !105: "directional propagation" to improve performance for a sequence of assert+propagate
+* Merge !106: improve performance of Problem.simplify()
 * fix #88: Explanations should be rule-specific when possible
 * fix #104: implications, equivalences are binary connectives, not n-ary.
+* fix #111: Missing law in explanation when between brackets
 
-### Interactive Constructors
+### Interactive Consultant
 * fix #98: Incorrect relevance with definitions
 * Merge 101: improve performance of IC (propagate dropdowns on request)
-
+* fix #112: Don't repeat the symbol name for symbol tiles with a header
 
 ## [0.8.2] - 2021-06-02
 

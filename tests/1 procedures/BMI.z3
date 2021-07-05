@@ -1,8 +1,10 @@
+weight() -> 80
 No more consequences.
 ['Male', 'Female']
 
 bmi() -> 0.00249680097375238
 riskLevel() -> Low
+weight() -> 80
 No more consequences.
 
 length() = 179

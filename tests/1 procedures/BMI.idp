@@ -46,12 +46,12 @@ theory T:V {
         [Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity]
         riskLevel() = Low <- ~(BMILevel() = Overweight | BMILevel() = Obese_I | BMILevel() = Obese_II | BMILevel() = Extreme_Obesity).
     }
+    (weight()=80).
 
 }
 
 
 structure {
-    weight := {-> 80}
     length := {->179}
 }
 

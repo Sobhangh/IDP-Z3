@@ -397,7 +397,7 @@ class Expression(ASTNode):
                    e0: "Expression",
                    e1: "Expression",
                    assignments: "Assignments",
-                   todo=None) -> "Expression":
+                   tag=None) -> "Expression":
         return self  # monkey-patched
 
     def instantiate(self,
@@ -414,17 +414,22 @@ class Expression(ASTNode):
                     ) -> "Expression":
         return self  # monkey-patched
 
+    def simplify_with(self, assignments: "Assignments") -> "Expression":
+        return self  # monkey-patched
+
     def symbolic_propagate(self,
                            assignments: "Assignments",
+                           tag: "Status",
                            truth: Optional["Expression"] = None
-                           ) -> List[Tuple["Expression"]]:
-        return []  # monkey-patched
+                           ):
+        return  # monkey-patched
 
     def propagate1(self,
                    assignments: "Assignments",
+                   tag: "Status",
                    truth: Optional["Expression"] = None
-                   ) -> List[Tuple["Expression", bool]]:
-        return []  # monkey-patched
+                   ):
+        return  # monkey-patched
 
     def translate(self):
         pass  # monkey-patched
@@ -1136,7 +1141,7 @@ class Brackets(Expression):
         if type(annotations) == dict:
             self.annotations = annotations
         elif annotations is None:
-            self.annotations['reading'] = ''
+            self.annotations = None
         else:  # Annotations instance
             self.annotations = annotations.annotations
 

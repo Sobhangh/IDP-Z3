@@ -116,8 +116,37 @@ class IDP(ASTNode):
             self.display = Display(constraints=[])
 
     @classmethod
-    def parse(cls, file_or_string: str) -> "IDP":
+    def from_file(cls, file:str) -> "IDP":
+        """parse an IDP program from file
+
+        Args:
+            file (str): path to the source file
+
+        Returns:
+            IDP: the result of parsing the IDP program
+        """
+        assert path.exists(file), f"Can't find {file}"
+        with open(file, "r") as source:
+            code = source.read()
+            cls.from_str(code)
+
+    @classmethod
+    def from_str(cls, code:str) -> "IDP":
         """parse an IDP program
+
+        Args:
+            code (str): source code to be parsed
+
+        Returns:
+            IDP: the result of parsing the IDP program
+        """
+        out = idpparser.model_from_str(code)
+        out.code = code
+        return out
+
+    @classmethod
+    def parse(cls, file_or_string: str) -> "IDP":
+        """DEPRECATED: parse an IDP program
 
         Args:
             file_or_string (str): path to the source file, or the source code itself
@@ -125,6 +154,7 @@ class IDP(ASTNode):
         Returns:
             IDP: the result of parsing the IDP program
         """
+        print("IDP.parse() is deprecated. Use `from_file` or `from_str` instead")
         code = file_or_string
         if path.exists(file_or_string):
             with open(file_or_string, "r") as source:

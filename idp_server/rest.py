@@ -96,7 +96,7 @@ def idpOf(code):
     if code in idps:
         return idps[code]
     else:
-        idp = IDP.parse(code)
+        idp = IDP.from_str(code)
         if 20 < len(idps):
             # remove oldest entry, to prevent memory overflow
             idps = {k: v for k, v in list(idps.items())[1:]}
@@ -243,12 +243,12 @@ class eval(Resource):
                     out = Output(out).fill(out)
                 if method == "abstract":
                     if args['symbol'] != "":  # theory to explain ?
-                        newTheory = (str(IDP.parse(args['code']).vocabulary)
+                        newTheory = (str(IDP.from_str(args['code']).vocabulary)
                                      + "theory {\n"
                                      + args['symbol']
                                      + "\n}\n"
                                      )
-                        idpModel = IDP.parse(newTheory)
+                        idpModel = IDP.from_str(newTheory)
                         expanded = {}
                         # for expr in idpModel.subtences.values():
                         #     expanded.update(expr.collect_symbols())

@@ -41,7 +41,7 @@ def cli(args=None):
         with open(file, "r") as f:
             theory = f.read()
 
-        idp = IDP.parse(theory)
+        idp = IDP.from_str(theory)
         idp.execute()
 
     sys.exit(error)
