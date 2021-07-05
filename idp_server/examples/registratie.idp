@@ -7,7 +7,7 @@ vocabulary environment {
   type Agreement_Dwelling_For_Social_Renting := {Less_Than_9_years, More_than_9_Or_9_years}
   type Transaction := {Public_Sale, Out_Hand, Public_Sale_Community}
   type Resale := {Less_Than_Three, Three_Or_More}
-  type Seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, ErkendeSocialeHuisvestingsMpy}
+  type Seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, Erkende_Sociale_Huisvestings_Mpy}
 
   region : () → Location
 
@@ -66,33 +66,40 @@ theory environment:environment {
 
 theory decision:decision {
 
-  { tax_rate() = 1 ←
+  { [1% tax for Heritage in Flemish region]
+    tax_rate() = 1 ←
       registration_type() = Heritage
       ∧ region() = Flemish_Region.
 
+    [2% tax for Social Dwellings in Flemish region]
     tax_rate() = 2 ← // correct amount is 1.5
       registration_type() = Social_Dwelling
       ∧ region() = Flemish_Region.
 
+    [4% tax for Professional buyers in Flemish region]
     tax_rate() = 4 ←
       registration_type() = Professional_Purchase
       ∧ region() = Flemish_Region.
 
+    [6% tax for Energy efficient dwellings, social purpose or exchange unbuilt ground in Flemish region]
     tax_rate() = 6 ←
       (registration_type() = Energy_Efficient_Dwelling
       ∨ registration_type() = Social_Purpose
       ∨ registration_type() = Exchange_Unbuilt_Ground)
       ∧ region() = Flemish_Region.
 
+    [7% tax for family dwelling or dwelling for social renting in Flemish region]
     tax_rate() = 7 ←
       (registration_type() = Family_Dwelling
       ∨ registration_type() = Dwelling_For_Social_Renting)
       ∧ region() = Flemish_Region.
 
+    [10% default tax in Flemish region]
     tax_rate() = 10 ←
       region() = Flemish_Region
       ∧ registration_type() = Other.
 
+    [12% tax in Brussels and Walloon region]
     tax_rate() = 12 ←
       region() = Brussels_Region
       ∨ region() = Walloon_Region.
@@ -111,19 +118,21 @@ theory decision:decision {
       ∧ additional_terms())
   .
 
-  registration_type() = Social_Dwelling ⇒
+  [A social dwelling is a residential real estate sold by Vlaamse_Mpy_Voor_Sociaal_Wonen or Erkende_Sociale_Huisvestings_Mpy to a natural person for social housing with a mortgage allowance]
+  (registration_type() = Social_Dwelling ⇒
       buyer() = Natural_Person
       ∧ type_of_real_estate() = Residential
       ∧ use() = Social_Housing
-      ∧ (seller() = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ seller() = ErkendeSocialeHuisvestingsMpy)
-      ∧ mortgage_loan_allowance()
+      ∧ (seller() = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ seller() = Erkende_Sociale_Huisvestings_Mpy)
+      ∧ mortgage_loan_allowance())
   .
 
-  registration_type() = Professional_Purchase ⇒
+  [A Professional purchase is a non-public sale to a professional buyer for resale with a certification not older than 8 years]
+  (registration_type() = Professional_Purchase ⇒
       professional_buyer()
       ∧ transaction_type()  ≠ Public_Sale
       ∧ use() = For_Resale
-      ∧ certification_date_sale() = certification_date() + 8
+      ∧ certification_date_sale() = certification_date() + 8)
   .
 
   registration_type() = Energy_Efficient_Dwelling ⇒
@@ -136,8 +145,8 @@ theory decision:decision {
       ∧ term_energy_renovation() = certification_date() + 5
   .
 
-  [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.](
-  registration_type() = Social_Purpose ⇒
+  [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.]
+  (registration_type() = Social_Purpose ⇒
       (seller() = Mpy_Erkend_Door_VMSW
       ∨ seller() = Vlaams_Woningfonds
       ∨ seller() = Gelijksoortige_Rechtspersoon_EER)

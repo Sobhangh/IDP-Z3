@@ -498,6 +498,8 @@ class Definition(ASTNode):
     def __init__(self, **kwargs):
         Definition.definition_id += 1
         self.id = Definition.definition_id
+        self.annotations = kwargs.pop('annotations')
+        self.annotations = self.annotations.annotations if self.annotations else {}
         self.rules = kwargs.pop('rules')
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}

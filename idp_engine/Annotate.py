@@ -188,32 +188,44 @@ def get_instantiables(self, for_explain=False):
                                         rule.definiendum.sub_exprs)
                 head.in_head = True
 
-            all_bodies = ADisjunction.make('∨', [r.body for r in rules])
             inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
                 and rule.definiendum.symbol.decl in rule.parent.level_symbols)
-            if not inductive:
-                if for_explain and 1 < len(rules):
-                    out = [ARImplication.make('⇐', [head.copy(), r.body],
-                                              r.annotations)
-                           for r in rules]
-                    out.append(ARImplication.make('⇒', [head, all_bodies]))
-                else:
-                    out = [AEquivalence.make('⇔', [head, all_bodies])]
-            else:
-                all_bodies = all_bodies.split_equivalences()
 
-                if for_explain:
-                    body2 = [r.body.copy().split_equivalences() for r in rules]
+            # determine reverse implications, if any
+            bodies, out = [], []
+            for r in rules:
+                if not inductive:
+                    bodies.append(r.body)
+                    if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
+                        out.append(ARImplication.make('⇐', [head, r.body],
+                                                      r.annotations))
                 else:
-                    body2 = [all_bodies.copy()]
-                body2 = [b.add_level_mapping(rule.parent.level_symbols,
+                    new = r.body.split_equivalences()
+                    bodies.append(new)
+                    if for_explain:
+                        new = new.add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
-                         for b in body2]
-                out = [ARImplication.make('⇐', [head.copy(), b]) for b in body2]
+                        out.append(ARImplication.make('⇐', [head, new],
+                                                      r.annotations))
 
+            all_bodies = ADisjunction.make('∨', bodies)
+            if not inductive:
+                if out:  # already contains reverse implications
+                    out.append(ARImplication.make('⇒', [head, all_bodies],
+                                                  self.annotations))
+                else:
+                    out = [AEquivalence.make('⇔', [head, all_bodies],
+                                             self.annotations)]
+            else:
+                if not out:  # no reverse implication yet
+                    new = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
+                                             rule.definiendum, False, False)
+                    out = [ARImplication.make('⇐', [head.copy(), new],
+                                              self.annotations)]
                 all_bodies = all_bodies.add_level_mapping(rule.parent.level_symbols,
-                                            rule.definiendum, True, True)
-                out.append(AImplication.make('⇒', [head, all_bodies]))
+                                        rule.definiendum, True, True)
+                out.append(AImplication.make('⇒', [head, all_bodies],
+                                             self.annotations))
             result[decl] = out
     return result
 Definition.get_instantiables = get_instantiables
@@ -627,7 +639,7 @@ def annotate(self, voc, q_vars):
         self.decl = voc.symbol_decls[self.name]
         self.fresh_vars = {}
         self.check(type(self.decl) == Constructor,
-                   f"{self} should be applied to arguments (or prefixed with a back-tick)")
+                   f"{self} should be applied to arguments (or prefixed with a out-tick)")
         return self
     if self.name in q_vars:
         return q_vars[self.name]

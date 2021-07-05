@@ -11,6 +11,7 @@ vocabulary V {
 }
 theory T:V {
     //BMI Level
+    [definition of BMILevel]
     {
         BMILevel() = Severely_Underweight <- bmi() < 18.5 & sex() = Male.
         BMILevel() = Underweight <- bmi() < 18.5 & sex() = Female.

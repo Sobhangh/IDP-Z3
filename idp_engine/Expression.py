@@ -241,7 +241,7 @@ class Expression(ASTNode):
         # attributes of the top node of a (co-)constraint
         self.questions: Optional[OrderedSet] = None
         self.relevant: Optional[bool] = None
-        self.block: Any = None
+        self.block: Any = None  # deprecated
         self.translated = None
 
     def copy(self):
