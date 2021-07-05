@@ -224,41 +224,40 @@ class eval(Resource):
                                    args['active'])
 
                 out = {}
-                if state.propagate_success:
-                    method = args['method']
-                    if method == "propagate":
-                        out = Output(state).fill(state)
-                    if method == 'get_range':
-                        out = state.get_range(args['field'])
-                    if method == "modelexpand":
-                        generator = state.expand(max=1, complete=False)
-                        out = copy(state)
-                        out.assignments = list(generator)[0]
-                        out = Output(out).fill(out)
-                    if method == "explain":
-                        out = explain(state, args['value'])
-                    if method == "minimize":
-                        out = copy(state)
-                        out = out.optimize(args['symbol'], args['minimize'],
-                                               complete=False)
-                        out = Output(out).fill(out)
-                    if method == "abstract":
-                        if args['symbol'] != "":  # theory to explain ?
-                            newTheory = (str(IDP.from_str(args['code']).vocabulary)
-                                         + "theory {\n"
-                                         + args['symbol']
-                                         + "\n}\n"
-                                         )
-                            idpModel = IDP.from_str(newTheory)
-                            expanded = {}
-                            # for expr in idpModel.subtences.values():
-                            #     expanded.update(expr.collect_symbols())
-                            expanded = tuple(expanded.keys())
-                            state = State.make(idpModel, "")
-                        out = abstract(state, args['active'])
-                    log("end /eval " + method)
-                else:
+                method = args['method']
+                if not state.propagate_success:
                     out = explain(state)
+                elif method == "propagate":
+                    out = Output(state).fill(state)
+                elif method == 'get_range':
+                    out = state.get_range(args['field'])
+                elif method == "modelexpand":
+                    generator = state.expand(max=1, complete=False)
+                    out = copy(state)
+                    out.assignments = list(generator)[0]
+                    out = Output(out).fill(out)
+                elif method == "explain":
+                    out = explain(state, args['value'])
+                elif method == "minimize":
+                    out = copy(state)
+                    out = out.optimize(args['symbol'], args['minimize'],
+                                           complete=False)
+                    out = Output(out).fill(out)
+                elif method == "abstract":
+                    if args['symbol'] != "":  # theory to explain ?
+                        newTheory = (str(IDP.from_str(args['code']).vocabulary)
+                                     + "theory {\n"
+                                     + args['symbol']
+                                     + "\n}\n"
+                                     )
+                        idpModel = IDP.from_str(newTheory)
+                        expanded = {}
+                        # for expr in idpModel.subtences.values():
+                        #     expanded.update(expr.collect_symbols())
+                        expanded = tuple(expanded.keys())
+                        state = State.make(idpModel, "")
+                    out = abstract(state, args['active'])
+                log("end /eval " + method)
                 if with_profiling:
                     g.profiler.stop()
                     print(g.profiler.output_text(unicode=True, color=True))
