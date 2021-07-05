@@ -193,7 +193,8 @@ def get_instantiables(self, for_explain=False):
                 and rule.definiendum.symbol.decl in rule.parent.level_symbols)
             if not inductive:
                 if for_explain and 1 < len(rules):
-                    out = [ARImplication.make('⇐', [head.copy(), r.body])
+                    out = [ARImplication.make('⇐', [head.copy(), r.body],
+                                              r.annotations)
                            for r in rules]
                     out.append(ARImplication.make('⇒', [head, all_bodies]))
                 else:

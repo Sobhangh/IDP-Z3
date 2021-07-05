@@ -198,7 +198,7 @@ class Expression(ASTNode):
 
             Equivalence is computed in the context of the theory and structure.
 
-        annotations (Dict):
+        annotations (Dict[str, str]):
             The set of annotations given by the expert in the IDP source code.
 
             ``annotations['reading']`` is the annotation
@@ -595,9 +595,11 @@ class AQuantification(Expression):
         self.type = BOOL
 
     @classmethod
-    def make(cls, q, quantees, f):
+    def make(cls, q, quantees, f, annotations=None):
         "make and annotate a quantified formula"
         out = cls(q=q, quantees=quantees, f=f)
+        if annotations:
+            out.annotations = annotations
         return out.annotate1()
 
     def __str1__(self):
@@ -648,7 +650,7 @@ class Operator(Expression):
                else None
 
     @classmethod
-    def make(cls, ops, operands):
+    def make(cls, ops, operands, annotations=None):
         """ creates a BinaryOp
             beware: cls must be specific for ops !
         """
@@ -663,6 +665,8 @@ class Operator(Expression):
         if isinstance(ops, str):
             ops = [ops] * (len(operands)-1)
         out = (cls)(sub_exprs=operands, operator=ops)
+        if annotations:
+            out.annotations = annotations
         return out.annotate1().simplify1()
 
     def __str1__(self):

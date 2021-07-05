@@ -425,7 +425,7 @@ class Problem(object):
         def_constraints = {}
         for defin in self.definitions:
             instantiables = defin.get_instantiables(for_explain=True)
-            defin.add_def_constraints(self, instantiables, def_constraints)
+            defin.add_def_constraints(instantiables, self, def_constraints)
 
         todo = chain(self.constraints, chain(*def_constraints.values()))
         for constraint in todo:

@@ -111,13 +111,27 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
-    self.add_def_constraints(problem, self.instantiables, problem.def_constraints)
+    self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
 Definition.interpret = interpret
 
-def add_def_constraints(self, problem, instantiables, result):
+def add_def_constraints(self, instantiables, problem, result):
+    """result is updated with the constraints for this definition.
+
+    The `instantiables` (of the definition) are expanded in `problem`.
+
+    Args:
+        instantiables (dict[SymbolDeclaration, list[Expression]]):
+            the constraints without the quantification
+
+        problem (Problem):
+            contains the structure for the expansion/interpretation of the constraints
+
+        result (dict[SymbolDeclaration, Definition, list[Expression]]):
+            a mapping from (Symbol, Definition) to the list of constraints
+    """
     for decl, bodies in instantiables.items():
         quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
-        expr = [AQuantification.make('∀', quantees, e)
+        expr = [AQuantification.make('∀', quantees, e, e.annotations)
                 .interpret(problem)
                 for e in bodies]
         result[decl, self] = expr
