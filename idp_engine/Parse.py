@@ -466,19 +466,29 @@ class Definition(ASTNode):
     """ The class of AST nodes representing an inductive definition.
         id (num): unique identifier for each definition
 
-        rules ([Rule]): set of rules for the definition
+        rules ([Rule]):
+            set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
-        canonicals (dict[Declaration, list[Rule]]): normalized rule for each defined symbol
+        canonicals (dict[Declaration, list[Rule]]):
+            normalized rule for each defined symbol,
+            e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
 
-        instantiables (dict[Declaration], list[Expression]): list of instantiable expressions for each symbol
+        instantiables (dict[Declaration], list[Expression]):
+            list of instantiable expressions for each symbol,
+            e.g., `p($p!1$) <=> q($p!1$)`
 
-        clarks (dict[Declaration, Transformed Rule]): normalized rule for each defined symbol (used to be Clark completion)
+        clarks (dict[Declaration, Transformed Rule]):
+            normalized rule for each defined symbol (used to be Clark completion)
+            e.g., `!$p!1$: p($p!1$) <=> q($p!1$)`
 
-        def_vars (dict[String, dict[String, Variable]]): Fresh variables for arguments and result
+        def_vars (dict[String, dict[String, Variable]]):
+            Fresh variables for arguments and result
 
-        level_symbols (dict[SymbolDeclaration, Symbol]): map of recursively defined symbols to level mapping symbols
+        level_symbols (dict[SymbolDeclaration, Symbol]):
+            map of recursively defined symbols to level mapping symbols
 
-        cache (dict[SymbolDeclaration, str, Expression]): cache of instantiation of the definition
+        cache (dict[SymbolDeclaration, str, Expression]):
+            cache of instantiation of the definition
 
         inst_def_level (int): depth of recursion during instantiation
 
@@ -593,31 +603,6 @@ class Rule(ASTNode):
         return (f"Rule:∀{','.join(str(q) for q in self.quantees)}: "
                 f"{self.definiendum} "
                 f"⇔{str(self.body)}")
-
-    def rename_args(self, new_vars):
-        """ for Clark's completion
-            input : '!v: f(args) <- body(args)'
-            output: '!nv: f(nv) <- nv=args & body(args)'
-        """
-        self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
-        vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
-        for i in range(len(self.definiendum.sub_exprs)):
-            arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
-            if type(arg) == Variable \
-            and arg.name in vars and arg.name not in new_vars:
-                self.body = self.body.instantiate([arg], [nv])
-                self.out = (self.out.instantiate([arg], [nv]) if self.out else
-                            self.out)
-                for j in range(i, len(self.definiendum.sub_exprs)):
-                    self.definiendum.sub_exprs[j] = \
-                        self.definiendum.sub_exprs[j].instantiate([arg], [nv])
-            else:
-                eq = AComparison.make('=', [nv, arg])
-                self.body = AConjunction.make('∧', [eq, self.body])
-
-        self.definiendum.sub_exprs = list(new_vars.values())
-        self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
-        return self
 
     def instantiate_definition(self, new_args, theory):
         """Create an instance of the definition for new_args, and interpret it for theory.

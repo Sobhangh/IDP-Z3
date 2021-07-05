@@ -27,9 +27,9 @@ from .Parse import (Vocabulary, Extern, TypeDeclaration,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
-from .Expression import (Expression, Constructor, IfExpr, AQuantification,
+from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AEquivalence, ADisjunction,
-                         Operator, AComparison, AUnary, AAggregate,
+                         AConjunction, Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number)
 
@@ -154,8 +154,13 @@ def annotate(self, theory, voc, q_vars):
         exprs = [rule.body for rule in rules]
         new_rule.body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = new_rule
+    self.instantiables = self.get_instantiables()
+    return self
+Definition.annotate = annotate
 
+def get_instantiables(self):
     # compute self.instantiables
+    result = {}
     for decl, rule in self.clarks.items():
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
@@ -185,9 +190,9 @@ def annotate(self, theory, voc, q_vars):
                                                     rule.definiendum, False, False)
                 out = [ AImplication.make('⇒', [head.copy(), body]),
                        ARImplication.make('⇐', [head, body2])]
-            self.instantiables[decl] = out
-    return self
-Definition.annotate = annotate
+            result[decl] = out
+    return result
+Definition.get_instantiables = get_instantiables
 
 
 # Class Rule  #######################################################
@@ -212,6 +217,32 @@ def annotate(self, voc, q_vars):
                                for s in self.definiendum.decl.sorts)
     return self
 Rule.annotate = annotate
+
+def rename_args(self, new_vars):
+    """ for Clark's completion
+        input : '!v: f(args) <- body(args)'
+        output: '!nv: f(nv) <- nv=args & body(args)'
+    """
+    self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
+    vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
+    for i in range(len(self.definiendum.sub_exprs)):
+        arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
+        if type(arg) == Variable \
+        and arg.name in vars and arg.name not in new_vars:
+            self.body = self.body.instantiate([arg], [nv])
+            self.out = (self.out.instantiate([arg], [nv]) if self.out else
+                        self.out)
+            for j in range(i, len(self.definiendum.sub_exprs)):
+                self.definiendum.sub_exprs[j] = \
+                    self.definiendum.sub_exprs[j].instantiate([arg], [nv])
+        else:
+            eq = AComparison.make('=', [nv, arg])
+            self.body = AConjunction.make('∧', [eq, self.body])
+
+    self.definiendum.sub_exprs = list(new_vars.values())
+    self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
+    return self
+Rule.rename_args = rename_args
 
 
 # Class Structure  #######################################################
