@@ -107,7 +107,7 @@ def interpret(self, problem):
     """updates problem.def_constraints, by expanding the definitions
 
     Args:
-        problem ([Problem]):
+        problem (Problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache

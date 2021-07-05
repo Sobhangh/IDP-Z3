@@ -513,7 +513,10 @@ class Definition(ASTNode):
         return "Definition " +str(self.id)+" of " + ",".join([k.name for k in self.canonicals.keys()])
 
     def __repr__(self):
-        return str(self)
+        out = []
+        for rule in self.clarks.values():
+            out.append(repr(rule))
+        return NEWL.join(out)
 
     def __eq__(self, another):
         return self.id == another.id
