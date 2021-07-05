@@ -66,6 +66,7 @@ theory environment:environment {
 
 theory decision:decision {
 
+  [Tax rate legislation]
   { [1% tax for Heritage in Flemish region]
     tax_rate() = 1 ←
       registration_type() = Heritage
