@@ -158,10 +158,22 @@ def annotate(self, theory, voc, q_vars):
     return self
 Definition.annotate = annotate
 
-def get_instantiables(self):
-    # compute self.instantiables
+def get_instantiables(self, for_explain=False):
+    """ compute Definition.instantiables, with level-mapping if definition is inductive
+
+    Uses implications instead of equivalence if `for_explain` is True
+
+    Example: `{ p() <- q(). p() <- r().}`
+    Result when not for_explain: `p() <=> q() | r()`
+    Result when for_explain    : `p() <= q(). p() <= r(). p() => (q() | r()).`
+
+    Args:
+        for_explain (Bool):
+            Use implications instead of equivalence, for rule-specific explanations
+    """
     result = {}
-    for decl, rule in self.clarks.items():
+    for decl, rules in self.canonicals.items():
+        rule = rules[0]
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
@@ -176,20 +188,31 @@ def get_instantiables(self):
                                         rule.definiendum.sub_exprs)
                 head.in_head = True
 
+            all_bodies = ADisjunction.make('∨', [r.body for r in rules])
             inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
                 and rule.definiendum.symbol.decl in rule.parent.level_symbols)
-            if not inductive: #TODO and only 1 rule
-                out = [AEquivalence.make('⇔', [head,rule.body])]
+            if not inductive:
+                if for_explain and 1 < len(rules):
+                    out = [ARImplication.make('⇐', [head.copy(), r.body])
+                           for r in rules]
+                    out.append(ARImplication.make('⇒', [head, all_bodies]))
+                else:
+                    out = [AEquivalence.make('⇔', [head, all_bodies])]
             else:
-                body = rule.body.split_equivalences()
-                body2 = body.copy()
-                if inductive:
-                    body = body.add_level_mapping(rule.parent.level_symbols,
-                                                rule.definiendum, True, True)
-                    body2 = body2.add_level_mapping(rule.parent.level_symbols,
-                                                    rule.definiendum, False, False)
-                out = [ AImplication.make('⇒', [head.copy(), body]),
-                       ARImplication.make('⇐', [head, body2])]
+                all_bodies = all_bodies.split_equivalences()
+
+                if for_explain:
+                    body2 = [r.body.copy().split_equivalences() for r in rules]
+                else:
+                    body2 = [all_bodies.copy()]
+                body2 = [b.add_level_mapping(rule.parent.level_symbols,
+                                             rule.definiendum, False, False)
+                         for b in body2]
+                out = [ARImplication.make('⇐', [head.copy(), b]) for b in body2]
+
+                all_bodies = all_bodies.add_level_mapping(rule.parent.level_symbols,
+                                            rule.definiendum, True, True)
+                out.append(AImplication.make('⇒', [head, all_bodies]))
             result[decl] = out
     return result
 Definition.get_instantiables = get_instantiables
