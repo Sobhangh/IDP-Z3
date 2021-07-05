@@ -420,7 +420,14 @@ class Problem(object):
                 ps[p] = ass
                 #TODO use assert_and_track ?
                 s.add(Implies(p, p))
-        todo = chain(self.constraints, chain(*self.def_constraints.values()))
+
+        # get expanded def_constraints
+        def_constraints = {}
+        for defin in self.definitions:
+            instantiables = defin.get_instantiables(for_explain=True)
+            defin.add_def_constraints(self, instantiables, def_constraints)
+
+        todo = chain(self.constraints, chain(*def_constraints.values()))
         for constraint in todo:
             p = constraint.reified()
             ps[p] = constraint.original.interpret(self).translate()
@@ -441,7 +448,7 @@ class Problem(object):
                             else:
                                 laws.append(a1.formula())
 
-            for a1 in chain(chain(*self.def_constraints.values()), self.constraints):
+            for a1 in chain(chain(*def_constraints.values()), self.constraints):
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.original.interpret(self).translate()) == str(ps[a2]):

@@ -111,13 +111,17 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
-    for decl, expr in self.instantiables.items():
-        quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
-        out = [AQuantification.make('∀', quantees, e)
-                .interpret(problem)
-                for e in self.instantiables[decl]]
-        problem.def_constraints[decl, self] = out
+    self.add_def_constraints(problem, self.instantiables, problem.def_constraints)
 Definition.interpret = interpret
+
+def add_def_constraints(self, problem, instantiables, result):
+    for decl, bodies in instantiables.items():
+        quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
+        expr = [AQuantification.make('∀', quantees, e)
+                .interpret(problem)
+                for e in bodies]
+        result[decl, self] = expr
+Definition.add_def_constraints = add_def_constraints
 
 
 # class SymbolInterpretation  ###########################################################
