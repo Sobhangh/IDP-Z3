@@ -837,6 +837,9 @@ class ConstructedFrom(Enumeration):
         self.constructors = kwargs.pop('constructors')
         self.tuples = None
 
+    def contains(self, args, function, arity=None, rank=0, tuples=None):
+        return TRUE
+
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
