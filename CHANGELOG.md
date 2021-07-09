@@ -20,6 +20,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #88: Explanations should be rule-specific when possible
 * fix #104: implications, equivalences are binary connectives, not n-ary.
 * fix #111: Missing law in explanation when between brackets
+* fix #118: Incorrect models for definitions over infinite domains
 
 ### Interactive Consultant
 * fix #98: Incorrect relevance with definitions

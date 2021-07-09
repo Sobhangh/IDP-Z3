@@ -1,13 +1,26 @@
-vocabulary V {
-    clip : Int → Int
-    x:() -> Int
-}
+vocabulary {
+    type Range := {1..2}
+    type Pos := constructed from {pos(x:Range, y:Range)}
+    gridSize: () -> Int // coordinates are in {1..gridSize}
 
-theory T:V {
-    {!n in Int: clip(n) = (if n<1 then 1 else n).}
-    x() = clip(1).
+    clip: Int -> Int    // restrict coordinate to {1..gridSize}
+    makePos: Int ⨯ Int -> Pos
+    _add: Pos ⨯ Pos -> Pos
+
+    x1: () -> Range
+    p: () -> Pos
+}
+theory {
+    gridSize := 2
+    {!n,m in Int: clip(n) = m <- m=(if n<1 then 1 else (if gridSize()<n then gridSize() else n)).}
+    {!n1,n2 in Int: makePos(n1,n2) = pos(clip(n1), clip(n2)).}
+    {!p1,p2 in Pos: _add(p1,p2) = makePos(x(p1)+x(p2), y(p1)+y(p2)).}
+
+    x1() = clip(4).
+    p() = _add(pos(1,2), pos(2,1)).
 }
 
 procedure main() {
+    //print(Problem(T).formula())
     pretty_print(model_expand(T))
 }
