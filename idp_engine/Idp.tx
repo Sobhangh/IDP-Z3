@@ -34,7 +34,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
 Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
 
-  Definition: '{' rules*=Rule '}';
+  Definition: annotations=Annotations '{' rules*=Rule '}';
   Rule: annotations=Annotations
         (('!'|'∀') quantees+=Quantee[','] ':' )*
         definiendum=AppliedSymbol

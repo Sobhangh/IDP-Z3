@@ -36,8 +36,7 @@ And(Color == blue,
     True,
     True,
     True,
-    Or(f(B, B) == A, f(B, B) == B),
-    True)
+    Or(f(B, B) == A, f(B, B) == B))
 T, S2
 No models.
 T2, S

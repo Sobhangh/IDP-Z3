@@ -48,8 +48,7 @@ from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction, ARImplication, AAggregate,
                     AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, AEquivalence)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT, \
-    DEF_SEMANTICS, Semantics
+from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT
 
 
 # class Extern  ###########################################################
@@ -105,52 +104,38 @@ SymbolDeclaration.interpret = interpret
 # class Definition  ###########################################################
 
 def interpret(self, problem):
-    for decl, rule in self.clarks.items():
-        if rule.is_whole_domain:
-            # rule.body = rule.body.interpret(problem)
-            rule.interpret(problem)
+    """updates problem.def_constraints, by expanding the definitions
+
+    Args:
+        problem (Problem):
+            containts the enumerations for the expansion; is updated with the expanded definitions
+    """
+    self.cache = {}  # reset the cache
+    self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
 Definition.interpret = interpret
 
+def add_def_constraints(self, instantiables, problem, result):
+    """result is updated with the constraints for this definition.
 
-# class Rule  ###########################################################
+    The `instantiables` (of the definition) are expanded in `problem`.
 
-def interpret(self, theory):
-    """ expand quantifiers and interpret """
+    Args:
+        instantiables (dict[SymbolDeclaration, list[Expression]]):
+            the constraints without the quantification
 
-    # compute self.whole_domain, by expanding:
-    # ∀ v: f(v)=out <=> body
-    # (after joining the rules of the same symbols)
-    assert self.is_whole_domain
-    self.cache = {}  # reset the cache
-    if self.out:
-        expr = AppliedSymbol.make(self.definiendum.symbol,
-                                  self.definiendum.sub_exprs[:-1])
-        expr.in_head = True
-        expr = AComparison.make('=', [expr, self.definiendum.sub_exprs[-1]])
-    else:
-        expr = AppliedSymbol.make(self.definiendum.symbol,
-                                  self.definiendum.sub_exprs)
-        expr.in_head = True
+        problem (Problem):
+            contains the structure for the expansion/interpretation of the constraints
 
-    if self.out or DEF_SEMANTICS == Semantics.COMPLETION or \
-            self.definiendum.symbol.decl not in self.parent.level_symbols:
-        self.whole_domain = AQuantification.make('∀', self.quantees,
-                            AEquivalence.make('⇔', [expr,self.body])).interpret(theory)
-    else:
-        body = self.body.split_equivalences().interpret(theory)
-        expr1 = AImplication.make('⇒', [expr.copy(),
-                                        body.copy().add_level_mapping(
-                                            self.parent.level_symbols,
-                                            self.definiendum, True, True)])
-        expr2 = ARImplication.make('⇐', [expr,
-                                        body.add_level_mapping(
-                                            self.parent.level_symbols,
-                                            self.definiendum, False, False)])
-        self.whole_domain = AQuantification.make('∀', self.quantees,
-                            AConjunction.make('∧', [expr1, expr2])).interpret(theory)
-    self.whole_domain.block = self.block
-    return self
-Rule.interpret = interpret
+        result (dict[SymbolDeclaration, Definition, list[Expression]]):
+            a mapping from (Symbol, Definition) to the list of constraints
+    """
+    for decl, bodies in instantiables.items():
+        quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
+        expr = [AQuantification.make('∀', quantees, e, e.annotations)
+                .interpret(problem)
+                for e in bodies]
+        result[decl, self] = expr
+Definition.add_def_constraints = add_def_constraints
 
 
 # class SymbolInterpretation  ###########################################################
@@ -434,15 +419,13 @@ def interpret(self, problem):
             f = problem.interpretations[self.decl.name].interpret_application
             simpler = f(problem, 0, self, sub_exprs)
         if (not self.in_head and not self.fresh_vars):
-            instantiations = [rule.instantiate_definition(sub_exprs, problem)
-                              for defin in problem.definitions
-                              for decl, rule in defin.clarks.items()
-                              if self.decl == decl]
-            instantiations = [x for x in instantiations if x]
-            if len(instantiations) == 1:
-                co_constraint = instantiations[0]
-            elif len(instantiations) > 1:
-                co_constraint = AConjunction.make('∧', instantiations)
+            inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
+                              for defin in problem.definitions]
+            inst = [x for x in inst if x]
+            if len(inst) == 1:
+                co_constraint = inst[0]
+            elif len(inst) > 1:
+                co_constraint = AConjunction.make('∧', inst)
     out = self._change(sub_exprs=sub_exprs, simpler=simpler,
                        co_constraint=co_constraint)
     return out

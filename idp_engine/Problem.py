@@ -61,8 +61,8 @@ class Problem(object):
 
         definitions ([Definition]): a list of definitions in this problem
 
-        def_constraints (dict[SymbolDeclaration, Definition], Expression):
-            A mapping of defined symbol to the whole-domain constraint
+        def_constraints (dict[SymbolDeclaration, Definition], list[Expression]):
+            A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.
 
         interpretations (dict[string, SymbolInterpretation]):
@@ -89,7 +89,7 @@ class Problem(object):
         self.definitions = []
         self.constraints = OrderedSet()
         self.assignments = Assignments()
-        self.def_constraints = {}  # {(Declaration, Definition): Expression}
+        self.def_constraints = {}  # {(Declaration, Definition): List[Expression]}
         self.interpretations = {}
         self.goals = {}
         self.name = ''
@@ -118,7 +118,8 @@ class Problem(object):
         out = copy(self)
         out.assignments = self.assignments.copy()
         out.constraints = OrderedSet(c.copy() for c in self.constraints)
-        out.def_constraints = self.def_constraints.copy()
+        out.def_constraints = {k:[e for e in v]  #TODO e.copy()
+                               for k,v in self.def_constraints.items()}
         # copy() is called before making substitutions => invalidate derived fields
         out._formula = None
         return out
@@ -180,9 +181,6 @@ class Problem(object):
         # expand whole-domain definitions
         for defin in self.definitions:
             defin.interpret(self)
-            for decl, rule in defin.clarks.items():
-                if rule.is_whole_domain:
-                    self.def_constraints[decl, defin] = rule.whole_domain
 
         # initialize assignments, co_constraints, questions
 
@@ -239,8 +237,7 @@ class Problem(object):
                       or (self.propagated and not self.cleared))]
                 + [s for s in self.constraints]  #perf could be pre-compiled
                 + [c for c in self.co_constraints]
-                + [s for s in self.def_constraints.values()]
-                + [TRUE]  # so that it is not empty
+                + [s for s in chain(*self.def_constraints.values())]
                 )
         return self._formula
 
@@ -418,7 +415,14 @@ class Problem(object):
                 ps[p] = ass
                 #TODO use assert_and_track ?
                 s.add(Implies(p, p))
-        todo = chain(self.constraints, self.def_constraints.values())
+
+        # get expanded def_constraints
+        def_constraints = {}
+        for defin in self.definitions:
+            instantiables = defin.get_instantiables(for_explain=True)
+            defin.add_def_constraints(instantiables, self, def_constraints)
+
+        todo = chain(self.constraints, chain(*def_constraints.values()))
         for constraint in todo:
             p = constraint.reified()
             ps[p] = constraint.original.interpret(self).translate()
@@ -439,7 +443,7 @@ class Problem(object):
                             else:
                                 laws.append(a1.formula())
 
-            for a1 in chain(self.def_constraints.values(), self.constraints):
+            for a1 in chain(chain(*def_constraints.values()), self.constraints):
                 #TODO find the rule
                 for a2 in unsatcore:
                     if str(a1.original.interpret(self).translate()) == str(ps[a2]):
@@ -538,9 +542,10 @@ class Problem(object):
             goal_pred = goal_string.split("(")[0]
             assert goal_pred in self.declarations, (
                 f"Unrecognized goal string: {goal_string}")
-            for (decl, _),e in self.def_constraints.items():
+            for (decl, _),es in self.def_constraints.items():
                 if decl != self.declarations[goal_pred]: continue
-                e.collect(questions, all_=True)
+                for e in es:
+                    e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
                     self.assignments.assert__(q, None, S.UNKNOWN,False)
@@ -548,7 +553,7 @@ class Problem(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        symbols = {decl for defin in self.definitions for decl in defin.clarks.keys()}
+        symbols = {decl for defin in self.definitions for decl in defin.canonicals.keys()}
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code

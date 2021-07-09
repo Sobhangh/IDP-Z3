@@ -11,6 +11,7 @@ vocabulary V {
 }
 theory T:V {
     //BMI Level
+    [definition of BMILevel]
     {
         BMILevel() = Severely_Underweight <- bmi() < 18.5 & sex() = Male.
         BMILevel() = Underweight <- bmi() < 18.5 & sex() = Female.
@@ -41,6 +42,8 @@ theory T:V {
         riskLevel() = Very_High <- BMILevel() = Obese_I & sex() = Female & waist() > 88.
         riskLevel() = Very_High <- BMILevel() = Obese_II.
         riskLevel() = Extremely_High <- BMILevel() = Extreme_Obesity.
+
+        [Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity]
         riskLevel() = Low <- ~(BMILevel() = Overweight | BMILevel() = Obese_I | BMILevel() = Obese_II | BMILevel() = Extreme_Obesity).
     }
     (weight()=80).
