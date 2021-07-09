@@ -1,7 +1,5 @@
-propagating:  Color()
-propagating:  p()
 No more consequences.
-(p() ⇒ Color() in {red, blue}) ∧ (Color() = red ∨ Color() = blue ∨ Color() = green) ∧ true
+(p() ⇒ Color() in {red, blue}) ∧ (Color() = red ∨ Color() = blue ∨ Color() = green)
 
 Model 1
 ==========
@@ -24,6 +22,11 @@ Color:={->red}
 p:={->false}
 
 Model 5
+==========
+Color:={->red}
+p:={->false}
+
+Model 6
 ==========
 Color:={->red}
 p:={->true}
