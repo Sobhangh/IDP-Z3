@@ -1,0 +1,13 @@
+vocabulary V {
+    clip : Int → Int
+    x:() -> Int
+}
+
+theory T:V {
+    {!n in Int: clip(n) = (if n<1 then 1 else n).}
+    x() = clip(1).
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}

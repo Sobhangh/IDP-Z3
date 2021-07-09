@@ -8,7 +8,7 @@ weight() -> 80
 No more consequences.
 
 length() = 179
-weight() = 80
 definition of BMILevel
 bmi() = $bmi$ ⇔ $bmi$ = weight() / (length() ⨯ length())
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
+weight() = 80
