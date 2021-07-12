@@ -206,7 +206,7 @@ def get_relevant_questions(self: "State"):
     return out
 
 
-def explain(state, consequence):
+def explain(state, consequence=None):
     (facts, laws) = state.explain(consequence)
     out = Output(state)
     for ass in facts:

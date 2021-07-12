@@ -25,6 +25,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #98: Incorrect relevance with definitions
 * Merge 101: improve performance of IC (propagate dropdowns on request)
 * fix #112: Don't repeat the symbol name for symbol tiles with a header
+* fix #17 (web-IDP-Z3): When no model can be found, an error is returned.
 * fix #113: Prettify not working correctly for ~=
 
 ## [0.8.2] - 2021-06-02
