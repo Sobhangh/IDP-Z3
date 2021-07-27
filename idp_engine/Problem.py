@@ -194,6 +194,9 @@ class Problem(object):
             # don't collect questions from type constraints
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
+        for es in self.def_constraints.values():
+            for e in es:
+                e.co_constraints(self.co_constraints)
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert__(s, None, S.UNKNOWN, False)
