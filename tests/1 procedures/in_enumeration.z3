@@ -24,6 +24,11 @@ p:={->false}
 Model 5
 ==========
 Color:={->red}
+p:={->false}
+
+Model 6
+==========
+Color:={->red}
 p:={->true}
 
 No more models.
