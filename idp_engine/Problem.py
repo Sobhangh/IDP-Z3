@@ -257,19 +257,19 @@ class Problem(object):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            val1 = None
             if not q.is_reified() or self.extended:
                 # evaluating q.translate() directly fails the pipeline on arithmetic/forall.idp
-                solver.push()  # in case todo contains complex formula
                 solver.add(q.reified() == q.translate())
-                res1 = solver.check()
-                if res1 == sat:
-                    val1 = solver.model().eval(q.reified(),
-                                               model_completion=complete)
-                solver.pop()
-            if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
-                val = str_to_IDP(q, str(val1))
-                ass.assert__(q, val, S.EXPANDED, None)
+        res1 = solver.check()
+        if res1 == sat:
+            for q in todo:
+                val1 = None
+                if not q.is_reified() or self.extended:
+                        val1 = solver.model().eval(q.reified(),
+                                                model_completion=complete)
+                if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
+                    val = str_to_IDP(q, str(val1))
+                    ass.assert__(q, val, S.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False):
