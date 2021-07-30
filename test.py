@@ -46,7 +46,7 @@ import re
 from idp_server.State import State
 from idp_server.IO import Output, metaJSON
 from idp_engine import IDP, Problem, model_expand, Status as S
-from idp_engine.utils import start, log, NEWL
+from idp_engine.utils import start, log, NEWL, RUN_FILE
 
 z3lock = threading.Lock()
 
@@ -59,7 +59,7 @@ def generateZ3(theory):
     """
 
     # capture stdout, print()
-    with open("/tmp/log.txt", mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
+    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
         try:
             idp = IDP.from_str(theory)
             if 'main' in idp.procedures:
@@ -78,9 +78,9 @@ def generateZ3(theory):
                     end ="")
         except Exception as exc:
             print(traceback.format_exc())
-    with open("/tmp/log.txt", mode='r', encoding='utf-8') as f:
+    with open(RUN_FILE, mode='r', encoding='utf-8') as f:
         return f.read()
-    os.remove("/tmp/log.txt")
+    os.remove(RUN_FILE)
 
 
 
@@ -197,7 +197,7 @@ def pipeline():
 def api():
     # capture stdout, print()
     error = 0
-    with open("/tmp/log.txt", mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
+    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
         try:
             test = """
                 vocabulary {
@@ -225,9 +225,9 @@ def api():
         except Exception as exc:
             print(traceback.format_exc())
             error = 1
-    with open("/tmp/log.txt", mode='r', encoding='utf-8') as f:
+    with open(RUN_FILE, mode='r', encoding='utf-8') as f:
         output = f.read()
-    os.remove("/tmp/log.txt")
+    os.remove(RUN_FILE)
     with open(os.path.join("./tests/api.z3"), "w") as fp:
         fp.write(output)
     return error

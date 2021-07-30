@@ -35,7 +35,7 @@ from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
-from idp_engine.utils import log
+from idp_engine.utils import log, RUN_FILE
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
@@ -128,14 +128,14 @@ class run(Resource):
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 # capture stdout, print()
-                with open("/tmp/log.txt", mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
+                with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
                     try:
                         idp.execute()
                     except Exception as exc:
                         print(exc)
-                with open("/tmp/log.txt", mode='r', encoding='utf-8') as f:
+                with open(RUN_FILE, mode='r', encoding='utf-8') as f:
                     out = f.read()
-                os.remove("/tmp/log.txt")
+                os.remove(RUN_FILE)
 
                 log("end /run ")
                 if with_profiling:
