@@ -17,6 +17,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * Merge !103: support alternative "batch" propagation algorithm (not faster)
 * Merge !105: "directional propagation" to improve performance for a sequence of assert+propagate
 * Merge !106: improve performance of Problem.simplify()
+* Merge !117: improve performance of Problem._from_model()
 * Merge !118: allow unicode characters in non-logic symbols
 * fix #88: Explanations should be rule-specific when possible
 * fix #104: implications, equivalences are binary connectives, not n-ary.
