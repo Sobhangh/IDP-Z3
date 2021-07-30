@@ -59,7 +59,7 @@ def generateZ3(theory):
     """
 
     # capture stdout, print()
-    with io.StringIO() as buf, redirect_stdout(buf):
+    with open("/tmp/log.txt", mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
         try:
             idp = IDP.from_str(theory)
             if 'main' in idp.procedures:
@@ -78,7 +78,9 @@ def generateZ3(theory):
                     end ="")
         except Exception as exc:
             print(traceback.format_exc())
-        return buf.getvalue()
+    with open("/tmp/log.txt", mode='r', encoding='utf-8') as f:
+        return f.read()
+    os.remove("/tmp/log.txt")
 
 
 
@@ -195,7 +197,7 @@ def pipeline():
 def api():
     # capture stdout, print()
     error = 0
-    with io.StringIO() as buf, redirect_stdout(buf):
+    with open("/tmp/log.txt", mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
         try:
             test = """
                 vocabulary {
@@ -223,7 +225,9 @@ def api():
         except Exception as exc:
             print(traceback.format_exc())
             error = 1
-        output = buf.getvalue()
+    with open("/tmp/log.txt", mode='r', encoding='utf-8') as f:
+        output = f.read()
+    os.remove("/tmp/log.txt")
     with open(os.path.join("./tests/api.z3"), "w") as fp:
         fp.write(output)
     return error

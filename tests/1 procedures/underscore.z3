@@ -1,18 +1,18 @@
 
 -- original ---------------------------------
 vocabulary V {
-    p, _q, r: () -> Bool
+    p, _q, δ: () -> Bool
 }
 
 theory T:V {
     p() => _q().
-    _q() => r().
+    _q() => δ().
 
 }
 
 
 display {
-    goal(`r).
+    goal(`δ).
   view() = expanded.
 }
 -- meta -------------------------------------
@@ -25,7 +25,7 @@ display {
               'type': 'proposition',
               'view': 'expanded'},
              {'environmental': False,
-              'idpname': 'r',
+              'idpname': 'δ',
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
@@ -42,11 +42,11 @@ display {
                'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
- 'r': {'__rank': 9999,
-       'r()': {'environmental': False,
+ 'δ': {'__rank': 9999,
+       'δ()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
-               'reading': 'r',
+               'reading': 'δ',
                'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}}}

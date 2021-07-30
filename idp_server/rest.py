@@ -26,7 +26,6 @@ with_profiling = False
 
 from contextlib import redirect_stdout
 from copy import copy
-import io
 import os
 import threading
 import traceback
@@ -129,12 +128,14 @@ class run(Resource):
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 # capture stdout, print()
-                with io.StringIO() as buf, redirect_stdout(buf):
+                with open("/tmp/log.txt", mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
                     try:
                         idp.execute()
                     except Exception as exc:
                         print(exc)
-                    out = buf.getvalue()
+                with open("/tmp/log.txt", mode='r', encoding='utf-8') as f:
+                    out = f.read()
+                os.remove("/tmp/log.txt")
 
                 log("end /run ")
                 if with_profiling:
