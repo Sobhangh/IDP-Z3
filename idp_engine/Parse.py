@@ -838,7 +838,11 @@ class ConstructedFrom(Enumeration):
         self.tuples = None
 
     def contains(self, args, function, arity=None, rank=0, tuples=None):
-        return TRUE
+        """returns True if args belong to the type enumeration"""
+        # args must satisfy the tester of one of the constructors
+        out = [AppliedSymbol.construct(constructor.tester, args)
+                for constructor in self.constructors]
+        return ADisjunction.make('∨', out)
 
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
