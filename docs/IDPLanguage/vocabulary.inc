@@ -14,7 +14,7 @@ The *vocabulary* block specifies the types, predicates, functions and constants 
 If the name is omitted, the vocabulary is named V.
 
 Each declaration goes on a new line (or are space separated).
-Symbols begins with an alphabetic character or ``_``, followed by alphanumeric characters or ``_``.
+Symbols begins with a word character excluding digits, followed by word characters (word characters include ``_``).
 Symbols can also be string literals delimited by ``'``, e.g., ``'blue planet'``.
 
 .. _type:
