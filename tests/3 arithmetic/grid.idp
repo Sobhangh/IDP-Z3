@@ -1,0 +1,13 @@
+vocabulary {
+    type Pos := constructed from {pos(x:Int, y:Int)}
+    p, q: () -> Pos
+}
+
+theory {
+    p()=pos(1,1).
+    q()=p().
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}
