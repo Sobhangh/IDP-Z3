@@ -81,6 +81,8 @@ class Problem(object):
         assigned (OrderedSet): set of questions asserted since last propagate
 
         cleared (OrderedSet): set of questions unassigned since last propagate
+
+        propagate_success (Bool): whether the last propagate call failed or not
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -98,6 +100,7 @@ class Problem(object):
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
         self.add(*blocks)
+        self.propagate_success = True
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -191,6 +194,9 @@ class Problem(object):
             # don't collect questions from type constraints
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
+        for es in self.def_constraints.values():
+            for e in es:
+                e.co_constraints(self.co_constraints)
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert__(s, None, S.UNKNOWN, False)
@@ -251,19 +257,18 @@ class Problem(object):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            val1 = None
             if not q.is_reified() or self.extended:
                 # evaluating q.translate() directly fails the pipeline on arithmetic/forall.idp
-                solver.push()  # in case todo contains complex formula
                 solver.add(q.reified() == q.translate())
-                res1 = solver.check()
-                if res1 == sat:
+        res1 = solver.check()
+        if res1 == sat:
+            for q in todo:
+                if not q.is_reified() or self.extended:
                     val1 = solver.model().eval(q.reified(),
                                                model_completion=complete)
-                solver.pop()
-            if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
-                val = str_to_IDP(q, str(val1))
-                ass.assert__(q, val, S.EXPANDED, None)
+                    val = str_to_IDP(q, str(val1))
+                    if val is not None:
+                        ass.assert__(q, val, S.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False):
@@ -342,7 +347,7 @@ class Problem(object):
             out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag))
-        assert out[0] != "Not satisfiable.", "Not satisfiable."
+        self.propagate_success = (out[0] != "Not satisfiable.")
         return self
 
     def get_range(self, term: str):
@@ -376,34 +381,21 @@ class Problem(object):
                 for e in out.assignments.values()
                 if e.value is None or e.value.same_as(TRUE)]
 
-    def explain(self, consequence):
-        """returns the facts and laws that justify 'consequence in the 'self Problem
+    def explain(self, consequence=None):
+        """
+        Pre: the problem is UNSAT (under the negation of the consequence if not None)
+
+        Returns the facts and laws that make the problem UNSAT.
 
         Args:
             self (Problem): the problem state
-            consequence (string): the code of the sentence to be explained.  Must be a key in self.assignments
+            consequence (string | None): the code of the sentence to be explained.  Must be a key in self.assignments
 
         Returns:
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
         reasons = [S.GIVEN, S.STRUCTURE]
-
-        negated = consequence.replace('~', '¬').startswith('¬')
-        consequence = consequence[1:] if negated else consequence
-        assert consequence in self.assignments, \
-            f"Can't find this sentence: {consequence}"
-
-        to_explain = self.assignments[consequence].sentence
-
-        # rules used in justification
-        if to_explain.type != BOOL:  # determine numeric value
-            val = self.assignments[consequence].value
-            if val is None:  # can't explain an expanded value
-                return ([], [])
-            to_explain = AComparison.make("=", [to_explain, val])
-        if negated:
-            to_explain = AUnary.make('¬', to_explain)
 
         s = Solver()
         s.set(':core.minimize', True)
@@ -428,7 +420,25 @@ class Problem(object):
             ps[p] = constraint.original.interpret(self).translate()
             s.add(Implies(p, ps[p]))
 
-        s.add(Not(to_explain.translate()))
+        if consequence:
+            negated = consequence.replace('~', '¬').startswith('¬')
+            consequence = consequence[1:] if negated else consequence
+            assert consequence in self.assignments, \
+                f"Can't find this sentence: {consequence}"
+
+            to_explain = self.assignments[consequence].sentence
+
+            # rules used in justification
+            if to_explain.type != BOOL:  # determine numeric value
+                val = self.assignments[consequence].value
+                if val is None:  # can't explain an expanded value
+                    return ([], [])
+                to_explain = AComparison.make("=", [to_explain, val])
+            if negated:
+                to_explain = AUnary.make('¬', to_explain)
+
+            s.add(Not(to_explain.translate()))
+
         s.check(list(ps.keys()))
         unsatcore = s.unsat_core()
 

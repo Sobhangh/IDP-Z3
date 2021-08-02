@@ -225,23 +225,25 @@ class eval(Resource):
 
                 out = {}
                 method = args['method']
-                if method == "propagate":
+                if not state.propagate_success:
+                    out = explain(state)
+                elif method == "propagate":
                     out = Output(state).fill(state)
-                if method == 'get_range':
+                elif method == 'get_range':
                     out = state.get_range(args['field'])
-                if method == "modelexpand":
+                elif method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
                     out = copy(state)
                     out.assignments = list(generator)[0]
                     out = Output(out).fill(out)
-                if method == "explain":
+                elif method == "explain":
                     out = explain(state, args['value'])
-                if method == "minimize":
+                elif method == "minimize":
                     out = copy(state)
                     out = out.optimize(args['symbol'], args['minimize'],
                                            complete=False)
                     out = Output(out).fill(out)
-                if method == "abstract":
+                elif method == "abstract":
                     if args['symbol'] != "":  # theory to explain ?
                         newTheory = (str(IDP.from_str(args['code']).vocabulary)
                                      + "theory {\n"

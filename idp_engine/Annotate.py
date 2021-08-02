@@ -248,6 +248,8 @@ def annotate(self, voc, q_vars):
 
     self.definiendum = self.definiendum.annotate(voc, q_v)
     self.body = self.body.annotate(voc, q_v)
+    if self.out:
+        self.out = self.out.annotate(voc, q_v)
 
     self.is_whole_domain = all(s.name not in [INT, REAL, DATE]  # can't use s.range yet
                                for s in self.definiendum.decl.sorts)

@@ -66,8 +66,12 @@ def str_to_IDP(atom, val_string):
     elif (hasattr(atom.decl.out.decl, 'map')
           and val_string in atom.decl.out.decl.map):  # constructor
         out = atom.decl.out.decl.map[val_string]
-    else:  # could be fraction
-        out = Number(number=str(eval(val_string.replace('?', ''))))
+    else:
+        try:
+            # could be a fraction
+            out = Number(number=str(eval(val_string.replace('?', ''))))
+        except:
+            out = None
     return out
 
 
