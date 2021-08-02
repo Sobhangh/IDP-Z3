@@ -5,9 +5,11 @@ vocabulary {
 
 theory {
     p()=pos(1,1).
+    x(pos(1,1))=1.
     q()=p().
 }
 
 procedure main() {
+    print(Problem(T).formula())
     pretty_print(model_expand(T))
 }

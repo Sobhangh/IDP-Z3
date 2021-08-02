@@ -831,11 +831,14 @@ class ConstructedFrom(Enumeration):
         tuples (OrderedSet[Tuple]): OrderedSet of tuples of Expression
 
         constructors (List[Constructor]): List of Constructor
+
+        accessors (dict[str, Int]): index of the accessor in the constructors
     """
     def __init__(self, **kwargs):
         self.constructed = kwargs.pop('constructed')
         self.constructors = kwargs.pop('constructors')
         self.tuples = None
+        self.accessors = dict()
 
     def contains(self, args, function, arity=None, rank=0, tuples=None):
         """returns True if args belong to the type enumeration"""

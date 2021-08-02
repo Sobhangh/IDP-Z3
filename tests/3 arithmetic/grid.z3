@@ -1,3 +1,4 @@
+p() = pos(1, 1) ∧ true ∧ q() = p() ∧ is_pos(p()) ∧ is_pos(q())
 Traceback (most recent call last):
   File "test.py", line ??, in generateZ3
     idp.execute()

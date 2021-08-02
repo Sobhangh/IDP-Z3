@@ -365,6 +365,11 @@ def annotate(self, voc):
         for i, ts in enumerate(c.sorts):
             if ts.accessor is None:
                 ts.accessor = Symbol(name=f"{c.name}_{i}")
+            if ts.accessor.name in self.accessors:
+                self.check(self.accessors[ts.accessor.name] == i,
+                           "Accessors used at incompatible indices")
+            else:
+                self.accessors[ts.accessor.name] = i
         c.annotate(voc)
 ConstructedFrom.annotate = annotate
 
