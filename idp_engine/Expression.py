@@ -994,7 +994,7 @@ class AppliedSymbol(Expression):
                 assert(DEF_SEMANTICS == Semantics.COINDUCTION)
                 op = ('≥' if pos_justification else '>') \
                     if polarity else ('<' if pos_justification else '≤')
-            comp = Operator.make(op, [
+            comp = AComparison.make(op, [
                 AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
                 AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
             ])
