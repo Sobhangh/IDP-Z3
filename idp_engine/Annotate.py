@@ -582,7 +582,7 @@ def annotate(self, voc, q_vars):
     self = AQuantification.annotate(self, voc, q_vars)
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
 
-    assert not self.using_if
+    assert not self.using_if, f"Internal error in Aggregate: {self}"
     self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
             then_f=Number(number='1') if self.out is None else
                     self.sub_exprs[AAggregate.OUT],

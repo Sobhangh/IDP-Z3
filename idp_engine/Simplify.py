@@ -58,8 +58,9 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         else:
             self.simpler = simpler
     assert (self.value is None
-            or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
-                                    Number, Date])
+               or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
+                                       Number, Date]), \
+            f"Incorrect value in _change: {self.value}"
 
     # reset derived attributes
     self.str = sys.intern(str(self))

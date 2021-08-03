@@ -981,7 +981,8 @@ class AppliedSymbol(Expression):
             constructors[symbol.name].append(constructor)
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        assert(head.symbol.decl in level_symbols)
+        assert head.symbol.decl in level_symbols, \
+               f"Internal error in level mapping: {self}"
         if self.symbol.decl not in level_symbols or self.in_head:
             return self
         else:
@@ -991,7 +992,8 @@ class AppliedSymbol(Expression):
             elif DEF_SEMANTICS == Semantics.KRIPKEKLEENE:
                 op = '>' if polarity else '≤'
             else:
-                assert(DEF_SEMANTICS == Semantics.COINDUCTION)
+                assert DEF_SEMANTICS == Semantics.COINDUCTION, \
+                        f"Internal error: DEF_SEMANTICS"
                 op = ('≥' if pos_justification else '>') \
                     if polarity else ('<' if pos_justification else '≤')
             comp = AComparison.make(op, [
