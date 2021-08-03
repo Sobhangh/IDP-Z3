@@ -6,7 +6,7 @@ vocabulary {
     q: (color) → Bool
 }
 theory {
-    p() <=> (?c in color: c~=red).
+    p() <=> ?c in color: c~=red.
     ?c in color: q(c).
 }
 display {

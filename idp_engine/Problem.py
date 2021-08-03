@@ -263,13 +263,12 @@ class Problem(object):
         res1 = solver.check()
         if res1 == sat:
             for q in todo:
-                val1 = None
                 if not q.is_reified() or self.extended:
-                        val1 = solver.model().eval(q.reified(),
-                                                model_completion=complete)
-                if val1 is not None and str(val1) != str(q.translate()):  # otherwise, unknown
+                    val1 = solver.model().eval(q.reified(),
+                                               model_completion=complete)
                     val = str_to_IDP(q, str(val1))
-                    ass.assert__(q, val, S.EXPANDED, None)
+                    if val is not None:
+                        ass.assert__(q, val, S.EXPANDED, None)
         return ass
 
     def expand(self, max=10, complete=False):
