@@ -148,9 +148,9 @@ IfExpr.translate1 = translate1
 # Class AQuantification  ######################################################
 
 def translate1(self):
-    self.check(len(self.sub_exprs) == 1,
-               f"Internal error in expansion of quantification: {self}")
     if not self.quantees:
+        assert len(self.sub_exprs) == 1, \
+               f"Internal error in expansion of quantification: {self}"
         return self.sub_exprs[0].translate()
     else:
         finalvars = []
