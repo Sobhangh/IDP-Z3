@@ -1,15 +1,15 @@
 vocabulary V {
-    p, _q, r: () -> Bool
+    p, _q, δ: () -> Bool
 }
 
 theory T:V {
     p() => _q().
-    _q() => r().
+    _q() => δ().
 
 }
 
 
 display {
-    goal(`r).
+    goal(`δ).
   view() = expanded.
 }

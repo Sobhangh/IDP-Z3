@@ -26,7 +26,6 @@ with_profiling = False
 
 from contextlib import redirect_stdout
 from copy import copy
-import io
 import os
 import threading
 import traceback
@@ -36,7 +35,7 @@ from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
-from idp_engine.utils import log
+from idp_engine.utils import log, RUN_FILE
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
@@ -129,12 +128,14 @@ class run(Resource):
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 # capture stdout, print()
-                with io.StringIO() as buf, redirect_stdout(buf):
+                with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
                     try:
                         idp.execute()
                     except Exception as exc:
                         print(exc)
-                    out = buf.getvalue()
+                with open(RUN_FILE, mode='r', encoding='utf-8') as f:
+                    out = f.read()
+                os.remove(RUN_FILE)
 
                 log("end /run ")
                 if with_profiling:
