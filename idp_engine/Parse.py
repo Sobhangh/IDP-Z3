@@ -31,7 +31,7 @@ from datetime import date
 from enum import Enum
 from itertools import groupby
 from os import path
-from re import findall
+from re import match, findall
 from sys import intern
 from textx import metamodel_from_file
 from typing import Dict, List, Union, Optional
@@ -66,12 +66,27 @@ def str_to_IDP(atom, val_string):
     elif (hasattr(atom.decl.out.decl, 'map')
           and val_string in atom.decl.out.decl.map):  # constructor
         out = atom.decl.out.decl.map[val_string]
+    elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
+        # deconstruct val_string
+        m = match(r"(?P<function>\w+)\s?\((?P<args>(?P<arg>\w+(,\s?)?)+)\)",
+                  val_string).groupdict()
+
+        typ = atom.decl.out.decl
+        assert hasattr(typ, 'interpretation'), "Internal error"
+        constructor = next(c for c in typ.interpretation.enumeration.constructors
+                           if c.name == m['function'])
+
+        args = m['args'].split(',')
+        args = [Number(number=str(eval(a.replace('?', ''))))  #TODO deal with any argument based on constructor signature
+                for a in args]
+
+        out = AppliedSymbol.construct(constructor, args)
     else:
         try:
             # could be a fraction
             out = Number(number=str(eval(val_string.replace('?', ''))))
         except:
-            out = None
+            out = None  # when z3 model has unknown value
     return out
 
 
