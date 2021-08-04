@@ -1,12 +1,15 @@
 vocabulary {
     type Pos := constructed from {pos(x:Int, y:Int)}
     p, q: () -> Pos
+    type Time :={0..2}
+    position: Time -> Pos
 }
 
 theory {
     p()=pos(1,1).
     x(pos(1,1))=1.
     q()=p().
+    {! t in Time: position(t) = pos(0,0).}
 }
 
 procedure main() {
