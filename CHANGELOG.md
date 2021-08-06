@@ -26,6 +26,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #118: Incorrect models for definitions over infinite domains
 
 ### Interactive Consultant
+* fix #91: empty box in top right of IC
 * fix #98: Incorrect relevance with definitions
 * Merge 101: improve performance of IC (propagate dropdowns on request)
 * fix #112: Don't repeat the symbol name for symbol tiles with a header
