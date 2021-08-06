@@ -23,6 +23,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #111: Missing law in explanation when between brackets
 * fix #116: Constructors on infinite domains
 * fix #118: Incorrect models for definitions over infinite domains
+* fix #121: Definitions over constructors with infinite domains
 
 ### Interactive Consultant
 * fix #98: Incorrect relevance with definitions

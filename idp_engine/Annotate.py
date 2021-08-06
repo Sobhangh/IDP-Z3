@@ -173,6 +173,8 @@ def get_instantiables(self, for_explain=False):
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
+        rule.is_whole_domain = all(s.decl.range  # not None nor []
+                               for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
@@ -250,8 +252,6 @@ def annotate(self, voc, q_vars):
     if self.out:
         self.out = self.out.annotate(voc, q_v)
 
-    self.is_whole_domain = all(s.name not in [INT, REAL, DATE]  # can't use s.range yet
-                               for s in self.definiendum.decl.sorts)
     return self
 Rule.annotate = annotate
 

@@ -3,6 +3,7 @@ vocabulary {
     p, q: () -> Pos
     type Time :={0..2}
     position: Time -> Pos
+    _add: Pos ⨯ Pos -> Pos
 }
 
 theory {
@@ -10,6 +11,8 @@ theory {
     x(pos(1,1))=1.
     q()=p().
     {! t in Time: position(t) = pos(0,0).}
+    {!p1,p2 in Pos: _add(p1,p2) = pos(x(p1)+x(p2), y(p1)+y(p2)).}
+
 }
 
 procedure main() {
