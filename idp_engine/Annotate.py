@@ -154,7 +154,6 @@ def annotate(self, theory, voc, q_vars):
         exprs = [rule.body for rule in rules]
         new_rule.body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = new_rule
-    self.instantiables = self.get_instantiables()
     return self
 Definition.annotate = annotate
 
@@ -203,7 +202,7 @@ def get_instantiables(self, for_explain=False):
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
-                        new = new.add_level_mapping(rule.parent.level_symbols,
+                        new = new.copy().add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
                         out.append(ARImplication.make('⇐', [head, new],
                                                       r.annotations))
@@ -222,7 +221,7 @@ def get_instantiables(self, for_explain=False):
                                              rule.definiendum, False, False)
                     out = [ARImplication.make('⇐', [head.copy(), new],
                                               self.annotations)]
-                all_bodies = all_bodies.add_level_mapping(rule.parent.level_symbols,
+                all_bodies = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                         rule.definiendum, True, True)
                 out.append(AImplication.make('⇒', [head, all_bodies],
                                              self.annotations))

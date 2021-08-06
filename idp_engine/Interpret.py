@@ -111,6 +111,7 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
+    self.instantiables = self.get_instantiables()
     self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
 Definition.interpret = interpret
 
