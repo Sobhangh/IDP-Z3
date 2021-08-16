@@ -154,7 +154,6 @@ def annotate(self, theory, voc, q_vars):
         exprs = [rule.body for rule in rules]
         new_rule.body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = new_rule
-    self.instantiables = self.get_instantiables()
     return self
 Definition.annotate = annotate
 
@@ -174,6 +173,8 @@ def get_instantiables(self, for_explain=False):
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
+        rule.is_whole_domain = all(s.decl.range  # not None nor []
+                               for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
@@ -203,7 +204,7 @@ def get_instantiables(self, for_explain=False):
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
-                        new = new.add_level_mapping(rule.parent.level_symbols,
+                        new = new.copy().add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
                         out.append(ARImplication.make('⇐', [head, new],
                                                       r.annotations))
@@ -222,7 +223,7 @@ def get_instantiables(self, for_explain=False):
                                              rule.definiendum, False, False)
                     out = [ARImplication.make('⇐', [head.copy(), new],
                                               self.annotations)]
-                all_bodies = all_bodies.add_level_mapping(rule.parent.level_symbols,
+                all_bodies = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                         rule.definiendum, True, True)
                 out.append(AImplication.make('⇒', [head, all_bodies],
                                              self.annotations))
@@ -251,8 +252,6 @@ def annotate(self, voc, q_vars):
     if self.out:
         self.out = self.out.annotate(voc, q_v)
 
-    self.is_whole_domain = all(s.name not in [INT, REAL, DATE]  # can't use s.range yet
-                               for s in self.definiendum.decl.sorts)
     return self
 Rule.annotate = annotate
 
