@@ -232,8 +232,10 @@ def substitute(self, e0, e1, assignments, tag=None):
     implementation for everything but AppliedSymbol, UnappliedSymbol and
     Fresh_variable
     """
-    assert not isinstance(e0, Variable) or isinstance(e1, Variable)  # should use instantiate instead
-    assert self.co_constraint is None  # see AppliedSymbol instead
+    assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
+               f"Internal error in substitute {e0} by {e1}" # should use instantiate instead
+    assert self.co_constraint is None,  \
+               f"Internal error in substitue: {self.co_constraint}" # see AppliedSymbol instead
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
@@ -254,7 +256,8 @@ def instantiate(self, e0, e1, problem=None):
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
-    assert all(type(e) == Variable for e in e0)
+    assert all(type(e) == Variable for e in e0), \
+           f"Internal error: instantiate {e0}"
     if self.value:
         return self
     if problem and all(e.name not in self.fresh_vars for e in e0):
@@ -316,7 +319,8 @@ def interpret(self, problem):
     inferred = self.sub_exprs[0].type_inference()
     for q in self.quantees:
         if not q.sub_exprs:
-            assert len(q.vars) == 1 and q.arity == 1
+            assert len(q.vars) == 1 and q.arity == 1, \
+                   f"Internal error: interpret {q}"
             var = q.vars[0][0]
             self.check(var.name in inferred,
                         f"can't infer type of {var.name}")
@@ -378,7 +382,7 @@ AQuantification.instantiate1 = instantiate1
 # Class AAggregate  ######################################################
 
 def interpret(self, problem):
-    assert self.using_if
+    assert self.using_if, f"Internal error in interpret"
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 
@@ -448,7 +452,8 @@ def substitute(self, e0, e1, assignments, tag=None):
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)
     elif self.simpler is not None:  # has an interpretation
-        assert self.co_constraint is None
+        assert self.co_constraint is None, \
+               f"Internal error in substitute: {self}"
         simpler = self.simpler.substitute(e0, e1, assignments, tag)
         return self._change(simpler=simpler)
     else:

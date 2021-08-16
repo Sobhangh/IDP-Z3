@@ -367,6 +367,11 @@ def annotate(self, voc):
         for i, ts in enumerate(c.sorts):
             if ts.accessor is None:
                 ts.accessor = Symbol(name=f"{c.name}_{i}")
+            if ts.accessor.name in self.accessors:
+                self.check(self.accessors[ts.accessor.name] == i,
+                           "Accessors used at incompatible indices")
+            else:
+                self.accessors[ts.accessor.name] = i
         c.annotate(voc)
 ConstructedFrom.annotate = annotate
 
@@ -577,7 +582,7 @@ def annotate(self, voc, q_vars):
     self = AQuantification.annotate(self, voc, q_vars)
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
 
-    assert not self.using_if
+    assert not self.using_if, f"Internal error in Aggregate: {self}"
     self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
             then_f=Number(number='1') if self.out is None else
                     self.sub_exprs[AAggregate.OUT],

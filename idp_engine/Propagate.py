@@ -108,7 +108,8 @@ def symbolic_propagate(self, assignments, tag, truth=TRUE):
     if self.code in assignments:
         assignments.assert__(self, truth, tag, False)
     if not self.quantees:  # expanded
-        assert len(self.sub_exprs) == 1  # a conjunction or disjunction
+        assert len(self.sub_exprs) == 1,  \
+               f"Internal error in symbolic_propagate: {self}"  # a conjunction or disjunction
         self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 AQuantification.symbolic_propagate = symbolic_propagate
 
@@ -336,7 +337,7 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
                 if atom in unreify:
                     yield self.assignments.assert__(unreify[atom], value, tag, True)
                 elif is_eq(consq):
-                    assert value == TRUE
+                    assert value == TRUE, f"Internal error in z3_propagate"
                     term = consq.children()[0]
                     if term in unreify:
                         q = unreify[term]

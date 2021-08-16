@@ -136,7 +136,7 @@ class OrderedSet(dict):
     a list of expressions without duplicates (first-in is selected)
     """
     def __init__(self, els=[]):
-        assert isinstance(els, Iterable)
+        assert isinstance(els, Iterable), "Internal error in OrderedSet"
         super(OrderedSet, self).__init__(((el.code, el) for el in els))
 
     def append(self, el):

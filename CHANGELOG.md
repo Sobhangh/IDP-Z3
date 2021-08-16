@@ -23,6 +23,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #104: implications, equivalences are binary connectives, not n-ary.
 * fix #105: Do not require parenthesis around quantification
 * fix #111: Missing law in explanation when between brackets
+* fix #116: Constructors on infinite domains
 * fix #118: Incorrect models for definitions over infinite domains
 
 ### Interactive Consultant

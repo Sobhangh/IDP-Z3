@@ -147,10 +147,10 @@ IfExpr.translate1 = translate1
 
 # Class AQuantification  ######################################################
 
-
 def translate1(self):
-    assert len(self.sub_exprs) == 1
     if not self.quantees:
+        assert len(self.sub_exprs) == 1, \
+               f"Internal error in expansion of quantification: {self}"
         return self.sub_exprs[0].translate()
     else:
         finalvars = []
@@ -231,15 +231,15 @@ AConjunction.translate1 = translate1
 # Class AComparison  #######################################################
 
 def translate1(self):
-    assert not self.operator == ['≠']
+    assert not self.operator == ['≠'],f"Internal error: {self}"
     # chained comparisons -> And()
     out = []
     for i in range(1, len(self.sub_exprs)):
         x = self.sub_exprs[i-1].translate()
-        assert x is not None
+        assert x is not None, f"Internal error: {x} is None"
         function = Operator.MAP[self.operator[i - 1]]
         y = self.sub_exprs[i].translate()
-        assert y is not None
+        assert y is not None, f"Internal error: {y} is None"
         try:
             out = out + [function(x, y)]
         except Z3Exception:
