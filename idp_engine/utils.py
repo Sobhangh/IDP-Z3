@@ -156,8 +156,8 @@ class OrderedSet(dict):
     # def items(self):
     #     return super(OrderedSet, self).items()
 
-    # def popitem(self):
-    #     return super(OrderedSet, self).popitem()
+    def pop(self, key, default=None):
+        return super(OrderedSet, self).pop(key.code, default)
 
     def __or__(self, other: "OrderedSet") -> "OrderedSet":
         """returns the union of self and other.  Use: `self | other`.

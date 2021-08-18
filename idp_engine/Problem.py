@@ -228,7 +228,8 @@ class Problem(object):
             val = str_to_IDP(atom, str(value))
             if self.propagated and not(old_value and old_value.same_as(val)):
                 self.assigned.append(atom)
-                self.cleared.pop(atom, None)
+                if old_value:
+                    self.cleared.append(atom)
             self.assignments.assert__(atom, val, status, False)
         self._formula = None
 
