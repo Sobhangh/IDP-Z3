@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+### API
+### Interactive Consultant
+
+
+## [0.8.3] - 2021-08-18
+
+Run `poetry install` to get the correct dependencies.
+
 Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
@@ -32,7 +40,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * fix #98: Incorrect relevance with definitions
 * Merge 101: improve performance of IC (propagate dropdowns on request)
 * fix #112: Don't repeat the symbol name for symbol tiles with a header
-* fix #17 (web-IDP-Z3): When no model can be found, an error is returned.
+* fix #17 (web-IDP-Z3): When no model can be found, an explanation is shown.
 * fix #113: Prettify not working correctly for ~=
 
 ## [0.8.2] - 2021-06-02
