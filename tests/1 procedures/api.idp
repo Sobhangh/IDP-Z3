@@ -27,4 +27,7 @@ procedure main() {
     print("Followed by propagation of p()=?:")
     P.assert_("p()", None)
     pretty_print(P.propagate().assignments)
+
+    a = duration("test")
+    // print("\nDuration:", duration(), "sec")  # not included to avoid changing test results
 }
