@@ -28,6 +28,7 @@ from contextlib import redirect_stdout
 from copy import copy
 import os
 import threading
+import time
 import traceback
 
 from flask import Flask, g, send_from_directory  # g is required for pyinstrument
@@ -119,6 +120,7 @@ class run(Resource):
         log("start /run")
         with z3lock:
             try:
+                start = time.process_time()
                 if with_profiling:
                     g.profiler = Profiler()
                     g.profiler.start()
@@ -131,6 +133,7 @@ class run(Resource):
                 with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
                     try:
                         idp.execute()
+                        print(f"\n> Executed in {round(time.process_time()-start, 3)} sec")
                     except Exception as exc:
                         print(exc)
                 with open(RUN_FILE, mode='r', encoding='utf-8') as f:
