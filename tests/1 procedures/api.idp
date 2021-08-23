@@ -9,7 +9,8 @@ theory T:V {
 
 procedure main() {
     P = Problem(T)
-    print("Propagation of a() = 1:")
+    i=1
+    print(f"Propagation of a() = {i}:")
     P.assert_("a()", 1)
     pretty_print(P.propagate().assignments)
     print("")

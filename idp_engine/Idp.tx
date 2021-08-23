@@ -140,13 +140,13 @@ Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}'
 
   PyStatement: PyAssignment | Call1 ;
   PyAssignment: var=ID '=' val=PyExpr;
-  PyExpr: !PyAssignment (Call1 | String | Number | PyList);
+  PyExpr: !PyAssignment (String | Call1 | Number | PyList);
 
   Call1: name=ID ( par='(' ( args+=PyExpr[','] (',' kwargs+=PyAssignment[','])?
                      | kwargs*=PyAssignment[',']) ')'
                  )?
         ('.' post=PyExpr)?;
-  String: literal=/"(\.|[^"])*"/;
+  String: literal=/f?"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 
 

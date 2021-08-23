@@ -116,4 +116,4 @@ decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
 
 duration(msg: str)
     Returns the processing time since the last call to `duration()`,
-    or since the begining of execution, followed by the msg
+    or since the begining of execution, followed by the msg (possibly an f-string)
