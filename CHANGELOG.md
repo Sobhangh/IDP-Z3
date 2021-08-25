@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### API
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
-* MR !127: improve performance by simplifying `abs` when possible
+* MR !126: improve performance by simplifying `abs` when possible
 
 ### Interactive Consultant
 * MR !124: show the overall time of execution of each run in the IDE
