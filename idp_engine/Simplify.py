@@ -35,7 +35,7 @@ from .Expression import (
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple, ConstructedFrom
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, SYMBOL, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
+from .utils import BOOL, INT, SYMBOL, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
 
 
 # class Expression  ###########################################################
@@ -354,6 +354,12 @@ def update_exprs(self, new_exprs):
     if self.decl and type(self.decl) == Constructor:
         if all(e.value is not None for e in new_exprs):
             return self._change(sub_exprs=new_exprs, value = self)
+
+    # simplify abs()
+    if (self.decl and self.decl.name == ABS and len(new_exprs) == 1
+        and new_exprs[0].value):
+        value = Number(number=str(abs(new_exprs[0].py_value)))
+        return self._change(value=value, sub_exprs=new_exprs)
 
     # simplify x(pos(0,0)) to 0,  is_pos(pos(0,0)) to True
     if (len(new_exprs) == 1
