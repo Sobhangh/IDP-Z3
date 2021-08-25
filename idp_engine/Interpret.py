@@ -262,7 +262,7 @@ def instantiate(self, e0, e1, problem=None):
     if self.value:
         return self
     if problem and all(e.name not in self.fresh_vars for e in e0):
-        return self.interpret(problem).instantiate1(e0, e1, problem)
+        return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
     out.fresh_vars = copy.copy(out.fresh_vars)
