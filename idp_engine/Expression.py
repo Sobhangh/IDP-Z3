@@ -476,8 +476,8 @@ class Expression(ASTNode):
         Returns:
             Expression
         """
-        return (self.update_exprs([e.add_level_mapping(level_symbols, head, pos_justification, polarity)
-                                   for e in self.sub_exprs])
+        return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity)
+                                   for e in self.sub_exprs))
                     .annotate1())  # update fresh_vars
 
 
@@ -790,11 +790,11 @@ class AUnary(Expression):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        sub_exprs = [e.add_level_mapping(level_symbols, head,
+        sub_exprs = (e.add_level_mapping(level_symbols, head,
                                          pos_justification,
                                          not polarity
                                          if self.operator == '¬' else polarity)
-                     for e in self.sub_exprs]
+                     for e in self.sub_exprs)
         return self.update_exprs(sub_exprs).annotate1()
 
 
