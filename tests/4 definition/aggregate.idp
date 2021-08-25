@@ -1,0 +1,15 @@
+vocabulary V {
+    type Range := {0..1}
+    type Count := {0..4}
+    count: Range ⨯ Range → Count
+}
+
+theory T:V {
+    { ∀r,c ∈ Range: count(r,c) = #{r1,c1 ∈ Range: true}.
+    }
+}
+
+procedure main() {
+    print(Problem(T).formula())
+    //pretty_print(model_expand(T))
+}
