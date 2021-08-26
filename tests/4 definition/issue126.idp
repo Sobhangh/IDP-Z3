@@ -1,0 +1,17 @@
+vocabulary V {
+    type Range := {0}
+    shown: Range → 𝔹
+}
+
+theory T:V {
+    {
+      shown(0) ← shown(0) | false.
+    }
+}
+
+structure S:V {
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}
