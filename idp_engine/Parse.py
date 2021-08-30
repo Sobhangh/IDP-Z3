@@ -898,19 +898,34 @@ class Ranges(Enumeration):
 
         tuples = []
         self.type = None
-        for x in self.elements:
-            if self.type == None:
-                self.type = x.fromI.type
-            if x.toI is None:
-                tuples.append(Tuple(args=[x.fromI]))
-            elif x.fromI.type == INT and x.toI.type == INT:
-                for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                    tuples.append(Tuple(args=[Number(number=str(i))]))
-            elif x.fromI.type == DATE and x.toI.type == DATE:
-                for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                    tuples.append(Tuple(args=[Number(number=str(i))])) #TODO1
-            else:
-                self.check(False, f"Can't have a range over reals")
+        if self.elements:
+            self.type = self.elements[0].fromI.type
+            for x in self.elements:
+                if x.fromI.type != self.type:
+                    if self.type in [INT, REAL] and x.fromI.type in [INT, REAL]:
+                        self.type = REAL  # convert to REAL
+                        tuples = [Tuple(args=[n.args[0].real()])
+                                  for n in tuples]
+                    else:
+                        self.check(False,
+                            f"incorrect value {x.fromI} for {self.type}")
+
+                if x.toI is None:
+                    tuples.append(Tuple(args=[x.fromI]))
+                elif self.type == INT and x.fromI.type == INT and x.toI.type == INT:
+                    for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                        tuples.append(Tuple(args=[Number(number=str(i))]))
+                elif self.type == REAL and x.fromI.type == INT and x.toI.type == INT:
+                    for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                        tuples.append(Tuple(args=[Number(number=str(float(i)))]))
+                elif self.type == REAL:
+                    self.check(False, f"Can't have a range over real: {x.fromI}..{x.toI}")
+                elif self.type == DATE and x.fromI.type == DATE and x.toI.type == DATE:
+                    for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                        d = Date(iso=f"#{date.fromordinal(i).isoformat()}")
+                        tuples.append(Tuple(args=[d]))
+                else:
+                    self.check(False, f"Incorrect value {x.toI} for {self.type}")
         Enumeration.__init__(self, tuples=tuples)
 
     def contains(self, args, function, arity=None, rank=0, tuples=None):

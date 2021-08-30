@@ -114,7 +114,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
-  Ranges: '{' elements*=RangeElement[','] '}';
+  Ranges: '{' elements+=RangeElement[','] '}';
       RangeElement:   (fromI=Number ('..' toI=Number)?)
                     | (fromI=Date   ('..' toI=Date  )?) ;
   Enumeration: '{' tuples*=Tuple[','] '}';
