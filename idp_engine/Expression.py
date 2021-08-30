@@ -1106,6 +1106,11 @@ class Number(Expression):
 
     def is_reified(self): return False
 
+    def real(self):
+        """converts the INT number to REAL"""
+        self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
+        return Number(number=str(float(self.py_value)))
+
 
 ZERO = Number(number='0')
 ONE = Number(number='1')
