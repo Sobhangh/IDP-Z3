@@ -27,8 +27,8 @@ structure S4 : V {
 }
 
 structure S5 : V {
-    diameter := {0.2..0.3}
-    rel := {0.25}
+    // diameter := {0.2..0.3}
+    // rel := {0.25}
 }
 
 procedure main() {
@@ -36,5 +36,5 @@ procedure main() {
     pretty_print(model_check(T,S2))
     pretty_print(model_check(T,S3))
     pretty_print(model_check(T,S4))
-    pretty_print(model_check(T,S5))
+    //pretty_print(model_check(T,S5))
 }
