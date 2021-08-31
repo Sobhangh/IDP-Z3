@@ -30,7 +30,7 @@ from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
                 BoolVal, Datatype)
 
-from idp_engine.Parse import TypeDeclaration, SymbolDeclaration
+from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
@@ -93,6 +93,12 @@ def translate(self):
     return self.translated
 SymbolDeclaration.translate = translate
 
+
+# class Tuple  ###########################################################
+
+def translate(self):
+    return [arg.translate() for arg in self.args]
+Tuple.translate = translate
 
 # class Constructor  ###########################################################
 

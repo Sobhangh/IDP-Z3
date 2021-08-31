@@ -50,7 +50,11 @@ def annotate(self, idp):
     for constructor in self.symbol_decls[SYMBOL].constructors:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
-    self.symbol_decls[SYMBOL].translate()  # to populate .map
+
+    # populate .map of SYMBOL
+    for c in self.symbol_decls[SYMBOL].constructors:
+        assert not c.sorts
+        self.symbol_decls[SYMBOL].map[str(c)] = UnappliedSymbol.construct(c)
 Vocabulary.annotate = annotate
 
 

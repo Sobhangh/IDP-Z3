@@ -877,9 +877,6 @@ class Tuple(ASTNode):
     def __repr__(self):
         return self.code
 
-    def translate(self):
-        return [arg.translate() for arg in self.args]
-
 class FunctionTuple(Tuple):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
