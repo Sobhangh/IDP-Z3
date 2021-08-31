@@ -8,7 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### API
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
-* MR !125: fix issue 126 where level mapping symbols were not fully instantiated.
+* fix #126: error in inductive definitions
+* fix #127: error in definition with aggregates
 * fix #128: fix enumerations that mix integer and real, or range over dates
 
 ### Interactive Consultant
