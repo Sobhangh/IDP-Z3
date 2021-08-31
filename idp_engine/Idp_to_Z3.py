@@ -23,12 +23,12 @@ TODO: vocabulary
 
 """
 
-
+from copy import copy
 from fractions import Fraction
 from itertools import product
 from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 Q, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
-                BoolVal, Datatype)
+                BoolVal, Datatype, ExprRef)
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
@@ -109,15 +109,24 @@ Constructor.translate = translate
 
 # class Expression  ###########################################################
 
-def translate(self):
+def translate(self, vars={}) -> ExprRef:
+    """Converts the syntax tree to a Z3 expression, using .value and .simpler if there
+
+    Args:
+        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+            Filled in by AQuantifier.  Defaults to {}.
+
+    Returns:
+        ExprRef: Z3 expression
+    """
     if self.value is not None and self.value is not self:
-        return self.value.translate()
+        return self.value.translate(vars)
     if self.simpler is not None:
-        return self.simpler.translate()
+        return self.simpler.translate(vars)
     if self.fresh_vars:
-        return self.translate1()
+        return self.translate1(vars)
     elif self.translated is None:
-        self.translated = self.translate1()
+        self.translated = self.translate1(vars)
     return self.translated
 Expression.translate = translate
 
@@ -130,7 +139,7 @@ Expression.reified = reified
 
 # class Symbol  ###############################################################
 
-def translate(self):
+def translate(self, vars={}):
     if self.name == BOOL:
         return BoolSort()
     elif self.name == INT:
@@ -144,35 +153,44 @@ Symbol.translate=translate
 
 # Class IfExpr  ###############################################################
 
-def translate1(self):
-    return If(self.sub_exprs[IfExpr.IF].translate(),
-              self.sub_exprs[IfExpr.THEN].translate(),
-              self.sub_exprs[IfExpr.ELSE].translate())
+def translate1(self, vars={}) -> ExprRef:
+    """Converts the syntax tree to a Z3 expression, ignoring .value and .simpler
+
+    Args:
+        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+            Filled in by AQuantifier.  Defaults to {}.
+
+    Returns:
+        ExprRef: Z3 expression
+    """
+    return If(self.sub_exprs[IfExpr.IF].translate(vars),
+              self.sub_exprs[IfExpr.THEN].translate(vars),
+              self.sub_exprs[IfExpr.ELSE].translate(vars))
 IfExpr.translate1 = translate1
 
 
 # Class AQuantification  ######################################################
 
-def translate1(self):
+def translate1(self, vars={}):
     if not self.quantees:
         assert len(self.sub_exprs) == 1, \
                f"Internal error in expansion of quantification: {self}"
-        return self.sub_exprs[0].translate()
+        return self.sub_exprs[0].translate(vars)
     else:
-        finalvars = []
+        finalvars = copy(vars)
         for q in self.quantees:
             for vars in q.vars:
                 for v in vars:
                     v.translated = FreshConst(v.sort.decl.translate())
-                    finalvars.append(v.translated)
-        forms = [f.translate() for f in self.sub_exprs]
+                    finalvars[id(v)] = v.translated
+        forms = [f.translate(finalvars) for f in self.sub_exprs]
 
         if self.q == '∀':
             forms = And(forms) if 1 < len(forms) else forms[0]
-            forms = ForAll(finalvars, forms)
+            forms = ForAll(list(finalvars.values()), forms)
         else:
             forms = Or(forms) if 1 < len(forms) else forms[0]
-            forms = Exists(finalvars, forms)
+            forms = Exists(list(finalvars.values()), forms)
         return forms
 AQuantification.translate1 = translate1
 
@@ -199,13 +217,13 @@ Operator.MAP = {'∧': lambda x, y: And(x, y),
                       }
 
 
-def translate1(self):
-    out = self.sub_exprs[0].translate()
+def translate1(self, vars={}):
+    out = self.sub_exprs[0].translate(vars)
 
     for i in range(1, len(self.sub_exprs)):
         function = Operator.MAP[self.operator[i - 1]]
         try:
-            out = function(out, self.sub_exprs[i].translate())
+            out = function(out, self.sub_exprs[i].translate(vars))
         except Exception as e:
             raise e
     return out
@@ -214,37 +232,37 @@ Operator.translate1 = translate1
 
 # Class ADisjunction  #######################################################
 
-def translate1(self):
+def translate1(self, vars={}):
     if len(self.sub_exprs) == 1:
-        out = self.sub_exprs[0].translate()
+        out = self.sub_exprs[0].translate(vars)
     else:
-        out = Or([e.translate() for e in self.sub_exprs])
+        out = Or([e.translate(vars) for e in self.sub_exprs])
     return out
 ADisjunction.translate1 = translate1
 
 
 # Class AConjunction  #######################################################
 
-def translate1(self):
+def translate1(self, vars={}):
     if len(self.sub_exprs) == 1:
-        out = self.sub_exprs[0].translate()
+        out = self.sub_exprs[0].translate(vars)
     else:
-        out = And([e.translate() for e in self.sub_exprs])
+        out = And([e.translate(vars) for e in self.sub_exprs])
     return out
 AConjunction.translate1 = translate1
 
 
 # Class AComparison  #######################################################
 
-def translate1(self):
+def translate1(self, vars={}):
     assert not self.operator == ['≠'],f"Internal error: {self}"
     # chained comparisons -> And()
     out = []
     for i in range(1, len(self.sub_exprs)):
-        x = self.sub_exprs[i-1].translate()
+        x = self.sub_exprs[i-1].translate(vars)
         assert x is not None, f"Internal error: {x} is None"
         function = Operator.MAP[self.operator[i - 1]]
-        y = self.sub_exprs[i].translate()
+        y = self.sub_exprs[i].translate(vars)
         assert y is not None, f"Internal error: {y} is None"
         try:
             out = out + [function(x, y)]
@@ -264,9 +282,9 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               '¬': lambda x: Not(x)
               }
 
-def translate1(self):
+def translate1(self, vars={}):
     try:
-        out = self.sub_exprs[0].translate()
+        out = self.sub_exprs[0].translate(vars)
         function = AUnary.MAP[self.operator]
         return function(out)
     except:
@@ -276,20 +294,20 @@ AUnary.translate1 = translate1
 
 # Class AAggregate  #######################################################
 
-def translate1(self):
+def translate1(self, vars={}):
     assert self.using_if and not self.quantees, f"Cannot expand {self.code}"
-    return Sum([f.translate() for f in self.sub_exprs])
+    return Sum([f.translate(vars) for f in self.sub_exprs])
 AAggregate.translate1 = translate1
 
 
 # Class AppliedSymbol  #######################################################
 
-def translate1(self):
+def translate1(self, vars={}):
     self.check(self.decl, f"Unknown symbol: {self.symbol}")
     if self.decl.name == RELEVANT:
         return TRUE.translate()
     if self.decl.name == 'abs':
-        arg = self.sub_exprs[0].translate()
+        arg = self.sub_exprs[0].translate(vars)
         return If(arg >= 0, arg, -arg)
     assert self.decl.name not in RESERVED_SYMBOLS, \
                f"Can't resolve argument of built-in symbols: {self}"
@@ -299,7 +317,7 @@ def translate1(self):
         if len(self.sub_exprs) == 0:
             return self.decl.translate()
         else:
-            arg = [x.translate() for x in self.sub_exprs]
+            arg = [x.translate(vars) for x in self.sub_exprs]
             # assert  all(a != None for a in arg)
             return (self.decl.translate())(arg)
     except AttributeError as e:
@@ -312,7 +330,7 @@ def translate1(self):
             raise AttributeError(e)
 AppliedSymbol.translate1 = translate1
 
-def reified(self) -> DatatypeRef:
+def reified(self, vars={}) -> DatatypeRef:
     if self._reified is None:
         sort = (BoolSort() if self.in_enumeration or self.is_enumerated else
                 self.decl.out.decl.translate())
@@ -323,21 +341,21 @@ AppliedSymbol.reified = reified
 
 # Class UnappliedSymbol  #######################################################
 
-def translate1(self):
+def translate1(self, vars={}):
     return self.decl.translated
 UnappliedSymbol.translate1 = translate1
 
 
 # Class Variable  #######################################################
 
-def translate(self):
-    return self.translated
+def translate(self, vars={}):
+    return vars[id(self)]
 Variable.translate = translate
 
 
 # Class Number  #######################################################
 
-def translate(self):
+def translate(self, vars={}):
     if self.translated is None:
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
@@ -363,7 +381,7 @@ Number.translate = translate
 
 # Class Date  #######################################################
 
-def translate(self):
+def translate(self, vars={}):
     if self.translated is None:
         self.translated = self.date.toordinal()
         self.py_value = self.translated
@@ -374,8 +392,8 @@ Date.translate = translate
 
 # Class Brackets  #######################################################
 
-def translate1(self):
-    return self.sub_exprs[0].translate()
+def translate1(self, vars={}):
+    return self.sub_exprs[0].translate(vars)
 Brackets.translate1 = translate1
 
 

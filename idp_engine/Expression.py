@@ -431,13 +431,13 @@ class Expression(ASTNode):
                    ):
         return  # monkey-patched
 
-    def translate(self):
+    def translate(self, vars={}):
         pass  # monkey-patched
 
     def reified(self):
         pass  # monkey-patched
 
-    def translate1(self):
+    def translate1(self, vars={}):
         pass  # monkey-patched
 
     def as_set_condition(self) -> Tuple[Optional["AppliedSymbol"], Optional[bool], Optional["Enumeration"]]:
