@@ -26,7 +26,7 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies, is_false
+from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -259,13 +259,13 @@ class Problem(object):
         ass = self.assignments.copy()
         for q in todo:
             if not q.is_reified() or self.extended:
-                # evaluating q.translate() directly fails the pipeline on arithmetic/forall.idp
-                solver.add(q.reified() == q.translate())
+                # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
+                solver.add(q.reified(self) == q.translate(self))
         res1 = solver.check()
         if res1 == sat:
             for q in todo:
                 if not q.is_reified() or self.extended:
-                    val1 = solver.model().eval(q.reified(),
+                    val1 = solver.model().eval(q.reified(self),
                                                model_completion=complete)
                     val = str_to_IDP(q, str(val1))
                     if val is not None:
@@ -274,7 +274,7 @@ class Problem(object):
 
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula().translate(self)
         todo = self._todo()
 
         solver = Solver()
@@ -294,7 +294,7 @@ class Problem(object):
                 for a in ass.values():
                     if a.status == S.EXPANDED:
                         q = a.sentence
-                        different.append(q.translate() != a.value.translate())
+                        different.append(q.translate(self) != a.value.translate(self))
                 solver.add(Or(different))
             else:
                 break
@@ -308,9 +308,9 @@ class Problem(object):
 
     def optimize(self, term, minimize=True, complete=False):
         solver = Optimize()
-        solver.add(self.formula().translate())
+        solver.add(self.formula().translate(self))
         assert term in self.assignments, "Internal error"
-        s = self.assignments[term].sentence.translate()
+        s = self.assignments[term].sentence.translate(self)
         if minimize:
             solver.minimize(s)
         else:
@@ -404,7 +404,7 @@ class Problem(object):
 
         for ass in self.assignments.values():
             if ass.status in reasons:
-                p = ass.translate()
+                p = ass.translate(self)
                 ps[p] = ass
                 #TODO use assert_and_track ?
                 s.add(Implies(p, p))
@@ -417,8 +417,8 @@ class Problem(object):
 
         todo = chain(self.constraints, chain(*def_constraints.values()))
         for constraint in todo:
-            p = constraint.reified()
-            ps[p] = constraint.original.interpret(self).translate()
+            p = constraint.reified(self)
+            ps[p] = constraint.original.interpret(self).translate(self)
             s.add(Implies(p, ps[p]))
 
         if consequence:
@@ -438,7 +438,7 @@ class Problem(object):
             if negated:
                 to_explain = AUnary.make('¬', to_explain)
 
-            s.add(Not(to_explain.translate()))
+            s.add(Not(to_explain.translate(self)))
 
         s.check(list(ps.keys()))
         unsatcore = s.unsat_core()
@@ -457,7 +457,7 @@ class Problem(object):
             for a1 in chain(chain(*def_constraints.values()), self.constraints):
                 #TODO find the rule
                 for a2 in unsatcore:
-                    if str(a1.original.interpret(self).translate()) == str(ps[a2]):
+                    if str(a1.original.interpret(self).translate(self)) == str(ps[a2]):
                         laws.append(a1)
         return (facts, laws)
 
@@ -502,18 +502,18 @@ class Problem(object):
                 that is a minimum satisfying assignment for `self`, given `known`
         """
         if z3_formula is None:
-            z3_formula = self.formula().translate()
+            z3_formula = self.formula().translate(self)
 
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
         solver = Solver()
-        z3_conditions = And([l.translate() for l in conditions])
+        z3_conditions = And([l.translate(self) for l in conditions])
         solver.add(And(z3_formula, known, z3_conditions))
         if solver.check() != sat:
             return []
         else:
             for i, c in (list(enumerate(conditions))): # optional: reverse the list
-                conditions_i = And([l.translate()
+                conditions_i = And([l.translate(self)
                         for j, l in enumerate(conditions)
                         if j != i])
                 solver = Solver()
@@ -523,7 +523,7 @@ class Problem(object):
                 else:  # decision table
                     # z3_formula & known & conditions => goal is always true
                     hypothesis = And(z3_formula, known, conditions_i)
-                    solver.add(Not(Implies(hypothesis, goal.translate())))
+                    solver.add(Not(Implies(hypothesis, goal.translate(self))))
                 if solver.check() == unsat:
                     conditions[i] = Assignment(TRUE, TRUE, S.UNKNOWN)
             conditions = join_set_conditions(conditions)
@@ -574,13 +574,13 @@ class Problem(object):
         assert not goal_string or goal_string in [a.code for a in questions], \
             f"Internal error"
 
-        known = And([ass.translate() for ass in self.assignments.values()
+        known = And([ass.translate(self) for ass in self.assignments.values()
                         if ass.status != S.UNKNOWN]
-                    + [q.reified()==q.translate() for q in questions
+                    + [q.reified(self)==q.translate(self) for q in questions
                         if q.is_reified()])
 
         formula = self.formula()
-        theory = formula.translate()
+        theory = formula.translate(self)
         solver = Solver()
         solver.add(theory)
         solver.add(known)
@@ -596,9 +596,9 @@ class Problem(object):
                 assignment = self.assignments.get(atom.code, None)
                 if assignment and assignment.value is None and atom.type == BOOL:
                     if not atom.is_reified():
-                        val1 = model.eval(atom.translate())
+                        val1 = model.eval(atom.translate(self))
                     else:
-                        val1 = model.eval(atom.reified())
+                        val1 = model.eval(atom.reified(self))
                     if val1 == True:
                         ass = Assignment(atom, TRUE, S.UNKNOWN)
                     elif val1 == False:
@@ -621,7 +621,7 @@ class Problem(object):
             models.append(assignments)
 
             # add constraint to eliminate this model
-            modelZ3 = Not(And( [l.translate() for l in assignments
+            modelZ3 = Not(And( [l.translate(self) for l in assignments
                 if l.value is not None] ))
             solver.add(modelZ3)
 
@@ -638,7 +638,7 @@ class Problem(object):
                 """
                 known2 = known
                 for model in models:
-                    condition = [l.translate() for l in model
+                    condition = [l.translate(self) for l in model
                                     if l.value is not None
                                     and l.sentence.code != goal_string]
                     known2 = And(known2, Not(And(condition)))
@@ -658,7 +658,7 @@ class Problem(object):
                     models1.append(models[0])
                     break
                 model = models.pop(0).copy()
-                condition = [l.translate() for l in model
+                condition = [l.translate(self) for l in model
                                 if l.value is not None
                                 and l.sentence.code != goal_string]
                 if condition:

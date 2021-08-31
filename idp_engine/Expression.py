@@ -431,13 +431,13 @@ class Expression(ASTNode):
                    ):
         return  # monkey-patched
 
-    def translate(self, vars={}):
+    def translate(self, problem: "Problem" = None, vars={}):
         pass  # monkey-patched
 
-    def reified(self):
+    def reified(self, problem: "Problem" = None):
         pass  # monkey-patched
 
-    def translate1(self, vars={}):
+    def translate1(self, problem: "Problem" = None, vars={}):
         pass  # monkey-patched
 
     def as_set_condition(self) -> Tuple[Optional["AppliedSymbol"], Optional[bool], Optional["Enumeration"]]:
@@ -968,10 +968,10 @@ class AppliedSymbol(Expression):
         return (self.in_enumeration or self.is_enumerated
                 or not all(e.value is not None for e in self.sub_exprs))
 
-    def reified(self):
+    def reified(self, problem: "Problem"):
         if self._reified is None:
-            self._reified = ( super().reified() if self.is_reified() else
-                 self.translate() )
+            self._reified = ( super().reified(problem) if self.is_reified() else
+                 self.translate(problem) )
         return self._reified
 
     def generate_constructors(self, constructors: dict):
