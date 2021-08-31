@@ -1,0 +1,40 @@
+vocabulary V {
+    type diameter
+    rel: (diameter) -> Bool
+}
+
+theory T: V {
+}
+
+structure S1 : V {
+    diameter := {0, 0.5}
+    rel := {(0.5)}
+}
+
+structure S2 : V {
+    diameter := {0..3, 0.5}
+    rel := {(0.5)}
+}
+
+structure S3 : V {
+    diameter := {0.5, 0..3}
+    rel := {(0.5)}
+}
+
+structure S4 : V {
+    diameter := {#2021-01-01..#2021-01-05}
+    rel := {#2021-01-03}
+}
+
+structure S5 : V {
+    // diameter := {0.2..0.3}
+    // rel := {0.25}
+}
+
+procedure main() {
+    pretty_print(model_check(T,S1))
+    pretty_print(model_check(T,S2))
+    pretty_print(model_check(T,S3))
+    pretty_print(model_check(T,S4))
+    //pretty_print(model_check(T,S5))
+}
