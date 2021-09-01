@@ -42,9 +42,10 @@ from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
 # class TypeDeclaration  ###########################################################
 
 def translate(self, problem: "Problem"):
-    if self.translated is None:
+    out = problem.z3.get(self.name, None)
+    if out is None:
         if self.name == BOOL:
-            self.translated = BoolSort()
+            out = BoolSort()
             self.constructors[0].type = BOOL
             self.constructors[1].type = BOOL
             problem.z3[self.constructors[0].name] = BoolVal(True)
@@ -57,26 +58,25 @@ def translate(self, problem: "Problem"):
                 sort.declare(c.name,
                              *[(a.decl.name, a.decl.out.translate(problem))
                                for a in c.sorts])
-            self.translated = sort.create()
+            out = sort.create()
 
             for c in self.constructors:
-                c.py_value = self.translated.__dict__[c.name]
+                c.py_value = out.__dict__[c.name]
                 problem.z3[c.name] = c.py_value
                 if c.tester:
-                    c.tester.translated = self.translated.__dict__[f"is_{c.name}"]
+                    problem.z3[c.tester.name] = out.__dict__[f"is_{c.name}"]
                 for a in c.sorts:
-                    problem.z3[a.decl.name] = self.translated.__dict__[a.accessor.name]
+                    problem.z3[a.decl.name] = out.__dict__[a.accessor.name]
                 if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
                 else:
                     for e in c.range:
                         self.map[str(e)] = e
         else: # list of numbers
-            if self.interpretation.enumeration.type == INT:
-                self.translated = IntSort()
-            else:
-                self.translated = RealSort()
-    return self.translated
+            out = (IntSort() if self.interpretation.enumeration.type == INT else
+                   RealSort())
+        problem.z3[self.name] = out
+    return out
 TypeDeclaration.translate = translate
 
 

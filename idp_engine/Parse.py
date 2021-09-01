@@ -349,8 +349,6 @@ class TypeDeclaration(ASTNode):
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
-        translated (Z3): the translation of the type in Z3
-
         map (Dict[string, Expression]): a mapping from code to Expression in range
     """
 
@@ -367,7 +365,6 @@ class TypeDeclaration(ASTNode):
         self.type = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
 
-        self.translated = None
         self.range = None
         self.map = {}  # {String: constructor}
 
