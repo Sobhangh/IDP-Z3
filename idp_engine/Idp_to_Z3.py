@@ -65,7 +65,7 @@ def translate(self, problem: "Problem"):
                 if c.tester:
                     c.tester.translated = self.translated.__dict__[f"is_{c.name}"]
                 for a in c.sorts:
-                    a.decl.translated = self.translated.__dict__[a.accessor.name]
+                    problem.z3[a.decl.name] = self.translated.__dict__[a.accessor.name]
                 if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
                 else:
@@ -83,14 +83,16 @@ TypeDeclaration.translate = translate
 # class SymbolDeclaration  ###########################################################
 
 def translate(self, problem: "Problem"):
-    if self.translated is None:
+    out = problem.z3.get(self.name, None)
+    if out is None:
         if len(self.sorts) == 0:
-            self.translated = Const(self.name, self.out.translate(problem))
+            out = Const(self.name, self.out.translate(problem))
         else:
             types = ( [x.translate(problem) for x in self.sorts]
                     + [self.out.translate(problem)])
-            self.translated = Function(self.name, types)
-    return self.translated
+            out = Function(self.name, types)
+        problem.z3[self.name] = out
+    return out
 SymbolDeclaration.translate = translate
 
 
@@ -348,7 +350,7 @@ AppliedSymbol.reified = reified
 # Class UnappliedSymbol  #######################################################
 
 def translate1(self, problem: "Problem", vars={}):
-    return self.decl.translated
+    return problem.z3[self.name]
 UnappliedSymbol.translate1 = translate1
 
 

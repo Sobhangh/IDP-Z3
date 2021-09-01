@@ -132,6 +132,7 @@ class Problem(object):
 
     def add(self, *blocks):
         for block in blocks:
+            self.z3 = {}
             self._formula = None  # need to reapply the definitions
 
             for name, decl in block.declarations.items():
@@ -142,7 +143,7 @@ class Problem(object):
                 self.declarations[name] = decl
             for decl in self.declarations.values():
                 if type(decl) == TypeDeclaration:
-                    decl.translated = None  # reset the translation of declarations
+                    decl.translated = None
                     decl.interpretation = (  #TODO side-effects ? issue #81
                         None if decl.name not in [INT, REAL, DATE, SYMBOL] else
                         decl.interpretation)

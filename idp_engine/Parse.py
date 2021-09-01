@@ -449,8 +449,6 @@ class SymbolDeclaration(ASTNode):
         self.unit: str = None
         self.heading: str = None
 
-        self.translated = None
-
         self.type = None  # a string
         self.domain = None  # all possible arguments
         self.range = None  # all possible values
