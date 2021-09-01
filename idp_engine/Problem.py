@@ -521,9 +521,12 @@ class Problem(object):
             return []
         else:
             for i, c in (list(enumerate(conditions))): # optional: reverse the list
-                conditions_i = And([l.translate(self)
-                        for j, l in enumerate(conditions)
-                        if j != i])
+                if 1< len(conditions):
+                    conditions_i = And([l.translate(self)
+                                        for j, l in enumerate(conditions)
+                                        if j != i])
+                else:
+                    conditions_i = TRUE.translate(self)
                 solver = Solver(ctx=self.ctx)
                 if goal.sentence == TRUE or goal.value is None:  # find an abstract model
                     # z3_formula & known & conditions => conditions_i is always true
@@ -582,10 +585,11 @@ class Problem(object):
         assert not goal_string or goal_string in [a.code for a in questions], \
             f"Internal error"
 
-        known = And([ass.translate(self) for ass in self.assignments.values()
+        known = ([ass.translate(self) for ass in self.assignments.values()
                         if ass.status != S.UNKNOWN]
                     + [q.reified(self)==q.translate(self) for q in questions
                         if q.is_reified()])
+        known = (And(known) if known else TRUE.translate(self))
 
         formula = self.formula()
         theory = formula.translate(self)
@@ -649,7 +653,8 @@ class Problem(object):
                     condition = [l.translate(self) for l in model
                                     if l.value is not None
                                     and l.sentence.code != goal_string]
-                    known2 = And(known2, Not(And(condition)))
+                    known2 = (And(known2, Not(And(condition))) if condition else
+                              FALSE.translate(self))
                 solver = Solver(ctx=self.ctx)
                 solver.add(known2)
                 assert solver.check() == unsat, \
