@@ -31,12 +31,12 @@ __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuanti
 import copy
 from collections import ChainMap
 from datetime import date
+from fractions import Fraction
 from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
-from z3 import BoolSort, IntSort, RealSort
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, RESERVED_SYMBOLS, \
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, \
     IDPZ3Error, DEF_SEMANTICS, Semantics
 
 
@@ -431,13 +431,13 @@ class Expression(ASTNode):
                    ):
         return  # monkey-patched
 
-    def translate(self, problem: "Problem" = None, vars={}):
+    def translate(self, problem: "Problem", vars={}):
         pass  # monkey-patched
 
-    def reified(self, problem: "Problem" = None):
+    def reified(self, problem: "Problem"):
         pass  # monkey-patched
 
-    def translate1(self, problem: "Problem" = None, vars={}):
+    def translate1(self, problem: "Problem", vars={}):
         pass  # monkey-patched
 
     def as_set_condition(self) -> Tuple[Optional["AppliedSymbol"], Optional[bool], Optional["Enumeration"]]:
@@ -1100,7 +1100,22 @@ class Number(Expression):
         self.value = self
 
         self.translated = None
-        self.translate()  # also sets self.type
+
+        ops = self.number.split("/")
+        if len(ops) == 2:  # possible with str_to_IDP on Z3 value
+            self.py_value = Fraction(self.number)
+            self.type = REAL
+        elif '.' in self.number:
+            v = (self.number if not self.number.endswith('?') else
+                 self.number[:-1])
+            if "e" in v:
+                self.py_value = float(eval(v))
+            else:
+                self.py_value = Fraction(v)
+            self.type = REAL
+        else:
+            self.py_value = int(self.number)
+            self.type = INT
 
     def __str__(self): return self.number
 
@@ -1131,7 +1146,8 @@ class Date(Expression):
         self.value = self
 
         self.translated = None
-        self.translate()  # also sets self.type
+        self.py_value = self.date.toordinal()
+        self.type = DATE
 
     def __str__(self): return f"#{self.date.isoformat()}"
 

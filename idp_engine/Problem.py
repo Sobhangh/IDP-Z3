@@ -83,6 +83,8 @@ class Problem(object):
         cleared (OrderedSet): set of questions unassigned since last propagate
 
         propagate_success (Bool): whether the last propagate call failed or not
+
+        z3 (dict[id, ExprRef]): mapping to speed-up translation
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -99,6 +101,7 @@ class Problem(object):
         self._formula = None  # the problem expressed in one logic formula
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
+        self.z3 = {}
         self.add(*blocks)
         self.propagate_success = True
 

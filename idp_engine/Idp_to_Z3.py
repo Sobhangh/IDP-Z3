@@ -25,7 +25,6 @@ TODO: vocabulary
 
 from copy import copy
 from fractions import Fraction
-from itertools import product
 from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
                 RatVal, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
                 BoolVal, Datatype, ExprRef)
@@ -110,10 +109,12 @@ Constructor.translate = translate
 
 # class Expression  ###########################################################
 
-def translate(self, problem: "Problem" = None, vars={}) -> ExprRef:
+def translate(self, problem: "Problem", vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, using .value and .simpler if there
 
     Args:
+        problem (Problem): holds the context for the translation (e.g. a cache of translations).
+
         vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
@@ -160,6 +161,8 @@ def translate1(self, problem: "Problem", vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, ignoring .value and .simpler
 
     Args:
+        problem (Problem): holds the context for the translation (e.g. a cache of translations).
+
         vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
@@ -352,47 +355,30 @@ UnappliedSymbol.translate1 = translate1
 # Class Variable  #######################################################
 
 def translate(self, problem: "Problem", vars={}):
-    return self.translated
+    return vars[id(self)]
 Variable.translate = translate
 
 
 # Class Number  #######################################################
 
-def translate(self, problem: "Problem" = None, vars={}):
-    if True: #self.translated is None:
-        ops = self.number.split("/")
-        if len(ops) == 2:  # possible with str_to_IDP on Z3 value
-            self.py_value = Fraction(self.number)
-            self.translated = RatVal(self.py_value.numerator,
-                                     self.py_value.denominator)
-            self.type = REAL
-        elif '.' in self.number:
-            v = (self.number if not self.number.endswith('?') else
-                 self.number[:-1])
-            if "e" in v:
-                self.py_value = float(eval(v))
-                self.translated = self.py_value
-            else:
-                self.py_value = Fraction(v)
-                self.translated = RatVal(self.py_value.numerator,
-                                         self.py_value.denominator)
-            self.type = REAL
-        else:
-            self.py_value = int(self.number)
-            self.translated = self.py_value
-            self.type = INT
-    return self.translated
+def translate(self, problem: "Problem", vars={}):
+    out = problem.z3.get(id(self), None)
+    if out is None:
+        out = (RatVal(self.py_value.numerator, self.py_value.denominator)
+               if isinstance(self.py_value, Fraction) else self.py_value)
+        problem.z3[id(self)] = out
+    return out
 Number.translate = translate
 
 
 # Class Date  #######################################################
 
-def translate(self, problem: "Problem" = None, vars={}):
-    if self.translated is None:
-        self.translated = self.date.toordinal()
-        self.py_value = self.translated
-        self.type = DATE
-    return self.translated
+def translate(self, problem: "Problem", vars={}):
+    out = problem.z3.get(id(self), None)
+    if out is None:
+        out = self.py_value
+        problem.z3[id(self)] = self.py_value
+    return out
 Date.translate = translate
 
 

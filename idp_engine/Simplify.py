@@ -33,7 +33,7 @@ from .Expression import (
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
     Number, Date, Brackets, TRUE, FALSE)
-from .Parse import Symbol, Enumeration, Tuple, ConstructedFrom
+from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, SYMBOL, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
 
@@ -316,7 +316,8 @@ def update_exprs(self, new_exprs):
         a = operand.value
         if a is not None:
             if type(a) == Number:
-                return self._change(value=Number(number=str(- a.translate())), sub_exprs=[operand])
+                return self._change(value=Number(number=f"{-a.py_value}"),
+                                    sub_exprs=[operand])
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
