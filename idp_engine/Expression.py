@@ -111,8 +111,6 @@ class Constructor(ASTNode):
         has been applied to some arguments (e.g., is_rgb)
 
         symbol (Symbol): only for Symbol constructors
-
-        translated (DataTypeRef): the value in Z3
     """
 
     def __init__(self, **kwargs):
@@ -126,7 +124,6 @@ class Constructor(ASTNode):
         self.type = None
         self.symbol = None
         self.tester = None
-        self.translated: Any = None
 
     def __str__(self):
         return (self.name if not self.sorts else
@@ -1033,7 +1030,6 @@ class UnappliedSymbol(Expression):
 
         self.sub_exprs = []
         self.decl = None
-        self.translated = None
         self.is_enumerated = None
         self.is_enumeration = None
         self.in_enumeration = None
@@ -1073,7 +1069,6 @@ class Variable(Expression):
 
         self.type = sort.decl.name if sort and sort.decl else ''
         self.sub_exprs = []
-        self.translated = None
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name
@@ -1094,8 +1089,6 @@ class Number(Expression):
         self.sub_exprs = []
         self.fresh_vars = set()
         self.value = self
-
-        self.translated = None
 
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
@@ -1141,7 +1134,6 @@ class Date(Expression):
         self.fresh_vars = set()
         self.value = self
 
-        self.translated = None
         self.py_value = self.date.toordinal()
         self.type = DATE
 

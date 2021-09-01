@@ -47,8 +47,8 @@ def translate(self, problem: "Problem"):
             self.translated = BoolSort()
             self.constructors[0].type = BOOL
             self.constructors[1].type = BOOL
-            self.constructors[0].translated = BoolVal(True)
-            self.constructors[1].translated = BoolVal(False)
+            problem.z3[self.constructors[0].name] = BoolVal(True)
+            problem.z3[self.constructors[1].name] = BoolVal(False)
             self.constructors[0].py_value = True
             self.constructors[1].py_value = False
         elif self.constructors:
@@ -60,12 +60,12 @@ def translate(self, problem: "Problem"):
             self.translated = sort.create()
 
             for c in self.constructors:
-                c.translated = self.translated.__dict__[c.name]
+                c.py_value = self.translated.__dict__[c.name]
+                problem.z3[c.name] = c.py_value
                 if c.tester:
                     c.tester.translated = self.translated.__dict__[f"is_{c.name}"]
                 for a in c.sorts:
                     a.decl.translated = self.translated.__dict__[a.accessor.name]
-                c.py_value = c.translated
                 if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
                 else:
@@ -103,7 +103,7 @@ Tuple.translate = translate
 # class Constructor  ###########################################################
 
 def translate(self, problem: "Problem"):
-    return self.translated
+    return problem.z3[self.name]
 Constructor.translate = translate
 
 
@@ -187,8 +187,8 @@ def translate1(self, problem: "Problem", vars={}):
         for q in self.quantees:
             for vars in q.vars:
                 for v in vars:
-                    v.translated = FreshConst(v.sort.decl.translate(problem))
-                    finalvars[v.str] = v.translated
+                    translated = FreshConst(v.sort.decl.translate(problem))
+                    finalvars[v.str] = translated
         forms = [f.translate(problem, finalvars) for f in self.sub_exprs]
 
         if self.q == '∀':
