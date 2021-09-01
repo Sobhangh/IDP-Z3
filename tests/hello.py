@@ -27,7 +27,7 @@ else:
         #print(c.interpretations)
         log("translate")
         print(simplify(c.translate()))
-        solver = Solver()
+        solver = Solver(ctx=problem.ctx)
         solver.add(c.translate())
         print(solver.check())
         log("solve")

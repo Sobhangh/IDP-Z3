@@ -213,7 +213,7 @@ class Expression(ASTNode):
     """
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code',
                  'annotations', 'original', 'str', 'fresh_vars', 'type',
-                 '_reified', 'is_type_constraint_for', 'co_constraint',
+                 'is_type_constraint_for', 'co_constraint',
                  'normal', 'questions', 'relevant')
 
     def __init__(self):
@@ -228,7 +228,6 @@ class Expression(ASTNode):
         self.str: str = self.code
         self.fresh_vars: Optional[Set[str]] = None
         self.type: Optional[str] = None
-        self._reified: Optional["Expression"] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional["Expression"] = None
 
@@ -962,10 +961,8 @@ class AppliedSymbol(Expression):
                 or not all(e.value is not None for e in self.sub_exprs))
 
     def reified(self, problem: "Problem"):
-        if self._reified is None:
-            self._reified = ( super().reified(problem) if self.is_reified() else
+        return ( super().reified(problem) if self.is_reified() else
                  self.translate(problem) )
-        return self._reified
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]

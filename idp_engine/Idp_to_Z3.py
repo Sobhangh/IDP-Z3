@@ -45,15 +45,15 @@ def translate(self, problem: "Problem"):
     out = problem.z3.get(self.name, None)
     if out is None:
         if self.name == BOOL:
-            out = BoolSort()
+            out = BoolSort(problem.ctx)
             self.constructors[0].type = BOOL
             self.constructors[1].type = BOOL
-            problem.z3[self.constructors[0].name] = BoolVal(True)
-            problem.z3[self.constructors[1].name] = BoolVal(False)
+            problem.z3[self.constructors[0].name] = BoolVal(True, problem.ctx)
+            problem.z3[self.constructors[1].name] = BoolVal(False, problem.ctx)
             self.constructors[0].py_value = True
             self.constructors[1].py_value = False
         elif self.constructors:
-            sort = Datatype(self.name)
+            sort = Datatype(self.name, ctx=problem.ctx)
             for c in self.constructors:
                 sort.declare(c.name,
                              *[(a.decl.name, a.decl.out.translate(problem))
@@ -73,8 +73,8 @@ def translate(self, problem: "Problem"):
                     for e in c.range:
                         self.map[str(e)] = e
         else: # list of numbers
-            out = (IntSort() if self.interpretation.enumeration.type == INT else
-                   RealSort())
+            out = (IntSort(problem.ctx) if self.interpretation.enumeration.type == INT else
+                   RealSort(problem.ctx))
         problem.z3[self.name] = out
     return out
 TypeDeclaration.translate = translate
@@ -137,9 +137,12 @@ def translate(self, problem: "Problem", vars={}) -> ExprRef:
 Expression.translate = translate
 
 def reified(self, problem: "Problem") -> DatatypeRef:
-    if self._reified is None:
-        self._reified = Const(b'*'+self.code.encode(), BoolSort())
-    return self._reified
+    str = b'*' + self.code.encode()
+    out = problem.z3.get(str, None)
+    if out is None:
+        out = Const(str, BoolSort(problem.ctx))
+        problem.z3[str] = out
+    return out
 Expression.reified = reified
 
 
@@ -147,11 +150,11 @@ Expression.reified = reified
 
 def translate(self, problem: "Problem", vars={}):
     if self.name == BOOL:
-        return BoolSort()
+        return BoolSort(problem.ctx)
     elif self.name == INT:
-        return IntSort()
+        return IntSort(problem.ctx)
     elif self.name == REAL:
-        return RealSort()
+        return RealSort(problem.ctx)
     else:
         return self.decl.translate(problem,)
 Symbol.translate=translate
@@ -339,11 +342,14 @@ def translate1(self, problem: "Problem", vars={}):
 AppliedSymbol.translate1 = translate1
 
 def reified(self, problem: "Problem", vars={}) -> DatatypeRef:
-    if self._reified is None:
-        sort = (BoolSort() if self.in_enumeration or self.is_enumerated else
+    str = b'*'+self.code.encode()
+    out = problem.z3.get(str, None)
+    if out is None:
+        sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
                 self.decl.out.decl.translate(problem))
-        self._reified = Const(b'*'+self.code.encode(), sort)
-    return self._reified
+        out = Const(str, sort)
+        problem.z3[str] = out
+    return out
 AppliedSymbol.reified = reified
 
 
@@ -366,7 +372,8 @@ Variable.translate = translate
 def translate(self, problem: "Problem", vars={}):
     out = problem.z3.get(self.str, None)
     if out is None:
-        out = (RatVal(self.py_value.numerator, self.py_value.denominator)
+        out = (RatVal(self.py_value.numerator, self.py_value.denominator,
+                      problem.ctx)
                if isinstance(self.py_value, Fraction) else self.py_value)
         problem.z3[self.str] = out
     return out

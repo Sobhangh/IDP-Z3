@@ -26,7 +26,7 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies
+from z3 import Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -85,6 +85,8 @@ class Problem(object):
         propagate_success (Bool): whether the last propagate call failed or not
 
         z3 (dict[id, ExprRef]): mapping to speed-up translation
+
+        ctx : Z3 context
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -102,6 +104,7 @@ class Problem(object):
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
         self.z3 = {}
+        self.ctx = Context()
         self.add(*blocks)
         self.propagate_success = True
 
@@ -280,7 +283,7 @@ class Problem(object):
         z3_formula = self.formula().translate(self)
         todo = self._todo()
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
 
         count = 0
@@ -298,11 +301,13 @@ class Problem(object):
                     if a.status == S.EXPANDED:
                         q = a.sentence
                         different.append(q.translate(self) != a.value.translate(self))
+                if not different:
+                    break
                 solver.add(Or(different))
             else:
                 break
 
-        if solver.check() == sat:
+        if solver.check() == sat and different:
             yield f"{NEWL}More models are available."
         elif 0 < count:
             yield f"{NEWL}No more models."
@@ -310,7 +315,7 @@ class Problem(object):
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):
-        solver = Optimize()
+        solver = Optimize(ctx=self.ctx)
         solver.add(self.formula().translate(self))
         assert term in self.assignments, "Internal error"
         s = self.assignments[term].sentence.translate(self)
@@ -401,7 +406,7 @@ class Problem(object):
         facts, laws = [], []
         reasons = [S.GIVEN, S.STRUCTURE]
 
-        s = Solver()
+        s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
         ps = {}  # {reified: constraint}
 
@@ -509,7 +514,7 @@ class Problem(object):
 
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         z3_conditions = And([l.translate(self) for l in conditions])
         solver.add(And(z3_formula, known, z3_conditions))
         if solver.check() != sat:
@@ -519,7 +524,7 @@ class Problem(object):
                 conditions_i = And([l.translate(self)
                         for j, l in enumerate(conditions)
                         if j != i])
-                solver = Solver()
+                solver = Solver(ctx=self.ctx)
                 if goal.sentence == TRUE or goal.value is None:  # find an abstract model
                     # z3_formula & known & conditions => conditions_i is always true
                     solver.add(Not(Implies(And(known, conditions_i), z3_conditions)))
@@ -584,7 +589,7 @@ class Problem(object):
 
         formula = self.formula()
         theory = formula.translate(self)
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(theory)
         solver.add(known)
 
@@ -645,7 +650,7 @@ class Problem(object):
                                     if l.value is not None
                                     and l.sentence.code != goal_string]
                     known2 = And(known2, Not(And(condition)))
-                solver = Solver()
+                solver = Solver(ctx=self.ctx)
                 solver.add(known2)
                 assert solver.check() == unsat, \
                     "The DMN table does not cover the full domain"
@@ -667,7 +672,7 @@ class Problem(object):
                 if condition:
                     possible = Not(And(condition))
                     if verify:
-                        solver = Solver()
+                        solver = Solver(ctx=self.ctx)
                         solver.add(known2)
                         solver.add(possible)
                         result = solver.check()

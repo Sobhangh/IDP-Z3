@@ -212,7 +212,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
     if todo:
         z3_formula = self.formula().translate(self)
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result = solver.check()
         if result == sat:
@@ -268,7 +268,7 @@ def _propagate(self, tag=S.CONSEQUENCE):
     if todo:
         z3_formula = self.formula().translate(self)
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result = solver.check()
         if result == sat:
@@ -294,7 +294,7 @@ def _propagate(self, tag=S.CONSEQUENCE):
                 solver.pop()
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
-                    solver = Solver()  # restart the solver
+                    solver = Solver(ctx=self.ctx)  # restart the solver
                     solver.add(z3_formula)
             yield "No more consequences."
         elif result == unsat:
@@ -323,7 +323,7 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
 
         z3_formula = self.formula().translate(self)
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result, consqs = solver.consequences([], z3_todo)
         if result == sat:
