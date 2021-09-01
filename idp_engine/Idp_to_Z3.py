@@ -127,11 +127,11 @@ def translate(self, problem: "Problem", vars={}) -> ExprRef:
         return self.simpler.translate(problem, vars)
     if self.fresh_vars:
         return self.translate1(problem, vars)
-    elif self.translated is None:
-        self.translated = self.translate1(problem, vars)
-        return self.translated
-    else:
-        return self.translated
+    out = problem.z3.get(self.str, None)
+    if out is None:
+        out = self.translate1(problem, vars)
+        problem.z3[self.str] = out
+    return out
 Expression.translate = translate
 
 def reified(self, problem: "Problem") -> DatatypeRef:
@@ -188,7 +188,7 @@ def translate1(self, problem: "Problem", vars={}):
             for vars in q.vars:
                 for v in vars:
                     v.translated = FreshConst(v.sort.decl.translate(problem))
-                    finalvars[id(v)] = v.translated
+                    finalvars[v.str] = v.translated
         forms = [f.translate(problem, finalvars) for f in self.sub_exprs]
 
         if self.q == '∀':
@@ -355,18 +355,18 @@ UnappliedSymbol.translate1 = translate1
 # Class Variable  #######################################################
 
 def translate(self, problem: "Problem", vars={}):
-    return vars[id(self)]
+    return vars[self.str]
 Variable.translate = translate
 
 
 # Class Number  #######################################################
 
 def translate(self, problem: "Problem", vars={}):
-    out = problem.z3.get(id(self), None)
+    out = problem.z3.get(self.str, None)
     if out is None:
         out = (RatVal(self.py_value.numerator, self.py_value.denominator)
                if isinstance(self.py_value, Fraction) else self.py_value)
-        problem.z3[id(self)] = out
+        problem.z3[self.str] = out
     return out
 Number.translate = translate
 
@@ -374,10 +374,10 @@ Number.translate = translate
 # Class Date  #######################################################
 
 def translate(self, problem: "Problem", vars={}):
-    out = problem.z3.get(id(self), None)
+    out = problem.z3.get(self.str, None)
     if out is None:
         out = self.py_value
-        problem.z3[id(self)] = self.py_value
+        problem.z3[self.str] = self.py_value
     return out
 Date.translate = translate
 

@@ -213,9 +213,6 @@ class Expression(ASTNode):
         is_type_constraint_for (string):
             name of the symbol for which the expression is a type constraint
 
-        translated (Optional[z3 ast]):
-            The translation of the expression to Z3 (cache)
-
     """
     __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code',
                  'annotations', 'original', 'str', 'fresh_vars', 'type',
@@ -242,7 +239,6 @@ class Expression(ASTNode):
         self.questions: Optional[OrderedSet] = None
         self.relevant: Optional[bool] = None
         self.block: Any = None  # deprecated
-        self.translated = None
 
     def copy(self):
         " create a deep copy (except for rigid terms and variables) "
@@ -260,7 +256,7 @@ class Expression(ASTNode):
         return out
 
     def same_as(self, other):
-        if id(self) == id(other):
+        if self.str == other.str:
             return True
         if self.value is not None and self.value is not self:
             return self.value  .same_as(other)
