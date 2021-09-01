@@ -211,10 +211,10 @@ class Expression(ASTNode):
             name of the symbol for which the expression is a type constraint
 
     """
-    __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code',
+    __slots__ = ('sub_exprs', 'simpler', 'value', 'code',
                  'annotations', 'original', 'str', 'fresh_vars', 'type',
                  'is_type_constraint_for', 'co_constraint',
-                 'normal', 'questions', 'relevant')
+                 'questions', 'relevant')
 
     def __init__(self):
         self.sub_exprs: List["Expression"]
@@ -234,7 +234,6 @@ class Expression(ASTNode):
         # attributes of the top node of a (co-)constraint
         self.questions: Optional[OrderedSet] = None
         self.relevant: Optional[bool] = None
-        self.block: Any = None  # deprecated
 
     def copy(self):
         " create a deep copy (except for rigid terms and variables) "
