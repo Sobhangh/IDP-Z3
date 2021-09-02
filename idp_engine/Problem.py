@@ -84,7 +84,7 @@ class Problem(object):
 
         propagate_success (Bool): whether the last propagate call failed or not
 
-        z3 (dict[id, ExprRef]): mapping to speed-up translation
+        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
 
         ctx : Z3 context
     """

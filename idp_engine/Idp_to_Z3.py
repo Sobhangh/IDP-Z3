@@ -112,7 +112,7 @@ Constructor.translate = translate
 # class Expression  ###########################################################
 
 def translate(self, problem: "Problem", vars={}) -> ExprRef:
-    """Converts the syntax tree to a Z3 expression, using .value and .simpler if there
+    """Converts the syntax tree to a Z3 expression, using .value and .simpler if present
 
     Args:
         problem (Problem): holds the context for the translation (e.g. a cache of translations).
