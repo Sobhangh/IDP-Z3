@@ -476,9 +476,9 @@ class Expression(ASTNode):
         Returns:
             Expression
         """
-        self.sub_exprs = [e.add_level_mapping(level_symbols, head, pos_justification, polarity)
-                          for e in self.sub_exprs]
-        return self
+        return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity)
+                                   for e in self.sub_exprs))
+                    .annotate1())  # update fresh_vars
 
 
 class Symbol(Expression):
@@ -698,9 +698,9 @@ class AImplication(Operator):
     PRECEDENCE = 50
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity),
-                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
-        return self
+        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity),
+                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
+        return self.update_exprs(sub_exprs).annotate1()
 
 
 class AEquivalence(Operator):
@@ -720,9 +720,9 @@ class ARImplication(Operator):
     PRECEDENCE = 30
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity),
-                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
-        return self
+        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity),
+                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
+        return self.update_exprs(sub_exprs).annotate1()
 
 
 class ADisjunction(Operator):
@@ -790,12 +790,12 @@ class AUnary(Expression):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [e.add_level_mapping(level_symbols, head,
-                                              pos_justification,
-                                              not polarity
-                                              if self.operator == '¬' else polarity)
-                          for e in self.sub_exprs]
-        return self
+        sub_exprs = (e.add_level_mapping(level_symbols, head,
+                                         pos_justification,
+                                         not polarity
+                                         if self.operator == '¬' else polarity)
+                     for e in self.sub_exprs)
+        return self.update_exprs(sub_exprs).annotate1()
 
 
 class AAggregate(Expression):
@@ -1084,6 +1084,8 @@ class Variable(Expression):
 
     def copy(self): return self
 
+    def annotate1(self): return self
+
 
 class Number(Expression):
     PRECEDENCE = 200
@@ -1103,6 +1105,11 @@ class Number(Expression):
     def __str__(self): return self.number
 
     def is_reified(self): return False
+
+    def real(self):
+        """converts the INT number to REAL"""
+        self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
+        return Number(number=str(float(self.py_value)))
 
 
 ZERO = Number(number='0')
