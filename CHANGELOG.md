@@ -85,6 +85,7 @@ Contributors (alphabetical):  Jo Devriendt, Matthias van der hallen, Pierre Carb
 * Merge !78: add `assert_(code, value)` to Problem API
 * fix #77: `in` operator does not work in some definitions
 * fix #80: infinite loop for recursive definitions
+* fix #81: Spill-over of structures
 * fix #82: allow number and date ranges in structures
 * fix #83: same symbol defined in multiple definitions
 * fix #84: infinite loop when instantiating co_constraint
