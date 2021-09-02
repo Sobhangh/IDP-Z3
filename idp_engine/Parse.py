@@ -349,8 +349,6 @@ class TypeDeclaration(ASTNode):
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
-        translated (Z3): the translation of the type in Z3
-
         map (Dict[string, Expression]): a mapping from code to Expression in range
     """
 
@@ -367,7 +365,6 @@ class TypeDeclaration(ASTNode):
         self.type = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
 
-        self.translated = None
         self.range = None
         self.map = {}  # {String: constructor}
 
@@ -448,8 +445,6 @@ class SymbolDeclaration(ASTNode):
         self.private = None
         self.unit: str = None
         self.heading: str = None
-
-        self.translated = None
 
         self.type = None  # a string
         self.domain = None  # all possible arguments
@@ -876,9 +871,6 @@ class Tuple(ASTNode):
 
     def __repr__(self):
         return self.code
-
-    def translate(self):
-        return [arg.translate() for arg in self.args]
 
 class FunctionTuple(Tuple):
     def __init__(self, **kwargs):

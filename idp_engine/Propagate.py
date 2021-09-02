@@ -210,19 +210,19 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
     """
     todo = self._directional_todo()
     if todo:
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula().translate(self)
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result = solver.check()
         if result == sat:
             lookup, tests = {}, []
             for q in todo:
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
+                solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
                 if solver.check() != sat:
                     # print("Falling back !")
                     yield from self._propagate(tag)
-                test = Not(q.reified() == solver.model().eval(q.reified()))
+                test = Not(q.reified(self) == solver.model().eval(q.reified(self)))
                 tests.append(test)
                 lookup[str(test)] = q
             solver.push()
@@ -240,7 +240,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                     solver.check()  # not sure why this is needed
                     for test in tests:
                         q = lookup[str(test)]
-                        val1 = solver.model().eval(q.reified())
+                        val1 = solver.model().eval(q.reified(self))
                         val = str_to_IDP(q, str(val1))
                         yield self.assignments.assert__(q, val, tag, True)
                     break
@@ -266,21 +266,21 @@ def _propagate(self, tag=S.CONSEQUENCE):
     """
     todo = self._directional_todo()
     if todo:
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula().translate(self)
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result = solver.check()
         if result == sat:
             for q in todo:
                 solver.push()  #  faster (~3%) with push than without
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
+                solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
                 res1 = solver.check()
                 if res1 == sat:
-                    val1 = solver.model().eval(q.reified())
-                    if str(val1) != str(q.reified()):  # if not irrelevant
+                    val1 = solver.model().eval(q.reified(self))
+                    if str(val1) != str(q.reified(self)):  # if not irrelevant
                         solver.push()
-                        solver.add(Not(q.reified() == val1))
+                        solver.add(Not(q.reified(self) == val1))
                         res2 = solver.check()
                         solver.pop()
 
@@ -294,7 +294,7 @@ def _propagate(self, tag=S.CONSEQUENCE):
                 solver.pop()
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
-                    solver = Solver()  # restart the solver
+                    solver = Solver(ctx=self.ctx)  # restart the solver
                     solver.add(z3_formula)
             yield "No more consequences."
         elif result == unsat:
@@ -318,12 +318,12 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
     if todo:
         z3_todo, unreify = [], {}
         for q in todo:
-            z3_todo.append(q.reified())
-            unreify[q.reified()] = q
+            z3_todo.append(q.reified(self))
+            unreify[q.reified(self)] = q
 
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula().translate(self)
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result, consqs = solver.consequences([], z3_todo)
         if result == sat:
