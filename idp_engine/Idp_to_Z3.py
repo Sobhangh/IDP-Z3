@@ -319,7 +319,7 @@ def translate1(self, problem: "Problem", vars={}):
         return TRUE.translate(problem, vars)
     if self.decl.name == 'abs':
         arg = self.sub_exprs[0].translate(problem, vars)
-        return If(arg >= 0, arg, -arg)
+        return If(arg >= 0, arg, -arg, problem.ctx)
     assert self.decl.name not in RESERVED_SYMBOLS, \
                f"Can't resolve argument of built-in symbols: {self}"
     try:
