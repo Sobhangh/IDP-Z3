@@ -26,7 +26,7 @@ TODO: vocabulary
 from copy import copy
 from fractions import Fraction
 from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
-                RatVal, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
+                RatVal, IntVal, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
                 BoolVal, Datatype, ExprRef)
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
@@ -374,7 +374,8 @@ def translate(self, problem: "Problem", vars={}):
     if out is None:
         out = (RatVal(self.py_value.numerator, self.py_value.denominator,
                       problem.ctx)
-               if isinstance(self.py_value, Fraction) else self.py_value)
+               if isinstance(self.py_value, Fraction) else
+               IntVal(self.py_value, problem.ctx))
         problem.z3[self.str] = out
     return out
 Number.translate = translate
