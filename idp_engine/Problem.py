@@ -251,7 +251,7 @@ class Problem(object):
                 + [s for s in self.constraints]  #perf could be pre-compiled
                 + [c for c in self.co_constraints]
                 + [s for s in chain(*self.def_constraints.values())]
-                )
+                ).translate(self)
         return self._formula
 
     def _todo(self):
@@ -280,7 +280,7 @@ class Problem(object):
 
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.formula().translate(self)
+        z3_formula = self.formula()
         todo = self._todo()
 
         solver = Solver(ctx=self.ctx)
@@ -316,7 +316,7 @@ class Problem(object):
 
     def optimize(self, term, minimize=True, complete=False):
         solver = Optimize(ctx=self.ctx)
-        solver.add(self.formula().translate(self))
+        solver.add(self.formula())
         assert term in self.assignments, "Internal error"
         s = self.assignments[term].sentence.translate(self)
         if minimize:
@@ -510,7 +510,7 @@ class Problem(object):
                 that is a minimum satisfying assignment for `self`, given `known`
         """
         if z3_formula is None:
-            z3_formula = self.formula().translate(self)
+            z3_formula = self.formula()
 
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
@@ -591,8 +591,7 @@ class Problem(object):
                         if q.is_reified()])
         known = (And(known) if known else TRUE.translate(self))
 
-        formula = self.formula()
-        theory = formula.translate(self)
+        theory = self.formula()
         solver = Solver(ctx=self.ctx)
         solver.add(theory)
         solver.add(known)

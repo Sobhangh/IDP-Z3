@@ -1,4 +1,4 @@
-true ∧ true ∧ ¬(is_rgb(red)) ∧ ¬(is_red(blue)) ∧ true
+And(True, True, Not(is(rgb, red)), Not(is(red, blue)), True)
 
 Model 1
 ==========

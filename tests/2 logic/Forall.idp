@@ -10,24 +10,24 @@ theory T1:V {
     p() <=> (∀c in Color: c=red).
     q := {red, blue}
     (∀c in Color: ~q(c) => c=color()).
-    ∀c in Color: Color(c).
-    ∀c in $(`Color): Color(c).
-    ∀c in q: Color(c).
-    ∀c in r, c2 in q: Color(c).
+    ∀c in Color: c=color().
+    ∀c in $(`Color): c=color().
+    ∀c in q: c=color().
+    ∀c in r, c2 in q: c=color().
 }
 theory T2:V {
     q := {red, blue}
-    ∀c in q: Color(c).
-    ∀c in r, c2 in q: Color(c).
+    ∀c in q: c=color().
+    ∀c in r, c2 in q: c=color().
 }
 theory T3:V {
     q := {red, blue}
     (∀c in Color: ~q(c) => c=color()).
-    ∀c in $(`Color): Color(c).
+    ∀c in $(`Color): c=color().
 }
 theory T4:V {
-    ∀c1, c2 in q: Color(c1) & Color(c2).
-    ∀c in q: Color(c).
+    ∀c1, c2 in q: c1=color() & c2=color().
+    ∀c in q: c=color().
 }
 theory T5:V {
     ! (x,y) in compatible: r(x) => r(y).

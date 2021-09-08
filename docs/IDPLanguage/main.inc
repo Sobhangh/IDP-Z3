@@ -75,7 +75,7 @@ copy(self)
     Returns an independent copy of a problem.
 
 formula(self)
-    Returns a python object representing the logic formula equivalent to the problem.
+    Returns a Z3 object representing the logic formula equivalent to the problem.
     This object can be converted to a string using ``str()``.
 
 expand(self, max=10, complete=False)

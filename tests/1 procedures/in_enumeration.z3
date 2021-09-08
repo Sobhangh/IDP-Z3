@@ -1,5 +1,6 @@
 No more consequences.
-(p() ⇒ Color() in {red, blue}) ∧ (Color() = red ∨ Color() = blue ∨ Color() = green)
+And(Or(Not(p), Or(Color == red, Color == blue)),
+    Or(Color == red, Color == blue, Color == green))
 
 Model 1
 ==========
