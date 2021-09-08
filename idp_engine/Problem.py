@@ -26,7 +26,7 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies, is_false
+from z3 import Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -83,6 +83,10 @@ class Problem(object):
         cleared (OrderedSet): set of questions unassigned since last propagate
 
         propagate_success (Bool): whether the last propagate call failed or not
+
+        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
+
+        ctx : Z3 context
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -99,6 +103,8 @@ class Problem(object):
         self._formula = None  # the problem expressed in one logic formula
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
+        self.z3 = {}
+        self.ctx = Context()
         self.add(*blocks)
         self.propagate_success = True
 
@@ -129,6 +135,7 @@ class Problem(object):
 
     def add(self, *blocks):
         for block in blocks:
+            self.z3 = {}
             self._formula = None  # need to reapply the definitions
 
             for name, decl in block.declarations.items():
@@ -139,7 +146,6 @@ class Problem(object):
                 self.declarations[name] = decl
             for decl in self.declarations.values():
                 if type(decl) == TypeDeclaration:
-                    decl.translated = None  # reset the translation of declarations
                     decl.interpretation = (  #TODO side-effects ? issue #81
                         None if decl.name not in [INT, REAL, DATE, SYMBOL] else
                         decl.interpretation)
@@ -259,13 +265,13 @@ class Problem(object):
         ass = self.assignments.copy()
         for q in todo:
             if not q.is_reified() or self.extended:
-                # evaluating q.translate() directly fails the pipeline on arithmetic/forall.idp
-                solver.add(q.reified() == q.translate())
+                # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
+                solver.add(q.reified(self) == q.translate(self))
         res1 = solver.check()
         if res1 == sat:
             for q in todo:
                 if not q.is_reified() or self.extended:
-                    val1 = solver.model().eval(q.reified(),
+                    val1 = solver.model().eval(q.reified(self),
                                                model_completion=complete)
                     val = str_to_IDP(q, str(val1))
                     if val is not None:
@@ -274,10 +280,10 @@ class Problem(object):
 
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula().translate(self)
         todo = self._todo()
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
 
         count = 0
@@ -294,12 +300,14 @@ class Problem(object):
                 for a in ass.values():
                     if a.status == S.EXPANDED:
                         q = a.sentence
-                        different.append(q.translate() != a.value.translate())
+                        different.append(q.translate(self) != a.value.translate(self))
+                if not different:
+                    break
                 solver.add(Or(different))
             else:
                 break
 
-        if solver.check() == sat:
+        if solver.check() == sat and different:
             yield f"{NEWL}More models are available."
         elif 0 < count:
             yield f"{NEWL}No more models."
@@ -307,10 +315,10 @@ class Problem(object):
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):
-        solver = Optimize()
-        solver.add(self.formula().translate())
+        solver = Optimize(ctx=self.ctx)
+        solver.add(self.formula().translate(self))
         assert term in self.assignments, "Internal error"
-        s = self.assignments[term].sentence.translate()
+        s = self.assignments[term].sentence.translate(self)
         if minimize:
             solver.minimize(s)
         else:
@@ -398,13 +406,13 @@ class Problem(object):
         facts, laws = [], []
         reasons = [S.GIVEN, S.STRUCTURE]
 
-        s = Solver()
+        s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
         ps = {}  # {reified: constraint}
 
         for ass in self.assignments.values():
             if ass.status in reasons:
-                p = ass.translate()
+                p = ass.translate(self)
                 ps[p] = ass
                 #TODO use assert_and_track ?
                 s.add(Implies(p, p))
@@ -417,8 +425,8 @@ class Problem(object):
 
         todo = chain(self.constraints, chain(*def_constraints.values()))
         for constraint in todo:
-            p = constraint.reified()
-            ps[p] = constraint.original.interpret(self).translate()
+            p = constraint.reified(self)
+            ps[p] = constraint.original.interpret(self).translate(self)
             s.add(Implies(p, ps[p]))
 
         if consequence:
@@ -438,7 +446,7 @@ class Problem(object):
             if negated:
                 to_explain = AUnary.make('¬', to_explain)
 
-            s.add(Not(to_explain.translate()))
+            s.add(Not(to_explain.translate(self)))
 
         s.check(list(ps.keys()))
         unsatcore = s.unsat_core()
@@ -457,7 +465,7 @@ class Problem(object):
             for a1 in chain(chain(*def_constraints.values()), self.constraints):
                 #TODO find the rule
                 for a2 in unsatcore:
-                    if str(a1.original.interpret(self).translate()) == str(ps[a2]):
+                    if str(a1.original.interpret(self).translate(self)) == str(ps[a2]):
                         laws.append(a1)
         return (facts, laws)
 
@@ -502,28 +510,31 @@ class Problem(object):
                 that is a minimum satisfying assignment for `self`, given `known`
         """
         if z3_formula is None:
-            z3_formula = self.formula().translate()
+            z3_formula = self.formula().translate(self)
 
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
-        solver = Solver()
-        z3_conditions = And([l.translate() for l in conditions])
+        solver = Solver(ctx=self.ctx)
+        z3_conditions = And([l.translate(self) for l in conditions])
         solver.add(And(z3_formula, known, z3_conditions))
         if solver.check() != sat:
             return []
         else:
             for i, c in (list(enumerate(conditions))): # optional: reverse the list
-                conditions_i = And([l.translate()
-                        for j, l in enumerate(conditions)
-                        if j != i])
-                solver = Solver()
+                if 1< len(conditions):
+                    conditions_i = And([l.translate(self)
+                                        for j, l in enumerate(conditions)
+                                        if j != i])
+                else:
+                    conditions_i = TRUE.translate(self)
+                solver = Solver(ctx=self.ctx)
                 if goal.sentence == TRUE or goal.value is None:  # find an abstract model
                     # z3_formula & known & conditions => conditions_i is always true
                     solver.add(Not(Implies(And(known, conditions_i), z3_conditions)))
                 else:  # decision table
                     # z3_formula & known & conditions => goal is always true
                     hypothesis = And(z3_formula, known, conditions_i)
-                    solver.add(Not(Implies(hypothesis, goal.translate())))
+                    solver.add(Not(Implies(hypothesis, goal.translate(self))))
                 if solver.check() == unsat:
                     conditions[i] = Assignment(TRUE, TRUE, S.UNKNOWN)
             conditions = join_set_conditions(conditions)
@@ -574,14 +585,15 @@ class Problem(object):
         assert not goal_string or goal_string in [a.code for a in questions], \
             f"Internal error"
 
-        known = And([ass.translate() for ass in self.assignments.values()
+        known = ([ass.translate(self) for ass in self.assignments.values()
                         if ass.status != S.UNKNOWN]
-                    + [q.reified()==q.translate() for q in questions
+                    + [q.reified(self)==q.translate(self) for q in questions
                         if q.is_reified()])
+        known = (And(known) if known else TRUE.translate(self))
 
         formula = self.formula()
-        theory = formula.translate()
-        solver = Solver()
+        theory = formula.translate(self)
+        solver = Solver(ctx=self.ctx)
         solver.add(theory)
         solver.add(known)
 
@@ -596,9 +608,9 @@ class Problem(object):
                 assignment = self.assignments.get(atom.code, None)
                 if assignment and assignment.value is None and atom.type == BOOL:
                     if not atom.is_reified():
-                        val1 = model.eval(atom.translate())
+                        val1 = model.eval(atom.translate(self))
                     else:
-                        val1 = model.eval(atom.reified())
+                        val1 = model.eval(atom.reified(self))
                     if val1 == True:
                         ass = Assignment(atom, TRUE, S.UNKNOWN)
                     elif val1 == False:
@@ -621,7 +633,7 @@ class Problem(object):
             models.append(assignments)
 
             # add constraint to eliminate this model
-            modelZ3 = Not(And( [l.translate() for l in assignments
+            modelZ3 = Not(And( [l.translate(self) for l in assignments
                 if l.value is not None] ))
             solver.add(modelZ3)
 
@@ -638,11 +650,12 @@ class Problem(object):
                 """
                 known2 = known
                 for model in models:
-                    condition = [l.translate() for l in model
+                    condition = [l.translate(self) for l in model
                                     if l.value is not None
                                     and l.sentence.code != goal_string]
-                    known2 = And(known2, Not(And(condition)))
-                solver = Solver()
+                    known2 = (And(known2, Not(And(condition))) if condition else
+                              FALSE.translate(self))
+                solver = Solver(ctx=self.ctx)
                 solver.add(known2)
                 assert solver.check() == unsat, \
                     "The DMN table does not cover the full domain"
@@ -658,13 +671,13 @@ class Problem(object):
                     models1.append(models[0])
                     break
                 model = models.pop(0).copy()
-                condition = [l.translate() for l in model
+                condition = [l.translate(self) for l in model
                                 if l.value is not None
                                 and l.sentence.code != goal_string]
                 if condition:
                     possible = Not(And(condition))
                     if verify:
-                        solver = Solver()
+                        solver = Solver(ctx=self.ctx)
                         solver.add(known2)
                         solver.add(possible)
                         result = solver.check()

@@ -50,7 +50,11 @@ def annotate(self, idp):
     for constructor in self.symbol_decls[SYMBOL].constructors:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
-    self.symbol_decls[SYMBOL].translate()  # to populate .map
+
+    # populate .map of SYMBOL
+    for c in self.symbol_decls[SYMBOL].constructors:
+        assert not c.sorts
+        self.symbol_decls[SYMBOL].map[str(c)] = UnappliedSymbol.construct(c)
 Vocabulary.annotate = annotate
 
 
@@ -266,6 +270,7 @@ def rename_args(self, new_vars):
         arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
         if type(arg) == Variable \
         and arg.name in vars and arg.name not in new_vars:
+            vars.remove(arg.name)
             self.body = self.body.instantiate([arg], [nv])
             self.out = (self.out.instantiate([arg], [nv]) if self.out else
                         self.out)
@@ -275,6 +280,8 @@ def rename_args(self, new_vars):
         else:
             eq = AComparison.make('=', [nv, arg])
             self.body = AConjunction.make('∧', [eq, self.body])
+
+    self.check(not vars, f"Too many variables in head of rule: {self}")
 
     self.definiendum.sub_exprs = list(new_vars.values())
     self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]

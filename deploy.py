@@ -51,7 +51,7 @@ if update_statics:
     require_clean_work_tree("../web-IDP-Z3")
 
     # Generate static and commit.
-    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
+    run('npm run-script build', cwd='../web-IDP-Z3', check=True)
     print("Copying to static folder ...")
     copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
 

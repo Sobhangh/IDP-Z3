@@ -70,10 +70,10 @@ Cardinality aggregate
 Arithmetic aggregate
     ``ꕕ{v_1 in typeOfV_1, .., v_n in typeOfV_n : ϕ : t}`` is a numerical term when ``ꕕ`` is ``sum``, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
 
-    The term denotes the sum of |t| for each distinct tuple of values for |v1,vn| which make |phi| true.
+    The term ``sum{v in T : ϕ(v) : t(v)}`` denotes the sum of ``t(v)`` for each distinct value of ``v`` which makes ``phi(v)`` true.
 
 (if .. then .. else ..)
-    ``(if\ t_1\ then\ t_2\ else\ t_3)`` is a term when |t1| is a sentence, |t2| and |t3| are terms of the same type.
+    ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a sentence, |t2| and |t3| are terms of the same type.
 
 
 .. _sentence:

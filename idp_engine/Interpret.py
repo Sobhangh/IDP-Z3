@@ -65,7 +65,7 @@ def interpret(self, problem):
         problem.interpretations[self.name].interpret(problem)
     if self.interpretation:
         self.constructors = self.interpretation.enumeration.constructors
-    self.translate()
+    self.translate(problem)
     if self.constructors:
         self.range = sum([c.interpret(problem).range for c in self.constructors], [])
     elif self.interpretation.enumeration:  # range declaration

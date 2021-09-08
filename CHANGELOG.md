@@ -9,12 +9,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
 * MR !126: improve performance by simplifying `abs` when possible
+* fix #119: improve error message when too many variables in head of rule.
 * fix #126: error in inductive definitions
 * fix #127: error in definition with aggregates
 * fix #128: fix enumerations that mix integer and real, or range over dates
+* fix #130: error when using conflicting web sessions
 
 ### Interactive Consultant
 * MR !124: show the overall time of execution of each run in the IDE
+* web MR !29: "Print" view + dynamic horizontal sizing of consultant
+* web MR !30: ctrl-S in editor runs the code
 
 
 ## [0.8.3] - 2021-08-18
