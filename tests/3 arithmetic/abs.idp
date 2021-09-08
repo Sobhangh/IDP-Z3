@@ -1,0 +1,16 @@
+vocabulary V {
+    x : () → Int
+}
+
+theory T:V {
+    x()=abs(-1).
+}
+
+structure S:V {
+
+}
+
+procedure main() {
+    print(Problem(T).formula())
+}
+
