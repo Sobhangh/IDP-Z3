@@ -2,10 +2,10 @@ Introduction
 ============
 
 IDP-Z3 is a reasoning engine for knowledge represented using the FO(.) language.
-FO(.) is First Order logic, with various extensions to make it more expressive: type, arithmetic, inductive definitions, aggregates, intensional objects.
-
-IDP-Z3 is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium.
+FO(.) is First Order logic, with various extensions to make it more expressive: types, arithmetic, inductive definitions, aggregates, and intensional objects.
 It uses the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ as back-end.
+
+IDP-Z3 is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium, and made available under the [GNU LGPL v3 License](https://www.gnu.org/licenses/lgpl-3.0.txt)..
 
 Projects
 --------
