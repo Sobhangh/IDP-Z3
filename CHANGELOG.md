@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #127: error in definition with aggregates
 * fix #128: fix enumerations that mix integer and real, or range over dates
 * fix #130: error when using conflicting web sessions
+* Added info on API endpoint to docs
 
 ### Interactive Consultant
 * MR !124: show the overall time of execution of each run in the IDE
