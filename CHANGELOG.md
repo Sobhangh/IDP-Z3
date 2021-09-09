@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### API
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
+* MR !126: improve performance by simplifying `abs` when possible
 * (breaking) MR !132: `Problem.formula()`returns a Z3 object, for performance
 * fix #119: improve error message when too many variables in head of rule.
 * fix #126: error in inductive definitions
@@ -89,6 +90,7 @@ Contributors (alphabetical):  Jo Devriendt, Matthias van der hallen, Pierre Carb
 * Merge !78: add `assert_(code, value)` to Problem API
 * fix #77: `in` operator does not work in some definitions
 * fix #80: infinite loop for recursive definitions
+* fix #81: Spill-over of structures
 * fix #82: allow number and date ranges in structures
 * fix #83: same symbol defined in multiple definitions
 * fix #84: infinite loop when instantiating co_constraint
