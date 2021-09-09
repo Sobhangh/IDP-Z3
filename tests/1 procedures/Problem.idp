@@ -20,5 +20,5 @@ structure S:V {
 
 procedure main () {
     problem = Problem(T,S)
-    pretty_print(problem.formula().translate(problem))
+    pretty_print(problem.formula())
 }

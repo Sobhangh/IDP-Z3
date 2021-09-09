@@ -36,7 +36,7 @@ def model_check(theories, structures=None):
     """ output: "sat", "unsat" or "unknown" """
 
     problem = Problem.make(theories, structures)
-    z3_formula = problem.formula().translate(problem)
+    z3_formula = problem.formula()
 
     solver = Solver(ctx=problem.ctx)
     solver.add(z3_formula)

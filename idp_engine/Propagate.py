@@ -210,7 +210,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
     """
     todo = self._directional_todo()
     if todo:
-        z3_formula = self.formula().translate(self)
+        z3_formula = self.formula()
 
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
@@ -266,7 +266,7 @@ def _propagate(self, tag=S.CONSEQUENCE):
     """
     todo = self._directional_todo()
     if todo:
-        z3_formula = self.formula().translate(self)
+        z3_formula = self.formula()
 
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
@@ -321,7 +321,7 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
             z3_todo.append(q.reified(self))
             unreify[q.reified(self)] = q
 
-        z3_formula = self.formula().translate(self)
+        z3_formula = self.formula()
 
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)

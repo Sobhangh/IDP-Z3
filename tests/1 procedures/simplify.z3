@@ -1,3 +1,3 @@
-p() ∧ (true) ∧ (r())
+And(p, True, r)
 
-p() ∧ r() ∧ (true) ∧ (true)
+And(p, r, True, True)

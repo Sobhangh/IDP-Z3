@@ -26,7 +26,8 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies
+from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
+                is_and, BoolVal)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -71,8 +72,10 @@ class Problem(object):
         goals (dict[string, SymbolDeclaration]):
             A set of goal symbols
 
-        _formula (Expression, optional): the logic formula that represents
-            the problem.
+        _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
+
+        _formula (ExprRef, optional): the Z3 formula that represents
+            the problem (assertions, co_constraints, definitions and assignments).
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
@@ -100,6 +103,7 @@ class Problem(object):
         self.goals = {}
         self.name = ''
 
+        self._contraintz = None
         self._formula = None  # the problem expressed in one logic formula
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
@@ -211,6 +215,7 @@ class Problem(object):
             ass.sentence = ass.sentence
             ass.sentence.original = ass.sentence.copy()
 
+        self._constraintz = None
         self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
@@ -239,19 +244,34 @@ class Problem(object):
             self.assignments.assert__(atom, val, status, False)
         self._formula = None
 
+    def constraintz(self):
+        """list of constraints, co_constraints and definitions in Z3 form"""
+        if self._constraintz is None:
+
+            def collect_constraints(e, constraints):
+                """collect constraints in e, flattening conjunctions"""
+                if is_and(e):
+                    for e1 in e.children():
+                        collect_constraints(e1, constraints)
+                else:
+                    constraints.append(e)
+
+            self._constraintz = []
+            for e in chain(self.constraints, self.co_constraints):
+                collect_constraints(e.translate(self), self._constraintz)
+            self._constraintz += [s.translate(self)
+                            for s in chain(*self.def_constraints.values())]
+        return self._constraintz
+
     def formula(self):
         """ the formula encoding the knowledge base """
-        if not self._formula:
-            self._formula = AConjunction.make(
-                '∧',
-                [a.formula() for a in self.assignments.values()
-                 if a.value is not None
-                 and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                      or (self.propagated and not self.cleared))]
-                + [s for s in self.constraints]  #perf could be pre-compiled
-                + [c for c in self.co_constraints]
-                + [s for s in chain(*self.def_constraints.values())]
-                )
+        if self._formula is None:
+            all = ([a.formula().translate(self) for a in self.assignments.values()
+                    if a.value is not None
+                    and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                     or (self.propagated and not self.cleared))]
+                   + self.constraintz())
+            self._formula = And(all) if all else BoolVal(True, self.ctx)
         return self._formula
 
     def _todo(self):
@@ -280,7 +300,7 @@ class Problem(object):
 
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.formula().translate(self)
+        z3_formula = self.formula()
         todo = self._todo()
 
         solver = Solver(ctx=self.ctx)
@@ -316,7 +336,7 @@ class Problem(object):
 
     def optimize(self, term, minimize=True, complete=False):
         solver = Optimize(ctx=self.ctx)
-        solver.add(self.formula().translate(self))
+        solver.add(self.formula())
         assert term in self.assignments, "Internal error"
         s = self.assignments[term].sentence.translate(self)
         if minimize:
@@ -488,7 +508,7 @@ class Problem(object):
             new_constraint = constraint.simplify_with(out.assignments)
             new_constraints.append(new_constraint)
         out.constraints = new_constraints
-        out._formula = None
+        out._formula, out._constraintz = None, None
         return out
 
     def _generalize(self,
@@ -510,7 +530,7 @@ class Problem(object):
                 that is a minimum satisfying assignment for `self`, given `known`
         """
         if z3_formula is None:
-            z3_formula = self.formula().translate(self)
+            z3_formula = self.formula()
 
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
@@ -591,8 +611,7 @@ class Problem(object):
                         if q.is_reified()])
         known = (And(known) if known else TRUE.translate(self))
 
-        formula = self.formula()
-        theory = formula.translate(self)
+        theory = self.formula()
         solver = Solver(ctx=self.ctx)
         solver.add(theory)
         solver.add(known)

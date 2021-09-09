@@ -1,4 +1,18 @@
-p() = pos(1, 1) ∧ true ∧ q() = p() ∧ is_pos(p()) ∧ is_pos(q()) ∧ is_pos(position(0)) ∧ is_pos(position(1)) ∧ is_pos(position(2)) ∧ (position(0) = pos(0, 0)) ∧ (position(1) = pos(0, 0)) ∧ (position(2) = pos(0, 0)) ∧ (∀$position$ ∈ Pos : position(0) = $position$ ⇔ $position$ = pos(0, 0))
+And(p == pos(1, 1),
+    True,
+    q == p,
+    is(pos, p),
+    is(pos, q),
+    is(pos, position(0)),
+    is(pos, position(1)),
+    is(pos, position(2)),
+    position(0) == pos(0, 0),
+    position(1) == pos(0, 0),
+    position(2) == pos(0, 0),
+    ForAll(c!0,
+           And((position(0) == c!0) == (c!0 == pos(0, 0)),
+               (position(1) == c!0) == (c!0 == pos(0, 0)),
+               (position(2) == c!0) == (c!0 == pos(0, 0)))))
 
 Model 1
 ==========
