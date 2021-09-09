@@ -25,9 +25,10 @@ TODO: vocabulary
 
 from copy import copy
 from fractions import Fraction
-from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
-                RatVal, IntVal, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
-                BoolVal, Datatype, ExprRef)
+from z3 import (set_option, Z3Exception, Datatype, DatatypeRef, ExprRef,
+                Function, Const, FreshConst, BoolSort, IntSort, RealSort,
+                Or, Not, And, ForAll, Exists, Sum, If,
+                BoolVal, RatVal, IntVal, )
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
@@ -38,6 +39,8 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    Variable, TRUE)
 from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
 
+# allow pretty printing of large Z3 formula (see https://stackoverflow.com/a/19570420/474491)
+set_option(max_args=10000000, max_lines=1000000, max_depth=10000000, max_visited=1000000)
 
 # class TypeDeclaration  ###########################################################
 
