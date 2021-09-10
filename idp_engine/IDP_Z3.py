@@ -56,6 +56,7 @@ def cli(args=None):
                     idp.execute()
                 except Exception as exc:
                     print(exc)
+                    error = 1
 
     else:
         parser.print_help()
