@@ -25,6 +25,7 @@ The command-line program to execute an IDP file with a main() block.
 import argparse
 import os
 import sys
+import time
 
 from idp_engine import IDP
 from contextlib import redirect_stdout
@@ -36,8 +37,8 @@ def cli(args=None):
     parser.add_argument('-o', '--output', help='name of the output file',
                         type=str)
     args = parser.parse_args()
-
     error = 0
+    start_time = time.time()
     if args.FILE:
         dir = os.getcwd()
         file = os.path.join(dir, args.FILE)
@@ -57,7 +58,7 @@ def cli(args=None):
                 except Exception as exc:
                     print(exc)
                     error = 1
-
+        print("Elapsed time: {} seconds".format(time.time() - start_time))
     else:
         parser.print_help()
 
