@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !124: show the overall time of execution of each run in the IDE
 * web MR !29: "Print" view + dynamic horizontal sizing of consultant
 * web MR !30: ctrl-S in editor runs the code
+* Added info on API endpoint to docs
 
 
 ## [0.8.3] - 2021-08-18
