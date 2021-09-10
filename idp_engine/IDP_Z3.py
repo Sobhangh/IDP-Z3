@@ -27,11 +27,14 @@ import os
 import sys
 
 from idp_engine import IDP
+from contextlib import redirect_stdout
 
 
 def cli(args=None):
     parser = argparse.ArgumentParser(description='IDP-Z3')
     parser.add_argument('FILE', help='path to the .idp file', type=str)
+    parser.add_argument('-o', '--output', help='name of the output file',
+                        type=str)
     args = parser.parse_args()
 
     error = 0
@@ -42,7 +45,18 @@ def cli(args=None):
             theory = f.read()
 
         idp = IDP.from_str(theory)
-        idp.execute()
+        if not args.output:
+            # Print output to stdout.
+            idp.execute()
+        else:
+            # Print output to file.
+            with open(args.output, mode='w', encoding='utf-8') \
+                    as buf, redirect_stdout(buf):
+                try:
+                    idp.execute()
+                except Exception as exc:
+                    print(exc)
+
     else:
         parser.print_help()
 
