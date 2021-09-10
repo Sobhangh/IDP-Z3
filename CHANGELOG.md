@@ -14,12 +14,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #127: error in definition with aggregates
 * fix #128: fix enumerations that mix integer and real, or range over dates
 * fix #130: error when using conflicting web sessions
-* Added info on API endpoint to docs
 
 ### Interactive Consultant
 * MR !124: show the overall time of execution of each run in the IDE
 * web MR !29: "Print" view + dynamic horizontal sizing of consultant
 * web MR !30: ctrl-S in editor runs the code
+* Added info on API endpoint to docs
 
 
 ## [0.8.3] - 2021-08-18
