@@ -25,9 +25,10 @@ TODO: vocabulary
 
 from copy import copy
 from fractions import Fraction
-from z3 import (Or, Not, And, ForAll, Exists, Z3Exception, Sum, If, FreshConst,
-                RatVal, IntVal, DatatypeRef, Const, BoolSort, IntSort, RealSort, Function,
-                BoolVal, Datatype, ExprRef)
+from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
+                Function, Const, FreshConst, BoolSort, IntSort, RealSort,
+                Or, Not, And, ForAll, Exists, Sum, If,
+                BoolVal, RatVal, IntVal, )
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
@@ -37,7 +38,6 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
 from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
-
 
 # class TypeDeclaration  ###########################################################
 
