@@ -9,10 +9,12 @@ IDP-Z3 is developed by the Knowledge Representation group at KU Leuven in Leuven
 
 Projects
 --------
-The IDP-Z3 suite is currently deployed in the following projects:
+The IDP-Z3 reasoning engine is currently deployed in the following open-source projects:
 
 * the `Interactive Consultant <interactive_consultant.html>`_, a tool enabling experts to encode their knowledge of a problem domain, and to automatically create an interactive web tool that helps end users find solutions for specific problems in that domain.
 * `DMN-IDP <https://dmn-idp.herokuapp.com/>`_, a user-friendly tool which combines the readability of the Decision Model and Notation (DMN) standard with the power of the IDP system through an interactive interface.
+
+IDP-Z3 has also been used in private projects by Saint-Gobain, Flanders Make, and a partner in the financial sector, among others.
 
 Get in touch?
 -------------
