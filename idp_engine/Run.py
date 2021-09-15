@@ -112,6 +112,8 @@ def pretty_print(x=""):
                 print(xi)
             else:
                 print(xi)
+    elif isinstance(x, Problem):
+        print(x.assignments)
     else:
         print(x)
 
