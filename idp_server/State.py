@@ -121,6 +121,8 @@ class State(Problem):
         :returns: the state with the jsonstr added
         :rtype: State
         """
+        if jsonstr == self.active:  # for get_range
+            return self
         out = self.copy()
         out.active = jsonstr
         if out.environment:

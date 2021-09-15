@@ -388,7 +388,8 @@ class Problem(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
-        out = self.copy()
+        out = copy(self)
+        out.assignments = self.assignments.copy()
         #  remove current assignments to same term
         if out.assignments[term].value:
             for a in out.assignments.values():

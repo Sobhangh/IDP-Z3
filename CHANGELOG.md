@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Interactive Consultant
 * MR !124: show the overall time of execution of each run in the IDE
+* MR !138: improve speed of opening a drop-down
 * web MR !29: "Print" view + dynamic horizontal sizing of consultant
 * web MR !30: ctrl-S in editor runs the code
 * Added info on API endpoint to docs
