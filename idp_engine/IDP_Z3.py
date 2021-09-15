@@ -29,6 +29,7 @@ import time
 
 from idp_engine import IDP
 from contextlib import redirect_stdout
+from z3 import set_option
 
 
 def cli(args=None):
@@ -36,8 +37,15 @@ def cli(args=None):
     parser.add_argument('FILE', help='path to the .idp file', type=str)
     parser.add_argument('-o', '--output', help='name of the output file',
                         type=str)
+    parser.add_argument('--full-formula', help='show the full formula',
+                        dest='formula', action='store_true')
     args = parser.parse_args()
     error = 0
+
+    if args.formula:
+        set_option(max_args=10000000, max_lines=1000000,
+                   max_depth=10000000, max_visited=1000000)
+
     start_time = time.time()
     if args.FILE:
         dir = os.getcwd()
