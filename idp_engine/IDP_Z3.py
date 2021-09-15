@@ -39,6 +39,10 @@ def cli(args=None):
                         type=str)
     parser.add_argument('--full-formula', help='show the full formula',
                         dest='formula', action='store_true')
+    parser.add_argument('--no-timing',
+                        help='don\'t display timing information',
+                        dest='timing', action='store_false',
+                        default=True)
     args = parser.parse_args()
     error = 0
 
@@ -66,7 +70,8 @@ def cli(args=None):
                 except Exception as exc:
                     print(exc)
                     error = 1
-        print("Elapsed time: {} seconds".format(time.time() - start_time))
+        if args.timing:
+            print("Elapsed time: {} seconds".format(time.time() - start_time))
     else:
         parser.print_help()
 
