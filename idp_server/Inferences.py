@@ -95,7 +95,6 @@ def get_relevant_questions(self: "State"):
     sets rank of symbols in self.relevant_symbols
     removes irrelevant constraints in self.constraints
     """
-
     out = self.simplify()  # creates a copy
 
     assert out.extended == True,\
@@ -201,9 +200,13 @@ def get_relevant_questions(self: "State"):
                         for q in constraint.questions)):
                 constraint.relevant = True
                 to_add.extend(constraint.questions)
-    out.relevant_symbols = (relevants if out.idp.display.moveSymbols else
-                             {})
-    return out
+
+    self.relevant_symbols = relevants if out.idp.display.moveSymbols else {}
+
+    # copy relevant information back to self
+    for k,v in out.assignments.items():
+        self.assignments[k].relevant = v.relevant
+    return self
 
 
 def explain(state, consequence=None):

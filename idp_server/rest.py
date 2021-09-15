@@ -39,7 +39,7 @@ from flask_restful import Resource, Api, reqparse
 from idp_engine import IDP
 from idp_engine.utils import log, RUN_FILE
 from .State import State
-from .Inferences import explain, abstract
+from .Inferences import explain, abstract, get_relevant_questions
 from .IO import Output, metaJSON
 
 from typing import Dict
@@ -186,6 +186,8 @@ class meta(Resource):
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 state = State.make(idp, "{}", "{}")
+                if not state.idp.display.manualRelevance:
+                    get_relevant_questions(state)
                 out = metaJSON(state)
                 out["propagated"] = Output(state).fill(state)
 
@@ -228,6 +230,7 @@ class eval(Resource):
                 parser.add_argument('value', type=str, help='Value to explain')
                 parser.add_argument('field', type=str, help='Applied Symbol whose range must be determined')
                 parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
+                parser.add_argument('with_relevance', type=bool, help='compute relevance if true')
                 args = parser.parse_args()
                 #print(args)
                 # expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
@@ -241,9 +244,13 @@ class eval(Resource):
                 if not state.propagate_success:
                     out = explain(state)
                 elif method == "propagate":
+                    if args.with_relevance:
+                        get_relevant_questions(state)
                     out = Output(state).fill(state)
                 elif method == 'get_range':
                     out = state.get_range(args['field'])
+                elif method == 'relevance':
+                    out = Output(state).fill(get_relevant_questions(state))
                 elif method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
                     out = copy(state)

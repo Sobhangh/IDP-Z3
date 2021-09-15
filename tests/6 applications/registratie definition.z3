@@ -236,7 +236,9 @@ display {
 }
 -- meta -------------------------------------
 {'manualPropagation': False,
+ 'manualRelevance': False,
  'optionalPropagation': False,
+ 'optionalRelevance': False,
  'symbols': [{'environmental': True,
               'idpname': 'Region',
               'priority': 'core',

@@ -71,7 +71,7 @@ class Assignment(object):
     """
     def __init__(self, sentence: Expression, value: Optional[Expression],
                  status: Optional[Status],
-                 relevant: Optional[bool] = False):
+                 relevant: Optional[bool] = True):
         self.sentence = sentence
         self.value = value
         self.status = status
@@ -195,7 +195,7 @@ class Assignments(dict):
     def assert__(self, sentence: Expression,
                 value: Optional[Expression],
                 status: Optional[Status],
-                relevant: Optional[bool]):
+                relevant: Optional[bool]=None):
         if sentence.code in self:
             out = self[sentence.code]
             out.value = value

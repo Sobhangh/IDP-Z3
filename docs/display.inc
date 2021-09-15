@@ -46,7 +46,15 @@ optionalPropagation
     By default, this button is not present.
 
 manualPropagation
-    If ``manualPropagation()`` is present in the *display block*, automatic propagation will be disabled in the interface. Instead, a button will be added to the header that allows propagation when clicked.
+    If ``manualPropagation()`` is present in the *display block*, automatic propagation will be disabled in the interface. Instead, a button will be added to the header that computes propagation when clicked.
+
+optionalRelevance
+    When the *display block* contains ``optionalRelevance()``, a toggle button will be available in the interface which allows toggling immediate computation of relevance on and off.
+
+    By default, this button is not present.
+
+manualRelevance
+    If ``manualRelevance()`` is present in the *display block*, automatic computation of relevant questions will be disabled in the interface. Instead, a button will be added to the header that computes relevance when clicked.
 
 unit
     ``unit('unitstr', s1, ..., sn)`` specifies the unit of one or more symbols.

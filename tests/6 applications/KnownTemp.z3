@@ -50,7 +50,9 @@ display {
 }
 -- meta -------------------------------------
 {'manualPropagation': False,
+ 'manualRelevance': False,
  'optionalPropagation': False,
+ 'optionalRelevance': False,
  'symbols': [{'environmental': True,
               'idpname': 'OMinT',
               'priority': 'core',

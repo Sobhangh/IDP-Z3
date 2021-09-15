@@ -441,6 +441,8 @@ def annotate(self, idp):
         ('moveSymbols', Symbol(name=BOOL)),
         ('optionalPropagation', Symbol(name=BOOL)),
         ('manualPropagation', Symbol(name=BOOL)),
+        ('optionalRelevance', Symbol(name=BOOL)),
+        ('manualRelevance', Symbol(name=BOOL)),
         ('unit', open_types['unit']),
         ('heading', open_types['heading'])
     ]:
