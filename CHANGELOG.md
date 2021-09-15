@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
 * MR !126: improve performance by simplifying `abs` when possible
 * (breaking) MR !132: `Problem.formula()`returns a Z3 object, for performance
+* Fix #49: improve command line interface
 * fix #119: improve error message when too many variables in head of rule.
 * fix #126: error in inductive definitions
 * fix #127: error in definition with aggregates
