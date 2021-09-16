@@ -10,16 +10,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
 * MR !126: improve performance by simplifying `abs` when possible
 * (breaking) MR !132: `Problem.formula()`returns a Z3 object, for performance
+* Fix #49: improve command line interface
 * fix #119: improve error message when too many variables in head of rule.
 * fix #126: error in inductive definitions
 * fix #127: error in definition with aggregates
 * fix #128: fix enumerations that mix integer and real, or range over dates
 * fix #130: error when using conflicting web sessions
+* fix #134: incorrect printing of the result of `Problem.optimize` in main block
 
 ### Interactive Consultant
 * MR !124: show the overall time of execution of each run in the IDE
+* MR !138: improve speed of opening a drop-down
 * web MR !29: "Print" view + dynamic horizontal sizing of consultant
 * web MR !30: ctrl-S in editor runs the code
+* Added info on API endpoint to docs
 
 
 ## [0.8.3] - 2021-08-18

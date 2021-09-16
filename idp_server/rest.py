@@ -30,6 +30,7 @@ import os
 import threading
 import time
 import traceback
+from z3 import set_option
 
 from flask import Flask, g, send_from_directory  # g is required for pyinstrument
 from flask_cors import CORS
@@ -117,6 +118,10 @@ class run(Resource):
 
         :returns stdout.
         """
+
+        # allow pretty printing of large Z3 formula (see https://stackoverflow.com/a/19570420/474491)
+        set_option(max_args=10000000, max_lines=1000000, max_depth=10000000, max_visited=1000000)
+
         log("start /run")
         with z3lock:
             try:
@@ -144,12 +149,16 @@ class run(Resource):
                 if with_profiling:
                     g.profiler.stop()
                     print(g.profiler.output_text(unicode=True, color=True))
-                return out
             except Exception as exc:
                 if with_profiling:
                     g.profiler.stop()
                 traceback.print_exc()
-                return str(exc)
+                out = str(exc)
+
+        # restore defaults in https://github.com/Z3Prover/z3/blob/master/src/api/python/z3/z3printer.py
+        set_option(max_args=128, max_lines=200,
+                   max_depth=20, max_visited=10000)
+        return out
 
 
 class meta(Resource):
