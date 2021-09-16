@@ -199,7 +199,8 @@ def get_relevant_questions(self: "State"):
                 and any(q in reachable and q not in given
                         for q in constraint.questions)):
                 constraint.relevant = True
-                to_add.extend(constraint.questions)
+                to_add.extend([q for q in constraint.questions
+                               if q not in reachable])
 
     self.relevant_symbols = relevants if out.idp.display.moveSymbols else {}
 
