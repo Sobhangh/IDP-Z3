@@ -241,7 +241,7 @@ class Problem(object):
                 self.assigned.append(atom)
                 if old_value:
                     self.cleared.append(atom)
-            self.assignments.assert__(atom, val, status, False)
+            self.assignments.assert__(atom, val, status)
         self._formula = None
 
     def constraintz(self):
@@ -295,7 +295,7 @@ class Problem(object):
                                                model_completion=complete)
                     val = str_to_IDP(q, str(val1))
                     if val is not None:
-                        ass.assert__(q, val, S.EXPANDED, None)
+                        ass.assert__(q, val, S.EXPANDED)
         return ass
 
     def expand(self, max=10, complete=False):
