@@ -19,3 +19,22 @@ Alternatively, if you installed it via pip, you can run it with the following co
 .. code::
 
     idp-engine path/to/file.idp
+
+The usage of the CLI is as follows:
+
+
+.. code-block:: none
+
+   usage: idp-engine.py [-h] [-o OUTPUT] [--full-formula] [--no-timing] FILE
+
+   IDP-Z3
+
+   positional arguments:
+     FILE                  path to the .idp file
+
+     optional arguments:
+       -h, --help            show this help message and exit
+       -o OUTPUT, --output OUTPUT
+       name of the output file
+       --full-formula        show the full formula
+       --no-timing           don't display timing information
