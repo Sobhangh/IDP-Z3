@@ -250,7 +250,8 @@ class eval(Resource):
                 elif method == 'get_range':
                     out = state.get_range(args['field'])
                 elif method == 'relevance':
-                    out = Output(state).fill(get_relevant_questions(state))
+                    get_relevant_questions(state)
+                    out = Output(state).fill(state)
                 elif method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
                     out = copy(state)
