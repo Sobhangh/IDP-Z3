@@ -41,20 +41,20 @@ moveSymbols
     By default, the symbols do not move.
 
 optionalPropagation
-    When the *display block* contains ``optionalPropagation()``, a toggle button will be available in the interface which allows toggling immediate propagation on and off.
+    When the *display block* contains ``optionalPropagation()``, a toggle button is shown next to the menu to allow toggling immediate propagation on and off.
 
     By default, this button is not present.
 
 manualPropagation
-    If ``manualPropagation()`` is present in the *display block*, automatic propagation will be disabled in the interface. Instead, a button will be added to the header that computes propagation when clicked.
+    When ``manualPropagation()`` is present in the *display block*, automatic propagation is disabled in the interface. Instead, a button is added to the menu that computes propagation when clicked.
 
 optionalRelevance
-    When the *display block* contains ``optionalRelevance()``, a toggle button will be available in the interface which allows toggling immediate computation of relevance on and off.
+    When the *display block* contains ``optionalRelevance()``, a toggle button is shown next to the menu to allow toggling immediate computation of relevance on and off.
 
     By default, this button is not present.
 
 manualRelevance
-    If ``manualRelevance()`` is present in the *display block*, automatic computation of relevant questions will be disabled in the interface. Instead, a button will be added to the header that computes relevance when clicked.
+    When ``manualRelevance()`` is present in the *display block*, automatic computation of relevant questions is disabled in the interface. Instead, a menu option is available in the "Reasoning" menu that computes relevance when selected.
 
 unit
     ``unit('unitstr', s1, ..., sn)`` specifies the unit of one or more symbols.
