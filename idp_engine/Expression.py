@@ -343,7 +343,7 @@ class Expression(ASTNode):
 
         `co_constraints` is an OrderedSet of Expression
         """
-        if self.co_constraint is not None:
+        if self.co_constraint is not None and self.co_constraint not in co_constraints:
             co_constraints.append(self.co_constraint)
             self.co_constraint.co_constraints(co_constraints)
         for e in self.sub_exprs:
