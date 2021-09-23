@@ -273,25 +273,27 @@ def _propagate(self, tag=S.CONSEQUENCE):
         result = solver.check()
         if result == sat:
             for q in todo:
-                solver.push()  #  faster (~3%) with push than without
                 solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
-                res1 = solver.check()
-                if res1 == sat:
-                    val1 = solver.model().eval(q.reified(self))
-                    if str(val1) != str(q.reified(self)):  # if not irrelevant
-                        solver.push()
-                        solver.add(Not(q.reified(self) == val1))
-                        res2 = solver.check()
-                        solver.pop()
+            res1 = solver.check()
+            if res1 == sat:
+                model = solver.model()
+                valqs = [(model.eval(q.reified(self)), q) for q in todo]
+                for val1, q in valqs:
+                    if str(val1) == str(q.reified(self)):
+                        continue  # irrelevant
+                    solver.push()
+                    solver.add(Not(q.reified(self) == val1))
+                    res2 = solver.check()
+                    solver.pop()
 
-                        if res2 == unsat:
-                            val = str_to_IDP(q, str(val1))
-                            yield self.assignments.assert__(q, val, tag, True)
-                        elif res2 == unknown:
-                            res1 = unknown
-                        else:  # reset the value
-                            self.assignments.assert__(q, None, S.UNKNOWN, False)
-                solver.pop()
+                    if res2 == unsat:
+                        val = str_to_IDP(q, str(val1))
+                        yield self.assignments.assert__(q, val, tag, True)
+                    elif res2 == unknown:
+                        res1 = unknown
+                        break
+                    else:  # reset the value
+                        self.assignments.assert__(q, None, S.UNKNOWN, False)
                 if res1 == unknown:
                     # yield(f"Unknown: {str(q)}")
                     solver = Solver(ctx=self.ctx)  # restart the solver
