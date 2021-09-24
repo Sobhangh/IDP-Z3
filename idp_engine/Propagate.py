@@ -226,7 +226,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                 if solver.check() != sat:
                     # print("Falling back !")
                     yield from self._propagate(tag)
-                test = Not(q.reified(self) == solver.model().eval(q.reified(self)))
+                test = Not(q.reified(self) == solver.model().eval(q.reified(self)))  #TODO compute model once
                 tests.append(test)
                 lookup[str(test)] = q
             solver.push()
@@ -234,9 +234,9 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                 solver.add(Or(tests))
                 result = solver.check()
                 if result == sat:
-                    tests = [t for t in tests if is_false(solver.model().eval(t))]
+                    tests = [t for t in tests if is_false(solver.model().eval(t))]  #TODO compute model once
                     for t in tests:  # reset the other assignments
-                        if is_true(solver.model().eval(t)):
+                        if is_true(solver.model().eval(t)):  #TODO compute model once
                             q = lookup[str(test)]
                             self.assignments.assert__(q, None, S.UNKNOWN, False)
                 elif result == unsat:
@@ -244,7 +244,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                     solver.check()  # not sure why this is needed
                     for test in tests:
                         q = lookup[str(test)]
-                        val1 = solver.model().eval(q.reified(self))
+                        val1 = solver.model().eval(q.reified(self))  #TODO compute model once
                         val = str_to_IDP(q, str(val1))
                         yield self.assignments.assert__(q, val, tag, True)
                     break
