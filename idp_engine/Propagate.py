@@ -298,11 +298,14 @@ def _propagate(self, tag=S.CONSEQUENCE):
                 if res2 == unsat:
                     val = str_to_IDP(q, str(val1))
                     yield self.assignments.assert__(q, val, tag, True)
+                    last_prop = time.process_time()
                 elif res2 == unknown:  # does not happen with newest version of Z3
                     solver = get_solver() # restart the solver
                     solver.check()
                 else:  # reset the value
-                    self.assignments.assert__(q, None, S.UNKNOWN, False)
+                    if self.assignments.get(q, True) is not None:
+                        self.assignments.assert__(q, None, S.UNKNOWN, False)
+                        last_prop = time.process_time()
             yield "No more consequences."
         elif res1 == unsat:
             yield "Not satisfiable."
