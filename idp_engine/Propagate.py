@@ -274,38 +274,37 @@ def _propagate(self, tag=S.CONSEQUENCE):
     if todo:
         z3_formula = self.formula()
 
-        solver = Solver(ctx=self.ctx)
-        solver.add(z3_formula)
-        result = solver.check()
-        if result == sat:
+        def get_solver():
+            solver = Solver(ctx=self.ctx)
+            solver.add(z3_formula)
+            solver.check()  # required for forall.idp !?
             for q in todo:
                 solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
-            res1 = solver.check()
-            if res1 == sat:
-                model = solver.model()
-                valqs = [(model.eval(q.reified(self)), q) for q in todo]
-                for val1, q in valqs:
-                    if str(val1) == str(q.reified(self)):
-                        continue  # irrelevant
-                    solver.push()
-                    solver.add(Not(q.reified(self) == val1))
-                    res2 = solver.check()
-                    solver.pop()
+            return solver
 
-                    if res2 == unsat:
-                        val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert__(q, val, tag, True)
-                    elif res2 == unknown:
-                        res1 = unknown
-                        break
-                    else:  # reset the value
-                        self.assignments.assert__(q, None, S.UNKNOWN, False)
-                if res1 == unknown:
-                    # yield(f"Unknown: {str(q)}")
-                    solver = Solver(ctx=self.ctx)  # restart the solver
-                    solver.add(z3_formula)
+        solver = get_solver()
+        res1 = solver.check()
+        if res1 == sat:
+            model = solver.model()
+            valqs = [(model.eval(q.reified(self)), q) for q in todo]
+            for val1, q in valqs:
+                if str(val1) == str(q.reified(self)):
+                    continue  # irrelevant
+                solver.push()
+                solver.add(Not(q.reified(self) == val1))
+                res2 = solver.check()
+                solver.pop()
+
+                if res2 == unsat:
+                    val = str_to_IDP(q, str(val1))
+                    yield self.assignments.assert__(q, val, tag, True)
+                elif res2 == unknown:  # does not happen with newest version of Z3
+                    solver = get_solver() # restart the solver
+                    solver.check()
+                else:  # reset the value
+                    self.assignments.assert__(q, None, S.UNKNOWN, False)
             yield "No more consequences."
-        elif result == unsat:
+        elif res1 == unsat:
             yield "Not satisfiable."
             yield str(z3_formula)
         else:
