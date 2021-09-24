@@ -28,6 +28,7 @@ It has 2 parts:
 This module monkey-patches the Expression and Problem classes and sub-classes.
 """
 
+import time
 from typing import List, Tuple, Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true, is_not, is_eq)
 
@@ -38,6 +39,9 @@ from .Expression import (Expression, AQuantification,
 from .Parse import str_to_IDP
 from .Problem import Problem
 from .utils import OrderedSet
+
+start = time.process_time()
+last_prop = "hello"
 
 ###############################################################################
 #
@@ -264,6 +268,8 @@ Problem._batch_propagate = _batch_propagate
 def _propagate(self, tag=S.CONSEQUENCE):
     """generator of new propagated assignments.  Update self.assignments too.
     """
+    global start, last_prop
+    start, last_prop = time.process_time(), None
     todo = self._directional_todo()
     if todo:
         z3_formula = self.formula()
@@ -308,6 +314,10 @@ def _propagate(self, tag=S.CONSEQUENCE):
     else:
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
+    if last_prop is None:
+        last_prop = 0
+    else:
+        last_prop -= start
 Problem._propagate = _propagate
 
 
