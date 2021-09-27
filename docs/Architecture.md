@@ -77,6 +77,8 @@ Returns:
 * **symbols**: contains information on each symbol used in the IDP program. This information includes symbol name, type, view, ...
 * **optionalPropagation**: a bool representing if a propagation toggle should be shown in the interface.
 * **manualPropagation**: a bool representing if propagation should be manual via a button.
+* **optionalRelevance**: a bool representing if a relevance toggle should be shown in the interface.
+* **manualRelevance**: a bool representing if relevance computation should be manual via a button.
 * **propagated**: contains the information on all the (expanded) symbols.
 
 ####  /eval
@@ -92,8 +94,8 @@ Arguments:
 * **symbol**: the name of a symbol, only used for *minimize* or *explain*.
 * **value**: a value, only used for *explain*.
 * **field**: the applied symbol for which a range must be determined, only for *get_range*.
-* **minimize**: *true* for minimization, *false* for maximization. 
- 
+* **minimize**: *true* for minimization, *false* for maximization.
+
 Returns:
 
 * **Global**: the global information of the current state of the IC.

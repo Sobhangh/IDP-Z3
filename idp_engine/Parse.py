@@ -960,6 +960,8 @@ class Display(ASTNode):
         self.moveSymbols = False
         self.optionalPropagation = False
         self.manualPropagation = False
+        self.optionalRelevance = False
+        self.manualRelevance = False
         self.name = "display"
 
     def run(self, idp):
@@ -1008,6 +1010,10 @@ class Display(ASTNode):
                     self.optionalPropagation = True
                 elif name == "manualPropagation":
                     self.manualPropagation = True
+                elif name == "optionalRelevance":
+                    self.optionalRelevance = True
+                elif name == "manualRelevance":
+                    self.manualRelevance = True
                 else:
                     raise IDPZ3Error(f"unknown display constraint:"
                                      f" {constraint}")

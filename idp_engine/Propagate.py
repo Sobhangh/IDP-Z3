@@ -92,7 +92,7 @@ def symbolic_propagate(self,
     """
     if self.value is None:
         if self.code in assignments:
-            assignments.assert__(self, truth, tag, False)
+            assignments.assert__(self, truth, tag)
         if self.simpler is not None:
             self.simpler.symbolic_propagate(assignments, tag, truth)
         else:
@@ -110,7 +110,7 @@ Expression.propagate1 = propagate1
 
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
     if self.code in assignments:
-        assignments.assert__(self, truth, tag, False)
+        assignments.assert__(self, truth, tag)
     if not self.quantees:  # expanded
         assert len(self.sub_exprs) == 1,  \
                f"Internal error in symbolic_propagate: {self}"  # a conjunction or disjunction
@@ -154,10 +154,10 @@ def propagate1(self, assignments, tag, truth=TRUE):
         operands1 = [e.value for e in self.sub_exprs]
         if (type(self.sub_exprs[0]) == AppliedSymbol
         and operands1[1] is not None):
-            assignments.assert__(self.sub_exprs[0], operands1[1], tag, False)
+            assignments.assert__(self.sub_exprs[0], operands1[1], tag)
         elif (type(self.sub_exprs[1]) == AppliedSymbol
         and operands1[0] is not None):
-            assignments.assert__(self.sub_exprs[1], operands1[0], tag, False)
+            assignments.assert__(self.sub_exprs[1], operands1[0], tag)
 AComparison.propagate1 = propagate1
 
 
@@ -238,7 +238,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                     for t in tests:  # reset the other assignments
                         if is_true(solver.model().eval(t)):  #TODO compute model once
                             q = lookup[str(test)]
-                            self.assignments.assert__(q, None, S.UNKNOWN, False)
+                            self.assignments.assert__(q, None, S.UNKNOWN)
                 elif result == unsat:
                     solver.pop()
                     solver.check()  # not sure why this is needed
@@ -246,7 +246,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                         q = lookup[str(test)]
                         val1 = solver.model().eval(q.reified(self))  #TODO compute model once
                         val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert__(q, val, tag, True)
+                        yield self.assignments.assert__(q, val, tag)
                     break
                 else:  # unknown
                     # print("Falling back !!")
@@ -297,14 +297,14 @@ def _propagate(self, tag=S.CONSEQUENCE):
 
                 if res2 == unsat:
                     val = str_to_IDP(q, str(val1))
-                    yield self.assignments.assert__(q, val, tag, True)
+                    yield self.assignments.assert__(q, val, tag)
                     last_prop = time.process_time()
                 elif res2 == unknown:  # does not happen with newest version of Z3
                     solver = get_solver() # restart the solver
                     solver.check()
                 else:  # reset the value
                     if self.assignments.get(q, True) is not None:
-                        self.assignments.assert__(q, None, S.UNKNOWN, False)
+                        self.assignments.assert__(q, None, S.UNKNOWN)
                         last_prop = time.process_time()
             yield "No more consequences."
         elif res1 == unsat:
@@ -349,14 +349,14 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
                     value = TRUE
                 # try to unreify it
                 if atom in unreify:
-                    yield self.assignments.assert__(unreify[atom], value, tag, True)
+                    yield self.assignments.assert__(unreify[atom], value, tag)
                 elif is_eq(consq):
                     assert value == TRUE, f"Internal error in z3_propagate"
                     term = consq.children()[0]
                     if term in unreify:
                         q = unreify[term]
                         val = str_to_IDP(q, consq.children()[1])
-                        yield self.assignments.assert__(q, val, tag, True)
+                        yield self.assignments.assert__(q, val, tag)
                     else:
                         print("???", str(consq))
                 else:

@@ -44,6 +44,7 @@ import re
 # pyximport.install(language_level=3)
 
 from idp_server.State import State
+from idp_server.Inferences import get_relevant_questions
 from idp_server.IO import Output, metaJSON
 from idp_engine import IDP, Problem, model_expand, Status as S
 from idp_engine.utils import start, log, NEWL, RUN_FILE
@@ -66,6 +67,7 @@ def generateZ3(theory):
                 idp.execute()
             else:
                 state = State(idp)
+                get_relevant_questions(state)
                 out = Output(state).fill(state)
 
                 print(

@@ -209,7 +209,7 @@ class Problem(object):
                 e.co_constraints(self.co_constraints)
         for s in list(questions.values()):
             if s.code not in self.assignments:
-                self.assignments.assert__(s, None, S.UNKNOWN, False)
+                self.assignments.assert__(s, None, S.UNKNOWN)
 
         for ass in self.assignments.values():
             ass.sentence = ass.sentence
@@ -234,14 +234,14 @@ class Problem(object):
             if self.propagated and old_value is not None:
                 self.cleared.append(atom)
                 self.assigned.pop(atom, None)
-            self.assignments.assert__(atom, value, S.UNKNOWN, False)
+            self.assignments.assert__(atom, value, S.UNKNOWN)
         else:
             val = str_to_IDP(atom, str(value))
             if self.propagated and not(old_value and old_value.same_as(val)):
                 self.assigned.append(atom)
                 if old_value:
                     self.cleared.append(atom)
-            self.assignments.assert__(atom, val, status, False)
+            self.assignments.assert__(atom, val, status)
         self._formula = None
 
     def constraintz(self):
@@ -296,7 +296,7 @@ class Problem(object):
                                                model_completion=complete)
                     val = str_to_IDP(q, str(val1))
                     if val is not None:
-                        ass.assert__(q, val, S.EXPANDED, None)
+                        ass.assert__(q, val, S.EXPANDED)
         return ass
 
     def expand(self, max=10, complete=False):
@@ -403,7 +403,7 @@ class Problem(object):
         for e in range:
             sentence = Assignment(termE, e, S.UNKNOWN).formula()
             # use assignments.assert_ to create one if necessary
-            out.assignments.assert__(sentence, None, S.UNKNOWN, False)
+            out.assignments.assert__(sentence, None, S.UNKNOWN)
         out.assigned = True  # to force propagation of Unknowns
         _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
         assert all(e.sentence.is_assignment()
@@ -592,7 +592,7 @@ class Problem(object):
                     e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
-                    self.assignments.assert__(q, None, S.UNKNOWN,False)
+                    self.assignments.assert__(q, None, S.UNKNOWN)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)

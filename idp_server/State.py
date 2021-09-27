@@ -109,6 +109,7 @@ class State(Problem):
                    if struct.voc.name != 'environment']
         self.add(*blocks)
         self.symbolic_propagate(tag=S.UNIVERSAL)
+        self.relevant_symbols = {}
 
         self._finalize()
 
@@ -138,11 +139,6 @@ class State(Problem):
             self.assignments.update(self.environment.assignments)
             self._formula = None
         self.propagate(tag=S.CONSEQUENCE)
-        out = get_relevant_questions(self)  # creates a copy of self
-        # copy relevant information
-        for k,v in out.assignments.items():
-            self.assignments[k].relevant = v.relevant
-        self.relevant_symbols = out.relevant_symbols
         return self
 
     def __str__(self) -> str:
