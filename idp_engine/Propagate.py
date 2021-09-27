@@ -28,6 +28,7 @@ It has 2 parts:
 This module monkey-patches the Expression and Problem classes and sub-classes.
 """
 
+import time
 from typing import List, Tuple, Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true, is_not, is_eq)
 
@@ -38,6 +39,9 @@ from .Expression import (Expression, AQuantification,
 from .Parse import str_to_IDP
 from .Problem import Problem
 from .utils import OrderedSet
+
+start = time.process_time()
+last_prop = "hello"
 
 ###############################################################################
 #
@@ -264,40 +268,46 @@ Problem._batch_propagate = _batch_propagate
 def _propagate(self, tag=S.CONSEQUENCE):
     """generator of new propagated assignments.  Update self.assignments too.
     """
+    global start, last_prop
+    start, last_prop = time.process_time(), None
     todo = self._directional_todo()
     if todo:
         z3_formula = self.formula()
 
-        solver = Solver(ctx=self.ctx)
-        solver.add(z3_formula)
-        result = solver.check()
-        if result == sat:
+        def get_solver():
+            solver = Solver(ctx=self.ctx)
+            solver.add(z3_formula)
+            solver.check()  # required for forall.idp !?
             for q in todo:
-                solver.push()  #  faster (~3%) with push than without
                 solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
-                res1 = solver.check()
-                if res1 == sat:
-                    val1 = solver.model().eval(q.reified(self))
-                    if str(val1) != str(q.reified(self)):  # if not irrelevant
-                        solver.push()
-                        solver.add(Not(q.reified(self) == val1))
-                        res2 = solver.check()
-                        solver.pop()
+            return solver
 
-                        if res2 == unsat:
-                            val = str_to_IDP(q, str(val1))
-                            yield self.assignments.assert__(q, val, tag)
-                        elif res2 == unknown:
-                            res1 = unknown
-                        else:  # reset the value
-                            self.assignments.assert__(q, None, S.UNKNOWN)
+        solver = get_solver()
+        res1 = solver.check()
+        if res1 == sat:
+            model = solver.model()
+            valqs = [(model.eval(q.reified(self)), q) for q in todo]
+            for val1, q in valqs:
+                if str(val1) == str(q.reified(self)):
+                    continue  # irrelevant
+                solver.push()
+                solver.add(Not(q.reified(self) == val1))
+                res2 = solver.check()
                 solver.pop()
-                if res1 == unknown:
-                    # yield(f"Unknown: {str(q)}")
-                    solver = Solver(ctx=self.ctx)  # restart the solver
-                    solver.add(z3_formula)
+
+                if res2 == unsat:
+                    val = str_to_IDP(q, str(val1))
+                    yield self.assignments.assert__(q, val, tag)
+                    last_prop = time.process_time()
+                elif res2 == unknown:  # does not happen with newest version of Z3
+                    solver = get_solver() # restart the solver
+                    solver.check()
+                else:  # reset the value
+                    if self.assignments.get(q, True) is not None:
+                        self.assignments.assert__(q, None, S.UNKNOWN)
+                        last_prop = time.process_time()
             yield "No more consequences."
-        elif result == unsat:
+        elif res1 == unsat:
             yield "Not satisfiable."
             yield str(z3_formula)
         else:
@@ -306,6 +316,10 @@ def _propagate(self, tag=S.CONSEQUENCE):
     else:
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
+    if last_prop is None:
+        last_prop = 0
+    else:
+        last_prop -= start
 Problem._propagate = _propagate
 
 
