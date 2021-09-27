@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !126: improve performance by simplifying `abs` when possible
 * (breaking) MR !132: `Problem.formula()`returns a Z3 object, for performance
 * MR !141: improve performance of definitions containing other defined terms
+* MR !142: more efficient inferences for large models
 * MR !143: API: `IDP.from_file()` should return an IDP instance, not None
 * Fix #49: improve command line interface
 * fix #119: improve error message when too many variables in head of rule.
