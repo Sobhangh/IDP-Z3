@@ -104,6 +104,7 @@ html_theme_options = {
     'navbar_links': [
         ("Home", "index"),
         ("Interactive Consultant", "interactive_consultant"),
+        ("Publications", "publications"),
         ("Online IDE", "https://interactive-consultant.IDP-Z3.be/IDE", True),
         ("Documentation", "https://docs.idp-z3.be/", True),
     ],

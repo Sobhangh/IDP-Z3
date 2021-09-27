@@ -147,7 +147,7 @@ class IDP(ASTNode):
         assert path.exists(file), f"Can't find {file}"
         with open(file, "r") as source:
             code = source.read()
-            cls.from_str(code)
+            return cls.from_str(code)
 
     @classmethod
     def from_str(cls, code:str) -> "IDP":

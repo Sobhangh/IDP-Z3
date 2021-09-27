@@ -1,5 +1,6 @@
-IDP-Z3 is a software collection implementing the Knowledge Base paradigm using the FO(.) language.
-FO(.) is First Order logic, extended with definitions, types, arithmetic, aggregates and intensional objects.
+idp-engine is a reasoning engine for knowledge represented using the FO(.) language.
+FO(.) is First Order logic, with various extensions to make it more expressive:  types, arithmetic, inductive definitions, aggregates, and intensional objects.
+The idp-engine uses the Z3 SMT solver as a back-end.
 
 It is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium, and made available under the [GNU LGPL v3 License](https://www.gnu.org/licenses/lgpl-3.0.txt).
 

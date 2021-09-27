@@ -289,9 +289,10 @@ class Problem(object):
                 solver.add(q.reified(self) == q.translate(self))
         res1 = solver.check()
         if res1 == sat:
+            model = solver.model()
             for q in todo:
                 if not q.is_reified() or self.extended:
-                    val1 = solver.model().eval(q.reified(self),
+                    val1 = model.eval(q.reified(self),
                                                model_completion=complete)
                     val = str_to_IDP(q, str(val1))
                     if val is not None:
