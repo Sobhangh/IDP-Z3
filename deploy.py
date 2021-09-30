@@ -33,6 +33,7 @@ def require_clean_work_tree(cwd):
         "Cannot deploy: you have unstaged changes."
     assert 0 == run('git diff-index --cached --quiet HEAD --ignore-submodules --', cwd=cwd).returncode, \
         "Cannot deploy: your index contains uncommitted changes."
+    run('git pull', cwd=cwd)  # may fail if there are commits
 
 
 def query_user(query, default="y", get=False):

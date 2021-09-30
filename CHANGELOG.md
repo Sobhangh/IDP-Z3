@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+
+## [0.8.4] - 2021-09-30
+
+Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
+
 ### API
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
 * MR !126: improve performance by simplifying `abs` when possible
