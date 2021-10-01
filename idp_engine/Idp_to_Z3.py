@@ -322,23 +322,14 @@ def translate1(self, problem: "Problem", vars={}):
         return If(arg >= 0, arg, -arg, problem.ctx)
     assert self.decl.name not in RESERVED_SYMBOLS, \
                f"Can't resolve argument of built-in symbols: {self}"
-    try:
-        self.check(len(self.sub_exprs) == self.decl.arity,
-                    f"Incorrect number of arguments for {self}")
-        if len(self.sub_exprs) == 0:
-            return self.decl.translate(problem)
-        else:
-            arg = [x.translate(problem, vars) for x in self.sub_exprs]
-            # assert  all(a != None for a in arg)
-            return (self.decl.translate(problem))(arg)
-    except AttributeError as e:
-        # Using argument on symbol that has no arity.
-        if str(e) == "'RangeDeclaration' object has no attribute 'arity'":
-            self.check(False,
-                        f"Symbol {self} does not accept an argument")
-        # Unknown error.
-        else:
-            raise AttributeError(e)
+    self.check(len(self.sub_exprs) == self.decl.arity,
+                f"Incorrect number of arguments for {self}")
+    if len(self.sub_exprs) == 0:
+        return self.decl.translate(problem)
+    else:
+        arg = [x.translate(problem, vars) for x in self.sub_exprs]
+        # assert  all(a != None for a in arg)
+        return (self.decl.translate(problem))(arg)
 AppliedSymbol.translate1 = translate1
 
 def reified(self, problem: "Problem", vars={}) -> DatatypeRef:

@@ -939,6 +939,10 @@ class AppliedSymbol(Expression):
             or any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
+        if self.symbol.decl:
+            self.check(self.symbol.decl.arity == len(self.sub_exprs),
+                f"Incorrect number of arguments in {self}: "
+                f"should be {self.symbol.decl.arity}")
         try:
             out = {}
             for i, e in enumerate(self.sub_exprs):
