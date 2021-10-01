@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+### API
+* fix #136: Improve error message for mis-applied symbol
+
 
 ## [0.8.4] - 2021-09-30
 
