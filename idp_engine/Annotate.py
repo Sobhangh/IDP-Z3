@@ -605,6 +605,9 @@ AAggregate.annotate1 = AQuantification.annotate1
 
 def annotate(self, voc, q_vars):
     self.symbol = self.symbol.annotate(voc, q_vars)
+    self.check((not self.symbol.decl or type(self.symbol.decl) != Constructor
+                or 0 < self.symbol.decl.arity),
+               f"Constructor `{self.symbol}` cannot be applied to argument(s)")
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)

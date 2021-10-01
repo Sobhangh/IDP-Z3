@@ -31,7 +31,7 @@ from .Expression import (
     Constructor, Expression, IfExpr, AQuantification, Quantee,
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status as S, Assignment
@@ -426,6 +426,8 @@ def update_exprs(self, new_exprs):
     value = (symbol if self.eval == '' else
              symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
              None)
+    self.check(not value or type(value) != Variable,
+               f"Variable `{value}` cannot be applied to argument(s).")
     self.decl = value.decl if value else None
     return self._change(sub_exprs=[symbol], value=value)
 SymbolExpr.update_exprs = update_exprs
