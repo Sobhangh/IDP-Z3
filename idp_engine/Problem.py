@@ -484,11 +484,12 @@ class Problem(object):
                             else:
                                 laws.append(a1.formula())
 
+            unsatcorestrings = {str(ps[a2]) for a2 in unsatcore}
             for a1 in chain(chain(*def_constraints.values()), self.constraints):
                 #TODO find the rule
-                for a2 in unsatcore:
-                    if str(a1.original.interpret(self).translate(self)) == str(ps[a2]):
-                        laws.append(a1)
+                if str(a1.original.interpret(self).translate(self)) in unsatcorestrings:
+                    laws.append(a1)
+
         return (facts, laws)
 
     def simplify(self):
