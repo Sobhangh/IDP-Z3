@@ -377,7 +377,12 @@ class TypeDeclaration(ASTNode):
                 f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
-        return self.interpretation.enumeration.contains([var], False)
+        if self.name == SYMBOL:
+            comparisons = [AComparison.make("=", [var, UnappliedSymbol.construct(c)])
+                          for c in self.constructors]
+            return ADisjunction.make("∨", comparisons)
+        else:
+            return self.interpretation.enumeration.contains([var], False)
 
     def is_subset_of(self, other):
         return self == other
