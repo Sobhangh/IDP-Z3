@@ -7,8 +7,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unpublished yet]
 
 ### API
-* fix #132, #136: Improve error message for mis-applied symbol
 * MR !145: Improve performance of explain
+* fix #132, #136: Improve error message for mis-applied symbol
+* fix #137: support of functions from Symbol to Symbol
 
 
 ## [0.8.4] - 2021-09-30

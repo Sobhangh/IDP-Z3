@@ -3,6 +3,7 @@ vocabulary {
     p, q: () → Bool
     important: (Symbol) → Bool
     opposite: color → color
+    f: Symbol -> Symbol
 }
 theory {
   ~p() | q().
@@ -17,6 +18,7 @@ theory {
   input_domain(`opposite, 1) ~= `Date.
   `opposite = `opposite.
   `opposite ~= `color.
+  f(`f) = `f.
 }
 display {
   relevant(`p).
