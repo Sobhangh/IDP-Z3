@@ -15,6 +15,6 @@ To quickstart your experience, the interactive consultant comes with two demo kn
 A short introductory video on the interactive consultant can be found below:
 
 .. rst-class:: center
-.. video:: https://interactive-consultant.IDP-Z3.be/assets/Interactive_Consultant.mp4
+.. video:: ./_static/Interactive_Consultant.mp4
    :width: 800
    :height: 480
