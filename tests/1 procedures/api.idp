@@ -1,0 +1,34 @@
+vocabulary V {
+    p : () → 𝔹
+    a,b: () -> Int
+}
+
+theory T:V {
+    p() => a()=b().
+}
+
+procedure main() {
+    P = Problem(T)
+    i=1
+    print(f"Propagation of a() = {i}:")
+    P.assert_("a()", 1)
+    pretty_print(P.propagate().assignments)
+    print("")
+
+    print("Followed by propagation of p()=true:")
+    P.assert_("p()", True)
+    pretty_print(P.propagate().assignments)
+    print("")
+
+    print("Followed by propagation of a() = 2:")
+    P.assert_("a()", 2)
+    pretty_print(P.propagate().assignments)
+    print("")
+
+    print("Followed by propagation of p()=?:")
+    P.assert_("p()", None)
+    pretty_print(P.propagate().assignments)
+
+    a = duration("test")
+    // print("\nDuration:", duration(), "sec")  # not included to avoid changing test results
+}

@@ -66,11 +66,15 @@ def metaJSON(state):
             symbols.append(d)
     optionalPropagation = state.idp.display.optionalPropagation
     manualPropagation = state.idp.display.manualPropagation
+    optionalRelevance = state.idp.display.optionalRelevance
+    manualRelevance = state.idp.display.manualRelevance
 
     # Create the output dictionary.
     out = {"title": "Interactive Consultant", "symbols": symbols,
            "optionalPropagation": optionalPropagation,
-           "manualPropagation": manualPropagation}
+           "manualPropagation": manualPropagation,
+           "optionalRelevance": optionalRelevance,
+           "manualRelevance": manualRelevance}
     return out
 
 
@@ -172,7 +176,7 @@ class Output(object):
 
                 if symbol:
                     symbol["status"] = ass.status.name
-                    symbol["relevant"] = ass.relevant
+                    symbol["relevant"] = ass.relevant if ass.relevant is not None else True
                     symbol['reading'] = reading.replace("()","")
                     symbol['normal'] = not atom.is_reified()
                     symbol['environmental'] = symb.block.name == 'environment'

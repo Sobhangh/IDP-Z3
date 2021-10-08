@@ -9,7 +9,9 @@ theory {
 
 -- meta -------------------------------------
 {'manualPropagation': False,
+ 'manualRelevance': False,
  'optionalPropagation': False,
+ 'optionalRelevance': False,
  'symbols': [{'environmental': False,
               'idpname': 'Start_Dt_Dwelling_For_Social_Rent',
               'priority': 'core',

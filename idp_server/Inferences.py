@@ -69,7 +69,7 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
             for e in c.sub_exprs:
                 split(e, cs)
         elif type(c) == AQuantification and c.q == '∀':
-            assert len(c.sub_exprs) == 1
+            assert len(c.sub_exprs) == 1, "Internal error in split"
             conj = OrderedSet()
             if c.simpler:
                 split(c.simpler, conj)
@@ -95,7 +95,6 @@ def get_relevant_questions(self: "State"):
     sets rank of symbols in self.relevant_symbols
     removes irrelevant constraints in self.constraints
     """
-
     out = self.simplify()  # creates a copy
 
     assert out.extended == True,\
@@ -200,10 +199,15 @@ def get_relevant_questions(self: "State"):
                 and any(q in reachable and q not in given
                         for q in constraint.questions)):
                 constraint.relevant = True
-                to_add.extend(constraint.questions)
-    out.relevant_symbols = (relevants if out.idp.display.moveSymbols else
-                             {})
-    return out
+                to_add.extend([q for q in constraint.questions
+                               if q not in reachable])
+
+    self.relevant_symbols = relevants if out.idp.display.moveSymbols else {}
+
+    # copy relevant information back to self
+    for k,v in out.assignments.items():
+        self.assignments[k].relevant = v.relevant
+    return self
 
 
 def explain(state, consequence=None):

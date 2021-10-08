@@ -31,11 +31,11 @@ from .Expression import (
     Constructor, Expression, IfExpr, AQuantification, Quantee,
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol,
+    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, SYMBOL, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
+from .utils import BOOL, INT, SYMBOL, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
 
 
 # class Expression  ###########################################################
@@ -58,8 +58,9 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         else:
             self.simpler = simpler
     assert (self.value is None
-            or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
-                                    Number, Date])
+               or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
+                                       Number, Date]), \
+            f"Incorrect value in _change: {self.value}"
 
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -315,7 +316,8 @@ def update_exprs(self, new_exprs):
         a = operand.value
         if a is not None:
             if type(a) == Number:
-                return self._change(value=Number(number=str(- a.translate())), sub_exprs=[operand])
+                return self._change(value=Number(number=f"{-a.py_value}"),
+                                    sub_exprs=[operand])
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
@@ -353,6 +355,26 @@ def update_exprs(self, new_exprs):
     if self.decl and type(self.decl) == Constructor:
         if all(e.value is not None for e in new_exprs):
             return self._change(sub_exprs=new_exprs, value = self)
+
+    # simplify abs()
+    if (self.decl and self.decl.name == ABS and len(new_exprs) == 1
+        and new_exprs[0].value):
+        value = Number(number=str(abs(new_exprs[0].py_value)))
+        return self._change(value=value, sub_exprs=new_exprs)
+
+    # simplify x(pos(0,0)) to 0,  is_pos(pos(0,0)) to True
+    if (len(new_exprs) == 1
+        and hasattr(new_exprs[0], 'decl')
+        and type(new_exprs[0].decl) == Constructor
+        and new_exprs[0].decl.tester
+        and self.decl):
+        if self.decl.name in new_exprs[0].decl.parent.accessors:
+            i = new_exprs[0].decl.parent.accessors[self.decl.name]
+            return self._change(simpler=new_exprs[0].sub_exprs[i], sub_exprs=new_exprs)
+        if self.decl.name == new_exprs[0].decl.tester.name:
+            return self._change(value=TRUE, sub_exprs=new_exprs)
+
+    # simplify arity(s), input_domain(s,0), output_domain(s)
     if (self.decl and new_exprs
         and type(new_exprs[0]) == UnappliedSymbol and new_exprs[0].decl):
         if self.decl.name == ARITY:
@@ -404,6 +426,8 @@ def update_exprs(self, new_exprs):
     value = (symbol if self.eval == '' else
              symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
              None)
+    self.check(not value or type(value) != Variable,
+               f"Variable `{value}` cannot be applied to argument(s).")
     self.decl = value.decl if value else None
     return self._change(sub_exprs=[symbol], value=value)
 SymbolExpr.update_exprs = update_exprs

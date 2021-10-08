@@ -33,6 +33,7 @@ def require_clean_work_tree(cwd):
         "Cannot deploy: you have unstaged changes."
     assert 0 == run('git diff-index --cached --quiet HEAD --ignore-submodules --', cwd=cwd).returncode, \
         "Cannot deploy: your index contains uncommitted changes."
+    run('git pull', cwd=cwd)  # may fail if there are commits
 
 
 def query_user(query, default="y", get=False):
@@ -51,7 +52,7 @@ if update_statics:
     require_clean_work_tree("../web-IDP-Z3")
 
     # Generate static and commit.
-    run('npm run -script build', cwd='../web-IDP-Z3', check=True)
+    run('npm run-script build', cwd='../web-IDP-Z3', check=True)
     print("Copying to static folder ...")
     copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
 
@@ -141,5 +142,4 @@ if update_statics:
         run("git push origin master", cwd="../5d82c61fa39e8aa23da1642a2e2b420a")
 
         # open browser on GAE
-        version = '' if new_tag else f'{id}-dot-'
-        run(f"browse https://{version}interactive-consultant.ew.r.appspot.com/")
+        run(f"browse https://{id}-dot-interactive-consultant.ew.r.appspot.com/")

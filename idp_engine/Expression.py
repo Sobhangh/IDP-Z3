@@ -31,12 +31,12 @@ __all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuanti
 import copy
 from collections import ChainMap
 from datetime import date
+from fractions import Fraction
 from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
-from z3 import BoolSort, IntSort, RealSort
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, RESERVED_SYMBOLS, \
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, \
     IDPZ3Error, DEF_SEMANTICS, Semantics
 
 
@@ -111,8 +111,6 @@ class Constructor(ASTNode):
         has been applied to some arguments (e.g., is_rgb)
 
         symbol (Symbol): only for Symbol constructors
-
-        translated (DataTypeRef): the value in Z3
     """
 
     def __init__(self, **kwargs):
@@ -126,7 +124,6 @@ class Constructor(ASTNode):
         self.type = None
         self.symbol = None
         self.tester = None
-        self.translated: Any = None
 
     def __str__(self):
         return (self.name if not self.sorts else
@@ -213,14 +210,11 @@ class Expression(ASTNode):
         is_type_constraint_for (string):
             name of the symbol for which the expression is a type constraint
 
-        translated (Optional[z3 ast]):
-            The translation of the expression to Z3 (cache)
-
     """
-    __slots__ = ('sub_exprs', 'simpler', 'value', 'status', 'code',
+    __slots__ = ('sub_exprs', 'simpler', 'value', 'code',
                  'annotations', 'original', 'str', 'fresh_vars', 'type',
-                 '_reified', 'is_type_constraint_for', 'co_constraint',
-                 'normal', 'questions', 'relevant')
+                 'is_type_constraint_for', 'co_constraint',
+                 'questions', 'relevant')
 
     def __init__(self):
         self.sub_exprs: List["Expression"]
@@ -234,15 +228,12 @@ class Expression(ASTNode):
         self.str: str = self.code
         self.fresh_vars: Optional[Set[str]] = None
         self.type: Optional[str] = None
-        self._reified: Optional["Expression"] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional["Expression"] = None
 
         # attributes of the top node of a (co-)constraint
         self.questions: Optional[OrderedSet] = None
         self.relevant: Optional[bool] = None
-        self.block: Any = None  # deprecated
-        self.translated = None
 
     def copy(self):
         " create a deep copy (except for rigid terms and variables) "
@@ -260,7 +251,7 @@ class Expression(ASTNode):
         return out
 
     def same_as(self, other):
-        if id(self) == id(other):
+        if self.str == other.str:
             return True
         if self.value is not None and self.value is not self:
             return self.value  .same_as(other)
@@ -352,7 +343,7 @@ class Expression(ASTNode):
 
         `co_constraints` is an OrderedSet of Expression
         """
-        if self.co_constraint is not None:
+        if self.co_constraint is not None and self.co_constraint not in co_constraints:
             co_constraints.append(self.co_constraint)
             self.co_constraint.co_constraints(co_constraints)
         for e in self.sub_exprs:
@@ -431,13 +422,13 @@ class Expression(ASTNode):
                    ):
         return  # monkey-patched
 
-    def translate(self):
+    def translate(self, problem: "Problem", vars={}):
         pass  # monkey-patched
 
-    def reified(self):
+    def reified(self, problem: "Problem"):
         pass  # monkey-patched
 
-    def translate1(self):
+    def translate1(self, problem: "Problem", vars={}):
         pass  # monkey-patched
 
     def as_set_condition(self) -> Tuple[Optional["AppliedSymbol"], Optional[bool], Optional["Enumeration"]]:
@@ -476,9 +467,9 @@ class Expression(ASTNode):
         Returns:
             Expression
         """
-        self.sub_exprs = [e.add_level_mapping(level_symbols, head, pos_justification, polarity)
-                          for e in self.sub_exprs]
-        return self
+        return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity)
+                                   for e in self.sub_exprs))
+                    .annotate1())  # update fresh_vars
 
 
 class Symbol(Expression):
@@ -698,9 +689,9 @@ class AImplication(Operator):
     PRECEDENCE = 50
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity),
-                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
-        return self
+        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity),
+                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
+        return self.update_exprs(sub_exprs).annotate1()
 
 
 class AEquivalence(Operator):
@@ -720,9 +711,9 @@ class ARImplication(Operator):
     PRECEDENCE = 30
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity),
-                          self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
-        return self
+        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity),
+                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
+        return self.update_exprs(sub_exprs).annotate1()
 
 
 class ADisjunction(Operator):
@@ -790,12 +781,12 @@ class AUnary(Expression):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        self.sub_exprs = [e.add_level_mapping(level_symbols, head,
-                                              pos_justification,
-                                              not polarity
-                                              if self.operator == '¬' else polarity)
-                          for e in self.sub_exprs]
-        return self
+        sub_exprs = (e.add_level_mapping(level_symbols, head,
+                                         pos_justification,
+                                         not polarity
+                                         if self.operator == '¬' else polarity)
+                     for e in self.sub_exprs)
+        return self.update_exprs(sub_exprs).annotate1()
 
 
 class AAggregate(Expression):
@@ -948,6 +939,10 @@ class AppliedSymbol(Expression):
             or any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self):
+        if self.symbol.decl:
+            self.check(self.symbol.decl.arity == len(self.sub_exprs),
+                f"Incorrect number of arguments in {self}: "
+                f"should be {self.symbol.decl.arity}")
         try:
             out = {}
             for i, e in enumerate(self.sub_exprs):
@@ -968,11 +963,9 @@ class AppliedSymbol(Expression):
         return (self.in_enumeration or self.is_enumerated
                 or not all(e.value is not None for e in self.sub_exprs))
 
-    def reified(self):
-        if self._reified is None:
-            self._reified = ( super().reified() if self.is_reified() else
-                 self.translate() )
-        return self._reified
+    def reified(self, problem: "Problem"):
+        return ( super().reified(problem) if self.is_reified() else
+                 self.translate(problem) )
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
@@ -981,7 +974,8 @@ class AppliedSymbol(Expression):
             constructors[symbol.name].append(constructor)
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        assert(head.symbol.decl in level_symbols)
+        assert head.symbol.decl in level_symbols, \
+               f"Internal error in level mapping: {self}"
         if self.symbol.decl not in level_symbols or self.in_head:
             return self
         else:
@@ -991,10 +985,11 @@ class AppliedSymbol(Expression):
             elif DEF_SEMANTICS == Semantics.KRIPKEKLEENE:
                 op = '>' if polarity else '≤'
             else:
-                assert(DEF_SEMANTICS == Semantics.COINDUCTION)
+                assert DEF_SEMANTICS == Semantics.COINDUCTION, \
+                        f"Internal error: DEF_SEMANTICS"
                 op = ('≥' if pos_justification else '>') \
                     if polarity else ('<' if pos_justification else '≤')
-            comp = Operator.make(op, [
+            comp = AComparison.make(op, [
                 AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
                 AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
             ])
@@ -1035,7 +1030,6 @@ class UnappliedSymbol(Expression):
 
         self.sub_exprs = []
         self.decl = None
-        self.translated = None
         self.is_enumerated = None
         self.is_enumeration = None
         self.in_enumeration = None
@@ -1075,12 +1069,13 @@ class Variable(Expression):
 
         self.type = sort.decl.name if sort and sort.decl else ''
         self.sub_exprs = []
-        self.translated = None
         self.fresh_vars = set([self.name])
 
     def __str1__(self): return self.name
 
     def copy(self): return self
+
+    def annotate1(self): return self
 
 
 class Number(Expression):
@@ -1095,12 +1090,30 @@ class Number(Expression):
         self.fresh_vars = set()
         self.value = self
 
-        self.translated = None
-        self.translate()  # also sets self.type
+        ops = self.number.split("/")
+        if len(ops) == 2:  # possible with str_to_IDP on Z3 value
+            self.py_value = Fraction(self.number)
+            self.type = REAL
+        elif '.' in self.number:
+            v = (self.number if not self.number.endswith('?') else
+                 self.number[:-1])
+            if "e" in v:
+                self.py_value = float(eval(v))
+            else:
+                self.py_value = Fraction(v)
+            self.type = REAL
+        else:
+            self.py_value = int(self.number)
+            self.type = INT
 
     def __str__(self): return self.number
 
     def is_reified(self): return False
+
+    def real(self):
+        """converts the INT number to REAL"""
+        self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
+        return Number(number=str(float(self.py_value)))
 
 
 ZERO = Number(number='0')
@@ -1121,8 +1134,8 @@ class Date(Expression):
         self.fresh_vars = set()
         self.value = self
 
-        self.translated = None
-        self.translate()  # also sets self.type
+        self.py_value = self.date.toordinal()
+        self.type = DATE
 
     def __str__(self): return f"#{self.date.isoformat()}"
 

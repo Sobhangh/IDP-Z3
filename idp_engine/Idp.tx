@@ -88,7 +88,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     UnaryOperator:   '-' | '~' | '¬';
 
 
-    Base:  AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
+    Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
       AppliedSymbol: symbol=SymbolExpr
               '(' sub_exprs*=Expression[','] ')'
@@ -114,7 +114,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
-  Ranges: '{' elements*=RangeElement[','] '}';
+  Ranges: '{' elements+=RangeElement[','] '}';
       RangeElement:   (fromI=Number ('..' toI=Number)?)
                     | (fromI=Date   ('..' toI=Date  )?) ;
   Enumeration: '{' tuples*=Tuple[','] '}';
@@ -140,13 +140,13 @@ Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}'
 
   PyStatement: PyAssignment | Call1 ;
   PyAssignment: var=ID '=' val=PyExpr;
-  PyExpr: !PyAssignment (Call1 | String | Number | PyList);
+  PyExpr: !PyAssignment (String | Call1 | Number | PyList);
 
   Call1: name=ID ( par='(' ( args+=PyExpr[','] (',' kwargs+=PyAssignment[','])?
                      | kwargs*=PyAssignment[',']) ')'
                  )?
         ('.' post=PyExpr)?;
-  String: literal=/"(\.|[^"])*"/;
+  String: literal=/f?"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 
 

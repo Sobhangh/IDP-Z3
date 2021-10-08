@@ -21,6 +21,7 @@ Classes to execute the main block of an IDP program
 
 """
 
+import time
 import types
 from z3 import Solver
 
@@ -29,14 +30,15 @@ from .Problem import Problem
 from .Assignments import Status as S, Assignments
 from .utils import NEWL
 
+last_call = time.process_time()  # define it as global
 
 def model_check(theories, structures=None):
     """ output: "sat", "unsat" or "unknown" """
 
     problem = Problem.make(theories, structures)
-    z3_formula = problem.formula().translate()
+    z3_formula = problem.formula()
 
-    solver = Solver()
+    solver = Solver(ctx=problem.ctx)
     solver.add(z3_formula)
     yield str(solver.check())
 
@@ -110,12 +112,24 @@ def pretty_print(x=""):
                 print(xi)
             else:
                 print(xi)
+    elif isinstance(x, Problem):
+        print(x.assignments)
     else:
         print(x)
 
 
+def duration(msg=""):
+    """Returns the processing time since the last call to `duration()`,
+    or since the begining of execution"""
+    global last_call
+    out = round(time.process_time() - last_call, 3)
+    last_call = time.process_time()
+    return f"{out} {msg}"
+
 def execute(self):
     """ Execute the IDP program """
+    global last_call
+    last_call = time.process_time()
     main = str(self.procedures['main'])
     mybuiltins = {}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
@@ -125,6 +139,8 @@ def execute(self):
     mylocals['decision_table'] = decision_table
     mylocals['pretty_print'] = pretty_print
     mylocals['Problem'] = Problem
+    mylocals['time'] = time
+    mylocals['duration'] = duration
 
     exec(main, mybuiltins, mylocals)
 

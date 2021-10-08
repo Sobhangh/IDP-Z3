@@ -31,6 +31,7 @@ from enum import Enum, auto
 
 CO_CONSTR_RECURSION_DEPTH = 3
 MAX_QUANTIFIER_EXPANSION = 20
+RUN_FILE = "/tmp/IDP_Z3_run_log.txt"  # must be in /tmp folder for GAE
 
 class Semantics(Enum):
     """Semantics for inductive definitions"""
@@ -135,7 +136,7 @@ class OrderedSet(dict):
     a list of expressions without duplicates (first-in is selected)
     """
     def __init__(self, els=[]):
-        assert isinstance(els, Iterable)
+        assert isinstance(els, Iterable), "Internal error in OrderedSet"
         super(OrderedSet, self).__init__(((el.code, el) for el in els))
 
     def append(self, el):
@@ -155,8 +156,8 @@ class OrderedSet(dict):
     # def items(self):
     #     return super(OrderedSet, self).items()
 
-    # def popitem(self):
-    #     return super(OrderedSet, self).popitem()
+    def pop(self, key, default=None):
+        return super(OrderedSet, self).pop(key.code, default)
 
     def __or__(self, other: "OrderedSet") -> "OrderedSet":
         """returns the union of self and other.  Use: `self | other`.

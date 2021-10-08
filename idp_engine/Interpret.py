@@ -65,7 +65,7 @@ def interpret(self, problem):
         problem.interpretations[self.name].interpret(problem)
     if self.interpretation:
         self.constructors = self.interpretation.enumeration.constructors
-    self.translate()
+    self.translate(problem)
     if self.constructors:
         self.range = sum([c.interpret(problem).range for c in self.constructors], [])
     elif self.interpretation.enumeration:  # range declaration
@@ -87,7 +87,7 @@ def interpret(self, problem):
             expr = AppliedSymbol.make(Symbol(name=self.name), arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
-            problem.assignments.assert__(expr, None, S.UNKNOWN, False)
+            problem.assignments.assert__(expr, None, S.UNKNOWN)
 
     # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
@@ -111,6 +111,7 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
+    self.instantiables = self.get_instantiables()
     self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
 Definition.interpret = interpret
 
@@ -155,20 +156,18 @@ def interpret(self, problem):
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
-            e = problem.assignments.assert__(expr, value, status, False)
+            e = problem.assignments.assert__(expr, value, status)
             if (status == S.GIVEN  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
-                problem.assignments.assert__(e.formula(), TRUE, status, False)
+                problem.assignments.assert__(e.formula(), TRUE, status)
         if self.default is not None:
             for code, expr in self.symbol.decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
-                    e = problem.assignments.assert__(expr, self.default, status,
-                                                False)
+                    e = problem.assignments.assert__(expr, self.default, status)
                     if (status == S.GIVEN  # for proper display in IC
                         and self.default.type != BOOL):
-                        problem.assignments.assert__(e.formula(), TRUE, status,
-                                                    False)
+                        problem.assignments.assert__(e.formula(), TRUE, status)
 SymbolInterpretation.interpret = interpret
 
 
@@ -232,8 +231,10 @@ def substitute(self, e0, e1, assignments, tag=None):
     implementation for everything but AppliedSymbol, UnappliedSymbol and
     Fresh_variable
     """
-    assert not isinstance(e0, Variable) or isinstance(e1, Variable)  # should use instantiate instead
-    assert self.co_constraint is None  # see AppliedSymbol instead
+    assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
+               f"Internal error in substitute {e0} by {e1}" # should use instantiate instead
+    assert self.co_constraint is None,  \
+               f"Internal error in substitue: {self.co_constraint}" # see AppliedSymbol instead
 
     # similar code in AppliedSymbol !
     if self.code == e0.code:
@@ -254,7 +255,8 @@ def instantiate(self, e0, e1, problem=None):
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update fresh_vars.
     """
-    assert all(type(e) == Variable for e in e0)
+    assert all(type(e) == Variable for e in e0), \
+           f"Internal error: instantiate {e0}"
     if self.value:
         return self
     if problem and all(e.name not in self.fresh_vars for e in e0):
@@ -316,7 +318,8 @@ def interpret(self, problem):
     inferred = self.sub_exprs[0].type_inference()
     for q in self.quantees:
         if not q.sub_exprs:
-            assert len(q.vars) == 1 and q.arity == 1
+            assert len(q.vars) == 1 and q.arity == 1, \
+                   f"Internal error: interpret {q}"
             var = q.vars[0][0]
             self.check(var.name in inferred,
                         f"can't infer type of {var.name}")
@@ -378,7 +381,7 @@ AQuantification.instantiate1 = instantiate1
 # Class AAggregate  ######################################################
 
 def interpret(self, problem):
-    assert self.using_if
+    assert self.using_if, f"Internal error in interpret"
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 
@@ -448,7 +451,8 @@ def substitute(self, e0, e1, assignments, tag=None):
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)
     elif self.simpler is not None:  # has an interpretation
-        assert self.co_constraint is None
+        assert self.co_constraint is None, \
+               f"Internal error in substitute: {self}"
         simpler = self.simpler.substitute(e0, e1, assignments, tag)
         return self._change(simpler=simpler)
     else:

@@ -50,7 +50,11 @@ def annotate(self, idp):
     for constructor in self.symbol_decls[SYMBOL].constructors:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
-    self.symbol_decls[SYMBOL].translate()  # to populate .map
+
+    # populate .map of SYMBOL
+    for c in self.symbol_decls[SYMBOL].constructors:
+        assert not c.sorts
+        self.symbol_decls[SYMBOL].map[str(c)] = UnappliedSymbol.construct(c)
 Vocabulary.annotate = annotate
 
 
@@ -154,7 +158,6 @@ def annotate(self, theory, voc, q_vars):
         exprs = [rule.body for rule in rules]
         new_rule.body = ADisjunction.make('∨', exprs)
         self.clarks[decl] = new_rule
-    self.instantiables = self.get_instantiables()
     return self
 Definition.annotate = annotate
 
@@ -174,6 +177,8 @@ def get_instantiables(self, for_explain=False):
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
+        rule.is_whole_domain = all(s.decl.range  # not None nor []
+                               for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
@@ -203,7 +208,7 @@ def get_instantiables(self, for_explain=False):
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
-                        new = new.add_level_mapping(rule.parent.level_symbols,
+                        new = new.copy().add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
                         out.append(ARImplication.make('⇐', [head, new],
                                                       r.annotations))
@@ -222,7 +227,7 @@ def get_instantiables(self, for_explain=False):
                                              rule.definiendum, False, False)
                     out = [ARImplication.make('⇐', [head.copy(), new],
                                               self.annotations)]
-                all_bodies = all_bodies.add_level_mapping(rule.parent.level_symbols,
+                all_bodies = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                         rule.definiendum, True, True)
                 out.append(AImplication.make('⇒', [head, all_bodies],
                                              self.annotations))
@@ -251,8 +256,6 @@ def annotate(self, voc, q_vars):
     if self.out:
         self.out = self.out.annotate(voc, q_v)
 
-    self.is_whole_domain = all(s.name not in [INT, REAL, DATE]  # can't use s.range yet
-                               for s in self.definiendum.decl.sorts)
     return self
 Rule.annotate = annotate
 
@@ -267,6 +270,7 @@ def rename_args(self, new_vars):
         arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
         if type(arg) == Variable \
         and arg.name in vars and arg.name not in new_vars:
+            vars.remove(arg.name)
             self.body = self.body.instantiate([arg], [nv])
             self.out = (self.out.instantiate([arg], [nv]) if self.out else
                         self.out)
@@ -276,6 +280,8 @@ def rename_args(self, new_vars):
         else:
             eq = AComparison.make('=', [nv, arg])
             self.body = AConjunction.make('∧', [eq, self.body])
+
+    self.check(not vars, f"Too many variables in head of rule: {self}")
 
     self.definiendum.sub_exprs = list(new_vars.values())
     self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
@@ -367,6 +373,11 @@ def annotate(self, voc):
         for i, ts in enumerate(c.sorts):
             if ts.accessor is None:
                 ts.accessor = Symbol(name=f"{c.name}_{i}")
+            if ts.accessor.name in self.accessors:
+                self.check(self.accessors[ts.accessor.name] == i,
+                           "Accessors used at incompatible indices")
+            else:
+                self.accessors[ts.accessor.name] = i
         c.annotate(voc)
 ConstructedFrom.annotate = annotate
 
@@ -430,6 +441,8 @@ def annotate(self, idp):
         ('moveSymbols', Symbol(name=BOOL)),
         ('optionalPropagation', Symbol(name=BOOL)),
         ('manualPropagation', Symbol(name=BOOL)),
+        ('optionalRelevance', Symbol(name=BOOL)),
+        ('manualRelevance', Symbol(name=BOOL)),
         ('unit', open_types['unit']),
         ('heading', open_types['heading'])
     ]:
@@ -577,12 +590,12 @@ def annotate(self, voc, q_vars):
     self = AQuantification.annotate(self, voc, q_vars)
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
 
-    assert not self.using_if
-    self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
-            then_f=Number(number='1') if self.out is None else
-                    self.sub_exprs[AAggregate.OUT],
-            else_f=Number(number='0'))]
-    self.using_if = True
+    if not self.using_if:
+        self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
+                then_f=Number(number='1') if self.out is None else
+                        self.sub_exprs[AAggregate.OUT],
+                else_f=Number(number='0'))]
+        self.using_if = True
     return self
 AAggregate.annotate = annotate
 AAggregate.annotate1 = AQuantification.annotate1
@@ -592,6 +605,9 @@ AAggregate.annotate1 = AQuantification.annotate1
 
 def annotate(self, voc, q_vars):
     self.symbol = self.symbol.annotate(voc, q_vars)
+    self.check((not self.symbol.decl or type(self.symbol.decl) != Constructor
+                or 0 < self.symbol.decl.arity),
+               f"Constructor `{self.symbol}` cannot be applied to argument(s)")
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)

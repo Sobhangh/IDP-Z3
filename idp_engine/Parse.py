@@ -31,7 +31,7 @@ from datetime import date
 from enum import Enum
 from itertools import groupby
 from os import path
-from re import findall
+from re import match, findall
 from sys import intern
 from textx import metamodel_from_file
 from typing import Dict, List, Union, Optional
@@ -66,12 +66,27 @@ def str_to_IDP(atom, val_string):
     elif (hasattr(atom.decl.out.decl, 'map')
           and val_string in atom.decl.out.decl.map):  # constructor
         out = atom.decl.out.decl.map[val_string]
+    elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
+        # deconstruct val_string
+        m = match(r"(?P<function>\w+)\s?\((?P<args>(?P<arg>\w+(,\s?)?)+)\)",
+                  val_string).groupdict()
+
+        typ = atom.decl.out.decl
+        assert hasattr(typ, 'interpretation'), "Internal error"
+        constructor = next(c for c in typ.interpretation.enumeration.constructors
+                           if c.name == m['function'])
+
+        args = m['args'].split(',')
+        args = [Number(number=str(eval(a.replace('?', ''))))  #TODO deal with any argument based on constructor signature
+                for a in args]
+
+        out = AppliedSymbol.construct(constructor, args)
     else:
         try:
             # could be a fraction
             out = Number(number=str(eval(val_string.replace('?', ''))))
         except:
-            out = None
+            out = None  # when z3 model has unknown value
     return out
 
 
@@ -132,7 +147,7 @@ class IDP(ASTNode):
         assert path.exists(file), f"Can't find {file}"
         with open(file, "r") as source:
             code = source.read()
-            cls.from_str(code)
+            return cls.from_str(code)
 
     @classmethod
     def from_str(cls, code:str) -> "IDP":
@@ -334,8 +349,6 @@ class TypeDeclaration(ASTNode):
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
-        translated (Z3): the translation of the type in Z3
-
         map (Dict[string, Expression]): a mapping from code to Expression in range
     """
 
@@ -352,7 +365,6 @@ class TypeDeclaration(ASTNode):
         self.type = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
 
-        self.translated = None
         self.range = None
         self.map = {}  # {String: constructor}
 
@@ -365,7 +377,12 @@ class TypeDeclaration(ASTNode):
                 f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
-        return self.interpretation.enumeration.contains([var], False)
+        if self.name == SYMBOL:
+            comparisons = [AComparison.make("=", [var, UnappliedSymbol.construct(c)])
+                          for c in self.constructors]
+            return ADisjunction.make("∨", comparisons)
+        else:
+            return self.interpretation.enumeration.contains([var], False)
 
     def is_subset_of(self, other):
         return self == other
@@ -433,8 +450,6 @@ class SymbolDeclaration(ASTNode):
         self.private = None
         self.unit: str = None
         self.heading: str = None
-
-        self.translated = None
 
         self.type = None  # a string
         self.domain = None  # all possible arguments
@@ -835,11 +850,21 @@ class ConstructedFrom(Enumeration):
         tuples (OrderedSet[Tuple]): OrderedSet of tuples of Expression
 
         constructors (List[Constructor]): List of Constructor
+
+        accessors (dict[str, Int]): index of the accessor in the constructors
     """
     def __init__(self, **kwargs):
         self.constructed = kwargs.pop('constructed')
         self.constructors = kwargs.pop('constructors')
         self.tuples = None
+        self.accessors = dict()
+
+    def contains(self, args, function, arity=None, rank=0, tuples=None):
+        """returns True if args belong to the type enumeration"""
+        # args must satisfy the tester of one of the constructors
+        out = [AppliedSymbol.construct(constructor.tester, args)
+                for constructor in self.constructors]
+        return ADisjunction.make('∨', out)
 
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
@@ -851,9 +876,6 @@ class Tuple(ASTNode):
 
     def __repr__(self):
         return self.code
-
-    def translate(self):
-        return [arg.translate() for arg in self.args]
 
 class FunctionTuple(Tuple):
     def __init__(self, **kwargs):
@@ -873,19 +895,34 @@ class Ranges(Enumeration):
 
         tuples = []
         self.type = None
-        for x in self.elements:
-            if self.type == None:
-                self.type = x.fromI.type
-            if x.toI is None:
-                tuples.append(Tuple(args=[x.fromI]))
-            elif x.fromI.type == INT and x.toI.type == INT:
-                for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                    tuples.append(Tuple(args=[Number(number=str(i))]))
-            elif x.fromI.type == DATE and x.toI.type == DATE:
-                for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                    tuples.append(Tuple(args=[Number(number=str(i))])) #TODO1
-            else:
-                self.check(False, f"Can't have a range over reals")
+        if self.elements:
+            self.type = self.elements[0].fromI.type
+            for x in self.elements:
+                if x.fromI.type != self.type:
+                    if self.type in [INT, REAL] and x.fromI.type in [INT, REAL]:
+                        self.type = REAL  # convert to REAL
+                        tuples = [Tuple(args=[n.args[0].real()])
+                                  for n in tuples]
+                    else:
+                        self.check(False,
+                            f"incorrect value {x.fromI} for {self.type}")
+
+                if x.toI is None:
+                    tuples.append(Tuple(args=[x.fromI]))
+                elif self.type == INT and x.fromI.type == INT and x.toI.type == INT:
+                    for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                        tuples.append(Tuple(args=[Number(number=str(i))]))
+                elif self.type == REAL and x.fromI.type == INT and x.toI.type == INT:
+                    for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                        tuples.append(Tuple(args=[Number(number=str(float(i)))]))
+                elif self.type == REAL:
+                    self.check(False, f"Can't have a range over real: {x.fromI}..{x.toI}")
+                elif self.type == DATE and x.fromI.type == DATE and x.toI.type == DATE:
+                    for i in range(x.fromI.py_value, x.toI.py_value + 1):
+                        d = Date(iso=f"#{date.fromordinal(i).isoformat()}")
+                        tuples.append(Tuple(args=[d]))
+                else:
+                    self.check(False, f"Incorrect value {x.toI} for {self.type}")
         Enumeration.__init__(self, tuples=tuples)
 
     def contains(self, args, function, arity=None, rank=0, tuples=None):
@@ -928,6 +965,8 @@ class Display(ASTNode):
         self.moveSymbols = False
         self.optionalPropagation = False
         self.manualPropagation = False
+        self.optionalRelevance = False
+        self.manualRelevance = False
         self.name = "display"
 
     def run(self, idp):
@@ -976,6 +1015,10 @@ class Display(ASTNode):
                     self.optionalPropagation = True
                 elif name == "manualPropagation":
                     self.manualPropagation = True
+                elif name == "optionalRelevance":
+                    self.optionalRelevance = True
+                elif name == "manualRelevance":
+                    self.manualRelevance = True
                 else:
                     raise IDPZ3Error(f"unknown display constraint:"
                                      f" {constraint}")

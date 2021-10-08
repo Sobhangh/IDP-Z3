@@ -71,7 +71,7 @@ class Assignment(object):
     """
     def __init__(self, sentence: Expression, value: Optional[Expression],
                  status: Optional[Status],
-                 relevant: Optional[bool] = False):
+                 relevant: Optional[bool] = True):
         self.sentence = sentence
         self.value = value
         self.status = status
@@ -153,8 +153,8 @@ class Assignment(object):
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
-    def translate(self) -> BoolRef:
-        return self.formula().translate()
+    def translate(self, problem: "Problem") -> BoolRef:
+        return self.formula().translate(problem)
 
     def as_set_condition(self):
         """returns an equivalent set condition, or None
@@ -194,18 +194,15 @@ class Assignments(dict):
 
     def assert__(self, sentence: Expression,
                 value: Optional[Expression],
-                status: Optional[Status],
-                relevant: Optional[bool]):
+                status: Optional[Status]):
         if sentence.code in self:
             out = self[sentence.code]
             out.value = value
             if not (out.status == Status.ENV_CONSQ and status == Status.CONSEQUENCE):
                 # do not change an env consequence to a decision consequence
                 out.status = status
-            if relevant is not None:
-                out.relevant = relevant
         else:
-            out = Assignment(sentence, value, status, relevant)
+            out = Assignment(sentence, value, status)
         if out.symbol_decl:  # ignore comparisons of constructors
             self[sentence.code] = out
             self.symbols[out.symbol_decl.name] = out.symbol_decl

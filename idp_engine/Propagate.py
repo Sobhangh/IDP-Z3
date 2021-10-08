@@ -28,6 +28,7 @@ It has 2 parts:
 This module monkey-patches the Expression and Problem classes and sub-classes.
 """
 
+import time
 from typing import List, Tuple, Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true, is_not, is_eq)
 
@@ -38,6 +39,9 @@ from .Expression import (Expression, AQuantification,
 from .Parse import str_to_IDP
 from .Problem import Problem
 from .utils import OrderedSet
+
+start = time.process_time()
+last_prop = "hello"
 
 ###############################################################################
 #
@@ -88,7 +92,7 @@ def symbolic_propagate(self,
     """
     if self.value is None:
         if self.code in assignments:
-            assignments.assert__(self, truth, tag, False)
+            assignments.assert__(self, truth, tag)
         if self.simpler is not None:
             self.simpler.symbolic_propagate(assignments, tag, truth)
         else:
@@ -106,9 +110,10 @@ Expression.propagate1 = propagate1
 
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
     if self.code in assignments:
-        assignments.assert__(self, truth, tag, False)
+        assignments.assert__(self, truth, tag)
     if not self.quantees:  # expanded
-        assert len(self.sub_exprs) == 1  # a conjunction or disjunction
+        assert len(self.sub_exprs) == 1,  \
+               f"Internal error in symbolic_propagate: {self}"  # a conjunction or disjunction
         self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
 AQuantification.symbolic_propagate = symbolic_propagate
 
@@ -149,10 +154,10 @@ def propagate1(self, assignments, tag, truth=TRUE):
         operands1 = [e.value for e in self.sub_exprs]
         if (type(self.sub_exprs[0]) == AppliedSymbol
         and operands1[1] is not None):
-            assignments.assert__(self.sub_exprs[0], operands1[1], tag, False)
+            assignments.assert__(self.sub_exprs[0], operands1[1], tag)
         elif (type(self.sub_exprs[1]) == AppliedSymbol
         and operands1[0] is not None):
-            assignments.assert__(self.sub_exprs[1], operands1[0], tag, False)
+            assignments.assert__(self.sub_exprs[1], operands1[0], tag)
 AComparison.propagate1 = propagate1
 
 
@@ -209,19 +214,19 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
     """
     todo = self._directional_todo()
     if todo:
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula()
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result = solver.check()
         if result == sat:
             lookup, tests = {}, []
             for q in todo:
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
+                solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
                 if solver.check() != sat:
                     # print("Falling back !")
                     yield from self._propagate(tag)
-                test = Not(q.reified() == solver.model().eval(q.reified()))
+                test = Not(q.reified(self) == solver.model().eval(q.reified(self)))  #TODO compute model once
                 tests.append(test)
                 lookup[str(test)] = q
             solver.push()
@@ -229,19 +234,19 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                 solver.add(Or(tests))
                 result = solver.check()
                 if result == sat:
-                    tests = [t for t in tests if is_false(solver.model().eval(t))]
+                    tests = [t for t in tests if is_false(solver.model().eval(t))]  #TODO compute model once
                     for t in tests:  # reset the other assignments
-                        if is_true(solver.model().eval(t)):
+                        if is_true(solver.model().eval(t)):  #TODO compute model once
                             q = lookup[str(test)]
-                            self.assignments.assert__(q, None, S.UNKNOWN, False)
+                            self.assignments.assert__(q, None, S.UNKNOWN)
                 elif result == unsat:
                     solver.pop()
                     solver.check()  # not sure why this is needed
                     for test in tests:
                         q = lookup[str(test)]
-                        val1 = solver.model().eval(q.reified())
+                        val1 = solver.model().eval(q.reified(self))  #TODO compute model once
                         val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert__(q, val, tag, True)
+                        yield self.assignments.assert__(q, val, tag)
                     break
                 else:  # unknown
                     # print("Falling back !!")
@@ -263,40 +268,46 @@ Problem._batch_propagate = _batch_propagate
 def _propagate(self, tag=S.CONSEQUENCE):
     """generator of new propagated assignments.  Update self.assignments too.
     """
+    global start, last_prop
+    start, last_prop = time.process_time(), None
     todo = self._directional_todo()
     if todo:
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula()
 
-        solver = Solver()
-        solver.add(z3_formula)
-        result = solver.check()
-        if result == sat:
+        def get_solver():
+            solver = Solver(ctx=self.ctx)
+            solver.add(z3_formula)
+            solver.check()  # required for forall.idp !?
             for q in todo:
-                solver.push()  #  faster (~3%) with push than without
-                solver.add(q.reified() == q.translate())  # in case todo contains complex formula
-                res1 = solver.check()
-                if res1 == sat:
-                    val1 = solver.model().eval(q.reified())
-                    if str(val1) != str(q.reified()):  # if not irrelevant
-                        solver.push()
-                        solver.add(Not(q.reified() == val1))
-                        res2 = solver.check()
-                        solver.pop()
+                solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
+            return solver
 
-                        if res2 == unsat:
-                            val = str_to_IDP(q, str(val1))
-                            yield self.assignments.assert__(q, val, tag, True)
-                        elif res2 == unknown:
-                            res1 = unknown
-                        else:  # reset the value
-                            self.assignments.assert__(q, None, S.UNKNOWN, False)
+        solver = get_solver()
+        res1 = solver.check()
+        if res1 == sat:
+            model = solver.model()
+            valqs = [(model.eval(q.reified(self)), q) for q in todo]
+            for val1, q in valqs:
+                if str(val1) == str(q.reified(self)):
+                    continue  # irrelevant
+                solver.push()
+                solver.add(Not(q.reified(self) == val1))
+                res2 = solver.check()
                 solver.pop()
-                if res1 == unknown:
-                    # yield(f"Unknown: {str(q)}")
-                    solver = Solver()  # restart the solver
-                    solver.add(z3_formula)
+
+                if res2 == unsat:
+                    val = str_to_IDP(q, str(val1))
+                    yield self.assignments.assert__(q, val, tag)
+                    last_prop = time.process_time()
+                elif res2 == unknown:  # does not happen with newest version of Z3
+                    solver = get_solver() # restart the solver
+                    solver.check()
+                else:  # reset the value
+                    if self.assignments.get(q, True) is not None:
+                        self.assignments.assert__(q, None, S.UNKNOWN)
+                        last_prop = time.process_time()
             yield "No more consequences."
-        elif result == unsat:
+        elif res1 == unsat:
             yield "Not satisfiable."
             yield str(z3_formula)
         else:
@@ -305,6 +316,10 @@ def _propagate(self, tag=S.CONSEQUENCE):
     else:
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
+    if last_prop is None:
+        last_prop = 0
+    else:
+        last_prop -= start
 Problem._propagate = _propagate
 
 
@@ -317,12 +332,12 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
     if todo:
         z3_todo, unreify = [], {}
         for q in todo:
-            z3_todo.append(q.reified())
-            unreify[q.reified()] = q
+            z3_todo.append(q.reified(self))
+            unreify[q.reified(self)] = q
 
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula()
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
         result, consqs = solver.consequences([], z3_todo)
         if result == sat:
@@ -334,14 +349,14 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
                     value = TRUE
                 # try to unreify it
                 if atom in unreify:
-                    yield self.assignments.assert__(unreify[atom], value, tag, True)
+                    yield self.assignments.assert__(unreify[atom], value, tag)
                 elif is_eq(consq):
-                    assert value == TRUE
+                    assert value == TRUE, f"Internal error in z3_propagate"
                     term = consq.children()[0]
                     if term in unreify:
                         q = unreify[term]
                         val = str_to_IDP(q, consq.children()[1])
-                        yield self.assignments.assert__(q, val, tag, True)
+                        yield self.assignments.assert__(q, val, tag)
                     else:
                         print("???", str(consq))
                 else:

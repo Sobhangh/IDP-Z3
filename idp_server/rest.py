@@ -26,19 +26,20 @@ with_profiling = False
 
 from contextlib import redirect_stdout
 from copy import copy
-import io
 import os
 import threading
+import time
 import traceback
+from z3 import set_option
 
 from flask import Flask, g, send_from_directory  # g is required for pyinstrument
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
-from idp_engine.utils import log
+from idp_engine.utils import log, RUN_FILE
 from .State import State
-from .Inferences import explain, abstract
+from .Inferences import explain, abstract, get_relevant_questions
 from .IO import Output, metaJSON
 
 from typing import Dict
@@ -117,9 +118,14 @@ class run(Resource):
 
         :returns stdout.
         """
+
+        # allow pretty printing of large Z3 formula (see https://stackoverflow.com/a/19570420/474491)
+        set_option(max_args=10000000, max_lines=1000000, max_depth=10000000, max_visited=1000000)
+
         log("start /run")
         with z3lock:
             try:
+                start = time.process_time()
                 if with_profiling:
                     g.profiler = Profiler()
                     g.profiler.start()
@@ -129,23 +135,30 @@ class run(Resource):
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 # capture stdout, print()
-                with io.StringIO() as buf, redirect_stdout(buf):
+                with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
                     try:
                         idp.execute()
+                        print(f"\n> Executed in {round(time.process_time()-start, 3)} sec")
                     except Exception as exc:
                         print(exc)
-                    out = buf.getvalue()
+                with open(RUN_FILE, mode='r', encoding='utf-8') as f:
+                    out = f.read()
+                os.remove(RUN_FILE)
 
                 log("end /run ")
                 if with_profiling:
                     g.profiler.stop()
                     print(g.profiler.output_text(unicode=True, color=True))
-                return out
             except Exception as exc:
                 if with_profiling:
                     g.profiler.stop()
                 traceback.print_exc()
-                return str(exc)
+                out = str(exc)
+
+        # restore defaults in https://github.com/Z3Prover/z3/blob/master/src/api/python/z3/z3printer.py
+        set_option(max_args=128, max_lines=200,
+                   max_depth=20, max_visited=10000)
+        return out
 
 
 class meta(Resource):
@@ -173,6 +186,8 @@ class meta(Resource):
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 state = State.make(idp, "{}", "{}")
+                if not state.idp.display.manualRelevance:
+                    get_relevant_questions(state)
                 out = metaJSON(state)
                 out["propagated"] = Output(state).fill(state)
 
@@ -215,6 +230,7 @@ class eval(Resource):
                 parser.add_argument('value', type=str, help='Value to explain')
                 parser.add_argument('field', type=str, help='Applied Symbol whose range must be determined')
                 parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
+                parser.add_argument('with_relevance', type=bool, help='compute relevance if true')
                 args = parser.parse_args()
                 #print(args)
                 # expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
@@ -228,9 +244,14 @@ class eval(Resource):
                 if not state.propagate_success:
                     out = explain(state)
                 elif method == "propagate":
+                    if args.with_relevance:
+                        get_relevant_questions(state)
                     out = Output(state).fill(state)
                 elif method == 'get_range':
                     out = state.get_range(args['field'])
+                elif method == 'relevance':
+                    get_relevant_questions(state)
+                    out = Output(state).fill(state)
                 elif method == "modelexpand":
                     generator = state.expand(max=1, complete=False)
                     out = copy(state)

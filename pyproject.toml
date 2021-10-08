@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "idp-engine"
-version = "0.8.2"
-description = "IDP-Z3 is a collection of software components implementing the Knowledge Base paradigm using the FO(.) language and a Z3 SMT solver."
+version = "0.8.4"
+description = "IDP-Z3 is a reasoning engine for knowledge represented using the FO(.) language."
 authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
 license = "GNU LGPL 3"
 readme = "README-pypi.md"
@@ -16,7 +16,7 @@ idp-engine = "idp_engine.IDP_Z3:cli"
 python = "^3.7"
 Click="^7.0"
 textX="^2.1.0"
-z3-solver="4.8.10.0"
+z3-solver = "4.8.12.0"
 pretty-errors = "^1.2.19"
 sphinxcontrib-mermaid = "0.6.3"
 

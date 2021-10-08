@@ -17,10 +17,11 @@ theory {
     {!p1,p2 in Pos: _add(p1,p2) = makePos(x(p1)+x(p2), y(p1)+y(p2)).}
 
     x1() = clip(4).
+    x(pos(1,1))=1.
     p() = _add(pos(1,2), pos(2,1)).
 }
 
 procedure main() {
-    //print(Problem(T).formula())
+    print(Problem(T).formula())
     pretty_print(model_expand(T))
 }

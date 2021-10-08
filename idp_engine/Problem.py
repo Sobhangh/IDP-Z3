@@ -26,7 +26,8 @@ from copy import copy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
-from z3 import Solver, sat, unsat, Optimize, Not, And, Or, Implies, is_false
+from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
+                is_and, BoolVal)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -71,8 +72,10 @@ class Problem(object):
         goals (dict[string, SymbolDeclaration]):
             A set of goal symbols
 
-        _formula (Expression, optional): the logic formula that represents
-            the problem.
+        _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
+
+        _formula (ExprRef, optional): the Z3 formula that represents
+            the problem (assertions, co_constraints, definitions and assignments).
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
@@ -83,6 +86,10 @@ class Problem(object):
         cleared (OrderedSet): set of questions unassigned since last propagate
 
         propagate_success (Bool): whether the last propagate call failed or not
+
+        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
+
+        ctx : Z3 context
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -96,9 +103,12 @@ class Problem(object):
         self.goals = {}
         self.name = ''
 
+        self._contraintz = None
         self._formula = None  # the problem expressed in one logic formula
         self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
+        self.z3 = {}
+        self.ctx = Context()
         self.add(*blocks)
         self.propagate_success = True
 
@@ -129,6 +139,7 @@ class Problem(object):
 
     def add(self, *blocks):
         for block in blocks:
+            self.z3 = {}
             self._formula = None  # need to reapply the definitions
 
             for name, decl in block.declarations.items():
@@ -139,7 +150,6 @@ class Problem(object):
                 self.declarations[name] = decl
             for decl in self.declarations.values():
                 if type(decl) == TypeDeclaration:
-                    decl.translated = None  # reset the translation of declarations
                     decl.interpretation = (  #TODO side-effects ? issue #81
                         None if decl.name not in [INT, REAL, DATE, SYMBOL] else
                         decl.interpretation)
@@ -199,12 +209,13 @@ class Problem(object):
                 e.co_constraints(self.co_constraints)
         for s in list(questions.values()):
             if s.code not in self.assignments:
-                self.assignments.assert__(s, None, S.UNKNOWN, False)
+                self.assignments.assert__(s, None, S.UNKNOWN)
 
         for ass in self.assignments.values():
             ass.sentence = ass.sentence
             ass.sentence.original = ass.sentence.copy()
 
+        self._constraintz = None
         self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
@@ -223,28 +234,44 @@ class Problem(object):
             if self.propagated and old_value is not None:
                 self.cleared.append(atom)
                 self.assigned.pop(atom, None)
-            self.assignments.assert__(atom, value, S.UNKNOWN, False)
+            self.assignments.assert__(atom, value, S.UNKNOWN)
         else:
             val = str_to_IDP(atom, str(value))
             if self.propagated and not(old_value and old_value.same_as(val)):
                 self.assigned.append(atom)
-                self.cleared.pop(atom, None)
-            self.assignments.assert__(atom, val, status, False)
+                if old_value:
+                    self.cleared.append(atom)
+            self.assignments.assert__(atom, val, status)
         self._formula = None
+
+    def constraintz(self):
+        """list of constraints, co_constraints and definitions in Z3 form"""
+        if self._constraintz is None:
+
+            def collect_constraints(e, constraints):
+                """collect constraints in e, flattening conjunctions"""
+                if is_and(e):
+                    for e1 in e.children():
+                        collect_constraints(e1, constraints)
+                else:
+                    constraints.append(e)
+
+            self._constraintz = []
+            for e in chain(self.constraints, self.co_constraints):
+                collect_constraints(e.translate(self), self._constraintz)
+            self._constraintz += [s.translate(self)
+                            for s in chain(*self.def_constraints.values())]
+        return self._constraintz
 
     def formula(self):
         """ the formula encoding the knowledge base """
-        if not self._formula:
-            self._formula = AConjunction.make(
-                '∧',
-                [a.formula() for a in self.assignments.values()
-                 if a.value is not None
-                 and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                      or (self.propagated and not self.cleared))]
-                + [s for s in self.constraints]  #perf could be pre-compiled
-                + [c for c in self.co_constraints]
-                + [s for s in chain(*self.def_constraints.values())]
-                )
+        if self._formula is None:
+            all = ([a.formula().translate(self) for a in self.assignments.values()
+                    if a.value is not None
+                    and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                     or (self.propagated and not self.cleared))]
+                   + self.constraintz())
+            self._formula = And(all) if all else BoolVal(True, self.ctx)
         return self._formula
 
     def _todo(self):
@@ -258,25 +285,26 @@ class Problem(object):
         ass = self.assignments.copy()
         for q in todo:
             if not q.is_reified() or self.extended:
-                # evaluating q.translate() directly fails the pipeline on arithmetic/forall.idp
-                solver.add(q.reified() == q.translate())
+                # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
+                solver.add(q.reified(self) == q.translate(self))
         res1 = solver.check()
         if res1 == sat:
+            model = solver.model()
             for q in todo:
                 if not q.is_reified() or self.extended:
-                    val1 = solver.model().eval(q.reified(),
+                    val1 = model.eval(q.reified(self),
                                                model_completion=complete)
                     val = str_to_IDP(q, str(val1))
                     if val is not None:
-                        ass.assert__(q, val, S.EXPANDED, None)
+                        ass.assert__(q, val, S.EXPANDED)
         return ass
 
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.formula().translate()
+        z3_formula = self.formula()
         todo = self._todo()
 
-        solver = Solver()
+        solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
 
         count = 0
@@ -293,12 +321,14 @@ class Problem(object):
                 for a in ass.values():
                     if a.status == S.EXPANDED:
                         q = a.sentence
-                        different.append(q.translate() != a.value.translate())
+                        different.append(q.translate(self) != a.value.translate(self))
+                if not different:
+                    break
                 solver.add(Or(different))
             else:
                 break
 
-        if solver.check() == sat:
+        if solver.check() == sat and different:
             yield f"{NEWL}More models are available."
         elif 0 < count:
             yield f"{NEWL}No more models."
@@ -306,10 +336,10 @@ class Problem(object):
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):
-        solver = Optimize()
-        solver.add(self.formula().translate())
+        solver = Optimize(ctx=self.ctx)
+        solver.add(self.formula())
         assert term in self.assignments, "Internal error"
-        s = self.assignments[term].sentence.translate()
+        s = self.assignments[term].sentence.translate(self)
         if minimize:
             solver.minimize(s)
         else:
@@ -359,7 +389,8 @@ class Problem(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
-        out = self.copy()
+        out = copy(self)
+        out.assignments = self.assignments.copy()
         #  remove current assignments to same term
         if out.assignments[term].value:
             for a in out.assignments.values():
@@ -372,7 +403,7 @@ class Problem(object):
         for e in range:
             sentence = Assignment(termE, e, S.UNKNOWN).formula()
             # use assignments.assert_ to create one if necessary
-            out.assignments.assert__(sentence, None, S.UNKNOWN, False)
+            out.assignments.assert__(sentence, None, S.UNKNOWN)
         out.assigned = True  # to force propagation of Unknowns
         _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
         assert all(e.sentence.is_assignment()
@@ -397,13 +428,13 @@ class Problem(object):
         facts, laws = [], []
         reasons = [S.GIVEN, S.STRUCTURE]
 
-        s = Solver()
+        s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
         ps = {}  # {reified: constraint}
 
         for ass in self.assignments.values():
             if ass.status in reasons:
-                p = ass.translate()
+                p = ass.translate(self)
                 ps[p] = ass
                 #TODO use assert_and_track ?
                 s.add(Implies(p, p))
@@ -416,8 +447,8 @@ class Problem(object):
 
         todo = chain(self.constraints, chain(*def_constraints.values()))
         for constraint in todo:
-            p = constraint.reified()
-            ps[p] = constraint.original.interpret(self).translate()
+            p = constraint.reified(self)
+            ps[p] = constraint.original.interpret(self).translate(self)
             s.add(Implies(p, ps[p]))
 
         if consequence:
@@ -437,7 +468,7 @@ class Problem(object):
             if negated:
                 to_explain = AUnary.make('¬', to_explain)
 
-            s.add(Not(to_explain.translate()))
+            s.add(Not(to_explain.translate(self)))
 
         s.check(list(ps.keys()))
         unsatcore = s.unsat_core()
@@ -453,11 +484,12 @@ class Problem(object):
                             else:
                                 laws.append(a1.formula())
 
+            unsatcorestrings = {str(ps[a2]) for a2 in unsatcore}
             for a1 in chain(chain(*def_constraints.values()), self.constraints):
                 #TODO find the rule
-                for a2 in unsatcore:
-                    if str(a1.original.interpret(self).translate()) == str(ps[a2]):
-                        laws.append(a1)
+                if str(a1.original.interpret(self).translate(self)) in unsatcorestrings:
+                    laws.append(a1)
+
         return (facts, laws)
 
     def simplify(self):
@@ -479,7 +511,7 @@ class Problem(object):
             new_constraint = constraint.simplify_with(out.assignments)
             new_constraints.append(new_constraint)
         out.constraints = new_constraints
-        out._formula = None
+        out._formula, out._constraintz = None, None
         return out
 
     def _generalize(self,
@@ -501,28 +533,31 @@ class Problem(object):
                 that is a minimum satisfying assignment for `self`, given `known`
         """
         if z3_formula is None:
-            z3_formula = self.formula().translate()
+            z3_formula = self.formula()
 
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
-        solver = Solver()
-        z3_conditions = And([l.translate() for l in conditions])
+        solver = Solver(ctx=self.ctx)
+        z3_conditions = And([l.translate(self) for l in conditions])
         solver.add(And(z3_formula, known, z3_conditions))
         if solver.check() != sat:
             return []
         else:
             for i, c in (list(enumerate(conditions))): # optional: reverse the list
-                conditions_i = And([l.translate()
-                        for j, l in enumerate(conditions)
-                        if j != i])
-                solver = Solver()
+                if 1< len(conditions):
+                    conditions_i = And([l.translate(self)
+                                        for j, l in enumerate(conditions)
+                                        if j != i])
+                else:
+                    conditions_i = TRUE.translate(self)
+                solver = Solver(ctx=self.ctx)
                 if goal.sentence == TRUE or goal.value is None:  # find an abstract model
                     # z3_formula & known & conditions => conditions_i is always true
                     solver.add(Not(Implies(And(known, conditions_i), z3_conditions)))
                 else:  # decision table
                     # z3_formula & known & conditions => goal is always true
                     hypothesis = And(z3_formula, known, conditions_i)
-                    solver.add(Not(Implies(hypothesis, goal.translate())))
+                    solver.add(Not(Implies(hypothesis, goal.translate(self))))
                 if solver.check() == unsat:
                     conditions[i] = Assignment(TRUE, TRUE, S.UNKNOWN)
             conditions = join_set_conditions(conditions)
@@ -558,7 +593,7 @@ class Problem(object):
                     e.collect(questions, all_=True)
             for q in questions:  # update assignments for defined goals
                 if q.code not in self.assignments:
-                    self.assignments.assert__(q, None, S.UNKNOWN,False)
+                    self.assignments.assert__(q, None, S.UNKNOWN)
         for c in self.constraints:
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
@@ -573,14 +608,14 @@ class Problem(object):
         assert not goal_string or goal_string in [a.code for a in questions], \
             f"Internal error"
 
-        known = And([ass.translate() for ass in self.assignments.values()
+        known = ([ass.translate(self) for ass in self.assignments.values()
                         if ass.status != S.UNKNOWN]
-                    + [q.reified()==q.translate() for q in questions
+                    + [q.reified(self)==q.translate(self) for q in questions
                         if q.is_reified()])
+        known = (And(known) if known else TRUE.translate(self))
 
-        formula = self.formula()
-        theory = formula.translate()
-        solver = Solver()
+        theory = self.formula()
+        solver = Solver(ctx=self.ctx)
         solver.add(theory)
         solver.add(known)
 
@@ -595,9 +630,9 @@ class Problem(object):
                 assignment = self.assignments.get(atom.code, None)
                 if assignment and assignment.value is None and atom.type == BOOL:
                     if not atom.is_reified():
-                        val1 = model.eval(atom.translate())
+                        val1 = model.eval(atom.translate(self))
                     else:
-                        val1 = model.eval(atom.reified())
+                        val1 = model.eval(atom.reified(self))
                     if val1 == True:
                         ass = Assignment(atom, TRUE, S.UNKNOWN)
                     elif val1 == False:
@@ -620,7 +655,7 @@ class Problem(object):
             models.append(assignments)
 
             # add constraint to eliminate this model
-            modelZ3 = Not(And( [l.translate() for l in assignments
+            modelZ3 = Not(And( [l.translate(self) for l in assignments
                 if l.value is not None] ))
             solver.add(modelZ3)
 
@@ -637,11 +672,12 @@ class Problem(object):
                 """
                 known2 = known
                 for model in models:
-                    condition = [l.translate() for l in model
+                    condition = [l.translate(self) for l in model
                                     if l.value is not None
                                     and l.sentence.code != goal_string]
-                    known2 = And(known2, Not(And(condition)))
-                solver = Solver()
+                    known2 = (And(known2, Not(And(condition))) if condition else
+                              FALSE.translate(self))
+                solver = Solver(ctx=self.ctx)
                 solver.add(known2)
                 assert solver.check() == unsat, \
                     "The DMN table does not cover the full domain"
@@ -657,13 +693,13 @@ class Problem(object):
                     models1.append(models[0])
                     break
                 model = models.pop(0).copy()
-                condition = [l.translate() for l in model
+                condition = [l.translate(self) for l in model
                                 if l.value is not None
                                 and l.sentence.code != goal_string]
                 if condition:
                     possible = Not(And(condition))
                     if verify:
-                        solver = Solver()
+                        solver = Solver(ctx=self.ctx)
                         solver.add(known2)
                         solver.add(possible)
                         result = solver.check()

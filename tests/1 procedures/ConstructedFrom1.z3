@@ -1,4 +1,4 @@
-R(rgb(t, u)) = t ∧ is_rgb(rgb(t, u)) ∧ ¬(is_rgb(red)) ∧ ¬(is_red(blue)) ∧ true
+And(True, True, Not(is(rgb, red)), Not(is(red, blue)), True)
 
 Model 1
 ==========

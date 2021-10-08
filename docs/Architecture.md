@@ -46,6 +46,61 @@ The information given by the user is combined with the idp code (in [State.py](/
 
 The IDP-Z3 server implements custom inferences such as the computation of relevance ([Inferences.py](/code_modules/server_inferences.html)), and the handling of environmental vs. decision variables.
 
+### API endpoints
+
+The IDP-Z3 server exposes multiple API endpoints, which are used to communicate information between the interface and server.
+
+#### /run
+
+**POST**: Runs an IDP program containing a main block. The program is be executed by the IDP-Z3 directly, and the output is returned.
+This endpoint is e.g. used to execute the code in the IDP webIDE.
+
+Arguments:
+
+* **code**: IDP code, containing a main block.
+
+Returns:
+
+* A string, containing the output of the IDP-Z3 engine after executing the program.
+
+#### /meta
+
+**POST**: generate the metaJSON for an IDP program. In the IC, this metaJSON is among others used to correctly lay out the different symbol tiles and to generate extra expanded symbols.
+
+Arguments:
+
+* **code**: IDP code, with or without main block.
+
+Returns:
+
+* **title**: the title that the IC should have.
+* **symbols**: contains information on each symbol used in the IDP program. This information includes symbol name, type, view, ...
+* **optionalPropagation**: a bool representing if a propagation toggle should be shown in the interface.
+* **manualPropagation**: a bool representing if propagation should be manual via a button.
+* **optionalRelevance**: a bool representing if a relevance toggle should be shown in the interface.
+* **manualRelevance**: a bool representing if relevance computation should be manual via a button.
+* **propagated**: contains the information on all the (expanded) symbols.
+
+####  /eval
+
+**POST**: execute one of IDP-Z3's inference methods.
+
+Arguments:
+
+* **method**: string containing the method to execute. Supported methods are: *propagate*, *get_range*, *modelexpand*, *explain*, *minimize*, and *abstract*.
+* **code**: the IDP code.
+* **active**: the active assignments, already input in the interface.
+* **previous_active**: the same as the above, sans the last added assignment.
+* **symbol**: the name of a symbol, only used for *minimize* or *explain*.
+* **value**: a value, only used for *explain*.
+* **field**: the applied symbol for which a range must be determined, only for *get_range*.
+* **minimize**: *true* for minimization, *false* for maximization.
+
+Returns:
+
+* **Global**: the global information of the current state of the IC.
+* A field for every symbol that appears in the IDP program, containing all its information.
+
 
 ## IDP-Z3 engine
 The code for the IDP-Z3 engine and IDP-Z3-CLI is in the `/idp_engine` folder. The IDP-Z3 engine exposes [an API](/IDPLanguage.html#main-block) implemented by [Run.py](/code_modules/solver_run.html) and [Problem.py](/code_modules/solver_problem.html).

@@ -1,0 +1,11 @@
+And(date < date + ToReal(1),
+    Or(date == 737791,
+       date == 737792,
+       date == 737793,
+       date == 737794,
+       date == 737795,
+       date == 737796,
+       date == 737797,
+       date == 737798,
+       date == 737799,
+       date == 737800))

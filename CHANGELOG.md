@@ -6,6 +6,44 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+### API
+* MR !145: Improve performance of explain
+* fix #132, #136: Improve error message for mis-applied symbol
+* fix #137: support of functions from Symbol to Symbol
+
+
+## [0.8.4] - 2021-09-30
+
+Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
+
+### API
+* MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
+* MR !126: improve performance by simplifying `abs` when possible
+* (breaking) MR !132: `Problem.formula()`returns a Z3 object, for performance
+* MR !141: improve performance of definitions containing other defined terms
+* MR !142: more efficient inferences for large models
+* MR !143: API: `IDP.from_file()` should return an IDP instance, not None
+* Fix #49: improve command line interface
+* fix #119: improve error message when too many variables in head of rule.
+* fix #126: error in inductive definitions
+* fix #127: error in definition with aggregates
+* fix #128: fix enumerations that mix integer and real, or range over dates
+* fix #130: error when using conflicting web sessions
+* fix #134: incorrect printing of the result of `Problem.optimize` in main block
+
+### Interactive Consultant
+* MR !124: show the overall time of execution of each run in the IDE
+* MR !138: improve speed of opening a drop-down
+* MR !140: manual / optional Relevance
+* web MR !29: "Print" view + dynamic horizontal sizing of consultant
+* web MR !30: ctrl-S in editor runs the code
+* Added info on API endpoint to docs
+
+
+## [0.8.3] - 2021-08-18
+
+Run `poetry install` to get the correct dependencies.
+
 Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
@@ -18,16 +56,21 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 * Merge !105: "directional propagation" to improve performance for a sequence of assert+propagate
 * Merge !106: improve performance of Problem.simplify()
 * Merge !117, !119: improve performance of Problem._from_model()
+* Merge !118: allow unicode characters in non-logic symbols
 * fix #88: Explanations should be rule-specific when possible
 * fix #104: implications, equivalences are binary connectives, not n-ary.
+* fix #105: Do not require parenthesis around quantification
 * fix #111: Missing law in explanation when between brackets
+* fix #116: Constructors on infinite domains
 * fix #118: Incorrect models for definitions over infinite domains
+* fix #121: Definitions over constructors with infinite domains
 
 ### Interactive Consultant
+* fix #91: empty box in top right of IC
 * fix #98: Incorrect relevance with definitions
 * Merge 101: improve performance of IC (propagate dropdowns on request)
 * fix #112: Don't repeat the symbol name for symbol tiles with a header
-* fix #17 (web-IDP-Z3): When no model can be found, an error is returned.
+* fix #17 (web-IDP-Z3): When no model can be found, an explanation is shown.
 * fix #113: Prettify not working correctly for ~=
 
 ## [0.8.2] - 2021-06-02
@@ -65,6 +108,7 @@ Contributors (alphabetical):  Jo Devriendt, Matthias van der hallen, Pierre Carb
 * Merge !78: add `assert_(code, value)` to Problem API
 * fix #77: `in` operator does not work in some definitions
 * fix #80: infinite loop for recursive definitions
+* fix #81: Spill-over of structures
 * fix #82: allow number and date ranges in structures
 * fix #83: same symbol defined in multiple definitions
 * fix #84: infinite loop when instantiating co_constraint

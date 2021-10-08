@@ -26,7 +26,9 @@ structure {
 
 -- meta -------------------------------------
 {'manualPropagation': False,
+ 'manualRelevance': False,
  'optionalPropagation': False,
+ 'optionalRelevance': False,
  'symbols': [{'environmental': False,
               'idpname': 'price',
               'priority': 'core',
