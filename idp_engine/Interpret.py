@@ -142,7 +142,7 @@ Definition.add_def_constraints = add_def_constraints
 # class SymbolInterpretation  ###########################################################
 
 def interpret(self, problem):
-    status = S.STRUCTURE if self.block.name != DEFAULT else S.GIVEN
+    status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
     if self.is_type_enumeration:
         self.enumeration.interpret(problem)
         self.symbol.decl.interpretation = self
