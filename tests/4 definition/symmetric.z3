@@ -53,7 +53,7 @@ display {
                        'status': 'UNKNOWN',
                        'typ': 'node',
                        'value': '',
-                       'values': []},
+                       'values': ['a', 'b', 'c']},
            '__rank': 9999},
  'edge': {'__rank': 9999,
           'edge(a, a)': {'environmental': False,

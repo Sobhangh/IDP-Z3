@@ -548,7 +548,7 @@ display {
                            'status': 'UNKNOWN',
                            'typ': 'subtype',
                            'value': '',
-                           'values': []},
+                           'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype() = irregular': {'environmental': False,
                                        'is_assignment': True,
                                        'normal': False,

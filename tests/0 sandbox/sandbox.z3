@@ -47,7 +47,7 @@ display {
                        'status': 'UNKNOWN',
                        'typ': 'color',
                        'value': '',
-                       'values': []},
+                       'values': ['red', 'blue', 'green']},
            '__rank': 9999,
            'opposite(Color())': {'environmental': False,
                                  'is_assignment': True,
