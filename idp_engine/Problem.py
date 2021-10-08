@@ -277,7 +277,7 @@ class Problem(object):
     def _todo(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.status not in [S.GIVEN, S.STRUCTURE, S.UNIVERSAL, S.ENV_UNIV]
+            if a.status not in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.UNIVERSAL, S.ENV_UNIV]
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -426,7 +426,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [S.GIVEN, S.STRUCTURE]
+        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE]
 
         s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
@@ -479,7 +479,7 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status == S.GIVEN:
+                            if a1.status == S.GIVEN or a1.status == S.DEFAULT:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())
