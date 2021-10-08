@@ -123,7 +123,7 @@ def get_relevant_questions(self: "State"):
     # analyse given information
     given = OrderedSet()
     for q in out.assignments.values():
-        if q.status == S.GIVEN:
+        if q.status in [S.GIVEN, S.DEFAULT]:
             if not q.sentence.has_decision():
                 given.append(q.sentence)
 
@@ -251,7 +251,8 @@ def abstract(state, given_json):
     out["universal"] = list(l for l in state.assignments.values()
                             if l.status == S.UNIVERSAL)
     out["given"    ] = list(l for l in state.assignments.values()
-                            if l.status == S.GIVEN)
+                            if l.status in [S.GIVEN, S.DEFAULT])
+    # TODO: separate field for S.DEFAULT?
     out["fixed"    ] = list(l for l in state.assignments.values()
                             if l.status in [S.ENV_CONSQ, S.CONSEQUENCE])
     out["irrelevant"]= list(l for l in state.assignments.values()

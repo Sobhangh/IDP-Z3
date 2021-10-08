@@ -479,7 +479,7 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status == S.GIVEN or a1.status == S.DEFAULT:
+                            if a1.status in [S.GIVEN, S.DEFAULT]:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())
