@@ -15,7 +15,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.8.4] - 2021-09-30
 
-Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
+Contributors (alphabetical): Jo Devriendt, Matthias Van der Hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
 * MR !124: add `duration()` API to allow measurement of time of processing in the `main` block.
@@ -45,7 +45,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 
 Run `poetry install` to get the correct dependencies.
 
-Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
+Contributors (alphabetical): Jo Devriendt, Matthias Van der Hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
 * Merge !90: add `IDP.from_file` and `IDP.from_str` to Python API
@@ -76,7 +76,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 
 ## [0.8.2] - 2021-06-02
 
-Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde.
+Contributors (alphabetical): Jo Devriendt, Matthias Van der Hallen, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
 * (breaking) Merge !82: Problem must be created with `extended=True` for `decision_table()` API
@@ -97,7 +97,7 @@ Contributors (alphabetical): Jo Devriendt, Matthias van der hallen, Pierre Carbo
 
 ## [0.8.1] - 2021-05-11
 
-Contributors (alphabetical):  Jo Devriendt, Matthias van der hallen, Pierre Carbonnelle, Simon Vandevelde
+Contributors (alphabetical):  Jo Devriendt, Matthias Van der Hallen, Pierre Carbonnelle, Simon Vandevelde
 
 ### API
 * (breaking) fix #85: use `pretty_print( )` in `procedure main()` block, instead of `print()`
