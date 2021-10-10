@@ -119,8 +119,8 @@ def load_json(state: Problem, jsonstr: str):
                                 if key2 in state.assignments:
                                     state.assert_(key2, TRUE, S.GIVEN)
 
-                        # If the atom was already set in default struct, overwrite.
-                        else:
+                        # If the atom was not already set in default struct, overwrite.
+                        elif atom.status != S.DEFAULT:
                             value = str_to_IDP(sentence, str(json_atom["value"]))
                             state.assert_(sentence.code, value, S.GIVEN)
 
