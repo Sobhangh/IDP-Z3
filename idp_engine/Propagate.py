@@ -202,7 +202,10 @@ def _directional_todo(self):
     else:
         todo = OrderedSet()
 
-    return todo + self.cleared if self.cleared else todo
+    if self.cleared:
+        for x in self.cleared:
+            todo.append(x)
+    return todo
 Problem._directional_todo = _directional_todo
 
 
