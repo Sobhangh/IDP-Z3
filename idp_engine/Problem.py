@@ -277,7 +277,7 @@ class Problem(object):
     def _todo(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.status not in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.UNIVERSAL, S.ENV_UNIV]
+            if a.status in [S.UNKNOWN]
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
