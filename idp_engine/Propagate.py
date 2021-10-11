@@ -184,13 +184,14 @@ def _directional_todo(self):
     * a clearing of assignment forces the re-propagation of previous consequences
     """
     statuses = []
+    print(self.propagated, self.cleared, self.assigned)
     if self.propagated:
         if self.assigned:
-            statuses.extend([S.UNKNOWN, S.EXPANDED])
+            statuses.extend([S.UNKNOWN])
         if self.cleared:
             statuses.extend([S.CONSEQUENCE, S.ENV_CONSQ])
     else:
-        statuses = [S.UNKNOWN, S.EXPANDED, S.CONSEQUENCE, S.ENV_CONSQ]
+        statuses = [S.UNKNOWN, S.CONSEQUENCE, S.ENV_CONSQ]
 
     if statuses:
         todo = OrderedSet(
@@ -200,7 +201,8 @@ def _directional_todo(self):
                 ))
     else:
         todo = OrderedSet()
-    return todo
+
+    return todo + self.cleared if self.cleared else todo
 Problem._directional_todo = _directional_todo
 
 
