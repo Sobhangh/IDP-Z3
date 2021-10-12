@@ -153,18 +153,12 @@ class Output(object):
                 typ = atom.type
                 if typ == BOOL:
                     symbol = {"typ": typ}
+                elif 0 < len(symb.range):
+                    typ = symb.out.decl.type
+                    symbol = {"typ": typ, "value": ""  #TODO
+                              , "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": typ, "value": ""}  # default
-                elif 0 < len(symb.range):
-                    # TODO: ugly string representation hack to get the range of a term
-                    sep = " in {"
-                    instring = [c.__str1__() for c in state.constraints]
-                    instring = [s.split(sep)[1][:-1] for s in instring if s.startswith(ass.sentence.__str__()+sep)]
-                    typ = symb.out.decl.type
-                    if len(instring) == 1:
-                        symbol = {"typ": typ, "value": "", "values": instring[0].split(', ')}
-                    else:
-                        symbol = {"typ": typ, "value": "", "values": []}
                 else:
                     assert False, "dead code"
                     symbol = None
