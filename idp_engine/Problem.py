@@ -274,7 +274,7 @@ class Problem(object):
             self._formula = And(all) if all else BoolVal(True, self.ctx)
         return self._formula
 
-    def _todo(self):
+    def _todo_expand(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
             if a.status in [S.UNKNOWN]
@@ -302,7 +302,7 @@ class Problem(object):
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.formula()
-        todo = self._todo()
+        todo = self._todo_expand()
 
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
@@ -358,7 +358,7 @@ class Problem(object):
                 solver.pop()  # get the last good one
                 solver.check()
                 break
-        self.assignments = self._from_model(solver, self._todo(), complete)
+        self.assignments = self._from_model(solver, self._todo_expand(), complete)
         return self
 
     def symbolic_propagate(self, tag=S.UNIVERSAL):
