@@ -184,7 +184,6 @@ def _directional_todo(self):
     * a clearing of assignment forces the re-propagation of previous consequences
     """
     statuses = []
-    print(self.propagated, self.cleared, self.assigned)
     if self.propagated:
         if self.assigned:
             statuses.extend([S.UNKNOWN])
