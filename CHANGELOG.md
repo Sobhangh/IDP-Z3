@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !145: Improve performance of explain
 * fix #132, #136: Improve error message for mis-applied symbol
 * fix #137: support of functions from Symbol to Symbol
-* MR !147: add DEFAULT assignment type to API and obtain a default domain for constants in the IC
+* MR !147: allow the user to edit system choices after model expansion / optimisation
 
 
 ## [0.8.4] - 2021-09-30
