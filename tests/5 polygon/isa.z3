@@ -187,7 +187,7 @@ structure isa:isa {
                                   'status': 'UNKNOWN',
                                   'typ': 'type',
                                   'value': '',
-                                  'values': []},
+                                  'values': ['1tri angle', 'quadrilateral']},
             'typeOf(rectangle)': {'environmental': False,
                                   'is_assignment': True,
                                   'normal': True,

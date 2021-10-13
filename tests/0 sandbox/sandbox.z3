@@ -57,7 +57,7 @@ display {
                                  'status': 'UNKNOWN',
                                  'typ': 'color',
                                  'value': '',
-                                 'values': []},
+                                 'values': ['red', 'blue', 'green']},
            'opposite(Color()) is enumerated': {'environmental': False,
                                                'is_assignment': False,
                                                'normal': False,

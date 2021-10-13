@@ -30,5 +30,5 @@ theory {
                                                                                'status': 'UNKNOWN',
                                                                                'typ': 'Int',
                                                                                'value': '',
-                                                                               'values': []},
+                                                                               'values': ['2015', '2016']},
                                        '__rank': 9999}}
