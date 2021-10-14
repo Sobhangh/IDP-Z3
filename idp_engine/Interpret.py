@@ -479,14 +479,6 @@ def instantiate1(self, e0, e1, problem=None):
 AppliedSymbol .instantiate1 = instantiate1
 
 
-# Class SymbolExpr  #######################################################
-
-def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)
-    return out
-SymbolExpr.instantiate1 = instantiate1
-
-
 # Class Variable  #######################################################
 
 def interpret(self, problem):
