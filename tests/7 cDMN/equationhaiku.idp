@@ -27,12 +27,12 @@ theory {
 	!Line in Line_t: true => Syllables(Line) = Allowed_Syllables(Line).
 
 	//Calculate the lines
-	!Line in Line_t: Solution(Line)  = sum{ : Line = Line: Hundreds(Line) * 100 }+sum{ : Line = Line: Tens(Line) * 10 }+sum{ : Line = Line: Units(Line) }.
+	!Line in Line_t: Solution(Line)  = sum(lambda : Line = Line: Hundreds(Line) * 100 )+sum(lambda : Line = Line: Tens(Line) * 10 )+sum(lambda : Line = Line: Units(Line) ).
 	//Solutions need to add up
 	true => Solution(Third) = Solution(First) + Solution(Second).
 
 	//Calculate syllables of line
-	!Line in Line_t: Syllables(Line)  = sum{ : Line = Line: Syllables_for_Hundreds(Hundreds(Line)) }+sum{ : Line = Line: Syllables_for_Tens(Tens(Line)) }+sum{ : Line = Line: Syllables_for_Units(Units(Line)) }.
+	!Line in Line_t: Syllables(Line)  = sum(lambda : Line = Line: Syllables_for_Hundreds(Hundreds(Line)) )+sum(lambda : Line = Line: Syllables_for_Tens(Tens(Line)) )+sum(lambda : Line = Line: Syllables_for_Units(Units(Line)) ).
 }
 
 

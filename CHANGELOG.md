@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unpublished yet]
 
 ### API
+* (breaking) MR !152: change syntax of sum aggregate to sum(lambda <quantee>: expr)
 * MR !145: Improve performance of explain
 * fix #132, #136: Improve error message for mis-applied symbol
 * fix #137: support of functions from Symbol to Symbol

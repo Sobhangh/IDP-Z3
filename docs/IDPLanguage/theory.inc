@@ -68,9 +68,9 @@ Cardinality aggregate
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
 Arithmetic aggregate
-    ``ꕕ{v_1 in typeOfV_1, .., v_n in typeOfV_n : ϕ : t}`` is a numerical term when ``ꕕ`` is ``sum``, |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
+    ``sum(lambda v_1 in typeOfV_1, .., v_n in typeOfV_n : t)`` is a numerical term when |v1,vn| are variables, |phi| is a sentence_, and |t| is a term.
 
-    The term ``sum{v in T : ϕ(v) : t(v)}`` denotes the sum of ``t(v)`` for each distinct value of ``v`` which makes ``phi(v)`` true.
+    The term ``sum(lambda v in T : t(v))`` denotes the sum of ``t(v)`` for each v in T.  ``t(v)`` can use the ``(if .. then .. else 0)`` construct for filtering the v values.
 
 (if .. then .. else ..)
     ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a sentence, |t2| and |t3| are terms of the same type.
