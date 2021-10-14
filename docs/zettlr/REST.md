@@ -98,6 +98,7 @@ GET response :
             - values : []       // list of possible values for the atom/term (from its type)
             - status : string   // UNKNOWN     : unknown value
                                 // GIVEN       : given by the user
+                                // DEFAULT     : part of a given default structure
                                 // ENV_UNIV    : immediate consequence of the environmental theory
                                 // UNIVERSAL   : immediate consequence of the theory
                                 // ENV_CONSQ   : value propagated from inputs and environmental theory

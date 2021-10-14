@@ -42,6 +42,7 @@ class Status(Enum):
     CONSEQUENCE = auto()
     EXPANDED = auto()
     STRUCTURE = auto()
+    DEFAULT = auto()
 
 
 class Assignment(object):

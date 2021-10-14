@@ -166,7 +166,7 @@ display {
                            'status': 'UNKNOWN',
                            'typ': 'subtype',
                            'value': '',
-                           'values': []},
+                           'values': ['regular_triangle', 'right_triangle', 'rectangle', 'square', 'irregular']},
              'Subtype() = rectangle': {'environmental': False,
                                        'is_assignment': True,
                                        'normal': False,
@@ -184,5 +184,5 @@ display {
                      'status': 'UNKNOWN',
                      'typ': 'type',
                      'value': '',
-                     'values': []},
+                     'values': ['triangle', 'quadrilateral']},
           '__rank': 9999}}

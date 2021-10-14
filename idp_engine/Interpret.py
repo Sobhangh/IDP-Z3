@@ -142,7 +142,7 @@ Definition.add_def_constraints = add_def_constraints
 # class SymbolInterpretation  ###########################################################
 
 def interpret(self, problem):
-    status = S.STRUCTURE if self.block.name != DEFAULT else S.GIVEN
+    status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
     if self.is_type_enumeration:
         self.enumeration.interpret(problem)
         self.symbol.decl.interpretation = self
@@ -157,7 +157,7 @@ def interpret(self, problem):
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
             e = problem.assignments.assert__(expr, value, status)
-            if (status == S.GIVEN  # for proper display in IC
+            if (status in [S.GIVEN, S.DEFAULT]  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
                 problem.assignments.assert__(e.formula(), TRUE, status)
         if self.default is not None:
@@ -165,7 +165,7 @@ def interpret(self, problem):
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
                     e = problem.assignments.assert__(expr, self.default, status)
-                    if (status == S.GIVEN  # for proper display in IC
+                    if (status in [S.GIVEN, S.DEFAULT]  # for proper display in IC
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
 SymbolInterpretation.interpret = interpret
