@@ -100,5 +100,5 @@ structure {
                                                                'status': 'UNKNOWN',
                                                                'typ': 'Post_Bureau_Risk_Categoryt_t',
                                                                'value': '',
-                                                               'values': []},
+                                                               'values': ['LOW', 'HIGH', 'VERY_LOW', 'MEDIUM']},
                                '__rank': 9999}}
