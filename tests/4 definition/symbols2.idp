@@ -10,3 +10,6 @@ theory {
 	mapping := {`amount_threshold -> `amount_thresholdEU, `period -> `periodEU}
 	! o in obligation, c in Country: $(mapping(o))() > $(o)(c).
 }
+procedure main() {
+    pretty_print(model_expand(T, max=1))
+}
