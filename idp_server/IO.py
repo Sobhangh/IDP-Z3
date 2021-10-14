@@ -100,7 +100,7 @@ def load_json(state: Problem, jsonstr: str):
             # tentative set of sentences to be cleared
             to_clear = set(atom.sentence for atom in state.assignments.values()
                            if (atom.symbol_decl.name == symbol
-                           and atom.status in [S.GIVEN, S.EXPANDED]))
+                           and atom.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]))
 
             # processed json_data
             for key, json_atom in json_data[symbol].items():
@@ -119,8 +119,8 @@ def load_json(state: Problem, jsonstr: str):
                                 if key2 in state.assignments:
                                     state.assert_(key2, TRUE, S.GIVEN)
 
-                        # If the atom was already set in default struct, overwrite.
-                        else:
+                        # If the atom was not already set in default struct, overwrite.
+                        elif atom.status != S.DEFAULT:
                             value = str_to_IDP(sentence, str(json_atom["value"]))
                             state.assert_(sentence.code, value, S.GIVEN)
 
@@ -156,7 +156,7 @@ class Output(object):
                 elif 0 < len(symb.range):
                     typ = symb.out.decl.type
                     symbol = {"typ": typ, "value": ""  #TODO
-                              , "values": []}
+                              , "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": typ, "value": ""}  # default
                 else:

@@ -31,7 +31,7 @@ theory  {
                'status': 'UNKNOWN',
                'typ': 'Int',
                'value': '',
-               'values': []},
+               'values': ['1', '2', '3', '4', '5']},
        'p() < 3': {'environmental': False,
                    'is_assignment': False,
                    'normal': False,

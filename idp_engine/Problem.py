@@ -286,10 +286,10 @@ class Problem(object):
                 self._formula = BoolVal(True, self.ctx)
         return self._formula
 
-    def _todo(self):
+    def _todo_expand(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.status not in [S.GIVEN, S.STRUCTURE, S.UNIVERSAL, S.ENV_UNIV]
+            if a.status in [S.UNKNOWN]
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -314,7 +314,7 @@ class Problem(object):
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.formula()
-        todo = self._todo()
+        todo = self._todo_expand()
 
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
@@ -370,7 +370,7 @@ class Problem(object):
                 solver.pop()  # get the last good one
                 solver.check()
                 break
-        self.assignments = self._from_model(solver, self._todo(), complete)
+        self.assignments = self._from_model(solver, self._todo_expand(), complete)
         return self
 
     def symbolic_propagate(self, tag=S.UNIVERSAL):
@@ -438,7 +438,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [S.GIVEN, S.STRUCTURE]
+        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE]
 
         s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
@@ -491,7 +491,7 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status == S.GIVEN:
+                            if a1.status in [S.GIVEN, S.DEFAULT]:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())

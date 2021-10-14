@@ -97,7 +97,7 @@ display {
                      'status': 'UNKNOWN',
                      'typ': 'csid',
                      'value': '',
-                     'values': []},
+                     'values': ['b', 'c', 'd', 'e', 'f']},
           'cSID() = b': {'environmental': False,
                          'is_assignment': True,
                          'normal': False,

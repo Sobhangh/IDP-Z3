@@ -131,5 +131,5 @@ structure {
                                    'status': 'UNKNOWN',
                                    'typ': 'Refuel_Areat_t',
                                    'value': '',
-                                   'values': []},
+                                   'values': ['NA', 'outdoor', 'indoor']},
                  '__rank': 9999}}

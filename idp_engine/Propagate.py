@@ -186,20 +186,22 @@ def _directional_todo(self):
     statuses = []
     if self.propagated:
         if self.assigned:
-            statuses.extend([S.UNKNOWN, S.EXPANDED])
+            statuses.extend([S.UNKNOWN])
         if self.cleared:
             statuses.extend([S.CONSEQUENCE, S.ENV_CONSQ])
     else:
-        statuses = [S.UNKNOWN, S.EXPANDED, S.CONSEQUENCE, S.ENV_CONSQ]
+        statuses = [S.UNKNOWN, S.CONSEQUENCE, S.ENV_CONSQ]
 
     if statuses:
+        cleareds = self.cleared if self.cleared else OrderedSet()
         todo = OrderedSet(
             a.sentence for a in self.assignments.values()
             if ((not a.sentence.is_reified() or self.extended)
-                and a.status in statuses
+                and (a.status in statuses or a.sentence in cleareds)
                 ))
     else:
         todo = OrderedSet()
+
     return todo
 Problem._directional_todo = _directional_todo
 
