@@ -27,7 +27,7 @@ from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
 from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
-                is_and, BoolVal)
+                is_and, BoolVal, Z3Exception)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -264,14 +264,26 @@ class Problem(object):
         return self._constraintz
 
     def formula(self):
+
+        def get_symbols(zexpr):
+            try:
+                return {zexpr.decl()}.union({symb for child in zexpr.children() for symb in get_symbols(child)})
+            except Z3Exception:
+                # z3 term is no application (e.g., a QuantifierRef) so no symbol exists
+                return {symb for child in zexpr.children() for symb in get_symbols(child)}
+
         """ the formula encoding the knowledge base """
         if self._formula is None:
-            all = ([a.formula().translate(self) for a in self.assignments.values()
-                    if a.value is not None
-                    and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                     or (self.propagated and not self.cleared))]
-                   + self.constraintz())
-            self._formula = And(all) if all else BoolVal(True, self.ctx)
+            if self.constraintz():
+                symbols = {s.name() for c in self.constraintz() for s in get_symbols(c)}
+                all = ([a.formula().translate(self) for a in self.assignments.values()
+                        if a.symbol_decl.name in symbols and a.value is not None
+                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                            or (self.propagated and not self.cleared))]
+                        + self.constraintz())
+                self._formula = And(all)
+            else:
+                self._formula = BoolVal(True, self.ctx)
         return self._formula
 
     def _todo(self):
