@@ -122,10 +122,10 @@ class Problem(object):
             theories.add(*structures)
             self = theories
         elif isinstance(theories, Iterable):
-            self = cls(* theories + structures, extended= extended)
+            self = cls(* theories + structures, extended=extended)
         else:
             self = cls(* [theories] + structures, extended=extended)
-        return self
+        return self.simplify()
 
     def copy(self):
         out = copy(self)
