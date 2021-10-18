@@ -143,6 +143,8 @@ class Output(object):
         self.m[' Global'] = {}
         self.m[' Global']['env_dec'] = state.environment is not None
         self.m[' Global']['active'] = state.active
+        FROM = {BOOL: 'Bool', INT: 'Int', REAL: 'Real',
+                '`'+BOOL: '`Bool', '`'+INT: '`Int', '`'+REAL: '`Real',}
 
         for key, ass in state.assignments.items():
             atom = ass.sentence
@@ -152,13 +154,13 @@ class Output(object):
 
                 typ = atom.type
                 if typ == BOOL:
-                    symbol = {"typ": typ}
+                    symbol = {"typ": "Bool"}
                 elif 0 < len(symb.range):
                     typ = symb.out.decl.type
-                    symbol = {"typ": typ, "value": ""  #TODO
-                              , "values": [str(v) for v in symb.range]}
+                    symbol = {"typ": FROM.get(typ, typ), "value": "",
+                              "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
-                    symbol = {"typ": typ, "value": ""}  # default
+                    symbol = {"typ": FROM.get(typ, typ), "value": ""}  # default
                 else:
                     assert False, "dead code"
                     symbol = None
@@ -174,7 +176,7 @@ class Output(object):
                     symbol['reading'] = reading.replace("()","")
                     symbol['normal'] = not atom.is_reified()
                     symbol['environmental'] = symb.block.name == 'environment'
-                    symbol['is_assignment'] = symbol['typ'] != BOOL \
+                    symbol['is_assignment'] = symbol['typ'] != "Bool" \
                         or bool(ass.sentence.is_assignment())
                     s.setdefault(key, symbol)
                     s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
