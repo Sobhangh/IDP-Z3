@@ -22,7 +22,7 @@ To profile it, set with_profiling to True
 """
 
 with_png = False
-with_profiling = False
+with_profiling = True  # TMP
 
 from contextlib import redirect_stdout
 from copy import copy

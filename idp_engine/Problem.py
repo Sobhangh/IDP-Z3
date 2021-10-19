@@ -125,6 +125,7 @@ class Problem(object):
             self = cls(* theories + structures, extended=extended)
         else:
             self = cls(* [theories] + structures, extended=extended)
+        # return self  # TMP
         return self.simplify()
 
     def copy(self):
