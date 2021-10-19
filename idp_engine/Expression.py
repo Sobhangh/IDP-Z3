@@ -797,23 +797,24 @@ class AAggregate(Expression):
         self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
+        if self.aggtype == "sum":
+            self.f = TRUE
 
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
         self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
-        if self.aggtype == "sum" and self.out is None:
-            raise Exception("Must have output variable for sum")
-        if self.aggtype != "sum" and self.out is not None:
-            raise Exception("Can't have output variable for  #")
 
     def __str1__(self):
         if not self.using_if:
             vars = "".join([f"{q}" for q in self.quantees])
-            output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
-            out = (f"{self.aggtype}{{{vars} : "
-                   f"{self.sub_exprs[AAggregate.CONDITION].str}"
-                   f"{output}}}")
+            out = ((f"sum(lambda {vars} : "
+                    f"{self.sub_exprs[AAggregate.OUT].str}"
+                    f")" ) if self.aggtype == "sum" else
+                   (f"{self.aggtype}{{{vars} : "
+                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
+                    f"}}")
+            )
         else:
             out = (f"{self.aggtype}{{"
                    f"{','.join(e.str for e in self.sub_exprs)}"

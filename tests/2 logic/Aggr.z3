@@ -5,7 +5,7 @@ vocabulary {
     p: () → Bool
 }
 theory {
-    p() <=> sum{c in color : true : 1} = 3.
+    p() <=> sum(lambda c in color : 1) = 3.
 }
 display {
     view() = expanded.

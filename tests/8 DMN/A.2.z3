@@ -9,7 +9,7 @@ vocabulary {
 }
 theory {
 	//Calculate Price Decision
-	price() = sum{ : age() < 2: 0 }+sum{ : 3 =< age() & age() =< 16: 20 }+sum{ : age() >= 16: 40 }+sum{ : priority(): 10 }.
+	price() = sum(lambda : if age() < 2 then 0 else 0)+sum(lambda : if 3 =< age() & age() =< 16 then 20 else 0)+sum(lambda : if age() >= 16 then 40 else 0)+sum(lambda : if priority() then 10 else 0).
 }
 
 
@@ -89,48 +89,60 @@ structure {
                        'status': 'UNKNOWN',
                        'typ': 'Real',
                        'value': ''},
-           'price() = sum{ : age() < 2 : 0} + sum{ : 3 ≤ age() ∧ age() ≤ 16 : 20} + sum{ : age() ≥ 16 : 40} + sum{ : priority() : 10}': {'environmental': False,
-                                                                                                                                         'is_assignment': False,
-                                                                                                                                         'normal': False,
-                                                                                                                                         'reading': 'price '
-                                                                                                                                                    '= '
-                                                                                                                                                    'sum{ '
-                                                                                                                                                    ': '
-                                                                                                                                                    'age '
-                                                                                                                                                    '< '
-                                                                                                                                                    '2 '
-                                                                                                                                                    ': '
-                                                                                                                                                    '0} '
-                                                                                                                                                    '+ '
-                                                                                                                                                    'sum{ '
-                                                                                                                                                    ': '
-                                                                                                                                                    '3 '
-                                                                                                                                                    '≤ '
-                                                                                                                                                    'age '
-                                                                                                                                                    '∧ '
-                                                                                                                                                    'age '
-                                                                                                                                                    '≤ '
-                                                                                                                                                    '16 '
-                                                                                                                                                    ': '
-                                                                                                                                                    '20} '
-                                                                                                                                                    '+ '
-                                                                                                                                                    'sum{ '
-                                                                                                                                                    ': '
-                                                                                                                                                    'age '
-                                                                                                                                                    '≥ '
-                                                                                                                                                    '16 '
-                                                                                                                                                    ': '
-                                                                                                                                                    '40} '
-                                                                                                                                                    '+ '
-                                                                                                                                                    'sum{ '
-                                                                                                                                                    ': '
-                                                                                                                                                    'priority '
-                                                                                                                                                    ': '
-                                                                                                                                                    '10}',
-                                                                                                                                         'relevant': True,
-                                                                                                                                         'status': 'UNIVERSAL',
-                                                                                                                                         'typ': 'Bool',
-                                                                                                                                         'value': True}},
+           'price() = sum(lambda  :  if   age() < 2 then 0 else 0) + sum(lambda  :  if   3 ≤ age() ∧ age() ≤ 16 then 20 else 0) + sum(lambda  :  if   age() ≥ 16 then 40 else 0) + sum(lambda  :  if   priority() then 10 else 0)': {'environmental': False,
+                                                                                                                                                                                                                                     'is_assignment': False,
+                                                                                                                                                                                                                                     'normal': False,
+                                                                                                                                                                                                                                     'reading': 'price '
+                                                                                                                                                                                                                                                '= '
+                                                                                                                                                                                                                                                'sum(lambda  '
+                                                                                                                                                                                                                                                ':  '
+                                                                                                                                                                                                                                                'if   '
+                                                                                                                                                                                                                                                'age '
+                                                                                                                                                                                                                                                '< '
+                                                                                                                                                                                                                                                '2 '
+                                                                                                                                                                                                                                                'then '
+                                                                                                                                                                                                                                                '0 '
+                                                                                                                                                                                                                                                'else '
+                                                                                                                                                                                                                                                '0) '
+                                                                                                                                                                                                                                                '+ '
+                                                                                                                                                                                                                                                'sum(lambda  '
+                                                                                                                                                                                                                                                ':  '
+                                                                                                                                                                                                                                                'if   '
+                                                                                                                                                                                                                                                '3 '
+                                                                                                                                                                                                                                                '≤ '
+                                                                                                                                                                                                                                                'age '
+                                                                                                                                                                                                                                                '∧ '
+                                                                                                                                                                                                                                                'age '
+                                                                                                                                                                                                                                                '≤ '
+                                                                                                                                                                                                                                                '16 '
+                                                                                                                                                                                                                                                'then '
+                                                                                                                                                                                                                                                '20 '
+                                                                                                                                                                                                                                                'else '
+                                                                                                                                                                                                                                                '0) '
+                                                                                                                                                                                                                                                '+ '
+                                                                                                                                                                                                                                                'sum(lambda  '
+                                                                                                                                                                                                                                                ':  '
+                                                                                                                                                                                                                                                'if   '
+                                                                                                                                                                                                                                                'age '
+                                                                                                                                                                                                                                                '≥ '
+                                                                                                                                                                                                                                                '16 '
+                                                                                                                                                                                                                                                'then '
+                                                                                                                                                                                                                                                '40 '
+                                                                                                                                                                                                                                                'else '
+                                                                                                                                                                                                                                                '0) '
+                                                                                                                                                                                                                                                '+ '
+                                                                                                                                                                                                                                                'sum(lambda  '
+                                                                                                                                                                                                                                                ':  '
+                                                                                                                                                                                                                                                'if   '
+                                                                                                                                                                                                                                                'priority '
+                                                                                                                                                                                                                                                'then '
+                                                                                                                                                                                                                                                '10 '
+                                                                                                                                                                                                                                                'else '
+                                                                                                                                                                                                                                                '0)',
+                                                                                                                                                                                                                                     'relevant': True,
+                                                                                                                                                                                                                                     'status': 'UNIVERSAL',
+                                                                                                                                                                                                                                     'typ': 'Bool',
+                                                                                                                                                                                                                                     'value': True}},
  'priority': {'__rank': 9999,
               'priority()': {'environmental': False,
                              'is_assignment': False,

@@ -90,10 +90,10 @@ theory {
     // General constraints
 
     [The perimeter is the sum of the lengths of the sides]
-    (Perimeter() = sum{n : true : Length(n)}).
+    (Perimeter() = sum(lambda n : Length(n))).
 
     [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
-    (sum{n in side : true : Angle(n)} = (Sides()-2)*180).
+    (sum(lambda n in side : Angle(n)) = (Sides()-2)*180).
 
     [Lengths are positive numbers]
     (!x in side: 0 =< Length(x)).
@@ -237,7 +237,7 @@ display {
                         'typ': 'Real',
                         'value': ''},
            '__rank': 9999,
-           'sum{n ∈ side : true : Angle(n)} = (Sides() - 2) ⨯ 180': {'environmental': False,
+           'sum(lambda n ∈ side : Angle(n)) = (Sides() - 2) ⨯ 180': {'environmental': False,
                                                                      'is_assignment': False,
                                                                      'normal': False,
                                                                      'reading': 'The sum of the angles is 180° for a '
@@ -360,7 +360,7 @@ display {
                                'status': 'CONSEQUENCE',
                                'typ': 'Real',
                                'value': '10'},
-               'Perimeter() = sum{n ∈ None : true : Length(n)}': {'environmental': False,
+               'Perimeter() = sum(lambda n ∈ None : Length(n))': {'environmental': False,
                                                                   'is_assignment': False,
                                                                   'normal': False,
                                                                   'reading': 'The perimeter is the sum of the lengths '

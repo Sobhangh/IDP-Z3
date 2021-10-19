@@ -10,7 +10,7 @@ vocabulary {
 }
 theory {
 	//Animal License Price
-	Total() = sum{ : Age() < 6 & ~(Sterilized()): 20.0 }+sum{ : Age() >= 6 & Sterilized(): 20.0 }+sum{ : Age() >= 6 & ~(Sterilized()): 40.0 }+sum{ : Animal() = Dog & ViciousDog(): 100.0 }.
+	Total() = sum(lambda : if Age() < 6 & ~(Sterilized()) then 20.0 else 0.0)+sum(lambda : if Age() >= 6 & Sterilized() then 20.0 else 0)+sum(lambda : if Age() >= 6 & ~(Sterilized()) then 40.0 else 0.0)+sum(lambda : if Animal() = Dog & ViciousDog() then 100.0 else 0.0 ).
 }
 
 
