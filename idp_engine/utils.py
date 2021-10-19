@@ -48,9 +48,9 @@ DEF_SEMANTICS = Semantics.WELLFOUNDED
 
 NEWL = "\n"
 indented = "\n  "
-BOOL = "Bool"
-INT = "Int"
-REAL = "Real"
+BOOL = "𝔹"
+INT = "ℤ"
+REAL = "ℝ"
 DATE = "Date"
 SYMBOL = "Symbol"
 

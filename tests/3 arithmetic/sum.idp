@@ -9,7 +9,7 @@ vocabulary V {
 theory T: V{
 	//Count the number of night shifts for each doctor
 	!Doctor in Doctor_t: nb_nights_of_Doctor(Doctor)  =
-           sum{ Day in Day_t: doctor_assigned_to_Day_and_Time(Day, Night) = Doctor: 1 }.
+           #{ Day in Day_t: doctor_assigned_to_Day_and_Time(Day, Night) = Doctor}.
 }
 
 procedure main(){

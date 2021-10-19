@@ -478,10 +478,8 @@ class Symbol(Expression):
     Attributes:
         name (string): name of the symbol
     """
-    TO = {'𝔹': BOOL, 'ℤ': INT, 'ℝ': REAL,
-          '`𝔹': '`'+BOOL, '`ℤ': '`'+INT, '`ℝ': '`'+REAL,}
-    FROM = {BOOL: '𝔹', INT: 'ℤ', REAL: 'ℝ',
-            '`'+BOOL: '`𝔹', '`'+INT: '`ℤ', '`'+REAL: '`ℝ',}
+    TO = {'Bool': BOOL, 'Int': INT, 'Real': REAL,
+          '`Bool': '`'+BOOL, '`Int': '`'+INT, '`Real': '`'+REAL,}
 
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
@@ -493,7 +491,7 @@ class Symbol(Expression):
         self.value = self
 
     def __str__(self):
-        return Symbol.FROM.get(self.name, self.name)
+        return self.name
 
     def __repr__(self):
         return str(self)
@@ -799,23 +797,24 @@ class AAggregate(Expression):
         self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
+        if self.aggtype == "sum":
+            self.f = TRUE
 
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
         self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
         super().__init__()
 
-        if self.aggtype == "sum" and self.out is None:
-            raise Exception("Must have output variable for sum")
-        if self.aggtype != "sum" and self.out is not None:
-            raise Exception("Can't have output variable for  #")
 
     def __str1__(self):
         if not self.using_if:
             vars = "".join([f"{q}" for q in self.quantees])
-            output = f" : {self.sub_exprs[AAggregate.OUT].str}" if self.out else ""
-            out = (f"{self.aggtype}{{{vars} : "
-                   f"{self.sub_exprs[AAggregate.CONDITION].str}"
-                   f"{output}}}")
+            out = ((f"sum(lambda {vars} : "
+                    f"{self.sub_exprs[AAggregate.OUT].str}"
+                    f")" ) if self.aggtype == "sum" else
+                   (f"{self.aggtype}{{{vars} : "
+                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
+                    f"}}")
+            )
         else:
             out = (f"{self.aggtype}{{"
                    f"{','.join(e.str for e in self.sub_exprs)}"

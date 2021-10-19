@@ -31,7 +31,7 @@ theory {
 	}
 
 	//Total Days
-	vacationdays() = sum{ : true: 20 }+sum{ : extra2(): 2 }+sum{ : extra3(): 3 }+sum{ : extra5(): 5 }.
+	vacationdays() = sum(lambda : 20 )+sum(lambda : if extra2() then 2 else 0)+sum(lambda : if extra3() then 3 else 0)+sum(lambda : if extra5() then 5 else 0).
 }
 
 
@@ -176,35 +176,42 @@ structure {
                                      'status': 'UNKNOWN',
                                      'typ': 'Int',
                                      'value': ''},
-                  'vacationdays() = sum{ : true : 20} + sum{ : extra2() : 2} + sum{ : extra3() : 3} + sum{ : extra5() : 5}': {'environmental': False,
-                                                                                                                              'is_assignment': False,
-                                                                                                                              'normal': False,
-                                                                                                                              'reading': 'vacationdays '
-                                                                                                                                         '= '
-                                                                                                                                         'sum{ '
-                                                                                                                                         ': '
-                                                                                                                                         'true '
-                                                                                                                                         ': '
-                                                                                                                                         '20} '
-                                                                                                                                         '+ '
-                                                                                                                                         'sum{ '
-                                                                                                                                         ': '
-                                                                                                                                         'extra2 '
-                                                                                                                                         ': '
-                                                                                                                                         '2} '
-                                                                                                                                         '+ '
-                                                                                                                                         'sum{ '
-                                                                                                                                         ': '
-                                                                                                                                         'extra3 '
-                                                                                                                                         ': '
-                                                                                                                                         '3} '
-                                                                                                                                         '+ '
-                                                                                                                                         'sum{ '
-                                                                                                                                         ': '
-                                                                                                                                         'extra5 '
-                                                                                                                                         ': '
-                                                                                                                                         '5}',
-                                                                                                                              'relevant': True,
-                                                                                                                              'status': 'UNIVERSAL',
-                                                                                                                              'typ': 'Bool',
-                                                                                                                              'value': True}}}
+                  'vacationdays() = sum(lambda  : 20) + sum(lambda  :  if   extra2() then 2 else 0) + sum(lambda  :  if   extra3() then 3 else 0) + sum(lambda  :  if   extra5() then 5 else 0)': {'environmental': False,
+                                                                                                                                                                                                   'is_assignment': False,
+                                                                                                                                                                                                   'normal': False,
+                                                                                                                                                                                                   'reading': 'vacationdays '
+                                                                                                                                                                                                              '= '
+                                                                                                                                                                                                              'sum(lambda  '
+                                                                                                                                                                                                              ': '
+                                                                                                                                                                                                              '20) '
+                                                                                                                                                                                                              '+ '
+                                                                                                                                                                                                              'sum(lambda  '
+                                                                                                                                                                                                              ':  '
+                                                                                                                                                                                                              'if   '
+                                                                                                                                                                                                              'extra2 '
+                                                                                                                                                                                                              'then '
+                                                                                                                                                                                                              '2 '
+                                                                                                                                                                                                              'else '
+                                                                                                                                                                                                              '0) '
+                                                                                                                                                                                                              '+ '
+                                                                                                                                                                                                              'sum(lambda  '
+                                                                                                                                                                                                              ':  '
+                                                                                                                                                                                                              'if   '
+                                                                                                                                                                                                              'extra3 '
+                                                                                                                                                                                                              'then '
+                                                                                                                                                                                                              '3 '
+                                                                                                                                                                                                              'else '
+                                                                                                                                                                                                              '0) '
+                                                                                                                                                                                                              '+ '
+                                                                                                                                                                                                              'sum(lambda  '
+                                                                                                                                                                                                              ':  '
+                                                                                                                                                                                                              'if   '
+                                                                                                                                                                                                              'extra5 '
+                                                                                                                                                                                                              'then '
+                                                                                                                                                                                                              '5 '
+                                                                                                                                                                                                              'else '
+                                                                                                                                                                                                              '0)',
+                                                                                                                                                                                                   'relevant': True,
+                                                                                                                                                                                                   'status': 'UNIVERSAL',
+                                                                                                                                                                                                   'typ': 'Bool',
+                                                                                                                                                                                                   'value': True}}}

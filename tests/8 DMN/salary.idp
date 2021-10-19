@@ -6,7 +6,7 @@ vocabulary {
 }
 theory {
 	//Salary Bonus
-	Bonus() = sum{ : Years_of_Work() > 1: 100 }+sum{ : Years_of_Work() > 2: 200 }+sum{ : Years_of_Work() > 3: 300 }+sum{ : Years_of_Work() > 5: 500 }.
+	Bonus() = sum(lambda : if Years_of_Work() > 1 then 100 else 0)+sum(lambda : if Years_of_Work() > 2 then 200 else 0)+sum(lambda : if Years_of_Work() > 3 then 300 else 0 )+sum(lambda : if Years_of_Work() > 5 then 500 else 0 ).
 }
 
 

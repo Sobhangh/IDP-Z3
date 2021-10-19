@@ -86,10 +86,10 @@ theory {
     // General constraints
 
     [The perimeter is the sum of the lengths of the sides]
-    (perimeter() = sum{n ∈ Side_Nr : true : length(n)}).
+    (perimeter() = sum(lambda n ∈ Side_Nr : length(n))).
 
     [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
-    (sum{n ∈ Side_Nr : true : angle(n)} = (nr_of_sides()-2)*180).
+    (sum(lambda n in Side_Nr : angle(n)) = (nr_of_sides()-2)*180).
 
     [Lengths are positive numbers]
     (∀x ∈ Side_Nr: 0 ≤ length(x)).

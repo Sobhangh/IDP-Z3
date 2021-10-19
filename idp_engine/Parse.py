@@ -275,7 +275,7 @@ class Vocabulary(ASTNode):
             TypeDeclaration(
                 name=SYMBOL,
                 constructors=([Constructor(name=f"`{s}")
-                               for s in [DATE,]]  # TODO '𝔹', 'ℤ', 'ℝ',
+                               for s in [ BOOL, INT, REAL, DATE, SYMBOL]]
                              +[Constructor(name=f"`{s.name}")
                                 for s in self.declarations
                                 if type(s) == SymbolDeclaration
