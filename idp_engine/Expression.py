@@ -478,10 +478,8 @@ class Symbol(Expression):
     Attributes:
         name (string): name of the symbol
     """
-    TO = {'𝔹': BOOL, 'ℤ': INT, 'ℝ': REAL,
-          '`𝔹': '`'+BOOL, '`ℤ': '`'+INT, '`ℝ': '`'+REAL,}
-    FROM = {BOOL: '𝔹', INT: 'ℤ', REAL: 'ℝ',
-            '`'+BOOL: '`𝔹', '`'+INT: '`ℤ', '`'+REAL: '`ℝ',}
+    TO = {'Bool': BOOL, 'Int': INT, 'Real': REAL,
+          '`Bool': '`'+BOOL, '`Int': '`'+INT, '`Real': '`'+REAL,}
 
     def __init__(self, **kwargs):
         self.name = unquote(kwargs.pop('name'))
@@ -493,7 +491,7 @@ class Symbol(Expression):
         self.value = self
 
     def __str__(self):
-        return Symbol.FROM.get(self.name, self.name)
+        return self.name
 
     def __repr__(self):
         return str(self)

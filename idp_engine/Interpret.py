@@ -393,7 +393,7 @@ AAggregate.instantiate1 = instantiate1  # from AQuantification
 def interpret(self, problem):
     self.symbol = self.symbol.interpret(problem)
     sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
-    simpler, co_constraint = None, None
+    value, simpler, co_constraint = None, None, None
     if self.decl:
         if self.is_enumerated:
             assert self.decl.type != BOOL, \
@@ -420,7 +420,7 @@ def interpret(self, problem):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
             f = problem.interpretations[self.decl.name].interpret_application
-            simpler = f(problem, 0, self, sub_exprs)
+            value = f(problem, 0, self, sub_exprs)
         if (not self.in_head and not self.fresh_vars):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]
@@ -429,9 +429,12 @@ def interpret(self, problem):
                 co_constraint = inst[0]
             elif len(inst) > 1:
                 co_constraint = AConjunction.make('∧', inst)
-    out = self._change(sub_exprs=sub_exprs, simpler=simpler,
-                       co_constraint=co_constraint)
-    return out
+        out = (value if value else
+               self._change(sub_exprs=sub_exprs, simpler=simpler,
+                        co_constraint=co_constraint))
+        return out
+    else:
+        return self
 AppliedSymbol.interpret = interpret
 
 
