@@ -139,9 +139,7 @@ class State(Problem):
             self.assignments.update(self.environment.assignments)
             self._formula = None
         self.propagate(tag=S.CONSEQUENCE)
-        return self.simplify()
-        # NOTE: to get a smaller formula at the cost of more overhead:
-        # return self.simplify()
+        return self
 
     def __str__(self) -> str:
         self.co_constraints = OrderedSet()
