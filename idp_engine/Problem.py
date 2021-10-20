@@ -27,7 +27,7 @@ from enum import Enum, auto
 from itertools import chain
 from typing import Any, Iterable, List
 from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
-                is_and, BoolVal, Z3Exception)
+                is_and, BoolVal)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
@@ -36,6 +36,7 @@ from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, SYMBOL, RELEVANT)
+from .Idp_to_Z3 import get_symbols_z
 
 class Propagation(Enum):
     """Describe propagation method    """
@@ -266,18 +267,12 @@ class Problem(object):
         return self._constraintz
 
     def formula(self):
-
-        def get_symbols(zexpr):
-            try:
-                return {zexpr.decl()}.union({symb for child in zexpr.children() for symb in get_symbols(child)})
-            except Z3Exception:
-                # z3 term is no application (e.g., a QuantifierRef) so no symbol exists
-                return {symb for child in zexpr.children() for symb in get_symbols(child)}
-
         """ the formula encoding the knowledge base """
         if self._formula is None:
             if self.constraintz():
-                symbols = {s.name() for c in self.constraintz() for s in get_symbols(c)}
+                # only add interpretation constraints for those symbols
+                # occurring in the (potentially simplified) z3 constraints
+                symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
                         and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
