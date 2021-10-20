@@ -16,7 +16,20 @@ f:={(A,A)->A; (A,B)->A; (B,A)->B; (B,B)->B}
 
 No more models.
 propagate
-And(True, True, True)
+And(f(A, A) == A,
+    f(A, B) == A,
+    f(B, A) == B,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    Or(f(B, B) == A, f(B, B) == B))
 T, S2
 No models.
 T2, S
