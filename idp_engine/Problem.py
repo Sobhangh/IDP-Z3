@@ -126,8 +126,6 @@ class Problem(object):
         else:
             self = cls(* [theories] + structures, extended=extended)
         return self
-        # NOTE: to get a smaller formula at the cost of more overhead:
-        # return self.simplify()
 
     def copy(self):
         out = copy(self)

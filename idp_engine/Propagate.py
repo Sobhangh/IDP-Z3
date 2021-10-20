@@ -70,7 +70,7 @@ def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
     ass = assignments.get(self.str, None)
     if ass and ass.value is not None:
         value = ass.value
-    self._change(value=value)
+        self._change(value=value)
     return self.simplify1()
 Expression.simplify_with = simplify_with
 
