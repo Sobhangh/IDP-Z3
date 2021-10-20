@@ -89,6 +89,7 @@ def interpret(self, problem):
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
 
+    # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
         for inst in self.instances.values():
             domain = self.out.decl.check_bounds(inst.copy())
