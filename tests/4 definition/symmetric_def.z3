@@ -3,14 +3,14 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric_symbol: Symbol -> Bool
-	symmetric: (Symbol) → Bool
+	symmetric_symbol: Concept -> Bool
+	symmetric: (Concept) → Bool
 }
 theory {
     edge(a,b).
-	{! s in Symbol: symmetric_symbol(s) ← arity(s)=2 ∧ input_domain(s,1) = input_domain(s,2). }
+	{! s in Concept: symmetric_symbol(s) ← arity(s)=2 ∧ input_domain(s,1) = input_domain(s,2). }
 	// TODO use symmetric_symbol(`p)
-    { !`p in Symbol: symmetric(`p) <- arity(`p)=2 ∧ input_domain(`p,1) = input_domain(`p,2) & (!x, y : $(`p)(x,y) => $(`p)(y,x)). }
+    { !`p in Concept: symmetric(`p) <- arity(`p)=2 ∧ input_domain(`p,1) = input_domain(`p,2) & (!x, y : $(`p)(x,y) => $(`p)(y,x)). }
 	symmetric(`edge).
 }
 display {
@@ -118,6 +118,14 @@ display {
                                                            'typ': 'Bool',
                                                            'value': True}},
  'symmetric': {'__rank': 9999,
+               'symmetric(`Concept)': {'environmental': False,
+                                       'is_assignment': False,
+                                       'normal': True,
+                                       'reading': 'symmetric(`Concept)',
+                                       'relevant': False,
+                                       'status': 'CONSEQUENCE',
+                                       'typ': 'Bool',
+                                       'value': False},
                'symmetric(`Date)': {'environmental': False,
                                     'is_assignment': False,
                                     'normal': True,
@@ -126,14 +134,6 @@ display {
                                     'status': 'CONSEQUENCE',
                                     'typ': 'Bool',
                                     'value': False},
-               'symmetric(`Symbol)': {'environmental': False,
-                                      'is_assignment': False,
-                                      'normal': True,
-                                      'reading': 'symmetric(`Symbol)',
-                                      'relevant': False,
-                                      'status': 'CONSEQUENCE',
-                                      'typ': 'Bool',
-                                      'value': False},
                'symmetric(`edge)': {'environmental': False,
                                     'is_assignment': False,
                                     'normal': True,
@@ -191,6 +191,14 @@ display {
                                  'typ': 'Bool',
                                  'value': False}},
  'symmetric_symbol': {'__rank': 9999,
+                      'symmetric_symbol(`Concept)': {'environmental': False,
+                                                     'is_assignment': False,
+                                                     'normal': True,
+                                                     'reading': 'symmetric_symbol(`Concept)',
+                                                     'relevant': False,
+                                                     'status': 'CONSEQUENCE',
+                                                     'typ': 'Bool',
+                                                     'value': False},
                       'symmetric_symbol(`Date)': {'environmental': False,
                                                   'is_assignment': False,
                                                   'normal': True,
@@ -199,14 +207,6 @@ display {
                                                   'status': 'CONSEQUENCE',
                                                   'typ': 'Bool',
                                                   'value': False},
-                      'symmetric_symbol(`Symbol)': {'environmental': False,
-                                                    'is_assignment': False,
-                                                    'normal': True,
-                                                    'reading': 'symmetric_symbol(`Symbol)',
-                                                    'relevant': False,
-                                                    'status': 'CONSEQUENCE',
-                                                    'typ': 'Bool',
-                                                    'value': False},
                       'symmetric_symbol(`edge)': {'environmental': False,
                                                   'is_assignment': False,
                                                   'normal': True,

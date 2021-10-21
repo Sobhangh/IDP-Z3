@@ -33,7 +33,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number)
 
-from .utils import (BOOL, INT, REAL, DATE, SYMBOL, OrderedSet, IDPZ3Error,
+from .utils import (BOOL, INT, REAL, DATE, CONCEPT, OrderedSet, IDPZ3Error,
                     DEF_SEMANTICS, Semantics)
 
 
@@ -47,14 +47,14 @@ def annotate(self, idp):
         s.block = self
         s.annotate(self)  # updates self.symbol_decls
 
-    for constructor in self.symbol_decls[SYMBOL].constructors:
+    for constructor in self.symbol_decls[CONCEPT].constructors:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
 
-    # populate .map of SYMBOL
-    for c in self.symbol_decls[SYMBOL].constructors:
+    # populate .map of CONCEPT
+    for c in self.symbol_decls[CONCEPT].constructors:
         assert not c.sorts
-        self.symbol_decls[SYMBOL].map[str(c)] = UnappliedSymbol.construct(c)
+        self.symbol_decls[CONCEPT].map[str(c)] = UnappliedSymbol.construct(c)
 Vocabulary.annotate = annotate
 
 
@@ -78,7 +78,7 @@ def annotate(self, voc):
     self.out.annotate(voc, {})
     for c in self.constructors:
         c.type = self.name
-        self.check(c.name not in voc.symbol_decls or self.name == SYMBOL,
+        self.check(c.name not in voc.symbol_decls or self.name == CONCEPT,
                     f"duplicate '{c.name}' constructor for '{self.name}' type")
         voc.symbol_decls[c.name] = c
     if self.interpretation:

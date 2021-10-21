@@ -3,12 +3,12 @@ type 𝔹 := {true,false}
 type ℤ := {}
 type ℝ := {}
 type Date := {}
-type Symbol := {`𝔹,`ℤ,`ℝ,`Date,`Symbol,`p}
+type Concept := {`𝔹,`ℤ,`ℝ,`Date,`Concept,`p}
 __relevant
-arity(Symbol) : ℤ
+arity(Concept) : ℤ
 abs(ℤ) : ℤ
-input_domain(Symbol,ℤ) : Symbol
-output_domain(Symbol) : Symbol
+input_domain(Concept,ℤ) : Concept
+output_domain(Concept) : Concept
 p
 }
 

@@ -2,8 +2,8 @@ vocabulary {
 	type Country := {Belgium, France}
 	amount_thresholdEU, periodEU: () -> Int
 	amount_threshold, period: Country -> Int
-	obligation: Symbol -> Bool
-	mapping: Symbol -> Symbol
+	obligation: Concept -> Bool
+	mapping: Concept -> Concept
 }
 theory {
 	obligation := {`amount_threshold, `period}

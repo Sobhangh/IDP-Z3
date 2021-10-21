@@ -48,7 +48,7 @@ from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction, ARImplication, AAggregate,
                     AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, AEquivalence)
-from .utils import BOOL, RESERVED_SYMBOLS, SYMBOL, OrderedSet, DEFAULT
+from .utils import BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT
 
 
 # class Extern  ###########################################################
@@ -415,7 +415,7 @@ def interpret(self, problem):
                 simpler = AUnary.make('¬', simpler)
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
-            and any(s.decl.name == SYMBOL for s in self.decl.sorts)
+            and any(s.decl.name == CONCEPT for s in self.decl.sorts)
             and all(a.value is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons

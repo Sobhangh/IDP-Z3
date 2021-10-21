@@ -28,7 +28,7 @@ Types
 
 IDP-Z3 supports built-in and custom types.
 
-The built-in types are:  ``𝔹``, ``ℤ``, ``ℝ``, ``Date``, and ``Symbol``.
+The built-in types are:  ``𝔹``, ``ℤ``, ``ℝ``, ``Date``, and ``Concept``.
 The equivalent ASCII symbols are ``Bool``, ``Int``, and ``Real``.
 
 Boolean literals are ``true`` and ``false``.
@@ -36,7 +36,7 @@ Number literals follow Python's conventions.
 Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``).
 ``#TODAY`` is also a Date literal.
 
-The type ``Symbol`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
+The type ``Concept`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
 The constructors are the names of the symbol, prefixed with `````
 
 Custom types are declared using the keyword ``type``, e.g., ``type color``.
@@ -85,9 +85,9 @@ Built-in functions
 The following functions are built-in:
 
 * ``abs: Int → Int`` (or ``abs: Float → Float``) yields the absolute value of an integer (or float) expression;
-* ``arity: Symbol → Symbol`` yields the arity of a symbol;
-* ``input_domain : Symbol ⨯ ℤ → Symbol`` yields the n-th input-domain of a symbol;
-* ``output_domain: Symbol → Symbol`` yields the output domain of a symbol.
+* ``arity: Concept → Concept`` yields the arity of a symbol;
+* ``input_domain : Concept ⨯ ℤ → Concept`` yields the n-th input-domain of a symbol;
+* ``output_domain: Concept → Concept`` yields the output domain of a symbol.
 
 .. _predicate:
 .. index:: predicate

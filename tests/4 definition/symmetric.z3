@@ -3,14 +3,14 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric: (Symbol) → Bool
+	symmetric: (Concept) → Bool
     Start: ()→node
 }
 theory {
     edge(a,b).
-    !`p in Symbol: arity(`p)=2 & input_domain(`p,1)=input_domain(`p,1)
+    !`p in Concept: arity(`p)=2 & input_domain(`p,1)=input_domain(`p,1)
 				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
-    !`p in Symbol: symmetric(`p)
+    !`p in Concept: symmetric(`p)
 				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
     !`p in symmetric: !x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x).
 	symmetric := {`edge}
@@ -121,68 +121,68 @@ display {
                          'relevant': True,
                          'status': 'UNKNOWN',
                          'typ': 'Bool'},
-          '∀`p ∈ Symbol : arity(`p) = 2 ∧ input_domain(`p, 1) = input_domain(`p, 1) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
-                                                                                                                                                               'is_assignment': False,
-                                                                                                                                                               'normal': False,
-                                                                                                                                                               'reading': '∀`p '
-                                                                                                                                                                          '∈ '
-                                                                                                                                                                          'Symbol '
-                                                                                                                                                                          ': '
-                                                                                                                                                                          'arity(`p) '
-                                                                                                                                                                          '= '
-                                                                                                                                                                          '2 '
-                                                                                                                                                                          '∧ '
-                                                                                                                                                                          'input_domain(`p, '
-                                                                                                                                                                          '1) '
-                                                                                                                                                                          '= '
-                                                                                                                                                                          'input_domain(`p, '
-                                                                                                                                                                          '1) '
-                                                                                                                                                                          '⇒ '
-                                                                                                                                                                          '(∀x '
-                                                                                                                                                                          '∈ '
-                                                                                                                                                                          'None '
-                                                                                                                                                                          ': '
-                                                                                                                                                                          '∀y '
-                                                                                                                                                                          '∈ '
-                                                                                                                                                                          '$(input_domain(`p, '
-                                                                                                                                                                          '2)) '
-                                                                                                                                                                          ': '
-                                                                                                                                                                          '$(`p)(x, '
-                                                                                                                                                                          'y) '
-                                                                                                                                                                          '⇒ '
-                                                                                                                                                                          '$(`p)(y, '
-                                                                                                                                                                          'x))',
-                                                                                                                                                               'relevant': False,
-                                                                                                                                                               'status': 'UNIVERSAL',
-                                                                                                                                                               'typ': 'Bool',
-                                                                                                                                                               'value': True},
-          '∀`p ∈ Symbol : symmetric(`p) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
-                                                                                                                   'is_assignment': False,
-                                                                                                                   'normal': False,
-                                                                                                                   'reading': '∀`p '
-                                                                                                                              '∈ '
-                                                                                                                              'Symbol '
-                                                                                                                              ': '
-                                                                                                                              'symmetric(`p) '
-                                                                                                                              '⇒ '
-                                                                                                                              '(∀x '
-                                                                                                                              '∈ '
-                                                                                                                              'None '
-                                                                                                                              ': '
-                                                                                                                              '∀y '
-                                                                                                                              '∈ '
-                                                                                                                              '$(input_domain(`p, '
-                                                                                                                              '2)) '
-                                                                                                                              ': '
-                                                                                                                              '$(`p)(x, '
-                                                                                                                              'y) '
-                                                                                                                              '⇒ '
-                                                                                                                              '$(`p)(y, '
-                                                                                                                              'x))',
-                                                                                                                   'relevant': False,
-                                                                                                                   'status': 'UNIVERSAL',
-                                                                                                                   'typ': 'Bool',
-                                                                                                                   'value': True},
+          '∀`p ∈ Concept : arity(`p) = 2 ∧ input_domain(`p, 1) = input_domain(`p, 1) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
+                                                                                                                                                                'is_assignment': False,
+                                                                                                                                                                'normal': False,
+                                                                                                                                                                'reading': '∀`p '
+                                                                                                                                                                           '∈ '
+                                                                                                                                                                           'Concept '
+                                                                                                                                                                           ': '
+                                                                                                                                                                           'arity(`p) '
+                                                                                                                                                                           '= '
+                                                                                                                                                                           '2 '
+                                                                                                                                                                           '∧ '
+                                                                                                                                                                           'input_domain(`p, '
+                                                                                                                                                                           '1) '
+                                                                                                                                                                           '= '
+                                                                                                                                                                           'input_domain(`p, '
+                                                                                                                                                                           '1) '
+                                                                                                                                                                           '⇒ '
+                                                                                                                                                                           '(∀x '
+                                                                                                                                                                           '∈ '
+                                                                                                                                                                           'None '
+                                                                                                                                                                           ': '
+                                                                                                                                                                           '∀y '
+                                                                                                                                                                           '∈ '
+                                                                                                                                                                           '$(input_domain(`p, '
+                                                                                                                                                                           '2)) '
+                                                                                                                                                                           ': '
+                                                                                                                                                                           '$(`p)(x, '
+                                                                                                                                                                           'y) '
+                                                                                                                                                                           '⇒ '
+                                                                                                                                                                           '$(`p)(y, '
+                                                                                                                                                                           'x))',
+                                                                                                                                                                'relevant': False,
+                                                                                                                                                                'status': 'UNIVERSAL',
+                                                                                                                                                                'typ': 'Bool',
+                                                                                                                                                                'value': True},
+          '∀`p ∈ Concept : symmetric(`p) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
+                                                                                                                    'is_assignment': False,
+                                                                                                                    'normal': False,
+                                                                                                                    'reading': '∀`p '
+                                                                                                                               '∈ '
+                                                                                                                               'Concept '
+                                                                                                                               ': '
+                                                                                                                               'symmetric(`p) '
+                                                                                                                               '⇒ '
+                                                                                                                               '(∀x '
+                                                                                                                               '∈ '
+                                                                                                                               'None '
+                                                                                                                               ': '
+                                                                                                                               '∀y '
+                                                                                                                               '∈ '
+                                                                                                                               '$(input_domain(`p, '
+                                                                                                                               '2)) '
+                                                                                                                               ': '
+                                                                                                                               '$(`p)(x, '
+                                                                                                                               'y) '
+                                                                                                                               '⇒ '
+                                                                                                                               '$(`p)(y, '
+                                                                                                                               'x))',
+                                                                                                                    'relevant': False,
+                                                                                                                    'status': 'UNIVERSAL',
+                                                                                                                    'typ': 'Bool',
+                                                                                                                    'value': True},
           '∀`p ∈ symmetric : ∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
                                                                                                     'is_assignment': False,
                                                                                                     'normal': False,
