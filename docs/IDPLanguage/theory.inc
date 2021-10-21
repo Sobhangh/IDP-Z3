@@ -47,7 +47,7 @@ Function application
     The resulting type of the function application is also defined in the function declaration.
     If the arity of ``F`` is 0, i.e., if ``F`` is a constant_, then ``F()`` is a term.
 
-    ``$(s)(t_1, t_2,.., t_n)`` is a term, when ``s`` is an expression of type Symbol that denotes a function of arity |n|, and |t1,tn| are terms.
+    ``$(s)(t_1, t_2,.., t_n)`` is a term, when ``s`` is an expression of type Concept that denotes a function of arity |n|, and |t1,tn| are terms.
 
     Please note that there are built-in function_\ s (see :ref:`built-in functions`).
 
@@ -96,7 +96,7 @@ Predicate application
     Each term must be of the appropriate type_, as defined in the predicate declaration.
     If the arity of ``P`` is 0, i.e., if ``P`` is a proposition, then ``P()`` is a sentence.
 
-    ``$(s)(t_1, t_2,.., t_n)`` is a sentence, when ``s`` is an expression of type Symbol that denotes a predicate of arity |n|, and |t1,tn| are terms.
+    ``$(s)(t_1, t_2,.., t_n)`` is a sentence, when ``s`` is an expression of type Concept that denotes a predicate of arity |n|, and |t1,tn| are terms.
 
 Comparison
     ``t_1 ꕕ t_2`` is a sentence, when |t1|, |t2| are two numerical terms and ``ꕕ`` is one of the following comparison operators ``<, ≤, =, ≥, >, ≠`` (or,  using ascii characters: ``=<, >=, ~=``).
@@ -142,7 +142,7 @@ Quantified formulas
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
     In the first form above, the type of each variable is inferred from their use in |phi|.
 
-    When quantifying a formula of type ``Symbol``,
+    When quantifying a formula of type ``Concept``,
     the expression must contain a "guard" to prevent arity or type error.
     A guard is a condition that can be resolved using the available enumerations.
     In the following example, ``symmetric`` must be defined by enumeration.
@@ -150,13 +150,13 @@ Quantified formulas
     .. code::
 
         symmetric := {`edge}
-        ∀s ∈ Symbol: symmetric(s) => (∀x, y : $(s)(x,y) ⇒ $(s)(y,x)).
+        ∀s ∈ Concept: symmetric(s) => (∀x, y : $(s)(x,y) ⇒ $(s)(y,x)).
 
     An alternative is to use the introspection functions ``arity, input_domain, output_domain``:
 
     .. code::
 
-        ∀s ∈ Symbol: arity(s)=2 ∧ input_domain(s,1)=input_domain(s,2)
+        ∀s ∈ Concept: arity(s)=2 ∧ input_domain(s,1)=input_domain(s,2)
             ⇒ (∀x ∈ $(input_domain(s,1)), y ∈ $(input_domain(s,2)) : $(s)(x,y) ⇒ $(s)(y,x)).
 
 
