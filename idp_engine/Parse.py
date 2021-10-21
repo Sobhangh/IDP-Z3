@@ -46,7 +46,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, SYMBOL,
+from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
@@ -273,9 +273,9 @@ class Vocabulary(ASTNode):
             TypeDeclaration(name=REAL, enumeration=RealRange()),
             TypeDeclaration(name=DATE, enumeration=DateRange()),
             TypeDeclaration(
-                name=SYMBOL,
+                name=CONCEPT,
                 constructors=([Constructor(name=f"`{s}")
-                               for s in [ BOOL, INT, REAL, DATE, SYMBOL]]
+                               for s in [ BOOL, INT, REAL, DATE, CONCEPT]]
                              +[Constructor(name=f"`{s.name}")
                                 for s in self.declarations
                                 if type(s) == SymbolDeclaration
@@ -283,17 +283,17 @@ class Vocabulary(ASTNode):
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
                                 sorts=[], out=Symbol(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Symbol(name=SYMBOL)],
+                                sorts=[Symbol(name=CONCEPT)],
                                 out=Symbol(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
                                 sorts=[Symbol(name=INT)],
                                 out=Symbol(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
-                                sorts=[Symbol(name=SYMBOL), Symbol(name=INT)],
-                                out=Symbol(name=SYMBOL)),
+                                sorts=[Symbol(name=CONCEPT), Symbol(name=INT)],
+                                out=Symbol(name=CONCEPT)),
             SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Symbol(name=SYMBOL)],
-                                out=Symbol(name=SYMBOL))
+                                sorts=[Symbol(name=CONCEPT)],
+                                out=Symbol(name=CONCEPT))
             ] + self.declarations
 
     def __str__(self):
@@ -377,7 +377,7 @@ class TypeDeclaration(ASTNode):
                 f"{{{','.join(map(str, self.constructors))}}}")
 
     def check_bounds(self, var):
-        if self.name == SYMBOL:
+        if self.name == CONCEPT:
             comparisons = [AComparison.make("=", [var, UnappliedSymbol.construct(c)])
                           for c in self.constructors]
             return ADisjunction.make("∨", comparisons)

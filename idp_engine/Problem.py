@@ -35,8 +35,9 @@ from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
 from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    RESERVED_SYMBOLS, SYMBOL, RELEVANT)
+                    RESERVED_SYMBOLS, CONCEPT, RELEVANT)
 from .Idp_to_Z3 import get_symbols_z
+
 
 class Propagation(Enum):
     """Describe propagation method    """
@@ -154,13 +155,13 @@ class Problem(object):
             for decl in self.declarations.values():
                 if type(decl) == TypeDeclaration:
                     decl.interpretation = (  #TODO side-effects ? issue #81
-                        None if decl.name not in [INT, REAL, DATE, SYMBOL] else
+                        None if decl.name not in [INT, REAL, DATE, CONCEPT] else
                         decl.interpretation)
 
             # process block.interpretations
             for name, interpret in block.interpretations.items():
                 assert (name not in self.interpretations
-                        or name in [INT, REAL, DATE, SYMBOL]
+                        or name in [INT, REAL, DATE, CONCEPT]
                         or self.interpretations[name] == block.interpretations[name]), \
                         f"Can't add enumeration for {name} in {block.name}: duplicate"
                 self.interpretations[name] = interpret

@@ -35,7 +35,7 @@ from .Expression import (
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, SYMBOL, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
+from .utils import BOOL, INT, CONCEPT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
 
 
 # class Expression  ###########################################################
@@ -380,14 +380,14 @@ def update_exprs(self, new_exprs):
         if self.decl.name == ARITY:
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{ARITY}': {len(new_exprs)}")
-            self.check(new_exprs[0].decl.type == SYMBOL,
+            self.check(new_exprs[0].decl.type == CONCEPT,
                     f"Argument of '{ARITY}' must be a Symbol: {new_exprs[0]}")
             value = Number(number=str(new_exprs[0].decl.symbol.decl.arity))
             return self._change(value=value, sub_exprs=new_exprs)
         elif self.decl.name == INPUT_DOMAIN:
             self.check(len(new_exprs) == 2,
                     f"Incorrect number of arguments for '{INPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].decl.type == SYMBOL
+            self.check(new_exprs[0].decl.type == CONCEPT
                        or (new_exprs[0].decl.sort.decl.arity == 1
                            and new_exprs[0].decl.sort.decl.type == BOOL),
                     f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
@@ -401,7 +401,7 @@ def update_exprs(self, new_exprs):
         elif self.decl.name == OUTPUT_DOMAIN:
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{OUTPUT_DOMAIN}': {len(new_exprs)}")
-            self.check(new_exprs[0].decl.type == SYMBOL,
+            self.check(new_exprs[0].decl.type == CONCEPT,
                     f"Argument of '{OUTPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
             # find the Symbol for the output domain of the argument
             symbol_string = f"`{new_exprs[0].decl.symbol.decl.out}"

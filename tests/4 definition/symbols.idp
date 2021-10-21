@@ -1,17 +1,17 @@
 vocabulary {
     type color := {red, blue, green}
     p, q: () → Bool
-    important: (Symbol) → Bool
+    important: (Concept) → Bool
     opposite: color → color
-    f: Symbol -> Symbol
+    f: Concept -> Concept
 }
 theory {
   ~p() | q().
   important(`p).
 
-  { !x in Symbol: important(x) <- arity(x)=0 & ~(x=`q) & $(x)(). }
+  { !x in Concept: important(x) <- arity(x)=0 & ~(x=`q) & $(x)(). }
   arity(`important) = 1.
-  !x in Symbol: arity(x)<2.
+  !x in Concept: arity(x)<2.
   output_domain(`opposite) = `color.
   output_domain(`opposite) ~= `Date.
   input_domain(`opposite, 1) = `color.

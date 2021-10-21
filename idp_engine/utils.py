@@ -52,14 +52,14 @@ BOOL = "𝔹"
 INT = "ℤ"
 REAL = "ℝ"
 DATE = "Date"
-SYMBOL = "Symbol"
+CONCEPT = "Concept"
 
 RELEVANT = "__relevant"
 ABS = "abs"
 ARITY = "arity"
 INPUT_DOMAIN = "input_domain"
 OUTPUT_DOMAIN = "output_domain"
-RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, SYMBOL,
+RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT,
                     RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
 
 DEFAULT = "default"
