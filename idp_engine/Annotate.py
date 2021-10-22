@@ -444,7 +444,8 @@ def annotate(self, idp):
         ('optionalRelevance', Symbol(name=BOOL)),
         ('manualRelevance', Symbol(name=BOOL)),
         ('unit', open_types['unit']),
-        ('heading', open_types['heading'])
+        ('heading', open_types['heading']),
+        ('optimizable', Symbol(name=BOOL))
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=Symbol(name=name),
