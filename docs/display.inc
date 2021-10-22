@@ -68,3 +68,8 @@ heading
 
     ``heading('label', `p1, ..., `pn)`` will force the display of the ```p1, ..., `pn`` symbols under a heading called ``label``.
     ``label`` may not be a symbol declared in the vocabulary.
+
+optimizable
+    ``optimizable(s1, .., sn)`` specifies that optimization buttons appear in the Interactive Consultant for symbols ``s1, .., sn``.
+
+    For example, ``optimizable(`angle).`` will add arrow up and arrow down buttons next to the input fields for `Angle`. 
