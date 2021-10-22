@@ -35,7 +35,7 @@ from .Expression import (
     Number, Date, Brackets, TRUE, FALSE)
 from .Parse import Symbol, Enumeration, Tuple
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, CONCEPT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN
+from .utils import BOOL, INT, CONCEPT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, RESERVED_SYMBOLS
 
 
 # class Expression  ###########################################################
@@ -381,7 +381,7 @@ def update_exprs(self, new_exprs):
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{ARITY}': {len(new_exprs)}")
             self.check(new_exprs[0].decl.type == CONCEPT,
-                    f"Argument of '{ARITY}' must be a Symbol: {new_exprs[0]}")
+                    f"Argument of '{ARITY}' must be a Concept: {new_exprs[0]}")
             value = Number(number=str(new_exprs[0].decl.symbol.decl.arity))
             return self._change(value=value, sub_exprs=new_exprs)
         elif self.decl.name == INPUT_DOMAIN:
@@ -390,11 +390,11 @@ def update_exprs(self, new_exprs):
             self.check(new_exprs[0].decl.type == CONCEPT
                        or (new_exprs[0].decl.sort.decl.arity == 1
                            and new_exprs[0].decl.sort.decl.type == BOOL),
-                    f"First argument of '{INPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
+                    f"First argument of '{INPUT_DOMAIN}' must be a Concept: {new_exprs[0]}")
             self.check(new_exprs[1].type == INT,
                     f"Second argument of '{INPUT_DOMAIN}' must be a Int: {new_exprs[1]}")
             if isinstance(new_exprs[1], Number):
-                # find the Symbol for the input domain
+                # find the Concept for the input domain
                 symbol_string = f"`{new_exprs[0].decl.symbol.decl.sorts[new_exprs[1].py_value - 1]}"
                 value = self.decl.out.decl.map[symbol_string]
                 return self._change(value=value, sub_exprs=new_exprs)
@@ -402,11 +402,14 @@ def update_exprs(self, new_exprs):
             self.check(len(new_exprs) == 1,
                     f"Incorrect number of arguments for '{OUTPUT_DOMAIN}': {len(new_exprs)}")
             self.check(new_exprs[0].decl.type == CONCEPT,
-                    f"Argument of '{OUTPUT_DOMAIN}' must be a Symbol: {new_exprs[0]}")
-            # find the Symbol for the output domain of the argument
+                    f"Argument of '{OUTPUT_DOMAIN}' must be a Concept: {new_exprs[0]}")
+            # find the Concept for the output domain of the argument
             symbol_string = f"`{new_exprs[0].decl.symbol.decl.out}"
             value = self.decl.out.decl.map[symbol_string]
             return self._change(value=value, sub_exprs=new_exprs)
+        elif self.decl.name in RESERVED_SYMBOLS:  # type
+            value = TRUE if self.sub_exprs[0] in self.decl.range else FALSE
+            return self._change(value=value)
     return self._change(sub_exprs=new_exprs)
 AppliedSymbol.update_exprs = update_exprs
 

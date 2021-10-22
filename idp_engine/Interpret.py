@@ -47,8 +47,9 @@ from .Parse import (Extern, TypeDeclaration,
 from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction, ARImplication, AAggregate,
                     AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
-                    Variable, TRUE, AEquivalence)
-from .utils import BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT
+                    Variable, TRUE, FALSE, AEquivalence, Number)
+from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
+                    ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN)
 
 
 # class Extern  ###########################################################
@@ -326,6 +327,7 @@ def interpret(self, problem):
             q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
+    assert len(forms)==1
     new_quantees = []
     for q in self.quantees:
         self.check(q.sub_exprs[0].decl.out.type == BOOL,
@@ -343,6 +345,13 @@ def interpret(self, problem):
             else:  # type declaration
                 range = [[t] for t in q.sub_exprs[0].decl.range] #TODO1 decl.enumeration.tuples
                 guard = None
+                if 1 < len(q.sub_exprs):  # x in Concept[T->T]
+                    range = [v for v in range
+                             if v[0].decl.symbol.decl.arity == len(q.sub_exprs)-2
+                            and v[0].decl.symbol.decl.out.name == q.sub_exprs[-1].name
+                            and all(s.name == q.name
+                                    for s, q in zip(v[0].decl.symbol.decl.sorts,
+                                                    q.sub_exprs[1:-1]))]
 
             for vars in q.vars:
                 self.check(q.sub_exprs[0].decl.arity == len(vars),

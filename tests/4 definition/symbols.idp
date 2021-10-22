@@ -12,6 +12,7 @@ theory {
   { !x in Concept: important(x) <- arity(x)=0 & ~(x=`q) & $(x)(). }
   arity(`important) = 1.
   !x in Concept: arity(x)<2.
+  !x in Concept[Concept -> Bool]: arity(x)=1 & input_domain(x,1)=`Concept & output_domain(x)= `Bool.
   output_domain(`opposite) = `color.
   output_domain(`opposite) ~= `Date.
   input_domain(`opposite, 1) = `color.
@@ -20,10 +21,6 @@ theory {
   `opposite ~= `color.
   f(`f) = `f.
 }
-display {
-  relevant(`p).
-  expand(`q).
-  hide(`important).
-  goal(`p).
-  view() = normal.
+procedure main() {
+    pretty_print(Problem(T).formula())
 }
