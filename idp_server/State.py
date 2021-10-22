@@ -109,6 +109,7 @@ class State(Problem):
                    if struct.voc.name != 'environment']
         self.add(*blocks)
         self.symbolic_propagate(tag=S.UNIVERSAL)
+        self.simplify()
         self.relevant_symbols = {}
 
         self._finalize()

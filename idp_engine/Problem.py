@@ -36,6 +36,8 @@ from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, CONCEPT, RELEVANT)
+from .Idp_to_Z3 import get_symbols_z
+
 
 class Propagation(Enum):
     """Describe propagation method    """
@@ -122,7 +124,7 @@ class Problem(object):
             theories.add(*structures)
             self = theories
         elif isinstance(theories, Iterable):
-            self = cls(* theories + structures, extended= extended)
+            self = cls(* theories + structures, extended=extended)
         else:
             self = cls(* [theories] + structures, extended=extended)
         return self
@@ -266,12 +268,18 @@ class Problem(object):
     def formula(self):
         """ the formula encoding the knowledge base """
         if self._formula is None:
-            all = ([a.formula().translate(self) for a in self.assignments.values()
-                    if a.value is not None
-                    and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                     or (self.propagated and not self.cleared))]
-                   + self.constraintz())
-            self._formula = And(all) if all else BoolVal(True, self.ctx)
+            if self.constraintz():
+                # only add interpretation constraints for those symbols
+                # occurring in the (potentially simplified) z3 constraints
+                symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
+                all = ([a.formula().translate(self) for a in self.assignments.values()
+                        if a.symbol_decl.name in symbols and a.value is not None
+                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                            or (self.propagated and not self.cleared))]
+                        + self.constraintz())
+                self._formula = And(all)
+            else:
+                self._formula = BoolVal(True, self.ctx)
         return self._formula
 
     def _todo_expand(self):

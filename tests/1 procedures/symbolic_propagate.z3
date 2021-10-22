@@ -1,13 +1,1 @@
-And(q,
-    1 == i,
-    2 == r,
-    c == blue,
-    3 == ra,
-    c == blue,
-    1 == i,
-    2 == r,
-    3 == ra,
-    Or(0 == ra, 1 == ra, 2 == ra, 3 == ra, 4 == ra, 5 == ra),
-    True,
-    True,
-    True)
+And(True, True, True)
