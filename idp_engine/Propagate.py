@@ -67,10 +67,10 @@ def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
         co_constraint = self.co_constraint.simplify_with(assignments)
     new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
     self._change(sub_exprs=new_e, simpler=simpler, co_constraint=co_constraint)
-    ass = assignments.get(self.str, None)
     # calculate ass.value on the changed expression, as simplified sub
     # expressions may lead to stronger simplifications
     # E.g., P(C()) where P := {0} and C := 0.
+    ass = assignments.get(self.str, None)
     if ass and ass.value is not None:
         value = ass.value
         self._change(value=value)
