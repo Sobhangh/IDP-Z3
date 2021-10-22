@@ -38,6 +38,8 @@ from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
 from idp_engine.utils import log, RUN_FILE
+
+from idp_engine.Parse import TypeDeclaration
 from .State import State
 from .Inferences import explain, abstract, get_relevant_questions
 from .IO import Output, metaJSON
@@ -234,50 +236,54 @@ class eval(Resource):
                 args = parser.parse_args()
                 #print(args)
                 # expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
-
-                state = State.make(idpOf(args['code']),
-                                   args.get('previous_active', None),
-                                   args['active'])
-
-                out = {}
                 method = args['method']
-                if not state.propagate_success:
-                    out = explain(state)
-                elif method == "propagate":
-                    if args.with_relevance:
-                        get_relevant_questions(state)
-                    out = Output(state).fill(state)
-                elif method == 'get_range':
-                    out = state.get_range(args['field'])
-                elif method == 'relevance':
-                    get_relevant_questions(state)
-                    out = Output(state).fill(state)
-                elif method == "modelexpand":
-                    generator = state.expand(max=1, complete=False)
-                    out = copy(state)
-                    out.assignments = list(generator)[0]
-                    out = Output(out).fill(out)
-                elif method == "explain":
-                    out = explain(state, args['value'])
-                elif method == "minimize":
-                    out = copy(state)
-                    out = out.optimize(args['symbol'], args['minimize'],
-                                           complete=False)
-                    out = Output(out).fill(out)
-                elif method == "abstract":
-                    if args['symbol'] != "":  # theory to explain ?
-                        newTheory = (str(IDP.from_str(args['code']).vocabulary)
+                out = {}
+                if method == "checkCode":
+                    idpModel = IDP.from_str(args['code'])
+                    if args['symbol'] != "":  # check only that sentence
+                        newTheory = (str(idpModel.vocabulary)
                                      + "theory {\n"
                                      + args['symbol']
                                      + "\n}\n"
                                      )
                         idpModel = IDP.from_str(newTheory)
-                        expanded = {}
-                        # for expr in idpModel.subtences.values():
-                        #     expanded.update(expr.collect_symbols())
-                        expanded = tuple(expanded.keys())
-                        state = State.make(idpModel, "")
-                    out = abstract(state, args['active'])
+                    # remove enumerations of functions/predicates
+                    for block in list(idpModel.theories.values()) + list(idpModel.structures.values()):
+                        block.interpretations = {k:v
+                            for k,v in block.interpretations.items()
+                            if v.is_type_enumeration == True}
+                    state = State(idpModel)  # don't use cache.  May raise an error
+                    out = {"result": "ok"}
+                else:
+                    state = State.make(idpOf(args['code']),
+                                    args.get('previous_active', None),
+                                    args['active'])
+
+                    if not state.propagate_success:
+                        out = explain(state)
+                    elif method == "propagate":
+                        if args.with_relevance:
+                            get_relevant_questions(state)
+                        out = Output(state).fill(state)
+                    elif method == 'get_range':
+                        out = state.get_range(args['field'])
+                    elif method == 'relevance':
+                        get_relevant_questions(state)
+                        out = Output(state).fill(state)
+                    elif method == "modelexpand":
+                        generator = state.expand(max=1, complete=False)
+                        out = copy(state)
+                        out.assignments = list(generator)[0]
+                        out = Output(out).fill(out)
+                    elif method == "explain":
+                        out = explain(state, args['value'])
+                    elif method == "minimize":
+                        out = copy(state)
+                        out = out.optimize(args['symbol'], args['minimize'],
+                                            complete=False)
+                        out = Output(out).fill(out)
+                    elif method == "abstract":
+                        out = abstract(state, args['active'])
                 log("end /eval " + method)
                 if with_profiling:
                     g.profiler.stop()
@@ -287,7 +293,7 @@ class eval(Resource):
                 if with_profiling:
                     g.profiler.stop()
                 traceback.print_exc()
-                return str(exc)
+                return f"{type(exc).__name__}: {exc}"
 
 
 class evalWithGraph(eval):  # subcclass that generates call graphs
