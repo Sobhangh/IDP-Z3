@@ -33,7 +33,7 @@ from .Expression import (
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
     Number, Date, Brackets, TRUE, FALSE)
-from .Parse import Symbol, Enumeration, Tuple
+from .Parse import Symbol, Enumeration, Tuple, TypeDeclaration
 from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, CONCEPT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, RESERVED_SYMBOLS
 
@@ -407,7 +407,7 @@ def update_exprs(self, new_exprs):
             symbol_string = f"`{new_exprs[0].decl.symbol.decl.out}"
             value = self.decl.out.decl.map[symbol_string]
             return self._change(value=value, sub_exprs=new_exprs)
-        elif self.decl.name in RESERVED_SYMBOLS:  # type
+        elif type(self.decl) == TypeDeclaration:  # type
             value = TRUE if self.sub_exprs[0] in self.decl.range else FALSE
             return self._change(value=value)
     return self._change(sub_exprs=new_exprs)
