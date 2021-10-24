@@ -37,6 +37,8 @@ def metaJSON(state):
 
     """
     symbols = []
+    no_optimizable_given = all([not decl.private and decl.optimizable is None for
+                           decl in state.assignments.symbols.values()])
     for decl in state.assignments.symbols.values():
         if not decl.private:
             typ = decl.out.name
@@ -45,7 +47,7 @@ def metaJSON(state):
                 "idpname": str(decl.name),
                 "type": symbol_type,
                 "priority": "core",
-                "showOptimize": decl.optimizable,
+                "showOptimize": no_optimizable_given or decl.optimizable is True,
                 "view": decl.view.value,
                 "environmental": decl.block.name == 'environment',
             }

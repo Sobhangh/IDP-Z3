@@ -448,7 +448,7 @@ class SymbolDeclaration(ASTNode):
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
         self.private = None
-        self.optimizable = False
+        self.optimizable = None
         self.unit: str = None
         self.heading: str = None
 
