@@ -252,7 +252,10 @@ class eval(Resource):
                         block.interpretations = {k:v
                             for k,v in block.interpretations.items()
                             if v.is_type_enumeration == True}
-                    state = State(idpModel)  # don't use cache.  May raise an error
+                    assert len(idpModel.theories) == 1 and len(idpModel.structures)<=1, \
+                        "Can't check code containing more than 1 theory or structure."
+                    state = State(idpModel, withPropagate=False)  # don't use cache.  May raise an error
+                    next(state.expand(max=1))
                     out = {"result": "ok"}
                 else:
                     state = State.make(idpOf(args['code']),
