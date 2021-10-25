@@ -196,8 +196,12 @@ class Assignments(dict):
     def assert__(self, sentence: Expression,
                 value: Optional[Expression],
                 status: Optional[Status]):
+
         if sentence.code in self:
             out = self[sentence.code]
+            assert not (out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT]
+                        and status in [Status.CONSEQUENCE, Status.ENV_CONSQ]), \
+                "System should not override given choices, please report this bug."
             out.value = value
             if not (out.status == Status.ENV_CONSQ and status == Status.CONSEQUENCE):
                 # do not change an env consequence to a decision consequence
