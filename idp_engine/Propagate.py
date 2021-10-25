@@ -61,16 +61,20 @@ def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
     if self.value is not None:
         return self
     value, simpler, new_e, co_constraint = None, None, None, None
-    ass = assignments.get(self.code, None)
-    if ass and ass.value is not None:
-        value = ass.value
     if self.simpler is not None:
         simpler = self.simpler.simplify_with(assignments)
     if self.co_constraint is not None:
         co_constraint = self.co_constraint.simplify_with(assignments)
     new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
-    return self._change(sub_exprs=new_e, value=value, simpler=simpler,
-                        co_constraint=co_constraint).simplify1()
+    self._change(sub_exprs=new_e, simpler=simpler, co_constraint=co_constraint)
+    # calculate ass.value on the changed expression, as simplified sub
+    # expressions may lead to stronger simplifications
+    # E.g., P(C()) where P := {0} and C := 0.
+    ass = assignments.get(self.str, None)
+    if ass and ass.value is not None:
+        value = ass.value
+        self._change(value=value)
+    return self.simplify1()
 Expression.simplify_with = simplify_with
 
 
@@ -197,7 +201,7 @@ def _directional_todo(self):
         todo = OrderedSet(
             a.sentence for a in self.assignments.values()
             if ((not a.sentence.is_reified() or self.extended)
-                and (a.status in statuses or a.sentence in cleareds)
+                and (a.status in statuses or (a.sentence in cleareds and a.status == S.UNKNOWN))
                 ))
     else:
         todo = OrderedSet()

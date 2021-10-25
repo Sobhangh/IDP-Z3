@@ -266,7 +266,7 @@ display {
                                                        'is_assignment': False,
                                                        'normal': False,
                                                        'reading': 'All angles are 60°',
-                                                       'relevant': True,
+                                                       'relevant': False,
                                                        'status': 'CONSEQUENCE',
                                                        'typ': 'Bool',
                                                        'value': False},

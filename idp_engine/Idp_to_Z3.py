@@ -28,7 +28,7 @@ from fractions import Fraction
 from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
                 Function, Const, FreshConst, BoolSort, IntSort, RealSort,
                 Or, Not, And, ForAll, Exists, Sum, If,
-                BoolVal, RatVal, IntVal, )
+                BoolVal, RatVal, IntVal)
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
 from idp_engine.Expression import (Constructor, Expression, IfExpr,
@@ -38,6 +38,16 @@ from idp_engine.Expression import (Constructor, Expression, IfExpr,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
 from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
+
+# general  #####################################################################
+
+def get_symbols_z(zexpr):
+    try:
+        return {zexpr.decl()}.union(
+            {symb for child in zexpr.children() for symb in get_symbols_z(child)})
+    except Z3Exception:
+        # z3 term is no application (e.g., a QuantifierRef) so no symbol exists
+        return {symb for child in zexpr.children() for symb in get_symbols_z(child)}
 
 # class TypeDeclaration  ###########################################################
 

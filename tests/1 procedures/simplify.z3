@@ -1,3 +1,3 @@
-And(p, True, r)
+And(r)
 
-And(p, r, True, True)
+True

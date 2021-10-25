@@ -12,4 +12,4 @@ a:={->2}
 b:={->2}
 
 Followed by propagation of p()=?:
-
+a:={->2}

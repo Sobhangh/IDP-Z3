@@ -45,7 +45,7 @@ def metaJSON(state):
                 "idpname": str(decl.name),
                 "type": symbol_type,
                 "priority": "core",
-                "showOptimize": True,  # GUI is smart enough to show buttons appropriately
+                "showOptimize": decl.optimizable,
                 "view": decl.view.value,
                 "environmental": decl.block.name == 'environment',
             }

@@ -12,28 +12,28 @@ The following predicates and functions are available:
 .. index:: expanded view
 
 expand
-    ``expand(s1, .., sn)`` specifies that :ref:`symbols<symbol>` ``s1, .., sn`` are shown expanded,
+    ``expand(`s1, .., `sn)`` specifies that :ref:`symbols<symbol>` ``s1, .., sn`` are shown expanded,
     i.e., that all sub-sentences of the theory where they occur are shown on the screen.
 
-    For example, ``expand(`Length).`` will force the Interactive Consultant to show all sub-sentences containing `Length`.
+    For example, ``expand(`length).`` will force the Interactive Consultant to show all sub-sentences containing `length`.
 
 hide
-    ``hide(s1, .., sn)`` specifies that symbols ``s1, .., sn`` are not shown on the screen.
+    ``hide(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are not shown on the screen.
 
-    For example, ``hide(`Length).`` will force the Interactive Consultant to not display the box containing `Length` information.
+    For example, ``hide(`length).`` will force the Interactive Consultant to not display the box containing `length` information.
 
 view()
     ``view() = normal.`` (default) specifies that symbols are displayed in normal mode.
 
-    ``view() = expanded.`` specifies that symbols are displayed expand_\ ed.
+    ``view() = expanded.`` specifies that symbols are displayed expanded.
 
 relevant
-    ``relevant(s1, .., sn)`` specifies that symbols ``s1, .., sn`` are relevant, i.e. that they should never be greyed out.
+    ``relevant(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are relevant, i.e. that they should never be greyed out.
 
     Irrelevant symbols and sub-sentences, i.e. symbols whose interpretation do not constrain the interpretation of the relevant symbols, are greyed out by the Interactive Consultant.
 
 goal
-    ``goal(s)`` specifies that symbols ``s`` is a goal, i.e. that it is relevant and shown expanded.
+    ``goal(`s)`` specifies that symbol ``s`` is a goal, i.e. that it is relevant and shown expanded.
 
 moveSymbols
     When the *display block* contains ``moveSymbols()``, the Interactive Consultant is allowed to change the layout of symbols on the screen, so that relevant symbols come first.
@@ -57,14 +57,19 @@ manualRelevance
     When ``manualRelevance()`` is present in the *display block*, automatic computation of relevant questions is disabled in the interface. Instead, a menu option is available in the "Reasoning" menu that computes relevance when selected.
 
 unit
-    ``unit('unitstr', s1, ..., sn)`` specifies the unit of one or more symbols.
+    ``unit('unitstr', `s1, ..., `sn)`` specifies the unit of one or more symbols.
     This unit will then show up in the symbol's header in the Interactive Consultant.
     ``unitstr`` may not be a symbol declared in the vocabulary.
 
-    For example: ``unit('m', length, perimeter).``
+    For example: ``unit('m', `length, `perimeter).``
 
 heading
     Experimental: this feature is likely to change in the future.
 
-    ``heading('label', `p1, ..., `pn)`` will force the display of the ```p1, ..., `pn`` symbols under a heading called ``label``.
+    ``heading('label', `p1, ..., `pn)`` will force the display of the ``p1, ..., pn`` symbols under a heading called ``label``.
     ``label`` may not be a symbol declared in the vocabulary.
+
+noOptimization
+    ``noOptimization(`s1, .., `sn)`` specifies that no optimization buttons appear in the Interactive Consultant for symbols ``s1, .., sn``.
+
+    For example, ``noOptimization(`angle).`` will hide the arrow up and arrow down buttons next to the input fields for `angle`.

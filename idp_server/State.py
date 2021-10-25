@@ -111,6 +111,7 @@ class State(Problem):
         self.relevant_symbols = {}
         if withPropagate:
             self.symbolic_propagate(tag=S.UNIVERSAL)
+            self.simplify()
             self._finalize()
 
     def add_given(self, jsonstr: str):
