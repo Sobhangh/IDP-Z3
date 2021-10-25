@@ -196,7 +196,7 @@ class Expression(ASTNode):
             Equivalence is computed in the context of the theory and structure.
 
         annotations (Dict[str, str]):
-            The set of annotations given by the expert in the IDP source code.
+            The set of annotations given by the expert in the IDP-Z3 program.
 
             ``annotations['reading']`` is the annotation
             giving the intended meaning of the expression (in English).

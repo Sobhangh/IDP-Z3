@@ -13,9 +13,9 @@ It takes the following form:
         // here comes the python-like code to be executed
     }
 
-The vocabularies, theories and structures defined in other blocks of the IDP source file are available through variables of the same name.
+Within that block, the vocabularies, theories and structures defined in other blocks of the IDP-Z3 program are available through variables of the same name.
 
-The following functions are available:
+The following functions are also available:
 
 
 model_check(theory, structure=None)

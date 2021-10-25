@@ -6,7 +6,7 @@ Often, some elements of a problem instance are under the control of the user (po
 
 To capture this difference, the FO(.) language allows the creation of 2 vocabularies and 2 theories.
 The first one is called 'environment', the second 'decision'.
-Hence, a more advanced skeleton of an IDP source file is:
+Hence, a more advanced skeleton of an IDP-Z3 program is:
 
 .. code::
 

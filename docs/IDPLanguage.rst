@@ -8,7 +8,7 @@ Overview
 ------------
 
 The FO(.) language is used to create knowledge bases.
-An IDP source file contains an FO(.) knowledge base and instructions to perform tasks on it.
+An IDP-Z3 program contains an FO(.) knowledge base and instructions to perform tasks on it.
 It is made of the following blocks of code:
 
 vocabulary
@@ -27,7 +27,7 @@ main
     (optional) executable procedure in the context of the knowledge base
 
 
-The basic skeleton of an IDP source file for the Interactive Consultant is as follows:
+The basic skeleton of an IDP-Z3 program for the Interactive Consultant is as follows:
 
 .. code::
 
