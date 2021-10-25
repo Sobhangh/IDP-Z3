@@ -190,7 +190,12 @@ class meta(Resource):
                     get_relevant_questions(state)
                 out = metaJSON(state)
                 out["propagated"] = Output(state).fill(state)
-
+                assert state.propagate_success, "Specification is unsatisfiable"
+                # TODO: explain unsat specification
+                if state.propagate_success:  # specification is SAT
+                    out["laws"] = []
+                else:  # specification is UNSAT
+                    out["laws"] = explain(state)['*laws*']
                 log("end /meta ")
                 if with_profiling:
                     g.profiler.stop()

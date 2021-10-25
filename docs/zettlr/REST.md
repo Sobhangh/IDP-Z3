@@ -41,6 +41,8 @@ POST result:
         - view: string        // "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
         - environmental: Bool // true if declared in environment vocabulary
         } ]
+    - propagated : []         // TODO
+    - laws : [string]         // laws explaining potential unsatisfiability. Empty if satisfiable.
 ```
 
 ### URL: /eval
