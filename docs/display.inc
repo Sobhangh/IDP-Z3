@@ -70,6 +70,8 @@ heading
     ``label`` may not be a symbol declared in the vocabulary.
 
 optimizable
-    ``optimizable(`s1, .., `sn)`` specifies that optimization buttons appear in the Interactive Consultant for symbols ``s1, .., sn``.
+    ``optimizable(`s1, .., `sn)`` specifies that optimization buttons appear in the Interactive Consultant for numeric symbols ``s1, .., sn``.
 
     For example, ``optimizable(`angle).`` will add arrow up and arrow down buttons next to the input fields for `angle`.
+
+    If no `optimizable` statements are provided, optimization buttons will appear for *all* numeric symbols.
