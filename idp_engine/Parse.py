@@ -453,7 +453,7 @@ class SymbolDeclaration(ASTNode):
         self.private = None
         self.unit: str = None
         self.heading: str = None
-        self.optimizable: bool = None
+        self.optimizable: bool = True
 
         self.type = None  # a string
         self.domain = None  # all possible arguments
@@ -1013,9 +1013,9 @@ class Display(ASTNode):
                     # e.g. heading('Shape', `type).
                     for symbol in symbols:
                         symbol.heading = str(constraint.sub_exprs[0])
-                elif name == 'optimizable':  # e.g., optimizable(`temp)
+                elif name == 'noOptimization':  # e.g., noOptimization(`temp)
                     for symbol in symbols:
-                        symbol.optimizable = True
+                        symbol.optimizable = False
                 elif name == "moveSymbols":
                     self.moveSymbols = True
                 elif name == "optionalPropagation":
