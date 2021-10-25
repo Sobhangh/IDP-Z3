@@ -201,7 +201,7 @@ def _directional_todo(self):
         todo = OrderedSet(
             a.sentence for a in self.assignments.values()
             if ((not a.sentence.is_reified() or self.extended)
-                and (a.status in statuses or a.sentence in cleareds)
+                and (a.status in statuses or (a.sentence in cleareds and a.status == S.UNKNOWN))
                 ))
     else:
         todo = OrderedSet()
