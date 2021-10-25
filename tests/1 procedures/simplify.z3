@@ -1,3 +1,3 @@
-And(True, r)
+And(r)
 
-And(True, True)
+True

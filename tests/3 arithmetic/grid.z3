@@ -1,5 +1,4 @@
 And(p == pos(1, 1),
-    True,
     q == p,
     is(pos, p),
     is(pos, q),
