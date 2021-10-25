@@ -475,11 +475,6 @@ class SymbolDeclaration(ASTNode):
         return (self.arity == 1 and self.type == BOOL
                 and self.sorts[0].decl == other)
 
-    def is_numeric(self):
-        print(range)
-        print(self.range[0])
-        return self.type in {REAL, INT}
-
     @classmethod
     def make(cls, strname, arity, sorts, out):
         o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
@@ -1020,10 +1015,6 @@ class Display(ASTNode):
                         symbol.heading = str(constraint.sub_exprs[0])
                 elif name == 'optimizable':  # e.g., optimizable(`temp)
                     for symbol in symbols:
-                        print(symbol.out)
-
-                        assert symbol.is_numeric(), \
-                            "Optimizable symbol should be numeric: "+symbol.name
                         symbol.optimizable = True
                 elif name == "moveSymbols":
                     self.moveSymbols = True
