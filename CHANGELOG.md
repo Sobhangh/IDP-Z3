@@ -9,13 +9,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 * (breaking) MR !152: IEP 22 change syntax of sum aggregate to sum(lambda <quantee>: expr)
 * (breaking) MR !154: built-in type is "Concept" (not "Symbol")
-* MR !145: Improve performance of explain
 * fix #132, #136: Improve error message for mis-applied symbol
 * fix #137: support of functions from Symbol to Symbol
+* MR !145: Improve performance of explain
 * MR !147: allow the user to edit system choices after model expansion / optimisation
 * MR !153: improve performance in case of large interpretations for symbols that do not occur in the theory
 * MR !155: allow to disable optimization buttons for certain symbols
+* MR !158: allow signature in quantification: `!x in Concept[T1->T2]: ..`
 
+### Interactive Consultant
+* MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
 
 ## [0.8.4] - 2021-09-30
 
