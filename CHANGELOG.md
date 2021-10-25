@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #137: support of functions from Symbol to Symbol
 * MR !147: allow the user to edit system choices after model expansion / optimisation
 * MR !153: improve performance in case of large interpretations for symbols that do not occur in the theory
+* fix #140: fix overriding choices by consequences
 
 
 ## [0.8.4] - 2021-09-30
