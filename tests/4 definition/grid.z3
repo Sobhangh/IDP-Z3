@@ -1,6 +1,5 @@
 And(2 == gridSize,
     x1 == clip(4),
-    True,
     p == _add(pos(1, 2), pos(2, 1)),
     is(pos, _add(pos(1, 1), pos(1, 1))),
     is(pos, _add(pos(1, 1), pos(1, 2))),

@@ -252,6 +252,8 @@ class Problem(object):
 
             def collect_constraints(e, constraints):
                 """collect constraints in e, flattening conjunctions"""
+                if e.sexpr() == 'true':
+                    return
                 if is_and(e):
                     for e1 in e.children():
                         collect_constraints(e1, constraints)

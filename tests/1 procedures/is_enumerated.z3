@@ -19,16 +19,6 @@ propagate
 And(f(A, A) == A,
     f(A, B) == A,
     f(B, A) == B,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
     Or(f(B, B) == A, f(B, B) == B))
 T, S2
 No models.
