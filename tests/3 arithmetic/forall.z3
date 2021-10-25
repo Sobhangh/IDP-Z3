@@ -64,6 +64,5 @@ display {
                'normal': True,
                'reading': 'q',
                'relevant': True,
-               'status': 'CONSEQUENCE',
-               'typ': 'Bool',
-               'value': True}}}
+               'status': 'UNKNOWN',
+               'typ': 'Bool'}}}
