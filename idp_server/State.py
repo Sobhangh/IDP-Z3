@@ -133,7 +133,7 @@ class State(Problem):
         # perform propagation
         if out.environment is not None:  # if there is a decision vocabulary
             out.environment.propagate(tag=S.ENV_CONSQ)
-            out.assignments.update(self.environment.assignments)
+            out.assignments.update(out.environment.assignments)
             out._formula = None
         out.propagate(tag=S.CONSEQUENCE)
 
