@@ -482,6 +482,7 @@ def instantiate1(self, e0, e1, problem=None):
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
                             f"Incorrect arity for {out.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
+                out.original = self
         if problem and not self.fresh_vars:
             return out.interpret(problem)
     return out
