@@ -70,7 +70,7 @@ class State(Problem):
             State.cache[(idp.code, jsonstr)] = state
         return state
 
-    def __init__(self, idp: IDP, withPropagate=True):
+    def __init__(self, idp: IDP):
         self.active = "{}"
 
         # determine default vocabulary, theory, before annotating display
