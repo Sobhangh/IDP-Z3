@@ -66,7 +66,7 @@ display {
                          'normal': True,
                          'reading': 'edge(a, b)',
                          'relevant': True,
-                         'status': 'UNIVERSAL',
+                         'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': True},
           'edge(a, c)': {'environmental': False,
@@ -151,7 +151,7 @@ display {
                                                                                                                                                                            '$(`p)(y, '
                                                                                                                                                                            'x))',
                                                                                                                                                                 'relevant': False,
-                                                                                                                                                                'status': 'UNIVERSAL',
+                                                                                                                                                                'status': 'CONSEQUENCE',
                                                                                                                                                                 'typ': 'Bool',
                                                                                                                                                                 'value': True},
           '∀`p ∈ Concept : symmetric(`p) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
@@ -178,7 +178,7 @@ display {
                                                                                                                                '$(`p)(y, '
                                                                                                                                'x))',
                                                                                                                     'relevant': False,
-                                                                                                                    'status': 'UNIVERSAL',
+                                                                                                                    'status': 'CONSEQUENCE',
                                                                                                                     'typ': 'Bool',
                                                                                                                     'value': True},
           '∀`p ∈ symmetric : ∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
@@ -196,7 +196,7 @@ display {
                                                                                                                '$(`p)(y, '
                                                                                                                'x)',
                                                                                                     'relevant': False,
-                                                                                                    'status': 'UNIVERSAL',
+                                                                                                    'status': 'CONSEQUENCE',
                                                                                                     'typ': 'Bool',
                                                                                                     'value': True}},
  'symmetric': {}}

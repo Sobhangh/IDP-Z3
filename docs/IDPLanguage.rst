@@ -1,14 +1,15 @@
 .. _IDP:
 
 
-The IDP Language
-================
+The FO(.) Language
+==================
 
 Overview
 ------------
 
-The IDP language is used to create knowledge bases.
-An IDP source file is made of the following blocks of code:
+The FO(.) language is used to create knowledge bases.
+An IDP-Z3 program contains an FO(.) knowledge base and instructions to perform tasks on it.
+It is made of the following blocks of code:
 
 vocabulary
     specify the types, predicates, functions and constants used to describe the problem domain.
@@ -26,7 +27,7 @@ main
     (optional) executable procedure in the context of the knowledge base
 
 
-The basic skeleton of an IDP knowledge base for the Interactive Consultant is as follows:
+The basic skeleton of an IDP-Z3 program for the Interactive Consultant is as follows:
 
 .. code::
 

@@ -79,7 +79,7 @@ display {
                'normal': True,
                'reading': 'r',
                'relevant': True,
-               'status': 'UNIVERSAL',
+               'status': 'CONSEQUENCE',
                'typ': 'Bool',
                'value': True}},
  'rd': {'rd()': {'environmental': False,

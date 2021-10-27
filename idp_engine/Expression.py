@@ -36,7 +36,7 @@ from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, RESERVED_SYMBOLS, \
+from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS, \
     IDPZ3Error, DEF_SEMANTICS, Semantics
 
 
@@ -196,7 +196,7 @@ class Expression(ASTNode):
             Equivalence is computed in the context of the theory and structure.
 
         annotations (Dict[str, str]):
-            The set of annotations given by the expert in the IDP source code.
+            The set of annotations given by the expert in the IDP-Z3 program.
 
             ``annotations['reading']`` is the annotation
             giving the intended meaning of the expression (in English).
@@ -531,15 +531,19 @@ class Quantee(Expression):
     Attributes:
         vars (List[List[Variable]): the (tuples of) variables being quantified
 
-        sub_exprs (List[SymbolExpr], Optional): the type or predicate to quantify over
+        sub_exprs (List[SymbolExpr], Optional): the type or predicate to quantify over.
+        If the type is "Concept" with a particular signature, it is followed by the types in the signature.
 
         arity (int): the length of the tuple of variable
     """
     def __init__(self, **kwargs):
         self.vars = kwargs.pop('vars')
         sort = kwargs.pop('sort')
-        self.sub_exprs = [sort] if sort else []
-
+        signature = kwargs.pop('signature') if 'signature' in kwargs else None
+        self.check(not signature or sort.str == CONCEPT,
+                   f"Can't use signature after predicate other than {CONCEPT}")
+        self.sub_exprs = (([sort] if sort else [])
+                         +(signature.sorts + [signature.out] if signature else []))
         self.arity = None
         for i, v in enumerate(self.vars):
             if hasattr(v, 'vars'):  # varTuple
@@ -563,8 +567,12 @@ class Quantee(Expression):
         return out.annotate1()
 
     def __str1__(self):
+        signature = ("" if len(self.sub_exprs) <= 1 else
+                     f"[{','.join(t.str for t in self.sub_exprs[1:-1])}->{self.sub_exprs[-1]}]"
+        )
         return (f"{','.join(str(v) for vs in self.vars for v in vs)} "
-                f"∈ {self.sub_exprs[0] if self.sub_exprs else None}")
+                f"∈ {self.sub_exprs[0] if self.sub_exprs else None}"
+                f"{signature}")
 
 
 class AQuantification(Expression):

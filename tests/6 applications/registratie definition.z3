@@ -683,7 +683,7 @@ display {
                                                                          'normal': True,
                                                                          'reading': 'Professional_Declaration_Filed',
                                                                          'relevant': True,
-                                                                         'status': 'UNIVERSAL',
+                                                                         'status': 'CONSEQUENCE',
                                                                          'typ': 'Bool',
                                                                          'value': False}},
  'Region': {'Region()': {'environmental': True,

@@ -54,7 +54,7 @@ display {
                'normal': True,
                'reading': 'p',
                'relevant': True,
-               'status': 'UNIVERSAL',
+               'status': 'CONSEQUENCE',
                'typ': 'Bool',
                'value': True}},
  'q': {'q()': {'environmental': False,

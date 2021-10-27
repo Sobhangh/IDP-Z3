@@ -36,6 +36,6 @@ display { view() = expanded. }
                     'normal': False,
                     'reading': 'f(1) ≥ 2',
                     'relevant': True,
-                    'status': 'UNIVERSAL',
+                    'status': 'CONSEQUENCE',
                     'typ': 'Bool',
                     'value': True}}}

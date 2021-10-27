@@ -24,18 +24,18 @@ IDP class
 The ``IDP`` class exposes the following methods:
 
 from_file(file_path: str)
-    This class method parses the :ref:`IDP source code<IDP>` in the file located at ``file_path``.
+    This class method parses the :ref:`IDP-Z3 program<IDP>` in the file located at ``file_path``.
 
 from_str(code: str)
-    This class method parses the :ref:`IDP source code<IDP>` in the ``code`` string.
+    This class method parses the :ref:`IDP-Z3 program<IDP>` in the ``code`` string.
 
 parse(file_or_string)
-    DEPRECATED: This class method parses the :ref:`IDP source code<IDP>` in the file or string.
+    DEPRECATED: This class method parses the :ref:`IDP-Z3 program<IDP>` in the file or string.
 
 get_blocks(names)
     This instance method returns the list of blocks whose names are given in a comma-separated string.
 
 execute()
-    This instance methods executes the `main()` procedure block in the IDP source file.
+    This instance methods executes the `main()` procedure block in the IDP-Z3 program.
 
 

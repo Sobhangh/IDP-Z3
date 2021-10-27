@@ -40,10 +40,14 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
         definiendum=AppliedSymbol
         ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: ( vars+=Variable[','] ( ('in' | '∈') sort=SymbolExpr)?
-               | vars+=VarTuple[','] ('in' | '∈') sort=SymbolExpr );
+      Quantee: ( vars+=Variable[','] ( ('in' | '∈') sort=SymbolExpr (signature=Signature)?)?
+               | vars+=VarTuple[','] ('in' | '∈') sort=SymbolExpr (signature=Signature)?);
           Variable: name=/`?[^\d\W]\w*\b/;
           VarTuple: '(' vars+=Variable[','] ')';
+          Signature: '['
+              ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
+              ('->' | '→') out=Symbol
+              ']';
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;

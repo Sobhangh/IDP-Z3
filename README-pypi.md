@@ -1,5 +1,5 @@
 idp-engine is a reasoning engine for knowledge represented using the FO(.) language.
-FO(.) is First Order logic, with various extensions to make it more expressive:  types, arithmetic, inductive definitions, aggregates, and intensional objects.
+FO(.) is First Order logic, with various extensions to make it more expressive:  types, equality, arithmetic, inductive definitions, aggregates, and intensional objects.
 The idp-engine uses the Z3 SMT solver as a back-end.
 
 It is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium, and made available under the [GNU LGPL v3 License](https://www.gnu.org/licenses/lgpl-3.0.txt).
@@ -17,7 +17,7 @@ See more information at [www.IDP-Z3.be](https://www.IDP-Z3.be).
 
 # Get started
 
-The following code illustrates how to run inferences on the IDP knowledge.
+The following code illustrates how to run inferences on a knowledge base.
 
 ```
     from idp_engine import IDP, model_expand

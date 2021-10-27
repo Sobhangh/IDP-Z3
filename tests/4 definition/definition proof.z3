@@ -68,7 +68,7 @@ display {
                             'normal': True,
                             'reading': 'codeOf(red)',
                             'relevant': True,
-                            'status': 'UNIVERSAL',
+                            'status': 'CONSEQUENCE',
                             'typ': 'code',
                             'value': 'b',
                             'values': ['b']},
@@ -85,6 +85,6 @@ display {
                                 'normal': False,
                                 'reading': 'codeOf(red) = b',
                                 'relevant': True,
-                                'status': 'UNIVERSAL',
+                                'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': True}}}

@@ -194,7 +194,7 @@ display {
                                       'normal': False,
                                       'reading': 'Cost = ECost(Epoxy)',
                                       'relevant': True,
-                                      'status': 'UNIVERSAL',
+                                      'status': 'CONSEQUENCE',
                                       'typ': 'Bool',
                                       'value': True}},
  'ECost': {},
@@ -241,7 +241,7 @@ display {
                                                                                                      '≥ '
                                                                                                      'ELowest_Storage_T(Epoxy)',
                                                                                           'relevant': True,
-                                                                                          'status': 'UNIVERSAL',
+                                                                                          'status': 'CONSEQUENCE',
                                                                                           'typ': 'Bool',
                                                                                           'value': True},
            'ELowest_Storage_T(Epoxy())': {'environmental': False,
@@ -269,7 +269,7 @@ display {
                                                                                                      '≤ '
                                                                                                      'EHighest_Storage_T(Epoxy)',
                                                                                           'relevant': True,
-                                                                                          'status': 'UNIVERSAL',
+                                                                                          'status': 'CONSEQUENCE',
                                                                                           'typ': 'Bool',
                                                                                           'value': True},
            'Epoxy()': {'environmental': False,
@@ -366,7 +366,7 @@ display {
                                                                                  'reading': 'Safe_High_Storage_T = '
                                                                                             'EHighest_Storage_T(Epoxy)',
                                                                                  'relevant': True,
-                                                                                 'status': 'UNIVERSAL',
+                                                                                 'status': 'CONSEQUENCE',
                                                                                  'typ': 'Bool',
                                                                                  'value': True}},
  'Safe_Low_Storage_T': {'Safe_Low_Storage_T()': {'environmental': False,
@@ -384,6 +384,6 @@ display {
                                                                               'reading': 'Safe_Low_Storage_T = '
                                                                                          'ELowest_Storage_T(Epoxy)',
                                                                               'relevant': True,
-                                                                              'status': 'UNIVERSAL',
+                                                                              'status': 'CONSEQUENCE',
                                                                               'typ': 'Bool',
                                                                               'value': True}}}

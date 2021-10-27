@@ -98,7 +98,7 @@ structure isa:isa {
                                          'normal': False,
                                          'reading': 'Type = typeOf(Subtype)',
                                          'relevant': True,
-                                         'status': 'UNIVERSAL',
+                                         'status': 'CONSEQUENCE',
                                          'typ': 'Bool',
                                          'value': True}},
  'asi': {'asi(1tri angle, rectangle)': {'environmental': False,
@@ -171,7 +171,7 @@ structure isa:isa {
                                                               'reading': '∀t ∈ type,st ∈ subtype : isa(st, t) ⇔ asi(t, '
                                                                          'st)',
                                                               'relevant': False,
-                                                              'status': 'UNIVERSAL',
+                                                              'status': 'CONSEQUENCE',
                                                               'typ': 'Bool',
                                                               'value': True}},
  'isa': {},
@@ -225,7 +225,7 @@ structure isa:isa {
                                                     'normal': False,
                                                     'reading': '∀st ∈ subtype : isa(st, typeOf(st))',
                                                     'relevant': False,
-                                                    'status': 'UNIVERSAL',
+                                                    'status': 'CONSEQUENCE',
                                                     'typ': 'Bool',
                                                     'value': True},
             '∀t ∈ type,st ∈ subtype : typeOf(st) = t ⇔ isa(st, t)': {'environmental': False,
@@ -234,6 +234,6 @@ structure isa:isa {
                                                                      'reading': '∀t ∈ type,st ∈ subtype : typeOf(st) = '
                                                                                 't ⇔ isa(st, t)',
                                                                      'relevant': False,
-                                                                     'status': 'UNIVERSAL',
+                                                                     'status': 'CONSEQUENCE',
                                                                      'typ': 'Bool',
                                                                      'value': True}}}

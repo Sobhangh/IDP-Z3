@@ -46,7 +46,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE)
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
+from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
@@ -373,8 +373,11 @@ class TypeDeclaration(ASTNode):
                                  enumeration=enumeration, default=None))
 
     def __str__(self):
-        return (f"type {self.name} := "
-                f"{{{','.join(map(str, self.constructors))}}}")
+        if self.name in RESERVED_SYMBOLS:
+            return ''
+        enumeration = (f"{','.join(map(str, self.constructors))}" if self.constructors else
+                       f"{self.enumeration}")
+        return (f"type {self.name} := {{{enumeration}}}")
 
     def check_bounds(self, var):
         if self.name == CONCEPT:
@@ -463,10 +466,12 @@ class SymbolDeclaration(ASTNode):
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
     def __str__(self):
-        args = ','.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
-        return (f"{self.name}"
-                f"{ '('+args+')' if args else ''}"
-                f"{'' if self.out.name == BOOL else f' : {self.out.name}'}")
+        if self.name in RESERVED_SYMBOLS:
+            return ''
+        args = '⨯'.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
+        return (f"{self.name}: "
+                f"{ '('+args+')' if args else '()'}"
+                f" -> {self.out.name}")
 
     def __repr__(self):
         return str(self)

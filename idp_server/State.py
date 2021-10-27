@@ -70,7 +70,7 @@ class State(Problem):
             State.cache[(idp.code, jsonstr)] = state
         return state
 
-    def __init__(self, idp: IDP):
+    def __init__(self, idp: IDP, withPropagate=True):
         self.active = "{}"
 
         # determine default vocabulary, theory, before annotating display
@@ -108,8 +108,6 @@ class State(Problem):
         blocks += [struct for struct in idp.structures.values()
                    if struct.voc.name != 'environment']
         self.add(*blocks)
-        self.symbolic_propagate(tag=S.UNIVERSAL)
-        self.simplify()
         self.relevant_symbols = {}
 
     def add_given(self, jsonstr: str):

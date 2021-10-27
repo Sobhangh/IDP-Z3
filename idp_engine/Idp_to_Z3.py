@@ -341,7 +341,14 @@ def translate1(self, problem: "Problem", vars={}):
     else:
         arg = [x.translate(problem, vars) for x in self.sub_exprs]
         # assert  all(a != None for a in arg)
-        return (self.decl.translate(problem))(arg)
+        try:
+            return (self.decl.translate(problem))(arg)
+        except:
+            if self.original.code.startswith('$'):
+                msg = f"$()() expression is not properly guarded: {self.original.code}"
+            else:
+                msg = f"Incorrect symbol application: {self}"
+            self.check(False, msg)
 AppliedSymbol.translate1 = translate1
 
 def reified(self, problem: "Problem", vars={}) -> DatatypeRef:

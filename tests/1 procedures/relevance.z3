@@ -66,7 +66,7 @@ display {
                                   'normal': False,
                                   'reading': '∀x ∈ num : f(x) = f(x)',
                                   'relevant': False,
-                                  'status': 'UNIVERSAL',
+                                  'status': 'CONSEQUENCE',
                                   'typ': 'Bool',
                                   'value': True}},
  'p': {'p()': {'environmental': False,

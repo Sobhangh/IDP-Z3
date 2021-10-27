@@ -96,7 +96,7 @@ structure {
                                                                                              'Fruit(Monkey) = Pear ⇒ '
                                                                                              'Place(Monkey) ≠ Branch',
                                                                                   'relevant': False,
-                                                                                  'status': 'UNIVERSAL',
+                                                                                  'status': 'CONSEQUENCE',
                                                                                   'typ': 'Bool',
                                                                                   'value': True},
            '∀Monkey ∈ Monkey_t : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange': {'environmental': False,
@@ -105,7 +105,7 @@ structure {
                                                                            'reading': '∀Monkey ∈ Monkey_t : Monkey = '
                                                                                       'Mike ⇒ Fruit(Monkey) ≠ Orange',
                                                                            'relevant': False,
-                                                                           'status': 'UNIVERSAL',
+                                                                           'status': 'CONSEQUENCE',
                                                                            'typ': 'Bool',
                                                                            'value': True}},
  'Place': {'Place(Anna)': {'environmental': False,
@@ -113,7 +113,7 @@ structure {
                            'normal': True,
                            'reading': 'Place(Anna)',
                            'relevant': False,
-                           'status': 'UNIVERSAL',
+                           'status': 'CONSEQUENCE',
                            'typ': 'Place_t',
                            'value': 'Stream',
                            'values': ['Stream']},
@@ -140,7 +140,7 @@ structure {
                           'normal': True,
                           'reading': 'Place(Sam)',
                           'relevant': False,
-                          'status': 'UNIVERSAL',
+                          'status': 'CONSEQUENCE',
                           'typ': 'Place_t',
                           'value': 'Grass',
                           'values': ['Grass']},
@@ -158,7 +158,7 @@ structure {
                                                                                                              'Fruit(Monkey) '
                                                                                                              '≠ Pear',
                                                                                                   'relevant': False,
-                                                                                                  'status': 'UNIVERSAL',
+                                                                                                  'status': 'CONSEQUENCE',
                                                                                                   'typ': 'Bool',
                                                                                                   'value': True},
            '∀Monkey ∈ Monkey_t : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
@@ -168,7 +168,7 @@ structure {
                                                                                          '= Harriet ⇒ Place(Monkey) ≠ '
                                                                                          'Branch',
                                                                               'relevant': False,
-                                                                              'status': 'UNIVERSAL',
+                                                                              'status': 'CONSEQUENCE',
                                                                               'typ': 'Bool',
                                                                               'value': True},
            '∀Monkey ∈ Monkey_t : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana': {'environmental': False,
@@ -185,7 +185,7 @@ structure {
                                                                                                              'Fruit(Monkey) '
                                                                                                              '≠ Banana',
                                                                                                   'relevant': False,
-                                                                                                  'status': 'UNIVERSAL',
+                                                                                                  'status': 'CONSEQUENCE',
                                                                                                   'typ': 'Bool',
                                                                                                   'value': True},
            '∀Monkey ∈ Monkey_t : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple': {'environmental': False,
@@ -195,7 +195,7 @@ structure {
                                                                                             'Place(Monkey) = Rock ⇒ '
                                                                                             'Fruit(Monkey) = Apple',
                                                                                  'relevant': False,
-                                                                                 'status': 'UNIVERSAL',
+                                                                                 'status': 'CONSEQUENCE',
                                                                                  'typ': 'Bool',
                                                                                  'value': True},
            '∀m1 ∈ Monkey_t : ∀m2 ∈ Monkey_t : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)': {'environmental': False,
@@ -221,6 +221,6 @@ structure {
                                                                                                                     '≠ '
                                                                                                                     'Fruit(m2)',
                                                                                                          'relevant': False,
-                                                                                                         'status': 'UNIVERSAL',
+                                                                                                         'status': 'CONSEQUENCE',
                                                                                                          'typ': 'Bool',
                                                                                                          'value': True}}}

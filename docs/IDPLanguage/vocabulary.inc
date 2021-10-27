@@ -104,6 +104,8 @@ The predicates with name ``myPred1``, ``myPred2`` and argument types ``T1``, ``T
 Their name should not start with a capital letter, by convention.
 The ASCII equivalent of ``→`` is ``->``, and of ``𝔹`` is ``Bool``.
 
+There is a built-in predicate ``T: T → 𝔹`` for each type T (``T(x)`` is ``true`` for any ``x`` in ``T``).
+
 .. _constant:
 .. index:: constant, proposition
 
