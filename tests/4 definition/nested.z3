@@ -38,8 +38,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'negated': {'__rank': 9999,
-             'negated(Jan)': {'environmental': False,
+ 'negated': {'negated(Jan)': {'environmental': False,
                               'is_assignment': True,
                               'normal': True,
                               'reading': 'negated(Jan)',
@@ -98,8 +97,7 @@ display {
                                                'status': 'CONSEQUENCE',
                                                'typ': 'Bool',
                                                'value': True}},
- 'same': {'__rank': 9999,
-          'same(Jan)': {'environmental': False,
+ 'same': {'same(Jan)': {'environmental': False,
                         'is_assignment': True,
                         'normal': True,
                         'reading': 'same(Jan)',

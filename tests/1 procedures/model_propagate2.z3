@@ -22,8 +22,7 @@ theory  {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'p': {'__rank': 9999,
-       'p()': {'environmental': False,
+ 'p': {'p()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
                'reading': 'p',

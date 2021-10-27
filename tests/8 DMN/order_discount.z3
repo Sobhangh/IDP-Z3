@@ -43,8 +43,7 @@ structure {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'amount': {'__rank': 9999,
-            'amount()': {'environmental': False,
+ 'amount': {'amount()': {'environmental': False,
                          'is_assignment': True,
                          'normal': True,
                          'reading': 'amount',
@@ -52,8 +51,7 @@ structure {
                          'status': 'UNKNOWN',
                          'typ': 'Int',
                          'value': ''}},
- 'discount': {'__rank': 9999,
-              'discount()': {'environmental': False,
+ 'discount': {'discount()': {'environmental': False,
                              'is_assignment': True,
                              'normal': True,
                              'reading': 'discount',

@@ -39,8 +39,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'negated': {'__rank': 9999,
-             'negated(-1)': {'environmental': False,
+ 'negated': {'negated(-1)': {'environmental': False,
                              'is_assignment': True,
                              'normal': True,
                              'reading': 'negated(-1)',
@@ -100,8 +99,7 @@ display {
                                                  'status': 'UNIVERSAL',
                                                  'typ': 'Bool',
                                                  'value': True}},
- 'same': {'__rank': 9999,
-          'same(-1)': {'environmental': False,
+ 'same': {'same(-1)': {'environmental': False,
                        'is_assignment': True,
                        'normal': True,
                        'reading': 'same(-1)',

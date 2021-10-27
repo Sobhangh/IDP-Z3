@@ -52,8 +52,7 @@ structure {
                                            'reading': 'Prepare_Terrace',
                                            'relevant': True,
                                            'status': 'UNKNOWN',
-                                           'typ': 'Bool'},
-                     '__rank': 9999},
+                                           'typ': 'Bool'}},
  'Rain_Probability': {'Rain_Probability()': {'environmental': False,
                                              'is_assignment': True,
                                              'normal': True,
@@ -61,8 +60,7 @@ structure {
                                              'relevant': True,
                                              'status': 'UNKNOWN',
                                              'typ': 'Int',
-                                             'value': ''},
-                      '__rank': 9999},
+                                             'value': ''}},
  'Temperature': {'Temperature()': {'environmental': False,
                                    'is_assignment': True,
                                    'normal': True,
@@ -70,5 +68,4 @@ structure {
                                    'relevant': True,
                                    'status': 'UNKNOWN',
                                    'typ': 'Int',
-                                   'value': ''},
-                 '__rank': 9999}}
+                                   'value': ''}}}

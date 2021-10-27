@@ -112,8 +112,6 @@ class State(Problem):
         self.simplify()
         self.relevant_symbols = {}
 
-        self._finalize()
-
     def add_given(self, jsonstr: str):
         """
         Add the assignments that the user gave through the interface.
@@ -131,16 +129,15 @@ class State(Problem):
             out.environment = out.environment.copy()
             load_json(out.environment, jsonstr)
         load_json(out, jsonstr)
-        return out._finalize()
 
-    def _finalize(self):
-        # propagate universals
-        if self.environment is not None:  # if there is a decision vocabulary
-            self.environment.propagate(tag=S.ENV_CONSQ)
-            self.assignments.update(self.environment.assignments)
-            self._formula = None
-        self.propagate(tag=S.CONSEQUENCE)
-        return self
+        # perform propagation
+        if out.environment is not None:  # if there is a decision vocabulary
+            out.environment.propagate(tag=S.ENV_CONSQ)
+            out.assignments.update(out.environment.assignments)
+            out._formula = None
+        out.propagate(tag=S.CONSEQUENCE)
+
+        return out
 
     def __str__(self) -> str:
         self.co_constraints = OrderedSet()
