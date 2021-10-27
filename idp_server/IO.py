@@ -62,8 +62,8 @@ def metaJSON(state):
                     d['longinfo'] = decl.annotations['long']
                 if 'Slider' in decl.annotations:
                     d['slider'] = decl.annotations['Slider']
-
             symbols.append(d)
+
     optionalPropagation = state.idp.display.optionalPropagation
     manualPropagation = state.idp.display.manualPropagation
     optionalRelevance = state.idp.display.optionalRelevance
@@ -179,7 +179,6 @@ class Output(object):
                     symbol['is_assignment'] = symbol['typ'] != "Bool" \
                         or bool(ass.sentence.is_assignment())
                     s.setdefault(key, symbol)
-                    s["__rank"] = self.state.relevant_symbols.get(symb.name, 9999)
 
         # Remove symbols that are in a structure.
         for key, l in state.assignments.items():
