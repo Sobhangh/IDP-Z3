@@ -103,7 +103,6 @@ France	    Luxembourg }
                                   'typ': 'Color_t',
                                   'value': '',
                                   'values': ['Green', 'Red', 'Yellow', 'Orange']},
-           '__rank': 9999,
            '∀c1 ∈ Country_t,c2 ∈ Country_t : Country_borders_Country(c1, c2) ⇒ Color(c1) ≠ Color(c2)': {'environmental': False,
                                                                                                         'is_assignment': False,
                                                                                                         'normal': False,
@@ -120,7 +119,7 @@ France	    Luxembourg }
                                                                                                                    '≠ '
                                                                                                                    'Color(c2)',
                                                                                                         'relevant': False,
-                                                                                                        'status': 'UNIVERSAL',
+                                                                                                        'status': 'CONSEQUENCE',
                                                                                                         'typ': 'Bool',
                                                                                                         'value': True}},
  'Country_borders_Country': {}}

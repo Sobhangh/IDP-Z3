@@ -93,10 +93,9 @@ structure {
                                                                                                                                                                                                                                                                               'else '
                                                                                                                                                                                                                                                                               '0)',
                                                                                                                                                                                                                                                                    'relevant': True,
-                                                                                                                                                                                                                                                                   'status': 'UNIVERSAL',
+                                                                                                                                                                                                                                                                   'status': 'CONSEQUENCE',
                                                                                                                                                                                                                                                                    'typ': 'Bool',
-                                                                                                                                                                                                                                                                   'value': True},
-           '__rank': 9999},
+                                                                                                                                                                                                                                                                   'value': True}},
  'Years_of_Work': {'Years_of_Work()': {'environmental': False,
                                        'is_assignment': True,
                                        'normal': True,
@@ -132,5 +131,4 @@ structure {
                                            'reading': 'Years_of_Work > 5',
                                            'relevant': True,
                                            'status': 'UNKNOWN',
-                                           'typ': 'Bool'},
-                   '__rank': 9999}}
+                                           'typ': 'Bool'}}}

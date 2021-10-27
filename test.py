@@ -67,6 +67,7 @@ def generateZ3(theory):
                 idp.execute()
             else:
                 state = State(idp)
+                state.propagate()
                 get_relevant_questions(state)
                 out = Output(state).fill(state)
 

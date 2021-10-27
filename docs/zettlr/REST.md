@@ -29,7 +29,6 @@ POST request:
 POST result:
 
 ```json
-    - title: string           // title of the page
     - symbols : [ {           // list of predicates/functions, each one corresponding to a box on the page
         - idpname : string    // name of the predicate/function in the FO(ID) vocabulary
         - type : string       // "Bool" | "Int" | "Real" | "Date" | <custom type>
@@ -40,7 +39,13 @@ POST result:
         - showOptimize : Bool // true if the optimize button should be shown for this symbol
         - view: string        // "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
         - environmental: Bool // true if declared in environment vocabulary
+        - values : [string]   // possible values for the symbol
         } ]
+    - optionalPropagation: Bool // use propagation toggle button in the IC.
+    - manualPropagation: Bool // deactivate automatic propagation in the IC.
+    - optionalRelevance: Bool // use propagation toggle button in the IC.
+    - manualRelevance: Bool   // deactivate automatic relevancy in the IC.
+    - valueinfo : format identical to <symbol> in /eval response // information about the values for the symbols for the gui
 ```
 
 ### URL: /eval
@@ -90,7 +95,6 @@ GET response :
         - env_dec: Bool         // true if the theory separates environmental/decision variables
     }
     - <symbol> : string {
-        - '__rank' : integer    // rank of the symbol, per informational relevance
         - <atom/term> : string {
             - typ : string      // "Bool" | "Int" | "Real" | <custom type>
             - environmental : Bool // True if atom/term does not contain a decision variable

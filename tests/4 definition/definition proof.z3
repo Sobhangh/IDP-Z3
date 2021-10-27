@@ -37,8 +37,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'c': {'__rank': 9999,
-       'c()': {'environmental': False,
+ 'c': {'c()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
                'reading': 'c',
@@ -55,8 +54,7 @@ display {
                      'status': 'CONSEQUENCE',
                      'typ': 'Bool',
                      'value': False}},
- 'codeOf': {'__rank': 9999,
-            'codeOf(blue)': {'environmental': False,
+ 'codeOf': {'codeOf(blue)': {'environmental': False,
                              'is_assignment': True,
                              'normal': True,
                              'reading': 'codeOf(blue)',
@@ -70,7 +68,7 @@ display {
                             'normal': True,
                             'reading': 'codeOf(red)',
                             'relevant': True,
-                            'status': 'UNIVERSAL',
+                            'status': 'CONSEQUENCE',
                             'typ': 'code',
                             'value': 'b',
                             'values': ['b']},
@@ -87,6 +85,6 @@ display {
                                 'normal': False,
                                 'reading': 'codeOf(red) = b',
                                 'relevant': True,
-                                'status': 'UNIVERSAL',
+                                'status': 'CONSEQUENCE',
                                 'typ': 'Bool',
                                 'value': True}}}

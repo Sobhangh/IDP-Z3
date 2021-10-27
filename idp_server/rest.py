@@ -191,7 +191,7 @@ class meta(Resource):
                 if not state.idp.display.manualRelevance:
                     get_relevant_questions(state)
                 out = metaJSON(state)
-                out["propagated"] = Output(state).fill(state)
+                out["valueinfo"] = Output(state).fill(state)
 
                 log("end /meta ")
                 if with_profiling:

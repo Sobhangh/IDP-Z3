@@ -29,8 +29,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'codeOf': {'__rank': 9999,
-            'codeOf(blue)': {'environmental': False,
+ 'codeOf': {'codeOf(blue)': {'environmental': False,
                              'is_assignment': True,
                              'normal': True,
                              'reading': 'codeOf(blue)',

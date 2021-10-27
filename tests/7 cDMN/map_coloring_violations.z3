@@ -126,7 +126,6 @@ structure {
                                   'typ': 'Color_t',
                                   'value': '',
                                   'values': ['Green', 'Red', 'Yellow']},
-           '__rank': 9999,
            '∀c1 ∈ Country_t : ∀c2 ∈ Country_t : c1 ≠ Luxembourg ∧ c2 ≠ Luxembourg ∧ Country_borders_Country(c1, c2) ⇒ Color(c1) ≠ Color(c2)': {'environmental': False,
                                                                                                                                                'is_assignment': False,
                                                                                                                                                'normal': False,
@@ -153,7 +152,7 @@ structure {
                                                                                                                                                           '≠ '
                                                                                                                                                           'Color(c2)',
                                                                                                                                                'relevant': False,
-                                                                                                                                               'status': 'UNIVERSAL',
+                                                                                                                                               'status': 'CONSEQUENCE',
                                                                                                                                                'typ': 'Bool',
                                                                                                                                                'value': True}},
  'Country_borders_Country': {},
@@ -10204,7 +10203,6 @@ structure {
                                                                                                                                                                                                                                                                          'else '
                                                                                                                                                                                                                                                                          '0)',
                                                                                                                                                                                                                                                               'relevant': True,
-                                                                                                                                                                                                                                                              'status': 'UNIVERSAL',
+                                                                                                                                                                                                                                                              'status': 'CONSEQUENCE',
                                                                                                                                                                                                                                                               'typ': 'Bool',
-                                                                                                                                                                                                                                                              'value': True},
-                '__rank': 9999}}
+                                                                                                                                                                                                                                                              'value': True}}}

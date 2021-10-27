@@ -33,17 +33,15 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'p': {'__rank': 9999,
-       'p()': {'environmental': False,
+ 'p': {'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
                'reading': 'p',
                'relevant': True,
-               'status': 'UNIVERSAL',
+               'status': 'CONSEQUENCE',
                'typ': 'Bool',
                'value': True}},
- 'q': {'__rank': 9999,
-       'q(blue)': {'environmental': False,
+ 'q': {'q(blue)': {'environmental': False,
                    'is_assignment': False,
                    'normal': True,
                    'reading': 'q(blue)',
@@ -69,6 +67,6 @@ display {
                              'normal': False,
                              'reading': '∃c ∈ color : q(c)',
                              'relevant': True,
-                             'status': 'UNIVERSAL',
+                             'status': 'CONSEQUENCE',
                              'typ': 'Bool',
                              'value': True}}}

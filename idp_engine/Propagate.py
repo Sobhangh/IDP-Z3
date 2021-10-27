@@ -277,50 +277,49 @@ def _propagate(self, tag=S.CONSEQUENCE):
     global start, last_prop
     start, last_prop = time.process_time(), None
     todo = self._directional_todo()
-    if todo:
-        z3_formula = self.formula()
 
-        def get_solver():
-            solver = Solver(ctx=self.ctx)
-            solver.add(z3_formula)
-            solver.check()  # required for forall.idp !?
-            for q in todo:
-                solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
-            return solver
+    z3_formula = self.formula()
 
-        solver = get_solver()
-        res1 = solver.check()
-        if res1 == sat:
-            model = solver.model()
-            valqs = [(model.eval(q.reified(self)), q) for q in todo]
-            for val1, q in valqs:
-                if str(val1) == str(q.reified(self)):
-                    continue  # irrelevant
-                solver.push()
-                solver.add(Not(q.reified(self) == val1))
-                res2 = solver.check()
-                solver.pop()
+    def get_solver():
+        solver = Solver(ctx=self.ctx)
+        solver.add(z3_formula)
+        solver.check()  # required for forall.idp !?
+        for q in todo:
+            solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
+        return solver
 
-                if res2 == unsat:
-                    val = str_to_IDP(q, str(val1))
-                    yield self.assignments.assert__(q, val, tag)
+    solver = get_solver()
+    res1 = solver.check()
+    if res1 == sat:
+        model = solver.model()
+        valqs = [(model.eval(q.reified(self)), q) for q in todo]
+        for val1, q in valqs:
+            if str(val1) == str(q.reified(self)):
+                continue  # irrelevant
+            solver.push()
+            solver.add(Not(q.reified(self) == val1))
+            res2 = solver.check()
+            solver.pop()
+
+            if res2 == unsat:
+                val = str_to_IDP(q, str(val1))
+                yield self.assignments.assert__(q, val, tag)
+                last_prop = time.process_time()
+            elif res2 == unknown:  # does not happen with newest version of Z3
+                solver = get_solver() # restart the solver
+                solver.check()
+            else:  # reset the value
+                if self.assignments.get(q, True) is not None:
+                    self.assignments.assert__(q, None, S.UNKNOWN)
                     last_prop = time.process_time()
-                elif res2 == unknown:  # does not happen with newest version of Z3
-                    solver = get_solver() # restart the solver
-                    solver.check()
-                else:  # reset the value
-                    if self.assignments.get(q, True) is not None:
-                        self.assignments.assert__(q, None, S.UNKNOWN)
-                        last_prop = time.process_time()
-            yield "No more consequences."
-        elif res1 == unsat:
-            yield "Not satisfiable."
-            yield str(z3_formula)
-        else:
-            yield "Unknown satisfiability."
-            yield str(z3_formula)
-    else:
         yield "No more consequences."
+    elif res1 == unsat:
+        yield "Not satisfiable."
+        yield str(z3_formula)
+    else:
+        yield "Unknown satisfiability."
+        yield str(z3_formula)
+
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
     if last_prop is None:
         last_prop = 0

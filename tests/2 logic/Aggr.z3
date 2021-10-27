@@ -26,12 +26,11 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'p': {'__rank': 1,
-       'p()': {'environmental': False,
+ 'p': {'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
                'reading': 'p',
                'relevant': True,
-               'status': 'UNIVERSAL',
+               'status': 'CONSEQUENCE',
                'typ': 'Bool',
                'value': True}}}

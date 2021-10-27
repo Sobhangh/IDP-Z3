@@ -36,5 +36,4 @@ display {
                        'status': 'UNKNOWN',
                        'typ': 'color',
                        'value': '',
-                       'values': ['red', 'blue', 'green', 'rgb(t, t)', 'rgb(t, u)', 'rgb(u, t)', 'rgb(u, u)']},
-           '__rank': 9999}}
+                       'values': ['red', 'blue', 'green', 'rgb(t, t)', 'rgb(t, u)', 'rgb(u, t)', 'rgb(u, u)']}}}

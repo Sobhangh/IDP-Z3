@@ -20,6 +20,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Interactive Consultant
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
 
+### Interactive Consultant
+* fix #139: IC should detect and explain theories without models
+
+
 ## [0.8.4] - 2021-09-30
 
 Contributors (alphabetical): Jo Devriendt, Matthias Van der Hallen, Pierre Carbonnelle, Simon Vandevelde.

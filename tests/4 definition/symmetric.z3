@@ -53,10 +53,8 @@ display {
                        'status': 'UNKNOWN',
                        'typ': 'node',
                        'value': '',
-                       'values': ['a', 'b', 'c']},
-           '__rank': 9999},
- 'edge': {'__rank': 9999,
-          'edge(a, a)': {'environmental': False,
+                       'values': ['a', 'b', 'c']}},
+ 'edge': {'edge(a, a)': {'environmental': False,
                          'is_assignment': False,
                          'normal': True,
                          'reading': 'edge(a, a)',
@@ -68,7 +66,7 @@ display {
                          'normal': True,
                          'reading': 'edge(a, b)',
                          'relevant': True,
-                         'status': 'UNIVERSAL',
+                         'status': 'CONSEQUENCE',
                          'typ': 'Bool',
                          'value': True},
           'edge(a, c)': {'environmental': False,
@@ -153,7 +151,7 @@ display {
                                                                                                                                                                            '$(`p)(y, '
                                                                                                                                                                            'x))',
                                                                                                                                                                 'relevant': False,
-                                                                                                                                                                'status': 'UNIVERSAL',
+                                                                                                                                                                'status': 'CONSEQUENCE',
                                                                                                                                                                 'typ': 'Bool',
                                                                                                                                                                 'value': True},
           '∀`p ∈ Concept : symmetric(`p) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
@@ -180,7 +178,7 @@ display {
                                                                                                                                '$(`p)(y, '
                                                                                                                                'x))',
                                                                                                                     'relevant': False,
-                                                                                                                    'status': 'UNIVERSAL',
+                                                                                                                    'status': 'CONSEQUENCE',
                                                                                                                     'typ': 'Bool',
                                                                                                                     'value': True},
           '∀`p ∈ symmetric : ∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
@@ -198,7 +196,7 @@ display {
                                                                                                                '$(`p)(y, '
                                                                                                                'x)',
                                                                                                     'relevant': False,
-                                                                                                    'status': 'UNIVERSAL',
+                                                                                                    'status': 'CONSEQUENCE',
                                                                                                     'typ': 'Bool',
                                                                                                     'value': True}},
  'symmetric': {}}

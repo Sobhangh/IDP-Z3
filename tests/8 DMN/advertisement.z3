@@ -50,8 +50,7 @@ structure {
                                                  'status': 'UNKNOWN',
                                                  'typ': 'Advertised_Objectst_t',
                                                  'value': '',
-                                                 'values': ['Toys', 'Cars', 'Videogames']},
-                        '__rank': 9999},
+                                                 'values': ['Toys', 'Cars', 'Videogames']}},
  'Age': {'Age()': {'environmental': False,
                    'is_assignment': True,
                    'normal': True,
@@ -59,5 +58,4 @@ structure {
                    'relevant': True,
                    'status': 'UNKNOWN',
                    'typ': 'Int',
-                   'value': ''},
-         '__rank': 9999}}
+                   'value': ''}}}

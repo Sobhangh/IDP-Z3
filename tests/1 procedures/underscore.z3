@@ -36,16 +36,14 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'p': {'__rank': 9999,
-       'p()': {'environmental': False,
+ 'p': {'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
                'reading': 'p',
                'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
- 'δ': {'__rank': 9999,
-       'δ()': {'environmental': False,
+ 'δ': {'δ()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
                'reading': 'δ',

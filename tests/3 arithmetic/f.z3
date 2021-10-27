@@ -23,8 +23,7 @@ display { view() = expanded. }
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'f': {'__rank': 9999,
-       'f(1)': {'environmental': False,
+ 'f': {'f(1)': {'environmental': False,
                 'is_assignment': True,
                 'normal': True,
                 'reading': 'f(1)',
@@ -37,6 +36,6 @@ display { view() = expanded. }
                     'normal': False,
                     'reading': 'f(1) ≥ 2',
                     'relevant': True,
-                    'status': 'UNIVERSAL',
+                    'status': 'CONSEQUENCE',
                     'typ': 'Bool',
                     'value': True}}}
