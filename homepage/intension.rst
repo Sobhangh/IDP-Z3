@@ -1,5 +1,5 @@
-Quantification and other abstractions overconcepts of the ontology
-==================================================================
+Quantification and other abstractions over concepts of the ontology
+===================================================================
 
 This page lists relevant links for the paper.
 
