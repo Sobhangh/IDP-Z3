@@ -57,5 +57,4 @@ display {
                         'relevant': True,
                         'status': 'UNIVERSAL',
                         'typ': 'Bool',
-                        'value': False},
-           '__rank': 9999}}
+                        'value': False}}}

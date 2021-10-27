@@ -31,8 +31,7 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'x': {'__rank': 9999,
-       'x()': {'environmental': False,
+ 'x': {'x()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
                'reading': 'x',
@@ -48,8 +47,7 @@ display {
                    'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True}},
- 'y': {'__rank': 9999,
-       'y()': {'environmental': False,
+ 'y': {'y()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
                'reading': 'y',

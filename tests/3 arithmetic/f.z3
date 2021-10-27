@@ -23,8 +23,7 @@ display { view() = expanded. }
 
 -- propagation ------------------------------
 {' Global': {'active': '{}', 'env_dec': False},
- 'f': {'__rank': 9999,
-       'f(1)': {'environmental': False,
+ 'f': {'f(1)': {'environmental': False,
                 'is_assignment': True,
                 'normal': True,
                 'reading': 'f(1)',

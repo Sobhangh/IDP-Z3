@@ -48,7 +48,6 @@ display {
                        'typ': 'color',
                        'value': '',
                        'values': ['red', 'blue', 'green']},
-           '__rank': 9999,
            'opposite(Color())': {'environmental': False,
                                  'is_assignment': True,
                                  'normal': False,
