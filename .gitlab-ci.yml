@@ -13,6 +13,7 @@ pages:
     - apt update
     - apt -y install python3 git
     - python3 get-poetry.py
+    - source $HOME/.poetry/env
     - poetry install
     - poetry run sphinx-build homepage public
   artifacts:
