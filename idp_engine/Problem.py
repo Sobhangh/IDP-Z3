@@ -282,7 +282,7 @@ class Problem(object):
             else:
                 all = [a.formula().translate(self)
                        for a in self.assignments.values()
-                       if a.status == S.GIVEN]
+                       if a.status in [S.DEFAULT, S.GIVEN, S.EXPANDED]]
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
