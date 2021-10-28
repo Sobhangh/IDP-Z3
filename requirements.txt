@@ -8,8 +8,10 @@ pycallgraph2
 pyyaml
 recommonmark
 sphinx-autobuild
-sphinx_bootstrap_theme
 sphinxcontrib-mermaid==0.5.0
+sphinxcontrib-video = {git = "https://github.com/sphinx-contrib/video.git"}
+sphinxcontrib-youtube
+sphinx_bootstrap_theme
 sphinx_rtd_theme
 textx==2.3
 z3-solver
