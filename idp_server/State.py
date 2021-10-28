@@ -98,7 +98,6 @@ class State(Problem):
                       + [struct for struct in idp.structures.values()
                          if struct.voc.name == 'environment'])
             self.environment = Problem(* blocks, extended=True)
-            self.environment.symbolic_propagate(tag=S.ENV_UNIV)
 
             blocks = [self.environment, idp.theories['decision']]
         else:  # take the first theory
@@ -108,6 +107,14 @@ class State(Problem):
         blocks += [struct for struct in idp.structures.values()
                    if struct.voc.name != 'environment']
         self.add(*blocks)
+
+        # sentences in decision theory may be environmental (issue 147)
+        if self.environment:
+            for a in self.assignments.values():
+                if (not a.sentence in self.environment.assignments
+                    and not a.sentence.has_decision()):
+                    self.environment.assignments.assert__(a.sentence, a.value, a.status)
+
         self.relevant_symbols = {}
 
     def add_given(self, jsonstr: str):

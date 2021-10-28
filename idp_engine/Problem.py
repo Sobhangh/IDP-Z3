@@ -279,9 +279,11 @@ class Problem(object):
                         and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
-                self._formula = And(all)
             else:
-                self._formula = BoolVal(True, self.ctx)
+                all = [a.formula().translate(self)
+                       for a in self.assignments.values()
+                       if a.status == S.GIVEN]
+            self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
     def _todo_expand(self):
