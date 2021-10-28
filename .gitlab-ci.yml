@@ -11,6 +11,7 @@ pages:
   stage: deploy
   script:
     - apt update
+    - apt -y install python3 git
     - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
     - poetry install
     - poetry run sphinx-build homepage public
