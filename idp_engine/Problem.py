@@ -114,6 +114,15 @@ class Problem(object):
         self.add(*blocks)
         self.propagate_success = True
 
+        self.slvr = None
+
+    def get_solver(self):
+        if not self.slvr:
+            self.slvr = Solver(ctx=self.ctx)
+            self.slvr.add(self.formula())
+            self.slvr.check()  # required for forall.idp !?
+        return self.slvr
+
     @classmethod
     def make(cls, theories, structures, extended=False):
         """ polymorphic creation """

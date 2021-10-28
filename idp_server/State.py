@@ -68,6 +68,7 @@ class State(Problem):
                 state = state.add_given(jsonstr)
 
             State.cache[(idp.code, jsonstr)] = state
+            state.get_solver()
         return state
 
     def __init__(self, idp: IDP):
