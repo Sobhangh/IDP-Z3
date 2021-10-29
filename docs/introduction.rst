@@ -1,10 +1,13 @@
 
+.. role:: raw-html(raw)
+   :format: html
+
 Introduction
 ============
 
-IDP-Z3 is a software collection implementing the Knowledge Base paradigm using the FO(.) language.
-FO(.) is First Order logic, extended with definitions, types, arithmetic, aggregates and intensional objects.
 
+IDP-Z3 is a software collection implementing the Knowledge Base paradigm using the FO(:raw-html:`&#183`) language.
+FO(:raw-html:`&#183`) is First Order logic, extended with definitions, types, arithmetic, aggregates and intensional objects.
 In the Knowledge Base paradigm, the knowledge about a particular problem domain is encoded using a declarative language,
 and later used to solve particular problems by applying the appropriate type of reasoning, or "inference".
 The inferences include:
