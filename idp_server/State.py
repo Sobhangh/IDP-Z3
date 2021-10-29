@@ -32,6 +32,8 @@ from typing import Dict, Tuple, Union
 
 
 class State(Problem):
+    """ Contains a state of problem solving """
+    cache: Dict[str, 'State'] = {}
 
     @classmethod
     def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
@@ -46,8 +48,16 @@ class State(Problem):
             State: a State
         """
 
-        state = State(idp)
-        state = state.add_given(jsonstr)
+        if jsonstr != "{}" and idp.code in State.cache:  # TODO: fix weird way to reset via "{}"
+            state = State.cache[idp.code]
+        else:
+            if 100 < len(State.cache):
+                # remove oldest entry, to prevent memory overflow
+                State.cache.pop(list(State.cache.keys())[-1])
+            state = State(idp)
+            State.cache[idp.code] = state
+
+        state.add_given(jsonstr)
         return state
 
     def __init__(self, idp: IDP):
