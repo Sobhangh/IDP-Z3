@@ -370,7 +370,7 @@ sphinxcontrib-qthelp==1.0.3; python_version >= "3.5" \
 sphinxcontrib-serializinghtml==1.1.5; python_version >= "3.5" \
     --hash=sha256:aa5f6de5dfdf809ef505c4895e51ef5c9eac17d0f287933eb49ec495280b6952 \
     --hash=sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd
-sphinxcontrib-video @ git+https://github.com/sphinx-contrib/video.git@master
+git+https://github.com/sphinx-contrib/video.git
 sphinxcontrib-youtube==1.0.1 \
     --hash=sha256:ddf996279eb93cb1c3ab965812a109c30292915f8737afddb6be1ce6134dfcaf \
     --hash=sha256:8946236bcf0b4b786ea3e3002f499c5f1a3298ab368fc56109dceeb0531b3cef

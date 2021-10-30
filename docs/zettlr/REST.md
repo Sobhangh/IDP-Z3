@@ -45,7 +45,7 @@ POST result:
     - manualPropagation: Bool // deactivate automatic propagation in the IC.
     - optionalRelevance: Bool // use propagation toggle button in the IC.
     - manualRelevance: Bool   // deactivate automatic relevancy in the IC.
-    - valueinfo : format identical to <symbol> in /eval response // information about the values for the symbols for the gui
+    - valueinfo : string // format identical to <symbol> in /eval response // information about the values for the symbols for the gui
 ```
 
 ### URL: /eval
