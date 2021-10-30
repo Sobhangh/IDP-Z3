@@ -1,6 +1,14 @@
 Selected Publications
 =====================
 
+Awards
+------
+* Simon Marynissen, et al. **On the relationship between Approximation Fixpoint Theory and Justification Theory**, Distinguished Paper Award at IJCAI 2021
+* Aerts, B., Vandevelde, S., & Vennekens, J. (2020). **Tackling the DMN challenges with cDMN: A tight integration of DMN and constraint reasoning**. In International Joint Conference on Rules and Reasoning. Best Paper Award at RuleML+RR 2020
+* Denecker, et al. **Ultimate Well-Founded and Stable Semantics for Logic Programs with Aggregates.** ICLP 2001, 20-Year Test of Time Award at ICLP 2021
+* Denecker, M. **Extending classical logic with inductive definitions.** ICCL2020. 20 Year Test of Time Award at ICLP 2020
+* Dasseville et al. **Combining DMN and the Knowledge Base Paradigm for Flexible Decision Enactment**, Winner of RuleML 2016 Challenge
+
 Core technology
 ---------------
 * De Cat, B., Bogaerts, B., Bruynooghe, M., Janssens, G. and Denecker, M., 2018. **Predicate logic as a modeling language: the IDP system.** In Declarative Logic Programming: Theory, Systems, and Applications (pp. 279-323).
