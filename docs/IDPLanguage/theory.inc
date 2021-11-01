@@ -159,6 +159,12 @@ Quantified formulas
         ∀s ∈ Concept: arity(s)=2 ∧ input_domain(s,1)=input_domain(s,2)
             ⇒ (∀x ∈ $(input_domain(s,1)), y ∈ $(input_domain(s,2)) : $(s)(x,y) ⇒ $(s)(y,x)).
 
+    Another alternative is to add the signature of the Concept in the quantification:
+
+    .. code::
+
+        ∃x ∈ Concept[()→B]: $(x)().
+
 
 "is (not) enumerated"
     ``f(a,b) is enumerated`` and ``f(a,b) is not enumerated`` are sentences,
