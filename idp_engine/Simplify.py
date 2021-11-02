@@ -252,6 +252,8 @@ def update_arith(self, family, operands):
     operands = list(operands)
     operands1 = [e.value for e in operands]
     if all(e is not None for e in operands1):
+        self.check(all(hasattr(e, 'py_value') for e in operands1),
+                f"Incorrect numeric type in {self}")
         out = operands1[0].py_value
 
         for e, op in zip(operands1[1:], self.operator):
