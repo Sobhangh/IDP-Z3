@@ -1,3 +1,4 @@
+   
 # Architecture
 
 This document presents the technical architecture of IDP-Z3.
@@ -73,12 +74,12 @@ Arguments:
 
 Returns:
 
-* **symbols**: contains information on each symbol used in the FO(.) specification. This information includes symbol name, type, view, ...
+* **symbols**: contains information on each symbol used in the FO(·) specification. This information includes symbol name, type, view, ...
 * **optionalPropagation**: a bool representing if a propagation toggle should be shown in the interface.
 * **manualPropagation**: a bool representing if propagation should be manual via a button.
 * **optionalRelevance**: a bool representing if a relevance toggle should be shown in the interface.
 * **manualRelevance**: a bool representing if relevance computation should be manual via a button.
-* **valueinfo**: contains information on the values for each symbol used in the FO(.) specification.
+* **valueinfo**: contains information on the values for each symbol used in the FO(·) specification.
 
 ####  /eval
 
