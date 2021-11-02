@@ -550,7 +550,8 @@ class Problem(object):
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
         solver = Solver(ctx=self.ctx)
-        z3_conditions = And([l.translate(self) for l in conditions])
+        z3_conditions = (TRUE.translate(self) if len(conditions)==0 else
+                         And([l.translate(self) for l in conditions]))
         solver.add(And(z3_formula, known, z3_conditions))
         if solver.check() != sat:
             return []
