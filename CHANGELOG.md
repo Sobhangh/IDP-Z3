@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Interactive Consultant
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
+* fix #147: incorrect reasoning about environmental consequences
 
 ### Interactive Consultant
 * fix #139: IC should detect and explain theories without models
