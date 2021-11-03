@@ -39,6 +39,7 @@ from .Expression import (Expression, AQuantification,
 from .Parse import str_to_IDP
 from .Problem import Problem
 from .utils import OrderedSet
+from .Idp_to_Z3 import get_symbols_z
 
 start = time.process_time()
 last_prop = "hello"
@@ -278,17 +279,20 @@ def _propagate(self, tag=S.CONSEQUENCE):
     start, last_prop = time.process_time(), None
     todo = self._directional_todo()
 
-    z3_formula = self.formula()
+    symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
+    assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
+                        if a.symbol_decl.name in symbols and a.value is not None
+                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                            or (self.propagated and not self.cleared))]
 
-    def get_solver():
-        solver = Solver(ctx=self.ctx)
-        solver.add(z3_formula)
-        solver.check()  # required for forall.idp !?
-        for q in todo:
-            solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
-        return solver
+    solver = self.get_solver()
+    self.get_solver().push()
+    for af in assignment_forms:
+        solver.add(af)
 
-    solver = get_solver()
+    for q in todo:
+        solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
+
     res1 = solver.check()
     if res1 == sat:
         model = solver.model()
@@ -323,6 +327,8 @@ def _propagate(self, tag=S.CONSEQUENCE):
         last_prop = 0
     else:
         last_prop -= start
+
+    solver.pop()
 Problem._propagate = _propagate
 
 

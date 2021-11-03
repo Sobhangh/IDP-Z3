@@ -110,22 +110,18 @@ class State(Problem):
         :rtype: State
         """
         if jsonstr == self.active:  # for get_range
-            return self
-        out = self.copy()
-        out.active = jsonstr
-        if out.environment:
-            out.environment = out.environment.copy()
-            load_json(out.environment, jsonstr)
-        load_json(out, jsonstr)
+            return
+        self.active = jsonstr
+        if self.environment:
+            load_json(self.environment, jsonstr)
+        load_json(self, jsonstr)
 
         # perform propagation
-        if out.environment is not None:  # if there is a decision vocabulary
-            out.environment.propagate(tag=S.ENV_CONSQ)
-            out.assignments.update(out.environment.assignments)
-            out._formula = None
-        out.propagate(tag=S.CONSEQUENCE)
-
-        return out
+        if self.environment is not None:  # if there is a decision vocabulary
+            self.environment.propagate(tag=S.ENV_CONSQ)
+            self.assignments.update(self.environment.assignments)
+            self._formula = None
+        self.propagate(tag=S.CONSEQUENCE)
 
     def __str__(self) -> str:
         self.co_constraints = OrderedSet()
