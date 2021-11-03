@@ -99,11 +99,12 @@ propagate(self)
 get_range(self, term:str)
     Returns a list of the possible values of the term (as strings).
 
-explain(self, consequence)
+explain(self, consequence=None)
     Returns the facts and laws to explain a consequence in the Problem.
 
-    The string ``consequence`` must be a key in the ``assignments`` property of the Problem.
-    The facts are a list of Assignment, and the laws are a list of Expression.
+    The string ``consequence`` must be a key in the ``assignments`` property of the Problem, or ``None``.
+    If it is ``None``, and the theory is unsatisfiable, the method returns a minimal set of facts and laws that make it so.
+    The facts are a list of Assignment, and the laws are a list of ``Expression``.
 
 simplify(self)
     Returns a simpler copy of the problem, with a simplified formula obtained
