@@ -279,9 +279,8 @@ def _propagate(self, tag=S.CONSEQUENCE):
     start, last_prop = time.process_time(), None
     todo = self._directional_todo()
 
-    symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
     assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
-                        if a.symbol_decl.name in symbols and a.value is not None
+                        if a.value is not None and a.status != S.STRUCTURE
                         and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
                             or (self.propagated and not self.cleared))]
 

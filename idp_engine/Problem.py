@@ -120,6 +120,13 @@ class Problem(object):
         if not self.slvr:
             self.slvr = Solver(ctx=self.ctx)
             self.slvr.add(self.formula())
+            symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
+            assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
+                                if a.value is not None and a.status == S.STRUCTURE and a.symbol_decl.name in symbols]
+            for af in assignment_forms:
+                print(af)
+                self.slvr.add(af)
+
             self.slvr.check()  # required for forall.idp !?
         return self.slvr
 
