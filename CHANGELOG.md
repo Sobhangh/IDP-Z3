@@ -21,6 +21,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Interactive Consultant
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
+* MR !160: IC should refuse theories without models
+* web MR !40: Enable resizing the IDE editor window
+* web MR !41: Support of touch devices
+* web MR !42: stabilize the progress spinner
 * fix #147: incorrect reasoning about environmental consequences
 
 ### Interactive Consultant
