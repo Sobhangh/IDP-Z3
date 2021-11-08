@@ -295,9 +295,11 @@ class Problem(object):
                         and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
-                self._formula = And(all)
             else:
-                self._formula = BoolVal(True, self.ctx)
+                all = [a.formula().translate(self)
+                       for a in self.assignments.values()
+                       if a.status in [S.DEFAULT, S.GIVEN, S.EXPANDED]]
+            self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
     def _todo_expand(self):
@@ -564,7 +566,8 @@ class Problem(object):
         conditions, goal = conjuncts[:-1], conjuncts[-1]
         # verify satisfiability
         solver = Solver(ctx=self.ctx)
-        z3_conditions = And([l.translate(self) for l in conditions])
+        z3_conditions = (TRUE.translate(self) if len(conditions)==0 else
+                         And([l.translate(self) for l in conditions]))
         solver.add(And(z3_formula, known, z3_conditions))
         if solver.check() != sat:
             return []

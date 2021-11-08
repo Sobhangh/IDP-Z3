@@ -49,8 +49,8 @@ vocabulary decision {
   type Registration_type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
   type Tax_Rate := {1, 2, 4, 6, 7, 10, 12}
 
-  tax_rate : () → Tax_Rate
   registration_type : () → Registration_type
+  tax_rate : () → Tax_Rate
   tax_amount : () → ℝ
 }
 
@@ -207,4 +207,5 @@ display {
       `energy_renovation_planned, `term_energy_renovation, `start_dt_dwelling_for_social_rent,
       `duration_of_agreement).
     heading(Registration, `registration_type, `tax_rate, `tax_amount).
+    unit('%', `tax_rate).
 }

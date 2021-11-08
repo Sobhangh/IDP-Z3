@@ -181,6 +181,7 @@ def pipeline():
 
                         if idp.procedures == {}:
                             state = State.make(idp, "{}", given_json)
+                            get_relevant_questions(state)
                             generator = state.expand(max=1,complete=False)
                             list(generator)[0]  # ignore result
                             out = Output(state).fill(state)

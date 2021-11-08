@@ -3,8 +3,12 @@ test:
     script:
         - apt update
         - apt -y install python3 python3-pip git
-        - pip3 install -r requirements.txt
-        - python3 test.py pipeline
+        - python3 get-poetry.py
+        - source $HOME/.poetry/env
+        - poetry install
+        - poetry run coverage run test.py pipeline
+        - poetry run coverage report
+        - poetry run coverage xml
 
 pages:
   image: ubuntu
@@ -12,8 +16,10 @@ pages:
   script:
     - apt update
     - apt -y install python3 python3-pip git
-    - pip3 install -r requirements.txt
-    - sphinx-build homepage public
+    - python3 get-poetry.py
+    - source $HOME/.poetry/env
+    - poetry install
+    - poetry run sphinx-build homepage public
   artifacts:
     paths:
     - public

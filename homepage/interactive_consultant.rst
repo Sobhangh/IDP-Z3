@@ -18,3 +18,10 @@ A short introductory video on the interactive consultant can be found below:
 .. video:: https://interactive-consultant.IDP-Z3.be/assets/Interactive_Consultant.mp4
    :width: 800
    :height: 480
+
+And an example of application:
+
+.. rst-class:: center
+.. youtube:: hO8k_64b_Oc
+   :width: 800
+   :height: 480

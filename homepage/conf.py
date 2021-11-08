@@ -17,7 +17,8 @@ import sphinx_bootstrap_theme
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 # Disabled: , 'sphinx.ext.intersphinx'
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode', 'sphinxcontrib.video']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.ifconfig',
+              'sphinx.ext.viewcode', 'sphinxcontrib.video', 'sphinxcontrib.youtube']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

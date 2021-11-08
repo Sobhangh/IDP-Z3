@@ -9,8 +9,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 * (breaking) MR !152: IEP 22 change syntax of sum aggregate to sum(lambda <quantee>: expr)
 * (breaking) MR !154: built-in type is "Concept" (not "Symbol")
+* fix #5: do not allow arithmetic operations on constructors
 * fix #132, #136: Improve error message for mis-applied symbol
 * fix #137: support of functions from Symbol to Symbol
+* fix #146: "Context mismatch" when performing abstract model expansion
 * MR !145: Improve performance of explain
 * MR !147: allow the user to edit system choices after model expansion / optimisation
 * MR !153: improve performance in case of large interpretations for symbols that do not occur in the theory
@@ -19,6 +21,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Interactive Consultant
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
+* MR !160: IC should refuse theories without models
+* web MR !40: Enable resizing the IDE editor window
+* web MR !41: Support of touch devices
+* web MR !42: stabilize the progress spinner
+* fix #147: incorrect reasoning about environmental consequences
 
 ### Interactive Consultant
 * fix #139: IC should detect and explain theories without models
