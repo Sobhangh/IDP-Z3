@@ -417,28 +417,18 @@ class Problem(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
-        out = copy(self)
-        out.assignments = self.assignments.copy()
-        #  remove current assignments to same term
-        if out.assignments[term].value:
-            for a in out.assignments.values():
-                if a.sentence.is_assignment and a.sentence.code.startswith(term):
-                    out.assert_(a.sentence, None, S.UNKNOWN)
-        out.formula()  # to keep universals and given, except self
+        # consider every value in range
+        todos = [Assignment(termE, e, S.UNKNOWN).formula() for e in range]
 
-        # now consider every value in range
-        out.assignments = Assignments()
-        for e in range:
-            sentence = Assignment(termE, e, S.UNKNOWN).formula()
-            # use assignments.assert_ to create one if necessary
-            out.assignments.assert__(sentence, None, S.UNKNOWN)
-        out.assigned = True  # to force propagation of Unknowns
-        _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
-        assert all(e.sentence.is_assignment()
-                   for e in out.assignments.values())
-        return [str(e.sentence.sub_exprs[1])
-                for e in out.assignments.values()
-                if e.value is None or e.value.same_as(TRUE)]
+        forbidden = set()
+        for ass in self._propagate(S.CONSEQUENCE, todos):
+            if isinstance(ass, str):
+                continue
+            print(type(ass.value))
+            if ass.value.same_as(FALSE):
+                forbidden.add(str(ass.sentence.sub_exprs[1]))
+
+        return [str(e.sub_exprs[1]) for e in todos if str(e.sub_exprs[1]) not in forbidden]
 
     def explain(self, consequence=None):
         """

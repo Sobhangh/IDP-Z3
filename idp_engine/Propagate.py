@@ -272,25 +272,29 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
 Problem._batch_propagate = _batch_propagate
 
 
-def _propagate(self, tag=S.CONSEQUENCE):
+def _propagate(self, tag, todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
     """
     global start, last_prop
     start, last_prop = time.process_time(), None
-    todo = self._directional_todo()
-
-    assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
-                        if a.value is not None and a.status != S.STRUCTURE
-                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                            or (self.propagated and not self.cleared))]
 
     solver = self.get_solver()
     self.get_solver().push()
+
+    assignment_forms = [a.formula().translate(self) for a in
+                        self.assignments.values()
+                        if a.value is not None and a.status != S.STRUCTURE
+                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                             or (self.propagated and not self.cleared))]
     for af in assignment_forms:
         solver.add(af)
 
+    if not todo:
+        todo = self._directional_todo()
+
     for q in todo:
-        solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
+        solver.add(q.reified(self) == q.translate(self))
+        # reification in case todo contains complex formula
 
     res1 = solver.check()
     if res1 == sat:
