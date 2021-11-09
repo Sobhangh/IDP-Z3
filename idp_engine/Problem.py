@@ -124,7 +124,6 @@ class Problem(object):
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
                                 if a.value is not None and a.status == S.STRUCTURE and a.symbol_decl.name in symbols]
             for af in assignment_forms:
-                print(af)
                 self.slvr.add(af)
 
             self.slvr.check()  # required for forall.idp !?
