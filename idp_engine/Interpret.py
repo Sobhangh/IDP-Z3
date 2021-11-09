@@ -366,6 +366,7 @@ def interpret(self, problem):
                             elif self.q == '∃':
                                 new_f = AConjunction.make('∧', [applied, new_f])
                             else:  # aggregate
+                                # if a then b else 0 -> if (applied & a) then b else 0
                                 self.check(isinstance(new_f, IfExpr),
                                            "internal error")
                                 arg1 = AConjunction.make('∧', [applied,
