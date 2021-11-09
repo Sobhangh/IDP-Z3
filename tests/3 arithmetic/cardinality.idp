@@ -1,0 +1,10 @@
+vocabulary V {
+    type ConfigObj := {o1, o2 }
+    Vehicle : ConfigObj -> Bool
+}
+theory T:V {
+    #{V ∈ Vehicle: true} = 1.
+}
+procedure main() {
+    pretty_print(model_expand(T, max=1))
+}
