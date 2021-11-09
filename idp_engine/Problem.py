@@ -405,9 +405,9 @@ class Problem(object):
         out.assignments = self.assignments.copy()
         #  remove current assignments to same term
         if out.assignments[term].value:
-            for a in out.assignments.values():
+            for k,a in out.assignments.items():
                 if a.sentence.is_assignment and a.sentence.code.startswith(term):
-                    out.assert_(a.sentence, None, S.UNKNOWN)
+                    out.assert_(k, None, S.UNKNOWN)
         out.formula()  # to keep universals and given, except self
 
         # now consider every value in range
