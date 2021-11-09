@@ -424,7 +424,6 @@ class Problem(object):
         for ass in self._propagate(S.CONSEQUENCE, todos):
             if isinstance(ass, str):
                 continue
-            print(type(ass.value))
             if ass.value.same_as(FALSE):
                 forbidden.add(str(ass.sentence.sub_exprs[1]))
 
