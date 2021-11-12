@@ -356,20 +356,7 @@ class Problem(object):
             solver.minimize(s)
         else:
             solver.maximize(s)
-        solver.check()
 
-        # deal with strict inequalities, e.g. min(0<x)
-        solver.push()
-        for i in range(0, 10):
-            val = solver.model().eval(s)
-            if minimize:
-                solver.add(s < val)
-            else:
-                solver.add(val < s)
-            if solver.check() != sat:
-                solver.pop()  # get the last good one
-                solver.check()
-                break
         self.assignments = self._from_model(solver, self._todo_expand(), complete)
         return self
 
