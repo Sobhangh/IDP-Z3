@@ -280,8 +280,7 @@ class Problem(object):
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
             else:
-                all = [a.formula().translate(self)
-                       for a in self.assignments.values()
+                all = [a.formula().translate(self) for a in self.assignments.values()
                        if a.status in [S.DEFAULT, S.GIVEN, S.EXPANDED]]
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
@@ -438,7 +437,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE]
+        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]
 
         s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
@@ -491,7 +490,7 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status in [S.GIVEN, S.DEFAULT]:
+                            if a1.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())
