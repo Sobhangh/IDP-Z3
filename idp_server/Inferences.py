@@ -254,9 +254,9 @@ def abstract(state, given_json):
                             if l.status in [S.GIVEN, S.DEFAULT])
     # TODO: separate field for S.DEFAULT?
     out["fixed"    ] = list(l for l in state.assignments.values()
-                            if l.status in [S.ENV_CONSQ, S.CONSEQUENCE])
+                            if l.status in [S.CONSEQUENCE])
     out["irrelevant"]= list(l for l in state.assignments.values()
-                            if l.status not in [S.ENV_CONSQ, S.CONSEQUENCE]
+                            if l.status not in [S.CONSEQUENCE]
                             and not l.relevant)
 
     out["models"] = ("" if len(models) < max_rows and time.time()<max_time else

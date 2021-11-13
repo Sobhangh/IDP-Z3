@@ -192,9 +192,9 @@ def _directional_todo(self):
         if self.assigned:
             statuses.extend([S.UNKNOWN])
         if self.cleared:
-            statuses.extend([S.CONSEQUENCE, S.ENV_CONSQ])
+            statuses.extend([S.CONSEQUENCE])
     else:
-        statuses = [S.UNKNOWN, S.CONSEQUENCE, S.ENV_CONSQ]
+        statuses = [S.UNKNOWN, S.CONSEQUENCE]
 
     if statuses:
         cleareds = self.cleared if self.cleared else OrderedSet()

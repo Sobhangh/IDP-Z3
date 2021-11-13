@@ -35,14 +35,14 @@ from .utils import NEWL, BOOL
 class Status(Enum):
     """Describes how the value of a question was obtained"""
     UNKNOWN = auto()
-    GIVEN = auto()
-    ENV_UNIV = auto()
-    UNIVERSAL = auto()
-    ENV_CONSQ = auto()
-    CONSEQUENCE = auto()
-    EXPANDED = auto()
+    # fixed values:
     STRUCTURE = auto()
+    UNIVERSAL = auto()
+    CONSEQUENCE = auto()
+    # choices:
+    EXPANDED = auto()
     DEFAULT = auto()
+    GIVEN = auto()
 
 
 class Assignment(object):
@@ -200,12 +200,10 @@ class Assignments(dict):
         if sentence.code in self:
             out = self[sentence.code]
             assert not (out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT]
-                        and status in [Status.CONSEQUENCE, Status.ENV_CONSQ]), \
+                        and status in [Status.CONSEQUENCE]), \
                 "System should not override given choices, please report this bug."
             out.value = value
-            if not (out.status == Status.ENV_CONSQ and status == Status.CONSEQUENCE):
-                # do not change an env consequence to a decision consequence
-                out.status = status
+            out.status = status
         else:
             out = Assignment(sentence, value, status)
         if out.symbol_decl:  # ignore comparisons of constructors

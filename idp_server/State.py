@@ -137,7 +137,7 @@ class State(Problem):
 
         # perform propagation
         if out.environment is not None:  # if there is a decision vocabulary
-            out.environment.propagate(tag=S.ENV_CONSQ)
+            out.environment.propagate(tag=S.CONSEQUENCE)
             out.assignments.update(out.environment.assignments)
             out._formula = None
         out.propagate(tag=S.CONSEQUENCE)
@@ -148,8 +148,8 @@ class State(Problem):
         self.co_constraints = OrderedSet()
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
-        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.UNIVERSAL, S.ENV_UNIV])}{NEWL}"
-                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.CONSEQUENCE, S.ENV_CONSQ])}{NEWL}"
+        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.UNIVERSAL])}{NEWL}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.CONSEQUENCE])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"

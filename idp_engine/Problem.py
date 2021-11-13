@@ -276,7 +276,7 @@ class Problem(object):
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
+                        and (a.status not in [S.CONSEQUENCE]
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
             else:
@@ -515,7 +515,6 @@ class Problem(object):
         for ass in out.assignments.values():
             if ass.value:
                 ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
-                        S.ENV_UNIV if ass.status == S.ENV_CONSQ else
                         ass.status)
 
         new_constraints: List[Expression] = []
