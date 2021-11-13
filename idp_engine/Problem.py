@@ -337,13 +337,21 @@ class Problem(object):
         solver = Optimize(ctx=self.ctx)
         solver.add(self.formula())
         assert term in self.assignments, "Internal error"
-        s = self.assignments[term].sentence.translate(self)
+        sentence = self.assignments[term].sentence
+        s = sentence.translate(self)
         if minimize:
             solver.minimize(s)
         else:
             solver.maximize(s)
+        solver.check()
 
-        self.assignments = self._from_model(solver, self._todo_expand(), complete)
+        val1 = solver.model().eval(s, model_completion=complete)
+        val = str_to_IDP(sentence, str(val1))
+        if val is not None:
+            self.assignments.assert__(sentence, val, S.EXPANDED)
+
+        self.propagate()
+
         return self
 
     def symbolic_propagate(self):
