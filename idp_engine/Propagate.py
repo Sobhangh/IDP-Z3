@@ -188,22 +188,32 @@ def _directional_todo(self):
     * a clearing of assignment forces the re-propagation of previous consequences
     * any cleared assignments should be repropagated as well
     """
-    # TODO: old_choices
-    statuses = []
-    if self.propagated:
-        if self.assigned:
-            statuses.extend([S.UNKNOWN])
-        if self.cleared:
-            statuses.extend([S.CONSEQUENCE])
-    else:
-        statuses = [S.UNKNOWN, S.CONSEQUENCE]
 
-    cleareds = self.cleared if self.cleared else OrderedSet()
+    added_choices = []
+    removed_choices = OrderedSet(self.old_choices)
+    self.old_choices = [a.sentence for a in self.assignments.values()
+                        if (not a.sentence.is_reified() or self.extended)
+                        and a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+                        ]
+
+    for s in self.old_choices:
+        if s in removed_choices:
+            removed_choices.pop(s)
+        else:
+            added_choices.append(s)
+
+    statuses = []
+    if added_choices:
+        statuses.extend([S.UNKNOWN])
+    if removed_choices:
+        statuses.extend([S.CONSEQUENCE])
+
     todo = OrderedSet(
         a.sentence for a in self.assignments.values()
-        if ((not a.sentence.is_reified() or self.extended)
-            and (a.status in statuses or (a.sentence in cleareds and a.status == S.UNKNOWN))
-            ))
+        if (not a.sentence.is_reified() or self.extended)
+            and a.status in statuses
+    )
+    todo.extend(removed_choices)
 
     return todo
 Problem._directional_todo = _directional_todo

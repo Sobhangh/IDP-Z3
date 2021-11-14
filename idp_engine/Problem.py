@@ -387,8 +387,10 @@ class Problem(object):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
             out = list(self._batch_propagate())
+            # NOTE: running this will confuse _directional_todo
         if method == Propagation.Z3:
             out = list(self._z3_propagate())
+            # NOTE: running this will confuse _directional_todo
         else:
             out = list(self._propagate())
         self.propagate_success = (out[0] != "Not satisfiable.")
