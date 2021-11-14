@@ -97,13 +97,9 @@ def load_json(state: Problem, jsonstr: str):
         assert json_data != {}, "Reset not expected here"
 
         # clear old choices
-        old_choices = set(atom.sentence for atom in state.assignments.values()
-                         if atom.status in [S.GIVEN, S.DEFAULT, S.EXPANDED])
-        for sentence in old_choices:
+        for sentence in [atom.sentence for atom in state.assignments.values()
+                         if atom.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]]:
             state.assert_(sentence.code, None, S.UNKNOWN)
-
-        # keep track if all old choices are still present
-        all_old_present = True
 
         # set new choices
         for symbol in json_data:
@@ -118,11 +114,6 @@ def load_json(state: Problem, jsonstr: str):
                         key2 = f"{sentence.code} = {str(value)}"
                         if key2 in state.assignments:
                             state.assert_(key2, TRUE, S.GIVEN)
-
-                    if sentence in old_choices:
-                        old_choices.remove(sentence)
-                    else:
-                        all_old_present = False
 
 
 

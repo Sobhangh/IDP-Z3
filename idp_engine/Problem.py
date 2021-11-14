@@ -87,6 +87,8 @@ class Problem(object):
 
         cleared (OrderedSet): set of questions unassigned since last propagate
 
+        old_choices (OrderedSet): set of choices with which previous propagate was executed
+
         propagate_success (Bool): whether the last propagate call failed or not
 
         z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
@@ -112,6 +114,7 @@ class Problem(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
+        self.old_choices = set()
         self.propagate_success = True
 
     @classmethod
@@ -372,22 +375,22 @@ class Problem(object):
         self.assignments = self._from_model(solver, self._todo_expand(), complete)
         return self
 
-    def symbolic_propagate(self, tag=S.UNIVERSAL):
+    def symbolic_propagate(self):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
-            new_constraint = c.substitute(TRUE, TRUE, self.assignments, tag)
-            new_constraint.symbolic_propagate(self.assignments, tag)
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, S.UNIVERSAL)
+            new_constraint.symbolic_propagate(self.assignments, S.UNIVERSAL)
         return self
 
-    def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
+    def propagate(self, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
-            out = list(self._batch_propagate(tag))
+            out = list(self._batch_propagate())
         if method == Propagation.Z3:
-            out = list(self._z3_propagate(tag))
+            out = list(self._z3_propagate())
         else:
-            out = list(self._propagate(tag))
+            out = list(self._propagate())
         self.propagate_success = (out[0] != "Not satisfiable.")
         return self
 
@@ -416,7 +419,7 @@ class Problem(object):
             # use assignments.assert_ to create one if necessary
             out.assignments.assert__(sentence, None, S.UNKNOWN)
         out.assigned = True  # to force propagation of Unknowns
-        _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
+        _ = list(out._propagate())  # run the generator
         assert all(e.sentence.is_assignment()
                    for e in out.assignments.values())
         return [str(e.sentence.sub_exprs[1])
