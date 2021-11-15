@@ -343,6 +343,7 @@ class Problem(object):
             solver.minimize(s)
         else:
             solver.maximize(s)
+
         solver.check()
 
         val1 = solver.model().eval(s, model_completion=complete)
