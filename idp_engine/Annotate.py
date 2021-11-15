@@ -22,7 +22,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 
-from .Parse import (Vocabulary, Extern, TypeDeclaration,
+from .Parse import (Vocabulary, Extern, TypeDeclaration, Type,
                     SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
@@ -33,8 +33,8 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number)
 
-from .utils import (BOOL, INT, REAL, DATE, CONCEPT, OrderedSet, IDPZ3Error,
-                    DEF_SEMANTICS, Semantics)
+from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
+                    OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -42,29 +42,39 @@ from .utils import (BOOL, INT, REAL, DATE, CONCEPT, OrderedSet, IDPZ3Error,
 def annotate(self, idp):
     self.idp = idp
 
+    # process extern vocabulary and determine the constructors of CONCEPT
+    temp = {}  # contains the new self.declarations
+    for s in self.declarations:
+        if isinstance(s, Extern):
+            other = self.idp.vocabularies[s.name]
+            for s1 in other.declarations:
+                temp[s1.name] = s1
+        else:
+            s.block = self
+            temp[s.name] = s
+    temp[CONCEPT].constructors=([Constructor(name=f"`{s}")
+                                 for s in [BOOL, INT, REAL, DATE, CONCEPT]]
+                               +[Constructor(name=f"`{s.name}")
+                                 for s in temp.values()
+                                 if s.name not in RESERVED_SYMBOLS
+                                 and (type(s) == SymbolDeclaration
+                                      or type(s) in Type.__args__)])
+    self.declarations = list(temp.values())
+
     # annotate declarations
     for s in self.declarations:
-        s.block = self
         s.annotate(self)  # updates self.symbol_decls
 
-    for constructor in self.symbol_decls[CONCEPT].constructors:
+    concepts = self.symbol_decls[CONCEPT]
+    for constructor in concepts.constructors:
         constructor.symbol = (Symbol(name=constructor.name[1:])
                                 .annotate(self, {}))
 
     # populate .map of CONCEPT
-    for c in self.symbol_decls[CONCEPT].constructors:
+    for c in concepts.constructors:
         assert not c.sorts
-        self.symbol_decls[CONCEPT].map[str(c)] = UnappliedSymbol.construct(c)
+        concepts.map[str(c)] = UnappliedSymbol.construct(c)
 Vocabulary.annotate = annotate
-
-
-# Class Extern  #######################################################
-
-def annotate(self, voc):
-    other = voc.idp.vocabularies[self.name]
-    #TODO merge while respecting order
-    voc.symbol_decls = {**other.symbol_decls, **voc.symbol_decls}
-Extern.annotate = annotate
 
 
 # Class TypeDeclaration  #######################################################

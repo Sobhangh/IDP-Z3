@@ -1,5 +1,6 @@
 vocabulary environment {
     Depth : ()→Real
+    measure: Concept -> Bool
 }
 vocabulary decision {
     extern vocabulary environment
@@ -14,9 +15,14 @@ theory decision:decision {
      cSID() = d ⇔ 4.294 ≤ Depth() ≤ 5.206.
      cSID() = e ⇔ 5.474 ≤ Depth() ≤ 6.686.
      cSID() = f ⇔ 8.312 ≤ Depth() ≤ 10.748.
+     ? s in measure: output_domain(s) = `csid.
 }
 
-display {
-    view() = expanded.
+structure S:decision {
+    measure := {`cSID}
+}
+procedure main() {
+    print(Problem(decision, S).formula())
+    pretty_print(model_check(decision, S))
 }
 
