@@ -81,12 +81,6 @@ class Problem(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        propagated (Bool): true if a propagation has been done
-
-        assigned (OrderedSet): set of questions asserted since last propagate
-
-        cleared (OrderedSet): set of questions unassigned since last propagate
-
         old_choices (OrderedSet): set of choices with which previous propagate was executed
 
         propagate_success (Bool): whether the last propagate call failed or not
@@ -221,32 +215,22 @@ class Problem(object):
             ass.sentence.original = ass.sentence.copy()
 
         self._constraintz = None
-        self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
-    def assert_(self, code: str, value: Any, status: S = S.GIVEN):
+    def assert_(self, code: str, value: Any, status: S):
         """asserts that an expression has a value (or not)
 
         Args:
             code (str): the code of the expression, e.g., "p()"
             value (Any): a Python value, e.g., True
-            status (Status, Optional): how the value was obtained.  Default: S.GIVEN
+            status (Status): how the value was obtained.
         """
         code = str(code)
         atom = self.assignments[code].sentence
-        old_value = self.assignments[code].value
         if value is None:
-            if self.propagated and old_value is not None:
-                self.cleared.append(atom)
-                self.assigned.pop(atom, None)
-            self.assignments.assert__(atom, value, S.UNKNOWN)
+            self.assignments.assert__(atom, None, S.UNKNOWN)
         else:
-            val = str_to_IDP(atom, str(value))
-            if self.propagated and not(old_value and old_value.same_as(val)):
-                self.assigned.append(atom)
-                if old_value:
-                    self.cleared.append(atom)
-            self.assignments.assert__(atom, val, status)
+            self.assignments.assert__(atom, str_to_IDP(atom, str(value)), status)
         self._formula = None
 
     def constraintz(self):
@@ -276,11 +260,11 @@ class Problem(object):
             if self.constraintz():
                 # only add interpretation constraints for those symbols
                 # occurring in the (potentially simplified) z3 constraints
+                # which were not propagated in a previous step
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status not in [S.CONSEQUENCE]
-                            or (self.propagated and not self.cleared))]
+                        and (a.status not in [S.CONSEQUENCE])]
                         + self.constraintz())
             else:
                 all = [a.formula().translate(self) for a in self.assignments.values()
@@ -407,26 +391,20 @@ class Problem(object):
 
         out = copy(self)
         out.assignments = self.assignments.copy()
-        #  remove current assignments to same term
-        if out.assignments[term].value:
-            for a in out.assignments.values():
-                if a.sentence.is_assignment and a.sentence.code.startswith(term):
-                    out.assert_(a.sentence, None, S.UNKNOWN)
         out.formula()  # to keep universals and given, except self
 
-        # now consider every value in range
-        out.assignments = Assignments()
-        for e in range:
-            sentence = Assignment(termE, e, S.UNKNOWN).formula()
-            # use assignments.assert_ to create one if necessary
-            out.assignments.assert__(sentence, None, S.UNKNOWN)
-        out.assigned = True  # to force propagation of Unknowns
-        _ = list(out._propagate())  # run the generator
-        assert all(e.sentence.is_assignment()
-                   for e in out.assignments.values())
-        return [str(e.sentence.sub_exprs[1])
-                for e in out.assignments.values()
-                if e.value is None or e.value.same_as(TRUE)]
+        # consider every value in range
+        todos = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
+
+        forbidden = set()
+        for ass in out._propagate(todos):
+            if isinstance(ass, str):
+                continue
+            if ass.value.same_as(FALSE):
+                forbidden.add(str(ass.sentence.sub_exprs[1]))
+
+        return [str(e.sub_exprs[1]) for e in todos if str(e.sub_exprs[1]) not in forbidden]
+
 
     def explain(self, consequence=None):
         """

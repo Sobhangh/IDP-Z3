@@ -276,16 +276,17 @@ def _batch_propagate(self):
             yield str(z3_formula)
     else:
         yield "No more consequences."
-    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Problem._batch_propagate = _batch_propagate
 
 
-def _propagate(self):
+def _propagate(self, todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
     """
     global start, last_prop
     start, last_prop = time.process_time(), None
-    todo = self._directional_todo()
+
+    if todo is None:
+        todo = self._directional_todo()
 
     z3_formula = self.formula()
 
@@ -329,7 +330,6 @@ def _propagate(self):
         yield "Unknown satisfiability."
         yield str(z3_formula)
 
-    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
     if last_prop is None:
         last_prop = 0
     else:
@@ -385,7 +385,6 @@ def _z3_propagate(self):
             yield str(z3_formula)
     else:
         yield "No more consequences."
-    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Problem._z3_propagate = _z3_propagate
 
 

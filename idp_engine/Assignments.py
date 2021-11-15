@@ -199,11 +199,12 @@ class Assignments(dict):
 
         if sentence.code in self:
             out = self[sentence.code]
-            assert not (out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT]
-                        and status in [Status.CONSEQUENCE]), \
-                "System should not override given choices, please report this bug."
-            out.value = value
-            out.status = status
+            if out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT] \
+                    and status in [Status.CONSEQUENCE, Status.UNIVERSAL]:
+                assert out.value == value, "System should not override given choices with different consequences, please report this bug."
+            else:
+                out.value = value
+                out.status = status
         else:
             out = Assignment(sentence, value, status)
         if out.symbol_decl:  # ignore comparisons of constructors
