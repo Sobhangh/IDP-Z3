@@ -326,7 +326,7 @@ AAggregate.translate1 = translate1
 def translate1(self, problem: "Problem", vars={}):
     self.check(self.decl, f"Unknown symbol: {self.symbol}.\n"
                f"Possible fix: introduce a variable "
-               f"(e.g., !x in Symbol: x=... => $(x)(..))")
+               f"(e.g., !x in Concept: x=... => $(x)(..))")
     if self.decl.name == RELEVANT:
         return TRUE.translate(problem, vars)
     if self.decl.name == 'abs':
