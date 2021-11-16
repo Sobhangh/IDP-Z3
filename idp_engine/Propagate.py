@@ -189,31 +189,36 @@ def _directional_todo(self):
     * any cleared assignments should be repropagated as well
     """
 
+    initialprop = self.old_choices is None
+    if initialprop:
+        removed_choices = set()
+    else:
+        removed_choices = set(self.old_choices)
     added_choices = []
-    removed_choices = OrderedSet(self.old_choices)
-    self.old_choices = [a.sentence for a in self.assignments.values()
+    self.old_choices = [(a.sentence, a.value) for a in self.assignments.values()
                         if (not a.sentence.is_reified() or self.extended)
                         and a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
                         ]
 
-    for s in self.old_choices:
-        if s in removed_choices:
-            removed_choices.pop(s)
+    for a in self.old_choices:
+        if a in removed_choices:
+            removed_choices.pop(a)
         else:
-            added_choices.append(s)
+            added_choices.append(a)
 
     statuses = []
-    if added_choices:
+    if initialprop or added_choices:
         statuses.extend([S.UNKNOWN])
     if removed_choices:
         statuses.extend([S.CONSEQUENCE])
 
-    todo = OrderedSet(
+    todo = set(
         a.sentence for a in self.assignments.values()
         if (not a.sentence.is_reified() or self.extended)
             and a.status in statuses
     )
-    todo.extend(removed_choices)
+    for a in removed_choices:
+        todo.add(a[0])
 
     return todo
 Problem._directional_todo = _directional_todo

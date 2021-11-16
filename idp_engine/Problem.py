@@ -81,7 +81,8 @@ class Problem(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        old_choices (OrderedSet): set of choices with which previous propagate was executed
+        old_choices ([Expression,Expression], optional): set of choices
+            (sentence-value pairs) with which previous propagate was executed
 
         propagate_success (Bool): whether the last propagate call failed or not
 
@@ -108,7 +109,7 @@ class Problem(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
-        self.old_choices = set()
+        self.old_choices = None
         self.propagate_success = True
 
     @classmethod
