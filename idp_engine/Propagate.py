@@ -202,7 +202,7 @@ def _directional_todo(self):
 
     for a in self.old_choices:
         if a in removed_choices:
-            removed_choices.pop(a)
+            removed_choices.remove(a)
         else:
             added_choices.append(a)
 
