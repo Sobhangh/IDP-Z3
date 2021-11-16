@@ -48,9 +48,13 @@ def annotate(self, idp):
         if isinstance(s, Extern):
             other = self.idp.vocabularies[s.name]
             for s1 in other.declarations:
+                s.check(s1.name not in temp or s1.name in RESERVED_SYMBOLS,
+                        f"Duplicate declaration of {s1.name}")
                 temp[s1.name] = s1
         else:
             s.block = self
+            s.check(s.name not in temp or s.name in RESERVED_SYMBOLS,
+                    f"Duplicate declaration of {s.name}")
             temp[s.name] = s
     temp[CONCEPT].constructors=([Constructor(name=f"`{s}")
                                  for s in [BOOL, INT, REAL, DATE, CONCEPT]]
