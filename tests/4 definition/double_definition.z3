@@ -5,4 +5,3 @@ p:={->true}
 q:={->true}
 r:={->true}
 
-No more models.

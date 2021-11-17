@@ -33,4 +33,4 @@ And(opposite(red) == green,
        is(blue, opposite(rgb(2, 2))),
        is(green, opposite(rgb(2, 2))),
        is(rgb, opposite(rgb(2, 2)))))
-2
+1

@@ -29,7 +29,6 @@ Model 6
 Color:={->red}
 opposite:={red->green; blue->red; green->red}
 
-No more models.
 
 Model 1
 ==========
@@ -61,4 +60,3 @@ Model 6
 Color:={->C}
 opposite:={A->C; B->C; C->A}
 
-No more models.

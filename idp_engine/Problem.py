@@ -311,7 +311,7 @@ class Problem(object):
                         ass.assert__(q, val, S.EXPANDED)
         return ass
 
-    def expand(self, max=10, complete=False):
+    def expand(self, max=10, timeout=30, complete=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.formula()
         todo = self._todo_expand()
@@ -319,32 +319,31 @@ class Problem(object):
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
 
-        count = 0
-        while count < max or max <= 0:
+        count, ass = 0, {}
+        start = time.process_time()
+        while (count < max or max <= 0) and time.process_time()-start < timeout:
+            # exclude ass
+            different = []
+            for a in ass.values():
+                if a.status == S.EXPANDED:
+                    q = a.sentence
+                    different.append(q.translate(self) != a.value.translate(self))
+            if different:
+                solver.add(Or(different))
 
             if solver.check() == sat:
                 count += 1
                 _ = solver.model()
                 ass = self._from_model(solver, todo, complete)
                 yield ass
-
-                # exclude this model
-                different = []
-                for a in ass.values():
-                    if a.status == S.EXPANDED:
-                        q = a.sentence
-                        different.append(q.translate(self) != a.value.translate(self))
-                if not different:
-                    break
-                solver.add(Or(different))
             else:
+                ass = {}
+            if not ass:
                 break
 
-        if solver.check() == sat and different:
+        if timeout <= time.process_time()-start:
             yield f"{NEWL}More models are available."
-        elif 0 < count:
-            yield f"{NEWL}No more models."
-        else:
+        elif count == 0:
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):

@@ -29,5 +29,3 @@ Wide:={1->false; 2->false; 3->false; 4->false}
 Base:={->5}
 Height:={->6}
 Surface:={->7}
-
-More models are available.

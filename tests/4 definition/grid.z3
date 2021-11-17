@@ -185,4 +185,3 @@ p:={->pos(2, 2)}
 clip:={4->2; 3->2}
 makePos:={(3,3)->pos(2, 2)}
 
-No more models.

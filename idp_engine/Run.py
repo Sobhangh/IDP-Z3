@@ -43,19 +43,21 @@ def model_check(theories, structures=None):
     yield str(solver.check())
 
 
-def model_expand(theories, structures=None, max=10, complete=False,
+def model_expand(theories, structures=None, max=10, timeout=30, complete=False,
                  extended=False, sort=False):
     """ output: a list of Assignments, ending with a string """
     problem = Problem.make(theories, structures, extended=extended)
-    if sort:
-        ms = [str(m) for m in problem.expand(max=max, complete=complete)]
-        ms = sorted(ms[:-1]) + [ms[-1]]
-        out = ""
-        for i, m in enumerate(ms[:-1]):
-            out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
-        yield out + f"{ms[-1]}"
+    ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
+    if isinstance(ms[-1], str):
+        ms, last = ms[:-1], ms[-1]
     else:
-        yield from problem.expand(max=max, complete=complete)
+        last = ""
+    if sort:
+        ms = sorted([str(m) for m in ms])
+    out = ""
+    for i, m in enumerate(ms):
+        out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
+    yield out + last
 
 
 def model_propagate(theories, structures=None, sort=False):

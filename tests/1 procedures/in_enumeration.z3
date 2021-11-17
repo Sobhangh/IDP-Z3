@@ -27,4 +27,3 @@ Model 5
 Color:={->red}
 p:={->true}
 
-No more models.

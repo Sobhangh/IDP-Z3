@@ -23,4 +23,3 @@ p:={->true}
 q:={->false}
 f:={red->true; blue->true; green->true}
 
-No more models.

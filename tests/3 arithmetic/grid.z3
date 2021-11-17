@@ -19,4 +19,3 @@ p:={->pos(1, 1)}
 q:={->pos(1, 1)}
 position:={0->pos(0, 0); 1->pos(0, 0); 2->pos(0, 0)}
 
-No more models.
