@@ -345,8 +345,10 @@ class Problem(object):
             if not ass:
                 break
 
-        if not (timeout <= 0 or time.process_time()-start < timeout):
-            yield f"{NEWL}More models are available."
+        # if interrupted by the timeout
+        if ((max <= 0 or count <= max)
+            and not (timeout <= 0 or time.process_time()-start < timeout)):
+            yield f"{NEWL}More models may be available."
         elif count == 0:
             yield "No models."
 
