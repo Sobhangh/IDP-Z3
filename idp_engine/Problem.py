@@ -293,26 +293,23 @@ class Problem(object):
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
-        """ returns Assignments from model in solver """
+        """ returns Assignments from model in solver
+
+        the solver must be in sat state
+        """
         ass = self.assignments.copy()
+        model = solver.model()
         for q in todo:
-            if (q.is_reified() and self.extended) or complete:
-                # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
-                solver.add(q.reified(self) == q.translate(self))
-        res1 = solver.check()
-        if res1 == sat:
-            model = solver.model()
-            for q in todo:
-                if not q.is_reified() or self.extended:
-                    if q.is_reified() or complete:
-                        val1 = model.eval(q.reified(self),
-                                                    model_completion=complete)
-                    else:
-                        val1 = model.eval(q.translate(self),
+            if not q.is_reified() or self.extended:
+                if q.is_reified() or complete:
+                    val1 = model.eval(q.reified(self),
                                                 model_completion=complete)
-                    val = str_to_IDP(q, str(val1))
-                    if val is not None:
-                        ass.assert__(q, val, S.EXPANDED)
+                else:
+                    val1 = model.eval(q.translate(self),
+                                            model_completion=complete)
+                val = str_to_IDP(q, str(val1))
+                if val is not None:
+                    ass.assert__(q, val, S.EXPANDED)
         return ass
 
     def expand(self, max=10, timeout=30, complete=False):
@@ -322,6 +319,9 @@ class Problem(object):
 
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
+        for q in todo:
+            if (q.is_reified() and self.extended) or complete:
+                solver.add(q.reified(self) == q.translate(self))
 
         count, ass = 0, {}
         start = time.process_time()
@@ -338,7 +338,6 @@ class Problem(object):
 
             if solver.check() == sat:
                 count += 1
-                _ = solver.model()
                 ass = self._from_model(solver, todo, complete)
                 yield ass
             else:
@@ -352,9 +351,15 @@ class Problem(object):
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):
+        assert term in self.assignments, "Internal error"
+        todo = self._todo_expand()
+
         solver = Optimize(ctx=self.ctx)
         solver.add(self.formula())
-        assert term in self.assignments, "Internal error"
+        for q in todo:
+            if (q.is_reified() and self.extended) or complete:
+                solver.add(q.reified(self) == q.translate(self))
+
         s = self.assignments[term].sentence.translate(self)
         if minimize:
             solver.minimize(s)
@@ -374,7 +379,7 @@ class Problem(object):
                 solver.pop()  # get the last good one
                 solver.check()
                 break
-        self.assignments = self._from_model(solver, self._todo_expand(), complete)
+        self.assignments = self._from_model(solver, todo, complete)
         return self
 
     def symbolic_propagate(self, tag=S.UNIVERSAL):
