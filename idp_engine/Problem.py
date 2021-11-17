@@ -81,11 +81,8 @@ class Problem(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        propagated (Bool): true if a propagation has been done
-
-        assigned (OrderedSet): set of questions asserted since last propagate
-
-        cleared (OrderedSet): set of questions unassigned since last propagate
+        old_choices ([Expression,Expression], optional): set of choices
+            (sentence-value pairs) with which previous propagate was executed
 
         propagate_success (Bool): whether the last propagate call failed or not
 
@@ -112,6 +109,7 @@ class Problem(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
+        self.old_choices = None
         self.propagate_success = True
 
         self.slvr = None
@@ -233,32 +231,22 @@ class Problem(object):
             ass.sentence.original = ass.sentence.copy()
 
         self._constraintz = None
-        self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
-    def assert_(self, code: str, value: Any, status: S = S.GIVEN):
+    def assert_(self, code: str, value: Any, status: S):
         """asserts that an expression has a value (or not)
 
         Args:
             code (str): the code of the expression, e.g., "p()"
             value (Any): a Python value, e.g., True
-            status (Status, Optional): how the value was obtained.  Default: S.GIVEN
+            status (Status): how the value was obtained.
         """
         code = str(code)
         atom = self.assignments[code].sentence
-        old_value = self.assignments[code].value
         if value is None:
-            if self.propagated and old_value is not None:
-                self.cleared.append(atom)
-                self.assigned.pop(atom, None)
-            self.assignments.assert__(atom, value, S.UNKNOWN)
+            self.assignments.assert__(atom, None, S.UNKNOWN)
         else:
-            val = str_to_IDP(atom, str(value))
-            if self.propagated and not(old_value and old_value.same_as(val)):
-                self.assigned.append(atom)
-                if old_value:
-                    self.cleared.append(atom)
-            self.assignments.assert__(atom, val, status)
+            self.assignments.assert__(atom, str_to_IDP(atom, str(value)), status)
         self._formula = None
 
     def constraintz(self):
@@ -288,15 +276,14 @@ class Problem(object):
             if self.constraintz():
                 # only add interpretation constraints for those symbols
                 # occurring in the (potentially simplified) z3 constraints
+                # which were not propagated in a previous step
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                            or (self.propagated and not self.cleared))]
+                        and (a.status not in [S.CONSEQUENCE])]
                         + self.constraintz())
             else:
-                all = [a.formula().translate(self)
-                       for a in self.assignments.values()
+                all = [a.formula().translate(self) for a in self.assignments.values()
                        if a.status in [S.DEFAULT, S.GIVEN, S.EXPANDED]]
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
@@ -366,44 +353,43 @@ class Problem(object):
         solver = Optimize(ctx=self.ctx)
         solver.add(self.formula())
         assert term in self.assignments, "Internal error"
-        s = self.assignments[term].sentence.translate(self)
+        sentence = self.assignments[term].sentence
+        s = sentence.translate(self)
         if minimize:
             solver.minimize(s)
         else:
             solver.maximize(s)
+
         solver.check()
 
-        # deal with strict inequalities, e.g. min(0<x)
-        solver.push()
-        for i in range(0, 10):
-            val = solver.model().eval(s)
-            if minimize:
-                solver.add(s < val)
-            else:
-                solver.add(val < s)
-            if solver.check() != sat:
-                solver.pop()  # get the last good one
-                solver.check()
-                break
-        self.assignments = self._from_model(solver, self._todo_expand(), complete)
+        val1 = solver.model().eval(s, model_completion=complete)
+        val = str_to_IDP(sentence, str(val1))
+        if val is not None:
+            self.assignments.assert__(sentence, val, S.EXPANDED)
+
+        self._formula = None  # reset directional propagation TODO needed?
+        self.propagate()
+
         return self
 
-    def symbolic_propagate(self, tag=S.UNIVERSAL):
+    def symbolic_propagate(self):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
-            new_constraint = c.substitute(TRUE, TRUE, self.assignments, tag)
-            new_constraint.symbolic_propagate(self.assignments, tag)
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, S.UNIVERSAL)
+            new_constraint.symbolic_propagate(self.assignments, S.UNIVERSAL)
         return self
 
-    def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
+    def propagate(self, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
-            out = list(self._batch_propagate(tag))
+            out = list(self._batch_propagate())
+            # NOTE: running this will confuse _directional_todo
         if method == Propagation.Z3:
-            out = list(self._z3_propagate(tag))
+            out = list(self._z3_propagate())
+            # NOTE: running this will confuse _directional_todo
         else:
-            out = list(self._propagate(tag))
+            out = list(self._propagate())
         self.propagate_success = (out[0] != "Not satisfiable.")
         return self
 
@@ -417,10 +403,10 @@ class Problem(object):
         assert range, f"Can't determine range on infinite domains"
 
         # consider every value in range
-        todos = [Assignment(termE, e, S.UNKNOWN).formula() for e in range]
+        todos = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
 
         forbidden = set()
-        for ass in self._propagate(S.CONSEQUENCE, todos):
+        for ass in self._propagate(todos):
             if isinstance(ass, str):
                 continue
             if ass.value.same_as(FALSE):
@@ -442,7 +428,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE]
+        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]
 
         s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
@@ -495,7 +481,7 @@ class Problem(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status in [S.GIVEN, S.DEFAULT]:
+                            if a1.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())
@@ -519,7 +505,6 @@ class Problem(object):
         for ass in out.assignments.values():
             if ass.value:
                 ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
-                        S.ENV_UNIV if ass.status == S.ENV_CONSQ else
                         ass.status)
 
         new_constraints: List[Expression] = []
