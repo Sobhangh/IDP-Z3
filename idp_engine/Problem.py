@@ -352,6 +352,7 @@ class Problem(object):
         if val is not None:
             self.assignments.assert__(sentence, val, S.EXPANDED)
 
+        self._formula = None  # reset directional propagation TODO needed?
         self.propagate()
 
         return self

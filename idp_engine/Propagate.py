@@ -292,6 +292,8 @@ def _propagate(self, todo=None):
 
     if todo is None:
         todo = self._directional_todo()
+    else:
+        self.old_choices = None
 
     z3_formula = self.formula()
 
