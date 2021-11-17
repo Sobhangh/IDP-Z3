@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 * (breaking) MR !152: IEP 22 change syntax of sum aggregate to sum(lambda <quantee>: expr)
 * (breaking) MR !154: built-in type is "Concept" (not "Symbol")
+* (breaking) MR !170: add timeout parameter to model expansion/optimisation and improve performance
 * fix #5: do not allow arithmetic operations on constructors
 * fix #132, #136: Improve error message for mis-applied symbol
 * fix #137: support of functions from Symbol to Symbol
