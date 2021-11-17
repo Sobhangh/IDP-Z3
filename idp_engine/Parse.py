@@ -52,8 +52,21 @@ from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, C
 
 
 def str_to_IDP(atom, val_string):
+    """cast a string value for 'atom into an Expr object, or None
+
+    used to convert Z3 models or json data from GUI
+
+    Args:
+        atom (Expr): the atom whose value must be converted
+        val_string (str): the string representation of the value
+
+    Returns:
+        Expr?: the value cast as Expr, or None if unknown
+    """
     assert atom.type, "Internal error"
-    if atom.type == BOOL:
+    if val_string == str(atom) or val_string+"()" == str(atom):
+        out = None  # Z3 means the value is unknown
+    elif atom.type == BOOL:
         if val_string not in ['True', 'False', 'true', 'false']:
             raise IDPZ3Error(
                 f"{atom.annotations['reading']} has wrong value: {val_string}")
@@ -81,12 +94,8 @@ def str_to_IDP(atom, val_string):
                 for a in args]
 
         out = AppliedSymbol.construct(constructor, args)
-    else:
-        try:
-            # could be a fraction
-            out = Number(number=str(eval(val_string.replace('?', ''))))
-        except:
-            out = None  # when z3 model has unknown value
+    else:  # a fraction
+        out = Number(number=str(eval(val_string.replace('?', ''))))
     return out
 
 

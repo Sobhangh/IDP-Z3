@@ -296,7 +296,7 @@ class Problem(object):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            if not q.is_reified() or self.extended:
+            if (q.is_reified() and self.extended) or complete:
                 # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
                 solver.add(q.reified(self) == q.translate(self))
         res1 = solver.check()
@@ -304,8 +304,12 @@ class Problem(object):
             model = solver.model()
             for q in todo:
                 if not q.is_reified() or self.extended:
-                    val1 = model.eval(q.reified(self),
-                                               model_completion=complete)
+                    if q.is_reified() or complete:
+                        val1 = model.eval(q.reified(self),
+                                                    model_completion=complete)
+                    else:
+                        val1 = model.eval(q.translate(self),
+                                                model_completion=complete)
                     val = str_to_IDP(q, str(val1))
                     if val is not None:
                         ass.assert__(q, val, S.EXPANDED)
@@ -321,7 +325,8 @@ class Problem(object):
 
         count, ass = 0, {}
         start = time.process_time()
-        while (count < max or max <= 0) and time.process_time()-start < timeout:
+        while ((max <= 0 or count < max)
+               and (timeout <= 0 or time.process_time()-start < timeout)):
             # exclude ass
             different = []
             for a in ass.values():
@@ -341,7 +346,7 @@ class Problem(object):
             if not ass:
                 break
 
-        if timeout <= time.process_time()-start:
+        if not (timeout <= 0 or time.process_time()-start < timeout):
             yield f"{NEWL}More models are available."
         elif count == 0:
             yield "No models."
