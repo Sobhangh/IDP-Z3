@@ -328,18 +328,17 @@ class Problem(object):
 
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.formula()
         todo = self._todo_expand()
 
-        solver = Solver(ctx=self.ctx)
-        solver.add(z3_formula)
+        solver = self.get_solver()
+        self.push_add_choices(solver)
 
         count = 0
         while count < max or max <= 0:
 
             if solver.check() == sat:
                 count += 1
-                _ = solver.model()
+                _ = solver.model()  # TODO: needed?
                 ass = self._from_model(solver, todo, complete)
                 yield ass
 
@@ -355,6 +354,8 @@ class Problem(object):
             else:
                 break
 
+        solver.pop()
+
         if solver.check() == sat and different:
             yield f"{NEWL}More models are available."
         elif 0 < count:
@@ -368,7 +369,7 @@ class Problem(object):
         s = sentence.translate(self)
 
         solver = self.get_optimize()
-        self.add_choices(solver)
+        self.push_add_choices(solver)
 
         if minimize:
             solver.minimize(s)
