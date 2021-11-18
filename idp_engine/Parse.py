@@ -274,12 +274,7 @@ class Vocabulary(ASTNode):
             TypeDeclaration(name=DATE, enumeration=DateRange()),
             TypeDeclaration(
                 name=CONCEPT,
-                constructors=([Constructor(name=f"`{s}")
-                               for s in [ BOOL, INT, REAL, DATE, CONCEPT]]
-                             +[Constructor(name=f"`{s.name}")
-                                for s in self.declarations
-                                if type(s) == SymbolDeclaration
-                                or type(s) in Type.__args__])),
+                constructors=[]),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
                                 sorts=[], out=Symbol(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
