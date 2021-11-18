@@ -274,7 +274,7 @@ class eval(Resource):
                         get_relevant_questions(state)
                         out = Output(state).fill(state)
                     elif method == "modelexpand":
-                        generator = state.expand(max=1, complete=False)
+                        generator = state.expand(max=1, timeout=0, complete=False)
                         out = copy(state)
                         out.assignments = list(generator)[0]
                         out = Output(out).fill(out)
