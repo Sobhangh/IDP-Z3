@@ -810,6 +810,7 @@ class AAggregate(Expression):
 
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
         self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
+        self.q = ''
         super().__init__()
 
 
