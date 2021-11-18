@@ -297,7 +297,7 @@ class Problem(object):
 
         the solver must be in sat state
         """
-        ass = self.assignments.copy()
+        ass = self.assignments.copy(shallow=True)
         model = solver.model()
         for q in todo:
             if not q.is_reified() or self.extended:
