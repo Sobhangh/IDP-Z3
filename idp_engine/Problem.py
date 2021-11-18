@@ -113,9 +113,10 @@ class Problem(object):
         self.propagate_success = True
 
         self.slvr = None
+        self.optmz = None
 
     def get_solver(self):
-        if not self.slvr:
+        if self.slvr is None:
             self.slvr = Solver(ctx=self.ctx)
             self.slvr.add(self.formula())
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
@@ -126,6 +127,18 @@ class Problem(object):
 
             self.slvr.check()  # required for forall.idp !?
         return self.slvr
+
+    def get_optimize(self):
+        if self.optmz is None:
+            self.optmz = Optimize(ctx=self.ctx)
+            self.optmz.add(self.formula())
+            symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
+            assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
+                                if a.value is not None and a.status == S.STRUCTURE and a.symbol_decl.name in symbols]
+            for af in assignment_forms:
+                self.optmz.add(af)
+
+        return self.optmz
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -350,24 +363,28 @@ class Problem(object):
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):
-        solver = Optimize(ctx=self.ctx)
-        solver.add(self.formula())
         assert term in self.assignments, "Internal error"
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
+
+        solver = self.get_optimize()
+        self.add_choices(solver)
+
         if minimize:
             solver.minimize(s)
         else:
             solver.maximize(s)
-
         solver.check()
 
-        val1 = solver.model().eval(s, model_completion=complete)
+        val1 = solver.model().eval(s)
         val = str_to_IDP(sentence, str(val1))
         if val is not None:
             self.assignments.assert__(sentence, val, S.EXPANDED)
 
+        solver.pop()
+
         self._formula = None  # reset directional propagation TODO needed?
+
         self.propagate()
 
         return self

@@ -284,6 +284,17 @@ def _batch_propagate(self):
         yield "No more consequences."
 Problem._batch_propagate = _batch_propagate
 
+def add_choices(self, solver):
+    solver.push()
+
+    assignment_forms = [a.formula().translate(self) for a in
+                        self.assignments.values()
+                        if a.value is not None
+                        and a.status not in [S.STRUCTURE, S.CONSEQUENCE]]
+    for af in assignment_forms:
+        solver.add(af)
+Problem.add_choices = add_choices
+
 
 def _propagate(self, todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
@@ -297,14 +308,7 @@ def _propagate(self, todo=None):
         self.old_choices = None
 
     solver = self.get_solver()
-    self.get_solver().push()
-
-    assignment_forms = [a.formula().translate(self) for a in
-                        self.assignments.values()
-                        if a.value is not None
-                        and a.status not in [S.STRUCTURE, S.CONSEQUENCE]]
-    for af in assignment_forms:
-        solver.add(af)
+    self.add_choices(solver)
 
     if not todo:
         todo = self._directional_todo()
