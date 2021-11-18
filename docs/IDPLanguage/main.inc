@@ -26,13 +26,23 @@ model_check(theory, structure=None)
     For example, ``print(model_check(T, S))`` will print ``sat`` if theory named ``T`` has a model expanding structure named ``S``.
 
 
-model_expand(theory, structure=None, max=10, timeout=30, complete=False)
-    Returns a list of models of the theory that are expansion of the structure.
+model_expand(theory, structure=None, max=10, timeout=10, complete=False)
+    Returns a (possibly empty) list of models of the theory that are expansion of the structure, possibly followed by a string message.
     ``theory`` and ``structure`` can be lists, in which case their elements are merged.
     The structure is optional.
     The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.
     The search for new models is stopped when processing exceeds ``timeout`` (in seconds) (unless it is 0).
     The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
+
+    The string message can be one of the following:
+
+    - ``No models.``
+
+    - ``More models may be available.  Change the max argument to see them.``
+
+    - ``More models may be available.  Change the timeout argument to see them.``
+
+    - ``More models may be available.  Change the max and timeout arguments to see them.``
 
     For example, ``print(model_expand(T, S))`` will print (up to) 10 models of theory named ``T`` expanding structure named ``S``.
 
@@ -79,7 +89,7 @@ formula(self)
     Returns a Z3 object representing the logic formula equivalent to the problem.
     This object can be converted to a string using ``str()``.
 
-expand(self, max=10, timeout=30, complete=False)
+expand(self, max=10, timeout=10, complete=False)
     Returns a list of models of the theory that are expansion of the known assignments.
     The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.
     The search for new models is stopped when processing exceeds ``timeout`` (in seconds) (unless it is 0).

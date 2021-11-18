@@ -43,7 +43,7 @@ def model_check(theories, structures=None):
     yield str(solver.check())
 
 
-def model_expand(theories, structures=None, max=10, timeout=30, complete=False,
+def model_expand(theories, structures=None, max=10, timeout=10, complete=False,
                  extended=False, sort=False):
     """ output: a list of Assignments, ending with a string """
     problem = Problem.make(theories, structures, extended=extended)

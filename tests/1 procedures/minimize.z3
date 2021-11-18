@@ -24,3 +24,5 @@ Wide:={1->false; 2->false; 3->false; 4->false}
 Base:={->0}
 Height:={->0}
 Surface:={->0}
+
+More models may be available.  Change the max argument to see them.

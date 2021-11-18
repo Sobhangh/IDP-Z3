@@ -312,7 +312,7 @@ class Problem(object):
                     ass.assert__(q, val, S.EXPANDED)
         return ass
 
-    def expand(self, max=10, timeout=30, complete=False):
+    def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.formula()
         todo = self._todo_expand()
@@ -345,10 +345,15 @@ class Problem(object):
             if not ass:
                 break
 
+
+        maxed = (0 < max <= count)
+        timeouted = (0 < timeout <= time.process_time()-start)
         # if interrupted by the timeout
-        if ((max <= 0 or count <= max)
-            and not (timeout <= 0 or time.process_time()-start < timeout)):
-            yield f"{NEWL}More models may be available."
+        if maxed or timeouted:
+            param = ("max and timeout arguments" if maxed and timeouted else
+                     "max argument" if maxed else
+                     "timeout argument")
+            yield f"{NEWL}More models may be available.  Change the {param} to see them."
         elif count == 0:
             yield "No models."
 
