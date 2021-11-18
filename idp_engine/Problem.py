@@ -354,7 +354,9 @@ class Problem(object):
                      "max argument" if maxed else
                      "timeout argument")
             yield f"{NEWL}More models may be available.  Change the {param} to see them."
-        elif count == 0:
+        elif 0 < count:
+            yield f"{NEWL}No more models."
+        else:
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):
