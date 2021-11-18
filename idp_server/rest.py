@@ -255,7 +255,7 @@ class eval(Resource):
                     assert len(idpModel.theories) == 1 and len(idpModel.structures)<=1, \
                         "Can't check code containing more than 1 theory or structure."
                     state = State(idpModel)  # don't use cache.  May raise an error
-                    next(state.expand(max=1))
+                    next(state.expand(max=1, timeout=0))
                     out = {"result": "ok"}
                 else:
                     state = State.make(idpOf(args['code']),
