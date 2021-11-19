@@ -42,7 +42,6 @@ from .utils import OrderedSet
 from .Idp_to_Z3 import get_symbols_z
 
 start = time.process_time()
-last_prop = "hello"
 
 ###############################################################################
 #
@@ -299,8 +298,8 @@ Problem.push_add_choices = push_add_choices
 def _propagate(self, todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
     """
-    global start, last_prop
-    start, last_prop = time.process_time(), None
+    global start
+    start = time.process_time()
 
     if todo is None:
         todo = self._directional_todo()
@@ -333,11 +332,9 @@ def _propagate(self, todo=None):
             if res2 == unsat:
                 val = str_to_IDP(q, str(val1))
                 yield self.assignments.assert__(q, val, S.CONSEQUENCE)
-                last_prop = time.process_time()
             else:  # reset the value
                 if self.assignments.get(q, True) is not None:
                     self.assignments.assert__(q, None, S.UNKNOWN)
-                    last_prop = time.process_time()
         yield "No more consequences."
     elif res1 == unsat:
         yield "Not satisfiable."
@@ -345,11 +342,6 @@ def _propagate(self, todo=None):
     else:
         yield "Unknown satisfiability."
         yield str(self.formula())
-
-    if last_prop is None:
-        last_prop = 0
-    else:
-        last_prop -= start
 
     solver.pop()
 Problem._propagate = _propagate
