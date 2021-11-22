@@ -293,64 +293,82 @@ class Problem(object):
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
-        """ returns Assignments from model in solver """
-        ass = self.assignments.copy()
+        """ returns Assignments from model in solver
+
+        the solver must be in sat state
+        """
+        ass = self.assignments.copy(shallow=True)
+        model = solver.model()
         for q in todo:
             if not q.is_reified() or self.extended:
-                # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
-                solver.add(q.reified(self) == q.translate(self))
-        res1 = solver.check()
-        if res1 == sat:
-            model = solver.model()
-            for q in todo:
-                if not q.is_reified() or self.extended:
+                if q.is_reified() or complete:
                     val1 = model.eval(q.reified(self),
-                                               model_completion=complete)
-                    val = str_to_IDP(q, str(val1))
-                    if val is not None:
-                        ass.assert__(q, val, S.EXPANDED)
+                                                model_completion=complete)
+                else:
+                    val1 = model.eval(q.translate(self),
+                                            model_completion=complete)
+                val = str_to_IDP(q, str(val1))
+                if val is not None:
+                    ass.assert__(q, val, S.EXPANDED)
         return ass
 
-    def expand(self, max=10, complete=False):
+    def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
         z3_formula = self.formula()
         todo = self._todo_expand()
 
         solver = Solver(ctx=self.ctx)
         solver.add(z3_formula)
+        for q in todo:
+            if (q.is_reified() and self.extended) or complete:
+                solver.add(q.reified(self) == q.translate(self))
 
-        count = 0
-        while count < max or max <= 0:
+        count, ass = 0, {}
+        start = time.process_time()
+        while ((max <= 0 or count < max)
+               and (timeout <= 0 or time.process_time()-start < timeout)):
+            # exclude ass
+            different = []
+            for a in ass.values():
+                if a.status == S.EXPANDED:
+                    q = a.sentence
+                    different.append(q.translate(self) != a.value.translate(self))
+            if different:
+                solver.add(Or(different))
 
             if solver.check() == sat:
                 count += 1
-                _ = solver.model()
                 ass = self._from_model(solver, todo, complete)
                 yield ass
-
-                # exclude this model
-                different = []
-                for a in ass.values():
-                    if a.status == S.EXPANDED:
-                        q = a.sentence
-                        different.append(q.translate(self) != a.value.translate(self))
-                if not different:
-                    break
-                solver.add(Or(different))
             else:
+                ass = {}
+            if not ass:
                 break
 
-        if solver.check() == sat and different:
-            yield f"{NEWL}More models are available."
+
+        maxed = (0 < max <= count)
+        timeouted = (0 < timeout <= time.process_time()-start)
+        # if interrupted by the timeout
+        if maxed or timeouted:
+            param = ("max and timeout arguments" if maxed and timeouted else
+                     "max argument" if maxed else
+                     "timeout argument")
+            yield f"{NEWL}More models may be available.  Change the {param} to see them."
         elif 0 < count:
             yield f"{NEWL}No more models."
         else:
             yield "No models."
 
     def optimize(self, term, minimize=True, complete=False):
+        assert term in self.assignments, "Internal error"
+        todo = self._todo_expand()
+
         solver = Optimize(ctx=self.ctx)
         solver.add(self.formula())
-        assert term in self.assignments, "Internal error"
+        for q in todo:
+            if (q.is_reified() and self.extended) or complete:
+                solver.add(q.reified(self) == q.translate(self))
+
         s = self.assignments[term].sentence.translate(self)
         if minimize:
             solver.minimize(s)
@@ -370,7 +388,7 @@ class Problem(object):
                 solver.pop()  # get the last good one
                 solver.check()
                 break
-        self.assignments = self._from_model(solver, self._todo_expand(), complete)
+        self.assignments = self._from_model(solver, todo, complete)
         return self
 
     def symbolic_propagate(self, tag=S.UNIVERSAL):

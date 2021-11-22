@@ -7,11 +7,6 @@ Subtype:={->regular_triangle}
 Convex:={->true}
 Equilateral:={->true}
 Perimeter:={->1}
-Large:={1->false; 2->false; 3->false; 4->false}
-Wide:={1->false; 2->false; 3->false; 4->false}
-Base:={->0}
-Height:={->0}
-Surface:={->0}
 
 Model 1
 ==========
@@ -26,8 +21,8 @@ Equilateral:={->true}
 Perimeter:={->1}
 Large:={1->false; 2->false; 3->false; 4->false}
 Wide:={1->false; 2->false; 3->false; 4->false}
-Base:={->5}
-Height:={->6}
-Surface:={->7}
+Base:={->0}
+Height:={->0}
+Surface:={->0}
 
-More models are available.
+More models may be available.  Change the max argument to see them.
