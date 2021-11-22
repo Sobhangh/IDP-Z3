@@ -81,8 +81,11 @@ class Problem(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        old_choices ([Expression,Expression], optional): set of choices
+        old_choices ([Expression,Expression]): set of choices
             (sentence-value pairs) with which previous propagate was executed
+
+        old_propagations ([Expression,Expression]): set of propagations
+            (sentence-value pairs) after last propagate execution
 
         propagate_success (Bool): whether the last propagate call failed or not
 
@@ -109,7 +112,8 @@ class Problem(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
-        self.old_choices = None
+        self.old_choices = []
+        self.old_propagations = []
         self.propagate_success = True
 
         self.slvr = None
@@ -124,8 +128,8 @@ class Problem(object):
                                 if a.value is not None and a.status == S.STRUCTURE and a.symbol_decl.name in symbols]
             for af in assignment_forms:
                 self.slvr.add(af)
-
             self.slvr.check()  # required for forall.idp !?
+            # TODO: make sure universals are propagated...
         return self.slvr
 
     def get_optimize(self):
@@ -287,9 +291,9 @@ class Problem(object):
         """ the formula encoding the knowledge base """
         if self._formula is None:
             if self.constraintz():
-                # only add interpretation constraints for those symbols
+                # use existing z3 constraints, but only add interpretations
+                # for those symbols, not propagated in a previous step,
                 # occurring in the (potentially simplified) z3 constraints
-                # which were not propagated in a previous step
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None

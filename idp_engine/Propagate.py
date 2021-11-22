@@ -189,16 +189,16 @@ def _directional_todo(self):
     * any cleared assignments should be repropagated as well
     """
 
-    initialprop = self.old_choices is None
-    if initialprop:
-        removed_choices = set()
-    else:
-        removed_choices = set(self.old_choices)
-    added_choices = []
+    removed_choices = set(self.old_choices)
     self.old_choices = [(a.sentence, a.value) for a in self.assignments.values()
                         if (not a.sentence.is_reified() or self.extended)
                         and a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
                         ]
+    added_choices = []
+
+    for a in self.assignments.values():
+        if a.status == S.CONSEQUENCE:
+            self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
     for a in self.old_choices:
         if a in removed_choices:
@@ -206,19 +206,21 @@ def _directional_todo(self):
         else:
             added_choices.append(a)
 
-    statuses = []
-    if initialprop or added_choices:
-        statuses.extend([S.UNKNOWN])
+    todo = set()
     if removed_choices:
-        statuses.extend([S.CONSEQUENCE])
+        for a in removed_choices:
+            todo.add(a[0])
+        for a in self.old_propagations:
+            todo.add(a[0])
+    else:
+        for a in self.old_propagations:
+            self.assignments.assert__(a[0], a[1], S.CONSEQUENCE)
+    self.old_propagations = []
 
-    todo = set(
-        a.sentence for a in self.assignments.values()
-        if (not a.sentence.is_reified() or self.extended)
-            and a.status in statuses
-    )
-    for a in removed_choices:
-        todo.add(a[0])
+    if added_choices:
+        for a in self.assignments.values():
+            if (not a.sentence.is_reified() or self.extended) and a.status == S.UNKNOWN:
+                todo.add(a.sentence)
 
     return todo
 Problem._directional_todo = _directional_todo
@@ -301,16 +303,15 @@ def _propagate(self, todo=None):
     global start
     start = time.process_time()
 
-    if todo is None:
+    dir_todo = todo is None
+
+    if dir_todo:
         todo = self._directional_todo()
     else:
-        self.old_choices = None
+        self.old_choices = []
 
     solver = self.get_solver()
     self.push_add_choices(solver)
-
-    if not todo:
-        todo = self._directional_todo()
 
     for q in todo:
         solver.add(q.reified(self) == q.translate(self))
@@ -326,7 +327,6 @@ def _propagate(self, todo=None):
             solver.push()
             solver.add(Not(q.reified(self) == val1))
             res2 = solver.check()
-            solver.pop()
 
             assert res2 != unknown
             if res2 == unsat:
@@ -335,6 +335,8 @@ def _propagate(self, todo=None):
             else:  # reset the value
                 if self.assignments.get(q, True) is not None:
                     self.assignments.assert__(q, None, S.UNKNOWN)
+            solver.pop()
+
         yield "No more consequences."
     elif res1 == unsat:
         yield "Not satisfiable."
@@ -343,6 +345,13 @@ def _propagate(self, todo=None):
         yield "Unknown satisfiability."
         yield str(self.formula())
 
+    if dir_todo:
+        self.old_propagations = [(a.sentence, a.value) for a in self.assignments.values()
+                        if (not a.sentence.is_reified() or self.extended)
+                        and a.status == S.CONSEQUENCE
+                        ]
+    else:
+        self.old_propagations = []
     solver.pop()
 Problem._propagate = _propagate
 
