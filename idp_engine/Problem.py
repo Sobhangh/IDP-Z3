@@ -87,7 +87,9 @@ class Problem(object):
         old_propagations ([Expression,Expression]): set of propagations
             (sentence-value pairs) after last propagate execution
 
-        propagate_success (Bool): whether the last propagate call failed or not
+        first_prop (Bool): whether the first propagate call still needs to happen
+
+        propagate_success (Bool): whether the last propagate call was succesful
 
         z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
 
@@ -114,6 +116,7 @@ class Problem(object):
         self.add(*blocks)
         self.old_choices = []
         self.old_propagations = []
+        self.first_prop = True
         self.propagate_success = True
 
         self.slvr = None
@@ -130,15 +133,13 @@ class Problem(object):
                                 and a.symbol_decl.name in symbols]
             for af in assignment_forms:
                 self.slvr.add(af)
-            self.slvr.check()  # required for forall.idp !?
-            # TODO: make sure universals are propagated...
         return self.slvr
 
     def get_optimize(self):
         if self.optmz is None:
             self.optmz = Optimize(ctx=self.ctx)
             assert self.constraintz()
-            self.slvr.add(And(self.constraintz()))
+            self.optmz.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
                                 if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
@@ -254,13 +255,13 @@ class Problem(object):
         self._constraintz = None
         return self
 
-    def assert_(self, code: str, value: Any, status: S):
+    def assert_(self, code: str, value: Any, status: S = S.GIVEN):
         """asserts that an expression has a value (or not)
 
         Args:
             code (str): the code of the expression, e.g., "p()"
             value (Any): a Python value, e.g., True
-            status (Status): how the value was obtained.
+            status (Status, optional): how the value was obtained.
         """
         code = str(code)
         atom = self.assignments[code].sentence
@@ -339,11 +340,10 @@ class Problem(object):
         todo = self._todo_expand()
 
         solver = self.get_solver()
-        self.push_add_choices(solver)
+        self.add_choices(solver)
 
         count = 0
         while count < max or max <= 0:
-
             if solver.check() == sat:
                 count += 1
                 _ = solver.model()  # TODO: needed?
@@ -362,9 +362,10 @@ class Problem(object):
             else:
                 break
 
+        more_models = solver.check() == sat
         solver.pop()
 
-        if solver.check() == sat and different:
+        if more_models and different:
             yield f"{NEWL}More models are available."
         elif 0 < count:
             yield f"{NEWL}No more models."
@@ -377,7 +378,7 @@ class Problem(object):
         s = sentence.translate(self)
 
         solver = self.get_optimize()
-        self.push_add_choices(solver)
+        self.add_choices(solver)
 
         if minimize:
             solver.minimize(s)

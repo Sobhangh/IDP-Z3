@@ -56,7 +56,7 @@ class State(Problem):
                 State.cache.pop(list(State.cache.keys())[-1])
             state = State(idp)
             State.cache[idp.code] = state
-
+        _ = state.get_solver()
         state.add_given(jsonstr)
         return state
 
@@ -101,8 +101,8 @@ class State(Problem):
         # sentences in decision theory may be environmental (issue 147)
         if self.environment:
             for a in self.assignments.values():
-                if (not a.sentence in self.environment.assignments
-                    and not a.sentence.has_decision()):
+                if (a.sentence not in self.environment.assignments
+                        and not a.sentence.has_decision()):
                     self.environment.assignments.assert__(a.sentence, a.value, a.status)
 
         self.relevant_symbols = {}

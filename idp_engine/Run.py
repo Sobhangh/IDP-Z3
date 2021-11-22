@@ -27,7 +27,7 @@ from z3 import Solver
 
 from .Parse import IDP
 from .Problem import Problem
-from .Assignments import Status as S, Assignments
+from .Assignments import Assignments
 from .utils import NEWL
 
 last_call = time.process_time()  # define it as global

@@ -285,7 +285,7 @@ def _batch_propagate(self):
         yield "No more consequences."
 Problem._batch_propagate = _batch_propagate
 
-def push_add_choices(self, solver):
+def add_choices(self, solver):
     solver.push()
 
     assignment_forms = [a.formula().translate(self) for a in
@@ -294,24 +294,33 @@ def push_add_choices(self, solver):
                         and a.status not in [S.STRUCTURE, S.CONSEQUENCE]]
     for af in assignment_forms:
         solver.add(af)
-Problem.push_add_choices = push_add_choices
+Problem.add_choices = add_choices
 
 
-def _propagate(self, todo=None):
+def _propagate(self, todo=None, universal=False):
     """generator of new propagated assignments.  Update self.assignments too.
     """
+
+    if self.first_prop:
+        self.first_prop = False
+        yield from self._propagate(universal=True)  # fix UNIVERSAL consequences
+
     global start
     start = time.process_time()
 
     dir_todo = todo is None
-
-    if dir_todo:
+    if universal:
+        for a in self.assignments.values():
+            if a.status == S.CONSEQUENCE:
+                self.assignments.assert__(a.sentence, None, S.UNKNOWN)
+        todo = set([a.sentence for a in self.assignments.values() if a.status not in [S.STRUCTURE, S.UNIVERSAL]])
+    elif dir_todo:
         todo = self._directional_todo()
-    else:
-        self.old_choices = []
 
     solver = self.get_solver()
-    self.push_add_choices(solver)
+    solver.push()
+    if not universal:
+        self.add_choices(solver)
 
     for q in todo:
         solver.add(q.reified(self) == q.translate(self))
@@ -331,10 +340,7 @@ def _propagate(self, todo=None):
             assert res2 != unknown
             if res2 == unsat:
                 val = str_to_IDP(q, str(val1))
-                yield self.assignments.assert__(q, val, S.CONSEQUENCE)
-            else:  # reset the value
-                if self.assignments.get(q, True) is not None:
-                    self.assignments.assert__(q, None, S.UNKNOWN)
+                yield self.assignments.assert__(q, val, S.CONSEQUENCE if universal else S.CONSEQUENCE)  # TODO first should be universal
             solver.pop()
 
         yield "No more consequences."

@@ -199,9 +199,12 @@ class Assignments(dict):
 
         if sentence.code in self:
             out = self[sentence.code]
-            if out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT] \
+            if out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT]\
                     and status in [Status.CONSEQUENCE, Status.UNIVERSAL]:
-                assert out.value.same_as(value), "System should not override given choices with different consequences, please report this bug."
+                assert out.value.same_as(value), \
+                        "System should not override given choices with different consequences, please report this bug." \
+                        if status == Status.CONSEQUENCE else \
+                        "Given choices contradict universal implications, please change them."
             else:
                 out.value = value
                 out.status = status
