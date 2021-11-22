@@ -122,10 +122,12 @@ class Problem(object):
     def get_solver(self):
         if self.slvr is None:
             self.slvr = Solver(ctx=self.ctx)
-            self.slvr.add(self.formula())
+            assert self.constraintz()
+            self.slvr.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
-                                if a.value is not None and a.status == S.STRUCTURE and a.symbol_decl.name in symbols]
+                                if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
+                                and a.symbol_decl.name in symbols]
             for af in assignment_forms:
                 self.slvr.add(af)
             self.slvr.check()  # required for forall.idp !?
@@ -135,10 +137,12 @@ class Problem(object):
     def get_optimize(self):
         if self.optmz is None:
             self.optmz = Optimize(ctx=self.ctx)
-            self.optmz.add(self.formula())
+            assert self.constraintz()
+            self.slvr.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
-                                if a.value is not None and a.status == S.STRUCTURE and a.symbol_decl.name in symbols]
+                                if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
+                                and a.symbol_decl.name in symbols]
             for af in assignment_forms:
                 self.optmz.add(af)
 
