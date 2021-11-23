@@ -84,7 +84,7 @@ theory {
                'normal': True,
                'reading': 'x',
                'relevant': True,
-               'status': 'CONSEQUENCE',
+               'status': 'UNIVERSAL',
                'typ': 'Int',
                'value': '1'},
        'x() = 1': {'environmental': False,
@@ -92,6 +92,6 @@ theory {
                    'normal': False,
                    'reading': 'x = 1',
                    'relevant': True,
-                   'status': 'CONSEQUENCE',
+                   'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True}}}

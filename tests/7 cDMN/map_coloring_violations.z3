@@ -152,7 +152,7 @@ structure {
                                                                                                                                                           '≠ '
                                                                                                                                                           'Color(c2)',
                                                                                                                                                'relevant': False,
-                                                                                                                                               'status': 'CONSEQUENCE',
+                                                                                                                                               'status': 'UNIVERSAL',
                                                                                                                                                'typ': 'Bool',
                                                                                                                                                'value': True}},
  'Country_borders_Country': {},
@@ -10203,6 +10203,6 @@ structure {
                                                                                                                                                                                                                                                                          'else '
                                                                                                                                                                                                                                                                          '0)',
                                                                                                                                                                                                                                                               'relevant': True,
-                                                                                                                                                                                                                                                              'status': 'CONSEQUENCE',
+                                                                                                                                                                                                                                                              'status': 'UNIVERSAL',
                                                                                                                                                                                                                                                               'typ': 'Bool',
                                                                                                                                                                                                                                                               'value': True}}}

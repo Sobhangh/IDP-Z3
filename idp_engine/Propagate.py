@@ -190,10 +190,7 @@ def _directional_todo(self):
     """
 
     removed_choices = set(self.old_choices)
-    self.old_choices = [(a.sentence, a.value) for a in self.assignments.values()
-                        if (not a.sentence.is_reified() or self.extended)
-                        and a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
-                        ]
+    self.old_choices = self.get_atoms([S.GIVEN, S.DEFAULT, S.EXPANDED])
     added_choices = []
 
     for a in self.assignments.values():
@@ -206,21 +203,20 @@ def _directional_todo(self):
         else:
             added_choices.append(a)
 
-    todo = set()
+    todo = OrderedSet()
     if removed_choices:
         for a in removed_choices:
-            todo.add(a[0])
+            todo.append(a[0])
         for a in self.old_propagations:
-            todo.add(a[0])
+            todo.append(a[0])
     else:
         for a in self.old_propagations:
             self.assignments.assert__(a[0], a[1], S.CONSEQUENCE)
     self.old_propagations = []
 
     if added_choices:
-        for a in self.assignments.values():
-            if (not a.sentence.is_reified() or self.extended) and a.status == S.UNKNOWN:
-                todo.add(a.sentence)
+        for a in self.get_atoms([S.UNKNOWN]):
+            todo.append(a[0])
 
     return todo
 Problem._directional_todo = _directional_todo
@@ -297,36 +293,73 @@ def add_choices(self, solver):
 Problem.add_choices = add_choices
 
 
-def _propagate(self, todo=None, universal=False):
-    """generator of new propagated assignments.  Update self.assignments too.
-    """
-
-    if self.first_prop:
-        self.first_prop = False
-        yield from self._propagate(universal=True)  # fix UNIVERSAL consequences
-
-    global start
-    start = time.process_time()
-
-    dir_todo = todo is None
-    if universal:
-        for a in self.assignments.values():
-            if a.status == S.CONSEQUENCE:
-                self.assignments.assert__(a.sentence, None, S.UNKNOWN)
-        todo = set([a.sentence for a in self.assignments.values() if a.status not in [S.STRUCTURE, S.UNIVERSAL]])
-    elif dir_todo:
-        todo = self._directional_todo()
+def first_propagate(self):
+    for a in self.assignments.values():
+        assert a.status not in [S.CONSEQUENCE, S.UNIVERSAL]
+    todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN]))
 
     solver = self.get_solver()
     solver.push()
-    if not universal:
-        self.add_choices(solver)
 
     for q in todo:
         solver.add(q.reified(self) == q.translate(self))
         # reification in case todo contains complex formula
 
     res1 = solver.check()
+    if res1 == unsat:
+        solver.pop()
+        return  # unsat, caller will fix this
+
+    assert res1 == sat
+    model = solver.model()
+    valqs = [(model.eval(q.reified(self)), q) for q in todo]
+    for val1, q in valqs:
+        if str(val1) == str(q.reified(self)):
+            continue  # irrelevant
+        solver.push()
+        solver.add(Not(q.reified(self) == val1))
+        res2 = solver.check()
+        solver.pop()
+
+        assert res2 != unknown
+        if res2 == unsat:
+            val = str_to_IDP(q, str(val1))
+
+            ass = self.assignments.get(q.code)
+            if ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and \
+                    not ass.value.same_as(val):
+                solver.pop()
+                return  # unsat under choices, caller will fix this
+            yield self.assignments.assert__(q, val, S.UNIVERSAL)
+
+    solver.pop()
+    self.first_prop = False
+Problem.first_propagate = first_propagate
+
+def _propagate(self, todo=None):
+    """generator of new propagated assignments.  Update self.assignments too.
+    """
+
+    if self.first_prop:
+        yield from self.first_propagate()
+
+    global start
+    start = time.process_time()
+
+    dir_todo = todo is None
+    if dir_todo:
+        todo = self._directional_todo()
+
+    solver = self.get_solver()
+    solver.push()
+    self.add_choices(solver)
+
+    for q in todo:
+        solver.add(q.reified(self) == q.translate(self))
+        # reification in case todo contains complex formula
+
+    res1 = solver.check()
+
     if res1 == sat:
         model = solver.model()
         valqs = [(model.eval(q.reified(self)), q) for q in todo]
@@ -336,12 +369,12 @@ def _propagate(self, todo=None, universal=False):
             solver.push()
             solver.add(Not(q.reified(self) == val1))
             res2 = solver.check()
+            solver.pop()
 
             assert res2 != unknown
             if res2 == unsat:
                 val = str_to_IDP(q, str(val1))
-                yield self.assignments.assert__(q, val, S.CONSEQUENCE if universal else S.CONSEQUENCE)  # TODO first should be universal
-            solver.pop()
+                yield self.assignments.assert__(q, val, S.CONSEQUENCE)
 
         yield "No more consequences."
     elif res1 == unsat:
@@ -352,12 +385,8 @@ def _propagate(self, todo=None, universal=False):
         yield str(self.formula())
 
     if dir_todo:
-        self.old_propagations = [(a.sentence, a.value) for a in self.assignments.values()
-                        if (not a.sentence.is_reified() or self.extended)
-                        and a.status == S.CONSEQUENCE
-                        ]
-    else:
-        self.old_propagations = []
+        self.old_propagations = self.get_atoms([S.CONSEQUENCE])
+
     solver.pop()
 Problem._propagate = _propagate
 

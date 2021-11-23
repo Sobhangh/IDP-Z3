@@ -36,6 +36,6 @@ theory  {
                    'normal': False,
                    'reading': 'p < 3',
                    'relevant': True,
-                   'status': 'CONSEQUENCE',
+                   'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True}}}

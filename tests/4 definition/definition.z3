@@ -34,7 +34,7 @@ display {
                              'normal': True,
                              'reading': 'codeOf(blue)',
                              'relevant': True,
-                             'status': 'CONSEQUENCE',
+                             'status': 'UNIVERSAL',
                              'typ': 'code',
                              'value': 'b',
                              'values': ['b']},
@@ -43,7 +43,7 @@ display {
                             'normal': True,
                             'reading': 'codeOf(red)',
                             'relevant': True,
-                            'status': 'CONSEQUENCE',
+                            'status': 'UNIVERSAL',
                             'typ': 'code',
                             'value': 'a',
                             'values': ['a']}}}

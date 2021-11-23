@@ -206,6 +206,6 @@ structure {
                                                                                                                                                                                                               'else '
                                                                                                                                                                                                               '0)',
                                                                                                                                                                                                    'relevant': True,
-                                                                                                                                                                                                   'status': 'CONSEQUENCE',
+                                                                                                                                                                                                   'status': 'UNIVERSAL',
                                                                                                                                                                                                    'typ': 'Bool',
                                                                                                                                                                                                    'value': True}}}

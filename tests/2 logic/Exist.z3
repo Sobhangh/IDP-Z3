@@ -38,7 +38,7 @@ display {
                'normal': True,
                'reading': 'p',
                'relevant': True,
-               'status': 'CONSEQUENCE',
+               'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},
  'q': {'q(blue)': {'environmental': False,
@@ -67,6 +67,6 @@ display {
                              'normal': False,
                              'reading': '∃c ∈ color : q(c)',
                              'relevant': True,
-                             'status': 'CONSEQUENCE',
+                             'status': 'UNIVERSAL',
                              'typ': 'Bool',
                              'value': True}}}

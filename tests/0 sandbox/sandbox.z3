@@ -62,7 +62,7 @@ display {
                                                'normal': False,
                                                'reading': 'opposite(Color) is enumerated',
                                                'relevant': True,
-                                               'status': 'CONSEQUENCE',
+                                               'status': 'UNIVERSAL',
                                                'typ': 'Bool',
                                                'value': True}},
  'opposite': {}}

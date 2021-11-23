@@ -310,34 +310,33 @@ class Problem(object):
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
-    def _todo_expand(self):
-        return OrderedSet(
-            a.sentence for a in self.assignments.values()
-            if a.status in [S.UNKNOWN]
-            and (not a.sentence.is_reified() or self.extended))
+
+    def get_atoms(self, statuses):
+        return [(a.sentence, a.value) for a in self.assignments.values()
+            if (self.extended or not a.sentence.is_reified())
+            and a.status in statuses]
 
     def _from_model(self, solver, todo, complete):
         """ returns Assignments from model in solver """
         ass = self.assignments.copy()
         for q in todo:
-            if not q.is_reified() or self.extended:
-                # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
-                solver.add(q.reified(self) == q.translate(self))
+            assert self.extended or not q.is_reified()
+            # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
+            solver.add(q.reified(self) == q.translate(self))
         res1 = solver.check()
         if res1 == sat:
             model = solver.model()
             for q in todo:
-                if not q.is_reified() or self.extended:
-                    val1 = model.eval(q.reified(self),
-                                               model_completion=complete)
-                    val = str_to_IDP(q, str(val1))
-                    if val is not None:
-                        ass.assert__(q, val, S.EXPANDED)
+                assert self.extended or not q.is_reified()
+                val1 = model.eval(q.reified(self), model_completion=complete)
+                val = str_to_IDP(q, str(val1))
+                if val is not None:
+                    ass.assert__(q, val, S.EXPANDED)
         return ass
 
     def expand(self, max=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        todo = self._todo_expand()
+        todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN]))
 
         solver = self.get_solver()
         self.add_choices(solver)

@@ -119,7 +119,7 @@ France	    Luxembourg }
                                                                                                                    '≠ '
                                                                                                                    'Color(c2)',
                                                                                                         'relevant': False,
-                                                                                                        'status': 'CONSEQUENCE',
+                                                                                                        'status': 'UNIVERSAL',
                                                                                                         'typ': 'Bool',
                                                                                                         'value': True}},
  'Country_borders_Country': {}}
