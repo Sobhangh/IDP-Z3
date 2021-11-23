@@ -2,12 +2,12 @@ weight() -> 80
 No more consequences.
 ['Male', 'Female']
 
-bmi() -> 0.00249680097375238
+bmi() -> 0.003125
 riskLevel() -> Low
 weight() -> 80
 No more consequences.
 
-length() = 179
+length() = 160
 definition of BMILevel
 bmi() = $bmi$ ⇔ $bmi$ = weight() / (length() ⨯ length())
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
