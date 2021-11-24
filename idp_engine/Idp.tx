@@ -79,7 +79,7 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
     AUnary: !INT !IDPFLOAT               (operators+=UnaryOperator  f=Aggregate);
     AAggregate: !Date ( aggtype=/#|card/ '{' quantees*=Quantee[',']  ':' f=Expression '}'
-                | aggtype=/sum/ '(' 'lambda' quantees*=Quantee[',']  ':' out=Expression ')');
+                | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' out=Expression ')');
 
     RImplicationOp: '<=' | '⇐';
     EquivalenceOp: '<=>' | '⇔';

@@ -2,14 +2,17 @@ vocabulary V {
     type ConfigObj := {o1, o2 }
     Vehicle : ConfigObj -> Bool
     weight : ConfigObj -> Int
-    total : () -> Int
+    total, min : () -> Int
 }
 theory T:V {
     Vehicle(o1).
     #{V ∈ Vehicle: true} = 1.
-    weight(o1)=2.
+    weight(o1)=3.
+    weight(o2)=4.
     total() = sum(lambda x in Vehicle: weight(x)).
+    min() = min(lambda x in ConfigObj: weight(x)).
 }
 procedure main() {
-    pretty_print(model_expand(T, max=1))
+    pretty_print(Problem(T).formula())
+    pretty_print(model_expand(T))
 }

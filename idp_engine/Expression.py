@@ -805,7 +805,7 @@ class AAggregate(Expression):
         self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
         self.out = kwargs.pop('out')
-        if self.aggtype == "sum":
+        if self.aggtype in ["sum", "min", "max"]:
             self.f = TRUE
 
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
@@ -817,9 +817,9 @@ class AAggregate(Expression):
     def __str1__(self):
         if not self.using_if:
             vars = "".join([f"{q}" for q in self.quantees])
-            out = ((f"sum(lambda {vars} : "
+            out = ((f"{self.aggtype}(lambda {vars} : "
                     f"{self.sub_exprs[AAggregate.OUT].str}"
-                    f")" ) if self.aggtype == "sum" else
+                    f")" ) if self.aggtype in ["sum", "min", "max"] else
                    (f"{self.aggtype}{{{vars} : "
                     f"{self.sub_exprs[AAggregate.CONDITION].str}"
                     f"}}")
