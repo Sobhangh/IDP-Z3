@@ -54,7 +54,6 @@ class State(Problem):
                 State.cache.pop(list(State.cache.keys())[-1])
             state = State(idp)
             State.cache[idp.code] = state
-        _ = state.get_solver()
         state.add_given(jsonstr)
         return state
 
