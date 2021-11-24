@@ -63,14 +63,6 @@ GET request :
                 }
             }
         }
-    - previous_active : {        // list of choices previously made by the user
-        - <symbol> : string {
-            - <atom/term> : string {
-                - typ : string   // "Bool" | "Int" | "Real" | <custom type>
-                - value: string  // value entered by the user
-                }
-            }
-        }
     - code : string              // source code in FO(ID)
     - method : string            // name of the inference to be made:
                                  //   "propagate"   find propagated values

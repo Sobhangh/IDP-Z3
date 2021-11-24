@@ -36,18 +36,16 @@ class State(Problem):
     cache: Dict[str, 'State'] = {}
 
     @classmethod
-    def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
+    def make(cls, idp: IDP, jsonstr: str) -> "State":
         """Manage the cache of State
 
         Args:
             idp (IDP): idp source code
-            previous_active (str): previous input from client // TODO: still needed?
             jsonstr (str): input from client
 
         Returns:
             State: a State
         """
-
         if jsonstr != "{}" and idp.code in State.cache:  # TODO: fix weird way to reset via "{}"
             state = State.cache[idp.code]
         else:
@@ -61,8 +59,6 @@ class State(Problem):
         return state
 
     def __init__(self, idp: IDP):
-        self.active = "{}"
-
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
             assert len(idp.vocabularies) == 2, \
@@ -106,6 +102,7 @@ class State(Problem):
                     self.environment.assignments.assert__(a.sentence, a.value, a.status)
 
         self.relevant_symbols = {}
+        self.fresh_state = True
 
     def add_given(self, jsonstr: str):
         """
@@ -116,9 +113,7 @@ class State(Problem):
         :returns: the state with the jsonstr added
         :rtype: State
         """
-        if jsonstr == self.active:  # for get_range
-            return
-        self.active = jsonstr
+
         if self.environment:
             load_json(self.environment, jsonstr)
         load_json(self, jsonstr)

@@ -45,7 +45,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'Prepare_Terrace': {'Prepare_Terrace()': {'environmental': False,
                                            'is_assignment': False,
                                            'normal': True,

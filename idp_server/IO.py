@@ -94,12 +94,13 @@ def load_json(state: Problem, jsonstr: str):
     """
     if jsonstr:
         json_data = ast.literal_eval(jsonstr)
-        assert json_data != {}, "Reset not expected here"
 
-        # clear old choices
-        for sentence in [atom.sentence for atom in state.assignments.values()
-                         if atom.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]]:
-            state.assert_(sentence.code, None, S.UNKNOWN)
+        # clear old choices, except for recent defaults, which should be kept
+        for atom in state.assignments.values():
+            if atom.status in ([S.GIVEN, S.EXPANDED] if state.fresh_state
+                        else [S.GIVEN, S.EXPANDED, S.DEFAULT]):
+                state.assert_(atom.sentence.code, None, S.UNKNOWN)
+        state.fresh_state = False
 
         # set new choices
         for symbol in json_data:
@@ -116,7 +117,6 @@ def load_json(state: Problem, jsonstr: str):
                             state.assert_(key2, TRUE, S.GIVEN)
 
 
-
 #################
 # response to client
 # see docs/zettlr/REST.md
@@ -130,7 +130,6 @@ class Output(object):
 
         self.m[' Global'] = {}
         self.m[' Global']['env_dec'] = state.environment is not None
-        self.m[' Global']['active'] = state.active
         FROM = {BOOL: 'Bool', INT: 'Int', REAL: 'Real',
                 '`'+BOOL: '`Bool', '`'+INT: '`Int', '`'+REAL: '`Real',}
 

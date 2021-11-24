@@ -187,7 +187,7 @@ class meta(Resource):
                 parser.add_argument('code', type=str, help='Code')
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
-                state = State.make(idp, "{}", "{}")
+                state = State.make(idp, "{}")
                 if not state.idp.display.manualRelevance:
                     get_relevant_questions(state)
                 out = metaJSON(state)
@@ -226,16 +226,12 @@ class eval(Resource):
                 parser.add_argument('method', type=str, help='Method to execute')
                 parser.add_argument('code', type=str, help='Code')
                 parser.add_argument('active', type=str, help='Three-valued structure')
-                parser.add_argument('previous_active', type=str, help='Previous input by user')
-                # parser.add_argument('expanded', type=str, action='append', help='list of expanded symbols')
                 parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
                 parser.add_argument('value', type=str, help='Value to explain')
                 parser.add_argument('field', type=str, help='Applied Symbol whose range must be determined')
                 parser.add_argument('minimize', type=bool, help='True -> minimize ; False -> maximize')
                 parser.add_argument('with_relevance', type=bool, help='compute relevance if true')
                 args = parser.parse_args()
-                #print(args)
-                # expanded = tuple([]) if args['expanded'] is None else tuple(args['expanded'])
                 method = args['method']
                 out = {}
                 if method == "checkCode":
@@ -258,9 +254,7 @@ class eval(Resource):
                     next(state.expand(max=1))
                     out = {"result": "ok"}
                 else:
-                    state = State.make(idpOf(args['code']),
-                                    args.get('previous_active', None),
-                                    args['active'])
+                    state = State.make(idpOf(args['code']), args['active'])
 
                     if not state.propagate_success:
                         out = explain(state)

@@ -42,7 +42,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'edge': {'edge(a, a)': {'environmental': False,
                          'is_assignment': False,
                          'normal': True,
