@@ -397,7 +397,7 @@ AQuantification.instantiate1 = instantiate1
 # Class AAggregate  ######################################################
 
 def interpret(self, problem):
-    assert self.using_if, f"Internal error in interpret"
+    assert self.annotated, f"Internal error in interpret"
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 

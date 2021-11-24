@@ -809,13 +809,13 @@ class AAggregate(Expression):
             self.f = TRUE
 
         self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
-        self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
+        self.annotated = False  # cannot test q_vars, because aggregate may not have quantee
         self.q = ''
         super().__init__()
 
 
     def __str1__(self):
-        if not self.using_if:
+        if not self.annotated:
             vars = "".join([f"{q}" for q in self.quantees])
             out = ((f"{self.aggtype}(lambda {vars} : "
                     f"{self.sub_exprs[AAggregate.OUT].str}"

@@ -605,12 +605,12 @@ def annotate(self, voc, q_vars):
     self = AQuantification.annotate(self, voc, q_vars)
     self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
 
-    if not self.using_if:
+    if not self.annotated:
         self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
                 then_f=Number(number='1') if self.out is None else
                         self.sub_exprs[AAggregate.OUT],
                 else_f=Number(number='0'))]
-        self.using_if = True
+        self.annotated = True
     return self
 AAggregate.annotate = annotate
 AAggregate.annotate1 = AQuantification.annotate1
