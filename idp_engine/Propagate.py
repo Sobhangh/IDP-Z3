@@ -295,8 +295,8 @@ Problem.add_choices = add_choices
 
 def first_propagate(self):
     for a in self.assignments.values():
-        assert a.status not in [S.CONSEQUENCE, S.UNIVERSAL]
-    todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN]))
+        assert a.status not in [S.UNIVERSAL], "incorrect propagate status "+str(a.status)+" for "+str(a)
+    todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE]))
 
     solver = self.get_solver()
     solver.push()

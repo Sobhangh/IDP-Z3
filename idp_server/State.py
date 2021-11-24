@@ -102,7 +102,6 @@ class State(Problem):
                     self.environment.assignments.assert__(a.sentence, a.value, a.status)
 
         self.relevant_symbols = {}
-        self.fresh_state = True
 
     def add_given(self, jsonstr: str):
         """

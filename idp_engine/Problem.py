@@ -114,6 +114,7 @@ class Problem(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
+        self.fresh_state = True
         self.old_choices = []
         self.old_propagations = []
         self.first_prop = True
@@ -121,33 +122,57 @@ class Problem(object):
 
         self.slvr = None
         self.optmz = None
+        self.expl = None
+        self.expl_reifs = {}  # {reified: (constraint, original)}
+        # TODO: describe attributes in comment above
 
     def get_solver(self):
         if self.slvr is None:
             self.slvr = Solver(ctx=self.ctx)
+            solver = self.slvr
             assert self.constraintz()
-            self.slvr.add(And(self.constraintz()))
+            solver.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
                                 if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
                                 and a.symbol_decl.name in symbols]
             for af in assignment_forms:
-                self.slvr.add(af)
+                solver.add(af)
         return self.slvr
 
-    def get_optimize(self):
+    def get_optimize_solver(self):
         if self.optmz is None:
             self.optmz = Optimize(ctx=self.ctx)
+            solver = self.optmz
             assert self.constraintz()
-            self.optmz.add(And(self.constraintz()))
+            solver.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
                                 if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
                                 and a.symbol_decl.name in symbols]
             for af in assignment_forms:
-                self.optmz.add(af)
-
+                solver.add(af)
         return self.optmz
+
+    def get_explain_solver(self):
+        if self.expl is None:
+            self.expl = Solver(ctx=self.ctx)
+            solver = self.expl
+            solver.set(':core.minimize', True)
+
+            # get expanded def_constraints
+            def_constraints = {}
+            for defin in self.definitions:
+                instantiables = defin.get_instantiables(for_explain=True)
+                defin.add_def_constraints(instantiables, self, def_constraints)
+
+            todo = chain(self.constraints, chain(*def_constraints.values()))
+            for constraint in todo:
+                p = constraint.reified(self)
+                self.expl_reifs[p] = (constraint.original.interpret(self).translate(self), constraint)
+                solver.add(Implies(p, self.expl_reifs[p][0]))
+
+        return self.expl
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -387,7 +412,7 @@ class Problem(object):
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
 
-        solver = self.get_optimize()
+        solver = self.get_optimize_solver()
         solver.push()
         self.add_choices(solver)
 
@@ -462,31 +487,17 @@ class Problem(object):
         Returns:
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
-        facts, laws = [], []
-        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]
 
-        s = Solver(ctx=self.ctx)
-        s.set(':core.minimize', True)
-        ps = {}  # {reified: constraint}
+        solver = self.get_explain_solver()
+        ps = self.expl_reifs.copy()
+
+        solver.push()
 
         for ass in self.assignments.values():
-            if ass.status in reasons:
+            if ass.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
                 p = ass.translate(self)
-                ps[p] = ass
-                #TODO use assert_and_track ?
-                s.add(Implies(p, p))
-
-        # get expanded def_constraints
-        def_constraints = {}
-        for defin in self.definitions:
-            instantiables = defin.get_instantiables(for_explain=True)
-            defin.add_def_constraints(instantiables, self, def_constraints)
-
-        todo = chain(self.constraints, chain(*def_constraints.values()))
-        for constraint in todo:
-            p = constraint.reified(self)
-            ps[p] = constraint.original.interpret(self).translate(self)
-            s.add(Implies(p, ps[p]))
+                ps[p] = (ass, ass.formula() if ass.status == S.STRUCTURE else None)
+                solver.add(Implies(p, p))
 
         if consequence:
             negated = consequence.replace('~', '¬').startswith('¬')
@@ -500,32 +511,23 @@ class Problem(object):
             if to_explain.type != BOOL:  # determine numeric value
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
+                    solver.pop()
                     return ([], [])
                 to_explain = AComparison.make("=", [to_explain, val])
             if negated:
                 to_explain = AUnary.make('¬', to_explain)
 
-            s.add(Not(to_explain.translate(self)))
+            solver.add(Not(to_explain.translate(self)))
 
-        s.check(list(ps.keys()))
-        unsatcore = s.unsat_core()
+        solver.check(list(ps.keys()))
+        unsatcore = solver.unsat_core()
 
+        solver.pop()
+
+        facts, laws = [], []
         if unsatcore:
-            for k, a1 in self.assignments.items():
-                if a1.status in reasons:
-                    for a2 in unsatcore:
-                        if type(ps[a2]) == Assignment \
-                        and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
-                                facts.append(a1)
-                            else:
-                                laws.append(a1.formula())
-
-            unsatcorestrings = {str(ps[a2]) for a2 in unsatcore}
-            for a1 in chain(chain(*def_constraints.values()), self.constraints):
-                #TODO find the rule
-                if str(a1.original.interpret(self).translate(self)) in unsatcorestrings:
-                    laws.append(a1)
+            facts = [ps[a][0] for a in unsatcore if ps[a][1] is None]
+            laws = [ps[a][1] for a in unsatcore if ps[a][1] is not None]
 
         return (facts, laws)
 
@@ -539,6 +541,7 @@ class Problem(object):
         # convert consequences to Universal
         for ass in out.assignments.values():
             if ass.value:
+                # TODO: what if consequences are due to choices (e.g., defaults?)
                 ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
                         ass.status)
 
