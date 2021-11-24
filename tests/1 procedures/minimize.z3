@@ -25,4 +25,4 @@ Base:={->5}
 Height:={->6}
 Surface:={->7}
 
-More models are available.
+More models may be available.  Change the max argument to see them.

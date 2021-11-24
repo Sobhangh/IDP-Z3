@@ -1,0 +1,15 @@
+vocabulary V {
+    type ConfigObj := {o1, o2 }
+    Vehicle : ConfigObj -> Bool
+    weight : ConfigObj -> Int
+    total : () -> Int
+}
+theory T:V {
+    Vehicle(o1).
+    #{V ∈ Vehicle: true} = 1.
+    weight(o1)=2.
+    total() = sum(lambda x in Vehicle: weight(x)).
+}
+procedure main() {
+    pretty_print(model_expand(T, max=1))
+}

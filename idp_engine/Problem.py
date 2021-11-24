@@ -317,66 +317,78 @@ class Problem(object):
             and a.status in statuses]
 
     def _from_model(self, solver, todo, complete):
-        """ returns Assignments from model in solver """
-        ass = self.assignments.copy()
+        """ returns Assignments from model in solver
+
+        the solver must be in sat state
+        """
+        ass = self.assignments.copy(shallow=True)  # TODO: copy needed?
+        model = solver.model()
         for q in todo:
             assert self.extended or not q.is_reified()
-            # evaluating q.translate(self) directly fails the pipeline on arithmetic/forall.idp
-            solver.add(q.reified(self) == q.translate(self))
-        res1 = solver.check()
-        if res1 == sat:
-            model = solver.model()
-            for q in todo:
-                assert self.extended or not q.is_reified()
+            if complete or q.is_reified():
                 val1 = model.eval(q.reified(self), model_completion=complete)
-                val = str_to_IDP(q, str(val1))
-                if val is not None:
-                    ass.assert__(q, val, S.EXPANDED)
+            else:
+                val1 = model.eval(q.translate(self), model_completion=complete)
+            val = str_to_IDP(q, str(val1))
+            if val is not None:
+                ass.assert__(q, val, S.EXPANDED)
         return ass
 
-    def expand(self, max=10, complete=False):
+    def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN]))
+        todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN]))  # TODO: complete?
 
         solver = self.get_solver()
+        solver.push()
         self.add_choices(solver)
+        for q in todo:
+            if (q.is_reified() and self.extended) or complete:
+                solver.add(q.reified(self) == q.translate(self))
 
-        count = 0
-        while count < max or max <= 0:
+
+        count, ass = 0, {}
+        start = time.process_time()
+        while (max <= 0 or count < max) and \
+                (timeout <= 0 or time.process_time()-start < timeout):
+            # exclude ass
+            different = []
+            for a in ass.values():
+                if a.status == S.EXPANDED:
+                    q = a.sentence
+                    different.append(q.translate(self) != a.value.translate(self))
+            if different:
+                solver.add(Or(different))
+
             if solver.check() == sat:
                 count += 1
-                _ = solver.model()  # TODO: needed?
                 ass = self._from_model(solver, todo, complete)
                 yield ass
-
-                # exclude this model
-                different = []
-                for a in ass.values():
-                    if a.status == S.EXPANDED:
-                        q = a.sentence
-                        different.append(q.translate(self) != a.value.translate(self))
-                if not different:
-                    break
-                solver.add(Or(different))
             else:
                 break
 
-        more_models = solver.check() == sat
         solver.pop()
 
-        if more_models and different:
-            yield f"{NEWL}More models are available."
+        maxed = (0 < max <= count)
+        timeouted = (0 < timeout <= time.process_time()-start)
+        # if interrupted by the timeout
+        if maxed or timeouted:
+            param = ("max and timeout arguments" if maxed and timeouted else
+                     "max argument" if maxed else
+                     "timeout argument")
+            yield f"{NEWL}More models may be available.  Change the {param} to see them."
         elif 0 < count:
             yield f"{NEWL}No more models."
         else:
             yield "No models."
 
-    def optimize(self, term, minimize=True, complete=False):
+    def optimize(self, term, minimize=True):
         assert term in self.assignments, "Internal error"
+
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
 
         solver = self.get_optimize()
+        solver.push()
         self.add_choices(solver)
 
         if minimize:
@@ -392,10 +404,7 @@ class Problem(object):
 
         solver.pop()
 
-        self._formula = None  # reset directional propagation TODO needed?
-
         self.propagate()
-
         return self
 
     def symbolic_propagate(self):

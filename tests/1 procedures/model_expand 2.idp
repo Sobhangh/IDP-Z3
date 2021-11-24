@@ -15,5 +15,5 @@ theory T2:V {
 
 procedure main () {
     pretty_print(model_expand([T1, T2], sort=True))
-    pretty_print(model_expand(T1, sort=True))
+    pretty_print(model_expand(T1, sort=True, complete=True))
 }

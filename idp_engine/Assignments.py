@@ -91,9 +91,10 @@ class Assignment(object):
         if not self.symbol_decl:  # use the '_' symbol (to allow relevance computation)
             self.symbol_decl = default
 
-    def copy(self):
+    def copy(self, shallow=False):
         out = copy(self)
-        out.sentence = out.sentence.copy()
+        if not shallow:
+            out.sentence = out.sentence.copy()
         return out
 
     def __str__(self):
@@ -186,8 +187,8 @@ class Assignments(dict):
             if a.symbol_decl:
                 self.symbols[a.symbol_decl.name] = a.symbol_decl
 
-    def copy(self):
-        return Assignments({k: v.copy() for k, v in self.items()})
+    def copy(self, shallow=False):
+        return Assignments({k: v.copy(shallow) for k, v in self.items()})
 
     def extend(self, more):
         for v in more.values():

@@ -11,5 +11,5 @@ theory {
 procedure main() {
     pretty_print(model_propagate(T, sort=True))
     pretty_print(Problem(T).formula())
-    pretty_print(model_expand(T, sort=True))
+    pretty_print(model_expand(T, sort=True, complete=True))
 }

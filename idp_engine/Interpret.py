@@ -41,15 +41,14 @@ from itertools import product
 
 from .Assignments import Status as S
 from .Parse import (Extern, TypeDeclaration,
-                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
+                    SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
-from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
-                    AImplication, AConjunction, ARImplication, AAggregate,
-                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
-                    Variable, TRUE, FALSE, AEquivalence, Number)
-from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
-                    ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN)
+from .Expression import (IfExpr, SymbolExpr, Expression, Constructor, AQuantification,
+                    AImplication, AConjunction, AAggregate,
+                    AUnary, AppliedSymbol, UnappliedSymbol,
+                    Variable, TRUE)
+from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
 
 
 # class Extern  ###########################################################
@@ -364,8 +363,16 @@ def interpret(self, problem):
                             applied = AppliedSymbol.make(guard, val)
                             if self.q == '∀':
                                 new_f = AImplication.make('⇒', [applied, new_f])
-                            else:
+                            elif self.q == '∃':
                                 new_f = AConjunction.make('∧', [applied, new_f])
+                            else:  # aggregate
+                                # if a then b else 0 -> if (applied & a) then b else 0
+                                self.check(isinstance(new_f, IfExpr),
+                                           "internal error")
+                                arg1 = AConjunction.make('∧', [applied,
+                                                    new_f.sub_exprs[0]])
+                                new_f = IfExpr.make(arg1, new_f.sub_exprs[1],
+                                                    new_f.sub_exprs[2])
                         out.append(new_f)
                 forms = out
 

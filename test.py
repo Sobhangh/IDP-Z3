@@ -220,7 +220,7 @@ def api():
             kb = IDP.from_str(test)
             T, S1 = kb.get_blocks("T, S")
             kb.execute()
-            for model in model_expand(T,S1):
+            for model in model_expand(T,S1,sort=True,complete=True):
                 print(model)
                 print()
             problem = Problem(T)
