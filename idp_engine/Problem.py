@@ -81,6 +81,12 @@ class Problem(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
+        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
+
+        ctx : Z3 context
+
+        fresh_state (Bool): whether the state was freshly created
+
         old_choices ([Expression,Expression]): set of choices
             (sentence-value pairs) with which previous propagate was executed
 
@@ -91,9 +97,20 @@ class Problem(object):
 
         propagate_success (Bool): whether the last propagate call was succesful
 
-        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
+        slvr (Solver): stateful solver used for propagation and model expansion.
+            Use self.get_solver() to access.
 
-        ctx : Z3 context
+        optmz (Solver): stateful solver used for optimization.
+            Use self.get_optimize_solver() to access.
+
+        expl (Solver): stateful solver used for explanation.
+            Use self.get_explain_solver() to access.
+
+        expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
+            information on the reification of the constraints and definitions,
+            where the key represents the reified symbol in the solver, and the
+            value the constraint in the solver as well as the original expression.
+
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -114,6 +131,7 @@ class Problem(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
+
         self.fresh_state = True
         self.old_choices = []
         self.old_propagations = []
@@ -124,7 +142,6 @@ class Problem(object):
         self.optmz = None
         self.expl = None
         self.expl_reifs = {}  # {reified: (constraint, original)}
-        # TODO: describe attributes in comment above
 
     def get_solver(self):
         if self.slvr is None:
@@ -361,7 +378,8 @@ class Problem(object):
 
     def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN]))  # TODO: complete?
+        todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN]))
+        # TODO: should todo be larger in case complete==True?
 
         solver = self.get_solver()
         solver.push()
@@ -369,7 +387,6 @@ class Problem(object):
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
                 solver.add(q.reified(self) == q.translate(self))
-
 
         count, ass = 0, {}
         start = time.process_time()
@@ -443,11 +460,13 @@ class Problem(object):
     def propagate(self, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
+            # NOTE: running this will confuse _directional_todo, not used right now
+            assert False
             out = list(self._batch_propagate())
-            # NOTE: running this will confuse _directional_todo
         if method == Propagation.Z3:
+            # NOTE: running this will confuse _directional_todo, not used right now
+            assert False
             out = list(self._z3_propagate())
-            # NOTE: running this will confuse _directional_todo
         else:
             out = list(self._propagate())
         self.propagate_success = (out[0] != "Not satisfiable.")
