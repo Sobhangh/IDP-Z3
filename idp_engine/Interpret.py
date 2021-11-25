@@ -374,7 +374,6 @@ def interpret(self, problem):
                                                         new_f.sub_exprs[2])
                                 else:  # sum
                                     new_f = IfExpr.make(applied, new_f, Number(number="0"))
-                                #TODO Min
                         out.append(new_f)
                 forms = out
 
