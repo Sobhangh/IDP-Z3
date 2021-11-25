@@ -797,18 +797,14 @@ class AUnary(Expression):
 
 class AAggregate(Expression):
     PRECEDENCE = 130
-    CONDITION = 0
-    OUT = 1
 
     def __init__(self, **kwargs):
         self.aggtype = kwargs.pop('aggtype')
         self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
-        self.out = kwargs.pop('out')
-        if self.aggtype in ["sum", "min", "max"]:
-            self.f = TRUE
 
-        self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
+        self.aggtype = "#" if self.aggtype == "card" else self.aggtype
+        self.sub_exprs = [self.f]  # later: expressions to be summed
         self.annotated = False  # cannot test q_vars, because aggregate may not have quantee
         self.q = ''
         super().__init__()
@@ -818,10 +814,10 @@ class AAggregate(Expression):
         if not self.annotated:
             vars = "".join([f"{q}" for q in self.quantees])
             out = ((f"{self.aggtype}(lambda {vars} : "
-                    f"{self.sub_exprs[AAggregate.OUT].str}"
-                    f")" ) if self.aggtype in ["sum", "min", "max"] else
+                    f"{self.sub_exprs[0].str}"
+                    f")" ) if self.aggtype is not "#" else
                    (f"{self.aggtype}{{{vars} : "
-                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
+                    f"{self.sub_exprs[0].str}"
                     f"}}")
             )
         else:

@@ -475,7 +475,17 @@ Display.annotate = annotate
 # Class Expression  #######################################################
 
 def annotate(self, voc, q_vars):
-    " annotate tree after parsing "
+    """annotate tree after parsing
+
+    Resolve names and determine type as well as variables in the expression
+
+    Args:
+        voc (Vocabulary): the vocabulary
+        q_vars (Dict[str, Variable]): the quantifier variables that may appear in the expression
+
+    Returns:
+        Expression: an equivalent AST node, with updated type, fresh_vars
+    """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     return self.annotate1()
 Expression.annotate = annotate
@@ -555,7 +565,7 @@ def annotate1(self):
 AImplication.annotate1 = annotate1
 
 
-# Class AImplication, AEquivalence  #######################################################
+# Class AEquivalence  #######################################################
 
 def annotate1(self):
     self.check(len(self.sub_exprs) == 2,
@@ -603,13 +613,16 @@ AUnary.annotate1 = annotate1
 
 def annotate(self, voc, q_vars):
     self = AQuantification.annotate(self, voc, q_vars)
-    self.type = self.sub_exprs[AAggregate.OUT].type if self.out else INT
 
     if not self.annotated:
-        self.sub_exprs = [IfExpr.make(if_f=self.sub_exprs[AAggregate.CONDITION],
-                then_f=Number(number='1') if self.out is None else
-                        self.sub_exprs[AAggregate.OUT],
-                else_f=Number(number='0'))]
+        assert len(self.sub_exprs) == 1, "Internal error"
+        if self.aggtype == "#":
+            self.sub_exprs = [IfExpr.make(self.sub_exprs[0],
+                                          Number(number='1'),
+                                          Number(number='0'))]
+            self.type = INT
+        else:
+            self.type = self.sub_exprs[0].type
         self.annotated = True
     return self
 AAggregate.annotate = annotate
