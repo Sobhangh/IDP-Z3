@@ -623,6 +623,30 @@ def annotate(self, voc, q_vars):
             self.type = INT
         else:
             self.type = self.sub_exprs[0].type
+            if self.aggtype in ["min", "max"]:
+                # the `min` aggregate in `!y in T: min(lamda x in type: term(x,y))=0`
+                # is simplified to `_*(y)` with the following co-constraint:
+                #     !y in T: ( ?x in type: term(x) = _*(y)
+                #                !x in type: term(x) =< _*(y).
+
+                symbol_decl = SymbolDeclaration.make(
+                    "_"+self.str, # name `_ *`
+                    len(q_vars),  # arity
+                    [Symbol(name=v.type) for v in q_vars],
+                    Symbol(name=self.type)).annotate(voc)    # output_domain
+                symbol = Symbol(name=symbol_decl.name).annotate(voc, q_vars)
+                applied = AppliedSymbol.make(symbol, q_vars.values()).annotate(voc, q_vars)
+                self.simpler = applied
+
+                coc1 = AQuantification.make('∃', self.quantees,
+                        AComparison.make('=', [applied, self.sub_exprs[0]]))
+                coc2 = AQuantification.make('∀', self.quantees,
+                        AComparison.make('≤' if self.aggtype == "min" else '≥',
+                                         [applied, self.sub_exprs[0]]))
+                coc = AConjunction.make('∧', [coc1, coc2])
+                quantees = [Quantee.make(v, Symbol(name=v.type)).annotate(voc, q_vars)
+                            for v in q_vars]
+                self.co_constraint = AQuantification.make('∀', quantees, coc)
         self.annotated = True
     return self
 AAggregate.annotate = annotate

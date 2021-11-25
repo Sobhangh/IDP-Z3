@@ -1,16 +1,18 @@
 vocabulary V {
-    type ConfigObj := {o1, o2 }
+    type ConfigObj := {o1, o2, o3 }
     Vehicle : ConfigObj -> Bool
     weight : ConfigObj -> Int
-    total, min : () -> Int
+    total, min, max : () -> Int
 }
 theory T:V {
-    Vehicle(o1).
-    #{V ∈ Vehicle: true} = 1.
+    Vehicle(o2). Vehicle(o3).
+    #{V ∈ Vehicle: true} = 2.
     weight(o1)=3.
     weight(o2)=4.
+    weight(o3)=5.
     total() = sum(lambda x in Vehicle: weight(x)).
     min() = min(lambda x in ConfigObj: weight(x)).
+    max() = max(lambda x in ConfigObj: weight(x)).
 }
 procedure main() {
     pretty_print(Problem(T).formula())
