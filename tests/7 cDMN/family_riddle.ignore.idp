@@ -1,0 +1,52 @@
+
+
+vocabulary V {
+    type Parent_t := { Rene, Leo } 
+    type Child_t := { 1..12 } 
+    type Gender_t := { Boy, Girl } 
+    type Age_t := { 0..20 } 
+    type SumAge_t := { 1..60 } 
+    type Number_t := { 1..6 } 
+    age_of_Child: Child_t -> Age_t
+    parent_of_Child: Child_t -> Parent_t
+    gender_of_Child: Child_t -> Gender_t
+    age_of_Parent_and_Gender: Parent_t * Gender_t -> SumAge_t
+    number_of_Parent_and_Gender: Parent_t * Gender_t -> Number_t
+    youngest_age_of_Parent: Parent_t -> Age_t
+    Total_Age:  -> SumAge_t
+}
+theory T: V{
+    //Age difference
+    !c1 in Child_t: !c2 in Child_t: c2 ~= c1 & parent_of_Child(c1) = parent_of_Child(c2) => abs((age_of_Child(c1) - age_of_Child(c2))) >= 1.
+
+    !c1 in Child_t: !c2 in Child_t: true => age_of_Child(c1) < 10.
+
+    //Count age per parent and gender
+    !parent_of_Child_ in Parent_t: !gender_of_Child_ in Gender_t: age_of_Parent_and_Gender(parent_of_Child_, gender_of_Child_)  = sum(lambda Child in Child_t: if (parent_of_Child(Child) = parent_of_Child_ & gender_of_Child(Child) = gender_of_Child_)then age_of_Child(Child) else 0 ).
+    //Count total age of children
+    Total_Age() = sum( lambda Child in Child_t: age_of_Child(Child) ).
+    //Count children per parent
+    !parent_of_Child_ in Parent_t: !gender_of_Child_ in Gender_t:  number_of_Parent_and_Gender(parent_of_Child_, gender_of_Child_) = (#{ Child in Child_t: parent_of_Child(Child) = parent_of_Child_ & gender_of_Child(Child) = gender_of_Child_ & Child = Child }).
+    //Each parent has 3 boys and 3 girls
+    !Parent in Parent_t: true => age_of_Parent_and_Gender(Parent, Girl) = age_of_Parent_and_Gender(Parent, Boy) & number_of_Parent_and_Gender(Parent, Girl) = 3 & number_of_Parent_and_Gender(Parent, Boy) = 3.
+
+    //Total Age constraint
+    true => Total_Age() = 60.
+
+    //youngest age of Parent
+    !poc in Parent_t: youngest_age_of_Parent(poc)  = min(lambda Child in Child_t: if parent_of_Child(Child) = poc then age_of_Child(Child) else 0 ).
+    //Youngest Child constraint
+    !Child in Child_t: parent_of_Child(Child) = Rene & age_of_Child(Child) = youngest_age_of_Parent(Rene) => gender_of_Child(Child) = Girl & age_of_Child(Child) = 0.
+
+    !Child in Child_t: parent_of_Child(Child) = Leo & age_of_Child(Child) = youngest_age_of_Parent(Leo) => gender_of_Child(Child) = Girl.
+
+    //The sum of boys’ and girls’ ages are the same for both parents
+    !Parent in Parent_t: true => age_of_Parent_and_Gender(Parent, Boy) = age_of_Parent_and_Gender(Parent, Girl).
+
+}
+
+
+structure S: V{
+}
+
+

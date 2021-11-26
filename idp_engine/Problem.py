@@ -31,7 +31,7 @@ from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
-                         AComparison, AUnary)
+                         EQUALS, NOT)
 from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
@@ -358,6 +358,13 @@ class Problem(object):
             if (self.extended or not a.sentence.is_reified())
             and a.status in statuses]
 
+
+    def sexpr(self):
+        s = Solver(ctx=self.ctx)
+        s.add(self.formula())
+        return s.sexpr()
+
+
     def _from_model(self, solver, todo, complete):
         """ returns Assignments from model in solver
 
@@ -532,9 +539,9 @@ class Problem(object):
                 if val is None:  # can't explain an expanded value
                     solver.pop()
                     return ([], [])
-                to_explain = AComparison.make("=", [to_explain, val])
+                to_explain = EQUALS([to_explain, val])
             if negated:
-                to_explain = AUnary.make('¬', to_explain)
+                to_explain = NOT(to_explain)
 
             solver.add(Not(to_explain.translate(self)))
 

@@ -1,0 +1,36 @@
+
+
+vocabulary V {
+    type Person_t := { Agatha, Butler, Charles } 
+    type Number_t := { 0..100 } 
+    hated_persons_of_Person: Person_t -> Number_t
+    Killer:  -> Person_t
+    Person_hates_Person: Person_t * Person_t -> Bool
+    Person_richer_than_Person: Person_t * Person_t -> Bool
+}
+theory T: V{
+    //A killer always hates, and is no richer than his victim
+    true => Person_hates_Person(Killer(), Agatha) & ~(Person_richer_than_Person(Killer(), Agatha)).
+
+    //Agatha hates everybody but the butler
+    !Person in Person_t: Person ~= Butler => Person_hates_Person(Agatha, Person).
+
+    !Person in Person_t: Person = Butler => ~(Person_hates_Person(Agatha, Person)).
+
+    //Charles hates no one that Agatha hates
+    !Person in Person_t: Person_hates_Person(Agatha, Person) => ~(Person_hates_Person(Charles, Person)) & Person_hates_Person(Butler, Person).
+
+    //Butler hates everyone not richer than Agatha
+    !Person in Person_t: ~(Person_richer_than_Person(Person, Agatha)) => Person_hates_Person(Butler, Person).
+
+    //Count enemies
+    !p1 in Person_t:  hated_persons_of_Person(p1) = (#{ p2 in Person_t: Person_hates_Person(p1, p2) & p1 = p1 & p2 = p2 }).
+    //Noone hates all
+    !Person in Person_t: true => hated_persons_of_Person(Person) < #{ typevar ∈ Person_t : true}.
+
+}
+
+
+structure S: V{
+}
+

@@ -1,0 +1,39 @@
+vocabulary V {
+    type Person_t := { Robinson, Warner, Stevens, White, Smith, Green, Brown, Klaus, Houston, Long, Short, Doe } 
+    type Marital_Status_t := { Married, Single } 
+    type Gender_t := { Male, Female } 
+    type Age_t := { 0..100 } 
+    Marital_Status_of_Person: Marital_Status_t * Person_t -> Marital_Status_t
+    Gender_of_Person: Gender_t * Person_t -> Gender_t
+    Age_of_Person: Age_t * Person_t -> Real
+    Salary_of_Person: Person_t -> Real
+    Minimal_Salary:  -> Real
+    Maximal_Salary:  -> Real
+    Average_Salary:  -> Real
+    Total_Salary:  -> Real
+    Person_is_Rich: Person_t -> Bool
+}
+theory T: V{
+    //Minimal Salary
+    Minimal_Salary() = min( lambda Person in Person_t: Salary_of_Person(Person) ).
+    //Maximal Salary
+    Maximal_Salary() = max( lambda Person in Person_t: Salary_of_Person(Person) ).
+    //Total Salary
+    Total_Salary() = sum( lambda Person in Person_t: Salary_of_Person(Person) ).
+
+
+
+
+    {
+        Average_Salary() = Total_Salary()/12 <- true.
+    }
+    {
+        !Person in Person_t: Person_is_Rich(Person) <- Salary_of_Person(Person) > 85000.
+    }
+}
+
+
+structure S: V{
+    Age_of_Person := {(Robinson) -> 25, (Warner) -> 45, (Stevens) -> 24, (White) -> 32, (Smith) -> 46, (Green) -> 28, (Brown) -> 32, (Klaus) -> 54, (Houston) -> 47, (Long) -> 29, (Short) -> 22, (Doe) -> 21}
+    Salary_of_Person := {(Robinson) -> 20000, (Warner) -> 150000, (Stevens) -> 35000, (White) -> 75000, (Smith) -> 110000, (Green) -> 40000, (Brown) -> 65000, (Klaus) -> 85000, (Houston) -> 35000, (Long) -> 40000, (Short) -> 20000, (Doe) -> 21000}
+}

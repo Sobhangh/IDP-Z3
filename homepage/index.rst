@@ -26,5 +26,5 @@ Our partners particularly appreciate the ease of encoding this knowledge in FO(.
 Get in touch?
 -------------
 The IDP-Z3 engine is available for experimentation through its `online IDE <https://interactive-consultant.IDP-Z3.be/IDE>`_.
-Its documentation is available `online <https://docs.idp-z3.be/en/stable/>`_, including a guide on how to install the IDP-Z3 system for use offline.
+Its documentation is available `online <https://docs.idp-z3.be/en/stable/introduction.html>`_, including a guide on how to install the IDP-Z3 system for use offline.
 For further support or other inquiries, you can contact us `by mail <mailto:krr@kuleuven.be>`_.
