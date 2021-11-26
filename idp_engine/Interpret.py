@@ -45,7 +45,7 @@ from .Parse import (Extern, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (IfExpr, SymbolExpr, Expression, Constructor, AQuantification,
-                    AImplication, AND, AAggregate,
+                    IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
@@ -362,7 +362,7 @@ def interpret(self, problem):
                         if guard:  # adds `guard(val) =>` in front of expression
                             applied = AppliedSymbol.make(guard, val)
                             if self.q == '∀':
-                                new_f = AImplication.make('⇒', [applied, new_f])
+                                new_f = IMPLIES([applied, new_f])
                             elif self.q == '∃':
                                 new_f = AND([applied, new_f])
                             else:  # aggregate

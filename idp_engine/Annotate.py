@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          ARImplication, AImplication, AEquivalence, ADisjunction,
                          AConjunction, Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR)
+                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, IMPLIES)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -243,8 +243,7 @@ def get_instantiables(self, for_explain=False):
                                               self.annotations)]
                 all_bodies = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                         rule.definiendum, True, True)
-                out.append(AImplication.make('⇒', [head, all_bodies],
-                                             self.annotations))
+                out.append(IMPLIES([head, all_bodies], self.annotations))
             result[decl] = out
     return result
 Definition.get_instantiables = get_instantiables
