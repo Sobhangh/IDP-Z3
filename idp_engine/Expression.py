@@ -715,6 +715,9 @@ class AEquivalence(Operator):
         out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
         return out.split()
 
+def EQUIV(exprs, annotations=None):
+    return AEquivalence.make('⇔', exprs, annotations)
+
 class ARImplication(Operator):
     PRECEDENCE = 30
 

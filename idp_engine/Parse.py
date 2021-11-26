@@ -45,7 +45,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
@@ -690,7 +690,7 @@ class Rule(ASTNode):
             self.check(len(self.definiendum.sub_exprs) == len(new_args),
                        "Internal error")
             out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
-            out = AEquivalence.make('⇔', [instance, out])
+            out = EQUIV([instance, out])
         else:
             self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
                        "Internal error")
