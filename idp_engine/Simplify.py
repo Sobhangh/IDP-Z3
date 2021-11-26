@@ -32,7 +32,7 @@ from .Expression import (
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
-    Number, Date, Brackets, TRUE, FALSE, NOT, AND)
+    Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
 from .Parse import Symbol, Enumeration, Tuple, TypeDeclaration
 from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, CONCEPT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, RESERVED_SYMBOLS
@@ -124,7 +124,7 @@ def update_exprs(self, new_exprs):
         if self.q == '∀':
             simpler = AND(exprs)
         else:
-            simpler = ADisjunction.make('∨', exprs)
+            simpler = OR(exprs)
         return self._change(simpler=simpler, sub_exprs=[simpler])
     return self._change(sub_exprs=exprs)
 AQuantification.update_exprs = update_exprs

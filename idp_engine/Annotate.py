@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          ARImplication, AImplication, AEquivalence, ADisjunction,
                          AConjunction, Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND)
+                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -170,7 +170,7 @@ def annotate(self, theory, voc, q_vars):
     for decl, rules in self.canonicals.items():
         new_rule = copy(rules[0])
         exprs = [rule.body for rule in rules]
-        new_rule.body = ADisjunction.make('∨', exprs)
+        new_rule.body = OR(exprs)
         self.clarks[decl] = new_rule
     return self
 Definition.annotate = annotate
@@ -227,7 +227,7 @@ def get_instantiables(self, for_explain=False):
                         out.append(ARImplication.make('⇐', [head, new],
                                                       r.annotations))
 
-            all_bodies = ADisjunction.make('∨', bodies)
+            all_bodies = OR(bodies)
             if not inductive:
                 if out:  # already contains reverse implications
                     out.append(ARImplication.make('⇒', [head, all_bodies],
@@ -626,7 +626,7 @@ def annotate(self, voc, q_vars):
             if self.aggtype in ["min", "max"]:
                 # the `min` aggregate in `!y in T: min(lamda x in type: term(x,y))=0`
                 # is replaced by `_*(y)` with the following co-constraint:
-                #     !y in T: ( ?x in type: term(x) = _*(y)
+                #     !y in T: ( x in type: term(x) = _*(y)
                 #                !x in type: term(x) =< _*(y).
 
                 symbol_decl = SymbolDeclaration.make(

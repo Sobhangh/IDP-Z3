@@ -45,7 +45,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
@@ -387,7 +387,7 @@ class TypeDeclaration(ASTNode):
         if self.name == CONCEPT:
             comparisons = [EQUALS([var, UnappliedSymbol.construct(c)])
                           for c in self.constructors]
-            return ADisjunction.make("∨", comparisons)
+            return OR(comparisons)
         else:
             return self.interpretation.enumeration.contains([var], False)
 
@@ -838,7 +838,7 @@ class Enumeration(ASTNode):
             if rank + 1 == arity:  # use OR
                 out = [ EQUALS([args[rank], t.args[rank]])
                         for t in tuples]
-                out = ADisjunction.make('∨', out)
+                out = OR(out)
                 out.enumerated = ', '.join(str(c) for c in tuples)
                 return out
             out = FALSE
@@ -877,7 +877,7 @@ class ConstructedFrom(Enumeration):
         # args must satisfy the tester of one of the constructors
         out = [AppliedSymbol.construct(constructor.tester, args)
                 for constructor in self.constructors]
-        return ADisjunction.make('∨', out)
+        return OR(out)
 
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
@@ -944,7 +944,7 @@ class Ranges(Enumeration):
             return None
         if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
             es = [EQUALS([var, c.args[0]]) for c in self.tuples]
-            e = ADisjunction.make('∨', es)
+            e = OR(es)
             return e
         sub_exprs = []
         for x in self.elements:
@@ -953,7 +953,7 @@ class Ranges(Enumeration):
             else:
                 e = AComparison.make('≤', [x.fromI, var, x.toI])
             sub_exprs.append(e)
-        return ADisjunction.make('∨', sub_exprs)
+        return OR(sub_exprs)
 
 class IntRange(Ranges):
     def __init__(self):

@@ -730,6 +730,8 @@ class ADisjunction(Operator):
             return super().__str1__()
         return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
 
+def OR(exprs):
+    return ADisjunction.make('∨', exprs)
 
 class AConjunction(Operator):
     PRECEDENCE = 70
