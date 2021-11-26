@@ -385,7 +385,7 @@ class TypeDeclaration(ASTNode):
 
     def check_bounds(self, var):
         if self.name == CONCEPT:
-            comparisons = [AComparison.make("=", [var, UnappliedSymbol.construct(c)])
+            comparisons = [EQUALS([var, UnappliedSymbol.construct(c)])
                           for c in self.constructors]
             return ADisjunction.make("∨", comparisons)
         else:
@@ -951,7 +951,7 @@ class Ranges(Enumeration):
             if x.toI is None:
                 e = EQUALS([var, x.fromI])
             else:
-                e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
+                e = AComparison.make('≤', [x.fromI, var, x.toI])
             sub_exprs.append(e)
         return ADisjunction.make('∨', sub_exprs)
 

@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          ARImplication, AImplication, AEquivalence, ADisjunction,
                          AConjunction, Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT, EQUALS)
+                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -293,7 +293,7 @@ def rename_args(self, new_vars):
                     self.definiendum.sub_exprs[j].instantiate([arg], [nv])
         else:
             eq = EQUALS([nv, arg])
-            self.body = AConjunction.make('∧', [eq, self.body])
+            self.body = AND([eq, self.body])
 
     self.check(not vars, f"Too many variables in head of rule: {self}")
 
@@ -643,7 +643,7 @@ def annotate(self, voc, q_vars):
                 coc2 = AQuantification.make('∀', self.quantees.copy(),
                         AComparison.make('≤' if self.aggtype == "min" else '≥',
                                          [applied.copy(), self.sub_exprs[0].copy()]))
-                coc = AConjunction.make('∧', [coc1, coc2])
+                coc = AND([coc1, coc2])
                 quantees = [Quantee.make(v, Symbol(name=v.sort.code))
                             for v in q_vars.values()]
                 applied.co_constraint = AQuantification.make('∀', quantees, coc).annotate(voc, q_vars)

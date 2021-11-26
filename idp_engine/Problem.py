@@ -31,7 +31,7 @@ from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
-                         AComparison, NOT)
+                         EQUALS, NOT)
 from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
@@ -499,7 +499,7 @@ class Problem(object):
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
                     return ([], [])
-                to_explain = AComparison.make("=", [to_explain, val])
+                to_explain = EQUALS([to_explain, val])
             if negated:
                 to_explain = NOT(to_explain)
 

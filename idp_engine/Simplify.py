@@ -32,7 +32,7 @@ from .Expression import (
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
-    Number, Date, Brackets, TRUE, FALSE, NOT)
+    Number, Date, Brackets, TRUE, FALSE, NOT, AND)
 from .Parse import Symbol, Enumeration, Tuple, TypeDeclaration
 from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, CONCEPT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, RESERVED_SYMBOLS
@@ -122,7 +122,7 @@ def update_exprs(self, new_exprs):
     exprs = list(new_exprs)
     if not self.quantees:
         if self.q == '∀':
-            simpler = AConjunction.make('∧', exprs)
+            simpler = AND(exprs)
         else:
             simpler = ADisjunction.make('∨', exprs)
         return self._change(simpler=simpler, sub_exprs=[simpler])
@@ -165,10 +165,10 @@ def update_exprs(self, new_exprs):
         return self._change(simpler=exprs[1], sub_exprs=exprs)
     for e in exprs:
         if e.same_as(TRUE):  # they must all be true
-            return self._change(simpler=AConjunction.make('∧', exprs),
+            return self._change(simpler=AND(exprs),
                                 sub_exprs=exprs)
         if e.same_as(FALSE):  # they must all be false
-            return self._change(simpler=AConjunction.make('∧', [NOT(e) for e in exprs]),
+            return self._change(simpler=AND([NOT(e) for e in exprs]),
                                 sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs

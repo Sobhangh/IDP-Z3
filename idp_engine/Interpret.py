@@ -45,7 +45,7 @@ from .Parse import (Extern, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (IfExpr, SymbolExpr, Expression, Constructor, AQuantification,
-                    AImplication, AConjunction, AAggregate,
+                    AImplication, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
@@ -364,11 +364,11 @@ def interpret(self, problem):
                             if self.q == '∀':
                                 new_f = AImplication.make('⇒', [applied, new_f])
                             elif self.q == '∃':
-                                new_f = AConjunction.make('∧', [applied, new_f])
+                                new_f = AND([applied, new_f])
                             else:  # aggregate
                                 if isinstance(new_f, IfExpr):  # cardinality
                                     # if a then b else 0 -> if (applied & a) then b else 0
-                                    arg1 = AConjunction.make('∧', [applied,
+                                    arg1 = AND([applied,
                                                         new_f.sub_exprs[0]])
                                     new_f = IfExpr.make(arg1, new_f.sub_exprs[1],
                                                         new_f.sub_exprs[2])
@@ -445,7 +445,7 @@ def interpret(self, problem):
             if len(inst) == 1:
                 co_constraint = inst[0]
             elif len(inst) > 1:
-                co_constraint = AConjunction.make('∧', inst)
+                co_constraint = AND(inst)
         out = (value if value else
                self._change(sub_exprs=sub_exprs, simpler=simpler,
                         co_constraint=co_constraint))

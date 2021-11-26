@@ -707,7 +707,7 @@ class AEquivalence(Operator):
     def split(self):
         posimpl = AImplication.make('⇒', [self.sub_exprs[0], self.sub_exprs[1]])
         negimpl = ARImplication.make('⇐', [self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
-        return AConjunction.make('∧', [posimpl, negimpl])
+        return AND([posimpl, negimpl])
 
     def split_equivalences(self):
         out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
@@ -734,6 +734,8 @@ class ADisjunction(Operator):
 class AConjunction(Operator):
     PRECEDENCE = 70
 
+def AND(exprs):
+    return AConjunction.make('∧', exprs)
 
 class AComparison(Operator):
     PRECEDENCE = 80
@@ -1002,7 +1004,7 @@ class AppliedSymbol(Expression):
                 AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
             ])
             if polarity:
-                return AConjunction.make('∧', [comp, self])
+                return AND([comp, self])
             else:
                 return ADisjunction.make('∨', [comp, self])
 
