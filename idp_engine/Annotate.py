@@ -28,10 +28,11 @@ from .Parse import (Vocabulary, Extern, TypeDeclaration, Type,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
 from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
-                         ARImplication, AImplication, AEquivalence, ADisjunction,
-                         AConjunction, Operator, AComparison, AUnary, AAggregate,
+                         ARImplication, AImplication, AEquivalence,
+                         Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number)
+                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR,
+                         IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -170,7 +171,7 @@ def annotate(self, theory, voc, q_vars):
     for decl, rules in self.canonicals.items():
         new_rule = copy(rules[0])
         exprs = [rule.body for rule in rules]
-        new_rule.body = ADisjunction.make('∨', exprs)
+        new_rule.body = OR(exprs)
         self.clarks[decl] = new_rule
     return self
 Definition.annotate = annotate
@@ -199,12 +200,12 @@ def get_instantiables(self, for_explain=False):
         else:
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
-                                        rule.definiendum.sub_exprs[:-1])
+                                          rule.definiendum.sub_exprs[:-1])
                 expr.in_head = True
-                head = AComparison.make('=', [expr, rule.definiendum.sub_exprs[-1]])
+                head = EQUALS([expr, rule.definiendum.sub_exprs[-1]])
             else:
                 head = AppliedSymbol.make(rule.definiendum.symbol,
-                                        rule.definiendum.sub_exprs)
+                                          rule.definiendum.sub_exprs)
                 head.in_head = True
 
             inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
@@ -216,35 +217,29 @@ def get_instantiables(self, for_explain=False):
                 if not inductive:
                     bodies.append(r.body)
                     if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
-                        out.append(ARImplication.make('⇐', [head, r.body],
-                                                      r.annotations))
+                        out.append(RIMPLIES([head, r.body], r.annotations))
                 else:
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
                         new = new.copy().add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
-                        out.append(ARImplication.make('⇐', [head, new],
-                                                      r.annotations))
+                        out.append(RIMPLIES([head, new], r.annotations))
 
-            all_bodies = ADisjunction.make('∨', bodies)
+            all_bodies = OR(bodies)
             if not inductive:
                 if out:  # already contains reverse implications
-                    out.append(ARImplication.make('⇒', [head, all_bodies],
-                                                  self.annotations))
+                    out.append(RIMPLIES([head, all_bodies], self.annotations))
                 else:
-                    out = [AEquivalence.make('⇔', [head, all_bodies],
-                                             self.annotations)]
+                    out = [EQUIV([head, all_bodies], self.annotations)]
             else:
                 if not out:  # no reverse implication yet
                     new = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
-                    out = [ARImplication.make('⇐', [head.copy(), new],
-                                              self.annotations)]
+                    out = [RIMPLIES([head.copy(), new], self.annotations)]
                 all_bodies = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                         rule.definiendum, True, True)
-                out.append(AImplication.make('⇒', [head, all_bodies],
-                                             self.annotations))
+                out.append(IMPLIES([head, all_bodies], self.annotations))
             result[decl] = out
     return result
 Definition.get_instantiables = get_instantiables
@@ -292,8 +287,8 @@ def rename_args(self, new_vars):
                 self.definiendum.sub_exprs[j] = \
                     self.definiendum.sub_exprs[j].instantiate([arg], [nv])
         else:
-            eq = AComparison.make('=', [nv, arg])
-            self.body = AConjunction.make('∧', [eq, self.body])
+            eq = EQUALS([nv, arg])
+            self.body = AND([eq, self.body])
 
     self.check(not vars, f"Too many variables in head of rule: {self}")
 
@@ -484,7 +479,7 @@ def annotate(self, voc, q_vars):
         q_vars (Dict[str, Variable]): the quantifier variables that may appear in the expression
 
     Returns:
-        Expression: an equivalent AST node, with updated type, fresh_vars
+        Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     return self.annotate1()
@@ -493,14 +488,14 @@ Expression.annotate = annotate
 
 def annotate1(self):
     " annotations that are common to __init__ and make() "
-    self.fresh_vars = set()
+    self.variables = set()
     if self.value is not None:
         pass
     if self.simpler is not None:
-        self.fresh_vars = self.simpler.fresh_vars
+        self.variables = self.simpler.variables
     else:
         for e in self.sub_exprs:
-            self.fresh_vars.update(e.fresh_vars)
+            self.variables.update(e.variables)
     return self
 Expression.annotate1 = annotate1
 
@@ -536,10 +531,10 @@ def annotate1(self):
     for q in self.quantees:  # remove declared variables
         for vs in q.vars:
             for v in vs:
-                self.fresh_vars.discard(v.name)
+                self.variables.discard(v.name)
     for q in self.quantees:  # add variables in sort expression
         for sort in q.sub_exprs:
-            self.fresh_vars.update(sort.fresh_vars)
+            self.variables.update(sort.variables)
     return self
 AQuantification.annotate1 = annotate1
 
@@ -594,7 +589,7 @@ def annotate(self, voc, q_vars):
     out.type = BOOL
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
-        out = AUnary.make('¬', AComparison.make('=', self.sub_exprs))
+        out = NOT(EQUALS(self.sub_exprs))
     return out
 AComparison.annotate = annotate
 
@@ -638,15 +633,16 @@ def annotate(self, voc, q_vars):
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
 
-                coc1 = AQuantification.make('∃', self.quantees,
-                        AComparison.make('=', [applied.copy(), self.sub_exprs[0]]))
-                coc2 = AQuantification.make('∀', self.quantees.copy(),
-                        AComparison.make('≤' if self.aggtype == "min" else '≥',
-                                         [applied.copy(), self.sub_exprs[0].copy()]))
-                coc = AConjunction.make('∧', [coc1, coc2])
+                coc1 = EXISTS(self.quantees,
+                              EQUALS([applied.copy(), self.sub_exprs[0]]))
+                op = '≤' if self.aggtype == "min" else '≥'
+                coc2 = FORALL(self.quantees.copy(),
+                              AComparison.make(op,
+                                    [applied.copy(), self.sub_exprs[0].copy()]))
+                coc = AND([coc1, coc2])
                 quantees = [Quantee.make(v, Symbol(name=v.sort.code))
                             for v in q_vars.values()]
-                applied.co_constraint = AQuantification.make('∀', quantees, coc).annotate(voc, q_vars)
+                applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                 return applied
         self.annotated = True
     return self
@@ -670,19 +666,19 @@ def annotate(self, voc, q_vars):
     if 'not' in self.is_enumerated:
         out = AppliedSymbol.make(out.symbol, out.sub_exprs,
                                  is_enumerated='is enumerated')
-        out = AUnary.make('¬', out)
+        out = NOT(out)
     elif 'not' in self.is_enumeration:
         out = AppliedSymbol.make(out.symbol, out.sub_exprs,
                                  is_enumeration='in',
                                  in_enumeration=out.in_enumeration)
-        out = AUnary.make('¬', out)
+        out = NOT(out)
     return out
 AppliedSymbol.annotate = annotate
 
 def annotate1(self):
     out = Expression.annotate1(self)
     out.symbol = out.symbol.annotate1()
-    out.fresh_vars.update(out.symbol.fresh_vars)
+    out.variables.update(out.symbol.variables)
     return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
 
@@ -708,7 +704,7 @@ Variable.annotate = annotate
 def annotate(self, voc, q_vars):
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
-        self.fresh_vars = {}
+        self.variables = {}
         self.check(type(self.decl) == Constructor,
                    f"{self} should be applied to arguments (or prefixed with a back-tick)")
         return self
@@ -730,7 +726,7 @@ def annotate1(self):
     self.type = self.sub_exprs[0].type
     if self.annotations['reading']:
         self.sub_exprs[0].annotations = self.annotations
-    self.fresh_vars = self.sub_exprs[0].fresh_vars
+    self.variables = self.sub_exprs[0].variables
     return self
 Brackets.annotate1 = annotate1
 

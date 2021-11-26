@@ -28,7 +28,7 @@ from enum import Enum, auto
 from typing import Optional
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, AUnary, AComparison
+from .Expression import Expression, TRUE, FALSE, NOT, EQUALS
 from .utils import NEWL, BOOL
 
 
@@ -137,9 +137,9 @@ class Assignment(object):
             raise Exception("can't translate unknown value")
         if self.sentence.type == BOOL:
             out = self.sentence if self.value.same_as(TRUE) else \
-                AUnary.make('¬', self.sentence)
+                NOT(self.sentence)
         else:
-            out = AComparison.make('=', [self.sentence, self.value])
+            out = EQUALS([self.sentence, self.value])
         return out
 
     def negate(self):

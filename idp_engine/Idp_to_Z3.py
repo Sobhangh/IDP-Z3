@@ -137,7 +137,7 @@ def translate(self, problem: "Problem", vars={}) -> ExprRef:
         return self.value.translate(problem, vars)
     if self.simpler is not None:
         return self.simpler.translate(problem, vars)
-    if self.fresh_vars:
+    if self.variables:
         return self.translate1(problem, vars)
     out = problem.z3.get(self.str, None)
     if out is None:
