@@ -32,7 +32,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR,
-                         IMPLIES, RIMPLIES, EQUIV)
+                         IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -633,15 +633,16 @@ def annotate(self, voc, q_vars):
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
 
-                coc1 = AQuantification.make('∃', self.quantees,
-                        EQUALS([applied.copy(), self.sub_exprs[0]]))
-                coc2 = AQuantification.make('∀', self.quantees.copy(),
-                        AComparison.make('≤' if self.aggtype == "min" else '≥',
-                                         [applied.copy(), self.sub_exprs[0].copy()]))
+                coc1 = EXISTS(self.quantees,
+                              EQUALS([applied.copy(), self.sub_exprs[0]]))
+                op = '≤' if self.aggtype == "min" else '≥'
+                coc2 = FORALL(self.quantees.copy(),
+                              AComparison.make(op,
+                                    [applied.copy(), self.sub_exprs[0].copy()]))
                 coc = AND([coc1, coc2])
                 quantees = [Quantee.make(v, Symbol(name=v.sort.code))
                             for v in q_vars.values()]
-                applied.co_constraint = AQuantification.make('∀', quantees, coc).annotate(voc, q_vars)
+                applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                 return applied
         self.annotated = True
     return self

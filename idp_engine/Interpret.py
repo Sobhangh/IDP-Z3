@@ -44,8 +44,8 @@ from .Parse import (Extern, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
-from .Expression import (IfExpr, SymbolExpr, Expression, Constructor, AQuantification,
-                    IMPLIES, AND, AAggregate,
+from .Expression import (IfExpr, SymbolExpr, Expression, Constructor,
+                    AQuantification, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
@@ -132,8 +132,7 @@ def add_def_constraints(self, instantiables, problem, result):
     """
     for decl, bodies in instantiables.items():
         quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
-        expr = [AQuantification.make('∀', quantees, e, e.annotations)
-                .interpret(problem)
+        expr = [FORALL(quantees, e, e.annotations).interpret(problem)
                 for e in bodies]
         result[decl, self] = expr
 Definition.add_def_constraints = add_def_constraints

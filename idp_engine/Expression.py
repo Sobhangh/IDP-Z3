@@ -630,6 +630,10 @@ class AQuantification(Expression):
             q.collect_symbols(symbols, co_constraints)
         return symbols
 
+def FORALL(qs, expr, annotations=None):
+    return AQuantification.make('∀', qs, expr, annotations)
+def EXISTS(qs, expr, annotations=None):
+    return AQuantification.make('∃', qs, expr, annotations)
 
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
