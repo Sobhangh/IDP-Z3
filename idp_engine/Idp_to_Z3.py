@@ -316,7 +316,7 @@ AUnary.translate1 = translate1
 # Class AAggregate  #######################################################
 
 def translate1(self, problem: "Problem", vars={}):
-    assert self.using_if and not self.quantees, f"Cannot expand {self.code}"
+    assert self.annotated and not self.quantees, f"Cannot expand {self.code}"
     return Sum([f.translate(problem, vars) for f in self.sub_exprs])
 AAggregate.translate1 = translate1
 

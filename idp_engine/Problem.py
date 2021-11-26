@@ -286,6 +286,11 @@ class Problem(object):
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
+    def sexpr(self):
+        s = Solver(ctx=self.ctx)
+        s.add(self.formula())
+        return s.sexpr()
+
     def _todo_expand(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()

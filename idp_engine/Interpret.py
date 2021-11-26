@@ -47,7 +47,7 @@ from .Parse import (Extern, TypeDeclaration,
 from .Expression import (IfExpr, SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction, AAggregate,
                     AUnary, AppliedSymbol, UnappliedSymbol,
-                    Variable, TRUE)
+                    Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
 
 
@@ -366,13 +366,14 @@ def interpret(self, problem):
                             elif self.q == '∃':
                                 new_f = AConjunction.make('∧', [applied, new_f])
                             else:  # aggregate
-                                # if a then b else 0 -> if (applied & a) then b else 0
-                                self.check(isinstance(new_f, IfExpr),
-                                           "internal error")
-                                arg1 = AConjunction.make('∧', [applied,
-                                                    new_f.sub_exprs[0]])
-                                new_f = IfExpr.make(arg1, new_f.sub_exprs[1],
-                                                    new_f.sub_exprs[2])
+                                if isinstance(new_f, IfExpr):  # cardinality
+                                    # if a then b else 0 -> if (applied & a) then b else 0
+                                    arg1 = AConjunction.make('∧', [applied,
+                                                        new_f.sub_exprs[0]])
+                                    new_f = IfExpr.make(arg1, new_f.sub_exprs[1],
+                                                        new_f.sub_exprs[2])
+                                else:  # sum
+                                    new_f = IfExpr.make(applied, new_f, Number(number="0"))
                         out.append(new_f)
                 forms = out
 
@@ -397,7 +398,7 @@ AQuantification.instantiate1 = instantiate1
 # Class AAggregate  ######################################################
 
 def interpret(self, problem):
-    assert self.using_if, f"Internal error in interpret"
+    assert self.annotated, f"Internal error in interpret"
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 
@@ -490,6 +491,8 @@ def instantiate1(self, e0, e1, problem=None):
                             f"Incorrect arity for {out.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
                 out.original = self
+        if out.co_constraint is not None:
+            out.co_constraint.instantiate(e0, e1, problem)
         if problem and not self.fresh_vars:
             return out.interpret(problem)
     return out
