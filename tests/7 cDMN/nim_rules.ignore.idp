@@ -1,0 +1,33 @@
+vocabulary V {
+    type Number_t := { 0..17 } 
+    type Players_t := { Computer, You } 
+    Ball_Amount_at_Start:  -> Number_t
+    Balls_taken:  -> Number_t
+    Ball_Amount_at_End:  -> Number_t
+    Turn:  -> Players_t
+    BallModuloEnd:  -> Number_t
+    BallModuloStart:  -> Number_t
+    Max_Draw_Balls:  -> Number_t
+    Start_of_Game:  -> Bool
+}
+theory T: V{
+    //Calculate Modulo
+    true => BallModuloEnd() = Ball_Amount_at_End() % (Max_Draw_Balls() + 1).
+
+    //Calculate Balls taken
+    true => Balls_taken() = Ball_Amount_at_Start() - Ball_Amount_at_End() & BallModuloEnd() = 1.
+
+    //Max 3 balls
+    Start_of_Game() => 0 =< Balls_taken() & Balls_taken() =< Max_Draw_Balls().
+
+    ~(Start_of_Game()) => 1 =< Balls_taken() & Balls_taken() =< Max_Draw_Balls().
+
+}
+
+
+structure S: V{
+    Ball_Amount_at_Start := {() -> 17}
+    Max_Draw_Balls := {() -> 3}
+    Start_of_Game := true
+}
+

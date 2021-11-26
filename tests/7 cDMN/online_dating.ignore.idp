@@ -1,0 +1,49 @@
+
+
+vocabulary V {
+    type Person_t := { Jane, Jim, Dave } 
+    type Gender_t := { Male, Female } 
+    type City_t := { Seattle, LA } 
+    type Age_t := { 0..100 } 
+    type Interest_t := { skydiving, knitting, reading, soccer, talking } 
+    type Number_t := { 0..100 } 
+    type Score_t := { 0..100 } 
+    gender_of_Person: Person_t -> Gender_t
+    city_of_Person: Person_t -> City_t
+    age_of_Person: Person_t -> Age_t
+    minimum_age_of_Person: Person_t -> Age_t
+    maximum_age_of_Person: Person_t -> Age_t
+    minimum_shared_interests_of_Person: Person_t -> Number_t
+    matching_interests_of_Person_and_Person: Person_t * Person_t -> Number_t
+    score_of_Person_and_Person: Person_t * Person_t -> Score_t
+    Person_has_Interest: Person_t * Interest_t -> Bool
+    Person_accepts_Gender: Person_t * Gender_t -> Bool
+    Person_likes_Person: Person_t * Person_t -> Bool
+    Person_matches_Person: Person_t * Person_t -> Bool
+}
+theory T: V{
+    //Number of matching interests
+    !p1 in Person_t: !p2 in Person_t:  matching_interests_of_Person_and_Person(p1, p2) = (#{ Interest in Interest_t: Person_has_Interest(p1, Interest) & Person_has_Interest(p2, Interest) & p1 = p1 & p2 = p2 & Interest = Interest }).
+
+
+
+
+    {
+        !p1 in Person_t: !p2 in Person_t: Person_likes_Person(p1, p2) <- p2 ~= p1 & city_of_Person(p2) = city_of_Person(p1) & Person_accepts_Gender(p1, gender_of_Person(p2)) & minimum_age_of_Person(p1) =< age_of_Person(p2) & age_of_Person(p2) =< maximum_age_of_Person(p1) & matching_interests_of_Person_and_Person(p1, p2) >= minimum_shared_interests_of_Person(p1).
+    }
+    {
+        !p1 in Person_t: !p2 in Person_t: Person_matches_Person(p1, p2) <- p2 ~= p1 & Person_likes_Person(p1, p2) & Person_likes_Person(p2, p1).
+    }
+}
+
+
+structure S: V{
+    gender_of_Person := {(Jane) -> Female, (Jim) -> Male, (Dave) -> Male}
+    city_of_Person := {(Jane) -> Seattle, (Jim) -> Seattle, (Dave) -> Seattle}
+    age_of_Person := {(Jane) -> 26, (Jim) -> 29, (Dave) -> 28}
+    minimum_age_of_Person := {(Jane) -> 28, (Jim) -> 24, (Dave) -> 18}
+    maximum_age_of_Person := {(Jane) -> 32, (Jim) -> 29, (Dave) -> 50}
+    minimum_shared_interests_of_Person := {(Jane) -> 1, (Jim) -> 2, (Dave) -> 0}
+    Person_has_Interest := {(Jane,skydiving), (Jane,knitting), (Jane,reading), (Jim,skydiving), (Jim,soccer), (Jim,knitting), (Dave,talking)}
+    Person_accepts_Gender := {(Jane,Male), (Jim,Female), (Dave,Male), (Dave,Female)}
+}
