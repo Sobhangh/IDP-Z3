@@ -708,7 +708,7 @@ class AEquivalence(Operator):
     # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
     def split(self):
         posimpl = IMPLIES([self.sub_exprs[0], self.sub_exprs[1]])
-        negimpl = ARImplication.make('⇐', [self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
+        negimpl = RIMPLIES([self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
         return AND([posimpl, negimpl])
 
     def split_equivalences(self):
@@ -723,6 +723,8 @@ class ARImplication(Operator):
                      self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
         return self.update_exprs(sub_exprs).annotate1()
 
+def RIMPLIES(exprs, annotations):
+    return ARImplication.make('⇐', exprs, annotations)
 
 class ADisjunction(Operator):
     PRECEDENCE = 60

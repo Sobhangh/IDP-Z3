@@ -29,9 +29,10 @@ from .Parse import (Vocabulary, Extern, TypeDeclaration, Type,
                     Tuple, ConstructedFrom, Display)
 from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AEquivalence, ADisjunction,
-                         AConjunction, Operator, AComparison, AUnary, AAggregate,
+                         Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, IMPLIES)
+                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR,
+                         IMPLIES, RIMPLIES)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -216,7 +217,7 @@ def get_instantiables(self, for_explain=False):
                 if not inductive:
                     bodies.append(r.body)
                     if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
-                        out.append(ARImplication.make('⇐', [head, r.body],
+                        out.append(RIMPLIES([head, r.body],
                                                       r.annotations))
                 else:
                     new = r.body.split_equivalences()
@@ -224,14 +225,13 @@ def get_instantiables(self, for_explain=False):
                     if for_explain:
                         new = new.copy().add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
-                        out.append(ARImplication.make('⇐', [head, new],
+                        out.append(RIMPLIES([head, new],
                                                       r.annotations))
 
             all_bodies = OR(bodies)
             if not inductive:
                 if out:  # already contains reverse implications
-                    out.append(ARImplication.make('⇒', [head, all_bodies],
-                                                  self.annotations))
+                    out.append(RIMPLIES([head, all_bodies], self.annotations))
                 else:
                     out = [AEquivalence.make('⇔', [head, all_bodies],
                                              self.annotations)]
@@ -239,8 +239,7 @@ def get_instantiables(self, for_explain=False):
                 if not out:  # no reverse implication yet
                     new = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
-                    out = [ARImplication.make('⇐', [head.copy(), new],
-                                              self.annotations)]
+                    out = [RIMPLIES([head.copy(), new], self.annotations)]
                 all_bodies = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
                                         rule.definiendum, True, True)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
