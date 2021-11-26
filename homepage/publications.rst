@@ -24,7 +24,7 @@ Applications
 ------------
 
 * Deryck, M., coppens, B.J., comenda, N., Vennekens, J. (2021). **&Logical Reasoning application with NLP interface to construct the Knowledge Base.** (736-738). Presented at the BNAIC2021, Esch-sur-Alzette, Luxembourg, 10 Nov 2021-12 Nov 2021
-* Deryck, M., Comenda, N., Coppens, B.J., Vennekens, J. (2021). **Combining Logic and Natural LanguageProcessing to Support Investment Management.** (647-649). Presented at the BNAIC 2021, Esch-sur-Alzette, Luxembourg, 10 Nov 2021-12 Nov 2021
+  Deryck, M., Vennekens, J., Comenda, N., Coppens, B. (2021). **Combining Logic and Natural Language Processing to Support Investment Management.** In: KR2021 proceedings. Presented at the 18th International Conference on Principles of Knowledge Representation and Reasoning, Hanoi, 03 Nov 202
 * Vandevelde, S., Etikala, V., Vanthienen, J., Vennekens, J. (2021). **Leveraging the Power of IDP with the Flexibility of DMN: a Multifunctional API.** In: Proceedings of RuleML+RR 2021. Presented at the RuleML+RR 2021, Leuven, Belgium.
 * Vandevelde, S., Vennekens, J. (2020). **A Multifunctional, Interactive DMN Decision Modelling Tool.** Presented at the BNAIC 2020, Virtual, 19 Nov 2020-20 Nov 2020.
 
