@@ -794,6 +794,8 @@ class AUnary(Expression):
                      for e in self.sub_exprs)
         return self.update_exprs(sub_exprs).annotate1()
 
+def NOT(expr):
+    return AUnary.make('¬', expr)
 
 class AAggregate(Expression):
     PRECEDENCE = 130

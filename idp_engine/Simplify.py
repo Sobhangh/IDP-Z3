@@ -32,7 +32,7 @@ from .Expression import (
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
-    Number, Date, Brackets, TRUE, FALSE)
+    Number, Date, Brackets, TRUE, FALSE, NOT)
 from .Parse import Symbol, Enumeration, Tuple, TypeDeclaration
 from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, CONCEPT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, RESERVED_SYMBOLS
@@ -98,7 +98,7 @@ def update_exprs(self, new_exprs):
         elif then_.same_as(TRUE) and else_.same_as(FALSE):
             return self._change(simpler=if_, sub_exprs=sub_exprs)
         elif then_.same_as(FALSE) and else_.same_as(TRUE):
-            return self._change(simpler=AUnary.make('¬', if_),
+            return self._change(simpler=NOT(if_),
                                 sub_exprs=sub_exprs)
     return self._change(sub_exprs=sub_exprs)
 IfExpr.update_exprs = update_exprs
@@ -151,7 +151,7 @@ def update_exprs(self, new_exprs):
             exprs0 = exprs0 if self.sub_exprs[0].same_as(TRUE) else TRUE
             value = TRUE
         elif exprs1.same_as(FALSE):  # (p => false) is ~p
-            simpler = AUnary.make('¬', exprs0)
+            simpler = NOT(exprs0)
     return self._change(value=value, simpler=simpler,
                         sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
@@ -168,7 +168,7 @@ def update_exprs(self, new_exprs):
             return self._change(simpler=AConjunction.make('∧', exprs),
                                 sub_exprs=exprs)
         if e.same_as(FALSE):  # they must all be false
-            return self._change(simpler=AConjunction.make('∧', [AUnary.make('¬', e) for e in exprs]),
+            return self._change(simpler=AConjunction.make('∧', [NOT(e) for e in exprs]),
                                 sub_exprs=exprs)
     return self._change(sub_exprs=exprs)
 AEquivalence.update_exprs = update_exprs

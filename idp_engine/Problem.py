@@ -31,7 +31,7 @@ from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
-                         AComparison, AUnary)
+                         AComparison, NOT)
 from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
@@ -501,7 +501,7 @@ class Problem(object):
                     return ([], [])
                 to_explain = AComparison.make("=", [to_explain, val])
             if negated:
-                to_explain = AUnary.make('¬', to_explain)
+                to_explain = NOT(to_explain)
 
             s.add(Not(to_explain.translate(self)))
 

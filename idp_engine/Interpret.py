@@ -46,7 +46,7 @@ from .Parse import (Extern, TypeDeclaration,
                     Definition)
 from .Expression import (IfExpr, SymbolExpr, Expression, Constructor, AQuantification,
                     AImplication, AConjunction, AAggregate,
-                    AUnary, AppliedSymbol, UnappliedSymbol,
+                    NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
 
@@ -422,14 +422,14 @@ def interpret(self, problem):
                 else:
                     simpler = interpretation.enumeration.contains(sub_exprs, True)
                 if 'not' in self.is_enumerated:
-                    simpler = AUnary.make('¬', simpler)
+                    simpler = NOT(simpler)
                 simpler.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
             core = AppliedSymbol.make(self.symbol, sub_exprs).copy()
             simpler = self.in_enumeration.contains([core], False)
             if 'not' in self.is_enumeration:
-                simpler = AUnary.make('¬', simpler)
+                simpler = NOT(simpler)
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
             and any(s.decl.name == CONCEPT for s in self.decl.sorts)
