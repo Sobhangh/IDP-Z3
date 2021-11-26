@@ -621,7 +621,7 @@ def annotate(self, voc, q_vars):
             if self.aggtype in ["min", "max"]:
                 # the `min` aggregate in `!y in T: min(lamda x in type: term(x,y))=0`
                 # is replaced by `_*(y)` with the following co-constraint:
-                #     !y in T: ( x in type: term(x) = _*(y)
+                #     !y in T: ( ?x in type: term(x) = _*(y)
                 #                !x in type: term(x) =< _*(y).
 
                 symbol_decl = SymbolDeclaration.make(

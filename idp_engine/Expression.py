@@ -1019,7 +1019,7 @@ class AppliedSymbol(Expression):
             if polarity:
                 return AND([comp, self])
             else:
-                return ADisjunction.make('∨', [comp, self])
+                return OR([comp, self])
 
 
 class SymbolExpr(Expression):
