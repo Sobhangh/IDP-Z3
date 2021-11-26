@@ -107,7 +107,7 @@ html_theme_options = {
         ("Interactive Consultant", "interactive_consultant"),
         ("Publications", "publications"),
         ("Online IDE", "https://interactive-consultant.IDP-Z3.be/IDE", True),
-        ("Documentation", "https://docs.idp-z3.be/", True),
+        ("Documentation", "https://docs.idp-z3.be/en/stable/introduction.html", True),
     ],
     # A list of tuples containing pages or urls to link to.
     # Valid tuples should be in the following forms:
