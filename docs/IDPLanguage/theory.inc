@@ -68,7 +68,7 @@ Cardinality aggregate
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
 Aggregate over anonymous function
-    ``agg(lambda v_1 in typeOfV_1, .., v_n in typeOfV_n : t)`` is a numerical term where ``agg`` can be any of (``sum, min, max``),
+    ``agg(lambda v_1 in typeOfV_1, .., v_n in typeOfV_n : t)`` is a numerical term where ``agg`` can be any of (``sum``, ``min``, ``max``),
     |v1,vn| are variables and |t| is a term.
 
     The term ``sum(lambda v in T : t(v))`` denotes the sum of ``t(v)`` for each ``v`` in ``T``.
