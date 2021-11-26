@@ -491,6 +491,8 @@ def instantiate1(self, e0, e1, problem=None):
                             f"Incorrect arity for {out.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
                 out.original = self
+        if out.co_constraint is not None:
+            out.co_constraint.instantiate(e0, e1, problem)
         if problem and not self.fresh_vars:
             return out.interpret(problem)
     return out

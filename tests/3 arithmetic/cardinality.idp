@@ -1,11 +1,15 @@
 vocabulary V {
     type ConfigObj := {o1, o2, o3 }
+    type Fleet := {f1, f2}
     Vehicle : ConfigObj -> Bool
+    fleetOf: ConfigObj -> Fleet
     weight : ConfigObj -> Int
     total, min, max : () -> Int
+    fleetTotal, fleetCard, fleetMin: Fleet -> Int
 }
 theory T:V {
     Vehicle(o2). Vehicle(o3).
+    fleetOf := {o1 -> f1, o2->f1, o3->f2}
     #{V ∈ Vehicle: true} = 2.
     weight(o1)=3.
     weight(o2)=4.
@@ -13,6 +17,10 @@ theory T:V {
     total() = sum(lambda x in Vehicle: weight(x)).
     min() = min(lambda x in ConfigObj: weight(x)).
     max() = max(lambda x in ConfigObj: weight(x)).
+    !f in Fleet: fleetTotal(f) = sum(lambda x in Vehicle: if fleetOf(x)=f then weight(x) else 0).
+    !f in Fleet: fleetCard(f) = card{x in Vehicle: fleetOf(x)=f}.
+    !f in Fleet: fleetMin(f) = min(lambda x in ConfigObj: if fleetOf(x)=f then weight(x) else 999).
+
 }
 procedure main() {
     pretty_print(Problem(T).formula())
