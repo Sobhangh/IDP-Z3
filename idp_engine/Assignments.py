@@ -28,7 +28,7 @@ from enum import Enum, auto
 from typing import Optional
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, NOT, AComparison
+from .Expression import Expression, TRUE, FALSE, NOT, EQUALS
 from .utils import NEWL, BOOL
 
 
@@ -139,7 +139,7 @@ class Assignment(object):
             out = self.sentence if self.value.same_as(TRUE) else \
                 NOT(self.sentence)
         else:
-            out = AComparison.make('=', [self.sentence, self.value])
+            out = EQUALS([self.sentence, self.value])
         return out
 
     def negate(self):

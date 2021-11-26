@@ -750,6 +750,8 @@ class AComparison(Operator):
                         for e in self.sub_exprs[0].sub_exprs) \
                 and self.sub_exprs[1].value is not None
 
+def EQUALS(exprs):
+    return AComparison.make('=',exprs)
 
 class ASumMinus(Operator):
     PRECEDENCE = 90

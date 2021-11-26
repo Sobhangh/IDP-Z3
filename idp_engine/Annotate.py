@@ -31,7 +31,7 @@ from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quant
                          ARImplication, AImplication, AEquivalence, ADisjunction,
                          AConjunction, Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT)
+                         FALSE, SymbolExpr, Number, NOT, EQUALS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -201,7 +201,7 @@ def get_instantiables(self, for_explain=False):
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
                                         rule.definiendum.sub_exprs[:-1])
                 expr.in_head = True
-                head = AComparison.make('=', [expr, rule.definiendum.sub_exprs[-1]])
+                head = EQUALS([expr, rule.definiendum.sub_exprs[-1]])
             else:
                 head = AppliedSymbol.make(rule.definiendum.symbol,
                                         rule.definiendum.sub_exprs)
@@ -292,7 +292,7 @@ def rename_args(self, new_vars):
                 self.definiendum.sub_exprs[j] = \
                     self.definiendum.sub_exprs[j].instantiate([arg], [nv])
         else:
-            eq = AComparison.make('=', [nv, arg])
+            eq = EQUALS([nv, arg])
             self.body = AConjunction.make('∧', [eq, self.body])
 
     self.check(not vars, f"Too many variables in head of rule: {self}")
@@ -594,7 +594,7 @@ def annotate(self, voc, q_vars):
     out.type = BOOL
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
-        out = NOT(AComparison.make('=', self.sub_exprs))
+        out = NOT(EQUALS(self.sub_exprs))
     return out
 AComparison.annotate = annotate
 
@@ -639,7 +639,7 @@ def annotate(self, voc, q_vars):
                 applied = applied.annotate(voc, q_vars)
 
                 coc1 = AQuantification.make('∃', self.quantees,
-                        AComparison.make('=', [applied.copy(), self.sub_exprs[0]]))
+                        EQUALS([applied.copy(), self.sub_exprs[0]]))
                 coc2 = AQuantification.make('∀', self.quantees.copy(),
                         AComparison.make('≤' if self.aggtype == "min" else '≥',
                                          [applied.copy(), self.sub_exprs[0].copy()]))

@@ -45,7 +45,7 @@ from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
@@ -783,7 +783,7 @@ class SymbolInterpretation(ASTNode):
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = IfExpr.make(
-                        AComparison.make('=', [args[rank], tuples[0].args[rank]]),
+                        EQUALS([args[rank], tuples[0].args[rank]]),
                         self.interpret_application(theory, rank+1,
                                                    applied, args, tuples),
                         out)
@@ -836,7 +836,7 @@ class Enumeration(ASTNode):
             return FALSE
         else:
             if rank + 1 == arity:  # use OR
-                out = [ AComparison.make('=', [args[rank], t.args[rank]])
+                out = [ EQUALS([args[rank], t.args[rank]])
                         for t in tuples]
                 out = ADisjunction.make('∨', out)
                 out.enumerated = ', '.join(str(c) for c in tuples)
@@ -845,7 +845,7 @@ class Enumeration(ASTNode):
             for val, tuples2 in groups:
                 tuples = list(tuples2)
                 out = IfExpr.make(
-                    AComparison.make('=', [args[rank], tuples[0].args[rank]]),
+                    EQUALS([args[rank], tuples[0].args[rank]]),
                     self.contains(args, function, arity, rank+1, tuples),
                     out)
             return out
@@ -943,13 +943,13 @@ class Ranges(Enumeration):
         if not self.elements:
             return None
         if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
-            es = [AComparison.make('=', [var, c.args[0]]) for c in self.tuples]
+            es = [EQUALS([var, c.args[0]]) for c in self.tuples]
             e = ADisjunction.make('∨', es)
             return e
         sub_exprs = []
         for x in self.elements:
             if x.toI is None:
-                e = AComparison.make('=', [var, x.fromI])
+                e = EQUALS([var, x.fromI])
             else:
                 e = AComparison.make(['≤', '≤'], [x.fromI, var, x.toI])
             sub_exprs.append(e)
