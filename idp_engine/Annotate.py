@@ -484,7 +484,7 @@ def annotate(self, voc, q_vars):
         q_vars (Dict[str, Variable]): the quantifier variables that may appear in the expression
 
     Returns:
-        Expression: an equivalent AST node, with updated type, fresh_vars
+        Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     return self.annotate1()
@@ -493,14 +493,14 @@ Expression.annotate = annotate
 
 def annotate1(self):
     " annotations that are common to __init__ and make() "
-    self.fresh_vars = set()
+    self.variables = set()
     if self.value is not None:
         pass
     if self.simpler is not None:
-        self.fresh_vars = self.simpler.fresh_vars
+        self.variables = self.simpler.variables
     else:
         for e in self.sub_exprs:
-            self.fresh_vars.update(e.fresh_vars)
+            self.variables.update(e.variables)
     return self
 Expression.annotate1 = annotate1
 
@@ -536,10 +536,10 @@ def annotate1(self):
     for q in self.quantees:  # remove declared variables
         for vs in q.vars:
             for v in vs:
-                self.fresh_vars.discard(v.name)
+                self.variables.discard(v.name)
     for q in self.quantees:  # add variables in sort expression
         for sort in q.sub_exprs:
-            self.fresh_vars.update(sort.fresh_vars)
+            self.variables.update(sort.variables)
     return self
 AQuantification.annotate1 = annotate1
 
@@ -682,7 +682,7 @@ AppliedSymbol.annotate = annotate
 def annotate1(self):
     out = Expression.annotate1(self)
     out.symbol = out.symbol.annotate1()
-    out.fresh_vars.update(out.symbol.fresh_vars)
+    out.variables.update(out.symbol.variables)
     return out.simplify1()
 AppliedSymbol.annotate1 = annotate1
 
@@ -708,7 +708,7 @@ Variable.annotate = annotate
 def annotate(self, voc, q_vars):
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
-        self.fresh_vars = {}
+        self.variables = {}
         self.check(type(self.decl) == Constructor,
                    f"{self} should be applied to arguments (or prefixed with a back-tick)")
         return self
@@ -730,7 +730,7 @@ def annotate1(self):
     self.type = self.sub_exprs[0].type
     if self.annotations['reading']:
         self.sub_exprs[0].annotations = self.annotations
-    self.fresh_vars = self.sub_exprs[0].fresh_vars
+    self.variables = self.sub_exprs[0].variables
     return self
 Brackets.annotate1 = annotate1
 

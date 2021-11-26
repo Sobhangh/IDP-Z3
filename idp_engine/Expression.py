@@ -204,7 +204,7 @@ class Expression(ASTNode):
         original (Expression):
             The original expression, before propagation and simplification.
 
-        fresh_vars (Set(string)):
+        variables (Set(string)):
             The set of names of the variables in the expression.
 
         is_type_constraint_for (string):
@@ -212,7 +212,7 @@ class Expression(ASTNode):
 
     """
     __slots__ = ('sub_exprs', 'simpler', 'value', 'code',
-                 'annotations', 'original', 'str', 'fresh_vars', 'type',
+                 'annotations', 'original', 'str', 'variables', 'type',
                  'is_type_constraint_for', 'co_constraint',
                  'questions', 'relevant')
 
@@ -226,7 +226,7 @@ class Expression(ASTNode):
         self.original: Expression = self
 
         self.str: str = self.code
-        self.fresh_vars: Optional[Set[str]] = None
+        self.variables: Optional[Set[str]] = None
         self.type: Optional[str] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional["Expression"] = None
@@ -241,7 +241,7 @@ class Expression(ASTNode):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
-        out.fresh_vars = copy.copy(out.fresh_vars)
+        out.variables = copy.copy(out.variables)
         out.value = None if out.value is None else out.value.copy()
         out.simpler = None if out.simpler is None else out.simpler.copy()
         out.co_constraint = (None if out.co_constraint is None
@@ -469,7 +469,7 @@ class Expression(ASTNode):
         """
         return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity)
                                    for e in self.sub_exprs))
-                    .annotate1())  # update fresh_vars
+                    .annotate1())  # update .variables
 
 
 class Symbol(Expression):
@@ -487,7 +487,7 @@ class Symbol(Expression):
         self.sub_exprs = []
         self.decl = None
         super().__init__()
-        self.fresh_vars = set()
+        self.variables = set()
         self.value = self
 
     def __str__(self):
@@ -895,7 +895,7 @@ class AppliedSymbol(Expression):
     def construct(cls, constructor, args):
         out= cls.make(Symbol(name=constructor.name), args)
         out.decl = constructor
-        out.fresh_vars = {}
+        out.variables = {}
         return out
 
     def __str1__(self):
@@ -1045,7 +1045,7 @@ class UnappliedSymbol(Expression):
         """
         out = (cls)(s=Symbol(name=constructor.name))
         out.decl = constructor
-        out.fresh_vars = {}
+        out.variables = {}
         return out
 
     def __str1__(self): return self.name
@@ -1073,7 +1073,7 @@ class Variable(Expression):
 
         self.type = sort.decl.name if sort and sort.decl else ''
         self.sub_exprs = []
-        self.fresh_vars = set([self.name])
+        self.variables = set([self.name])
 
     def __str1__(self): return self.name
 
@@ -1091,7 +1091,7 @@ class Number(Expression):
         super().__init__()
 
         self.sub_exprs = []
-        self.fresh_vars = set()
+        self.variables = set()
         self.value = self
 
         ops = self.number.split("/")
@@ -1135,7 +1135,7 @@ class Date(Expression):
         super().__init__()
 
         self.sub_exprs = []
-        self.fresh_vars = set()
+        self.variables = set()
         self.value = self
 
         self.py_value = self.date.toordinal()

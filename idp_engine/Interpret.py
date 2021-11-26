@@ -253,17 +253,17 @@ def instantiate(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
-    Update fresh_vars.
+    Update .variables.
     """
     assert all(type(e) == Variable for e in e0), \
            f"Internal error: instantiate {e0}"
     if self.value:
         return self
-    if problem and all(e.name not in self.fresh_vars for e in e0):
+    if problem and all(e.name not in self.variables for e in e0):
         return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
-    out.fresh_vars = copy.copy(out.fresh_vars)
+    out.variables = copy.copy(out.variables)
     return out.instantiate1(e0, e1, problem)
 Expression.instantiate = instantiate
 
@@ -271,7 +271,7 @@ def instantiate1(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
-    Update fresh_vars.
+    Update .variables.
     """
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem)
@@ -281,10 +281,10 @@ def instantiate1(self, e0, e1, problem=None):
         out = out.value
     else:
         for o, n in zip(e0, e1):
-            if o.name in out.fresh_vars:
-                out.fresh_vars.discard(o.name)
+            if o.name in out.variables:
+                out.variables.discard(o.name)
                 if type(n) == Variable:
-                    out.fresh_vars.add(n.name)
+                    out.variables.add(n.name)
             out.code = str(out)
     out.annotations['reading'] = out.code
     return out
@@ -385,11 +385,11 @@ AQuantification.interpret = interpret
 
 
 def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
+    out = Expression.instantiate1(self, e0, e1, problem)  # updates .variables
     for q in self.quantees: # for !x in $(output_domain(s,1))
         if q.sub_exprs:
             q.sub_exprs[0] = q.sub_exprs[0].instantiate(e0, e1, problem)
-    if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
+    if problem and not self.variables:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out
 AQuantification.instantiate1 = instantiate1
@@ -438,7 +438,7 @@ def interpret(self, problem):
             # do not do it otherwise, for performance reasons
             f = problem.interpretations[self.decl.name].interpret_application
             value = f(problem, 0, self, sub_exprs)
-        if (not self.in_head and not self.fresh_vars):
+        if (not self.in_head and not self.variables):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]
             inst = [x for x in inst if x]
@@ -482,7 +482,7 @@ def substitute(self, e0, e1, assignments, tag=None):
 AppliedSymbol .substitute = substitute
 
 def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # update fresh_vars
+    out = Expression.instantiate1(self, e0, e1, problem)  # update .variables
     if type(out) == AppliedSymbol:  # might be a number after instantiation
         if type(out.symbol) == SymbolExpr and out.symbol.is_intentional():  # $(x)()
             out.symbol = out.symbol.instantiate(e0, e1, problem)
@@ -493,7 +493,7 @@ def instantiate1(self, e0, e1, problem=None):
                 out.original = self
         if out.co_constraint is not None:
             out.co_constraint.instantiate(e0, e1, problem)
-        if problem and not self.fresh_vars:
+        if problem and not self.variables:
             return out.interpret(problem)
     return out
 AppliedSymbol .instantiate1 = instantiate1
