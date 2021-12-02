@@ -1,11 +1,6 @@
 Sides:={->3}
-Vertices:={->3}
-Type:={->triangle}
-Length:={1->0.3333333333333333; 2->0.3333333333333333; 3->0.3333333333333333; 4->0}
-Angle:={1->60; 2->60; 3->60; 4->0}
+Length:={1->0.3333333333333333}
 Subtype:={->regular_triangle}
-Convex:={->true}
-Equilateral:={->true}
 Perimeter:={->1}
 
 Model 1

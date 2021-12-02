@@ -453,7 +453,6 @@ class Problem(object):
 
         solver.pop()
 
-        self.propagate()
         return self
 
     def symbolic_propagate(self):
