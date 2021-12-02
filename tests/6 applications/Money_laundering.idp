@@ -7,7 +7,7 @@ vocabulary V1 {
 }
 vocabulary V2 {
     extern vocabulary Type
-    c1: Color -> Color
+    c2: () -> Color
 }
 
 vocabulary V {
@@ -16,7 +16,7 @@ vocabulary V {
     }
 
 theory T:V {
-    c1()=c1().
+    c1()=c2().
 }
 
 procedure main() {
