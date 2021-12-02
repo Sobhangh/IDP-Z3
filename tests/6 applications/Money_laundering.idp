@@ -1,0 +1,25 @@
+vocabulary Type {
+    type Color := {red, blue, green}
+}
+vocabulary V1 {
+    extern vocabulary Type
+    c1: () -> Color
+}
+vocabulary V2 {
+    extern vocabulary Type
+    c1: Color -> Color
+}
+
+vocabulary V {
+    extern vocabulary V1
+    extern vocabulary V2
+    }
+
+theory T:V {
+    c1()=c1().
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}
+
