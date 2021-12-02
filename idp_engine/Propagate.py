@@ -281,16 +281,16 @@ def _batch_propagate(self):
         yield "No more consequences."
 Problem._batch_propagate = _batch_propagate
 
-def add_choices(self, solver):
+def add_assignment(self, solver, excluded):
     solver.push()
 
     assignment_forms = [a.formula().translate(self) for a in
                         self.assignments.values()
                         if a.value is not None
-                        and a.status not in [S.STRUCTURE, S.CONSEQUENCE]]
+                        and a.status not in excluded]
     for af in assignment_forms:
         solver.add(af)
-Problem.add_choices = add_choices
+Problem.add_assignment = add_assignment
 
 
 def first_propagate(self):
@@ -346,17 +346,19 @@ def _propagate(self, todo=None):
     global start
     start = time.process_time()
 
+    solver = self.solver
+    solver.push()
+
     dir_todo = todo is None
     if dir_todo:
         todo = self._directional_todo()
 
-    solver = self.solver
-    solver.push()
-    self.add_choices(solver)
-
     for q in todo:
         solver.add(q.reified(self) == q.translate(self))
         # reification in case todo contains complex formula
+
+    # NOTE: correct consequences are set only via self._directional_todo()
+    self.add_assignment(solver, [S.STRUCTURE] if dir_todo else [S.STRUCTURE, S.CONSEQUENCE])
 
     res1 = solver.check()
 

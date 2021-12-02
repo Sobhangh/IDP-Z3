@@ -390,7 +390,7 @@ class Problem(object):
 
         solver = self.solver
         solver.push()
-        self.add_choices(solver)
+        self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE])
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
                 solver.add(q.reified(self) == q.translate(self))
@@ -438,7 +438,7 @@ class Problem(object):
 
         solver = self.optimize_solver
         solver.push()
-        self.add_choices(solver)
+        self.add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE])
 
         if minimize:
             solver.minimize(s)
