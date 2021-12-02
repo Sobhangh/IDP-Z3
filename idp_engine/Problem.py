@@ -303,7 +303,7 @@ class Problem(object):
         Args:
             code (str): the code of the expression, e.g., "p()"
             value (Any): a Python value, e.g., True
-            status (Status, optional): how the value was obtained.
+            status (Status, optional): how the value was obtained. Default: S.GIVEN
         """
         code = str(code)
         atom = self.assignments[code].sentence
