@@ -298,7 +298,7 @@ def first_propagate(self):
         assert a.status not in [S.UNIVERSAL], "incorrect propagate status "+str(a.status)+" for "+str(a)
     todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE]))
 
-    solver = self.get_solver()
+    solver = self.solver
     solver.push()
 
     for q in todo:
@@ -350,7 +350,7 @@ def _propagate(self, todo=None):
     if dir_todo:
         todo = self._directional_todo()
 
-    solver = self.get_solver()
+    solver = self.solver
     solver.push()
     self.add_choices(solver)
 

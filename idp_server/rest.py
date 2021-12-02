@@ -189,9 +189,9 @@ class meta(Resource):
                 idp = idpOf(args['code'])
                 state = State.make(idp, "{}")
                 # ensure the stateful solvers are initialized
-                _ = state.get_solver()
-                _ = state.get_optimize_solver()
-                _ = state.get_explain_solver()
+                _ = state.solver
+                _ = state.optimize_solver
+                _ = state.explain_solver
                 if not state.idp.display.manualRelevance:
                     get_relevant_questions(state)
                 out = metaJSON(state)

@@ -97,14 +97,14 @@ class Problem(object):
 
         propagate_success (Bool): whether the last propagate call was succesful
 
-        slvr (Solver): stateful solver used for propagation and model expansion.
-            Use self.get_solver() to access.
+        _slvr (Solver): stateful solver used for propagation and model expansion.
+            Use self.solver to access.
 
-        optmz (Solver): stateful solver used for optimization.
-            Use self.get_optimize_solver() to access.
+        _optmz (Solver): stateful solver used for optimization.
+            Use self.optimize_solver to access.
 
-        expl (Solver): stateful solver used for explanation.
-            Use self.get_explain_solver() to access.
+        _expl (Solver): stateful solver used for explanation.
+            Use self.explain_solver to access.
 
         expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
             information on the reification of the constraints and definitions,
@@ -138,44 +138,44 @@ class Problem(object):
         self.first_prop = True
         self.propagate_success = True
 
-        self.slvr = None
-        self.optmz = None
-        self.expl = None
+        self._slvr = None
+        self._optmz = None
+        self._expl = None
         self.expl_reifs = {}  # {reified: (constraint, original)}
 
-    def get_solver(self):
-        if self.slvr is None:
-            self.slvr = Solver(ctx=self.ctx)
-            solver = self.slvr
+    @property
+    def solver(self):
+        if self._slvr is None:
+            self._slvr = Solver(ctx=self.ctx)
             assert self.constraintz()
-            solver.add(And(self.constraintz()))
+            self._slvr.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
                                 if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
                                 and a.symbol_decl.name in symbols]
             for af in assignment_forms:
-                solver.add(af)
-        return self.slvr
+                self._slvr.add(af)
+        return self._slvr
 
-    def get_optimize_solver(self):
-        if self.optmz is None:
-            self.optmz = Optimize(ctx=self.ctx)
-            solver = self.optmz
+    @property
+    def optimize_solver(self):
+        if self._optmz is None:
+            self._optmz = Optimize(ctx=self.ctx)
             assert self.constraintz()
-            solver.add(And(self.constraintz()))
+            self._optmz.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
                                 if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
                                 and a.symbol_decl.name in symbols]
             for af in assignment_forms:
-                solver.add(af)
-        return self.optmz
+                self._optmz.add(af)
+        return self._optmz
 
-    def get_explain_solver(self):
-        if self.expl is None:
-            self.expl = Solver(ctx=self.ctx)
-            solver = self.expl
-            solver.set(':core.minimize', True)
+    @property
+    def explain_solver(self):
+        if self._expl is None:
+            self._expl = Solver(ctx=self.ctx)
+            self._expl.set(':core.minimize', True)
 
             # get expanded def_constraints
             def_constraints = {}
@@ -187,9 +187,9 @@ class Problem(object):
             for constraint in todo:
                 p = constraint.reified(self)
                 self.expl_reifs[p] = (constraint.original.interpret(self).translate(self), constraint)
-                solver.add(Implies(p, self.expl_reifs[p][0]))
+                self._expl.add(Implies(p, self.expl_reifs[p][0]))
 
-        return self.expl
+        return self._expl
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -388,7 +388,7 @@ class Problem(object):
         todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN]))
         # TODO: should todo be larger in case complete==True?
 
-        solver = self.get_solver()
+        solver = self.solver
         solver.push()
         self.add_choices(solver)
         for q in todo:
@@ -436,7 +436,7 @@ class Problem(object):
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
 
-        solver = self.get_optimize_solver()
+        solver = self.optimize_solver
         solver.push()
         self.add_choices(solver)
 
@@ -514,7 +514,7 @@ class Problem(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
 
-        solver = self.get_explain_solver()
+        solver = self.explain_solver
         ps = self.expl_reifs.copy()
 
         solver.push()
