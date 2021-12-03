@@ -343,13 +343,13 @@ def interpret(self, problem):
             else:  # type declaration
                 range = [[t] for t in q.sub_exprs[0].decl.range] #TODO1 decl.enumeration.tuples
                 guard = None
-                if 1 < len(q.sub_exprs):  # x in Concept[T->T]
+                if q.domain and q.domain.ins:  # x in Concept[T->T]
                     range = [v for v in range
-                             if v[0].decl.symbol.decl.arity == len(q.sub_exprs)-2
-                            and v[0].decl.symbol.decl.out.name == q.sub_exprs[-1].name
+                             if v[0].decl.symbol.decl.arity == len(q.domain.ins)
+                            and v[0].decl.symbol.decl.out.name == q.domain.out.name
                             and all(s.name == q.name
                                     for s, q in zip(v[0].decl.symbol.decl.sorts,
-                                                    q.sub_exprs[1:-1]))]
+                                                    q.domain.ins))]
 
             for vars in q.vars:
                 self.check(q.sub_exprs[0].decl.arity == len(vars),
