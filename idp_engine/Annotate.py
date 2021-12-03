@@ -640,8 +640,7 @@ def annotate(self, voc, q_vars):
                               AComparison.make(op,
                                     [applied.copy(), self.sub_exprs[0].copy()]))
                 coc = AND([coc1, coc2])
-                quantees = [Quantee.make(v, Symbol(name=v.sort.code))
-                            for v in q_vars.values()]
+                quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
                 applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                 return applied
         self.annotated = True
