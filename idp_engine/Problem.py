@@ -278,7 +278,7 @@ class Problem(object):
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
                         and (a.status not in [S.CONSEQUENCE]
-                             or (self.propagated and not self.cleared))]
+                            or (self.propagated and not self.cleared))]
                         + self.constraintz())
             else:
                 all = [a.formula().translate(self) for a in self.assignments.values()
