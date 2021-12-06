@@ -84,7 +84,7 @@ def metaJSON(state):
 #################
 
 
-def load_json(state: Problem, jsonstr: str):
+def load_json(state: Problem, jsonstr: str, keep_defaults: bool):
     """ Parse a json string and update assignments in a state accordingly.
 
     :arg state: a Problem object containing the concepts that appear in the json
@@ -95,12 +95,11 @@ def load_json(state: Problem, jsonstr: str):
     if jsonstr:
         json_data = ast.literal_eval(jsonstr)
 
-        # clear old choices, except for recent defaults, which should be kept
+        # clear old choices, except for recent defaults, which should be kept after meta construction
         for atom in state.assignments.values():
-            if atom.status in ([S.GIVEN, S.EXPANDED] if state.fresh_state
+            if atom.status in ([S.GIVEN, S.EXPANDED] if keep_defaults
                         else [S.GIVEN, S.EXPANDED, S.DEFAULT]):
                 state.assert_(atom.sentence.code, None, S.UNKNOWN)
-        state.fresh_state = False
 
         # set new choices
         for symbol in json_data:

@@ -85,8 +85,6 @@ class Problem(object):
 
         ctx : Z3 context
 
-        fresh_state (Bool): whether the state was freshly created
-
         old_choices ([Expression,Expression]): set of choices
             (sentence-value pairs) with which previous propagate was executed
 
@@ -132,7 +130,6 @@ class Problem(object):
         self.ctx = Context()
         self.add(*blocks)
 
-        self.fresh_state = True
         self.old_choices = []
         self.old_propagations = []
         self.first_prop = True

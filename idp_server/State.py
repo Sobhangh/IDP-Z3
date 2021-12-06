@@ -48,13 +48,14 @@ class State(Problem):
         """
         if jsonstr != "{}" and idp.code in State.cache:  # TODO: fix weird way to reset via "{}"
             state = State.cache[idp.code]
+            state.add_given(jsonstr)
         else:
             if 100 < len(State.cache):
                 # remove oldest entry, to prevent memory overflow
                 State.cache.pop(list(State.cache.keys())[-1])
             state = State(idp)
             State.cache[idp.code] = state
-        state.add_given(jsonstr)
+            state.add_given(jsonstr, True)
         return state
 
     def __init__(self, idp: IDP):
@@ -102,7 +103,7 @@ class State(Problem):
 
         self.relevant_symbols = {}
 
-    def add_given(self, jsonstr: str):
+    def add_given(self, jsonstr: str, keep_defaults: bool=False):
         """
         Add the assignments that the user gave through the interface.
         These are in the form of a json string.
@@ -113,8 +114,8 @@ class State(Problem):
         """
 
         if self.environment:
-            load_json(self.environment, jsonstr)
-        load_json(self, jsonstr)
+            load_json(self.environment, jsonstr, keep_defaults)
+        load_json(self, jsonstr, keep_defaults)
 
         # perform propagation
         if self.environment is not None:  # if there is a decision vocabulary
