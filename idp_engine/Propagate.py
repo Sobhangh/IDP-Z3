@@ -268,6 +268,7 @@ def _batch_propagate(self):
             yield str(z3_formula)
     else:
         yield "No more consequences."
+    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Problem._batch_propagate = _batch_propagate
 
 
@@ -321,6 +322,7 @@ def _propagate(self):
         yield "Unknown satisfiability."
         yield str(z3_formula)
 
+    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
     if last_prop is None:
         last_prop = 0
     else:
