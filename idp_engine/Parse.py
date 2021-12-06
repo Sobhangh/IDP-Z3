@@ -419,7 +419,7 @@ class SymbolDeclaration(ASTNode):
 
         type (string): name of the Z3 type of an instance of the symbol
 
-        domain (List): the list of possible tuples of arguments
+        in_domain (List): the list of possible tuples of arguments
 
         instances (Dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
@@ -463,7 +463,7 @@ class SymbolDeclaration(ASTNode):
         self.optimizable: bool = True
 
         self.type = None  # a string
-        self.domain = None  # all possible arguments
+        self.in_domain = None  # all possible arguments
         self.range = None  # all possible values
         self.instances = None  # {string: AppliedSymbol} not starting with '_'
         self.block: Optional[Block] = None  # vocabulary where it is declared

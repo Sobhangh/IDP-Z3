@@ -77,13 +77,13 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    self.domain = list(product(*[s.decl.range for s in self.sorts]))
+    self.in_domain = list(product(*[s.decl.range for s in self.sorts]))
     self.range = self.out.decl.range
 
     # create instances
     if self.name not in RESERVED_SYMBOLS:
         self.instances = {}
-        for arg in self.domain:
+        for arg in self.in_domain:
             expr = AppliedSymbol.make(Symbol(name=self.name), arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
@@ -338,7 +338,7 @@ def interpret(self, problem):
                 range = [t.args for t in enumeration.tuples.values()]
                 guard = None
             elif type(q.sub_exprs[0].decl) == SymbolDeclaration:
-                range = q.sub_exprs[0].decl.domain
+                range = q.sub_exprs[0].decl.in_domain
                 guard = q.sub_exprs[0]
             else:  # type declaration
                 range = [[t] for t in q.sub_exprs[0].decl.range] #TODO1 decl.enumeration.tuples
