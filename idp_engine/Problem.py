@@ -81,8 +81,11 @@ class Problem(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        old_choices ([Expression,Expression], optional): set of choices
-            (sentence-value pairs) with which previous propagate was executed
+        propagated (Bool): true if a propagation has been done
+
+        assigned (OrderedSet): set of questions asserted since last propagate
+
+        cleared (OrderedSet): set of questions unassigned since last propagate
 
         propagate_success (Bool): whether the last propagate call failed or not
 
@@ -109,7 +112,6 @@ class Problem(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
-        self.old_choices = None
         self.propagate_success = True
 
     @classmethod
@@ -216,22 +218,32 @@ class Problem(object):
             ass.sentence.original = ass.sentence.copy()
 
         self._constraintz = None
+        self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
-    def assert_(self, code: str, value: Any, status: S):
+    def assert_(self, code: str, value: Any, status: S = S.GIVEN):
         """asserts that an expression has a value (or not)
 
         Args:
             code (str): the code of the expression, e.g., "p()"
             value (Any): a Python value, e.g., True
-            status (Status): how the value was obtained.
+            status (Status, Optional): how the value was obtained.  Default: S.GIVEN
         """
         code = str(code)
         atom = self.assignments[code].sentence
+        old_value = self.assignments[code].value
         if value is None:
-            self.assignments.assert__(atom, None, S.UNKNOWN)
+            if self.propagated and old_value is not None:
+                self.cleared.append(atom)
+                self.assigned.pop(atom, None)
+            self.assignments.assert__(atom, value, S.UNKNOWN)
         else:
-            self.assignments.assert__(atom, str_to_IDP(atom, str(value)), status)
+            val = str_to_IDP(atom, str(value))
+            if self.propagated and not(old_value and old_value.same_as(val)):
+                self.assigned.append(atom)
+                if old_value:
+                    self.cleared.append(atom)
+            self.assignments.assert__(atom, val, status)
         self._formula = None
 
     def constraintz(self):
@@ -415,19 +427,26 @@ class Problem(object):
 
         out = copy(self)
         out.assignments = self.assignments.copy()
+        #  remove current assignments to same term
+        if out.assignments[term].value:
+            for k,a in out.assignments.items():
+                if a.sentence.is_assignment and a.sentence.code.startswith(term):
+                    out.assert_(k, None, S.UNKNOWN)
         out.formula()  # to keep universals and given, except self
 
-        # consider every value in range
-        todos = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
-
-        forbidden = set()
-        for ass in out._propagate(todos):
-            if isinstance(ass, str):
-                continue
-            if ass.value.same_as(FALSE):
-                forbidden.add(str(ass.sentence.sub_exprs[1]))
-
-        return [str(e.sub_exprs[1]) for e in todos if str(e.sub_exprs[1]) not in forbidden]
+        # now consider every value in range
+        out.assignments = Assignments()
+        for e in range:
+            sentence = Assignment(termE, e, S.UNKNOWN).formula()
+            # use assignments.assert_ to create one if necessary
+            out.assignments.assert__(sentence, None, S.UNKNOWN)
+        out.assigned = True  # to force propagation of Unknowns
+        _ = list(out._propagate())  # run the generator
+        assert all(e.sentence.is_assignment()
+                   for e in out.assignments.values())
+        return [str(e.sentence.sub_exprs[1])
+                for e in out.assignments.values()
+                if e.value is None or e.value.same_as(TRUE)]
 
 
     def explain(self, consequence=None):

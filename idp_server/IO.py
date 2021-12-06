@@ -96,25 +96,37 @@ def load_json(state: Problem, jsonstr: str):
         json_data = ast.literal_eval(jsonstr)
         assert json_data != {}, "Reset not expected here"
 
-        # clear old choices
-        for sentence in [atom.sentence for atom in state.assignments.values()
-                         if atom.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]]:
-            state.assert_(sentence.code, None, S.UNKNOWN)
-
-        # set new choices
         for symbol in json_data:
+            # tentative set of sentences to be cleared
+            to_clear = set(atom.sentence for atom in state.assignments.values()
+                           if (atom.symbol_decl.name == symbol
+                           and atom.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]))
+
+            # processed json_data
             for key, json_atom in json_data[symbol].items():
-                if json_atom["value"] != '' and key in state.assignments:
-                    # If the atom is known, set its value as normal.
+                if key in state.assignments:
                     atom = state.assignments[key]
                     sentence = atom.sentence
-                    value = str_to_IDP(sentence, str(json_atom["value"]))
-                    state.assert_(sentence.code, value, S.GIVEN)
-                    if json_atom["typ"] != "Bool":
-                        key2 = f"{sentence.code} = {str(value)}"
-                        if key2 in state.assignments:
-                            state.assert_(key2, TRUE, S.GIVEN)
 
+                    # If the atom is unknown, set its value as normal.
+                    if json_atom["value"] != '':
+                        to_clear.discard(sentence)
+                        if atom.status == S.UNKNOWN:
+                            value = str_to_IDP(sentence, str(json_atom["value"]))
+                            state.assert_(sentence.code, value, S.GIVEN)
+                            if json_atom["typ"] != "Bool":
+                                key2 = f"{sentence.code} = {str(value)}"
+                                if key2 in state.assignments:
+                                    state.assert_(key2, TRUE, S.GIVEN)
+
+                        # If the atom was not already set in default struct, overwrite.
+                        elif atom.status != S.DEFAULT:
+                            value = str_to_IDP(sentence, str(json_atom["value"]))
+                            state.assert_(sentence.code, value, S.GIVEN)
+
+            # clear the remaining sentences
+            for sentence in to_clear:
+                state.assert_(sentence.code, None, S.UNKNOWN)
 
 
 #################

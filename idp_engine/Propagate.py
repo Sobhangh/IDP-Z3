@@ -188,37 +188,24 @@ def _directional_todo(self):
     * a clearing of assignment forces the re-propagation of previous consequences
     * any cleared assignments should be repropagated as well
     """
-
-    initialprop = self.old_choices is None
-    if initialprop:
-        removed_choices = set()
-    else:
-        removed_choices = set(self.old_choices)
-    added_choices = []
-    self.old_choices = [(a.sentence, a.value) for a in self.assignments.values()
-                        if (not a.sentence.is_reified() or self.extended)
-                        and a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
-                        ]
-
-    for a in self.old_choices:
-        if a in removed_choices:
-            removed_choices.pop(a)
-        else:
-            added_choices.append(a)
-
     statuses = []
-    if initialprop or added_choices:
-        statuses.extend([S.UNKNOWN])
-    if removed_choices:
-        statuses.extend([S.CONSEQUENCE])
+    if self.propagated:
+        if self.assigned:
+            statuses.extend([S.UNKNOWN])
+        if self.cleared:
+            statuses.extend([S.CONSEQUENCE])
+    else:
+        statuses = [S.UNKNOWN, S.CONSEQUENCE]
 
-    todo = set(
-        a.sentence for a in self.assignments.values()
-        if (not a.sentence.is_reified() or self.extended)
-            and a.status in statuses
-    )
-    for a in removed_choices:
-        todo.add(a[0])
+    if statuses:
+        cleareds = self.cleared if self.cleared else OrderedSet()
+        todo = OrderedSet(
+            a.sentence for a in self.assignments.values()
+            if ((not a.sentence.is_reified() or self.extended)
+                and (a.status in statuses or (a.sentence in cleareds and a.status == S.UNKNOWN))
+                ))
+    else:
+        todo = OrderedSet()
 
     return todo
 Problem._directional_todo = _directional_todo
@@ -284,14 +271,13 @@ def _batch_propagate(self):
 Problem._batch_propagate = _batch_propagate
 
 
-def _propagate(self, todo=None):
+def _propagate(self):
     """generator of new propagated assignments.  Update self.assignments too.
     """
     global start, last_prop
     start, last_prop = time.process_time(), None
 
-    if todo is None:
-        todo = self._directional_todo()
+    todo = self._directional_todo()
 
     z3_formula = self.formula()
 
@@ -390,6 +376,7 @@ def _z3_propagate(self):
             yield str(z3_formula)
     else:
         yield "No more consequences."
+    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Problem._z3_propagate = _z3_propagate
 
 
