@@ -39,7 +39,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         IfExpr, AQuantification, Quantee,
+                         IfExpr, AQuantification, Domain, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -393,23 +393,6 @@ class TypeDeclaration(ASTNode):
 
     def is_subset_of(self, other):
         return self == other
-
-
-class Domain(ASTNode):
-    """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
-
-    Args:
-        name (Symbol): name of the concept
-
-        ins (List[Symbol], Optional): domain of the signature, e.g., `[T, T]`
-
-        out (Symbol, Optional): range of the signature, e.g., `Bool`
-    """
-
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.ins = kwargs.pop('ins', None)
-        self.out = kwargs.pop('out', None)
 
 
 class SymbolDeclaration(ASTNode):

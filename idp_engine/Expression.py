@@ -496,6 +496,34 @@ class Symbol(Expression):
         return str(self)
 
 
+class Domain(Symbol):
+    """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
+
+    Args:
+        name (Symbol): name of the concept
+
+        ins (List[Symbol], Optional): domain of the signature, e.g., `[T, T]`
+
+        out (Symbol, Optional): range of the signature, e.g., `Bool`
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.ins = kwargs.pop('ins', None)
+        self.out = kwargs.pop('out', None)
+
+    def __str__(self):
+        return self.name + ("" if not self.ins else
+                            f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
+
+    def annotate(self, voc, q_vars={}):
+        self.decl = voc.symbol_decls[self.name]
+        if self.ins:
+            self.ins = [s.annotate(voc, q_vars) for s in self.ins]
+            self.out = self.out.annotate(voc, q_vars)
+        return self
+
+
 class IfExpr(Expression):
     PRECEDENCE = 10
     IF = 0
@@ -548,11 +576,11 @@ class Quantee(Expression):
         self.domain = kwargs.pop('domain') if 'domain' in kwargs else None
         sort = kwargs.pop('sort') if 'sort' in kwargs else None
         if self.domain:
-            self.check(not (self.domain.name.name != CONCEPT and 0 <len(self.domain.ins)),
+            self.check(not (self.domain.name != CONCEPT and 0 <len(self.domain.ins)),
                    f"Can't use signature after predicate {self.domain.name}")
 
         self.sub_exprs = ([sort] if sort else
-                          [self.domain.name] if self.domain else
+                          [self.domain] if self.domain else
                           [])
         self.arity = None
         for i, v in enumerate(self.vars):
