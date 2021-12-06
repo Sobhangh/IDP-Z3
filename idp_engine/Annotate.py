@@ -49,9 +49,11 @@ def annotate(self, idp):
         if isinstance(s, Extern):
             other = self.idp.vocabularies[s.name]
             for s1 in other.declarations:
-                s.check(s1.name not in temp or s1.name in RESERVED_SYMBOLS,
-                        f"Duplicate declaration of {s1.name}")
-                temp[s1.name] = s1
+                if s1.name in temp:
+                    s.check(str(temp[s1.name]) == str(s1),
+                            f"Inconsistent declaration for {s1.name}")
+                else:
+                    temp[s1.name] = s1
         else:
             s.block = self
             s.check(s.name not in temp or s.name in RESERVED_SYMBOLS,
