@@ -93,7 +93,11 @@ class Problem(object):
 
         first_prop (Bool): whether the first propagate call still needs to happen
 
-        propagate_success (Bool): whether the last propagate call was succesful
+        propagate_success (Bool): keeps track whether a propagation still needs
+        to happen. If so during a propagate call, first an initial propagation
+        without any choices (including defaults) executes to find the universal
+        consequences of the theory (`S.UNIVERSAL`). This is done once to improve
+        subsequent propagations.
 
         _slvr (Solver): stateful solver used for propagation and model expansion.
             Use self.solver to access.
@@ -105,9 +109,11 @@ class Problem(object):
             Use self.explain_solver to access.
 
         expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
-            information on the reification of the constraints and definitions,
-            where the key represents the reified symbol in the solver, and the
-            value the constraint in the solver as well as the original expression.
+            dictionary storing for reification symbols (the keys) which
+            constraint it represents, and what the original expression was. If
+            the original expression is `None`, the reification represents a
+            fact, otherwise it represents a law. Used in the explanation
+            inference.
 
     """
     def __init__(self, *blocks, extended=False):
