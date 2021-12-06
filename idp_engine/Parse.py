@@ -395,6 +395,23 @@ class TypeDeclaration(ASTNode):
         return self == other
 
 
+class Domain(ASTNode):
+    """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
+
+    Args:
+        name (Symbol): name of the concept
+
+        ins (List[Symbol], Optional): domain of the signature, e.g., `[T, T]`
+
+        out (Symbol, Optional): range of the signature, e.g., `Bool`
+    """
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.ins = kwargs.pop('ins', None)
+        self.out = kwargs.pop('out', None)
+
+
 class SymbolDeclaration(ASTNode):
     """The class of AST nodes representing an entry in the vocabulary,
     declaring one or more symbols.
@@ -1118,7 +1135,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         TypeDeclaration, Accessor,
+                                         TypeDeclaration, Accessor, Domain,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
