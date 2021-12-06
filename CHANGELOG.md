@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #146: "Context mismatch" when performing abstract model expansion
 * fix #152: Error in binary quantification in aggregate
 * fix #156: Concept: error when using several vocabularies
+* fix #161: Improve "Duplicate declaration of..." error
 * MR !145: Improve performance of explain
 * MR !147: allow the user to edit system choices after model expansion / optimisation
 * MR !153: improve performance in case of large interpretations for symbols that do not occur in the theory
