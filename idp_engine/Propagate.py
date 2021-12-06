@@ -279,6 +279,7 @@ def _batch_propagate(self):
             yield str(z3_formula)
     else:
         yield "No more consequences."
+    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Problem._batch_propagate = _batch_propagate
 
 def add_assignment(self, solver, excluded):
@@ -336,8 +337,10 @@ def first_propagate(self):
     self.first_prop = False
 Problem.first_propagate = first_propagate
 
+
 def _propagate(self, todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
+    :arg todo: custom list of assignments to check during propagation.
     """
 
     if self.first_prop:
@@ -441,6 +444,7 @@ def _z3_propagate(self):
             yield str(z3_formula)
     else:
         yield "No more consequences."
+    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Problem._z3_propagate = _z3_propagate
 
 
