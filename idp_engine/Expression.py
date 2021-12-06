@@ -592,8 +592,6 @@ class Quantee(Expression):
 
     @classmethod
     def make(cls, var, sort):
-        if sort and type(sort) != SymbolExpr:
-            sort = SymbolExpr(eval='', s=sort).annotate1()
         out = (cls) (vars=[var], sort=sort)
         return out.annotate1()
 

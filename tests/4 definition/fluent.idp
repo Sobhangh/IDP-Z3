@@ -1,0 +1,18 @@
+vocabulary V {
+    type Time := {0..3}
+	on, put, remove : Time → 𝔹   // ignoring x,y for the sake of clarity
+    fluent : Concept[Time→𝔹] ⨯ 𝔹 ⨯ Concept[Time→𝔹] ⨯ Concept[Time→𝔹] → 𝔹
+}
+
+theory T:V {
+	// `on is a fluent with initial condition False, initiator `put and terminator `remove
+	fluent(`on, false, `put, `remove).
+
+	{ ∀f, i, r ∈ Concept[Time→𝔹]: ∀d ∈ 𝔹:
+        fluent(f, d, i, r) ← $(f)(0)=d
+                           ∧ (∀ t ∈ Time: $(f)(t+1) ⇔ ( $(i)(t) ∨ ( $(f)(t) ∧ ¬$(r)(t) ) )). }
+ }
+
+procedure main() {
+    pretty_print(model_expand(T))
+}

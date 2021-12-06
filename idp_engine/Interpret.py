@@ -45,7 +45,7 @@ from .Parse import (Extern, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (IfExpr, SymbolExpr, Expression, Constructor,
-                    AQuantification, FORALL, IMPLIES, AND, AAggregate,
+                    AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
@@ -341,15 +341,17 @@ def interpret(self, problem):
                 range = q.sub_exprs[0].decl.in_domain
                 guard = q.sub_exprs[0]
             else:  # type declaration
-                range = [[t] for t in q.sub_exprs[0].decl.range] #TODO1 decl.enumeration.tuples
+                domain = q.sub_exprs[0]
+                range = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
                 guard = None
-                if q.domain and q.domain.ins:  # x in Concept[T->T]
+                if isinstance(domain, Domain) and domain.ins:  # x in Concept[T->T]
                     range = [v for v in range
-                             if v[0].decl.symbol.decl.arity == len(q.domain.ins)
-                            and v[0].decl.symbol.decl.out.name == q.domain.out.name
+                             if v[0].decl.symbol.decl.arity == len(domain.ins)
+                             and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
+                            and v[0].decl.symbol.decl.out.name == domain.out.name
                             and all(s.name == q.name
                                     for s, q in zip(v[0].decl.symbol.decl.sorts,
-                                                    q.domain.ins))]
+                                                    domain.ins))]
 
             for vars in q.vars:
                 self.check(q.sub_exprs[0].decl.arity == len(vars),
