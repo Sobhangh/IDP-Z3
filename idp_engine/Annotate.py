@@ -638,7 +638,7 @@ def annotate(self, voc, q_vars):
                 symbol_decl = SymbolDeclaration.make(
                     "_"+self.str, # name `_ *`
                     len(q_vars),  # arity
-                    [Symbol(name=v.sort.code) for v in q_vars.values()],
+                    [Domain(name=v.sort.code) for v in q_vars.values()],
                     Domain(name=self.type)).annotate(voc)    # output_domain
                 symbol = Symbol(name=symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
