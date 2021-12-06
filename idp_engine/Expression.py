@@ -834,7 +834,7 @@ class AAggregate(Expression):
             vars = "".join([f"{q}" for q in self.quantees])
             out = ((f"{self.aggtype}(lambda {vars} : "
                     f"{self.sub_exprs[0].str}"
-                    f")") if self.aggtype != "#" else
+                    f")") if self.aggtype is not "#" else
                    (f"{self.aggtype}{{{vars} : "
                     f"{self.sub_exprs[0].str}"
                     f"}}")
