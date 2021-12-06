@@ -22,7 +22,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 
-from .Parse import (Vocabulary, Extern, TypeDeclaration, Type,
+from .Parse import (Vocabulary, Extern, TypeDeclaration, Type, Domain,
                     SymbolDeclaration, Symbol,
                     Theory, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
@@ -112,7 +112,7 @@ def annotate(self, voc):
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
-    self.type = self.out.decl.name
+    self.type = self.out.name
     return self
 SymbolDeclaration.annotate = annotate
 
@@ -126,6 +126,17 @@ def annotate(self, voc, q_vars):
     self.type = self.decl.type
     return self
 Symbol.annotate = annotate
+
+
+# Class Domain  #######################################################
+
+def annotate(self, voc, q_vars={}):
+    Symbol.annotate(self, voc, q_vars)
+    if self.ins:
+        self.ins = [s.annotate(voc, q_vars) for s in self.ins]
+        self.out = self.out.annotate(voc, q_vars)
+    return self
+Domain.annotate = annotate
 
 
 # Class Theory  #######################################################
@@ -628,7 +639,7 @@ def annotate(self, voc, q_vars):
                     "_"+self.str, # name `_ *`
                     len(q_vars),  # arity
                     [Symbol(name=v.sort.code) for v in q_vars.values()],
-                    Symbol(name=self.type)).annotate(voc)    # output_domain
+                    Domain(name=self.type)).annotate(voc)    # output_domain
                 symbol = Symbol(name=symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)

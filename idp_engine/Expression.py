@@ -508,20 +508,13 @@ class Domain(Symbol):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
         self.ins = kwargs.pop('ins', None)
         self.out = kwargs.pop('out', None)
+        super().__init__(**kwargs)
 
     def __str__(self):
         return self.name + ("" if not self.ins else
                             f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
-
-    def annotate(self, voc, q_vars={}):
-        self.decl = voc.symbol_decls[self.name]
-        if self.ins:
-            self.ins = [s.annotate(voc, q_vars) for s in self.ins]
-            self.out = self.out.annotate(voc, q_vars)
-        return self
 
 
 class IfExpr(Expression):
@@ -1130,7 +1123,7 @@ class Variable(Expression):
         self.name = kwargs.pop('name')
         sort = kwargs.pop('sort') if 'sort' in kwargs else None
         self.sort = sort
-        assert sort is None or isinstance(sort, Symbol)
+        assert sort is None or isinstance(sort, Domain) or isinstance(sort, Symbol)
 
         super().__init__()
 

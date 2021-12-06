@@ -27,7 +27,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
           ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
-          ('->' | '→') out=Symbol;
+          ('->' | '→') out=Domain;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
