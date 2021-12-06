@@ -204,7 +204,7 @@ class Expression(ASTNode):
         original (Expression):
             The original expression, before propagation and simplification.
 
-        fresh_vars (Set(string)):
+        variables (Set(string)):
             The set of names of the variables in the expression.
 
         is_type_constraint_for (string):
@@ -212,7 +212,7 @@ class Expression(ASTNode):
 
     """
     __slots__ = ('sub_exprs', 'simpler', 'value', 'code',
-                 'annotations', 'original', 'str', 'fresh_vars', 'type',
+                 'annotations', 'original', 'str', 'variables', 'type',
                  'is_type_constraint_for', 'co_constraint',
                  'questions', 'relevant')
 
@@ -226,7 +226,7 @@ class Expression(ASTNode):
         self.original: Expression = self
 
         self.str: str = self.code
-        self.fresh_vars: Optional[Set[str]] = None
+        self.variables: Optional[Set[str]] = None
         self.type: Optional[str] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional["Expression"] = None
@@ -241,7 +241,7 @@ class Expression(ASTNode):
             return self
         out = copy.copy(self)
         out.sub_exprs = [e.copy() for e in out.sub_exprs]
-        out.fresh_vars = copy.copy(out.fresh_vars)
+        out.variables = copy.copy(out.variables)
         out.value = None if out.value is None else out.value.copy()
         out.simpler = None if out.simpler is None else out.simpler.copy()
         out.co_constraint = (None if out.co_constraint is None
@@ -469,7 +469,7 @@ class Expression(ASTNode):
         """
         return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity)
                                    for e in self.sub_exprs))
-                    .annotate1())  # update fresh_vars
+                    .annotate1())  # update .variables
 
 
 class Symbol(Expression):
@@ -487,7 +487,7 @@ class Symbol(Expression):
         self.sub_exprs = []
         self.decl = None
         super().__init__()
-        self.fresh_vars = set()
+        self.variables = set()
         self.value = self
 
     def __str__(self):
@@ -630,6 +630,10 @@ class AQuantification(Expression):
             q.collect_symbols(symbols, co_constraints)
         return symbols
 
+def FORALL(qs, expr, annotations=None):
+    return AQuantification.make('∀', qs, expr, annotations)
+def EXISTS(qs, expr, annotations=None):
+    return AQuantification.make('∃', qs, expr, annotations)
 
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
@@ -699,19 +703,24 @@ class AImplication(Operator):
                      self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
         return self.update_exprs(sub_exprs).annotate1()
 
+def IMPLIES(exprs, annotations=None):
+    return AImplication.make('⇒', exprs, annotations)
 
 class AEquivalence(Operator):
     PRECEDENCE = 40
 
     # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
     def split(self):
-        posimpl = AImplication.make('⇒', [self.sub_exprs[0], self.sub_exprs[1]])
-        negimpl = ARImplication.make('⇐', [self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
-        return AConjunction.make('∧', [posimpl, negimpl])
+        posimpl = IMPLIES([self.sub_exprs[0], self.sub_exprs[1]])
+        negimpl = RIMPLIES([self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
+        return AND([posimpl, negimpl])
 
     def split_equivalences(self):
         out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
         return out.split()
+
+def EQUIV(exprs, annotations=None):
+    return AEquivalence.make('⇔', exprs, annotations)
 
 class ARImplication(Operator):
     PRECEDENCE = 30
@@ -721,6 +730,8 @@ class ARImplication(Operator):
                      self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
         return self.update_exprs(sub_exprs).annotate1()
 
+def RIMPLIES(exprs, annotations):
+    return ARImplication.make('⇐', exprs, annotations)
 
 class ADisjunction(Operator):
     PRECEDENCE = 60
@@ -730,10 +741,14 @@ class ADisjunction(Operator):
             return super().__str1__()
         return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
 
+def OR(exprs):
+    return ADisjunction.make('∨', exprs)
 
 class AConjunction(Operator):
     PRECEDENCE = 70
 
+def AND(exprs):
+    return AConjunction.make('∧', exprs)
 
 class AComparison(Operator):
     PRECEDENCE = 80
@@ -750,6 +765,8 @@ class AComparison(Operator):
                         for e in self.sub_exprs[0].sub_exprs) \
                 and self.sub_exprs[1].value is not None
 
+def EQUALS(exprs):
+    return AComparison.make('=',exprs)
 
 class ASumMinus(Operator):
     PRECEDENCE = 90
@@ -794,33 +811,32 @@ class AUnary(Expression):
                      for e in self.sub_exprs)
         return self.update_exprs(sub_exprs).annotate1()
 
+def NOT(expr):
+    return AUnary.make('¬', expr)
 
 class AAggregate(Expression):
     PRECEDENCE = 130
-    CONDITION = 0
-    OUT = 1
 
     def __init__(self, **kwargs):
         self.aggtype = kwargs.pop('aggtype')
         self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
-        self.out = kwargs.pop('out')
-        if self.aggtype == "sum":
-            self.f = TRUE
 
-        self.sub_exprs = [self.f, self.out] if self.out else [self.f]  # later: expressions to be summed
-        self.using_if = False  # cannot test q_vars, because aggregate may not have quantee
+        self.aggtype = "#" if self.aggtype == "card" else self.aggtype
+        self.sub_exprs = [self.f]  # later: expressions to be summed
+        self.annotated = False  # cannot test q_vars, because aggregate may not have quantee
+        self.q = ''
         super().__init__()
 
 
     def __str1__(self):
-        if not self.using_if:
+        if not self.annotated:
             vars = "".join([f"{q}" for q in self.quantees])
-            out = ((f"sum(lambda {vars} : "
-                    f"{self.sub_exprs[AAggregate.OUT].str}"
-                    f")" ) if self.aggtype == "sum" else
+            out = ((f"{self.aggtype}(lambda {vars} : "
+                    f"{self.sub_exprs[0].str}"
+                    f")" ) if self.aggtype is not "#" else
                    (f"{self.aggtype}{{{vars} : "
-                    f"{self.sub_exprs[AAggregate.CONDITION].str}"
+                    f"{self.sub_exprs[0].str}"
                     f"}}")
             )
         else:
@@ -898,7 +914,7 @@ class AppliedSymbol(Expression):
     def construct(cls, constructor, args):
         out= cls.make(Symbol(name=constructor.name), args)
         out.decl = constructor
-        out.fresh_vars = {}
+        out.variables = {}
         return out
 
     def __str1__(self):
@@ -1001,9 +1017,9 @@ class AppliedSymbol(Expression):
                 AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
             ])
             if polarity:
-                return AConjunction.make('∧', [comp, self])
+                return AND([comp, self])
             else:
-                return ADisjunction.make('∨', [comp, self])
+                return OR([comp, self])
 
 
 class SymbolExpr(Expression):
@@ -1048,7 +1064,7 @@ class UnappliedSymbol(Expression):
         """
         out = (cls)(s=Symbol(name=constructor.name))
         out.decl = constructor
-        out.fresh_vars = {}
+        out.variables = {}
         return out
 
     def __str1__(self): return self.name
@@ -1076,7 +1092,7 @@ class Variable(Expression):
 
         self.type = sort.decl.name if sort and sort.decl else ''
         self.sub_exprs = []
-        self.fresh_vars = set([self.name])
+        self.variables = set([self.name])
 
     def __str1__(self): return self.name
 
@@ -1094,7 +1110,7 @@ class Number(Expression):
         super().__init__()
 
         self.sub_exprs = []
-        self.fresh_vars = set()
+        self.variables = set()
         self.value = self
 
         ops = self.number.split("/")
@@ -1138,7 +1154,7 @@ class Date(Expression):
         super().__init__()
 
         self.sub_exprs = []
-        self.fresh_vars = set()
+        self.variables = set()
         self.value = self
 
         self.py_value = self.date.toordinal()

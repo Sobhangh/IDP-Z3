@@ -41,15 +41,14 @@ from itertools import product
 
 from .Assignments import Status as S
 from .Parse import (Extern, TypeDeclaration,
-                    SymbolDeclaration, Symbol, Rule, SymbolInterpretation,
+                    SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
-from .Expression import (SymbolExpr, Expression, Constructor, AQuantification,
-                    AImplication, AConjunction, ARImplication, AAggregate,
-                    AComparison, AUnary, AppliedSymbol, UnappliedSymbol,
-                    Variable, TRUE, FALSE, AEquivalence, Number)
-from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
-                    ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN)
+from .Expression import (IfExpr, SymbolExpr, Expression, Constructor,
+                    AQuantification, FORALL, IMPLIES, AND, AAggregate,
+                    NOT, AppliedSymbol, UnappliedSymbol,
+                    Variable, TRUE, Number)
+from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
 
 
 # class Extern  ###########################################################
@@ -133,8 +132,7 @@ def add_def_constraints(self, instantiables, problem, result):
     """
     for decl, bodies in instantiables.items():
         quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
-        expr = [AQuantification.make('∀', quantees, e, e.annotations)
-                .interpret(problem)
+        expr = [FORALL(quantees, e, e.annotations).interpret(problem)
                 for e in bodies]
         result[decl, self] = expr
 Definition.add_def_constraints = add_def_constraints
@@ -254,17 +252,17 @@ def instantiate(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
-    Update fresh_vars.
+    Update .variables.
     """
     assert all(type(e) == Variable for e in e0), \
            f"Internal error: instantiate {e0}"
     if self.value:
         return self
-    if problem and all(e.name not in self.fresh_vars for e in e0):
+    if problem and all(e.name not in self.variables for e in e0):
         return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
-    out.fresh_vars = copy.copy(out.fresh_vars)
+    out.variables = copy.copy(out.variables)
     return out.instantiate1(e0, e1, problem)
 Expression.instantiate = instantiate
 
@@ -272,7 +270,7 @@ def instantiate1(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
-    Update fresh_vars.
+    Update .variables.
     """
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem)
@@ -282,10 +280,10 @@ def instantiate1(self, e0, e1, problem=None):
         out = out.value
     else:
         for o, n in zip(e0, e1):
-            if o.name in out.fresh_vars:
-                out.fresh_vars.discard(o.name)
+            if o.name in out.variables:
+                out.variables.discard(o.name)
                 if type(n) == Variable:
-                    out.fresh_vars.add(n.name)
+                    out.variables.add(n.name)
             out.code = str(out)
     out.annotations['reading'] = out.code
     return out
@@ -363,9 +361,18 @@ def interpret(self, problem):
                         if guard:  # adds `guard(val) =>` in front of expression
                             applied = AppliedSymbol.make(guard, val)
                             if self.q == '∀':
-                                new_f = AImplication.make('⇒', [applied, new_f])
-                            else:
-                                new_f = AConjunction.make('∧', [applied, new_f])
+                                new_f = IMPLIES([applied, new_f])
+                            elif self.q == '∃':
+                                new_f = AND([applied, new_f])
+                            else:  # aggregate
+                                if isinstance(new_f, IfExpr):  # cardinality
+                                    # if a then b else 0 -> if (applied & a) then b else 0
+                                    arg1 = AND([applied,
+                                                        new_f.sub_exprs[0]])
+                                    new_f = IfExpr.make(arg1, new_f.sub_exprs[1],
+                                                        new_f.sub_exprs[2])
+                                else:  # sum
+                                    new_f = IfExpr.make(applied, new_f, Number(number="0"))
                         out.append(new_f)
                 forms = out
 
@@ -377,11 +384,11 @@ AQuantification.interpret = interpret
 
 
 def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # updates fresh_vars
+    out = Expression.instantiate1(self, e0, e1, problem)  # updates .variables
     for q in self.quantees: # for !x in $(output_domain(s,1))
         if q.sub_exprs:
             q.sub_exprs[0] = q.sub_exprs[0].instantiate(e0, e1, problem)
-    if problem and not self.fresh_vars:  # expand nested quantifier if no variables left
+    if problem and not self.variables:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out
 AQuantification.instantiate1 = instantiate1
@@ -390,7 +397,7 @@ AQuantification.instantiate1 = instantiate1
 # Class AAggregate  ######################################################
 
 def interpret(self, problem):
-    assert self.using_if, f"Internal error in interpret"
+    assert self.annotated, f"Internal error in interpret"
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 
@@ -414,14 +421,14 @@ def interpret(self, problem):
                 else:
                     simpler = interpretation.enumeration.contains(sub_exprs, True)
                 if 'not' in self.is_enumerated:
-                    simpler = AUnary.make('¬', simpler)
+                    simpler = NOT(simpler)
                 simpler.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
             core = AppliedSymbol.make(self.symbol, sub_exprs).copy()
             simpler = self.in_enumeration.contains([core], False)
             if 'not' in self.is_enumeration:
-                simpler = AUnary.make('¬', simpler)
+                simpler = NOT(simpler)
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
             and any(s.decl.name == CONCEPT for s in self.decl.sorts)
@@ -430,14 +437,14 @@ def interpret(self, problem):
             # do not do it otherwise, for performance reasons
             f = problem.interpretations[self.decl.name].interpret_application
             value = f(problem, 0, self, sub_exprs)
-        if (not self.in_head and not self.fresh_vars):
+        if (not self.in_head and not self.variables):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]
             inst = [x for x in inst if x]
             if len(inst) == 1:
                 co_constraint = inst[0]
             elif len(inst) > 1:
-                co_constraint = AConjunction.make('∧', inst)
+                co_constraint = AND(inst)
         out = (value if value else
                self._change(sub_exprs=sub_exprs, simpler=simpler,
                         co_constraint=co_constraint))
@@ -474,7 +481,7 @@ def substitute(self, e0, e1, assignments, tag=None):
 AppliedSymbol .substitute = substitute
 
 def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # update fresh_vars
+    out = Expression.instantiate1(self, e0, e1, problem)  # update .variables
     if type(out) == AppliedSymbol:  # might be a number after instantiation
         if type(out.symbol) == SymbolExpr and out.symbol.is_intentional():  # $(x)()
             out.symbol = out.symbol.instantiate(e0, e1, problem)
@@ -483,7 +490,9 @@ def instantiate1(self, e0, e1, problem=None):
                             f"Incorrect arity for {out.code}")
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs)
                 out.original = self
-        if problem and not self.fresh_vars:
+        if out.co_constraint is not None:
+            out.co_constraint.instantiate(e0, e1, problem)
+        if problem and not self.variables:
             return out.interpret(problem)
     return out
 AppliedSymbol .instantiate1 = instantiate1
