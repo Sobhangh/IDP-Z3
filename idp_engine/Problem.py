@@ -459,12 +459,24 @@ class Problem(object):
             solver.minimize(s)
         else:
             solver.maximize(s)
-        solver.check()
+        res = solver.check()
+        assert res == sat, "Optimization requires satisfiable specification"
 
-        val1 = solver.model().eval(s)
-        val = str_to_IDP(sentence, str(val1))
-        if val is not None:
-            self.assignments.assert__(sentence, val, S.EXPANDED)
+        # deal with strict inequalities, e.g. min(0<x)
+        val = solver.model().eval(s)
+        for i in range(0, 10):
+            if minimize:
+                solver.add(s < val)
+            else:
+                solver.add(val < s)
+            if solver.check() == sat:
+                val = solver.model().eval(s)
+            else:
+                break
+
+        val_IDP = str_to_IDP(sentence, str(val))
+        if val_IDP is not None:
+            self.assignments.assert__(sentence, val_IDP, S.EXPANDED)
 
         solver.pop()
 
