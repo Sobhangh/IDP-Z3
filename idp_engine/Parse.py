@@ -287,16 +287,16 @@ class Vocabulary(ASTNode):
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
                                 sorts=[], out=Domain(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Symbol(name=CONCEPT)],
+                                sorts=[Domain(name=CONCEPT)],
                                 out=Domain(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
-                                sorts=[Symbol(name=INT)],
+                                sorts=[Domain(name=INT)],
                                 out=Domain(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
-                                sorts=[Symbol(name=CONCEPT), Symbol(name=INT)],
+                                sorts=[Domain(name=CONCEPT), Domain(name=INT)],
                                 out=Domain(name=CONCEPT)),
             SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Symbol(name=CONCEPT)],
+                                sorts=[Domain(name=CONCEPT)],
                                 out=Domain(name=CONCEPT))
             ] + self.declarations
 

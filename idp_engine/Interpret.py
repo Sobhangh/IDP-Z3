@@ -77,6 +77,7 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
+    assert all(isinstance(s, Domain) for s in self.sorts), 'internal error'
     self.in_domain = list(product(*[s.decl.range for s in self.sorts]))
     self.range = self.out.decl.range
 
