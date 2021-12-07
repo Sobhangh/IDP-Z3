@@ -141,7 +141,7 @@ def annotate(self, idp):
         i.annotate(self)
     self.voc.add_voc_to_block(self)
 
-    self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
+    self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
@@ -150,7 +150,7 @@ Theory.annotate = annotate
 
 # Class Definition  #######################################################
 
-def annotate(self, theory, voc, q_vars):
+def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
     self.set_level_symbols()
 
