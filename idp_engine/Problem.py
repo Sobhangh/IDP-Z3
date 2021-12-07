@@ -277,7 +277,7 @@ class Problem(object):
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status not in [S.CONSEQUENCE]
+                        and (a.status != S.CONSEQUENCE
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
             else:
@@ -294,7 +294,7 @@ class Problem(object):
     def _todo_expand(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.status in [S.UNKNOWN]
+            if a.status == S.UNKNOWN
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):

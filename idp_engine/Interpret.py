@@ -156,7 +156,7 @@ def interpret(self, problem):
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
             e = problem.assignments.assert__(expr, value, status)
-            if (status in [S.DEFAULT]  # for proper display in IC
+            if (status == S.DEFAULT  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
                 problem.assignments.assert__(e.formula(), TRUE, status)
         if self.default is not None:
@@ -164,7 +164,7 @@ def interpret(self, problem):
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
                     e = problem.assignments.assert__(expr, self.default, status)
-                    if (status in [S.DEFAULT]  # for proper display in IC
+                    if (status == S.DEFAULT  # for proper display in IC
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
 SymbolInterpretation.interpret = interpret

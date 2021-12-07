@@ -191,9 +191,9 @@ def _directional_todo(self):
     statuses = []
     if self.propagated:
         if self.assigned:
-            statuses.extend([S.UNKNOWN])
+            statuses.append(S.UNKNOWN)
         if self.cleared:
-            statuses.extend([S.CONSEQUENCE])
+            statuses.append(S.CONSEQUENCE)
     else:
         statuses = [S.UNKNOWN, S.CONSEQUENCE]
 
