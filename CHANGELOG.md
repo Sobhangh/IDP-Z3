@@ -30,6 +30,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * web MR !40: Enable resizing the IDE editor window
 * web MR !41: Support of touch devices
 * web MR !42: stabilize the progress spinner
+* web MR !44: Irrelevant boxes should show the title
 * fix #139: IC should detect and explain theories without models
 * fix #147: incorrect reasoning about environmental consequences
 * fix #151: Error in dropdown using Glue Select
