@@ -22,7 +22,7 @@ Classes to parse an IDP-Z3 theory.
 """
 __all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
            "TypeDeclaration",
-           "SymbolDeclaration", "Symbol", "Theory", "Definition",
+           "SymbolDeclaration", "Symbol", "TheoryBlock", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", ]
 
@@ -113,7 +113,7 @@ class IDP(ASTNode):
 
         vocabularies (dict[str, Vocabulary]): list of vocabulary blocks, by name
 
-        theories (dict[str, Theory]): list of theory blocks, by name
+        theories (dict[str, TheoryBlock]): list of theory blocks, by name
 
         structures (dict[str, Structure]): list of structure blocks, by name
 
@@ -198,7 +198,7 @@ class IDP(ASTNode):
             blocks (List[str]): list of names of the blocks to retrieve
 
         Returns:
-            List[Union[Vocabulary, Theory, Structure, Procedure, Display]]:
+            List[Union[Vocabulary, TheoryBlock, Structure, Procedure, Display]]:
                 list of AST nodes
         """
         names = blocks.split(",") if type(blocks) is str else blocks
@@ -493,10 +493,10 @@ class SymbolDeclaration(ASTNode):
 Type = Union[TypeDeclaration, SymbolDeclaration]
 
 
-################################ Theory  ###############################
+################################ TheoryBlock  ###############################
 
 
-class Theory(ASTNode):
+class TheoryBlock(ASTNode):
     """ The class of AST nodes representing a theory block.
     """
     def __init__(self, **kwargs):
@@ -1110,7 +1110,7 @@ class PyAssignment(ASTNode):
 
 ########################################################################
 
-Block = Union[Vocabulary, Theory, Structure, Display]
+Block = Union[Vocabulary, TheoryBlock, Structure, Display]
 
 dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 
@@ -1122,7 +1122,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
-                                         Theory, Definition, Rule, IfExpr,
+                                         TheoryBlock, Definition, Rule, IfExpr,
                                          AQuantification, Quantee, ARImplication,
                                          AEquivalence, AImplication,
                                          ADisjunction, AConjunction,

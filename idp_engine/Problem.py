@@ -32,7 +32,7 @@ from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
                          EQUALS, NOT)
-from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
+from .Parse import (TypeDeclaration, Symbol, TheoryBlock, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, CONCEPT, RELEVANT)
@@ -164,7 +164,7 @@ class Problem(object):
                         f"Can't add enumeration for {name} in {block.name}: duplicate"
                 self.interpretations[name] = interpret
 
-            if isinstance(block, Theory) or isinstance(block, Problem):
+            if isinstance(block, TheoryBlock) or isinstance(block, Problem):
                 self.co_constraints = None
                 self.definitions += block.definitions
                 self.constraints.extend(v.copy() for v in block.constraints)
