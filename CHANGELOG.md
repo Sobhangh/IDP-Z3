@@ -34,6 +34,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #139: IC should detect and explain theories without models
 * fix #147: incorrect reasoning about environmental consequences
 * fix #151: Error in dropdown using Glue Select
+* fix #160: Irrelevant boxes should show the title
 
 
 ## [0.8.4] - 2021-09-30
