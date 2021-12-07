@@ -22,5 +22,5 @@ theory {
   f(`f) = `f.
 }
 procedure main() {
-    pretty_print(Problem(T).formula())
+    pretty_print(Theory(T).formula())
 }

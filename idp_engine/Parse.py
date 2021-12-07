@@ -309,7 +309,7 @@ class Vocabulary(ASTNode):
         """adds the enumerations in a vocabulary to a theory or structure block
 
         Args:
-            block (Problem): the block to be updated
+            block (Theory): the block to be updated
         """
         for s in self.declarations:
             block.check(s.name not in block.declarations,
@@ -676,7 +676,7 @@ class Rule(ASTNode):
 
         Args:
             new_args ([Expression]): tuple of arguments to be applied to the defined symbol
-            theory (Problem): the context for the interpretation
+            theory (Theory): the context for the interpretation
 
         Returns:
             Expression: a boolean expression

@@ -8,7 +8,7 @@ theory T:V {
 }
 
 procedure main() {
-    P = Problem(T)
+    P = Theory(T)
     i=1
     print(f"Propagation of a() = {i}:")
     P.assert_("a()", 1)

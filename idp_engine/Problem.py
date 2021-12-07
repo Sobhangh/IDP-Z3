@@ -46,7 +46,7 @@ class Propagation(Enum):
     Z3 = auto()  # use Z3's consequences API (incomplete propagation)
 
 
-class Problem(object):
+class Theory(object):
     """A collection of theory and structure blocks.
 
     Attributes:
@@ -120,7 +120,7 @@ class Problem(object):
         structures = ([] if structures is None else
                       structures if isinstance(structures, Iterable) else
                       [structures])
-        if type(theories) == 'Problem':
+        if type(theories) == 'Theory':
             theories.add(*structures)
             self = theories
         elif isinstance(theories, Iterable):
@@ -164,7 +164,7 @@ class Problem(object):
                         f"Can't add enumeration for {name} in {block.name}: duplicate"
                 self.interpretations[name] = interpret
 
-            if isinstance(block, TheoryBlock) or isinstance(block, Problem):
+            if isinstance(block, TheoryBlock) or isinstance(block, Theory):
                 self.co_constraints = None
                 self.definitions += block.definitions
                 self.constraints.extend(v.copy() for v in block.constraints)
@@ -454,7 +454,7 @@ class Problem(object):
         Returns the facts and laws that make the problem UNSAT.
 
         Args:
-            self (Problem): the problem state
+            self (Theory): the problem state
             consequence (string | None): the code of the sentence to be explained.  Must be a key in self.assignments
 
         Returns:
@@ -528,7 +528,7 @@ class Problem(object):
         return (facts, laws)
 
     def simplify(self):
-        """ returns a simpler copy of the Problem, using known assignments
+        """ returns a simpler copy of the Theory, using known assignments
 
         Assignments obtained by propagation become fixed constraints.
         """
