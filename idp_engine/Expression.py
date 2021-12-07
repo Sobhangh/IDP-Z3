@@ -516,6 +516,9 @@ class Domain(Symbol):
         return self.name + ("" if not self.ins else
                             f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
 
+    def range():
+        pass  # monkey-patched
+
 
 class IfExpr(Expression):
     PRECEDENCE = 10

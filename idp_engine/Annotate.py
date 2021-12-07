@@ -203,8 +203,8 @@ def get_instantiables(self, for_explain=False):
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.decl.range  # not None nor []
-                               for s in rule.definiendum.decl.sorts)
+        rule.is_whole_domain = all(s.range()  # not None nor []
+                                   for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
