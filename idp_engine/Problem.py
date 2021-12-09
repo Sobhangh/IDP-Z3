@@ -314,7 +314,13 @@ class Theory(object):
                                             model_completion=complete)
                 val = str_to_IDP(q, str(val1))
                 if val is not None:
-                    ass.assert__(q, val, S.EXPANDED)
+                    if q.is_assignment() and val == FALSE:
+                        print(q.sub_exprs[0].decl.block.name)
+                        tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
+                               else S.CONSEQUENCE)
+                    else:
+                        tag = S.EXPANDED
+                    ass.assert__(q, val, tag)
         return ass
 
     def expand(self, max=10, timeout=10, complete=False):
