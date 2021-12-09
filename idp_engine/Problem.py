@@ -396,22 +396,20 @@ class Problem(object):
         self.assignments = self._from_model(solver, todo, complete)
         return self
 
-    def symbolic_propagate(self):
+    def symbolic_propagate(self, tag=S.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
-            new_constraint = c.substitute(TRUE, TRUE, self.assignments, S.UNIVERSAL)
-            new_constraint.symbolic_propagate(self.assignments, S.UNIVERSAL)
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, tag)
+            new_constraint.symbolic_propagate(self.assignments, tag)
         return self
 
     def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
             out = list(self._batch_propagate(tag))
-            # NOTE: running this will confuse _directional_todo
         if method == Propagation.Z3:
             out = list(self._z3_propagate(tag))
-            # NOTE: running this will confuse _directional_todo
         else:
             out = list(self._propagate(tag))
         self.propagate_success = (out[0] != "Not satisfiable.")
@@ -442,7 +440,7 @@ class Problem(object):
             # use assignments.assert_ to create one if necessary
             out.assignments.assert__(sentence, None, S.UNKNOWN)
         out.assigned = True  # to force propagation of Unknowns
-        _ = list(out._propagate())  # run the generator
+        _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
         assert all(e.sentence.is_assignment()
                    for e in out.assignments.values())
         return [str(e.sentence.sub_exprs[1])
