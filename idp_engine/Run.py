@@ -64,14 +64,14 @@ def model_propagate(theories, structures=None, sort=False):
     """ output: a list of Assignment """
     problem = Problem.make(theories, structures)
     if sort:
-        ms = [str(m) for m in problem._propagate()]
+        ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
         out = ""
         for i, m in enumerate(ms[:-1]):
             out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
         yield out + f"{ms[-1]}"
     else:
-        yield from problem._propagate()
+        yield from problem._propagate(tag=S.CONSEQUENCE)
 
 
 def decision_table(theories, structures=None, goal_string="",

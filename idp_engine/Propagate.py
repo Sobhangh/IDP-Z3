@@ -193,9 +193,9 @@ def _directional_todo(self):
         if self.assigned:
             statuses.append(S.UNKNOWN)
         if self.cleared:
-            statuses.append(S.CONSEQUENCE)
+            statuses.extend([S.CONSEQUENCE, S.ENV_CONSQ])
     else:
-        statuses = [S.UNKNOWN, S.CONSEQUENCE]
+        statuses = [S.UNKNOWN, S.CONSEQUENCE, S.ENV_CONSQ]
 
     if statuses:
         cleareds = self.cleared if self.cleared else OrderedSet()
@@ -211,7 +211,7 @@ def _directional_todo(self):
 Problem._directional_todo = _directional_todo
 
 
-def _batch_propagate(self):
+def _batch_propagate(self, tag=S.CONSEQUENCE):
     """ generator of new propagated assignments.  Update self.assignments too.
 
     uses the method outlined in https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3/37061846#37061846
@@ -232,7 +232,7 @@ def _batch_propagate(self):
                 solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
                 if solver.check() != sat:
                     # print("Falling back !")
-                    yield from self._propagate()
+                    yield from self._propagate(tag)
                 test = Not(q.reified(self) == solver.model().eval(q.reified(self)))  #TODO compute model once
                 tests.append(test)
                 lookup[str(test)] = q
@@ -257,7 +257,7 @@ def _batch_propagate(self):
                     break
                 else:  # unknown
                     # print("Falling back !!")
-                    yield from self._propagate()
+                    yield from self._propagate(tag)
                     break
             yield "No more consequences."
         elif result == unsat:
@@ -272,7 +272,7 @@ def _batch_propagate(self):
 Problem._batch_propagate = _batch_propagate
 
 
-def _propagate(self):
+def _propagate(self, tag=S.CONSEQUENCE):
     """generator of new propagated assignments.  Update self.assignments too.
     """
     global start, last_prop
@@ -305,7 +305,7 @@ def _propagate(self):
 
             if res2 == unsat:
                 val = str_to_IDP(q, str(val1))
-                yield self.assignments.assert__(q, val, S.CONSEQUENCE)
+                yield self.assignments.assert__(q, val, tag)
                 last_prop = time.process_time()
             elif res2 == unknown:  # does not happen with newest version of Z3
                 solver = get_solver() # restart the solver
@@ -330,7 +330,7 @@ def _propagate(self):
 Problem._propagate = _propagate
 
 
-def _z3_propagate(self):
+def _z3_propagate(self, tag=S.CONSEQUENCE):
     """generator of new propagated assignments.  Update self.assignments too.
 
     use z3's consequences API (incomplete propagation)
@@ -356,20 +356,20 @@ def _z3_propagate(self):
                     value = TRUE
                 # try to unreify it
                 if atom in unreify:
-                    yield self.assignments.assert__(unreify[atom], value, S.CONSEQUENCE)
+                    yield self.assignments.assert__(unreify[atom], value, tag)
                 elif is_eq(consq):
                     assert value == TRUE, f"Internal error in z3_propagate"
                     term = consq.children()[0]
                     if term in unreify:
                         q = unreify[term]
                         val = str_to_IDP(q, consq.children()[1])
-                        yield self.assignments.assert__(q, val, S.CONSEQUENCE)
+                        yield self.assignments.assert__(q, val, tag)
                     else:
                         print("???", str(consq))
                 else:
                     print("???", str(consq))
             yield "No more consequences."
-            #yield from self._propagate()  # incomplete --> finish with normal propagation
+            #yield from self._propagate(tag)  # incomplete --> finish with normal propagation
         elif result == unsat:
             yield "Not satisfiable."
             yield str(z3_formula)

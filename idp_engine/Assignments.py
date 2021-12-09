@@ -39,6 +39,7 @@ class Status(Enum):
     STRUCTURE = auto()
     UNIVERSAL = auto()
     CONSEQUENCE = auto()
+    ENV_CONSQ = auto()
     # choices:
     EXPANDED = auto()
     DEFAULT = auto()
@@ -201,7 +202,7 @@ class Assignments(dict):
         if sentence.code in self:
             out = self[sentence.code]
             if out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT]\
-                    and status in [Status.CONSEQUENCE, Status.UNIVERSAL]:
+                    and status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.UNIVERSAL]:
                 assert out.value.same_as(value), \
                         "System should not override given choices with different consequences, please report this bug."
             else:

@@ -137,10 +137,10 @@ class State(Problem):
 
         # perform propagation
         if out.environment is not None:  # if there is a decision vocabulary
-            out.environment.propagate()
+            out.environment.propagate(tag=S.ENV_CONSQ)
             out.assignments.update(out.environment.assignments)
             out._formula = None
-        out.propagate()
+        out.propagate(tag=S.CONSEQUENCE)
 
         return out
 
@@ -149,7 +149,7 @@ class State(Problem):
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
         return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == S.UNIVERSAL)}{NEWL}"
-                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == S.CONSEQUENCE)}{NEWL}"
+                f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.CONSEQUENCE, S.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
                 f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"

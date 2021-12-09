@@ -106,6 +106,7 @@ GET response :
                                 // EXPANDED    : value obtained by model expansion (only after optimize / expand call)
                                 // UNIVERSAL   : immediate consequence of the theory
                                 // CONSEQUENCE : value obtained by propagation of inputs
+                                // ENV_CONSQ   : value obtained by propagation of inputs on environmental theory
             - relevant: Bool
             - reading : string  // English reading of the atom/term
             - normal : Bool     // false if to be shown in expanded view only

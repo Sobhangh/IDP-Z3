@@ -277,7 +277,7 @@ class Problem(object):
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status != S.CONSEQUENCE
+                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
             else:
@@ -404,16 +404,16 @@ class Problem(object):
             new_constraint.symbolic_propagate(self.assignments, S.UNIVERSAL)
         return self
 
-    def propagate(self, method=Propagation.DEFAULT):
+    def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
-            out = list(self._batch_propagate())
+            out = list(self._batch_propagate(tag))
             # NOTE: running this will confuse _directional_todo
         if method == Propagation.Z3:
-            out = list(self._z3_propagate())
+            out = list(self._z3_propagate(tag))
             # NOTE: running this will confuse _directional_todo
         else:
-            out = list(self._propagate())
+            out = list(self._propagate(tag))
         self.propagate_success = (out[0] != "Not satisfiable.")
         return self
 
@@ -540,7 +540,7 @@ class Problem(object):
         # convert consequences to Universal
         for ass in out.assignments.values():
             if ass.value:
-                ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
+                ass.status = (S.UNIVERSAL if ass.status in [S.CONSEQUENCE, S.ENV_CONSQ] else
                         ass.status)
 
         new_constraints: List[Expression] = []
