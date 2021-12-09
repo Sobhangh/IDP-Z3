@@ -19,6 +19,6 @@ structure S:V {
 }
 
 procedure main () {
-    problem = Problem(T,S)
+    problem = Theory(T,S)
     pretty_print(problem.formula())
 }

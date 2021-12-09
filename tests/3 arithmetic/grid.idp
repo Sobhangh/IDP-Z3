@@ -16,6 +16,6 @@ theory {
 }
 
 procedure main() {
-    print(Problem(T).formula())
+    print(Theory(T).formula())
     pretty_print(model_expand(T))
 }

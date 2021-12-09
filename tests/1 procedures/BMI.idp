@@ -57,9 +57,9 @@ structure {
 
 procedure main() {
     pretty_print(model_propagate(T))
-    print(Problem(T).get_range("sex()"))
+    print(Theory(T).get_range("sex()"))
     print()
     pretty_print(model_propagate(T, S))
     print()
-    pretty_print(Problem(T,S).propagate().explain("riskLevel()"))
+    pretty_print(Theory(T,S).propagate().explain("riskLevel()"))
 }

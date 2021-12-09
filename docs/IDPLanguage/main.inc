@@ -63,16 +63,16 @@ pretty_print(...)
     Prints its argument on stdout, in a readable form.
 
 
-Problem class
+Theory class
 +++++++++++++
 
-The main block can also use instances of the ``Problem`` class.
-This is beneficial when several inferences must be made in a row (e.g., ``Problem(T,S).propagate().simplify().formula()``).
-Instances of the ``Problem`` class represent a collection of theory and structure blocks.
+The main block can also use instances of the ``Theory`` class.
+This is beneficial when several inferences must be made in a row (e.g., ``Theory(T,S).propagate().simplify().formula()``).
+Instances of the ``Theory`` class represent a collection of theory and structure blocks.
 The class has the following methods:
 
 __init__(self, \*blocks, extended=False)
-    Creates an instance of ``Problem`` for the list of blocks, e.g., ``Problem(T,S)``.
+    Creates an instance of ``Theory`` for the list of blocks, e.g., ``Theory(T,S)``.
 
     Use `extended=True` when the truth value of inequalities and quantified formula is of interest (e.g. for the Interactive Consultant).
 
@@ -112,9 +112,9 @@ get_range(self, term:str)
     Returns a list of the possible values of the term (as strings).
 
 explain(self, consequence=None)
-    Returns the facts and laws to explain a consequence in the Problem.
+    Returns the facts and laws to explain a consequence in the Theory.
 
-    The string ``consequence`` must be a key in the ``assignments`` property of the Problem, or ``None``.
+    The string ``consequence`` must be a key in the ``assignments`` property of the Theory, or ``None``.
     If it is ``None``, and the theory is unsatisfiable, the method returns a minimal set of facts and laws that make it so.
     The facts are a list of Assignment, and the laws are a list of ``Expression``.
 

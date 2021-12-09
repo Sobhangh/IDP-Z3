@@ -22,7 +22,7 @@ structure S:decision {
     measure := {`cSID}
 }
 procedure main() {
-    print(Problem(decision, S).formula())
+    print(Theory(decision, S).formula())
     pretty_print(model_check(decision, S))
 }
 
