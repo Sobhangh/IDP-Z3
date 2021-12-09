@@ -315,7 +315,6 @@ class Theory(object):
                 val = str_to_IDP(q, str(val1))
                 if val is not None:
                     if q.is_assignment() and val == FALSE:
-                        print(q.sub_exprs[0].decl.block.name)
                         tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
                                else S.CONSEQUENCE)
                     else:
