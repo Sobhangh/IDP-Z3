@@ -63,30 +63,30 @@ pretty_print(...)
     Prints its argument on stdout, in a readable form.
 
 
-Problem class
+Theory class
 +++++++++++++
 
-The main block can also use instances of the ``Problem`` class.
-This is beneficial when several inferences must be made in a row (e.g., ``Problem(T,S).propagate().simplify().formula()``).
-Instances of the ``Problem`` class represent a collection of theory and structure blocks.
+The main block can also use instances of the ``Theory`` class.
+This is beneficial when several inferences must be made in a row (e.g., ``Theory(T,S).propagate().simplify().formula()``).
+Instances of the ``Theory`` class represent a collection of theory and structure blocks.
 The class has the following methods:
 
 __init__(self, \*blocks, extended=False)
-    Creates an instance of ``Problem`` for the list of blocks, e.g., ``Problem(T,S)``.
+    Creates an instance of ``Theory`` for the list of blocks, e.g., ``Theory(T,S)``.
 
     Use `extended=True` when the truth value of inequalities and quantified formula is of interest (e.g. for the Interactive Consultant).
 
 add(self, \*blocks)
-    Adds a list of theory or structure blocks to the problem.
+    Adds a list of theory or structure blocks to the theory.
 
 assert_(self, code: str, value: Any)
-    Asserts that an expression has a value, e.g. `problem.assert_("p()", True)`.
+    Asserts that an expression has a value, e.g. `theory.assert_("p()", True)`.
 
 copy(self)
-    Returns an independent copy of a problem.
+    Returns an independent copy of a theory.
 
 formula(self)
-    Returns a Z3 object representing the logic formula equivalent to the problem.
+    Returns a Z3 object representing the logic formula equivalent to the theory.
     This object can be converted to a string using ``str()``.
 
 expand(self, max=10, timeout=10, complete=False)
@@ -101,31 +101,31 @@ optimize(self, term, minimize=True, complete=False)
     The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
 
 symbolic_propagate(self)
-    Returns the problem with its ``assignments`` property updated with direct consequences of the constraints of the problem.
+    Returns the theory with its ``assignments`` property updated with direct consequences of the constraints of the theory.
     This propagation is less complete than ``propagate()``.
 
 propagate(self)
-    Returns the problem with its ``assignments`` property updated with values for all terms and atoms that have the same value in every model (i.e., satisfying structure of the problem).
+    Returns the theory with its ``assignments`` property updated with values for all terms and atoms that have the same value in every model (i.e., satisfying structure of the theory).
     Terms and propositions starting with '_' are ignored.
 
 get_range(self, term:str)
     Returns a list of the possible values of the term (as strings).
 
 explain(self, consequence=None)
-    Returns the facts and laws to explain a consequence in the Problem.
+    Returns the facts and laws to explain a consequence in the Theory.
 
-    The string ``consequence`` must be a key in the ``assignments`` property of the Problem, or ``None``.
+    The string ``consequence`` must be a key in the ``assignments`` property of the Theory, or ``None``.
     If it is ``None``, and the theory is unsatisfiable, the method returns a minimal set of facts and laws that make it so.
     The facts are a list of Assignment, and the laws are a list of ``Expression``.
 
 simplify(self)
-    Returns a simpler copy of the problem, with a simplified formula obtained
+    Returns a simpler copy of the theory, with a simplified formula obtained
     by substituting terms and atoms by their known values.
 
 decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
     Experimental.  Returns the rows for a decision table that defines ``goal_string``.
     ``goal_string`` must be a predicate application defined in the theory.
-    The problem must be created with ``extended=True``.
+    The theory must be created with ``extended=True``.
 
 duration(msg: str)
     Returns the processing time since the last call to `duration()`,

@@ -1,7 +1,7 @@
 IDP:
     Shebang?
     ( vocabularies=Vocabulary
-    | theories=Theory
+    | theories=TheoryBlock
     | structures=Structure
     | procedures=Procedure) *
     display=Display?
@@ -32,7 +32,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
+TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
 
   Definition: annotations=Annotations '{' rules*=Rule '}';
   Rule: annotations=Annotations

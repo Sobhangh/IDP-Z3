@@ -25,7 +25,7 @@ It has 2 parts:
 * symbolic propagation
 * Z3 propagation
 
-This module monkey-patches the Expression and Problem classes and sub-classes.
+This module monkey-patches the Expression and Theory classes and sub-classes.
 """
 
 import time
@@ -37,7 +37,7 @@ from .Expression import (Expression, AQuantification,
                     ADisjunction, AConjunction, AppliedSymbol,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
-from .Problem import Problem
+from .Problem import Theory
 from .utils import OrderedSet
 
 start = time.process_time()
@@ -207,7 +207,7 @@ def _directional_todo(self):
         todo = OrderedSet()
 
     return todo
-Problem._directional_todo = _directional_todo
+Theory._directional_todo = _directional_todo
 
 
 def _batch_propagate(self, tag=S.CONSEQUENCE):
@@ -268,7 +268,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
     else:
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
-Problem._batch_propagate = _batch_propagate
+Theory._batch_propagate = _batch_propagate
 
 
 def _propagate(self, tag=S.CONSEQUENCE):
@@ -325,7 +325,7 @@ def _propagate(self, tag=S.CONSEQUENCE):
         last_prop = 0
     else:
         last_prop -= start
-Problem._propagate = _propagate
+Theory._propagate = _propagate
 
 
 def _z3_propagate(self, tag=S.CONSEQUENCE):
@@ -377,7 +377,7 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
     else:
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
-Problem._z3_propagate = _z3_propagate
+Theory._z3_propagate = _z3_propagate
 
 
 Done = True

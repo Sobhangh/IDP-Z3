@@ -11,5 +11,5 @@ structure {
     dates := {#2021-01-01..#2021-01-10}
 }
 procedure main() {
-    print(Problem(T,S).formula())
+    print(Theory(T,S).formula())
 }

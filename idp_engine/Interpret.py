@@ -108,7 +108,7 @@ def interpret(self, problem):
     """updates problem.def_constraints, by expanding the definitions
 
     Args:
-        problem (Problem):
+        problem (Theory):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
@@ -125,7 +125,7 @@ def add_def_constraints(self, instantiables, problem, result):
         instantiables (dict[SymbolDeclaration, list[Expression]]):
             the constraints without the quantification
 
-        problem (Problem):
+        problem (Theory):
             contains the structure for the expansion/interpretation of the constraints
 
         result (dict[SymbolDeclaration, Definition, list[Expression]]):
@@ -210,7 +210,7 @@ def interpret(self, problem) -> Expression:
     - instantiate definitions
 
     Args:
-        problem (Problem): the Problem to apply
+        problem (Theory): the Theory to apply
 
     Returns:
         Expression: the resulting expression
@@ -320,7 +320,7 @@ def interpret(self, problem):
     """apply information in the problem and its vocabulary
 
     Args:
-        problem (Problem): the problem to be applied
+        problem (Theory): the problem to be applied
 
     Returns:
         Expression: the expanded quantifier expression
