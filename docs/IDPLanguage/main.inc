@@ -95,10 +95,9 @@ expand(self, max=10, timeout=10, complete=False)
     The search for new models is stopped when processing exceeds ``timeout`` (in seconds) (unless it is 0).
     The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
 
-optimize(self, term, minimize=True, complete=False)
-    Returns the problem with its ``assignments`` property updated with values such that the term is minimized (or maximized if ``minimize`` is ``False``)
+optimize(self, term, minimize=True)
+    Updates the Theory so that the value of term in the ``assignments`` property is the minimal (or maximal if ``minimize`` is ``False``) value that is compatible with the Theory.
     ``term`` is a string (e.g. ``"Length(1)"``).
-    The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
 
 symbolic_propagate(self)
     Returns the problem with its ``assignments`` property updated with direct consequences of the constraints of the problem.

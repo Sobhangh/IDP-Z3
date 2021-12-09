@@ -364,17 +364,18 @@ class Theory(object):
         else:
             yield "No models."
 
-    def optimize(self, term, minimize=True, complete=False):
+    def optimize(self, term, minimize=True):
         assert term in self.assignments, "Internal error"
+        sentence = self.assignments[term].sentence
         todo = self._todo_expand()
 
         solver = Optimize(ctx=self.ctx)
         solver.add(self.formula())
         for q in todo:
-            if (q.is_reified() and self.extended) or complete:
+            if q.is_reified() and self.extended:
                 solver.add(q.reified(self) == q.translate(self))
 
-        s = self.assignments[term].sentence.translate(self)
+        s = sentence.translate(self)
         if minimize:
             solver.minimize(s)
         else:
@@ -393,7 +394,13 @@ class Theory(object):
                 solver.pop()  # get the last good one
                 solver.check()
                 break
-        self.assignments = self._from_model(solver, todo, complete)
+
+        val_IDP = str_to_IDP(sentence, str(val))
+        if val_IDP is not None:
+            self.assert_(str(sentence), val_IDP, S.GIVEN)
+            ass = str(EQUALS([sentence, val_IDP]))
+            if ass in self.assignments:
+                self.assert_(ass, True, S.GIVEN)
         return self
 
     def symbolic_propagate(self, tag=S.UNIVERSAL):

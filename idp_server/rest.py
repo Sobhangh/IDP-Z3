@@ -276,14 +276,15 @@ class eval(Resource):
                     elif method == "modelexpand":
                         generator = state.expand(max=1, timeout=0, complete=False)
                         out = copy(state)
+                        out.assignments = out.assignments.copy(shallow=True)
                         out.assignments = list(generator)[0]
                         out = Output(out).fill(out)
                     elif method == "explain":
                         out = explain(state, args['value'])
                     elif method == "minimize":
                         out = copy(state)
-                        out = out.optimize(args['symbol'], args['minimize'],
-                                            complete=False)
+                        out.assignments = out.assignments.copy(shallow=True)
+                        out = out.optimize(args['symbol'], args['minimize'])
                         out = Output(out).fill(out)
                     elif method == "abstract":
                         out = abstract(state, args['active'])
