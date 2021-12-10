@@ -206,8 +206,10 @@ class Assignments(dict):
                 assert out.value.same_as(value), \
                         "System should not override given choices with different consequences, please report this bug."
             else:
-                out.value = value
-                out.status = status
+                if not (out.status == Status.ENV_CONSQ and status == Status.CONSEQUENCE):
+                    # do not change an env consequence to a decision consequence
+                    out.value = value
+                    out.status = status
         else:
             out = Assignment(sentence, value, status)
         if out.symbol_decl:  # ignore comparisons of constructors
