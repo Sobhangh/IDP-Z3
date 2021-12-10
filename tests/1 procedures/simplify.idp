@@ -14,7 +14,7 @@ structure S:V {
 }
 
 procedure main () {
-    pretty_print(str(Problem(T,S).simplify().formula()))
+    pretty_print(str(Theory(T,S).simplify().formula()))
     print()
-    pretty_print(str(Problem(T,S).propagate().simplify().formula()))
+    pretty_print(str(Theory(T,S).propagate().simplify().formula()))
 }

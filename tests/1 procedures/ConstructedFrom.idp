@@ -15,6 +15,6 @@ structure S:V {
 }
 
 procedure main() {
-  pretty_print(Problem(T, S).formula())
-  pretty_print(len(list(Problem(T,S).expand(max=1))))
+  pretty_print(Theory(T, S).formula())
+  pretty_print(len(list(Theory(T,S).expand(max=1))))
 }

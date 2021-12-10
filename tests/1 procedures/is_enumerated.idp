@@ -39,7 +39,7 @@ procedure main() {
     print("T, S")
     pretty_print(model_expand(T, S, sort=True))
     print("propagate")
-    problem = Problem(T,S)
+    problem = Theory(T,S)
     pretty_print(str(problem.propagate().simplify().formula()))
     print("T, S2")
     pretty_print(model_expand(T, S2, sort=True))

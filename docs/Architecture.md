@@ -1,4 +1,4 @@
-   
+
 # Architecture
 
 This document presents the technical architecture of IDP-Z3.
@@ -129,7 +129,7 @@ The graph of calls is outlined in `/docs/zettlr/Call graph.md`.
 
 The code is organised by steps, not by classes:  for example, all methods to annotate an expression by another are grouped in [Annotate.py](/code_modules/engine_annotate).  We use [monkey-patching](https://www.geeksforgeeks.org/monkey-patching-in-python-dynamic-behavior/) to attach methods to the classes declared in another module.
 
-Important classes of the IDP-Z3 engine are: [Expression](/code_modules/engine_expression#idp_engine.Expression.Expression), [Assignment](/code_modules/engine_assignments#idp_engine.Assignments.Assignment), [Problem](/code_modules/engine_problem#idp_engine.Problem.Problem).
+Important classes of the IDP-Z3 engine are: [Expression](/code_modules/engine_expression#idp_engine.Expression.Expression), [Assignment](/code_modules/engine_assignments#idp_engine.Assignments.Assignment), [Theory](/code_modules/engine_problem#idp_engine.Problem.Theory).
 
 Substitute() modifies the AST "in place".  Because the results of step 1-2 are cached, steps 4-7 are done after copying the AST (custom `copy()`).
 

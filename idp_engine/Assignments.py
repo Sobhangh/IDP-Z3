@@ -156,7 +156,7 @@ class Assignment(object):
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
-    def translate(self, problem: "Problem") -> BoolRef:
+    def translate(self, problem: "Theory") -> BoolRef:
         return self.formula().translate(problem)
 
     def as_set_condition(self):

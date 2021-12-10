@@ -26,7 +26,7 @@ import types
 from z3 import Solver
 
 from .Parse import IDP
-from .Problem import Problem
+from .Problem import Theory
 from .Assignments import Status as S, Assignments
 from .utils import NEWL
 
@@ -35,7 +35,7 @@ last_call = time.process_time()  # define it as global
 def model_check(theories, structures=None):
     """ output: "sat", "unsat" or "unknown" """
 
-    problem = Problem.make(theories, structures)
+    problem = Theory.make(theories, structures)
     z3_formula = problem.formula()
 
     solver = Solver(ctx=problem.ctx)
@@ -46,7 +46,7 @@ def model_check(theories, structures=None):
 def model_expand(theories, structures=None, max=10, timeout=10, complete=False,
                  extended=False, sort=False):
     """ output: a list of Assignments, ending with a string """
-    problem = Problem.make(theories, structures, extended=extended)
+    problem = Theory.make(theories, structures, extended=extended)
     ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
@@ -62,7 +62,7 @@ def model_expand(theories, structures=None, max=10, timeout=10, complete=False,
 
 def model_propagate(theories, structures=None, sort=False):
     """ output: a list of Assignment """
-    problem = Problem.make(theories, structures)
+    problem = Theory.make(theories, structures)
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
@@ -88,7 +88,7 @@ def decision_table(theories, structures=None, goal_string="",
     Yields:
         str: a textual representation of each rule
     """
-    problem = Problem.make(theories, structures, extended=True)
+    problem = Theory.make(theories, structures, extended=True)
     for model in problem.decision_table(goal_string, timeout, max_rows,
                                         first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model
@@ -101,7 +101,7 @@ def decision_table(theories, structures=None, goal_string="",
 
 
 def pretty_print(x=""):
-    if type(x) is tuple and len(x)==2: # result of Problem.explain()
+    if type(x) is tuple and len(x)==2: # result of Theory.explain()
         facts, laws = x
         for f in facts:
             print(str(f))
@@ -114,7 +114,7 @@ def pretty_print(x=""):
                 print(xi)
             else:
                 print(xi)
-    elif isinstance(x, Problem):
+    elif isinstance(x, Theory):
         print(x.assignments)
     else:
         print(x)
@@ -140,7 +140,7 @@ def execute(self):
     mylocals['model_propagate'] = model_propagate
     mylocals['decision_table'] = decision_table
     mylocals['pretty_print'] = pretty_print
-    mylocals['Problem'] = Problem
+    mylocals['Theory'] = Theory
     mylocals['time'] = time
     mylocals['duration'] = duration
 

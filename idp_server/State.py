@@ -21,7 +21,7 @@ Management of the State of problem solving with the Interactive Consultant.
 
 
 from idp_engine.Assignments import Status as S
-from idp_engine.Run import Problem
+from idp_engine.Run import Theory
 from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
 from .IO import load_json
 from .Inferences import get_relevant_questions
@@ -31,7 +31,7 @@ from idp_engine import IDP
 from typing import Dict, Tuple, Union
 
 
-class State(Problem):
+class State(Theory):
     """ Contains a state of problem solving """
     cache: Dict[Tuple[str, str], 'State'] = {}
 
@@ -97,7 +97,7 @@ class State(Problem):
             blocks = ([idp.theories['environment']]
                       + [struct for struct in idp.structures.values()
                          if struct.voc.name == 'environment'])
-            self.environment = Problem(* blocks, extended=True)
+            self.environment = Theory(* blocks, extended=True)
 
             blocks = [self.environment, idp.theories['decision']]
         else:  # take the first theory
