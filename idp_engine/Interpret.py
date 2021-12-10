@@ -45,7 +45,7 @@ from .Parse import (Extern, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (IfExpr, SymbolExpr, Expression, Constructor,
-                    AQuantification, FORALL, IMPLIES, AND, AAggregate,
+                    AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
@@ -77,13 +77,14 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    self.domain = list(product(*[s.decl.range for s in self.sorts]))
-    self.range = self.out.decl.range
+    assert all(isinstance(s, Domain) for s in self.sorts), 'internal error'
+    self.in_domain = list(product(*[s.range() for s in self.sorts]))
+    self.range = self.out.range()
 
     # create instances
     if self.name not in RESERVED_SYMBOLS:
         self.instances = {}
-        for arg in self.domain:
+        for arg in self.in_domain:
             expr = AppliedSymbol.make(Symbol(name=self.name), arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
@@ -195,7 +196,7 @@ def interpret(self, problem):
         self.range = [UnappliedSymbol.construct(self)]
     else:
         self.range = [AppliedSymbol.construct(self, e)
-                      for e in product(*[s.decl.out.decl.range for s in self.sorts])]
+                      for e in product(*[s.decl.out.range() for s in self.sorts])]
     return self
 Constructor.interpret = interpret
 
@@ -297,6 +298,22 @@ def instantiate(self, e0, e1, problem=None):
 Symbol.instantiate = instantiate
 
 
+# class Domain ###########################################################
+
+def range(self):
+    range = [t for t in self.decl.range]
+    if self.ins:  # x in Concept[T->T]
+        range = [v for v in range
+                 if v.decl.symbol.decl.arity == len(self.ins)
+                 and isinstance(v.decl.symbol.decl, SymbolDeclaration)
+                 and v.decl.symbol.decl.out.name == self.out.name
+                 and all(s.name == q.name
+                         for s, q in zip(v.decl.symbol.decl.sorts,
+                                         self.ins))]
+    return range
+Domain.range = range
+
+
 # Class AQuantification  ######################################################
 
 def interpret(self, problem):
@@ -328,32 +345,30 @@ def interpret(self, problem):
     assert len(forms)==1
     new_quantees = []
     for q in self.quantees:
-        self.check(q.sub_exprs[0].decl.out.type == BOOL,
-                    f"{q.sub_exprs[0]} is not a type or predicate")
-        if not q.sub_exprs[0].decl.range:
+        domain = q.sub_exprs[0]
+        self.check(domain.decl.out.type == BOOL,
+                    f"{domain} is not a type or predicate")
+        if not domain.decl.range:
             new_quantees.append(q)
         else:
-            if q.sub_exprs[0].code in problem.interpretations:
-                enumeration = problem.interpretations[q.sub_exprs[0].code].enumeration
+            if domain.code in problem.interpretations:
+                enumeration = problem.interpretations[domain.code].enumeration
                 range = [t.args for t in enumeration.tuples.values()]
                 guard = None
-            elif type(q.sub_exprs[0].decl) == SymbolDeclaration:
-                range = q.sub_exprs[0].decl.domain
-                guard = q.sub_exprs[0]
-            else:  # type declaration
-                range = [[t] for t in q.sub_exprs[0].decl.range] #TODO1 decl.enumeration.tuples
+            elif type(domain.decl) == SymbolDeclaration:
+                range = domain.decl.in_domain
+                guard = domain
+            elif isinstance(domain, Domain):
+                range = [[t] for t in domain.range()]
                 guard = None
-                if 1 < len(q.sub_exprs):  # x in Concept[T->T]
-                    range = [v for v in range
-                             if v[0].decl.symbol.decl.arity == len(q.sub_exprs)-2
-                            and v[0].decl.symbol.decl.out.name == q.sub_exprs[-1].name
-                            and all(s.name == q.name
-                                    for s, q in zip(v[0].decl.symbol.decl.sorts,
-                                                    q.sub_exprs[1:-1]))]
+            else:  # SymbolExpr (e.g. $(`Color))
+                range = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
+                guard = None
+
 
             for vars in q.vars:
-                self.check(q.sub_exprs[0].decl.arity == len(vars),
-                            f"Incorrect arity of {q.sub_exprs[0]}")
+                self.check(domain.decl.arity == len(vars),
+                            f"Incorrect arity of {domain}")
                 out = []
                 for f in forms:
                     for val in range:
