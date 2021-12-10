@@ -148,7 +148,7 @@ class State(Theory):
         self.co_constraints = OrderedSet()
         for c in self.constraints:
             c.co_constraints(self.co_constraints)
-        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.UNIVERSAL, S.ENV_UNIV])}{NEWL}"
+        return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == S.UNIVERSAL)}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.CONSEQUENCE, S.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"

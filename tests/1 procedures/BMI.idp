@@ -52,7 +52,7 @@ theory T:V {
 
 
 structure {
-    length := {->179}
+    length := {->160} // this value yields a friendly floating point BMI
 }
 
 procedure main() {

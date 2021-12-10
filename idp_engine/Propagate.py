@@ -186,11 +186,12 @@ def _directional_todo(self):
     Takes into account assertions made via self.assert_ since the last propagation:
     * a new assignment forces the re-propagation of Unknowns
     * a clearing of assignment forces the re-propagation of previous consequences
+    * any cleared assignments should be repropagated as well
     """
     statuses = []
     if self.propagated:
         if self.assigned:
-            statuses.extend([S.UNKNOWN])
+            statuses.append(S.UNKNOWN)
         if self.cleared:
             statuses.extend([S.CONSEQUENCE, S.ENV_CONSQ])
     else:
@@ -276,6 +277,7 @@ def _propagate(self, tag=S.CONSEQUENCE):
     """
     global start, last_prop
     start, last_prop = time.process_time(), None
+
     todo = self._directional_todo()
 
     z3_formula = self.formula()
