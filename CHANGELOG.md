@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+Highlights of the breaking changes:
+* `sum{x in T: p(x): t(x)}` is now `sum(lambda x in T: t(x))`
+* `Symbol` is now `Concept`
+* `Problem(T,S)` is now `Theory(T,S)`
+
+
 ### API
 * (breaking) MR !152: IEP 22 change syntax of sum aggregate to sum(lambda <quantee>: expr)
 * (breaking) MR !154: built-in type is "Concept" (not "Symbol")
