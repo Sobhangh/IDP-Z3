@@ -273,6 +273,7 @@ class Theory(object):
             if self.constraintz():
                 # only add interpretation constraints for those symbols
                 # occurring in the (potentially simplified) z3 constraints
+                # which were not propagated in a previous step
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
@@ -280,8 +281,7 @@ class Theory(object):
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
             else:
-                all = [a.formula().translate(self)
-                       for a in self.assignments.values()
+                all = [a.formula().translate(self) for a in self.assignments.values()
                        if a.status in [S.DEFAULT, S.GIVEN, S.EXPANDED]]
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
@@ -294,7 +294,7 @@ class Theory(object):
     def _todo_expand(self):
         return OrderedSet(
             a.sentence for a in self.assignments.values()
-            if a.status in [S.UNKNOWN]
+            if a.status == S.UNKNOWN
             and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
@@ -459,6 +459,7 @@ class Theory(object):
                 for e in out.assignments.values()
                 if e.value is None or e.value.same_as(TRUE)]
 
+
     def explain(self, consequence=None):
         """
         Pre: the problem is UNSAT (under the negation of the consequence if not None)
@@ -473,7 +474,7 @@ class Theory(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
         facts, laws = [], []
-        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE]
+        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]
 
         s = Solver(ctx=self.ctx)
         s.set(':core.minimize', True)
@@ -526,7 +527,7 @@ class Theory(object):
                     for a2 in unsatcore:
                         if type(ps[a2]) == Assignment \
                         and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status in [S.GIVEN, S.DEFAULT]:
+                            if a1.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
                                 facts.append(a1)
                             else:
                                 laws.append(a1.formula())
@@ -549,8 +550,7 @@ class Theory(object):
         # convert consequences to Universal
         for ass in out.assignments.values():
             if ass.value:
-                ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
-                        S.ENV_UNIV if ass.status == S.ENV_CONSQ else
+                ass.status = (S.UNIVERSAL if ass.status in [S.CONSEQUENCE, S.ENV_CONSQ] else
                         ass.status)
 
         new_constraints: List[Expression] = []

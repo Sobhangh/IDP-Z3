@@ -150,7 +150,6 @@ class Accessor(ASTNode):
                 f"{self.accessor}: {self.type}" )
 
 
-
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
 
@@ -497,6 +496,30 @@ class Symbol(Expression):
         return str(self)
 
 
+class Domain(Symbol):
+    """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
+
+    Args:
+        name (Symbol): name of the concept
+
+        ins (List[Symbol], Optional): domain of the signature, e.g., `[T, T]`
+
+        out (Symbol, Optional): range of the signature, e.g., `Bool`
+    """
+
+    def __init__(self, **kwargs):
+        self.ins = kwargs.pop('ins', None)
+        self.out = kwargs.pop('out', None)
+        super().__init__(**kwargs)
+
+    def __str__(self):
+        return self.name + ("" if not self.ins else
+                            f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
+
+    def range():
+        pass  # monkey-patched
+
+
 class IfExpr(Expression):
     PRECEDENCE = 10
     IF = 0
@@ -527,23 +550,34 @@ class IfExpr(Expression):
 
 class Quantee(Expression):
     """represents the description of quantification, e.g., `x in T` or `(x,y) in P`
+    The `Concept` type may be qualified, e.g. `Concept[Color->Bool]`
 
     Attributes:
         vars (List[List[Variable]): the (tuples of) variables being quantified
 
-        sub_exprs (List[SymbolExpr], Optional): the type or predicate to quantify over.
-        If the type is "Concept" with a particular signature, it is followed by the types in the signature.
+        domain (Domain, Optional): a literal Domain to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
 
-        arity (int): the length of the tuple of variable
+        sort (SymbolExpr, Optional): a dereferencing expression, e.g.,. `$(i)`.
+
+        sub_exprs (List[SymbolExpr], Optional): the (unqualified) type or predicate to quantify over,
+        e.g., `[Color], [Concept] or [$(i)]`.
+
+        arity (int): the length of the tuple of variables
+
+        decl (SymbolDeclaration, Optional): the (unqualified) Declaration to quantify over, after resolution of `$(i)`.
+        e.g., the declaration of `Color`
     """
     def __init__(self, **kwargs):
         self.vars = kwargs.pop('vars')
-        sort = kwargs.pop('sort')
-        signature = kwargs.pop('signature') if 'signature' in kwargs else None
-        self.check(not signature or sort.str == CONCEPT,
-                   f"Can't use signature after predicate other than {CONCEPT}")
-        self.sub_exprs = (([sort] if sort else [])
-                         +(signature.sorts + [signature.out] if signature else []))
+        self.domain = kwargs.pop('domain') if 'domain' in kwargs else None
+        sort = kwargs.pop('sort') if 'sort' in kwargs else None
+        if self.domain:
+            self.check(not (self.domain.name != CONCEPT and 0 <len(self.domain.ins)),
+                   f"Can't use signature after predicate {self.domain.name}")
+
+        self.sub_exprs = ([sort] if sort else
+                          [self.domain] if self.domain else
+                          [])
         self.arity = None
         for i, v in enumerate(self.vars):
             if hasattr(v, 'vars'):  # varTuple
@@ -561,8 +595,6 @@ class Quantee(Expression):
 
     @classmethod
     def make(cls, var, sort):
-        if sort and type(sort) != SymbolExpr:
-            sort = SymbolExpr(eval='', s=sort).annotate1()
         out = (cls) (vars=[var], sort=sort)
         return out.annotate1()
 
@@ -834,7 +866,7 @@ class AAggregate(Expression):
             vars = "".join([f"{q}" for q in self.quantees])
             out = ((f"{self.aggtype}(lambda {vars} : "
                     f"{self.sub_exprs[0].str}"
-                    f")" ) if self.aggtype is not "#" else
+                    f")" ) if self.aggtype != "#" else
                    (f"{self.aggtype}{{{vars} : "
                     f"{self.sub_exprs[0].str}"
                     f"}}")
@@ -1080,6 +1112,11 @@ FALSE = UnappliedSymbol.construct(FALSEC)
 
 class Variable(Expression):
     """AST node for a variable in a quantification or aggregate
+
+    Args:
+        name (str): name of the variable
+
+        sort (Optional[Symbol]): sort of the variable, if known
     """
     PRECEDENCE = 200
 
@@ -1087,6 +1124,7 @@ class Variable(Expression):
         self.name = kwargs.pop('name')
         sort = kwargs.pop('sort') if 'sort' in kwargs else None
         self.sort = sort
+        assert sort is None or isinstance(sort, Domain) or isinstance(sort, Symbol)
 
         super().__init__()
 

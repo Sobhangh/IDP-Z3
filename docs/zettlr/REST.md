@@ -102,12 +102,11 @@ GET response :
             - values : []       // list of possible values for the atom/term (from its type)
             - status : string   // UNKNOWN     : unknown value
                                 // GIVEN       : given by the user
-                                // DEFAULT     : part of a given default structure
-                                // ENV_UNIV    : immediate consequence of the environmental theory
+                                // DEFAULT     : part of a given default structure (only after meta call)
+                                // EXPANDED    : value obtained by model expansion (only after optimize / expand call)
                                 // UNIVERSAL   : immediate consequence of the theory
-                                // ENV_CONSQ   : value propagated from inputs and environmental theory
                                 // CONSEQUENCE : value obtained by propagation of inputs
-                                // EXPANDED    : value obtained by model expansion
+                                // ENV_CONSQ   : value obtained by propagation of inputs on environmental theory
             - relevant: Bool
             - reading : string  // English reading of the atom/term
             - normal : Bool     // false if to be shown in expanded view only

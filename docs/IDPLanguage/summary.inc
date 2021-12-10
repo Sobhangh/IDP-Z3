@@ -20,7 +20,7 @@ The equivalent ASCII-only encoding is shown on the right.
         p : () → 𝔹                                p: () -> Bool
         p1, p2 : T1 ⨯ T2 → 𝔹                      p1, p2: T1*T2 -> Bool
         f: T → T                                  f: T -> T
-        f1, f2: T → T                             f1, f2: T -> T
+        f1, f2: Concept[T1->T2] → T               f1, f2: Concept[T1->T2] -> T
 
         [this is the intended meaning of p]
         p : () → 𝔹

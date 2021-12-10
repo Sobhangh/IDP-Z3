@@ -26,8 +26,8 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=ConstructedFrom))?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
-          ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
-          ('->' | '→') out=Symbol;
+          ( '(' sorts*=Domain[/[*⨯]/] ')' | sorts*=Domain[/[*⨯]/] )
+          ('->' | '→') out=Domain;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
@@ -40,14 +40,16 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
         definiendum=AppliedSymbol
         ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: ( vars+=Variable[','] ( ('in' | '∈') sort=SymbolExpr (signature=Signature)?)?
-               | vars+=VarTuple[','] ('in' | '∈') sort=SymbolExpr (signature=Signature)?);
+      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (domain=Domain | sort=SymbolExpr) )?
+               | vars+=VarTuple[','] ( ('in' | '∈') (domain=Domain | sort=SymbolExpr) )?);
           Variable: name=/`?[^\d\W]\w*\b/;
           VarTuple: '(' vars+=Variable[','] ')';
-          Signature: '['
-              ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
+          Domain: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+            ( '['
+              ( '(' ins*=Symbol[/[*⨯]/] ')' | ins*=Symbol[/[*⨯]/] )
               ('->' | '→') out=Symbol
-              ']';
+              ']'
+            )?;
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
