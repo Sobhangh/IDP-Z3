@@ -23,7 +23,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !155: allow to disable optimization buttons for certain symbols
 * MR !158: allow signature in quantification: `!x in Concept[T1->T2]: ..`
 * MR !172: IEP 05: Min and Max aggregates over anonymous function
-* MR !176: simplify number of status codes
+* MR !176: remove ENV_UNIV status code
 
 ### Interactive Consultant
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
