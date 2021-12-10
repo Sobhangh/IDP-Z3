@@ -25,6 +25,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !158: allow signature in quantification: `!x in Concept[T1->T2]: ..`
 * MR !172: IEP 05: Min and Max aggregates over anonymous function
 * MR !176: remove ENV_UNIV status code
+* MR !177: Allow `Concept[T->T]` in symbol declarations
 
 ### Interactive Consultant
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
