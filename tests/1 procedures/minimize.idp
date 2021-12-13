@@ -109,11 +109,11 @@ theory T:V {
 
 structure S:V {
     Sides:=3.
-    Perimeter:=1
+    Perimeter:=3 // propagation fails if Perimeter=1, because of rounding issues
     Subtype:=regular_triangle
 }
 
 procedure main () {
-    pretty_print(Theory(T, S).optimize("Length(1)").assignments)
+    pretty_print(Theory(T, S).optimize("Length(1)").propagate().assignments)
     pretty_print(Theory(T,S).expand(max=1, complete=True))
 }

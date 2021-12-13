@@ -17,6 +17,7 @@ Highlights of the breaking changes:
 * (breaking) MR !154: built-in type is "Concept" (not "Symbol")
 * (breaking) MR !170: add timeout parameter to model expansion/optimisation and improve performance
 * (breaking) MR !178: rename `Problem` class to `Theory`
+* (breaking) MR !179: `optimize` does not return a full model anymore; it only returns the optimized value
 * fix #5: do not allow arithmetic operations on constructors
 * fix #132, #136: Improve error message for mis-applied symbol
 * fix #137: support of functions from Symbol to Symbol
@@ -25,15 +26,15 @@ Highlights of the breaking changes:
 * fix #156: Concept: error when using several vocabularies
 * fix #161: Improve "Duplicate declaration of..." error
 * MR !145: Improve performance of explain
-* MR !147: allow the user to edit system choices after model expansion / optimisation
 * MR !153: improve performance in case of large interpretations for symbols that do not occur in the theory
-* MR !155: allow to disable optimization buttons for certain symbols
 * MR !158: allow signature in quantification: `!x in Concept[T1->T2]: ..`
 * MR !172: IEP 05: Min and Max aggregates over anonymous function
 * MR !176: remove ENV_UNIV status code
 * MR !177: Allow `Concept[T->T]` in symbol declarations
 
 ### Interactive Consultant
+* MR !147: allow the user to edit system choices after model expansion / optimisation
+* MR !155: allow to disable optimization buttons for certain symbols
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
 * MR !160: IC should refuse theories without models
 * web MR !40: Enable resizing the IDE editor window
