@@ -402,15 +402,15 @@ class Theory(object):
 
         solver = self.solver
         solver.push()
-        self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE])
+        self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
                 solver.add(q.reified(self) == q.translate(self))
 
         count, ass = 0, {}
         start = time.process_time()
-        while (max <= 0 or count < max) and \
-                (timeout <= 0 or time.process_time()-start < timeout):
+        while ((max <= 0 or count < max) and
+               (timeout <= 0 or time.process_time()-start < timeout)):
             # exclude ass
             different = []
             for a in ass.values():

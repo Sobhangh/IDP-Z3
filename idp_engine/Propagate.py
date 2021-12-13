@@ -181,7 +181,7 @@ Brackets.symbolic_propagate = symbolic_propagate
 
 def _set_consequences_get_changed_choices(self):
     for a in self.assignments.values():
-        if a.status == S.CONSEQUENCE:
+        if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
             self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
     removed_choices = {a.sentence.code: a for a in self.old_assignments.values()
@@ -190,15 +190,15 @@ def _set_consequences_get_changed_choices(self):
 
     for a in self.assignments.values():
         if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
-            if a.sentence.code in removed_choices \
-                    and removed_choices[a.sentence.code].value.same_as(a.value):
+            if (a.sentence.code in removed_choices
+                    and removed_choices[a.sentence.code].value.same_as(a.value)):
                 removed_choices.pop(a.sentence.code)
             else:
                 added_choices.append(a)
 
     if not removed_choices:
         for a in self.old_assignments.values():
-            if a.status in [S.CONSEQUENCE]:
+            if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
                 self.assignments.assert__(a.sentence, a.value, a.status)
 
     # TODO: why is it not ok to use get_core_atoms in this method?
@@ -304,7 +304,8 @@ Theory.add_assignment = add_assignment
 def _first_propagate(self):
     for a in self.assignments.values():
         assert a.status not in [S.UNIVERSAL], "incorrect propagate status "+str(a.status)+" for "+str(a)
-    todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE]))
+    todo = OrderedSet(a.sentence for a in self.get_core_atoms(
+        [S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE, S.ENV_CONSQ]))
 
     solver = self.solver
     solver.push()
@@ -334,8 +335,8 @@ def _first_propagate(self):
             val = str_to_IDP(q, str(val1))
 
             ass = self.assignments.get(q.code)
-            if ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and \
-                    not ass.value.same_as(val):
+            if (ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
+                    not ass.value.same_as(val)):
                 solver.pop()
                 return  # unsat under choices, caller will fix this
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
@@ -369,7 +370,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         for a in todo.values():
             if a.code in self.assignments:
                 to_remove.append(a)
-                if self.assignments[a.code].status in [S.CONSEQUENCE]:
+                if self.assignments[a.code].status in [S.CONSEQUENCE, S.ENV_CONSQ]:
                     yield self.assignments[a.code]
         for a in to_remove:
             todo.pop(a.code)
@@ -385,7 +386,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         solver.add(q.reified(self) == q.translate(self))
         # reification in case todo contains complex formula
 
-    self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE])
+    self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
 
     res1 = solver.check()
 
