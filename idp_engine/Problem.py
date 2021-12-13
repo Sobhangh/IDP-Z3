@@ -85,11 +85,7 @@ class Problem(object):
 
         ctx : Z3 context
 
-        old_choices ([Expression,Expression]): set of choices
-            (sentence-value pairs) with which previous propagate was executed
-
-        old_propagations ([Expression,Expression]): set of propagations
-            (sentence-value pairs) after last propagate execution
+        old_assignments (Assignment): assignment after previous full propagation
 
         first_prop (Bool): whether the first propagate call still needs to happen
 
@@ -136,8 +132,7 @@ class Problem(object):
         self.ctx = Context()
         self.add(*blocks)
 
-        self.old_choices = []
-        self.old_propagations = []
+        self.old_assignments = Assignments()
         self.first_prop = True
 
         self.propagate_success = True
@@ -367,18 +362,15 @@ class Problem(object):
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
-
-    def get_atoms(self, statuses):
-        return [(a.sentence, a.value) for a in self.assignments.values()
+    def get_core_atoms(self, statuses):
+        return [a for a in self.assignments.values()
             if (self.extended or not a.sentence.is_reified())
             and a.status in statuses]
-
 
     def sexpr(self):
         s = Solver(ctx=self.ctx)
         s.add(self.formula())
         return s.sexpr()
-
 
     def _from_model(self, solver, todo, complete):
         """ returns Assignments from model in solver
@@ -400,7 +392,7 @@ class Problem(object):
 
     def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN]))
+        todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
         # TODO: should todo be larger in case complete==True?
 
         solver = self.solver
@@ -515,7 +507,8 @@ class Problem(object):
         assert range, f"Can't determine range on infinite domains"
 
         # consider every value in range
-        todos = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
+        atoms = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
+        todos = {a.code: a for a in atoms}
 
         forbidden = set()
         for ass in self._propagate(todos):
@@ -524,7 +517,7 @@ class Problem(object):
             if ass.value.same_as(FALSE):
                 forbidden.add(str(ass.sentence.sub_exprs[1]))
 
-        return [str(e.sub_exprs[1]) for e in todos if str(e.sub_exprs[1]) not in forbidden]
+        return [str(e.sub_exprs[1]) for e in todos.values() if str(e.sub_exprs[1]) not in forbidden]
 
     def explain(self, consequence=None):
         """

@@ -179,44 +179,49 @@ Brackets.symbolic_propagate = symbolic_propagate
 #
 ###############################################################################
 
-
-def _directional_todo(self):
-    """ computes the list of candidate atoms for a new propagation
-
-    Takes into account assertions made via self.assert_ since the last propagation:
-    * a new assignment forces the re-propagation of Unknowns
-    * a clearing of assignment forces the re-propagation of previous consequences
-    * any cleared assignments should be repropagated as well
-    """
-
-    removed_choices = set(self.old_choices)
-    self.old_choices = self.get_atoms([S.GIVEN, S.DEFAULT, S.EXPANDED])
-    added_choices = []
-
+def _set_consequences_get_changed_choices(self):
     for a in self.assignments.values():
         if a.status == S.CONSEQUENCE:
             self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
-    for a in self.old_choices:
-        if a in removed_choices:
-            removed_choices.remove(a)
-        else:
-            added_choices.append(a)
+    removed_choices = {a.sentence.code: a for a in self.old_assignments.values()
+                       if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]}
+    added_choices = []
 
-    todo = OrderedSet()
+    for a in self.assignments.values():
+        if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
+            if a.sentence.code in removed_choices:
+                removed_choices.pop(a.sentence.code)
+            else:
+                added_choices.append(a)
+
+    if not removed_choices:
+        for a in self.old_assignments.values():
+            if a.status in [S.CONSEQUENCE]:
+                self.assignments.assert__(a.sentence, a.value, a.status)
+
+    return removed_choices, added_choices
+Problem._set_consequences_get_changed_choices = _set_consequences_get_changed_choices
+
+
+def _directional_todo(self, removed_choices={}, added_choices=[]):
+    """ computes the list of candidate atoms for a new propagation
+    * if choices are removed, all previous consequences and removed choices
+      should be checked for propagation
+    * if choices are added, all unknown atoms should be checked
+    """
+    # TODO: why is it ok to use get_core_atoms here?
+
+    todo = {}
     if removed_choices:
-        for a in removed_choices:
-            todo.append(a[0])
-        for a in self.old_propagations:
-            todo.append(a[0])
-    else:
-        for a in self.old_propagations:
-            self.assignments.assert__(a[0], a[1], S.CONSEQUENCE)
-    self.old_propagations = []
+        for a in removed_choices.values():
+            todo[a.sentence.code] = a.sentence
+        for a in self.get_core_atoms([S.CONSEQUENCE]):
+            todo[a.sentence.code] = a.sentence
 
     if added_choices:
-        for a in self.get_atoms([S.UNKNOWN]):
-            todo.append(a[0])
+        for a in self.get_core_atoms([S.UNKNOWN]):
+            todo[a.sentence.code] = a.sentence
 
     return todo
 Problem._directional_todo = _directional_todo
@@ -294,10 +299,10 @@ def add_assignment(self, solver, excluded):
 Problem.add_assignment = add_assignment
 
 
-def first_propagate(self):
+def _first_propagate(self):
     for a in self.assignments.values():
         assert a.status not in [S.UNIVERSAL], "incorrect propagate status "+str(a.status)+" for "+str(a)
-    todo = OrderedSet(a[0] for a in self.get_atoms([S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE]))
+    todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE]))
 
     solver = self.solver
     solver.push()
@@ -335,39 +340,56 @@ def first_propagate(self):
 
     solver.pop()
     self.first_prop = False
-Problem.first_propagate = first_propagate
+Problem._first_propagate = _first_propagate
 
 
-def _propagate(self, todo=None):
+def _propagate(self, given_todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
     :arg todo: custom list of assignments to check during propagation.
     """
 
-    if self.first_prop:
-        yield from self.first_propagate()
-
     global start
     start = time.process_time()
+
+    if self.first_prop:
+        yield from self._first_propagate()
+
+    removed_choices, added_choices = self._set_consequences_get_changed_choices()
+
+    dir_todo = given_todo is None
+    if dir_todo:
+        todo = self._directional_todo(removed_choices, added_choices)
+    else:
+        todo = given_todo.copy()  # copy needed because todo might be adjusted
+
+    if not removed_choices and not added_choices:
+        to_remove = []
+        for a in todo.values():
+            if a.code in self.assignments:
+                to_remove.append(a)
+                if self.assignments[a.code].status in [S.CONSEQUENCE]:
+                    yield self.assignments[a.code]
+        for a in to_remove:
+            todo.pop(a.code)
+
+    if not todo:
+        yield "No more consequences."
+        return
 
     solver = self.solver
     solver.push()
 
-    dir_todo = todo is None
-    if dir_todo:
-        todo = self._directional_todo()
-
-    for q in todo:
+    for q in todo.values():
         solver.add(q.reified(self) == q.translate(self))
         # reification in case todo contains complex formula
 
-    # NOTE: correct consequences are set only via self._directional_todo()
-    self.add_assignment(solver, [S.STRUCTURE] if dir_todo else [S.STRUCTURE, S.CONSEQUENCE])
+    self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE])
 
     res1 = solver.check()
 
     if res1 == sat:
         model = solver.model()
-        valqs = [(model.eval(q.reified(self)), q) for q in todo]
+        valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
         for val1, q in valqs:
             if str(val1) == str(q.reified(self)):
                 continue  # irrelevant
@@ -390,7 +412,7 @@ def _propagate(self, todo=None):
         yield str(self.formula())
 
     if dir_todo:
-        self.old_propagations = self.get_atoms([S.CONSEQUENCE])
+        self.old_assignments = self.assignments.copy(shallow=True)
 
     solver.pop()
 Problem._propagate = _propagate
