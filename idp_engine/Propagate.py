@@ -190,7 +190,8 @@ def _set_consequences_get_changed_choices(self):
 
     for a in self.assignments.values():
         if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
-            if a.sentence.code in removed_choices:
+            if a.sentence.code in removed_choices \
+                    and removed_choices[a.sentence.code].value.same_as(a.value):
                 removed_choices.pop(a.sentence.code)
             else:
                 added_choices.append(a)
@@ -199,6 +200,8 @@ def _set_consequences_get_changed_choices(self):
         for a in self.old_assignments.values():
             if a.status in [S.CONSEQUENCE]:
                 self.assignments.assert__(a.sentence, a.value, a.status)
+
+    # TODO: why is it not ok to use get_core_atoms in this method?
 
     return removed_choices, added_choices
 Problem._set_consequences_get_changed_choices = _set_consequences_get_changed_choices
@@ -210,7 +213,6 @@ def _directional_todo(self, removed_choices={}, added_choices=[]):
       should be checked for propagation
     * if choices are added, all unknown atoms should be checked
     """
-    # TODO: why is it ok to use get_core_atoms here?
 
     todo = {}
     if removed_choices:
