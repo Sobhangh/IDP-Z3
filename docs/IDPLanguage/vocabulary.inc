@@ -37,7 +37,7 @@ Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``)
 ``#TODAY`` is also a Date literal.
 
 The type ``Concept`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary.
-The constructors are the names of the symbol, prefixed with `````
+The constructors are the names of the symbol, prefixed with `````.
 
 Custom types are declared using the keyword ``type``, e.g., ``type color``.
 Their name should be singular and capitalized, by convention.
@@ -66,7 +66,7 @@ The ``RGB`` constructor takes 3 arguments of type ``Byte``.
 Functions
 +++++++++
 
-The functions with name ``MyFunc1``, ``MyFunc2``, input types ``T1``, ``T2``, ``T3`` and output type ``T``, are declared by:
+The functions with name ``myFunc1``, ``myFunc2``, input types ``T1``, ``T2``, ``T3`` and output type ``T``, are declared by:
 
 .. code::
 
@@ -74,6 +74,10 @@ The functions with name ``MyFunc1``, ``MyFunc2``, input types ``T1``, ``T2``, ``
 
 Their name should not start with a capital letter, by convention.
 The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
+
+The input and output types of myFunc1 can be sets of concepts with a specific type signature, indicated in brackets.
+For example, T1 can be `Concept[TT1 -> TT2]` to denote the concepts with type signature `TT1 -> TT2`.
+
 
 IDP-Z3 does not support partial functions.
 
@@ -103,6 +107,9 @@ The predicates with name ``myPred1``, ``myPred2`` and argument types ``T1``, ``T
 
 Their name should not start with a capital letter, by convention.
 The ASCII equivalent of ``→`` is ``->``, and of ``𝔹`` is ``Bool``.
+
+The input and output types of myPred1 can be sets of concepts with a specific type signature, indicated in brackets.
+For example, T1 can be `Concept[TT1 -> TT2]` to denote the concepts with type signature `TT1 -> TT2`.
 
 There is a built-in predicate ``T: T → 𝔹`` for each type T (``T(x)`` is ``true`` for any ``x`` in ``T``).
 

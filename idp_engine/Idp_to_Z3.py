@@ -51,7 +51,7 @@ def get_symbols_z(zexpr):
 
 # class TypeDeclaration  ###########################################################
 
-def translate(self, problem: "Problem"):
+def translate(self, problem: "Theory"):
     out = problem.z3.get(self.name, None)
     if out is None:
         if self.name == BOOL:
@@ -92,7 +92,7 @@ TypeDeclaration.translate = translate
 
 # class SymbolDeclaration  ###########################################################
 
-def translate(self, problem: "Problem"):
+def translate(self, problem: "Theory"):
     out = problem.z3.get(self.name, None)
     if out is None:
         if len(self.sorts) == 0:
@@ -108,24 +108,24 @@ SymbolDeclaration.translate = translate
 
 # class Tuple  ###########################################################
 
-def translate(self, problem: "Problem"):
+def translate(self, problem: "Theory"):
     return [arg.translate(problem) for arg in self.args]
 Tuple.translate = translate
 
 # class Constructor  ###########################################################
 
-def translate(self, problem: "Problem"):
+def translate(self, problem: "Theory"):
     return problem.z3[self.name]
 Constructor.translate = translate
 
 
 # class Expression  ###########################################################
 
-def translate(self, problem: "Problem", vars={}) -> ExprRef:
+def translate(self, problem: "Theory", vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, using .value and .simpler if present
 
     Args:
-        problem (Problem): holds the context for the translation (e.g. a cache of translations).
+        problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
         vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
@@ -146,7 +146,7 @@ def translate(self, problem: "Problem", vars={}) -> ExprRef:
     return out
 Expression.translate = translate
 
-def reified(self, problem: "Problem") -> DatatypeRef:
+def reified(self, problem: "Theory") -> DatatypeRef:
     str = b'*' + self.code.encode()
     out = problem.z3.get(str, None)
     if out is None:
@@ -158,7 +158,7 @@ Expression.reified = reified
 
 # class Symbol  ###############################################################
 
-def translate(self, problem: "Problem", vars={}):
+def translate(self, problem: "Theory", vars={}):
     if self.name == BOOL:
         return BoolSort(problem.ctx)
     elif self.name == INT:
@@ -172,11 +172,11 @@ Symbol.translate=translate
 
 # Class IfExpr  ###############################################################
 
-def translate1(self, problem: "Problem", vars={}) -> ExprRef:
+def translate1(self, problem: "Theory", vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, ignoring .value and .simpler
 
     Args:
-        problem (Problem): holds the context for the translation (e.g. a cache of translations).
+        problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
         vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
@@ -192,7 +192,7 @@ IfExpr.translate1 = translate1
 
 # Class AQuantification  ######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     if not self.quantees:
         assert len(self.sub_exprs) == 1, \
                f"Internal error in expansion of quantification: {self}"
@@ -238,7 +238,7 @@ Operator.MAP = {'∧': lambda x, y: And(x, y),
                       }
 
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     out = self.sub_exprs[0].translate(problem, vars)
 
     for i in range(1, len(self.sub_exprs)):
@@ -253,7 +253,7 @@ Operator.translate1 = translate1
 
 # Class ADisjunction  #######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
     else:
@@ -264,7 +264,7 @@ ADisjunction.translate1 = translate1
 
 # Class AConjunction  #######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
     else:
@@ -275,7 +275,7 @@ AConjunction.translate1 = translate1
 
 # Class AComparison  #######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     assert not self.operator == ['≠'],f"Internal error: {self}"
     # chained comparisons -> And()
     out = []
@@ -303,7 +303,7 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               '¬': lambda x: Not(x)
               }
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     try:
         out = self.sub_exprs[0].translate(problem, vars)
         function = AUnary.MAP[self.operator]
@@ -315,7 +315,7 @@ AUnary.translate1 = translate1
 
 # Class AAggregate  #######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     assert self.annotated and not self.quantees, f"Cannot expand {self.code}"
     return Sum([f.translate(problem, vars) for f in self.sub_exprs])
 AAggregate.translate1 = translate1
@@ -323,7 +323,7 @@ AAggregate.translate1 = translate1
 
 # Class AppliedSymbol  #######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     self.check(self.decl, f"Unknown symbol: {self.symbol}.\n"
                f"Possible fix: introduce a variable "
                f"(e.g., !x in Concept: x=... => $(x)(..))")
@@ -351,7 +351,7 @@ def translate1(self, problem: "Problem", vars={}):
             self.check(False, msg)
 AppliedSymbol.translate1 = translate1
 
-def reified(self, problem: "Problem", vars={}) -> DatatypeRef:
+def reified(self, problem: "Theory", vars={}) -> DatatypeRef:
     str = b'*'+self.code.encode()
     out = problem.z3.get(str, None)
     if out is None:
@@ -365,21 +365,21 @@ AppliedSymbol.reified = reified
 
 # Class UnappliedSymbol  #######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     return problem.z3[self.name]
 UnappliedSymbol.translate1 = translate1
 
 
 # Class Variable  #######################################################
 
-def translate(self, problem: "Problem", vars={}):
+def translate(self, problem: "Theory", vars={}):
     return vars[self.str]
 Variable.translate = translate
 
 
 # Class Number  #######################################################
 
-def translate(self, problem: "Problem", vars={}):
+def translate(self, problem: "Theory", vars={}):
     out = problem.z3.get(self.str, None)
     if out is None:
         out = (RatVal(self.py_value.numerator, self.py_value.denominator,
@@ -393,7 +393,7 @@ Number.translate = translate
 
 # Class Date  #######################################################
 
-def translate(self, problem: "Problem", vars={}):
+def translate(self, problem: "Theory", vars={}):
     out = problem.z3.get(self.str, None)
     if out is None:
         out = self.py_value
@@ -404,7 +404,7 @@ Date.translate = translate
 
 # Class Brackets  #######################################################
 
-def translate1(self, problem: "Problem", vars={}):
+def translate1(self, problem: "Theory", vars={}):
     return self.sub_exprs[0].translate(problem, vars)
 Brackets.translate1 = translate1
 

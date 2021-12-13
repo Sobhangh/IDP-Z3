@@ -22,9 +22,9 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 
-from .Parse import (Vocabulary, Extern, TypeDeclaration, Type,
+from .Parse import (Vocabulary, Extern, TypeDeclaration, Type, Domain,
                     SymbolDeclaration, Symbol,
-                    Theory, Definition, Rule,
+                    TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
 from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
@@ -52,8 +52,7 @@ def annotate(self, idp):
                 if s1.name in temp:
                     s.check(str(temp[s1.name]) == str(s1),
                             f"Inconsistent declaration for {s1.name}")
-                else:
-                    temp[s1.name] = s1
+                temp[s1.name] = s1
         else:
             s.block = self
             s.check(s.name not in temp or s.name in RESERVED_SYMBOLS,
@@ -114,7 +113,7 @@ def annotate(self, voc):
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
-    self.type = self.out.decl.name
+    self.type = self.out.name
     return self
 SymbolDeclaration.annotate = annotate
 
@@ -130,7 +129,18 @@ def annotate(self, voc, q_vars):
 Symbol.annotate = annotate
 
 
-# Class Theory  #######################################################
+# Class Domain  #######################################################
+
+def annotate(self, voc, q_vars={}):
+    Symbol.annotate(self, voc, q_vars)
+    if self.ins:
+        self.ins = [s.annotate(voc, q_vars) for s in self.ins]
+        self.out = self.out.annotate(voc, q_vars)
+    return self
+Domain.annotate = annotate
+
+
+# Class TheoryBlock  #######################################################
 
 def annotate(self, idp):
     self.check(self.vocab_name in idp.vocabularies,
@@ -141,16 +151,16 @@ def annotate(self, idp):
         i.annotate(self)
     self.voc.add_voc_to_block(self)
 
-    self.definitions = [e.annotate(self, self.voc, {}) for e in self.definitions]
+    self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
-Theory.annotate = annotate
+TheoryBlock.annotate = annotate
 
 
 # Class Definition  #######################################################
 
-def annotate(self, theory, voc, q_vars):
+def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
     self.set_level_symbols()
 
@@ -194,8 +204,8 @@ def get_instantiables(self, for_explain=False):
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.decl.range  # not None nor []
-                               for s in rule.definiendum.decl.sorts)
+        rule.is_whole_domain = all(s.range()  # not None nor []
+                                   for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
                        f"Cannot have inductive definitions on infinite domain")
@@ -400,13 +410,13 @@ def annotate(self, voc):
         self.check(a.type in voc.symbol_decls,
                    f"Unknown type: {a.type}" )
         a.decl = SymbolDeclaration(annotations='', name=a.accessor,
-                                   sorts=[Symbol(name=self.type)],
-                                   out=Symbol(name=a.type))
+                                   sorts=[Domain(name=self.type)],
+                                   out=Domain(name=a.type))
         a.decl.annotate(voc)
     self.tester = SymbolDeclaration(annotations='',
                                     name=Symbol(name=f"is_{self.name}"),
-                                    sorts=[Symbol(name=self.type)],
-                                    out=Symbol(name=BOOL))
+                                    sorts=[Domain(name=self.type)],
+                                    out=Domain(name=BOOL))
     self.tester.annotate(voc)
 Constructor.annotate = annotate
 
@@ -629,8 +639,8 @@ def annotate(self, voc, q_vars):
                 symbol_decl = SymbolDeclaration.make(
                     "_"+self.str, # name `_ *`
                     len(q_vars),  # arity
-                    [Symbol(name=v.sort.code) for v in q_vars.values()],
-                    Symbol(name=self.type)).annotate(voc)    # output_domain
+                    [Domain(name=v.sort.code) for v in q_vars.values()],
+                    Domain(name=self.type)).annotate(voc)    # output_domain
                 symbol = Symbol(name=symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
@@ -642,8 +652,7 @@ def annotate(self, voc, q_vars):
                               AComparison.make(op,
                                     [applied.copy(), self.sub_exprs[0].copy()]))
                 coc = AND([coc1, coc2])
-                quantees = [Quantee.make(v, Symbol(name=v.sort.code))
-                            for v in q_vars.values()]
+                quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
                 applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                 return applied
         self.annotated = True

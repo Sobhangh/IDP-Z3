@@ -11,6 +11,6 @@ structure S:V {
 }
 
 procedure main() {
-    print(Problem(T).formula())
+    print(Theory(T).formula())
 }
 

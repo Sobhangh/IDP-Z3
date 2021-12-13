@@ -6,11 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+Highlights of the breaking changes:
+* `sum{x in T: p(x): t(x)}` is now `sum(lambda x in T: t(x))`
+* `Symbol` is now `Concept`
+* `Problem(T,S)` is now `Theory(T,S)`
+
+
 ### API
 * (breaking) MR !152: IEP 22 change syntax of sum aggregate to sum(lambda <quantee>: expr)
 * (breaking) MR !154: built-in type is "Concept" (not "Symbol")
 * (breaking) MR !170: add timeout parameter to model expansion/optimisation and improve performance
-* (breaking) MR !171: refactor inferences to use a stateful solver. Fixes #154 and part of #148.
+* (breaking) MR !171: refactor inferences to use a stateful solver.
+* (breaking) MR !178: rename `Problem` class to `Theory`
+* (breaking) MR !179: `optimize` does not return a full model anymore; it only returns the optimized value
 * fix #5: do not allow arithmetic operations on constructors
 * fix #132, #136: Improve error message for mis-applied symbol
 * fix #137: support of functions from Symbol to Symbol
@@ -19,14 +27,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #156: Concept: error when using several vocabularies
 * fix #161: Improve "Duplicate declaration of..." error
 * MR !145: Improve performance of explain
-* MR !147: allow the user to edit system choices after model expansion / optimisation
 * MR !153: improve performance in case of large interpretations for symbols that do not occur in the theory
-* MR !155: allow to disable optimization buttons for certain symbols
 * MR !158: allow signature in quantification: `!x in Concept[T1->T2]: ..`
 * MR !172: IEP 05: Min and Max aggregates over anonymous function
-* MR !176: simplify number of status codes
+* MR !176: remove ENV_UNIV status code
+* MR !177: Allow `Concept[T->T]` in symbol declarations
 
 ### Interactive Consultant
+* MR !147: allow the user to edit system choices after model expansion / optimisation
+* MR !155: allow to disable optimization buttons for certain symbols
 * MR !158: button in editor to check that the `$(..)(..)` are well-guarded;
 * MR !160: IC should refuse theories without models
 * web MR !40: Enable resizing the IDE editor window
@@ -35,6 +44,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #139: IC should detect and explain theories without models
 * fix #147: incorrect reasoning about environmental consequences
 * fix #151: Error in dropdown using Glue Select
+* fix #160: Irrelevant boxes should show the title
 
 
 ## [0.8.4] - 2021-09-30

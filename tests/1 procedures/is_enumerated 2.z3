@@ -8,7 +8,7 @@ Traceback (most recent call last):
   File "idp_engine/Run.py", line ??, in pretty_print
     for i, xi in enumerate(x):
   File "idp_engine/Run.py", line ??, in model_expand
-    problem = Problem.make(theories, structures, extended=extended)
+    problem = Theory.make(theories, structures, extended=extended)
   File "idp_engine/Problem.py", line ??, in make
     self = cls(* [theories] + structures, extended=extended)
   File "idp_engine/Problem.py", line ??, in __init__

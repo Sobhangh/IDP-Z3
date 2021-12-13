@@ -32,7 +32,7 @@ from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
                          EQUALS, NOT)
-from .Parse import (TypeDeclaration, Symbol, Theory, str_to_IDP)
+from .Parse import (TypeDeclaration, Symbol, TheoryBlock, str_to_IDP)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, CONCEPT, RELEVANT)
@@ -46,7 +46,7 @@ class Propagation(Enum):
     Z3 = auto()  # use Z3's consequences API (incomplete propagation)
 
 
-class Problem(object):
+class Theory(object):
     """A collection of theory and structure blocks.
 
     Attributes:
@@ -196,7 +196,7 @@ class Problem(object):
         structures = ([] if structures is None else
                       structures if isinstance(structures, Iterable) else
                       [structures])
-        if type(theories) == 'Problem':
+        if type(theories) == 'Theory':
             theories.add(*structures)
             self = theories
         elif isinstance(theories, Iterable):
@@ -240,7 +240,7 @@ class Problem(object):
                         f"Can't add enumeration for {name} in {block.name}: duplicate"
                 self.interpretations[name] = interpret
 
-            if isinstance(block, Theory) or isinstance(block, Problem):
+            if isinstance(block, TheoryBlock) or isinstance(block, Theory):
                 self.co_constraints = None
                 self.definitions += block.definitions
                 self.constraints.extend(v.copy() for v in block.constraints)
@@ -353,7 +353,7 @@ class Problem(object):
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status not in [S.CONSEQUENCE]
+                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
                             or (self.propagated and not self.cleared))]
                         + self.constraintz())
             else:
@@ -387,7 +387,12 @@ class Problem(object):
                 val1 = model.eval(q.translate(self), model_completion=complete)
             val = str_to_IDP(q, str(val1))
             if val is not None:
-                ass.assert__(q, val, S.EXPANDED)
+                if q.is_assignment() and val == FALSE:
+                    tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
+                           else S.CONSEQUENCE)
+                else:
+                    tag = S.EXPANDED
+                ass.assert__(q, val, tag)
         return ass
 
     def expand(self, max=10, timeout=10, complete=False):
@@ -445,7 +450,7 @@ class Problem(object):
 
         solver = self.optimize_solver
         solver.push()
-        self.add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE])
+        self.add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
 
         if minimize:
             solver.minimize(s)
@@ -465,35 +470,38 @@ class Problem(object):
                 val = solver.model().eval(s)
             else:
                 break
+        solver.pop()
 
         val_IDP = str_to_IDP(sentence, str(val))
         if val_IDP is not None:
-            self.assignments.assert__(sentence, val_IDP, S.EXPANDED)
+            self.assert_(str(sentence), val_IDP, S.EXPANDED)
+            ass = str(EQUALS([sentence, val_IDP]))
+            if ass in self.assignments:
+                self.assert_(ass, True, S.EXPANDED)
 
-        solver.pop()
 
         return self
 
-    def symbolic_propagate(self):
+    def symbolic_propagate(self, tag=S.UNIVERSAL):
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
-            new_constraint = c.substitute(TRUE, TRUE, self.assignments, S.UNIVERSAL)
-            new_constraint.symbolic_propagate(self.assignments, S.UNIVERSAL)
+            new_constraint = c.substitute(TRUE, TRUE, self.assignments, tag)
+            new_constraint.symbolic_propagate(self.assignments, tag)
         return self
 
-    def propagate(self, method=Propagation.DEFAULT):
+    def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
             # NOTE: running this will confuse _directional_todo, not used right now
             assert False
-            out = list(self._batch_propagate())
+            out = list(self._batch_propagate(tag))
         if method == Propagation.Z3:
             # NOTE: running this will confuse _directional_todo, not used right now
             assert False
-            out = list(self._z3_propagate())
+            out = list(self._z3_propagate(tag))
         else:
-            out = list(self._propagate())
+            out = list(self._propagate(tag=tag))
         self.propagate_success = (out[0] != "Not satisfiable.")
         return self
 
@@ -511,7 +519,7 @@ class Problem(object):
         todos = {a.code: a for a in atoms}
 
         forbidden = set()
-        for ass in self._propagate(todos):
+        for ass in self._propagate(given_todo=todos):
             if isinstance(ass, str):
                 continue
             if ass.value.same_as(FALSE):
@@ -526,7 +534,7 @@ class Problem(object):
         Returns the facts and laws that make the problem UNSAT.
 
         Args:
-            self (Problem): the problem state
+            self (Theory): the problem state
             consequence (string | None): the code of the sentence to be explained.  Must be a key in self.assignments
 
         Returns:
@@ -577,7 +585,7 @@ class Problem(object):
         return (facts, laws)
 
     def simplify(self):
-        """ returns a simpler copy of the Problem, using known assignments
+        """ returns a simpler copy of the Theory, using known assignments
 
         Assignments obtained by propagation become fixed constraints.
         """
@@ -587,7 +595,7 @@ class Problem(object):
         for ass in out.assignments.values():
             if ass.value:
                 # TODO: what if consequences are due to choices (e.g., defaults?)
-                ass.status = (S.UNIVERSAL if ass.status == S.CONSEQUENCE else
+                ass.status = (S.UNIVERSAL if ass.status in [S.CONSEQUENCE, S.ENV_CONSQ] else
                         ass.status)
 
         new_constraints: List[Expression] = []

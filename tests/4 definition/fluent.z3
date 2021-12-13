@@ -1,0 +1,9 @@
+
+Model 1
+==========
+on:={0->false; 1->false; 2->false; 3->false}
+put:={0->false; 1->false; 2->false; 3->false}
+remove:={0->false; 1->false; 2->false; 3->false}
+fluent:={(`on,true,`on,`on)->false; (`on,true,`on,`put)->false; (`on,true,`on,`remove)->false; (`on,true,`put,`on)->false; (`on,true,`put,`put)->false; (`on,true,`put,`remove)->false; (`on,true,`remove,`on)->false; (`on,true,`remove,`put)->false; (`on,true,`remove,`remove)->false; (`on,false,`on,`on)->true; (`on,false,`on,`put)->true; (`on,false,`on,`remove)->true; (`on,false,`put,`on)->true; (`on,false,`put,`put)->true; (`on,false,`put,`remove)->true; (`on,false,`remove,`on)->true; (`on,false,`remove,`put)->true; (`on,false,`remove,`remove)->true; (`put,true,`on,`on)->false; (`put,true,`on,`put)->false; (`put,true,`on,`remove)->false; (`put,true,`put,`on)->false; (`put,true,`put,`put)->false; (`put,true,`put,`remove)->false; (`put,true,`remove,`on)->false; (`put,true,`remove,`put)->false; (`put,true,`remove,`remove)->false; (`put,false,`on,`on)->true; (`put,false,`on,`put)->true; (`put,false,`on,`remove)->true; (`put,false,`put,`on)->true; (`put,false,`put,`put)->true; (`put,false,`put,`remove)->true; (`put,false,`remove,`on)->true; (`put,false,`remove,`put)->true; (`put,false,`remove,`remove)->true; (`remove,true,`on,`on)->false; (`remove,true,`on,`put)->false; (`remove,true,`on,`remove)->false; (`remove,true,`put,`on)->false; (`remove,true,`put,`put)->false; (`remove,true,`put,`remove)->false; (`remove,true,`remove,`on)->false; (`remove,true,`remove,`put)->false; (`remove,true,`remove,`remove)->false; (`remove,false,`on,`on)->true; (`remove,false,`on,`put)->true; (`remove,false,`on,`remove)->true; (`remove,false,`put,`on)->true; (`remove,false,`put,`put)->true; (`remove,false,`put,`remove)->true; (`remove,false,`remove,`on)->true; (`remove,false,`remove,`put)->true; (`remove,false,`remove,`remove)->true}
+
+More models may be available.  Change the max argument to see them.

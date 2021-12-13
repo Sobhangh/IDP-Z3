@@ -39,6 +39,7 @@ class Status(Enum):
     STRUCTURE = auto()
     UNIVERSAL = auto()
     CONSEQUENCE = auto()
+    ENV_CONSQ = auto()
     # choices:
     EXPANDED = auto()
     DEFAULT = auto()
@@ -155,7 +156,7 @@ class Assignment(object):
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
-    def translate(self, problem: "Problem") -> BoolRef:
+    def translate(self, problem: "Theory") -> BoolRef:
         return self.formula().translate(problem)
 
     def as_set_condition(self):
@@ -201,12 +202,14 @@ class Assignments(dict):
         if sentence.code in self:
             out = self[sentence.code]
             if out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT]\
-                    and status in [Status.CONSEQUENCE, Status.UNIVERSAL]:
+                    and status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.UNIVERSAL]:
                 assert out.value.same_as(value), \
                         "System should not override given choices with different consequences, please report this bug."
             else:
-                out.value = value
-                out.status = status
+                if not (out.status == Status.ENV_CONSQ and status == Status.CONSEQUENCE):
+                    # do not change an env consequence to a decision consequence
+                    out.value = value
+                    out.status = status
         else:
             out = Assignment(sentence, value, status)
         if out.symbol_decl:  # ignore comparisons of constructors

@@ -22,7 +22,7 @@ Classes to parse an IDP-Z3 theory.
 """
 __all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
            "TypeDeclaration",
-           "SymbolDeclaration", "Symbol", "Theory", "Definition",
+           "SymbolDeclaration", "Symbol", "TheoryBlock", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
            "Display", "Procedure", ]
 
@@ -39,7 +39,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         IfExpr, AQuantification, Quantee,
+                         IfExpr, AQuantification, Domain, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -113,7 +113,7 @@ class IDP(ASTNode):
 
         vocabularies (dict[str, Vocabulary]): list of vocabulary blocks, by name
 
-        theories (dict[str, Theory]): list of theory blocks, by name
+        theories (dict[str, TheoryBlock]): list of theory blocks, by name
 
         structures (dict[str, Structure]): list of structure blocks, by name
 
@@ -198,7 +198,7 @@ class IDP(ASTNode):
             blocks (List[str]): list of names of the blocks to retrieve
 
         Returns:
-            List[Union[Vocabulary, Theory, Structure, Procedure, Display]]:
+            List[Union[Vocabulary, TheoryBlock, Structure, Procedure, Display]]:
                 list of AST nodes
         """
         names = blocks.split(",") if type(blocks) is str else blocks
@@ -285,19 +285,19 @@ class Vocabulary(ASTNode):
                 name=CONCEPT,
                 constructors=[]),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                                sorts=[], out=Symbol(name=BOOL)),
+                                sorts=[], out=Domain(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Symbol(name=CONCEPT)],
-                                out=Symbol(name=INT)),
+                                sorts=[Domain(name=CONCEPT)],
+                                out=Domain(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
-                                sorts=[Symbol(name=INT)],
-                                out=Symbol(name=INT)),
+                                sorts=[Domain(name=INT)],
+                                out=Domain(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
-                                sorts=[Symbol(name=CONCEPT), Symbol(name=INT)],
-                                out=Symbol(name=CONCEPT)),
+                                sorts=[Domain(name=CONCEPT), Domain(name=INT)],
+                                out=Domain(name=CONCEPT)),
             SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Symbol(name=CONCEPT)],
-                                out=Symbol(name=CONCEPT))
+                                sorts=[Domain(name=CONCEPT)],
+                                out=Domain(name=CONCEPT))
             ] + self.declarations
 
     def __str__(self):
@@ -309,7 +309,7 @@ class Vocabulary(ASTNode):
         """adds the enumerations in a vocabulary to a theory or structure block
 
         Args:
-            block (Problem): the block to be updated
+            block (Theory): the block to be updated
         """
         for s in self.declarations:
             block.check(s.name not in block.declarations,
@@ -419,7 +419,7 @@ class SymbolDeclaration(ASTNode):
 
         type (string): name of the Z3 type of an instance of the symbol
 
-        domain (List): the list of possible tuples of arguments
+        in_domain (List): the list of possible tuples of arguments
 
         instances (Dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
@@ -463,7 +463,7 @@ class SymbolDeclaration(ASTNode):
         self.optimizable: bool = True
 
         self.type = None  # a string
-        self.domain = None  # all possible arguments
+        self.in_domain = None  # all possible arguments
         self.range = None  # all possible values
         self.instances = None  # {string: AppliedSymbol} not starting with '_'
         self.block: Optional[Block] = None  # vocabulary where it is declared
@@ -493,10 +493,10 @@ class SymbolDeclaration(ASTNode):
 Type = Union[TypeDeclaration, SymbolDeclaration]
 
 
-################################ Theory  ###############################
+################################ TheoryBlock  ###############################
 
 
-class Theory(ASTNode):
+class TheoryBlock(ASTNode):
     """ The class of AST nodes representing a theory block.
     """
     def __init__(self, **kwargs):
@@ -631,7 +631,7 @@ class Definition(ASTNode):
                 continue
             symbdec = SymbolDeclaration.make(
                 "_"+str(self.id)+"lvl_"+key.name,
-                key.arity, key.sorts, Symbol(name=REAL))
+                key.arity, key.sorts, Domain(name=REAL))
             self.level_symbols[key] = Symbol(name=symbdec.name)
             self.level_symbols[key].decl = symbdec
 
@@ -676,7 +676,7 @@ class Rule(ASTNode):
 
         Args:
             new_args ([Expression]): tuple of arguments to be applied to the defined symbol
-            theory (Problem): the context for the interpretation
+            theory (Theory): the context for the interpretation
 
         Returns:
             Expression: a boolean expression
@@ -1110,7 +1110,7 @@ class PyAssignment(ASTNode):
 
 ########################################################################
 
-Block = Union[Vocabulary, Theory, Structure, Display]
+Block = Union[Vocabulary, TheoryBlock, Structure, Display]
 
 dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 
@@ -1118,11 +1118,11 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         TypeDeclaration, Accessor,
+                                         TypeDeclaration, Accessor, Domain,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
-                                         Theory, Definition, Rule, IfExpr,
+                                         TheoryBlock, Definition, Rule, IfExpr,
                                          AQuantification, Quantee, ARImplication,
                                          AEquivalence, AImplication,
                                          ADisjunction, AConjunction,

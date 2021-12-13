@@ -1,7 +1,7 @@
 IDP:
     Shebang?
     ( vocabularies=Vocabulary
-    | theories=Theory
+    | theories=TheoryBlock
     | structures=Structure
     | procedures=Procedure) *
     display=Display?
@@ -26,13 +26,13 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=ConstructedFrom))?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
-          ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
-          ('->' | '→') out=Symbol;
+          ( '(' sorts*=Domain[/[*⨯]/] ')' | sorts*=Domain[/[*⨯]/] )
+          ('->' | '→') out=Domain;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
+TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
 
   Definition: annotations=Annotations '{' rules*=Rule '}';
   Rule: annotations=Annotations
@@ -40,14 +40,16 @@ Theory: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (con
         definiendum=AppliedSymbol
         ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: ( vars+=Variable[','] ( ('in' | '∈') sort=SymbolExpr (signature=Signature)?)?
-               | vars+=VarTuple[','] ('in' | '∈') sort=SymbolExpr (signature=Signature)?);
+      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (domain=Domain | sort=SymbolExpr) )?
+               | vars+=VarTuple[','] ( ('in' | '∈') (domain=Domain | sort=SymbolExpr) )?);
           Variable: name=/`?[^\d\W]\w*\b/;
           VarTuple: '(' vars+=Variable[','] ')';
-          Signature: '['
-              ( '(' sorts*=Symbol[/[*⨯]/] ')' | sorts*=Symbol[/[*⨯]/] )
+          Domain: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+            ( '['
+              ( '(' ins*=Symbol[/[*⨯]/] ')' | ins*=Symbol[/[*⨯]/] )
               ('->' | '→') out=Symbol
-              ']';
+              ']'
+            )?;
 
   Expression: IfExpr | Quantification;
     IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;

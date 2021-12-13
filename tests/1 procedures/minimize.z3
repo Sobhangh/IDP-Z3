@@ -1,23 +1,28 @@
 Sides:={->3}
-Length:={1->0.3333333333333333}
+Vertices:={->3}
+Type:={->triangle}
+Length:={1->1; 2->1; 3->1; 4->0}
+Angle:={1->60; 2->60; 3->60; 4->0}
 Subtype:={->regular_triangle}
-Perimeter:={->1}
+Convex:={->true}
+Equilateral:={->true}
+Perimeter:={->3}
 
 Model 1
 ==========
 Sides:={->3}
 Vertices:={->3}
 Type:={->triangle}
-Length:={1->0.3333333333333333; 2->0.3333333333333333; 3->0.3333333333333333; 4->0}
+Length:={1->1; 2->1; 3->1; 4->0}
 Angle:={1->60; 2->60; 3->60; 4->0}
 Subtype:={->regular_triangle}
 Convex:={->true}
 Equilateral:={->true}
-Perimeter:={->1}
+Perimeter:={->3}
 Large:={1->false; 2->false; 3->false; 4->false}
 Wide:={1->false; 2->false; 3->false; 4->false}
-Base:={->5}
-Height:={->6}
-Surface:={->7}
+Base:={->6}
+Height:={->7}
+Surface:={->8}
 
 More models may be available.  Change the max argument to see them.

@@ -25,7 +25,7 @@ It has 2 parts:
 * symbolic propagation
 * Z3 propagation
 
-This module monkey-patches the Expression and Problem classes and sub-classes.
+This module monkey-patches the Expression and Theory classes and sub-classes.
 """
 
 import time
@@ -37,7 +37,7 @@ from .Expression import (Expression, AQuantification,
                     ADisjunction, AConjunction, AppliedSymbol,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
-from .Problem import Problem
+from .Problem import Theory
 from .utils import OrderedSet
 from .Idp_to_Z3 import get_symbols_z
 
@@ -204,7 +204,7 @@ def _set_consequences_get_changed_choices(self):
     # TODO: why is it not ok to use get_core_atoms in this method?
 
     return removed_choices, added_choices
-Problem._set_consequences_get_changed_choices = _set_consequences_get_changed_choices
+Theory._set_consequences_get_changed_choices = _set_consequences_get_changed_choices
 
 
 def _directional_todo(self, removed_choices={}, added_choices=[]):
@@ -218,7 +218,7 @@ def _directional_todo(self, removed_choices={}, added_choices=[]):
     if removed_choices:
         for a in removed_choices.values():
             todo[a.sentence.code] = a.sentence
-        for a in self.get_core_atoms([S.CONSEQUENCE]):
+        for a in self.get_core_atoms([S.CONSEQUENCE, S.ENV_CONSQ]):
             todo[a.sentence.code] = a.sentence
 
     if added_choices:
@@ -226,10 +226,10 @@ def _directional_todo(self, removed_choices={}, added_choices=[]):
             todo[a.sentence.code] = a.sentence
 
     return todo
-Problem._directional_todo = _directional_todo
+Theory._directional_todo = _directional_todo
 
 
-def _batch_propagate(self):
+def _batch_propagate(self, tag=S.CONSEQUENCE):
     """ generator of new propagated assignments.  Update self.assignments too.
 
     uses the method outlined in https://stackoverflow.com/questions/37061360/using-maxsat-queries-in-z3/37061846#37061846
@@ -250,7 +250,7 @@ def _batch_propagate(self):
                 solver.add(q.reified(self) == q.translate(self))  # in case todo contains complex formula
                 if solver.check() != sat:
                     # print("Falling back !")
-                    yield from self._propagate()
+                    yield from self._propagate(tag=tag)
                 test = Not(q.reified(self) == solver.model().eval(q.reified(self)))  #TODO compute model once
                 tests.append(test)
                 lookup[str(test)] = q
@@ -275,7 +275,7 @@ def _batch_propagate(self):
                     break
                 else:  # unknown
                     # print("Falling back !!")
-                    yield from self._propagate()
+                    yield from self._propagate(tag=tag)
                     break
             yield "No more consequences."
         elif result == unsat:
@@ -287,7 +287,7 @@ def _batch_propagate(self):
     else:
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
-Problem._batch_propagate = _batch_propagate
+Theory._batch_propagate = _batch_propagate
 
 def add_assignment(self, solver, excluded):
     solver.push()
@@ -298,7 +298,7 @@ def add_assignment(self, solver, excluded):
                         and a.status not in excluded]
     for af in assignment_forms:
         solver.add(af)
-Problem.add_assignment = add_assignment
+Theory.add_assignment = add_assignment
 
 
 def _first_propagate(self):
@@ -342,10 +342,10 @@ def _first_propagate(self):
 
     solver.pop()
     self.first_prop = False
-Problem._first_propagate = _first_propagate
+Theory._first_propagate = _first_propagate
 
 
-def _propagate(self, given_todo=None):
+def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
     :arg todo: custom list of assignments to check during propagation.
     """
@@ -403,7 +403,7 @@ def _propagate(self, given_todo=None):
             assert res2 != unknown
             if res2 == unsat:
                 val = str_to_IDP(q, str(val1))
-                yield self.assignments.assert__(q, val, S.CONSEQUENCE)
+                yield self.assignments.assert__(q, val, tag)
 
         yield "No more consequences."
     elif res1 == unsat:
@@ -417,10 +417,10 @@ def _propagate(self, given_todo=None):
         self.old_assignments = self.assignments.copy(shallow=True)
 
     solver.pop()
-Problem._propagate = _propagate
+Theory._propagate = _propagate
 
 
-def _z3_propagate(self):
+def _z3_propagate(self, tag=S.CONSEQUENCE):
     """generator of new propagated assignments.  Update self.assignments too.
 
     use z3's consequences API (incomplete propagation)
@@ -446,20 +446,20 @@ def _z3_propagate(self):
                     value = TRUE
                 # try to unreify it
                 if atom in unreify:
-                    yield self.assignments.assert__(unreify[atom], value, S.CONSEQUENCE)
+                    yield self.assignments.assert__(unreify[atom], value, tag)
                 elif is_eq(consq):
                     assert value == TRUE, f"Internal error in z3_propagate"
                     term = consq.children()[0]
                     if term in unreify:
                         q = unreify[term]
                         val = str_to_IDP(q, consq.children()[1])
-                        yield self.assignments.assert__(q, val, S.CONSEQUENCE)
+                        yield self.assignments.assert__(q, val, tag)
                     else:
                         print("???", str(consq))
                 else:
                     print("???", str(consq))
             yield "No more consequences."
-            #yield from self._propagate()  # incomplete --> finish with normal propagation
+            #yield from self._propagate(tag=tag)  # incomplete --> finish with normal propagation
         elif result == unsat:
             yield "Not satisfiable."
             yield str(z3_formula)
@@ -469,7 +469,7 @@ def _z3_propagate(self):
     else:
         yield "No more consequences."
     self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
-Problem._z3_propagate = _z3_propagate
+Theory._z3_propagate = _z3_propagate
 
 
 Done = True
