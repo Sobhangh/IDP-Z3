@@ -90,6 +90,7 @@ Arguments:
 * **method**: string containing the method to execute. Supported methods are: *checkCode*, *propagate*, *get_range*, *modelexpand*, *explain*, *minimize*, and *abstract*.
 * **code**: the IDP code.
 * **active**: the active assignments, already input in the interface.
+* **previous_active**: the assignments after the last full propagation.
 * **symbol**: the name of a symbol, only used for *minimize*, *explain* and *checkCode*.
 * **value**: a value, only used for *explain*.
 * **field**: the applied symbol for which a range must be determined, only for *get_range*.

@@ -60,6 +60,22 @@ GET request :
             - <atom/term> : string {
                 - typ : string   // "Bool" | "Int" | "Real" | <custom type>
                 - value: string  // value entered by the user
+                - status: string // GIVEN       : given by the user, fixed for now
+                }
+            }
+        }
+    - previous_active : {    // list of assignments from last full propagation
+        - <symbol> : string {
+            - <atom/term> : string {
+                - typ : string   // "Bool" | "Int" | "Real" | <custom type>
+                - value: string  // value entered by the user
+                - status: string // UNKNOWN     : unknown value
+                                 // GIVEN       : given by the user
+                                 // DEFAULT     : part of a given default structure (only after meta call)
+                                 // EXPANDED    : value obtained by model expansion (only after optimize / expand call)
+                                 // UNIVERSAL   : immediate consequence of the theory
+                                 // CONSEQUENCE : value obtained by propagation of inputs
+                                 // ENV_CONSQ   : value obtained by propagation of inputs on environmental theory
                 }
             }
         }

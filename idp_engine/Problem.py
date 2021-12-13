@@ -85,7 +85,7 @@ class Theory(object):
 
         ctx : Z3 context
 
-        old_assignments (Assignment): assignment after previous full propagation
+        previous_assignments (Assignment): assignment after previous full propagation
 
         first_prop (Bool): whether the first propagate call still needs to happen
 
@@ -132,7 +132,7 @@ class Theory(object):
         self.ctx = Context()
         self.add(*blocks)
 
-        self.old_assignments = Assignments()
+        self.previous_assignments = Assignments()
         self.first_prop = True
 
         self.propagate_success = True
@@ -294,7 +294,6 @@ class Theory(object):
             ass.sentence.original = ass.sentence.copy()
 
         self._constraintz = None
-        self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
     def assert_(self, code: str, value: Any, status: S = S.GIVEN):
@@ -305,20 +304,11 @@ class Theory(object):
             value (Any): a Python value, e.g., True
             status (Status, Optional): how the value was obtained.  Default: S.GIVEN
         """
-        code = str(code)
         atom = self.assignments[code].sentence
-        old_value = self.assignments[code].value
         if value is None:
-            if self.propagated and old_value is not None:
-                self.cleared.append(atom)
-                self.assigned.pop(atom, None)
-            self.assignments.assert__(atom, value, S.UNKNOWN)
+            self.assignments.assert__(atom, None, S.UNKNOWN)
         else:
             val = str_to_IDP(atom, str(value))
-            if self.propagated and not(old_value and old_value.same_as(val)):
-                self.assigned.append(atom)
-                if old_value:
-                    self.cleared.append(atom)
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
@@ -353,8 +343,7 @@ class Theory(object):
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                            or (self.propagated and not self.cleared))]
+                        and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
                         + self.constraintz())
             else:
                 all = [a.formula().translate(self) for a in self.assignments.values()

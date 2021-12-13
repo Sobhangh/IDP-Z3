@@ -36,26 +36,27 @@ class State(Theory):
     cache: Dict[str, 'State'] = {}
 
     @classmethod
-    def make(cls, idp: IDP, jsonstr: str) -> "State":
+    def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
         """Manage the cache of State
 
         Args:
             idp (IDP): idp source code
+            previous_active (str): assignments due to previous full propagation
             jsonstr (str): input from client
 
         Returns:
             State: a State
         """
-        if jsonstr != "{}" and idp.code in State.cache:  # TODO: fix weird way to reset via "{}"
+        if jsonstr != "{}" and idp.code in State.cache:
             state = State.cache[idp.code]
-            state.add_given(jsonstr)
+            state.add_given(jsonstr, previous_active)
         else:
             if 100 < len(State.cache):
                 # remove oldest entry, to prevent memory overflow
                 State.cache.pop(list(State.cache.keys())[-1])
             state = State(idp)
             State.cache[idp.code] = state
-            state.add_given(jsonstr, True)
+            state.add_given(jsonstr, previous_active, True)
         return state
 
     def __init__(self, idp: IDP):
@@ -103,19 +104,21 @@ class State(Theory):
 
         self.relevant_symbols = {}
 
-    def add_given(self, jsonstr: str, keep_defaults: bool=False):
+    def add_given(self, jsonstr: str, previous: str, keep_defaults: bool = False):
         """
         Add the assignments that the user gave through the interface.
         These are in the form of a json string.
 
         :arg jsonstr: the user's assignment in json
-        :returns: the state with the jsonstr added
-        :rtype: State
+        :arg previous: the assignments from the last propagation
+        :post: the state has the jsonstr and previous added
         """
 
         if self.environment:
-            load_json(self.environment, jsonstr, keep_defaults)
-        load_json(self, jsonstr, keep_defaults)
+            load_json(self.environment.assignments, jsonstr, keep_defaults)
+            load_json(self.environment.previous_assignments, previous, False)
+        load_json(self.assignments, jsonstr, keep_defaults)
+        load_json(self.previous_assignments, previous, False)
 
         # perform propagation
         if self.environment is not None:  # if there is a decision vocabulary

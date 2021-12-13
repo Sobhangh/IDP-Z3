@@ -180,11 +180,13 @@ Brackets.symbolic_propagate = symbolic_propagate
 ###############################################################################
 
 def _set_consequences_get_changed_choices(self):
+    # clear consequences, as these might not be cleared by add_given when
+    # running via CLI
     for a in self.assignments.values():
         if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
             self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
-    removed_choices = {a.sentence.code: a for a in self.old_assignments.values()
+    removed_choices = {a.sentence.code: a for a in self.previous_assignments.values()
                        if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]}
     added_choices = []
 
@@ -197,7 +199,7 @@ def _set_consequences_get_changed_choices(self):
                 added_choices.append(a)
 
     if not removed_choices:
-        for a in self.old_assignments.values():
+        for a in self.previous_assignments.values():
             if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
                 self.assignments.assert__(a.sentence, a.value, a.status)
 
@@ -218,8 +220,9 @@ def _directional_todo(self, removed_choices={}, added_choices=[]):
     if removed_choices:
         for a in removed_choices.values():
             todo[a.sentence.code] = a.sentence
-        for a in self.get_core_atoms([S.CONSEQUENCE, S.ENV_CONSQ]):
-            todo[a.sentence.code] = a.sentence
+        for a in self.previous_assignments.values():
+            if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
+                todo[a.sentence.code] = a.sentence
 
     if added_choices:
         for a in self.get_core_atoms([S.UNKNOWN]):
@@ -286,7 +289,6 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
             yield str(z3_formula)
     else:
         yield "No more consequences."
-    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Theory._batch_propagate = _batch_propagate
 
 def add_assignment(self, solver, excluded):
@@ -415,7 +417,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield str(self.formula())
 
     if dir_todo:
-        self.old_assignments = self.assignments.copy(shallow=True)
+        self.previous_assignments = self.assignments.copy(shallow=True)
 
     solver.pop()
 Theory._propagate = _propagate
@@ -469,7 +471,6 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
             yield str(z3_formula)
     else:
         yield "No more consequences."
-    self.propagated, self.assigned, self.cleared = True, OrderedSet(), OrderedSet()
 Theory._z3_propagate = _z3_propagate
 
 
