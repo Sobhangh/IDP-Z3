@@ -111,6 +111,7 @@ class State(Theory):
 
         :arg jsonstr: the user's assignment in json
         :arg previous: the assignments from the last propagation
+        :arg keep_default: whether default assignments should not be reset
         :post: the state has the jsonstr and previous added
         """
 

@@ -97,9 +97,9 @@ def load_json(assignments, jsonstr: str, keep_defaults: bool):
         json_data = ast.literal_eval(jsonstr)
 
         # clear old choices, except for recent defaults, which should be kept after meta construction
+        excluded = [S.STRUCTURE, S.UNIVERSAL] + ([S.DEFAULT] if keep_defaults else [])
         for atom in assignments.values():
-            if atom.status not in ([S.STRUCTURE, S.UNIVERSAL, S.DEFAULT] if keep_defaults
-                        else [S.STRUCTURE, S.UNIVERSAL]):
+            if atom.status not in excluded:
                 assignments.assert__(atom.sentence, None, S.UNKNOWN)
 
         # set new choices
