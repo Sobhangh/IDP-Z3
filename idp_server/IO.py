@@ -87,11 +87,10 @@ def metaJSON(state):
 def load_json(assignments, jsonstr: str, keep_defaults: bool):
     """ Parse a json string and update assignments in a state accordingly.
 
-    :arg state: a Theory object containing the concepts that appear in the json
-    :arg jsonstr: the user's assignments in json
+    :arg assignments: an assignments containing the concepts that appear in the json
+    :arg jsonstr: assignments in json
     :arg keep_defaults: whether to not delete the default assignments
-    :returns: the assignments
-    :rtype: idp_engine.Assignments
+    :post: assignments is updated with information in json
     """
 
     if jsonstr:

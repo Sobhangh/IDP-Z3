@@ -338,7 +338,9 @@ Theory._first_propagate = _first_propagate
 
 def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
-    :arg todo: custom list of assignments to check during propagation.
+    :arg given_todo: custom collection of assignments to check during propagation.
+    given_todo is organized as a dictionary where the keys function to quickly
+    check if a certain assignment is in the collection.
     """
 
     global start
@@ -353,9 +355,10 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     if dir_todo:
         todo = self._directional_todo(removed_choices, added_choices)
     else:
-        todo = given_todo.copy()  # copy needed because todo might be adjusted
+        todo = given_todo.copy()  # shallow copy needed because todo might be adjusted
 
     if not removed_choices and not added_choices:
+        # nothing changed since the previous propagation
         to_remove = []
         for a in todo.values():
             if a.code in self.assignments:
