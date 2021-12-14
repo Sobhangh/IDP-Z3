@@ -304,8 +304,7 @@ Theory.add_assignment = add_assignment
 
 
 def _first_propagate(self):
-    for a in self.assignments.values():
-        assert a.status not in [S.UNIVERSAL], "incorrect propagate status "+str(a.status)+" for "+str(a)
+    # NOTE: some universal assignments may be set due to the environment theory
     todo = OrderedSet(a.sentence for a in self.get_core_atoms(
         [S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE, S.ENV_CONSQ]))
 
