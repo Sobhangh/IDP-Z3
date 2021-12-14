@@ -87,9 +87,9 @@ class Theory(object):
 
         previous_assignments (Assignment): assignment after previous full propagation
 
-        first_prop (Bool): whether the first propagate call still needs to happen
+        satisfied (Bool): whether propagate found an initial model
 
-        propagate_success (Bool): keeps track whether a propagation still needs
+        first_prop (Bool): keeps track whether a propagation still needs
         to happen. If so during a propagate call, first an initial propagation
         without any choices (including defaults) executes to find the universal
         consequences of the theory (`S.UNIVERSAL`). This is done once to improve
@@ -135,7 +135,7 @@ class Theory(object):
         self.previous_assignments = Assignments()
         self.first_prop = True
 
-        self.propagate_success = True
+        self.satisfied = True
 
         self._slvr = None
         self._optmz = None
@@ -499,7 +499,7 @@ class Theory(object):
             out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag=tag))
-        self.propagate_success = (out[0] != "Not satisfiable.")
+        self.satisfied = (out[0] != "Not satisfiable.")
         return self
 
     def get_range(self, term: str):

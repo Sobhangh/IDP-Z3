@@ -263,7 +263,7 @@ class eval(Resource):
                                        args['previous_active'],
                                        args['active'])
 
-                    if not state.propagate_success:
+                    if not state.satisfied:
                         out = explain(state)
                     elif method == "propagate":
                         if args.with_relevance:
