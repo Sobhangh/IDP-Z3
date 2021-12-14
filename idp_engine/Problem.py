@@ -146,7 +146,7 @@ class Theory(object):
     def solver(self):
         if self._slvr is None:
             self._slvr = Solver(ctx=self.ctx)
-            assert self.constraintz()
+            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
             self._slvr.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
@@ -160,7 +160,7 @@ class Theory(object):
     def optimize_solver(self):
         if self._optmz is None:
             self._optmz = Optimize(ctx=self.ctx)
-            assert self.constraintz()
+            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
             self._optmz.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
@@ -369,7 +369,8 @@ class Theory(object):
         ass = self.assignments.copy(shallow=True)  # TODO: copy needed?
         model = solver.model()
         for q in todo:
-            assert self.extended or not q.is_reified()
+            assert (self.extended or not q.is_reified(),
+                    "Reified atom should only appear in case of extended theories")
             if complete or q.is_reified():
                 val1 = model.eval(q.reified(self), model_completion=complete)
             else:
@@ -491,11 +492,11 @@ class Theory(object):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
             # NOTE: running this will confuse _directional_todo, not used right now
-            assert False
+            assert False, "dead code"
             out = list(self._batch_propagate(tag))
         if method == Propagation.Z3:
             # NOTE: running this will confuse _directional_todo, not used right now
-            assert False
+            assert False, "dead code"
             out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag=tag))

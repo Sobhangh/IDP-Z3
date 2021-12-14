@@ -309,7 +309,7 @@ def _first_propagate(self):
         solver.pop()
         return  # unsat, caller will fix this
 
-    assert res1 == sat
+    assert res1 == sat, "Incorrect solver behavior"
     model = solver.model()
     valqs = [(model.eval(q.reified(self)), q) for q in todo]
     for val1, q in valqs:
@@ -320,7 +320,7 @@ def _first_propagate(self):
         res2 = solver.check()
         solver.pop()
 
-        assert res2 != unknown
+        assert res2 != unknown, "Incorrect solver behavior"
         if res2 == unsat:
             val = str_to_IDP(q, str(val1))
 
@@ -394,7 +394,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
             res2 = solver.check()
             solver.pop()
 
-            assert res2 != unknown
+            assert res2 != unknown, "Incorrect solver behavior"
             if res2 == unsat:
                 val = str_to_IDP(q, str(val1))
                 yield self.assignments.assert__(q, val, tag)
