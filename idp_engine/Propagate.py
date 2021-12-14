@@ -291,17 +291,6 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
         yield "No more consequences."
 Theory._batch_propagate = _batch_propagate
 
-def add_assignment(self, solver, excluded):
-    solver.push()
-
-    assignment_forms = [a.formula().translate(self) for a in
-                        self.assignments.values()
-                        if a.value is not None
-                        and a.status not in excluded]
-    for af in assignment_forms:
-        solver.add(af)
-Theory.add_assignment = add_assignment
-
 
 def _first_propagate(self):
     # NOTE: some universal assignments may be set due to the environment theory
@@ -387,7 +376,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         solver.add(q.reified(self) == q.translate(self))
         # reification in case todo contains complex formula
 
-    self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+    self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
 
     res1 = solver.check()
 

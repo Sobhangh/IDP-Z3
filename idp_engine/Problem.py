@@ -384,6 +384,14 @@ class Theory(object):
                 ass.assert__(q, val, tag)
         return ass
 
+    def _add_assignment(self, solver, excluded):
+        assignment_forms = [a.formula().translate(self) for a in
+                            self.assignments.values()
+                            if a.value is not None
+                            and a.status not in excluded]
+        for af in assignment_forms:
+            solver.add(af)
+
     def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
         todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
@@ -391,7 +399,7 @@ class Theory(object):
 
         solver = self.solver
         solver.push()
-        self.add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+        self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
                 solver.add(q.reified(self) == q.translate(self))
@@ -439,7 +447,7 @@ class Theory(object):
 
         solver = self.optimize_solver
         solver.push()
-        self.add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+        self._add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
 
         if minimize:
             solver.minimize(s)
