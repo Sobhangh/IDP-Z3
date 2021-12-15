@@ -571,7 +571,8 @@ class Theory(object):
             solver.add(Not(to_explain.translate(self)))
 
         result = solver.check(list(ps.keys()))
-        assert result == unsat, "Incorrect solver result during explain inference"
+        assert result == unsat, ("Incorrect solver result during explain inference. "
+                                 "This may be due to floating point imprecision.")
         unsatcore = solver.unsat_core()
 
         solver.pop()
