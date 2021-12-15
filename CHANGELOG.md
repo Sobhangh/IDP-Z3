@@ -44,6 +44,7 @@ Highlights of the breaking changes:
 * fix #147: incorrect reasoning about environmental consequences
 * fix #151: Error in dropdown using Glue Select
 * fix #160: Irrelevant boxes should show the title
+* fix #167: Incorrect display of numeric value 1 in inconsistency panel
 
 
 ## [0.8.4] - 2021-09-30
