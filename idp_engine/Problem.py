@@ -472,10 +472,10 @@ class Theory(object):
 
         val_IDP = str_to_IDP(sentence, str(val))
         if val_IDP is not None:
-            self.assert_(str(sentence), val_IDP, S.EXPANDED)
+            self.assert_(str(sentence), val_IDP, S.GIVEN)
             ass = str(EQUALS([sentence, val_IDP]))
             if ass in self.assignments:
-                self.assert_(ass, True, S.EXPANDED)
+                self.assert_(ass, True, S.GIVEN)
 
 
         return self
