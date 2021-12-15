@@ -570,7 +570,8 @@ class Theory(object):
 
             solver.add(Not(to_explain.translate(self)))
 
-        solver.check(list(ps.keys()))
+        result = solver.check(list(ps.keys()))
+        assert result == unsat, "Incorrect solver result during explain inference"
         unsatcore = solver.unsat_core()
 
         solver.pop()
