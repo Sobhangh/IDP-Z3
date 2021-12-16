@@ -166,12 +166,7 @@ def pipeline():
     with z3lock:
         for file_name in test_files:
             # avoid files meant to raise an error
-            if file_name not in ['./tests/1 procedures/ok.idp',
-                './tests/1 procedures/is_enumerated 2.idp',
-                './tests/5 polygon/Sides3.idp',
-                './tests/9 DMN1.ignore/disjoint.idp',
-                './tests/9 DMN1.ignore/nondeterministic.idp',
-                './tests/9 DMN1.ignore/middle.idp',]:
+            if '.error' not in file_name:
                 try:
                     log(f"start /eval {file_name}")
                     with open(file_name, "r") as fp:
