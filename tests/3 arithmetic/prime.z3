@@ -25,13 +25,13 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'Prime': {'Prime(1)': {'environmental': False,
                         'is_assignment': False,
                         'normal': True,
                         'reading': 'Prime(1)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': True},
            'Prime(2)': {'environmental': False,
@@ -39,7 +39,7 @@ display {
                         'normal': True,
                         'reading': 'Prime(2)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': True},
            'Prime(3)': {'environmental': False,
@@ -47,7 +47,7 @@ display {
                         'normal': True,
                         'reading': 'Prime(3)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': True},
            'Prime(4)': {'environmental': False,
@@ -55,6 +55,6 @@ display {
                         'normal': True,
                         'reading': 'Prime(4)',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': False}}}

@@ -39,13 +39,13 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'Works': {'∃x ∈ ℝ : Works(x)': {'environmental': False,
                                  'is_assignment': False,
                                  'normal': False,
                                  'reading': '∃x ∈ ℝ : Works(x)',
                                  'relevant': True,
-                                 'status': 'CONSEQUENCE',
+                                 'status': 'UNIVERSAL',
                                  'typ': 'Bool',
                                  'value': True}},
  'p': {'p()': {'environmental': False,
@@ -53,7 +53,7 @@ display {
                'normal': True,
                'reading': 'p',
                'relevant': True,
-               'status': 'CONSEQUENCE',
+               'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},
  'q': {'q()': {'environmental': False,
@@ -61,6 +61,6 @@ display {
                'normal': True,
                'reading': 'q',
                'relevant': True,
-               'status': 'CONSEQUENCE',
+               'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}}}

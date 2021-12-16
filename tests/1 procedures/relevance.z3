@@ -35,7 +35,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'f': {'f(1)': {'environmental': False,
                 'is_assignment': True,
                 'normal': True,
@@ -66,7 +66,7 @@ display {
                                   'normal': False,
                                   'reading': '∀x ∈ num : f(x) = f(x)',
                                   'relevant': False,
-                                  'status': 'CONSEQUENCE',
+                                  'status': 'UNIVERSAL',
                                   'typ': 'Bool',
                                   'value': True}},
  'p': {'p()': {'environmental': False,

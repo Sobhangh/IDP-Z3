@@ -62,14 +62,14 @@ structure S: V{
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'Product_is_duplicate_of_Product': {'Product_is_duplicate_of_Product(1, 1)': {'environmental': False,
                                                                                'is_assignment': False,
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '1)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(1, 2)': {'environmental': False,
@@ -78,7 +78,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '2)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(1, 3)': {'environmental': False,
@@ -87,7 +87,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '3)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(1, 4)': {'environmental': False,
@@ -96,7 +96,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '4)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(1, 5)': {'environmental': False,
@@ -105,7 +105,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '5)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(1, 6)': {'environmental': False,
@@ -114,7 +114,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '6)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(1, 7)': {'environmental': False,
@@ -123,7 +123,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '7)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(2, 1)': {'environmental': False,
@@ -132,7 +132,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '1)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(2, 2)': {'environmental': False,
@@ -141,7 +141,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '2)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(2, 3)': {'environmental': False,
@@ -150,7 +150,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '3)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(2, 4)': {'environmental': False,
@@ -159,7 +159,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '4)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': True},
                                      'Product_is_duplicate_of_Product(2, 5)': {'environmental': False,
@@ -168,7 +168,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '5)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(2, 6)': {'environmental': False,
@@ -177,7 +177,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '6)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(2, 7)': {'environmental': False,
@@ -186,7 +186,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '7)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(3, 1)': {'environmental': False,
@@ -195,7 +195,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '1)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(3, 2)': {'environmental': False,
@@ -204,7 +204,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '2)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(3, 3)': {'environmental': False,
@@ -213,7 +213,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '3)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(3, 4)': {'environmental': False,
@@ -222,7 +222,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '4)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(3, 5)': {'environmental': False,
@@ -231,7 +231,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '5)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(3, 6)': {'environmental': False,
@@ -240,7 +240,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '6)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(3, 7)': {'environmental': False,
@@ -249,7 +249,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '7)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(4, 1)': {'environmental': False,
@@ -258,7 +258,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '1)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(4, 2)': {'environmental': False,
@@ -267,7 +267,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '2)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': True},
                                      'Product_is_duplicate_of_Product(4, 3)': {'environmental': False,
@@ -276,7 +276,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '3)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(4, 4)': {'environmental': False,
@@ -285,7 +285,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '4)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(4, 5)': {'environmental': False,
@@ -294,7 +294,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '5)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(4, 6)': {'environmental': False,
@@ -303,7 +303,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '6)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(4, 7)': {'environmental': False,
@@ -312,7 +312,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '7)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(5, 1)': {'environmental': False,
@@ -321,7 +321,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '1)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(5, 2)': {'environmental': False,
@@ -330,7 +330,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '2)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(5, 3)': {'environmental': False,
@@ -339,7 +339,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '3)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(5, 4)': {'environmental': False,
@@ -348,7 +348,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '4)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(5, 5)': {'environmental': False,
@@ -357,7 +357,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '5)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(5, 6)': {'environmental': False,
@@ -366,7 +366,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '6)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(5, 7)': {'environmental': False,
@@ -375,7 +375,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '7)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(6, 1)': {'environmental': False,
@@ -384,7 +384,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '1)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(6, 2)': {'environmental': False,
@@ -393,7 +393,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '2)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(6, 3)': {'environmental': False,
@@ -402,7 +402,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '3)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(6, 4)': {'environmental': False,
@@ -411,7 +411,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '4)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(6, 5)': {'environmental': False,
@@ -420,7 +420,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '5)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(6, 6)': {'environmental': False,
@@ -429,7 +429,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '6)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(6, 7)': {'environmental': False,
@@ -438,7 +438,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '7)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(7, 1)': {'environmental': False,
@@ -447,7 +447,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '1)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(7, 2)': {'environmental': False,
@@ -456,7 +456,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '2)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(7, 3)': {'environmental': False,
@@ -465,7 +465,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '3)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(7, 4)': {'environmental': False,
@@ -474,7 +474,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '4)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(7, 5)': {'environmental': False,
@@ -483,7 +483,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '5)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(7, 6)': {'environmental': False,
@@ -492,7 +492,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '6)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
                                      'Product_is_duplicate_of_Product(7, 7)': {'environmental': False,
@@ -501,7 +501,7 @@ structure S: V{
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '7)',
                                                                                'relevant': True,
-                                                                               'status': 'CONSEQUENCE',
+                                                                               'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False}},
  'price_of_Product': {},

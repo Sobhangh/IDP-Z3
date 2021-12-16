@@ -21,8 +21,8 @@ Equilateral:={->true}
 Perimeter:={->3}
 Large:={1->false; 2->false; 3->false; 4->false}
 Wide:={1->false; 2->false; 3->false; 4->false}
-Base:={->0}
-Height:={->0}
-Surface:={->0}
+Base:={->6}
+Height:={->7}
+Surface:={->8}
 
 More models may be available.  Change the max argument to see them.

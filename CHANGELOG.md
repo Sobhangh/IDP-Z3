@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 
 ### Interactive Consultant
+* MR !171: refactor inferences to use a stateful solver.
 
 
 ## [0.9.0] - 2021-12-16

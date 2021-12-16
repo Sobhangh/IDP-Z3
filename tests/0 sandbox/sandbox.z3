@@ -38,7 +38,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'Color': {'Color()': {'environmental': False,
                        'is_assignment': True,
                        'normal': True,
@@ -62,7 +62,7 @@ display {
                                                'normal': False,
                                                'reading': 'opposite(Color) is enumerated',
                                                'relevant': True,
-                                               'status': 'CONSEQUENCE',
+                                               'status': 'UNIVERSAL',
                                                'typ': 'Bool',
                                                'value': True}},
  'opposite': {}}

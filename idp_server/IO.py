@@ -84,50 +84,55 @@ def metaJSON(state):
 #################
 
 
-def load_json(state: Theory, jsonstr: str):
+def load_json(assignments, jsonstr: str, keep_defaults: bool):
     """ Parse a json string and update assignments in a state accordingly.
 
-    :arg state: a Theory object containing the concepts that appear in the json
-    :arg jsonstr: the user's assignments in json
-    :returns: the assignments
-    :rtype: idp_engine.Assignments
+    :arg assignments: an assignments containing the concepts that appear in the json
+    :arg jsonstr: assignments in json
+    :arg keep_defaults: whether to not delete the default assignments
+    :post: assignments is updated with information in json
     """
+
     if jsonstr:
         json_data = ast.literal_eval(jsonstr)
-        assert json_data != {}, "Reset not expected here"
+
+        # clear old choices, except for recent defaults, which should be kept after meta construction
+        excluded = [S.STRUCTURE, S.UNIVERSAL] + ([S.DEFAULT] if keep_defaults else [])
+        for atom in assignments.values():
+            if atom.status not in excluded:
+                assignments.assert__(atom.sentence, None, S.UNKNOWN)
+
+        # set new choices
+        status_map = {
+            "UNKNOWN": S.UNKNOWN,
+            "STRUCTURE": S.STRUCTURE,
+            "UNIVERSAL": S.UNIVERSAL,
+            "CONSEQUENCE": S.CONSEQUENCE,
+            "ENV_CONSQ": S.ENV_CONSQ,
+            "EXPANDED": S.EXPANDED,
+            "DEFAULT": S.DEFAULT,
+            "GIVEN": S.GIVEN
+        }
 
         for symbol in json_data:
-            # tentative set of sentences to be cleared
-            to_clear = set(atom.sentence for atom in state.assignments.values()
-                           if (atom.symbol_decl.name == symbol
-                           and atom.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]))
-
             # processed json_data
             for key, json_atom in json_data[symbol].items():
-                if key in state.assignments:
-                    atom = state.assignments[key]
+                if key in assignments:
+                    atom = assignments[key]
                     sentence = atom.sentence
 
                     # If the atom is unknown, set its value as normal.
-                    if json_atom["value"] != '':
-                        to_clear.discard(sentence)
-                        if atom.status == S.UNKNOWN:
-                            value = str_to_IDP(sentence, str(json_atom["value"]))
-                            state.assert_(sentence.code, value, S.GIVEN)
-                            if json_atom["typ"] != "Bool":
-                                key2 = f"{sentence.code} = {str(value)}"
-                                if key2 in state.assignments:
-                                    state.assert_(key2, TRUE, S.GIVEN)
+                    status = (S.GIVEN if json_atom["status"] == '' else
+                            status_map[json_atom["status"]])
 
-                        # If the atom was not already set in default struct, overwrite.
-                        elif atom.status != S.DEFAULT:
-                            value = str_to_IDP(sentence, str(json_atom["value"]))
-                            state.assert_(sentence.code, value, S.GIVEN)
-
-            # clear the remaining sentences
-            for sentence in to_clear:
-                state.assert_(sentence.code, None, S.UNKNOWN)
-
+                    if json_atom["value"] != '' and atom.status == S.UNKNOWN:
+                        value = str_to_IDP(sentence, str(json_atom["value"]))
+                        assignments.assert__(sentence, value, status)
+                        if json_atom["typ"] != "Bool":
+                            code = f"{sentence.code} = {str(value)}"
+                            if code in assignments:
+                                atom = assignments[code].sentence
+                                assignments.assert__(atom, TRUE, status)
 
 #################
 # response to client
@@ -142,7 +147,6 @@ class Output(object):
 
         self.m[' Global'] = {}
         self.m[' Global']['env_dec'] = state.environment is not None
-        self.m[' Global']['active'] = state.active
         FROM = {BOOL: 'Bool', INT: 'Int', REAL: 'Real',
                 '`'+BOOL: '`Bool', '`'+INT: '`Int', '`'+REAL: '`Real',}
 

@@ -81,17 +81,36 @@ class Theory(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        propagated (Bool): true if a propagation has been done
-
-        assigned (OrderedSet): set of questions asserted since last propagate
-
-        cleared (OrderedSet): set of questions unassigned since last propagate
-
-        propagate_success (Bool): whether the last propagate call failed or not
-
         z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
 
         ctx : Z3 context
+
+        previous_assignments (Assignment): assignment after previous full propagation
+
+        satisfied (Bool): whether propagate found an initial model
+
+        first_prop (Bool): keeps track whether a propagation still needs
+        to happen. If so during a propagate call, first an initial propagation
+        without any choices (including defaults) executes to find the universal
+        consequences of the theory (`S.UNIVERSAL`). This is done once to improve
+        subsequent propagations.
+
+        _slvr (Solver): stateful solver used for propagation and model expansion.
+            Use self.solver to access.
+
+        _optmz (Solver): stateful solver used for optimization.
+            Use self.optimize_solver to access.
+
+        _expl (Solver): stateful solver used for explanation.
+            Use self.explain_solver to access.
+
+        expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
+            dictionary storing for reification symbols (the keys) which
+            constraint it represents, and what the original expression was. If
+            the original expression is `None`, the reification represents a
+            fact, otherwise it represents a law. Used in the explanation
+            inference.
+
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -112,7 +131,64 @@ class Theory(object):
         self.z3 = {}
         self.ctx = Context()
         self.add(*blocks)
-        self.propagate_success = True
+
+        self.previous_assignments = Assignments()
+        self.first_prop = True
+
+        self.satisfied = True
+
+        self._slvr = None
+        self._optmz = None
+        self._expl = None
+        self.expl_reifs = {}  # {reified: (constraint, original)}
+
+    @property
+    def solver(self):
+        if self._slvr is None:
+            self._slvr = Solver(ctx=self.ctx)
+            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
+            self._slvr.add(And(self.constraintz()))
+            symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
+            assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
+                                if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
+                                and a.symbol_decl.name in symbols]
+            for af in assignment_forms:
+                self._slvr.add(af)
+        return self._slvr
+
+    @property
+    def optimize_solver(self):
+        if self._optmz is None:
+            self._optmz = Optimize(ctx=self.ctx)
+            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
+            self._optmz.add(And(self.constraintz()))
+            symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
+            assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
+                                if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
+                                and a.symbol_decl.name in symbols]
+            for af in assignment_forms:
+                self._optmz.add(af)
+        return self._optmz
+
+    @property
+    def explain_solver(self):
+        if self._expl is None:
+            self._expl = Solver(ctx=self.ctx)
+            self._expl.set(':core.minimize', True)
+
+            # get expanded def_constraints
+            def_constraints = {}
+            for defin in self.definitions:
+                instantiables = defin.get_instantiables(for_explain=True)
+                defin.add_def_constraints(instantiables, self, def_constraints)
+
+            todo = chain(self.constraints, chain(*def_constraints.values()))
+            for constraint in todo:
+                p = constraint.reified(self)
+                self.expl_reifs[p] = (constraint.original.interpret(self).translate(self), constraint)
+                self._expl.add(Implies(p, self.expl_reifs[p][0]))
+
+        return self._expl
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -218,7 +294,6 @@ class Theory(object):
             ass.sentence.original = ass.sentence.copy()
 
         self._constraintz = None
-        self.propagated, self.assigned, self.cleared = False, None, None
         return self
 
     def assert_(self, code: str, value: Any, status: S = S.GIVEN):
@@ -229,20 +304,11 @@ class Theory(object):
             value (Any): a Python value, e.g., True
             status (Status, Optional): how the value was obtained.  Default: S.GIVEN
         """
-        code = str(code)
         atom = self.assignments[code].sentence
-        old_value = self.assignments[code].value
         if value is None:
-            if self.propagated and old_value is not None:
-                self.cleared.append(atom)
-                self.assigned.pop(atom, None)
-            self.assignments.assert__(atom, value, S.UNKNOWN)
+            self.assignments.assert__(atom, None, S.UNKNOWN)
         else:
             val = str_to_IDP(atom, str(value))
-            if self.propagated and not(old_value and old_value.same_as(val)):
-                self.assigned.append(atom)
-                if old_value:
-                    self.cleared.append(atom)
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
@@ -271,14 +337,13 @@ class Theory(object):
         """ the formula encoding the knowledge base """
         if self._formula is None:
             if self.constraintz():
-                # only add interpretation constraints for those symbols
+                # use existing z3 constraints, but only add interpretations
+                # for those symbols, not propagated in a previous step,
                 # occurring in the (potentially simplified) z3 constraints
-                # which were not propagated in a previous step
                 symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
                 all = ([a.formula().translate(self) for a in self.assignments.values()
                         if a.symbol_decl.name in symbols and a.value is not None
-                        and (a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]
-                            or (self.propagated and not self.cleared))]
+                        and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
                         + self.constraintz())
             else:
                 all = [a.formula().translate(self) for a in self.assignments.values()
@@ -286,57 +351,64 @@ class Theory(object):
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
+    def get_core_atoms(self, statuses):
+        return [a for a in self.assignments.values()
+            if (self.extended or not a.sentence.is_reified())
+            and a.status in statuses]
+
     def sexpr(self):
         s = Solver(ctx=self.ctx)
         s.add(self.formula())
         return s.sexpr()
-
-    def _todo_expand(self):
-        return OrderedSet(
-            a.sentence for a in self.assignments.values()
-            if a.status == S.UNKNOWN
-            and (not a.sentence.is_reified() or self.extended))
 
     def _from_model(self, solver, todo, complete):
         """ returns Assignments from model in solver
 
         the solver must be in sat state
         """
-        ass = self.assignments.copy(shallow=True)
+        ass = self.assignments.copy(shallow=True)  # TODO: copy needed?
         model = solver.model()
         for q in todo:
-            if not q.is_reified() or self.extended:
-                if q.is_reified() or complete:
-                    val1 = model.eval(q.reified(self),
-                                                model_completion=complete)
+            assert (self.extended or not q.is_reified(),
+                    "Reified atom should only appear in case of extended theories")
+            if complete or q.is_reified():
+                val1 = model.eval(q.reified(self), model_completion=complete)
+            else:
+                val1 = model.eval(q.translate(self), model_completion=complete)
+            val = str_to_IDP(q, str(val1))
+            if val is not None:
+                if q.is_assignment() and val == FALSE:
+                    tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
+                           else S.CONSEQUENCE)
                 else:
-                    val1 = model.eval(q.translate(self),
-                                            model_completion=complete)
-                val = str_to_IDP(q, str(val1))
-                if val is not None:
-                    if q.is_assignment() and val == FALSE:
-                        tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
-                               else S.CONSEQUENCE)
-                    else:
-                        tag = S.EXPANDED
-                    ass.assert__(q, val, tag)
+                    tag = S.EXPANDED
+                ass.assert__(q, val, tag)
         return ass
+
+    def _add_assignment(self, solver, excluded):
+        assignment_forms = [a.formula().translate(self) for a in
+                            self.assignments.values()
+                            if a.value is not None
+                            and a.status not in excluded]
+        for af in assignment_forms:
+            solver.add(af)
 
     def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        z3_formula = self.formula()
-        todo = self._todo_expand()
+        todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
+        # TODO: should todo be larger in case complete==True?
 
-        solver = Solver(ctx=self.ctx)
-        solver.add(z3_formula)
+        solver = self.solver
+        solver.push()
+        self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
                 solver.add(q.reified(self) == q.translate(self))
 
         count, ass = 0, {}
         start = time.process_time()
-        while ((max <= 0 or count < max)
-               and (timeout <= 0 or time.process_time()-start < timeout)):
+        while ((max <= 0 or count < max) and
+               (timeout <= 0 or time.process_time()-start < timeout)):
             # exclude ass
             different = []
             for a in ass.values():
@@ -351,10 +423,9 @@ class Theory(object):
                 ass = self._from_model(solver, todo, complete)
                 yield ass
             else:
-                ass = {}
-            if not ass:
                 break
 
+        solver.pop()
 
         maxed = (0 < max <= count)
         timeouted = (0 < timeout <= time.process_time()-start)
@@ -371,34 +442,33 @@ class Theory(object):
 
     def optimize(self, term, minimize=True):
         assert term in self.assignments, "Internal error"
+
         sentence = self.assignments[term].sentence
-        todo = self._todo_expand()
-
-        solver = Optimize(ctx=self.ctx)
-        solver.add(self.formula())
-        for q in todo:
-            if q.is_reified() and self.extended:
-                solver.add(q.reified(self) == q.translate(self))
-
         s = sentence.translate(self)
+
+        solver = self.optimize_solver
+        solver.push()
+        self._add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+
         if minimize:
             solver.minimize(s)
         else:
             solver.maximize(s)
-        solver.check()
+        res = solver.check()
+        assert res == sat, "Optimization requires satisfiable specification"
 
         # deal with strict inequalities, e.g. min(0<x)
-        solver.push()
+        val = solver.model().eval(s)
         for i in range(0, 10):
-            val = solver.model().eval(s)
             if minimize:
                 solver.add(s < val)
             else:
                 solver.add(val < s)
-            if solver.check() != sat:
-                solver.pop()  # get the last good one
-                solver.check()
+            if solver.check() == sat:
+                val = solver.model().eval(s)
+            else:
                 break
+        solver.pop()
 
         val_IDP = str_to_IDP(sentence, str(val))
         if val_IDP is not None:
@@ -406,6 +476,8 @@ class Theory(object):
             ass = str(EQUALS([sentence, val_IDP]))
             if ass in self.assignments:
                 self.assert_(ass, True, S.GIVEN)
+
+
         return self
 
     def symbolic_propagate(self, tag=S.UNIVERSAL):
@@ -419,12 +491,16 @@ class Theory(object):
     def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
+            # NOTE: running this will confuse _directional_todo, not used right now
+            assert False, "dead code"
             out = list(self._batch_propagate(tag))
         if method == Propagation.Z3:
+            # NOTE: running this will confuse _directional_todo, not used right now
+            assert False, "dead code"
             out = list(self._z3_propagate(tag))
         else:
-            out = list(self._propagate(tag))
-        self.propagate_success = (out[0] != "Not satisfiable.")
+            out = list(self._propagate(tag=tag))
+        self.satisfied = (out[0] != "Not satisfiable.")
         return self
 
     def get_range(self, term: str):
@@ -436,29 +512,26 @@ class Theory(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
-        out = copy(self)
-        out.assignments = self.assignments.copy()
         #  remove current assignments to same term
-        if out.assignments[term].value:
-            for k,a in out.assignments.items():
-                if a.sentence.is_assignment and a.sentence.code.startswith(term):
-                    out.assert_(k, None, S.UNKNOWN)
-        out.formula()  # to keep universals and given, except self
+        if self.assignments[term].value:
+            for k,a in self.assignments.items():
+                if (a.sentence.is_assignment and
+                        a.sentence.code.startswith(term) and
+                        a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]):
+                    self.assert_(k, None, S.UNKNOWN)
 
-        # now consider every value in range
-        out.assignments = Assignments()
-        for e in range:
-            sentence = Assignment(termE, e, S.UNKNOWN).formula()
-            # use assignments.assert_ to create one if necessary
-            out.assignments.assert__(sentence, None, S.UNKNOWN)
-        out.assigned = True  # to force propagation of Unknowns
-        _ = list(out._propagate(S.CONSEQUENCE))  # run the generator
-        assert all(e.sentence.is_assignment()
-                   for e in out.assignments.values())
-        return [str(e.sentence.sub_exprs[1])
-                for e in out.assignments.values()
-                if e.value is None or e.value.same_as(TRUE)]
+        # consider every value in range
+        atoms = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
+        todos = {a.code: a for a in atoms}
 
+        forbidden = set()
+        for ass in self._propagate(given_todo=todos):
+            if isinstance(ass, str):
+                continue
+            if ass.value.same_as(FALSE):
+                forbidden.add(str(ass.sentence.sub_exprs[1]))
+
+        return [str(e.sub_exprs[1]) for e in todos.values() if str(e.sub_exprs[1]) not in forbidden]
 
     def explain(self, consequence=None):
         """
@@ -473,31 +546,17 @@ class Theory(object):
         Returns:
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
-        facts, laws = [], []
-        reasons = [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]
 
-        s = Solver(ctx=self.ctx)
-        s.set(':core.minimize', True)
-        ps = {}  # {reified: constraint}
+        solver = self.explain_solver
+        ps = self.expl_reifs.copy()
+
+        solver.push()
 
         for ass in self.assignments.values():
-            if ass.status in reasons:
+            if ass.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
                 p = ass.translate(self)
-                ps[p] = ass
-                #TODO use assert_and_track ?
-                s.add(Implies(p, p))
-
-        # get expanded def_constraints
-        def_constraints = {}
-        for defin in self.definitions:
-            instantiables = defin.get_instantiables(for_explain=True)
-            defin.add_def_constraints(instantiables, self, def_constraints)
-
-        todo = chain(self.constraints, chain(*def_constraints.values()))
-        for constraint in todo:
-            p = constraint.reified(self)
-            ps[p] = constraint.original.interpret(self).translate(self)
-            s.add(Implies(p, ps[p]))
+                ps[p] = (ass, ass.formula() if ass.status == S.STRUCTURE else None)
+                solver.add(Implies(p, p))
 
         if consequence:
             negated = consequence.replace('~', '¬').startswith('¬')
@@ -511,32 +570,25 @@ class Theory(object):
             if to_explain.type != BOOL:  # determine numeric value
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
+                    solver.pop()
                     return ([], [])
                 to_explain = EQUALS([to_explain, val])
             if negated:
                 to_explain = NOT(to_explain)
 
-            s.add(Not(to_explain.translate(self)))
+            solver.add(Not(to_explain.translate(self)))
 
-        s.check(list(ps.keys()))
-        unsatcore = s.unsat_core()
+        result = solver.check(list(ps.keys()))
+        assert result == unsat, ("Incorrect solver result during explain inference. "
+                                 "This may be due to floating point imprecision.")
+        unsatcore = solver.unsat_core()
 
+        solver.pop()
+
+        facts, laws = [], []
         if unsatcore:
-            for k, a1 in self.assignments.items():
-                if a1.status in reasons:
-                    for a2 in unsatcore:
-                        if type(ps[a2]) == Assignment \
-                        and a1.sentence.same_as(ps[a2].sentence):  #TODO we might miss some equality
-                            if a1.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
-                                facts.append(a1)
-                            else:
-                                laws.append(a1.formula())
-
-            unsatcorestrings = {str(ps[a2]) for a2 in unsatcore}
-            for a1 in chain(chain(*def_constraints.values()), self.constraints):
-                #TODO find the rule
-                if str(a1.original.interpret(self).translate(self)) in unsatcorestrings:
-                    laws.append(a1)
+            facts = [ps[a][0] for a in unsatcore if ps[a][1] is None]
+            laws = [ps[a][1] for a in unsatcore if ps[a][1] is not None]
 
         return (facts, laws)
 
@@ -550,6 +602,7 @@ class Theory(object):
         # convert consequences to Universal
         for ass in out.assignments.values():
             if ass.value:
+                # TODO: what if consequences are due to choices (e.g., defaults?)
                 ass.status = (S.UNIVERSAL if ass.status in [S.CONSEQUENCE, S.ENV_CONSQ] else
                         ass.status)
 

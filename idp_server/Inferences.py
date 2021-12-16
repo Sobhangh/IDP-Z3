@@ -222,8 +222,9 @@ def explain(state, consequence=None):
         if symb != "*laws*":
             out.m[symb] = {k: v for k, v in dictionary.items()
                             if type(v) == dict and v['status'] in
-                               ['GIVEN', 'STRUCTURE', 'DEFAULT']
+                               ['GIVEN', 'STRUCTURE', 'DEFAULT', 'EXPANDED']
                             and v.get('value', '') != ''}
+
     out.m = {k: v for k, v in out.m.items() if v or k =="*laws*"}
     return out.m
 

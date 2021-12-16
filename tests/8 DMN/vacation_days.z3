@@ -82,7 +82,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'Age': {'Age()': {'environmental': False,
                    'is_assignment': True,
                    'normal': True,
@@ -206,6 +206,6 @@ structure {
                                                                                                                                                                                                               'else '
                                                                                                                                                                                                               '0)',
                                                                                                                                                                                                    'relevant': True,
-                                                                                                                                                                                                   'status': 'CONSEQUENCE',
+                                                                                                                                                                                                   'status': 'UNIVERSAL',
                                                                                                                                                                                                    'typ': 'Bool',
                                                                                                                                                                                                    'value': True}}}

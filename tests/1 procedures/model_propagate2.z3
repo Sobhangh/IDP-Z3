@@ -21,7 +21,7 @@ theory  {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'p': {'p()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
@@ -36,6 +36,6 @@ theory  {
                    'normal': False,
                    'reading': 'p < 3',
                    'relevant': True,
-                   'status': 'CONSEQUENCE',
+                   'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True}}}

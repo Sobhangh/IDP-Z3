@@ -33,7 +33,7 @@ from typing import Dict, Tuple, Union
 
 class State(Theory):
     """ Contains a state of problem solving """
-    cache: Dict[Tuple[str, str], 'State'] = {}
+    cache: Dict[str, 'State'] = {}
 
     @classmethod
     def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
@@ -41,38 +41,25 @@ class State(Theory):
 
         Args:
             idp (IDP): idp source code
-            previous_active (str): previous input from client
+            previous_active (str): assignments due to previous full propagation
             jsonstr (str): input from client
 
         Returns:
             State: a State
         """
-
-        if (idp.code, jsonstr) in State.cache:
-            state = State.cache[(idp.code, jsonstr)]
+        if jsonstr != "{}" and idp.code in State.cache:
+            state = State.cache[idp.code]
+            state.add_given(jsonstr, previous_active)
         else:
             if 100 < len(State.cache):
                 # remove oldest entry, to prevent memory overflow
-                State.cache = {k: v for k, v in list(State.cache.items())[1:]}
-
-            if jsonstr == "{}":  # reset, with default structure, not in cache yet
-                state = State(idp)
-            elif (idp.code, previous_active) in State.cache:  # update previous state
-                state = State.cache[(idp.code, previous_active)]
-                if jsonstr != previous_active:
-                    state = state.add_given(jsonstr)
-            else:  # restart from reset, e.g., after server restart  or when client is directed to new GAE server
-                if (idp.code, "{}") not in State.cache:  # with default structure !
-                    State.cache[(idp.code, "{}")] = State(idp)
-                state = State.cache[(idp.code, "{}")]
-                state = state.add_given(jsonstr)
-
-            State.cache[(idp.code, jsonstr)] = state
+                State.cache.pop(list(State.cache.keys())[-1])
+            state = State(idp)
+            State.cache[idp.code] = state
+            state.add_given(jsonstr, previous_active, True)
         return state
 
     def __init__(self, idp: IDP):
-        self.active = "{}"
-
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
             assert len(idp.vocabularies) == 2, \
@@ -111,38 +98,35 @@ class State(Theory):
         # sentences in decision theory may be environmental (issue 147)
         if self.environment:
             for a in self.assignments.values():
-                if (not a.sentence in self.environment.assignments
-                    and not a.sentence.has_decision()):
+                if (a.sentence not in self.environment.assignments
+                        and not a.sentence.has_decision()):
                     self.environment.assignments.assert__(a.sentence, a.value, a.status)
 
         self.relevant_symbols = {}
 
-    def add_given(self, jsonstr: str):
+    def add_given(self, jsonstr: str, previous: str, keep_defaults: bool = False):
         """
         Add the assignments that the user gave through the interface.
         These are in the form of a json string.
 
         :arg jsonstr: the user's assignment in json
-        :returns: the state with the jsonstr added
-        :rtype: State
+        :arg previous: the assignments from the last propagation
+        :arg keep_default: whether default assignments should not be reset
+        :post: the state has the jsonstr and previous added
         """
-        if jsonstr == self.active:  # for get_range
-            return self
-        out = self.copy()
-        out.active = jsonstr
-        if out.environment:
-            out.environment = out.environment.copy()
-            load_json(out.environment, jsonstr)
-        load_json(out, jsonstr)
+
+        if self.environment:
+            load_json(self.environment.assignments, jsonstr, keep_defaults)
+            load_json(self.environment.previous_assignments, previous, False)
+        load_json(self.assignments, jsonstr, keep_defaults)
+        load_json(self.previous_assignments, previous, False)
 
         # perform propagation
-        if out.environment is not None:  # if there is a decision vocabulary
-            out.environment.propagate(tag=S.ENV_CONSQ)
-            out.assignments.update(out.environment.assignments)
-            out._formula = None
-        out.propagate(tag=S.CONSEQUENCE)
-
-        return out
+        if self.environment is not None:  # if there is a decision vocabulary
+            self.environment.propagate(tag=S.ENV_CONSQ)
+            self.assignments.update(self.environment.assignments)
+            self._formula = None
+        self.propagate(tag=S.CONSEQUENCE)
 
     def __str__(self) -> str:
         self.co_constraints = OrderedSet()

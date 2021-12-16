@@ -42,7 +42,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'age': {'3 ≤ age()': {'environmental': False,
                        'is_assignment': False,
                        'normal': False,
@@ -138,7 +138,7 @@ structure {
                                                                                                                                                                                                                                                 'else '
                                                                                                                                                                                                                                                 '0)',
                                                                                                                                                                                                                                      'relevant': True,
-                                                                                                                                                                                                                                     'status': 'CONSEQUENCE',
+                                                                                                                                                                                                                                     'status': 'UNIVERSAL',
                                                                                                                                                                                                                                      'typ': 'Bool',
                                                                                                                                                                                                                                      'value': True}},
  'priority': {'priority()': {'environmental': False,

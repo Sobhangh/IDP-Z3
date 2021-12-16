@@ -37,13 +37,13 @@ theory {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  't': {'t()': {'environmental': False,
                'is_assignment': True,
                'normal': True,
                'reading': 't',
                'relevant': False,
-               'status': 'CONSEQUENCE',
+               'status': 'UNIVERSAL',
                'typ': 'num',
                'value': 'Piet',
                'values': ['Piet']}},
@@ -52,7 +52,7 @@ theory {
                  'normal': True,
                  'reading': 't0',
                  'relevant': True,
-                 'status': 'CONSEQUENCE',
+                 'status': 'UNIVERSAL',
                  'typ': 'num',
                  'value': 'Piet',
                  'values': ['Piet']},
@@ -61,7 +61,7 @@ theory {
                         'normal': False,
                         'reading': 't0 = Piet',
                         'relevant': True,
-                        'status': 'CONSEQUENCE',
+                        'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': True}},
  't1': {'t1()': {'environmental': False,
@@ -69,7 +69,7 @@ theory {
                  'normal': True,
                  'reading': 't1',
                  'relevant': False,
-                 'status': 'CONSEQUENCE',
+                 'status': 'UNIVERSAL',
                  'typ': 'num',
                  'value': 'Piet',
                  'values': ['Piet']}}}

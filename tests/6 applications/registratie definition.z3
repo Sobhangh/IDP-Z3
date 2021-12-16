@@ -428,7 +428,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': True},
+{' Global': {'env_dec': True},
  'Additional_Security_Required': {'Additional_Security_Required()': {'environmental': True,
                                                                      'is_assignment': False,
                                                                      'normal': True,
@@ -675,7 +675,7 @@ display {
                                                  'normal': True,
                                                  'reading': 'Professional_Buyer',
                                                  'relevant': True,
-                                                 'status': 'CONSEQUENCE',
+                                                 'status': 'UNIVERSAL',
                                                  'typ': 'Bool',
                                                  'value': False}},
  'Professional_Declaration_Filed': {'Professional_Declaration_Filed()': {'environmental': True,
@@ -683,7 +683,7 @@ display {
                                                                          'normal': True,
                                                                          'reading': 'Professional_Declaration_Filed',
                                                                          'relevant': True,
-                                                                         'status': 'CONSEQUENCE',
+                                                                         'status': 'UNIVERSAL',
                                                                          'typ': 'Bool',
                                                                          'value': False}},
  'Region': {'Region()': {'environmental': True,
@@ -784,7 +784,7 @@ display {
                                                                        'reading': 'Registration_Type = '
                                                                                   'Professional_Purchase',
                                                                        'relevant': True,
-                                                                       'status': 'CONSEQUENCE',
+                                                                       'status': 'UNIVERSAL',
                                                                        'typ': 'Bool',
                                                                        'value': False},
                        'Registration_Type() = Social_Dwelling': {'environmental': False,
@@ -937,7 +937,7 @@ display {
                        'normal': False,
                        'reading': 'Tax = 4',
                        'relevant': True,
-                       'status': 'CONSEQUENCE',
+                       'status': 'UNIVERSAL',
                        'typ': 'Bool',
                        'value': False},
          'Tax() = 6': {'environmental': False,

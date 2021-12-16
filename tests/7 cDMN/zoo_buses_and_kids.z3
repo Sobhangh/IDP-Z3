@@ -81,7 +81,7 @@ structure {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': False},
+{' Global': {'env_dec': False},
  'Amount': {'Amount(Big)': {'environmental': False,
                             'is_assignment': True,
                             'normal': True,
@@ -125,7 +125,7 @@ structure {
                                                                                                                                   '+ '
                                                                                                                                   '01',
                                                                                                                        'relevant': False,
-                                                                                                                       'status': 'CONSEQUENCE',
+                                                                                                                       'status': 'UNIVERSAL',
                                                                                                                        'typ': 'Bool',
                                                                                                                        'value': True}},
  'Kids': {'Kids(Big)': {'environmental': False,
@@ -751,7 +751,7 @@ structure {
                                    'normal': True,
                                    'reading': 'Kids_amount',
                                    'relevant': True,
-                                   'status': 'CONSEQUENCE',
+                                   'status': 'UNIVERSAL',
                                    'typ': 'Int',
                                    'value': '300',
                                    'values': ['300']},
@@ -760,7 +760,7 @@ structure {
                                          'normal': False,
                                          'reading': 'Kids_amount = 300',
                                          'relevant': True,
-                                         'status': 'CONSEQUENCE',
+                                         'status': 'UNIVERSAL',
                                          'typ': 'Bool',
                                          'value': True},
                  'Kids_amount() = sum(lambda Bus ∈ Bus_t : Kids(Bus))': {'environmental': False,
@@ -769,7 +769,7 @@ structure {
                                                                          'reading': 'Kids_amount = sum(lambda Bus ∈ '
                                                                                     'Bus_t : Kids(Bus))',
                                                                          'relevant': True,
-                                                                         'status': 'CONSEQUENCE',
+                                                                         'status': 'UNIVERSAL',
                                                                          'typ': 'Bool',
                                                                          'value': True}},
  'Price': {},
@@ -4792,6 +4792,6 @@ structure {
                                                                                                       'Amount(Small) ⨯ '
                                                                                                       'Price(Small)',
                                                                                            'relevant': True,
-                                                                                           'status': 'CONSEQUENCE',
+                                                                                           'status': 'UNIVERSAL',
                                                                                            'typ': 'Bool',
                                                                                            'value': True}}}

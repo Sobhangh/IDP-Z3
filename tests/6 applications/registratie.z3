@@ -431,7 +431,7 @@ display {
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
-{' Global': {'active': '{}', 'env_dec': True},
+{' Global': {'env_dec': True},
  'Additional_Security_Required': {'Additional_Security_Required()': {'environmental': True,
                                                                      'is_assignment': False,
                                                                      'normal': True,
