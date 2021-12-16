@@ -6,11 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+### API
+
+### Interactive Consultant
+
+
+## [0.9.0] - 2021-12-16
+
 Highlights of the breaking changes:
 * `sum{x in T: p(x): t(x)}` is now `sum(lambda x in T: t(x))`
 * `Symbol` is now `Concept`
 * `Problem(T,S)` is now `Theory(T,S)`
 
+Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
 * (breaking) MR !152: IEP 22 change syntax of sum aggregate to sum(lambda <quantee>: expr)
@@ -21,7 +29,7 @@ Highlights of the breaking changes:
 * (breaking) MR !179: `optimize` does not return a full model anymore; it only returns the optimized value
 * fix #5: do not allow arithmetic operations on constructors
 * fix #132, #136: Improve error message for mis-applied symbol
-* fix #137: support of functions from Symbol to Symbol
+* fix #137: support of functions from Concept to Concept
 * fix #146: "Context mismatch" when performing abstract model expansion
 * fix #152: Error in binary quantification in aggregate
 * fix #156: Concept: error when using several vocabularies
