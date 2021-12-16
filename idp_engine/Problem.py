@@ -512,6 +512,14 @@ class Theory(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
+        #  remove current assignments to same term
+        if self.assignments[term].value:
+            for k,a in self.assignments.items():
+                if (a.sentence.is_assignment and
+                        a.sentence.code.startswith(term) and
+                        a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]):
+                    self.assert_(k, None, S.UNKNOWN)
+
         # consider every value in range
         atoms = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
         todos = {a.code: a for a in atoms}
