@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 
 ### Interactive Consultant
+* fix #125: Bug in relevance for Registration
 * MR !171: refactor inferences to use a stateful solver.
 
 
