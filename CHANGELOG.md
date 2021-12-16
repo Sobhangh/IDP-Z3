@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### API
 
 ### Interactive Consultant
+* MR !171: refactor inferences to use a stateful solver.
 
 
 ## [0.9.0] - 2021-12-16
@@ -24,7 +25,6 @@ Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 * (breaking) MR !152: IEP 22 change syntax of sum aggregate to sum(lambda <quantee>: expr)
 * (breaking) MR !154: built-in type is "Concept" (not "Symbol")
 * (breaking) MR !170: add timeout parameter to model expansion/optimisation and improve performance
-* (breaking) MR !171: refactor inferences to use a stateful solver.
 * (breaking) MR !178: rename `Problem` class to `Theory`
 * (breaking) MR !179: `optimize` does not return a full model anymore; it only returns the optimized value
 * fix #5: do not allow arithmetic operations on constructors
