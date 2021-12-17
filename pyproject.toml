@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "idp-engine"
 version = "0.9.0"
-description = "IDP-Z3 is a reasoning engine for knowledge represented using the FO(.) language."
+description = "IDP-Z3 is a reasoning engine for knowledge represented using the FO(.) (aka FOdot) language."
 authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
 license = "GNU LGPL 3"
 readme = "README-pypi.md"

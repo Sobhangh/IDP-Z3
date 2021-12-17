@@ -9,7 +9,7 @@ The FO(:raw-html:`&#183`) Language
 Overview
 ------------
 
-The FO(:raw-html:`&#183`) language is used to create knowledge bases.
+The FO(:raw-html:`&#183`) (aka FOdot) language is used to create knowledge bases.
 An IDP-Z3 program contains an FO(:raw-html:`&#183`) knowledge base and instructions to perform tasks on it.
 It is made of the following blocks of code:
 
