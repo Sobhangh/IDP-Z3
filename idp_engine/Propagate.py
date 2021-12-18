@@ -29,6 +29,7 @@ This module monkey-patches the Expression and Theory classes and sub-classes.
 """
 
 import time
+from copy import copy
 from typing import List, Tuple, Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true, is_not, is_eq)
 
@@ -407,7 +408,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield str(self.formula())
 
     if dir_todo:
-        self.previous_assignments = self.assignments.copy(shallow=True)
+        self.previous_assignments = copy(self.assignments)
 
     solver.pop()
 Theory._propagate = _propagate

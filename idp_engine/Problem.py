@@ -371,7 +371,7 @@ class Theory(object):
 
         the solver must be in sat state
         """
-        ass = self.assignments.copy(shallow=True)  # TODO: copy needed?
+        ass = copy(self.assignments)
         model = solver.model()
         for q in todo:
             assert (self.extended or not q.is_reified(),
