@@ -704,11 +704,13 @@ class Theory(object):
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         # ignore questions about defined symbols (except goal)
-        symbols = {decl for defin in self.definitions for decl in defin.canonicals.keys()}
+        symbols = {decl for defin in self.definitions
+                   for decl in defin.canonicals.keys()}
         qs = OrderedSet()
         for q in questions.values():
             if (goal_string == q.code
-            or any(s not in symbols for s in q.collect_symbols(co_constraints=False).values())):
+            or any(s not in symbols
+                   for s in q.collect_symbols(co_constraints=False).values())):
                 qs.append(q)
         questions = qs
         assert not goal_string or goal_string in [a.code for a in questions], \

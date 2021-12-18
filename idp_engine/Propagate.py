@@ -39,7 +39,6 @@ from .Expression import (Expression, AQuantification,
 from .Parse import str_to_IDP
 from .Problem import Theory
 from .utils import OrderedSet
-from .Idp_to_Z3 import get_symbols_z
 
 start = time.process_time()
 
