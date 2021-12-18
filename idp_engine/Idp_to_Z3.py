@@ -42,6 +42,7 @@ from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
 # general  #####################################################################
 
 def get_symbols_z(zexpr):
+    # TODO use accumulator for performance
     try:
         return {zexpr.decl()}.union(
             {symb for child in zexpr.children() for symb in get_symbols_z(child)})

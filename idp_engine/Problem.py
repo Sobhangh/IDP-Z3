@@ -76,6 +76,8 @@ class Theory(object):
 
         _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
 
+        _symbols (Set[str]): set of symbol name occurring in self._constraintz
+
         _formula (ExprRef, optional): the Z3 formula that represents
             the problem (assertions, co_constraints, definitions and assignments).
 
@@ -148,12 +150,12 @@ class Theory(object):
             self._slvr = Solver(ctx=self.ctx)
             assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
             self._slvr.add(And(self.constraintz()))
-            symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
-            assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
-                                if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
-                                and a.symbol_decl.name in symbols]
-            for af in assignment_forms:
-                self._slvr.add(af)
+            assignment_forms = [a.formula().translate(self)
+                                for a in self.assignments.values()
+                                if a.value is not None
+                                and a.status in [S.STRUCTURE, S.UNIVERSAL]
+                                and a.symbol_decl.name in self._symbols]
+            self._slvr.add(assignment_forms)
         return self._slvr
 
     @property
@@ -162,12 +164,12 @@ class Theory(object):
             self._optmz = Optimize(ctx=self.ctx)
             assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
             self._optmz.add(And(self.constraintz()))
-            symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
-            assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
-                                if a.value is not None and a.status in [S.STRUCTURE, S.UNIVERSAL]
-                                and a.symbol_decl.name in symbols]
-            for af in assignment_forms:
-                self._optmz.add(af)
+            assignment_forms = [a.formula().translate(self)
+                                for a in self.assignments.values()
+                                if a.value is not None
+                                and a.status in [S.STRUCTURE, S.UNIVERSAL]
+                                and a.symbol_decl.name in self._symbols]
+            self._optmz.add(assignment_forms)
         return self._optmz
 
     @property
@@ -331,6 +333,8 @@ class Theory(object):
                 collect_constraints(e.translate(self), self._constraintz)
             self._constraintz += [s.translate(self)
                             for s in chain(*self.def_constraints.values())]
+            self._symbols = {s.name() for c in self.constraintz()
+                             for s in get_symbols_z(c)}
         return self._constraintz
 
     def formula(self):
@@ -340,9 +344,10 @@ class Theory(object):
                 # use existing z3 constraints, but only add interpretations
                 # for those symbols, not propagated in a previous step,
                 # occurring in the (potentially simplified) z3 constraints
-                symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
-                all = ([a.formula().translate(self) for a in self.assignments.values()
-                        if a.symbol_decl.name in symbols and a.value is not None
+                all = ([a.formula().translate(self)
+                        for a in self.assignments.values()
+                        if a.symbol_decl.name in self._symbols
+                        and a.value is not None
                         and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
                         + self.constraintz())
             else:
