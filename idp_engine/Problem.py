@@ -333,8 +333,8 @@ class Theory(object):
                 collect_constraints(e.translate(self), self._constraintz)
             self._constraintz += [s.translate(self)
                             for s in chain(*self.def_constraints.values())]
-            self._symbols = {s.name() for c in self.constraintz()
-                             for s in get_symbols_z(c)}
+            self._symbols = set().union(*[get_symbols_z(c)
+                                          for c in self._constraintz])
         return self._constraintz
 
     def formula(self):
