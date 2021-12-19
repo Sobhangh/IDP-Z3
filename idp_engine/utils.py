@@ -19,7 +19,8 @@
     Various utilities (in particular, OrderedSet)
 """
 
-from collections import ChainMap, Iterable
+from collections import ChainMap
+from collections.abc import Iterable
 from json import JSONEncoder
 import time
 from enum import Enum, auto
