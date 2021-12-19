@@ -24,6 +24,7 @@ from idp_engine.Assignments import Status as S
 from idp_engine.Run import Theory
 from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
 from .IO import load_json
+import json
 from .Inferences import get_relevant_questions
 
 # Types
@@ -36,30 +37,32 @@ class State(Theory):
     cache: Dict[str, 'State'] = {}
 
     @classmethod
-    def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
+    def make(cls, idp: IDP, previous_active: str, active: str, ignore: str) -> "State":
         """Manage the cache of State
 
         Args:
             idp (IDP): idp source code
             previous_active (str): assignments due to previous full propagation
-            jsonstr (str): input from client
+            active (str): assignment choices from client
+            ignore (str): user-disabled laws to ignore
 
         Returns:
             State: a State
         """
-        if jsonstr != "{}" and idp.code in State.cache:
-            state = State.cache[idp.code]
-            state.add_given(jsonstr, previous_active)
+        cachedstring = idp.code + (ignore if ignore else "")
+        if active != "{}" and cachedstring in State.cache:
+            state = State.cache[cachedstring]
+            state.add_given(active, previous_active)
         else:
             if 100 < len(State.cache):
                 # remove oldest entry, to prevent memory overflow
                 State.cache.pop(list(State.cache.keys())[-1])
-            state = State(idp)
-            State.cache[idp.code] = state
-            state.add_given(jsonstr, previous_active, True)
+            state = State(idp, json.loads(ignore, encoding='utf-8') if ignore else [])
+            State.cache[cachedstring] = state
+            state.add_given(active, previous_active, True)
         return state
 
-    def __init__(self, idp: IDP):
+    def __init__(self, idp: IDP, ignored_laws=[]):
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
             assert len(idp.vocabularies) == 2, \
@@ -78,7 +81,7 @@ class State(Theory):
             idp.display.run(idp)
         self.idp = idp  # IDP vocabulary and theory
 
-        super().__init__(extended=True)
+        super().__init__(extended=True, ignored_laws=ignored_laws)
 
         if len(idp.theories) == 2:
             blocks = ([idp.theories['environment']]

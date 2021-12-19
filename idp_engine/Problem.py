@@ -112,8 +112,9 @@ class Theory(object):
             inference.
 
     """
-    def __init__(self, *blocks, extended=False):
+    def __init__(self, *blocks, extended=False, ignored_laws = []):
         self.extended = extended
+        self.ignored_laws = ignored_laws
 
         self.declarations = {}
         self.definitions = []
@@ -146,7 +147,6 @@ class Theory(object):
     def solver(self):
         if self._slvr is None:
             self._slvr = Solver(ctx=self.ctx)
-            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
             self._slvr.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
@@ -160,7 +160,6 @@ class Theory(object):
     def optimize_solver(self):
         if self._optmz is None:
             self._optmz = Optimize(ctx=self.ctx)
-            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
             self._optmz.add(And(self.constraintz()))
             symbols = {s.name() for c in self.constraintz() for s in get_symbols_z(c)}
             assignment_forms = [a.formula().translate(self) for a in self.assignments.values()
@@ -326,11 +325,13 @@ class Theory(object):
                 else:
                     constraints.append(e)
 
-            self._constraintz = []
+            self._constraintz = [TRUE.translate(self)]  # avoids passing empty conjunction to Z3
             for e in chain(self.constraints, self.co_constraints):
-                collect_constraints(e.translate(self), self._constraintz)
+                if e.code not in self.ignored_laws:
+                    collect_constraints(e.translate(self), self._constraintz)
             self._constraintz += [s.translate(self)
-                            for s in chain(*self.def_constraints.values())]
+                            for s in chain(*self.def_constraints.values())
+                                  if s.code not in self.ignored_laws]
         return self._constraintz
 
     def formula(self):

@@ -172,10 +172,9 @@ def pipeline():
                     with open(file_name, "r") as fp:
 
                         idp = IDP.from_str(fp.read())
-                        given_json = ""
 
                         if idp.procedures == {}:
-                            state = State.make(idp, "{}", given_json)
+                            state = State.make(idp, "{}", "{}", "[]")
                             get_relevant_questions(state)
                             generator = state.expand(max=1,complete=False)
                             list(generator)[0]  # ignore result

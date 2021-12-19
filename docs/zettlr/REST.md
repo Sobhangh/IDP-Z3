@@ -79,6 +79,7 @@ GET request :
                 }
             }
         }
+    - ignore: [string]           // user-disabled laws to ignore
     - code : string              // source code in FO(ID)
     - method : string            // name of the inference to be made:
                                  //   "propagate"   find propagated values
