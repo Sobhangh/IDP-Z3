@@ -29,28 +29,6 @@ from idp_engine.utils import OrderedSet, RELEVANT
 from .IO import Output
 
 
-# def get_relevant_questions(self) -> Tuple[Dict[str, SymbolDeclaration], Dict[str, Expression]]:
-#     """ causal interpretation of relevance """
-#     #TODO performance.  This method is called many times !  use expr.contains(expr, symbols)
-#     constraints = ( self.constraints )
-
-#     # determine relevant symbols (including defined ones)
-#     relevant_symbols = mergeDicts( e.collect_symbols() for e in constraints )
-
-#     # remove irrelevant domain conditions
-#     self.constraints = list(filter(lambda e: e.is_type_constraint_for is None or e.is_type_constraint_for in relevant_symbols
-#                                  , self.constraints))
-
-#     # determine relevant subtences
-#     relevant_subtences = mergeDicts( e.subtences() for e in constraints )
-#     relevant_subtences.update(mergeDicts(s.instances for s in relevant_symbols.values()))
-
-#     for k, l in self.assignments.items():
-#         symbols = list(l.sentence.collect_symbols().keys())
-#         has_relevant_symbol = any(s in relevant_symbols for s in symbols)
-#         if k in relevant_subtences and symbols and has_relevant_symbol:
-#             l.relevant = True
-
 def split_constraints(constraints: OrderedSet) -> OrderedSet:
     """replace [.., a ∧ b, ..] by [.., a, b, ..]
 
@@ -92,8 +70,6 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
 def get_relevant_questions(self: "State"):
     """
     sets 'relevant in self.assignments
-    sets rank of symbols in self.relevant_symbols
-    removes irrelevant constraints in self.constraints
     """
     out = self.simplify()  # creates a copy
 
@@ -151,31 +127,6 @@ def get_relevant_questions(self: "State"):
                 for q in def_constraint.questions:
                     reachable.append(q)
 
-    # find relevant symbols by depth-first propagation
-    # relevants, rank = {}, 1
-    # def dfs(question):
-    #     nonlocal relevants, rank
-    #     for constraint in constraints:
-    #         # consider constraint not yet considered
-    #         if ( not constraint.relevant
-    #         # containing the question
-    #         and question in constraint.questions):
-    #             constraint.relevant = True
-    #             for q in constraint.questions:
-    #                 out.assignments[q.code].relevant = True
-    #                 for s in q.collect_symbols(co_constraints=False):
-    #                     if s not in relevants:
-    #                         relevants[s] = rank
-    #                         rank = rank+1
-    #                 if q.code != question.code \
-    #                 and q.type == BOOL\
-    #                 and not q in given:
-    #                     print("==>", q)
-    #                     reachable.add(q)
-    #                     dfs(q)
-    # for question in list(reachable.values()):
-    #     dfs(question)
-
     # find relevant symbols by breadth-first propagation
     # input: reachable, given, constraints
     # output: out.assignments[].relevant, constraints[].relevant, relevants[].rank
@@ -201,8 +152,6 @@ def get_relevant_questions(self: "State"):
                 constraint.relevant = True
                 to_add.extend([q for q in constraint.questions
                                if q not in reachable])
-
-    self.relevant_symbols = relevants if out.idp.display.moveSymbols else {}
 
     # copy relevant information back to self
     for k,v in out.assignments.items():
