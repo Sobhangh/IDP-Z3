@@ -292,8 +292,7 @@ class Theory(object):
                 self.assignments.assert__(s, None, S.UNKNOWN)
 
         for ass in self.assignments.values():
-            ass.sentence = ass.sentence
-            ass.sentence.original = ass.sentence.copy()
+            ass.sentence.original = ass.sentence
 
         self._constraintz = None
         return self
