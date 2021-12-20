@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unpublished yet]
 
 ### API
+* fix #163: improve performance by avoiding unnecessary copying
 
 ### Interactive Consultant
 * fix #125: Bug in relevance for Registration
