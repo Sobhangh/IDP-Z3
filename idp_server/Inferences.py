@@ -67,7 +67,7 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
     return new_constraints
 
 
-def get_relevant_questions(self: "State"):
+def determine_relevance(self: "State"):
     """determines the atoms that occur in one of the possible justifications of self being true
 
     Call must be made after a propagation, on a Theory created with 'extended=True'.
