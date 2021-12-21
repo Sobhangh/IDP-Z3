@@ -192,8 +192,6 @@ structure default:environment {
   region:=Flemish_Region
 }
 display {
-    goal(`tax_amount).
-    relevant(`tax_rate, `registration_type, `tax_amount).
     view() = normal.
     expand(`registration_type, `tax_rate).
     heading(Building, `region, `type_of_real_estate, `monument).

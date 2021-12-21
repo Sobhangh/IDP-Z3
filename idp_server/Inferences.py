@@ -68,15 +68,30 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
 
 
 def get_relevant_questions(self: "State"):
+    """determines the atoms that occur in one of the possible justifications of self being true
+
+    Call must be made after a propagation, on a Theory created with 'extended=True'.
+    The result is found in the `relevant` attribute of the assignments in self.assignments.
+
+    Defined symbols that do not occur in the justification of axioms do not need to be justified,
+    unless they are specified as relevant by use of the `relevant` predicate.
+    Symbols declared in a `decision` vocabulary must be justified, even if given by the user.
     """
-    sets 'relevant in self.assignments
-    """
+    assert self.extended == True,\
+        "The theory must be created with 'extended=True' for relevance computations."
+
+    for a in self.assignments.values():
+        a.relevant = False
+
     out = self.simplify()  # creates a copy
 
-    assert out.extended == True,\
-        "The problem must be created with 'extended=True' for relevance computations."
-    for a in out.assignments.values():
-        a.relevant = False
+    # analyse given information
+    given = OrderedSet()
+    for q in out.assignments.values():
+        q.relevant = False
+        if q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
+            if not q.sentence.has_decision():
+                given.append(q.sentence)
 
     # collect (co-)constraints
     constraints = OrderedSet()
@@ -85,10 +100,16 @@ def get_relevant_questions(self: "State"):
         constraint.co_constraints(constraints)
     constraints = split_constraints(constraints)
 
-
+    # constraints have set of questions in out.assignments
+    # set constraint.relevant, constraint.questions
     # initialize reachable with relevant, if any
     reachable = OrderedSet()
     for constraint in constraints:
+        constraint.relevant = False
+        constraint.questions = OrderedSet()
+        constraint.collect(constraint.questions,
+                           all_=True, co_constraints=False)
+
         if type(constraint) == AppliedSymbol and \
            constraint.decl.name == RELEVANT:
             for e in constraint.sub_exprs:
@@ -96,27 +117,13 @@ def get_relevant_questions(self: "State"):
                     f"Invalid expression in relevant: {e.code}"
                 reachable.append(e)
 
-    # analyse given information
-    given = OrderedSet()
-    for q in out.assignments.values():
-        if q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
-            if not q.sentence.has_decision():
-                given.append(q.sentence)
-
-    # constraints have set of questions in out.assignments
-    # set constraint.relevant, constraint.questions
-    for constraint in constraints:
-        constraint.relevant = False
-        constraint.questions = OrderedSet()
-        constraint.collect(constraint.questions,
-                           all_=True, co_constraints=False)
-
-    # nothing relevant --> make every question in a constraint relevant
+    # nothing relevant --> make every question in a simplified constraint relevant
     if len(reachable) == 0:
         for constraint in constraints:
             if constraint.is_type_constraint_for is None:
                 for q in constraint.questions:
                     reachable.append(q)
+
     # still nothing relevant --> make every question in def_constraints relevant
     if len(reachable) == 0:
         for def_constraints in out.def_constraints.values():
@@ -134,11 +141,11 @@ def get_relevant_questions(self: "State"):
     to_add, rank = reachable, 1
     while to_add:
         for q in to_add:
-            if q.code in out.assignments:
-                out.assignments[q.code].relevant = True
-            for s in q.collect_symbols(co_constraints=False):
-                if s not in relevants:
-                    relevants[s] = rank
+            if q.code in self.assignments:
+                self.assignments[q.code].relevant = True
+            # for s in q.collect_symbols(co_constraints=False):
+            #     if s not in relevants:
+            #         relevants[s] = rank
             if q not in given:
                 reachable.append(q)
 
@@ -153,9 +160,6 @@ def get_relevant_questions(self: "State"):
                 to_add.extend([q for q in constraint.questions
                                if q not in reachable])
 
-    # copy relevant information back to self
-    for k,v in out.assignments.items():
-        self.assignments[k].relevant = v.relevant
     return self
 
 
