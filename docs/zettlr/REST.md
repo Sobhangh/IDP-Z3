@@ -46,7 +46,6 @@ POST result:
     - optionalRelevance: Bool // use propagation toggle button in the IC.
     - manualRelevance: Bool   // deactivate automatic relevancy in the IC.
     - valueinfo : string // format identical to <symbol> in /eval response // information about the values for the symbols for the gui
-    - laws : [(string,string)] // laws in the theory. First element is id, second is natural description.
 ```
 
 ### URL: /eval
@@ -123,7 +122,9 @@ GET response :
             }
         }
     - 'laws' : [
-        law : string            // laws used to obtain the value to be explained
+        law : (string, string)  // laws used to obtain the value to be explained
+                                // first string is identifier
+                                // second string is reading
     ]
 ```
 

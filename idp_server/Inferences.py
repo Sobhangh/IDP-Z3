@@ -215,17 +215,17 @@ def explain(state, consequence=None):
     out = Output(state)
     for ass in facts:
         out.addAtom(ass.sentence, ass.value, ass.status)
-    out.m["laws"] = [l.code for l in laws]
+    out.m['laws'] = [(law.code, law.annotations['reading']) for law in laws]
 
     # remove irrelevant atoms
     for symb, dictionary in out.m.items():
-        if symb != "laws":
+        if symb != 'laws':
             out.m[symb] = {k: v for k, v in dictionary.items()
                             if type(v) == dict and v['status'] in
                                ['GIVEN', 'STRUCTURE', 'DEFAULT', 'EXPANDED']
                             and v.get('value', '') != ''}
 
-    out.m = {k: v for k, v in out.m.items() if v or k =="laws"}
+    out.m = {k: v for k, v in out.m.items() if v or k == 'laws'}
     return out.m
 
 
