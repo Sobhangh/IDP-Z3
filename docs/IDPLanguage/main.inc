@@ -121,11 +121,21 @@ simplify(self)
     Returns a simpler copy of the theory, with a simplified formula obtained
     by substituting terms and atoms by their known values.
 
+determine_relevance(self)
+    Determines the atoms that occur in one of the possible justifications of ``self`` being true.
+
+    Call must be made after a propagation, on a Theory created with ``extended=True``.
+    The result is found in the ``relevant`` attribute of the assignments in ``self.assignments``.
+
+    Defined symbols that do not occur in the justification of axioms do not need to be justified,
+    unless they are specified as relevant by use of the ``relevant`` predicate.
+    Symbols declared in a ``decision`` vocabulary must be justified, even if given by the user.
+
 decision_table(self, goal_string="", timeout=20, max_rows=50, first_hit=True)
     Experimental.  Returns the rows for a decision table that defines ``goal_string``.
     ``goal_string`` must be a predicate application defined in the theory.
     The theory must be created with ``extended=True``.
 
 duration(msg: str)
-    Returns the processing time since the last call to `duration()`,
+    Returns the processing time since the last call to ``duration()``,
     or since the begining of execution, followed by the msg (possibly an f-string)
