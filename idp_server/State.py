@@ -37,7 +37,7 @@ class State(Theory):
     cache: Dict[str, 'State'] = {}
 
     @classmethod
-    def make(cls, idp: IDP, previous_active: str, active: str, ignore: str) -> "State":
+    def make(cls, idp: IDP, previous_active: str, active: str, ignore: str = None) -> "State":
         """Manage the cache of State
 
         Args:
@@ -49,7 +49,9 @@ class State(Theory):
         Returns:
             State: a State
         """
-        cachedstring = idp.code + (ignore if ignore else "")
+        if not ignore:
+            ignore = "{}"
+        cachedstring = idp.code + ignore
         if active != "{}" and cachedstring in State.cache:
             state = State.cache[cachedstring]
             state.add_given(active, previous_active)
