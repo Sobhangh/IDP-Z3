@@ -50,7 +50,7 @@ class State(Theory):
             State: a State
         """
         if not ignore:
-            ignore = "{}"
+            ignore = "[]"
         cachedstring = idp.code + ignore
         if active != "{}" and cachedstring in State.cache:
             state = State.cache[cachedstring]
@@ -59,7 +59,7 @@ class State(Theory):
             if 100 < len(State.cache):
                 # remove oldest entry, to prevent memory overflow
                 State.cache.pop(list(State.cache.keys())[-1])
-            state = State(idp, json.loads(ignore, encoding='utf-8') if ignore else [])
+            state = State(idp, json.loads(ignore, encoding='utf-8'))
             State.cache[cachedstring] = state
             state.add_given(active, previous_active, True)
         return state
