@@ -125,7 +125,8 @@ determine_relevance(self)
     Determines the atoms that occur in one of the possible justifications of ``self`` being true.
 
     Call must be made after a propagation, on a Theory created with ``extended=True``.
-    The result is found in the ``relevant`` attribute of the assignments in ``self.assignments``.
+    If the ``relevant`` predicate occurs in the theory, we consider the possible justifications of the relevant symbols only.
+    The result of the call is found in the ``relevant`` attribute of the assignments in ``self.assignments``.
 
     Defined symbols that do not occur in the justification of axioms do not need to be justified,
     unless they are specified as relevant by use of the ``relevant`` predicate.

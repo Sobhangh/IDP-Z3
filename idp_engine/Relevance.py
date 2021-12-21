@@ -68,6 +68,7 @@ def determine_relevance(self: "State"):
     """determines the atoms that occur in one of the possible justifications of self being true
 
     Call must be made after a propagation, on a Theory created with 'extended=True'.
+    If the `relevant` predicate occurs in the theory, we consider the possible justifications of the relevant symbols only.
     The result is found in the `relevant` attribute of the assignments in self.assignments.
 
     Defined symbols that do not occur in the justification of axioms do not need to be justified,
