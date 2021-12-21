@@ -32,6 +32,8 @@ import time
 import traceback
 from z3 import set_option
 
+import json
+
 from flask import Flask, g, send_from_directory  # g is required for pyinstrument
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
@@ -196,6 +198,8 @@ class meta(Resource):
                     get_relevant_questions(state)
                 out = metaJSON(state)
                 out["valueinfo"] = Output(state).fill(state)
+                out["laws"] = json.dumps({form.code: form.annotations['reading']
+                                          for (_, form) in state.expl_reifs.values()})
 
                 log("end /meta ")
                 if with_profiling:

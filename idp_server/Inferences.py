@@ -215,7 +215,7 @@ def explain(state, consequence=None):
     out = Output(state)
     for ass in facts:
         out.addAtom(ass.sentence, ass.value, ass.status)
-    out.m["*laws*"] = [l.annotations['reading'] for l in laws]
+    out.m["*laws*"] = [l.code for l in laws]
 
     # remove irrelevant atoms
     for symb, dictionary in out.m.items():
