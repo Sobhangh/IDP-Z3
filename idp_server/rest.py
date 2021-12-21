@@ -281,7 +281,7 @@ class eval(Resource):
                         generator = state.expand(max=1, timeout=0, complete=False)
                         # TODO: this copying is not needed?
                         out = copy(state)
-                        out.assignments = out.assignments.copy(shallow=True)
+                        out.assignments = copy(out.assignments)
                         out.assignments = list(generator)[0]
                         out = Output(out).fill(out)
                     elif method == "explain":
@@ -289,7 +289,7 @@ class eval(Resource):
                     elif method == "minimize":
                         # TODO: this copying is not needed?
                         out = copy(state)
-                        out.assignments = out.assignments.copy(shallow=True)
+                        out.assignments = copy(out.assignments)
                         out = out.optimize(args['symbol'], args['minimize'])
                         out = Output(out).fill(out)
                     elif method == "abstract":
