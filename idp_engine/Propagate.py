@@ -307,7 +307,9 @@ def _first_propagate(self):
     res1 = solver.check()
     if res1 == unsat:
         solver.pop()
-        return  # unsat, caller will fix this
+        yield "Not satisfiable."
+        yield str(self.formula())
+        return  # unsat theory
 
     assert res1 == sat, "Incorrect solver behavior"
     model = solver.model()
