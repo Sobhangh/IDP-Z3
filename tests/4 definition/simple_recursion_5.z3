@@ -1,12 +1,14 @@
 
 Model 1
 ==========
-p:={->false}
-q:={->false}
+p := {}
+q := {}
+
 
 Model 2
 ==========
-p:={->true}
-q:={->true}
+p := true
+q := true
+
 
 No more models.

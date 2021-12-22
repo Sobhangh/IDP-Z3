@@ -1,7 +1,8 @@
 
 Model 1
 ==========
-Location:={->static}
-BackupDesign:={->null}
+Location := static
+BackupDesign := null
+
 
 No more models.
