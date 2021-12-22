@@ -122,7 +122,9 @@ GET response :
             }
         }
     - '*laws*' : [
-        law : string            // laws used to obtain the value to be explained
+        law : (string, string)  // laws used to obtain the value to be explained
+                                // first string is identifier
+                                // second string is reading
     ]
 ```
 
