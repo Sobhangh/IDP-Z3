@@ -220,10 +220,14 @@ class Assignments(dict):
     def __str__(self):
         out = {}
         for a in self.values():
-            if a.value is not None and not a.sentence.is_reified():
+            if (a.value is not None and not a.sentence.is_reified() and
+                    a.value != FALSE):
                 c = ",".join(str(e) for e in a.sentence.sub_exprs)
                 c = f"({c})" if 1 < len(a.sentence.sub_exprs) else c
-                c = f"{c}->{str(a.value)}"
+                if a.value == TRUE:  # In case of predicate.
+                    c = f"{c}"
+                else: # In case of function.
+                    c = f"{c}->{str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
-        return NEWL.join(f"{k}:={{{ '; '.join(s for s in a) }}}"
+        return NEWL.join(f"{k} := {{{ ', '.join(s for s in a) }}}"
                          for k, a in out.items())
