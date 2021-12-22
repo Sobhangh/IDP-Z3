@@ -78,14 +78,15 @@ And(fleetOf(o1) == f1,
 
 Model 1
 ==========
-Vehicle:={o1->false; o2->true; o3->true}
-fleetOf:={o1->f1; o2->f1; o3->f2}
-weight:={o1->3; o2->4; o3->5}
-total:={->9}
-min:={->3}
-max:={->5}
-fleetTotal:={f1->4; f2->5}
-fleetCard:={f1->1; f2->1}
-fleetMin:={f1->3; f2->5}
+Vehicle := {o2, o3}
+fleetOf := {o1->f1, o2->f1, o3->f2}
+weight := {o1->3, o2->4, o3->5}
+total := 9
+min := 3
+max := 5
+fleetTotal := {f1->4, f2->5}
+fleetCard := {f1->1, f2->1}
+fleetMin := {f1->3, f2->5}
+
 
 No more models.
