@@ -4,27 +4,32 @@ And(Or(Not(p), Or(Color == red, Color == blue)),
 
 Model 1
 ==========
-Color:={->blue}
-p:={->false}
+Color := blue
+p := true
+
 
 Model 2
 ==========
-Color:={->blue}
-p:={->true}
+Color := blue
+p := {}
+
 
 Model 3
 ==========
-Color:={->green}
-p:={->false}
+Color := green
+p := {}
+
 
 Model 4
 ==========
-Color:={->red}
-p:={->false}
+Color := red
+p := true
+
 
 Model 5
 ==========
-Color:={->red}
-p:={->true}
+Color := red
+p := {}
+
 
 No more models.
