@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Interactive Consultant
 * fix #125: Bug in relevance for Registration
+* Web-MR !50: open local file with `/?file=spec.idp`
 * MR !171, !180: refactor inferences to use a stateful solver, for performance.
 * MR !186: switching between reading and formula view now works for explanations too.
 
