@@ -1,6 +1,7 @@
 
 Model 1
 ==========
-shown:={0->false}
+shown := {}
+
 
 No more models.
