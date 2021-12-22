@@ -121,7 +121,7 @@ GET response :
             - is_assignment : Bool // true if the atom assigns a value to a symbol
             }
         }
-    - 'laws' : [
+    - '*laws*' : [
         law : (string, string)  // laws used to obtain the value to be explained
                                 // first string is identifier
                                 // second string is reading
