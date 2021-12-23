@@ -306,8 +306,10 @@ def _first_propagate(self):
 
     res1 = solver.check()
     if res1 == unsat:
+        yield "Not satisfiable."
+        yield str(solver.sexpr())
         solver.pop()
-        return  # unsat, caller will fix this
+        return  # unsat theory
 
     assert res1 == sat, "Incorrect solver behavior"
     model = solver.model()
@@ -402,10 +404,10 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield "No more consequences."
     elif res1 == unsat:
         yield "Not satisfiable."
-        yield str(self.formula())
+        yield str(solver.sexpr())
     else:
         yield "Unknown satisfiability."
-        yield str(self.formula())
+        yield str(solver.sexpr())
 
     if dir_todo:
         self.previous_assignments = copy(self.assignments)
