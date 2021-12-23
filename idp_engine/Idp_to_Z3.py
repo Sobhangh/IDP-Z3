@@ -41,13 +41,20 @@ from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
 
 # general  #####################################################################
 
-def get_symbols_z(zexpr):
+def get_symbols_z(zexpr, symbols):
+    """adds the symbols in zexpr to symbols
+
+    Args:
+        zexpr (ExprRef): a Z3 expression
+        symbols (set(str)): set of symbol name
+    """
     try:
-        return {zexpr.decl()}.union(
-            {symb for child in zexpr.children() for symb in get_symbols_z(child)})
+        symbols.add(zexpr.decl().name())
     except Z3Exception:
-        # z3 term is no application (e.g., a QuantifierRef) so no symbol exists
-        return {symb for child in zexpr.children() for symb in get_symbols_z(child)}
+        pass
+    for child in zexpr.children():
+        get_symbols_z(child, symbols)
+
 
 # class TypeDeclaration  ###########################################################
 

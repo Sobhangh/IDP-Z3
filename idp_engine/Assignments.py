@@ -200,7 +200,7 @@ class Assignments(dict):
                 status: Optional[Status]):
 
         if sentence.code in self:
-            out = self[sentence.code]
+            out = self[sentence.code].copy(shallow=True)
             if out.status in [Status.GIVEN, Status.EXPANDED, Status.DEFAULT]\
                     and status in [Status.CONSEQUENCE, Status.ENV_CONSQ, Status.UNIVERSAL]:
                 assert out.value.same_as(value), \
