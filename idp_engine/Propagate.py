@@ -292,6 +292,39 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
 Theory._batch_propagate = _batch_propagate
 
 
+def _propagate_inner(self, tag, solver, todo):
+    for q in todo.values():
+        solver.add(q.reified(self) == q.translate(self))
+        # reification in case todo contains complex formula
+
+    res1 = solver.check()
+
+    if res1 == sat:
+        model = solver.model()
+        valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
+        for val1, q in valqs:
+            if str(val1) == str(q.reified(self)):
+                continue  # irrelevant
+            solver.push()
+            solver.add(Not(q.reified(self) == val1))
+            res2 = solver.check()
+            solver.pop()
+
+            assert res2 != unknown, "Incorrect solver behavior"
+            if res2 == unsat:
+                val = str_to_IDP(q, str(val1))
+                yield self.assignments.assert__(q, val, tag)
+
+        yield "No more consequences."
+    elif res1 == unsat:
+        yield "Not satisfiable."
+        yield str(solver.sexpr())
+    else:
+        assert False, "Incorrect solver behavior"
+
+Theory._propagate_inner = _propagate_inner
+
+
 def _first_propagate(self):
     # NOTE: some universal assignments may be set due to the environment theory
     todo = OrderedSet(a.sentence for a in self.get_core_atoms(
@@ -337,7 +370,10 @@ def _first_propagate(self):
     self.first_prop = False
 Theory._first_propagate = _first_propagate
 
-def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None, ignored_laws=None):
+
+def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
+    assert self.ignored_laws, "Internal error"
+
     solver = self.explain_solver
     solver.push()
 
@@ -355,44 +391,13 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None, ignored_laws=No
             solver.add(p)
 
     for z3_form, expr in self.expl_reifs.values():
-        if expr.code not in ignored_laws:
+        if expr.code not in self.ignored_laws:
             solver.add(z3_form)
 
-
-    for q in todo.values():
-        solver.add(q.reified(self) == q.translate(self))
-        # reification in case todo contains complex formula
-
-    self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
-
-    res1 = solver.check()
-
-    if res1 == sat:
-        model = solver.model()
-        valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
-        for val1, q in valqs:
-            if str(val1) == str(q.reified(self)):
-                continue  # irrelevant
-            solver.push()
-            solver.add(Not(q.reified(self) == val1))
-            res2 = solver.check()
-            solver.pop()
-
-            assert res2 != unknown, "Incorrect solver behavior"
-            if res2 == unsat:
-                val = str_to_IDP(q, str(val1))
-                yield self.assignments.assert__(q, val, tag)
-
-        yield "No more consequences."
-    elif res1 == unsat:
-        yield "Not satisfiable."
-        yield str(solver.sexpr())
-    else:
-        yield "Unknown satisfiability."
-        yield str(solver.sexpr())
-
+    yield from self._propagate_inner(tag, solver, todo)
     solver.pop()
 Theory._propagate_ignored = _propagate_ignored
+
 
 def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
@@ -405,7 +410,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     start = time.process_time()
 
     if self.ignored_laws:
-        yield from self._propagate_ignored(tag, given_todo, self.ignored_laws)
+        yield from self._propagate_ignored(tag, given_todo)
         return
 
     if self.first_prop:
@@ -437,42 +442,13 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver
     solver.push()
 
-    for q in todo.values():
-        solver.add(q.reified(self) == q.translate(self))
-        # reification in case todo contains complex formula
-
     self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
 
-    res1 = solver.check()
-
-    if res1 == sat:
-        model = solver.model()
-        valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
-        for val1, q in valqs:
-            if str(val1) == str(q.reified(self)):
-                continue  # irrelevant
-            solver.push()
-            solver.add(Not(q.reified(self) == val1))
-            res2 = solver.check()
-            solver.pop()
-
-            assert res2 != unknown, "Incorrect solver behavior"
-            if res2 == unsat:
-                val = str_to_IDP(q, str(val1))
-                yield self.assignments.assert__(q, val, tag)
-
-        yield "No more consequences."
-    elif res1 == unsat:
-        yield "Not satisfiable."
-        yield str(solver.sexpr())
-    else:
-        yield "Unknown satisfiability."
-        yield str(solver.sexpr())
+    yield from self._propagate_inner(tag, solver, todo)
+    solver.pop()
 
     if dir_todo:
         self.previous_assignments = copy(self.assignments)
-
-    solver.pop()
 Theory._propagate = _propagate
 
 
