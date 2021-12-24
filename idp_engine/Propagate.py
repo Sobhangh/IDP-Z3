@@ -388,10 +388,9 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
         if a.status in statuses:
             p = a.translate(self)
             ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
-            solver.add(p)
 
-    for z3_form, expr in self.expl_reifs.values():
-        if expr.code not in self.ignored_laws:
+    for z3_form, (_, expr) in ps.items():
+        if not(expr and expr.code in self.ignored_laws):
             solver.add(z3_form)
 
     yield from self._propagate_inner(tag, solver, todo)

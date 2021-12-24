@@ -107,11 +107,11 @@ class Theory(object):
             Use self.explain_solver to access.
 
         expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
-            dictionary storing for reification symbols (the keys) which
-            constraint it represents, and what the original expression was. If
-            the original expression is `None`, the reification represents a
+            dictionary storing for Z3 reification symbols (the keys) which
+            Z3 constraint it represents, and what the original expression was.
+            If the original expression is `None`, the reification represents a
             fact, otherwise it represents a law. Used in the explanation
-            inference.
+            inference and when disabling laws.
 
     """
     def __init__(self, *blocks, extended=False):
@@ -559,7 +559,6 @@ class Theory(object):
             if ass.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
                 p = ass.translate(self)
                 ps[p] = (ass, ass.formula() if ass.status == S.STRUCTURE else None)
-                solver.add(p)
 
         if consequence:
             negated = consequence.replace('~', '¬').startswith('¬')
@@ -581,7 +580,8 @@ class Theory(object):
 
             solver.add(Not(to_explain.translate(self)))
 
-        result = solver.check(list(ps.keys()))
+        result = solver.check([z3_form for z3_form, (_, expr) in ps.items() if
+                                    not (expr and expr.code in self.ignored_laws)])
         assert result == unsat, ("Incorrect solver result during explain inference. "
                                  "This may be due to floating point imprecision.")
         unsatcore = solver.unsat_core()
