@@ -152,7 +152,8 @@ class Theory(object):
     def solver(self):
         if self._slvr is None:
             self._slvr = Solver(ctx=self.ctx)
-            self._slvr.add(And(self.constraintz()))
+            if self.constraintz():
+                self._slvr.add(And(self.constraintz()))
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
@@ -165,7 +166,8 @@ class Theory(object):
     def optimize_solver(self):
         if self._optmz is None:
             self._optmz = Optimize(ctx=self.ctx)
-            self._optmz.add(And(self.constraintz()))
+            if self.constraintz():
+                self._optmz.add(And(self.constraintz()))
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
