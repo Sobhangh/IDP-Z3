@@ -329,11 +329,12 @@ class Theory(object):
                 else:
                     constraints.append(e)
 
-            self._constraintz = [TRUE.translate(self)]  # avoids passing empty conjunction to Z3
+            self._constraintz = []
             for e in chain(self.constraints, self.co_constraints):
                 collect_constraints(e.translate(self), self._constraintz)
             self._constraintz += [s.translate(self)
                             for s in chain(*self.def_constraints.values())]
+
             self._symbols = set()
             for c in self._constraintz:
                 get_symbols_z(c, self._symbols)
