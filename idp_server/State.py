@@ -49,7 +49,7 @@ class State(Theory):
         Returns:
             State: a State
         """
-        ignored_laws = json.loads(ignore, encoding='utf-8') if ignore else []
+        ignored_laws = set(json.loads(ignore, encoding='utf-8')) if ignore else set()
         if active != "{}" and idp.code in State.cache:
             state = State.cache[idp.code]
             state.ignored_laws = ignored_laws
@@ -128,6 +128,7 @@ class State(Theory):
 
         # perform propagation
         if self.environment is not None:  # if there is a decision vocabulary
+            self.environment.ignored_laws = self.ignored_laws
             self.environment.propagate(tag=S.ENV_CONSQ)
             self.assignments.update(self.environment.assignments)
             self._formula = None

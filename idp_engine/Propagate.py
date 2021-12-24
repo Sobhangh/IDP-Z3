@@ -183,7 +183,7 @@ def _set_consequences_get_changed_choices(self):
     # clear consequences, as these might not be cleared by add_given when
     # running via CLI
     for a in self.assignments.values():
-        if a.status in [S.CONSEQUENCE]:
+        if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
             self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
     removed_choices = {a.sentence.code: a for a in self.previous_assignments.values()
@@ -377,17 +377,18 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.explain_solver
     solver.push()
 
-    statuses = [S.GIVEN, S.DEFAULT, S.EXPANDED, S.STRUCTURE]
-
     todo = given_todo.copy() if given_todo else {a.sentence.code: a.sentence
                      for a in self.assignments.values()
-                     if a.status not in statuses}
+                     if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
+                     (a.status != S.STRUCTURE or a.translate(self) in self.ignored_laws)}
 
     ps = self.expl_reifs.copy()
     for a in self.assignments.values():
-        if a.status in statuses:
+        if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED, S.STRUCTURE]:
             p = a.translate(self)
             ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
+        elif a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
+            self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
     for z3_form, (_, expr) in ps.items():
         if not(expr and expr.code in self.ignored_laws):

@@ -113,6 +113,9 @@ class Theory(object):
             fact, otherwise it represents a law. Used in the explanation
             inference and when disabling laws.
 
+        ignored_laws = set(string): laws disabled by the user.
+            The string matches Expression.code in expl_reifs.
+
     """
     def __init__(self, *blocks, extended=False):
         self.extended = extended
@@ -143,6 +146,7 @@ class Theory(object):
         self._optmz = None
         self._expl = None
         self.expl_reifs = {}  # {reified: (constraint, original)}
+        self.ignored_laws = set()
 
     @property
     def solver(self):
@@ -573,7 +577,7 @@ class Theory(object):
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
                     solver.pop()
-                    return ([], [])
+                    return [], []
                 to_explain = EQUALS([to_explain, val])
             if negated:
                 to_explain = NOT(to_explain)
@@ -593,7 +597,7 @@ class Theory(object):
             facts = [ps[a][0] for a in unsatcore if ps[a][1] is None]
             laws = [ps[a][1] for a in unsatcore if ps[a][1] is not None]
 
-        return (facts, laws)
+        return facts, laws
 
     def simplify(self):
         """ returns a simpler copy of the Theory, using known assignments
