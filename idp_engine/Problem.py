@@ -114,9 +114,8 @@ class Theory(object):
             inference.
 
     """
-    def __init__(self, *blocks, extended=False, ignored_laws = []):
+    def __init__(self, *blocks, extended=False):
         self.extended = extended
-        self.ignored_laws = ignored_laws
 
         self.declarations = {}
         self.definitions = []
@@ -328,11 +327,9 @@ class Theory(object):
 
             self._constraintz = [TRUE.translate(self)]  # avoids passing empty conjunction to Z3
             for e in chain(self.constraints, self.co_constraints):
-                if e.code not in self.ignored_laws:
-                    collect_constraints(e.translate(self), self._constraintz)
+                collect_constraints(e.translate(self), self._constraintz)
             self._constraintz += [s.translate(self)
-                            for s in chain(*self.def_constraints.values())
-                                  if s.code not in self.ignored_laws]
+                            for s in chain(*self.def_constraints.values())]
             self._symbols = set()
             for c in self._constraintz:
                 get_symbols_z(c, self._symbols)
@@ -562,7 +559,7 @@ class Theory(object):
             if ass.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
                 p = ass.translate(self)
                 ps[p] = (ass, ass.formula() if ass.status == S.STRUCTURE else None)
-                solver.add(Implies(p, p))
+                solver.add(p)
 
         if consequence:
             negated = consequence.replace('~', '¬').startswith('¬')

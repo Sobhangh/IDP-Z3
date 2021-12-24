@@ -49,22 +49,22 @@ class State(Theory):
         Returns:
             State: a State
         """
-        if not ignore:
-            ignore = "[]"
-        cachedstring = idp.code + ignore
-        if active != "{}" and cachedstring in State.cache:
-            state = State.cache[cachedstring]
+        ignored_laws = json.loads(ignore, encoding='utf-8') if ignore else []
+        if active != "{}" and idp.code in State.cache:
+            state = State.cache[idp.code]
+            state.ignored_laws = ignored_laws
             state.add_given(active, previous_active)
         else:
             if 100 < len(State.cache):
                 # remove oldest entry, to prevent memory overflow
                 State.cache.pop(list(State.cache.keys())[-1])
-            state = State(idp, json.loads(ignore, encoding='utf-8'))
-            State.cache[cachedstring] = state
+            state = State(idp)
+            State.cache[idp.code] = state
+            state.ignored_laws = ignored_laws
             state.add_given(active, previous_active, True)
         return state
 
-    def __init__(self, idp: IDP, ignored_laws=[]):
+    def __init__(self, idp: IDP):
         # determine default vocabulary, theory, before annotating display
         if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
             assert len(idp.vocabularies) == 2, \
@@ -83,7 +83,7 @@ class State(Theory):
             idp.display.run(idp)
         self.idp = idp  # IDP vocabulary and theory
 
-        super().__init__(extended=True, ignored_laws=ignored_laws)
+        super().__init__(extended=True)
 
         if len(idp.theories) == 2:
             blocks = ([idp.theories['environment']]

@@ -337,6 +337,62 @@ def _first_propagate(self):
     self.first_prop = False
 Theory._first_propagate = _first_propagate
 
+def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None, ignored_laws=None):
+    solver = self.explain_solver
+    solver.push()
+
+    statuses = [S.GIVEN, S.DEFAULT, S.EXPANDED, S.STRUCTURE]
+
+    todo = given_todo.copy() if given_todo else {a.sentence.code: a.sentence
+                     for a in self.assignments.values()
+                     if a.status not in statuses}
+
+    ps = self.expl_reifs.copy()
+    for a in self.assignments.values():
+        if a.status in statuses:
+            p = a.translate(self)
+            ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
+            solver.add(p)
+
+    for z3_form, expr in self.expl_reifs.values():
+        if expr.code not in ignored_laws:
+            solver.add(z3_form)
+
+
+    for q in todo.values():
+        solver.add(q.reified(self) == q.translate(self))
+        # reification in case todo contains complex formula
+
+    self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+
+    res1 = solver.check()
+
+    if res1 == sat:
+        model = solver.model()
+        valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
+        for val1, q in valqs:
+            if str(val1) == str(q.reified(self)):
+                continue  # irrelevant
+            solver.push()
+            solver.add(Not(q.reified(self) == val1))
+            res2 = solver.check()
+            solver.pop()
+
+            assert res2 != unknown, "Incorrect solver behavior"
+            if res2 == unsat:
+                val = str_to_IDP(q, str(val1))
+                yield self.assignments.assert__(q, val, tag)
+
+        yield "No more consequences."
+    elif res1 == unsat:
+        yield "Not satisfiable."
+        yield str(solver.sexpr())
+    else:
+        yield "Unknown satisfiability."
+        yield str(solver.sexpr())
+
+    solver.pop()
+Theory._propagate_ignored = _propagate_ignored
 
 def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
@@ -347,6 +403,10 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
 
     global start
     start = time.process_time()
+
+    if self.ignored_laws:
+        yield from self._propagate_ignored(tag, given_todo, self.ignored_laws)
+        return
 
     if self.first_prop:
         yield from self._first_propagate()
