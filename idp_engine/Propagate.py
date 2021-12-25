@@ -200,7 +200,9 @@ def _set_consequences_get_changed_choices(self):
 
     if not removed_choices:
         for a in self.previous_assignments.values():
-            if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
+            if (a.status in [S.CONSEQUENCE, S.ENV_CONSQ] and
+                    self.assignments[a.sentence.code].status
+                    not in [S.GIVEN, S.EXPANDED, S.DEFAULT]):
                 self.assignments.assert__(a.sentence, a.value, a.status)
 
     # TODO: why is it not ok to use get_core_atoms in this method?
@@ -374,7 +376,7 @@ Theory._first_propagate = _first_propagate
 def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
     assert self.ignored_laws, "Internal error"
 
-    solver = self.explain_solver
+    solver = self.solver_reified
     solver.push()
 
     todo = given_todo.copy() if given_todo else {a.sentence.code: a.sentence

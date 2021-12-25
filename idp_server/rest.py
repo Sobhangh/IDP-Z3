@@ -191,7 +191,8 @@ class meta(Resource):
                 # ensure the stateful solvers are initialized
                 _ = state.solver
                 _ = state.optimize_solver
-                _ = state.explain_solver
+                _ = state.solver_reified
+                _ = state.optimize_solver_reified
                 if not state.idp.display.manualRelevance:
                     get_relevant_questions(state)
                 out = metaJSON(state)

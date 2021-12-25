@@ -103,12 +103,15 @@ class Theory(object):
         _optmz (Solver): stateful solver used for optimization.
             Use self.optimize_solver to access.
 
-        _expl (Solver): stateful solver used for explanation.
-            Use self.explain_solver to access.
+        _reified (Solver): stateful solver used for explanation and disabling laws.
+            Use self.solver_reified to access.
+
+        _optmz_reif (Solver): stateful solver used for optimizing when disabling laws.
+            Use self.optimize_solver_reified to access.
 
         expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
             dictionary storing for Z3 reification symbols (the keys) which
-            Z3 constraint it represents, and what the original expression was.
+            Z3 constraint it represents, and what the original FO(.) expression was.
             If the original expression is `None`, the reification represents a
             fact, otherwise it represents a law. Used in the explanation
             inference and when disabling laws.
@@ -144,7 +147,8 @@ class Theory(object):
 
         self._slvr = None
         self._optmz = None
-        self._expl = None
+        self._reif = None
+        self._optmz_reif = None
         self.expl_reifs = {}  # {reified: (constraint, original)}
         self.ignored_laws = set()
 
@@ -177,10 +181,10 @@ class Theory(object):
         return self._optmz
 
     @property
-    def explain_solver(self):
-        if self._expl is None:
-            self._expl = Solver(ctx=self.ctx)
-            self._expl.set(':core.minimize', True)
+    def solver_reified(self):
+        if self._reif is None:
+            self._reif = Solver(ctx=self.ctx)
+            self._reif.set(':core.minimize', True)
 
             # get expanded def_constraints
             def_constraints = {}
@@ -192,9 +196,19 @@ class Theory(object):
             for constraint in todo:
                 p = constraint.reified(self)
                 self.expl_reifs[p] = (constraint.original.interpret(self).translate(self), constraint)
-                self._expl.add(Implies(p, self.expl_reifs[p][0]))
+                self._reif.add(Implies(p, self.expl_reifs[p][0]))
 
-        return self._expl
+        return self._reif
+
+    @property
+    def optimize_solver_reified(self):
+        if self._optmz_reif is None:
+            _ = self.solver_reified  # ensure self._reif_set is instantiated
+            self._optmz_reif = Optimize(ctx=self.ctx)
+            for z3_reif, (z3_orig, _) in self.expl_reifs.items():
+                self._optmz_reif.add(Implies(z3_reif, z3_orig))
+
+        return self._optmz_reif
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -423,7 +437,7 @@ class Theory(object):
             todo = OrderedSet(a.sentence for a in self.get_core_atoms(
                 [S.UNKNOWN, S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ]))
             # TODO: should todo be larger in case complete==True?
-            solver = self.explain_solver
+            solver = self.solver_reified
             solver.push()
             self._add_assignment_ignored(solver)
         else:
@@ -474,13 +488,17 @@ class Theory(object):
 
     def optimize(self, term, minimize=True):
         assert term in self.assignments, "Internal error"
-
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
 
-        solver = self.optimize_solver
-        solver.push()
-        self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
+        if self.ignored_laws:
+            solver = self.optimize_solver_reified
+            solver.push()
+            self._add_assignment_ignored(solver)
+        else:
+            solver = self.optimize_solver
+            solver.push()
+            self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
 
         if minimize:
             solver.minimize(s)
@@ -508,7 +526,6 @@ class Theory(object):
             ass = str(EQUALS([sentence, val_IDP]))
             if ass in self.assignments:
                 self.assert_(ass, True, S.GIVEN)
-
 
         return self
 
@@ -579,7 +596,7 @@ class Theory(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
 
-        solver = self.explain_solver
+        solver = self.solver_reified
         ps = self.expl_reifs.copy()
 
         solver.push()
