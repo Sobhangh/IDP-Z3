@@ -382,17 +382,7 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
                      if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
                      (a.status != S.STRUCTURE or a.translate(self) in self.ignored_laws)}
 
-    ps = self.expl_reifs.copy()
-    for a in self.assignments.values():
-        if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED, S.STRUCTURE]:
-            p = a.translate(self)
-            ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
-        elif a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
-            self.assignments.assert__(a.sentence, None, S.UNKNOWN)
-
-    for z3_form, (_, expr) in ps.items():
-        if not(expr and expr.code in self.ignored_laws):
-            solver.add(z3_form)
+    self._add_assignment_ignored(solver)
 
     yield from self._propagate_inner(tag, solver, todo)
     solver.pop()
@@ -442,7 +432,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver
     solver.push()
 
-    self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+    self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
 
     yield from self._propagate_inner(tag, solver, todo)
     solver.pop()

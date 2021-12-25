@@ -403,14 +403,36 @@ class Theory(object):
         for af in assignment_forms:
             solver.add(af)
 
+    def _add_assignment_ignored(self, solver):
+        ps = self.expl_reifs.copy()
+        for a in self.assignments.values():
+            if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] or (
+                    a.status == S.STRUCTURE and
+                    a.translate(self) not in self.ignored_laws):
+                p = a.translate(self)
+                ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
+            elif a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
+                self.assignments.assert__(a.sentence, None, S.UNKNOWN)
+        for z3_form, (_, expr) in ps.items():
+            if not (expr and expr.code in self.ignored_laws):
+                solver.add(z3_form)
+
     def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
-        # TODO: should todo be larger in case complete==True?
+        if self.ignored_laws:
+            todo = OrderedSet(a.sentence for a in self.get_core_atoms(
+                [S.UNKNOWN, S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ]))
+            # TODO: should todo be larger in case complete==True?
+            solver = self.explain_solver
+            solver.push()
+            self._add_assignment_ignored(solver)
+        else:
+            todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
+            # TODO: should todo be larger in case complete==True?
+            solver = self.solver
+            solver.push()
+            self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
 
-        solver = self.solver
-        solver.push()
-        self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
                 solver.add(q.reified(self) == q.translate(self))
@@ -458,7 +480,7 @@ class Theory(object):
 
         solver = self.optimize_solver
         solver.push()
-        self._add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+        self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
 
         if minimize:
             solver.minimize(s)
