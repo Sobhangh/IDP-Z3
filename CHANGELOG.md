@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !171, !180: refactor inferences to use a stateful solver, for performance.
 * MR !186: switching between reading and formula view now works for explanations too.
 * MR !187: fix regression where unsatisfiable theories were not explained in the IC.
+* MR !183: allow to disable constraints
 
 
 ## [0.9.0] - 2021-12-16
