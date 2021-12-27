@@ -49,7 +49,7 @@ class State(Theory):
         Returns:
             State: a State
         """
-        ignored_laws = set(json.loads(ignore, encoding='utf-8')) if ignore else set()
+        ignored_laws = set(json.loads(ignore)) if ignore else set()
         if active != "{}" and idp.code in State.cache:
             state = State.cache[idp.code]
             state.ignored_laws = ignored_laws

@@ -110,7 +110,7 @@ def generate():
 
             # stabilize the output
             if 'minimize.idp' in file:
-                output = re.sub(r'^f:=.*\n?', '', output, flags=re.MULTILINE)
+                output = re.sub(r'^f :=.*\n?', '', output, flags=re.MULTILINE)
 
             # Remove absolute paths from output.
             output = re.sub(r'(/.*)(?=site-packages/)', '', output, flags=re.MULTILINE)
