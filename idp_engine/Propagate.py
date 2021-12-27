@@ -401,12 +401,12 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     global start
     start = time.process_time()
 
+    if self.first_prop:
+        yield from self._first_propagate()
+
     if self.ignored_laws:
         yield from self._propagate_ignored(tag, given_todo)
         return
-
-    if self.first_prop:
-        yield from self._first_propagate()
 
     removed_choices, added_choices = self._set_consequences_get_changed_choices()
 
