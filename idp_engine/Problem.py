@@ -331,6 +331,22 @@ class Theory(object):
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
+    def enable_law(self, code):
+        """enables a law
+
+        Args:
+            code (str): the code of the law to be enabled
+        """
+        self.ignored_laws.remove(code)
+
+    def disable_law(self, code):
+        """disables a law
+
+        Args:
+            code (str): the code of the law to be disabled
+        """
+        self.ignored_laws.add(code)
+
     def constraintz(self):
         """list of constraints, co_constraints and definitions in Z3 form"""
         if self._constraintz is None:

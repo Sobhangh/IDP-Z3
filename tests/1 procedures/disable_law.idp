@@ -1,0 +1,22 @@
+vocabulary V {
+    p, q, r: () → Bool
+}
+
+theory T:V {
+    p() => q().
+    q() => r().
+}
+
+structure S:V {
+    p:=true
+}
+
+procedure main () {
+    theo = Theory(T,S)
+    theo.disable_law("q() ⇒ r()")
+    pretty_print(theo.propagate())
+    theo.enable_law("q() ⇒ r()")
+    pretty_print(theo.propagate())
+    theo.disable_law("p() ⇒ q()")
+    pretty_print(theo.propagate())
+}
