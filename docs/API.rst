@@ -1,6 +1,4 @@
-
-.. _API:
-.. index:: Python API
+.. _api:
 
 Python API
 ==========

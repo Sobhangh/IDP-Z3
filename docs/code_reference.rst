@@ -1,14 +1,12 @@
 .. _code_reference:
 
-Appendix: IDP-Z3 developer reference
-====================================
+Appendix: IDP-Z3 internal reference
+===================================
 
 
-.. note::
-   The contents of this reference are intended for people who want to further develop IDP-Z3.
-
-.. note::
-   Despite our best efforts, this documentation may not be complete and up-to-date.
+.. warning::
+   This reference is only intended for the **core IDP-Z3 development team**.
+   If you do not work on the IDP-Z3 engine itself, but just want to use it in your applications, please use our :ref:`API` instead.
 
 The components of IDP-Z3 are shown below.
 
