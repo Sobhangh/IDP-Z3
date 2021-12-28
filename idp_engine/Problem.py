@@ -422,6 +422,24 @@ class Theory(object):
         for af in assignment_forms:
             solver.add(af)
 
+    def _extend_reifications(self, reifs):
+        """extends the given reifications with the current choices and structure
+
+        Args:
+            reifs (dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
+            be extended
+        """
+        for a in self.assignments.values():
+            if a.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
+                p = a.translate(self)
+                if a.status == S.STRUCTURE:
+                    form = a.formula()
+                    form.annotations['reading'] = ("Structure formula " +
+                                                   form.annotations['reading'])
+                else:
+                    form = None
+                reifs[p] = (a, form)
+
     def _add_assignment_ignored(self, solver):
         """adds the current choices to the reified solver
         and resets propagated assignments
@@ -430,11 +448,9 @@ class Theory(object):
             solver (Z3 solver): the reified solver to add the assignments to
         """
         ps = self.expl_reifs.copy()
+        self._extend_reifications(ps)
         for a in self.assignments.values():
-            if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED, S.STRUCTURE]:
-                p = a.translate(self)
-                ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
-            elif a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
+            if a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
                 self.assignments.assert__(a.sentence, None, S.UNKNOWN)
         for z3_form, (_, expr) in ps.items():
             if not (expr and expr.code in self.ignored_laws):
@@ -607,13 +623,9 @@ class Theory(object):
 
         solver = self.solver_reified
         ps = self.expl_reifs.copy()
+        self._extend_reifications(ps)
 
         solver.push()
-
-        for a in self.assignments.values():
-            if a.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
-                p = a.translate(self)
-                ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
 
         if consequence:
             negated = consequence.replace('~', '¬').startswith('¬')
