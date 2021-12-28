@@ -434,7 +434,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver
     solver.push()
 
-    self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
+    self._add_assignment(solver)
 
     yield from self._propagate_inner(tag, solver, todo)
     solver.pop()

@@ -203,7 +203,7 @@ class Theory(object):
     @property
     def optimize_solver_reified(self):
         if self._optmz_reif is None:
-            _ = self.solver_reified  # ensure self._reif_set is instantiated
+            _ = self.solver_reified  # ensure self.expl_reifs is instantiated
             self._optmz_reif = Optimize(ctx=self.ctx)
             for z3_reif, (z3_orig, _) in self.expl_reifs.items():
                 self._optmz_reif.add(Implies(z3_reif, z3_orig))
@@ -409,20 +409,29 @@ class Theory(object):
                 ass.assert__(q, val, tag)
         return ass
 
-    def _add_assignment(self, solver, excluded):
+    def _add_assignment(self, solver):
+        """adds the current choices to the (non-reified) solver
+
+        Args:
+            solver (Z3 solver): the solver to add the assignments to
+        """
         assignment_forms = [a.formula().translate(self) for a in
                             self.assignments.values()
                             if a.value is not None
-                            and a.status not in excluded]
+                            and a.status in [S.GIVEN, S.EXPANDED, S.DEFAULT]]
         for af in assignment_forms:
             solver.add(af)
 
     def _add_assignment_ignored(self, solver):
+        """adds the current choices to the reified solver
+        and resets propagated assignments
+
+        Args:
+            solver (Z3 solver): the reified solver to add the assignments to
+        """
         ps = self.expl_reifs.copy()
         for a in self.assignments.values():
-            if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] or (
-                    a.status == S.STRUCTURE and
-                    a.translate(self) not in self.ignored_laws):
+            if a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED, S.STRUCTURE]:
                 p = a.translate(self)
                 ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
             elif a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
@@ -445,7 +454,7 @@ class Theory(object):
             # TODO: should todo be larger in case complete==True?
             solver = self.solver
             solver.push()
-            self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
+            self._add_assignment(solver)
 
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
@@ -498,7 +507,7 @@ class Theory(object):
         else:
             solver = self.optimize_solver
             solver.push()
-            self._add_assignment(solver, [S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ])
+            self._add_assignment(solver)
 
         if minimize:
             solver.minimize(s)
@@ -601,10 +610,10 @@ class Theory(object):
 
         solver.push()
 
-        for ass in self.assignments.values():
-            if ass.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
-                p = ass.translate(self)
-                ps[p] = (ass, ass.formula() if ass.status == S.STRUCTURE else None)
+        for a in self.assignments.values():
+            if a.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
+                p = a.translate(self)
+                ps[p] = (a, a.formula() if a.status == S.STRUCTURE else None)
 
         if consequence:
             negated = consequence.replace('~', '¬').startswith('¬')
