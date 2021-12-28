@@ -1,5 +1,5 @@
 idp-engine is a reasoning engine for knowledge represented using the FO(.) language.
-FO(.) (aka FOdot) is First Order logic, with various extensions to make it more expressive:  types, equality, arithmetic, inductive definitions, aggregates, and intensional objects.
+FO(.) (aka FO-dot) is First Order logic, with various extensions to make it more expressive:  types, equality, arithmetic, inductive definitions, aggregates, and intensional objects.
 The idp-engine uses the Z3 SMT solver as a back-end.
 
 It is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium, and made available under the [GNU LGPL v3 License](https://www.gnu.org/licenses/lgpl-3.0.txt).
