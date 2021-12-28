@@ -332,7 +332,9 @@ class Theory(object):
         self._formula = None
 
     def enable_law(self, code):
-        """enables a law
+        """Enables a law. The law should not be arising from the structure
+        (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
+        c: () -> T).
 
         Args:
             code (str): the code of the law to be enabled
@@ -340,7 +342,9 @@ class Theory(object):
         self.ignored_laws.remove(code)
 
     def disable_law(self, code):
-        """disables a law
+        """Disables a law. The law should not be arising from the structure
+        (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
+        c: () -> T).
 
         Args:
             code (str): the code of the law to be disabled
