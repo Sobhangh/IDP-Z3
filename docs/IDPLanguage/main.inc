@@ -89,6 +89,16 @@ formula(self)
     Returns a Z3 object representing the logic formula equivalent to the theory.
     This object can be converted to a string using ``str()``.
 
+disable_law(self, code:str):
+    Disables a law, represented as a code string taken from the output of explain(...).
+    The law should not be arising from the structure (e.g., from p:=true) or from
+    the types (e.g., from T:={1..10} and c: () -> T).
+
+enable_law(self, code:str):
+    Re-enables a disabled law, represented as a code string taken from the output of explain(...).
+    The law should not be arising from the structure (e.g., from p:=true) or from
+    the types (e.g., from T:={1..10} and c: () -> T).
+
 expand(self, max=10, timeout=10, complete=False)
     Returns a list of models of the theory that are expansion of the known assignments.
     The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.

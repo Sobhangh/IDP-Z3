@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * fix #163: improve performance by avoiding unnecessary copying
 * MR !181: support Python 3.10
 * MR !188: print models in uniform format to structure
+* MR !183: add enable_law and disable_law to the API
 
 ### Interactive Consultant
 * fix #125: Bug in relevance for Registration
