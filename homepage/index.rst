@@ -3,7 +3,7 @@ Introduction
 
 IDP-Z3 is a reasoning engine for knowledge represented using the FO(.) language.
 
-FO(.) (aka FOdot) is First Order logic, with various extensions to make it more expressive: types, arithmetic, inductive definitions, aggregates, and intensional objects.
+FO(.) (aka FO-dot) is First Order logic, with various extensions to make it more expressive: types, arithmetic, inductive definitions, aggregates, and intensional objects.
 
 Once the knowledge of a problem domain is encoded in FO(.), the engine can perform a variety of reasoning tasks: find relevant questions to solve a particular problem, derive consequences from new information, explain how it derived these consequences, find a solution that minimizes a cost function, ...
 
