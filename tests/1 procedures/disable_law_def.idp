@@ -1,0 +1,30 @@
+vocabulary V {
+    type T := {a,b,c,d,e}
+    p: (T*T) -> Bool
+    q: (T*T) -> Bool
+    f: () -> Int
+}
+
+theory T:V {
+    {
+        ! x,y in T: p(x,y) <- q(x,y).
+        ! x,y in T: p(x,y) <- q(y,x).
+        ! x,y in T: p(x,y) <- ?z in T: p(x,z) & p(z,y).
+    }
+    f() = #{x,y in T: p(x,y)}.
+}
+
+structure S:V {
+    q := {(a,b),(b,c),(d,e)}
+}
+
+procedure main () {
+    theo = Theory(T,S)
+    pretty_print(theo.expand())
+    theo.disable_law("∀$p!0$ ∈ T,$p!1$ ∈ T : p($p!0$, $p!1$) ⇐ q($p!0$, $p!1$)")
+    pretty_print(theo.propagate())
+    theo.enable_law("∀$p!0$ ∈ T,$p!1$ ∈ T : p($p!0$, $p!1$) ⇐ q($p!0$, $p!1$)")
+    pretty_print(theo.expand())
+    theo.disable_law("∀$p!0$ ∈ T,$p!1$ ∈ T : p($p!0$, $p!1$) ⇐ q($p!1$, $p!0$)")
+    pretty_print(theo.optimize("f()",minimize=False))
+}
