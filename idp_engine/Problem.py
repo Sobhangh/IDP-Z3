@@ -103,15 +103,21 @@ class Theory(object):
         _optmz (Solver): stateful solver used for optimization.
             Use self.optimize_solver to access.
 
-        _expl (Solver): stateful solver used for explanation.
-            Use self.explain_solver to access.
+        _reified (Solver): stateful solver used for explanation and disabling laws.
+            Use self.solver_reified to access.
+
+        _optmz_reif (Solver): stateful solver used for optimizing when disabling laws.
+            Use self.optimize_solver_reified to access.
 
         expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
-            dictionary storing for reification symbols (the keys) which
-            constraint it represents, and what the original expression was. If
-            the original expression is `None`, the reification represents a
+            dictionary storing for Z3 reification symbols (the keys) which
+            Z3 constraint it represents, and what the original FO(.) expression was.
+            If the original expression is `None`, the reification represents a
             fact, otherwise it represents a law. Used in the explanation
-            inference.
+            inference and when disabling laws.
+
+        ignored_laws = set(string): laws disabled by the user.
+            The string matches Expression.code in expl_reifs.
 
     """
     def __init__(self, *blocks, extended=False):
@@ -141,15 +147,17 @@ class Theory(object):
 
         self._slvr = None
         self._optmz = None
-        self._expl = None
+        self._reif = None
+        self._optmz_reif = None
         self.expl_reifs = {}  # {reified: (constraint, original)}
+        self.ignored_laws = set()
 
     @property
     def solver(self):
         if self._slvr is None:
             self._slvr = Solver(ctx=self.ctx)
-            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
-            self._slvr.add(And(self.constraintz()))
+            if self.constraintz():
+                self._slvr.add(And(self.constraintz()))
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
@@ -162,8 +170,8 @@ class Theory(object):
     def optimize_solver(self):
         if self._optmz is None:
             self._optmz = Optimize(ctx=self.ctx)
-            assert self.constraintz(), "Solver can only be initialized after encoding to Z3"
-            self._optmz.add(And(self.constraintz()))
+            if self.constraintz():
+                self._optmz.add(And(self.constraintz()))
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
@@ -173,10 +181,10 @@ class Theory(object):
         return self._optmz
 
     @property
-    def explain_solver(self):
-        if self._expl is None:
-            self._expl = Solver(ctx=self.ctx)
-            self._expl.set(':core.minimize', True)
+    def solver_reified(self):
+        if self._reif is None:
+            self._reif = Solver(ctx=self.ctx)
+            self._reif.set(':core.minimize', True)
 
             # get expanded def_constraints
             def_constraints = {}
@@ -188,9 +196,19 @@ class Theory(object):
             for constraint in todo:
                 p = constraint.reified(self)
                 self.expl_reifs[p] = (constraint.original.interpret(self).translate(self), constraint)
-                self._expl.add(Implies(p, self.expl_reifs[p][0]))
+                self._reif.add(Implies(p, self.expl_reifs[p][0]))
 
-        return self._expl
+        return self._reif
+
+    @property
+    def optimize_solver_reified(self):
+        if self._optmz_reif is None:
+            _ = self.solver_reified  # ensure self.expl_reifs is instantiated
+            self._optmz_reif = Optimize(ctx=self.ctx)
+            for z3_reif, (z3_orig, _) in self.expl_reifs.items():
+                self._optmz_reif.add(Implies(z3_reif, z3_orig))
+
+        return self._optmz_reif
 
     @classmethod
     def make(cls, theories, structures, extended=False):
@@ -313,6 +331,26 @@ class Theory(object):
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
+    def enable_law(self, code):
+        """Enables a law. The law should not be arising from the structure
+        (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
+        c: () -> T).
+
+        Args:
+            code (str): the code of the law to be enabled
+        """
+        self.ignored_laws.remove(code)
+
+    def disable_law(self, code):
+        """Disables a law. The law should not be arising from the structure
+        (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
+        c: () -> T).
+
+        Args:
+            code (str): the code of the law to be disabled
+        """
+        self.ignored_laws.add(code)
+
     def constraintz(self):
         """list of constraints, co_constraints and definitions in Z3 form"""
         if self._constraintz is None:
@@ -391,22 +429,69 @@ class Theory(object):
                 ass.assert__(q, val, tag)
         return ass
 
-    def _add_assignment(self, solver, excluded):
+    def _add_assignment(self, solver):
+        """adds the current choices to the (non-reified) solver
+
+        Args:
+            solver (Z3 solver): the solver to add the assignments to
+        """
         assignment_forms = [a.formula().translate(self) for a in
                             self.assignments.values()
                             if a.value is not None
-                            and a.status not in excluded]
+                            and a.status in [S.GIVEN, S.EXPANDED, S.DEFAULT]]
         for af in assignment_forms:
             solver.add(af)
 
+    def _extend_reifications(self, reifs):
+        """extends the given reifications with the current choices and structure
+
+        Args:
+            reifs (dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
+            be extended
+        """
+        for a in self.assignments.values():
+            if a.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
+                p = a.translate(self)
+                if a.status == S.STRUCTURE:
+                    form = a.formula()
+                    form.annotations['reading'] = ("Structure formula " +
+                                                   form.annotations['reading'])
+                else:
+                    form = None
+                reifs[p] = (a, form)
+
+    def _add_assignment_ignored(self, solver):
+        """adds the current choices to the reified solver
+        and resets propagated assignments
+
+        Args:
+            solver (Z3 solver): the reified solver to add the assignments to
+        """
+        ps = self.expl_reifs.copy()
+        self._extend_reifications(ps)
+        for a in self.assignments.values():
+            if a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
+                self.assignments.assert__(a.sentence, None, S.UNKNOWN)
+        for z3_form, (_, expr) in ps.items():
+            if not (expr and expr.code in self.ignored_laws):
+                solver.add(z3_form)
+
     def expand(self, max=10, timeout=10, complete=False):
         """ output: a list of Assignments, ending with a string """
-        todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
-        # TODO: should todo be larger in case complete==True?
+        if self.ignored_laws:
+            todo = OrderedSet(a.sentence for a in self.get_core_atoms(
+                [S.UNKNOWN, S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ]))
+            # TODO: should todo be larger in case complete==True?
+            solver = self.solver_reified
+            solver.push()
+            self._add_assignment_ignored(solver)
+        else:
+            todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
+            # TODO: should todo be larger in case complete==True?
+            solver = self.solver
+            solver.push()
+            self._add_assignment(solver)
 
-        solver = self.solver
-        solver.push()
-        self._add_assignment(solver, [S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
                 solver.add(q.reified(self) == q.translate(self))
@@ -448,13 +533,17 @@ class Theory(object):
 
     def optimize(self, term, minimize=True):
         assert term in self.assignments, "Internal error"
-
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
 
-        solver = self.optimize_solver
-        solver.push()
-        self._add_assignment(solver,[S.STRUCTURE, S.CONSEQUENCE, S.ENV_CONSQ])
+        if self.ignored_laws:
+            solver = self.optimize_solver_reified
+            solver.push()
+            self._add_assignment_ignored(solver)
+        else:
+            solver = self.optimize_solver
+            solver.push()
+            self._add_assignment(solver)
 
         if minimize:
             solver.minimize(s)
@@ -482,7 +571,6 @@ class Theory(object):
             ass = str(EQUALS([sentence, val_IDP]))
             if ass in self.assignments:
                 self.assert_(ass, True, S.GIVEN)
-
 
         return self
 
@@ -553,16 +641,11 @@ class Theory(object):
             (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
 
-        solver = self.explain_solver
+        solver = self.solver_reified
         ps = self.expl_reifs.copy()
+        self._extend_reifications(ps)
 
         solver.push()
-
-        for ass in self.assignments.values():
-            if ass.status in [S.GIVEN, S.DEFAULT, S.STRUCTURE, S.EXPANDED]:
-                p = ass.translate(self)
-                ps[p] = (ass, ass.formula() if ass.status == S.STRUCTURE else None)
-                solver.add(Implies(p, p))
 
         if consequence:
             negated = consequence.replace('~', '¬').startswith('¬')
@@ -577,14 +660,15 @@ class Theory(object):
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
                     solver.pop()
-                    return ([], [])
+                    return [], []
                 to_explain = EQUALS([to_explain, val])
             if negated:
                 to_explain = NOT(to_explain)
 
             solver.add(Not(to_explain.translate(self)))
 
-        result = solver.check(list(ps.keys()))
+        result = solver.check([z3_form for z3_form, (_, expr) in ps.items() if
+                                    not (expr and expr.code in self.ignored_laws)])
         assert result == unsat, ("Incorrect solver result during explain inference. "
                                  "This may be due to floating point imprecision.")
         unsatcore = solver.unsat_core()
@@ -596,7 +680,7 @@ class Theory(object):
             facts = [ps[a][0] for a in unsatcore if ps[a][1] is None]
             laws = [ps[a][1] for a in unsatcore if ps[a][1] is not None]
 
-        return (facts, laws)
+        return facts, laws
 
     def simplify(self):
         """ returns a simpler copy of the Theory, using known assignments
