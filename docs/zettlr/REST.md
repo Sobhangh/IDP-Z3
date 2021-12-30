@@ -79,6 +79,7 @@ GET request :
                 }
             }
         }
+    - ignore: [string]           // user-disabled laws to ignore
     - code : string              // source code in FO(ID)
     - method : string            // name of the inference to be made:
                                  //   "propagate"   find propagated values
@@ -122,7 +123,9 @@ GET response :
             }
         }
     - '*laws*' : [
-        law : string            // laws used to obtain the value to be explained
+        law : (string, string)  // laws used to obtain the value to be explained
+                                // first string is identifier
+                                // second string is reading
     ]
 ```
 

@@ -24,6 +24,7 @@ from idp_engine.Assignments import Status as S
 from idp_engine.Run import Theory
 from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
 from .IO import load_json
+import json
 
 # Types
 from idp_engine import IDP
@@ -35,27 +36,31 @@ class State(Theory):
     cache: Dict[str, 'State'] = {}
 
     @classmethod
-    def make(cls, idp: IDP, previous_active: str, jsonstr: str) -> "State":
+    def make(cls, idp: IDP, previous_active: str, active: str, ignore: str = None) -> "State":
         """Manage the cache of State
 
         Args:
             idp (IDP): idp source code
             previous_active (str): assignments due to previous full propagation
-            jsonstr (str): input from client
+            active (str): assignment choices from client
+            ignore (str): user-disabled laws to ignore
 
         Returns:
             State: a State
         """
-        if jsonstr != "{}" and idp.code in State.cache:
+        ignored_laws = set(json.loads(ignore)) if ignore else set()
+        if active != "{}" and idp.code in State.cache:
             state = State.cache[idp.code]
-            state.add_given(jsonstr, previous_active)
+            state.ignored_laws = ignored_laws
+            state.add_given(active, previous_active)
         else:
             if 100 < len(State.cache):
                 # remove oldest entry, to prevent memory overflow
                 State.cache.pop(list(State.cache.keys())[-1])
             state = State(idp)
             State.cache[idp.code] = state
-            state.add_given(jsonstr, previous_active, True)
+            state.ignored_laws = ignored_laws
+            state.add_given(active, previous_active, True)
         return state
 
     def __init__(self, idp: IDP):
@@ -120,6 +125,7 @@ class State(Theory):
 
         # perform propagation
         if self.environment is not None:  # if there is a decision vocabulary
+            self.environment.ignored_laws = self.ignored_laws
             self.environment.propagate(tag=S.ENV_CONSQ)
             self.assignments.update(self.environment.assignments)
             self._formula = None

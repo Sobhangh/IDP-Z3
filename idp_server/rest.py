@@ -187,11 +187,12 @@ class meta(Resource):
                 parser.add_argument('code', type=str, help='Code')
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
-                state = State.make(idp, "{}", "{}")
+                state = State.make(idp, "{}", "{}", "[]")
                 # ensure the stateful solvers are initialized
                 _ = state.solver
                 _ = state.optimize_solver
-                _ = state.explain_solver
+                _ = state.solver_reified
+                _ = state.optimize_solver_reified
                 if not state.idp.display.manualRelevance:
                     state.determine_relevance()
                 out = metaJSON(state)
@@ -231,6 +232,7 @@ class eval(Resource):
                 parser.add_argument('code', type=str, help='Code')
                 parser.add_argument('active', type=str, help='Three-valued structure')
                 parser.add_argument('previous_active', type=str, help='Previously propagated assignment')
+                parser.add_argument('ignore', type=str, help='User-disabled laws to ignore')
                 parser.add_argument('symbol', type=str, help='Symbol to explain or optimize')
                 parser.add_argument('value', type=str, help='Value to explain')
                 parser.add_argument('field', type=str, help='Applied Symbol whose range must be determined')
@@ -261,7 +263,9 @@ class eval(Resource):
                 else:
                     state = State.make(idpOf(args['code']),
                                        args['previous_active'],
-                                       args['active'])
+                                       args['active'],
+                                       args['ignore']
+                                       )
 
                     if not state.satisfied:
                         out = explain(state)

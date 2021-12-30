@@ -111,6 +111,9 @@ structure S:V {
     Sides:=3.
     Perimeter:=3 // propagation fails if Perimeter=1, because of rounding issues
     Subtype:=regular_triangle
+    Base:=8
+    Height:=9
+    Surface:=10
 }
 
 procedure main () {
