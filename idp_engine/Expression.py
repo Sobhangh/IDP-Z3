@@ -32,6 +32,7 @@ import copy
 from collections import ChainMap
 from datetime import date
 from fractions import Fraction
+from re import findall
 from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
@@ -93,6 +94,36 @@ class ASTNode(object):
 
     def interpret(self, problem: Any) -> "Expression":
         return self  # monkey-patched
+
+
+class Annotations(ASTNode):
+    def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
+
+        def pair(s):
+            p = s.split(':', 1)
+            if len(p) == 2:
+                try:
+                    # Do we have a Slider?
+                    # The format of p[1] is as follows:
+                    # (lower_sym, upper_sym): (lower_bound, upper_bound)
+                    pat = r"\(((.*?), (.*?))\)"
+                    arg = findall(pat, p[1])
+                    l_symb = arg[0][1]
+                    u_symb = arg[0][2]
+                    l_bound = arg[1][1]
+                    u_bound = arg[1][2]
+                    slider_arg = {'lower_symbol': l_symb,
+                                  'upper_symbol': u_symb,
+                                  'lower_bound': l_bound,
+                                  'upper_bound': u_bound}
+                    return(p[0], slider_arg)
+                except:  # could not parse the slider data
+                    return (p[0], p[1])
+            else:
+                return ('reading', p[0])
+
+        self.annotations = dict((pair(t) for t in self.annotations))
 
 
 class Constructor(ASTNode):
@@ -221,7 +252,10 @@ class Expression(ASTNode):
         self.value: Optional["Expression"] = None
 
         self.code: str = intern(str(self))
-        self.annotations: Dict[str, str] = {'reading': self.code}
+        if not hasattr(self, 'annotations'):
+            self.annotations: Dict[str, str] = {'reading': self.code}
+        elif type(self.annotations) == Annotations:
+            self.annotations = self.annotations.annotations
         self.original: Expression = self
 
         self.str: str = self.code
@@ -1208,16 +1242,11 @@ class Brackets(Expression):
 
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        annotations = kwargs.pop('annotations')
+        self.annotations = kwargs.pop('annotations')
         self.sub_exprs = [self.f]
 
         super().__init__()
-        if type(annotations) == dict:
-            self.annotations = annotations
-        elif annotations is None:
-            self.annotations = None
-        else:  # Annotations instance
-            self.annotations = annotations.annotations
+
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
