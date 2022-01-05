@@ -28,7 +28,7 @@ import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, IfExpr, AQuantification, Quantee, Domain,
+    Constructor, Expression, AIfExpr, AQuantification, Quantee, Domain,
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
@@ -82,7 +82,7 @@ Expression.simplify1 = simplify1
 
 
 
-# Class IfExpr  ###############################################################
+# Class AIfExpr  ###############################################################
 
 
 def update_exprs(self, new_exprs):
@@ -101,7 +101,7 @@ def update_exprs(self, new_exprs):
             return self._change(simpler=NOT(if_),
                                 sub_exprs=sub_exprs)
     return self._change(sub_exprs=sub_exprs)
-IfExpr.update_exprs = update_exprs
+AIfExpr.update_exprs = update_exprs
 
 
 # Class Quantee  #######################################################

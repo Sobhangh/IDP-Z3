@@ -31,7 +31,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
                 BoolVal, RatVal, IntVal)
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
-from idp_engine.Expression import (Constructor, Expression, IfExpr,
+from idp_engine.Expression import (Constructor, Expression, AIfExpr,
                                    AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
@@ -177,7 +177,7 @@ def translate(self, problem: "Theory", vars={}):
 Symbol.translate=translate
 
 
-# Class IfExpr  ###############################################################
+# Class AIfExpr  ###############################################################
 
 def translate1(self, problem: "Theory", vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, ignoring .value and .simpler
@@ -191,10 +191,10 @@ def translate1(self, problem: "Theory", vars={}) -> ExprRef:
     Returns:
         ExprRef: Z3 expression
     """
-    return If(self.sub_exprs[IfExpr.IF].translate(problem, vars),
-              self.sub_exprs[IfExpr.THEN].translate(problem, vars),
-              self.sub_exprs[IfExpr.ELSE].translate(problem, vars))
-IfExpr.translate1 = translate1
+    return If(self.sub_exprs[AIfExpr.IF].translate(problem, vars),
+              self.sub_exprs[AIfExpr.THEN].translate(problem, vars),
+              self.sub_exprs[AIfExpr.ELSE].translate(problem, vars))
+AIfExpr.translate1 = translate1
 
 
 # Class AQuantification  ######################################################

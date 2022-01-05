@@ -44,7 +44,7 @@ from .Parse import (Extern, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
-from .Expression import (IfExpr, SymbolExpr, Expression, Constructor,
+from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
@@ -380,14 +380,14 @@ def interpret(self, problem):
                             elif self.q == '∃':
                                 new_f = AND([applied, new_f])
                             else:  # aggregate
-                                if isinstance(new_f, IfExpr):  # cardinality
+                                if isinstance(new_f, AIfExpr):  # cardinality
                                     # if a then b else 0 -> if (applied & a) then b else 0
                                     arg1 = AND([applied,
                                                         new_f.sub_exprs[0]])
-                                    new_f = IfExpr.make(arg1, new_f.sub_exprs[1],
+                                    new_f = AIfExpr.make(arg1, new_f.sub_exprs[1],
                                                         new_f.sub_exprs[2])
                                 else:  # sum
-                                    new_f = IfExpr.make(applied, new_f, Number(number="0"))
+                                    new_f = AIfExpr.make(applied, new_f, Number(number="0"))
                         out.append(new_f)
                 forms = out
 

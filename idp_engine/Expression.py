@@ -21,7 +21,7 @@
 (They are monkey-patched by other modules)
 
 """
-__all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
+__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "Quantee", "AQuantification",
            "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
@@ -297,7 +297,7 @@ class Expression(ASTNode):
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for UnappliedSymbol, IfExpr, AUnary, Variable,
+        default implementation for UnappliedSymbol, AIfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
         for e in self.sub_exprs:
@@ -520,7 +520,7 @@ class Domain(Symbol):
         pass  # monkey-patched
 
 
-class IfExpr(Expression):
+class AIfExpr(Expression):
     PRECEDENCE = 10
     IF = 0
     THEN = 1
@@ -540,9 +540,9 @@ class IfExpr(Expression):
         return out.annotate1().simplify1()
 
     def __str1__(self):
-        return (f" if   {self.sub_exprs[IfExpr.IF  ].str}"
-                f" then {self.sub_exprs[IfExpr.THEN].str}"
-                f" else {self.sub_exprs[IfExpr.ELSE].str}")
+        return (f" if   {self.sub_exprs[AIfExpr.IF  ].str}"
+                f" then {self.sub_exprs[AIfExpr.THEN].str}"
+                f" else {self.sub_exprs[AIfExpr.ELSE].str}")
 
     def collect_nested_symbols(self, symbols, is_nested):
         return Expression.collect_nested_symbols(self, symbols, True)

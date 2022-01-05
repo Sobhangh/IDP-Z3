@@ -51,8 +51,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
               ']'
             )?;
 
-  Expression: IfExpr | Quantification;
-    IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
+  Expression: Quantification;
 
     Quantification: AQuantification | RImplication;
     RImplication:   ARImplication   | Equivalence;
@@ -65,7 +64,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
     MultDiv:        AMultDiv        | Power;
     Power:          APower          | Unary;
     Unary:          AUnary          | Aggregate;
-    Aggregate:      AAggregate      | Base;
+    Aggregate:      AAggregate      | IfExpr;
+    IfExpr:         AIfExpr         | Base;
 
 
     AQuantification: q=Quantor quantees+=Quantee[','] ':' f=Expression;
@@ -82,6 +82,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
     AUnary: !INT !IDPFLOAT               (operators+=UnaryOperator  f=Aggregate);
     AAggregate: !Date ( aggtype=/#|card/ '{' quantees*=Quantee[',']  ':' f=Expression '}'
                 | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' f=Expression ')');
+    AIfExpr: 'if' if_f=Expression 'then' then_f=Expression 'else' else_f=Expression;
 
     RImplicationOp: '<=' | '⇐';
     EquivalenceOp: '<=>' | '⇔';
@@ -94,7 +95,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
     UnaryOperator:   '-' | '~' | '¬';
 
 
-    Base:  IfExpr | AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
+    Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
       AppliedSymbol: symbol=SymbolExpr
               '(' sub_exprs*=Expression[','] ')'

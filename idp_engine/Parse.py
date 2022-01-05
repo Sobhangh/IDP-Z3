@@ -39,7 +39,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         IfExpr, AQuantification, Domain, Quantee,
+                         AIfExpr, AQuantification, Domain, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -782,7 +782,7 @@ class SymbolInterpretation(ASTNode):
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
-                    out = IfExpr.make(
+                    out = AIfExpr.make(
                         EQUALS([args[rank], tuples[0].args[rank]]),
                         self.interpret_application(theory, rank+1,
                                                    applied, args, tuples),
@@ -844,7 +844,7 @@ class Enumeration(ASTNode):
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
-                out = IfExpr.make(
+                out = AIfExpr.make(
                     EQUALS([args[rank], tuples[0].args[rank]]),
                     self.contains(args, function, arity, rank+1, tuples),
                     out)
@@ -1122,7 +1122,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
-                                         TheoryBlock, Definition, Rule, IfExpr,
+                                         TheoryBlock, Definition, Rule, AIfExpr,
                                          AQuantification, Quantee, ARImplication,
                                          AEquivalence, AImplication,
                                          ADisjunction, AConjunction,
