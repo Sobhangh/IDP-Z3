@@ -34,7 +34,7 @@ from .utils import NEWL
 last_call = time.process_time()  # define it as global
 
 def model_check(theories: List[Theory],
-                structures: List[Theory] = None) -> Iterator[str]:
+                structures: List[Theory] = None) -> str:
     """ output: "sat", "unsat" or "unknown" """
 
     problem = Theory.make(theories, structures)
@@ -42,7 +42,7 @@ def model_check(theories: List[Theory],
 
     solver = Solver(ctx=problem.ctx)
     solver.add(z3_formula)
-    yield str(solver.check())
+    return str(solver.check())
 
 
 def model_expand(theories: List[Theory],
