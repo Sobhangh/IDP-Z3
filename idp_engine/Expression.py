@@ -252,7 +252,7 @@ class Expression(ASTNode):
         self.value: Optional["Expression"] = None
 
         self.code: str = intern(str(self))
-        if not hasattr(self, 'annotations'):
+        if not hasattr(self, 'annotations') or self.annotations == None:
             self.annotations: Dict[str, str] = {'reading': self.code}
         elif type(self.annotations) == Annotations:
             self.annotations = self.annotations.annotations
@@ -645,6 +645,7 @@ class AQuantification(Expression):
     PRECEDENCE = 20
 
     def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
         self.q = kwargs.pop('q')
         self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
@@ -665,9 +666,7 @@ class AQuantification(Expression):
     @classmethod
     def make(cls, q, quantees, f, annotations=None):
         "make and annotate a quantified formula"
-        out = cls(q=q, quantees=quantees, f=f)
-        if annotations:
-            out.annotations = annotations
+        out = cls(annotations=annotations, q=q, quantees=quantees, f=f)
         return out.annotate1()
 
     def __str1__(self):
@@ -1243,6 +1242,8 @@ class Brackets(Expression):
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
         self.annotations = kwargs.pop('annotations')
+        if not self.annotations:
+            self.annotations: Dict[str, str] = {'reading': self.f.code}
         self.sub_exprs = [self.f]
 
         super().__init__()

@@ -68,7 +68,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
     IfExpr:         AIfExpr         | Base;
 
 
-    AQuantification: q=Quantor quantees+=Quantee[','] ':' f=Expression;
+    AQuantification: annotations=Annotations q=Quantor quantees+=Quantee[','] ':' f=Expression;
       Quantor: '∀' | '!' | '∃' | '?' ;
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
     AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
