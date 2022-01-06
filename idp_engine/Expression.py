@@ -98,9 +98,10 @@ class ASTNode(object):
 
 class Annotations(ASTNode):
     def __init__(self, **kwargs):
-        self.annotations = kwargs.pop('annotations')
+        annotations = kwargs.pop('annotations')
 
-        def pair(s):
+        self.annotations = {}
+        for s in annotations:
             p = s.split(':', 1)
             if len(p) == 2:
                 try:
@@ -117,13 +118,14 @@ class Annotations(ASTNode):
                                   'upper_symbol': u_symb,
                                   'lower_bound': l_bound,
                                   'upper_bound': u_bound}
-                    return(p[0], slider_arg)
+                    k, v = (p[0], slider_arg)
                 except:  # could not parse the slider data
-                    return (p[0], p[1])
+                    k, v = (p[0], p[1])
             else:
-                return ('reading', p[0])
-
-        self.annotations = dict((pair(t) for t in self.annotations))
+                k, v = ('reading', p[0])
+            self.check(k not in self.annotations,
+                       f"Duplicate annotation: [{k}: {v}]")
+            self.annotations[k] = v
 
 
 class Constructor(ASTNode):
