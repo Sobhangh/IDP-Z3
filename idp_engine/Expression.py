@@ -948,6 +948,7 @@ class AppliedSymbol(Expression):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
         self.symbol = kwargs.pop('symbol')
         self.sub_exprs = kwargs.pop('sub_exprs')
         if 'is_enumerated' in kwargs:
@@ -972,7 +973,7 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        out = cls(symbol=symbol, sub_exprs=args, **kwargs)
+        out = cls(annotations=None, symbol=symbol, sub_exprs=args, **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
@@ -1246,7 +1247,7 @@ class Brackets(Expression):
         self.f = kwargs.pop('f')
         self.annotations = kwargs.pop('annotations')
         if not self.annotations:
-            self.annotations: Dict[str, str] = {'reading': self.f.code}
+            self.annotations = {'reading': self.f.annotations['reading']}
         self.sub_exprs = [self.f]
 
         super().__init__()

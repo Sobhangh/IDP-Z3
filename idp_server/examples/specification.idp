@@ -35,7 +35,7 @@ theory decision:decision {
                               have_Covid_Safe_Ticket().
 
     [Cinemas and Theater can sit at most 2 people next to each other, all with Covid Safe Ticker, and must close at 11 PM]
-    ([Cinema or Theater](activity() ∈ {Cinema, Theater})) ⇒ end_time() ≤ 11 ∧
+    ([Cinema or Theater] activity() ∈ {Cinema, Theater}) ⇒ end_time() ≤ 11 ∧
                     [1 or 2 participants] nr_of_participants() ≤ 2 ∧
                     have_Covid_Safe_Ticket().
 

@@ -102,7 +102,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
 
     Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
-      AppliedSymbol: symbol=SymbolExpr
+      AppliedSymbol: annotations=Annotations
+              symbol=SymbolExpr
               '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | is_enumeration=/(not\s+)?in|∈|(∉)/ in_enumeration=Enumeration)?;
