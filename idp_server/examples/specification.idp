@@ -18,25 +18,29 @@ vocabulary decision {
 }
 theory environment:environment {
     [Nr of participants is positive]
-    (1 ≤ nr_of_participants()).
+    1 ≤ nr_of_participants().
 }
 theory decision:decision {
 
     [Outdoor sport activity must end at 8 PM]
-    (activity() = Outdoor_sport ⇒ [ends at 8 PM](end_time() ≤ 8)
-            ∧ ( have_masks() ∨ have_Covid_Safe_Ticket() )).
+    activity() = Outdoor_sport ⇒ [ends at 8 PM](end_time() ≤ 8)
+            ∧ ( have_masks() ∨ have_Covid_Safe_Ticket() ).
 
     [Indoor sport activity must end at 8 PM and participants must have the Covid Safe Ticket]
-    (activity() = Indoor_sport ⇒ end_time() ≤ 8 ∧ have_Covid_Safe_Ticket()).
+    activity() = Indoor_sport ⇒ end_time() ≤ 8 ∧ have_Covid_Safe_Ticket().
 
     [At most 6 persons, all with Covid Safe Ticket, can sit at a restaurant table, up to 11 PM]
-    (activity() = Restaurant ⇒ [ends at 11 PM](end_time() ≤ 11) ∧ nr_of_participants() ≤ 6 ∧ have_Covid_Safe_Ticket()).
+    activity() = Restaurant ⇒ [ends at 11 PM](end_time() ≤ 11) ∧
+                              [6 participants or less] nr_of_participants() ≤ 6 ∧
+                              have_Covid_Safe_Ticket().
 
     [Cinemas and Theater can sit at most 2 people next to each other, all with Covid Safe Ticker, and must close at 11 PM]
-    ([Cinema or Theater](activity() ∈ {Cinema, Theater}) ⇒ end_time() ≤ 11 ∧ nr_of_participants() ≤ 2 ∧ have_Covid_Safe_Ticket()).
+    ([Cinema or Theater](activity() ∈ {Cinema, Theater})) ⇒ end_time() ≤ 11 ∧
+                    [1 or 2 participants] nr_of_participants() ≤ 2 ∧
+                    have_Covid_Safe_Ticket().
 
     [Activities end in the afternoon]
-    (1 ≤ end_time() ≤ 12).
+    1 ≤ end_time() ≤ 12.
 }
 
 display {
