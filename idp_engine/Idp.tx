@@ -75,7 +75,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
     AImplication:  sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+;
     ADisjunction:  sub_exprs=Conjunction (operator=DisjunctionOp  sub_exprs=Conjunction)+;
     AConjunction:  sub_exprs=Comparison  (operator=ConjunctionOp  sub_exprs=Comparison )+;
-    AComparison:   sub_exprs=SumMinus    (operator=ComparisonOp   sub_exprs=SumMinus   )+;
+    AComparison:   annotations=Annotations
+                   sub_exprs=SumMinus    (operator=ComparisonOp   sub_exprs=SumMinus   )+;
     ASumMinus:     sub_exprs=MultDiv     (operator=SumMinusOp     sub_exprs=MultDiv    )+;
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );

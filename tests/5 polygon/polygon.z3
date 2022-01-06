@@ -83,8 +83,8 @@ theory {
     (Subtype()=square    <=> Sides()=4 & Equilateral()).
 
     [In a triangle, no side is longer than the sum of the 2 other sides]
-    ( Type()=triangle => ( Length(1) =< Length(2) + Length(3))
-                    &  ( Length(2) =< Length(3) + Length(1))
+    ( Type()=triangle => [Short L1] Length(1) =< Length(2) + Length(3)
+                    &    [Short L2] Length(2) =< Length(3) + Length(1)
                     &  ( Length(3) =< Length(1) + Length(2))).
 
     // General constraints

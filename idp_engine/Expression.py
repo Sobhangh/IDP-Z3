@@ -735,7 +735,7 @@ class Operator(Expression):
             return operands[0]
         if isinstance(ops, str):
             ops = [ops] * (len(operands)-1)
-        out = (cls)(sub_exprs=operands, operator=ops)
+        out = (cls)(annotations=annotations, sub_exprs=operands, operator=ops)
         if annotations:
             out.annotations = annotations
         return out.annotate1().simplify1()
@@ -819,6 +819,7 @@ class AComparison(Operator):
     PRECEDENCE = 80
 
     def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
         super().__init__(**kwargs)
 
     def is_assignment(self):
