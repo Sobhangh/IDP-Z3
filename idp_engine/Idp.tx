@@ -32,7 +32,11 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
+TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
+             ( definitions=Definition*
+               constraints=Constraint*
+               interpretations=SymbolInterpretation*
+             )* '}';
 
   Definition: annotations=Annotations '{' rules*=Rule '}';
   Rule: annotations=Annotations
@@ -51,9 +55,9 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
               ']'
             )?;
 
-  Expression: Quantification;
+  Constraint: annotations=Annotations expr=Expression '.';
 
-    Quantification: AQuantification | RImplication;
+    Expression:     AQuantification | RImplication;
     RImplication:   ARImplication   | Equivalence;
     Equivalence:    AEquivalence    | Implication;
     Implication:    AImplication    | Disjunction;

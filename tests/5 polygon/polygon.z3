@@ -47,7 +47,7 @@ theory {
       (Vertices()=4 <=> Sides()=4)).
 
     [All triangles are convex]
-    (Sides()=3 => Convex()).
+    Sides()=3 => Convex().
 
     [Definition of Convex]
     (Convex() <=> [All angles are below 180°]
@@ -80,12 +80,12 @@ theory {
     (Subtype()=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2)).
 
     [A square is an equilateral quadrilateral]
-    (Subtype()=square    <=> Sides()=4 & Equilateral()).
+    Subtype()=square    <=> Sides()=4 & Equilateral().
 
     [In a triangle, no side is longer than the sum of the 2 other sides]
-    ( Type()=triangle => [Short L1] Length(1) =< Length(2) + Length(3)
+    Type()=triangle => [Short L1] Length(1) =< Length(2) + Length(3)
                     &    [Short L2] Length(2) =< Length(3) + Length(1)
-                    &  ( Length(3) =< Length(1) + Length(2))).
+                    &  ( Length(3) =< Length(1) + Length(2)).
 
     // General constraints
 

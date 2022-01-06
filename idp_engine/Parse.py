@@ -472,7 +472,7 @@ class TheoryBlock(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
-        self.constraints = OrderedSet(kwargs.pop('constraints'))
+        constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
         self.goals = {}
@@ -484,8 +484,12 @@ class TheoryBlock(ASTNode):
         self.def_constraints = {}  # {(Declaration, Definition): list[Expression]}
         self.assignments = Assignments()
 
-        for constraint in self.constraints:
-            constraint.block = self
+        self.constraints = OrderedSet()
+        for c in constraints:
+            c.block = self
+            if c.annotations is not None:
+                c.expr.annotations = c.annotations.annotations
+            self.constraints.append(c.expr)
         for definition in self.definitions:
             for rule in definition.rules:
                 rule.block = self
