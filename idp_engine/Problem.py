@@ -25,14 +25,15 @@ import time
 from copy import copy
 from enum import Enum, auto
 from itertools import chain
-from typing import Any, Iterable, List
-from z3 import (Context, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
+from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
                 is_and, BoolVal)
 
 from .Assignments import Status as S, Assignment, Assignments
-from .Expression import (TRUE, AConjunction, Expression, FALSE, AppliedSymbol,
+from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
                          EQUALS, NOT)
-from .Parse import (TypeDeclaration, Symbol, TheoryBlock, str_to_IDP)
+from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
+                    TheoryBlock, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, CONCEPT, RELEVANT)
@@ -120,40 +121,43 @@ class Theory(object):
             The string matches Expression.code in expl_reifs.
 
     """
-    def __init__(self, *blocks, extended=False):
-        self.extended = extended
+    def __init__(self,
+                 *blocks: List[Any],  #TODO
+                 extended: Optional[bool] = False) -> None:
+        self.extended: Optional[bool] = extended
 
-        self.declarations = {}
-        self.definitions = []
-        self.constraints = OrderedSet()
-        self.assignments = Assignments()
-        self.def_constraints = {}  # {(Declaration, Definition): List[Expression]}
-        self.interpretations = {}
-        self.goals = {}
-        self.name = ''
+        self.declarations: dict[str, Type] = {}
+        self.definitions: List[Definition] = []
+        self.constraints: OrderedSet = OrderedSet()
+        self.assignments: Assignments = Assignments()
+        self.def_constraints: dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
+        self.interpretations: dict[str, SymbolInterpretation] = {}
+        self.goals: dict[str, SymbolDeclaration] = {}
+        self.name: str = ''
 
-        self._contraintz = None
-        self._formula = None  # the problem expressed in one logic formula
-        self.co_constraints = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
+        self._contraintz: Optional[List[BoolRef]] = None
+        self._formula: Optional[BoolRef] = None  # the problem expressed in one logic formula
+        self.co_constraints: Optional[OrderedSet] = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
-        self.z3 = {}
-        self.ctx = Context()
+        self.z3: dict[str, ExprRef] = {}
+        self.ctx: Context = Context()
         self.add(*blocks)
 
-        self.previous_assignments = Assignments()
-        self.first_prop = True
+        self.previous_assignments: Assignments = Assignments()
+        self.first_prop: bool = True
 
-        self.satisfied = True
+        self.satisfied: bool = True
 
-        self._slvr = None
-        self._optmz = None
-        self._reif = None
-        self._optmz_reif = None
-        self.expl_reifs = {}  # {reified: (constraint, original)}
-        self.ignored_laws = set()
+        self._slvr: Solver = None
+        self._optmz: Solver = None
+        self._reif: Solver = None
+        self._optmz_reif: Solver = None
+
+        self.expl_reifs: dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
+        self.ignored_laws: set[str] = set()
 
     @property
-    def solver(self):
+    def solver(self) -> Solver:
         if self._slvr is None:
             self._slvr = Solver(ctx=self.ctx)
             if self.constraintz():
@@ -167,7 +171,7 @@ class Theory(object):
         return self._slvr
 
     @property
-    def optimize_solver(self):
+    def optimize_solver(self) -> Solver:
         if self._optmz is None:
             self._optmz = Optimize(ctx=self.ctx)
             if self.constraintz():
@@ -181,7 +185,7 @@ class Theory(object):
         return self._optmz
 
     @property
-    def solver_reified(self):
+    def solver_reified(self) -> Solver:
         if self._reif is None:
             self._reif = Solver(ctx=self.ctx)
             self._reif.set(':core.minimize', True)
@@ -201,7 +205,7 @@ class Theory(object):
         return self._reif
 
     @property
-    def optimize_solver_reified(self):
+    def optimize_solver_reified(self) -> Solver:
         if self._optmz_reif is None:
             _ = self.solver_reified  # ensure self.expl_reifs is instantiated
             self._optmz_reif = Optimize(ctx=self.ctx)
@@ -211,7 +215,10 @@ class Theory(object):
         return self._optmz_reif
 
     @classmethod
-    def make(cls, theories, structures, extended=False):
+    def make(cls,
+             theories: List["Theory"],
+             structures: List["Theory"],
+             extended: Optional[bool] = False) -> "Theory":
         """ polymorphic creation """
         structures = ([] if structures is None else
                       structures if isinstance(structures, Iterable) else
@@ -225,7 +232,7 @@ class Theory(object):
             self = cls(* [theories] + structures, extended=extended)
         return self
 
-    def copy(self):
+    def copy(self) -> "Theory":
         out = copy(self)
         out.assignments = self.assignments.copy()
         out.constraints = OrderedSet(c.copy() for c in self.constraints)
@@ -235,7 +242,7 @@ class Theory(object):
         out._formula = None
         return out
 
-    def add(self, *blocks):
+    def add(self, *blocks: List["Theory"]) -> "Theory":
         for block in blocks:
             self.z3 = {}
             self._formula = None  # need to reapply the definitions
@@ -315,7 +322,11 @@ class Theory(object):
         self._constraintz = None
         return self
 
-    def assert_(self, code: str, value: Any, status: S = S.GIVEN):
+    def assert_(self,
+                code: str,
+                value: Any,
+                status: Optional[S] = S.GIVEN
+                ) -> "Theory":
         """asserts that an expression has a value (or not)
 
         Args:
@@ -331,7 +342,7 @@ class Theory(object):
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
-    def enable_law(self, code):
+    def enable_law(self, code: str) -> "Theory":
         """Enables a law. The law should not be arising from the structure
         (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
         c: () -> T).
@@ -341,7 +352,7 @@ class Theory(object):
         """
         self.ignored_laws.remove(code)
 
-    def disable_law(self, code):
+    def disable_law(self, code: str) -> "Theory":
         """Disables a law. The law should not be arising from the structure
         (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
         c: () -> T).
@@ -351,7 +362,7 @@ class Theory(object):
         """
         self.ignored_laws.add(code)
 
-    def constraintz(self):
+    def constraintz(self) -> List[BoolRef]:
         """list of constraints, co_constraints and definitions in Z3 form"""
         if self._constraintz is None:
 
@@ -376,7 +387,7 @@ class Theory(object):
                 get_symbols_z(c, self._symbols)
         return self._constraintz
 
-    def formula(self):
+    def formula(self) -> BoolRef:
         """ the formula encoding the knowledge base """
         if self._formula is None:
             if self.constraintz():
@@ -395,17 +406,20 @@ class Theory(object):
             self._formula = And(all) if all != [] else BoolVal(True, self.ctx)
         return self._formula
 
-    def get_core_atoms(self, statuses):
+    def get_core_atoms(self, statuses: List[S]) -> List[Assignment]:
         return [a for a in self.assignments.values()
             if (self.extended or not a.sentence.is_reified())
             and a.status in statuses]
 
-    def sexpr(self):
+    def sexpr(self) -> str:
         s = Solver(ctx=self.ctx)
         s.add(self.formula())
         return s.sexpr()
 
-    def _from_model(self, solver, todo, complete):
+    def _from_model(self,
+                    solver: Solver,
+                    todo: List[Expression],
+                    complete: bool) -> Assignments:
         """ returns Assignments from model in solver
 
         the solver must be in sat state
@@ -429,7 +443,7 @@ class Theory(object):
                 ass.assert__(q, val, tag)
         return ass
 
-    def _add_assignment(self, solver):
+    def _add_assignment(self, solver: Solver) -> None:
         """adds the current choices to the (non-reified) solver
 
         Args:
@@ -442,7 +456,9 @@ class Theory(object):
         for af in assignment_forms:
             solver.add(af)
 
-    def _extend_reifications(self, reifs):
+    def _extend_reifications(self,
+                             reifs: Dict[ExprRef, Tuple[Assignment, Expression]]
+                             ) -> None:
         """extends the given reifications with the current choices and structure
 
         Args:
@@ -460,7 +476,7 @@ class Theory(object):
                     form = None
                 reifs[p] = (a, form)
 
-    def _add_assignment_ignored(self, solver):
+    def _add_assignment_ignored(self, solver: Solver) -> None:
         """adds the current choices to the reified solver
         and resets propagated assignments
 
@@ -476,7 +492,11 @@ class Theory(object):
             if not (expr and expr.code in self.ignored_laws):
                 solver.add(z3_form)
 
-    def expand(self, max=10, timeout=10, complete=False):
+    def expand(self,
+               max: Optional[int] = 10,
+               timeout: Optional[int] = 10,
+               complete: Optional[bool] = False
+               ) -> Iterator[Union[Assignments, str]]:
         """ output: a list of Assignments, ending with a string """
         if self.ignored_laws:
             todo = OrderedSet(a.sentence for a in self.get_core_atoms(
@@ -531,7 +551,10 @@ class Theory(object):
         else:
             yield "No models."
 
-    def optimize(self, term, minimize=True):
+    def optimize(self,
+                 term: str,
+                 minimize: Optional[bool] = True
+                 ) -> "Theory":
         assert term in self.assignments, "Internal error"
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
@@ -574,7 +597,7 @@ class Theory(object):
 
         return self
 
-    def symbolic_propagate(self, tag=S.UNIVERSAL):
+    def symbolic_propagate(self, tag: Optional[S] = S.UNIVERSAL) -> "Theory":
         """ determine the immediate consequences of the constraints """
         for c in self.constraints:
             # determine consequences, including from co-constraints
@@ -582,7 +605,10 @@ class Theory(object):
             new_constraint.symbolic_propagate(self.assignments, tag)
         return self
 
-    def propagate(self, tag=S.CONSEQUENCE, method=Propagation.DEFAULT):
+    def propagate(self,
+                  tag: Optional[S] = S.CONSEQUENCE,
+                  method: Optional[Propagation] = Propagation.DEFAULT
+                  ) -> "Theory":
         """ determine all the consequences of the constraints """
         if method == Propagation.BATCH:
             # NOTE: running this will confuse _directional_todo, not used right now
@@ -597,7 +623,7 @@ class Theory(object):
         self.satisfied = (out[0] != "Not satisfiable.")
         return self
 
-    def get_range(self, term: str):
+    def get_range(self, term: str) -> List[str]:
         """ Returns a list of the possible values of the term.
         """
         assert term in self.assignments, f"Unknown term: {term}"
@@ -627,7 +653,9 @@ class Theory(object):
 
         return [str(e.sub_exprs[1]) for e in todos.values() if str(e.sub_exprs[1]) not in forbidden]
 
-    def explain(self, consequence=None):
+    def explain(self,
+                consequence: Optional[str] = None
+                ) -> Tuple[List[Assignment], List[Expression]]:
         """
         Pre: the problem is UNSAT (under the negation of the consequence if not None)
 
@@ -682,7 +710,7 @@ class Theory(object):
 
         return facts, laws
 
-    def simplify(self):
+    def simplify(self) -> "Theory":
         """ returns a simpler copy of the Theory, using known assignments
 
         Assignments obtained by propagation become fixed constraints.
@@ -706,8 +734,9 @@ class Theory(object):
 
     def _generalize(self,
                     conjuncts: List[Assignment],
-                    known, z3_formula=None
-    ) -> List[Assignment]:
+                    known: BoolRef,
+                    z3_formula: Optional[BoolRef] = None
+                    ) -> List[Assignment]:
         """finds a subset of `conjuncts`
             that is still a minimum satisfying assignment for `self`, given `known`.
 
@@ -754,8 +783,13 @@ class Theory(object):
             conditions = join_set_conditions(conditions)
             return [c for c in conditions if c.sentence != TRUE]+[goal]
 
-    def decision_table(self, goal_string="", timeout=20, max_rows=50,
-                       first_hit=True, verify=False):
+    def decision_table(self,
+                       goal_string: Optional[str] = "",
+                       timeout: Optional[int] = 20,
+                       max_rows: Optional[int] = 50,
+                       first_hit: Optional[bool] = True,
+                       verify: Optional[bool] = False
+                       ) -> List[List[Assignment]]:
         """returns a decision table for `goal_string`, given `self`.
 
         Args:

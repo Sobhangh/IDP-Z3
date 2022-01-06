@@ -6,6 +6,6 @@ from .Simplify import Done
 from .Idp_to_Z3 import Done
 from .Run import (model_check, model_expand, model_propagate,
                   execute, decision_table)
-from .Problem import Theory
+from .Problem import Propagation, Theory
 from .Propagate import Done
-from .Assignments import Status
+from .Assignments import Status, Assignment, Assignments

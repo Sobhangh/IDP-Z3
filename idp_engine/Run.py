@@ -23,6 +23,7 @@ Classes to execute the main block of an IDP program
 
 import time
 import types
+from typing import Any, Iterator, List
 from z3 import Solver
 
 from .Parse import IDP
@@ -32,7 +33,8 @@ from .utils import NEWL
 
 last_call = time.process_time()  # define it as global
 
-def model_check(theories, structures=None):
+def model_check(theories: List[Theory],
+                structures: List[Theory] = None) -> Iterator[str]:
     """ output: "sat", "unsat" or "unknown" """
 
     problem = Theory.make(theories, structures)
@@ -43,8 +45,14 @@ def model_check(theories, structures=None):
     yield str(solver.check())
 
 
-def model_expand(theories, structures=None, max=10, timeout=10, complete=False,
-                 extended=False, sort=False):
+def model_expand(theories: List[Theory],
+                 structures: List[Theory] = None,
+                 max: int = 10,
+                 timeout: int = 10,
+                 complete: bool = False,
+                 extended: bool = False,
+                 sort: bool = False
+                 ) -> Iterator[str]:
     """ output: a list of Assignments, ending with a string """
     problem = Theory.make(theories, structures, extended=extended)
     ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
@@ -60,7 +68,10 @@ def model_expand(theories, structures=None, max=10, timeout=10, complete=False,
     yield out + last
 
 
-def model_propagate(theories, structures=None, sort=False):
+def model_propagate(theories: List[Theory],
+                    structures: List[Theory] = None,
+                    sort: bool = False
+                    ) -> Iterator[str]:
     """ output: a list of Assignment """
     problem = Theory.make(theories, structures)
     if sort:
@@ -74,8 +85,14 @@ def model_propagate(theories, structures=None, sort=False):
         yield from problem._propagate(tag=S.CONSEQUENCE)
 
 
-def decision_table(theories, structures=None, goal_string="",
-                timeout=20, max_rows=50, first_hit=True, verify=False):
+def decision_table(theories: List[Theory],
+                   structures: List[Theory] = None,
+                   goal_string: str = "",
+                   timeout: int = 20,
+                   max_rows: int = 50,
+                   first_hit: bool = True,
+                   verify: bool = False
+                   ) -> Iterator[str]:
     """returns a decision table for `goal_string`, given `theories` and `structures`.
 
     Args:
@@ -100,7 +117,7 @@ def decision_table(theories, structures=None, goal_string="",
     yield "end of decision table"
 
 
-def pretty_print(x=""):
+def pretty_print(x: Any ="") -> None:
     if type(x) is tuple and len(x)==2: # result of Theory.explain()
         facts, laws = x
         for f in facts:
@@ -120,7 +137,7 @@ def pretty_print(x=""):
         print(x)
 
 
-def duration(msg=""):
+def duration(msg: str = "") -> str:
     """Returns the processing time since the last call to `duration()`,
     or since the begining of execution"""
     global last_call
@@ -128,7 +145,7 @@ def duration(msg=""):
     last_call = time.process_time()
     return f"{out} {msg}"
 
-def execute(self):
+def execute(self: IDP) -> None:
     """ Execute the IDP program """
     global last_call
     last_call = time.process_time()
