@@ -1,7 +1,7 @@
 .. index:: display block
 
-Display
--------
+Display block
+-------------
 
 The *display block* configures the user interface of the :ref:`Interactive Consultant<Consultant>`.
 It consists of a set of *display facts*, i.e., :ref:`predicate<predicate application>` and :ref:`function applications<function application>` terminated by ``.``.
