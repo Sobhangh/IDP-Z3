@@ -17,13 +17,13 @@
 
 """
 
-Classes to execute the main block of an IDP program
+The following functions can be used in the main block of an IDP program:
 
 """
 
 import time
 import types
-from typing import Any, Iterator, List
+from typing import Any, Iterator, List, Union
 from z3 import Solver
 
 from .Parse import IDP
@@ -33,9 +33,22 @@ from .utils import NEWL
 
 last_call = time.process_time()  # define it as global
 
-def model_check(theories: List[Theory],
-                structures: List[Theory] = None) -> str:
-    """ output: "sat", "unsat" or "unknown" """
+def model_check(theories: Union[Theory, List[Theory]],
+                structures: Union[Theory, List[Theory]] = None
+                ) -> str:
+    """Returns a string stating whether the theory has a model expanding the structure.
+
+    If ``theory`` and ``structure`` are lists, they are merged.
+
+    For example, ``print(model_check(T, S))`` will print ``sat`` if theory named ``T`` has a model expanding structure named ``S``.
+
+    Args:
+        theories (Union[Theory, List[Theory]]): normal theories
+        structures (Union[Theory, List[Theory]], optional): structures, aka data theories. Defaults to None.
+
+    Returns:
+        str: ``sat``, ``unsat`` or ``unknown``
+    """
 
     problem = Theory._make(theories, structures)
     z3_formula = problem.formula()
@@ -45,15 +58,46 @@ def model_check(theories: List[Theory],
     return str(solver.check())
 
 
-def model_expand(theories: List[Theory],
-                 structures: List[Theory] = None,
+def model_expand(theories: Union[Theory, List[Theory]],
+                 structures:Union[Theory, List[Theory]] = None,
                  max: int = 10,
                  timeout: int = 10,
                  complete: bool = False,
                  extended: bool = False,
                  sort: bool = False
                  ) -> Iterator[str]:
-    """ output: a list of Assignments, ending with a string """
+    """Returns a (possibly empty) list of models of the theory
+    that are expansion of the structure,
+    followed by a string message.
+
+    For example, ``print(model_expand(T, S))`` will return (up to) 10
+    string representations of models of theory named ``T``
+    expanding structure named ``S``.
+
+    The string message can be one of the following:
+
+    - ``No models.``
+
+    - ``More models may be available.  Change the max argument to see them.``
+
+    - ``More models may be available.  Change the timeout argument to see them.``
+
+    - ``More models may be available.  Change the max and timeout arguments to see them.``
+
+    Args:
+        theories (Union[Theory, List[Theory]]): normal theories
+        structures (Union[Theory, List[Theory]], optional): structures, aka data theories. Defaults to None.
+        max (int, optional): max number of models. Defaults to 10.
+        timeout (int, optional): timeout in seconds. Defaults to 10.
+        complete (bool, optional): True to obtain complete structures. Defaults to False.
+        extended (bool, optional): use `True` when the truth value of
+                inequalities and quantified formula is of interest
+                (e.g. for the Interactive Consultant). Defaults to False.
+        sort (bool, optional): True if the models should be in alphabetical order. Defaults to False.
+
+    Yields:
+        str
+    """
     problem = Theory._make(theories, structures, extended=extended)
     ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
     if isinstance(ms[-1], str):
@@ -68,11 +112,29 @@ def model_expand(theories: List[Theory],
     yield out + last
 
 
-def model_propagate(theories: List[Theory],
-                    structures: List[Theory] = None,
+def model_propagate(theories: Union[Theory, List[Theory]],
+                    structures: Union[Theory, List[Theory]] = None,
                     sort: bool = False
                     ) -> Iterator[str]:
-    """ output: a list of Assignment """
+    """
+    Returns a list of assignments that are true in any expansion of the structure consistent with the theory.
+
+    ``theory`` and ``structure`` can be lists, in which case their elements are merged.
+
+    Terms and symbols starting with '_' are ignored.
+
+    For example, ``print(model_propagate(T, S))`` will return the assignments
+    that are true in any expansion of the structure named ``S``
+    consistent with the theory named ``T``.
+
+    Args:
+        theories (Union[Theory, List[Theory]]): normal theories
+        structures (Union[Theory, List[Theory]], optional): structures, aka data theories. Defaults to None.
+        sort (bool, optional): True if the assignments should be in alphabetical order. Defaults to False.
+
+    Yields:
+        str
+    """
     problem = Theory._make(theories, structures)
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
@@ -93,10 +155,11 @@ def decision_table(theories: List[Theory],
                    first_hit: bool = True,
                    verify: bool = False
                    ) -> Iterator[str]:
-    """returns a decision table for `goal_string`, given `theories` and `structures`.
+    """Experimental. Returns a decision table for `goal_string`, given `theories` and `structures`.
 
     Args:
         goal_string (str, optional): the last column of the table.
+            Must be a predicate application defined in the theory, e.g. ``eligible()``.
         timeout (int, optional): maximum duration in seconds. Defaults to 20.
         max_rows (int, optional): maximum number of rows. Defaults to 50.
         first_hit (bool, optional): requested hit-policy. Defaults to True.
@@ -118,6 +181,11 @@ def decision_table(theories: List[Theory],
 
 
 def pretty_print(x: Any ="") -> None:
+    """Prints its argument on stdout, in a readable form.
+
+    Args:
+        x (Any, optional): the result of an API call. Defaults to "".
+    """
     if type(x) is tuple and len(x)==2: # result of Theory.explain()
         facts, laws = x
         for f in facts:

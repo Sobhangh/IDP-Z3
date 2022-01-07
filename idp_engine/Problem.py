@@ -536,7 +536,7 @@ class Theory(object):
 
         Args:
             max (int, optional): maximum number of models. Defaults to 10.
-            timeout (int, optional): Defaults to 10.
+            timeout (int, optional): timeout in seconds.  Defaults to 10.
             complete (bool, optional): ``True`` for complete models. Defaults to False.
 
         Yields:
