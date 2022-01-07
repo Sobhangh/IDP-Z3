@@ -10,8 +10,7 @@ Overview
 --------
 
 The FO(:raw-html:`&#183`) (aka FO-dot) language is used to create knowledge bases.
-An IDP-Z3 program contains an FO(:raw-html:`&#183`) knowledge base and instructions to perform tasks on it.
-It is made of the following blocks of code:
+An FO-dot knowledge base is a text file containing the following blocks of code:
 
 vocabulary
     specify the types, predicates, functions and constants used to describe the problem domain.
@@ -47,4 +46,3 @@ Everything between ``//`` and the end of the line is a comment.
 .. include:: IDPLanguage/theory.inc
 .. include:: IDPLanguage/structure.inc
 .. include:: IDPLanguage/IDP3.inc
-.. include:: IDPLanguage/summary.inc

@@ -65,3 +65,5 @@ autodoc_default_options = {
     'member-order': 'bysource',
     'special-members': '__init__',
 }
+add_module_names = False
+autodoc_typehints = "description"

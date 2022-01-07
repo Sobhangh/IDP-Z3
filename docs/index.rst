@@ -15,6 +15,7 @@ Welcome to IDP-Z3's documentation!
    IDP-Z3
    interactive_consultant
    code_reference
+   summary
    genindex
 
 
