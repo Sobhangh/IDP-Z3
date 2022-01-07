@@ -27,7 +27,6 @@ The ``IDP`` class exposes the following methods:
 
 .. autoclass:: idp_engine.Parse.IDP
     :members:
-    :noindex:
 
 .. _Theory:
 
@@ -43,7 +42,6 @@ The class has the following methods:
 
 .. autoclass:: idp_engine.Problem.Theory
     :members:
-    :noindex:
 
 .. _idp_engine:
 
@@ -53,4 +51,3 @@ The class has the following methods:
 
 .. automodule:: idp_engine.Run
     :members:
-    :noindex:

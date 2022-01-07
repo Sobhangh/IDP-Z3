@@ -6,3 +6,4 @@ idp_engine.Expression
 .. automodule:: idp_engine.Expression
    :members:
    :show-inheritance:
+   :noindex:
