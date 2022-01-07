@@ -93,10 +93,10 @@ class Theory(object):
         satisfied (Bool): whether propagate found an initial model
 
         first_prop (Bool): keeps track whether a propagation still needs
-        to happen. If so during a propagate call, first an initial propagation
-        without any choices (including defaults) executes to find the universal
-        consequences of the theory (`S.UNIVERSAL`). This is done once to improve
-        subsequent propagations.
+            to happen. If so during a propagate call, first an initial propagation
+            without any choices (including defaults) executes to find the universal
+            consequences of the theory (`S.UNIVERSAL`). This is done once to improve
+            subsequent propagations.
 
         _slvr (Solver): stateful solver used for propagation and model expansion.
             Use self.solver to access.
@@ -110,7 +110,7 @@ class Theory(object):
         _optmz_reif (Solver): stateful solver used for optimizing when disabling laws.
             Use self.optimize_solver_reified to access.
 
-        expl_reifs = (dict[z3.BoolRef: (z3.BoolRef,Expression)]):
+        expl_reifs = (dict[z3.BoolRef, (z3.BoolRef,Expression)]):
             dictionary storing for Z3 reification symbols (the keys) which
             Z3 constraint it represents, and what the original FO(.) expression was.
             If the original expression is `None`, the reification represents a
