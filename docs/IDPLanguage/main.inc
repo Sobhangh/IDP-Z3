@@ -2,9 +2,11 @@
 .. index:: main block
 
 Main block
-----------
+++++++++++
 
-The *main block* consists of python-like statements to be executed by the :ref:`IDP-Z3 executable<CLI>` or the Web IDE, in the context of the knowledge base.
+The *main block* consists of python-like statements
+to be executed by the :ref:`IDP-Z3 executable<CLI>` or the :ref:`webIDE <webIDE>`,
+in the context of the knowledge base.
 It takes the following form:
 
 .. code::
@@ -13,23 +15,18 @@ It takes the following form:
         // here comes the python-like code to be executed
     }
 
-Within that block, the vocabularies, theories and structures defined in other blocks of the IDP-Z3 program are available through variables of the same name.
+Within that block, the following variables, classes and functions are available:
 
+    - variables containing the vocabularies, theories and structures specified in the same IDP-Z3 program.  The variables have the name of the block.
+    - the ``Theory`` class, described :ref:`here <Theory>`;
+    - the functions exposed by the ``idp_engine``, described :ref:`here <idp_engine>`.
 
-.. automodule:: idp_engine.Run
-    :members:
-    :noindex:
+Below is an example of a main block.
 
+.. code-block:: python
 
+    procedure main() {
+        pretty_print(Theory(T, S).propagate())
+        duration("End")
+    }
 
-Theory class
-+++++++++++++
-
-The main block can also use instances of the ``Theory`` class.
-This is beneficial when several inferences must be made in a row (e.g., ``Theory(T,S).propagate().simplify().formula()``).
-Instances of the ``Theory`` class represent a collection of theory and structure blocks.
-The class has the following methods:
-
-.. autoclass:: idp_engine.Problem.Theory
-    :members:
-    :noindex:

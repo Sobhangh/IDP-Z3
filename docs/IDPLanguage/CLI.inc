@@ -1,7 +1,7 @@
 .. _CLI:
 
 Command Line Interface
-======================
+----------------------
 
 IDP-Z3 can be run through a Command Line Interface.
 
@@ -38,3 +38,6 @@ The usage of the CLI is as follows:
        name of the output file
        --full-formula        show the full formula
        --no-timing           don't display timing information
+
+
+.. include:: IDPLanguage/main.inc

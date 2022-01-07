@@ -107,8 +107,9 @@ class ViewType(Enum):
 
 class IDP(ASTNode):
     """The class of AST nodes representing an IDP-Z3 program.
-
-    Args:
+    """
+    """ do not display this info in the API
+    Attributes:
         code (str): source code of the IDP program
 
         vocabularies (dict[str, Vocabulary]): list of vocabulary blocks, by name
@@ -191,7 +192,7 @@ class IDP(ASTNode):
         out.code = code
         return out
 
-    def get_blocks(self, blocks: List[str]):
+    def get_blocks(self, blocks: List[str]) -> List[ASTNode]:
         """returns the AST nodes for the blocks whose names are given
 
         Args:
@@ -212,6 +213,9 @@ class IDP(ASTNode):
                        self.display if name == "Display" else
                        "")
         return out
+
+    def execute(self) -> None:
+        pass  # monkey patched
 
 
 ################################ Vocabulary  ##############################

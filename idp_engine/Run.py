@@ -17,7 +17,8 @@
 
 """
 
-The following functions can be used in the main block of an IDP program:
+The following Python functions can be used to perform computations
+using FO-dot knowledge bases:
 
 """
 
@@ -214,7 +215,7 @@ def duration(msg: str = "") -> str:
     return f"{out} {msg}"
 
 def execute(self: IDP) -> None:
-    """ Execute the IDP program """
+    """ Execute the ``main()`` procedure block in the IDP program """
     global last_call
     last_call = time.process_time()
     main = str(self.procedures['main'])
