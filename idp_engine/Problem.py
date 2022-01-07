@@ -50,6 +50,12 @@ class Propagation(Enum):
 class Theory(object):
     """A collection of theory and structure blocks.
 
+        assignments (Assignments): the set of assignments.
+            The assignments are updated by the different steps of the problem
+            resolution.  Assignments include inequalities and quantified formula
+            when the problem is extended
+    """
+    """  do not include these in the API documentation
     Attributes:
         extended (Bool): True when the truth value of inequalities
             and quantified formula is of interest (e.g. in the Interactive Consultant)
@@ -57,11 +63,6 @@ class Theory(object):
         declarations (dict[str, Type]): the list of type and symbol declarations
 
         constraints (OrderedSet): a set of assertions.
-
-        assignments (Assignment): the set of assignments.
-            The assignments are updated by the different steps of the problem
-            resolution.  Assignments include inequalities and quantified formula
-            when the problem is extended
 
         definitions ([Definition]): a list of definitions in this problem
 
@@ -122,8 +123,18 @@ class Theory(object):
 
     """
     def __init__(self,
-                 *blocks: List[Any],  #TODO
-                 extended: Optional[bool] = False) -> None:
+                 *blocks: List[Any],
+                 extended: bool = False
+                 ) -> None:
+        """Creates an instance of ``Theory`` for the list of blocks, e.g., ``Theory(T,S)``.
+
+        Args:
+            extended (bool, optional): use `True` when the truth value of
+                inequalities and quantified formula is of interest
+                (e.g. for the Interactive Consultant).
+                Defaults to False.
+        """
+
         self.extended: Optional[bool] = extended
 
         self.declarations: dict[str, Type] = {}
@@ -215,10 +226,10 @@ class Theory(object):
         return self._optmz_reif
 
     @classmethod
-    def make(cls,
+    def _make(cls,
              theories: List["Theory"],
              structures: List["Theory"],
-             extended: Optional[bool] = False) -> "Theory":
+             extended: bool = False) -> "Theory":
         """ polymorphic creation """
         structures = ([] if structures is None else
                       structures if isinstance(structures, Iterable) else
@@ -233,6 +244,8 @@ class Theory(object):
         return self
 
     def copy(self) -> "Theory":
+        """Returns an independent copy of a theory.
+        """
         out = copy(self)
         out.assignments = self.assignments.copy()
         out.constraints = OrderedSet(c.copy() for c in self.constraints)
@@ -243,6 +256,8 @@ class Theory(object):
         return out
 
     def add(self, *blocks: List["Theory"]) -> "Theory":
+        """Adds a list of theory or structure blocks to the theory.
+        """
         for block in blocks:
             self.z3 = {}
             self._formula = None  # need to reapply the definitions
@@ -325,13 +340,13 @@ class Theory(object):
     def assert_(self,
                 code: str,
                 value: Any,
-                status: Optional[S] = S.GIVEN
+                status: S = S.GIVEN
                 ) -> "Theory":
-        """asserts that an expression has a value (or not)
+        """asserts that an expression has a value (or not), e.g. ``theory.assert_("p()", True)``
 
         Args:
-            code (str): the code of the expression, e.g., "p()"
-            value (Any): a Python value, e.g., True
+            code (str): the code of the expression, e.g., ``"p()"``
+            value (Any): a Python value, e.g., ``True``
             status (Status, Optional): how the value was obtained.  Default: S.GIVEN
         """
         atom = self.assignments[code].sentence
@@ -343,9 +358,10 @@ class Theory(object):
         self._formula = None
 
     def enable_law(self, code: str) -> "Theory":
-        """Enables a law. The law should not be arising from the structure
-        (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
-        c: () -> T).
+        """Enables a law, represented as a code string taken from the output of explain(...).
+
+        The law should not result from a structure (e.g., from ``p:=true``)
+        or from a types (e.g., from ``T:={1..10}`` and ``c: () -> T``).
 
         Args:
             code (str): the code of the law to be enabled
@@ -353,9 +369,10 @@ class Theory(object):
         self.ignored_laws.remove(code)
 
     def disable_law(self, code: str) -> "Theory":
-        """Disables a law. The law should not be arising from the structure
-        (e.g., from p:=true) or from the types (e.g., from T:={1..10} and
-        c: () -> T).
+        """Disables a law, represented as a code string taken from the output of explain(...).
+
+        The law should not result from a structure (e.g., from ``p:=true``)
+        or from a types (e.g., from ``T:={1..10}`` and ``c: () -> T``).
 
         Args:
             code (str): the code of the law to be disabled
@@ -363,6 +380,7 @@ class Theory(object):
         self.ignored_laws.add(code)
 
     def constraintz(self) -> List[BoolRef]:
+        """"""
         """list of constraints, co_constraints and definitions in Z3 form"""
         if self._constraintz is None:
 
@@ -388,7 +406,10 @@ class Theory(object):
         return self._constraintz
 
     def formula(self) -> BoolRef:
-        """ the formula encoding the knowledge base """
+        """ Returns a Z3 object representing the logic formula equivalent to the theory.
+
+        This object can be converted to a string using ``str()``.
+        """
         if self._formula is None:
             if self.constraintz():
                 # use existing z3 constraints, but only add interpretations
@@ -493,11 +514,34 @@ class Theory(object):
                 solver.add(z3_form)
 
     def expand(self,
-               max: Optional[int] = 10,
-               timeout: Optional[int] = 10,
-               complete: Optional[bool] = False
+               max: int = 10,
+               timeout: int = 10,
+               complete: bool = False
                ) -> Iterator[Union[Assignments, str]]:
-        """ output: a list of Assignments, ending with a string """
+        """Generates a list of models of the theory that are expansion of the known assignments.
+
+        The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.
+        The search for new models is stopped when processing exceeds ``timeout`` (in seconds) (unless it is 0).
+        The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
+
+        The string message can be one of the following:
+
+        - ``No models.``
+
+        - ``More models may be available.  Change the max argument to see them.``
+
+        - ``More models may be available.  Change the timeout argument to see them.``
+
+        - ``More models may be available.  Change the max and timeout arguments to see them.``
+
+        Args:
+            max (int, optional): maximum number of models. Defaults to 10.
+            timeout (int, optional): Defaults to 10.
+            complete (bool, optional): ``True`` for complete models. Defaults to False.
+
+        Yields:
+            Iterator[Union[Assignments, str]]: [description]
+        """
         if self.ignored_laws:
             todo = OrderedSet(a.sentence for a in self.get_core_atoms(
                 [S.UNKNOWN, S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ]))
@@ -553,8 +597,15 @@ class Theory(object):
 
     def optimize(self,
                  term: str,
-                 minimize: Optional[bool] = True
+                 minimize: bool = True
                  ) -> "Theory":
+        """Updates the Theory so that the value of term in the ``assignments`` property
+        is the optimal value that is compatible with the Theory.
+
+        Args:
+            term (str): e.g., ``"Length(1)"``
+            minimize (bool): ``True`` to minimize ``term``, ``False`` to maximize it
+        """
         assert term in self.assignments, "Internal error"
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
@@ -597,8 +648,15 @@ class Theory(object):
 
         return self
 
-    def symbolic_propagate(self, tag: Optional[S] = S.UNIVERSAL) -> "Theory":
-        """ determine the immediate consequences of the constraints """
+    def symbolic_propagate(self, tag: S = S.UNIVERSAL) -> "Theory":
+        """Returns the theory with its ``assignments`` property updated
+        with direct consequences of the constraints of the theory.
+
+        This propagation is less complete than ``propagate()``.
+
+        Args:
+            tag (S): the status of propagated assignments
+        """
         for c in self.constraints:
             # determine consequences, including from co-constraints
             new_constraint = c.substitute(TRUE, TRUE, self.assignments, tag)
@@ -606,10 +664,19 @@ class Theory(object):
         return self
 
     def propagate(self,
-                  tag: Optional[S] = S.CONSEQUENCE,
-                  method: Optional[Propagation] = Propagation.DEFAULT
+                  tag: S = S.CONSEQUENCE,
+                  method: Propagation = Propagation.DEFAULT
                   ) -> "Theory":
-        """ determine all the consequences of the constraints """
+        """Returns the theory with its ``assignments`` property updated
+        with values for all terms and atoms that have the same value
+        in every model of the theory.
+
+        Terms and propositions starting with '_' are ignored.
+
+        Args:
+            tag (S): the status of propagated assignments
+            method (Propagation): the particular propagation to use
+        """
         if method == Propagation.BATCH:
             # NOTE: running this will confuse _directional_todo, not used right now
             assert False, "dead code"
@@ -624,7 +691,14 @@ class Theory(object):
         return self
 
     def get_range(self, term: str) -> List[str]:
-        """ Returns a list of the possible values of the term.
+        """Returns a list of the possible values of the term.
+
+        Args:
+            term (str): terms whose possible values are requested, e.g. ``subtype()``.
+                Must be a key in ``self.assignments``
+
+        Returns:
+            List[str]: e.g., ``['right triangle', 'regular triangle']``
         """
         assert term in self.assignments, f"Unknown term: {term}"
         termE : Expression = self.assignments[term].sentence
@@ -656,17 +730,14 @@ class Theory(object):
     def explain(self,
                 consequence: Optional[str] = None
                 ) -> Tuple[List[Assignment], List[Expression]]:
-        """
-        Pre: the problem is UNSAT (under the negation of the consequence if not None)
-
-        Returns the facts and laws that make the problem UNSAT.
+        """Returns the facts and laws that make the Theory unsatisfiable, or that explains a consequence.
 
         Args:
             self (Theory): the problem state
-            consequence (string | None): the code of the sentence to be explained.  Must be a key in self.assignments
+            consequence (string, optional): the code of the consequence to be explained.  Must be a key in ``self.assignments``
 
         Returns:
-            (facts, laws) (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
+            (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
 
         solver = self.solver_reified
@@ -711,9 +782,10 @@ class Theory(object):
         return facts, laws
 
     def simplify(self) -> "Theory":
-        """ returns a simpler copy of the Theory, using known assignments
+        """ Returns a simpler copy of the theory, with a simplified formula
+        obtained by substituting terms and atoms by their known values.
 
-        Assignments obtained by propagation become fixed constraints.
+        Assignments obtained by propagation become UNIVERSAL constraints.
         """
         out = self.copy()
 
@@ -784,13 +856,16 @@ class Theory(object):
             return [c for c in conditions if c.sentence != TRUE]+[goal]
 
     def decision_table(self,
-                       goal_string: Optional[str] = "",
-                       timeout: Optional[int] = 20,
-                       max_rows: Optional[int] = 50,
-                       first_hit: Optional[bool] = True,
-                       verify: Optional[bool] = False
+                       goal_string: str = "",
+                       timeout: int = 20,
+                       max_rows: int = 50,
+                       first_hit: bool = True,
+                       verify: bool = False
                        ) -> List[List[Assignment]]:
-        """returns a decision table for `goal_string`, given `self`.
+        """Experimental.  Returns the rows for a decision table that defines ``goal_string``.
+
+        ``goal_string`` must be a predicate application defined in the theory.
+        The theory must be created with ``extended=True``.
 
         Args:
             goal_string (str, optional): the last column of the table.
@@ -800,7 +875,7 @@ class Theory(object):
             verify (bool, optional): request verification of table completeness.  Defaults to False
 
         Returns:
-            list(list(Assignment)): the non-empty cells of the decision table
+            list(list(Assignment)): the non-empty cells of the decision table  for ``goal_string``, given ``self``.
         """
         max_time = time.time()+timeout  # 20 seconds max
         assert self.extended == True, \

@@ -37,7 +37,7 @@ def model_check(theories: List[Theory],
                 structures: List[Theory] = None) -> str:
     """ output: "sat", "unsat" or "unknown" """
 
-    problem = Theory.make(theories, structures)
+    problem = Theory._make(theories, structures)
     z3_formula = problem.formula()
 
     solver = Solver(ctx=problem.ctx)
@@ -54,7 +54,7 @@ def model_expand(theories: List[Theory],
                  sort: bool = False
                  ) -> Iterator[str]:
     """ output: a list of Assignments, ending with a string """
-    problem = Theory.make(theories, structures, extended=extended)
+    problem = Theory._make(theories, structures, extended=extended)
     ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
@@ -73,7 +73,7 @@ def model_propagate(theories: List[Theory],
                     sort: bool = False
                     ) -> Iterator[str]:
     """ output: a list of Assignment """
-    problem = Theory.make(theories, structures)
+    problem = Theory._make(theories, structures)
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
@@ -105,7 +105,7 @@ def decision_table(theories: List[Theory],
     Yields:
         str: a textual representation of each rule
     """
-    problem = Theory.make(theories, structures, extended=True)
+    problem = Theory._make(theories, structures, extended=True)
     for model in problem.decision_table(goal_string, timeout, max_rows,
                                         first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model
