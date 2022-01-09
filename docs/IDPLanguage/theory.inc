@@ -232,4 +232,4 @@ The following expressions can be annotated:
 * Membership in an enumeration
 * Brackets
 
-When necessary, use parenthesis to avoid ambiguity, e.g. ``[Positif or p] ( [Positif] x()<0 ) | p().``.
+When necessary, use parenthesis to avoid ambiguity, e.g. ``[Positive or p] ( [Positive] x()<0 ) | p().``.
