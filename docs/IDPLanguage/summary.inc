@@ -58,7 +58,7 @@ The equivalent ASCII-only encoding is shown on the right.
         }
 
         [this is the intended meaning of the rule]
-        (p()).
+        p().
     }
 
     structure S:V {

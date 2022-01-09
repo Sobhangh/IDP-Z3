@@ -81,9 +81,9 @@ theory {
     (Subtype()=square    <=> Sides()=4 & Equilateral()).
 
     [In a triangle, no side is longer than the sum of the 2 other sides]
-    ( Type()=triangle => ( Length(1) =< Length(2) + Length(3))
-                    &  ( Length(2) =< Length(3) + Length(1))
-                    &  ( Length(3) =< Length(1) + Length(2))).
+    ( Type()=triangle => [Short L1] Length(1) =< Length(2) + Length(3)
+                    &  [Short L2] Length(2) =< Length(3) + Length(1)
+                    &  [Short L3]( Length(3) =< Length(1) + Length(2))).
 
     // General constraints
 
@@ -405,7 +405,7 @@ display {
             'Length(1) ≤ Length(2) + Length(3)': {'environmental': False,
                                                   'is_assignment': False,
                                                   'normal': False,
-                                                  'reading': 'Length(1) ≤ Length(2) + Length(3)',
+                                                  'reading': 'Short L1',
                                                   'relevant': True,
                                                   'status': 'UNIVERSAL',
                                                   'typ': 'Bool',
@@ -429,7 +429,7 @@ display {
             'Length(2) ≤ Length(3) + Length(1)': {'environmental': False,
                                                   'is_assignment': False,
                                                   'normal': False,
-                                                  'reading': 'Length(2) ≤ Length(3) + Length(1)',
+                                                  'reading': 'Short L2',
                                                   'relevant': True,
                                                   'status': 'UNIVERSAL',
                                                   'typ': 'Bool',
@@ -445,7 +445,7 @@ display {
             'Length(3) ≤ Length(1) + Length(2)': {'environmental': False,
                                                   'is_assignment': False,
                                                   'normal': False,
-                                                  'reading': 'Length(3) ≤ Length(1) + Length(2)',
+                                                  'reading': 'Short L3',
                                                   'relevant': True,
                                                   'status': 'UNIVERSAL',
                                                   'typ': 'Bool',

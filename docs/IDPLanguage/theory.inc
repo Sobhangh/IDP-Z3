@@ -212,3 +212,24 @@ If the body is ``true``, the left arrow and body of the rule can be omitted.
 
 
 
+.. _annotation:
+.. index:: annotation
+
+Annotations
++++++++++++
+
+Some expressions can be annotated with their informal meaning, between brackets.
+For example, ``[age is a positive number] 0 =< age()``.
+Such annotations are used in the `Interactive Consultant <interactive_consultant.html>`_.
+
+The following expressions can be annotated:
+
+* Definitions
+* Rules
+* Constraints
+* Quantified formula
+* Comparisons
+* Membership in an enumeration
+* Brackets
+
+When necessary, use parenthesis to avoid ambiguity, e.g. ``[Positive or p] ( [Positive] x()<0 ) | p().``.
