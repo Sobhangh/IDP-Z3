@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
+
 ### API
 * (breaking) MR !193: minor public API changes
 * fix #163: improve performance by avoiding unnecessary copying
