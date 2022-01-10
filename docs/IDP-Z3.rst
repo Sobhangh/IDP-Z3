@@ -9,11 +9,11 @@ IDP-Z3
 IDP-Z3 is used to perform reasoning on FO(:raw-html:`&#183`) knowledge bases.
 It can be invoked in 3 ways:
 
-    - in a Python program: by using classes and functions imported from the ``idp_engine`` package available on `Pypi <https://pypi.org/project/idp-engine/>`_.
+    - via a web interface, called webIDE.
 
     - in a shell, using the Command Line Interface of IDP-Z3.
 
-    - via a web interface, called webIDE.
+    - in a Python program: by using classes and functions imported from the ``idp_engine`` package available on `Pypi <https://pypi.org/project/idp-engine/>`_.
 
 These methods are further described below.
 
@@ -24,6 +24,6 @@ These methods are further described below.
     This procedure block is described later in this chapter.
 
 
-.. include:: IDPLanguage/API.inc
-.. include:: IDPLanguage/CLI.inc
 .. include:: IDPLanguage/webIDE.inc
+.. include:: IDPLanguage/CLI.inc
+.. include:: IDPLanguage/API.inc

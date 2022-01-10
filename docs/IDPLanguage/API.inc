@@ -16,9 +16,11 @@ The following code illustrates how to invoke it.
         print(model)
     duration("End")
 
+The file ``path/to/file.idp`` must contain an :ref:`FO-dot <FO-dot>` knowledge base (with vocabulary, theory and, optionally, structure blocks).
 
-``idp_engine`` exposes the ``IDP`` and ``Theory`` classes, as well as some useful functions.
-They are described below.
+
+``idp_engine`` exposes :ref:`useful functions <IDP_functions>`, as well as the ``Theory`` (described :ref:`here <Theory_class>`) and ``IDP`` classes.
+
 
 IDP class
 +++++++++
@@ -29,25 +31,3 @@ The ``IDP`` class exposes the following methods:
     :members:
 
 .. _Theory:
-
-
-Theory class
-+++++++++++++
-
-Instances of the ``Theory`` class represent a collection of theory and structure blocks.
-
-Many operations on Theory instances can be chained, e.g., ``Theory(T,S).propagate().simplify().formula()``.
-
-The class has the following methods:
-
-.. autoclass:: idp_engine.Problem.Theory
-    :members:
-
-.. _idp_engine:
-
-``idp_engine`` functions
-++++++++++++++++++++++++
-
-
-.. automodule:: idp_engine.Run
-    :members:

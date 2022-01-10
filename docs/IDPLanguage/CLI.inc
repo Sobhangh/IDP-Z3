@@ -12,7 +12,7 @@ If you have downloaded IDP-Z3 from the GitLab repo, you may run the CLI using po
     poetry run python3 idp-engine.py path/to/file.idp
 
 where `path/to/file.idp` is the path to the file containing the IDP-Z3 program to be run.
-This file must contain a :ref:`main block<main>`.
+This file must contain an :ref:`FO-dot <FO-dot>` knowledge base (vocabulary, theory and structure blocks), and a :ref:`main block<main>`.
 
 Alternatively, if you installed it via pip, you can run it with the following command:
 
@@ -39,5 +39,3 @@ The usage of the CLI is as follows:
        --full-formula        show the full formula
        --no-timing           don't display timing information
 
-
-.. include:: IDPLanguage/main.inc
