@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unpublished yet]
 
 ### API
-* (breaking) MR 193: `model_expand` API is now a regular function, not an iterator
+* (breaking) MR !193: minor public API changes
 * fix #163: improve performance by avoiding unnecessary copying
 * MR !181: support Python 3.10
 * MR !188: print models in uniform format to structure
