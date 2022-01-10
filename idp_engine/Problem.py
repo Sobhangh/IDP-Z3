@@ -60,20 +60,20 @@ class Theory(object):
         extended (Bool): True when the truth value of inequalities
             and quantified formula is of interest (e.g. in the Interactive Consultant)
 
-        declarations (dict[str, Type]): the list of type and symbol declarations
+        declarations (Dict[str, Type]): the list of type and symbol declarations
 
         constraints (OrderedSet): a set of assertions.
 
         definitions ([Definition]): a list of definitions in this problem
 
-        def_constraints (dict[SymbolDeclaration, Definition], list[Expression]):
+        def_constraints (Dict[SymbolDeclaration, Definition], list[Expression]):
             A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.
 
-        interpretations (dict[string, SymbolInterpretation]):
+        interpretations (Dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        goals (dict[string, SymbolDeclaration]):
+        goals (Dict[string, SymbolDeclaration]):
             A set of goal symbols
 
         _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
@@ -85,7 +85,7 @@ class Theory(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
+        z3 (Dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
 
         ctx : Z3 context
 
@@ -111,7 +111,7 @@ class Theory(object):
         _optmz_reif (Solver): stateful solver used for optimizing when disabling laws.
             Use self.optimize_solver_reified to access.
 
-        expl_reifs = (dict[z3.BoolRef, (z3.BoolRef,Expression)]):
+        expl_reifs = (Dict[z3.BoolRef, (z3.BoolRef,Expression)]):
             dictionary storing for Z3 reification symbols (the keys) which
             Z3 constraint it represents, and what the original FO(.) expression was.
             If the original expression is `None`, the reification represents a
@@ -137,20 +137,20 @@ class Theory(object):
 
         self.extended: Optional[bool] = extended
 
-        self.declarations: dict[str, Type] = {}
+        self.declarations: Dict[str, Type] = {}
         self.definitions: List[Definition] = []
         self.constraints: OrderedSet = OrderedSet()
         self.assignments: Assignments = Assignments()
-        self.def_constraints: dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
-        self.interpretations: dict[str, SymbolInterpretation] = {}
-        self.goals: dict[str, SymbolDeclaration] = {}
+        self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
+        self.interpretations: Dict[str, SymbolInterpretation] = {}
+        self.goals: Dict[str, SymbolDeclaration] = {}
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None
         self._formula: Optional[BoolRef] = None  # the problem expressed in one logic formula
         self.co_constraints: Optional[OrderedSet] = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
-        self.z3: dict[str, ExprRef] = {}
+        self.z3: Dict[str, ExprRef] = {}
         self.ctx: Context = Context()
         self.add(*blocks)
 
@@ -164,7 +164,7 @@ class Theory(object):
         self._reif: Solver = None
         self._optmz_reif: Solver = None
 
-        self.expl_reifs: dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
+        self.expl_reifs: Dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
         self.ignored_laws: set[str] = set()
 
     @property
@@ -483,7 +483,7 @@ class Theory(object):
         """extends the given reifications with the current choices and structure
 
         Args:
-            reifs (dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
+            reifs (Dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
             be extended
         """
         for a in self.assignments.values():

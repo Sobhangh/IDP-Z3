@@ -188,7 +188,7 @@ class Assignments(dict):
     """Contains a set of Assignment"""
     def __init__(self, *arg, **kw):
         super(Assignments, self).__init__(*arg, **kw)
-        self.symbols: dict[str, "SymbolDeclaration"] = {}
+        self.symbols: Dict[str, "SymbolDeclaration"] = {}
         for a in self.values():
             if a.symbol_decl:
                 self.symbols[a.symbol_decl.name] = a.symbol_decl

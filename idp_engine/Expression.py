@@ -453,7 +453,7 @@ class Expression(ASTNode):
          are added to atoms containing recursive symbols.
 
         Arguments:
-            - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
+            - level_symbols (Dict[SymbolDeclaration, Symbol]): the level mapping
               symbols as well as their corresponding recursive symbols
             - head (AppliedSymbol): head of the rule we are adding level mapping
               symbols to.

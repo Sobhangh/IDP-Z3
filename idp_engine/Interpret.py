@@ -122,13 +122,13 @@ def add_def_constraints(self, instantiables, problem, result):
     The `instantiables` (of the definition) are expanded in `problem`.
 
     Args:
-        instantiables (dict[SymbolDeclaration, list[Expression]]):
+        instantiables (Dict[SymbolDeclaration, list[Expression]]):
             the constraints without the quantification
 
         problem (Theory):
             contains the structure for the expansion/interpretation of the constraints
 
-        result (dict[SymbolDeclaration, Definition, list[Expression]]):
+        result (Dict[SymbolDeclaration, Definition, list[Expression]]):
             a mapping from (Symbol, Definition) to the list of constraints
     """
     for decl, bodies in instantiables.items():

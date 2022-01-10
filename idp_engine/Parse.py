@@ -112,13 +112,13 @@ class IDP(ASTNode):
     Attributes:
         code (str): source code of the IDP program
 
-        vocabularies (dict[str, Vocabulary]): list of vocabulary blocks, by name
+        vocabularies (Dict[str, Vocabulary]): list of vocabulary blocks, by name
 
-        theories (dict[str, TheoryBlock]): list of theory blocks, by name
+        theories (Dict[str, TheoryBlock]): list of theory blocks, by name
 
-        structures (dict[str, Structure]): list of structure blocks, by name
+        structures (Dict[str, Structure]): list of structure blocks, by name
 
-        procedures (dict[str, Procedure]): list of procedure blocks, by name
+        procedures (Dict[str, Procedure]): list of procedure blocks, by name
 
         display (Display, Optional): display block, if any
     """
@@ -535,25 +535,25 @@ class Definition(ASTNode):
         rules ([Rule]):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
-        canonicals (dict[Declaration, list[Rule]]):
+        canonicals (Dict[Declaration, list[Rule]]):
             normalized rule for each defined symbol,
             e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
 
-        instantiables (dict[Declaration], list[Expression]):
+        instantiables (Dict[Declaration], list[Expression]):
             list of instantiable expressions for each symbol,
             e.g., `p($p!1$) <=> q($p!1$)`
 
-        clarks (dict[Declaration, Transformed Rule]):
+        clarks (Dict[Declaration, Transformed Rule]):
             normalized rule for each defined symbol (used to be Clark completion)
             e.g., `!$p!1$: p($p!1$) <=> q($p!1$)`
 
-        def_vars (dict[String, dict[String, Variable]]):
+        def_vars (Dict[String, Dict[String, Variable]]):
             Fresh variables for arguments and result
 
-        level_symbols (dict[SymbolDeclaration, Symbol]):
+        level_symbols (Dict[SymbolDeclaration, Symbol]):
             map of recursively defined symbols to level mapping symbols
 
-        cache (dict[SymbolDeclaration, str, Expression]):
+        cache (Dict[SymbolDeclaration, str, Expression]):
             cache of instantiation of the definition
 
         inst_def_level (int): depth of recursion during instantiation
@@ -868,7 +868,7 @@ class ConstructedFrom(Enumeration):
 
         constructors (List[Constructor]): List of Constructor
 
-        accessors (dict[str, Int]): index of the accessor in the constructors
+        accessors (Dict[str, Int]): index of the accessor in the constructors
     """
     def __init__(self, **kwargs):
         self.constructed = kwargs.pop('constructed')
