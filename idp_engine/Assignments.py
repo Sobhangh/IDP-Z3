@@ -79,7 +79,9 @@ class Assignment(object):
         self.status: Optional[Status] = status
         self.relevant: Optional[bool] = relevant
 
-        # first symbol in the sentence, preferably not starting with '_'
+        # First symbol in the sentence, preferably not starting with '_':
+        # if no public symbol (not starting with '_') is found, the first
+        # private one is used.
         self.symbol_decl: "SymbolDeclaration" = None
         default = None
         self.symbols: Dict[str, "SymbolDeclaration"] = \
