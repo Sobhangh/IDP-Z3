@@ -19,5 +19,5 @@ theory T2:V {
 procedure main () {
     pretty_print(model_propagate(T))
     print()
-    pretty_print(model_propagate([T, T2]))
+    pretty_print(model_propagate(T, T2))
 }

@@ -8,11 +8,9 @@ Traceback (most recent call last):
   File "idp_engine/Run.py", line ??, in pretty_print
     for i, xi in enumerate(x):
   File "idp_engine/Run.py", line ??, in model_expand
-    problem = Theory._make(theories, structures, extended=extended)
-  File "idp_engine/Problem.py", line ??, in _make
-    self = cls(* [theories] + structures, extended=extended)
+    problem = Theory(*theories, extended=extended)
   File "idp_engine/Problem.py", line ??, in __init__
-    self.add(*blocks)
+    self.add(*theories)
   File "idp_engine/Problem.py", line ??, in add
     c.interpret(self)
   File "idp_engine/Interpret.py", line ??, in interpret

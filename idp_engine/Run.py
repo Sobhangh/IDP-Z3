@@ -27,31 +27,26 @@ import types
 from typing import Any, Iterator, List, Union
 from z3 import Solver
 
-from .Parse import IDP
+from .Parse import IDP, TheoryBlock, Structure
 from .Problem import Theory
 from .Assignments import Status as S, Assignments
 from .utils import NEWL
 
 last_call = time.process_time()  # define it as global
 
-def model_check(theories: Union[Theory, List[Theory]],
-                structures: Union[Theory, List[Theory]] = None
-                ) -> str:
-    """Returns a string stating whether the theory has a model expanding the structure.
-
-    If ``theory`` and ``structure`` are lists, they are merged.
+def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
+    """Returns a string stating whether the combination of theories is satisfiable.
 
     For example, ``print(model_check(T, S))`` will print ``sat`` if theory named ``T`` has a model expanding structure named ``S``.
 
     Args:
-        theories (Union[Theory, List[Theory]]): normal theories
-        structures (Union[Theory, List[Theory]], optional): structures, aka data theories. Defaults to None.
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
 
     Returns:
         str: ``sat``, ``unsat`` or ``unknown``
     """
 
-    problem = Theory._make(theories, structures)
+    problem = Theory(*theories)
     z3_formula = problem.formula()
 
     solver = Solver(ctx=problem.ctx)
@@ -59,16 +54,14 @@ def model_check(theories: Union[Theory, List[Theory]],
     return str(solver.check())
 
 
-def model_expand(theories: Union[Theory, List[Theory]],
-                 structures:Union[Theory, List[Theory]] = None,
+def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,
                  timeout: int = 10,
                  complete: bool = False,
                  extended: bool = False,
                  sort: bool = False
                  ) -> Iterator[str]:
-    """Returns a (possibly empty) list of models of the theory
-    that are expansion of the structure,
+    """Returns a (possibly empty) list of models of the combination of theories,
     followed by a string message.
 
     For example, ``print(model_expand(T, S))`` will return (up to) 10
@@ -86,8 +79,7 @@ def model_expand(theories: Union[Theory, List[Theory]],
     - ``More models may be available.  Change the max and timeout arguments to see them.``
 
     Args:
-        theories (Union[Theory, List[Theory]]): normal theories
-        structures (Union[Theory, List[Theory]], optional): structures, aka data theories. Defaults to None.
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         max (int, optional): max number of models. Defaults to 10.
         timeout (int, optional): timeout in seconds. Defaults to 10.
         complete (bool, optional): True to obtain complete structures. Defaults to False.
@@ -99,7 +91,7 @@ def model_expand(theories: Union[Theory, List[Theory]],
     Yields:
         str
     """
-    problem = Theory._make(theories, structures, extended=extended)
+    problem = Theory(*theories, extended=extended)
     ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
@@ -113,14 +105,11 @@ def model_expand(theories: Union[Theory, List[Theory]],
     yield out + last
 
 
-def model_propagate(theories: Union[Theory, List[Theory]],
-                    structures: Union[Theory, List[Theory]] = None,
+def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
                     sort: bool = False
                     ) -> Iterator[str]:
     """
-    Returns a list of assignments that are true in any expansion of the structure consistent with the theory.
-
-    ``theory`` and ``structure`` can be lists, in which case their elements are merged.
+    Returns a list of assignments that are true in any model of the combination of theories.
 
     Terms and symbols starting with '_' are ignored.
 
@@ -129,14 +118,13 @@ def model_propagate(theories: Union[Theory, List[Theory]],
     consistent with the theory named ``T``.
 
     Args:
-        theories (Union[Theory, List[Theory]]): normal theories
-        structures (Union[Theory, List[Theory]], optional): structures, aka data theories. Defaults to None.
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         sort (bool, optional): True if the assignments should be in alphabetical order. Defaults to False.
 
     Yields:
         str
     """
-    problem = Theory._make(theories, structures)
+    problem = Theory(*theories)
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
@@ -148,17 +136,17 @@ def model_propagate(theories: Union[Theory, List[Theory]],
         yield from problem._propagate(tag=S.CONSEQUENCE)
 
 
-def decision_table(theories: List[Theory],
-                   structures: List[Theory] = None,
+def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
                    goal_string: str = "",
                    timeout: int = 20,
                    max_rows: int = 50,
                    first_hit: bool = True,
                    verify: bool = False
                    ) -> Iterator[str]:
-    """Experimental. Returns a decision table for `goal_string`, given `theories` and `structures`.
+    """Experimental. Returns a decision table for `goal_string`, given the combination of theories.
 
     Args:
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         goal_string (str, optional): the last column of the table.
             Must be a predicate application defined in the theory, e.g. ``eligible()``.
         timeout (int, optional): maximum duration in seconds. Defaults to 20.
@@ -169,7 +157,7 @@ def decision_table(theories: List[Theory],
     Yields:
         str: a textual representation of each rule
     """
-    problem = Theory._make(theories, structures, extended=True)
+    problem = Theory(*theories, extended=True)
     for model in problem.decision_table(goal_string, timeout, max_rows,
                                         first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model

@@ -33,7 +33,7 @@ from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
                          EQUALS, NOT)
 from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
-                    TheoryBlock, Definition, str_to_IDP, SymbolInterpretation)
+                    TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, CONCEPT, RELEVANT)
@@ -123,12 +123,13 @@ class Theory(object):
 
     """
     def __init__(self,
-                 *blocks: List[Any],
+                 *theories: Union[TheoryBlock, Structure, "Theory"],
                  extended: bool = False
                  ) -> None:
-        """Creates an instance of ``Theory`` for the list of blocks, e.g., ``Theory(T,S)``.
+        """Creates an instance of ``Theory`` for the list of theories, e.g., ``Theory(T,S)``.
 
         Args:
+            theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
             extended (bool, optional): use `True` when the truth value of
                 inequalities and quantified formula is of interest
                 (e.g. for the Interactive Consultant).
@@ -152,7 +153,7 @@ class Theory(object):
 
         self.z3: Dict[str, ExprRef] = {}
         self.ctx: Context = Context()
-        self.add(*blocks)
+        self.add(*theories)
 
         self.previous_assignments: Assignments = Assignments()
         self.first_prop: bool = True
@@ -225,24 +226,6 @@ class Theory(object):
 
         return self._optmz_reif
 
-    @classmethod
-    def _make(cls,
-             theories: List["Theory"],
-             structures: List["Theory"],
-             extended: bool = False) -> "Theory":
-        """ polymorphic creation """
-        structures = ([] if structures is None else
-                      structures if isinstance(structures, Iterable) else
-                      [structures])
-        if type(theories) == 'Theory':
-            theories.add(*structures)
-            self = theories
-        elif isinstance(theories, Iterable):
-            self = cls(* theories + structures, extended=extended)
-        else:
-            self = cls(* [theories] + structures, extended=extended)
-        return self
-
     def copy(self) -> "Theory":
         """Returns an independent copy of a theory.
         """
@@ -255,10 +238,13 @@ class Theory(object):
         out._formula = None
         return out
 
-    def add(self, *blocks: List["Theory"]) -> "Theory":
-        """Adds a list of theory or structure blocks to the theory.
+    def add(self, *theories: Union[TheoryBlock, Structure, "Theory"]) -> "Theory":
+        """Adds a list of theories to the theory.
+
+        Args:
+            theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         """
-        for block in blocks:
+        for block in theories:
             self.z3 = {}
             self._formula = None  # need to reapply the definitions
 
