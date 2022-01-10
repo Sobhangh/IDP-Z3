@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unpublished yet]
 
 ### API
+* (breaking) MR !193: minor public API changes
 * fix #163: improve performance by avoiding unnecessary copying
 * fix #170: reduce the need for parenthesis in expressions (annotations, if..then..else)
 * MR !181: support Python 3.10

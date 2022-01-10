@@ -57,7 +57,7 @@ To launch the Interactive Consultant web server:
 After that, you can open
 
 * the Interactive Consultant at http://127.0.0.1:5000
-* the web IDE at http://127.0.0.1:5000/IDE
+* the webIDE at http://127.0.0.1:5000/IDE
 
 
 
@@ -102,7 +102,7 @@ On Windows, the commands are:
 After that, you can open
 
 * the Interactive Consultant at http://127.0.0.1:5000
-* the web IDE at http://127.0.0.1:5000/IDE
+* the webIDE at http://127.0.0.1:5000/IDE
 
 Installation of idp_engine module
 ---------------------------------

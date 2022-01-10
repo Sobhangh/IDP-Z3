@@ -3,7 +3,7 @@
 Differences with IDP3
 ---------------------
 
-Here are the main differences with IDP3, listed for migration purposes:
+Here are the main differences with IDP3 (the previous version of IDP-Z3), listed for migration purposes:
 
 Infinite domains
     IDP-Z3 supports infinite domains: ``Int, Real``.
@@ -22,9 +22,6 @@ Partial functions
     IDP-Z3 does not support partial functions.
     The handling of division by 0 may differ.
     See `IEP 07 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-07-Division-by-0>`_
-
-Programming API
-    IDP3 procedures are written in Lua, IDP-Z3 procedures are written in Python-like language.
 
 Qualified quantifications
     IDP-Z3 does not support qualified quantifications, e.g. ``!2 x[color]: p(x).``. (p. 11 of the IDP3 manual).

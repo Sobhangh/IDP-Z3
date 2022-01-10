@@ -5,3 +5,4 @@ idp_engine.Assignments
 
 .. automodule:: idp_engine.Assignments
    :members:
+   :noindex:

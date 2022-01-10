@@ -7,15 +7,15 @@ Welcome to IDP-Z3's documentation!
 ==================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    introduction
-   IDPLanguage
-   API
-   CLI
+   FO-dot
+   IDP-Z3
    interactive_consultant
    code_reference
+   summary
    genindex
 
 
