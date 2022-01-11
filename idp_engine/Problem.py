@@ -344,6 +344,9 @@ class Theory(object):
 
         Args:
             code (str): the code of the law to be enabled
+
+        Raises:
+            AssertionError: if code is unknown
         """
         _ = self.solver_reified
         assert any(e.code == code
@@ -359,6 +362,9 @@ class Theory(object):
 
         Args:
             code (str): the code of the law to be disabled
+
+        Raises:
+            AssertionError: if code is unknown
         """
         _ = self.solver_reified
         assert any(e.code == code
