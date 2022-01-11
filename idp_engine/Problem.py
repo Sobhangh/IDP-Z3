@@ -902,6 +902,7 @@ class Theory(object):
                         if q.is_reified()])
         known = (And(known) if known else TRUE.translate(self))
 
+        self._formula = None
         theory = self.formula()
         solver = Solver(ctx=self.ctx)
         solver.add(theory)
