@@ -337,7 +337,7 @@ class Theory(object):
         self._formula = None
 
     def enable_law(self, code: str) -> "Theory":
-        """Experimental (for Interactive Consultant only). Enables a law, represented as a code string taken from the output of explain(...).
+        """Enables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true``)
         or from a types (e.g., from ``T:={1..10}`` and ``c: () -> T``).
@@ -345,10 +345,14 @@ class Theory(object):
         Args:
             code (str): the code of the law to be enabled
         """
+        _ = self.solver_reified
+        assert any(e.code == code
+                   for _, e in self.expl_reifs.values()), \
+                f"Cannot enable an unknown law: {code}"
         self.ignored_laws.remove(code)
 
     def disable_law(self, code: str) -> "Theory":
-        """Experimental (for Interactive Consultant only). Disables a law, represented as a code string taken from the output of explain(...).
+        """Disables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true``)
         or from a types (e.g., from ``T:={1..10}`` and ``c: () -> T``).
@@ -356,6 +360,10 @@ class Theory(object):
         Args:
             code (str): the code of the law to be disabled
         """
+        _ = self.solver_reified
+        assert any(e.code == code
+                   for _, e in self.expl_reifs.values()), \
+                f"Cannot disable an unknown law: {code}"
         self.ignored_laws.add(code)
 
     def constraintz(self) -> List[BoolRef]:
