@@ -93,12 +93,6 @@ class Theory(object):
 
         satisfied (Bool): whether propagate found an initial model
 
-        first_prop (Bool): keeps track whether a propagation still needs
-            to happen. If so during a propagate call, first an initial propagation
-            without any choices (including defaults) executes to find the universal
-            consequences of the theory (`S.UNIVERSAL`). This is done once to improve
-            subsequent propagations.
-
         _slvr (Solver): stateful solver used for propagation and model expansion.
             Use self.solver to access.
 
@@ -156,7 +150,6 @@ class Theory(object):
         self.add(*theories)
 
         self.previous_assignments: Assignments = Assignments()
-        self.first_prop: bool = True
 
         self.satisfied: bool = True
 

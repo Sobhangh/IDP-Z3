@@ -369,7 +369,6 @@ def _first_propagate(self):
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
     solver.pop()
-    self.first_prop = False
 Theory._first_propagate = _first_propagate
 
 
@@ -379,10 +378,11 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver_reified
     solver.push()
 
-    todo = given_todo.copy() if given_todo else {a.sentence.code: a.sentence
-                     for a in self.assignments.values()
-                     if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
-                     (a.status != S.STRUCTURE or a.translate(self) in self.ignored_laws)}
+    todo = (given_todo.copy() if given_todo else
+            {a.sentence.code: a.sentence
+            for a in self.assignments.values()
+            if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
+            (a.status != S.STRUCTURE or a.translate(self) in self.ignored_laws)})
 
     self._add_assignment_ignored(solver)
 
@@ -405,7 +405,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield from self._propagate_ignored(tag, given_todo)
         return
 
-    if self.first_prop:
+    if not self.previous_assignments:
         yield from self._first_propagate()
 
     removed_choices, added_choices = self._set_consequences_get_changed_choices()
