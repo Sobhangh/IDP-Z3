@@ -15,6 +15,7 @@ Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 * MR !181: support Python 3.10
 * MR !188: print models in uniform format to structure
 * MR !183: add enable_law and disable_law to the API
+* MR !196: add `Theory.to_smt_lib` API
 
 ### Interactive Consultant
 * fix #125: Bug in relevance for Registration
