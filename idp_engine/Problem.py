@@ -536,18 +536,18 @@ class Theory(object):
             Iterator[Union[Assignments, str]]: [description]
         """
         if self.ignored_laws:
-            todo = OrderedSet(a.sentence for a in self.get_core_atoms(
-                [S.UNKNOWN, S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ]))
             # TODO: should todo be larger in case complete==True?
             solver = self.solver_reified
             solver.push()
             self._add_assignment_ignored(solver)
+            if not self.previous_assignments:
+                list(self._first_propagate(solver))
         else:
-            todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
             # TODO: should todo be larger in case complete==True?
             solver = self.solver
             solver.push()
             self._add_assignment(solver)
+        todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
 
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
@@ -1051,5 +1051,10 @@ class Theory(object):
                 verify_models(known, models, goal_string)
 
         return models
+
+    def _first_propagate(self, solver):
+        """monkey-patched"""
+        print()
+        pass
 
 Done = True

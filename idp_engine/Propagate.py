@@ -327,12 +327,12 @@ def _propagate_inner(self, tag, solver, todo):
 Theory._propagate_inner = _propagate_inner
 
 
-def _first_propagate(self):
+def _first_propagate(self, solver):
+    "determine universals"
     # NOTE: some universal assignments may be set due to the environment theory
     todo = OrderedSet(a.sentence for a in self.get_core_atoms(
         [S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE, S.ENV_CONSQ]))
 
-    solver = self.solver
     solver.push()
 
     for q in todo:
@@ -365,7 +365,8 @@ def _first_propagate(self):
             if (ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
                     not ass.value.same_as(val)):
                 solver.pop()
-                return  # unsat under choices, caller will fix this
+                yield "Not satisfiable."
+                return
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
     solver.pop()
@@ -406,7 +407,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         return
 
     if not self.previous_assignments:
-        yield from self._first_propagate()
+        yield from self._first_propagate(self.solver)
 
     removed_choices, added_choices = self._set_consequences_get_changed_choices()
 
