@@ -503,7 +503,10 @@ def instantiate1(self, e0, e1, problem=None):
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
                             f"Incorrect arity for {out.code}")
-                out = AppliedSymbol.make(out.symbol, out.sub_exprs)
+                kwargs = ({'is_enumerated': out.is_enumerated} if out.is_enumerated else
+                          {'in_enumeration': out.in_enumeration} if out.in_enumeration else
+                          {})
+                out = AppliedSymbol.make(out.symbol, out.sub_exprs, **kwargs)
                 out.original = self
         if out.co_constraint is not None:
             out.co_constraint.instantiate(e0, e1, problem)
