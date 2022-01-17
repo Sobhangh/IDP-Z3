@@ -8,11 +8,10 @@ weight() -> 80
 No more consequences.
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
-bmi() = $bmi$ ⇔ $bmi$ = weight() / (length() ⨯ length())
-Structure formula length() = 160
-BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Severely_Underweight ∧ (bmi() < 18.5 ∧ sex() = Male)
+bmi() = $bmi$ ⇔ $bmi$ = weight() / (25600)
 weight() = 80
 BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Underweight ∧ (bmi() < 18.5 ∧ sex() = Female)
+BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Severely_Underweight ∧ (bmi() < 18.5 ∧ sex() = Male)
 
 (declare-datatypes ((BMILevelt_t 0)) (((Obese_II) (Obese_I) (Normal) (Severely_Underweight) (Underweight) (Overweight) (Extreme_Obesity))))
 (declare-datatypes ((riskLevelt_t 0)) (((High) (Very_High) (Low) (Increased) (Extremely_High))))
@@ -21,7 +20,6 @@ BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Underweight ∧ (bmi() < 18.5 ∧ sex()
 (declare-fun riskLevel () riskLevelt_t)
 (declare-fun waist () Real)
 (declare-fun sex () sext_t)
-(declare-fun length () Real)
 (declare-fun weight () Real)
 (declare-fun bmi () Real)
 (assert (let ((a!1 (and (<= (/ 37.0 2.0) bmi) (>= (/ 249.0 10.0) bmi) (= sex Male)))
@@ -37,7 +35,7 @@ BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Underweight ∧ (bmi() < 18.5 ∧ sex()
       (a!9 (= (= BMILevel Obese_I)
               (and (<= (to_real 30) bmi) (>= (/ 349.0 10.0) bmi))))
       (a!11 (forall ((c!0 Real))
-              (= (= bmi c!0) (= c!0 (/ weight (* length length))))))
+              (= (= bmi c!0) (= c!0 (/ weight (to_real 25600))))))
       (a!12 (or false
                 (and (= BMILevel Overweight)
                      (= sex Male)
@@ -121,7 +119,7 @@ BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Underweight ∧ (bmi() < 18.5 ∧ sex()
            (= riskLevel Low)
            (= riskLevel Increased)
            (= riskLevel Extremely_High))
-       (= bmi (/ weight (* length length)))
+       (= bmi (/ weight (to_real 25600)))
        a!7
        a!8
        a!9

@@ -17,6 +17,7 @@ Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 * MR !188: print models in uniform format to structure
 * MR !183: add enable_law and disable_law to the API
 * MR !196: add `Theory.to_smt_lib` API
+* MR !198: Performance: replace applied symbols by their interpretation, if known
 
 ### Interactive Consultant
 * fix #125: Bug in relevance for Registration
