@@ -323,6 +323,11 @@ class Theory(object):
         self._constraintz = None
         return self
 
+    def to_smt_lib(self) -> str:
+        """Returns an SMT-LIB version of the theory
+        """
+        return self.solver.sexpr()
+
     def assert_(self,
                 code: str,
                 value: Any,
