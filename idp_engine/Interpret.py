@@ -446,7 +446,7 @@ def interpret(self, problem):
                 simpler = NOT(simpler)
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
-            and any(s.decl.name == CONCEPT for s in self.decl.sorts)
+            # and any(s.decl.name == CONCEPT for s in self.decl.sorts)
             and all(a.value is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
