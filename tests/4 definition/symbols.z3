@@ -1,4 +1,5 @@
-And(Or(Not(p), q),
+And(opposite(red) == blue,
+    Or(Not(p), q),
     important(`p),
     f(`f) == `f,
     Or(opposite(red) == red,
