@@ -5,3 +5,4 @@ idp_engine.Problem
 
 .. automodule:: idp_engine.Problem
    :members:
+   :noindex:

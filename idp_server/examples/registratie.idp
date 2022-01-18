@@ -110,30 +110,30 @@ theory decision:decision {
   // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
 
   [An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
-  (registration_type() = Heritage ⇒
+  registration_type() = Heritage ⇒
       type_of_real_estate() = Residential
       ∧ monument()
       ∧ use() = As_Family_Dwelling
       ∧ heritage_investment()
       ∧ heritage_plan()
-      ∧ additional_terms())
+      ∧ additional_terms()
   .
 
   [A social dwelling is a residential real estate sold by Vlaamse_Mpy_Voor_Sociaal_Wonen or Erkende_Sociale_Huisvestings_Mpy to a natural person for social housing with a mortgage allowance]
-  (registration_type() = Social_Dwelling ⇒
+  registration_type() = Social_Dwelling ⇒
       buyer() = Natural_Person
       ∧ type_of_real_estate() = Residential
       ∧ use() = Social_Housing
       ∧ (seller() = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ seller() = Erkende_Sociale_Huisvestings_Mpy)
-      ∧ mortgage_loan_allowance())
+      ∧ mortgage_loan_allowance()
   .
 
   [A Professional purchase is a non-public sale to a professional buyer for resale with a certification not older than 8 years]
-  (registration_type() = Professional_Purchase ⇒
+  registration_type() = Professional_Purchase ⇒
       professional_buyer()
       ∧ transaction_type()  ≠ Public_Sale
       ∧ use() = For_Resale
-      ∧ certification_date_sale() = certification_date() + 8)
+      ∧ certification_date_sale() = certification_date() + 8
   .
 
   registration_type() = Energy_Efficient_Dwelling ⇒
@@ -147,12 +147,12 @@ theory decision:decision {
   .
 
   [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.]
-  (registration_type() = Social_Purpose ⇒
+  registration_type() = Social_Purpose ⇒
       (seller() = Mpy_Erkend_Door_VMSW
       ∨ seller() = Vlaams_Woningfonds
       ∨ seller() = Gelijksoortige_Rechtspersoon_EER)
       ∧ use() = Community_Purpose
-  ).
+  .
 
   registration_type() = Exchange_Unbuilt_Ground ⇒
       additional_terms()

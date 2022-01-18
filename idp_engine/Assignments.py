@@ -25,10 +25,10 @@ __all__ = ["Status", "Assignment", "Assignments"]
 
 from copy import copy
 from enum import Enum, auto
-from typing import Optional
+from typing import Dict, Optional, Tuple
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, NOT, EQUALS
+from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol
 from .utils import NEWL, BOOL
 
 
@@ -74,14 +74,18 @@ class Assignment(object):
     def __init__(self, sentence: Expression, value: Optional[Expression],
                  status: Optional[Status],
                  relevant: Optional[bool] = True):
-        self.sentence = sentence
-        self.value = value
-        self.status = status
-        self.relevant = relevant
+        self.sentence: Expression = sentence
+        self.value: Optional[Expression] = value
+        self.status: Optional[Status] = status
+        self.relevant: Optional[bool] = relevant
 
-        # first symbol in the sentence, preferably not starting with '_'
-        self.symbol_decl, default = None, None
-        self.symbols = sentence.collect_symbols(co_constraints=False).values()
+        # First symbol in the sentence, preferably not starting with '_':
+        # if no public symbol (not starting with '_') is found, the first
+        # private one is used.
+        self.symbol_decl: "SymbolDeclaration" = None
+        default = None
+        self.symbols: Dict[str, "SymbolDeclaration"] = \
+            sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
             if not d.private:
                 if d.block:  # ignore accessors and testers
@@ -92,13 +96,13 @@ class Assignment(object):
         if not self.symbol_decl:  # use the '_' symbol (to allow relevance computation)
             self.symbol_decl = default
 
-    def copy(self, shallow=False):
+    def copy(self, shallow: Optional[bool] =False) -> "Assignment":
         out = copy(self)
         if not shallow:
             out.sentence = out.sentence.copy()
         return out
 
-    def __str__(self):
+    def __str__(self) -> str:
         pre, post = '', ''
         if self.value is None:
             pre = "? "
@@ -110,10 +114,10 @@ class Assignment(object):
             post = f" -> {str(self.value)}"
         return f"{pre}{self.sentence.annotations['reading']}{post}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __log__(self):
+    def __log__(self) -> Optional[Expression]:
         return self.value
 
     def same_as(self, other:"Assignment") -> bool:
@@ -133,7 +137,7 @@ class Assignment(object):
     def to_json(self) -> str:  # for GUI
         return str(self)
 
-    def formula(self):
+    def formula(self) -> Expression:
         if self.value is None:
             raise Exception("can't translate unknown value")
         if self.sentence.type == BOOL:
@@ -143,7 +147,7 @@ class Assignment(object):
             out = EQUALS([self.sentence, self.value])
         return out
 
-    def negate(self):
+    def negate(self) -> "Assignment":
         """returns an Assignment for the same sentence, but an opposite truth value.
 
         Raises:
@@ -159,7 +163,10 @@ class Assignment(object):
     def translate(self, problem: "Theory") -> BoolRef:
         return self.formula().translate(problem)
 
-    def as_set_condition(self):
+    def as_set_condition(self
+             ) -> Tuple[Optional[AppliedSymbol],
+                        Optional[bool],
+                        Optional["Enumeration"]]:
         """returns an equivalent set condition, or None
 
         Returns:
@@ -170,7 +177,7 @@ class Assignment(object):
             return (x, y if self.value.same_as(TRUE) else not y, z)
         return (None, None, None)
 
-    def unset(self):
+    def unset(self) -> None:
         """ Unsets the value of an assignment.
 
         Returns:
@@ -183,21 +190,23 @@ class Assignments(dict):
     """Contains a set of Assignment"""
     def __init__(self, *arg, **kw):
         super(Assignments, self).__init__(*arg, **kw)
-        self.symbols = {}  # { decl.name: decl }
+        self.symbols: Dict[str, "SymbolDeclaration"] = {}
         for a in self.values():
             if a.symbol_decl:
                 self.symbols[a.symbol_decl.name] = a.symbol_decl
 
-    def copy(self, shallow=False):
+    def copy(self, shallow: bool = False) -> "Assignments":
         return Assignments({k: v.copy(shallow) for k, v in self.items()})
 
-    def extend(self, more):
+    def extend(self, more: "Assignments") -> None:
         for v in more.values():
             self.assert_(v.sentence, v.value, v.status, v.relevant)
 
-    def assert__(self, sentence: Expression,
-                value: Optional[Expression],
-                status: Optional[Status]):
+    def assert__(self,
+                 sentence: Expression,
+                 value: Optional[Expression],
+                 status: Optional[Status]
+                ) -> Assignment:
 
         if sentence.code in self:
             out = self[sentence.code].copy(shallow=True)
@@ -217,12 +226,11 @@ class Assignments(dict):
             self.symbols[out.symbol_decl.name] = out.symbol_decl
         return out
 
-    def __str__(self):
+    def __str__(self) -> str:
         """ Print the assignments in the same format as a model.
 
         Most symbols are printed as `name := {(val1, ..., val} -> valx, ...}`
         with two exceptions:
-
             1. Nullary symbols are printed as `name := value`
             2. Predicates without True atoms are printed as `name := {}`
         """

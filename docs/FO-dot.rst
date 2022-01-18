@@ -1,4 +1,4 @@
-.. _IDP:
+.. _FO-dot:
 
 .. role:: raw-html(raw)
    :format: html
@@ -7,11 +7,10 @@ The FO(:raw-html:`&#183`) Language
 ==================================
 
 Overview
-------------
+--------
 
 The FO(:raw-html:`&#183`) (aka FO-dot) language is used to create knowledge bases.
-An IDP-Z3 program contains an FO(:raw-html:`&#183`) knowledge base and instructions to perform tasks on it.
-It is made of the following blocks of code:
+An FO-dot knowledge base is a text file containing the following blocks of code:
 
 vocabulary
     specify the types, predicates, functions and constants used to describe the problem domain.
@@ -22,14 +21,8 @@ theory
 structure
     (optional) specify the interpretation of some predicates, functions and constants.
 
-display
-    (optional) configure the user interface of the :ref:`interactive_consultant`.
 
-main
-    (optional) executable procedure in the context of the knowledge base
-
-
-The basic skeleton of an IDP-Z3 program for the Interactive Consultant is as follows:
+The basic skeleton of an FO-dot knowledge base is as follows:
 
 .. code::
 
@@ -45,9 +38,6 @@ The basic skeleton of an IDP-Z3 program for the Interactive Consultant is as fol
         // here comes the interpretation of some symbols
     }
 
-    display {
-        // here comes the configuration of the user interface
-    }
 
 Everything between ``//`` and the end of the line is a comment.
 
@@ -55,6 +45,4 @@ Everything between ``//`` and the end of the line is a comment.
 .. include:: IDPLanguage/vocabulary.inc
 .. include:: IDPLanguage/theory.inc
 .. include:: IDPLanguage/structure.inc
-.. include:: IDPLanguage/main.inc
 .. include:: IDPLanguage/IDP3.inc
-.. include:: IDPLanguage/summary.inc

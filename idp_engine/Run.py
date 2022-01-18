@@ -17,36 +17,81 @@
 
 """
 
-Classes to execute the main block of an IDP program
+The following Python functions can be used to perform computations
+using FO-dot knowledge bases:
 
 """
 
 import time
 import types
+from typing import Any, Iterator, List, Union
 from z3 import Solver
 
-from .Parse import IDP
+from .Parse import IDP, TheoryBlock, Structure
 from .Problem import Theory
 from .Assignments import Status as S, Assignments
 from .utils import NEWL
 
 last_call = time.process_time()  # define it as global
 
-def model_check(theories, structures=None):
-    """ output: "sat", "unsat" or "unknown" """
+def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
+    """Returns a string stating whether the combination of theories is satisfiable.
 
-    problem = Theory.make(theories, structures)
+    For example, ``print(model_check(T, S))`` will print ``sat`` if theory named ``T`` has a model expanding structure named ``S``.
+
+    Args:
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
+
+    Returns:
+        str: ``sat``, ``unsat`` or ``unknown``
+    """
+
+    problem = Theory(*theories)
     z3_formula = problem.formula()
 
     solver = Solver(ctx=problem.ctx)
     solver.add(z3_formula)
-    yield str(solver.check())
+    return str(solver.check())
 
 
-def model_expand(theories, structures=None, max=10, timeout=10, complete=False,
-                 extended=False, sort=False):
-    """ output: a list of Assignments, ending with a string """
-    problem = Theory.make(theories, structures, extended=extended)
+def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
+                 max: int = 10,
+                 timeout: int = 10,
+                 complete: bool = False,
+                 extended: bool = False,
+                 sort: bool = False
+                 ) -> Iterator[str]:
+    """Returns a (possibly empty) list of models of the combination of theories,
+    followed by a string message.
+
+    For example, ``print(model_expand(T, S))`` will return (up to) 10
+    string representations of models of theory named ``T``
+    expanding structure named ``S``.
+
+    The string message can be one of the following:
+
+    - ``No models.``
+
+    - ``More models may be available.  Change the max argument to see them.``
+
+    - ``More models may be available.  Change the timeout argument to see them.``
+
+    - ``More models may be available.  Change the max and timeout arguments to see them.``
+
+    Args:
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
+        max (int, optional): max number of models. Defaults to 10.
+        timeout (int, optional): timeout in seconds. Defaults to 10.
+        complete (bool, optional): True to obtain complete structures. Defaults to False.
+        extended (bool, optional): use `True` when the truth value of
+                inequalities and quantified formula is of interest
+                (e.g. for the Interactive Consultant). Defaults to False.
+        sort (bool, optional): True if the models should be in alphabetical order. Defaults to False.
+
+    Yields:
+        str
+    """
+    problem = Theory(*theories, extended=extended)
     ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
@@ -60,9 +105,26 @@ def model_expand(theories, structures=None, max=10, timeout=10, complete=False,
     yield out + last
 
 
-def model_propagate(theories, structures=None, sort=False):
-    """ output: a list of Assignment """
-    problem = Theory.make(theories, structures)
+def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
+                    sort: bool = False
+                    ) -> Iterator[str]:
+    """
+    Returns a list of assignments that are true in any model of the combination of theories.
+
+    Terms and symbols starting with '_' are ignored.
+
+    For example, ``print(model_propagate(T, S))`` will return the assignments
+    that are true in any expansion of the structure named ``S``
+    consistent with the theory named ``T``.
+
+    Args:
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
+        sort (bool, optional): True if the assignments should be in alphabetical order. Defaults to False.
+
+    Yields:
+        str
+    """
+    problem = Theory(*theories)
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
@@ -74,12 +136,19 @@ def model_propagate(theories, structures=None, sort=False):
         yield from problem._propagate(tag=S.CONSEQUENCE)
 
 
-def decision_table(theories, structures=None, goal_string="",
-                timeout=20, max_rows=50, first_hit=True, verify=False):
-    """returns a decision table for `goal_string`, given `theories` and `structures`.
+def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
+                   goal_string: str = "",
+                   timeout: int = 20,
+                   max_rows: int = 50,
+                   first_hit: bool = True,
+                   verify: bool = False
+                   ) -> Iterator[str]:
+    """Experimental. Returns a decision table for `goal_string`, given the combination of theories.
 
     Args:
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         goal_string (str, optional): the last column of the table.
+            Must be a predicate application defined in the theory, e.g. ``eligible()``.
         timeout (int, optional): maximum duration in seconds. Defaults to 20.
         max_rows (int, optional): maximum number of rows. Defaults to 50.
         first_hit (bool, optional): requested hit-policy. Defaults to True.
@@ -88,7 +157,7 @@ def decision_table(theories, structures=None, goal_string="",
     Yields:
         str: a textual representation of each rule
     """
-    problem = Theory.make(theories, structures, extended=True)
+    problem = Theory(*theories, extended=True)
     for model in problem.decision_table(goal_string, timeout, max_rows,
                                         first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model
@@ -100,7 +169,12 @@ def decision_table(theories, structures=None, goal_string="",
     yield "end of decision table"
 
 
-def pretty_print(x=""):
+def pretty_print(x: Any ="") -> None:
+    """Prints its argument on stdout, in a readable form.
+
+    Args:
+        x (Any, optional): the result of an API call. Defaults to "".
+    """
     if type(x) is tuple and len(x)==2: # result of Theory.explain()
         facts, laws = x
         for f in facts:
@@ -120,7 +194,7 @@ def pretty_print(x=""):
         print(x)
 
 
-def duration(msg=""):
+def duration(msg: str = "") -> str:
     """Returns the processing time since the last call to `duration()`,
     or since the begining of execution"""
     global last_call
@@ -128,8 +202,8 @@ def duration(msg=""):
     last_call = time.process_time()
     return f"{out} {msg}"
 
-def execute(self):
-    """ Execute the IDP program """
+def execute(self: IDP) -> None:
+    """ Execute the ``main()`` procedure block in the IDP program """
     global last_call
     last_call = time.process_time()
     main = str(self.procedures['main'])

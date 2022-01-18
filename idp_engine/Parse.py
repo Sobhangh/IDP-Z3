@@ -31,15 +31,15 @@ from datetime import date
 from enum import Enum
 from itertools import groupby
 from os import path
-from re import match, findall
+from re import match
 from sys import intern
 from textx import metamodel_from_file
 from typing import Dict, List, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         IfExpr, AQuantification, Domain, Quantee,
+from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
+                         AIfExpr, AQuantification, Domain, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -107,17 +107,18 @@ class ViewType(Enum):
 
 class IDP(ASTNode):
     """The class of AST nodes representing an IDP-Z3 program.
-
-    Args:
+    """
+    """ do not display this info in the API
+    Attributes:
         code (str): source code of the IDP program
 
-        vocabularies (dict[str, Vocabulary]): list of vocabulary blocks, by name
+        vocabularies (Dict[str, Vocabulary]): list of vocabulary blocks, by name
 
-        theories (dict[str, TheoryBlock]): list of theory blocks, by name
+        theories (Dict[str, TheoryBlock]): list of theory blocks, by name
 
-        structures (dict[str, Structure]): list of structure blocks, by name
+        structures (Dict[str, Structure]): list of structure blocks, by name
 
-        procedures (dict[str, Procedure]): list of procedure blocks, by name
+        procedures (Dict[str, Procedure]): list of procedure blocks, by name
 
         display (Display, Optional): display block, if any
     """
@@ -191,7 +192,7 @@ class IDP(ASTNode):
         out.code = code
         return out
 
-    def get_blocks(self, blocks: List[str]):
+    def get_blocks(self, blocks: List[str]) -> List[ASTNode]:
         """returns the AST nodes for the blocks whose names are given
 
         Args:
@@ -213,38 +214,11 @@ class IDP(ASTNode):
                        "")
         return out
 
+    def execute(self) -> None:
+        pass  # monkey patched
+
 
 ################################ Vocabulary  ##############################
-
-
-class Annotations(ASTNode):
-    def __init__(self, **kwargs):
-        self.annotations = kwargs.pop('annotations')
-
-        def pair(s):
-            p = s.split(':', 1)
-            if len(p) == 2:
-                try:
-                    # Do we have a Slider?
-                    # The format of p[1] is as follows:
-                    # (lower_sym, upper_sym): (lower_bound, upper_bound)
-                    pat = r"\(((.*?), (.*?))\)"
-                    arg = findall(pat, p[1])
-                    l_symb = arg[0][1]
-                    u_symb = arg[0][2]
-                    l_bound = arg[1][1]
-                    u_bound = arg[1][2]
-                    slider_arg = {'lower_symbol': l_symb,
-                                  'upper_symbol': u_symb,
-                                  'lower_bound': l_bound,
-                                  'upper_bound': u_bound}
-                    return(p[0], slider_arg)
-                except:  # could not parse the slider data
-                    return (p[0], p[1])
-            else:
-                return ('reading', p[0])
-
-        self.annotations = dict((pair(t) for t in self.annotations))
 
 
 class Vocabulary(ASTNode):
@@ -502,7 +476,7 @@ class TheoryBlock(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
-        self.constraints = OrderedSet(kwargs.pop('constraints'))
+        constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
         self.goals = {}
@@ -514,8 +488,12 @@ class TheoryBlock(ASTNode):
         self.def_constraints = {}  # {(Declaration, Definition): list[Expression]}
         self.assignments = Assignments()
 
-        for constraint in self.constraints:
-            constraint.block = self
+        self.constraints = OrderedSet()
+        for c in constraints:
+            c.block = self
+            if c.annotations is not None:
+                c.expr.annotations = c.annotations.annotations
+            self.constraints.append(c.expr)
         for definition in self.definitions:
             for rule in definition.rules:
                 rule.block = self
@@ -531,25 +509,25 @@ class Definition(ASTNode):
         rules ([Rule]):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
-        canonicals (dict[Declaration, list[Rule]]):
+        canonicals (Dict[Declaration, list[Rule]]):
             normalized rule for each defined symbol,
             e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
 
-        instantiables (dict[Declaration], list[Expression]):
+        instantiables (Dict[Declaration], list[Expression]):
             list of instantiable expressions for each symbol,
             e.g., `p($p!1$) <=> q($p!1$)`
 
-        clarks (dict[Declaration, Transformed Rule]):
+        clarks (Dict[Declaration, Transformed Rule]):
             normalized rule for each defined symbol (used to be Clark completion)
             e.g., `!$p!1$: p($p!1$) <=> q($p!1$)`
 
-        def_vars (dict[String, dict[String, Variable]]):
+        def_vars (Dict[String, Dict[String, Variable]]):
             Fresh variables for arguments and result
 
-        level_symbols (dict[SymbolDeclaration, Symbol]):
+        level_symbols (Dict[SymbolDeclaration, Symbol]):
             map of recursively defined symbols to level mapping symbols
 
-        cache (dict[SymbolDeclaration, str, Expression]):
+        cache (Dict[SymbolDeclaration, str, Expression]):
             cache of instantiation of the definition
 
         inst_def_level (int): depth of recursion during instantiation
@@ -782,7 +760,7 @@ class SymbolInterpretation(ASTNode):
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
-                    out = IfExpr.make(
+                    out = AIfExpr.make(
                         EQUALS([args[rank], tuples[0].args[rank]]),
                         self.interpret_application(theory, rank+1,
                                                    applied, args, tuples),
@@ -844,7 +822,7 @@ class Enumeration(ASTNode):
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
-                out = IfExpr.make(
+                out = AIfExpr.make(
                     EQUALS([args[rank], tuples[0].args[rank]]),
                     self.contains(args, function, arity, rank+1, tuples),
                     out)
@@ -864,7 +842,7 @@ class ConstructedFrom(Enumeration):
 
         constructors (List[Constructor]): List of Constructor
 
-        accessors (dict[str, Int]): index of the accessor in the constructors
+        accessors (Dict[str, Int]): index of the accessor in the constructors
     """
     def __init__(self, **kwargs):
         self.constructed = kwargs.pop('constructed')
@@ -1122,7 +1100,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 
-                                         TheoryBlock, Definition, Rule, IfExpr,
+                                         TheoryBlock, Definition, Rule, AIfExpr,
                                          AQuantification, Quantee, ARImplication,
                                          AEquivalence, AImplication,
                                          ADisjunction, AConjunction,

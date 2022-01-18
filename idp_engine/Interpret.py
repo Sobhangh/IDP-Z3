@@ -44,7 +44,7 @@ from .Parse import (Extern, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
-from .Expression import (IfExpr, SymbolExpr, Expression, Constructor,
+from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
@@ -122,13 +122,13 @@ def add_def_constraints(self, instantiables, problem, result):
     The `instantiables` (of the definition) are expanded in `problem`.
 
     Args:
-        instantiables (dict[SymbolDeclaration, list[Expression]]):
+        instantiables (Dict[SymbolDeclaration, list[Expression]]):
             the constraints without the quantification
 
         problem (Theory):
             contains the structure for the expansion/interpretation of the constraints
 
-        result (dict[SymbolDeclaration, Definition, list[Expression]]):
+        result (Dict[SymbolDeclaration, Definition, list[Expression]]):
             a mapping from (Symbol, Definition) to the list of constraints
     """
     for decl, bodies in instantiables.items():
@@ -380,14 +380,14 @@ def interpret(self, problem):
                             elif self.q == '∃':
                                 new_f = AND([applied, new_f])
                             else:  # aggregate
-                                if isinstance(new_f, IfExpr):  # cardinality
+                                if isinstance(new_f, AIfExpr):  # cardinality
                                     # if a then b else 0 -> if (applied & a) then b else 0
                                     arg1 = AND([applied,
                                                         new_f.sub_exprs[0]])
-                                    new_f = IfExpr.make(arg1, new_f.sub_exprs[1],
+                                    new_f = AIfExpr.make(arg1, new_f.sub_exprs[1],
                                                         new_f.sub_exprs[2])
                                 else:  # sum
-                                    new_f = IfExpr.make(applied, new_f, Number(number="0"))
+                                    new_f = AIfExpr.make(applied, new_f, Number(number="0"))
                         out.append(new_f)
                 forms = out
 
@@ -446,7 +446,7 @@ def interpret(self, problem):
                 simpler = NOT(simpler)
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
-            and any(s.decl.name == CONCEPT for s in self.decl.sorts)
+            # and any(s.decl.name == CONCEPT for s in self.decl.sorts)
             and all(a.value is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
@@ -503,7 +503,10 @@ def instantiate1(self, e0, e1, problem=None):
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
                             f"Incorrect arity for {out.code}")
-                out = AppliedSymbol.make(out.symbol, out.sub_exprs)
+                kwargs = ({'is_enumerated': out.is_enumerated} if out.is_enumerated else
+                          {'in_enumeration': out.in_enumeration} if out.in_enumeration else
+                          {})
+                out = AppliedSymbol.make(out.symbol, out.sub_exprs, **kwargs)
                 out.original = self
         if out.co_constraint is not None:
             out.co_constraint.instantiate(e0, e1, problem)

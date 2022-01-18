@@ -27,7 +27,7 @@ from .Parse import (Vocabulary, Extern, TypeDeclaration, Type, Domain,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
-from .Expression import (Expression, Constructor, IfExpr, AQuantification, Quantee,
+from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AEquivalence,
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
@@ -512,12 +512,12 @@ def annotate1(self):
 Expression.annotate1 = annotate1
 
 
-# Class IfExpr  #######################################################
+# Class AIfExpr  #######################################################
 
 def annotate1(self):
-    self.type = self.sub_exprs[IfExpr.THEN].type
+    self.type = self.sub_exprs[AIfExpr.THEN].type
     return Expression.annotate1(self)
-IfExpr.annotate1 = annotate1
+AIfExpr.annotate1 = annotate1
 
 
 # Class AQuantification  #######################################################
@@ -624,7 +624,7 @@ def annotate(self, voc, q_vars):
     if not self.annotated:
         assert len(self.sub_exprs) == 1, "Internal error"
         if self.aggtype == "#":
-            self.sub_exprs = [IfExpr.make(self.sub_exprs[0],
+            self.sub_exprs = [AIfExpr.make(self.sub_exprs[0],
                                           Number(number='1'),
                                           Number(number='0'))]
             self.type = INT

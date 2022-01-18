@@ -6,12 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
+
 ### API
+* (breaking) MR !193: minor public API changes
 * fix #163: improve performance by avoiding unnecessary copying
+* fix #170: reduce the need for parenthesis in expressions (annotations, if..then..else)
+* fix #177: Incorrect translation of `$(c)(Adhesive()) is enumerated`
 * MR !181: support Python 3.10
 * MR !183: add enable_law and disable_law to the API
 * MR !184: add `Theory.determine_relevance(self)` to the official API
 * MR !188: print models in uniform format to structure
+* MR !196: add `Theory.to_smt_lib` API
+* MR !198: Performance: replace applied symbols by their interpretation, if known
 
 ### Interactive Consultant
 * fix #125: Bug in relevance for Registration
@@ -20,6 +27,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * MR !186: switching between reading and formula view now works for explanations too.
 * MR !187: fix regression where unsatisfiable theories were not explained in the IC.
 * MR !183: allow to disable constraints
+* MR !190: add Covid example
 
 
 ## [0.9.0] - 2021-12-16

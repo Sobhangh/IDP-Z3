@@ -31,7 +31,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
                 BoolVal, RatVal, IntVal)
 
 from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
-from idp_engine.Expression import (Constructor, Expression, IfExpr,
+from idp_engine.Expression import (Constructor, Expression, AIfExpr,
                                    AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
                                    AUnary, AAggregate, AppliedSymbol,
@@ -134,7 +134,7 @@ def translate(self, problem: "Theory", vars={}) -> ExprRef:
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
-        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+        vars (Dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
     Returns:
@@ -177,7 +177,7 @@ def translate(self, problem: "Theory", vars={}):
 Symbol.translate=translate
 
 
-# Class IfExpr  ###############################################################
+# Class AIfExpr  ###############################################################
 
 def translate1(self, problem: "Theory", vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, ignoring .value and .simpler
@@ -185,16 +185,16 @@ def translate1(self, problem: "Theory", vars={}) -> ExprRef:
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
-        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+        vars (Dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
     Returns:
         ExprRef: Z3 expression
     """
-    return If(self.sub_exprs[IfExpr.IF].translate(problem, vars),
-              self.sub_exprs[IfExpr.THEN].translate(problem, vars),
-              self.sub_exprs[IfExpr.ELSE].translate(problem, vars))
-IfExpr.translate1 = translate1
+    return If(self.sub_exprs[AIfExpr.IF].translate(problem, vars),
+              self.sub_exprs[AIfExpr.THEN].translate(problem, vars),
+              self.sub_exprs[AIfExpr.ELSE].translate(problem, vars))
+AIfExpr.translate1 = translate1
 
 
 # Class AQuantification  ######################################################
@@ -334,6 +334,10 @@ def translate1(self, problem: "Theory", vars={}):
     self.check(self.decl, f"Unknown symbol: {self.symbol}.\n"
                f"Possible fix: introduce a variable "
                f"(e.g., !x in Concept: x=... => $(x)(..))")
+    self.check(not self.is_enumerated,
+               f"{self.decl.name} is not enumerated")
+    self.check(not self.in_enumeration,
+               f"Internal error")
     if self.decl.name == RELEVANT:
         return TRUE.translate(problem, vars)
     if self.decl.name == 'abs':

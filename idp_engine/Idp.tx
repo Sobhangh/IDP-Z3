@@ -32,7 +32,11 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition* (constraints=Expression '.')* interpretations=SymbolInterpretation* )* '}';
+TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
+             ( definitions=Definition*
+               constraints=Constraint*
+               interpretations=SymbolInterpretation*
+             )* '}';
 
   Definition: annotations=Annotations '{' rules*=Rule '}';
   Rule: annotations=Annotations
@@ -51,10 +55,9 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
               ']'
             )?;
 
-  Expression: IfExpr | Quantification;
-    IfExpr: 'if' if_f=Quantification 'then' then_f=Expression 'else' else_f=Expression;
+  Constraint: annotations=Annotations expr=Expression '.';
 
-    Quantification: AQuantification | RImplication;
+    Expression:     AQuantification | RImplication;
     RImplication:   ARImplication   | Equivalence;
     Equivalence:    AEquivalence    | Implication;
     Implication:    AImplication    | Disjunction;
@@ -65,23 +68,26 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
     MultDiv:        AMultDiv        | Power;
     Power:          APower          | Unary;
     Unary:          AUnary          | Aggregate;
-    Aggregate:      AAggregate      | Base;
+    Aggregate:      AAggregate      | IfExpr;
+    IfExpr:         AIfExpr         | Base;
 
 
-    AQuantification: q=Quantor quantees+=Quantee[','] ':' f=Expression;
+    AQuantification: annotations=Annotations q=Quantor quantees+=Quantee[','] ':' f=Expression;
       Quantor: '∀' | '!' | '∃' | '?' ;
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
     AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
     AImplication:  sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+;
     ADisjunction:  sub_exprs=Conjunction (operator=DisjunctionOp  sub_exprs=Conjunction)+;
     AConjunction:  sub_exprs=Comparison  (operator=ConjunctionOp  sub_exprs=Comparison )+;
-    AComparison:   sub_exprs=SumMinus    (operator=ComparisonOp   sub_exprs=SumMinus   )+;
+    AComparison:   annotations=Annotations
+                   sub_exprs=SumMinus    (operator=ComparisonOp   sub_exprs=SumMinus   )+;
     ASumMinus:     sub_exprs=MultDiv     (operator=SumMinusOp     sub_exprs=MultDiv    )+;
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
     AUnary: !INT !IDPFLOAT               (operators+=UnaryOperator  f=Aggregate);
     AAggregate: !Date ( aggtype=/#|card/ '{' quantees*=Quantee[',']  ':' f=Expression '}'
                 | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' f=Expression ')');
+    AIfExpr: 'if' if_f=Expression 'then' then_f=Expression 'else' else_f=Expression;
 
     RImplicationOp: '<=' | '⇐';
     EquivalenceOp: '<=>' | '⇔';
@@ -96,7 +102,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{' ( definitions=Definition*
 
     Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
-      AppliedSymbol: symbol=SymbolExpr
+      AppliedSymbol: annotations=Annotations
+              symbol=SymbolExpr
               '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+(not\s+)?enumerated/
               | is_enumeration=/(not\s+)?in|∈|(∉)/ in_enumeration=Enumeration)?;

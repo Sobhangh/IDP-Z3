@@ -20,7 +20,11 @@ theory {
   `opposite = `opposite.
   `opposite ~= `color.
   f(`f) = `f.
+  !x in Concept[color->color]: $(x)(red) is enumerated.
+}
+structure S:V {
+  opposite := {red->blue}
 }
 procedure main() {
-    pretty_print(Theory(T).formula())
+    pretty_print(Theory(T, S).formula())
 }

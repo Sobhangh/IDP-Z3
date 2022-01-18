@@ -47,15 +47,15 @@ theory {
       (Vertices()=4 <=> Sides()=4)).
 
     [All triangles are convex]
-    (Sides()=3 => Convex()).
+    Sides()=3 => Convex().
 
     [Definition of Convex]
     (Convex() <=> [All angles are below 180°]
-                (∀n in side: Angle(n)<180)).
+                  ∀n in side: Angle(n)<180).
 
     [Definition of Equilateral]
     (Equilateral() <=> [All sides have the same length]
-                     (∀n in side: Length(n)=Length(1) | Sides() < n)).
+                       ∀n in side: Length(n)=Length(1) | Sides() < n).
 
     [A triangle is regular, right, or irregular]
     ( Subtype()=right_triangle | Subtype()=regular_triangle | Subtype()=irregular <= Sides()=3).
@@ -66,26 +66,26 @@ theory {
 
     [A regular triangle is a triangle where all angles are 60°]
     (Subtype()=regular_triangle <=> Sides()=3 & [All angles are 60°]
-                                            (!n in side: Angle(n)=60 | Sides() < n)).
+                                            !n in side: Angle(n)=60 | Sides() < n).
 
     [A right triangle is a triangle with a 90° angle]
     (Subtype()=right_triangle   <=> Sides()=3 & [One angle is 90°]
-                                           (?n in side: Angle(n)=90)).
+                                           ?n in side: Angle(n)=90).
 
     [All angles are 90° in squares and rectangles]
     (Subtype()=square | Subtype()=rectangle <=> Sides()=4 & [All angles are 90°]
-                                                     (!n in side: Angle(n)=90 | Sides() < n)).
+                                                     !n in side: Angle(n)=90 | Sides() < n).
 
     [In a rectangle, opposite side have the same length, and adjacent sides have different lengths]
     (Subtype()=rectangle => Length(1)=Length(3) & Length(2)=Length(4) & Length(1)~=Length(2)).
 
     [A square is an equilateral quadrilateral]
-    (Subtype()=square    <=> Sides()=4 & Equilateral()).
+    Subtype()=square    <=> Sides()=4 & Equilateral().
 
     [In a triangle, no side is longer than the sum of the 2 other sides]
-    ( Type()=triangle => ( Length(1) =< Length(2) + Length(3))
-                    &  ( Length(2) =< Length(3) + Length(1))
-                    &  ( Length(3) =< Length(1) + Length(2))).
+    Type()=triangle => [Short L1] Length(1) =< Length(2) + Length(3)
+                    &    [Short L2] Length(2) =< Length(3) + Length(1)
+                    &  ( Length(3) =< Length(1) + Length(2)).
 
     // General constraints
 
@@ -96,19 +96,19 @@ theory {
     (sum(lambda n in side : Angle(n)) = (Sides()-2)*180).
 
     [Lengths are positive numbers]
-    (!x in side: 0 =< Length(x)).
+    !x in side: 0 =< Length(x).
 
     [Angles are positive numbers]
-    (!x in side: 0 =< Angle(x)).
+    !x in side: 0 =< Angle(x).
 
     [Angles cannot be 180°]
-    (!x in side: Angle(x) ~= 180).
+    !x in side: Angle(x) ~= 180.
 
     [A polygon with N vertices has N angles]
-    (!n in side: Angle(n)=0 <=> Vertices()<n ).
+    !n in side: Angle(n)=0 <=> Vertices()<n .
 
     [A polygon with N sides has N lengths]
-    (!n in side: Length(n)=0 <=> Sides()<n).
+    !n in side: Length(n)=0 <=> Sides()<n.
 
 
 

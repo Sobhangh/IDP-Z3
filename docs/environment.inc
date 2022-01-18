@@ -4,8 +4,8 @@
 
 .. index:: environment
 
-Environment
------------
+Environment & Decision
+----------------------
 Often, some elements of a problem instance are under the control of the user (possibly indirectly), while others are not.
 
 To capture this difference, the FO(:raw-html:`&#183`) language allows the creation of 2 vocabularies and 2 theories.

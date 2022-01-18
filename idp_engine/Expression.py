@@ -21,7 +21,7 @@
 (They are monkey-patched by other modules)
 
 """
-__all__ = ["ASTNode", "Expression", "Constructor", "IfExpr", "Quantee", "AQuantification",
+__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "Quantee", "AQuantification",
            "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
@@ -32,6 +32,7 @@ import copy
 from collections import ChainMap
 from datetime import date
 from fractions import Fraction
+from re import findall
 from sys import intern
 from textx import get_location
 from typing import Optional, List, Tuple, Dict, Set, Any
@@ -93,6 +94,38 @@ class ASTNode(object):
 
     def interpret(self, problem: Any) -> "Expression":
         return self  # monkey-patched
+
+
+class Annotations(ASTNode):
+    def __init__(self, **kwargs):
+        annotations = kwargs.pop('annotations')
+
+        self.annotations = {}
+        for s in annotations:
+            p = s.split(':', 1)
+            if len(p) == 2:
+                try:
+                    # Do we have a Slider?
+                    # The format of p[1] is as follows:
+                    # (lower_sym, upper_sym): (lower_bound, upper_bound)
+                    pat = r"\(((.*?), (.*?))\)"
+                    arg = findall(pat, p[1])
+                    l_symb = arg[0][1]
+                    u_symb = arg[0][2]
+                    l_bound = arg[1][1]
+                    u_bound = arg[1][2]
+                    slider_arg = {'lower_symbol': l_symb,
+                                  'upper_symbol': u_symb,
+                                  'lower_bound': l_bound,
+                                  'upper_bound': u_bound}
+                    k, v = (p[0], slider_arg)
+                except:  # could not parse the slider data
+                    k, v = (p[0], p[1])
+            else:
+                k, v = ('reading', p[0])
+            self.check(k not in self.annotations,
+                       f"Duplicate annotation: [{k}: {v}]")
+            self.annotations[k] = v
 
 
 class Constructor(ASTNode):
@@ -221,7 +254,10 @@ class Expression(ASTNode):
         self.value: Optional["Expression"] = None
 
         self.code: str = intern(str(self))
-        self.annotations: Dict[str, str] = {'reading': self.code}
+        if not hasattr(self, 'annotations') or self.annotations == None:
+            self.annotations: Dict[str, str] = {'reading': self.code}
+        elif type(self.annotations) == Annotations:
+            self.annotations = self.annotations.annotations
         self.original: Expression = self
 
         self.str: str = self.code
@@ -297,7 +333,7 @@ class Expression(ASTNode):
         and AppliedSymbol interpreted in a structure
         co_constraints=False : ignore co_constraints
 
-        default implementation for UnappliedSymbol, IfExpr, AUnary, Variable,
+        default implementation for UnappliedSymbol, AIfExpr, AUnary, Variable,
         Number_constant, Brackets
         """
         for e in self.sub_exprs:
@@ -453,7 +489,7 @@ class Expression(ASTNode):
          are added to atoms containing recursive symbols.
 
         Arguments:
-            - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
+            - level_symbols (Dict[SymbolDeclaration, Symbol]): the level mapping
               symbols as well as their corresponding recursive symbols
             - head (AppliedSymbol): head of the rule we are adding level mapping
               symbols to.
@@ -520,7 +556,7 @@ class Domain(Symbol):
         pass  # monkey-patched
 
 
-class IfExpr(Expression):
+class AIfExpr(Expression):
     PRECEDENCE = 10
     IF = 0
     THEN = 1
@@ -540,9 +576,9 @@ class IfExpr(Expression):
         return out.annotate1().simplify1()
 
     def __str1__(self):
-        return (f" if   {self.sub_exprs[IfExpr.IF  ].str}"
-                f" then {self.sub_exprs[IfExpr.THEN].str}"
-                f" else {self.sub_exprs[IfExpr.ELSE].str}")
+        return (f" if   {self.sub_exprs[AIfExpr.IF  ].str}"
+                f" then {self.sub_exprs[AIfExpr.THEN].str}"
+                f" else {self.sub_exprs[AIfExpr.ELSE].str}")
 
     def collect_nested_symbols(self, symbols, is_nested):
         return Expression.collect_nested_symbols(self, symbols, True)
@@ -611,6 +647,7 @@ class AQuantification(Expression):
     PRECEDENCE = 20
 
     def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
         self.q = kwargs.pop('q')
         self.quantees = kwargs.pop('quantees')
         self.f = kwargs.pop('f')
@@ -631,9 +668,7 @@ class AQuantification(Expression):
     @classmethod
     def make(cls, q, quantees, f, annotations=None):
         "make and annotate a quantified formula"
-        out = cls(q=q, quantees=quantees, f=f)
-        if annotations:
-            out.annotations = annotations
+        out = cls(annotations=annotations, q=q, quantees=quantees, f=f)
         return out.annotate1()
 
     def __str1__(self):
@@ -702,7 +737,7 @@ class Operator(Expression):
             return operands[0]
         if isinstance(ops, str):
             ops = [ops] * (len(operands)-1)
-        out = (cls)(sub_exprs=operands, operator=ops)
+        out = (cls)(annotations=annotations, sub_exprs=operands, operator=ops)
         if annotations:
             out.annotations = annotations
         return out.annotate1().simplify1()
@@ -786,6 +821,7 @@ class AComparison(Operator):
     PRECEDENCE = 80
 
     def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
         super().__init__(**kwargs)
 
     def is_assignment(self):
@@ -912,6 +948,7 @@ class AppliedSymbol(Expression):
     PRECEDENCE = 200
 
     def __init__(self, **kwargs):
+        self.annotations = kwargs.pop('annotations')
         self.symbol = kwargs.pop('symbol')
         self.sub_exprs = kwargs.pop('sub_exprs')
         if 'is_enumerated' in kwargs:
@@ -936,7 +973,7 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls, symbol, args, **kwargs):
-        out = cls(symbol=symbol, sub_exprs=args, **kwargs)
+        out = cls(annotations=None, symbol=symbol, sub_exprs=args, **kwargs)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
@@ -1208,16 +1245,13 @@ class Brackets(Expression):
 
     def __init__(self, **kwargs):
         self.f = kwargs.pop('f')
-        annotations = kwargs.pop('annotations')
+        self.annotations = kwargs.pop('annotations')
+        if not self.annotations:
+            self.annotations = {'reading': self.f.annotations['reading']}
         self.sub_exprs = [self.f]
 
         super().__init__()
-        if type(annotations) == dict:
-            self.annotations = annotations
-        elif annotations is None:
-            self.annotations = None
-        else:  # Annotations instance
-            self.annotations = annotations.annotations
+
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"

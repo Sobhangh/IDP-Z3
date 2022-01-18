@@ -29,7 +29,7 @@ TODO for relevance: in branch Pierre
     - [x] all angles are 90° → not convex ?
     - [ ] eliminate replace_by(), \_change()
         - [ ] Expression.substitute by non constructor
-        - [ ] IfExpr, AQuantification: ok because at expand, interpret stages
+        - [ ] AIfExpr, AQuantification: ok because at expand, interpret stages
         - [ ] AImplication
         - [ ] AEquivalence
         - [ ] arithmetic, AMultDiv, APower, AUnary

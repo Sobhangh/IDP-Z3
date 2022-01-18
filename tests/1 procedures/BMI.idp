@@ -62,4 +62,6 @@ procedure main() {
     pretty_print(model_propagate(T, S))
     print()
     pretty_print(Theory(T,S).propagate().explain("riskLevel()"))
+    print()
+    print(Theory(T).to_smt_lib())
 }
