@@ -4,7 +4,7 @@ vocabulary V {
     Vehicle : ConfigObj -> Bool
     fleetOf: ConfigObj -> Fleet
     weight : ConfigObj -> Int
-    total, min, max : () -> Int
+    total, min, max, max2 : () -> Int
     fleetTotal, fleetCard, fleetMin: Fleet -> Int
 }
 theory T:V {
@@ -17,6 +17,7 @@ theory T:V {
     total() = sum(lambda x in Vehicle: weight(x)).
     min() = min(lambda x in ConfigObj: weight(x)).
     max() = max(lambda x in ConfigObj: weight(x)).
+    max2() = max(lambda x in ConfigObj: weight(x)).
     !f in Fleet: fleetTotal(f) = sum(lambda x in Vehicle: if fleetOf(x)=f then weight(x) else 0).
     !f in Fleet: fleetCard(f) = card{x in Vehicle: fleetOf(x)=f}.
     !f in Fleet: fleetMin(f) = min(lambda x in ConfigObj: if fleetOf(x)=f then weight(x) else 999).
