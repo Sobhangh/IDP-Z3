@@ -25,6 +25,7 @@ Partial functions
 
 Syntax changes
     The syntax of quantifications and aggregates has slightly change.
+    IDP-Z3 supports quantification over the tuples satisfying a predicate.
     IDP-Z3 does not support qualified quantifications, e.g. ``!2 x[color]: p(x).``. (p. 11 of the IDP3 manual).
 
 if .. then .. else ..
