@@ -9,8 +9,8 @@ Infinite domains
     IDP-Z3 supports infinite domains: ``Int, Real``.
     However, quantifications over infinite domains is discouraged.
 
-if .. then .. else ..
-    IDP-Z3 supports `if .. then .. else ..` terms and sentences.
+Type
+    IDP-Z3 does not support type hierarchies.
 
 LTC
     IDP-Z3 does not support LTC vocabularies.
@@ -23,16 +23,17 @@ Partial functions
     The handling of division by 0 may differ.
     See `IEP 07 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-07-Division-by-0>`_
 
-Qualified quantifications
+Syntax changes
+    The syntax of quantifications and aggregates has slightly change.
     IDP-Z3 does not support qualified quantifications, e.g. ``!2 x[color]: p(x).``. (p. 11 of the IDP3 manual).
+
+if .. then .. else ..
+    IDP-Z3 supports `if .. then .. else ..` terms and sentences.
 
 Structure
     IDP-Z3 does not support ``u`` uncertain interpretations (p.17 of IDP3 manual).
     Function enumerations must have an ``else`` part.
     (see also `IEP 04 <https://gitlab.com/krr/IDP-Z3/-/wikis/IEP-04-Incomplete-enumerations>`_)
-
-Type
-    IDP-Z3 does not support type hierarchies.
 
 To improve performance, do not quantify over the value of a function.
 Use ``p(f(x))`` instead of ``?y: f(x)=y & p(y)``.
