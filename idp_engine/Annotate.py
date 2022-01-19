@@ -454,7 +454,6 @@ def annotate(self, idp):
         open_types[name] = Symbol(name=type_name)
 
     for name, out in [
-        ('goal', Symbol(name=BOOL)),
         ('expand', Symbol(name=BOOL)),
         ('relevant', Symbol(name=BOOL)),
         ('hide', Symbol(name=BOOL)),

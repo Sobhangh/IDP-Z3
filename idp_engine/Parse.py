@@ -980,11 +980,7 @@ class Display(ASTNode):
                         f" must be a symbol")
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if name == 'goal':  # e.g.,  goal(Prime)
-                    for s in symbols:
-                        idp.theory.goals[s.name] = s
-                        s.view = ViewType.EXPANDED  # the goal is always expanded
-                elif name == 'expand':  # e.g. expand(Length, Angle)
+                if name == 'expand':  # e.g. expand(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
                 elif name == 'hide':  # e.g. hide(Length, Angle)

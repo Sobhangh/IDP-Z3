@@ -33,9 +33,6 @@ goal_symbol
     Irrelevant symbols and questions, i.e. expressions whose interpretation do not constrain the interpretation of the relevant symbols,
     are greyed out by the Interactive Consultant.
 
-goal
-    ``goal(`s)`` specifies that symbol ``s`` is a goal, i.e. that it is relevant and shown expanded.
-
 moveSymbols
     When the *display block* contains ``moveSymbols()``, the Interactive Consultant is allowed to change the layout of symbols on the screen, so that relevant symbols come first.
 

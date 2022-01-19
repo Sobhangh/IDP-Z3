@@ -84,7 +84,6 @@ The equivalent ASCII-only encoding is shown on the right.
         hide(`p).
         view() = expanded.
         goal_smbol(`p1, `p2).
-        goal(`p).
         optionalPropagation.
     }
 

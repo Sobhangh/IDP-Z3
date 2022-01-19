@@ -12,7 +12,8 @@ theory {
 }
 
 display {
-    goal(`p).
+    expand(`p).
+    goal_symbol(`p).
 }
 
 -- meta -------------------------------------
