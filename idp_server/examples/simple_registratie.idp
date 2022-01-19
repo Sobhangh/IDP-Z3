@@ -37,6 +37,6 @@ theory decision:decision {
 
 display {
     expand(`tax_rate).
-    goal_symbol(`tax_rate, `registration_Type).
+    goal_symbol := {`tax_rate, `registration_Type}.
     view() = normal.
 }

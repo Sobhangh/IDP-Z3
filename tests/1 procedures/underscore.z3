@@ -12,7 +12,7 @@ theory T:V {
 
 
 display {
-    goal_symbol(`δ).
+    goal_symbol:={`δ}.
   view() = expanded.
 }
 -- meta -------------------------------------

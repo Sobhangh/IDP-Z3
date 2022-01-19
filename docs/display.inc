@@ -28,7 +28,8 @@ view()
     ``view() = expanded.`` specifies that symbols are displayed expanded.
 
 goal_symbol
-    ``goal_symbol(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are always relevant, i.e. that they should never be greyed out.
+    ``goal_symbol := {`s1, .., `sn}`` specifies that symbols ``s1, .., sn`` are always relevant, i.e. that they should never be greyed out.
+    ``goal_symbol`` can only be used in an enumeration.
 
     Irrelevant symbols and questions, i.e. expressions whose interpretation do not constrain the interpretation of the relevant symbols,
     are greyed out by the Interactive Consultant.

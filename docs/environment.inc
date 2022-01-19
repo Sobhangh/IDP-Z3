@@ -24,11 +24,11 @@ Hence, a more advanced skeleton of an IDP-Z3 program is:
     }
 
     theory environment:environment {
-        // here comes the definitions and constraints satisfied by any environment possibly faced by the user
+        // here comes the definitions and axioms satisfied by any environment possibly faced by the user
     }
 
     theory decision:decision {
-        // here comes the definitions and constraints to be satisfied by any solution
+        // here comes the definitions and axioms to be satisfied by any solution
     }
 
     structure environment:environment {

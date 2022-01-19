@@ -64,16 +64,17 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
     return new_constraints
 
 
-def determine_relevance(self: "State"):
-    """determines the atoms that occur in one of the possible justifications of self being true
+def determine_relevance(self: Theory):
+    """Determines the atoms that are relevant to find a model, or to find the values of ``goal_symbol``.
 
-    Call must be made after a propagation, on a Theory created with 'extended=True'.
-    If the `relevant` predicate occurs in the theory, we consider the possible justifications of the relevant symbols only.
-    The result is found in the `relevant` attribute of the assignments in self.assignments.
+    Call must be made after a propagation, on a Theory created with ``extended=True``.
+    The result is found in the ``relevant`` attribute of the assignments in ``self.assignments``.
+
+    If ``goal_symbol`` has an enumeration in the theory (e.g., ``goal_symbol := {`tax_amount}``),
+    relevance is computed relative to those goals.
 
     Defined symbols that do not occur in the justification of axioms do not need to be justified,
-    unless they are specified as relevant by use of the `relevant` predicate.
-    Symbols declared in a `decision` vocabulary must be justified, even if given by the user.
+    unless they are specified as goals by use of an enumeration of ``goal_symbol``.
     """
     assert self.extended == True,\
         "The theory must be created with 'extended=True' for relevance computations."

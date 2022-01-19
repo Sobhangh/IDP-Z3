@@ -45,7 +45,7 @@ theory decision:decision {
 }
 
 display {
-    goal_symbol(`M).
+    goal_symbol:={`M}.
     expand(`M).
     view() = expanded.
 }

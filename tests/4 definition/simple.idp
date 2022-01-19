@@ -11,6 +11,6 @@ theory {
     { c()=red. }
 }
 display {
-    goal_symbol(`b).
+    goal_symbol:={`b}.
     view() = expanded.
 }

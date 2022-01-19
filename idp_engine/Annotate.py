@@ -471,9 +471,11 @@ def annotate(self, idp):
                                         sorts=[], out=out)
         symbol_decl.annotate(self.voc)
 
-    # annotate constraints
+    # annotate constraints and interpretations
     for constraint in self.constraints:
         constraint.annotate(self.voc, {})
+    for i in self.interpretations.values():
+        i.annotate(self)
 Display.annotate = annotate
 
 

@@ -278,19 +278,21 @@ class Theory(object):
         for decl in self.declarations.values():
             decl.interpret(self)
 
+        # remove RELEVANT constraints
+        self.constraints = OrderedSet([v for k,v in self.constraints.items()
+            if not(type(v) == AppliedSymbol
+                   and v.decl is not None
+                   and v.decl.name == RELEVANT)])
+
+        # process enumerations, including GOAL_SYMBOL
+        to_add = OrderedSet()
         for symbol_interpretation in self.interpretations.values():
             if not symbol_interpretation.is_type_enumeration:
                 symbol_interpretation.interpret(self)
-
-        # expand goal_symbol
-        to_add = OrderedSet()
-        for original in self.constraints:
-            if (type(original) == AppliedSymbol
-                and original.symbol.decl is not None
-                and original.symbol.decl.name == GOAL_SYMBOL):
-                symbols = original.sub_exprs
-
-                for symbol in symbols:
+            if symbol_interpretation.name == GOAL_SYMBOL:
+                # expand goal_symbol
+                for t in symbol_interpretation.enumeration.tuples:
+                    symbol = t.args[0]
                     decl = self.declarations[symbol.name[1:]]
                     assert decl.instances, "goals must be instantiable."
                     relevant = Symbol(name=RELEVANT)
@@ -797,6 +799,10 @@ class Theory(object):
         out.constraints = new_constraints
         out._formula, out._constraintz = None, None
         return out
+
+    def determine_relevance(self) -> "Theory":
+        # monkey-patched
+        pass
 
     def _generalize(self,
                     conjuncts: List[Assignment],

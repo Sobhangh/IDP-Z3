@@ -10,7 +10,7 @@ theory {
   r().
 }
 display {
-  goal_symbol(`p).
+  goal_symbol:={`p}.
 }
 -- meta -------------------------------------
 {'manualPropagation': False,

@@ -10,7 +10,7 @@ theory {
     q().
 }
 display {
-    goal_symbol(`b).
+    goal_symbol := {`b}
     view() = expanded.
 }
 -- meta -------------------------------------

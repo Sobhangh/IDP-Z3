@@ -1,61 +1,500 @@
+Traceback (most recent call last):
+  File "textx/model.py", line ??, in _parse
+    return self.parser_model.parse(self)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = [self.nodes[0].parse(parser)]
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = p(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    raise parser.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = p(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    sep_result = sep(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = [self.nodes[0].parse(parser)]
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = [self.nodes[0].parse(parser)]
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse_comments
+    parser.comments_model.parse(parser))
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse_comments
+    parser.comments_model.parse(parser))
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse_comments
+    parser.comments_model.parse(parser))
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    sep_result = sep(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = p(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = p(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    result = e.parse(parser)
+  File "arpeggio/__init__.py", line ??, in parse
+    result = self._parse(parser)
+  File "arpeggio/__init__.py", line ??, in _parse
+    parser._nm_raise(self, c_pos, parser)
+  File "arpeggio/__init__.py", line ??, in _nm_raise
+    raise self.nm
+arpeggio.NoMatch: Expected '(' or '->' or '→' or ',' or '}' at position (10, 27) => ':= {`Prime*)}     exp'.
 
--- original ---------------------------------
-vocabulary {
-    type num := {1..4}
-    Prime: (num) → Bool
-}
+During handling of the above exception, another exception occurred:
 
-theory {
-	{ !x : Prime(x) ← !y ∈ num : 1<y & y<x => x % y ~=0.}
-}
-display {
-    goal_symbol(`Prime).
-    expand(`Prime).
-}
--- meta -------------------------------------
-{'manualPropagation': False,
- 'manualRelevance': False,
- 'optionalPropagation': False,
- 'optionalRelevance': False,
- 'symbols': [{'environmental': False,
-              'idpname': 'Prime',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'function',
-              'view': 'expanded'}],
- 'title': 'Interactive Consultant'}
+Traceback (most recent call last):
+  File "test.py", line ??, in generateZ3
+    idp = IDP.from_str(theory)
+  File "idp_engine/Parse.py", line ??, in from_str
+    out = idpparser.model_from_str(code)
+  File "textx/metamodel.py", line ??, in model_from_str
+    model = self._parser_blueprint.clone().get_model_from_str(
+  File "textx/model.py", line ??, in get_model_from_str
+    self.parse(model_str, file_name=file_name)
+  File "arpeggio/__init__.py", line ??, in parse
+    self.parse_tree = self._parse()
+  File "textx/model.py", line ??, in _parse
+    raise TextXSyntaxError(message=text(e),
+textx.exceptions.TextXSyntaxError: None:10:27: error: Expected '(' or '->' or '→' or ',' or '}' at position (10, 27) => ':= {`Prime*)}     exp'.
 
--- propagation ------------------------------
-{' Global': {'env_dec': False},
- 'Prime': {'Prime(1)': {'environmental': False,
-                        'is_assignment': False,
-                        'normal': True,
-                        'reading': 'Prime(1)',
-                        'relevant': True,
-                        'status': 'UNIVERSAL',
-                        'typ': 'Bool',
-                        'value': True},
-           'Prime(2)': {'environmental': False,
-                        'is_assignment': False,
-                        'normal': True,
-                        'reading': 'Prime(2)',
-                        'relevant': True,
-                        'status': 'UNIVERSAL',
-                        'typ': 'Bool',
-                        'value': True},
-           'Prime(3)': {'environmental': False,
-                        'is_assignment': False,
-                        'normal': True,
-                        'reading': 'Prime(3)',
-                        'relevant': True,
-                        'status': 'UNIVERSAL',
-                        'typ': 'Bool',
-                        'value': True},
-           'Prime(4)': {'environmental': False,
-                        'is_assignment': False,
-                        'normal': True,
-                        'reading': 'Prime(4)',
-                        'relevant': True,
-                        'status': 'UNIVERSAL',
-                        'typ': 'Bool',
-                        'value': False}}}

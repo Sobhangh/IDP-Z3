@@ -142,7 +142,7 @@ class IDP(ASTNode):
         self.vocabulary = next(iter(self.vocabularies.values()))
         self.theory = next(iter(self.theories    .values()))
         if self.display is None:
-            self.display = Display(constraints=[])
+            self.display = Display(constraints=[], interpretations=[])
 
     @classmethod
     def from_file(cls, file:str) -> "IDP":
@@ -953,6 +953,7 @@ class DateRange(Ranges):
 class Display(ASTNode):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
+        self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
         self.moveSymbols = False
         self.optionalPropagation = False
         self.manualPropagation = False
@@ -961,6 +962,7 @@ class Display(ASTNode):
         self.name = "display"
 
     def run(self, idp):
+        idp.theory.interpretations.update(self.interpretations)
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
                 self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
@@ -987,7 +989,7 @@ class Display(ASTNode):
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif name == GOAL_SYMBOL:  # e.g. goal_symbol(`tax_amount`)
-                    idp.theory.constraints.append(constraint)
+                    self.check(False, "Please use an enumeration for goal_symbol")
                 elif name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
