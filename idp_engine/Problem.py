@@ -293,7 +293,7 @@ class Theory(object):
                 for t in symbol_interpretation.enumeration.tuples:
                     symbol = t.args[0]
                     decl = self.declarations[symbol.name[1:]]
-                    assert decl.instances, "goals must be instantiable."
+                    assert decl.instances, f"goal {decl.name} must be instantiable."
                     relevant = Symbol(name=RELEVANT)
                     relevant.decl = self.declarations[RELEVANT]
                     for i in decl.instances.values():
