@@ -27,10 +27,11 @@ view()
 
     ``view() = expanded.`` specifies that symbols are displayed expanded.
 
-relevant
-    ``relevant(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are relevant, i.e. that they should never be greyed out.
+goal_symbol
+    ``goal_symbol(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are always relevant, i.e. that they should never be greyed out.
 
-    Irrelevant symbols and sub-sentences, i.e. symbols whose interpretation do not constrain the interpretation of the relevant symbols, are greyed out by the Interactive Consultant.
+    Irrelevant symbols and questions, i.e. expressions whose interpretation do not constrain the interpretation of the relevant symbols,
+    are greyed out by the Interactive Consultant.
 
 goal
     ``goal(`s)`` specifies that symbol ``s`` is a goal, i.e. that it is relevant and shown expanded.

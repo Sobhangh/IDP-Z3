@@ -990,7 +990,7 @@ class Display(ASTNode):
                 elif name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
-                elif name == 'relevant':  # e.g. relevant(Tax)
+                elif name == GOAL_SYMBOL:  # e.g. goal_symbol(`tax_amount`)
                     for s in symbols:
                         idp.theory.goals[s.name] = s
                 elif name == 'unit':  # e.g. unit('m', `length):

@@ -83,7 +83,7 @@ The equivalent ASCII-only encoding is shown on the right.
         expand(`p).
         hide(`p).
         view() = expanded.
-        relevant(`p1, `p2).
+        goal_smbol(`p1, `p2).
         goal(`p).
         optionalPropagation.
     }
