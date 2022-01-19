@@ -47,7 +47,7 @@ from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, Sy
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-                    GOAL_SYMBOL, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    GOAL_SYMBOL, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
@@ -259,7 +259,9 @@ class Vocabulary(ASTNode):
                 name=CONCEPT,
                 constructors=[]),
             SymbolDeclaration(annotations='', name=Symbol(name=GOAL_SYMBOL),
-                                sorts=[], out=Domain(name=BOOL)),
+                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
+            SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
+                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
                                 sorts=[Domain(name=CONCEPT)],
                                 out=Domain(name=INT)),
@@ -479,7 +481,6 @@ class TheoryBlock(ASTNode):
         constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
-        self.goals = {}
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -695,7 +696,6 @@ class Structure(ASTNode):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
-        self.goals = {}
 
         self.name = 'S' if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -987,8 +987,7 @@ class Display(ASTNode):
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
                 elif name == GOAL_SYMBOL:  # e.g. goal_symbol(`tax_amount`)
-                    for s in symbols:
-                        idp.theory.goals[s.name] = s
+                    idp.theory.constraints.append(constraint)
                 elif name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])

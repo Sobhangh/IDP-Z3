@@ -21,9 +21,9 @@ This module contains the logic for the computation of relevance.
 
 from idp_engine.Assignments import Status as S
 from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
-                                   AConjunction, Brackets)
+                                   AConjunction, Brackets, UnappliedSymbol)
 from idp_engine.Problem import Theory
-from idp_engine.utils import OrderedSet, GOAL_SYMBOL
+from idp_engine.utils import OrderedSet, GOAL_SYMBOL, RELEVANT
 
 
 def split_constraints(constraints: OrderedSet) -> OrderedSet:
@@ -108,12 +108,9 @@ def determine_relevance(self: "State"):
         constraint.collect(constraint.questions,
                            all_=True, co_constraints=False)
 
-        if type(constraint) == AppliedSymbol and \
-           constraint.decl.name == GOAL_SYMBOL:
-            for e in constraint.sub_exprs:
-                assert e.code in out.assignments, \
-                    f"Invalid expression in relevant: {e.code}"
-                reachable.append(e)
+        if (type(constraint) == AppliedSymbol
+           and constraint.decl.name == RELEVANT):
+            reachable.append(constraint.sub_exprs[0])
 
     # nothing relevant --> make every question in a simplified constraint relevant
     if len(reachable) == 0:

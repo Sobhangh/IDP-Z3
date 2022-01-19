@@ -56,12 +56,13 @@ DATE = "Date"
 CONCEPT = "Concept"
 
 GOAL_SYMBOL = "goal_symbol"
+RELEVANT = " relevant"  # internal.  Leading space to avoid conflict with user vocabulary
 ABS = "abs"
 ARITY = "arity"
 INPUT_DOMAIN = "input_domain"
 OUTPUT_DOMAIN = "output_domain"
 RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT,
-                    GOAL_SYMBOL, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
+                    GOAL_SYMBOL, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
 
 DEFAULT = "default"
 

@@ -455,7 +455,6 @@ def annotate(self, idp):
 
     for name, out in [
         ('expand', Symbol(name=BOOL)),
-        ('relevant', Symbol(name=BOOL)),
         ('hide', Symbol(name=BOOL)),
         ('view', Symbol(name='_ViewType')),
         ('moveSymbols', Symbol(name=BOOL)),

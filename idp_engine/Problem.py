@@ -36,7 +36,7 @@ from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL)
+                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT)
 from .Idp_to_Z3 import get_symbols_z
 
 
@@ -72,9 +72,6 @@ class Theory(object):
 
         interpretations (Dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
-
-        goals (Dict[string, SymbolDeclaration]):
-            A set of goal symbols
 
         _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
 
@@ -144,7 +141,6 @@ class Theory(object):
         self.assignments: Assignments = Assignments()
         self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
         self.interpretations: Dict[str, SymbolInterpretation] = {}
-        self.goals: Dict[str, SymbolDeclaration] = {}
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None
@@ -275,9 +271,6 @@ class Theory(object):
                 self.def_constraints.update(
                     {k:v.copy() for k,v in block.def_constraints.items()})
 
-            for name, s in block.goals.items():
-                self.goals[name] = s
-
         # apply the enumerations and definitions
 
         self.assignments = Assignments()
@@ -289,13 +282,23 @@ class Theory(object):
             if not symbol_interpretation.is_type_enumeration:
                 symbol_interpretation.interpret(self)
 
-        # expand goals
-        for s in self.goals.values():
-            assert s.instances, "goals must be instantiable."
-            relevant = Symbol(name=GOAL_SYMBOL)
-            relevant.decl = self.declarations[GOAL_SYMBOL]
-            constraint = AppliedSymbol.make(relevant, s.instances.values())
-            self.constraints.append(constraint)
+        # expand goal_symbol
+        to_add = OrderedSet()
+        for original in self.constraints:
+            if (type(original) == AppliedSymbol
+                and original.symbol.decl is not None
+                and original.symbol.decl.name == GOAL_SYMBOL):
+                symbols = original.sub_exprs
+
+                for symbol in symbols:
+                    decl = self.declarations[symbol.name[1:]]
+                    assert decl.instances, "goals must be instantiable."
+                    relevant = Symbol(name=RELEVANT)
+                    relevant.decl = self.declarations[RELEVANT]
+                    for i in decl.instances.values():
+                        constraint = AppliedSymbol.make(relevant, [i])
+                        to_add.append(constraint)
+        self.constraints.extend(to_add)
 
         # expand whole-domain definitions
         for defin in self.definitions:
