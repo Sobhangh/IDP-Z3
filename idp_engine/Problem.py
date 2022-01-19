@@ -285,7 +285,6 @@ class Theory(object):
                    and v.decl.name == RELEVANT)])
 
         # process enumerations, including GOAL_SYMBOL
-        to_add = OrderedSet()
         for symbol_interpretation in self.interpretations.values():
             if not symbol_interpretation.is_type_enumeration:
                 symbol_interpretation.interpret(self)
@@ -299,8 +298,7 @@ class Theory(object):
                     relevant.decl = self.declarations[RELEVANT]
                     for i in decl.instances.values():
                         constraint = AppliedSymbol.make(relevant, [i])
-                        to_add.append(constraint)
-        self.constraints.extend(to_add)
+                        self.constraints.append(constraint)
 
         # expand whole-domain definitions
         for defin in self.definitions:
