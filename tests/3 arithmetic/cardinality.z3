@@ -16,6 +16,7 @@ And(fleetOf(o1) == f1,
     If(Vehicle(o3), weight(o3), 0),
     min == _min(lambda x ∈ ConfigObj : weight(x)),
     max == _max(lambda x ∈ ConfigObj : weight(x)),
+    max2 == _max(lambda x ∈ ConfigObj : weight(x)),
     fleetTotal(f1) ==
     If(Vehicle(o1), weight(o1), 0) +
     If(Vehicle(o2), weight(o2), 0) +
@@ -76,6 +77,7 @@ weight := {o1->3, o2->4, o3->5}
 total := 9
 min := 3
 max := 5
+max2 := 5
 fleetTotal := {f1->4, f2->5}
 fleetCard := {f1->1, f2->1}
 fleetMin := {f1->3, f2->5}
