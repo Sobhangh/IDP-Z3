@@ -781,7 +781,7 @@ class Enumeration(ASTNode):
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
         if not isinstance(self.tuples, OrderedSet):
-            # self.tuples.sort(key=lambda t: t.code)
+            # self.tuples.sort(key=lambda t: t.code) # do not change dropdown order
             self.tuples = OrderedSet(self.tuples)
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
