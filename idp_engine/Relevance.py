@@ -23,7 +23,7 @@ from idp_engine.Assignments import Status as S
 from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
                                    AConjunction, Brackets)
 from idp_engine.Problem import Theory
-from idp_engine.utils import OrderedSet, RELEVANT
+from idp_engine.utils import OrderedSet, GOAL_SYMBOL
 
 
 def split_constraints(constraints: OrderedSet) -> OrderedSet:
@@ -109,7 +109,7 @@ def determine_relevance(self: "State"):
                            all_=True, co_constraints=False)
 
         if type(constraint) == AppliedSymbol and \
-           constraint.decl.name == RELEVANT:
+           constraint.decl.name == GOAL_SYMBOL:
             for e in constraint.sub_exprs:
                 assert e.code in out.assignments, \
                     f"Invalid expression in relevant: {e.code}"

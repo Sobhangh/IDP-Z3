@@ -25,7 +25,7 @@ import time
 from idp_engine.Assignments import Status as S
 from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
                                    AConjunction, Brackets)
-from idp_engine.utils import OrderedSet, RELEVANT
+from idp_engine.utils import OrderedSet
 from .IO import Output
 
 

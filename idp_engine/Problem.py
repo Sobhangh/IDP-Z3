@@ -36,7 +36,7 @@ from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    RESERVED_SYMBOLS, CONCEPT, RELEVANT)
+                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL)
 from .Idp_to_Z3 import get_symbols_z
 
 
@@ -292,8 +292,8 @@ class Theory(object):
         # expand goals
         for s in self.goals.values():
             assert s.instances, "goals must be instantiable."
-            relevant = Symbol(name=RELEVANT)
-            relevant.decl = self.declarations[RELEVANT]
+            relevant = Symbol(name=GOAL_SYMBOL)
+            relevant.decl = self.declarations[GOAL_SYMBOL]
             constraint = AppliedSymbol.make(relevant, s.instances.values())
             self.constraints.append(constraint)
 
