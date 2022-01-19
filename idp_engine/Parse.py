@@ -750,6 +750,7 @@ class SymbolInterpretation(ASTNode):
         else:  # constructs If-then-else recursively
             out = (self.default if self.default is not None else
                    applied._change(sub_exprs=args))
+            tuples.sort(key=lambda t: str(t.args[rank]))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if args[rank].value is not None:
@@ -806,6 +807,7 @@ class Enumeration(ASTNode):
                 "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'.")
 
         # constructs If-then-else recursively
+        tuples = sorted(list(tuples), key=lambda t: str(t.args[rank]))
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve
