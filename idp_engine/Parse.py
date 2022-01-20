@@ -128,8 +128,11 @@ class IDP(ASTNode):
         self.vocabularies = self.dedup_nodes(kwargs, 'vocabularies')
         self.theories = self.dedup_nodes(kwargs, 'theories')
         self.structures = self.dedup_nodes(kwargs, 'structures')
-        self.display = kwargs.pop('display')
+        displays = kwargs.pop('displays')
         self.procedures = self.dedup_nodes(kwargs, 'procedures')
+
+        assert len(displays) <= 1, "Too many display blocks"
+        self.display = displays[0] if len(displays) == 1 else None
 
         for voc in self.vocabularies.values():
             voc.annotate(self)
