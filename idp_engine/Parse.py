@@ -962,31 +962,41 @@ class Display(ASTNode):
         self.name = "display"
 
     def run(self, idp):
+        """apply the display block to the idp theory"""
+
+        def base_symbols(name, concepts):
+            """Verify that concepts is a list of concepts.  Returns the list of symbols"""
+            symbols = []
+            # All concepts should be concepts, except for the first
+            # argument of 'unit' and 'heading'.
+            for i, symbol in enumerate(concepts):
+                if name in ['unit', 'heading'] and i == 0:
+                    continue
+                self.check(symbol.name.startswith('`'),
+                    f"arg '{symbol.name}' of {name}'"
+                    f" must begin with a tick '`'")
+                self.check(symbol.name[1:] in self.voc.symbol_decls,
+                    f"argument '{symbol.name}' of '{name}'"
+                    f" must be a concept")
+                symbols.append(self.voc.symbol_decls[symbol.name[1:]])
+            return symbols
+
         for k, interpretation in self.interpretations.items():
+            symbols = base_symbols(interpretation.name,
+                [t.args[0] for t in interpretation.enumeration.tuples])
             if interpretation.name == EXPAND:
-                for t in interpretation.enumeration.tuples:
-                    symbol = t.args[0]
-                    self.voc.symbol_decls[symbol.name[1:]].view = ViewType.EXPANDED
-            else:
+                for symbol in symbols:
+                    self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
+            elif interpretation.name == GOAL_SYMBOL:
                 idp.theory.interpretations[k] = interpretation
+            else:
+                raise IDPZ3Error(f"Unknown enumeration in display: {interpretation}")
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
                 self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
                            f"Invalid syntax: {constraint}")
                 name = constraint.symbol.sub_exprs[0].name
-                symbols = []
-                # All arguments should be symbols, except for the first
-                # argument of 'unit' and 'heading'.
-                for i, symbol in enumerate(constraint.sub_exprs):
-                    if name in ['unit', 'heading'] and i == 0:
-                        continue
-                    self.check(symbol.name.startswith('`'),
-                        f"arg '{symbol.name}' of {name}'"
-                        f" must begin with a tick '`'")
-                    self.check(symbol.name[1:] in self.voc.symbol_decls,
-                        f"argument '{symbol.name}' of '{name}'"
-                        f" must be a symbol")
-                    symbols.append(self.voc.symbol_decls[symbol.name[1:]])
+                symbols = base_symbols(name, constraint.sub_exprs)
 
                 if name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
@@ -1014,7 +1024,7 @@ class Display(ASTNode):
                 elif name == "manualRelevance":
                     self.manualRelevance = True
                 else:
-                    raise IDPZ3Error(f"unknown display constraint:"
+                    raise IDPZ3Error(f"Unknown display axiom:"
                                      f" {constraint}")
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
@@ -1027,9 +1037,9 @@ class Display(ASTNode):
                                 s.view = ViewType.EXPANDED  # don't change hidden symbols
                     else:
                         self.check(constraint.sub_exprs[1].name == 'normal',
-                                   f"unknown display constraint: {constraint}")
+                                   f"Unknown display axiom: {constraint}")
             else:
-                raise IDPZ3Error(f"unknown display contraint: {constraint}")
+                raise IDPZ3Error(f"Unknown display axiom: {constraint}")
 
 
 ################################ Main  ##################################
