@@ -10,7 +10,7 @@ theory {
 }
 display {
     goal_symbol := {`Prime}
-    expand(`Prime).
+    expand := {`Prime}.
 }
 -- meta -------------------------------------
 {'manualPropagation': False,

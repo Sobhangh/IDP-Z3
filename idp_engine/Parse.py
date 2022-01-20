@@ -47,7 +47,7 @@ from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, Sy
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-                    GOAL_SYMBOL, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
@@ -962,7 +962,13 @@ class Display(ASTNode):
         self.name = "display"
 
     def run(self, idp):
-        idp.theory.interpretations.update(self.interpretations)
+        for k, interpretation in self.interpretations.items():
+            if interpretation.name == EXPAND:
+                for t in interpretation.enumeration.tuples:
+                    symbol = t.args[0]
+                    self.voc.symbol_decls[symbol.name[1:]].view = ViewType.EXPANDED
+            else:
+                idp.theory.interpretations[k] = interpretation
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
                 self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
@@ -982,14 +988,11 @@ class Display(ASTNode):
                         f" must be a symbol")
                     symbols.append(self.voc.symbol_decls[symbol.name[1:]])
 
-                if name == 'expand':  # e.g. expand(Length, Angle)
-                    for symbol in symbols:
-                        self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
-                elif name == 'hide':  # e.g. hide(Length, Angle)
+                if name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
-                elif name == GOAL_SYMBOL:  # e.g. goal_symbol(`tax_amount`)
-                    self.check(False, "Please use an enumeration for goal_symbol")
+                elif name in [GOAL_SYMBOL, EXPAND]:  # e.g. goal_symbol(`tax_amount`)
+                    self.check(False, f"Please use an enumeration for {name}")
                 elif name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])

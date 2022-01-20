@@ -235,7 +235,7 @@ Registration_Type() = Other =>     // @EXPLAIN: Registration_Type cannot be Othe
 
 display {
     goal_symbol:={`Tax}.
-    expand(`Tax).
+    expand := {`Tax}.
     view() = normal.
 }
 -- meta -------------------------------------

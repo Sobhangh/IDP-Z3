@@ -57,6 +57,7 @@ CONCEPT = "Concept"
 
 GOAL_SYMBOL = "goal_symbol"
 RELEVANT = " relevant"  # internal.  Leading space to avoid conflict with user vocabulary
+EXPAND = "expand"
 ABS = "abs"
 ARITY = "arity"
 INPUT_DOMAIN = "input_domain"

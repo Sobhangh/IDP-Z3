@@ -13,7 +13,7 @@ theory {
 }
 
 display {
-    expand(`p).
+    expand := {`p}.
 }
 
 -- meta -------------------------------------

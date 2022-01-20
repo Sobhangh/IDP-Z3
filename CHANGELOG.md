@@ -10,6 +10,7 @@ Highlights of the breaking changes:
 * `model_expand` API is now a regular function, not an iterator
 * API functions do not accept a list of theories anymore (e.g., `model_check([T,S])`.  Use `model_check(T,S)` instead)
 * the `goal` and `relevant`predicates are not accepted in the `display` block. Use an enumeration of `goal_symbol` instead.
+* use an enumeration for `expand` in the display block
 
 Contributors (alphabetical): Benjamin Callewaert, Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 

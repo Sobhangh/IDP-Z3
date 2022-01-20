@@ -12,10 +12,10 @@ The following predicates and functions are available:
 .. index:: expanded view
 
 expand
-    ``expand(`s1, .., `sn)`` specifies that :ref:`symbols<symbol>` ``s1, .., sn`` are shown expanded,
+    ``expand := {`s1, .., `sn}`` specifies that :ref:`symbols<symbol>` ``s1, .., sn`` are shown expanded,
     i.e., that all sub-sentences of the theory where they occur are shown on the screen.
 
-    For example, ``expand(`length).`` will force the Interactive Consultant to show all sub-sentences containing `length`.
+    For example, ``expand := {`length}.`` will force the Interactive Consultant to show all sub-sentences containing `length`.
 
 hide
     ``hide(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are not shown on the screen.

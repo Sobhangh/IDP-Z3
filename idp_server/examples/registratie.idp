@@ -194,7 +194,7 @@ structure default:environment {
 display {
     goal_symbol := {`tax_amount}
     view() = normal.
-    expand(`registration_type, `tax_rate).
+    expand := {`registration_type, `tax_rate}.
     heading(Building, `region, `type_of_real_estate, `monument).
     heading(Buyer, `buyer, `domicile_established, `first_ownership,
       `causal_connection, `professional_buyer, `professional_declaration_filed,
