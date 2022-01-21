@@ -64,17 +64,26 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
     return new_constraints
 
 
-def determine_relevance(self: Theory):
-    """Determines the atoms that are relevant to find a model, or to find the values of ``goal_symbol``.
+def determine_relevance(self: Theory) -> Theory:
+    """Determines the questions that are relevant in a model,
+    or that can appear in a justification of a ``goal_symbol``.
+
+    When an *irrelevant* value is changed in a model M of the theory,
+    the resulting M' structure is still a model.
+    Relevant questions are those that are not irrelevant.
 
     Call must be made after a propagation, on a Theory created with ``extended=True``.
     The result is found in the ``relevant`` attribute of the assignments in ``self.assignments``.
 
-    If ``goal_symbol`` has an enumeration in the theory (e.g., ``goal_symbol := {`tax_amount}``),
+    If ``goal_symbol`` has an enumeration in the theory
+    (e.g., ``goal_symbol := {`tax_amount}``),
     relevance is computed relative to those goals.
 
-    Defined symbols that do not occur in the justification of axioms do not need to be justified,
-    unless they are specified as goals by use of an enumeration of ``goal_symbol``.
+    Definitions in the theory are ignored,
+    unless they influence axioms in the theory or goals in ``goal_symbol``.
+
+    Returns:
+        Theory: the Theory with relevant information in ``self.assignments``.
     """
     assert self.extended == True,\
         "The theory must be created with 'extended=True' for relevance computations."

@@ -534,7 +534,7 @@ class Theory(object):
             complete (bool, optional): ``True`` for complete models. Defaults to False.
 
         Yields:
-            Iterator[Union[Assignments, str]]: [description]
+            the models, followed by a string message
         """
         if self.ignored_laws:
             todo = OrderedSet(a.sentence for a in self.get_core_atoms(
