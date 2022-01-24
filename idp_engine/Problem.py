@@ -36,7 +36,7 @@ from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    RESERVED_SYMBOLS, CONCEPT, RELEVANT, NOT_SATISFIABLE)
+                    RESERVED_SYMBOLS, GOAL_SYMBOL, CONCEPT, RELEVANT, NOT_SATISFIABLE)
 from .Idp_to_Z3 import get_symbols_z
 
 
