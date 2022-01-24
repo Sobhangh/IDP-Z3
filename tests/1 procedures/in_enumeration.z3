@@ -1,6 +1,6 @@
 No more consequences.
-And(Or(Not(p), Or(Color == red, Color == blue)),
-    Or(Color == red, Color == blue, Color == green))
+And(Or(Not(p), Or(Color == blue, Color == red)),
+    Or(Color == blue, Color == green, Color == red))
 
 Model 1
 ==========

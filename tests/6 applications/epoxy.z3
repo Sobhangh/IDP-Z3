@@ -316,7 +316,7 @@ display {
                                        'is_assignment': True,
                                        'normal': True,
                                        'reading': 'Max_Storage_T',
-                                       'relevant': True,
+                                       'relevant': False,
                                        'status': 'DEFAULT',
                                        'typ': 'Real',
                                        'value': '23'},

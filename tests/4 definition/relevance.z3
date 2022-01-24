@@ -10,7 +10,7 @@ theory {
   r().
 }
 display {
-  goal(`p).
+  goal_symbol:={`p}.
 }
 -- meta -------------------------------------
 {'manualPropagation': False,
@@ -22,7 +22,7 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
-              'view': 'expanded'},
+              'view': 'normal'},
              {'environmental': False,
               'idpname': 'l',
               'priority': 'core',

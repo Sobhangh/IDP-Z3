@@ -37,7 +37,8 @@ from idp_engine.Expression import (Constructor, Expression, AIfExpr,
                                    AUnary, AAggregate, AppliedSymbol,
                                    UnappliedSymbol, Number, Date, Brackets,
                                    Variable, TRUE)
-from idp_engine.utils import BOOL, INT, REAL, DATE, RELEVANT, RESERVED_SYMBOLS
+from idp_engine.utils import (BOOL, INT, REAL, DATE,
+                              GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS)
 
 # general  #####################################################################
 
@@ -334,7 +335,11 @@ def translate1(self, problem: "Theory", vars={}):
     self.check(self.decl, f"Unknown symbol: {self.symbol}.\n"
                f"Possible fix: introduce a variable "
                f"(e.g., !x in Concept: x=... => $(x)(..))")
-    if self.decl.name == RELEVANT:
+    self.check(not self.is_enumerated,
+               f"{self.decl.name} is not enumerated")
+    self.check(not self.in_enumeration,
+               f"Internal error")
+    if self.decl.name in [GOAL_SYMBOL, RELEVANT]:
         return TRUE.translate(problem, vars)
     if self.decl.name == 'abs':
         arg = self.sub_exprs[0].translate(problem, vars)

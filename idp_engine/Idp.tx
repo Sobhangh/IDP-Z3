@@ -3,8 +3,8 @@ IDP:
     ( vocabularies=Vocabulary
     | theories=TheoryBlock
     | structures=Structure
-    | procedures=Procedure) *
-    display=Display?
+    | procedures=Procedure
+    | displays=Display) *
 ;
 
 Comment:
@@ -147,7 +147,7 @@ Goal: 'goal' name=ID;
 View: 'view' viewType=ViewType;
   ViewType: 'normal' | 'expanded';
 
-Display: 'display' '{' (constraints=Expression '.')* '}';
+Display: 'display' '{' (constraints=Expression '.' | interpretations=SymbolInterpretation '.'?)* '}';
 
 Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
 

@@ -454,9 +454,7 @@ def annotate(self, idp):
         open_types[name] = Symbol(name=type_name)
 
     for name, out in [
-        ('goal', Symbol(name=BOOL)),
         ('expand', Symbol(name=BOOL)),
-        ('relevant', Symbol(name=BOOL)),
         ('hide', Symbol(name=BOOL)),
         ('view', Symbol(name='_ViewType')),
         ('moveSymbols', Symbol(name=BOOL)),
@@ -473,9 +471,11 @@ def annotate(self, idp):
                                         sorts=[], out=out)
         symbol_decl.annotate(self.voc)
 
-    # annotate constraints
+    # annotate constraints and interpretations
     for constraint in self.constraints:
         constraint.annotate(self.voc, {})
+    for i in self.interpretations.values():
+        i.annotate(self)
 Display.annotate = annotate
 
 
@@ -635,25 +635,31 @@ def annotate(self, voc, q_vars):
                 # is replaced by `_*(y)` with the following co-constraint:
                 #     !y in T: ( ?x in type: term(x) = _*(y)
                 #                !x in type: term(x) =< _*(y).
-
-                symbol_decl = SymbolDeclaration.make(
-                    "_"+self.str, # name `_ *`
-                    len(q_vars),  # arity
-                    [Domain(name=v.sort.code) for v in q_vars.values()],
-                    Domain(name=self.type)).annotate(voc)    # output_domain
+                name = "_" + self.str
+                if name in voc.symbol_decls:
+                    symbol_decl = voc.symbol_decls[name]
+                    to_create = False
+                else:
+                    symbol_decl = SymbolDeclaration.make(
+                        "_"+self.str, # name `_ *`
+                        len(q_vars),  # arity
+                        [Domain(name=v.sort.code) for v in q_vars.values()],
+                        Domain(name=self.type)).annotate(voc)    # output_domain
+                    to_create = True
                 symbol = Symbol(name=symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
 
-                coc1 = EXISTS(self.quantees,
-                              EQUALS([applied.copy(), self.sub_exprs[0]]))
-                op = '≤' if self.aggtype == "min" else '≥'
-                coc2 = FORALL(self.quantees.copy(),
-                              AComparison.make(op,
-                                    [applied.copy(), self.sub_exprs[0].copy()]))
-                coc = AND([coc1, coc2])
-                quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
-                applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
+                if to_create:
+                    coc1 = EXISTS(self.quantees,
+                                EQUALS([applied.copy(), self.sub_exprs[0]]))
+                    op = '≤' if self.aggtype == "min" else '≥'
+                    coc2 = FORALL(self.quantees.copy(),
+                                AComparison.make(op,
+                                        [applied.copy(), self.sub_exprs[0].copy()]))
+                    coc = AND([coc1, coc2])
+                    quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
+                    applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                 return applied
         self.annotated = True
     return self

@@ -9,7 +9,8 @@ theory {
 	{ !x : Prime(x) ← !y ∈ num : 1<y & y<x => x % y ~=0.}
 }
 display {
-    goal(`Prime).
+    goal_symbol := {`Prime}
+    expand := {`Prime}.
 }
 -- meta -------------------------------------
 {'manualPropagation': False,
