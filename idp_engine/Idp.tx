@@ -3,8 +3,8 @@ IDP:
     ( vocabularies=Vocabulary
     | theories=TheoryBlock
     | structures=Structure
-    | procedures=Procedure) *
-    display=Display?
+    | procedures=Procedure
+    | displays=Display) *
 ;
 
 Comment:

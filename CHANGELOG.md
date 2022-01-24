@@ -35,6 +35,7 @@ Contributors (alphabetical): Benjamin Callewaert, Jo Devriendt, Pierre Carbonnel
 * MR !187: fix regression where unsatisfiable theories were not explained in the IC.
 * MR !183: allow to disable axioms
 * MR !190: add Covid example
+* MR !201: allow switching from IDE to IC, and vice-versa
 
 
 ## [0.9.0] - 2021-12-16

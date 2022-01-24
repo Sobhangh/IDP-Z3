@@ -65,7 +65,7 @@ class State(Theory):
 
     def __init__(self, idp: IDP):
         # determine default vocabulary, theory, before annotating display
-        if len(idp.theories) != 1 and 'main' not in idp.procedures:  # (implicit) display block
+        if len(idp.theories) != 1:
             assert len(idp.vocabularies) == 2, \
                 "Maximum 2 vocabularies are allowed in Interactive Consultant"
             assert len(idp.theories) == 2, \
