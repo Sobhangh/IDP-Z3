@@ -39,7 +39,7 @@ from .Expression import (Expression, AQuantification,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Problem import Theory
-from .utils import OrderedSet
+from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
 
 start = time.process_time()
 
@@ -284,7 +284,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                     break
             yield "No more consequences."
         elif result == unsat:
-            yield "Not satisfiable."
+            yield NOT_SATISFIABLE
             yield str(z3_formula)
         else:
             yield "Unknown satisfiability."
@@ -319,7 +319,7 @@ def _propagate_inner(self, tag, solver, todo):
 
         yield "No more consequences."
     elif res1 == unsat:
-        yield "Not satisfiable."
+        yield NOT_SATISFIABLE
         yield str(solver.sexpr())
     else:
         assert False, "Incorrect solver behavior"
@@ -341,10 +341,8 @@ def _first_propagate(self, solver):
 
     res1 = solver.check()
     if res1 == unsat:
-        yield "Not satisfiable."
-        yield str(solver.sexpr())
         solver.pop()
-        return  # unsat theory
+        raise IDPZ3Error(NOT_SATISFIABLE)
 
     assert res1 == sat, "Incorrect solver behavior"
     model = solver.model()
@@ -365,7 +363,7 @@ def _first_propagate(self, solver):
             if (ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
                     not ass.value.same_as(val)):
                 solver.pop()
-                yield "Not satisfiable."
+                yield NOT_SATISFIABLE
                 return
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
@@ -407,7 +405,10 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         return
 
     if not self.previous_assignments:
-        yield from self._first_propagate(self.solver)
+        try:
+            yield from self._first_propagate(self.solver)
+        except IDPZ3Error:
+            pass
 
     removed_choices, added_choices = self._set_consequences_get_changed_choices()
 
@@ -486,7 +487,7 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
             yield "No more consequences."
             #yield from self._propagate(tag=tag)  # incomplete --> finish with normal propagation
         elif result == unsat:
-            yield "Not satisfiable."
+            yield NOT_SATISFIABLE
             yield str(z3_formula)
         else:
             yield "Unknown satisfiability."

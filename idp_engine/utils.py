@@ -49,6 +49,7 @@ DEF_SEMANTICS = Semantics.WELLFOUNDED
 
 NEWL = "\n"
 indented = "\n  "
+
 BOOL = "𝔹"
 INT = "ℤ"
 REAL = "ℝ"
@@ -64,6 +65,8 @@ RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT,
                     RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN]
 
 DEFAULT = "default"
+
+NOT_SATISFIABLE ="Not satisfiable."
 
 """ Module that monkey-patches json module when it's imported so
 JSONEncoder.default() automatically checks for a special "to_json()"

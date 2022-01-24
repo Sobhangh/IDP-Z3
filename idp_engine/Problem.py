@@ -36,7 +36,7 @@ from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    RESERVED_SYMBOLS, CONCEPT, RELEVANT)
+                    RESERVED_SYMBOLS, CONCEPT, RELEVANT, NOT_SATISFIABLE)
 from .Idp_to_Z3 import get_symbols_z
 
 
@@ -541,7 +541,11 @@ class Theory(object):
             solver.push()
             self._add_assignment_ignored(solver)
             if not self.previous_assignments:
-                list(self._first_propagate(solver))
+                try:
+                    list(self._first_propagate(solver))
+                except IDPZ3Error:  # unsatifiable
+                    yield "No models."
+                    return
         else:
             # TODO: should todo be larger in case complete==True?
             solver = self.solver
@@ -664,7 +668,9 @@ class Theory(object):
         with values for all terms and atoms that have the same value
         in every model of the theory.
 
-        Terms and propositions starting with '_' are ignored.
+       ``self.satisfied`` is also updated to reflect satisfiability.
+
+        Terms and propositions starting with ``_`` are ignored.
 
         Args:
             tag (S): the status of propagated assignments
@@ -680,7 +686,7 @@ class Theory(object):
             out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag=tag))
-        self.satisfied = (out[0] != "Not satisfiable.")
+        self.satisfied = (out[0] != NOT_SATISFIABLE)
         return self
 
     def get_range(self, term: str) -> List[str]:
