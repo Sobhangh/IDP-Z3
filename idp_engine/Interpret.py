@@ -166,6 +166,7 @@ def interpret(self, problem):
                     or problem.assignments[code].status != status):
                     e = problem.assignments.assert__(expr, self.default, status)
                     if (status == S.DEFAULT  # for proper display in IC
+                        and type(self.enumeration) == FunctionEnum
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
 SymbolInterpretation.interpret = interpret
