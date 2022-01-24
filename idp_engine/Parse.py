@@ -47,7 +47,7 @@ from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, Sy
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-                    RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
@@ -142,7 +142,7 @@ class IDP(ASTNode):
         self.vocabulary = next(iter(self.vocabularies.values()))
         self.theory = next(iter(self.theories    .values()))
         if self.display is None:
-            self.display = Display(constraints=[])
+            self.display = Display(constraints=[], interpretations=[])
 
     @classmethod
     def from_file(cls, file:str) -> "IDP":
@@ -258,8 +258,10 @@ class Vocabulary(ASTNode):
             TypeDeclaration(
                 name=CONCEPT,
                 constructors=[]),
+            SymbolDeclaration(annotations='', name=Symbol(name=GOAL_SYMBOL),
+                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                                sorts=[], out=Domain(name=BOOL)),
+                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
                                 sorts=[Domain(name=CONCEPT)],
                                 out=Domain(name=INT)),
@@ -479,7 +481,6 @@ class TheoryBlock(ASTNode):
         constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
-        self.goals = {}
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -695,7 +696,6 @@ class Structure(ASTNode):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
-        self.goals = {}
 
         self.name = 'S' if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -955,6 +955,7 @@ class DateRange(Ranges):
 class Display(ASTNode):
     def __init__(self, **kwargs):
         self.constraints = kwargs.pop('constraints')
+        self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
         self.moveSymbols = False
         self.optionalPropagation = False
         self.manualPropagation = False
@@ -963,38 +964,47 @@ class Display(ASTNode):
         self.name = "display"
 
     def run(self, idp):
+        """apply the display block to the idp theory"""
+
+        def base_symbols(name, concepts):
+            """Verify that concepts is a list of concepts.  Returns the list of symbols"""
+            symbols = []
+            # All concepts should be concepts, except for the first
+            # argument of 'unit' and 'heading'.
+            for i, symbol in enumerate(concepts):
+                if name in ['unit', 'heading'] and i == 0:
+                    continue
+                self.check(symbol.name.startswith('`'),
+                    f"arg '{symbol.name}' of {name}'"
+                    f" must begin with a tick '`'")
+                self.check(symbol.name[1:] in self.voc.symbol_decls,
+                    f"argument '{symbol.name}' of '{name}'"
+                    f" must be a concept")
+                symbols.append(self.voc.symbol_decls[symbol.name[1:]])
+            return symbols
+
+        for k, interpretation in self.interpretations.items():
+            symbols = base_symbols(interpretation.name,
+                [t.args[0] for t in interpretation.enumeration.tuples])
+            if interpretation.name == EXPAND:
+                for symbol in symbols:
+                    self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
+            elif interpretation.name == GOAL_SYMBOL:
+                idp.theory.interpretations[k] = interpretation
+            else:
+                raise IDPZ3Error(f"Unknown enumeration in display: {interpretation}")
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
                 self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
                            f"Invalid syntax: {constraint}")
                 name = constraint.symbol.sub_exprs[0].name
-                symbols = []
-                # All arguments should be symbols, except for the first
-                # argument of 'unit' and 'heading'.
-                for i, symbol in enumerate(constraint.sub_exprs):
-                    if name in ['unit', 'heading'] and i == 0:
-                        continue
-                    self.check(symbol.name.startswith('`'),
-                        f"arg '{symbol.name}' of {name}'"
-                        f" must begin with a tick '`'")
-                    self.check(symbol.name[1:] in self.voc.symbol_decls,
-                        f"argument '{symbol.name}' of '{name}'"
-                        f" must be a symbol")
-                    symbols.append(self.voc.symbol_decls[symbol.name[1:]])
+                symbols = base_symbols(name, constraint.sub_exprs)
 
-                if name == 'goal':  # e.g.,  goal(Prime)
-                    for s in symbols:
-                        idp.theory.goals[s.name] = s
-                        s.view = ViewType.EXPANDED  # the goal is always expanded
-                elif name == 'expand':  # e.g. expand(Length, Angle)
-                    for symbol in symbols:
-                        self.voc.symbol_decls[symbol.name].view = ViewType.EXPANDED
-                elif name == 'hide':  # e.g. hide(Length, Angle)
+                if name == 'hide':  # e.g. hide(Length, Angle)
                     for symbol in symbols:
                         self.voc.symbol_decls[symbol.name].view = ViewType.HIDDEN
-                elif name == 'relevant':  # e.g. relevant(Tax)
-                    for s in symbols:
-                        idp.theory.goals[s.name] = s
+                elif name in [GOAL_SYMBOL, EXPAND]:  # e.g. goal_symbol(`tax_amount`)
+                    self.check(False, f"Please use an enumeration for {name}")
                 elif name == 'unit':  # e.g. unit('m', `length):
                     for symbol in symbols:
                         symbol.unit = str(constraint.sub_exprs[0])
@@ -1016,7 +1026,7 @@ class Display(ASTNode):
                 elif name == "manualRelevance":
                     self.manualRelevance = True
                 else:
-                    raise IDPZ3Error(f"unknown display constraint:"
+                    raise IDPZ3Error(f"Unknown display axiom:"
                                      f" {constraint}")
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
@@ -1029,9 +1039,9 @@ class Display(ASTNode):
                                 s.view = ViewType.EXPANDED  # don't change hidden symbols
                     else:
                         self.check(constraint.sub_exprs[1].name == 'normal',
-                                   f"unknown display constraint: {constraint}")
+                                   f"Unknown display axiom: {constraint}")
             else:
-                raise IDPZ3Error(f"unknown display contraint: {constraint}")
+                raise IDPZ3Error(f"Unknown display axiom: {constraint}")
 
 
 ################################ Main  ##################################

@@ -454,9 +454,7 @@ def annotate(self, idp):
         open_types[name] = Symbol(name=type_name)
 
     for name, out in [
-        ('goal', Symbol(name=BOOL)),
         ('expand', Symbol(name=BOOL)),
-        ('relevant', Symbol(name=BOOL)),
         ('hide', Symbol(name=BOOL)),
         ('view', Symbol(name='_ViewType')),
         ('moveSymbols', Symbol(name=BOOL)),
@@ -473,9 +471,11 @@ def annotate(self, idp):
                                         sorts=[], out=out)
         symbol_decl.annotate(self.voc)
 
-    # annotate constraints
+    # annotate constraints and interpretations
     for constraint in self.constraints:
         constraint.annotate(self.voc, {})
+    for i in self.interpretations.values():
+        i.annotate(self)
 Display.annotate = annotate
 
 

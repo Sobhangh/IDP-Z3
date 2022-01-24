@@ -48,6 +48,8 @@ theory T:V {
     }
     (weight()=80).
 
+    goal_symbol := {`riskLevel}
+
 }
 
 
@@ -60,6 +62,8 @@ procedure main() {
     print(Theory(T).get_range("sex()"))
     print()
     pretty_print(model_propagate(T, S))
+    print()
+    pretty_print(determine_relevance(T,S))
     print()
     pretty_print(Theory(T,S).propagate().explain("riskLevel()"))
     print()

@@ -48,7 +48,8 @@ from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
-from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
+from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
+                    GOAL_SYMBOL, EXPAND)
 
 
 # class Extern  ###########################################################
@@ -146,7 +147,8 @@ def interpret(self, problem):
     if self.is_type_enumeration:
         self.enumeration.interpret(problem)
         self.symbol.decl.interpretation = self
-    else: # update problem.assignments with data from enumeration
+    elif not self.name in [GOAL_SYMBOL, EXPAND]:
+        # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]

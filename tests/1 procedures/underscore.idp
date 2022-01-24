@@ -10,6 +10,6 @@ theory T:V {
 
 
 display {
-    goal(`δ).
+    goal_symbol:={`δ}.
   view() = expanded.
 }

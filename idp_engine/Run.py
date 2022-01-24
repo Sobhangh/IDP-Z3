@@ -155,7 +155,7 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
         verify (bool, optional): request verification of table completeness.  Defaults to False
 
     Yields:
-        str: a textual representation of each rule
+        a textual representation of each rule
     """
     problem = Theory(*theories, extended=True)
     for model in problem.decision_table(goal_string, timeout, max_rows,
@@ -167,6 +167,32 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
               f"⇒ {str(model[-1]) if has_goal else '?'}"))
         yield("")
     yield "end of decision table"
+
+def determine_relevance(*theories: Union[TheoryBlock, Structure, Theory]) -> Iterator[str]:
+    """Generates a list of questions that are relevant,
+    or that can appear in a justification of a ``goal_symbol``.
+
+    The questions are preceded with `` ? `` when their answer is unknown.
+
+    When an *irrelevant* value is changed in a model M of the theories,
+    the resulting M' structure is still a model.
+    Relevant questions are those that are not irrelevant.
+
+    If ``goal_symbol`` has an enumeration in the theory
+    (e.g., ``goal_symbol := {`tax_amount}``),
+    relevance is computed relative to those goals.
+
+    Definitions in the theory are ignored,
+    unless they influence axioms in the theory or goals in ``goal_symbol``.
+
+    Yields:
+        relevant questions
+    """
+    problem = Theory(*theories, extended=True).propagate()
+    problem.determine_relevance()
+    for ass in problem.assignments.values():
+        if ass.relevant:
+            yield str(ass)
 
 
 def pretty_print(x: Any ="") -> None:
@@ -213,6 +239,7 @@ def execute(self: IDP) -> None:
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate
     mylocals['decision_table'] = decision_table
+    mylocals['determine_relevance'] = determine_relevance
     mylocals['pretty_print'] = pretty_print
     mylocals['Theory'] = Theory
     mylocals['time'] = time

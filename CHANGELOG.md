@@ -6,17 +6,24 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
-Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
+Highlights of the breaking changes:
+* `model_expand` API is now a regular function, not an iterator
+* API functions do not accept a list of theories anymore (e.g., `model_check([T,S])`.  Use `model_check(T,S)` instead)
+* the `goal` and `relevant`predicates are not accepted in the `display` block. Use an enumeration of `goal_symbol` instead.
+* use an enumeration for `expand` in the display block
+
+Contributors (alphabetical): Benjamin Callewaert, Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 
 ### API
+* (Breaking) MR !184: add `Theory.determine_relevance(self)` to the official API
 * (breaking) MR !193: minor public API changes
 * fix #163: improve performance by avoiding unnecessary copying
 * fix #170: reduce the need for parenthesis in expressions (annotations, if..then..else)
 * fix #177: Incorrect translation of `$(c)(Adhesive()) is enumerated`
 * fix #179: duplicate declaration of `_max`
 * MR !181: support Python 3.10
-* MR !188: print models in uniform format to structure
 * MR !183: add enable_law and disable_law to the API
+* MR !188: print models in uniform format to structure
 * MR !196: add `Theory.to_smt_lib` API
 * MR !198: Performance: replace applied symbols by their interpretation, if known
 
@@ -26,7 +33,7 @@ Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 * MR !171, !180: refactor inferences to use a stateful solver, for performance.
 * MR !186: switching between reading and formula view now works for explanations too.
 * MR !187: fix regression where unsatisfiable theories were not explained in the IC.
-* MR !183: allow to disable constraints
+* MR !183: allow to disable axioms
 * MR !190: add Covid example
 
 

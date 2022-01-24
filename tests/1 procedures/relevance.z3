@@ -9,10 +9,11 @@ vocabulary {
 theory {
     !x in num: f(x)=f(x).
     f(1)=1 => p().
+    goal_symbol := {`p}
 }
 
 display {
-    goal(`p).
+    expand := {`p}.
 }
 
 -- meta -------------------------------------

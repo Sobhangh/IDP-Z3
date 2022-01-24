@@ -36,7 +36,7 @@ from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    RESERVED_SYMBOLS, CONCEPT, RELEVANT)
+                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT)
 from .Idp_to_Z3 import get_symbols_z
 
 
@@ -72,9 +72,6 @@ class Theory(object):
 
         interpretations (Dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
-
-        goals (Dict[string, SymbolDeclaration]):
-            A set of goal symbols
 
         _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
 
@@ -144,7 +141,6 @@ class Theory(object):
         self.assignments: Assignments = Assignments()
         self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
         self.interpretations: Dict[str, SymbolInterpretation] = {}
-        self.goals: Dict[str, SymbolDeclaration] = {}
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None
@@ -275,9 +271,6 @@ class Theory(object):
                 self.def_constraints.update(
                     {k:v.copy() for k,v in block.def_constraints.items()})
 
-            for name, s in block.goals.items():
-                self.goals[name] = s
-
         # apply the enumerations and definitions
 
         self.assignments = Assignments()
@@ -285,17 +278,27 @@ class Theory(object):
         for decl in self.declarations.values():
             decl.interpret(self)
 
+        # remove RELEVANT constraints
+        self.constraints = OrderedSet([v for k,v in self.constraints.items()
+            if not(type(v) == AppliedSymbol
+                   and v.decl is not None
+                   and v.decl.name == RELEVANT)])
+
+        # process enumerations, including GOAL_SYMBOL
         for symbol_interpretation in self.interpretations.values():
             if not symbol_interpretation.is_type_enumeration:
                 symbol_interpretation.interpret(self)
-
-        # expand goals
-        for s in self.goals.values():
-            assert s.instances, "goals must be instantiable."
-            relevant = Symbol(name=RELEVANT)
-            relevant.decl = self.declarations[RELEVANT]
-            constraint = AppliedSymbol.make(relevant, s.instances.values())
-            self.constraints.append(constraint)
+            if symbol_interpretation.name == GOAL_SYMBOL:
+                # expand goal_symbol
+                for t in symbol_interpretation.enumeration.tuples:
+                    symbol = t.args[0]
+                    decl = self.declarations[symbol.name[1:]]
+                    assert decl.instances, f"goal {decl.name} must be instantiable."
+                    relevant = Symbol(name=RELEVANT)
+                    relevant.decl = self.declarations[RELEVANT]
+                    for i in decl.instances.values():
+                        constraint = AppliedSymbol.make(relevant, [i])
+                        self.constraints.append(constraint)
 
         # expand whole-domain definitions
         for defin in self.definitions:
@@ -531,7 +534,7 @@ class Theory(object):
             complete (bool, optional): ``True`` for complete models. Defaults to False.
 
         Yields:
-            Iterator[Union[Assignments, str]]: [description]
+            the models, followed by a string message
         """
         if self.ignored_laws:
             todo = OrderedSet(a.sentence for a in self.get_core_atoms(
@@ -794,6 +797,10 @@ class Theory(object):
         out.constraints = new_constraints
         out._formula, out._constraintz = None, None
         return out
+
+    def determine_relevance(self) -> "Theory":
+        # monkey-patched
+        pass
 
     def _generalize(self,
                     conjuncts: List[Assignment],

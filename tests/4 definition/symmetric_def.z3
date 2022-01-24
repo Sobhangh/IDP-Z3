@@ -14,7 +14,7 @@ theory {
 	symmetric(`edge).
 }
 display {
-	expand(`edge).
+	expand := {`edge}.
 }
 -- meta -------------------------------------
 {'manualPropagation': False,

@@ -17,7 +17,7 @@ Theory
         // here comes the theory named T, on vocabulary named V
     }
 
-A *theory* is a set of constraints and definitions to be satisfied.
+A *theory* is a set of axioms and definitions to be satisfied.
 If the names are omitted, the theory is named T, for vocabulary V.
 
 Before explaining their syntax, we need to introduce the concept of term.
@@ -80,13 +80,13 @@ Aggregate over anonymous function
 
 
 .. _sentence:
-.. _constraint:
-.. index:: sentence, constraint
+.. _axiom:
+.. index:: sentence, axiom
 
-Sentences and constraints
+Sentences and axioms
 +++++++++++++++++++++++++
 
-A *constraint* is a sentence followed by ``.``.
+An *axiom* is a sentence followed by ``.``.
 A *sentence* is inductively defined as follows:
 
 true and false

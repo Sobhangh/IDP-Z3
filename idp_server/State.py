@@ -25,7 +25,6 @@ from idp_engine.Run import Theory
 from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
 from .IO import load_json
 import json
-from .Inferences import get_relevant_questions
 
 # Types
 from idp_engine import IDP
@@ -106,8 +105,6 @@ class State(Theory):
                 if (a.sentence not in self.environment.assignments
                         and not a.sentence.has_decision()):
                     self.environment.assignments.assert__(a.sentence, a.value, a.status)
-
-        self.relevant_symbols = {}
 
     def add_given(self, jsonstr: str, previous: str, keep_defaults: bool = False):
         """
