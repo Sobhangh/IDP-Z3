@@ -41,7 +41,7 @@ from idp_engine.utils import log, RUN_FILE
 
 from idp_engine.Parse import TypeDeclaration
 from .State import State
-from .Inferences import explain, abstract, get_relevant_questions
+from .Inferences import explain, abstract
 from .IO import Output, metaJSON
 
 from typing import Dict
@@ -194,7 +194,7 @@ class meta(Resource):
                 _ = state.solver_reified
                 _ = state.optimize_solver_reified
                 if not state.idp.display.manualRelevance:
-                    get_relevant_questions(state)
+                    state.determine_relevance()
                 out = metaJSON(state)
                 out["valueinfo"] = Output(state).fill(state)
 
@@ -271,12 +271,12 @@ class eval(Resource):
                         out = explain(state)
                     elif method == "propagate":
                         if args.with_relevance:
-                            get_relevant_questions(state)
+                            state.determine_relevance()
                         out = Output(state).fill(state)
                     elif method == 'get_range':
                         out = state.get_range(args['field'])
                     elif method == 'relevance':
-                        get_relevant_questions(state)
+                        state.determine_relevance()
                         out = Output(state).fill(state)
                     elif method == "modelexpand":
                         generator = state.expand(max=1, timeout=0, complete=False)

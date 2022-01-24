@@ -48,7 +48,8 @@ from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
-from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT)
+from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
+                    GOAL_SYMBOL, EXPAND)
 
 
 # class Extern  ###########################################################
@@ -146,7 +147,8 @@ def interpret(self, problem):
     if self.is_type_enumeration:
         self.enumeration.interpret(problem)
         self.symbol.decl.interpretation = self
-    else: # update problem.assignments with data from enumeration
+    elif not self.name in [GOAL_SYMBOL, EXPAND]:
+        # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
@@ -446,7 +448,7 @@ def interpret(self, problem):
                 simpler = NOT(simpler)
             simpler.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
-            and any(s.decl.name == CONCEPT for s in self.decl.sorts)
+            # and any(s.decl.name == CONCEPT for s in self.decl.sorts)
             and all(a.value is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
@@ -503,7 +505,10 @@ def instantiate1(self, e0, e1, problem=None):
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
                             f"Incorrect arity for {out.code}")
-                out = AppliedSymbol.make(out.symbol, out.sub_exprs)
+                kwargs = ({'is_enumerated': out.is_enumerated} if out.is_enumerated else
+                          {'in_enumeration': out.in_enumeration} if out.in_enumeration else
+                          {})
+                out = AppliedSymbol.make(out.symbol, out.sub_exprs, **kwargs)
                 out.original = self
         if out.co_constraint is not None:
             out.co_constraint.instantiate(e0, e1, problem)

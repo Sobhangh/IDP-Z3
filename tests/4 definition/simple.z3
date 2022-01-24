@@ -13,7 +13,7 @@ theory {
     { c()=red. }
 }
 display {
-    goal(`b).
+    goal_symbol:={`b}.
     view() = expanded.
 }
 -- meta -------------------------------------

@@ -8,4 +8,5 @@ from .Run import (model_check, model_expand, model_propagate,
                   execute, decision_table)
 from .Problem import Propagation, Theory
 from .Propagate import Done
+from .Relevance import Done
 from .Assignments import Status, Assignment, Assignments

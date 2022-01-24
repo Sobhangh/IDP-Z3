@@ -80,12 +80,11 @@ The equivalent ASCII-only encoding is shown on the right.
     }
 
     display {
-        expand(`p).
+        goal_symbol := {`p1, `p2}
         hide(`p).
+        expand := {`p}.
         view() = expanded.
-        relevant(`p1, `p2).
-        goal(`p).
-        optionalPropagation.
+        optionalPropagation().
     }
 
     procedure main() {

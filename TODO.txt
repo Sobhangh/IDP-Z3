@@ -1,3 +1,0 @@
-The content of this file has been moved to docs/zettlr/todo.md
-
-(zettlr is a markdown editor)

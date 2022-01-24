@@ -16,7 +16,7 @@ vocabulary
     specify the types, predicates, functions and constants used to describe the problem domain.
 
 theory
-    specify the definitions and constraints satisfied by any solutions.
+    specify the definitions and axioms satisfied by any solutions.
 
 structure
     (optional) specify the interpretation of some predicates, functions and constants.
@@ -31,7 +31,7 @@ The basic skeleton of an FO-dot knowledge base is as follows:
     }
 
     theory {
-        // here comes the definitions and constraints
+        // here comes the definitions and axioms
     }
 
     structure {

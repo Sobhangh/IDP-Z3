@@ -1,10 +1,5 @@
-And(q(red),
-    q(blue),
-    Not(q(green)),
-    Not(p),
-    Or(Not(Not(q(red))), red == color),
-    Or(Not(Not(q(blue))), blue == color),
-    Or(Not(Not(q(green))), green == color),
+And(Not(p),
+    green == color,
     red == color,
     blue == color,
     green == color,
@@ -19,7 +14,7 @@ And(q(red),
     Or(Not(r(blue)), blue == color),
     Or(Not(r(green)), green == color),
     Or(Not(r(green)), green == color),
-    Or(color == red, color == blue, color == green))
+    Or(color == blue, color == green, color == red))
 And(red == color,
     blue == color,
     Or(Not(r(red)), red == color),
@@ -28,17 +23,12 @@ And(red == color,
     Or(Not(r(blue)), blue == color),
     Or(Not(r(green)), green == color),
     Or(Not(r(green)), green == color),
-    Or(color == red, color == blue, color == green))
-And(q(red),
-    q(blue),
-    Not(q(green)),
-    Or(Not(Not(q(red))), red == color),
-    Or(Not(Not(q(blue))), blue == color),
-    Or(Not(Not(q(green))), green == color),
+    Or(color == blue, color == green, color == red))
+And(green == color,
     red == color,
     blue == color,
     green == color,
-    Or(color == red, color == blue, color == green))
+    Or(color == blue, color == green, color == red))
 And(Or(Not(q(red)),
        Or(Not(q(red)), And(red == color, red == color))),
     Or(Not(q(blue)),
@@ -61,7 +51,7 @@ And(Or(Not(q(red)),
     Or(Not(q(red)), red == color),
     Or(Not(q(blue)), blue == color),
     Or(Not(q(green)), green == color),
-    Or(color == red, color == blue, color == green))
+    Or(color == blue, color == green, color == red))
 And(Or(Not(compatible(red, red)), Or(Not(r(red)), r(red))),
     Or(Not(compatible(red, blue)), Or(Not(r(red)), r(blue))),
     Or(Not(compatible(red, green)),
@@ -77,4 +67,4 @@ And(Or(Not(compatible(red, red)), Or(Not(r(red)), r(red))),
        Or(Not(r(green)), r(blue))),
     Or(Not(compatible(green, green)),
        Or(Not(r(green)), r(green))),
-    Or(color == red, color == blue, color == green))
+    Or(color == blue, color == green, color == red))

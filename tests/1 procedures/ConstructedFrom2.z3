@@ -10,7 +10,8 @@ theory T:V {
     R(rgb(t,u)) = t.
 }
 display {
-    goal(`Color).
+    expand := {`Color}.
+    goal_symbol := {`Color}
 }
 
 -- meta -------------------------------------

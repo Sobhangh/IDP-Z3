@@ -12,10 +12,10 @@ The following predicates and functions are available:
 .. index:: expanded view
 
 expand
-    ``expand(`s1, .., `sn)`` specifies that :ref:`symbols<symbol>` ``s1, .., sn`` are shown expanded,
+    ``expand := {`s1, .., `sn}`` specifies that :ref:`symbols<symbol>` ``s1, .., sn`` are shown expanded,
     i.e., that all sub-sentences of the theory where they occur are shown on the screen.
 
-    For example, ``expand(`length).`` will force the Interactive Consultant to show all sub-sentences containing `length`.
+    For example, ``expand := {`length}.`` will force the Interactive Consultant to show all sub-sentences containing `length`.
 
 hide
     ``hide(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are not shown on the screen.
@@ -27,13 +27,12 @@ view()
 
     ``view() = expanded.`` specifies that symbols are displayed expanded.
 
-relevant
-    ``relevant(`s1, .., `sn)`` specifies that symbols ``s1, .., sn`` are relevant, i.e. that they should never be greyed out.
+goal_symbol
+    ``goal_symbol := {`s1, .., `sn}`` specifies that symbols ``s1, .., sn`` are always relevant, i.e. that they should never be greyed out.
+    ``goal_symbol`` can only be used in an enumeration.
 
-    Irrelevant symbols and sub-sentences, i.e. symbols whose interpretation do not constrain the interpretation of the relevant symbols, are greyed out by the Interactive Consultant.
-
-goal
-    ``goal(`s)`` specifies that symbol ``s`` is a goal, i.e. that it is relevant and shown expanded.
+    Irrelevant symbols and questions, i.e. expressions whose interpretation do not constrain the interpretation of the relevant symbols,
+    are greyed out by the Interactive Consultant.
 
 moveSymbols
     When the *display block* contains ``moveSymbols()``, the Interactive Consultant is allowed to change the layout of symbols on the screen, so that relevant symbols come first.
