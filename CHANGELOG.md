@@ -20,6 +20,7 @@ Contributors (alphabetical): Benjamin Callewaert, Jo Devriendt, Pierre Carbonnel
 * fix #163: improve performance by avoiding unnecessary copying
 * fix #170: reduce the need for parenthesis in expressions (annotations, if..then..else)
 * fix #177: Incorrect translation of `$(c)(Adhesive()) is enumerated`
+* fix #179: duplicate declaration of `_max`
 * MR !181: support Python 3.10
 * MR !183: add enable_law and disable_law to the API
 * MR !188: print models in uniform format to structure

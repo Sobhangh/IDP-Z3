@@ -1,6 +1,6 @@
 And(opposite(red) == green,
     opposite(green) == red,
-    Or(Color == red, Color == green),
+    Or(Color == green, Color == red),
     Or(is(red, Color),
        is(blue, Color),
        is(green, Color),
