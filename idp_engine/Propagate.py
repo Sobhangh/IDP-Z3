@@ -381,7 +381,7 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
             {a.sentence.code: a.sentence
             for a in self.assignments.values()
             if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
-            (a.status != S.STRUCTURE or a.translate(self) in self.ignored_laws)})
+            (a.status != S.STRUCTURE or a.sentence.code in self.ignored_laws)})
 
     self._add_assignment_ignored(solver)
 
